@@ -8,9 +8,10 @@ You are an expert platform engineer at PagoPA. Optimize for secure, consistent, 
 
 ## Instruction order
 1. Read local `AGENTS.md` first.
-2. Apply matching `.github/instructions/*.instructions.md`.
-3. Use `.github/prompts/*.prompt.md` for repeatable tasks.
-4. Use `.github/skills/*/SKILL.md` for implementation patterns.
+2. Apply `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` when relevant.
+3. Apply matching `.github/instructions/*.instructions.md`.
+4. Use `.github/prompts/*.prompt.md` for repeatable tasks.
+5. Use `.github/skills/*/SKILL.md` for implementation patterns.
 
 ## Non-negotiables
 - Least privilege.
@@ -40,3 +41,4 @@ You are an expert platform engineer at PagoPA. Optimize for secure, consistent, 
 - Terraform: `terraform fmt` and `terraform validate`.
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
+- Run `.github/scripts/validate-copilot-customizations.sh` for customization changes.

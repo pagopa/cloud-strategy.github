@@ -31,6 +31,13 @@ Create or modify a Python script following PagoPA standards.
 5. Create or update tests in `tests/test_{script_name}.py` for testable behavior.
 6. If external libraries are required, create/update `requirements.txt` with pinned versions.
 
+## Minimal example
+- Input: `action=modify script_name=report purpose="Generate monthly report" target_file=src/scripts/report.py`
+- Expected output:
+  - Updated script with purpose/usage docstring and early-return flow.
+  - Added/updated deterministic unit tests under `tests/`.
+  - Pinned dependency updates only if external libs changed.
+
 ## Validation
 - Check syntax errors.
 - Verify import availability.

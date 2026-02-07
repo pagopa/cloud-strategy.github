@@ -29,4 +29,11 @@ Usage examples:
 
 ## Testing
 - Put tests under `tests/`.
+- Use `pytest` as default test framework.
 - Keep tests deterministic and isolated.
+
+## Minimal test example
+```python
+def test_main_success() -> None:
+    assert True
+```

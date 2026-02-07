@@ -15,11 +15,12 @@ argument-hint: action=<create|modify> cloud=<aws|azure|gcp> policy_name=<name> p
 - **Effect (optional)**: ${input:effect:deny,audit,modify,append,disabled}
 
 ## Instructions
-1. Reuse existing policy patterns in the target repository.
-2. Keep policy logic explicit (scope, conditions, effect).
-3. Preserve naming and folder conventions.
-4. Keep technical text in English.
-5. If `action=modify`, preserve existing behavior unless explicitly changed.
+1. Use `.github/skills/cloud-policy/SKILL.md`.
+2. Reuse existing policy patterns in the target repository.
+3. Keep policy logic explicit (scope, conditions, effect).
+4. Preserve naming and folder conventions.
+5. Keep technical text in English.
+6. If `action=modify`, preserve existing behavior unless explicitly changed.
 
 ## Minimal example
 - Input: `action=create cloud=azure policy_name=deny_public_ip purpose="Block public IPs" effect=deny`

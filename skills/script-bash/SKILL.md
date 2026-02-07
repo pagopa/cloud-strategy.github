@@ -28,6 +28,8 @@ description: Create or modify Bash scripts with purpose header, emoji logs, and 
 set -euo pipefail
 
 log_info() { echo "ℹ️  $*"; }
+log_warn() { echo "⚠️  $*"; }
+log_success() { echo "✅ $*"; }
 log_error() { echo "❌ $*" >&2; }
 ```
 

@@ -29,6 +29,13 @@ Create or modify Node.js project modules with clear behavior and unit tests.
 4. If `action=modify`, preserve existing behavior unless explicit changes are requested.
 5. Add or update unit tests using `node:test` + `node:assert/strict` (BDD-like `describe`/`it` style where available).
 
+## Minimal example
+- Input: `action=modify component_type=handler component_name=user-handler purpose="Validate input before processing"`
+- Expected output:
+  - Updated module with clear purpose comment and early-return guards.
+  - Deterministic unit tests using `node:test`.
+  - No unintended behavioral drift outside requested change.
+
 ## Validation
 - Run lint/type checks if present.
 - Run unit tests.

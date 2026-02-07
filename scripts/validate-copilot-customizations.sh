@@ -23,6 +23,18 @@ log_warn() { echo "⚠️  $*"; }
 log_error() { echo "❌ $*" >&2; }
 log_success() { echo "✅ $*"; }
 
+search_pattern() {
+  local pattern="$1"
+  local target="$2"
+
+  if command -v rg >/dev/null 2>&1; then
+    rg -n "$pattern" "$target"
+    return $?
+  fi
+
+  grep -R -nE "$pattern" "$target"
+}
+
 frontmatter() {
   awk '
     NR == 1 && $0 == "---" { in_fm = 1; next }
@@ -37,10 +49,31 @@ has_key() {
   frontmatter "$file" | grep -Eq "^${key}:[[:space:]]*.+$"
 }
 
+has_heading() {
+  local file="$1"
+  local heading="$2"
+  grep -Eq "^${heading}$" "$file"
+}
+
+has_any_heading() {
+  local file="$1"
+  shift
+  local heading
+
+  for heading in "$@"; do
+    if has_heading "$file" "$heading"; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 check_required_keys() {
   local file="$1"
   shift
   local missing=()
+  local key
 
   for key in "$@"; do
     if ! has_key "$file" "$key"; then
@@ -54,37 +87,126 @@ check_required_keys() {
   fi
 }
 
+validate_prompt_skill_references() {
+  local file="$1"
+  local refs=()
+  local ref
+
+  while IFS= read -r ref; do
+    refs+=("$ref")
+  done < <(grep -oE '\.github/skills/[A-Za-z0-9._/-]+/SKILL\.md' "$file" | sort -u || true)
+
+  if [[ "${#refs[@]}" -eq 0 ]]; then
+    log_error "Prompt must reference at least one skill: ${file}"
+    FAILURES=$((FAILURES + 1))
+    return
+  fi
+
+  for ref in "${refs[@]}"; do
+    if [[ ! -f "${ROOT_DIR}/${ref}" ]]; then
+      log_error "Prompt references missing skill path '${ref}' in ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+  done
+}
+
 validate_prompts() {
+  local file
+
   while IFS= read -r file; do
-    check_required_keys "$file" description name agent
+    check_required_keys "$file" description name agent argument-hint
+
     if frontmatter "$file" | grep -Eq '^mode:[[:space:]]*'; then
       log_error "Legacy key 'mode' is not allowed: ${file}"
       FAILURES=$((FAILURES + 1))
     fi
+
+    if ! has_heading "$file" '## Instructions'; then
+      log_error "Prompt missing '## Instructions' section: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+
+    if ! has_heading "$file" '## Validation'; then
+      log_error "Prompt missing '## Validation' section: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+
+    if ! has_heading "$file" '## Minimal example'; then
+      log_error "Prompt missing '## Minimal example' section: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+
+    validate_prompt_skill_references "$file"
   done < <(find "${PROMPTS_DIR}" -type f -name "*.prompt.md" | sort)
 }
 
 validate_instructions() {
+  local file
+
   while IFS= read -r file; do
     check_required_keys "$file" applyTo
+
+    if ! grep -Eq '^# ' "$file"; then
+      log_error "Instruction missing top heading: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
   done < <(find "${INSTRUCTIONS_DIR}" -type f -name "*.instructions.md" | sort)
 }
 
+validate_skill_directories() {
+  local dir
+
+  while IFS= read -r dir; do
+    if [[ ! -f "${dir}/SKILL.md" ]]; then
+      log_error "Skill directory missing SKILL.md: ${dir}"
+      FAILURES=$((FAILURES + 1))
+    fi
+  done < <(find "${SKILLS_DIR}" -mindepth 1 -maxdepth 1 -type d | sort)
+}
+
 validate_skills() {
+  local file
+
+  validate_skill_directories
+
   while IFS= read -r file; do
     check_required_keys "$file" name description
+
+    if ! has_heading "$file" '## When to use'; then
+      log_error "Skill missing '## When to use' section: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+
+    if ! has_any_heading "$file" '## Validation' '## Checklist' '## Testing' '## Test stack'; then
+      log_error "Skill missing validation/testing section: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+  done < <(find "${SKILLS_DIR}" -type f -name "SKILL.md" | sort)
+}
+
+validate_unreferenced_skills() {
+  local skill
+  local skill_ref
+
+  while IFS= read -r skill; do
+    skill_ref="${skill#"${ROOT_DIR}"/}"
+    if ! grep -R -q "${skill_ref}" "${PROMPTS_DIR}"; then
+      log_warn "Unreferenced skill (consider using in prompts): ${skill_ref}"
+    fi
   done < <(find "${SKILLS_DIR}" -type f -name "SKILL.md" | sort)
 }
 
 validate_workflow_pinning() {
+  local pattern='uses:[[:space:]]*[^[:space:]]+@v[0-9]+'
+
   if [[ ! -d "${WORKFLOWS_DIR}" ]]; then
     log_warn "No .github/workflows directory found; skipping action pinning check."
     return
   fi
 
-  if rg -n "uses:[[:space:]]*[^[:space:]]+@v[0-9]+" "${WORKFLOWS_DIR}" >/dev/null 2>&1; then
+  if search_pattern "$pattern" "${WORKFLOWS_DIR}" >/dev/null 2>&1; then
     log_error "Workflow action tags (@v*) found. Pin actions to full-length SHAs."
-    rg -n "uses:[[:space:]]*[^[:space:]]+@v[0-9]+" "${WORKFLOWS_DIR}" || true
+    search_pattern "$pattern" "${WORKFLOWS_DIR}" || true
     FAILURES=$((FAILURES + 1))
   fi
 }
@@ -100,6 +222,7 @@ main() {
   validate_prompts
   validate_instructions
   validate_skills
+  validate_unreferenced_skills
   validate_workflow_pinning
 
   if [[ "${FAILURES}" -gt 0 ]]; then

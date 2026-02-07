@@ -32,6 +32,13 @@ Create or modify a Bash script following PagoPA standards.
 5. Do not add unit tests for Bash unless explicitly requested.
 6. Make the file executable.
 
+## Minimal example
+- Input: `action=create script_name=sync-users purpose="Sync users from CSV"`
+- Expected output:
+  - Executable Bash script with purpose/usage header.
+  - Guard clauses, emoji log helpers, and readable flow.
+  - No behavior beyond requested scope.
+
 ## Validation
 - Run `bash -n` on the script.
 - Run `shellcheck -s bash` when available.

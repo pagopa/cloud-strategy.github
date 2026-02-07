@@ -23,6 +23,10 @@ applyTo: "**/*.py"
 ## Dependencies
 - If external libraries are needed, pin versions in `requirements.txt`.
 
+## Testing defaults
+- Use `pytest` as default unit-test framework.
+- Keep tests under `tests/` with deterministic behavior.
+
 ## Minimal skeleton
 ```python
 #!/usr/bin/env python3
@@ -31,4 +35,10 @@ applyTo: "**/*.py"
 Usage examples:
   python script.py --help
 """
+```
+
+## Minimal test example
+```python
+def test_example() -> None:
+    assert 1 + 1 == 2
 ```

@@ -29,6 +29,13 @@ Create or modify Java project components with clear structure and test coverage.
 4. If `action=modify`, preserve existing behavior unless explicit changes are requested.
 5. Add or update unit tests under `src/test/java` using JUnit 5 (BDD-like naming with `@DisplayName` and `given_when_then`).
 
+## Minimal example
+- Input: `action=create component_type=service component_name=UserPolicyService purpose="Apply policy checks"`
+- Expected output:
+  - New/updated Java component with purpose JavaDoc and guard clauses.
+  - Readable implementation aligned with package conventions.
+  - JUnit 5 tests with BDD-like naming.
+
 ## Validation
 - Ensure code compiles.
 - Run unit tests.

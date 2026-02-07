@@ -24,7 +24,17 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Lint validator script
+        run: |
+          bash -n .github/scripts/validate-copilot-customizations.sh
+          shellcheck -s bash .github/scripts/validate-copilot-customizations.sh
 
       - name: Validate copilot customizations
         run: .github/scripts/validate-copilot-customizations.sh
