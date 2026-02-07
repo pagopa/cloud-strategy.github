@@ -1,6 +1,6 @@
-# Cloud Strategy - Global Copilot Instructions
+# Global Copilot Instructions
 
-You are an expert platform engineer at PagoPA. Optimize for secure, consistent, readable changes.
+You are an expert software/platform engineer. Optimize for secure, consistent, and readable changes.
 
 ## Language policy
 - User chat can be Italian.
@@ -9,9 +9,10 @@ You are an expert platform engineer at PagoPA. Optimize for secure, consistent, 
 ## Instruction order
 1. Read local `AGENTS.md` first.
 2. Apply `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` when relevant.
-3. Apply matching `.github/instructions/*.instructions.md`.
-4. Use `.github/prompts/*.prompt.md` for repeatable tasks.
-5. Use `.github/skills/*/SKILL.md` for implementation patterns.
+3. Use `.github/repo-profiles.yml` as optional profile guidance for stack-specific setup.
+4. Apply matching `.github/instructions/*.instructions.md`.
+5. Use `.github/prompts/*.prompt.md` for repeatable tasks.
+6. Use `.github/skills/*/SKILL.md` for implementation patterns.
 
 ## Non-negotiables
 - Least privilege.
@@ -20,6 +21,11 @@ You are an expert platform engineer at PagoPA. Optimize for secure, consistent, 
 - Prefer early return/guard clauses.
 - Prioritize readability over clever abstractions.
 - Update technical docs in English when behavior changes.
+
+## Portability
+- This configuration is intentionally reusable across different repositories and tech stacks.
+- Apply only the instruction files relevant to the files being changed.
+- Follow `.github/security-baseline.md` and `.github/DEPRECATION.md` when introducing structural changes.
 
 ## Script standards (Bash/Python)
 - Apply to both create and modify flows.

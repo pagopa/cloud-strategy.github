@@ -33,8 +33,8 @@ jobs:
 
       - name: Lint validator script
         run: |
-          bash -n .github/scripts/validate-copilot-customizations.sh
-          shellcheck -s bash .github/scripts/validate-copilot-customizations.sh
+          bash -n .github/scripts/*.sh
+          shellcheck -s bash .github/scripts/*.sh
 
       - name: Validate copilot customizations
-        run: .github/scripts/validate-copilot-customizations.sh
+        run: .github/scripts/validate-copilot-customizations.sh --scope root --mode strict
