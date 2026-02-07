@@ -1,7 +1,7 @@
 ---
 description: Analyze IAM and policy changes for least-privilege compliance across AWS, Azure, and GCP.
 name: IAMLeastPrivilege
-tools: ["search", "usages", "problems"]
+tools: ["search", "usages", "problems", "fetch"]
 ---
 
 # IAM Least Privilege Agent

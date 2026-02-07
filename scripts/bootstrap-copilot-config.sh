@@ -5,6 +5,7 @@
 #   ./.github/scripts/bootstrap-copilot-config.sh --target /path/to/repo
 #   ./.github/scripts/bootstrap-copilot-config.sh --target /path/to/repo --apply
 #   ./.github/scripts/bootstrap-copilot-config.sh --target /path/to/repo --apply --clean
+#   ./.github/scripts/bootstrap-copilot-config.sh --target /path/to/repo --apply --include-workflows
 #
 
 set -euo pipefail
@@ -16,6 +17,10 @@ SOURCE_DIR="${DEFAULT_SOURCE_DIR}"
 TARGET_REPO=""
 DRY_RUN=true
 CLEAN_SYNC=false
+INCLUDE_WORKFLOWS=false
+USE_DEFAULT_EXCLUDES=true
+EXCLUDE_FILE=""
+EXCLUDE_PATTERNS=()
 
 log_info() { echo "ℹ️  $*"; }
 log_warn() { echo "⚠️  $*"; }
@@ -24,14 +29,22 @@ log_success() { echo "✅ $*"; }
 
 usage() {
   cat <<'USAGE'
-Usage: bootstrap-copilot-config.sh --target <repo-path> [--source <.github-path>] [--apply] [--clean]
+Usage: bootstrap-copilot-config.sh --target <repo-path> [options]
 
 Options:
-  --target   Target repository path (required)
-  --source   Source `.github` directory path (default: sibling .github directory)
-  --apply    Apply changes (default is dry-run)
-  --clean    Remove files in target `.github` that are not in source (requires --apply)
-  -h, --help Show help
+  --target <path>          Target repository path (required)
+  --source <path>          Source `.github` directory path (default: sibling .github directory)
+  --apply                  Apply changes (default is dry-run)
+  --clean                  Remove files in target `.github` that are not in source (requires --apply)
+  --include-workflows      Include `.github/workflows/` in synchronization
+  --no-default-excludes    Disable default exclusion set
+  --exclude <pattern>      Add rsync exclude pattern (repeatable)
+  --exclude-file <path>    Read additional exclude patterns from file
+  -h, --help               Show help
+
+Notes:
+  - Default excludes: `.git/`, `CHANGELOG.md`, `dependabot.yml`, `workflows/`.
+  - If `<source>/.bootstrap-ignore` exists, patterns are loaded automatically.
 USAGE
 }
 
@@ -60,6 +73,22 @@ parse_args() {
       --clean)
         CLEAN_SYNC=true
         shift
+        ;;
+      --include-workflows)
+        INCLUDE_WORKFLOWS=true
+        shift
+        ;;
+      --no-default-excludes)
+        USE_DEFAULT_EXCLUDES=false
+        shift
+        ;;
+      --exclude)
+        EXCLUDE_PATTERNS+=("${2:-}")
+        shift 2
+        ;;
+      --exclude-file)
+        EXCLUDE_FILE="${2:-}"
+        shift 2
         ;;
       -h|--help)
         usage
@@ -98,25 +127,60 @@ validate_paths() {
     log_error "Target repository not found: $TARGET_REPO"
     return 1
   fi
+
+  if [[ -n "$EXCLUDE_FILE" && ! -f "$EXCLUDE_FILE" ]]; then
+    log_error "Exclude file not found: $EXCLUDE_FILE"
+    return 1
+  fi
+}
+
+build_rsync_args() {
+  local -n out_args=$1
+
+  out_args=(-a)
+
+  if [[ "$USE_DEFAULT_EXCLUDES" == true ]]; then
+    out_args+=(--exclude '.git/' --exclude 'CHANGELOG.md' --exclude 'dependabot.yml')
+    if [[ "$INCLUDE_WORKFLOWS" != true ]]; then
+      out_args+=(--exclude 'workflows/')
+    fi
+  fi
+
+  local pattern
+  for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+    [[ -n "$pattern" ]] && out_args+=(--exclude "$pattern")
+  done
+
+  if [[ -f "${SOURCE_DIR}/.bootstrap-ignore" ]]; then
+    out_args+=(--exclude-from "${SOURCE_DIR}/.bootstrap-ignore")
+  fi
+
+  if [[ -n "$EXCLUDE_FILE" ]]; then
+    out_args+=(--exclude-from "$EXCLUDE_FILE")
+  fi
+
+  if [[ "$CLEAN_SYNC" == true ]]; then
+    out_args+=(--delete)
+  fi
+
+  if [[ "$DRY_RUN" == true ]]; then
+    out_args+=(--dry-run)
+  fi
 }
 
 run_sync() {
   local target_github_dir="${TARGET_REPO}/.github"
-  local rsync_args=(-a --exclude '.git/')
+  local rsync_args=()
 
-  if [[ "$CLEAN_SYNC" == true ]]; then
-    rsync_args+=(--delete)
-  fi
-
-  if [[ "$DRY_RUN" == true ]]; then
-    rsync_args+=(--dry-run)
-  fi
+  build_rsync_args rsync_args
 
   mkdir -p "$target_github_dir"
 
   log_info "📦 Source: ${SOURCE_DIR}"
   log_info "🎯 Target: ${target_github_dir}"
   log_info "🧪 Mode: $([[ "$DRY_RUN" == true ]] && echo dry-run || echo apply)"
+  log_info "🛡️  Default excludes: $([[ "$USE_DEFAULT_EXCLUDES" == true ]] && echo enabled || echo disabled)"
+  log_info "📚 Source ignore file: $([[ -f "${SOURCE_DIR}/.bootstrap-ignore" ]] && echo found || echo not-found)"
 
   rsync "${rsync_args[@]}" "${SOURCE_DIR}/" "${target_github_dir}/"
 

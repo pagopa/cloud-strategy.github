@@ -1,7 +1,7 @@
 ---
 description: Review Terraform changes for guardrails, lifecycle safety, and state hygiene.
 name: TerraformGuardrails
-tools: ["search", "usages", "problems"]
+tools: ["search", "usages", "problems", "fetch"]
 ---
 
 # Terraform Guardrails Agent

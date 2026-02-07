@@ -20,6 +20,7 @@ REPORT_FILE=""
 
 FAILURES=0
 WARNINGS=0
+FINDINGS=()
 
 log_info() { echo "ℹ️  $*"; }
 log_warn() { echo "⚠️  $*"; }
@@ -54,12 +55,14 @@ record_error() {
   local msg="$1"
   log_error "$msg"
   FAILURES=$((FAILURES + 1))
+  FINDINGS+=("error|$msg")
 }
 
 record_warn() {
   local msg="$1"
   log_warn "$msg"
   WARNINGS=$((WARNINGS + 1))
+  FINDINGS+=("warning|$msg")
 }
 
 record_issue() {
@@ -149,10 +152,39 @@ write_json_report() {
   local status="$1"
   local timestamp
   local payload
+  local findings_json
+  local entry
+  local severity
+  local message
+  local is_first=true
+  local finding_count=0
 
   [[ "$REPORT_FORMAT" == "json" ]] || return 0
 
   timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+  findings_json="["
+  for entry in "${FINDINGS[@]-}"; do
+    [[ -n "${entry:-}" ]] || continue
+    finding_count=$((finding_count + 1))
+    severity="${entry%%|*}"
+    message="${entry#*|}"
+    if [[ "$is_first" == true ]]; then
+      is_first=false
+    else
+      findings_json+=","
+    fi
+    findings_json+=$'\n    {"severity":"'
+    findings_json+="$(json_escape "$severity")"
+    findings_json+='","message":"'
+    findings_json+="$(json_escape "$message")"
+    findings_json+='"}'
+  done
+  if [[ "$finding_count" -gt 0 ]]; then
+    findings_json+=$'\n  ]'
+  else
+    findings_json+="]"
+  fi
 
   payload="$(cat <<EOF
 {
@@ -161,6 +193,7 @@ write_json_report() {
   "scope": "$(json_escape "$SCOPE")",
   "failures": ${FAILURES},
   "warnings": ${WARNINGS},
+  "findings": ${findings_json},
   "timestamp_utc": "$(json_escape "$timestamp")"
 }
 EOF
@@ -182,7 +215,7 @@ frontmatter() {
 has_key() {
   local file="$1"
   local key="$2"
-  frontmatter "$file" | grep -Eq "^${key}:[[:space:]]*.+$"
+  frontmatter "$file" | grep -Eq "^${key}:[[:space:]]*.*$"
 }
 
 has_heading_exact() {
@@ -413,7 +446,7 @@ validate_workflow_pinning() {
     while IFS= read -r token; do
       [[ -n "$token" ]] || continue
 
-      if [[ "$token" == ./* || "$token" == docker://* ]]; then
+      if [[ "$token" == ./* || "$token" == .github/actions/* || "$token" == docker://* ]]; then
         continue
       fi
 

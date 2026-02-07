@@ -8,7 +8,7 @@ argument-hint: action=<create|modify> script_name=<name> purpose=<purpose> [loca
 # Bash Script Task
 
 ## Context
-Create or modify a Bash script following PagoPA standards.
+Create or modify a Bash script following repository standards.
 
 ## Required inputs
 - **Action**: ${input:action:create,modify}

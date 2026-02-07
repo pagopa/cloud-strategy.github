@@ -8,7 +8,7 @@ argument-hint: title=<text> intent=<text> changed_files=<comma-separated paths> 
 # Pull Request Description Task
 
 ## Context
-Create or update a pull request body using the repository PR template that already exists, including a short list of key changes.
+Create or update a pull request body using the existing template at `.github/pull_request_template.md`, including a short list of key changes.
 
 ## Required inputs
 - **Title**: ${input:title}
@@ -17,6 +17,16 @@ Create or update a pull request body using the repository PR template that alrea
 - **Validation**: ${input:validation:Not provided}
 - **Risk**: ${input:risk:Low,Medium,High}
 - **Links**: ${input:links:N/A}
+
+## Required section headings
+- `## Summary`
+- `## Scope`
+- `## Changes`
+- `## Validation`
+- `## Security and Compliance`
+- `## Risk and Rollback`
+- `## Related Links`
+- `## Reviewer Notes`
 
 ## Instructions
 1. Use `.github/skills/pr-writing/SKILL.md`.
@@ -29,13 +39,13 @@ Create or update a pull request body using the repository PR template that alrea
 8. Keep content concise, concrete, and in English.
 
 ## Minimal example
-- Input: `title="Add JSON report support in validator" intent="Improve CI visibility" changed_files=".github/scripts/validate-copilot-customizations.sh, .github/workflows/validate-copilot-customizations.yml" validation="bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh; ./scripts/validate-copilot-customizations.sh --scope root --mode strict" risk=Low links="Issue: N/A"`
+- Input: `title="Add JSON report support in validator" intent="Improve CI visibility" changed_files=".github/scripts/validate-copilot-customizations.sh, .github/workflows/validate-copilot-customizations.yml" validation="bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh; .github/scripts/validate-copilot-customizations.sh --scope root --mode strict" risk=Low links="Issue: N/A"`
 - Expected output:
   - Full PR markdown body aligned with `.github/pull_request_template.md`.
   - `Changes` section with short bullets summarizing the real modifications.
   - `Validation` section containing commands and outcomes.
 
 ## Validation
-- Confirm all sections from `.github/pull_request_template.md` are present and non-empty (or `N/A`).
+- Confirm all required section headings are present and non-empty (or `N/A`).
 - Confirm `Changes` bullets are brief and aligned with modified files.
 - Confirm risk level and rollback plan are explicitly included.

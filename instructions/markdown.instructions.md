@@ -4,10 +4,13 @@ applyTo: "**/*.md"
 
 # Markdown Instructions
 
+## Language policy
+- All repository documentation must be in English.
+
 ## Structure
 - Use clear heading hierarchy.
 - Keep sections focused and short.
-- Use English for technical documentation.
+- Prefer task-oriented sections over narrative blocks.
 
 ## Style
 - Prefer concise bullets over long paragraphs.

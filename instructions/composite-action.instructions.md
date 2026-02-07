@@ -33,9 +33,11 @@ runs:
   using: "composite"
   steps:
     - shell: bash
+      env:
+        TARGET: ${{ inputs.target }}
       run: |
         set -euo pipefail
-        if [[ -z "${{ inputs.target }}" ]]; then
+        if [[ -z "$TARGET" ]]; then
           echo "❌ target is required" >&2
           exit 1
         fi

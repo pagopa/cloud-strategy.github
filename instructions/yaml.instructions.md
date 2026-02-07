@@ -17,3 +17,4 @@ applyTo: "**/*.yml,**/*.yaml"
 ## Validation
 - Validate syntax before commit.
 - Reuse existing schema/style in the target repository.
+- For GitHub Actions workflows, validate against the GitHub Actions schema when available.

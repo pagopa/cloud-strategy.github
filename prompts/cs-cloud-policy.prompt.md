@@ -28,6 +28,9 @@ argument-hint: action=<create|modify> cloud=<aws|azure|gcp> policy_name=<name> p
   - A new policy definition in the repository standard location.
   - Clear `if` conditions and `then.effect = "deny"`.
   - Matching docs update in English if behavior is new.
+- Cloud hints:
+  - AWS: generate SCP JSON with explicit `Action`/`Resource`/`Condition`.
+  - GCP: generate `google_org_policy_policy` with explicit `parent` scope and enforce rule.
 
 ## Validation
 - Validate syntax for the target cloud policy format.

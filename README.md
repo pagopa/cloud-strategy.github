@@ -18,13 +18,8 @@ This folder contains global Copilot/Codex customization that can be reused acros
 - `templates/`: reusable templates (for example `AGENTS.md`)
 
 ## Agent routing
-- `agents/Planner`: planning and analysis (read-only)
-- `agents/Implementer`: implementation and validation execution
-- `agents/Reviewer`: structured review findings
-- `agents/SecurityReviewer`: final security review
-- `agents/WorkflowSupplyChain`: GitHub Actions hardening
-- `agents/TerraformGuardrails`: Terraform safety and lifecycle checks
-- `agents/IAMLeastPrivilege`: IAM and policy scope minimization
+- Read-only agents: `Planner`, `Reviewer`, `SecurityReviewer`, `WorkflowSupplyChain`, `TerraformGuardrails`, `IAMLeastPrivilege`
+- Write-capable agent: `Implementer`
 
 See `.github/agents/README.md` for details.
 
@@ -32,7 +27,11 @@ See `.github/agents/README.md` for details.
 1. Update files under `.github/`.
 2. Run `.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 3. Optional: generate a machine-readable summary with `.github/scripts/validate-copilot-customizations.sh --scope root --mode strict --report json --report-file /tmp/copilot-report.json`.
-4. Optional: bootstrap this configuration into another repository with `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>`.
+4. Optional: bootstrap this configuration into another repository with `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` (default excludes apply; see `.github/.bootstrap-ignore`).
 5. Optionally run cross-repo assessment with `.github/scripts/validate-copilot-customizations.sh --scope all --mode legacy-compatible`.
 6. Ensure workflow checks pass.
 7. Update `.github/CHANGELOG.md` for notable changes.
+
+## Notes
+- `repo-profiles.yml` is currently advisory (human-readable profile catalog).
+- Use `templates/copilot-quickstart.md` for a short onboarding flow.

@@ -8,7 +8,7 @@ argument-hint: action=<create|modify> script_name=<name> purpose=<purpose> [loca
 # Python Script Task
 
 ## Context
-Create or modify a Python script following PagoPA standards.
+Create or modify a Python script following repository standards.
 
 ## Required inputs
 - **Action**: ${input:action:create,modify}

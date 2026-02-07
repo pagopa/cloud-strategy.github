@@ -3,6 +3,8 @@
 ## Goal
 Bootstrap a repository with a minimal, portable `.github` Copilot customization setup.
 
+For detailed maintenance and validation flow, refer to `.github/README.md`.
+
 ## Steps
 1. Copy baseline files:
    - `.github/copilot-instructions.md`
@@ -20,3 +22,6 @@ Bootstrap a repository with a minimal, portable `.github` Copilot customization 
 
 ## Validation gate
 Add `.github/workflows/validate-copilot-customizations.yml` to enforce consistency in pull requests.
+
+## Bootstrap tip
+Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` in dry-run first, then `--apply`.

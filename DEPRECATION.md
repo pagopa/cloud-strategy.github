@@ -23,3 +23,6 @@ Define a predictable process for deprecating Copilot customization assets (`inst
 
 ## Emergency exception
 Immediate removal is allowed only for security or compliance issues. The removal reason must be documented in `.github/CHANGELOG.md`.
+
+## Current deprecations
+- None at this time.

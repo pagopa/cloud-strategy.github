@@ -20,9 +20,19 @@ description: Produce concise, complete pull request descriptions aligned with th
 
 ## Template alignment
 - Use the existing repository template at `.github/pull_request_template.md`.
-- Follow template sections in order and keep template headings unchanged.
-- Keep unchanged sections but write `N/A` if not applicable.
-- Avoid empty placeholders.
+- Keep headings and section order unchanged.
+- If a section is not applicable, write `N/A`.
+- Avoid leaving placeholders empty.
+
+## Required section headings
+- `## Summary`
+- `## Scope`
+- `## Changes`
+- `## Validation`
+- `## Security and Compliance`
+- `## Risk and Rollback`
+- `## Related Links`
+- `## Reviewer Notes`
 
 ## Minimal example
 - Input:
@@ -30,10 +40,10 @@ description: Produce concise, complete pull request descriptions aligned with th
   - changed_files: ".github/scripts/validate-copilot-customizations.sh, .github/workflows/validate-copilot-customizations.yml"
   - validation: "bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh"
 - Expected output:
-  - Complete PR body with filled `Summary`, `Scope`, `Changes`, `Validation`, `Security and Compliance`, and `Risk and Rollback`.
+  - Complete PR body with all required template sections.
   - A brief and accurate bullet list under `Changes`.
 
 ## Validation
-- Ensure every section from `.github/pull_request_template.md` is present.
+- Ensure every required section heading is present.
 - Ensure `Changes` has concise bullets describing the real diff.
 - Ensure risk and rollback are explicit and actionable.
