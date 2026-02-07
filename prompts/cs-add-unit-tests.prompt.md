@@ -2,7 +2,7 @@
 description: Add or improve unit tests for Python, Java, or Node.js code
 name: cs-add-unit-tests
 agent: agent
-argument-hint: language=<python|java|node> target_file=<path> [test_framework=<name>]
+argument-hint: language=<python|java|nodejs> target_file=<path> [test_framework=<name>]
 ---
 
 # Add Unit Tests
@@ -11,9 +11,9 @@ argument-hint: language=<python|java|node> target_file=<path> [test_framework=<n
 Add or improve unit tests for an existing script or module while preserving repository conventions.
 
 ## Required inputs
-- **Language**: ${input:language:python,java,node}
+- **Language**: ${input:language:python,java,nodejs}
 - **Target file**: ${input:target_file}
-- **Test framework**: ${input:test_framework:python=repo-default|java=junit5|node=node:test}
+- **Test framework**: ${input:test_framework:python=repo-default|java=junit5|nodejs=node:test}
 
 ## Instructions
 

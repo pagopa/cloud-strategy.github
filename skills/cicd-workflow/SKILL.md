@@ -16,6 +16,23 @@ description: Create or modify secure GitHub Actions workflows for CI/CD pipeline
 - Keep `permissions` least-privilege.
 - Keep step names and operational output in English.
 
+## Minimal workflow example
+```yaml
+name: CI
+on: [pull_request]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@<FULL_LENGTH_COMMIT_SHA>
+      - run: terraform fmt -check -recursive
+```
+
 ## Auth snippets
 
 ### AWS

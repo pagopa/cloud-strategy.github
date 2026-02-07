@@ -39,4 +39,4 @@ You are an expert platform engineer at PagoPA. Optimize for secure, consistent, 
 ## Validation baseline
 - Terraform: `terraform fmt` and `terraform validate`.
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
-- Python/Java/Node: run unit tests relevant to the change.
+- Python/Java/Node.js: run unit tests relevant to the change.

@@ -21,6 +21,13 @@ argument-hint: action=<create|modify> cloud=<aws|azure|gcp> policy_name=<name> p
 4. Keep technical text in English.
 5. If `action=modify`, preserve existing behavior unless explicitly changed.
 
+## Minimal example
+- Input: `action=create cloud=azure policy_name=deny_public_ip purpose="Block public IPs" effect=deny`
+- Expected output:
+  - A new policy definition in the repository standard location.
+  - Clear `if` conditions and `then.effect = "deny"`.
+  - Matching docs update in English if behavior is new.
+
 ## Validation
 - Validate syntax for the target cloud policy format.
 - Test in non-production first.

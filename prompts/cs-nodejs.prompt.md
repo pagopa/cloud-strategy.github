@@ -1,6 +1,6 @@
 ---
 description: Create or modify Node.js project modules with tests
-name: cs-node
+name: cs-nodejs
 agent: agent
 argument-hint: action=<create|modify> component_type=<service|handler|module|utility|adapter> component_name=<name> purpose=<purpose> [target_path=<path>]
 ---
@@ -19,7 +19,7 @@ Create or modify Node.js project modules with clear behavior and unit tests.
 
 ## Instructions
 
-1. Use the skill in `.github/skills/project-node/SKILL.md`.
+1. Use the skill in `.github/skills/project-nodejs/SKILL.md`.
 2. Reuse existing repository conventions for module format and folder layout.
 3. Create or update the component with:
    - top comment block containing purpose
