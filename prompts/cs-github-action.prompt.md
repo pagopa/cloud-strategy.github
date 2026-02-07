@@ -1,16 +1,17 @@
 ---
 description: Create or modify a GitHub Actions workflow
-name: new-github-action
+name: cs-github-action
 agent: agent
-argument-hint: workflow_name=<name> purpose=<purpose> [triggers=push,pull_request]
+argument-hint: action=<create|modify> workflow_name=<name> purpose=<purpose> [triggers=push,pull_request]
 ---
 
-# Create GitHub Actions Workflow
+# GitHub Actions Workflow Task
 
 ## Context
 Create or modify a CI/CD workflow while enforcing security, least privilege, and consistency with existing workflows.
 
 ## Required inputs
+- **Action**: ${input:action:create,modify}
 - **Workflow name**: ${input:workflow_name}
 - **Purpose**: ${input:purpose}
 - **Triggers**: ${input:triggers:push,pull_request}

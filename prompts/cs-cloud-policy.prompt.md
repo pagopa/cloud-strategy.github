@@ -1,16 +1,17 @@
 ---
-description: Create a cloud governance policy (AWS SCP, Azure Policy, GCP Org Policy)
-name: new-cloud-policy
+description: Create or modify a cloud governance policy (AWS SCP, Azure Policy, GCP Org Policy)
+name: cs-cloud-policy
 agent: agent
-argument-hint: cloud=<aws|azure|gcp> policy_name=<name> purpose=<purpose>
+argument-hint: action=<create|modify> cloud=<aws|azure|gcp> policy_name=<name> purpose=<purpose>
 ---
 
-# Create Cloud Governance Policy
+# Cloud Governance Policy Task
 
 ## Context
-Create a new governance policy for AWS, Azure, or GCP while following repository naming and structure patterns.
+Create or modify a governance policy for AWS, Azure, or GCP while following repository naming and structure patterns.
 
 ## Required inputs
+- **Action**: ${input:action:create,modify}
 - **Cloud provider**: ${input:cloud:aws,azure,gcp}
 - **Policy name**: ${input:policy_name}
 - **Purpose**: ${input:purpose}

@@ -1,17 +1,18 @@
 ---
-description: Add or modify Terraform resources and features
-name: terraform-change
+description: Create or modify Terraform resources and features
+name: cs-terraform
 agent: agent
-argument-hint: type=<resource|variable|output|data_source> description=<text> target_dir=<path>
+argument-hint: action=<create|modify> type=<resource|module|variable|output|data_source> description=<text> target_dir=<path>
 ---
 
-# Terraform Change
+# Terraform Task
 
 ## Context
-Add or modify Terraform resources, variables, outputs, or data sources while preserving module consistency.
+Create or modify Terraform resources, modules, variables, outputs, or data sources while preserving module consistency.
 
 ## Required inputs
-- **Change type**: ${input:type:resource,variable,output,data_source}
+- **Action**: ${input:action:create,modify}
+- **Task type**: ${input:type:resource,module,variable,output,data_source}
 - **Description**: ${input:description}
 - **Target directory**: ${input:target_dir}
 
@@ -20,7 +21,7 @@ Add or modify Terraform resources, variables, outputs, or data sources while pre
 1. Use the skill in `.github/skills/terraform-feature/SKILL.md`.
 2. Search existing `.tf` files in the target directory.
 3. Follow existing naming conventions and patterns.
-4. Apply the change with:
+4. Apply the task with:
    - correct naming (`snake_case`)
    - `description` for variables/outputs
    - no hardcoded values

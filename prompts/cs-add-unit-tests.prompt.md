@@ -1,6 +1,6 @@
 ---
 description: Add or improve unit tests for Python, Java, or Node.js code
-name: add-unit-tests
+name: cs-add-unit-tests
 agent: agent
 argument-hint: language=<python|java|node> target_file=<path> [test_framework=<name>]
 ---
