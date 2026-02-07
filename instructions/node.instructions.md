@@ -5,8 +5,9 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
 # Node.js Instructions
 
 ## Mandatory rules
-- Start script files with a top comment that explains purpose.
-- Use emoji logs for key runtime states.
+- Treat Node.js work as project-oriented (modules, handlers, services, adapters), not script-oriented.
+- Add a concise top comment that explains purpose for new or changed core modules when intent is not obvious.
+- Use emoji logs for key runtime states when adding or updating logging.
 - Prefer early return and guard clauses.
 - Prioritize readability and simple control flow.
 - Unit tests are required for testable logic.
@@ -19,22 +20,17 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
 ## Recommended structure
 ```javascript
 /**
- * Purpose: Explain what this script does.
+ * Purpose: Explain what this module is responsible for.
  */
 
-function main(argv) {
-  if (!argv.includes("--input")) {
-    console.error("❌ Missing --input");
-    return 1;
+function buildUserProfile(input) {
+  if (!input?.id) {
+    throw new Error("❌ id is required");
   }
 
-  console.log("🚀 Starting script");
   // implementation
-  console.log("✅ Completed");
-  return 0;
+  return { id: input.id, name: input.name ?? "unknown" };
 }
-
-process.exit(main(process.argv.slice(2)));
 ```
 
 ## Testing

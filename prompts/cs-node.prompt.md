@@ -1,27 +1,27 @@
 ---
-description: Create or modify a Node.js script with tests
-name: cs-node-script
+description: Create or modify Node.js project modules with tests
+name: cs-node
 agent: agent
-argument-hint: action=<create|modify> script_name=<name> purpose=<purpose> [location=scripts] [target_file=<path>]
+argument-hint: action=<create|modify> component_type=<service|handler|module|utility|adapter> component_name=<name> purpose=<purpose> [target_path=<path>]
 ---
 
-# Node.js Script Task
+# Node.js Project Task
 
 ## Context
-Create or modify a Node.js script with clear behavior and unit tests.
+Create or modify Node.js project modules with clear behavior and unit tests.
 
 ## Required inputs
 - **Action**: ${input:action:create,modify}
-- **Script name**: ${input:script_name}
+- **Component type**: ${input:component_type:service,handler,module,utility,adapter}
+- **Component name**: ${input:component_name}
 - **Purpose**: ${input:purpose}
-- **Location**: ${input:location:scripts}
-- **Target file (when modifying)**: ${input:target_file}
+- **Target path**: ${input:target_path:src}
 
 ## Instructions
 
-1. Use the skill in `.github/skills/script-node/SKILL.md`.
+1. Use the skill in `.github/skills/project-node/SKILL.md`.
 2. Reuse existing repository conventions for module format and folder layout.
-3. Create or update the script with:
+3. Create or update the component with:
    - top comment block containing purpose
    - emoji logs for runtime progress
    - early return guard clauses

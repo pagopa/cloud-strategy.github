@@ -29,18 +29,25 @@ You are an expert platform engineer at PagoPA. Your goal is to maintain quality,
 
 ## Script engineering standards
 - Bash and Python scripts must start with a clear description of purpose and usage examples.
-- Java and Node.js script-like entrypoints must start with a clear purpose comment (usage examples are optional and not required).
 - Logs should use meaningful emojis that make runtime state easy to understand.
 - Unit tests are required for all scripts except Bash.
 - Python scripts that rely on external libraries must include a pinned `requirements.txt`.
 - Apply the same script standards when creating or modifying scripts.
 
+## Java and Node.js project standards
+- Java and Node.js tasks are project-oriented, not script-oriented.
+- Focus on creating or modifying project components (for example services, modules, handlers, controllers, utilities, and tests).
+- Add a concise purpose comment or JavaDoc for new or changed core components when intent is not obvious.
+- Keep unit tests simple and BDD-like:
+  - Java: JUnit 5 with `@DisplayName` and `given_when_then` method naming.
+  - Node.js: built-in `node:test` + `node:assert/strict`, using `describe`/`it` when available.
+
 ## Style standards
 - **Terraform**: 2-space indentation, run `terraform fmt`, prefer explicit references over hardcoded IDs.
 - **Bash scripts (`*.sh`)**: always use Bash (`#!/usr/bin/env bash`), never POSIX `sh`.
 - **Python**: PEP8, type hints, explicit error handling.
-- **Java**: clear package structure, descriptive class names, use JUnit 5 for unit tests.
-- **Node.js**: explicit module boundaries, robust input validation, use built-in `node:test` with `node:assert/strict` for unit tests.
+- **Java**: project-centric structure, descriptive class names, use JUnit 5 for unit tests.
+- **Node.js**: project-centric modules, robust input validation, use built-in `node:test` with `node:assert/strict` for unit tests.
 - **Interactive terminal commands**: can remain `zsh` compatible.
 
 ## Recommended workflow
