@@ -14,6 +14,17 @@ This folder contains global Copilot/Codex customization for Cloud Strategy repos
 - `workflows/`: CI validation workflows
 - `templates/`: reusable templates (for example `AGENTS.md`)
 
+## Agent routing
+- `agents/Planner`: planning and analysis (read-only)
+- `agents/Implementer`: implementation and validation execution
+- `agents/Reviewer`: structured review findings
+- `agents/SecurityReviewer`: final security review
+- `agents/WorkflowSupplyChain`: GitHub Actions hardening
+- `agents/TerraformGuardrails`: Terraform safety and lifecycle checks
+- `agents/IAMLeastPrivilege`: IAM and policy scope minimization
+
+See `.github/agents/README.md` for details.
+
 ## Maintenance workflow
 1. Update files under `.github/`.
 2. Run `.github/scripts/validate-copilot-customizations.sh`.

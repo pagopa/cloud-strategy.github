@@ -14,6 +14,7 @@ readonly ROOT_DIR
 PROMPTS_DIR="${ROOT_DIR}/.github/prompts"
 INSTRUCTIONS_DIR="${ROOT_DIR}/.github/instructions"
 SKILLS_DIR="${ROOT_DIR}/.github/skills"
+AGENTS_DIR="${ROOT_DIR}/.github/agents"
 WORKFLOWS_DIR="${ROOT_DIR}/.github/workflows"
 
 FAILURES=0
@@ -184,6 +185,40 @@ validate_skills() {
   done < <(find "${SKILLS_DIR}" -type f -name "SKILL.md" | sort)
 }
 
+validate_agents() {
+  local file
+  local agent_count=0
+
+  if [[ ! -d "${AGENTS_DIR}" ]]; then
+    log_warn "No .github/agents directory found; skipping agent validation."
+    return
+  fi
+
+  while IFS= read -r file; do
+    agent_count=$((agent_count + 1))
+    check_required_keys "$file" name description tools
+
+    if ! grep -Eq '^# ' "$file"; then
+      log_error "Agent missing top heading: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+
+    if ! has_heading "$file" '## Objective'; then
+      log_error "Agent missing '## Objective' section: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+
+    if ! has_heading "$file" '## Restrictions'; then
+      log_error "Agent missing '## Restrictions' section: ${file}"
+      FAILURES=$((FAILURES + 1))
+    fi
+  done < <(find "${AGENTS_DIR}" -type f -name "*.agent.md" | sort)
+
+  if [[ "${agent_count}" -eq 0 ]]; then
+    log_warn "No custom agents found under .github/agents."
+  fi
+}
+
 validate_unreferenced_skills() {
   local skill
   local skill_ref
@@ -222,6 +257,7 @@ main() {
   validate_prompts
   validate_instructions
   validate_skills
+  validate_agents
   validate_unreferenced_skills
   validate_workflow_pinning
 

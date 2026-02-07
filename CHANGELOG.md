@@ -5,5 +5,6 @@
 - Added new instruction files: YAML, Markdown, Makefile, Scripts, Lambda.
 - Added new skills: `terraform-module`, `cloud-policy`.
 - Added `.github/README.md` and `AGENTS` template.
-- Added planner custom agent.
-- Hardened prompt/skill/instruction validation and workflow checks.
+- Added custom agents: `Planner`, `Implementer`, `Reviewer`, `SecurityReviewer`, `WorkflowSupplyChain`, `TerraformGuardrails`, `IAMLeastPrivilege`.
+- Added `.github/agents/README.md` with routing guidance.
+- Hardened prompt/skill/instruction/agent validation and workflow checks.
