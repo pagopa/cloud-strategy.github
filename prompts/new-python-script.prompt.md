@@ -1,31 +1,33 @@
 ---
-description: Create a new Python script with proper structure
+description: Create a new Python script with a standard structure
 name: new-python-script
 agent: agent
+argument-hint: script_name=<name> purpose=<purpose> [location=src/scripts]
 ---
 
 # Create Python Script
 
 ## Context
-Create a new Python script following PagoPA conventions.
+Create a new Python script following PagoPA standards.
 
-## Required Inputs
+## Required inputs
 - **Script name**: ${input:script_name}
 - **Purpose**: ${input:purpose}
 - **Location**: ${input:location:src/scripts}
 
 ## Instructions
 
-1. Use the skill in `.github/skills/script-python/SKILL.md`
-2. Search existing scripts in the repository for patterns
+1. Use the skill in `.github/skills/script-python/SKILL.md`.
+2. Search for existing scripts in the repository to reuse patterns.
 3. Create the script with:
-   - Proper shebang and docstring
+   - shebang and docstring
    - argparse for CLI arguments
-   - Logging with emoji prefixes
-   - Type hints
-   - Error handling
-4. If tests are needed, create `tests/test_{script_name}.py`
+   - structured logging
+   - type hints
+   - explicit error handling
+4. If needed, create tests in `tests/test_{script_name}.py`.
+5. Generate code and operational messages in English (docstrings, logs, error messages).
 
 ## Validation
-- Check for syntax errors
-- Verify imports are available
+- Check syntax errors.
+- Verify import availability.

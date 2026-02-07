@@ -5,40 +5,38 @@ applyTo: "**/*.py"
 # Python Instructions
 
 ## Style
-- Follow PEP8
-- Use type hints for function signatures
-- Maximum line length: 120 characters
+- Follow PEP8.
+- Use type hints in function signatures.
+- Maximum line length: 120 characters.
 
-## Structure
+## Output language rules
+- Generated docstrings must be in English.
+- Logs, user-facing exceptions, and CLI output must be in English.
+
+## Recommended structure
 ```python
 #!/usr/bin/env python3
-"""
-Script description.
-"""
+"""Script description."""
 
 import argparse
 import logging
 import sys
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+
 def main() -> int:
-    logger.info("🔍 Starting...")
+    logger.info("Starting...")
     # implementation
-    logger.info("✅ Completed")
+    logger.info("Completed")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
 ```
 
-## Logging Prefixes
-- 🔍 Info/Progress
-- ✅ Success
-- ❌ Error
-- ⚠️ Warning
-
 ## Dependencies
-- Pin versions in `requirements.txt`
-- Use virtual environments
+- Pin dependency versions using the toolchain adopted by the repository.
+- Use virtual environments when applicable.

@@ -4,32 +4,39 @@ applyTo: "**/*.sh"
 
 # Bash Instructions
 
-## Header
+## Mandatory rule
+- `.sh` files must use Bash, not POSIX `sh`.
+
+## Standard header
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 ```
 
-## Logging Functions
+## Logging functions
 ```bash
-log_info()    { echo "🔍 $*"; }
-log_success() { echo "✅ $*"; }
-log_error()   { echo "❌ $*" >&2; }
+log_info()    { echo "INFO: $*"; }
+log_success() { echo "SUCCESS: $*"; }
+log_error()   { echo "ERROR: $*" >&2; }
 ```
 
-## Best Practices
-- Quote all variables: `"$var"` not `$var`
-- Use `[[ ]]` for conditionals
-- Use `$(command)` not backticks
-- Check command existence: `command -v tool &>/dev/null`
+## Best practices
+- Quote all variables: `"$var"`.
+- Use `[[ ... ]]` for conditionals.
+- Use `$(command)` instead of backticks.
+- Check dependencies with `command -v tool >/dev/null 2>&1`.
 
-## Structure
+## Recommended structure
 ```bash
 main() {
-    log_info "Starting script"
-    # implementation
-    log_success "Completed"
+  log_info "Starting script"
+  # implementation
+  log_success "Completed"
 }
 
 main "$@"
 ```
+
+## Validation
+- Run `bash -n <script>.sh`.
+- Run `shellcheck -s bash <script>.sh` when available.

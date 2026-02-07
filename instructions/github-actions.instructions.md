@@ -5,11 +5,12 @@ applyTo: ".github/workflows/**"
 # GitHub Actions Instructions
 
 ## Security
-- Use OIDC authentication (no long-lived secrets)
-- Pin action versions with SHA: `actions/checkout@v4` → `actions/checkout@<sha>`
-- Use `permissions` block with minimal scope
+- Use OIDC whenever possible (avoid long-lived secrets).
+- Pin actions to full-length commit SHAs, not only `@v*` tags.
+- Define `permissions` with least privilege.
+- Avoid `pull_request_target` for untrusted code execution.
 
-## Structure
+## Minimal structure example
 ```yaml
 name: Workflow Name
 
@@ -24,18 +25,20 @@ permissions:
   contents: read
 
 jobs:
-  job-name:
+  ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@<FULL_LENGTH_COMMIT_SHA>
 ```
 
-## Naming
-- Use emoji prefixes in step names
-- 📥 Checkout, 🔐 Auth, 🏗️ Build, 🧪 Test, 🚀 Deploy
+## Step naming
+- Emoji prefixes are allowed.
+- Keep step text in English.
 
-## Terraform Jobs
-- Always run `terraform fmt -check`
-- Use `-input=false` for plan/apply
-- Store plan as artifact for apply job
+## Terraform jobs
+- Always run `terraform fmt -check`.
+- Use `-input=false` for `terraform plan` and `terraform apply`.
+- Store plan output as an artifact before apply.
+- Use `concurrency` to avoid concurrent applies on the same target.

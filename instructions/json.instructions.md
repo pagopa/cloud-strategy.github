@@ -5,12 +5,15 @@ applyTo: "**/*.json"
 # JSON Instructions
 
 ## Formatting
-- Use 2 spaces for indentation
-- Keep keys in alphabetical order where applicable
-- No trailing commas
+- Use 2-space indentation.
+- Keep keys in alphabetical order when applicable.
+- Do not use trailing commas.
 
-## For Authorization Registries
-- Validate schema before committing
-- Maintain consistency with existing entries
-- Use lowercase for identifiers
-- Follow existing naming patterns in the file
+## Authorization registries
+- Validate schema before commit.
+- Keep consistency with existing patterns in the file.
+- Use lowercase identifiers.
+- Avoid unnecessary structural changes.
+
+## Language of content
+- Use technical English in descriptive/documentation fields intended for operational output.

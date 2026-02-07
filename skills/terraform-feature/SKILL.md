@@ -1,24 +1,24 @@
 ---
 name: terraform-feature
-description: Add or modify Terraform resources, variables, outputs, and data sources. Use for infrastructure changes and new features.
+description: Add or modify Terraform resources, variables, outputs, and data sources.
 ---
 
 # Terraform Feature Skill
 
-## When to Use
-- Adding new resources to existing configuration
-- Modifying existing resources
-- Adding variables or outputs
-- Creating data sources
+## When to use
+- Adding new resources.
+- Modifying existing resources.
+- Introducing variables and outputs.
+- Creating data sources.
 
-## Discovery Steps
+## Discovery steps
 
-1. Check existing files in the target directory
-2. Identify naming patterns and conventions
-3. Look for related resources that might need updates
-4. Check for existing variables that can be reused
+1. Inspect existing files in the target directory.
+2. Identify naming conventions and patterns to preserve.
+3. Check related resources that may require updates.
+4. Reuse existing variables whenever possible.
 
-## Adding a Resource
+## Resource example
 
 ```hcl
 resource "aws_iam_role" "example" {
@@ -40,7 +40,7 @@ resource "aws_iam_role" "example" {
 }
 ```
 
-## Adding a Variable
+## Variable example
 
 ```hcl
 variable "example_config" {
@@ -56,7 +56,7 @@ variable "example_config" {
 }
 ```
 
-## Adding an Output
+## Output example
 
 ```hcl
 output "example_arn" {
@@ -66,9 +66,9 @@ output "example_arn" {
 ```
 
 ## Checklist
-- [ ] Resource follows naming convention
-- [ ] Variables have descriptions and types
-- [ ] Outputs have descriptions
-- [ ] No hardcoded values (use variables/locals)
-- [ ] Tags applied where supported
-- [ ] `terraform fmt` passes
+- [ ] Naming follows repository conventions.
+- [ ] Variables include `description` and `type`.
+- [ ] Outputs include `description`.
+- [ ] No hardcoded values.
+- [ ] Tags are applied where supported.
+- [ ] `terraform fmt` and `terraform validate` pass.

@@ -1,33 +1,35 @@
 ---
 name: script-python
-description: Create Python scripts with logging, error handling, and optional tests. Use for data processing, automation, and API interactions.
+description: Create Python scripts with logging, error handling, and optional tests.
 ---
 
 # Python Script Skill
 
-## When to Use
-- Creating automation scripts
-- Data processing (CSV, JSON, Parquet)
-- API interactions
-- Cost analysis and reporting
+## When to use
+- Automation scripts.
+- Data processing (CSV, JSON, Parquet).
+- API integrations.
+- Reporting and analytics.
+
+## Output language rule
+- Docstrings, code comments, and log messages must be in English.
 
 ## Template
 
 ```python
 #!/usr/bin/env python3
 """
-📋 {script_name}.py
+{script_name}.py
 
-🎯 Purpose: {description}
-📖 Usage: python {script_name}.py [options]
+Purpose: {description}
+Usage: python {script_name}.py [options]
 """
 
 import argparse
 import logging
 import sys
-from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -41,17 +43,17 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    
-    logger.info("🔍 Starting {script_name}")
-    
+
+    logger.info("Starting {script_name}")
+
     try:
         # Implementation here
-        pass
-    except Exception as e:
-        logger.error(f"❌ Error: {e}")
+        _ = args
+    except Exception as exc:
+        logger.error(f"Error: {exc}")
         return 1
-    
-    logger.info("✅ Completed successfully")
+
+    logger.info("Completed successfully")
     return 0
 
 
@@ -59,22 +61,22 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-## Test Template
+## Test template
 
 Create `tests/test_{script_name}.py`:
 
 ```python
-import pytest
 from {script_name} import main
 
-def test_main_success():
+
+def test_main_success() -> None:
     # Test implementation
-    pass
+    assert main() in (0, 1)
 ```
 
 ## Checklist
-- [ ] Type hints on all functions
-- [ ] Docstrings for public functions
-- [ ] Error handling with try/except
-- [ ] Logging with emoji prefixes
-- [ ] argparse for CLI arguments
+- [ ] Type hints are used on functions.
+- [ ] Docstrings are in English.
+- [ ] Error handling uses `try/except`.
+- [ ] Logging is in English.
+- [ ] CLI arguments use argparse.

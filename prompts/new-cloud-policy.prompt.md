@@ -1,38 +1,40 @@
 ---
-description: Create cloud governance policy (AWS SCP, Azure Policy, GCP Org Policy)
+description: Create a cloud governance policy (AWS SCP, Azure Policy, GCP Org Policy)
 name: new-cloud-policy
 agent: agent
+argument-hint: cloud=<aws|azure|gcp> policy_name=<name> purpose=<purpose>
 ---
 
-# Cloud Governance Policy
+# Create Cloud Governance Policy
 
 ## Context
-Create a new governance policy for AWS, Azure, or GCP.
+Create a new governance policy for AWS, Azure, or GCP while following repository naming and structure patterns.
 
-## Required Inputs
+## Required inputs
 - **Cloud provider**: ${input:cloud:aws,azure,gcp}
 - **Policy name**: ${input:policy_name}
 - **Purpose**: ${input:purpose}
-- **Effect**: ${input:effect:deny,audit,modify}
+- **Effect**: ${input:effect}
 
 ## Instructions
 
 ### AWS (SCP)
-- Location: `src/scp/`
-- Format: JSON policy document
-- Attach to OUs via Terraform
+- Recommended path: `src/scp/`.
+- Format: JSON SCP document.
+- Model `Action`/`NotAction`, `Resource`, and `Condition` explicitly.
+- Keep technical text and descriptions in English.
 
 ### Azure (Policy)
-- Location: `src/02_policy_*/`
-- Format: `azurerm_policy_definition` resource
-- Follow folder naming: `02_policy_{service}/`
+- Recommended path: `src/02_policy_*/`.
+- Format: `azurerm_policy_definition` resource.
+- Common effects: `deny`, `audit`, `modify`, `append`, `disabled`.
 
 ### GCP (Org Policy)
-- Location: `src/02_policy_custom/`
-- Format: `google_org_policy_policy` resource
-- Apply to folders/projects
+- Recommended path: `src/02_policy_custom/`.
+- Format: `google_org_policy_policy` resource.
+- Define target scope clearly (organization/folder/project).
 
-## Template (Azure)
+## Base template (Azure)
 
 ```hcl
 resource "azurerm_policy_definition" "{policy_name}" {
@@ -59,6 +61,6 @@ resource "azurerm_policy_definition" "{policy_name}" {
 ```
 
 ## Validation
-- Validate policy syntax
-- Test in non-production first
-- Document in README
+- Validate policy syntax before commit.
+- Test in a non-production environment.
+- Update technical documentation in English.

@@ -1,17 +1,23 @@
 ---
 name: cicd-workflow
-description: Create or modify GitHub Actions workflows for CI/CD pipelines. Use for automation, testing, and deployment.
+description: Create or modify secure GitHub Actions workflows for CI/CD pipelines.
 ---
 
 # CI/CD Workflow Skill
 
-## When to Use
-- Creating new GitHub Actions workflows
-- Adding jobs to existing workflows
-- Setting up Terraform CI/CD
-- Configuring OIDC authentication
+## When to use
+- Creating new GitHub Actions workflows.
+- Adding jobs to existing workflows.
+- Setting up Terraform CI/CD pipelines.
+- Configuring OIDC authentication.
 
-## Terraform Workflow Template
+## Mandatory rules
+- Use OIDC whenever possible.
+- Pin actions to full-length commit SHAs.
+- Keep `permissions` minimal.
+- Keep step names and operational output in English.
+
+## Terraform workflow template
 
 ```yaml
 name: Terraform
@@ -33,52 +39,56 @@ env:
 
 jobs:
   plan:
-    name: 📋 Plan
+    name: Plan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@<FULL_LENGTH_COMMIT_SHA>
 
-      - name: 🔐 Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@<FULL_LENGTH_COMMIT_SHA>
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-south-1
 
-      - name: 🏗️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@<FULL_LENGTH_COMMIT_SHA>
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: 📐 Format Check
+      - name: Format check
         run: terraform fmt -check -recursive
         working-directory: ${{ env.WORKING_DIR }}
 
-      - name: 🔧 Init
+      - name: Init
         run: terraform init -input=false
         working-directory: ${{ env.WORKING_DIR }}
 
-      - name: 📋 Plan
+      - name: Plan
         run: terraform plan -input=false -out=tfplan
         working-directory: ${{ env.WORKING_DIR }}
 
   apply:
-    name: 🚀 Apply
+    name: Apply
     needs: plan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: production
+    concurrency:
+      group: terraform-${{ github.ref }}
+      cancel-in-progress: false
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@<FULL_LENGTH_COMMIT_SHA>
       # ... apply steps
 ```
 
-## OIDC Authentication
+## OIDC snippets
 
 ### AWS
 ```yaml
-- uses: aws-actions/configure-aws-credentials@v4
+- uses: aws-actions/configure-aws-credentials@<FULL_LENGTH_COMMIT_SHA>
   with:
     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
     aws-region: eu-south-1
@@ -86,7 +96,7 @@ jobs:
 
 ### Azure
 ```yaml
-- uses: azure/login@v2
+- uses: azure/login@<FULL_LENGTH_COMMIT_SHA>
   with:
     client-id: ${{ secrets.AZURE_CLIENT_ID }}
     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -95,15 +105,15 @@ jobs:
 
 ### GCP
 ```yaml
-- uses: google-github-actions/auth@v2
+- uses: google-github-actions/auth@<FULL_LENGTH_COMMIT_SHA>
   with:
     workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
     service_account: ${{ secrets.SA_EMAIL }}
 ```
 
 ## Checklist
-- [ ] OIDC authentication (no long-lived secrets)
-- [ ] Minimal permissions in `permissions` block
-- [ ] Emoji prefixes in step names
-- [ ] Environment protection for production
-- [ ] terraform fmt check included
+- [ ] OIDC is configured.
+- [ ] Actions are pinned by SHA.
+- [ ] `permissions` are minimal.
+- [ ] Production protection/environment is configured.
+- [ ] `terraform fmt -check` is included.
