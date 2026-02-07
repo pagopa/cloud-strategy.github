@@ -1,86 +1,32 @@
 ---
 name: script-python
-description: Create Python scripts with purpose docstring, emoji logs, early return patterns, unit tests, and pinned requirements when needed.
+description: Create or modify Python scripts with purpose docstring, emoji logs, tests, and pinned dependencies when needed.
 ---
 
 # Python Script Skill
 
 ## When to use
-- Automation scripts.
-- Data processing (CSV, JSON, Parquet).
-- API integrations.
-- Reporting and analytics.
-- Creating new scripts and modifying existing Python scripts.
+- New Python scripts.
+- Existing Python scripts that need updates.
 
 ## Mandatory rules
-- Start with a docstring that includes purpose and usage examples.
+- Module docstring must include purpose and usage examples.
 - Use emoji logs for execution states.
-- Prefer early return guard clauses.
-- Keep implementation readable and explicit.
+- Prefer early return and guard clauses.
+- Keep implementation explicit and readable.
 - Add unit tests for testable behavior.
-- If external libraries are required, add/update `requirements.txt` with pinned versions.
-- Apply these rules both to new files and existing files being modified.
+- If external libraries are needed, pin `requirements.txt`.
 
-## Template
-
+## Minimal template
 ```python
 #!/usr/bin/env python3
-"""
-Purpose: {description}
+"""Purpose: {description}
 
 Usage examples:
   python {script_name}.py --help
-  python {script_name}.py --input data.json
 """
-
-import argparse
-import logging
-import sys
-
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="{description}")
-    parser.add_argument("--input", required=True, help="Input file path")
-    return parser.parse_args()
-
-
-def main() -> int:
-    args = parse_args()
-
-    if not args.input:
-        logger.error("❌ Missing --input")
-        return 1
-
-    logger.info("🚀 Starting {script_name}")
-    # Implementation here
-    logger.info("✅ Completed")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
 ```
 
-## Test template
-
-Create `tests/test_{script_name}.py`:
-
-```python
-from {script_name} import main
-
-
-def test_main_success() -> None:
-    # Arrange / Act / Assert
-    assert main() in (0, 1)
-```
-
-## Checklist
-- [ ] Purpose and usage examples are in the module docstring.
-- [ ] Type hints are used on functions.
-- [ ] Emoji logging is used consistently.
-- [ ] Early return guard clauses are used.
-- [ ] Unit tests are included for testable behavior.
-- [ ] `requirements.txt` is pinned when external dependencies are used.
+## Testing
+- Put tests under `tests/`.
+- Keep tests deterministic and isolated.

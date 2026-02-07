@@ -14,98 +14,77 @@ readonly ROOT_DIR
 PROMPTS_DIR="${ROOT_DIR}/.github/prompts"
 INSTRUCTIONS_DIR="${ROOT_DIR}/.github/instructions"
 SKILLS_DIR="${ROOT_DIR}/.github/skills"
+WORKFLOWS_DIR="${ROOT_DIR}/.github/workflows"
 
 FAILURES=0
 
-log_info() {
-  echo "ℹ️  $*"
-}
-
-log_success() {
-  echo "✅ $*"
-}
-
-log_warn() {
-  echo "⚠️  $*"
-}
-
-log_error() {
-  echo "❌ $*" >&2
-}
+log_info() { echo "ℹ️  $*"; }
+log_warn() { echo "⚠️  $*"; }
+log_error() { echo "❌ $*" >&2; }
+log_success() { echo "✅ $*"; }
 
 frontmatter() {
-  local file="$1"
   awk '
     NR == 1 && $0 == "---" { in_fm = 1; next }
     in_fm && $0 == "---" { exit }
     in_fm { print }
-  ' "$file"
+  ' "$1"
 }
 
-has_frontmatter_key() {
+has_key() {
   local file="$1"
   local key="$2"
-  if frontmatter "$file" | grep -Eq "^${key}:[[:space:]]*.+$"; then
-    return 0
-  fi
-  return 1
+  frontmatter "$file" | grep -Eq "^${key}:[[:space:]]*.+$"
 }
 
-validate_prompt_file() {
+check_required_keys() {
   local file="$1"
+  shift
   local missing=()
 
-  for key in description name agent; do
-    if ! has_frontmatter_key "$file" "$key"; then
+  for key in "$@"; do
+    if ! has_key "$file" "$key"; then
       missing+=("$key")
     fi
   done
 
   if [[ "${#missing[@]}" -gt 0 ]]; then
-    log_error "Prompt missing frontmatter keys (${missing[*]}): ${file}"
-    FAILURES=$((FAILURES + 1))
-  fi
-
-  if frontmatter "$file" | grep -Eq '^mode:[[:space:]]*'; then
-    log_error "Legacy frontmatter key 'mode' is not allowed in: ${file}"
+    log_error "Missing frontmatter keys (${missing[*]}): ${file}"
     FAILURES=$((FAILURES + 1))
   fi
 }
 
-validate_instruction_file() {
-  local file="$1"
-  if ! has_frontmatter_key "$file" "applyTo"; then
-    log_error "Instruction missing 'applyTo' frontmatter: ${file}"
-    FAILURES=$((FAILURES + 1))
-  fi
-}
-
-validate_skill_file() {
-  local file="$1"
-  local missing=()
-
-  for key in name description; do
-    if ! has_frontmatter_key "$file" "$key"; then
-      missing+=("$key")
+validate_prompts() {
+  while IFS= read -r file; do
+    check_required_keys "$file" description name agent
+    if frontmatter "$file" | grep -Eq '^mode:[[:space:]]*'; then
+      log_error "Legacy key 'mode' is not allowed: ${file}"
+      FAILURES=$((FAILURES + 1))
     fi
-  done
-
-  if [[ "${#missing[@]}" -gt 0 ]]; then
-    log_error "Skill missing frontmatter keys (${missing[*]}): ${file}"
-    FAILURES=$((FAILURES + 1))
-  fi
+  done < <(find "${PROMPTS_DIR}" -type f -name "*.prompt.md" | sort)
 }
 
-validate_no_version_tags_in_workflows() {
-  local workflows_dir="${ROOT_DIR}/.github/workflows"
-  if [[ ! -d "${workflows_dir}" ]]; then
+validate_instructions() {
+  while IFS= read -r file; do
+    check_required_keys "$file" applyTo
+  done < <(find "${INSTRUCTIONS_DIR}" -type f -name "*.instructions.md" | sort)
+}
+
+validate_skills() {
+  while IFS= read -r file; do
+    check_required_keys "$file" name description
+  done < <(find "${SKILLS_DIR}" -type f -name "SKILL.md" | sort)
+}
+
+validate_workflow_pinning() {
+  if [[ ! -d "${WORKFLOWS_DIR}" ]]; then
     log_warn "No .github/workflows directory found; skipping action pinning check."
     return
   fi
 
-  if rg -n "uses:[[:space:]]*[^[:space:]]+@v[0-9]+" "${workflows_dir}" >/dev/null 2>&1; then
+  if rg -n "uses:[[:space:]]*[^[:space:]]+@v[0-9]+" "${WORKFLOWS_DIR}" >/dev/null 2>&1; then
     log_error "Workflow action tags (@v*) found. Pin actions to full-length SHAs."
-    rg -n "uses:[[:space:]]*[^[:space:]]+@v[0-9]+" "${workflows_dir}" || true
+    rg -n "uses:[[:space:]]*[^[:space:]]+@v[0-9]+" "${WORKFLOWS_DIR}" || true
     FAILURES=$((FAILURES + 1))
   fi
 }
@@ -118,19 +97,10 @@ main() {
     return 1
   fi
 
-  while IFS= read -r file; do
-    validate_prompt_file "$file"
-  done < <(find "${PROMPTS_DIR}" -type f -name "*.prompt.md" | sort)
-
-  while IFS= read -r file; do
-    validate_instruction_file "$file"
-  done < <(find "${INSTRUCTIONS_DIR}" -type f -name "*.instructions.md" | sort)
-
-  while IFS= read -r file; do
-    validate_skill_file "$file"
-  done < <(find "${SKILLS_DIR}" -type f -name "SKILL.md" | sort)
-
-  validate_no_version_tags_in_workflows
+  validate_prompts
+  validate_instructions
+  validate_skills
+  validate_workflow_pinning
 
   if [[ "${FAILURES}" -gt 0 ]]; then
     log_error "Validation failed with ${FAILURES} issue(s)."
@@ -138,7 +108,6 @@ main() {
   fi
 
   log_success "🏁 Copilot customization validation passed."
-  return 0
 }
 
 main "$@"
