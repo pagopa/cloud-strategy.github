@@ -19,7 +19,7 @@ description: Produce concise, complete pull request descriptions aligned with th
 - Explicitly state risk level and rollback plan.
 
 ## Template alignment
-- Use the existing repository template at `.github/pull_request_template.md`.
+- Use the existing repository template at `.github/PULL_REQUEST_TEMPLATE.md`.
 - Keep headings and section order unchanged.
 - If a section is not applicable, write `N/A`.
 - Avoid leaving placeholders empty.

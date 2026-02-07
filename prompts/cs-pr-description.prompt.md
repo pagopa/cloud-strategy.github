@@ -8,7 +8,7 @@ argument-hint: title=<text> intent=<text> changed_files=<comma-separated paths> 
 # Pull Request Description Task
 
 ## Context
-Create or update a pull request body using the existing template at `.github/pull_request_template.md`, including a short list of key changes.
+Create or update a pull request body using the existing template at `.github/PULL_REQUEST_TEMPLATE.md`, including a short list of key changes.
 
 ## Required inputs
 - **Title**: ${input:title}
@@ -30,7 +30,7 @@ Create or update a pull request body using the existing template at `.github/pul
 
 ## Instructions
 1. Use `.github/skills/pr-writing/SKILL.md`.
-2. Use the existing repository template at `.github/pull_request_template.md`.
+2. Use the existing repository template at `.github/PULL_REQUEST_TEMPLATE.md`.
 3. Follow template section order and headings exactly.
 4. Do not remove required sections from the template.
 5. Fill all sections; if a section is not applicable, use `N/A`.
@@ -41,7 +41,7 @@ Create or update a pull request body using the existing template at `.github/pul
 ## Minimal example
 - Input: `title="Add JSON report support in validator" intent="Improve CI visibility" changed_files=".github/scripts/validate-copilot-customizations.sh, .github/workflows/validate-copilot-customizations.yml" validation="bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh; .github/scripts/validate-copilot-customizations.sh --scope root --mode strict" risk=Low links="Issue: N/A"`
 - Expected output:
-  - Full PR markdown body aligned with `.github/pull_request_template.md`.
+  - Full PR markdown body aligned with `.github/PULL_REQUEST_TEMPLATE.md`.
   - `Changes` section with short bullets summarizing the real modifications.
   - `Validation` section containing commands and outcomes.
 
