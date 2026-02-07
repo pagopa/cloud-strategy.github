@@ -10,6 +10,7 @@ applyTo: "**/*.py"
 - Prefer early return and clear guard clauses.
 - Prioritize readability over compact or clever patterns.
 - Unit tests are required for testable logic.
+- Apply these rules both when creating new scripts and when modifying existing scripts.
 
 ## Style
 - Follow PEP8.

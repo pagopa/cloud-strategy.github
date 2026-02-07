@@ -20,11 +20,11 @@ Create a Java CLI entrypoint with clear structure and test coverage.
 1. Use the skill in `.github/skills/script-java/SKILL.md`.
 2. Reuse repository conventions for package naming and folder structure.
 3. Create the class with:
-   - top JavaDoc containing purpose and usage examples
+   - top JavaDoc containing purpose
    - emoji logs for state transitions
    - early return guard clauses
    - readable, straightforward flow
-4. Add unit tests under `src/test/java` using JUnit 5.
+4. Add unit tests under `src/test/java` using JUnit 5 (BDD-like naming with `@DisplayName` and `given_when_then`).
 
 ## Validation
 - Ensure code compiles.

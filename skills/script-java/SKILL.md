@@ -11,7 +11,7 @@ description: Create Java CLI entrypoints with purpose JavaDoc, emoji logs, early
 - Data transformation scripts in Java.
 
 ## Mandatory rules
-- Add top JavaDoc with purpose and usage examples.
+- Add top JavaDoc with purpose.
 - Use emoji logs for start/progress/error/completion.
 - Prefer early return and guard clauses.
 - Keep code readable and avoid over-engineering.
@@ -22,10 +22,6 @@ description: Create Java CLI entrypoints with purpose JavaDoc, emoji logs, early
 ```java
 /**
  * Purpose: {description}
- *
- * Usage examples:
- *   java -cp target/classes {class_name} --help
- *   java -cp target/classes {class_name} --input data.json
  */
 public final class {class_name} {
 
@@ -71,7 +67,7 @@ class {class_name}Test {
 ```
 
 ## Checklist
-- [ ] Purpose and usage examples are documented.
+- [ ] Purpose is documented.
 - [ ] Emoji logs are used for key states.
 - [ ] Guard clauses use early return.
 - [ ] Code is readability-first.

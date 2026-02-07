@@ -19,15 +19,16 @@ Create a new Bash script following PagoPA standards.
 
 1. Use the skill in `.github/skills/script-bash/SKILL.md`.
 2. Search for existing scripts in the repository to reuse patterns.
-3. Create the script with:
+3. When modifying an existing script, retrofit the same standards below where feasible.
+4. Create or update the script with:
    - `#!/usr/bin/env bash`
    - initial comment block with purpose and usage examples
    - `set -euo pipefail`
    - emoji logging functions
    - early return guard clauses
    - readable and simple control flow
-4. Do not add unit tests for Bash unless explicitly requested.
-5. Make the file executable.
+5. Do not add unit tests for Bash unless explicitly requested.
+6. Make the file executable.
 
 ## Validation
 - Run `bash -n` on the script.

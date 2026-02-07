@@ -9,6 +9,7 @@ applyTo: "**/*.sh"
 - Start each script with a comment block that explains purpose and usage examples.
 - Use emoji logs to make execution flow easy to follow.
 - Prefer early return and simple, readable functions.
+- Apply these rules both when creating new scripts and when modifying existing scripts.
 
 ## Standard header
 ```bash

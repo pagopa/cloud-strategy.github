@@ -11,7 +11,7 @@ description: Create Node.js scripts with purpose header, emoji logs, early retur
 - Data processing scripts in JavaScript/TypeScript.
 
 ## Mandatory rules
-- Add a top comment block with purpose and usage examples.
+- Add a top comment block with purpose.
 - Use emoji logs for key execution states.
 - Prefer early return and guard clauses.
 - Keep code readable and straightforward.
@@ -22,9 +22,6 @@ description: Create Node.js scripts with purpose header, emoji logs, early retur
 ```javascript
 /**
  * Purpose: {description}
- * Usage examples:
- *   node {script_name}.js --help
- *   node {script_name}.js --input data.json
  */
 
 function run(argv) {
@@ -61,7 +58,7 @@ test("returns error when --input is missing", () => {
 ```
 
 ## Checklist
-- [ ] Purpose and usage examples are documented at the top.
+- [ ] Purpose is documented at the top.
 - [ ] Emoji logs are used for key states.
 - [ ] Guard clauses use early return.
 - [ ] Code is readability-first.

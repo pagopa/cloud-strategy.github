@@ -20,11 +20,11 @@ Create a Node.js script with clear behavior and unit tests.
 1. Use the skill in `.github/skills/script-node/SKILL.md`.
 2. Reuse existing repository conventions for module format and folder layout.
 3. Create the script with:
-   - top comment block containing purpose and usage examples
+   - top comment block containing purpose
    - emoji logs for runtime progress
    - early return guard clauses
    - readability-first implementation
-4. Add unit tests using the repository test framework (`node:test`, Jest, or Vitest).
+4. Add unit tests using `node:test` + `node:assert/strict` (BDD-like `describe`/`it` style where available).
 
 ## Validation
 - Run lint/type checks if present.

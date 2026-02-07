@@ -10,6 +10,7 @@ description: Create Python scripts with purpose docstring, emoji logs, early ret
 - Data processing (CSV, JSON, Parquet).
 - API integrations.
 - Reporting and analytics.
+- Creating new scripts and modifying existing Python scripts.
 
 ## Mandatory rules
 - Start with a docstring that includes purpose and usage examples.
@@ -18,6 +19,7 @@ description: Create Python scripts with purpose docstring, emoji logs, early ret
 - Keep implementation readable and explicit.
 - Add unit tests for testable behavior.
 - If external libraries are required, add/update `requirements.txt` with pinned versions.
+- Apply these rules both to new files and existing files being modified.
 
 ## Template
 

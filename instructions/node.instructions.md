@@ -5,7 +5,7 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
 # Node.js Instructions
 
 ## Mandatory rules
-- Start script files with a top comment that explains purpose and usage examples.
+- Start script files with a top comment that explains purpose.
 - Use emoji logs for key runtime states.
 - Prefer early return and guard clauses.
 - Prioritize readability and simple control flow.
@@ -20,9 +20,6 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
 ```javascript
 /**
  * Purpose: Explain what this script does.
- * Usage examples:
- *   node script.js --help
- *   node script.js --input data.json
  */
 
 function main(argv) {
@@ -41,5 +38,6 @@ process.exit(main(process.argv.slice(2)));
 ```
 
 ## Testing
-- Use the test framework already adopted by the repository (`node:test`, Jest, or Vitest).
+- Use built-in `node:test` with `node:assert/strict` as the default test stack.
+- Prefer BDD-like structure using `describe`/`it` where available.
 - Keep unit tests isolated and deterministic.

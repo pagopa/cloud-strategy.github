@@ -28,17 +28,19 @@ You are an expert platform engineer at PagoPA. Your goal is to maintain quality,
 6. **Readability First**: choose clear code over clever or esoteric constructs.
 
 ## Script engineering standards
-- Every script must start with a clear description of purpose and usage examples.
+- Bash and Python scripts must start with a clear description of purpose and usage examples.
+- Java and Node.js script-like entrypoints must start with a clear purpose comment (usage examples are optional and not required).
 - Logs should use meaningful emojis that make runtime state easy to understand.
 - Unit tests are required for all scripts except Bash.
 - Python scripts that rely on external libraries must include a pinned `requirements.txt`.
+- Apply the same script standards when creating or modifying scripts.
 
 ## Style standards
 - **Terraform**: 2-space indentation, run `terraform fmt`, prefer explicit references over hardcoded IDs.
 - **Bash scripts (`*.sh`)**: always use Bash (`#!/usr/bin/env bash`), never POSIX `sh`.
 - **Python**: PEP8, type hints, explicit error handling.
-- **Java**: clear package structure, descriptive class names, JUnit tests for testable logic.
-- **Node.js**: explicit module boundaries, robust input validation, unit tests for testable logic.
+- **Java**: clear package structure, descriptive class names, use JUnit 5 for unit tests.
+- **Node.js**: explicit module boundaries, robust input validation, use built-in `node:test` with `node:assert/strict` for unit tests.
 - **Interactive terminal commands**: can remain `zsh` compatible.
 
 ## Recommended workflow

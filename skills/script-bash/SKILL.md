@@ -10,6 +10,7 @@ description: Create Bash scripts with purpose header, emoji logs, early return p
 - CLI wrappers.
 - Local environment setup.
 - Quick automation tasks.
+- Creating new scripts and modifying existing Bash scripts.
 
 ## Mandatory rules
 - `.sh` files must use Bash (`#!/usr/bin/env bash`).
@@ -17,6 +18,7 @@ description: Create Bash scripts with purpose header, emoji logs, early return p
 - Start with a script comment block that describes purpose and usage examples.
 - Use emoji logs to make runtime behavior clear.
 - Prefer early return and guard clauses.
+- Apply these rules both to new files and existing files being modified.
 
 ## Template
 
