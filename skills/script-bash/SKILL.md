@@ -1,77 +1,38 @@
 ---
 name: script-bash
-description: Create Bash scripts with proper error handling and logging. Use for simple automation and shell operations.
+description: Create or modify Bash scripts with purpose header, emoji logs, and readable guard-clause flow.
 ---
 
 # Bash Script Skill
 
-## When to Use
-- Simple file operations
-- Wrapper scripts for tools
-- Environment setup
-- Quick automation tasks
+## When to use
+- New Bash scripts.
+- Existing Bash scripts that need updates.
 
-## Template
+## Mandatory rules
+- Use Bash (`#!/usr/bin/env bash`), never POSIX `sh`.
+- Header must include purpose and usage examples.
+- Use emoji logs for runtime states.
+- Prefer early return and guard clauses.
+- Keep logic straightforward and readable.
+- Do not add unit tests unless explicitly requested.
 
+## Minimal template
 ```bash
 #!/usr/bin/env bash
 #
-# 📋 {script_name}.sh
-# 🎯 Purpose: {description}
-# 📖 Usage: ./{script_name}.sh [options]
-#
+# Purpose: {description}
+# Usage examples:
+#   ./{script_name}.sh --help
 
 set -euo pipefail
 
-# ==============================================================================
-# Configuration
-# ==============================================================================
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_DIR
-
-# ==============================================================================
-# Logging
-# ==============================================================================
-
-log_info()    { echo "🔍 $*"; }
+log_info() { echo "ℹ️  $*"; }
+log_warn() { echo "⚠️  $*"; }
 log_success() { echo "✅ $*"; }
-log_error()   { echo "❌ $*" >&2; }
-log_warning() { echo "⚠️  $*"; }
-
-# ==============================================================================
-# Functions
-# ==============================================================================
-
-usage() {
-    cat << EOF
-Usage: $(basename "$0") [options]
-
-Options:
-    -h, --help      Show this help message
-    -v, --verbose   Enable verbose output
-
-EOF
-}
-
-# ==============================================================================
-# Main
-# ==============================================================================
-
-main() {
-    log_info "Starting {script_name}"
-    
-    # Implementation here
-    
-    log_success "Completed"
-}
-
-main "$@"
+log_error() { echo "❌ $*" >&2; }
 ```
 
-## Checklist
-- [ ] `set -euo pipefail` at the top
-- [ ] All variables quoted
-- [ ] Logging functions used
-- [ ] Usage/help function
-- [ ] Error handling for critical operations
+## Validation
+- `bash -n`
+- `shellcheck -s bash` (if available)

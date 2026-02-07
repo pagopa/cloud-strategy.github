@@ -1,80 +1,39 @@
 ---
 name: script-python
-description: Create Python scripts with logging, error handling, and optional tests. Use for data processing, automation, and API interactions.
+description: Create or modify Python scripts with purpose docstring, emoji logs, tests, and pinned dependencies when needed.
 ---
 
 # Python Script Skill
 
-## When to Use
-- Creating automation scripts
-- Data processing (CSV, JSON, Parquet)
-- API interactions
-- Cost analysis and reporting
+## When to use
+- New Python scripts.
+- Existing Python scripts that need updates.
 
-## Template
+## Mandatory rules
+- Module docstring must include purpose and usage examples.
+- Use emoji logs for execution states.
+- Prefer early return and guard clauses.
+- Keep implementation explicit and readable.
+- Add unit tests for testable behavior.
+- If external libraries are needed, pin `requirements.txt`.
 
+## Minimal template
 ```python
 #!/usr/bin/env python3
+"""Purpose: {description}
+
+Usage examples:
+  python {script_name}.py --help
 """
-📋 {script_name}.py
-
-🎯 Purpose: {description}
-📖 Usage: python {script_name}.py [options]
-"""
-
-import argparse
-import logging
-import sys
-from pathlib import Path
-
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logger = logging.getLogger(__name__)
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="{description}")
-    parser.add_argument("--input", "-i", required=True, help="Input file path")
-    parser.add_argument("--output", "-o", help="Output file path")
-    parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
-    return parser.parse_args()
-
-
-def main() -> int:
-    args = parse_args()
-    
-    logger.info("🔍 Starting {script_name}")
-    
-    try:
-        # Implementation here
-        pass
-    except Exception as e:
-        logger.error(f"❌ Error: {e}")
-        return 1
-    
-    logger.info("✅ Completed successfully")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
 ```
 
-## Test Template
+## Testing
+- Put tests under `tests/`.
+- Use `pytest` as default test framework.
+- Keep tests deterministic and isolated.
 
-Create `tests/test_{script_name}.py`:
-
+## Minimal test example
 ```python
-import pytest
-from {script_name} import main
-
-def test_main_success():
-    # Test implementation
-    pass
+def test_main_success() -> None:
+    assert True
 ```
-
-## Checklist
-- [ ] Type hints on all functions
-- [ ] Docstrings for public functions
-- [ ] Error handling with try/except
-- [ ] Logging with emoji prefixes
-- [ ] argparse for CLI arguments

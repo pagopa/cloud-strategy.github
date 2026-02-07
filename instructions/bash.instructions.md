@@ -4,32 +4,31 @@ applyTo: "**/*.sh"
 
 # Bash Instructions
 
-## Header
+## Mandatory rules
+- Use Bash only: `#!/usr/bin/env bash`.
+- Add a header comment with purpose and usage examples.
+- Use emoji logs (`ℹ️ ✅ ⚠️ ❌`) for runtime visibility.
+- Prefer early return and simple, readable functions.
+- Apply these rules for both create and modify operations.
+
+## Standard skeleton
 ```bash
 #!/usr/bin/env bash
+#
+# Purpose: Explain what this script does.
+# Usage examples:
+#   ./script.sh --help
+#   ./script.sh --input data.json
+
 set -euo pipefail
 ```
 
-## Logging Functions
-```bash
-log_info()    { echo "🔍 $*"; }
-log_success() { echo "✅ $*"; }
-log_error()   { echo "❌ $*" >&2; }
-```
+## Best practices
+- Quote variables (`"$var"`).
+- Use `[[ ... ]]` and `$(...)`.
+- Check dependencies with `command -v`.
+- Keep functions short and focused.
 
-## Best Practices
-- Quote all variables: `"$var"` not `$var`
-- Use `[[ ]]` for conditionals
-- Use `$(command)` not backticks
-- Check command existence: `command -v tool &>/dev/null`
-
-## Structure
-```bash
-main() {
-    log_info "Starting script"
-    # implementation
-    log_success "Completed"
-}
-
-main "$@"
-```
+## Validation
+- `bash -n <script>.sh`
+- `shellcheck -s bash <script>.sh` (if available)
