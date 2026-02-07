@@ -15,4 +15,5 @@
 - Added `instructions/composite-action.instructions.md` for reusable composite actions.
 - Added `scripts/bootstrap-copilot-config.sh` for safe `.github` bootstrap and sync.
 - Added `templates/copilot-quickstart.md` for portable onboarding.
+- Added PR authoring assets: `prompts/cs-pr-description.prompt.md` and `skills/pr-writing/SKILL.md`.
 - Updated docs to be repository-agnostic and reusable across different tech stacks.
