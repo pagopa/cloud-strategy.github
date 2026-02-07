@@ -21,12 +21,13 @@ Create a new Bash script following PagoPA standards.
 2. Search for existing scripts in the repository to reuse patterns.
 3. Create the script with:
    - `#!/usr/bin/env bash`
+   - initial comment block with purpose and usage examples
    - `set -euo pipefail`
-   - logging functions
-   - usage/help function
-   - proper variable quoting
-4. Make the file executable.
-5. Generate code and operational messages in English (comments, `echo`, usage text).
+   - emoji logging functions
+   - early return guard clauses
+   - readable and simple control flow
+4. Do not add unit tests for Bash unless explicitly requested.
+5. Make the file executable.
 
 ## Validation
 - Run `bash -n` on the script.

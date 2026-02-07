@@ -1,6 +1,6 @@
 ---
 name: script-python
-description: Create Python scripts with logging, error handling, and optional tests.
+description: Create Python scripts with purpose docstring, emoji logs, early return patterns, unit tests, and pinned requirements when needed.
 ---
 
 # Python Script Skill
@@ -11,18 +11,24 @@ description: Create Python scripts with logging, error handling, and optional te
 - API integrations.
 - Reporting and analytics.
 
-## Output language rule
-- Docstrings, code comments, and log messages must be in English.
+## Mandatory rules
+- Start with a docstring that includes purpose and usage examples.
+- Use emoji logs for execution states.
+- Prefer early return guard clauses.
+- Keep implementation readable and explicit.
+- Add unit tests for testable behavior.
+- If external libraries are required, add/update `requirements.txt` with pinned versions.
 
 ## Template
 
 ```python
 #!/usr/bin/env python3
 """
-{script_name}.py
-
 Purpose: {description}
-Usage: python {script_name}.py [options]
+
+Usage examples:
+  python {script_name}.py --help
+  python {script_name}.py --input data.json
 """
 
 import argparse
@@ -35,25 +41,20 @@ logger = logging.getLogger(__name__)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="{description}")
-    parser.add_argument("--input", "-i", required=True, help="Input file path")
-    parser.add_argument("--output", "-o", help="Output file path")
-    parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
+    parser.add_argument("--input", required=True, help="Input file path")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
 
-    logger.info("Starting {script_name}")
-
-    try:
-        # Implementation here
-        _ = args
-    except Exception as exc:
-        logger.error(f"Error: {exc}")
+    if not args.input:
+        logger.error("❌ Missing --input")
         return 1
 
-    logger.info("Completed successfully")
+    logger.info("🚀 Starting {script_name}")
+    # Implementation here
+    logger.info("✅ Completed")
     return 0
 
 
@@ -70,13 +71,14 @@ from {script_name} import main
 
 
 def test_main_success() -> None:
-    # Test implementation
+    # Arrange / Act / Assert
     assert main() in (0, 1)
 ```
 
 ## Checklist
+- [ ] Purpose and usage examples are in the module docstring.
 - [ ] Type hints are used on functions.
-- [ ] Docstrings are in English.
-- [ ] Error handling uses `try/except`.
-- [ ] Logging is in English.
-- [ ] CLI arguments use argparse.
+- [ ] Emoji logging is used consistently.
+- [ ] Early return guard clauses are used.
+- [ ] Unit tests are included for testable behavior.
+- [ ] `requirements.txt` is pinned when external dependencies are used.

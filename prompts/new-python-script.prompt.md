@@ -20,14 +20,15 @@ Create a new Python script following PagoPA standards.
 1. Use the skill in `.github/skills/script-python/SKILL.md`.
 2. Search for existing scripts in the repository to reuse patterns.
 3. Create the script with:
-   - shebang and docstring
+   - module docstring containing purpose and usage examples
    - argparse for CLI arguments
-   - structured logging
-   - type hints
-   - explicit error handling
-4. If needed, create tests in `tests/test_{script_name}.py`.
-5. Generate code and operational messages in English (docstrings, logs, error messages).
+   - emoji logging
+   - early return guard clauses
+   - readable and explicit control flow
+4. Create tests in `tests/test_{script_name}.py` for testable behavior.
+5. If external libraries are required, create/update `requirements.txt` with pinned versions.
 
 ## Validation
 - Check syntax errors.
 - Verify import availability.
+- Run unit tests.

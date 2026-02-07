@@ -1,6 +1,6 @@
 ---
 name: script-bash
-description: Create Bash scripts with logging, error handling, and minimum validation.
+description: Create Bash scripts with purpose header, emoji logs, early return patterns, and strong readability.
 ---
 
 # Bash Script Skill
@@ -11,46 +11,68 @@ description: Create Bash scripts with logging, error handling, and minimum valid
 - Local environment setup.
 - Quick automation tasks.
 
-## Mandatory rule
+## Mandatory rules
 - `.sh` files must use Bash (`#!/usr/bin/env bash`).
 - Do not use POSIX `sh` in generated templates.
+- Start with a script comment block that describes purpose and usage examples.
+- Use emoji logs to make runtime behavior clear.
+- Prefer early return and guard clauses.
 
 ## Template
 
 ```bash
 #!/usr/bin/env bash
 #
-# {script_name}.sh
 # Purpose: {description}
-# Usage: ./{script_name}.sh [options]
-#
+# Usage examples:
+#   ./{script_name}.sh --help
+#   ./{script_name}.sh --input data.json
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_DIR
 
-log_info()    { echo "INFO: $*"; }
-log_success() { echo "SUCCESS: $*"; }
-log_error()   { echo "ERROR: $*" >&2; }
-log_warning() { echo "WARNING: $*"; }
+log_info()    { echo "ℹ️  $*"; }
+log_success() { echo "✅ $*"; }
+log_warn()    { echo "⚠️  $*"; }
+log_error()   { echo "❌ $*" >&2; }
 
 usage() {
-    cat << EOF
+  cat << 'USAGE'
 Usage: $(basename "$0") [options]
 
 Options:
-  -h, --help      Show this help message
-  -v, --verbose   Enable verbose output
-EOF
+  -h, --help         Show this help message
+  -i, --input PATH   Input path
+USAGE
+}
+
+parse_args() {
+  if [[ $# -eq 0 ]]; then
+    log_error "Missing arguments"
+    usage
+    return 1
+  fi
+
+  if [[ "${1:-}" == "--help" ]]; then
+    usage
+    return 1
+  fi
+
+  return 0
 }
 
 main() {
-  log_info "Starting {script_name}"
+  log_info "🚀 Starting {script_name}"
+
+  if ! parse_args "$@"; then
+    return 1
+  fi
 
   # Implementation here
 
-  log_success "Completed"
+  log_success "🏁 Completed"
 }
 
 main "$@"
@@ -59,6 +81,7 @@ main "$@"
 ## Checklist
 - [ ] `set -euo pipefail` is present.
 - [ ] Variables are always quoted.
-- [ ] Logging functions are used.
-- [ ] Usage/help function is present.
+- [ ] Purpose and usage examples are in the script header.
+- [ ] Emoji logging is used consistently.
+- [ ] Early return guards are used.
 - [ ] Validation includes `bash -n` and `shellcheck -s bash`.
