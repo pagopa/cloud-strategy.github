@@ -135,44 +135,42 @@ validate_paths() {
 }
 
 build_rsync_args() {
-  local -n out_args=$1
-
-  out_args=(-a)
+  RSYNC_ARGS=(-a)
 
   if [[ "$USE_DEFAULT_EXCLUDES" == true ]]; then
-    out_args+=(--exclude '.git/' --exclude 'CHANGELOG.md' --exclude 'dependabot.yml')
+    RSYNC_ARGS+=(--exclude '.git/' --exclude 'CHANGELOG.md' --exclude 'dependabot.yml')
     if [[ "$INCLUDE_WORKFLOWS" != true ]]; then
-      out_args+=(--exclude 'workflows/')
+      RSYNC_ARGS+=(--exclude 'workflows/')
     fi
   fi
 
   local pattern
   for pattern in "${EXCLUDE_PATTERNS[@]}"; do
-    [[ -n "$pattern" ]] && out_args+=(--exclude "$pattern")
+    [[ -n "$pattern" ]] && RSYNC_ARGS+=(--exclude "$pattern")
   done
 
   if [[ -f "${SOURCE_DIR}/.bootstrap-ignore" ]]; then
-    out_args+=(--exclude-from "${SOURCE_DIR}/.bootstrap-ignore")
+    RSYNC_ARGS+=(--exclude-from "${SOURCE_DIR}/.bootstrap-ignore")
   fi
 
   if [[ -n "$EXCLUDE_FILE" ]]; then
-    out_args+=(--exclude-from "$EXCLUDE_FILE")
+    RSYNC_ARGS+=(--exclude-from "$EXCLUDE_FILE")
   fi
 
   if [[ "$CLEAN_SYNC" == true ]]; then
-    out_args+=(--delete)
+    RSYNC_ARGS+=(--delete)
   fi
 
   if [[ "$DRY_RUN" == true ]]; then
-    out_args+=(--dry-run)
+    RSYNC_ARGS+=(--dry-run)
   fi
 }
 
 run_sync() {
   local target_github_dir="${TARGET_REPO}/.github"
-  local rsync_args=()
+  RSYNC_ARGS=()
 
-  build_rsync_args rsync_args
+  build_rsync_args
 
   mkdir -p "$target_github_dir"
 
@@ -182,7 +180,7 @@ run_sync() {
   log_info "🛡️  Default excludes: $([[ "$USE_DEFAULT_EXCLUDES" == true ]] && echo enabled || echo disabled)"
   log_info "📚 Source ignore file: $([[ -f "${SOURCE_DIR}/.bootstrap-ignore" ]] && echo found || echo not-found)"
 
-  rsync "${rsync_args[@]}" "${SOURCE_DIR}/" "${target_github_dir}/"
+  rsync "${RSYNC_ARGS[@]}" "${SOURCE_DIR}/" "${target_github_dir}/"
 
   if [[ "$DRY_RUN" == true ]]; then
     log_success "Dry-run completed. Re-run with --apply to persist changes."

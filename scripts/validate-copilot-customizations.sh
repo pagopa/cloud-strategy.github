@@ -412,16 +412,19 @@ validate_unreferenced_skills() {
   local prompts_dir="$1"
   local skills_dir="$2"
   local skill
-  local skill_ref
+  local skill_ref_workspace
+  local skill_ref_repo
 
   if [[ ! -d "$prompts_dir" || ! -d "$skills_dir" ]]; then
     return 0
   fi
 
   while IFS= read -r skill; do
-    skill_ref="${skill#"${ROOT_DIR}"/}"
-    if ! grep -R -q "$skill_ref" "$prompts_dir"; then
-      record_warn "Unreferenced skill (consider using in prompts): ${skill_ref}"
+    skill_ref_workspace="${skill#"${ROOT_DIR}"/}"
+    skill_ref_repo=".github/${skill#"${skills_dir%/skills}/"}"
+
+    if ! grep -R -q "$skill_ref_workspace" "$prompts_dir" && ! grep -R -q "$skill_ref_repo" "$prompts_dir"; then
+      record_warn "Unreferenced skill (consider using in prompts): ${skill_ref_workspace}"
     fi
   done < <(find "$skills_dir" -type f -name 'SKILL.md' | sort)
 
@@ -461,6 +464,46 @@ validate_workflow_pinning() {
       fi
     done < <(grep -oE 'uses:[[:space:]]*[^[:space:]]+' "$file" | sed -E 's/^uses:[[:space:]]*//' || true)
   done < <(find "$workflows_dir" -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+
+  return 0
+}
+
+validate_workflow_permissions() {
+  local workflows_dir="$1"
+  local file
+  local severity="error"
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  if [[ ! -d "$workflows_dir" ]]; then
+    return
+  fi
+
+  while IFS= read -r file; do
+    if ! grep -Eq '^[[:space:]]*permissions:[[:space:]]*' "$file"; then
+      record_issue "$severity" "Workflow missing permissions block: ${file}"
+    fi
+  done < <(find "$workflows_dir" -mindepth 1 -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+
+  return 0
+}
+
+validate_pr_template_consistency() {
+  local github_dir="$1"
+  local lower_template="${github_dir}/pull_request_template.md"
+  local upper_template="${github_dir}/PULL_REQUEST_TEMPLATE.md"
+  local severity="error"
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  if [[ ! -f "$lower_template" && ! -f "$upper_template" ]]; then
+    record_issue "$severity" "Missing PR template in ${github_dir} (expected pull_request_template.md or PULL_REQUEST_TEMPLATE.md)"
+    return 0
+  fi
+
+  if [[ -f "$lower_template" && -f "$upper_template" ]] && ! cmp -s "$lower_template" "$upper_template"; then
+    record_issue "$severity" "PR template files diverge in ${github_dir}: pull_request_template.md vs PULL_REQUEST_TEMPLATE.md"
+  fi
 
   return 0
 }
@@ -513,6 +556,8 @@ validate_target() {
   validate_agents_dir "$agents_dir"
   validate_unreferenced_skills "$prompts_dir" "$skills_dir"
   validate_workflow_pinning "$workflows_dir"
+  validate_workflow_permissions "$workflows_dir"
+  validate_pr_template_consistency "$github_dir"
 
   return 0
 }
