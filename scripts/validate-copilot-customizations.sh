@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Purpose: Validate Copilot customization files under .github.
+# Purpose: Validate Copilot customization files in root layout or .github layout.
 # Usage examples:
-#   ./.github/scripts/validate-copilot-customizations.sh
-#   ./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict
+#   ./scripts/validate-copilot-customizations.sh
+#   ./scripts/validate-copilot-customizations.sh --scope root --mode strict
 #   ./.github/scripts/validate-copilot-customizations.sh --scope all --mode legacy-compatible
 #   ./.github/scripts/validate-copilot-customizations.sh --scope repo=my-repo --mode legacy-compatible
 #
@@ -235,6 +235,22 @@ has_heading_regex() {
   grep -Eq "$regex" "$file"
 }
 
+frontmatter_value() {
+  local file="$1"
+  local key="$2"
+  frontmatter "$file" | awk -v wanted="$key" '
+    {
+      line = $0
+      sub(/^[[:space:]]+/, "", line)
+      if (line ~ ("^" wanted ":[[:space:]]*")) {
+        sub("^" wanted ":[[:space:]]*", "", line)
+        print line
+        exit
+      }
+    }
+  '
+}
+
 check_required_keys() {
   local file="$1"
   local severity="$2"
@@ -258,6 +274,51 @@ check_optional_keys() {
       record_warn "Recommended frontmatter key '${key}' is missing: ${file}"
     fi
   done
+}
+
+prompt_expected_name() {
+  local file="$1"
+  local name
+
+  name="$(basename "$file")"
+
+  case "$name" in
+    github-action.prompt.md)
+      printf '%s' "cs-github-action"
+      ;;
+    github-composite-action.prompt.md)
+      printf '%s' "cs-composite-action"
+      ;;
+    github-pr-description.prompt.md)
+      printf '%s' "cs-pr-description"
+      ;;
+    *.prompt.md)
+      printf '%s' "${name%.prompt.md}"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+validate_prompt_name_policy() {
+  local file="$1"
+  local expected_name
+  local actual_name
+  local severity="error"
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  if ! expected_name="$(prompt_expected_name "$file")"; then
+    return 0
+  fi
+
+  actual_name="$(frontmatter_value "$file" "name")"
+  [[ -n "$actual_name" ]] || return 0
+
+  if [[ "$actual_name" != "$expected_name" ]]; then
+    record_issue "$severity" "Prompt name policy mismatch in ${file}: expected '${expected_name}', found '${actual_name}'"
+  fi
 }
 
 prompt_skill_refs() {
@@ -355,6 +416,8 @@ validate_prompt_file() {
     record_issue "$severity" "Legacy prompt key 'mode' found: ${file}"
   fi
 
+  validate_prompt_name_policy "$file"
+
   if ! has_heading_exact "$file" '## Instructions'; then
     record_issue "$section_severity" "Prompt missing '## Instructions' section: ${file}"
   fi
@@ -439,6 +502,9 @@ validate_agents_dir() {
   local agents_dir="$1"
   local file
   local count=0
+  local semantic_severity="error"
+
+  [[ "$MODE" == "legacy-compatible" ]] && semantic_severity="warn"
 
   if [[ ! -d "$agents_dir" ]]; then
     record_warn "No .github/agents directory found in ${agents_dir%/.github/agents}"
@@ -458,11 +524,183 @@ validate_agents_dir() {
     if ! has_heading_exact "$file" '## Restrictions'; then
       record_error "Agent missing '## Restrictions' section: ${file}"
     fi
+
+    case "$(basename "$file")" in
+      planner.agent.md)
+        if ! has_heading_exact "$file" '## Scope guard'; then
+          record_issue "$semantic_severity" "Planner agent missing '## Scope guard' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Skill and prompt awareness'; then
+          record_issue "$semantic_severity" "Planner agent missing '## Skill and prompt awareness' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Handoff output'; then
+          record_issue "$semantic_severity" "Planner agent missing '## Handoff output' section: ${file}"
+        fi
+        if ! grep -Fq 'security-baseline.md' "$file"; then
+          record_issue "$semantic_severity" "Planner agent should reference security baseline: ${file}"
+        fi
+        ;;
+      implementer.agent.md)
+        if ! has_heading_exact "$file" '## Handoff input'; then
+          record_issue "$semantic_severity" "Implementer agent missing '## Handoff input' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Stack resolution'; then
+          record_issue "$semantic_severity" "Implementer agent missing '## Stack resolution' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Commit messages'; then
+          record_issue "$semantic_severity" "Implementer agent missing '## Commit messages' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Execution policy'; then
+          record_issue "$semantic_severity" "Implementer agent missing '## Execution policy' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Error recovery'; then
+          record_issue "$semantic_severity" "Implementer agent missing '## Error recovery' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Handoff output'; then
+          record_issue "$semantic_severity" "Implementer agent missing '## Handoff output' section: ${file}"
+        fi
+        if ! grep -Fq 'security-baseline.md' "$file"; then
+          record_issue "$semantic_severity" "Implementer agent should reference security baseline: ${file}"
+        fi
+        if ! grep -Fq 'copilot-commit-message-instructions.md' "$file"; then
+          record_issue "$semantic_severity" "Implementer agent should reference commit message instructions: ${file}"
+        fi
+        if ! grep -Fq 'scripts/validate-copilot-customizations.sh' "$file"; then
+          record_issue "$semantic_severity" "Implementer agent should reference customization validator: ${file}"
+        fi
+        ;;
+      reviewer.agent.md)
+        if ! has_heading_exact "$file" '## Review format'; then
+          record_issue "$semantic_severity" "Reviewer agent missing '## Review format' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Diff-first approach'; then
+          record_issue "$semantic_severity" "Reviewer agent missing '## Diff-first approach' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Specialist delegation'; then
+          record_issue "$semantic_severity" "Reviewer agent missing '## Specialist delegation' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Handoff output'; then
+          record_issue "$semantic_severity" "Reviewer agent missing '## Handoff output' section: ${file}"
+        fi
+        if ! grep -Fq 'security-baseline.md' "$file"; then
+          record_issue "$semantic_severity" "Reviewer agent should reference security baseline: ${file}"
+        fi
+        if ! grep -Fq 'copilot-code-review-instructions.md' "$file"; then
+          record_issue "$semantic_severity" "Reviewer agent should reference code review instructions: ${file}"
+        fi
+        ;;
+    esac
   done < <(find "$agents_dir" -type f -name '*.agent.md' | sort)
 
   if [[ "$count" -eq 0 ]]; then
     record_warn "No custom agents found under ${agents_dir}"
   fi
+}
+
+resolve_agents_file() {
+  local target_root="$1"
+  local config_dir="$2"
+
+  if [[ -f "${target_root}/AGENTS.md" ]]; then
+    printf '%s' "${target_root}/AGENTS.md"
+    return 0
+  fi
+
+  if [[ -f "${config_dir}/AGENTS.md" ]]; then
+    printf '%s' "${config_dir}/AGENTS.md"
+    return 0
+  fi
+
+  return 1
+}
+
+agents_contains_path() {
+  local agents_file="$1"
+  local path="$2"
+  local alternate_path
+
+  alternate_path="$path"
+  if [[ "$path" == .github/* ]]; then
+    alternate_path="${path#.github/}"
+  else
+    alternate_path=".github/${path}"
+  fi
+
+  if grep -Fq "$path" "$agents_file" || grep -Fq "$alternate_path" "$agents_file"; then
+    return 0
+  fi
+
+  return 1
+}
+
+validate_agents_inventory() {
+  local target_root="$1"
+  local config_dir="$2"
+  local instructions_dir="$3"
+  local prompts_dir="$4"
+  local skills_dir="$5"
+  local agents_file=""
+  local file
+  local rel_path
+  local severity="error"
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  if ! agents_file="$(resolve_agents_file "$target_root" "$config_dir")"; then
+    record_issue "$severity" "Missing AGENTS.md for inventory validation (checked ${target_root} and ${config_dir})"
+    return 0
+  fi
+
+  if [[ -d "$instructions_dir" ]]; then
+    while IFS= read -r file; do
+      rel_path="${file#"${target_root}/"}"
+      if ! agents_contains_path "$agents_file" "$rel_path"; then
+        record_issue "$severity" "AGENTS.md is missing instruction inventory entry for '${rel_path}'"
+      fi
+    done < <(find "$instructions_dir" -type f -name '*.instructions.md' | sort)
+  fi
+
+  if [[ -d "$prompts_dir" ]]; then
+    while IFS= read -r file; do
+      rel_path="${file#"${target_root}/"}"
+      if ! agents_contains_path "$agents_file" "$rel_path"; then
+        record_issue "$severity" "AGENTS.md is missing prompt inventory entry for '${rel_path}'"
+      fi
+    done < <(find "$prompts_dir" -type f -name '*.prompt.md' | sort)
+  fi
+
+  if [[ -d "$skills_dir" ]]; then
+    while IFS= read -r file; do
+      rel_path="${file#"${target_root}/"}"
+      if ! agents_contains_path "$agents_file" "$rel_path"; then
+        record_issue "$severity" "AGENTS.md is missing skill inventory entry for '${rel_path}'"
+      fi
+    done < <(find "$skills_dir" -type f -name 'SKILL.md' | sort)
+  fi
+
+  return 0
+}
+
+validate_codeowners_placeholder() {
+  local target_root="$1"
+  local config_dir="$2"
+  local codeowners_file
+  local checked_files=""
+
+  for codeowners_file in "${target_root}/CODEOWNERS" "${config_dir}/CODEOWNERS"; do
+    [[ -f "$codeowners_file" ]] || continue
+
+    if [[ "$checked_files" == *"|${codeowners_file}|"* ]]; then
+      continue
+    fi
+    checked_files="${checked_files}|${codeowners_file}|"
+
+    if grep -Fq '@your-org/platform-governance-team' "$codeowners_file"; then
+      record_warn "CODEOWNERS still uses template placeholder owner in ${codeowners_file}"
+    fi
+  done
+
+  return 0
 }
 
 validate_skill_dirs() {
@@ -652,6 +890,8 @@ validate_target() {
   fi
 
   validate_agents_dir "$agents_dir"
+  validate_agents_inventory "$target_root" "$github_dir" "$instructions_dir" "$prompts_dir" "$skills_dir"
+  validate_codeowners_placeholder "$target_root" "$github_dir"
   validate_unreferenced_skills "$prompts_dir" "$skills_dir"
   validate_workflow_pinning "$workflows_dir"
   validate_workflow_permissions "$workflows_dir"

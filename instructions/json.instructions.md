@@ -5,6 +5,10 @@ applyTo: "**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json
 
 # JSON Instructions
 
+## Scope boundary
+- This instruction intentionally applies only to registry-like JSON paths declared in `applyTo`.
+- Root-level or ecosystem-managed JSON files (for example `package.json`, lock files) are out of scope unless they match the configured paths.
+
 ## Formatting
 - Use 2-space indentation.
 - Keep keys in alphabetical order when applicable.

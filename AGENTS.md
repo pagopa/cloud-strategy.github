@@ -5,6 +5,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ## Naming Policy
 - Use GitHub Copilot terminology in repository-facing content.
 - Do not mention internal runtime names in repository artifacts.
+- Treat prompt frontmatter `name:` as the canonical command identifier.
 
 ## Decision Priority
 1. Apply repository non-negotiables from `copilot-instructions.md`.
@@ -94,6 +95,11 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `templates/AGENTS.template.md`: Template for onboarding new repositories.
 - `templates/copilot-quickstart.md`: Quick start guide for new teams.
 
+## Template Placeholders
+- `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories.
+- Consumer repositories must replace placeholder owners before enabling review enforcement.
+- The validator should warn when the placeholder owner is still present.
+
 ## Prohibitions
 - Never hardcode secrets, tokens, or credentials.
 - Never modify `README.md` files unless explicitly requested by the user.
@@ -105,3 +111,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ## PR and Workflow Conventions
 - PR content must follow `pull_request_template.md` in exact section order.
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with release/tag reference.
+
+## Backlog Triggers
+- Add `instructions/docker.instructions.md` when the first Dockerfile is introduced in this repository.
