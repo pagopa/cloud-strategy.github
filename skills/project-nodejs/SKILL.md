@@ -10,6 +10,9 @@ description: Create or modify Node.js project modules with purpose comments and 
 - Refactoring or extending existing Node.js components.
 
 ## Mandatory rules
+- Apply DDD boundaries: keep domain behavior in domain modules/services.
+- Keep transport and infrastructure logic in handlers/adapters.
+- Use ubiquitous language for domain concepts and errors.
 - Add a concise top purpose comment for new/changed core modules.
 - Use emoji logs for key runtime states when logging is touched.
 - Prefer early return and guard clauses.

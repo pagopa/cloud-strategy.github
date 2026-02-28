@@ -10,6 +10,9 @@ description: Create or modify Java project components with purpose JavaDoc and s
 - Refactoring or extending existing Java components.
 
 ## Mandatory rules
+- Apply DDD boundaries: keep domain logic in domain services/entities/value objects.
+- Keep infrastructure concerns outside domain classes.
+- Use ubiquitous language for domain classes, methods, and exceptions.
 - Add concise purpose JavaDoc for new/changed core classes.
 - Use emoji logs for key runtime transitions when logging is touched.
 - Prefer early return and guard clauses.

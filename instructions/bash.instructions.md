@@ -1,4 +1,5 @@
 ---
+description: Bash scripting standards for safe execution, guard clauses, and consistent runtime logs.
 applyTo: "**/*.sh"
 ---
 

@@ -10,7 +10,12 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ "$(basename "$(cd "${SCRIPT_DIR}/.." && pwd)")" == ".github" ]]; then
+  ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+else
+  ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+fi
 readonly ROOT_DIR
 
 MODE="strict"
@@ -33,8 +38,8 @@ Usage: validate-copilot-customizations.sh [--scope root|all|repo=<name>] [--mode
 
 Options:
   --scope   Validation scope (default: root)
-            root            Validate only workspace root .github
-            all             Validate root + all immediate sub-repos that contain .github
+            root            Validate only workspace root Copilot config
+            all             Validate root + all immediate sub-repos that contain Copilot config
             repo=<name>     Validate root + one specific sub-repo (e.g., repo=my-repo)
 
   --mode    Validation profile (default: strict)
@@ -257,12 +262,80 @@ check_optional_keys() {
 
 prompt_skill_refs() {
   local file="$1"
-  grep -oE '\.github/skills/[A-Za-z0-9._/-]+/SKILL\.md' "$file" | sort -u || true
+  grep -oE '(\.github/)?skills/[A-Za-z0-9._/-]+/SKILL\.md' "$file" | sort -u || true
+}
+
+strip_github_prefix() {
+  local value="$1"
+  if [[ "$value" == .github/* ]]; then
+    printf '%s' "${value#".github/"}"
+    return 0
+  fi
+
+  printf '%s' "$value"
+}
+
+resolve_reference_file() {
+  local target_root="$1"
+  local config_dir="$2"
+  local ref="$3"
+  local ref_no_prefix
+
+  ref_no_prefix="$(strip_github_prefix "$ref")"
+
+  if [[ -f "${target_root}/${ref}" ]]; then
+    printf '%s' "${target_root}/${ref}"
+    return 0
+  fi
+
+  if [[ -f "${target_root}/${ref_no_prefix}" ]]; then
+    printf '%s' "${target_root}/${ref_no_prefix}"
+    return 0
+  fi
+
+  if [[ -f "${config_dir}/${ref}" ]]; then
+    printf '%s' "${config_dir}/${ref}"
+    return 0
+  fi
+
+  if [[ -f "${config_dir}/${ref_no_prefix}" ]]; then
+    printf '%s' "${config_dir}/${ref_no_prefix}"
+    return 0
+  fi
+
+  return 1
+}
+
+resolve_config_dir() {
+  local target_root="$1"
+
+  if [[ -f "${target_root}/copilot-instructions.md" && -d "${target_root}/instructions" ]]; then
+    printf '%s' "${target_root}"
+    return 0
+  fi
+
+  if [[ -d "${target_root}/.github" ]]; then
+    printf '%s' "${target_root}/.github"
+    return 0
+  fi
+
+  return 1
+}
+
+has_copilot_config() {
+  local target_root="$1"
+
+  if resolve_config_dir "$target_root" >/dev/null; then
+    return 0
+  fi
+
+  return 1
 }
 
 validate_prompt_file() {
   local file="$1"
-  local base_dir="$2"
+  local target_root="$2"
+  local config_dir="$3"
   local severity="error"
   local section_severity="error"
   local refs=()
@@ -316,7 +389,7 @@ validate_prompt_file() {
   fi
 
   for ref in "${refs[@]}"; do
-    if [[ ! -f "${base_dir}/${ref}" ]]; then
+    if ! resolve_reference_file "$target_root" "$config_dir" "$ref" >/dev/null; then
       if [[ "$MODE" == "strict" ]]; then
         record_error "Prompt references missing skill path '${ref}' in ${file}"
       else
@@ -329,7 +402,13 @@ validate_prompt_file() {
 validate_instruction_file() {
   local file="$1"
 
-  check_required_keys "$file" error applyTo
+  if [[ "$MODE" == "strict" ]]; then
+    check_required_keys "$file" error applyTo description
+  else
+    check_required_keys "$file" error applyTo
+    check_optional_keys "$file" description
+  fi
+
   if ! grep -Eq '^# ' "$file"; then
     record_error "Instruction missing top heading: ${file}"
   fi
@@ -412,19 +491,19 @@ validate_unreferenced_skills() {
   local prompts_dir="$1"
   local skills_dir="$2"
   local skill
-  local skill_ref_workspace
-  local skill_ref_repo
+  local skill_ref
+  local prefixed_skill_ref
 
   if [[ ! -d "$prompts_dir" || ! -d "$skills_dir" ]]; then
     return 0
   fi
 
   while IFS= read -r skill; do
-    skill_ref_workspace="${skill#"${ROOT_DIR}"/}"
-    skill_ref_repo=".github/${skill#"${skills_dir%/skills}/"}"
+    skill_ref="skills/${skill#"${skills_dir}/"}"
+    prefixed_skill_ref=".github/${skill_ref}"
 
-    if ! grep -R -q "$skill_ref_workspace" "$prompts_dir" && ! grep -R -q "$skill_ref_repo" "$prompts_dir"; then
-      record_warn "Unreferenced skill (consider using in prompts): ${skill_ref_workspace}"
+    if ! grep -R -q "$skill_ref" "$prompts_dir" && ! grep -R -q "$prefixed_skill_ref" "$prompts_dir"; then
+      record_warn "Unreferenced skill (consider using in prompts): ${skill_ref}"
     fi
   done < <(find "$skills_dir" -type f -name 'SKILL.md' | sort)
 
@@ -511,7 +590,7 @@ validate_pr_template_consistency() {
 validate_target() {
   local target_root="$1"
   local label="$2"
-  local github_dir="${target_root}/.github"
+  local github_dir=""
   local prompts_dir="${github_dir}/prompts"
   local instructions_dir="${github_dir}/instructions"
   local skills_dir="${github_dir}/skills"
@@ -519,23 +598,29 @@ validate_target() {
   local workflows_dir="${github_dir}/workflows"
   local file
 
-  if [[ ! -d "$github_dir" ]]; then
+  if ! github_dir="$(resolve_config_dir "$target_root")"; then
     if [[ "$MODE" == "strict" ]]; then
-      record_error "${label}: missing .github directory"
+      record_error "${label}: missing Copilot configuration root"
     else
-      record_warn "${label}: missing .github directory"
+      record_warn "${label}: missing Copilot configuration root"
     fi
     return
   fi
 
-  log_info "🔎 Validating ${label} (.github)"
+  prompts_dir="${github_dir}/prompts"
+  instructions_dir="${github_dir}/instructions"
+  skills_dir="${github_dir}/skills"
+  agents_dir="${github_dir}/agents"
+  workflows_dir="${github_dir}/workflows"
+
+  log_info "🔎 Validating ${label} (${github_dir})"
 
   if [[ -d "$prompts_dir" ]]; then
     while IFS= read -r file; do
-      validate_prompt_file "$file" "$target_root"
+      validate_prompt_file "$file" "$target_root" "$github_dir"
     done < <(find "$prompts_dir" -type f -name '*.prompt.md' | sort)
   else
-    record_warn "${label}: no .github/prompts directory"
+    record_warn "${label}: no prompts directory"
   fi
 
   if [[ -d "$instructions_dir" ]]; then
@@ -543,7 +628,7 @@ validate_target() {
       validate_instruction_file "$file"
     done < <(find "$instructions_dir" -type f -name '*.instructions.md' | sort)
   else
-    record_warn "${label}: no .github/instructions directory"
+    record_warn "${label}: no instructions directory"
   fi
 
   validate_skill_dirs "$skills_dir"
@@ -580,7 +665,7 @@ main() {
       targets+=("$ROOT_DIR")
       for target in "$ROOT_DIR"/*; do
         [[ -d "$target" ]] || continue
-        [[ -d "$target/.github" ]] || continue
+        has_copilot_config "$target" || continue
         targets+=("$target")
       done
       ;;

@@ -18,9 +18,12 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Least privilege.
 - No hardcoded secrets.
 - Preserve existing conventions.
+- Prefer domain-driven design (DDD) for non-trivial application code.
 - Prefer early return/guard clauses.
 - Prioritize readability over clever abstractions.
-- Update technical docs in English when behavior changes.
+- Keep repository artifacts in English.
+- Do not modify `README.md` files unless explicitly requested by the user.
+- Update non-README technical docs in English when behavior changes.
 
 ## Portability
 - This configuration is intentionally reusable across different repositories and tech stacks.

@@ -1,4 +1,5 @@
 ---
+description: Markdown standards for concise, maintainable documentation and explicit command/path formatting.
 applyTo: "**/*.md"
 ---
 
@@ -18,5 +19,6 @@ applyTo: "**/*.md"
 - Keep links explicit and maintainable.
 
 ## Maintenance
-- Update docs when behavior or workflows change.
+- Update documentation when behavior or workflows change.
+- Do not modify `README.md` files unless explicitly requested by the user.
 - Avoid stale examples and mismatched file paths.

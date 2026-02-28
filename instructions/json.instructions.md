@@ -1,4 +1,5 @@
 ---
+description: JSON formatting and consistency standards for registry and configuration data files.
 applyTo: "**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json"
 ---
 

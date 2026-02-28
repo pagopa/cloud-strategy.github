@@ -1,4 +1,5 @@
 ---
+description: Terraform authoring standards for readability, typed interfaces, and validation-first delivery.
 applyTo: "**/*.tf"
 ---
 

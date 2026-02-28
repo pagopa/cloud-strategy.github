@@ -4,6 +4,7 @@ This folder contains optional custom agents for focused tasks.
 
 ## Recommended routing
 - Read-only: `Planner`, `Reviewer`, `SecurityReviewer`, `WorkflowSupplyChain`, `TerraformGuardrails`, `IAMLeastPrivilege`.
+- PR-focused: `PRWriter`.
 - Write-capable: `Implementer`.
 
 ## Selection guide
@@ -12,4 +13,5 @@ This folder contains optional custom agents for focused tasks.
 3. Use `Reviewer` for non-security quality gates.
 4. Use `TerraformGuardrails` and `IAMLeastPrivilege` on policy/infrastructure changes.
 5. Use `WorkflowSupplyChain` on workflow changes.
-6. Use `SecurityReviewer` as final security gate.
+6. Use `PRWriter` to create or update PR title/body from template and diff.
+7. Use `SecurityReviewer` as final security gate.

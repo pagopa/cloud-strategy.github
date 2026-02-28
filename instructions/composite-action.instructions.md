@@ -1,4 +1,5 @@
 ---
+description: Standards for secure, deterministic GitHub composite actions with explicit input validation.
 applyTo: ".github/actions/**/action.y*ml"
 ---
 

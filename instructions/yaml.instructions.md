@@ -1,4 +1,5 @@
 ---
+description: YAML formatting and clarity conventions for stable, maintainable configuration files.
 applyTo: "**/*.yml,**/*.yaml"
 ---
 

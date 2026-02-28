@@ -17,12 +17,27 @@ description: Produce concise, complete pull request descriptions aligned with th
 - Provide a short bullet list of key changes.
 - Include validation commands and results.
 - Explicitly state risk level and rollback plan.
+- If PR tools are available, apply updates to the PR (do not stop at generated markdown only).
+- Do not modify any `README.md` file unless explicitly requested by the user.
 
 ## Template alignment
-- Use the existing repository template at `.github/PULL_REQUEST_TEMPLATE.md`.
+- Resolve and use one existing repository template path:
+  - `.github/pull_request_template.md`
+  - `.github/PULL_REQUEST_TEMPLATE.md`
+  - `pull_request_template.md`
+  - `PULL_REQUEST_TEMPLATE.md`
 - Keep headings and section order unchanged.
 - If a section is not applicable, write `N/A`.
 - Avoid leaving placeholders empty.
+
+## Tool-driven workflow (VS Code / JetBrains)
+1. Detect whether an open PR exists for the current branch.
+2. If PR exists, update title/body directly.
+3. If PR does not exist, create a draft PR first.
+4. Update PR title/body using template-compliant content.
+5. Re-fetch PR and verify required section headings exist in persisted body.
+6. Return PR URL and a concise confirmation summary.
+7. If PR tools are unavailable, return ready-to-paste markdown plus exact CLI fallback commands.
 
 ## Required section headings
 - `## Summary`
@@ -47,3 +62,4 @@ description: Produce concise, complete pull request descriptions aligned with th
 - Ensure every required section heading is present.
 - Ensure `Changes` has concise bullets describing the real diff.
 - Ensure risk and rollback are explicit and actionable.
+- Ensure final PR body is persisted when tooling supports PR updates.

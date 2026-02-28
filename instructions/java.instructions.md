@@ -1,4 +1,5 @@
 ---
+description: Java project standards with DDD boundaries, readability-first design, and deterministic unit testing.
 applyTo: "**/*.java"
 ---
 
@@ -6,6 +7,9 @@ applyTo: "**/*.java"
 
 ## Mandatory rules
 - Treat work as project-oriented (services/modules/components), not script-oriented.
+- Apply DDD boundaries: keep domain logic inside domain services/entities/value objects.
+- Keep infrastructure details (I/O, SDK calls, persistence wiring) outside core domain logic.
+- Use ubiquitous language in class names, methods, and domain-level exceptions.
 - Add concise purpose JavaDoc for new/changed core classes when intent is not obvious.
 - Use emoji logs for key runtime transitions when logging is touched.
 - Prefer early return and guard clauses.
