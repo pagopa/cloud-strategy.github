@@ -7,7 +7,7 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Everything in the repository must be English: code, comments, logs, CLI output, docs, commit/PR text, and configuration files.
 
 ## Instruction order
-1. Read local `AGENTS.md` first.
+1. Read local `AGENTS.md` first and follow its decision priority.
 2. Apply `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` when relevant.
 3. Use `.github/repo-profiles.yml` as optional profile guidance for stack-specific setup.
 4. Apply matching `.github/instructions/*.instructions.md`.

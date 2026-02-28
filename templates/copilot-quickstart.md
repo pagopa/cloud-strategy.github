@@ -18,10 +18,10 @@ For detailed maintenance and validation flow, refer to `.github/README.md`.
 ## Suggested starter sets
 - Java repositories: `java.instructions.md`, `cs-java.prompt.md`, `project-java/SKILL.md`
 - Node.js repositories: `nodejs.instructions.md`, `cs-nodejs.prompt.md`, `project-nodejs/SKILL.md`
-- CI-focused repositories: `github-actions.instructions.md`, `cs-github-action.prompt.md`, `cicd-workflow/SKILL.md`
+- CI-focused repositories: `github-actions.instructions.md`, `github-action.prompt.md`, `cicd-workflow/SKILL.md`
 
 ## Validation gate
-Add `.github/workflows/validate-copilot-customizations.yml` to enforce consistency in pull requests.
+Add `.github/workflows/github-validate-copilot-customizations.yml` to enforce consistency in pull requests.
 
 ## Bootstrap tip
 Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` in dry-run first, then `--apply`.

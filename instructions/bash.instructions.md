@@ -20,6 +20,8 @@ applyTo: "**/*.sh"
 # Usage examples:
 #   ./script.sh --help
 #   ./script.sh --input data.json
+#   ./script.sh --input <file content>
+
 
 set -euo pipefail
 ```
@@ -29,6 +31,10 @@ set -euo pipefail
 - Use `[[ ... ]]` and `$(...)`.
 - Check dependencies with `command -v`.
 - Keep functions short and focused.
+- keet logs informative and consistent.
+- Use `getopts` for argument parsing.
+- keep simple and avoid unnecessary complexity.
+- Validate inputs and handle errors gracefully.
 
 ## Validation
 - `bash -n <script>.sh`

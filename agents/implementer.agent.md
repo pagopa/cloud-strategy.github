@@ -16,6 +16,13 @@ Deliver requested changes end-to-end with safe, minimal, and testable modificati
 - Preserve existing behavior unless requirements state otherwise.
 - Prefer repository conventions over introducing new patterns.
 
+## Stack resolution
+- This agent is intentionally technology-agnostic.
+- Resolve technology from requested target files and prompt inputs.
+- Apply matching `instructions/*.instructions.md` `applyTo` rules before editing.
+- If a prompt references a skill, use that skill as the implementation pattern.
+- If changes span multiple technologies, apply all relevant instruction files.
+
 ## Execution policy
 1. Gather local context before editing.
 2. Implement the smallest correct change.

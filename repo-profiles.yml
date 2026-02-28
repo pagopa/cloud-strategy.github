@@ -12,7 +12,7 @@ profiles:
       - instructions/yaml.instructions.md
       - instructions/json.instructions.md
     recommended_prompts:
-      - prompts/cs-github-action.prompt.md
+      - prompts/github-action.prompt.md
     recommended_skills:
       - skills/cicd-workflow/SKILL.md
 
@@ -79,7 +79,7 @@ profiles:
     recommended_prompts:
       - prompts/cs-java.prompt.md
       - prompts/cs-nodejs.prompt.md
-      - prompts/cs-github-action.prompt.md
+      - prompts/github-action.prompt.md
       - prompts/cs-terraform.prompt.md
     recommended_skills:
       - skills/project-java/SKILL.md
