@@ -22,7 +22,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
   - `**/*.py` -> `instructions/python.instructions.md`
   - `**/*.java` -> `instructions/java.instructions.md`
   - `**/*.sh` -> `instructions/bash.instructions.md`
-  - `.github/workflows/**` -> `instructions/github-actions.instructions.md`
+  - `**/workflows/**` -> `instructions/github-actions.instructions.md`
+  - `**/actions/**/action.y*ml` -> `instructions/github-action-composite.instructions.md`
 - If a change spans multiple stacks, apply all relevant instruction files.
 
 ## Agent Routing
@@ -34,4 +35,3 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ## PR and Workflow Conventions
 - PR content must follow `pull_request_template.md` in exact section order.
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with release/tag reference.
-

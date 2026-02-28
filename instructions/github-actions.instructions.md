@@ -1,6 +1,6 @@
 ---
 description: Security and reliability standards for GitHub Actions workflows with SHA pinning and least privilege.
-applyTo: ".github/workflows/**"
+applyTo: "**/workflows/**"
 ---
 
 # GitHub Actions Instructions

@@ -31,9 +31,9 @@ set -euo pipefail
 - Use `[[ ... ]]` and `$(...)`.
 - Check dependencies with `command -v`.
 - Keep functions short and focused.
-- keet logs informative and consistent.
+- Keep logs informative and consistent.
 - Use `getopts` for argument parsing.
-- keep simple and avoid unnecessary complexity.
+- Keep logic simple and avoid unnecessary complexity.
 - Validate inputs and handle errors gracefully.
 
 ## Validation

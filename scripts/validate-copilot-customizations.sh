@@ -513,6 +513,9 @@ validate_unreferenced_skills() {
 validate_workflow_pinning() {
   local workflows_dir="$1"
   local file
+  local entry
+  local line_number
+  local line_text
   local token
   local ref
   local severity="error"
@@ -525,7 +528,12 @@ validate_workflow_pinning() {
   fi
 
   while IFS= read -r file; do
-    while IFS= read -r token; do
+    while IFS= read -r entry; do
+      [[ -n "$entry" ]] || continue
+
+      line_number="${entry%%:*}"
+      line_text="${entry#*:}"
+      token="$(printf '%s\n' "$line_text" | sed -E 's/.*uses:[[:space:]]*([^[:space:]]+).*/\1/')"
       [[ -n "$token" ]] || continue
 
       if [[ "$token" == ./* || "$token" == .github/actions/* || "$token" == docker://* ]]; then
@@ -533,15 +541,20 @@ validate_workflow_pinning() {
       fi
 
       if [[ "$token" != *"@"* ]]; then
-        record_issue "$severity" "Workflow action reference is not pinned by SHA: ${file} -> ${token}"
+        record_issue "$severity" "Workflow action reference is not pinned by SHA: ${file}:${line_number} -> ${token}"
         continue
       fi
 
       ref="${token##*@}"
       if [[ ! "$ref" =~ ^[a-f0-9]{40}$ ]]; then
-        record_issue "$severity" "Workflow action reference is not full SHA: ${file} -> ${token}"
+        record_issue "$severity" "Workflow action reference is not full SHA: ${file}:${line_number} -> ${token}"
+        continue
       fi
-    done < <(grep -oE 'uses:[[:space:]]*[^[:space:]]+' "$file" | sed -E 's/^uses:[[:space:]]*//' || true)
+
+      if ! printf '%s\n' "$line_text" | grep -Eq '#[[:space:]]*[^#]*https://github\.com/[^[:space:]]+/[^[:space:]]+/releases/tag/[^[:space:]]+'; then
+        record_issue "$severity" "Workflow SHA pin is missing adjacent release URL comment: ${file}:${line_number} -> ${token}"
+      fi
+    done < <(grep -nE 'uses:[[:space:]]*[^[:space:]]+' "$file" || true)
   done < <(find "$workflows_dir" -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
 
   return 0
