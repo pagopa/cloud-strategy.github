@@ -16,6 +16,7 @@ description: Create or modify Python scripts with purpose docstring, emoji logs,
 - Keep implementation explicit and readable.
 - Add unit tests for testable behavior.
 - If external libraries are needed, pin `requirements.txt`.
+- For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
 
 ## Minimal template
 ```python
@@ -31,6 +32,7 @@ Usage examples:
 - Put tests under `tests/`.
 - Use `pytest` as default test framework.
 - Keep tests deterministic and isolated.
+- For modify tasks with existing tests: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Minimal test example
 ```python

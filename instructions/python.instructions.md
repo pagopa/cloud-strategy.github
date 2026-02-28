@@ -11,6 +11,8 @@ applyTo: "**/*.py"
 - Keep code explicit and readable.
 - Unit tests are required for testable logic.
 - Apply these rules for both create and modify operations.
+- For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
+- Keep template content complete and externalize only values intentionally passed by the caller.
 
 ## Application code (non-script)
 - Apply DDD boundaries for non-trivial features: domain, application, and infrastructure concerns must stay separated.
@@ -37,6 +39,7 @@ applyTo: "**/*.py"
 ## Testing defaults
 - Use `pytest` as default unit-test framework.
 - Keep tests under `tests/` with deterministic behavior.
+- For modify tasks with existing tests: edit code first, run existing tests, then update tests only if behavior changes are intentional.
 
 ## Minimal skeleton
 ```python

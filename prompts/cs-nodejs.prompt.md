@@ -28,7 +28,8 @@ Create or modify Node.js project modules with clear behavior and unit tests.
    - early return guard clauses
    - readability-first implementation
 4. If `action=modify`, preserve existing behavior unless explicit changes are requested.
-5. Add or update unit tests using `node:test` + `node:assert/strict` (BDD-like `describe`/`it` style where available).
+5. If `action=modify` and tests already exist, run existing tests before editing test files.
+6. Add or update unit tests using `node:test` + `node:assert/strict` (BDD-like `describe`/`it` style where available) only after the first test run, and only for intentional behavior changes or uncovered new behavior.
 
 ## Minimal example
 - Input: `action=modify component_type=handler component_name=user-handler purpose="Validate input before processing"`

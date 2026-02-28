@@ -35,6 +35,7 @@ public final class UserService {
 ## Test stack
 - JUnit 5.
 - BDD-like naming with `@DisplayName` and `given_when_then`.
+- For modify tasks with existing tests: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Minimal test example
 ```java

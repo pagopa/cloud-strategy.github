@@ -33,6 +33,7 @@ function buildUserProfile(input) {
 ## Test stack
 - Built-in `node:test` + `node:assert/strict`.
 - BDD-like grouping (`describe`/`it`) when available.
+- For modify tasks with existing tests: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Minimal test example
 ```javascript

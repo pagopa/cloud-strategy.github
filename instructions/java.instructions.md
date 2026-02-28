@@ -20,6 +20,7 @@ applyTo: "**/*.java"
 - Use JUnit 5.
 - Use BDD-like naming: `@DisplayName` and `given_when_then`.
 - Keep unit tests deterministic and isolated.
+- For modify tasks with existing tests: change implementation first, run existing tests, and update tests only for intentional behavior changes.
 
 ## Reference implementation
 - For code and test examples, use `.github/skills/project-java/SKILL.md`.
