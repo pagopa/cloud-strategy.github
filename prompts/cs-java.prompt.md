@@ -28,7 +28,8 @@ Create or modify Java project components with clear structure and test coverage.
    - early return guard clauses
    - readable, straightforward flow
 4. If `action=modify`, preserve existing behavior unless explicit changes are requested.
-5. Add or update unit tests under `src/test/java` using JUnit 5 (BDD-like naming with `@DisplayName` and `given_when_then`).
+5. If `action=modify` and tests already exist, run existing tests before editing test files.
+6. Add or update unit tests under `src/test/java` using JUnit 5 (BDD-like naming with `@DisplayName` and `given_when_then`) only after the first test run, and only for intentional behavior changes or uncovered new behavior.
 
 ## Minimal example
 - Input: `action=create component_type=service component_name=UserPolicyService purpose="Apply policy checks"`

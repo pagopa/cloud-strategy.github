@@ -27,7 +27,9 @@ Create or modify Python application components with DDD boundaries, early-return
 4. Use early return and guard clauses.
 5. Keep all code comments, logs, and exceptions in English.
 6. If `action=modify`, preserve existing behavior unless explicit changes are requested.
-7. Add or update deterministic `pytest` unit tests for testable behavior.
+7. If the task includes Python templates, use Jinja templates named `<file-name>.<extension>.j2`.
+8. If `action=modify` and tests already exist, run existing tests before editing test files.
+9. Add or update deterministic `pytest` unit tests only after the first test run, and only for intentional behavior changes or uncovered new behavior.
 
 ## Minimal example
 - Input: `action=create component_type=domain_service component_name=PolicyEvaluator purpose="Evaluate policy eligibility"`

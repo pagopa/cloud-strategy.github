@@ -25,6 +25,19 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Do not modify `README.md` files unless explicitly requested by the user.
 - Update non-README technical docs in English when behavior changes.
 
+## Python template policy
+- When asked to create templates for Python-related flows, use Jinja templates.
+- Template filenames must follow `<file-name>.<extension>.j2`.
+- Keep templates mostly complete and parameterize only values explicitly passed from the caller.
+
+## Test execution sequence
+- For technologies with tests, follow this order on modify tasks:
+  1. Edit implementation code first.
+  2. Run relevant existing tests before editing test files.
+  3. Analyze failures to identify what is broken or misaligned.
+  4. Update tests only when behavior changes are intentional or new behavior has no existing coverage.
+- Do not preemptively change tests before the first post-change test run.
+
 ## Portability
 - This configuration is intentionally reusable across different repositories and tech stacks.
 - Apply only the instruction files relevant to the files being changed.

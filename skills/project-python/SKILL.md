@@ -23,6 +23,7 @@ description: Create or modify Python application components using DDD boundaries
 - Use `pytest`.
 - Keep tests deterministic and isolated.
 - Prefer BDD-like names in the `given_when_then` style.
+- For modify tasks with existing tests: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Minimal module example
 ```python

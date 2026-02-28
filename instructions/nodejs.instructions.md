@@ -20,6 +20,7 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
 - Use built-in `node:test` + `node:assert/strict`.
 - Prefer BDD-like structure (`describe`/`it` where available).
 - Keep tests deterministic and isolated.
+- For modify tasks with existing tests: change implementation first, run existing tests, and update tests only for intentional behavior changes.
 
 ## Reference implementation
 - For module and test examples, use `.github/skills/project-nodejs/SKILL.md`.
