@@ -12,7 +12,7 @@ profiles:
       - instructions/yaml.instructions.md
       - instructions/json.instructions.md
     recommended_prompts:
-      - prompts/cs-github-action.prompt.md
+      - prompts/github-action.prompt.md
     recommended_skills:
       - skills/cicd-workflow/SKILL.md
 
@@ -42,6 +42,19 @@ profiles:
       - skills/project-nodejs/SKILL.md
       - skills/cicd-workflow/SKILL.md
 
+  backend-python:
+    description: Python service repositories.
+    recommended_instructions:
+      - instructions/python.instructions.md
+      - instructions/github-actions.instructions.md
+      - instructions/markdown.instructions.md
+    recommended_prompts:
+      - prompts/cs-python.prompt.md
+      - prompts/cs-add-unit-tests.prompt.md
+    recommended_skills:
+      - skills/project-python/SKILL.md
+      - skills/cicd-workflow/SKILL.md
+
   infrastructure-heavy:
     description: Infrastructure repositories with Terraform as primary language.
     recommended_instructions:
@@ -66,7 +79,7 @@ profiles:
     recommended_prompts:
       - prompts/cs-java.prompt.md
       - prompts/cs-nodejs.prompt.md
-      - prompts/cs-github-action.prompt.md
+      - prompts/github-action.prompt.md
       - prompts/cs-terraform.prompt.md
     recommended_skills:
       - skills/project-java/SKILL.md

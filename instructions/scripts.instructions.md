@@ -1,5 +1,6 @@
 ---
-applyTo: "**/*.sh,**/*.py"
+description: Cross-language conventions for automation scripts with guard clauses and English runtime output.
+applyTo: "**/*.sh,**/scripts/**/*.py,**/bin/**/*.py,**/*script*.py"
 ---
 
 # Script Instructions

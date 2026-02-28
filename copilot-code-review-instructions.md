@@ -5,7 +5,7 @@
 2. No hardcoded secrets or credentials.
 3. Consistency with repository naming and structure conventions.
 4. Test coverage for testable logic.
-5. Documentation updates when behavior changes.
+5. Documentation updates when behavior changes (exclude `README.md` unless explicitly requested).
 
 ## Review output format
 - `Critical`: must-fix issues

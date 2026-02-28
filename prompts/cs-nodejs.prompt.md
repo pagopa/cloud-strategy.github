@@ -22,6 +22,7 @@ Create or modify Node.js project modules with clear behavior and unit tests.
 1. Use the skill in `.github/skills/project-nodejs/SKILL.md`.
 2. Reuse existing repository conventions for module format and folder layout.
 3. Create or update the component with:
+   - explicit DDD boundaries (domain logic separated from transport/infrastructure adapters)
    - top comment block containing purpose
    - emoji logs for runtime progress
    - early return guard clauses

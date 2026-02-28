@@ -6,6 +6,9 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-02-28
+- Renamed GitHub-related files to `github-*` prefix for consistency across agents, prompts, instructions, and workflows.
+
 ## 2026-02-07
 - Added missing global Copilot instruction files for commit messages and code review.
 - Added new instruction files: YAML, Markdown, Makefile, Scripts, Lambda.

@@ -1,4 +1,5 @@
 ---
+description: Makefile conventions for deterministic targets, readable recipes, and explicit phony declarations.
 applyTo: "**/Makefile,**/*.mk"
 ---
 

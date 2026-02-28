@@ -1,5 +1,6 @@
 ---
-applyTo: ".github/workflows/**"
+description: Security and reliability standards for GitHub Actions workflows with SHA pinning and least privilege.
+applyTo: "**/workflows/**"
 ---
 
 # GitHub Actions Instructions
@@ -7,6 +8,7 @@ applyTo: ".github/workflows/**"
 ## Security baseline
 - Prefer OIDC over long-lived secrets.
 - Pin actions to full-length commit SHAs.
+- For each pinned SHA, add an adjacent comment with release/tag and upstream release URL.
 - Keep `permissions` minimal.
 - Avoid `pull_request_target` for untrusted code.
 
@@ -22,6 +24,10 @@ applyTo: ".github/workflows/**"
 
 ## Minimal example
 ```yaml
+steps:
+  - name: Checkout
+    uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.7 https://github.com/actions/checkout/releases/tag/v4.1.7
+
 concurrency:
   group: example-${{ github.ref }}
   cancel-in-progress: true

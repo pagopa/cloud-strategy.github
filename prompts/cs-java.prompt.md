@@ -22,6 +22,7 @@ Create or modify Java project components with clear structure and test coverage.
 1. Use the skill in `.github/skills/project-java/SKILL.md`.
 2. Reuse repository conventions for package naming and folder structure.
 3. Create or update the component with:
+   - explicit DDD boundaries (domain vs application vs infrastructure responsibilities)
    - top JavaDoc containing purpose
    - emoji logs for state transitions
    - early return guard clauses

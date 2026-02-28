@@ -7,25 +7,28 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Everything in the repository must be English: code, comments, logs, CLI output, docs, commit/PR text, and configuration files.
 
 ## Instruction order
-1. Read local `AGENTS.md` first.
-2. Apply `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` when relevant.
-3. Use `.github/repo-profiles.yml` as optional profile guidance for stack-specific setup.
-4. Apply matching `.github/instructions/*.instructions.md`.
-5. Use `.github/prompts/*.prompt.md` for repeatable tasks.
-6. Use `.github/skills/*/SKILL.md` for implementation patterns.
+1. Read local `AGENTS.md` first and follow its decision priority.
+2. Apply `copilot-code-review-instructions.md` and `copilot-commit-message-instructions.md` when relevant (or `.github/...` paths in repositories using `.github` layout).
+3. Use `repo-profiles.yml` as optional profile guidance for stack-specific setup (or `.github/repo-profiles.yml` in `.github` layout).
+4. Apply matching `instructions/*.instructions.md` (or `.github/instructions/*.instructions.md` in `.github` layout).
+5. Use `prompts/*.prompt.md` for repeatable tasks (or `.github/prompts/*.prompt.md` in `.github` layout).
+6. Use `skills/*/SKILL.md` for implementation patterns (or `.github/skills/*/SKILL.md` in `.github` layout).
 
 ## Non-negotiables
 - Least privilege.
 - No hardcoded secrets.
 - Preserve existing conventions.
+- Prefer domain-driven design (DDD) for non-trivial application code.
 - Prefer early return/guard clauses.
 - Prioritize readability over clever abstractions.
-- Update technical docs in English when behavior changes.
+- Keep repository artifacts in English.
+- Do not modify `README.md` files unless explicitly requested by the user.
+- Update non-README technical docs in English when behavior changes.
 
 ## Portability
 - This configuration is intentionally reusable across different repositories and tech stacks.
 - Apply only the instruction files relevant to the files being changed.
-- Follow `.github/security-baseline.md` and `.github/DEPRECATION.md` when introducing structural changes.
+- Follow `security-baseline.md` and `DEPRECATION.md` when introducing structural changes (or `.github/...` equivalents in `.github` layout).
 
 ## Script standards (Bash/Python)
 - Apply to both create and modify flows.
@@ -47,4 +50,4 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Terraform: `terraform fmt` and `terraform validate`.
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
-- Run `.github/scripts/validate-copilot-customizations.sh` for customization changes.
+- Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).

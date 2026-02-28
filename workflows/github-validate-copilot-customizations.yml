@@ -1,0 +1,77 @@
+name: Validate Copilot Customizations
+
+on:
+  pull_request:
+    paths:
+      - ".github/**"
+      - "agents/**"
+      - "instructions/**"
+      - "prompts/**"
+      - "skills/**"
+      - "scripts/**"
+      - "templates/**"
+      - "workflows/**"
+      - "copilot-*.md"
+      - "AGENTS.md"
+      - "pull_request_template.md"
+      - "repo-profiles.yml"
+      - "security-baseline.md"
+      - "DEPRECATION.md"
+      - ".bootstrap-ignore"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/**"
+      - "agents/**"
+      - "instructions/**"
+      - "prompts/**"
+      - "skills/**"
+      - "scripts/**"
+      - "templates/**"
+      - "workflows/**"
+      - "copilot-*.md"
+      - "AGENTS.md"
+      - "pull_request_template.md"
+      - "repo-profiles.yml"
+      - "security-baseline.md"
+      - "DEPRECATION.md"
+      - ".bootstrap-ignore"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-copilot-customizations-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Files
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 https://github.com/actions/checkout/releases/tag/v6.0.2
+
+      - name: Detect config root
+        id: config-root
+        run: |
+          if [[ -d ".github/scripts" ]]; then
+            echo "root=.github" >> "$GITHUB_OUTPUT"
+          else
+            echo "root=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Lint validator script
+        run: |
+          bash -n "${{ steps.config-root.outputs.root }}/scripts/"*.sh
+          shellcheck -s bash "${{ steps.config-root.outputs.root }}/scripts/"*.sh
+
+      - name: Validate copilot customizations
+        run: "${{ steps.config-root.outputs.root }}/scripts/validate-copilot-customizations.sh" --scope root --mode strict

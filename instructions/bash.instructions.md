@@ -1,4 +1,5 @@
 ---
+description: Bash scripting standards for safe execution, guard clauses, and consistent runtime logs.
 applyTo: "**/*.sh"
 ---
 
@@ -19,6 +20,8 @@ applyTo: "**/*.sh"
 # Usage examples:
 #   ./script.sh --help
 #   ./script.sh --input data.json
+#   ./script.sh --input <file content>
+
 
 set -euo pipefail
 ```
@@ -28,6 +31,10 @@ set -euo pipefail
 - Use `[[ ... ]]` and `$(...)`.
 - Check dependencies with `command -v`.
 - Keep functions short and focused.
+- Keep logs informative and consistent.
+- Use `getopts` for argument parsing.
+- Keep logic simple and avoid unnecessary complexity.
+- Validate inputs and handle errors gracefully.
 
 ## Validation
 - `bash -n <script>.sh`

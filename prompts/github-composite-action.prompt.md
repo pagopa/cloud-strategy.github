@@ -15,7 +15,7 @@ argument-hint: action=<create|modify> action_name=<name> purpose=<purpose> [acti
 
 ## Instructions
 1. Use `.github/skills/composite-action/SKILL.md`.
-2. Apply `.github/instructions/composite-action.instructions.md`.
+2. Apply `.github/instructions/github-action-composite.instructions.md`.
 3. If `action=modify`, preserve public inputs/outputs unless changes are explicitly requested.
 4. Keep logs, comments, and user-facing output in English.
 5. Keep shell logic readable; move complex logic to scripts when needed.

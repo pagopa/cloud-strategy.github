@@ -1,16 +1,27 @@
 ---
+description: Python standards for both scripts and application code with DDD boundaries, guard clauses, and pytest defaults.
 applyTo: "**/*.py"
 ---
 
 # Python Instructions
 
 ## Mandatory rules
-- Start scripts with a module docstring containing purpose and usage examples.
 - Use emoji logs for key execution states.
 - Prefer early return and clear guard clauses.
 - Keep code explicit and readable.
 - Unit tests are required for testable logic.
 - Apply these rules for both create and modify operations.
+
+## Application code (non-script)
+- Apply DDD boundaries for non-trivial features: domain, application, and infrastructure concerns must stay separated.
+- Keep business rules in domain entities/value objects/domain services.
+- Keep infrastructure concerns (DB, API clients, cloud SDK) in adapters and repositories.
+- Use ubiquitous language in domain classes, method names, and errors.
+
+## Script code
+- Start scripts with a module docstring containing purpose and usage examples.
+- Keep CLI parsing and orchestration explicit.
+- Avoid embedding domain rules that belong to reusable application modules.
 
 ## Style
 - Follow PEP8.

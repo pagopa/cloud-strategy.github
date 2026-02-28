@@ -1,8 +1,13 @@
 ---
+description: JSON formatting and consistency standards for registry and configuration data files.
 applyTo: "**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json"
 ---
 
 # JSON Instructions
+
+## Scope boundary
+- This instruction intentionally applies only to registry-like JSON paths declared in `applyTo`.
+- Root-level or ecosystem-managed JSON files (for example `package.json`, lock files) are out of scope unless they match the configured paths.
 
 ## Formatting
 - Use 2-space indentation.
