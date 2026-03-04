@@ -43,12 +43,14 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `Planner` for ambiguous scope, tradeoff analysis, or multi-step design.
 - Use `Implementer` for direct code/config changes and validations.
 - Use `Reviewer` for quality gates and defect/regression findings.
+- Use `TechAIScriptReviewer` for exhaustive, nit-level code reviews on Python, Bash, and Terraform with per-language anti-pattern catalogs.
 - Use specialist agents (`WorkflowSupplyChain`, `SecurityReviewer`, `TerraformGuardrails`, `IAMLeastPrivilege`, `PRWriter`) only when their domain matches the task.
 
 ### When NOT to use (anti-patterns)
 - Do not use `Planner` for trivial single-file changes with clear requirements — go directly to `Implementer`.
 - Do not use `Implementer` when requirements are ambiguous or scope is unclear — use `Planner` first.
 - Do not use generic `Reviewer` when the change is purely Terraform, IAM, workflows, or security — use the matching specialist instead.
+- Do not use generic `Reviewer` when you need exhaustive per-language nit-level review — use `TechAIScriptReviewer` instead.
 
 ### Agent composition
 - For changes spanning multiple specialist domains (e.g., Terraform + IAM), run each relevant specialist and aggregate findings.
@@ -62,6 +64,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ## Available Skills
 - `cicd-workflow` (`skills/cicd-workflow/SKILL.md`): GitHub Actions workflow design and CI/CD patterns.
 - `cloud-policy` (`skills/cloud-policy/SKILL.md`): AWS SCP, Azure Policy, GCP Org Policy governance.
+- `code-review` (`skills/code-review/SKILL.md`): Exhaustive per-language anti-pattern catalogs for strict code reviews.
 - `composite-action` (`skills/composite-action/SKILL.md`): Reusable GitHub composite actions.
 - `data-registry` (`skills/data-registry/SKILL.md`): JSON data registry entries and schema patterns.
 - `pr-writing` (`skills/pr-writing/SKILL.md`): PR title/body generation from template and diff.
@@ -75,6 +78,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ## Available Prompts
 - `cs-add-unit-tests` (`prompts/cs-add-unit-tests.prompt.md`): Add or improve unit tests.
+- `cs-code-review` (`prompts/cs-code-review.prompt.md`): Perform exhaustive, nit-level code reviews.
 - `cs-bash-script` (`prompts/cs-bash-script.prompt.md`): Create or modify Bash scripts.
 - `cs-cloud-policy` (`prompts/cs-cloud-policy.prompt.md`): Create cloud governance policies.
 - `cs-data-registry` (`prompts/cs-data-registry.prompt.md`): Create JSON data registry entries.

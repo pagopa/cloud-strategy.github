@@ -6,6 +6,13 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-03-04
+- Added `skills/code-review/SKILL.md`: per-language anti-pattern catalogs with severity mappings and good-vs-bad examples.
+- Added `prompts/cs-code-review.prompt.md`: on-demand strict code review prompt with configurable strictness.
+- Added `agents/tech-ai-script-reviewer.agent.md`: exhaustive, nit-level code reviewer (`TechAIScriptReviewer`) for Python, Bash, and Terraform with review persona inspired by Martin Fowler, Raymond Hettinger, and Kelsey Hightower.
+- Expanded `copilot-code-review-instructions.md` with Python/Bash/Terraform-specific check sections, `Nit` severity level, and escalation rules.
+- Updated `AGENTS.md` with `TechAIScriptReviewer` routing, `code-review` skill, and `cs-code-review` prompt.
+
 ## 2026-02-28
 - Renamed GitHub-related files to `github-*` prefix for consistency across agents, prompts, instructions, and workflows.
 
