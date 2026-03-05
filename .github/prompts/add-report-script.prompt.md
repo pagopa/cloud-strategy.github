@@ -1,81 +1,36 @@
 ---
+description: Add or update a reusable reporting script for repository maintenance and governance
+name: add-report-script
 agent: agent
-description: Add a new cost report or analysis script
+argument-hint: action=<create|modify> script_name=<name> purpose=<purpose> output_format=<json|yaml|md|txt> [target_path=<path>]
 ---
 
-# Add Cost Report Script
+# Add Reporting Script
 
 ## Context
+Use this prompt to add or update a reporting script that supports governance and maintenance workflows in a reusable way.
 
-This prompt helps you create a new cost analysis or reporting script.
-
-## Input Required
-
-- **Script Name**: ${input:scriptName}
-- **Cloud Provider**: ${input:provider:azure,aws}
-- **Description**: ${input:description}
+## Required inputs
+- **Action**: ${input:action:create,modify}
+- **Script name**: ${input:script_name}
+- **Purpose**: ${input:purpose}
+- **Output format**: ${input:output_format:json,yaml,md,txt}
+- **Target path**: ${input:target_path:.github/scripts}
 
 ## Instructions
+1. Use `.github/skills/script-python/SKILL.md` as the implementation baseline.
+2. Keep input/output contracts explicit and deterministic.
+3. Keep logs and messages in English.
+4. Avoid references to any specific consumer repository, tenant, subscription, or billing scope.
+5. If behavior changes, update related prompt/instruction references accordingly.
 
-1. Create the script in appropriate folder:
-   - Azure: `azure/rel/`
-   - AWS: `aws/`
+## Minimal example
+- Input: `action=create script_name=inventory_report purpose="Summarize customization assets" output_format=json target_path=.github/scripts`
+- Expected output:
+  - New script with clear CLI parameters, deterministic output, and error handling.
+  - Optional tests for the parsing/formatting logic when practical.
 
-2. Use this template:
-
-```python
-#!/usr/bin/env python3
-"""
-Script Name: ${input:scriptName}.py
-Description: ${input:description}
-Usage: python ${input:scriptName}.py [options]
-Author: PagoPA Cloud Engineering
-"""
-
-import logging
-import argparse
-from typing import List, Dict, Optional
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-
-def main() -> None:
-    """Main entry point."""
-    logger.info("🚀 Starting ${input:scriptName}...")
-
-    try:
-        # Implementation
-        result = process()
-        logger.info("✅ Completed successfully")
-    except Exception as e:
-        logger.error("❌ Failed: %s", e)
-        raise
-
-
-def process() -> Dict:
-    """Process cost data."""
-    # Implementation
-    pass
-
-
-if __name__ == "__main__":
-    main()
-```
-
-3. Add dependencies to `requirements.txt`
-
-## Validations
-
-- [ ] Type hints included
-- [ ] Docstrings complete
-- [ ] Error handling implemented
-- [ ] Logging with emoji prefixes
-- [ ] Dependencies documented
-
-## References
-
-Follow the conventions in `#file:.github/instructions/python.instructions.md`
+## Validation
+- Run relevant script checks (`python -m compileall`, `pytest` if tests exist).
+- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
+- Verify script output does not leak secrets or environment-specific identifiers.

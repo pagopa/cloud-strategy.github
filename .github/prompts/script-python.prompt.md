@@ -1,25 +1,36 @@
 ---
+description: Create or modify reusable Python scripts with deterministic behavior and tests
+name: script-python
 agent: agent
-description: Create Python scripts with test suite for complex operations
+argument-hint: action=<create|modify> script_name=<name> purpose=<purpose> [target_path=<path>] [test_scope=<none|unit>]
 ---
 
 # Create Python Script
 
 ## Context
+Use this prompt to create or modify Python scripts for governance automation in a reusable, repository-agnostic way.
 
-I need to create a Python script for FinOps operations (cost analysis, dashboards, reports).
-
-## Inputs
-
+## Required inputs
+- **Action**: ${input:action:create,modify}
 - **Script name**: ${input:script_name}
 - **Purpose**: ${input:purpose}
+- **Target path**: ${input:target_path:.github/scripts}
+- **Test scope**: ${input:test_scope:unit,none}
 
-## Steps
+## Instructions
+1. Use `.github/skills/script-python/SKILL.md` as implementation baseline.
+2. Keep public interfaces explicit (CLI args, input/output schema, exit codes).
+3. Keep logs and comments in English.
+4. Add/update tests for deterministic logic when `test_scope=unit`.
+5. Avoid domain-specific assumptions (consumer repo paths, cloud account IDs, organization names).
 
-1. Use the `script-python` skill in `.github/skills/script-python/SKILL.md`.
-2. Use `#codebase` to search for existing Python scripts in `aws/` or `azure/`.
-3. Implement changes following the skill template and repository instructions.
+## Minimal example
+- Input: `action=create script_name=prompt_inventory purpose="List prompts and skill references" target_path=.github/scripts test_scope=unit`
+- Expected output:
+  - Script with clear argument parsing and deterministic output.
+  - Focused unit tests for parsing and formatting logic.
 
-## Validations
-
-- Check `#problems` for errors after changes.
+## Validation
+- Run `python -m compileall <changed_python_paths>`.
+- Run `pytest` for the changed script/tests when present.
+- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.

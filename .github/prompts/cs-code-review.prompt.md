@@ -65,7 +65,7 @@ Findings: <critical> Critical | <major> Major | <minor> Minor | <nit> Nit
 ```
 
 ## Minimal example
-- Input: `target=azure/anomaly_detection/utils.py language=auto strictness=strict`
+- Input: `target=src/service/utils.py language=auto strictness=strict`
 - Expected output:
   - All Python anti-patterns checked against the file.
   - Findings grouped by severity with file/line references.

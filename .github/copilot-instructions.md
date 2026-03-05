@@ -65,38 +65,34 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Python/Java/Node.js: run unit tests relevant to the change.
 - Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).
 
-
 ## Repository Alignment
-- Repository: `eng-finops`
-- Recommended profile from `repo-profiles.yml`: `backend-python`
-- Primary scope: FinOps repository for Azure and AWS cost extraction, data normalization, and anomaly detection automation.
+- Repository role: top-level standards repository for reusable Copilot customization assets.
+- Recommended profile from `repo-profiles.yml`: `minimal`.
+- Primary scope: generic instructions, prompts, skills, agents, workflows, and validation tooling.
 - High-priority paths:
-  - `aws`
-  - `azure`
-  - `utils`
-  - `scripts`
+  - `.github/AGENTS.md`
+  - `.github/instructions`
+  - `.github/prompts`
+  - `.github/skills`
+  - `.github/agents`
+  - `.github/scripts`
+  - `.github/workflows`
 - Default instruction set for daily tasks:
-  - `instructions/python.instructions.md`
-  - `instructions/scripts.instructions.md`
-  - `instructions/terraform.instructions.md`
-  - `instructions/json.instructions.md`
+  - `instructions/markdown.instructions.md`
   - `instructions/yaml.instructions.md`
+  - `instructions/json.instructions.md`
+  - `instructions/github-actions.instructions.md`
 - Preferred prompts for repeatable work:
-  - `prompts/add-report-script.prompt.md`
-  - `prompts/add-platform.prompt.md`
-  - `prompts/cs-python.prompt.md`
-  - `prompts/cs-python-script.prompt.md`
+  - `prompts/cs-code-review.prompt.md`
+  - `prompts/github-action.prompt.md`
   - `prompts/github-pr-description.prompt.md`
+  - `prompts/cs-add-unit-tests.prompt.md`
 - Preferred skills:
-  - `skills/project-python/SKILL.md`
-  - `skills/script-python/SKILL.md`
-  - `skills/script-bash/SKILL.md`
-  - `skills/terraform-feature/SKILL.md`
+  - `skills/code-review/SKILL.md`
+  - `skills/cicd-workflow/SKILL.md`
   - `skills/pr-writing/SKILL.md`
 - Minimum validation before commit:
-  - `python -m pytest (if tests exist for changed logic)`
-  - `python -m compileall <changed_python_paths>`
-  - `terraform fmt/validate for terraform changes`
-  - `sample run for cost/anomaly scripts when feasible`
+  - `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
+  - language-specific checks for changed stacks (`pytest`, `bash -n`, `shellcheck`, `terraform fmt/validate`)
 - Keep assistant-facing language mapped through AGENTS.md and avoid mentioning internal runtime names.
-- PRs must be completed using `.github/PULL_REQUEST_TEMPLATE.md` (or mirrored lowercase template).
+- PRs must be completed using `.github/pull_request_template.md`.

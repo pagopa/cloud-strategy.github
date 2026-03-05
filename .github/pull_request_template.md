@@ -1,33 +1,32 @@
 <!-- markdownlint-disable-file MD041 -->
 <!-- PR title format: <type>(<scope>): <summary> -->
-<!-- Examples: feat(terraform): add new SCP policy -->
-<!--           fix(scripts): correct JSON validation logic -->
+<!-- Examples: feat(prompts): add reusable prompt template -->
+<!--           fix(workflows): tighten customization validation -->
 
 ## Description
 
-<!-- Describe what changed in data extraction, processing, or reporting. -->
+<!-- Describe what changed and why. -->
 
 ## Change Type
 
-- [ ] Monthly cost data update
-- [ ] FinOps script/refactor update
-- [ ] Anomaly detection update
-- [ ] Platform/WBS mapping update
-- [ ] Dashboard/reporting update
-- [ ] Infrastructure/automation update
-- [ ] Documentation only
+- [ ] Agent update
+- [ ] Instruction update
+- [ ] Prompt update
+- [ ] Skill update
+- [ ] Workflow/automation update
+- [ ] Validation script update
+- [ ] Documentation/configuration only
 - [ ] Other
 
 ## List of changes
 
 - <!-- Brief summary of changes -->
 
-## FinOps Impact
+## Consumer Impact
 
-- Reporting period (if applicable):
-- Affected cloud providers:
-- Affected datasets/files:
-- Expected reporting/alerting impact:
+- Affected customization assets:
+- Backward compatibility notes:
+- Rollout or migration notes (if any):
 
 ## Testing Instructions
 
@@ -37,9 +36,9 @@
 
 ## Validation Evidence
 
-- Python checks/tests summary:
-- Script execution evidence:
-- Data quality/consistency checks:
+- Customization validator result:
+- Stack-specific checks/tests result:
+- Security/supply-chain checks result:
 
 ## Breaking Changes
 
@@ -48,8 +47,8 @@
 
 ## Checklist
 
-- [ ] No confidential billing identifiers or secrets committed
-- [ ] Python changes are type-safe/readable and tested where possible
-- [ ] Cost/report outputs were sanity-checked
-- [ ] Terraform validation executed when infra changed
-- [ ] Any operational follow-up actions are documented
+- [ ] No secrets/tokens/credentials committed
+- [ ] Repository artifacts remain in English
+- [ ] `validate-copilot-customizations.sh --mode strict` executed successfully
+- [ ] Workflow action pins use full SHA with adjacent release/tag reference
+- [ ] References remain repository-agnostic and reusable

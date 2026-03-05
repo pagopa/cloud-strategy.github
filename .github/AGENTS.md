@@ -1,4 +1,4 @@
-# AGENTS.md - eng-finops
+# AGENTS.md - customization-standards
 
 This file is for GitHub Copilot and AI assistants working in this repository.
 
@@ -26,16 +26,19 @@ This file is for GitHub Copilot and AI assistants working in this repository.
   - `**/*.py` -> `instructions/python.instructions.md`
   - `**/*.sh` -> `instructions/bash.instructions.md`
   - `**/*.tf` -> `instructions/terraform.instructions.md`
+  - `**/*.java` -> `instructions/java.instructions.md`
+  - `**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx` -> `instructions/nodejs.instructions.md`
+  - `**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts` -> `instructions/lambda.instructions.md`
   - `**/*.yml,**/*.yaml` -> `instructions/yaml.instructions.md`
   - `**/*.md` -> `instructions/markdown.instructions.md`
   - `**/Makefile,**/*.mk` -> `instructions/makefile.instructions.md`
   - `**/workflows/**` -> `instructions/github-actions.instructions.md`
   - `**/actions/**/action.y*ml` -> `instructions/github-action-composite.instructions.md`
   - `**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json` -> `instructions/json.instructions.md`
-- Overlay rules (additive — apply alongside the primary instruction above):
+- Overlay rules (additive - apply alongside the primary instruction above):
   - `**/*.sh,**/scripts/**/*.py,**/scripts/**/*.sh` -> `instructions/scripts.instructions.md`
 - If a change spans multiple stacks, apply all relevant instruction files.
-- Overlay instructions never conflict with primary instructions — they add cross-cutting standards.
+- Overlay instructions never conflict with primary instructions - they add cross-cutting standards.
 
 ## Agent Routing
 
@@ -45,19 +48,21 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `Implementer` for direct code/config changes and validations.
 - Use `Reviewer` for quality gates and defect/regression findings.
 - Use `TechAIScriptReviewer` for exhaustive, nit-level code reviews on Python, Bash, and Terraform with per-language anti-pattern catalogs.
+- Use `CustomizationAuditor` to validate and normalize Copilot customization assets for this repository.
 - Use specialist agents (`WorkflowSupplyChain`, `SecurityReviewer`, `TerraformGuardrails`, `IAMLeastPrivilege`, `PRWriter`) only when their domain matches the task.
 
 ### When NOT to use (anti-patterns)
 
-- Do not use `Planner` for trivial single-file changes with clear requirements — go directly to `Implementer`.
-- Do not use `Implementer` when requirements are ambiguous or scope is unclear — use `Planner` first.
-- Do not use generic `Reviewer` when the change is purely Terraform, IAM, workflows, or security — use the matching specialist instead.
-- Do not use generic `Reviewer` when you need exhaustive per-language nit-level review — use `TechAIScriptReviewer` instead.
+- Do not use `Planner` for trivial single-file changes with clear requirements - go directly to `Implementer`.
+- Do not use `Implementer` when requirements are ambiguous or scope is unclear - use `Planner` first.
+- Do not use generic `Reviewer` when the change is purely Terraform, IAM, workflows, or security - use the matching specialist instead.
+- Do not use generic `Reviewer` when you need exhaustive per-language nit-level review - use `TechAIScriptReviewer` instead.
 
 ### Agent composition
 
-- For changes spanning multiple specialist domains (e.g., Terraform + IAM), run each relevant specialist and aggregate findings.
-- The standard chain for non-trivial work is: `Planner` → `Implementer` → `Reviewer` (or specialist reviewer).
+- For changes spanning multiple specialist domains (for example Terraform + IAM), run each relevant specialist and aggregate findings.
+- The standard chain for non-trivial work is: `Planner` -> `Implementer` -> `Reviewer` (or specialist reviewer).
+- For Copilot customization changes (for example `.github/prompts`, `.github/skills`, `.github/agents`, `.github/scripts`), run `CustomizationAuditor` before final handoff.
 
 ### Handoff protocol
 
@@ -68,10 +73,14 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ## Available Skills
 
 - `cicd-workflow` (`skills/cicd-workflow/SKILL.md`): GitHub Actions workflow design and CI/CD patterns.
-- `cloud-policy` (`skills/cloud-policy/SKILL.md`): AWS SCP, Azure Policy, GCP Org Policy governance.
+- `cloud-policy` (`skills/cloud-policy/SKILL.md`): AWS SCP, Azure Policy, and GCP Org Policy governance.
 - `code-review` (`skills/code-review/SKILL.md`): Exhaustive per-language anti-pattern catalogs for strict code reviews.
+- `composite-action` (`skills/composite-action/SKILL.md`): GitHub composite action implementation patterns.
+- `data-registry` (`skills/data-registry/SKILL.md`): Data registry schema and governance automation patterns.
 - `pr-writing` (`skills/pr-writing/SKILL.md`): PR title/body generation from template and diff.
-- `project-python` (`skills/project-python/SKILL.md`): Python project code with DDD, pytest, type hints.
+- `project-java` (`skills/project-java/SKILL.md`): Java project code with DDD and deterministic tests.
+- `project-nodejs` (`skills/project-nodejs/SKILL.md`): Node.js project code with module boundaries and tests.
+- `project-python` (`skills/project-python/SKILL.md`): Python project code with DDD, pytest, and type hints.
 - `script-bash` (`skills/script-bash/SKILL.md`): Bash utility scripts with strict mode and shellcheck.
 - `script-python` (`skills/script-python/SKILL.md`): Python utility scripts with argparse and tests.
 - `terraform-feature` (`skills/terraform-feature/SKILL.md`): Terraform feature implementation patterns.
@@ -79,15 +88,25 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ## Available Prompts
 
+- `add-platform` (`prompts/add-platform.prompt.md`): Add a new supported platform/profile pattern in a generic way.
+- `add-report-script` (`prompts/add-report-script.prompt.md`): Add a reusable reporting/analysis automation script.
+- `cicd-workflow` (`prompts/cicd-workflow.prompt.md`): Create or modify GitHub Actions workflows.
 - `cs-add-unit-tests` (`prompts/cs-add-unit-tests.prompt.md`): Add or improve unit tests.
-- `cs-code-review` (`prompts/cs-code-review.prompt.md`): Perform exhaustive, nit-level code reviews.
 - `cs-bash-script` (`prompts/cs-bash-script.prompt.md`): Create or modify Bash scripts.
 - `cs-cloud-policy` (`prompts/cs-cloud-policy.prompt.md`): Create cloud governance policies.
-- `cs-python-script` (`prompts/cs-python-script.prompt.md`): Create Python utility scripts.
+- `cs-code-review` (`prompts/cs-code-review.prompt.md`): Perform exhaustive, nit-level code reviews.
+- `cs-data-registry` (`prompts/cs-data-registry.prompt.md`): Create or update data registry assets.
+- `cs-java` (`prompts/cs-java.prompt.md`): Generate Java project code.
+- `cs-nodejs` (`prompts/cs-nodejs.prompt.md`): Generate Node.js project code.
 - `cs-python` (`prompts/cs-python.prompt.md`): Generate Python project code.
+- `cs-python-script` (`prompts/cs-python-script.prompt.md`): Create Python utility scripts.
 - `cs-terraform` (`prompts/cs-terraform.prompt.md`): Create Terraform modules and features.
 - `cs-github-action` (`prompts/github-action.prompt.md`): Create GitHub Actions workflows.
+- `cs-composite-action` (`prompts/github-composite-action.prompt.md`): Create GitHub composite actions.
 - `cs-pr-description` (`prompts/github-pr-description.prompt.md`): Generate PR descriptions.
+- `script-bash` (`prompts/script-bash.prompt.md`): Create Bash scripts with repository conventions.
+- `script-python` (`prompts/script-python.prompt.md`): Create Python scripts with repository conventions.
+- `terraform-module` (`prompts/terraform-module.prompt.md`): Create or modify Terraform modules.
 
 ## Governance References
 
@@ -115,7 +134,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ## PR and Workflow Conventions
 
-- PR content must follow `PULL_REQUEST_TEMPLATE.md` in exact section order.
+- PR content must follow `pull_request_template.md` in exact section order.
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with release/tag reference.
 
 ## Backlog Triggers
@@ -124,43 +143,46 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ## Repository Defaults
 
-- Primary focus: FinOps repository for Azure and AWS cost extraction, data normalization, and anomaly detection automation.
-- Profile hint: `backend-python`
+- Primary focus: reusable, repository-agnostic Copilot customization standards.
+- Profile hint: `minimal`
 - AGENTS.md is the external bridge for assistant behavior and naming; keep runtime references abstract.
 - Prioritize these paths:
-  - `aws`
-  - `azure`
+  - `.github/instructions`
+  - `.github/prompts`
+  - `.github/skills`
+  - `.github/agents`
+  - `.github/scripts`
 
 ### Default instruction routing
 
-- `instructions/python.instructions.md`
-- `instructions/scripts.instructions.md`
-- `instructions/terraform.instructions.md`
-- `instructions/json.instructions.md`
+- `instructions/markdown.instructions.md`
 - `instructions/yaml.instructions.md`
+- `instructions/json.instructions.md`
+- `instructions/github-actions.instructions.md`
+- `instructions/github-action-composite.instructions.md`
 
 ### Preferred prompts
 
-- `prompts/add-report-script.prompt.md`
-- `prompts/add-platform.prompt.md`
-- `prompts/cs-python.prompt.md`
-- `prompts/cs-python-script.prompt.md`
+- `prompts/cs-code-review.prompt.md`
+- `prompts/github-action.prompt.md`
 - `prompts/github-pr-description.prompt.md`
+- `prompts/cs-add-unit-tests.prompt.md`
+- `prompts/cs-terraform.prompt.md`
 
 ### Preferred skills
 
-- `skills/project-python/SKILL.md`
-- `skills/script-python/SKILL.md`
-- `skills/script-bash/SKILL.md`
-- `skills/terraform-feature/SKILL.md`
+- `skills/code-review/SKILL.md`
+- `skills/cicd-workflow/SKILL.md`
 - `skills/pr-writing/SKILL.md`
+- `skills/cloud-policy/SKILL.md`
+- `skills/terraform-module/SKILL.md`
 
 ### Required validations before PR
 
-- `python -m pytest (if tests exist for changed logic)`
-- `python -m compileall <changed_python_paths>`
-- `terraform fmt/validate for terraform changes`
-- `sample run for cost/anomaly scripts when feasible`
+- `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
+- `bash -n` and `shellcheck -s bash` for changed Bash scripts (when available)
+- `python -m compileall <changed_python_paths>` and relevant `pytest` checks for Python changes
+- `terraform fmt` and `terraform validate` for Terraform changes
 
 ## Repository Inventory (Auto-generated)
 
@@ -169,9 +191,12 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/instructions/bash.instructions.md`
 - `.github/instructions/github-action-composite.instructions.md`
 - `.github/instructions/github-actions.instructions.md`
+- `.github/instructions/java.instructions.md`
 - `.github/instructions/json.instructions.md`
+- `.github/instructions/lambda.instructions.md`
 - `.github/instructions/makefile.instructions.md`
 - `.github/instructions/markdown.instructions.md`
+- `.github/instructions/nodejs.instructions.md`
 - `.github/instructions/python.instructions.md`
 - `.github/instructions/scripts.instructions.md`
 - `.github/instructions/terraform.instructions.md`
@@ -186,10 +211,14 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/cs-bash-script.prompt.md`
 - `.github/prompts/cs-cloud-policy.prompt.md`
 - `.github/prompts/cs-code-review.prompt.md`
+- `.github/prompts/cs-data-registry.prompt.md`
+- `.github/prompts/cs-java.prompt.md`
+- `.github/prompts/cs-nodejs.prompt.md`
 - `.github/prompts/cs-python-script.prompt.md`
 - `.github/prompts/cs-python.prompt.md`
 - `.github/prompts/cs-terraform.prompt.md`
 - `.github/prompts/github-action.prompt.md`
+- `.github/prompts/github-composite-action.prompt.md`
 - `.github/prompts/github-pr-description.prompt.md`
 - `.github/prompts/script-bash.prompt.md`
 - `.github/prompts/script-python.prompt.md`
@@ -200,7 +229,11 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/cicd-workflow/SKILL.md`
 - `.github/skills/cloud-policy/SKILL.md`
 - `.github/skills/code-review/SKILL.md`
+- `.github/skills/composite-action/SKILL.md`
+- `.github/skills/data-registry/SKILL.md`
 - `.github/skills/pr-writing/SKILL.md`
+- `.github/skills/project-java/SKILL.md`
+- `.github/skills/project-nodejs/SKILL.md`
 - `.github/skills/project-python/SKILL.md`
 - `.github/skills/script-bash/SKILL.md`
 - `.github/skills/script-python/SKILL.md`
@@ -209,6 +242,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Agents
 
+- `.github/agents/customization-auditor.agent.md`
 - `.github/agents/github-pr-writer.agent.md`
 - `.github/agents/github-workflow-supply-chain.agent.md`
 - `.github/agents/iam-least-privilege.agent.md`

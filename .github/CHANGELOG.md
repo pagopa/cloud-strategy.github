@@ -33,7 +33,7 @@ Use this format for new updates:
 - Added `templates/copilot-quickstart.md` for portable onboarding.
 - Added PR authoring assets: `prompts/cs-pr-description.prompt.md` and `skills/pr-writing/SKILL.md`.
 - Updated docs to be repository-agnostic and reusable across different tech stacks.
-- Replaced non-portable `PagoPA standards` wording with generic repository standards in script prompts.
+- Standardized script prompt wording to remove organization-specific terminology and keep language portable.
 - Hardened validator frontmatter key detection for multiline YAML keys.
 - Extended validator JSON output with per-finding details.
 - Added `prompts/cs-composite-action.prompt.md` and `skills/composite-action/SKILL.md`.
@@ -44,4 +44,4 @@ Use this format for new updates:
 - Added bootstrap hardening (`--include-workflows`, `--exclude`, `--exclude-file`, `.bootstrap-ignore` support).
 - Added `.github/CODEOWNERS` baseline and expanded Dependabot ecosystems.
 - Enriched instruction files: composite action safety, Lambda specificity, YAML schema hint, Markdown language policy, Makefile example.
-- Replaced placeholder `AGENTS.md` with repository-specific operational guidance in all `eng-*` repositories.
+- Replaced placeholder `AGENTS.md` with operational guidance tailored for consumer repositories.
