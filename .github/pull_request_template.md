@@ -1,46 +1,54 @@
 <!-- markdownlint-disable-file MD041 -->
-## Summary
-Describe what changed and why.
+<!-- PR title format: <type>(<scope>): <summary> -->
+<!-- Examples: feat(prompts): add reusable prompt template -->
+<!--           fix(workflows): tighten customization validation -->
 
-## Scope
-- [ ] Infrastructure (Terraform)
-- [ ] GitHub Actions
-- [ ] Scripts (Bash/Python)
-- [ ] Data files (JSON/YAML)
-- [ ] Documentation
+## Description
+
+<!-- Describe what changed and why. -->
+
+## Change Type
+
+- [ ] Agent update
+- [ ] Instruction update
+- [ ] Prompt update
+- [ ] Skill update
+- [ ] Workflow/automation update
+- [ ] Validation script update
+- [ ] Documentation/configuration only
 - [ ] Other
 
-## Changes
-List the key changes in bullet points:
-- 
-- 
+## List of changes
 
-## Validation
-Describe what you ran and the results.
+- <!-- Brief summary of changes -->
 
-```bash
-# Example checks (keep only what applies)
-terraform fmt -check
-terraform validate
-bash -n <script>.sh
-shellcheck -s bash <script>.sh
-pytest -q
-```
+## Consumer Impact
 
-## Security and Compliance
-- [ ] Least privilege preserved
-- [ ] No hardcoded secrets/tokens
-- [ ] Actions pinned to full-length SHA (if workflows changed)
-- [ ] Breaking changes reviewed
+- Affected customization assets:
+- Backward compatibility notes:
+- Rollout or migration notes (if any):
 
-## Risk and Rollback
-- **Risk level**: Low / Medium / High
-- **Rollback plan**: Explain how to revert safely
+## Testing Instructions
 
-## Related Links
-- Issue:
-- Docs:
-- Runbook:
+<!-- Step-by-step instructions for reviewers to validate changes -->
+1.
+2.
 
-## Reviewer Notes
-Anything reviewers should focus on.
+## Validation Evidence
+
+- Customization validator result:
+- Stack-specific checks/tests result:
+- Security/supply-chain checks result:
+
+## Breaking Changes
+
+- [ ] This PR contains breaking changes
+<!-- If checked, describe what breaks and migration path -->
+
+## Checklist
+
+- [ ] No secrets/tokens/credentials committed
+- [ ] Repository artifacts remain in English
+- [ ] `validate-copilot-customizations.sh --mode strict` executed successfully
+- [ ] Workflow action pins use full SHA with adjacent release/tag reference
+- [ ] References remain repository-agnostic and reusable

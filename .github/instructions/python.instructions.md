@@ -9,6 +9,10 @@ applyTo: "**/*.py"
 - Use emoji logs for key execution states.
 - Prefer early return and clear guard clauses.
 - Keep code explicit and readable.
+- Prefer well-maintained libraries (stdlib first, then approved third-party) when they simplify code and reduce custom logic.
+- Do not reinvent common parsing/validation/serialization behavior when a library provides a clear solution.
+- Prefer simple, readable, and easily modifiable code over clever abstractions.
+- Accept additional lines or mild redundancy when it improves clarity, maintainability, and safe future changes.
 - Unit tests are required for testable logic.
 - Apply these rules for both create and modify operations.
 - For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.

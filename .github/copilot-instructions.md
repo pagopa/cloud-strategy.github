@@ -64,3 +64,35 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
 - Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).
+
+## Repository Alignment
+- Repository role: top-level standards repository for reusable Copilot customization assets.
+- Recommended profile from `repo-profiles.yml`: `minimal`.
+- Primary scope: generic instructions, prompts, skills, agents, workflows, and validation tooling.
+- High-priority paths:
+  - `.github/AGENTS.md`
+  - `.github/instructions`
+  - `.github/prompts`
+  - `.github/skills`
+  - `.github/agents`
+  - `.github/scripts`
+  - `.github/workflows`
+- Default instruction set for daily tasks:
+  - `instructions/markdown.instructions.md`
+  - `instructions/yaml.instructions.md`
+  - `instructions/json.instructions.md`
+  - `instructions/github-actions.instructions.md`
+- Preferred prompts for repeatable work:
+  - `prompts/cs-code-review.prompt.md`
+  - `prompts/github-action.prompt.md`
+  - `prompts/github-pr-description.prompt.md`
+  - `prompts/cs-add-unit-tests.prompt.md`
+- Preferred skills:
+  - `skills/code-review/SKILL.md`
+  - `skills/cicd-workflow/SKILL.md`
+  - `skills/pr-writing/SKILL.md`
+- Minimum validation before commit:
+  - `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
+  - language-specific checks for changed stacks (`pytest`, `bash -n`, `shellcheck`, `terraform fmt/validate`)
+- Keep assistant-facing language mapped through AGENTS.md and avoid mentioning internal runtime names.
+- PRs must be completed using `.github/PULL_REQUEST_TEMPLATE.md`.
