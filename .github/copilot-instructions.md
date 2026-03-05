@@ -95,4 +95,4 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
   - `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
   - language-specific checks for changed stacks (`pytest`, `bash -n`, `shellcheck`, `terraform fmt/validate`)
 - Keep assistant-facing language mapped through AGENTS.md and avoid mentioning internal runtime names.
-- PRs must be completed using `.github/pull_request_template.md`.
+- PRs must be completed using `.github/PULL_REQUEST_TEMPLATE.md`.

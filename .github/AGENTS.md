@@ -134,7 +134,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ## PR and Workflow Conventions
 
-- PR content must follow `pull_request_template.md` in exact section order.
+- PR content must follow `PULL_REQUEST_TEMPLATE.md` in exact section order.
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with release/tag reference.
 
 ## Backlog Triggers
