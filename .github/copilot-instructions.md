@@ -64,3 +64,39 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
 - Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).
+
+
+## Repository Alignment
+- Repository: `eng-finops`
+- Recommended profile from `repo-profiles.yml`: `backend-python`
+- Primary scope: FinOps repository for Azure and AWS cost extraction, data normalization, and anomaly detection automation.
+- High-priority paths:
+  - `aws`
+  - `azure`
+  - `utils`
+  - `scripts`
+- Default instruction set for daily tasks:
+  - `instructions/python.instructions.md`
+  - `instructions/scripts.instructions.md`
+  - `instructions/terraform.instructions.md`
+  - `instructions/json.instructions.md`
+  - `instructions/yaml.instructions.md`
+- Preferred prompts for repeatable work:
+  - `prompts/add-report-script.prompt.md`
+  - `prompts/add-platform.prompt.md`
+  - `prompts/cs-python.prompt.md`
+  - `prompts/cs-python-script.prompt.md`
+  - `prompts/github-pr-description.prompt.md`
+- Preferred skills:
+  - `skills/project-python/SKILL.md`
+  - `skills/script-python/SKILL.md`
+  - `skills/script-bash/SKILL.md`
+  - `skills/terraform-feature/SKILL.md`
+  - `skills/pr-writing/SKILL.md`
+- Minimum validation before commit:
+  - `python -m pytest (if tests exist for changed logic)`
+  - `python -m compileall <changed_python_paths>`
+  - `terraform fmt/validate for terraform changes`
+  - `sample run for cost/anomaly scripts when feasible`
+- Keep assistant-facing language mapped through AGENTS.md and avoid mentioning internal runtime names.
+- PRs must be completed using `.github/PULL_REQUEST_TEMPLATE.md` (or mirrored lowercase template).

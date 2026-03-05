@@ -1,46 +1,55 @@
 <!-- markdownlint-disable-file MD041 -->
-## Summary
-Describe what changed and why.
+<!-- PR title format: <type>(<scope>): <summary> -->
+<!-- Examples: feat(terraform): add new SCP policy -->
+<!--           fix(scripts): correct JSON validation logic -->
 
-## Scope
-- [ ] Infrastructure (Terraform)
-- [ ] GitHub Actions
-- [ ] Scripts (Bash/Python)
-- [ ] Data files (JSON/YAML)
-- [ ] Documentation
+## Description
+
+<!-- Describe what changed in data extraction, processing, or reporting. -->
+
+## Change Type
+
+- [ ] Monthly cost data update
+- [ ] FinOps script/refactor update
+- [ ] Anomaly detection update
+- [ ] Platform/WBS mapping update
+- [ ] Dashboard/reporting update
+- [ ] Infrastructure/automation update
+- [ ] Documentation only
 - [ ] Other
 
-## Changes
-List the key changes in bullet points:
-- 
-- 
+## List of changes
 
-## Validation
-Describe what you ran and the results.
+- <!-- Brief summary of changes -->
 
-```bash
-# Example checks (keep only what applies)
-terraform fmt -check
-terraform validate
-bash -n <script>.sh
-shellcheck -s bash <script>.sh
-pytest -q
-```
+## FinOps Impact
 
-## Security and Compliance
-- [ ] Least privilege preserved
-- [ ] No hardcoded secrets/tokens
-- [ ] Actions pinned to full-length SHA (if workflows changed)
-- [ ] Breaking changes reviewed
+- Reporting period (if applicable):
+- Affected cloud providers:
+- Affected datasets/files:
+- Expected reporting/alerting impact:
 
-## Risk and Rollback
-- **Risk level**: Low / Medium / High
-- **Rollback plan**: Explain how to revert safely
+## Testing Instructions
 
-## Related Links
-- Issue:
-- Docs:
-- Runbook:
+<!-- Step-by-step instructions for reviewers to validate changes -->
+1.
+2.
 
-## Reviewer Notes
-Anything reviewers should focus on.
+## Validation Evidence
+
+- Python checks/tests summary:
+- Script execution evidence:
+- Data quality/consistency checks:
+
+## Breaking Changes
+
+- [ ] This PR contains breaking changes
+<!-- If checked, describe what breaks and migration path -->
+
+## Checklist
+
+- [ ] No confidential billing identifiers or secrets committed
+- [ ] Python changes are type-safe/readable and tested where possible
+- [ ] Cost/report outputs were sanity-checked
+- [ ] Terraform validation executed when infra changed
+- [ ] Any operational follow-up actions are documented
