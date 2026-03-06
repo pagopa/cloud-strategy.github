@@ -49,6 +49,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `Reviewer` for quality gates and defect/regression findings.
 - Use `TechAIScriptReviewer` for exhaustive, nit-level code reviews on Python, Bash, and Terraform with per-language anti-pattern catalogs.
 - Use `CustomizationAuditor` to validate and normalize Copilot customization assets for this repository.
+- Use `TechAISyncCopilotConfigs` to analyze a local consumer repository and conservatively align the minimum Copilot customization assets from this standards repository.
 - Use specialist agents (`WorkflowSupplyChain`, `SecurityReviewer`, `TerraformGuardrails`, `IAMLeastPrivilege`, `PRWriter`) only when their domain matches the task.
 
 ### When NOT to use (anti-patterns)
@@ -57,6 +58,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Do not use `Implementer` when requirements are ambiguous or scope is unclear - use `Planner` first.
 - Do not use generic `Reviewer` when the change is purely Terraform, IAM, workflows, or security - use the matching specialist instead.
 - Do not use generic `Reviewer` when you need exhaustive per-language nit-level review - use `TechAIScriptReviewer` instead.
+- Do not use `Implementer` alone when the task is cross-repository Copilot configuration alignment - use `TechAISyncCopilotConfigs`.
 
 ### Agent composition
 
@@ -83,6 +85,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `project-python` (`skills/project-python/SKILL.md`): Python project code with DDD, pytest, and type hints.
 - `script-bash` (`skills/script-bash/SKILL.md`): Bash utility scripts with strict mode and shellcheck.
 - `script-python` (`skills/script-python/SKILL.md`): Python utility scripts with argparse and tests.
+- `tech-ai-sync-copilot-configs` (`skills/tech-ai-sync-copilot-configs/SKILL.md`): Conservative local repository alignment for minimal Copilot customization assets with reporting.
 - `terraform-feature` (`skills/terraform-feature/SKILL.md`): Terraform feature implementation patterns.
 - `terraform-module` (`skills/terraform-module/SKILL.md`): Terraform reusable module design.
 
@@ -106,6 +109,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `cs-pr-description` (`prompts/github-pr-description.prompt.md`): Generate PR descriptions.
 - `script-bash` (`prompts/script-bash.prompt.md`): Create Bash scripts with repository conventions.
 - `script-python` (`prompts/script-python.prompt.md`): Create Python scripts with repository conventions.
+- `tech-ai-sync-copilot-configs` (`prompts/tech-ai-sync-copilot-configs.prompt.md`): Analyze and conservatively align a local repository with the minimum Copilot customization assets from this standards repo.
 - `terraform-module` (`prompts/terraform-module.prompt.md`): Create or modify Terraform modules.
 
 ## Governance References
@@ -165,6 +169,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 - `prompts/cs-code-review.prompt.md`
 - `prompts/github-action.prompt.md`
+- `prompts/tech-ai-sync-copilot-configs.prompt.md`
 - `prompts/github-pr-description.prompt.md`
 - `prompts/cs-add-unit-tests.prompt.md`
 - `prompts/cs-terraform.prompt.md`
@@ -173,6 +178,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 - `skills/code-review/SKILL.md`
 - `skills/cicd-workflow/SKILL.md`
+- `skills/tech-ai-sync-copilot-configs/SKILL.md`
 - `skills/pr-writing/SKILL.md`
 - `skills/cloud-policy/SKILL.md`
 - `skills/terraform-module/SKILL.md`
@@ -222,6 +228,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/github-pr-description.prompt.md`
 - `.github/prompts/script-bash.prompt.md`
 - `.github/prompts/script-python.prompt.md`
+- `.github/prompts/tech-ai-sync-copilot-configs.prompt.md`
 - `.github/prompts/terraform-module.prompt.md`
 
 ### Skills
@@ -237,6 +244,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/project-python/SKILL.md`
 - `.github/skills/script-bash/SKILL.md`
 - `.github/skills/script-python/SKILL.md`
+- `.github/skills/tech-ai-sync-copilot-configs/SKILL.md`
 - `.github/skills/terraform-feature/SKILL.md`
 - `.github/skills/terraform-module/SKILL.md`
 
@@ -250,5 +258,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/agents/planner.agent.md`
 - `.github/agents/reviewer.agent.md`
 - `.github/agents/security-reviewer.agent.md`
+- `.github/agents/tech-ai-sync-copilot-configs.agent.md`
 - `.github/agents/tech-ai-script-reviewer.agent.md`
 - `.github/agents/terraform-guardrails.agent.md`

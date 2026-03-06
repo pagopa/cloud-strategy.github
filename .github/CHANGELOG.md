@@ -6,6 +6,12 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-03-06
+- Added `agents/tech-ai-sync-copilot-configs.agent.md`: `TechAISyncCopilotConfigs` for local repository analysis and conservative Copilot-core alignment.
+- Added `prompts/tech-ai-sync-copilot-configs.prompt.md` and `skills/tech-ai-sync-copilot-configs/SKILL.md` for repeatable alignment workflows.
+- Added `scripts/tech-ai-sync-copilot-configs.py` plus `tests/test_tech_ai_sync_copilot_configs.py` for deterministic analysis, manifest-based sync planning, and reporting.
+- Updated `AGENTS.md` with `TechAISyncCopilotConfigs` routing, inventory, and preferred asset references.
+
 ## 2026-03-04
 - Added `skills/code-review/SKILL.md`: per-language anti-pattern catalogs with severity mappings and good-vs-bad examples.
 - Added `prompts/cs-code-review.prompt.md`: on-demand strict code review prompt with configurable strictness.
