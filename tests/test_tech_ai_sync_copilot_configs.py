@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = REPO_ROOT / ".github" / "scripts" / "tech-ai-sync-copilot-configs.py"
@@ -38,6 +40,17 @@ def build_eng_like_target(path: Path) -> None:
     write_file(path / "src" / "03_policy_set" / "main.tf", 'resource "null_resource" "set" {}\n')
     write_file(path / "src" / "04_policy_assignments" / "main.tf", 'resource "null_resource" "assign" {}\n')
     write_file(path / "src" / "scripts" / "policy_remediation.sh", "#!/usr/bin/env bash\nset -euo pipefail\n")
+
+
+def build_python_service_target(path: Path) -> None:
+    write_file(path / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(path / "src" / "app.py", 'def main() -> None:\n    print("hello")\n')
+
+
+def build_script_automation_target(path: Path) -> None:
+    write_file(path / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(path / "scripts" / "sync.sh", "#!/usr/bin/env bash\nset -euo pipefail\n")
+    write_file(path / "src" / "scripts" / "report.py", 'def main() -> None:\n    print("report")\n')
 
 
 def test_build_plan_detects_infrastructure_heavy_and_root_agents_conflict(tmp_path: Path) -> None:
@@ -132,3 +145,76 @@ def test_main_supports_targets_without_existing_github_directory(tmp_path: Path,
     assert result == 0
     assert report_file.is_file()
     assert '"profile": "infrastructure-heavy"' in captured.out
+
+
+def test_build_plan_detects_backend_python_profile_and_python_validation_commands(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service"
+    build_python_service_target(target_root)
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert plan.analysis.profile_name == "backend-python"
+    assert "python -m compileall <changed_python_paths>" in plan.selection.validation_commands
+    assert "pytest" in plan.selection.validation_commands
+    assert ".github/prompts/cs-python.prompt.md" in plan.selection.prompts
+
+
+def test_build_plan_prefers_canonical_script_prompts_to_reduce_prompt_duplication(tmp_path: Path) -> None:
+    target_root = tmp_path / "automation"
+    build_script_automation_target(target_root)
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert ".github/prompts/cs-bash-script.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/cs-python-script.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/cs-add-unit-tests.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/script-bash.prompt.md" not in plan.selection.prompts
+    assert ".github/prompts/script-python.prompt.md" not in plan.selection.prompts
+
+
+def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> None:
+    target_root = tmp_path / "polyglot"
+    write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(target_root / "Dockerfile", "FROM alpine:3.21\n")
+    write_file(target_root / "main.go", "package main\n\nfunc main() {}\n")
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert plan.analysis.unsupported_stacks == ["docker", "go"]
+    recommendations = "\n".join(plan.recommendations["missing instructions/prompts/skills"])
+    assert "unsupported target stacks: docker, go" in recommendations
+
+
+def test_build_plan_fails_for_corrupted_manifest(tmp_path: Path) -> None:
+    target_root = tmp_path / "broken-manifest"
+    build_python_service_target(target_root)
+    write_file(target_root / MODULE.MANIFEST_RELATIVE_PATH, "{not-json}\n")
+
+    with pytest.raises(MODULE.CliError, match="Invalid JSON manifest"):
+        MODULE.build_plan(REPO_ROOT, target_root)
+
+
+def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> None:
+    target_root = tmp_path / "json-report"
+    build_python_service_target(target_root)
+
+    report_file = tmp_path / "tech-ai-sync-report.json"
+    result = MODULE.main(
+        [
+            "--target",
+            str(target_root),
+            "--mode",
+            "plan",
+            "--report-format",
+            "json",
+            "--report-file",
+            str(report_file),
+        ]
+    )
+
+    payload = json.loads(report_file.read_text(encoding="utf-8"))
+    assert result == 0
+    assert payload["tool"] == "TechAISyncCopilotConfigs"
+    assert payload["analysis"]["profile"] == "backend-python"
+    assert ".github/prompts/cs-python.prompt.md" in payload["selection"]["prompts"]
+    assert any(action["status"] == "create" for action in payload["actions"])

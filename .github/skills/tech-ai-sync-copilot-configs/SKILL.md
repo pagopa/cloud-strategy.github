@@ -14,9 +14,10 @@ description: Analyze a local repository, select the minimum Copilot customizatio
 1. Inspect the target repository layout, manifests, `.github` contents, `AGENTS.md` location, and git state.
 2. Classify the repository against `repo-profiles.yml`, then extend the profile with stack-specific rules only when needed.
 3. Select the minimum Copilot core assets that the target repository actually needs.
-4. Render a target-specific `AGENTS.md` that uses GitHub Copilot wording only.
-5. Apply conservative merge rules through the manifest file and never overwrite unmanaged divergent files.
-6. Produce a final report with target actions and source-repository improvement recommendations.
+4. Prefer canonical prompt families when multiple prompts cover the same workflow so consumer repositories keep the same capability with fewer tokens.
+5. Render a target-specific `AGENTS.md` that uses GitHub Copilot wording only.
+6. Apply conservative merge rules through the manifest file and never overwrite unmanaged divergent files.
+7. Produce a final report with target actions and source-repository improvement recommendations.
 
 ## Scope rules
 - Manage Copilot core assets only.

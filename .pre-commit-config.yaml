@@ -45,3 +45,11 @@ repos:
 #          - --args=-platform=darwin_arm64
 #          - --args=-platform=linux_amd64
 #          - --args=-platform=linux_arm64
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args:
+          - "-s"
+          - "bash"
+        files: "\\.sh$"

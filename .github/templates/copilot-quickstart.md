@@ -23,5 +23,7 @@ For detailed maintenance and validation flow, refer to `.github/README.md`.
 ## Validation gate
 Add `.github/workflows/github-validate-copilot-customizations.yml` to enforce consistency in pull requests.
 
-## Bootstrap tip
-Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` in dry-run first, then `--apply`.
+## Alignment strategy
+- Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` in dry-run first for the initial copy.
+- Use `python .github/scripts/tech-ai-sync-copilot-configs.py --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection.
+- Prefer canonical `cs-*` script prompts in consumer repositories to reduce prompt duplication and token footprint.

@@ -47,6 +47,8 @@ SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/code-review/SKILL.md",
     ".github/skills/tech-ai-sync-copilot-configs/SKILL.md",
 }
+CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/cs-bash-script.prompt.md"
+CANONICAL_PYTHON_SCRIPT_PROMPT_PATH = ".github/prompts/cs-python-script.prompt.md"
 ALWAYS_EXCLUDED_RELATIVE_PATHS = {
     ".github/README.md",
     ".github/CHANGELOG.md",
@@ -608,18 +610,12 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
             prompts.add(prefixed)
 
     if "bash" in stacks:
-        prompts.update(
-            {
-                ".github/prompts/cs-bash-script.prompt.md",
-                ".github/prompts/script-bash.prompt.md",
-            }
-        )
+        prompts.add(CANONICAL_BASH_SCRIPT_PROMPT_PATH)
     if "python" in stacks:
         prompts.update(
             {
                 ".github/prompts/cs-python.prompt.md",
-                ".github/prompts/cs-python-script.prompt.md",
-                ".github/prompts/script-python.prompt.md",
+                CANONICAL_PYTHON_SCRIPT_PROMPT_PATH,
                 ".github/prompts/cs-add-unit-tests.prompt.md",
             }
         )

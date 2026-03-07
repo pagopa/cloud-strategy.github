@@ -11,6 +11,9 @@ Use this format for new updates:
 - Added `prompts/tech-ai-sync-copilot-configs.prompt.md` and `skills/tech-ai-sync-copilot-configs/SKILL.md` for repeatable alignment workflows.
 - Added `scripts/tech-ai-sync-copilot-configs.py` plus `tests/test_tech_ai_sync_copilot_configs.py` for deterministic analysis, manifest-based sync planning, and reporting.
 - Updated `AGENTS.md` with `TechAISyncCopilotConfigs` routing, inventory, and preferred asset references.
+- Reduced `copilot-code-review-instructions.md` to a lighter-weight review protocol that delegates the detailed anti-pattern catalog to `skills/code-review/SKILL.md`.
+- Updated `scripts/tech-ai-sync-copilot-configs.py` to prefer canonical `cs-*` script prompts during consumer alignment, reducing prompt duplication and token footprint without removing legacy source assets.
+- Added `.github/tech-ai-requirements-dev.txt`, CI pytest execution, `shellcheck` pre-commit coverage, and validator integration tests for stronger local and CI validation.
 
 ## 2026-03-04
 - Added `skills/code-review/SKILL.md`: per-language anti-pattern catalogs with severity mappings and good-vs-bad examples.

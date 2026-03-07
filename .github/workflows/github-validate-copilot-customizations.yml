@@ -70,6 +70,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y shellcheck
 
+      - name: Install TechAI Python test dependencies
+        run: python3 -m pip install -r .github/tech-ai-requirements-dev.txt
+
       - name: Lint validator script
         run: |
           bash -n "${{ steps.config-root.outputs.root }}/scripts/"*.sh
@@ -77,3 +80,8 @@ jobs:
 
       - name: Validate copilot customizations
         run: "${{ steps.config-root.outputs.root }}/scripts/validate-copilot-customizations.sh" --scope root --mode strict
+
+      - name: Run TechAI Python checks
+        run: |
+          python3 -m compileall .github/scripts tests
+          pytest -q
