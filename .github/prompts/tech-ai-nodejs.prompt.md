@@ -1,6 +1,6 @@
 ---
 description: Create or modify Node.js project modules with tests
-name: cs-nodejs
+name: TechAINodejs
 agent: agent
 argument-hint: action=<create|modify> component_type=<service|handler|module|utility|adapter> component_name=<name> purpose=<purpose> [target_path=<path>]
 ---

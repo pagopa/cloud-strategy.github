@@ -7,6 +7,9 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use GitHub Copilot terminology in repository-facing content.
 - Do not mention internal runtime names in repository artifacts.
 - Treat prompt frontmatter `name:` as the canonical command identifier.
+- Canonical repository-owned prompt, agent, and instruction filenames should use the `tech-ai-` prefix when introduced or renamed.
+- Canonical prompt, skill, and agent `name:` values should use the `TechAI` prefix.
+- Keep legacy aliases only when required for backward compatibility, and prefer canonical `tech-ai-*` assets in docs, examples, and sync selection.
 
 ## Decision Priority
 
@@ -85,7 +88,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `project-python` (`skills/project-python/SKILL.md`): Python project code with DDD, pytest, and type hints.
 - `script-bash` (`skills/script-bash/SKILL.md`): Bash utility scripts with strict mode and shellcheck.
 - `script-python` (`skills/script-python/SKILL.md`): Python utility scripts with argparse and tests.
-- `tech-ai-sync-copilot-configs` (`skills/tech-ai-sync-copilot-configs/SKILL.md`): Conservative local repository alignment for minimal Copilot customization assets with reporting.
+- `TechAISyncCopilotConfigs` (`skills/tech-ai-sync-copilot-configs/SKILL.md`): Conservative local repository alignment for minimal Copilot customization assets with reporting.
 - `terraform-feature` (`skills/terraform-feature/SKILL.md`): Terraform feature implementation patterns.
 - `terraform-module` (`skills/terraform-module/SKILL.md`): Terraform reusable module design.
 
@@ -94,22 +97,20 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `add-platform` (`prompts/add-platform.prompt.md`): Add a new supported platform/profile pattern in a generic way.
 - `add-report-script` (`prompts/add-report-script.prompt.md`): Add a reusable reporting/analysis automation script.
 - `cicd-workflow` (`prompts/cicd-workflow.prompt.md`): Create or modify GitHub Actions workflows.
-- `cs-add-unit-tests` (`prompts/cs-add-unit-tests.prompt.md`): Add or improve unit tests.
-- `cs-bash-script` (`prompts/cs-bash-script.prompt.md`): Create or modify Bash scripts.
-- `cs-cloud-policy` (`prompts/cs-cloud-policy.prompt.md`): Create cloud governance policies.
-- `cs-code-review` (`prompts/cs-code-review.prompt.md`): Perform exhaustive, nit-level code reviews.
-- `cs-data-registry` (`prompts/cs-data-registry.prompt.md`): Create or update data registry assets.
-- `cs-java` (`prompts/cs-java.prompt.md`): Generate Java project code.
-- `cs-nodejs` (`prompts/cs-nodejs.prompt.md`): Generate Node.js project code.
-- `cs-python` (`prompts/cs-python.prompt.md`): Generate Python project code.
-- `cs-python-script` (`prompts/cs-python-script.prompt.md`): Create Python utility scripts.
-- `cs-terraform` (`prompts/cs-terraform.prompt.md`): Create Terraform modules and features.
-- `cs-github-action` (`prompts/github-action.prompt.md`): Create GitHub Actions workflows.
-- `cs-composite-action` (`prompts/github-composite-action.prompt.md`): Create GitHub composite actions.
-- `cs-pr-description` (`prompts/github-pr-description.prompt.md`): Generate PR descriptions.
-- `script-bash` (`prompts/script-bash.prompt.md`): Create Bash scripts with repository conventions.
-- `script-python` (`prompts/script-python.prompt.md`): Create Python scripts with repository conventions.
-- `tech-ai-sync-copilot-configs` (`prompts/tech-ai-sync-copilot-configs.prompt.md`): Analyze and conservatively align a local repository with the minimum Copilot customization assets from this standards repo.
+- `TechAIAddUnitTests` (`prompts/tech-ai-add-unit-tests.prompt.md`): Add or improve unit tests.
+- `TechAICloudPolicy` (`prompts/tech-ai-cloud-policy.prompt.md`): Create cloud governance policies.
+- `TechAICodeReview` (`prompts/tech-ai-code-review.prompt.md`): Perform exhaustive, nit-level code reviews.
+- `TechAIDataRegistry` (`prompts/tech-ai-data-registry.prompt.md`): Create or update data registry assets.
+- `TechAIJava` (`prompts/tech-ai-java.prompt.md`): Generate Java project code.
+- `TechAINodejs` (`prompts/tech-ai-nodejs.prompt.md`): Generate Node.js project code.
+- `TechAIPython` (`prompts/tech-ai-python.prompt.md`): Generate Python project code.
+- `TechAITerraform` (`prompts/tech-ai-terraform.prompt.md`): Create Terraform modules and features.
+- `TechAIGitHubAction` (`prompts/github-action.prompt.md`): Create GitHub Actions workflows.
+- `TechAICompositeAction` (`prompts/github-composite-action.prompt.md`): Create GitHub composite actions.
+- `TechAIPRDescription` (`prompts/github-pr-description.prompt.md`): Generate PR descriptions.
+- `TechAIBashScript` (`prompts/tech-ai-bash-script.prompt.md`): Create or modify Bash scripts with the canonical low-duplication prompt.
+- `TechAIPythonScript` (`prompts/tech-ai-python-script.prompt.md`): Create or modify Python utility scripts with the canonical low-duplication prompt.
+- `TechAISyncCopilotConfigs` (`prompts/tech-ai-sync-copilot-configs.prompt.md`): Analyze and conservatively align a local repository with the minimum Copilot customization assets from this standards repo.
 - `terraform-module` (`prompts/terraform-module.prompt.md`): Create or modify Terraform modules.
 
 ## Governance References
@@ -167,12 +168,12 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Preferred prompts
 
-- `prompts/cs-code-review.prompt.md`
+- `prompts/tech-ai-code-review.prompt.md`
 - `prompts/github-action.prompt.md`
 - `prompts/tech-ai-sync-copilot-configs.prompt.md`
 - `prompts/github-pr-description.prompt.md`
-- `prompts/cs-add-unit-tests.prompt.md`
-- `prompts/cs-terraform.prompt.md`
+- `prompts/tech-ai-add-unit-tests.prompt.md`
+- `prompts/tech-ai-terraform.prompt.md`
 
 ### Preferred skills
 
@@ -213,22 +214,20 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/add-platform.prompt.md`
 - `.github/prompts/add-report-script.prompt.md`
 - `.github/prompts/cicd-workflow.prompt.md`
-- `.github/prompts/cs-add-unit-tests.prompt.md`
-- `.github/prompts/cs-bash-script.prompt.md`
-- `.github/prompts/cs-cloud-policy.prompt.md`
-- `.github/prompts/cs-code-review.prompt.md`
-- `.github/prompts/cs-data-registry.prompt.md`
-- `.github/prompts/cs-java.prompt.md`
-- `.github/prompts/cs-nodejs.prompt.md`
-- `.github/prompts/cs-python-script.prompt.md`
-- `.github/prompts/cs-python.prompt.md`
-- `.github/prompts/cs-terraform.prompt.md`
 - `.github/prompts/github-action.prompt.md`
 - `.github/prompts/github-composite-action.prompt.md`
 - `.github/prompts/github-pr-description.prompt.md`
-- `.github/prompts/script-bash.prompt.md`
-- `.github/prompts/script-python.prompt.md`
+- `.github/prompts/tech-ai-add-unit-tests.prompt.md`
+- `.github/prompts/tech-ai-bash-script.prompt.md`
+- `.github/prompts/tech-ai-cloud-policy.prompt.md`
+- `.github/prompts/tech-ai-code-review.prompt.md`
+- `.github/prompts/tech-ai-data-registry.prompt.md`
+- `.github/prompts/tech-ai-java.prompt.md`
+- `.github/prompts/tech-ai-nodejs.prompt.md`
+- `.github/prompts/tech-ai-python-script.prompt.md`
+- `.github/prompts/tech-ai-python.prompt.md`
 - `.github/prompts/tech-ai-sync-copilot-configs.prompt.md`
+- `.github/prompts/tech-ai-terraform.prompt.md`
 - `.github/prompts/terraform-module.prompt.md`
 
 ### Skills

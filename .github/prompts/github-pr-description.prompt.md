@@ -1,6 +1,6 @@
 ---
 description: Build a complete pull request body using the existing repository PR template
-name: cs-pr-description
+name: TechAIPRDescription
 agent: PRWriter
 argument-hint: title=<text> intent=<text> changed_files=<comma-separated paths> [validation=<commands/results>] [risk=<Low|Medium|High>] [links=<issue/docs/runbook>] [target_branch=<name>] [pr_number=<number>]
 ---

@@ -1,6 +1,6 @@
 ---
 description: Perform an exhaustive, nit-level code review on Python, Bash, or Terraform files
-name: cs-code-review
+name: TechAICodeReview
 agent: agent
 argument-hint: target=<file_or_folder> [language=<python|bash|terraform|auto>] [strictness=<strict|moderate>]
 ---

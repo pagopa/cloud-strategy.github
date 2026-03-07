@@ -52,7 +52,7 @@ def test_tech_ai_validator_reports_missing_prompt_argument_hint(tmp_path: Path) 
     target_root = tmp_path / "invalid-repo"
     copy_copilot_config(target_root)
 
-    prompt_path = target_root / ".github" / "prompts" / "cs-bash-script.prompt.md"
+    prompt_path = target_root / ".github" / "prompts" / "tech-ai-bash-script.prompt.md"
     prompt_lines = [
         line for line in prompt_path.read_text(encoding="utf-8").splitlines() if not line.startswith("argument-hint:")
     ]

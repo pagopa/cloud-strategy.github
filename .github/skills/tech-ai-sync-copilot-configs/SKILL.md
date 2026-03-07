@@ -1,5 +1,5 @@
 ---
-name: tech-ai-sync-copilot-configs
+name: TechAISyncCopilotConfigs
 description: Analyze a local repository, select the minimum Copilot customization assets, tailor them, and align them conservatively with a final report.
 ---
 

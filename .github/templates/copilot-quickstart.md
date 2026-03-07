@@ -16,8 +16,8 @@ For detailed maintenance and validation flow, refer to `.github/README.md`.
 5. Run `.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 
 ## Suggested starter sets
-- Java repositories: `java.instructions.md`, `cs-java.prompt.md`, `project-java/SKILL.md`
-- Node.js repositories: `nodejs.instructions.md`, `cs-nodejs.prompt.md`, `project-nodejs/SKILL.md`
+- Java repositories: `java.instructions.md`, `tech-ai-java.prompt.md`, `project-java/SKILL.md`
+- Node.js repositories: `nodejs.instructions.md`, `tech-ai-nodejs.prompt.md`, `project-nodejs/SKILL.md`
 - CI-focused repositories: `github-actions.instructions.md`, `github-action.prompt.md`, `cicd-workflow/SKILL.md`
 
 ## Validation gate

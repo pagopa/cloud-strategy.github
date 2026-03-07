@@ -1,6 +1,6 @@
 ---
 description: Analyze and conservatively align a local repository with the minimum Copilot customization assets from this standards repo
-name: tech-ai-sync-copilot-configs
+name: TechAISyncCopilotConfigs
 agent: agent
 argument-hint: target_repo=<path> [source_repo=<path>] [mode=<plan|apply>] [report_format=<md|json>] [report_file=<path>]
 ---

@@ -1,6 +1,6 @@
 ---
 description: Create or modify a GitHub Actions workflow
-name: cs-github-action
+name: TechAIGitHubAction
 agent: agent
 argument-hint: action=<create|modify> workflow_name=<name> purpose=<purpose> [triggers=push,pull_request]
 ---

@@ -23,8 +23,8 @@ profiles:
       - instructions/github-actions.instructions.md
       - instructions/markdown.instructions.md
     recommended_prompts:
-      - prompts/cs-java.prompt.md
-      - prompts/cs-add-unit-tests.prompt.md
+      - prompts/tech-ai-java.prompt.md
+      - prompts/tech-ai-add-unit-tests.prompt.md
     recommended_skills:
       - skills/project-java/SKILL.md
       - skills/cicd-workflow/SKILL.md
@@ -36,8 +36,8 @@ profiles:
       - instructions/github-actions.instructions.md
       - instructions/markdown.instructions.md
     recommended_prompts:
-      - prompts/cs-nodejs.prompt.md
-      - prompts/cs-add-unit-tests.prompt.md
+      - prompts/tech-ai-nodejs.prompt.md
+      - prompts/tech-ai-add-unit-tests.prompt.md
     recommended_skills:
       - skills/project-nodejs/SKILL.md
       - skills/cicd-workflow/SKILL.md
@@ -49,8 +49,8 @@ profiles:
       - instructions/github-actions.instructions.md
       - instructions/markdown.instructions.md
     recommended_prompts:
-      - prompts/cs-python.prompt.md
-      - prompts/cs-add-unit-tests.prompt.md
+      - prompts/tech-ai-python.prompt.md
+      - prompts/tech-ai-add-unit-tests.prompt.md
     recommended_skills:
       - skills/project-python/SKILL.md
       - skills/cicd-workflow/SKILL.md
@@ -62,8 +62,8 @@ profiles:
       - instructions/github-actions.instructions.md
       - instructions/yaml.instructions.md
     recommended_prompts:
-      - prompts/cs-terraform.prompt.md
-      - prompts/cs-cloud-policy.prompt.md
+      - prompts/tech-ai-terraform.prompt.md
+      - prompts/tech-ai-cloud-policy.prompt.md
     recommended_skills:
       - skills/terraform-feature/SKILL.md
       - skills/terraform-module/SKILL.md
@@ -77,10 +77,10 @@ profiles:
       - instructions/github-actions.instructions.md
       - instructions/terraform.instructions.md
     recommended_prompts:
-      - prompts/cs-java.prompt.md
-      - prompts/cs-nodejs.prompt.md
+      - prompts/tech-ai-java.prompt.md
+      - prompts/tech-ai-nodejs.prompt.md
       - prompts/github-action.prompt.md
-      - prompts/cs-terraform.prompt.md
+      - prompts/tech-ai-terraform.prompt.md
     recommended_skills:
       - skills/project-java/SKILL.md
       - skills/project-nodejs/SKILL.md

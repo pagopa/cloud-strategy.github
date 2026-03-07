@@ -1,6 +1,6 @@
 ---
 description: Create or modify Java project components with tests
-name: cs-java
+name: TechAIJava
 agent: agent
 argument-hint: action=<create|modify> component_type=<service|controller|handler|utility|module> component_name=<name> purpose=<purpose> [target_path=<path>]
 ---

@@ -284,13 +284,16 @@ prompt_expected_name() {
 
   case "$name" in
     github-action.prompt.md)
-      printf '%s' "cs-github-action"
+      printf '%s' "TechAIGitHubAction"
       ;;
     github-composite-action.prompt.md)
-      printf '%s' "cs-composite-action"
+      printf '%s' "TechAICompositeAction"
       ;;
     github-pr-description.prompt.md)
-      printf '%s' "cs-pr-description"
+      printf '%s' "TechAIPRDescription"
+      ;;
+    tech-ai-*.prompt.md)
+      tech_ai_prompt_name "${name%.prompt.md}"
       ;;
     *.prompt.md)
       printf '%s' "${name%.prompt.md}"
@@ -299,6 +302,24 @@ prompt_expected_name() {
       return 1
       ;;
   esac
+}
+
+tech_ai_prompt_name() {
+  local stem="$1"
+  local remainder
+  local output="TechAI"
+  local part
+  local first_char
+
+  remainder="${stem#tech-ai-}"
+  IFS='-' read -r -a parts <<< "$remainder"
+  for part in "${parts[@]}"; do
+    [[ -n "$part" ]] || continue
+    first_char="$(printf '%s' "${part:0:1}" | tr '[:lower:]' '[:upper:]')"
+    output+="${first_char}${part:1}"
+  done
+
+  printf '%s' "$output"
 }
 
 validate_prompt_name_policy() {

@@ -1,6 +1,6 @@
 ---
 description: Create or modify a reusable GitHub composite action
-name: cs-composite-action
+name: TechAICompositeAction
 agent: agent
 argument-hint: action=<create|modify> action_name=<name> purpose=<purpose> [action_path=.github/actions/<name>/action.yml]
 ---

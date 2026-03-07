@@ -1,6 +1,6 @@
 ---
 description: Add or modify entries in structured JSON/YAML registry files
-name: cs-data-registry
+name: TechAIDataRegistry
 agent: agent
 argument-hint: action=<create|modify|remove> file=<path> key=<identifier> change=<summary>
 ---

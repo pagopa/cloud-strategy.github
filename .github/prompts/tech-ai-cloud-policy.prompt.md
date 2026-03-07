@@ -1,6 +1,6 @@
 ---
 description: Create or modify a cloud governance policy (AWS SCP, Azure Policy, GCP Org Policy)
-name: cs-cloud-policy
+name: TechAICloudPolicy
 agent: agent
 argument-hint: action=<create|modify> cloud=<aws|azure|gcp> policy_name=<name> purpose=<purpose> [effect=<deny|audit|modify|append|disabled>]
 ---

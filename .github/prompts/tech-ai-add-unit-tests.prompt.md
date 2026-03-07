@@ -1,6 +1,6 @@
 ---
 description: Add or improve unit tests for Python code
-name: cs-add-unit-tests
+name: TechAIAddUnitTests
 agent: agent
 argument-hint: target_file=<path> [test_framework=<name>]
 ---

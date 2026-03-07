@@ -156,18 +156,18 @@ def test_build_plan_detects_backend_python_profile_and_python_validation_command
     assert plan.analysis.profile_name == "backend-python"
     assert "python -m compileall <changed_python_paths>" in plan.selection.validation_commands
     assert "pytest" in plan.selection.validation_commands
-    assert ".github/prompts/cs-python.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/tech-ai-python.prompt.md" in plan.selection.prompts
 
 
-def test_build_plan_prefers_canonical_script_prompts_to_reduce_prompt_duplication(tmp_path: Path) -> None:
+def test_build_plan_prefers_tech_ai_script_prompts_to_reduce_prompt_duplication(tmp_path: Path) -> None:
     target_root = tmp_path / "automation"
     build_script_automation_target(target_root)
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/prompts/cs-bash-script.prompt.md" in plan.selection.prompts
-    assert ".github/prompts/cs-python-script.prompt.md" in plan.selection.prompts
-    assert ".github/prompts/cs-add-unit-tests.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/tech-ai-bash-script.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/tech-ai-python-script.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/tech-ai-add-unit-tests.prompt.md" in plan.selection.prompts
     assert ".github/prompts/script-bash.prompt.md" not in plan.selection.prompts
     assert ".github/prompts/script-python.prompt.md" not in plan.selection.prompts
 
@@ -216,5 +216,5 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
     assert result == 0
     assert payload["tool"] == "TechAISyncCopilotConfigs"
     assert payload["analysis"]["profile"] == "backend-python"
-    assert ".github/prompts/cs-python.prompt.md" in payload["selection"]["prompts"]
+    assert ".github/prompts/tech-ai-python.prompt.md" in payload["selection"]["prompts"]
     assert any(action["status"] == "create" for action in payload["actions"])

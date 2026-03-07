@@ -1,6 +1,6 @@
 ---
 description: Create or modify Python application components with DDD boundaries and tests
-name: cs-python
+name: TechAIPython
 agent: agent
 argument-hint: action=<create|modify> component_type=<domain_service|entity|value_object|use_case|adapter|repository|module> component_name=<name> purpose=<purpose> [target_path=<path>]
 ---

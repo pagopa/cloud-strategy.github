@@ -40,15 +40,15 @@ SOURCE_ONLY_AGENT_PATHS = {
 SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/add-platform.prompt.md",
     ".github/prompts/add-report-script.prompt.md",
-    ".github/prompts/cs-code-review.prompt.md",
+    ".github/prompts/tech-ai-code-review.prompt.md",
     ".github/prompts/tech-ai-sync-copilot-configs.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/code-review/SKILL.md",
     ".github/skills/tech-ai-sync-copilot-configs/SKILL.md",
 }
-CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/cs-bash-script.prompt.md"
-CANONICAL_PYTHON_SCRIPT_PROMPT_PATH = ".github/prompts/cs-python-script.prompt.md"
+CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-bash-script.prompt.md"
+CANONICAL_PYTHON_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-python-script.prompt.md"
 ALWAYS_EXCLUDED_RELATIVE_PATHS = {
     ".github/README.md",
     ".github/CHANGELOG.md",
@@ -614,13 +614,13 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if "python" in stacks:
         prompts.update(
             {
-                ".github/prompts/cs-python.prompt.md",
+                ".github/prompts/tech-ai-python.prompt.md",
                 CANONICAL_PYTHON_SCRIPT_PROMPT_PATH,
-                ".github/prompts/cs-add-unit-tests.prompt.md",
+                ".github/prompts/tech-ai-add-unit-tests.prompt.md",
             }
         )
     if "terraform" in stacks:
-        prompts.add(".github/prompts/cs-terraform.prompt.md")
+        prompts.add(".github/prompts/tech-ai-terraform.prompt.md")
     if "github-actions" in stacks:
         prompts.add(".github/prompts/github-action.prompt.md")
     if "composite-action" in stacks:

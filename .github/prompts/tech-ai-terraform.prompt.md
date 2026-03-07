@@ -1,6 +1,6 @@
 ---
 description: Create or modify Terraform resources and features
-name: cs-terraform
+name: TechAITerraform
 agent: agent
 argument-hint: action=<create|modify> type=<resource|module|variable|output|data_source> description=<text> target_dir=<path>
 ---
