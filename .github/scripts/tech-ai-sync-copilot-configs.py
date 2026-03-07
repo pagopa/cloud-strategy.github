@@ -522,17 +522,8 @@ def build_analysis(source_root: Path, target_root: Path, profiles: dict[str, Rep
     if profile_name not in profiles:
         profile_name = "minimal"
 
-    agents_root_path = target_root / "AGENTS.md"
-    agents_config_path = target_root / ".github" / "AGENTS.md"
-    if agents_root_path.exists():
-        agents_relative_path = "AGENTS.md"
-        agents_is_root = True
-    elif agents_config_path.exists():
-        agents_relative_path = ".github/AGENTS.md"
-        agents_is_root = False
-    else:
-        agents_relative_path = "AGENTS.md"
-        agents_is_root = True
+    agents_relative_path = "AGENTS.md"
+    agents_is_root = True
 
     git_dirty, git_status_lines = detect_git_state(target_root)
     workflow_dir = target_root / ".github" / "workflows"
@@ -1088,6 +1079,12 @@ def build_recommendations(
         recommendations["weak conflict-handling rules"].append(
             "Consider generated section markers or a dedicated root-AGENTS template to reduce consumer AGENTS "
             "merge conflicts."
+        )
+
+    if not (analysis.repo_root / "AGENTS.md").exists() and (analysis.repo_root / ".github" / "AGENTS.md").exists():
+        recommendations["missing consumer-facing validation or onboarding guidance"].append(
+            "Move legacy `.github/AGENTS.md` to root `AGENTS.md`; root is the canonical location for project "
+            "agent routing and inventory."
         )
 
     if analysis.agents_is_root and not (source_root / "AGENTS.md").exists():

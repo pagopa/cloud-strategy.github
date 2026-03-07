@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def copy_copilot_config(target_root: Path) -> None:
     shutil.copytree(REPO_ROOT / ".github", target_root / ".github")
+    (target_root / "AGENTS.md").write_text((REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8"), encoding="utf-8")
 
 
 def run_validator(repo_root: Path, report_file: Path) -> subprocess.CompletedProcess[str]:
@@ -66,3 +67,18 @@ def test_tech_ai_validator_reports_missing_prompt_argument_hint(tmp_path: Path) 
     assert result.returncode == 1
     assert payload["status"] == "failed"
     assert any("Missing frontmatter key 'argument-hint'" in message for message in messages)
+
+
+def test_tech_ai_validator_requires_root_agents_file(tmp_path: Path) -> None:
+    target_root = tmp_path / "legacy-agents-repo"
+    shutil.copytree(REPO_ROOT / ".github", target_root / ".github")
+    (target_root / ".github" / "AGENTS.md").write_text("# Legacy AGENTS\n", encoding="utf-8")
+
+    report_file = tmp_path / "tech-ai-validator-root-agents.json"
+    result = run_validator(target_root, report_file)
+
+    payload = json.loads(report_file.read_text(encoding="utf-8"))
+    messages = [finding["message"] for finding in payload["findings"]]
+    assert result.returncode == 1
+    assert payload["status"] == "failed"
+    assert any("AGENTS.md must live in repository root" in message for message in messages)

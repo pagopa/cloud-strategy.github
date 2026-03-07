@@ -673,14 +673,21 @@ validate_agents_inventory() {
   local prompts_dir="$4"
   local skills_dir="$5"
   local agents_file=""
+  local root_agents_file="${target_root}/AGENTS.md"
+  local legacy_agents_file="${config_dir}/AGENTS.md"
   local file
   local rel_path
   local severity="error"
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
-  if ! agents_file="$(resolve_agents_file "$target_root" "$config_dir")"; then
-    record_issue "$severity" "Missing AGENTS.md for inventory validation (checked ${target_root} and ${config_dir})"
+  if [[ -f "$root_agents_file" ]]; then
+    agents_file="$root_agents_file"
+  elif [[ -f "$legacy_agents_file" ]]; then
+    record_issue "$severity" "AGENTS.md must live in repository root; found legacy ${legacy_agents_file}"
+    agents_file="$legacy_agents_file"
+  else
+    record_issue "$severity" "Missing AGENTS.md in repository root: ${root_agents_file}"
     return 0
   fi
 

@@ -69,6 +69,18 @@ def test_build_plan_detects_infrastructure_heavy_and_root_agents_conflict(tmp_pa
     )
 
 
+def test_build_plan_normalizes_legacy_github_agents_to_root_path(tmp_path: Path) -> None:
+    target_root = tmp_path / "legacy-agents"
+    write_file(target_root / ".github" / "AGENTS.md", "# Legacy AGENTS\n")
+    write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(target_root / "infra" / "main.tf", 'resource "null_resource" "infra" {}\n')
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert plan.analysis.agents_relative_path == "AGENTS.md"
+    assert plan.analysis.agents_is_root is True
+
+
 def test_build_plan_adopts_matching_source_files_and_reports_target_only_prompts(tmp_path: Path) -> None:
     target_root = tmp_path / "consumer"
     write_file(
