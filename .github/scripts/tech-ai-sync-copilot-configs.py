@@ -33,18 +33,18 @@ MANAGED_ALWAYS = (
     ".github/scripts/validate-copilot-customizations.sh",
 )
 SOURCE_ONLY_AGENT_PATHS = {
-    ".github/agents/customization-auditor.agent.md",
+    ".github/agents/tech-ai-customization-auditor.agent.md",
     ".github/agents/tech-ai-script-reviewer.agent.md",
     ".github/agents/tech-ai-sync-copilot-configs.agent.md",
 }
 SOURCE_ONLY_PROMPT_PATHS = {
-    ".github/prompts/add-platform.prompt.md",
-    ".github/prompts/add-report-script.prompt.md",
+    ".github/prompts/tech-ai-add-platform.prompt.md",
+    ".github/prompts/tech-ai-add-report-script.prompt.md",
     ".github/prompts/tech-ai-code-review.prompt.md",
     ".github/prompts/tech-ai-sync-copilot-configs.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
-    ".github/skills/code-review/SKILL.md",
+    ".github/skills/tech-ai-code-review/SKILL.md",
     ".github/skills/tech-ai-sync-copilot-configs/SKILL.md",
 }
 CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-bash-script.prompt.md"
@@ -622,11 +622,11 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if "terraform" in stacks:
         prompts.add(".github/prompts/tech-ai-terraform.prompt.md")
     if "github-actions" in stacks:
-        prompts.add(".github/prompts/github-action.prompt.md")
+        prompts.add(".github/prompts/tech-ai-github-action.prompt.md")
     if "composite-action" in stacks:
-        prompts.add(".github/prompts/github-composite-action.prompt.md")
+        prompts.add(".github/prompts/tech-ai-github-composite-action.prompt.md")
     if target_has_pr_template(analysis.repo_root):
-        prompts.add(".github/prompts/github-pr-description.prompt.md")
+        prompts.add(".github/prompts/tech-ai-github-pr-description.prompt.md")
 
     prompts = {
         prompt
@@ -646,19 +646,19 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     skills = {skill for skill in skills if skill not in SOURCE_ONLY_SKILL_PATHS}
 
     agents: set[str] = {
-        ".github/agents/planner.agent.md",
-        ".github/agents/implementer.agent.md",
-        ".github/agents/reviewer.agent.md",
-        ".github/agents/security-reviewer.agent.md",
+        ".github/agents/tech-ai-planner.agent.md",
+        ".github/agents/tech-ai-implementer.agent.md",
+        ".github/agents/tech-ai-reviewer.agent.md",
+        ".github/agents/tech-ai-security-reviewer.agent.md",
     }
     if "github-actions" in stacks:
-        agents.add(".github/agents/github-workflow-supply-chain.agent.md")
+        agents.add(".github/agents/tech-ai-github-workflow-supply-chain.agent.md")
     if "terraform" in stacks:
-        agents.add(".github/agents/terraform-guardrails.agent.md")
+        agents.add(".github/agents/tech-ai-terraform-guardrails.agent.md")
     if repo_needs_iam_review(analysis.repo_root):
-        agents.add(".github/agents/iam-least-privilege.agent.md")
+        agents.add(".github/agents/tech-ai-iam-least-privilege.agent.md")
     if target_has_pr_template(analysis.repo_root):
-        agents.add(".github/agents/github-pr-writer.agent.md")
+        agents.add(".github/agents/tech-ai-github-pr-writer.agent.md")
 
     agents = {agent for agent in agents if agent not in SOURCE_ONLY_AGENT_PATHS and (source_root / agent).is_file()}
 
@@ -911,7 +911,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         "4. Apply matching files under `instructions/*.instructions.md` using `applyTo`.",
         "5. Apply selected prompt constraints from `prompts/*.prompt.md`.",
         "6. Apply implementation details from referenced `skills/*/SKILL.md`.",
-        "7. If no agent is explicitly selected, default to `Implementer`.",
+        "7. If no agent is explicitly selected, default to `TechAIImplementer`.",
         "",
         "## Stack Resolution Rules",
         "- The agent role is behavioral, not language-specific.",
@@ -934,7 +934,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
             "",
             "### Agent composition",
             "- For changes spanning multiple specialist domains, run each relevant specialist and aggregate findings.",
-            "- The standard chain for non-trivial work is: `Planner` -> `Implementer` -> `Reviewer` or a matching specialist.",
+            "- The standard chain for non-trivial work is: `TechAIPlanner` -> `TechAIImplementer` -> `TechAIReviewer` or a matching specialist.",
             "",
             "## Available Skills",
         ]
@@ -1028,22 +1028,22 @@ def describe_assets(source_root: Path, relative_paths: list[str], asset_type: st
 def agent_routing_lines(agent_paths: list[str]) -> list[str]:
     lines: list[str] = []
     agent_names = {Path(path).name for path in agent_paths}
-    if "planner.agent.md" in agent_names:
-        lines.append("- Use `Planner` for ambiguous scope, tradeoff analysis, or multi-step design.")
-    if "implementer.agent.md" in agent_names:
-        lines.append("- Use `Implementer` for direct code/config changes and validation-first delivery.")
-    if "reviewer.agent.md" in agent_names:
-        lines.append("- Use `Reviewer` for quality gates and defect/regression findings.")
-    if "terraform-guardrails.agent.md" in agent_names:
-        lines.append("- Use `TerraformGuardrails` for Terraform safety and policy guardrail reviews.")
-    if "iam-least-privilege.agent.md" in agent_names:
-        lines.append("- Use `IAMLeastPrivilege` for role and permission scoping checks.")
-    if "github-workflow-supply-chain.agent.md" in agent_names:
-        lines.append("- Use `WorkflowSupplyChain` for workflow supply-chain hardening and CI checks.")
-    if "security-reviewer.agent.md" in agent_names:
-        lines.append("- Use `SecurityReviewer` as the security-focused review gate.")
-    if "github-pr-writer.agent.md" in agent_names:
-        lines.append("- Use `PRWriter` when generating pull request content from the repository template.")
+    if "tech-ai-planner.agent.md" in agent_names:
+        lines.append("- Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.")
+    if "tech-ai-implementer.agent.md" in agent_names:
+        lines.append("- Use `TechAIImplementer` for direct code/config changes and validation-first delivery.")
+    if "tech-ai-reviewer.agent.md" in agent_names:
+        lines.append("- Use `TechAIReviewer` for quality gates and defect/regression findings.")
+    if "tech-ai-terraform-guardrails.agent.md" in agent_names:
+        lines.append("- Use `TechAITerraformGuardrails` for Terraform safety and policy guardrail reviews.")
+    if "tech-ai-iam-least-privilege.agent.md" in agent_names:
+        lines.append("- Use `TechAIIAMLeastPrivilege` for role and permission scoping checks.")
+    if "tech-ai-github-workflow-supply-chain.agent.md" in agent_names:
+        lines.append("- Use `TechAIWorkflowSupplyChain` for workflow supply-chain hardening and CI checks.")
+    if "tech-ai-security-reviewer.agent.md" in agent_names:
+        lines.append("- Use `TechAISecurityReviewer` as the security-focused review gate.")
+    if "tech-ai-github-pr-writer.agent.md" in agent_names:
+        lines.append("- Use `TechAIPRWriter` when generating pull request content from the repository template.")
     return lines
 
 

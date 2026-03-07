@@ -23,4 +23,4 @@ applyTo: "**/*.java"
 - For modify tasks with existing tests: change implementation first, run existing tests, and update tests only for intentional behavior changes.
 
 ## Reference implementation
-- For code and test examples, use `.github/skills/project-java/SKILL.md`.
+- For code and test examples, use `.github/skills/tech-ai-project-java/SKILL.md`.

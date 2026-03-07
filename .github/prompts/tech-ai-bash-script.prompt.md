@@ -18,7 +18,7 @@ Create or modify a Bash script while keeping behavior explicit, reusable, and ea
 - **Target file (when modifying)**: ${input:target_file}
 
 ## Instructions
-1. Use `.github/skills/script-bash/SKILL.md`.
+1. Use `.github/skills/tech-ai-script-bash/SKILL.md`.
 2. Reuse existing repository patterns before introducing new structure.
 3. Keep `#!/usr/bin/env bash`, `set -euo pipefail`, a short purpose/usage header, English logs, and guard clauses.
 4. Preserve existing behavior on modify tasks unless a change is explicitly requested.

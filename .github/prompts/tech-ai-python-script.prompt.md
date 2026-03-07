@@ -19,7 +19,7 @@ Create or modify a Python script while keeping interfaces explicit, behavior det
 - **Test scope**: ${input:test_scope:unit,none}
 
 ## Instructions
-1. Use `.github/skills/script-python/SKILL.md`.
+1. Use `.github/skills/tech-ai-script-python/SKILL.md`.
 2. Reuse existing repository patterns before introducing new structure.
 3. Keep module purpose/usage clear, public interfaces explicit, comments/logs in English, and control flow easy to follow.
 4. If `action=modify` and tests already exist, run the existing tests before editing them.

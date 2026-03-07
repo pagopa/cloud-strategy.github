@@ -16,9 +16,9 @@ For detailed maintenance and validation flow, refer to `.github/README.md`.
 5. Run `.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 
 ## Suggested starter sets
-- Java repositories: `java.instructions.md`, `tech-ai-java.prompt.md`, `project-java/SKILL.md`
-- Node.js repositories: `nodejs.instructions.md`, `tech-ai-nodejs.prompt.md`, `project-nodejs/SKILL.md`
-- CI-focused repositories: `github-actions.instructions.md`, `github-action.prompt.md`, `cicd-workflow/SKILL.md`
+- Java repositories: `java.instructions.md`, `tech-ai-java.prompt.md`, `tech-ai-project-java/SKILL.md`
+- Node.js repositories: `nodejs.instructions.md`, `tech-ai-nodejs.prompt.md`, `tech-ai-project-nodejs/SKILL.md`
+- CI-focused repositories: `github-actions.instructions.md`, `tech-ai-github-action.prompt.md`, `tech-ai-cicd-workflow/SKILL.md`
 
 ## Validation gate
 Add `.github/workflows/github-validate-copilot-customizations.yml` to enforce consistency in pull requests.
@@ -26,4 +26,4 @@ Add `.github/workflows/github-validate-copilot-customizations.yml` to enforce co
 ## Alignment strategy
 - Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` in dry-run first for the initial copy.
 - Use `python .github/scripts/tech-ai-sync-copilot-configs.py --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection.
-- Prefer canonical `cs-*` script prompts in consumer repositories to reduce prompt duplication and token footprint.
+- Prefer canonical `tech-ai-*` script prompts in consumer repositories to reduce prompt duplication and token footprint.

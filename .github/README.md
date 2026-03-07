@@ -18,8 +18,8 @@ This folder contains global Copilot/Codex customization that can be reused acros
 - `templates/`: reusable templates (for example `AGENTS.md`)
 
 ## Agent routing
-- Read-only agents: `Planner`, `Reviewer`, `SecurityReviewer`, `WorkflowSupplyChain`, `TerraformGuardrails`, `IAMLeastPrivilege`
-- Write-capable agent: `Implementer`
+- Read-only agents: `TechAIPlanner`, `TechAIReviewer`, `TechAISecurityReviewer`, `TechAIWorkflowSupplyChain`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`
+- Write-capable agent: `TechAIImplementer`
 
 See `.github/agents/README.md` for details.
 

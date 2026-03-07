@@ -283,14 +283,26 @@ prompt_expected_name() {
   name="$(basename "$file")"
 
   case "$name" in
-    github-action.prompt.md)
+    tech-ai-github-action.prompt.md)
       printf '%s' "TechAIGitHubAction"
       ;;
-    github-composite-action.prompt.md)
+    tech-ai-github-composite-action.prompt.md)
       printf '%s' "TechAICompositeAction"
       ;;
-    github-pr-description.prompt.md)
+    tech-ai-github-pr-description.prompt.md)
       printf '%s' "TechAIPRDescription"
+      ;;
+    tech-ai-add-platform.prompt.md)
+      printf '%s' "TechAIAddPlatform"
+      ;;
+    tech-ai-add-report-script.prompt.md)
+      printf '%s' "TechAIAddReportScript"
+      ;;
+    tech-ai-cicd-workflow.prompt.md)
+      printf '%s' "TechAICICDWorkflow"
+      ;;
+    tech-ai-terraform-module.prompt.md)
+      printf '%s' "TechAITerraformModule"
       ;;
     tech-ai-*.prompt.md)
       tech_ai_prompt_name "${name%.prompt.md}"
@@ -547,7 +559,7 @@ validate_agents_dir() {
     fi
 
     case "$(basename "$file")" in
-      planner.agent.md)
+      tech-ai-planner.agent.md)
         if ! has_heading_exact "$file" '## Scope guard'; then
           record_issue "$semantic_severity" "Planner agent missing '## Scope guard' section: ${file}"
         fi
@@ -561,7 +573,7 @@ validate_agents_dir() {
           record_issue "$semantic_severity" "Planner agent should reference security baseline: ${file}"
         fi
         ;;
-      implementer.agent.md)
+      tech-ai-implementer.agent.md)
         if ! has_heading_exact "$file" '## Handoff input'; then
           record_issue "$semantic_severity" "Implementer agent missing '## Handoff input' section: ${file}"
         fi
@@ -590,7 +602,7 @@ validate_agents_dir() {
           record_issue "$semantic_severity" "Implementer agent should reference customization validator: ${file}"
         fi
         ;;
-      reviewer.agent.md)
+      tech-ai-reviewer.agent.md)
         if ! has_heading_exact "$file" '## Review format'; then
           record_issue "$semantic_severity" "Reviewer agent missing '## Review format' section: ${file}"
         fi

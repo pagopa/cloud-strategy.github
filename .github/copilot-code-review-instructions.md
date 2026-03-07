@@ -25,7 +25,7 @@
 
 ## Token-aware review protocol
 - Load only the diff, directly related files, and the matching instruction files.
-- Use `.github/skills/code-review/SKILL.md` as the detailed anti-pattern catalog for Python, Bash, and Terraform.
+- Use `.github/skills/tech-ai-code-review/SKILL.md` as the detailed anti-pattern catalog for Python, Bash, and Terraform.
 - Do not inline long language-specific catalogs when the `code-review` skill is available.
 
 ## Focus by area

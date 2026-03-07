@@ -17,7 +17,7 @@ Perform a thorough, opinionated code review using per-language anti-pattern cata
 
 ## Instructions
 
-1. Use the skill in `.github/skills/code-review/SKILL.md` as the anti-pattern reference catalog.
+1. Use the skill in `.github/skills/tech-ai-code-review/SKILL.md` as the anti-pattern reference catalog.
 2. Auto-detect language from file extensions when `language=auto` (default).
 3. For multi-language targets, apply all relevant checklists in a single pass.
 4. Cross-reference findings with the matching instruction files:

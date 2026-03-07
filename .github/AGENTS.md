@@ -19,7 +19,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 4. Apply matching files under `instructions/*.instructions.md` using `applyTo`.
 5. Apply selected prompt constraints from `prompts/*.prompt.md`.
 6. Apply implementation details from referenced `skills/*/SKILL.md`.
-7. If no agent is explicitly selected, default to `Implementer`.
+7. If no agent is explicitly selected, default to `TechAIImplementer`.
 
 ## Stack Resolution Rules
 
@@ -47,56 +47,56 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### When to use each agent
 
-- Use `Planner` for ambiguous scope, tradeoff analysis, or multi-step design.
-- Use `Implementer` for direct code/config changes and validations.
-- Use `Reviewer` for quality gates and defect/regression findings.
+- Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.
+- Use `TechAIImplementer` for direct code/config changes and validations.
+- Use `TechAIReviewer` for quality gates and defect/regression findings.
 - Use `TechAIScriptReviewer` for exhaustive, nit-level code reviews on Python, Bash, and Terraform with per-language anti-pattern catalogs.
-- Use `CustomizationAuditor` to validate and normalize Copilot customization assets for this repository.
+- Use `TechAICustomizationAuditor` to validate and normalize Copilot customization assets for this repository.
 - Use `TechAISyncCopilotConfigs` to analyze a local consumer repository and conservatively align the minimum Copilot customization assets from this standards repository.
-- Use specialist agents (`WorkflowSupplyChain`, `SecurityReviewer`, `TerraformGuardrails`, `IAMLeastPrivilege`, `PRWriter`) only when their domain matches the task.
+- Use specialist agents (`TechAIWorkflowSupplyChain`, `TechAISecurityReviewer`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`, `TechAIPRWriter`) only when their domain matches the task.
 
 ### When NOT to use (anti-patterns)
 
-- Do not use `Planner` for trivial single-file changes with clear requirements - go directly to `Implementer`.
-- Do not use `Implementer` when requirements are ambiguous or scope is unclear - use `Planner` first.
-- Do not use generic `Reviewer` when the change is purely Terraform, IAM, workflows, or security - use the matching specialist instead.
-- Do not use generic `Reviewer` when you need exhaustive per-language nit-level review - use `TechAIScriptReviewer` instead.
-- Do not use `Implementer` alone when the task is cross-repository Copilot configuration alignment - use `TechAISyncCopilotConfigs`.
+- Do not use `TechAIPlanner` for trivial single-file changes with clear requirements - go directly to `TechAIImplementer`.
+- Do not use `TechAIImplementer` when requirements are ambiguous or scope is unclear - use `TechAIPlanner` first.
+- Do not use generic `TechAIReviewer` when the change is purely Terraform, IAM, workflows, or security - use the matching specialist instead.
+- Do not use generic `TechAIReviewer` when you need exhaustive per-language nit-level review - use `TechAIScriptReviewer` instead.
+- Do not use `TechAIImplementer` alone when the task is cross-repository Copilot configuration alignment - use `TechAISyncCopilotConfigs`.
 
 ### Agent composition
 
 - For changes spanning multiple specialist domains (for example Terraform + IAM), run each relevant specialist and aggregate findings.
-- The standard chain for non-trivial work is: `Planner` -> `Implementer` -> `Reviewer` (or specialist reviewer).
-- For Copilot customization changes (for example `.github/prompts`, `.github/skills`, `.github/agents`, `.github/scripts`), run `CustomizationAuditor` before final handoff.
+- The standard chain for non-trivial work is: `TechAIPlanner` -> `TechAIImplementer` -> `TechAIReviewer` (or specialist reviewer).
+- For Copilot customization changes (for example `.github/prompts`, `.github/skills`, `.github/agents`, `.github/scripts`), run `TechAICustomizationAuditor` before final handoff.
 
 ### Handoff protocol
 
-- Planner output (implementation plan) is input context for Implementer.
-- Implementer output (list of changed files + validation results) is input context for Reviewer.
-- Reviewer findings flagged as `Critical` or `Major` route back to Implementer for remediation.
+- `TechAIPlanner` output (implementation plan) is input context for `TechAIImplementer`.
+- `TechAIImplementer` output (list of changed files + validation results) is input context for `TechAIReviewer`.
+- `TechAIReviewer` findings flagged as `Critical` or `Major` route back to `TechAIImplementer` for remediation.
 
 ## Available Skills
 
-- `cicd-workflow` (`skills/cicd-workflow/SKILL.md`): GitHub Actions workflow design and CI/CD patterns.
-- `cloud-policy` (`skills/cloud-policy/SKILL.md`): AWS SCP, Azure Policy, and GCP Org Policy governance.
-- `code-review` (`skills/code-review/SKILL.md`): Exhaustive per-language anti-pattern catalogs for strict code reviews.
-- `composite-action` (`skills/composite-action/SKILL.md`): GitHub composite action implementation patterns.
-- `data-registry` (`skills/data-registry/SKILL.md`): Data registry schema and governance automation patterns.
-- `pr-writing` (`skills/pr-writing/SKILL.md`): PR title/body generation from template and diff.
-- `project-java` (`skills/project-java/SKILL.md`): Java project code with DDD and deterministic tests.
-- `project-nodejs` (`skills/project-nodejs/SKILL.md`): Node.js project code with module boundaries and tests.
-- `project-python` (`skills/project-python/SKILL.md`): Python project code with DDD, pytest, and type hints.
-- `script-bash` (`skills/script-bash/SKILL.md`): Bash utility scripts with strict mode and shellcheck.
-- `script-python` (`skills/script-python/SKILL.md`): Python utility scripts with argparse and tests.
+- `TechAICICDWorkflow` (`skills/tech-ai-cicd-workflow/SKILL.md`): GitHub Actions workflow design and CI/CD patterns.
+- `TechAICloudPolicy` (`skills/tech-ai-cloud-policy/SKILL.md`): AWS SCP, Azure Policy, and GCP Org Policy governance.
+- `TechAICodeReview` (`skills/tech-ai-code-review/SKILL.md`): Exhaustive per-language anti-pattern catalogs for strict code reviews.
+- `TechAICompositeAction` (`skills/tech-ai-composite-action/SKILL.md`): GitHub composite action implementation patterns.
+- `TechAIDataRegistry` (`skills/tech-ai-data-registry/SKILL.md`): Data registry schema and governance automation patterns.
+- `TechAIPRWriting` (`skills/tech-ai-pr-writing/SKILL.md`): PR title/body generation from template and diff.
+- `TechAIProjectJava` (`skills/tech-ai-project-java/SKILL.md`): Java project code with DDD and deterministic tests.
+- `TechAIProjectNodejs` (`skills/tech-ai-project-nodejs/SKILL.md`): Node.js project code with module boundaries and tests.
+- `TechAIProjectPython` (`skills/tech-ai-project-python/SKILL.md`): Python project code with DDD, pytest, and type hints.
+- `TechAIScriptBash` (`skills/tech-ai-script-bash/SKILL.md`): Bash utility scripts with strict mode and shellcheck.
+- `TechAIScriptPython` (`skills/tech-ai-script-python/SKILL.md`): Python utility scripts with argparse and tests.
 - `TechAISyncCopilotConfigs` (`skills/tech-ai-sync-copilot-configs/SKILL.md`): Conservative local repository alignment for minimal Copilot customization assets with reporting.
-- `terraform-feature` (`skills/terraform-feature/SKILL.md`): Terraform feature implementation patterns.
-- `terraform-module` (`skills/terraform-module/SKILL.md`): Terraform reusable module design.
+- `TechAITerraformFeature` (`skills/tech-ai-terraform-feature/SKILL.md`): Terraform feature implementation patterns.
+- `TechAITerraformModule` (`skills/tech-ai-terraform-module/SKILL.md`): Terraform reusable module design.
 
 ## Available Prompts
 
-- `add-platform` (`prompts/add-platform.prompt.md`): Add a new supported platform/profile pattern in a generic way.
-- `add-report-script` (`prompts/add-report-script.prompt.md`): Add a reusable reporting/analysis automation script.
-- `cicd-workflow` (`prompts/cicd-workflow.prompt.md`): Create or modify GitHub Actions workflows.
+- `TechAIAddPlatform` (`prompts/tech-ai-add-platform.prompt.md`): Add a new supported platform/profile pattern in a generic way.
+- `TechAIAddReportScript` (`prompts/tech-ai-add-report-script.prompt.md`): Add a reusable reporting/analysis automation script.
+- `TechAICICDWorkflow` (`prompts/tech-ai-cicd-workflow.prompt.md`): Create or modify GitHub Actions workflows.
 - `TechAIAddUnitTests` (`prompts/tech-ai-add-unit-tests.prompt.md`): Add or improve unit tests.
 - `TechAICloudPolicy` (`prompts/tech-ai-cloud-policy.prompt.md`): Create cloud governance policies.
 - `TechAICodeReview` (`prompts/tech-ai-code-review.prompt.md`): Perform exhaustive, nit-level code reviews.
@@ -105,13 +105,13 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAINodejs` (`prompts/tech-ai-nodejs.prompt.md`): Generate Node.js project code.
 - `TechAIPython` (`prompts/tech-ai-python.prompt.md`): Generate Python project code.
 - `TechAITerraform` (`prompts/tech-ai-terraform.prompt.md`): Create Terraform modules and features.
-- `TechAIGitHubAction` (`prompts/github-action.prompt.md`): Create GitHub Actions workflows.
-- `TechAICompositeAction` (`prompts/github-composite-action.prompt.md`): Create GitHub composite actions.
-- `TechAIPRDescription` (`prompts/github-pr-description.prompt.md`): Generate PR descriptions.
+- `TechAIGitHubAction` (`prompts/tech-ai-github-action.prompt.md`): Create GitHub Actions workflows.
+- `TechAICompositeAction` (`prompts/tech-ai-github-composite-action.prompt.md`): Create GitHub composite actions.
+- `TechAIPRDescription` (`prompts/tech-ai-github-pr-description.prompt.md`): Generate PR descriptions.
 - `TechAIBashScript` (`prompts/tech-ai-bash-script.prompt.md`): Create or modify Bash scripts with the canonical low-duplication prompt.
 - `TechAIPythonScript` (`prompts/tech-ai-python-script.prompt.md`): Create or modify Python utility scripts with the canonical low-duplication prompt.
 - `TechAISyncCopilotConfigs` (`prompts/tech-ai-sync-copilot-configs.prompt.md`): Analyze and conservatively align a local repository with the minimum Copilot customization assets from this standards repo.
-- `terraform-module` (`prompts/terraform-module.prompt.md`): Create or modify Terraform modules.
+- `TechAITerraformModule` (`prompts/tech-ai-terraform-module.prompt.md`): Create or modify Terraform modules.
 
 ## Governance References
 
@@ -169,20 +169,20 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Preferred prompts
 
 - `prompts/tech-ai-code-review.prompt.md`
-- `prompts/github-action.prompt.md`
+- `prompts/tech-ai-github-action.prompt.md`
 - `prompts/tech-ai-sync-copilot-configs.prompt.md`
-- `prompts/github-pr-description.prompt.md`
+- `prompts/tech-ai-github-pr-description.prompt.md`
 - `prompts/tech-ai-add-unit-tests.prompt.md`
 - `prompts/tech-ai-terraform.prompt.md`
 
 ### Preferred skills
 
-- `skills/code-review/SKILL.md`
-- `skills/cicd-workflow/SKILL.md`
+- `skills/tech-ai-code-review/SKILL.md`
+- `skills/tech-ai-cicd-workflow/SKILL.md`
 - `skills/tech-ai-sync-copilot-configs/SKILL.md`
-- `skills/pr-writing/SKILL.md`
-- `skills/cloud-policy/SKILL.md`
-- `skills/terraform-module/SKILL.md`
+- `skills/tech-ai-pr-writing/SKILL.md`
+- `skills/tech-ai-cloud-policy/SKILL.md`
+- `skills/tech-ai-terraform-module/SKILL.md`
 
 ### Required validations before PR
 
@@ -211,12 +211,12 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Prompts
 
-- `.github/prompts/add-platform.prompt.md`
-- `.github/prompts/add-report-script.prompt.md`
-- `.github/prompts/cicd-workflow.prompt.md`
-- `.github/prompts/github-action.prompt.md`
-- `.github/prompts/github-composite-action.prompt.md`
-- `.github/prompts/github-pr-description.prompt.md`
+- `.github/prompts/tech-ai-add-platform.prompt.md`
+- `.github/prompts/tech-ai-add-report-script.prompt.md`
+- `.github/prompts/tech-ai-cicd-workflow.prompt.md`
+- `.github/prompts/tech-ai-github-action.prompt.md`
+- `.github/prompts/tech-ai-github-composite-action.prompt.md`
+- `.github/prompts/tech-ai-github-pr-description.prompt.md`
 - `.github/prompts/tech-ai-add-unit-tests.prompt.md`
 - `.github/prompts/tech-ai-bash-script.prompt.md`
 - `.github/prompts/tech-ai-cloud-policy.prompt.md`
@@ -228,35 +228,35 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/tech-ai-python.prompt.md`
 - `.github/prompts/tech-ai-sync-copilot-configs.prompt.md`
 - `.github/prompts/tech-ai-terraform.prompt.md`
-- `.github/prompts/terraform-module.prompt.md`
+- `.github/prompts/tech-ai-terraform-module.prompt.md`
 
 ### Skills
 
-- `.github/skills/cicd-workflow/SKILL.md`
-- `.github/skills/cloud-policy/SKILL.md`
-- `.github/skills/code-review/SKILL.md`
-- `.github/skills/composite-action/SKILL.md`
-- `.github/skills/data-registry/SKILL.md`
-- `.github/skills/pr-writing/SKILL.md`
-- `.github/skills/project-java/SKILL.md`
-- `.github/skills/project-nodejs/SKILL.md`
-- `.github/skills/project-python/SKILL.md`
-- `.github/skills/script-bash/SKILL.md`
-- `.github/skills/script-python/SKILL.md`
+- `.github/skills/tech-ai-cicd-workflow/SKILL.md`
+- `.github/skills/tech-ai-cloud-policy/SKILL.md`
+- `.github/skills/tech-ai-code-review/SKILL.md`
+- `.github/skills/tech-ai-composite-action/SKILL.md`
+- `.github/skills/tech-ai-data-registry/SKILL.md`
+- `.github/skills/tech-ai-pr-writing/SKILL.md`
+- `.github/skills/tech-ai-project-java/SKILL.md`
+- `.github/skills/tech-ai-project-nodejs/SKILL.md`
+- `.github/skills/tech-ai-project-python/SKILL.md`
+- `.github/skills/tech-ai-script-bash/SKILL.md`
+- `.github/skills/tech-ai-script-python/SKILL.md`
 - `.github/skills/tech-ai-sync-copilot-configs/SKILL.md`
-- `.github/skills/terraform-feature/SKILL.md`
-- `.github/skills/terraform-module/SKILL.md`
+- `.github/skills/tech-ai-terraform-feature/SKILL.md`
+- `.github/skills/tech-ai-terraform-module/SKILL.md`
 
 ### Agents
 
-- `.github/agents/customization-auditor.agent.md`
-- `.github/agents/github-pr-writer.agent.md`
-- `.github/agents/github-workflow-supply-chain.agent.md`
-- `.github/agents/iam-least-privilege.agent.md`
-- `.github/agents/implementer.agent.md`
-- `.github/agents/planner.agent.md`
-- `.github/agents/reviewer.agent.md`
-- `.github/agents/security-reviewer.agent.md`
+- `.github/agents/tech-ai-customization-auditor.agent.md`
+- `.github/agents/tech-ai-github-pr-writer.agent.md`
+- `.github/agents/tech-ai-github-workflow-supply-chain.agent.md`
+- `.github/agents/tech-ai-iam-least-privilege.agent.md`
+- `.github/agents/tech-ai-implementer.agent.md`
+- `.github/agents/tech-ai-planner.agent.md`
+- `.github/agents/tech-ai-reviewer.agent.md`
+- `.github/agents/tech-ai-security-reviewer.agent.md`
 - `.github/agents/tech-ai-sync-copilot-configs.agent.md`
 - `.github/agents/tech-ai-script-reviewer.agent.md`
-- `.github/agents/terraform-guardrails.agent.md`
+- `.github/agents/tech-ai-terraform-guardrails.agent.md`

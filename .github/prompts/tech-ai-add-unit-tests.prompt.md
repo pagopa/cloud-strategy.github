@@ -16,7 +16,7 @@ Add or improve unit tests for an existing Python module or script while preservi
 
 ## Instructions
 
-1. Use the skill in `.github/skills/script-python/SKILL.md`.
+1. Use the skill in `.github/skills/tech-ai-script-python/SKILL.md`.
 2. Inspect `${input:target_file}` and identify testable behavior.
 3. Add or update tests covering:
    - happy path

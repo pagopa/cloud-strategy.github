@@ -18,7 +18,7 @@ Create or modify Python application components with DDD boundaries, early-return
 - **Target path**: ${input:target_path:src}
 
 ## Instructions
-1. Use the skill in `.github/skills/project-python/SKILL.md`.
+1. Use the skill in `.github/skills/tech-ai-project-python/SKILL.md`.
 2. Reuse repository naming and folder conventions.
 3. Keep DDD boundaries explicit:
    - domain rules in domain-level modules

@@ -21,12 +21,12 @@ Use this format for new updates:
 - Added `prompts/tech-ai-sync-copilot-configs.prompt.md` and `skills/tech-ai-sync-copilot-configs/SKILL.md` for repeatable alignment workflows.
 - Added `scripts/tech-ai-sync-copilot-configs.py` plus `tests/test_tech_ai_sync_copilot_configs.py` for deterministic analysis, manifest-based sync planning, and reporting.
 - Updated `AGENTS.md` with `TechAISyncCopilotConfigs` routing, inventory, and preferred asset references.
-- Reduced `copilot-code-review-instructions.md` to a lighter-weight review protocol that delegates the detailed anti-pattern catalog to `skills/code-review/SKILL.md`.
+- Reduced `copilot-code-review-instructions.md` to a lighter-weight review protocol that delegates the detailed anti-pattern catalog to `skills/tech-ai-code-review/SKILL.md`.
 - Updated `scripts/tech-ai-sync-copilot-configs.py` to prefer canonical `cs-*` script prompts during consumer alignment, reducing prompt duplication and token footprint without removing legacy source assets.
 - Added `.github/tech-ai-requirements-dev.txt`, CI pytest execution, `shellcheck` pre-commit coverage, and validator integration tests for stronger local and CI validation.
 
 ## 2026-03-04
-- Added `skills/code-review/SKILL.md`: per-language anti-pattern catalogs with severity mappings and good-vs-bad examples.
+- Added `skills/tech-ai-code-review/SKILL.md`: per-language anti-pattern catalogs with severity mappings and good-vs-bad examples.
 - Added `prompts/cs-code-review.prompt.md`: on-demand strict code review prompt with configurable strictness.
 - Added `agents/tech-ai-script-reviewer.agent.md`: exhaustive, nit-level code reviewer (`TechAIScriptReviewer`) for Python, Bash, and Terraform with review persona inspired by Martin Fowler, Raymond Hettinger, and Kelsey Hightower.
 - Expanded `copilot-code-review-instructions.md` with Python/Bash/Terraform-specific check sections, `Nit` severity level, and escalation rules.
@@ -50,13 +50,13 @@ Use this format for new updates:
 - Added `instructions/composite-action.instructions.md` for reusable composite actions.
 - Added `scripts/bootstrap-copilot-config.sh` for safe `.github` bootstrap and sync.
 - Added `templates/copilot-quickstart.md` for portable onboarding.
-- Added PR authoring assets: `prompts/cs-pr-description.prompt.md` and `skills/pr-writing/SKILL.md`.
+- Added PR authoring assets: `prompts/tech-ai-github-pr-description.prompt.md` and `skills/tech-ai-pr-writing/SKILL.md`.
 - Updated docs to be repository-agnostic and reusable across different tech stacks.
 - Standardized script prompt wording to remove organization-specific terminology and keep language portable.
 - Hardened validator frontmatter key detection for multiline YAML keys.
 - Extended validator JSON output with per-finding details.
-- Added `prompts/cs-composite-action.prompt.md` and `skills/composite-action/SKILL.md`.
-- Added `prompts/cs-data-registry.prompt.md` and `skills/data-registry/SKILL.md`.
+- Added `prompts/tech-ai-github-composite-action.prompt.md` and `skills/tech-ai-composite-action/SKILL.md`.
+- Added `prompts/tech-ai-data-registry.prompt.md` and `skills/tech-ai-data-registry/SKILL.md`.
 - Expanded `cloud-policy` skill with concrete AWS/Azure/GCP templates.
 - Reduced duplication by moving Java/Node examples from instructions to skills.
 - Reduced overlap in `scripts.instructions.md` to cross-cutting rules only.

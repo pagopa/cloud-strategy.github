@@ -55,7 +55,7 @@ In addition, always provide a dedicated architecture assessment section that eva
 
 ## Anti-pattern catalog
 
-- Load and apply `.github/skills/code-review/SKILL.md` as the primary reference for per-language anti-patterns and severity mappings.
+- Load and apply `.github/skills/tech-ai-code-review/SKILL.md` as the primary reference for per-language anti-patterns and severity mappings.
 - Cross-reference with language instruction files:
   - Python: `.github/instructions/python.instructions.md`
   - Bash: `.github/instructions/bash.instructions.md`
@@ -122,5 +122,5 @@ After regular findings, always include:
 
 ## Handoff
 
-- Findings flagged as `Critical` or `Major` route back to Implementer for remediation.
+- Findings flagged as `Critical` or `Major` route back to `TechAIImplementer` for remediation.
 - Include exact file references and suggested fix patterns for each finding.
