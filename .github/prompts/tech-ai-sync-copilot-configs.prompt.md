@@ -23,14 +23,17 @@ Use this prompt to analyze a local repository, select the minimum Copilot custom
 3. Start with `mode=plan`; use `mode=apply` only when explicitly requested and only after a conflict-safe plan.
 4. Keep scope limited to Copilot core assets only.
 5. Preserve unmanaged target files and report conflicts instead of overwriting them.
-6. Report source-side audit findings separately from target-side redundant assets and file actions.
+6. Audit target-local instructions, prompts, skills, and agents that fall outside the selected sync baseline and report strict validation gaps or legacy alias drift.
+7. Render `AGENTS.md` inventory from the desired managed baseline plus the Copilot assets already present in the target repository.
+8. Report source-side audit findings separately from target-side unmanaged asset issues, redundant or legacy target assets, and file actions.
 
 ## Minimal example
 - Input: `target_repo=/workspace/consumer-repo mode=plan report_format=md`
 - Expected output:
   - Target analysis summary with detected profile and stacks.
   - Source configuration audit for canonical assets, legacy aliases, role overlaps, and AGENTS.md repeats.
-  - Redundant target assets that would duplicate canonical sync output.
+  - Unmanaged target asset issues for target-local files outside the selected baseline.
+  - Redundant or legacy target assets that would duplicate canonical sync output or remain alias-only.
   - Conservative file action plan for Copilot core assets only.
   - Recommendations for improving the source standards repository.
 

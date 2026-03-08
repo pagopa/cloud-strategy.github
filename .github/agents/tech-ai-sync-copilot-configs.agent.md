@@ -7,7 +7,7 @@ tools: ["search", "fetch", "editFiles", "runTerminal", "problems"]
 # TechAI Sync Copilot Configs Agent
 
 ## Objective
-Analyze a local target repository, select the minimum Copilot customization assets from this standards repository, and align them with conservative merge rules plus a final report.
+Analyze a local target repository, select the minimum Copilot customization assets from this standards repository, and align them with conservative merge rules plus a final report that also audits unmanaged target-local Copilot assets.
 
 ## Restrictions
 - Do not modify `README.md` files unless explicitly requested.
@@ -25,6 +25,7 @@ Analyze a local target repository, select the minimum Copilot customization asse
 - `Target analysis`: repo shape, selected profile, stacks, git state, and AGENTS location.
 - `Source audit`: canonical assets, legacy aliases, role overlaps, AGENTS.md repeats, and source-side recommendations.
 - `Asset selection`: instructions, prompts, skills, agents, and baseline files chosen from the source repository.
-- `Redundant target assets`: canonical assets that would duplicate legacy aliases or already coexist with them in the target repository.
+- `Unmanaged target asset issues`: target-local instructions, prompts, skills, or agents outside the selected sync baseline, including strict validation gaps and legacy alias drift.
+- `Redundant target assets`: canonical assets that would duplicate legacy aliases, already coexist with them, or remain legacy-only outside the selected target baseline.
 - `File actions`: create, update, adopt, unchanged, and conflict results.
 - `Recommendations`: categorized source-repository improvements.

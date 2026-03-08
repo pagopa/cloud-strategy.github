@@ -39,6 +39,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
 
 ## Repository Inventory (Auto-generated)
+This inventory should reflect the managed sync baseline plus any repository-local Copilot assets that already exist in the target repository.
 
 ### Instructions
 - `.github/instructions/<file>.instructions.md`

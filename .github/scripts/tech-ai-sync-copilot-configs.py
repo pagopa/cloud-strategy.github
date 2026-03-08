@@ -87,6 +87,14 @@ EXTRA_LEGACY_ALIAS_PATHS = {
 ROLE_OVERLAP_SECTION_PREFIXES = ("workflow", "instructions", "validation")
 ROLE_OVERLAP_LINE_THRESHOLD = 3
 AGENTS_INVENTORY_CATEGORIES = ("instructions", "prompts", "skills", "agents")
+PROMPT_NAME_OVERRIDES = {
+    "tech-ai-add-platform.prompt.md": "TechAIAddPlatform",
+    "tech-ai-add-report-script.prompt.md": "TechAIAddReportScript",
+    "tech-ai-cicd-workflow.prompt.md": "TechAICICDWorkflow",
+    "tech-ai-github-composite-action.prompt.md": "TechAICompositeAction",
+    "tech-ai-github-pr-description.prompt.md": "TechAIPRDescription",
+    "tech-ai-terraform-module.prompt.md": "TechAITerraformModule",
+}
 
 
 def log_info(message: str) -> None:
@@ -189,6 +197,7 @@ class SyncPlan:
     selection: AssetSelection
     actions: list[FileAction]
     redundant_assets: list["RedundantAsset"]
+    target_asset_issues: list["TargetAssetIssue"]
     source_audit: "SourceAudit"
     recommendations: dict[str, list[str]]
     manifest_relative_path: str
@@ -217,11 +226,26 @@ class RedundantAsset:
                 "Equivalent legacy asset(s) already exist in target: "
                 f"{listed}. Syncing `{self.canonical_target_path}` would create redundant configuration."
             )
+        if self.issue_type == "legacy_alias_only":
+            return (
+                "Legacy alias asset(s) exist in target without the canonical file: "
+                f"{listed}. Prefer `{self.canonical_target_path}` when aligning this capability family."
+            )
 
         return (
             "Equivalent assets from the same capability family already coexist in target: "
             f"{listed}. Consolidate to one canonical asset before continuing."
         )
+
+
+@dataclass
+class TargetAssetIssue:
+    category: str
+    target_relative_path: str
+    issue_types: list[str]
+    details: list[str]
+    severity: str
+    canonical_source_path: str | None = None
 
 
 @dataclass
@@ -383,20 +407,31 @@ def load_profiles(path: Path) -> dict[str, RepoProfile]:
     return profiles
 
 
-def frontmatter_value(path: Path, key: str) -> str:
+def parse_frontmatter(path: Path) -> dict[str, str]:
+    frontmatter: dict[str, str] = {}
     inside_frontmatter = False
     for raw_line in path.read_text(encoding="utf-8").splitlines():
-        if raw_line.strip() == "---":
-            inside_frontmatter = not inside_frontmatter
+        stripped = raw_line.strip()
+        if stripped == "---":
+            if inside_frontmatter:
+                break
+            inside_frontmatter = True
             continue
 
-        if not inside_frontmatter:
+        if not inside_frontmatter or ":" not in raw_line:
             continue
 
-        if raw_line.startswith(f"{key}:"):
-            return raw_line.split(":", 1)[1].strip().strip('"')
+        key, value = raw_line.split(":", 1)
+        key = key.strip()
+        if not key or " " in key:
+            continue
+        frontmatter[key] = value.strip().strip('"')
 
-    return ""
+    return frontmatter
+
+
+def frontmatter_value(path: Path, key: str) -> str:
+    return parse_frontmatter(path).get(key, "")
 
 
 def prompt_skill_refs(path: Path) -> list[str]:
@@ -405,14 +440,51 @@ def prompt_skill_refs(path: Path) -> list[str]:
         if "skills/" not in raw_line or "SKILL.md" not in raw_line:
             continue
 
-        for token in raw_line.replace("`", " ").replace("(", " ").replace(")", " ").split():
-            cleaned = token.strip(".,")
-            if cleaned.endswith("SKILL.md") and "skills/" in cleaned:
-                if cleaned.startswith(PROMPT_SKILL_REFERENCE_PREFIX):
-                    refs.add(cleaned)
-                else:
-                    refs.add(f"{PROMPT_SKILL_REFERENCE_PREFIX}{cleaned}")
+        for token in re.findall(r"(?:\.github/)?skills/[A-Za-z0-9._/-]+/SKILL\.md", raw_line):
+            if token.startswith(PROMPT_SKILL_REFERENCE_PREFIX):
+                refs.add(token)
+            else:
+                refs.add(f"{PROMPT_SKILL_REFERENCE_PREFIX}{token}")
     return sorted(refs)
+
+
+def markdown_headings(path: Path) -> list[str]:
+    headings: list[str] = []
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        stripped = raw_line.strip()
+        if stripped.startswith("#"):
+            headings.append(stripped)
+    return headings
+
+
+def has_heading_exact(path: Path, heading: str) -> bool:
+    return heading in markdown_headings(path)
+
+
+def has_heading_regex(path: Path, pattern: str) -> bool:
+    regex = re.compile(pattern)
+    return any(regex.match(heading) for heading in markdown_headings(path))
+
+
+def tech_ai_prompt_name(stem: str) -> str:
+    remainder = stem[len("tech-ai-") :]
+    output = "TechAI"
+    for part in remainder.split("-"):
+        if not part:
+            continue
+        output += part[:1].upper() + part[1:]
+    return output
+
+
+def prompt_expected_name(relative_path: str) -> str | None:
+    name = Path(relative_path).name
+    if name in PROMPT_NAME_OVERRIDES:
+        return PROMPT_NAME_OVERRIDES[name]
+    if name.startswith("tech-ai-") and name.endswith(".prompt.md"):
+        return tech_ai_prompt_name(name[: -len(".prompt.md")])
+    if name.endswith(".prompt.md"):
+        return name[: -len(".prompt.md")]
+    return None
 
 
 def scan_repo_files(repo_root: Path) -> list[Path]:
@@ -612,6 +684,35 @@ def known_legacy_alias_paths(source_root: Path) -> set[str]:
     return aliases
 
 
+def known_legacy_alias_map(source_root: Path) -> dict[str, str]:
+    alias_map: dict[str, str] = {}
+    for group in detect_canonical_asset_groups(source_root):
+        if group.category not in {"prompts", "skills", "agents"}:
+            continue
+        canonical_path = group.paths[0]
+        for alias_path in legacy_alias_paths_for_canonical_path(canonical_path):
+            alias_map.setdefault(alias_path, canonical_path)
+    return alias_map
+
+
+def collect_target_config_assets(target_root: Path) -> dict[str, list[str]]:
+    assets: dict[str, list[str]] = {category: [] for category in AGENTS_INVENTORY_CATEGORIES}
+    patterns = {
+        "instructions": "*.instructions.md",
+        "prompts": "*.prompt.md",
+        "skills": "SKILL.md",
+        "agents": "*.agent.md",
+    }
+
+    for category, pattern in patterns.items():
+        target_dir = target_root / ".github" / category
+        if not target_dir.is_dir():
+            continue
+        assets[category] = sorted(str(path.relative_to(target_root)) for path in target_dir.rglob(pattern))
+
+    return assets
+
+
 def detect_target_only_assets(source_root: Path, target_root: Path) -> dict[str, list[str]]:
     result: dict[str, list[str]] = {"prompts": [], "skills": [], "agents": []}
     known_aliases = known_legacy_alias_paths(source_root)
@@ -621,12 +722,14 @@ def detect_target_only_assets(source_root: Path, target_root: Path) -> dict[str,
         if not target_dir.is_dir():
             continue
 
-        source_names = {path.name for path in source_dir.rglob(pattern)} if source_dir.is_dir() else set()
+        source_relative_paths = (
+            {str(path.relative_to(source_root)) for path in source_dir.rglob(pattern)} if source_dir.is_dir() else set()
+        )
         for path in sorted(target_dir.rglob(pattern)):
             relative_path = str(path.relative_to(target_root))
             if relative_path in known_aliases:
                 continue
-            if path.name not in source_names:
+            if relative_path not in source_relative_paths:
                 result[category].append(relative_path)
     return result
 
@@ -1114,6 +1217,151 @@ def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[s
     return commands
 
 
+def merged_inventory_paths(target_root: Path, selection: AssetSelection) -> dict[str, list[str]]:
+    target_assets = collect_target_config_assets(target_root)
+    return {
+        "instructions": sorted(set(selection.instructions) | set(target_assets["instructions"])),
+        "prompts": sorted(set(selection.prompts) | set(target_assets["prompts"])),
+        "skills": sorted(set(selection.skills) | set(target_assets["skills"])),
+        "agents": sorted(set(selection.agents) | set(target_assets["agents"])),
+    }
+
+
+def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str) -> list[str]:
+    path = target_root / relative_path
+    frontmatter = parse_frontmatter(path)
+    issues: list[str] = []
+
+    for key in ("description", "name", "agent", "argument-hint"):
+        if not frontmatter.get(key):
+            issues.append(f"Missing frontmatter key `{key}`.")
+
+    if "mode" in frontmatter:
+        issues.append("Legacy prompt key `mode` found.")
+
+    expected_name = prompt_expected_name(relative_path)
+    actual_name = frontmatter.get("name", "")
+    if expected_name and actual_name and actual_name != expected_name:
+        issues.append(f"Prompt name policy mismatch: expected `{expected_name}`, found `{actual_name}`.")
+
+    for heading in ("## Instructions", "## Validation", "## Minimal example"):
+        if not has_heading_exact(path, heading):
+            issues.append(f"Missing `{heading}` section.")
+
+    refs = prompt_skill_refs(path)
+    if not refs:
+        issues.append("Missing skill reference.")
+        return issues
+
+    for ref in refs:
+        if not (target_root / ref).is_file():
+            issues.append(f"Referenced skill path is missing: `{ref}`.")
+
+    return issues
+
+
+def validate_unmanaged_skill_asset(target_root: Path, relative_path: str) -> list[str]:
+    path = target_root / relative_path
+    frontmatter = parse_frontmatter(path)
+    issues: list[str] = []
+
+    for key in ("name", "description"):
+        if not frontmatter.get(key):
+            issues.append(f"Missing frontmatter key `{key}`.")
+
+    if not has_heading_regex(path, r"^## When to [Uu]se$"):
+        issues.append("Missing `## When to use` section.")
+    if not has_heading_regex(path, r"^## (Validation|Checklist|Testing|Test stack)$"):
+        issues.append("Missing validation/testing section.")
+
+    return issues
+
+
+def validate_unmanaged_agent_asset(target_root: Path, relative_path: str) -> list[str]:
+    path = target_root / relative_path
+    frontmatter = parse_frontmatter(path)
+    issues: list[str] = []
+
+    for key in ("name", "description", "tools"):
+        if not frontmatter.get(key):
+            issues.append(f"Missing frontmatter key `{key}`.")
+
+    if not any(heading.startswith("# ") for heading in markdown_headings(path)):
+        issues.append("Missing top heading.")
+    if not has_heading_exact(path, "## Objective"):
+        issues.append("Missing `## Objective` section.")
+    if not has_heading_exact(path, "## Restrictions"):
+        issues.append("Missing `## Restrictions` section.")
+
+    return issues
+
+
+def validate_unmanaged_instruction_asset(target_root: Path, relative_path: str) -> list[str]:
+    path = target_root / relative_path
+    frontmatter = parse_frontmatter(path)
+    issues: list[str] = []
+
+    for key in ("applyTo", "description"):
+        if not frontmatter.get(key):
+            issues.append(f"Missing frontmatter key `{key}`.")
+
+    if not any(heading.startswith("# ") for heading in markdown_headings(path)):
+        issues.append("Missing top heading.")
+
+    return issues
+
+
+def detect_unmanaged_target_asset_issues(
+    source_root: Path,
+    target_root: Path,
+    selection: AssetSelection,
+) -> list[TargetAssetIssue]:
+    alias_map = known_legacy_alias_map(source_root)
+    managed_paths = set(selection.managed_source_paths)
+    validators = {
+        "instructions": validate_unmanaged_instruction_asset,
+        "prompts": validate_unmanaged_prompt_asset,
+        "skills": validate_unmanaged_skill_asset,
+        "agents": validate_unmanaged_agent_asset,
+    }
+
+    issues: list[TargetAssetIssue] = []
+    for category, relative_paths in collect_target_config_assets(target_root).items():
+        validator = validators[category]
+        for relative_path in relative_paths:
+            if relative_path in managed_paths:
+                continue
+
+            issue_types: list[str] = []
+            details: list[str] = []
+            canonical_source_path = alias_map.get(relative_path)
+
+            if canonical_source_path:
+                issue_types.append("legacy_alias")
+                details.append(f"Legacy alias of `{canonical_source_path}`.")
+
+            validation_issues = validator(target_root, relative_path)
+            if validation_issues:
+                issue_types.append("validation")
+                details.extend(validation_issues)
+
+            if not issue_types:
+                continue
+
+            issues.append(
+                TargetAssetIssue(
+                    category=category,
+                    target_relative_path=relative_path,
+                    issue_types=issue_types,
+                    details=sorted(dict.fromkeys(details)),
+                    severity="error" if "validation" in issue_types else "warn",
+                    canonical_source_path=canonical_source_path,
+                )
+            )
+
+    return sorted(issues, key=lambda item: (item.category, item.target_relative_path))
+
+
 def build_planned_files(
     source_root: Path,
     target_root: Path,
@@ -1148,19 +1396,19 @@ def build_planned_files(
     return sorted(planned_files, key=lambda item: item.target_relative_path)
 
 
-def detect_redundant_assets(target_root: Path, selection: AssetSelection) -> list[RedundantAsset]:
+def detect_redundant_assets(source_root: Path, target_root: Path, selection: AssetSelection) -> list[RedundantAsset]:
     selected_paths = set(selection.managed_source_paths)
     redundant_assets: list[RedundantAsset] = []
 
-    canonical_candidates = {
-        path
-        for path in selected_paths
-        if asset_category(path) in {"prompts", "skills", "agents"}
-    }
+    canonical_candidates = set(known_legacy_alias_map(source_root).values())
+    canonical_candidates.update(
+        path for path in selected_paths if asset_category(path) in {"prompts", "skills", "agents"}
+    )
     canonical_candidates.update(
         str(path.relative_to(target_root))
         for path in scan_repo_files(target_root)
-        if asset_category(str(path.relative_to(target_root))) in {"prompts", "skills", "agents"}
+        if is_canonical_source_asset(str(path.relative_to(target_root)))
+        and asset_category(str(path.relative_to(target_root))) in {"prompts", "skills", "agents"}
     )
 
     for canonical_relative_path in sorted(canonical_candidates):
@@ -1193,6 +1441,18 @@ def detect_redundant_assets(target_root: Path, selection: AssetSelection) -> lis
                     existing_target_paths=present_aliases,
                     issue_type="sync_would_duplicate",
                     selected_for_sync=True,
+                )
+            )
+            continue
+
+        if present_aliases and not canonical_exists:
+            redundant_assets.append(
+                RedundantAsset(
+                    category=asset_category(canonical_relative_path),
+                    canonical_target_path=canonical_relative_path,
+                    existing_target_paths=present_aliases,
+                    issue_type="legacy_alias_only",
+                    selected_for_sync=False,
                 )
             )
 
@@ -1365,6 +1625,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
     instructions_apply_to = build_instruction_rules(source_root, selection.instructions)
     preferred_prompts = preferred_asset_lines(source_root, selection.preferred_prompts)
     preferred_skills = preferred_asset_lines(source_root, selection.preferred_skills)
+    inventory_paths = merged_inventory_paths(analysis.repo_root, selection)
     governance_references = [
         ".github/security-baseline.md",
         ".github/DEPRECATION.md",
@@ -1439,17 +1700,18 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         [
             "",
             "## Repository Inventory (Auto-generated)",
+            "This inventory reflects the desired managed baseline plus repository-local Copilot assets already present in the target repository.",
             "",
             "### Instructions",
         ]
     )
-    lines.extend(f"- `{path}`" for path in selection.instructions)
+    lines.extend(f"- `{path}`" for path in inventory_paths["instructions"])
     lines.extend(["", "### Prompts"])
-    lines.extend(f"- `{path}`" for path in selection.prompts)
+    lines.extend(f"- `{path}`" for path in inventory_paths["prompts"])
     lines.extend(["", "### Skills"])
-    lines.extend(f"- `{path}`" for path in selection.skills)
+    lines.extend(f"- `{path}`" for path in inventory_paths["skills"])
     lines.extend(["", "### Agents"])
-    lines.extend(f"- `{path}`" for path in selection.agents)
+    lines.extend(f"- `{path}`" for path in inventory_paths["agents"])
 
     return "\n".join(lines) + "\n"
 
@@ -1517,6 +1779,7 @@ def build_recommendations(
     selection: AssetSelection,
     actions: list[FileAction],
     redundant_assets: list[RedundantAsset],
+    target_asset_issues: list[TargetAssetIssue],
     source_root: Path,
 ) -> dict[str, list[str]]:
     recommendations: dict[str, list[str]] = {
@@ -1544,10 +1807,36 @@ def build_recommendations(
         )
 
     target_only_prompt_assets = analysis.target_only_assets.get("prompts", [])
-    if target_only_prompt_assets:
+    target_only_skill_assets = analysis.target_only_assets.get("skills", [])
+    if target_only_prompt_assets or target_only_skill_assets:
+        target_only_summary: list[str] = []
+        if target_only_prompt_assets:
+            target_only_summary.append(f"prompts: {', '.join(target_only_prompt_assets)}")
+        if target_only_skill_assets:
+            target_only_summary.append(f"skills: {', '.join(target_only_skill_assets)}")
         recommendations["missing instructions/prompts/skills"].append(
-            "The target repository already contains prompt assets that are not available in the source standards "
-            f"repo: {', '.join(target_only_prompt_assets)}."
+            "The target repository already contains Copilot assets that are not available in the source standards "
+            f"repo: {'; '.join(target_only_summary)}."
+        )
+
+    legacy_alias_issues = [
+        f"{issue.target_relative_path} -> {issue.canonical_source_path}"
+        for issue in target_asset_issues
+        if "legacy_alias" in issue.issue_types and issue.canonical_source_path
+    ]
+    if legacy_alias_issues:
+        recommendations["weak conflict-handling rules"].append(
+            "The target repository still contains legacy prompt/skill/agent aliases outside the selected baseline: "
+            f"{', '.join(legacy_alias_issues)}."
+        )
+
+    validation_issue_paths = [
+        issue.target_relative_path for issue in target_asset_issues if "validation" in issue.issue_types
+    ]
+    if validation_issue_paths:
+        recommendations["missing consumer-facing validation or onboarding guidance"].append(
+            "The target repository contains unmanaged Copilot assets with strict-validation gaps: "
+            f"{', '.join(validation_issue_paths)}."
         )
 
     if any(action.target_relative_path == analysis.agents_relative_path and action.status == "conflict" for action in actions):
@@ -1656,7 +1945,23 @@ def render_markdown_report(plan: SyncPlan) -> str:
     lines.extend(
         [
             "",
-        "## Redundant target assets",
+            "## Unmanaged target asset issues",
+        ]
+    )
+    if not plan.target_asset_issues:
+        lines.append("- None")
+    else:
+        for issue in plan.target_asset_issues:
+            issue_types = ", ".join(issue.issue_types)
+            details = "; ".join(issue.details)
+            lines.append(
+                f"- `{issue.target_relative_path}` [{issue.severity}] ({issue.category}; {issue_types}): {details}"
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Redundant or legacy target assets",
         ]
     )
     if not plan.redundant_assets:
@@ -1769,6 +2074,17 @@ def render_json_report(plan: SyncPlan) -> str:
             "priority_paths": plan.analysis.priority_paths,
             "top_extension_counts": plan.analysis.top_extension_counts,
             "target_only_assets": plan.analysis.target_only_assets,
+            "unmanaged_target_asset_issues": [
+                {
+                    "category": issue.category,
+                    "target_relative_path": issue.target_relative_path,
+                    "issue_types": issue.issue_types,
+                    "details": issue.details,
+                    "severity": issue.severity,
+                    "canonical_source_path": issue.canonical_source_path,
+                }
+                for issue in plan.target_asset_issues
+            ],
             "redundant_assets": [
                 {
                     "category": asset.category,
@@ -1848,16 +2164,25 @@ def build_plan(source_root: Path, target_root: Path) -> tuple[SyncPlan, list[Pla
     manifest = load_manifest(target_root)
     planned_files = build_planned_files(source_root, target_root, analysis, selection)
     actions = plan_actions(target_root, planned_files, manifest)
-    redundant_assets = detect_redundant_assets(target_root, selection)
+    redundant_assets = detect_redundant_assets(source_root, target_root, selection)
+    target_asset_issues = detect_unmanaged_target_asset_issues(source_root, target_root, selection)
     source_audit = audit_source_configuration(source_root)
     actions = apply_redundancy_conflicts(actions, redundant_assets, analysis.agents_relative_path)
-    recommendations = build_recommendations(analysis, selection, actions, redundant_assets, source_root)
+    recommendations = build_recommendations(
+        analysis,
+        selection,
+        actions,
+        redundant_assets,
+        target_asset_issues,
+        source_root,
+    )
     return (
         SyncPlan(
             analysis=analysis,
             selection=selection,
             actions=actions,
             redundant_assets=redundant_assets,
+            target_asset_issues=target_asset_issues,
             source_audit=source_audit,
             recommendations=recommendations,
             manifest_relative_path=MANIFEST_RELATIVE_PATH,

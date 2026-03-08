@@ -214,6 +214,130 @@ def test_build_plan_adopts_matching_source_files_and_reports_target_only_prompts
     assert "create-policy.prompt.md" in missing_assets
 
 
+def test_build_plan_reports_unmanaged_target_assets_and_legacy_aliases_outside_selected_profile(tmp_path: Path) -> None:
+    target_root = tmp_path / "unmanaged-assets"
+    build_python_service_target(target_root)
+    write_file(
+        target_root / ".github" / "prompts" / "add-external-user.prompt.md",
+        "\n".join(
+            [
+                "---",
+                "agent: edit",
+                "description: Add an external user to Azure AD",
+                "---",
+                "",
+                "# Add External User",
+                "",
+                "## Instructions",
+                "- Update the external user registry.",
+                "",
+                "## Validations",
+                "- Keep JSON valid.",
+                "",
+            ]
+        ),
+    )
+    write_file(
+        target_root / ".github" / "prompts" / "cs-data-registry.prompt.md",
+        "\n".join(
+            [
+                "---",
+                "description: Add or modify entries in structured JSON/YAML registry files",
+                "name: cs-data-registry",
+                "agent: agent",
+                "argument-hint: action=<create|modify|remove> file=<path> key=<identifier> change=<summary>",
+                "---",
+                "",
+                "# Data Registry Task",
+                "",
+                "## Instructions",
+                "1. Use `.github/skills/data-registry/SKILL.md`.",
+                "",
+                "## Minimal example",
+                "- Input: `action=modify file=data.json key=user change=disable`",
+                "",
+                "## Validation",
+                "- Validate JSON syntax.",
+                "",
+            ]
+        ),
+    )
+    write_file(
+        target_root / ".github" / "skills" / "data-registry" / "SKILL.md",
+        "\n".join(
+            [
+                "---",
+                "name: data-registry",
+                "description: Safely update structured JSON/YAML registry files.",
+                "---",
+                "",
+                "# Data Registry Skill",
+                "",
+                "## When to use",
+                "- Update structured data safely.",
+                "",
+                "## Validation",
+                "- Validate syntax and duplicate keys.",
+                "",
+            ]
+        ),
+    )
+    write_file(
+        target_root / ".github" / "skills" / "local-registry" / "SKILL.md",
+        "\n".join(
+            [
+                "---",
+                "name: local-registry",
+                "description: Custom local registry helper.",
+                "---",
+                "",
+                "# Local Registry Skill",
+                "",
+                "## When to use",
+                "- Maintain a custom local registry.",
+                "",
+                "## Validation",
+                "- Validate repository-local data.",
+                "",
+            ]
+        ),
+    )
+
+    plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    issue_by_path = {issue.target_relative_path: issue for issue in plan.target_asset_issues}
+    agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
+
+    assert ".github/prompts/add-external-user.prompt.md" in plan.analysis.target_only_assets["prompts"]
+    assert ".github/skills/local-registry/SKILL.md" in plan.analysis.target_only_assets["skills"]
+    assert ".github/prompts/cs-data-registry.prompt.md" not in plan.analysis.target_only_assets["prompts"]
+    assert ".github/skills/data-registry/SKILL.md" not in plan.analysis.target_only_assets["skills"]
+
+    assert any(
+        asset.canonical_target_path == ".github/prompts/tech-ai-data-registry.prompt.md"
+        and asset.issue_type == "legacy_alias_only"
+        for asset in plan.redundant_assets
+    )
+    assert any(
+        asset.canonical_target_path == ".github/skills/tech-ai-data-registry/SKILL.md"
+        and asset.issue_type == "legacy_alias_only"
+        for asset in plan.redundant_assets
+    )
+
+    assert "validation" in issue_by_path[".github/prompts/add-external-user.prompt.md"].issue_types
+    assert "Missing frontmatter key `name`." in issue_by_path[".github/prompts/add-external-user.prompt.md"].details
+    assert "legacy_alias" in issue_by_path[".github/prompts/cs-data-registry.prompt.md"].issue_types
+    assert (
+        issue_by_path[".github/prompts/cs-data-registry.prompt.md"].canonical_source_path
+        == ".github/prompts/tech-ai-data-registry.prompt.md"
+    )
+
+    assert ".github/prompts/add-external-user.prompt.md" in agents_file.desired_content
+    assert ".github/prompts/cs-data-registry.prompt.md" in agents_file.desired_content
+    assert ".github/skills/data-registry/SKILL.md" in agents_file.desired_content
+    assert ".github/skills/local-registry/SKILL.md" in agents_file.desired_content
+
+
 def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:
     target_root = tmp_path / "fresh-target"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
@@ -415,6 +539,10 @@ def test_build_plan_fails_for_corrupted_manifest(tmp_path: Path) -> None:
 def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> None:
     target_root = tmp_path / "json-report"
     build_python_service_target(target_root)
+    write_file(
+        target_root / ".github" / "prompts" / "add-external-user.prompt.md",
+        "---\nagent: edit\ndescription: invalid custom prompt\n---\n# Add External User\n\n## Instructions\n- Update registry.\n",
+    )
 
     report_file = tmp_path / "tech-ai-sync-report.json"
     result = MODULE.main(
@@ -436,6 +564,12 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
     assert payload["analysis"]["profile"] == "backend-python"
     assert ".github/prompts/tech-ai-python.prompt.md" in payload["selection"]["prompts"]
     assert "redundant_assets" in payload["analysis"]
+    assert "unmanaged_target_asset_issues" in payload["analysis"]
+    assert any(
+        issue["target_relative_path"] == ".github/prompts/add-external-user.prompt.md"
+        and "validation" in issue["issue_types"]
+        for issue in payload["analysis"]["unmanaged_target_asset_issues"]
+    )
     assert sorted(payload["source_audit"].keys()) == [
         "agents_md_repeats",
         "canonical_assets",

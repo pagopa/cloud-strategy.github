@@ -7,6 +7,10 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-03-08
+- Updated `scripts/tech-ai-sync-copilot-configs.py` so target-only skill detection compares full relative paths instead of the shared `SKILL.md` filename, fixing missed unmanaged skill assets in consumer repositories.
+- Expanded sync planning to audit unmanaged target-local instructions, prompts, skills, and agents for strict validation gaps and legacy alias drift, and added the new report section in both markdown and JSON outputs.
+- Updated sync planning so legacy aliases such as `cs-*`, unprefixed prompt names, and legacy skill directories are reported even when the canonical family is outside the selected minimum baseline.
+- Updated generated `AGENTS.md` inventory rendering and `.github/templates/AGENTS.template.md` so inventory reflects the desired managed baseline plus target-local Copilot assets already present in the consumer repository.
 - Added source-side redundancy auditing to `scripts/tech-ai-sync-copilot-configs.py`, including canonical asset inventory, legacy alias detection, triad role-overlap checks, and `AGENTS.md` inventory-repeat detection in both markdown and JSON reports.
 - Refactored `agents/tech-ai-sync-copilot-configs.agent.md`, `skills/tech-ai-sync-copilot-configs/SKILL.md`, and `prompts/tech-ai-sync-copilot-configs.prompt.md` so workflow detail lives in the skill while the agent and prompt stay thin.
 - Simplified root `AGENTS.md` and `.github/templates/AGENTS.template.md` to keep asset paths in the inventory section only and remove descriptive prompt or skill catalogs.
