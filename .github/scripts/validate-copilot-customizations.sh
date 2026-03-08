@@ -283,14 +283,29 @@ prompt_expected_name() {
   name="$(basename "$file")"
 
   case "$name" in
-    github-action.prompt.md)
-      printf '%s' "cs-github-action"
+    tech-ai-github-action.prompt.md)
+      printf '%s' "TechAIGitHubAction"
       ;;
-    github-composite-action.prompt.md)
-      printf '%s' "cs-composite-action"
+    tech-ai-github-composite-action.prompt.md)
+      printf '%s' "TechAICompositeAction"
       ;;
-    github-pr-description.prompt.md)
-      printf '%s' "cs-pr-description"
+    tech-ai-github-pr-description.prompt.md)
+      printf '%s' "TechAIPRDescription"
+      ;;
+    tech-ai-add-platform.prompt.md)
+      printf '%s' "TechAIAddPlatform"
+      ;;
+    tech-ai-add-report-script.prompt.md)
+      printf '%s' "TechAIAddReportScript"
+      ;;
+    tech-ai-cicd-workflow.prompt.md)
+      printf '%s' "TechAICICDWorkflow"
+      ;;
+    tech-ai-terraform-module.prompt.md)
+      printf '%s' "TechAITerraformModule"
+      ;;
+    tech-ai-*.prompt.md)
+      tech_ai_prompt_name "${name%.prompt.md}"
       ;;
     *.prompt.md)
       printf '%s' "${name%.prompt.md}"
@@ -299,6 +314,24 @@ prompt_expected_name() {
       return 1
       ;;
   esac
+}
+
+tech_ai_prompt_name() {
+  local stem="$1"
+  local remainder
+  local output="TechAI"
+  local part
+  local first_char
+
+  remainder="${stem#tech-ai-}"
+  IFS='-' read -r -a parts <<< "$remainder"
+  for part in "${parts[@]}"; do
+    [[ -n "$part" ]] || continue
+    first_char="$(printf '%s' "${part:0:1}" | tr '[:lower:]' '[:upper:]')"
+    output+="${first_char}${part:1}"
+  done
+
+  printf '%s' "$output"
 }
 
 validate_prompt_name_policy() {
@@ -526,7 +559,7 @@ validate_agents_dir() {
     fi
 
     case "$(basename "$file")" in
-      planner.agent.md)
+      tech-ai-planner.agent.md)
         if ! has_heading_exact "$file" '## Scope guard'; then
           record_issue "$semantic_severity" "Planner agent missing '## Scope guard' section: ${file}"
         fi
@@ -540,7 +573,7 @@ validate_agents_dir() {
           record_issue "$semantic_severity" "Planner agent should reference security baseline: ${file}"
         fi
         ;;
-      implementer.agent.md)
+      tech-ai-implementer.agent.md)
         if ! has_heading_exact "$file" '## Handoff input'; then
           record_issue "$semantic_severity" "Implementer agent missing '## Handoff input' section: ${file}"
         fi
@@ -569,7 +602,7 @@ validate_agents_dir() {
           record_issue "$semantic_severity" "Implementer agent should reference customization validator: ${file}"
         fi
         ;;
-      reviewer.agent.md)
+      tech-ai-reviewer.agent.md)
         if ! has_heading_exact "$file" '## Review format'; then
           record_issue "$semantic_severity" "Reviewer agent missing '## Review format' section: ${file}"
         fi
@@ -587,6 +620,58 @@ validate_agents_dir() {
         fi
         if ! grep -Fq 'copilot-code-review-instructions.md' "$file"; then
           record_issue "$semantic_severity" "Reviewer agent should reference code review instructions: ${file}"
+        fi
+        ;;
+      tech-ai-global-customization-builder.agent.md)
+        if ! has_heading_exact "$file" '## Source of truth'; then
+          record_issue "$semantic_severity" "Global customization builder missing '## Source of truth' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Creation protocol'; then
+          record_issue "$semantic_severity" "Global customization builder missing '## Creation protocol' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Token discipline'; then
+          record_issue "$semantic_severity" "Global customization builder missing '## Token discipline' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Validation'; then
+          record_issue "$semantic_severity" "Global customization builder missing '## Validation' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Handoff'; then
+          record_issue "$semantic_severity" "Global customization builder missing '## Handoff' section: ${file}"
+        fi
+        if ! grep -Fq 'AGENTS.md' "$file"; then
+          record_issue "$semantic_severity" "Global customization builder should reference root AGENTS.md: ${file}"
+        fi
+        if ! grep -Fq 'security-baseline.md' "$file"; then
+          record_issue "$semantic_severity" "Global customization builder should reference security baseline: ${file}"
+        fi
+        if ! grep -Fq 'DEPRECATION.md' "$file"; then
+          record_issue "$semantic_severity" "Global customization builder should reference deprecation policy: ${file}"
+        fi
+        if ! grep -Fq 'scripts/validate-copilot-customizations.sh' "$file"; then
+          record_issue "$semantic_severity" "Global customization builder should reference customization validator: ${file}"
+        fi
+        if ! grep -Fq 'TechAIGlobalCustomizationAuditor' "$file"; then
+          record_issue "$semantic_severity" "Global customization builder should hand off to TechAIGlobalCustomizationAuditor: ${file}"
+        fi
+        ;;
+      tech-ai-global-customization-auditor.agent.md)
+        if ! has_heading_exact "$file" '## Audit protocol'; then
+          record_issue "$semantic_severity" "Global customization auditor missing '## Audit protocol' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Severity output'; then
+          record_issue "$semantic_severity" "Global customization auditor missing '## Severity output' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Validation'; then
+          record_issue "$semantic_severity" "Global customization auditor missing '## Validation' section: ${file}"
+        fi
+        if ! has_heading_exact "$file" '## Handoff'; then
+          record_issue "$semantic_severity" "Global customization auditor missing '## Handoff' section: ${file}"
+        fi
+        if ! grep -Fq 'scripts/validate-copilot-customizations.sh' "$file"; then
+          record_issue "$semantic_severity" "Global customization auditor should reference customization validator: ${file}"
+        fi
+        if ! grep -Fq 'TechAIGlobalCustomizationBuilder' "$file"; then
+          record_issue "$semantic_severity" "Global customization auditor should route major findings to TechAIGlobalCustomizationBuilder: ${file}"
         fi
         ;;
     esac
@@ -640,14 +725,21 @@ validate_agents_inventory() {
   local prompts_dir="$4"
   local skills_dir="$5"
   local agents_file=""
+  local root_agents_file="${target_root}/AGENTS.md"
+  local legacy_agents_file="${config_dir}/AGENTS.md"
   local file
   local rel_path
   local severity="error"
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
-  if ! agents_file="$(resolve_agents_file "$target_root" "$config_dir")"; then
-    record_issue "$severity" "Missing AGENTS.md for inventory validation (checked ${target_root} and ${config_dir})"
+  if [[ -f "$root_agents_file" ]]; then
+    agents_file="$root_agents_file"
+  elif [[ -f "$legacy_agents_file" ]]; then
+    record_issue "$severity" "AGENTS.md must live in repository root; found legacy ${legacy_agents_file}"
+    agents_file="$legacy_agents_file"
+  else
+    record_issue "$severity" "Missing AGENTS.md in repository root: ${root_agents_file}"
     return 0
   fi
 

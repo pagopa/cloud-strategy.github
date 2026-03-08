@@ -23,4 +23,4 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
 - For modify tasks with existing tests: change implementation first, run existing tests, and update tests only for intentional behavior changes.
 
 ## Reference implementation
-- For module and test examples, use `.github/skills/project-nodejs/SKILL.md`.
+- For module and test examples, use `.github/skills/tech-ai-project-nodejs/SKILL.md`.
