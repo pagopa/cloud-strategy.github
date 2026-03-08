@@ -6,6 +6,15 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-03-08
+- Added source-side redundancy auditing to `scripts/tech-ai-sync-copilot-configs.py`, including canonical asset inventory, legacy alias detection, triad role-overlap checks, and `AGENTS.md` inventory-repeat detection in both markdown and JSON reports.
+- Refactored `agents/tech-ai-sync-copilot-configs.agent.md`, `skills/tech-ai-sync-copilot-configs/SKILL.md`, and `prompts/tech-ai-sync-copilot-configs.prompt.md` so workflow detail lives in the skill while the agent and prompt stay thin.
+- Simplified root `AGENTS.md` and `.github/templates/AGENTS.template.md` to keep asset paths in the inventory section only and remove descriptive prompt or skill catalogs.
+- Expanded sync and validator tests to cover source audit behavior, slimmer AGENTS structure, and JSON report sections.
+- Updated `agents/tech-ai-sync-copilot-configs.agent.md`, `skills/tech-ai-sync-copilot-configs/SKILL.md`, and `prompts/tech-ai-sync-copilot-configs.prompt.md` so the sync workflow explicitly detects redundant legacy aliases before apply.
+- Updated `scripts/tech-ai-sync-copilot-configs.py` to recognize legacy `cs-*`, unprefixed prompt names, and legacy agent or skill aliases, report them as redundant target assets, and raise sync conflicts instead of creating duplicate canonical `tech-ai-*` assets.
+- Updated `tests/test_tech_ai_sync_copilot_configs.py` to cover duplicate-alias detection and conflict behavior during sync planning.
+
 ## 2026-03-07
 - Added repo-only global customization agents `TechAIGlobalCustomizationBuilder` and `TechAIGlobalCustomizationAuditor` for standards-authoring and final quality gates in this repository.
 - Marked `TechAICustomizationAuditor` as a deprecated compatibility alias that now points to `TechAIGlobalCustomizationAuditor`.

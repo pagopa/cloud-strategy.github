@@ -108,6 +108,8 @@ def test_root_agents_routes_customization_work_to_global_agents() -> None:
     assert "TechAIGlobalCustomizationBuilder" in agents_text
     assert "TechAIGlobalCustomizationAuditor" in agents_text
     assert "repo-only" in agents_text
+    assert "## Available Skills" not in agents_text
+    assert "## Available Prompts" not in agents_text
 
 
 def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated() -> None:

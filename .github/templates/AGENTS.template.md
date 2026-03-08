@@ -1,25 +1,53 @@
 # AGENTS.md - <repository-name>
 
-This file is for AI assistants and GitHub Copilot working in this repository.
+This file is for GitHub Copilot and AI assistants working in this repository.
 
-## Main Instructions
-- Read `.github/copilot-instructions.md` first.
-- Then apply path-specific files under `.github/instructions/`.
+## Naming Policy
+- Use GitHub Copilot terminology in repository-facing content.
+- Keep repository-facing text in English.
+- Treat prompt frontmatter `name:` as the canonical command identifier.
 
-## Configuration Files
-- `.github/copilot-instructions.md`
-- `.github/copilot-code-review-instructions.md`
-- `.github/copilot-commit-message-instructions.md`
-- Relevant `.github/instructions/*.instructions.md`
+## Decision Priority
+1. Apply repository non-negotiables from `.github/copilot-instructions.md`.
+2. Apply explicit user requirements for the current task.
+3. Apply the selected agent behavior.
+4. Apply matching `.github/instructions/*.instructions.md` files.
+5. Apply selected prompt constraints from `.github/prompts/*.prompt.md`.
+6. Apply implementation details from referenced `.github/skills/*/SKILL.md`.
 
-## Available Skills
-- List local skill files and their purpose.
+## Agent Routing
+- Keep agent guidance short and behavioral.
+- Document only the preferred agents for this repository and when to use them.
+- Keep file path references in `Repository Inventory (Auto-generated)` only.
 
-## Available Prompts
-- List local prompt files and when to use them.
+## Repository Defaults
+- Primary focus: <one-line repository summary>
+- Priority paths:
+  - `<path>`
+  - `<path>`
 
-## Conventions
-- Language, naming, testing, and validation commands.
+### Default instruction routing
+- `<glob>` -> `<instruction label>`
 
-## Prohibitions
-- Explicit unsafe actions to avoid for this repository.
+### Preferred prompts
+- `<PromptName>`: <when to use it>
+
+### Preferred skills
+- `<SkillName>`: <when to use it>
+
+### Required validations before PR
+- `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
+
+## Repository Inventory (Auto-generated)
+
+### Instructions
+- `.github/instructions/<file>.instructions.md`
+
+### Prompts
+- `.github/prompts/<file>.prompt.md`
+
+### Skills
+- `.github/skills/<skill>/SKILL.md`
+
+### Agents
+- `.github/agents/<agent>.agent.md`

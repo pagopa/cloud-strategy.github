@@ -12,20 +12,31 @@ description: Analyze a local repository, select the minimum Copilot customizatio
 
 ## Workflow
 1. Inspect the target repository layout, manifests, `.github` contents, `AGENTS.md` location, and git state.
-2. Classify the repository against `repo-profiles.yml`, then extend the profile with stack-specific rules only when needed.
-3. Select the minimum Copilot core assets that the target repository actually needs.
-4. Prefer canonical prompt families when multiple prompts cover the same workflow so consumer repositories keep the same capability with fewer tokens.
-5. Render a target-specific `AGENTS.md` that uses GitHub Copilot wording only.
-6. Apply conservative merge rules through the manifest file and never overwrite unmanaged divergent files.
-7. Produce a final report with target actions and source-repository improvement recommendations.
+2. Audit the source standards repository before syncing:
+   - classify canonical instructions, prompts, skills, and agents;
+   - detect source-side legacy aliases such as `cs-*` and unprefixed equivalents;
+   - detect operational overlap across prompt/skill/agent triads;
+   - detect repeated asset references across `AGENTS.md` sections.
+3. Classify the repository against `repo-profiles.yml`, then extend the profile with stack-specific rules only when needed.
+4. Select the minimum Copilot core assets that the target repository actually needs.
+5. Prefer canonical prompt families when multiple prompts cover the same workflow so consumer repositories keep the same capability with fewer tokens.
+6. Detect redundant legacy aliases for selected canonical assets, especially `cs-*`, unprefixed prompt names, and legacy agent or skill filenames.
+7. Treat redundant canonical-vs-legacy overlaps as conflicts instead of silently creating duplicate configuration families.
+8. Render a target-specific `AGENTS.md` only when the selected inventory is conflict-safe:
+   - keep `Preferred prompts` and `Preferred skills` as a curated shortlist;
+   - keep asset path references in `Repository Inventory (Auto-generated)` only;
+   - avoid descriptive prompt/skill catalogs that duplicate the inventory.
+9. Apply conservative merge rules through the manifest file and never overwrite unmanaged divergent files.
+10. Produce a final report that separates source-side redundancy from target-side conflicts and actions.
 
 ## Scope rules
 - Manage Copilot core assets only.
 - Exclude README, changelog, templates, workflows, bootstrap helpers, and source-only review/audit agents from consumer sync.
 - Prefer an existing root `AGENTS.md` over creating a second managed AGENTS file under `.github/`.
 - Keep recommendation categories fixed and comparable across runs.
+- Keep legacy alias logic in code and tests instead of repeating the same rules across prompt, skill, and agent prose.
 
 ## Validation
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
-- Run `python -m compileall .github/scripts/tech-ai-sync-copilot-configs.py tests`.
+- Run `python -m compileall .github/scripts tests`.
 - Run `pytest` for the `TechAISyncCopilotConfigs` test suite.
+- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.

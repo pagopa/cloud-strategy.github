@@ -20,15 +20,17 @@ Use this prompt to analyze a local repository, select the minimum Copilot custom
 ## Instructions
 1. Use `.github/skills/tech-ai-sync-copilot-configs/SKILL.md` as the workflow definition.
 2. Use `.github/scripts/tech-ai-sync-copilot-configs.py` for deterministic execution.
-3. Keep scope limited to Copilot core assets only.
-4. Preserve unmanaged target files and report conflicts instead of overwriting them.
-5. Render the target `AGENTS.md` with GitHub Copilot wording only.
-6. Keep recommendation categories stable across runs.
+3. Start with `mode=plan`; use `mode=apply` only when explicitly requested and only after a conflict-safe plan.
+4. Keep scope limited to Copilot core assets only.
+5. Preserve unmanaged target files and report conflicts instead of overwriting them.
+6. Report source-side audit findings separately from target-side redundant assets and file actions.
 
 ## Minimal example
 - Input: `target_repo=/workspace/consumer-repo mode=plan report_format=md`
 - Expected output:
   - Target analysis summary with detected profile and stacks.
+  - Source configuration audit for canonical assets, legacy aliases, role overlaps, and AGENTS.md repeats.
+  - Redundant target assets that would duplicate canonical sync output.
   - Conservative file action plan for Copilot core assets only.
   - Recommendations for improving the source standards repository.
 

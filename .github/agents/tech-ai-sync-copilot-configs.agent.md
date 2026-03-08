@@ -15,16 +15,16 @@ Analyze a local target repository, select the minimum Copilot customization asse
 - Do not overwrite unmanaged divergent files.
 - Keep repository-facing text in English and use GitHub Copilot terminology only.
 
-## Workflow
-1. Inspect the target repository layout, manifests, `.github` contents, `AGENTS.md` location, and local git state.
-2. Classify the target repository against `repo-profiles.yml` and extend with stack-specific rules only when necessary.
-3. Select the minimum Copilot core asset set from the source repository.
-4. Render target-specific content, especially `AGENTS.md`.
-5. Run `.github/scripts/tech-ai-sync-copilot-configs.py` in `plan` mode first and use `apply` only when requested and conflict-safe.
-6. Produce a final report with applied, skipped, unchanged, and conflicted items plus source-repository recommendations.
+## Routing
+- Use this agent only for cross-repository Copilot-core alignment work.
+- Treat `.github/skills/tech-ai-sync-copilot-configs/SKILL.md` as the single workflow definition.
+- Treat `.github/scripts/tech-ai-sync-copilot-configs.py` as the deterministic execution path.
+- Start with `plan` mode and move to `apply` only on explicit request and only when the plan is conflict-safe.
 
-## Output format
+## Output Contract
 - `Target analysis`: repo shape, selected profile, stacks, git state, and AGENTS location.
+- `Source audit`: canonical assets, legacy aliases, role overlaps, AGENTS.md repeats, and source-side recommendations.
 - `Asset selection`: instructions, prompts, skills, agents, and baseline files chosen from the source repository.
+- `Redundant target assets`: canonical assets that would duplicate legacy aliases or already coexist with them in the target repository.
 - `File actions`: create, update, adopt, unchanged, and conflict results.
 - `Recommendations`: categorized source-repository improvements.
