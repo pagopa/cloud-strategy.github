@@ -184,6 +184,16 @@ def test_build_plan_prefers_tech_ai_script_prompts_to_reduce_prompt_duplication(
     assert ".github/prompts/script-python.prompt.md" not in plan.selection.prompts
 
 
+def test_build_plan_excludes_repo_only_global_customization_agents_from_consumer_selection(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service"
+    build_python_service_target(target_root)
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert ".github/agents/tech-ai-global-customization-builder.agent.md" not in plan.selection.agents
+    assert ".github/agents/tech-ai-global-customization-auditor.agent.md" not in plan.selection.agents
+
+
 def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> None:
     target_root = tmp_path / "polyglot"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")

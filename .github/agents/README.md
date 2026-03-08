@@ -12,6 +12,7 @@ This folder contains optional custom agents for focused tasks.
 - Read-only: `TechAIPlanner`, `TechAIReviewer`, `TechAISecurityReviewer`, `TechAIWorkflowSupplyChain`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`.
 - PR-focused: `TechAIPRWriter`.
 - Write-capable: `TechAIImplementer`.
+- Repo-only standards specialists: `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`.
 
 ## Why generic core agents
 - `TechAIPlanner`, `TechAIImplementer`, and `TechAIReviewer` are workflow roles, not language roles.
@@ -26,3 +27,5 @@ This folder contains optional custom agents for focused tasks.
 5. Use `TechAIWorkflowSupplyChain` on workflow changes.
 6. Use `TechAIPRWriter` to create or update PR title/body from template and diff.
 7. Use `TechAISecurityReviewer` as final security gate.
+8. Use `TechAIGlobalCustomizationBuilder` for GitHub Copilot customization assets in this standards repository.
+9. Use `TechAIGlobalCustomizationAuditor` as the final gate for those customization changes.

@@ -7,6 +7,9 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-03-07
+- Added repo-only global customization agents `TechAIGlobalCustomizationBuilder` and `TechAIGlobalCustomizationAuditor` for standards-authoring and final quality gates in this repository.
+- Marked `TechAICustomizationAuditor` as a deprecated compatibility alias that now points to `TechAIGlobalCustomizationAuditor`.
+- Updated root `AGENTS.md`, agent catalog docs, sync exclusions, validator semantics, and tests to treat the `TechAIGlobal*` pair as repo-only standards agents.
 - Added `.gitignore` coverage for Python caches/virtualenvs and macOS Finder artifacts so local validation runs stop creating noisy untracked files.
 - Added canonical low-duplication script prompts: `prompts/tech-ai-bash-script.prompt.md` (`TechAIBashScript`) and `prompts/tech-ai-python-script.prompt.md` (`TechAIPythonScript`).
 - Reduced the legacy `cs-*` and `script-*` Bash/Python prompts to thin compatibility aliases that now point to the canonical TechAI prompts.

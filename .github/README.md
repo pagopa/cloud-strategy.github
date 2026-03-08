@@ -1,6 +1,6 @@
 # .github Configuration
 
-This folder contains global Copilot/Codex customization that can be reused across repositories.
+This folder contains global GitHub Copilot customization that can be reused across repositories.
 
 ## Structure
 - `copilot-instructions.md`: global baseline rules
@@ -20,6 +20,7 @@ This folder contains global Copilot/Codex customization that can be reused acros
 ## Agent routing
 - Read-only agents: `TechAIPlanner`, `TechAIReviewer`, `TechAISecurityReviewer`, `TechAIWorkflowSupplyChain`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`
 - Write-capable agent: `TechAIImplementer`
+- Repo-only global customization agents: `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`
 
 See `.github/agents/README.md` for details.
 
@@ -35,4 +36,5 @@ See `.github/agents/README.md` for details.
 ## Notes
 - `repo-profiles.yml` is currently advisory (human-readable profile catalog).
 - The canonical project `AGENTS.md` belongs in repository root, not under `.github/`.
+- `TechAIGlobalCustomizationBuilder` and `TechAIGlobalCustomizationAuditor` are repo-only standards agents and must not be synced to consumer repositories.
 - Use `templates/copilot-quickstart.md` for a short onboarding flow.

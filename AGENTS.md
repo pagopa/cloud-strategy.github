@@ -9,6 +9,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Treat prompt frontmatter `name:` as the canonical command identifier.
 - Canonical repository-owned prompt, agent, and instruction filenames should use the `tech-ai-` prefix when introduced or renamed.
 - Canonical prompt, skill, and agent `name:` values should use the `TechAI` prefix.
+- Reserve the `TechAIGlobal` prefix only for repo-only agents that encode standards for this global configuration repository.
 - The canonical project-owned `AGENTS.md` file must live in repository root as `AGENTS.md`.
 - Keep legacy aliases only when required for backward compatibility, and prefer canonical `tech-ai-*` assets in docs, examples, and sync selection.
 
@@ -52,29 +53,36 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `TechAIImplementer` for direct code/config changes and validations.
 - Use `TechAIReviewer` for quality gates and defect/regression findings.
 - Use `TechAIScriptReviewer` for exhaustive, nit-level code reviews on Python, Bash, and Terraform with per-language anti-pattern catalogs.
-- Use `TechAICustomizationAuditor` to validate and normalize Copilot customization assets for this repository.
+- Use `TechAIGlobalCustomizationBuilder` as the default specialist for creating or updating GitHub Copilot customization assets in this repository.
+- Use `TechAIGlobalCustomizationAuditor` as the final quality gate for GitHub Copilot customization changes in this repository.
+- Use `TechAICustomizationAuditor` only as a deprecated compatibility alias while older references are migrated.
 - Use `TechAISyncCopilotConfigs` to analyze a local consumer repository and conservatively align the minimum Copilot customization assets from this standards repository.
 - Use specialist agents (`TechAIWorkflowSupplyChain`, `TechAISecurityReviewer`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`, `TechAIPRWriter`) only when their domain matches the task.
+- The `TechAIGlobalCustomizationBuilder` and `TechAIGlobalCustomizationAuditor` agents are repo-only and must not be synced to consumer repositories.
 
 ### When NOT to use (anti-patterns)
 
 - Do not use `TechAIPlanner` for trivial single-file changes with clear requirements - go directly to `TechAIImplementer`.
 - Do not use `TechAIImplementer` when requirements are ambiguous or scope is unclear - use `TechAIPlanner` first.
+- Do not use `TechAIImplementer` as the primary authoring agent for GitHub Copilot customization assets in this repository - use `TechAIGlobalCustomizationBuilder`.
 - Do not use generic `TechAIReviewer` when the change is purely Terraform, IAM, workflows, or security - use the matching specialist instead.
 - Do not use generic `TechAIReviewer` when you need exhaustive per-language nit-level review - use `TechAIScriptReviewer` instead.
+- Do not use `TechAICustomizationAuditor` for new work - use `TechAIGlobalCustomizationAuditor`.
 - Do not use `TechAIImplementer` alone when the task is cross-repository Copilot configuration alignment - use `TechAISyncCopilotConfigs`.
 
 ### Agent composition
 
 - For changes spanning multiple specialist domains (for example Terraform + IAM), run each relevant specialist and aggregate findings.
 - The standard chain for non-trivial work is: `TechAIPlanner` -> `TechAIImplementer` -> `TechAIReviewer` (or specialist reviewer).
-- For Copilot customization changes (for example `.github/prompts`, `.github/skills`, `.github/agents`, `.github/scripts`), run `TechAICustomizationAuditor` before final handoff.
+- For GitHub Copilot customization changes (for example `.github/prompts`, `.github/skills`, `.github/agents`, `.github/scripts`, `copilot-*.md`, `repo-profiles.yml`, and validator/workflow assets), use `TechAIGlobalCustomizationBuilder` first and `TechAIGlobalCustomizationAuditor` before final handoff.
 
 ### Handoff protocol
 
 - `TechAIPlanner` output (implementation plan) is input context for `TechAIImplementer`.
 - `TechAIImplementer` output (list of changed files + validation results) is input context for `TechAIReviewer`.
 - `TechAIReviewer` findings flagged as `Critical` or `Major` route back to `TechAIImplementer` for remediation.
+- `TechAIGlobalCustomizationBuilder` output (changed assets + validation results) is input context for `TechAIGlobalCustomizationAuditor`.
+- `TechAIGlobalCustomizationAuditor` findings flagged as `Critical` or `Major` route back to `TechAIGlobalCustomizationBuilder` for remediation.
 
 ## Available Skills
 
@@ -251,6 +259,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Agents
 
 - `.github/agents/tech-ai-customization-auditor.agent.md`
+- `.github/agents/tech-ai-global-customization-auditor.agent.md`
+- `.github/agents/tech-ai-global-customization-builder.agent.md`
 - `.github/agents/tech-ai-github-pr-writer.agent.md`
 - `.github/agents/tech-ai-github-workflow-supply-chain.agent.md`
 - `.github/agents/tech-ai-iam-least-privilege.agent.md`

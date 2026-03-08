@@ -34,6 +34,8 @@ MANAGED_ALWAYS = (
 )
 SOURCE_ONLY_AGENT_PATHS = {
     ".github/agents/tech-ai-customization-auditor.agent.md",
+    ".github/agents/tech-ai-global-customization-auditor.agent.md",
+    ".github/agents/tech-ai-global-customization-builder.agent.md",
     ".github/agents/tech-ai-script-reviewer.agent.md",
     ".github/agents/tech-ai-sync-copilot-configs.agent.md",
 }

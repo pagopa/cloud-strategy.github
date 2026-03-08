@@ -82,3 +82,47 @@ def test_tech_ai_validator_requires_root_agents_file(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert payload["status"] == "failed"
     assert any("AGENTS.md must live in repository root" in message for message in messages)
+
+
+def test_tech_ai_validator_enforces_global_builder_semantic_sections(tmp_path: Path) -> None:
+    target_root = tmp_path / "invalid-global-builder"
+    copy_copilot_config(target_root)
+
+    builder_path = target_root / ".github" / "agents" / "tech-ai-global-customization-builder.agent.md"
+    builder_text = builder_path.read_text(encoding="utf-8").replace("## Token discipline", "## Token notes")
+    builder_path.write_text(builder_text, encoding="utf-8")
+
+    report_file = tmp_path / "tech-ai-validator-global-builder.json"
+    result = run_validator(target_root, report_file)
+
+    payload = json.loads(report_file.read_text(encoding="utf-8"))
+    messages = [finding["message"] for finding in payload["findings"]]
+    assert result.returncode == 1
+    assert payload["status"] == "failed"
+    assert any("Global customization builder missing '## Token discipline' section" in message for message in messages)
+
+
+def test_root_agents_routes_customization_work_to_global_agents() -> None:
+    agents_text = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "TechAIGlobalCustomizationBuilder" in agents_text
+    assert "TechAIGlobalCustomizationAuditor" in agents_text
+    assert "repo-only" in agents_text
+
+
+def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated() -> None:
+    builder_text = (
+        REPO_ROOT / ".github" / "agents" / "tech-ai-global-customization-builder.agent.md"
+    ).read_text(encoding="utf-8")
+    legacy_auditor_text = (
+        REPO_ROOT / ".github" / "agents" / "tech-ai-customization-auditor.agent.md"
+    ).read_text(encoding="utf-8")
+
+    assert "AGENTS.md" in builder_text
+    assert "copilot-instructions.md" in builder_text
+    assert "copilot-code-review-instructions.md" in builder_text
+    assert "security-baseline.md" in builder_text
+    assert "DEPRECATION.md" in builder_text
+    assert "validate-copilot-customizations.sh" in builder_text
+    assert "Deprecated compatibility alias" in legacy_auditor_text
+    assert "TechAIGlobalCustomizationAuditor" in legacy_auditor_text
