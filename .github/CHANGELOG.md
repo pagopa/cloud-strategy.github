@@ -6,6 +6,14 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-03-09
+- Added the repo-only `TechAILocalCopilotCustomizationBuilder` agent, prompt, and skill for creating consumer-local `local-*` Copilot assets without duplicating the shared baseline, and excluded the trio from consumer sync.
+- Deprecated `.github/scripts/bootstrap-copilot-config.sh` in favor of `.github/scripts/tech-ai-sync-copilot-configs.py`, updated lifecycle docs, and made quickstart plus `.github/README.md` prefer sync-first alignment.
+- Added source release metadata with root `VERSION`, contributor workflow documentation, and manifest provenance fields for source version and commit.
+- Tightened consumer alignment: improved composite-action detection, enabled data-registry selection for JSON-heavy repositories, slimmed generated `AGENTS.md`, removed spurious `pytest` recommendations for repos without pytest tests, and added sync recommendations for missing Copilot validation workflows plus legacy source-only residues.
+- Reduced source maintenance noise by trimming Dependabot ecosystems, updating the GitHub Actions checkout example, adding explicit `.github/` CODEOWNERS coverage, and documenting security-control enforcement status.
+- Expanded validator and sync tests to cover new recommendation, rendering, provenance, and validation paths.
+
 ## 2026-03-08
 - Updated the PR-writing prompt, skill, and agent guidance to derive required sections from the resolved repository PR template instead of hardcoding older headings such as `Security and Compliance` or `Related Links`.
 - Updated `scripts/tech-ai-sync-copilot-configs.py` and `scripts/validate-copilot-customizations.sh` so repository-owned prompt, skill, and agent assets outside the synced global baseline must use `local-*` in both filenames and `name:` values, making local customizations visibly distinct from synced `tech-ai-*` assets.

@@ -409,7 +409,7 @@ def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:
 
     assert not any(action.status == "conflict" for action in plan.actions if action.target_relative_path != "AGENTS.md")
 
-    MODULE.apply_plan(target_root, plan, planned_files)
+    MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
 
     manifest_path = target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json"
     agents_path = target_root / "AGENTS.md"
@@ -418,6 +418,8 @@ def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert "AGENTS.md" in manifest["managed_files"]
     assert ".github/copilot-instructions.md" in manifest["managed_files"]
+    assert manifest["source_version"] == (REPO_ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    assert len(manifest["source_commit"]) == 40
 
 
 def test_rendered_agents_markdown_keeps_github_copilot_wording(tmp_path: Path) -> None:
@@ -470,8 +472,18 @@ def test_build_plan_detects_backend_python_profile_and_python_validation_command
 
     assert plan.analysis.profile_name == "backend-python"
     assert "python -m compileall <changed_python_paths>" in plan.selection.validation_commands
-    assert "pytest" in plan.selection.validation_commands
+    assert "pytest" not in plan.selection.validation_commands
     assert ".github/prompts/tech-ai-python.prompt.md" in plan.selection.prompts
+
+
+def test_build_plan_adds_pytest_only_when_repo_contains_pytest_tests(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service-with-tests"
+    build_python_service_target(target_root)
+    write_file(target_root / "tests" / "test_app.py", 'def test_placeholder() -> None:\n    assert True\n')
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert "pytest" in plan.selection.validation_commands
 
 
 def test_build_plan_prefers_tech_ai_script_prompts_to_reduce_prompt_duplication(tmp_path: Path) -> None:
@@ -576,6 +588,21 @@ def test_build_plan_excludes_repo_only_global_customization_agents_from_consumer
     assert ".github/agents/tech-ai-global-customization-auditor.agent.md" not in plan.selection.agents
 
 
+def test_local_builder_triads_are_source_only_and_excluded_from_consumer_sync() -> None:
+    assert (
+        ".github/agents/tech-ai-local-copilot-customization-builder.agent.md"
+        in MODULE.SOURCE_ONLY_AGENT_PATHS
+    )
+    assert (
+        ".github/prompts/tech-ai-local-copilot-customization-builder.prompt.md"
+        in MODULE.SOURCE_ONLY_PROMPT_PATHS
+    )
+    assert (
+        ".github/skills/tech-ai-local-copilot-customization-builder/SKILL.md"
+        in MODULE.SOURCE_ONLY_SKILL_PATHS
+    )
+
+
 def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> None:
     target_root = tmp_path / "polyglot"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
@@ -587,6 +614,76 @@ def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> 
     assert plan.analysis.unsupported_stacks == ["docker", "go"]
     recommendations = "\n".join(plan.recommendations["missing instructions/prompts/skills"])
     assert "unsupported target stacks: docker, go" in recommendations
+
+
+def test_build_plan_detects_composite_actions_under_workflows_tree(tmp_path: Path) -> None:
+    target_root = tmp_path / "workflow-composite"
+    write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(
+        target_root / ".github" / "workflows" / "shared" / "action.yml",
+        "\n".join(
+            [
+                "name: shared",
+                "runs:",
+                "  using: composite",
+                "  steps:",
+                "    - shell: bash",
+                '      run: echo "ok"',
+                "",
+            ]
+        ),
+    )
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert "composite-action" in plan.analysis.stacks
+    assert ".github/instructions/github-action-composite.instructions.md" in plan.selection.instructions
+    assert ".github/prompts/tech-ai-github-composite-action.prompt.md" in plan.selection.prompts
+
+
+def test_build_plan_adds_data_registry_assets_for_json_heavy_repositories(tmp_path: Path) -> None:
+    target_root = tmp_path / "json-heavy"
+    write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    for index in range(5):
+        write_file(target_root / "data" / f"registry-{index}.json", '{"enabled": true}\n')
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert ".github/prompts/tech-ai-data-registry.prompt.md" in plan.selection.prompts
+    assert ".github/skills/tech-ai-data-registry/SKILL.md" in plan.selection.skills
+
+
+def test_rendered_agents_markdown_uses_explicit_github_paths_and_table_routing(tmp_path: Path) -> None:
+    target_root = tmp_path / "rendered-agents"
+    build_python_service_target(target_root)
+
+    _plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+    agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
+
+    assert "Apply repository non-negotiables from `.github/copilot-instructions.md`." in agents_file.desired_content
+    assert "| Pattern | Instruction |" in agents_file.desired_content
+    assert "Apply all non-negotiables from `.github/copilot-instructions.md` plus:" in agents_file.desired_content
+    assert "- `TechAIAddUnitTests`" in agents_file.desired_content
+    assert "- `TechAICICDWorkflow`" in agents_file.desired_content
+    assert ": Add or improve unit tests for Python code" not in agents_file.desired_content
+
+
+def test_build_plan_reports_missing_validation_workflow_and_source_only_residues(tmp_path: Path) -> None:
+    target_root = tmp_path / "consumer-residue"
+    build_python_service_target(target_root)
+    write_file(target_root / ".github" / "README.md", "# source-only\n")
+    write_file(target_root / ".github" / "agents" / "README.md", "# source-only\n")
+    write_file(target_root / ".github" / "templates" / "AGENTS.template.md", "# source-only\n")
+    write_file(target_root / ".github" / "scripts" / "bootstrap-copilot-config.sh", "#!/usr/bin/env bash\n")
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    guidance = "\n".join(plan.recommendations["missing consumer-facing validation or onboarding guidance"])
+    assert "github-validate-copilot-customizations.yml" in guidance
+    assert ".github/README.md" in guidance
+    assert ".github/agents/README.md" in guidance
+    assert ".github/templates/**" in guidance
+    assert ".github/scripts/bootstrap-copilot-config.sh" in guidance
 
 
 def test_build_plan_fails_for_corrupted_manifest(tmp_path: Path) -> None:
@@ -631,6 +728,10 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
         issue["target_relative_path"] == ".github/prompts/add-external-user.prompt.md"
         and "validation" in issue["issue_types"]
         for issue in payload["analysis"]["unmanaged_target_asset_issues"]
+    )
+    assert any(
+        "github-validate-copilot-customizations.yml" in item
+        for item in payload["recommendations"]["missing consumer-facing validation or onboarding guidance"]
     )
     assert sorted(payload["source_audit"].keys()) == [
         "agents_md_repeats",

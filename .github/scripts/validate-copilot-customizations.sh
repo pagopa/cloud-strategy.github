@@ -251,6 +251,23 @@ frontmatter_value() {
   '
 }
 
+validate_frontmatter_structure() {
+  local file="$1"
+  local severity="$2"
+
+  if [[ "$(head -n 1 "$file" 2>/dev/null)" != "---" ]]; then
+    record_issue "$severity" "File is missing opening frontmatter fence: ${file}"
+    return 1
+  fi
+
+  if [[ "$(grep -c '^---$' "$file")" -lt 2 ]]; then
+    record_issue "$severity" "File has malformed frontmatter fence: ${file}"
+    return 1
+  fi
+
+  return 0
+}
+
 check_required_keys() {
   local file="$1"
   local severity="$2"
@@ -568,6 +585,8 @@ validate_prompt_file() {
     section_severity="warn"
   fi
 
+  validate_frontmatter_structure "$file" error || true
+
   if frontmatter "$file" | grep -Eq '^mode:[[:space:]]*'; then
     severity="error"
     [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
@@ -624,6 +643,8 @@ validate_prompt_file() {
 validate_instruction_file() {
   local file="$1"
 
+  validate_frontmatter_structure "$file" error || true
+
   if [[ "$MODE" == "strict" ]]; then
     check_required_keys "$file" error applyTo description
   else
@@ -642,6 +663,7 @@ validate_skill_file() {
 
   [[ "$MODE" == "legacy-compatible" ]] && section_severity="warn"
 
+  validate_frontmatter_structure "$file" error || true
   check_required_keys "$file" error name description
   validate_repo_local_skill_naming "$file"
 
@@ -673,6 +695,7 @@ validate_agents_dir() {
 
   while IFS= read -r file; do
     count=$((count + 1))
+    validate_frontmatter_structure "$file" error || true
     check_required_keys "$file" error name description tools
     validate_repo_local_agent_naming "$file"
 

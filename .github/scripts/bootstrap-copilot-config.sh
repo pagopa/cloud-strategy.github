@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 #
+# ⚠️  DEPRECATED: Prefer .github/scripts/tech-ai-sync-copilot-configs.py for consumer alignment.
+# This script is maintained for backward compatibility only.
+# See .github/DEPRECATION.md for lifecycle policy.
+#
 # Purpose: Bootstrap Copilot customization files from a source config root into a target repository `.github` folder.
 # Usage examples:
 #   ./.github/scripts/bootstrap-copilot-config.sh --target /path/to/repo

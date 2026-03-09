@@ -38,6 +38,7 @@ SOURCE_ONLY_AGENT_PATHS = {
     ".github/agents/tech-ai-customization-auditor.agent.md",
     ".github/agents/tech-ai-global-customization-auditor.agent.md",
     ".github/agents/tech-ai-global-customization-builder.agent.md",
+    ".github/agents/tech-ai-local-copilot-customization-builder.agent.md",
     ".github/agents/tech-ai-script-reviewer.agent.md",
     ".github/agents/tech-ai-sync-copilot-configs.agent.md",
 }
@@ -45,10 +46,12 @@ SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/tech-ai-add-platform.prompt.md",
     ".github/prompts/tech-ai-add-report-script.prompt.md",
     ".github/prompts/tech-ai-code-review.prompt.md",
+    ".github/prompts/tech-ai-local-copilot-customization-builder.prompt.md",
     ".github/prompts/tech-ai-sync-copilot-configs.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/tech-ai-code-review/SKILL.md",
+    ".github/skills/tech-ai-local-copilot-customization-builder/SKILL.md",
     ".github/skills/tech-ai-sync-copilot-configs/SKILL.md",
 }
 CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-bash-script.prompt.md"
@@ -95,6 +98,13 @@ PROMPT_NAME_OVERRIDES = {
     "tech-ai-github-pr-description.prompt.md": "TechAIPRDescription",
     "tech-ai-terraform-module.prompt.md": "TechAITerraformModule",
 }
+VALIDATION_WORKFLOW_RELATIVE_PATH = ".github/workflows/github-validate-copilot-customizations.yml"
+SOURCE_ONLY_TARGET_RESIDUE_PATHS = (
+    ".github/README.md",
+    ".github/agents/README.md",
+    ".github/scripts/bootstrap-copilot-config.sh",
+)
+SOURCE_ONLY_TARGET_RESIDUE_DIRECTORIES = (".github/templates",)
 
 
 def log_info(message: str) -> None:
@@ -300,6 +310,44 @@ def sha256_path(path: Path) -> str:
 
 def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def read_source_version(source_root: Path) -> str | None:
+    version_path = source_root / "VERSION"
+    if not version_path.is_file():
+        return None
+
+    value = version_path.read_text(encoding="utf-8").strip()
+    return value or None
+
+
+def git_commit_sha(repo_root: Path) -> str | None:
+    if not (repo_root / ".git").exists():
+        return None
+
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+
+    return result.stdout.strip() or None
+
+
+def is_composite_action_file(path: Path) -> bool:
+    if path.name not in {"action.yml", "action.yaml"}:
+        return False
+
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    return bool(re.search(r"(?ms)^runs:\s*$.*?^[ \t]+using:\s*[\"']?composite[\"']?\s*$", content))
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -565,13 +613,11 @@ def detect_stacks(repo_root: Path, files: list[Path]) -> tuple[list[str], list[s
 
         if name.startswith("Dockerfile"):
             unsupported.add("docker")
+        if is_composite_action_file(path):
+            stacks.add("composite-action")
 
     if (repo_root / ".github" / "workflows").is_dir():
         stacks.add("github-actions")
-    if any(part == "actions" for path in files for part in path.parts) and any(
-        path.name in {"action.yml", "action.yaml"} for path in files
-    ):
-        stacks.add("composite-action")
     if (repo_root / "package.json").is_file():
         stacks.add("nodejs")
     if (repo_root / "pyproject.toml").is_file() or any(path.name.startswith("requirements") for path in files):
@@ -673,6 +719,10 @@ def detect_git_state(repo_root: Path) -> tuple[bool, list[str]]:
     )
     lines = [line for line in result.stdout.splitlines() if line.strip()]
     return bool(lines), lines
+
+
+def count_composite_action_files(files: list[Path]) -> int:
+    return sum(1 for path in files if is_composite_action_file(path))
 
 
 def legacy_alias_paths_for_canonical_path(canonical_relative_path: str) -> list[str]:
@@ -1061,7 +1111,11 @@ def build_analysis(source_root: Path, target_root: Path, profiles: dict[str, Rep
         stacks=stacks,
         unsupported_stacks=unsupported_stacks,
         workflow_count=len(list(workflow_dir.glob("*.y*ml"))) if workflow_dir.is_dir() else 0,
-        composite_action_count=len(list(action_dir.glob("*/action.y*ml"))) if action_dir.is_dir() else 0,
+        composite_action_count=(
+            count_composite_action_files(files)
+            if action_dir.is_dir() or workflow_dir.is_dir()
+            else 0
+        ),
         focus=detect_focus(target_root.name, stacks, target_root),
         priority_paths=detect_priority_paths(target_root, stacks),
         top_extension_counts={key: value for key, value in extension_counts.items() if value},
@@ -1137,6 +1191,8 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
         prompts.add(".github/prompts/tech-ai-github-action.prompt.md")
     if "composite-action" in stacks:
         prompts.add(".github/prompts/tech-ai-github-composite-action.prompt.md")
+    if repo_needs_data_registry(analysis.repo_root, analysis):
+        prompts.add(".github/prompts/tech-ai-data-registry.prompt.md")
     if target_has_pr_template(analysis.repo_root):
         prompts.add(".github/prompts/tech-ai-github-pr-description.prompt.md")
 
@@ -1223,6 +1279,63 @@ def repo_needs_iam_review(repo_root: Path) -> bool:
     return False
 
 
+def repo_needs_data_registry(repo_root: Path, analysis: TargetAnalysis) -> bool:
+    json_count = analysis.top_extension_counts.get(".json", 0)
+    if json_count >= 5:
+        return True
+
+    interesting_dirs = {"authorizations", "organization", "data", "registry", "registries", "resources"}
+    for path in scan_repo_files(repo_root):
+        if path.suffix.lower() not in {".json", ".yaml", ".yml"}:
+            continue
+        relative_path = path.relative_to(repo_root)
+        if relative_path.parts and relative_path.parts[0] == ".github":
+            continue
+        if any(part in interesting_dirs for part in relative_path.parts):
+            return True
+
+    return False
+
+
+def repo_has_pytest_tests(repo_root: Path) -> bool:
+    tests_dir = repo_root / "tests"
+    if tests_dir.is_dir():
+        for pattern in ("test_*.py", "*_test.py"):
+            if any(tests_dir.rglob(pattern)):
+                return True
+
+    if (repo_root / "pytest.ini").is_file():
+        return True
+
+    pyproject = repo_root / "pyproject.toml"
+    if pyproject.is_file() and "pytest" in pyproject.read_text(encoding="utf-8"):
+        return True
+
+    for requirements_file in repo_root.glob("requirements*.txt"):
+        if "pytest" in requirements_file.read_text(encoding="utf-8"):
+            return True
+
+    return False
+
+
+def target_has_validation_workflow(repo_root: Path) -> bool:
+    return (repo_root / VALIDATION_WORKFLOW_RELATIVE_PATH).is_file()
+
+
+def detect_source_only_residues(target_root: Path) -> list[str]:
+    residues: list[str] = []
+
+    for relative_path in SOURCE_ONLY_TARGET_RESIDUE_PATHS:
+        if (target_root / relative_path).exists():
+            residues.append(relative_path)
+
+    for relative_dir in SOURCE_ONLY_TARGET_RESIDUE_DIRECTORIES:
+        if (target_root / relative_dir).exists():
+            residues.append(f"{relative_dir}/**")
+
+    return residues
+
+
 def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[str] | list[str]) -> list[str]:
     commands: list[str] = []
     if "terraform" in analysis.stacks:
@@ -1230,7 +1343,9 @@ def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[s
     if "bash" in analysis.stacks:
         commands.extend(["bash -n <changed_bash_paths>", "shellcheck -s bash <changed_bash_paths>"])
     if "python" in analysis.stacks:
-        commands.extend(["python -m compileall <changed_python_paths>", "pytest"])
+        commands.append("python -m compileall <changed_python_paths>")
+        if repo_has_pytest_tests(analysis.repo_root):
+            commands.append("pytest")
     commands.append("bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict")
     return commands
 
@@ -1672,7 +1787,7 @@ def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: 
 
 
 def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, source_root: Path) -> str:
-    instructions_apply_to = build_instruction_rules(source_root, selection.instructions)
+    instructions_apply_to = build_instruction_rule_pairs(source_root, selection.instructions)
     preferred_prompts = preferred_asset_lines(source_root, selection.preferred_prompts)
     preferred_skills = preferred_asset_lines(source_root, selection.preferred_skills)
     inventory_paths = merged_inventory_paths(analysis.repo_root, selection)
@@ -1696,12 +1811,12 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         "- Repository-local prompt, skill, and agent `name:` values must also start with `local-`.",
         "",
         "## Decision Priority",
-        "1. Apply repository non-negotiables from `copilot-instructions.md`.",
+        "1. Apply repository non-negotiables from `.github/copilot-instructions.md`.",
         "2. Apply explicit user requirements for the current task.",
         "3. Apply the selected agent behavior (agent-first routing).",
-        "4. Apply matching files under `instructions/*.instructions.md` using `applyTo`.",
-        "5. Apply selected prompt constraints from `prompts/*.prompt.md`.",
-        "6. Apply implementation details from referenced `skills/*/SKILL.md`.",
+        "4. Apply matching files under `.github/instructions/*.instructions.md` using `applyTo`.",
+        "5. Apply selected prompt constraints from `.github/prompts/*.prompt.md`.",
+        "6. Apply implementation details from referenced `.github/skills/*/SKILL.md`.",
         "7. If no agent is explicitly selected, default to `TechAIImplementer`.",
         "",
         "## Agent Routing",
@@ -1724,10 +1839,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         [
             "",
             "## Prohibitions",
-            "- Never hardcode secrets, tokens, or credentials.",
-            "- Never modify `README.md` files unless explicitly requested by the user.",
-            "- Never introduce new patterns when existing repository conventions exist.",
-            "- Keep all repository artifacts in English (user chat may be in other languages).",
+            "- Apply all non-negotiables from `.github/copilot-instructions.md` plus:",
             "- Never run destructive commands unless explicitly requested.",
             "- Never skip validation after making changes.",
             "",
@@ -1740,8 +1852,8 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         ]
     )
     lines.extend(f"  - `{path}`" for path in analysis.priority_paths)
-    lines.extend(["", "### Default instruction routing"])
-    lines.extend(f"- `{rule}`" for rule in instructions_apply_to)
+    lines.extend(["", "### Default instruction routing", "| Pattern | Instruction |", "| --- | --- |"])
+    lines.extend(f"| `{pattern}` | `{label}` |" for pattern, label in instructions_apply_to)
     lines.extend(["", "### Preferred prompts"])
     lines.extend(preferred_prompts)
     lines.extend(["", "### Preferred skills"])
@@ -1774,14 +1886,14 @@ def strip_github_prefix(value: str) -> str:
     return value
 
 
-def build_instruction_rules(source_root: Path, instruction_paths: list[str]) -> list[str]:
-    rules: list[str] = []
+def build_instruction_rule_pairs(source_root: Path, instruction_paths: list[str]) -> list[tuple[str, str]]:
+    rules: list[tuple[str, str]] = []
     for instruction_path in instruction_paths:
         apply_to = frontmatter_value(source_root / instruction_path, "applyTo")
         if not apply_to:
             continue
         label = Path(strip_github_prefix(instruction_path)).name
-        rules.append(f"{apply_to} -> `{label}`")
+        rules.append((apply_to, label))
     return rules
 
 
@@ -1789,8 +1901,7 @@ def preferred_asset_lines(source_root: Path, relative_paths: list[str]) -> list[
     lines: list[str] = []
     for relative_path in relative_paths:
         name = asset_display_name(source_root, relative_path)
-        description = frontmatter_value(source_root / relative_path, "description") or "No description available."
-        lines.append(f"- `{name}`: {description}")
+        lines.append(f"- `{name}`")
     return lines
 
 
@@ -1900,6 +2011,19 @@ def build_recommendations(
             f"`name:` values: {', '.join(local_naming_issue_paths)}."
         )
 
+    if not target_has_validation_workflow(analysis.repo_root):
+        recommendations["missing consumer-facing validation or onboarding guidance"].append(
+            "The target repository is missing `.github/workflows/github-validate-copilot-customizations.yml`; "
+            "add it manually if the consumer wants Copilot customization CI enforcement."
+        )
+
+    source_only_residues = detect_source_only_residues(analysis.repo_root)
+    if source_only_residues:
+        recommendations["missing consumer-facing validation or onboarding guidance"].append(
+            "The target repository still contains source-only bootstrap residues that should not be treated as "
+            f"consumer baseline assets: {', '.join(source_only_residues)}."
+        )
+
     if any(action.target_relative_path == analysis.agents_relative_path and action.status == "conflict" for action in actions):
         recommendations["weak conflict-handling rules"].append(
             "Consider generated section markers or a dedicated root-AGENTS template to reduce consumer AGENTS "
@@ -1941,7 +2065,7 @@ def write_report(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFile]) -> None:
+def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFile], source_root: Path) -> None:
     content_map = {item.target_relative_path: item for item in planned_files}
     for action in plan.actions:
         if action.status not in {"create", "update"}:
@@ -1958,6 +2082,8 @@ def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFil
         "generated_at_utc": utc_now(),
         "target_repo": str(target_root),
         "profile": plan.selection.profile.name,
+        "source_version": read_source_version(source_root),
+        "source_commit": git_commit_sha(source_root),
         "managed_files": {},
     }
 
@@ -2054,7 +2180,7 @@ def render_markdown_report(plan: SyncPlan) -> str:
     for command in plan.selection.validation_commands:
         lines.append(f"- `{command}`")
 
-    lines.extend(["", "## Target-driven recommendations for improving the source repo"])
+    lines.extend(["", "## Target-driven recommendations"])
     for category, items in plan.recommendations.items():
         lines.append(f"### {category.title()}")
         for item in items:
@@ -2281,7 +2407,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.mode == "apply":
         log_info("Applying conservative merge for source-managed files.")
-        apply_plan(target_root, plan, planned_files)
+        apply_plan(target_root, plan, planned_files, source_root)
         log_success(f"Manifest written to {target_root / MANIFEST_RELATIVE_PATH}")
     else:
         log_info("Plan mode selected - no repository files will be changed.")

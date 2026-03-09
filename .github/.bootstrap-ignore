@@ -4,3 +4,8 @@
 # Example:
 # workflows/
 # dependabot.yml
+README.md
+agents/README.md
+templates/
+scripts/bootstrap-copilot-config.sh
+tech-ai-requirements-dev.txt

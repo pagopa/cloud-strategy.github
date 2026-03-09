@@ -28,13 +28,15 @@ See `.github/agents/README.md` for details.
 1. Update files under `.github/`.
 2. Run `.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 3. Optional: generate a machine-readable summary with `.github/scripts/validate-copilot-customizations.sh --scope root --mode strict --report json --report-file /tmp/copilot-report.json`.
-4. Optional: bootstrap this configuration into another repository with `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` (default excludes apply; see `.github/.bootstrap-ignore`).
-5. Optionally run cross-repo assessment with `.github/scripts/validate-copilot-customizations.sh --scope all --mode legacy-compatible`.
-6. Ensure workflow checks pass.
-7. Update `.github/CHANGELOG.md` for notable changes.
+4. Prefer cross-repo alignment with `python .github/scripts/tech-ai-sync-copilot-configs.py --target <repo-path> --mode plan` before any apply step.
+5. Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` only as a legacy fallback bootstrap path (default excludes apply; see `.github/.bootstrap-ignore`).
+6. Optionally run cross-repo assessment with `.github/scripts/validate-copilot-customizations.sh --scope all --mode legacy-compatible`.
+7. Ensure workflow checks pass.
+8. Update `.github/CHANGELOG.md` for notable changes.
 
 ## Notes
 - `repo-profiles.yml` is currently advisory (human-readable profile catalog).
 - The canonical project `AGENTS.md` belongs in repository root, not under `.github/`.
-- `TechAIGlobalCustomizationBuilder` and `TechAIGlobalCustomizationAuditor` are repo-only standards agents and must not be synced to consumer repositories.
+- `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`, `TechAILocalCopilotCustomizationBuilder`, and `TechAISyncCopilotConfigs` are repo-only source agents and must not be synced to consumer repositories.
+- `.github/README.md`, `.github/agents/README.md`, `.github/templates/**`, and `.github/scripts/bootstrap-copilot-config.sh` are source-only assets and should not be part of consumer baselines.
 - Use `templates/copilot-quickstart.md` for a short onboarding flow.
