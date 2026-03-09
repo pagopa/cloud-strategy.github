@@ -325,17 +325,79 @@ def test_build_plan_reports_unmanaged_target_assets_and_legacy_aliases_outside_s
     )
 
     assert "validation" in issue_by_path[".github/prompts/add-external-user.prompt.md"].issue_types
+    assert "local_naming" in issue_by_path[".github/prompts/add-external-user.prompt.md"].issue_types
     assert "Missing frontmatter key `name`." in issue_by_path[".github/prompts/add-external-user.prompt.md"].details
+    assert (
+        "Repository-local prompt filename must start with `local-`."
+        in issue_by_path[".github/prompts/add-external-user.prompt.md"].details
+    )
     assert "legacy_alias" in issue_by_path[".github/prompts/cs-data-registry.prompt.md"].issue_types
     assert (
         issue_by_path[".github/prompts/cs-data-registry.prompt.md"].canonical_source_path
         == ".github/prompts/tech-ai-data-registry.prompt.md"
     )
+    assert ".github/skills/local-registry/SKILL.md" not in issue_by_path
 
     assert ".github/prompts/add-external-user.prompt.md" in agents_file.desired_content
     assert ".github/prompts/cs-data-registry.prompt.md" in agents_file.desired_content
     assert ".github/skills/data-registry/SKILL.md" in agents_file.desired_content
     assert ".github/skills/local-registry/SKILL.md" in agents_file.desired_content
+
+
+def test_build_plan_accepts_local_prefixed_repo_owned_assets(tmp_path: Path) -> None:
+    target_root = tmp_path / "local-assets"
+    build_python_service_target(target_root)
+    write_file(
+        target_root / ".github" / "prompts" / "local-add-external-user.prompt.md",
+        "\n".join(
+            [
+                "---",
+                "name: local-add-external-user",
+                "description: Add an external user to Entra ID.",
+                "agent: agent",
+                "argument-hint: user=<email>",
+                "---",
+                "",
+                "# Local Add External User",
+                "",
+                "## Instructions",
+                "1. Use `.github/skills/local-entra-access/SKILL.md`.",
+                "",
+                "## Validation",
+                "- Validate the repository-local registry update.",
+                "",
+                "## Minimal example",
+                "- Input: `user=guest@example.com`",
+                "",
+            ]
+        ),
+    )
+    write_file(
+        target_root / ".github" / "skills" / "local-entra-access" / "SKILL.md",
+        "\n".join(
+            [
+                "---",
+                "name: local-entra-access",
+                "description: Repository-local Entra access workflow.",
+                "---",
+                "",
+                "# Local Entra Access",
+                "",
+                "## When to use",
+                "- Manage repository-local Entra access automation.",
+                "",
+                "## Validation",
+                "- Validate repository-local access rules.",
+                "",
+            ]
+        ),
+    )
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    issue_paths = {issue.target_relative_path for issue in plan.target_asset_issues}
+    assert ".github/prompts/local-add-external-user.prompt.md" not in issue_paths
+    assert ".github/skills/local-entra-access/SKILL.md" not in issue_paths
 
 
 def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:

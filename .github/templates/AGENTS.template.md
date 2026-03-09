@@ -6,6 +6,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use GitHub Copilot terminology in repository-facing content.
 - Keep repository-facing text in English.
 - Treat prompt frontmatter `name:` as the canonical command identifier.
+- Repository-local prompts, skills, and agents must use the `local-*` prefix in filenames.
+- Repository-local prompt, skill, and agent `name:` values must also use the `local-*` prefix.
 
 ## Decision Priority
 1. Apply repository non-negotiables from `.github/copilot-instructions.md`.

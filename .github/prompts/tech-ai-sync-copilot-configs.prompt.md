@@ -23,7 +23,7 @@ Use this prompt to analyze a local repository, select the minimum Copilot custom
 3. Start with `mode=plan`; use `mode=apply` only when explicitly requested and only after a conflict-safe plan.
 4. Keep scope limited to Copilot core assets only.
 5. Preserve unmanaged target files and report conflicts instead of overwriting them.
-6. Audit target-local instructions, prompts, skills, and agents that fall outside the selected sync baseline and report strict validation gaps or legacy alias drift.
+6. Audit target-local instructions, prompts, skills, and agents that fall outside the selected sync baseline and report strict validation gaps, `local-*` naming violations for repository-owned prompt/skill/agent assets, or legacy alias drift.
 7. Render `AGENTS.md` inventory from the desired managed baseline plus the Copilot assets already present in the target repository.
 8. Report source-side audit findings separately from target-side unmanaged asset issues, redundant or legacy target assets, and file actions.
 

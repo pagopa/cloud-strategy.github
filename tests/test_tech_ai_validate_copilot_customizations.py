@@ -69,6 +69,73 @@ def test_tech_ai_validator_reports_missing_prompt_argument_hint(tmp_path: Path) 
     assert any("Missing frontmatter key 'argument-hint'" in message for message in messages)
 
 
+def test_tech_ai_validator_requires_local_prefix_for_repo_owned_assets(tmp_path: Path) -> None:
+    target_root = tmp_path / "invalid-local-assets"
+    copy_copilot_config(target_root)
+
+    (target_root / ".github" / "prompts").mkdir(parents=True, exist_ok=True)
+    (target_root / ".github" / "skills" / "user-admin").mkdir(parents=True, exist_ok=True)
+    (target_root / ".github" / "prompts" / "add-external-user.prompt.md").write_text(
+        "\n".join(
+            [
+                "---",
+                "name: add-external-user",
+                "description: Add an external user",
+                "agent: agent",
+                "argument-hint: user=<email>",
+                "---",
+                "",
+                "# Add External User",
+                "",
+                "## Instructions",
+                "1. Use `.github/skills/user-admin/SKILL.md`.",
+                "",
+                "## Validation",
+                "- Validate the external user request.",
+                "",
+                "## Minimal example",
+                "- Input: `user=guest@example.com`",
+                "",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (target_root / ".github" / "skills" / "user-admin" / "SKILL.md").write_text(
+        "\n".join(
+            [
+                "---",
+                "name: user-admin",
+                "description: Repository-local user administration workflow.",
+                "---",
+                "",
+                "# User Admin",
+                "",
+                "## When to use",
+                "- Manage repository-local user administration.",
+                "",
+                "## Validation",
+                "- Validate repository-local access state.",
+                "",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report_file = tmp_path / "tech-ai-validator-local-prefix.json"
+    result = run_validator(target_root, report_file)
+
+    payload = json.loads(report_file.read_text(encoding="utf-8"))
+    messages = [finding["message"] for finding in payload["findings"]]
+    assert result.returncode == 1
+    assert payload["status"] == "failed"
+    assert any("Repository-local prompt filename must start with 'local-'" in message for message in messages)
+    assert any("Repository-local prompt name must start with 'local-'" in message for message in messages)
+    assert any("Repository-local skill directory must start with 'local-'" in message for message in messages)
+    assert any("Repository-local skill name must start with 'local-'" in message for message in messages)
+
+
 def test_tech_ai_validator_requires_root_agents_file(tmp_path: Path) -> None:
     target_root = tmp_path / "legacy-agents-repo"
     shutil.copytree(REPO_ROOT / ".github", target_root / ".github")

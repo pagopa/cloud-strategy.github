@@ -487,6 +487,24 @@ def prompt_expected_name(relative_path: str) -> str | None:
     return None
 
 
+def local_asset_identifier(relative_path: str) -> str | None:
+    path = Path(relative_path)
+    category = asset_category(relative_path)
+
+    if category == "prompts" and path.name.endswith(".prompt.md"):
+        return path.name[: -len(".prompt.md")]
+    if category == "agents" and path.name.endswith(".agent.md"):
+        return path.name[: -len(".agent.md")]
+    if category == "skills" and path.name == "SKILL.md":
+        return path.parent.name
+    return None
+
+
+def is_local_asset_path(relative_path: str) -> bool:
+    identifier = local_asset_identifier(relative_path)
+    return bool(identifier and identifier.startswith("local-"))
+
+
 def scan_repo_files(repo_root: Path) -> list[Path]:
     files: list[Path] = []
     for path in repo_root.rglob("*"):
@@ -1227,7 +1245,7 @@ def merged_inventory_paths(target_root: Path, selection: AssetSelection) -> dict
     }
 
 
-def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str) -> list[str]:
+def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str, repo_local: bool = False) -> list[str]:
     path = target_root / relative_path
     frontmatter = parse_frontmatter(path)
     issues: list[str] = []
@@ -1243,6 +1261,15 @@ def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str) -> li
     actual_name = frontmatter.get("name", "")
     if expected_name and actual_name and actual_name != expected_name:
         issues.append(f"Prompt name policy mismatch: expected `{expected_name}`, found `{actual_name}`.")
+
+    if repo_local:
+        if not is_local_asset_path(relative_path):
+            issues.append("Repository-local prompt filename must start with `local-`.")
+        if actual_name and not actual_name.startswith("local-"):
+            issues.append("Repository-local prompt `name` must start with `local-`.")
+        local_identifier = local_asset_identifier(relative_path)
+        if local_identifier and local_identifier.startswith("local-") and actual_name and actual_name != local_identifier:
+            issues.append(f"Repository-local prompt `name` should match filename stem `{local_identifier}`.")
 
     for heading in ("## Instructions", "## Validation", "## Minimal example"):
         if not has_heading_exact(path, heading):
@@ -1260,7 +1287,7 @@ def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str) -> li
     return issues
 
 
-def validate_unmanaged_skill_asset(target_root: Path, relative_path: str) -> list[str]:
+def validate_unmanaged_skill_asset(target_root: Path, relative_path: str, repo_local: bool = False) -> list[str]:
     path = target_root / relative_path
     frontmatter = parse_frontmatter(path)
     issues: list[str] = []
@@ -1274,10 +1301,20 @@ def validate_unmanaged_skill_asset(target_root: Path, relative_path: str) -> lis
     if not has_heading_regex(path, r"^## (Validation|Checklist|Testing|Test stack)$"):
         issues.append("Missing validation/testing section.")
 
+    if repo_local:
+        local_identifier = local_asset_identifier(relative_path)
+        actual_name = frontmatter.get("name", "")
+        if not is_local_asset_path(relative_path):
+            issues.append("Repository-local skill directory must start with `local-`.")
+        if actual_name and not actual_name.startswith("local-"):
+            issues.append("Repository-local skill `name` must start with `local-`.")
+        if local_identifier and local_identifier.startswith("local-") and actual_name and actual_name != local_identifier:
+            issues.append(f"Repository-local skill `name` should match directory name `{local_identifier}`.")
+
     return issues
 
 
-def validate_unmanaged_agent_asset(target_root: Path, relative_path: str) -> list[str]:
+def validate_unmanaged_agent_asset(target_root: Path, relative_path: str, repo_local: bool = False) -> list[str]:
     path = target_root / relative_path
     frontmatter = parse_frontmatter(path)
     issues: list[str] = []
@@ -1293,10 +1330,20 @@ def validate_unmanaged_agent_asset(target_root: Path, relative_path: str) -> lis
     if not has_heading_exact(path, "## Restrictions"):
         issues.append("Missing `## Restrictions` section.")
 
+    if repo_local:
+        local_identifier = local_asset_identifier(relative_path)
+        actual_name = frontmatter.get("name", "")
+        if not is_local_asset_path(relative_path):
+            issues.append("Repository-local agent filename must start with `local-`.")
+        if actual_name and not actual_name.startswith("local-"):
+            issues.append("Repository-local agent `name` must start with `local-`.")
+        if local_identifier and local_identifier.startswith("local-") and actual_name and actual_name != local_identifier:
+            issues.append(f"Repository-local agent `name` should match filename stem `{local_identifier}`.")
+
     return issues
 
 
-def validate_unmanaged_instruction_asset(target_root: Path, relative_path: str) -> list[str]:
+def validate_unmanaged_instruction_asset(target_root: Path, relative_path: str, repo_local: bool = False) -> list[str]:
     path = target_root / relative_path
     frontmatter = parse_frontmatter(path)
     issues: list[str] = []
@@ -1335,14 +1382,17 @@ def detect_unmanaged_target_asset_issues(
             issue_types: list[str] = []
             details: list[str] = []
             canonical_source_path = alias_map.get(relative_path)
+            repo_local = canonical_source_path is None and not (source_root / relative_path).is_file()
 
             if canonical_source_path:
                 issue_types.append("legacy_alias")
                 details.append(f"Legacy alias of `{canonical_source_path}`.")
 
-            validation_issues = validator(target_root, relative_path)
+            validation_issues = validator(target_root, relative_path, repo_local=repo_local)
             if validation_issues:
                 issue_types.append("validation")
+                if any(detail.startswith("Repository-local ") for detail in validation_issues):
+                    issue_types.append("local_naming")
                 details.extend(validation_issues)
 
             if not issue_types:
@@ -1642,6 +1692,8 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         "- Use GitHub Copilot terminology in repository-facing content.",
         "- Do not mention internal runtime names in repository artifacts.",
         "- Treat prompt frontmatter `name:` as the canonical command identifier.",
+        "- Repository-local prompt, skill, and agent filenames must start with `local-`.",
+        "- Repository-local prompt, skill, and agent `name:` values must also start with `local-`.",
         "",
         "## Decision Priority",
         "1. Apply repository non-negotiables from `copilot-instructions.md`.",
@@ -1837,6 +1889,15 @@ def build_recommendations(
         recommendations["missing consumer-facing validation or onboarding guidance"].append(
             "The target repository contains unmanaged Copilot assets with strict-validation gaps: "
             f"{', '.join(validation_issue_paths)}."
+        )
+
+    local_naming_issue_paths = [
+        issue.target_relative_path for issue in target_asset_issues if "local_naming" in issue.issue_types
+    ]
+    if local_naming_issue_paths:
+        recommendations["missing consumer-facing validation or onboarding guidance"].append(
+            "Repository-local Copilot prompts, skills, and agents should use `local-*` in both filenames and "
+            f"`name:` values: {', '.join(local_naming_issue_paths)}."
         )
 
     if any(action.target_relative_path == analysis.agents_relative_path and action.status == "conflict" for action in actions):

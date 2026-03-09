@@ -334,6 +334,131 @@ tech_ai_prompt_name() {
   printf '%s' "$output"
 }
 
+local_asset_identifier() {
+  local file="$1"
+  local base
+  local parent
+
+  case "$file" in
+    *.prompt.md)
+      base="$(basename "$file")"
+      printf '%s' "${base%.prompt.md}"
+      ;;
+    *.agent.md)
+      base="$(basename "$file")"
+      printf '%s' "${base%.agent.md}"
+      ;;
+    */SKILL.md)
+      parent="$(basename "$(dirname "$file")")"
+      printf '%s' "$parent"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+validate_repo_local_prompt_naming() {
+  local file="$1"
+  local severity="error"
+  local actual_name=""
+  local expected_local_name=""
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  actual_name="$(frontmatter_value "$file" "name")"
+  expected_local_name="$(local_asset_identifier "$file" || true)"
+
+  case "$(basename "$file")" in
+    tech-ai-*.prompt.md)
+      return 0
+      ;;
+    local-*.prompt.md)
+      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
+        record_issue "$severity" "Repository-local prompt name must start with 'local-': ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_local_name" && "$actual_name" != "$expected_local_name" ]]; then
+        record_issue "$severity" "Repository-local prompt name must match filename stem '${expected_local_name}': ${file}"
+      fi
+      return 0
+      ;;
+    *)
+      record_issue "$severity" "Repository-local prompt filename must start with 'local-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
+        record_issue "$severity" "Repository-local prompt name must start with 'local-': ${file}"
+      fi
+      ;;
+  esac
+}
+
+validate_repo_local_skill_naming() {
+  local file="$1"
+  local severity="error"
+  local actual_name=""
+  local expected_local_name=""
+  local skill_dir
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  actual_name="$(frontmatter_value "$file" "name")"
+  expected_local_name="$(local_asset_identifier "$file" || true)"
+  skill_dir="$(basename "$(dirname "$file")")"
+
+  case "$skill_dir" in
+    tech-ai-*)
+      return 0
+      ;;
+    local-*)
+      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
+        record_issue "$severity" "Repository-local skill name must start with 'local-': ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_local_name" && "$actual_name" != "$expected_local_name" ]]; then
+        record_issue "$severity" "Repository-local skill name must match directory name '${expected_local_name}': ${file}"
+      fi
+      return 0
+      ;;
+    *)
+      record_issue "$severity" "Repository-local skill directory must start with 'local-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
+        record_issue "$severity" "Repository-local skill name must start with 'local-': ${file}"
+      fi
+      ;;
+  esac
+}
+
+validate_repo_local_agent_naming() {
+  local file="$1"
+  local severity="error"
+  local actual_name=""
+  local expected_local_name=""
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  actual_name="$(frontmatter_value "$file" "name")"
+  expected_local_name="$(local_asset_identifier "$file" || true)"
+
+  case "$(basename "$file")" in
+    tech-ai-*.agent.md)
+      return 0
+      ;;
+    local-*.agent.md)
+      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
+        record_issue "$severity" "Repository-local agent name must start with 'local-': ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_local_name" && "$actual_name" != "$expected_local_name" ]]; then
+        record_issue "$severity" "Repository-local agent name must match filename stem '${expected_local_name}': ${file}"
+      fi
+      return 0
+      ;;
+    *)
+      record_issue "$severity" "Repository-local agent filename must start with 'local-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
+        record_issue "$severity" "Repository-local agent name must start with 'local-': ${file}"
+      fi
+      ;;
+  esac
+}
+
 validate_prompt_name_policy() {
   local file="$1"
   local expected_name
@@ -450,6 +575,7 @@ validate_prompt_file() {
   fi
 
   validate_prompt_name_policy "$file"
+  validate_repo_local_prompt_naming "$file"
 
   if ! has_heading_exact "$file" '## Instructions'; then
     record_issue "$section_severity" "Prompt missing '## Instructions' section: ${file}"
@@ -517,6 +643,7 @@ validate_skill_file() {
   [[ "$MODE" == "legacy-compatible" ]] && section_severity="warn"
 
   check_required_keys "$file" error name description
+  validate_repo_local_skill_naming "$file"
 
   if ! has_heading_regex "$file" '^## When to [Uu]se$'; then
     record_issue "$section_severity" "Skill missing '## When to use' section: ${file}"
@@ -547,6 +674,7 @@ validate_agents_dir() {
   while IFS= read -r file; do
     count=$((count + 1))
     check_required_keys "$file" error name description tools
+    validate_repo_local_agent_naming "$file"
 
     if ! grep -Eq '^# ' "$file"; then
       record_error "Agent missing top heading: ${file}"

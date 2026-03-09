@@ -9,6 +9,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Treat prompt frontmatter `name:` as the canonical command identifier.
 - Canonical repository-owned prompt, agent, and instruction filenames should use the `tech-ai-` prefix when introduced or renamed.
 - Canonical prompt, skill, and agent `name:` values should use the `TechAI` prefix.
+- Repository-local prompt, skill, and agent filenames in consumer repositories should use the `local-` prefix.
+- Repository-local prompt, skill, and agent `name:` values in consumer repositories should also use the `local-` prefix.
 - Reserve the `TechAIGlobal` prefix only for repo-only agents that encode standards for this global configuration repository.
 - The canonical project-owned `AGENTS.md` file must live in repository root as `AGENTS.md`.
 - Keep legacy aliases only when required for backward compatibility, and prefer canonical `tech-ai-*` assets in docs, examples, and sync selection.

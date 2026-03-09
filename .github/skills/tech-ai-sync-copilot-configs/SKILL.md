@@ -23,6 +23,7 @@ description: Analyze a local repository, select the minimum Copilot customizatio
 6. Detect redundant legacy aliases for canonical prompt/skill/agent families, including families that are not part of the selected minimum baseline, so `cs-*` and unprefixed leftovers still appear in the plan.
 7. Audit target-local instructions, prompts, skills, and agents that are outside the selected sync baseline:
    - report strict validation gaps for unmanaged files;
+   - require repository-owned prompts, skills, and agents to use `local-*` in both filenames and `name:` values so they are visually distinct from synced global assets;
    - report legacy aliases even when the canonical family is not selected;
    - keep target-only custom assets visible instead of silently omitting them.
 8. Treat redundant canonical-vs-legacy overlaps as conflicts instead of silently creating duplicate configuration families.
