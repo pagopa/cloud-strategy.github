@@ -39,6 +39,8 @@ Evaluate against these DDD principles:
 
 #### DDD smell catalog
 
+> **Conditional**: Skip this catalog when the DDD alignment verdict is "Not Applicable" (e.g., pure infrastructure or configuration repositories). Reference it only when the change set contains application code with domain modeling.
+
 Use these IDs when flagging DDD violations:
 
 ##### Critical
