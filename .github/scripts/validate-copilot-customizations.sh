@@ -251,6 +251,23 @@ frontmatter_value() {
   '
 }
 
+validate_frontmatter_structure() {
+  local file="$1"
+  local severity="$2"
+
+  if [[ "$(head -n 1 "$file" 2>/dev/null)" != "---" ]]; then
+    record_issue "$severity" "File is missing opening frontmatter fence: ${file}"
+    return 1
+  fi
+
+  if [[ "$(grep -c '^---$' "$file")" -lt 2 ]]; then
+    record_issue "$severity" "File has malformed frontmatter fence: ${file}"
+    return 1
+  fi
+
+  return 0
+}
+
 check_required_keys() {
   local file="$1"
   local severity="$2"
@@ -332,6 +349,131 @@ tech_ai_prompt_name() {
   done
 
   printf '%s' "$output"
+}
+
+internal_asset_identifier() {
+  local file="$1"
+  local base
+  local parent
+
+  case "$file" in
+    *.prompt.md)
+      base="$(basename "$file")"
+      printf '%s' "${base%.prompt.md}"
+      ;;
+    *.agent.md)
+      base="$(basename "$file")"
+      printf '%s' "${base%.agent.md}"
+      ;;
+    */SKILL.md)
+      parent="$(basename "$(dirname "$file")")"
+      printf '%s' "$parent"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+validate_repo_local_prompt_naming() {
+  local file="$1"
+  local severity="error"
+  local actual_name=""
+  local expected_internal_name=""
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  actual_name="$(frontmatter_value "$file" "name")"
+  expected_internal_name="$(internal_asset_identifier "$file" || true)"
+
+  case "$(basename "$file")" in
+    tech-ai-*.prompt.md)
+      return 0
+      ;;
+    internal-*.prompt.md)
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal prompt name must start with 'internal-': ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
+        record_issue "$severity" "Repository-internal prompt name must match filename stem '${expected_internal_name}': ${file}"
+      fi
+      return 0
+      ;;
+    *)
+      record_issue "$severity" "Repository-internal prompt filename must start with 'internal-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal prompt name must start with 'internal-': ${file}"
+      fi
+      ;;
+  esac
+}
+
+validate_repo_local_skill_naming() {
+  local file="$1"
+  local severity="error"
+  local actual_name=""
+  local expected_internal_name=""
+  local skill_dir
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  actual_name="$(frontmatter_value "$file" "name")"
+  expected_internal_name="$(internal_asset_identifier "$file" || true)"
+  skill_dir="$(basename "$(dirname "$file")")"
+
+  case "$skill_dir" in
+    tech-ai-*)
+      return 0
+      ;;
+    internal-*)
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal skill name must start with 'internal-': ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
+        record_issue "$severity" "Repository-internal skill name must match directory name '${expected_internal_name}': ${file}"
+      fi
+      return 0
+      ;;
+    *)
+      record_issue "$severity" "Repository-internal skill directory must start with 'internal-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal skill name must start with 'internal-': ${file}"
+      fi
+      ;;
+  esac
+}
+
+validate_repo_local_agent_naming() {
+  local file="$1"
+  local severity="error"
+  local actual_name=""
+  local expected_internal_name=""
+
+  [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
+
+  actual_name="$(frontmatter_value "$file" "name")"
+  expected_internal_name="$(internal_asset_identifier "$file" || true)"
+
+  case "$(basename "$file")" in
+    tech-ai-*.agent.md)
+      return 0
+      ;;
+    internal-*.agent.md)
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal agent name must start with 'internal-': ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
+        record_issue "$severity" "Repository-internal agent name must match filename stem '${expected_internal_name}': ${file}"
+      fi
+      return 0
+      ;;
+    *)
+      record_issue "$severity" "Repository-internal agent filename must start with 'internal-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal agent name must start with 'internal-': ${file}"
+      fi
+      ;;
+  esac
 }
 
 validate_prompt_name_policy() {
@@ -443,6 +585,8 @@ validate_prompt_file() {
     section_severity="warn"
   fi
 
+  validate_frontmatter_structure "$file" error || true
+
   if frontmatter "$file" | grep -Eq '^mode:[[:space:]]*'; then
     severity="error"
     [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
@@ -450,6 +594,7 @@ validate_prompt_file() {
   fi
 
   validate_prompt_name_policy "$file"
+  validate_repo_local_prompt_naming "$file"
 
   if ! has_heading_exact "$file" '## Instructions'; then
     record_issue "$section_severity" "Prompt missing '## Instructions' section: ${file}"
@@ -498,6 +643,8 @@ validate_prompt_file() {
 validate_instruction_file() {
   local file="$1"
 
+  validate_frontmatter_structure "$file" error || true
+
   if [[ "$MODE" == "strict" ]]; then
     check_required_keys "$file" error applyTo description
   else
@@ -516,7 +663,9 @@ validate_skill_file() {
 
   [[ "$MODE" == "legacy-compatible" ]] && section_severity="warn"
 
+  validate_frontmatter_structure "$file" error || true
   check_required_keys "$file" error name description
+  validate_repo_local_skill_naming "$file"
 
   if ! has_heading_regex "$file" '^## When to [Uu]se$'; then
     record_issue "$section_severity" "Skill missing '## When to use' section: ${file}"
@@ -546,7 +695,9 @@ validate_agents_dir() {
 
   while IFS= read -r file; do
     count=$((count + 1))
+    validate_frontmatter_structure "$file" error || true
     check_required_keys "$file" error name description tools
+    validate_repo_local_agent_naming "$file"
 
     if ! grep -Eq '^# ' "$file"; then
       record_error "Agent missing top heading: ${file}"

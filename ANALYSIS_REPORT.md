@@ -1,5 +1,7 @@
 # Cloud Strategy GitHub — Comprehensive Analysis Report
 
+> **STATUS**: SUPERSEDED by `COPILOT_REVIEW.md` dated 2026-03-09. Some findings below are already resolved and should be treated as historical context, not the current source of truth.
+
 > **Generated**: 2025-07-17
 > **Scope**: Full repository audit of `cloud-strategy.github`
 > **Purpose**: Identify issues, improvement opportunities, and unconsidered areas in the central Copilot customization standards repository.

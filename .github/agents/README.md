@@ -13,6 +13,15 @@ This folder contains optional custom agents for focused tasks.
 - PR-focused: `TechAIPRWriter`.
 - Write-capable: `TechAIImplementer`.
 - Repo-only standards specialists: `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`.
+- Repo-only consumer-repository specialist: `TechAIInternalCopilotCustomizationBuilder`.
+
+## Repo-only agents (not synced to consumers)
+- `TechAIGlobalCustomizationBuilder`
+- `TechAIGlobalCustomizationAuditor`
+- `TechAIInternalCopilotCustomizationBuilder`
+- `TechAIScriptReviewer`
+- `TechAISyncCopilotConfigs`
+- `TechAICustomizationAuditor` (deprecated compatibility alias)
 
 ## Why generic core agents
 - `TechAIPlanner`, `TechAIImplementer`, and `TechAIReviewer` are workflow roles, not language roles.
@@ -29,3 +38,5 @@ This folder contains optional custom agents for focused tasks.
 7. Use `TechAISecurityReviewer` as final security gate.
 8. Use `TechAIGlobalCustomizationBuilder` for GitHub Copilot customization assets in this standards repository.
 9. Use `TechAIGlobalCustomizationAuditor` as the final gate for those customization changes.
+10. Use `TechAISyncCopilotConfigs` to align a consumer baseline before creating repo-owned internal assets.
+11. Use `TechAIInternalCopilotCustomizationBuilder` for repo-owned `internal-*` prompts, skills, agents, and `AGENTS.md` updates that should stay consumer-repository.
