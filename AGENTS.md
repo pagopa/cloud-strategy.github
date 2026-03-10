@@ -33,6 +33,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `TechAIImplementer` for direct code or configuration changes and validation-first delivery.
 - Use `TechAIReviewer` for quality gates and defect or regression findings.
 - Use `TechAIScriptReviewer` for exhaustive, nit-level reviews on Python, Bash, and Terraform.
+- Use `TechAIPairArchitect` for deep change-impact analysis with DDD focus, blind-spot detection, and structured Markdown report generation.
 - Use `TechAIGlobalCustomizationBuilder` as the default specialist for creating or updating GitHub Copilot customization assets in this repository.
 - Use `TechAIGlobalCustomizationAuditor` as the final quality gate for GitHub Copilot customization changes in this repository.
 - Use `TechAICustomizationAuditor` only as a deprecated compatibility alias while older references are migrated.
@@ -52,6 +53,9 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Do not use `TechAIImplementer` alone when the task is cross-repository Copilot configuration alignment; use `TechAISyncCopilotConfigs`.
 - Do not use `TechAISyncCopilotConfigs` alone when the task is to author new repository-owned `internal-*` assets in a consumer repository; use `TechAIInternalCopilotCustomizationBuilder` after baseline alignment.
 - Do not use `TechAIInternalCopilotCustomizationBuilder` to add new shared `tech-ai-*` assets in this standards repository; use `TechAIGlobalCustomizationBuilder`.
+- Do not use `TechAIPairArchitect` for quick line-level nit reviews; use `TechAIScriptReviewer` or `TechAICodeReview` instead.
+- Do not use `TechAIReviewer` when you need holistic change-set impact analysis with DDD, architecture, and blind spots; use `TechAIPairArchitect`.
+- Do not use `TechAIPairArchitect` for exhaustive per-language anti-pattern scanning; use `TechAIScriptReviewer` and then `TechAIPairArchitect` for the bigger picture.
 
 ### Composition and Handoffs
 
@@ -64,6 +68,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAIReviewer` findings flagged as `Critical` or `Major` route back to `TechAIImplementer` for remediation.
 - `TechAIGlobalCustomizationBuilder` output is input context for `TechAIGlobalCustomizationAuditor`.
 - `TechAIGlobalCustomizationAuditor` findings flagged as `Critical` or `Major` route back to `TechAIGlobalCustomizationBuilder` for remediation.
+- `TechAIPairArchitect` output (`ANALYSIS_REPORT.md`) is input context for `TechAIImplementer` when remediation is needed.
+- For thorough pre-merge validation, the recommended chain is `TechAIImplementer` -> `TechAIPairArchitect` -> `TechAIImplementer` (remediation).
 
 ## Governance References
 
@@ -136,6 +142,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAIPRDescription`: pull request body generation.
 - `TechAIAddUnitTests`: test authoring and improvement.
 - `TechAITerraform`: Terraform feature or module authoring.
+- `TechAIPairArchitectAnalysis`: deep change-impact analysis with DDD focus, health score, risk matrix, and devil's advocate mode.
 
 ### Preferred skills
 
@@ -146,6 +153,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAIPRWriting`: PR writing conventions aligned to the repository template.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
 - `TechAITerraformModule`: reusable Terraform module design.
+- `TechAIPairArchitect`: change-set-level impact, DDD smell catalog, health scoring, risk matrix, and blind-spot detection.
 
 ### Required validations before PR
 
@@ -178,6 +186,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/tech-ai-add-report-script.prompt.md`
 - `.github/prompts/tech-ai-add-unit-tests.prompt.md`
 - `.github/prompts/tech-ai-bash-script.prompt.md`
+- `.github/prompts/tech-ai-pair-architect-analysis.prompt.md`
 - `.github/prompts/tech-ai-cicd-workflow.prompt.md`
 - `.github/prompts/tech-ai-cloud-policy.prompt.md`
 - `.github/prompts/tech-ai-code-review.prompt.md`
@@ -196,6 +205,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Skills
 
+- `.github/skills/tech-ai-pair-architect/SKILL.md`
 - `.github/skills/tech-ai-cicd-workflow/SKILL.md`
 - `.github/skills/tech-ai-cloud-policy/SKILL.md`
 - `.github/skills/tech-ai-code-review/SKILL.md`
@@ -214,6 +224,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Agents
 
+- `.github/agents/tech-ai-pair-architect.agent.md`
 - `.github/agents/tech-ai-customization-auditor.agent.md`
 - `.github/agents/tech-ai-github-pr-writer.agent.md`
 - `.github/agents/tech-ai-github-workflow-supply-chain.agent.md`
