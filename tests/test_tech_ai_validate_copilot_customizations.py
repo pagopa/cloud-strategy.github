@@ -293,3 +293,22 @@ def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated
     assert "validate-copilot-customizations.sh" in builder_text
     assert "Deprecated compatibility alias" in legacy_auditor_text
     assert "TechAIGlobalCustomizationAuditor" in legacy_auditor_text
+
+
+def test_local_builder_requires_grounding_against_concrete_target_files() -> None:
+    agent_text = (
+        REPO_ROOT / ".github" / "agents" / "tech-ai-local-copilot-customization-builder.agent.md"
+    ).read_text(encoding="utf-8")
+    prompt_text = (
+        REPO_ROOT / ".github" / "prompts" / "tech-ai-local-copilot-customization-builder.prompt.md"
+    ).read_text(encoding="utf-8")
+    skill_text = (
+        REPO_ROOT / ".github" / "skills" / "tech-ai-local-copilot-customization-builder" / "SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "inspect concrete target files first" in agent_text
+    assert "`Target evidence`" in agent_text
+    assert "Inspect one or more concrete target files" in prompt_text
+    assert "stop and report the missing grounding" in prompt_text
+    assert "Identify at least one representative target file" in skill_text
+    assert "do not invent fields, object shapes, identity suffixes, or naming conventions" in skill_text

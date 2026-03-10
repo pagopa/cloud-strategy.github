@@ -15,6 +15,7 @@ Create and refine consumer-repository Copilot customization assets that must rem
 - Do not duplicate a capability that already exists in the synced baseline unless the requested behavior is genuinely repository-specific.
 - Do not overwrite manifest-managed synced files unless explicitly requested and conflict-safe.
 - Do not sync workflows, templates, changelog files, or bootstrap helpers from the source repository as part of local customization work.
+- Do not infer target schema, naming conventions, identity normalization rules, or example payloads from memory; inspect concrete target files first and ground every local asset against them.
 - Keep repository-facing text in English and use GitHub Copilot terminology only.
 
 ## Routing
@@ -24,6 +25,7 @@ Create and refine consumer-repository Copilot customization assets that must rem
 
 ## Output Contract
 - `Baseline check`: whether the consumer already has the required synced Copilot core assets and validator coverage.
+- `Target evidence`: concrete files, field names, naming patterns, and validation commands used to ground the local asset.
 - `Local customization decision`: why a new `local-*` asset is needed instead of reusing an existing `tech-ai-*` capability.
 - `File plan`: `local-*` prompts, skills, agents, and `AGENTS.md` updates to create or modify.
 - `Validation`: target-repository validation commands run and their results.

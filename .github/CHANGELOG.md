@@ -8,6 +8,7 @@ Use this format for new updates:
 
 ## 2026-03-09
 - Added the repo-only `TechAILocalCopilotCustomizationBuilder` agent, prompt, and skill for creating consumer-local `local-*` Copilot assets without duplicating the shared baseline, and excluded the trio from consumer sync.
+- Tightened `TechAILocalCopilotCustomizationBuilder` so it must ground repo-local prompts, examples, schema snippets, and naming rules on concrete target files instead of generic remembered patterns.
 - Deprecated `.github/scripts/bootstrap-copilot-config.sh` in favor of `.github/scripts/tech-ai-sync-copilot-configs.py`, updated lifecycle docs, and made quickstart plus `.github/README.md` prefer sync-first alignment.
 - Added source release metadata with root `VERSION`, contributor workflow documentation, and manifest provenance fields for source version and commit.
 - Tightened consumer alignment: improved composite-action detection, enabled data-registry selection for JSON-heavy repositories, slimmed generated `AGENTS.md`, removed spurious `pytest` recommendations for repos without pytest tests, and added sync recommendations for missing Copilot validation workflows plus legacy source-only residues.
