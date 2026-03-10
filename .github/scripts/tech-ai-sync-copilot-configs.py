@@ -38,7 +38,7 @@ SOURCE_ONLY_AGENT_PATHS = {
     ".github/agents/tech-ai-customization-auditor.agent.md",
     ".github/agents/tech-ai-global-customization-auditor.agent.md",
     ".github/agents/tech-ai-global-customization-builder.agent.md",
-    ".github/agents/tech-ai-local-copilot-customization-builder.agent.md",
+    ".github/agents/tech-ai-internal-copilot-customization-builder.agent.md",
     ".github/agents/tech-ai-script-reviewer.agent.md",
     ".github/agents/tech-ai-sync-copilot-configs.agent.md",
 }
@@ -46,12 +46,12 @@ SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/tech-ai-add-platform.prompt.md",
     ".github/prompts/tech-ai-add-report-script.prompt.md",
     ".github/prompts/tech-ai-code-review.prompt.md",
-    ".github/prompts/tech-ai-local-copilot-customization-builder.prompt.md",
+    ".github/prompts/tech-ai-internal-copilot-customization-builder.prompt.md",
     ".github/prompts/tech-ai-sync-copilot-configs.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/tech-ai-code-review/SKILL.md",
-    ".github/skills/tech-ai-local-copilot-customization-builder/SKILL.md",
+    ".github/skills/tech-ai-internal-copilot-customization-builder/SKILL.md",
     ".github/skills/tech-ai-sync-copilot-configs/SKILL.md",
 }
 CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-bash-script.prompt.md"
@@ -535,7 +535,7 @@ def prompt_expected_name(relative_path: str) -> str | None:
     return None
 
 
-def local_asset_identifier(relative_path: str) -> str | None:
+def internal_asset_identifier(relative_path: str) -> str | None:
     path = Path(relative_path)
     category = asset_category(relative_path)
 
@@ -548,9 +548,9 @@ def local_asset_identifier(relative_path: str) -> str | None:
     return None
 
 
-def is_local_asset_path(relative_path: str) -> bool:
-    identifier = local_asset_identifier(relative_path)
-    return bool(identifier and identifier.startswith("local-"))
+def is_internal_asset_path(relative_path: str) -> bool:
+    identifier = internal_asset_identifier(relative_path)
+    return bool(identifier and identifier.startswith("internal-"))
 
 
 def scan_repo_files(repo_root: Path) -> list[Path]:
@@ -1378,13 +1378,13 @@ def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str, repo_
         issues.append(f"Prompt name policy mismatch: expected `{expected_name}`, found `{actual_name}`.")
 
     if repo_local:
-        if not is_local_asset_path(relative_path):
-            issues.append("Repository-local prompt filename must start with `local-`.")
-        if actual_name and not actual_name.startswith("local-"):
-            issues.append("Repository-local prompt `name` must start with `local-`.")
-        local_identifier = local_asset_identifier(relative_path)
-        if local_identifier and local_identifier.startswith("local-") and actual_name and actual_name != local_identifier:
-            issues.append(f"Repository-local prompt `name` should match filename stem `{local_identifier}`.")
+        if not is_internal_asset_path(relative_path):
+            issues.append("Repository-internal prompt filename must start with `internal-`.")
+        if actual_name and not actual_name.startswith("internal-"):
+            issues.append("Repository-internal prompt `name` must start with `internal-`.")
+        internal_identifier = internal_asset_identifier(relative_path)
+        if internal_identifier and internal_identifier.startswith("internal-") and actual_name and actual_name != internal_identifier:
+            issues.append(f"Repository-internal prompt `name` should match filename stem `{internal_identifier}`.")
 
     for heading in ("## Instructions", "## Validation", "## Minimal example"):
         if not has_heading_exact(path, heading):
@@ -1417,14 +1417,14 @@ def validate_unmanaged_skill_asset(target_root: Path, relative_path: str, repo_l
         issues.append("Missing validation/testing section.")
 
     if repo_local:
-        local_identifier = local_asset_identifier(relative_path)
+        internal_identifier = internal_asset_identifier(relative_path)
         actual_name = frontmatter.get("name", "")
-        if not is_local_asset_path(relative_path):
-            issues.append("Repository-local skill directory must start with `local-`.")
-        if actual_name and not actual_name.startswith("local-"):
-            issues.append("Repository-local skill `name` must start with `local-`.")
-        if local_identifier and local_identifier.startswith("local-") and actual_name and actual_name != local_identifier:
-            issues.append(f"Repository-local skill `name` should match directory name `{local_identifier}`.")
+        if not is_internal_asset_path(relative_path):
+            issues.append("Repository-internal skill directory must start with `internal-`.")
+        if actual_name and not actual_name.startswith("internal-"):
+            issues.append("Repository-internal skill `name` must start with `internal-`.")
+        if internal_identifier and internal_identifier.startswith("internal-") and actual_name and actual_name != internal_identifier:
+            issues.append(f"Repository-internal skill `name` should match directory name `{internal_identifier}`.")
 
     return issues
 
@@ -1446,14 +1446,14 @@ def validate_unmanaged_agent_asset(target_root: Path, relative_path: str, repo_l
         issues.append("Missing `## Restrictions` section.")
 
     if repo_local:
-        local_identifier = local_asset_identifier(relative_path)
+        internal_identifier = internal_asset_identifier(relative_path)
         actual_name = frontmatter.get("name", "")
-        if not is_local_asset_path(relative_path):
-            issues.append("Repository-local agent filename must start with `local-`.")
-        if actual_name and not actual_name.startswith("local-"):
-            issues.append("Repository-local agent `name` must start with `local-`.")
-        if local_identifier and local_identifier.startswith("local-") and actual_name and actual_name != local_identifier:
-            issues.append(f"Repository-local agent `name` should match filename stem `{local_identifier}`.")
+        if not is_internal_asset_path(relative_path):
+            issues.append("Repository-internal agent filename must start with `internal-`.")
+        if actual_name and not actual_name.startswith("internal-"):
+            issues.append("Repository-internal agent `name` must start with `internal-`.")
+        if internal_identifier and internal_identifier.startswith("internal-") and actual_name and actual_name != internal_identifier:
+            issues.append(f"Repository-internal agent `name` should match filename stem `{internal_identifier}`.")
 
     return issues
 
@@ -1506,8 +1506,8 @@ def detect_unmanaged_target_asset_issues(
             validation_issues = validator(target_root, relative_path, repo_local=repo_local)
             if validation_issues:
                 issue_types.append("validation")
-                if any(detail.startswith("Repository-local ") for detail in validation_issues):
-                    issue_types.append("local_naming")
+                if any(detail.startswith("Repository-internal ") for detail in validation_issues):
+                    issue_types.append("internal_naming")
                 details.extend(validation_issues)
 
             if not issue_types:
@@ -1807,8 +1807,8 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         "- Use GitHub Copilot terminology in repository-facing content.",
         "- Do not mention internal runtime names in repository artifacts.",
         "- Treat prompt frontmatter `name:` as the canonical command identifier.",
-        "- Repository-local prompt, skill, and agent filenames must start with `local-`.",
-        "- Repository-local prompt, skill, and agent `name:` values must also start with `local-`.",
+        "- Repository-internal prompt, skill, and agent filenames must start with `internal-`.",
+        "- Repository-internal prompt, skill, and agent `name:` values must also start with `internal-`.",
         "",
         "## Decision Priority",
         "1. Apply repository non-negotiables from `.github/copilot-instructions.md`.",
@@ -1864,7 +1864,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         [
             "",
             "## Repository Inventory (Auto-generated)",
-            "This inventory reflects the desired managed baseline plus repository-local Copilot assets already present in the target repository.",
+            "This inventory reflects the desired managed baseline plus repository-owned internal Copilot assets already present in the target repository.",
             "",
             "### Instructions",
         ]
@@ -2002,13 +2002,13 @@ def build_recommendations(
             f"{', '.join(validation_issue_paths)}."
         )
 
-    local_naming_issue_paths = [
-        issue.target_relative_path for issue in target_asset_issues if "local_naming" in issue.issue_types
+    internal_naming_issue_paths = [
+        issue.target_relative_path for issue in target_asset_issues if "internal_naming" in issue.issue_types
     ]
-    if local_naming_issue_paths:
+    if internal_naming_issue_paths:
         recommendations["missing consumer-facing validation or onboarding guidance"].append(
-            "Repository-local Copilot prompts, skills, and agents should use `local-*` in both filenames and "
-            f"`name:` values: {', '.join(local_naming_issue_paths)}."
+            "Repository-internal Copilot prompts, skills, and agents should use `internal-*` in both filenames and "
+            f"`name:` values: {', '.join(internal_naming_issue_paths)}."
         )
 
     if not target_has_validation_workflow(analysis.repo_root):

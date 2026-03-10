@@ -7,7 +7,7 @@ This repository is the source baseline for reusable GitHub Copilot customization
 - Canonical source-owned instructions, prompts, skills, and agents use the `tech-ai-` filename prefix.
 - Canonical prompt, skill, and agent `name:` values use the `TechAI` prefix.
 - Repo-only standards agents use the `TechAIGlobal` prefix and must stay source-only.
-- Consumer-local assets use the `local-` prefix in both filenames and `name:` values.
+- Consumer-repository assets use the `internal-` prefix in both filenames and `name:` values.
 
 ## Adding or updating assets
 - Instructions: keep frontmatter `description` and `applyTo`, use repository-agnostic wording, and avoid stack duplication already covered by a skill.

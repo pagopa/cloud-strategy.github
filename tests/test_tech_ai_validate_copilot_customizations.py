@@ -75,8 +75,8 @@ def test_tech_ai_validator_reports_missing_prompt_argument_hint(tmp_path: Path) 
     assert any("Missing frontmatter key 'argument-hint'" in message for message in messages)
 
 
-def test_tech_ai_validator_requires_local_prefix_for_repo_owned_assets(tmp_path: Path) -> None:
-    target_root = tmp_path / "invalid-local-assets"
+def test_tech_ai_validator_requires_internal_prefix_for_repo_owned_assets(tmp_path: Path) -> None:
+    target_root = tmp_path / "invalid-internal-assets"
     copy_copilot_config(target_root)
 
     (target_root / ".github" / "prompts").mkdir(parents=True, exist_ok=True)
@@ -112,7 +112,7 @@ def test_tech_ai_validator_requires_local_prefix_for_repo_owned_assets(tmp_path:
             [
                 "---",
                 "name: user-admin",
-                "description: Repository-local user administration workflow.",
+                "description: Repository-internal user administration workflow.",
                 "---",
                 "",
                 "# User Admin",
@@ -129,17 +129,17 @@ def test_tech_ai_validator_requires_local_prefix_for_repo_owned_assets(tmp_path:
         encoding="utf-8",
     )
 
-    report_file = tmp_path / "tech-ai-validator-local-prefix.json"
+    report_file = tmp_path / "tech-ai-validator-internal-prefix.json"
     result = run_validator(target_root, report_file)
 
     payload = json.loads(report_file.read_text(encoding="utf-8"))
     messages = [finding["message"] for finding in payload["findings"]]
     assert result.returncode == 1
     assert payload["status"] == "failed"
-    assert any("Repository-local prompt filename must start with 'local-'" in message for message in messages)
-    assert any("Repository-local prompt name must start with 'local-'" in message for message in messages)
-    assert any("Repository-local skill directory must start with 'local-'" in message for message in messages)
-    assert any("Repository-local skill name must start with 'local-'" in message for message in messages)
+    assert any("Repository-internal prompt filename must start with 'internal-'" in message for message in messages)
+    assert any("Repository-internal prompt name must start with 'internal-'" in message for message in messages)
+    assert any("Repository-internal skill directory must start with 'internal-'" in message for message in messages)
+    assert any("Repository-internal skill name must start with 'internal-'" in message for message in messages)
 
 
 def test_tech_ai_validator_requires_root_agents_file(tmp_path: Path) -> None:
@@ -271,7 +271,7 @@ def test_root_agents_routes_customization_work_to_global_and_local_customization
 
     assert "TechAIGlobalCustomizationBuilder" in agents_text
     assert "TechAIGlobalCustomizationAuditor" in agents_text
-    assert "TechAILocalCopilotCustomizationBuilder" in agents_text
+    assert "TechAIInternalCopilotCustomizationBuilder" in agents_text
     assert "repo-only" in agents_text
     assert "## Available Skills" not in agents_text
     assert "## Available Prompts" not in agents_text
@@ -295,15 +295,15 @@ def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated
     assert "TechAIGlobalCustomizationAuditor" in legacy_auditor_text
 
 
-def test_local_builder_requires_grounding_against_concrete_target_files() -> None:
+def test_internal_builder_requires_grounding_against_concrete_target_files() -> None:
     agent_text = (
-        REPO_ROOT / ".github" / "agents" / "tech-ai-local-copilot-customization-builder.agent.md"
+        REPO_ROOT / ".github" / "agents" / "tech-ai-internal-copilot-customization-builder.agent.md"
     ).read_text(encoding="utf-8")
     prompt_text = (
-        REPO_ROOT / ".github" / "prompts" / "tech-ai-local-copilot-customization-builder.prompt.md"
+        REPO_ROOT / ".github" / "prompts" / "tech-ai-internal-copilot-customization-builder.prompt.md"
     ).read_text(encoding="utf-8")
     skill_text = (
-        REPO_ROOT / ".github" / "skills" / "tech-ai-local-copilot-customization-builder" / "SKILL.md"
+        REPO_ROOT / ".github" / "skills" / "tech-ai-internal-copilot-customization-builder" / "SKILL.md"
     ).read_text(encoding="utf-8")
 
     assert "inspect concrete target files first" in agent_text

@@ -351,7 +351,7 @@ tech_ai_prompt_name() {
   printf '%s' "$output"
 }
 
-local_asset_identifier() {
+internal_asset_identifier() {
   local file="$1"
   local base
   local parent
@@ -379,30 +379,30 @@ validate_repo_local_prompt_naming() {
   local file="$1"
   local severity="error"
   local actual_name=""
-  local expected_local_name=""
+  local expected_internal_name=""
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
   actual_name="$(frontmatter_value "$file" "name")"
-  expected_local_name="$(local_asset_identifier "$file" || true)"
+  expected_internal_name="$(internal_asset_identifier "$file" || true)"
 
   case "$(basename "$file")" in
     tech-ai-*.prompt.md)
       return 0
       ;;
-    local-*.prompt.md)
-      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
-        record_issue "$severity" "Repository-local prompt name must start with 'local-': ${file}"
+    internal-*.prompt.md)
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal prompt name must start with 'internal-': ${file}"
       fi
-      if [[ -n "$actual_name" && -n "$expected_local_name" && "$actual_name" != "$expected_local_name" ]]; then
-        record_issue "$severity" "Repository-local prompt name must match filename stem '${expected_local_name}': ${file}"
+      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
+        record_issue "$severity" "Repository-internal prompt name must match filename stem '${expected_internal_name}': ${file}"
       fi
       return 0
       ;;
     *)
-      record_issue "$severity" "Repository-local prompt filename must start with 'local-': ${file}"
-      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
-        record_issue "$severity" "Repository-local prompt name must start with 'local-': ${file}"
+      record_issue "$severity" "Repository-internal prompt filename must start with 'internal-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal prompt name must start with 'internal-': ${file}"
       fi
       ;;
   esac
@@ -412,32 +412,32 @@ validate_repo_local_skill_naming() {
   local file="$1"
   local severity="error"
   local actual_name=""
-  local expected_local_name=""
+  local expected_internal_name=""
   local skill_dir
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
   actual_name="$(frontmatter_value "$file" "name")"
-  expected_local_name="$(local_asset_identifier "$file" || true)"
+  expected_internal_name="$(internal_asset_identifier "$file" || true)"
   skill_dir="$(basename "$(dirname "$file")")"
 
   case "$skill_dir" in
     tech-ai-*)
       return 0
       ;;
-    local-*)
-      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
-        record_issue "$severity" "Repository-local skill name must start with 'local-': ${file}"
+    internal-*)
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal skill name must start with 'internal-': ${file}"
       fi
-      if [[ -n "$actual_name" && -n "$expected_local_name" && "$actual_name" != "$expected_local_name" ]]; then
-        record_issue "$severity" "Repository-local skill name must match directory name '${expected_local_name}': ${file}"
+      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
+        record_issue "$severity" "Repository-internal skill name must match directory name '${expected_internal_name}': ${file}"
       fi
       return 0
       ;;
     *)
-      record_issue "$severity" "Repository-local skill directory must start with 'local-': ${file}"
-      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
-        record_issue "$severity" "Repository-local skill name must start with 'local-': ${file}"
+      record_issue "$severity" "Repository-internal skill directory must start with 'internal-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal skill name must start with 'internal-': ${file}"
       fi
       ;;
   esac
@@ -447,30 +447,30 @@ validate_repo_local_agent_naming() {
   local file="$1"
   local severity="error"
   local actual_name=""
-  local expected_local_name=""
+  local expected_internal_name=""
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
   actual_name="$(frontmatter_value "$file" "name")"
-  expected_local_name="$(local_asset_identifier "$file" || true)"
+  expected_internal_name="$(internal_asset_identifier "$file" || true)"
 
   case "$(basename "$file")" in
     tech-ai-*.agent.md)
       return 0
       ;;
-    local-*.agent.md)
-      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
-        record_issue "$severity" "Repository-local agent name must start with 'local-': ${file}"
+    internal-*.agent.md)
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal agent name must start with 'internal-': ${file}"
       fi
-      if [[ -n "$actual_name" && -n "$expected_local_name" && "$actual_name" != "$expected_local_name" ]]; then
-        record_issue "$severity" "Repository-local agent name must match filename stem '${expected_local_name}': ${file}"
+      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
+        record_issue "$severity" "Repository-internal agent name must match filename stem '${expected_internal_name}': ${file}"
       fi
       return 0
       ;;
     *)
-      record_issue "$severity" "Repository-local agent filename must start with 'local-': ${file}"
-      if [[ -n "$actual_name" && "$actual_name" != local-* ]]; then
-        record_issue "$severity" "Repository-local agent name must start with 'local-': ${file}"
+      record_issue "$severity" "Repository-internal agent filename must start with 'internal-': ${file}"
+      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
+        record_issue "$severity" "Repository-internal agent name must start with 'internal-': ${file}"
       fi
       ;;
   esac
