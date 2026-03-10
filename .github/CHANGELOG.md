@@ -7,8 +7,8 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-03-09
-- Added the repo-only `TechAIInternalCopilotCustomizationBuilder` agent, prompt, and skill for creating consumer-repository `internal-*` Copilot assets without duplicating the shared baseline, and excluded the trio from consumer sync.
-- Tightened `TechAIInternalCopilotCustomizationBuilder` so it must ground repo-local prompts, examples, schema snippets, and naming rules on concrete target files instead of generic remembered patterns.
+- Added the repo-only `TechAIRepoCopilotExtender` agent, prompt, and skill for creating consumer-repository `internal-*` Copilot assets without duplicating the shared baseline, and excluded the trio from consumer sync.
+- Tightened `TechAIRepoCopilotExtender` so it must ground repo-local prompts, examples, schema snippets, and naming rules on concrete target files instead of generic remembered patterns.
 - Deprecated `.github/scripts/bootstrap-copilot-config.sh` in favor of `.github/scripts/tech-ai-sync-copilot-configs.py`, updated lifecycle docs, and made quickstart plus `.github/README.md` prefer sync-first alignment.
 - Added source release metadata with root `VERSION`, contributor workflow documentation, and manifest provenance fields for source version and commit.
 - Tightened consumer alignment: improved composite-action detection, enabled data-registry selection for JSON-heavy repositories, slimmed generated `AGENTS.md`, removed spurious `pytest` recommendations for repos without pytest tests, and added sync recommendations for missing Copilot validation workflows plus legacy source-only residues.
@@ -23,31 +23,31 @@ Use this format for new updates:
 - Updated sync planning so legacy aliases such as `cs-*`, unprefixed prompt names, and legacy skill directories are reported even when the canonical family is outside the selected minimum baseline.
 - Updated generated `AGENTS.md` inventory rendering and `.github/templates/AGENTS.template.md` so inventory reflects the desired managed baseline plus target-local Copilot assets already present in the consumer repository.
 - Added source-side redundancy auditing to `scripts/tech-ai-sync-copilot-configs.py`, including canonical asset inventory, legacy alias detection, triad role-overlap checks, and `AGENTS.md` inventory-repeat detection in both markdown and JSON reports.
-- Refactored `agents/tech-ai-sync-copilot-configs.agent.md`, `skills/tech-ai-sync-copilot-configs/SKILL.md`, and `prompts/tech-ai-sync-copilot-configs.prompt.md` so workflow detail lives in the skill while the agent and prompt stay thin.
+- Refactored `agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`, `skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`, and `prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md` so workflow detail lives in the skill while the agent and prompt stay thin.
 - Simplified root `AGENTS.md` and `.github/templates/AGENTS.template.md` to keep asset paths in the inventory section only and remove descriptive prompt or skill catalogs.
 - Expanded sync and validator tests to cover source audit behavior, slimmer AGENTS structure, and JSON report sections.
-- Updated `agents/tech-ai-sync-copilot-configs.agent.md`, `skills/tech-ai-sync-copilot-configs/SKILL.md`, and `prompts/tech-ai-sync-copilot-configs.prompt.md` so the sync workflow explicitly detects redundant legacy aliases before apply.
+- Updated `agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`, `skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`, and `prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md` so the sync workflow explicitly detects redundant legacy aliases before apply.
 - Updated `scripts/tech-ai-sync-copilot-configs.py` to recognize legacy `cs-*`, unprefixed prompt names, and legacy agent or skill aliases, report them as redundant target assets, and raise sync conflicts instead of creating duplicate canonical `tech-ai-*` assets.
 - Updated `tests/test_tech_ai_sync_copilot_configs.py` to cover duplicate-alias detection and conflict behavior during sync planning.
 
 ## 2026-03-07
-- Added repo-only global customization agents `TechAIGlobalCustomizationBuilder` and `TechAIGlobalCustomizationAuditor` for standards-authoring and final quality gates in this repository.
-- Marked `TechAICustomizationAuditor` as a deprecated compatibility alias that now points to `TechAIGlobalCustomizationAuditor`.
+- Added repo-only global customization agents `TechAIStandardsRepoConfigBuilder` and `TechAIStandardsRepoConfigAuditor` for standards-authoring and final quality gates in this repository.
+- Marked `TechAICustomizationAuditor` as a deprecated compatibility alias that now points to `TechAIStandardsRepoConfigAuditor`.
 - Updated root `AGENTS.md`, agent catalog docs, sync exclusions, validator semantics, and tests to treat the `TechAIGlobal*` pair as repo-only standards agents.
 - Added `.gitignore` coverage for Python caches/virtualenvs and macOS Finder artifacts so local validation runs stop creating noisy untracked files.
 - Added canonical low-duplication script prompts: `prompts/tech-ai-bash-script.prompt.md` (`TechAIBashScript`) and `prompts/tech-ai-python-script.prompt.md` (`TechAIPythonScript`).
 - Reduced the legacy `cs-*` and `script-*` Bash/Python prompts to thin compatibility aliases that now point to the canonical TechAI prompts.
 - Updated `scripts/tech-ai-sync-copilot-configs.py`, `AGENTS.md`, and tests to prefer the new `tech-ai-*` canonical script prompts.
 - Reduced token overlap by trimming repository-specific catalog content out of `copilot-instructions.md` and keeping `AGENTS.md` as the single repository-specific source of truth.
-- Normalized the `name:` frontmatter for the TechAI sync prompt and skill to `TechAISyncCopilotConfigs`.
+- Normalized the `name:` frontmatter for the TechAI sync prompt and skill to `TechAISyncGlobalCopilotConfigsIntoRepo`.
 - Renamed the remaining canonical `cs-*` prompt files to `tech-ai-*` and updated profile, AGENTS, sync, and test references accordingly.
 - Removed the redundant `script-bash.prompt.md` and `script-python.prompt.md` alias prompts to keep one canonical script prompt per stack.
 
 ## 2026-03-06
-- Added `agents/tech-ai-sync-copilot-configs.agent.md`: `TechAISyncCopilotConfigs` for local repository analysis and conservative Copilot-core alignment.
-- Added `prompts/tech-ai-sync-copilot-configs.prompt.md` and `skills/tech-ai-sync-copilot-configs/SKILL.md` for repeatable alignment workflows.
+- Added `agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`: `TechAISyncGlobalCopilotConfigsIntoRepo` for local repository analysis and conservative Copilot-core alignment.
+- Added `prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md` and `skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md` for repeatable alignment workflows.
 - Added `scripts/tech-ai-sync-copilot-configs.py` plus `tests/test_tech_ai_sync_copilot_configs.py` for deterministic analysis, manifest-based sync planning, and reporting.
-- Updated `AGENTS.md` with `TechAISyncCopilotConfigs` routing, inventory, and preferred asset references.
+- Updated `AGENTS.md` with `TechAISyncGlobalCopilotConfigsIntoRepo` routing, inventory, and preferred asset references.
 - Reduced `copilot-code-review-instructions.md` to a lighter-weight review protocol that delegates the detailed anti-pattern catalog to `skills/tech-ai-code-review/SKILL.md`.
 - Updated `scripts/tech-ai-sync-copilot-configs.py` to prefer canonical `cs-*` script prompts during consumer alignment, reducing prompt duplication and token footprint without removing legacy source assets.
 - Added `.github/tech-ai-requirements-dev.txt`, CI pytest execution, `shellcheck` pre-commit coverage, and validator integration tests for stronger local and CI validation.
@@ -77,7 +77,7 @@ Use this format for new updates:
 - Added `instructions/composite-action.instructions.md` for reusable composite actions.
 - Added `scripts/bootstrap-copilot-config.sh` for safe `.github` bootstrap and sync.
 - Added `templates/copilot-quickstart.md` for portable onboarding.
-- Added PR authoring assets: `prompts/tech-ai-github-pr-description.prompt.md` and `skills/tech-ai-pr-writing/SKILL.md`.
+- Added PR authoring assets: `prompts/tech-ai-pr-description.prompt.md` and `skills/tech-ai-pr-editor/SKILL.md`.
 - Updated docs to be repository-agnostic and reusable across different tech stacks.
 - Standardized script prompt wording to remove organization-specific terminology and keep language portable.
 - Hardened validator frontmatter key detection for multiline YAML keys.

@@ -526,7 +526,7 @@ The changelog has entries dated in 2026 (e.g., `2026-02-07`, `2026-02-28`, `2026
 | `.github/scripts/tech-ai-sync-copilot-configs.py` | Well-architected sync tool (~900 lines) |
 | `AGENTS.md` | Comprehensive agent routing and decision priority |
 | `.github/skills/code-review/SKILL.md` | Excellent anti-pattern catalogs |
-| `.github/skills/tech-ai-sync-copilot-configs/SKILL.md` | Thorough implementation reference |
+| `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md` | Thorough implementation reference |
 
 ---
 

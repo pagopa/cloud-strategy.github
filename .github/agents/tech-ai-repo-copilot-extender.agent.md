@@ -1,6 +1,6 @@
 ---
-description: Create or update repository-owned internal GitHub Copilot customization assets in a consumer repository without duplicating the shared baseline.
-name: TechAIInternalCopilotCustomizationBuilder
+description: Add repo-specific internal-* Copilot assets (prompts, skills, agents) to a consumer repo. Extends the shared baseline without duplicating it. Run TechAISyncGlobalCopilotConfigsIntoRepo first.
+name: TechAIRepoCopilotExtender
 tools: ["search", "usages", "problems", "editFiles", "runTerminal", "fetch"]
 ---
 
@@ -20,8 +20,8 @@ Create and refine consumer-repository Copilot customization assets that must rem
 
 ## Routing
 - Use this agent when a consumer repository needs repo-owned prompts, skills, agents, or `AGENTS.md` wiring that must stay internal.
-- If the consumer baseline is missing or stale, start with `TechAISyncCopilotConfigs` in `plan` mode before creating new internal assets.
-- Treat `.github/skills/tech-ai-internal-copilot-customization-builder/SKILL.md` as the workflow definition.
+- If the consumer baseline is missing or stale, start with `TechAISyncGlobalCopilotConfigsIntoRepo` in `plan` mode before creating new internal assets.
+- Treat `.github/skills/tech-ai-repo-copilot-extender/SKILL.md` as the workflow definition.
 
 ## Output Contract
 - `Baseline check`: whether the consumer already has the required synced Copilot core assets and validator coverage.

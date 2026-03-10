@@ -306,7 +306,7 @@ prompt_expected_name() {
     tech-ai-github-composite-action.prompt.md)
       printf '%s' "TechAICompositeAction"
       ;;
-    tech-ai-github-pr-description.prompt.md)
+    tech-ai-pr-description.prompt.md)
       printf '%s' "TechAIPRDescription"
       ;;
     tech-ai-add-platform.prompt.md)
@@ -773,7 +773,7 @@ validate_agents_dir() {
           record_issue "$semantic_severity" "Reviewer agent should reference code review instructions: ${file}"
         fi
         ;;
-      tech-ai-global-customization-builder.agent.md)
+      tech-ai-standards-repo-config-builder.agent.md)
         if ! has_heading_exact "$file" '## Source of truth'; then
           record_issue "$semantic_severity" "Global customization builder missing '## Source of truth' section: ${file}"
         fi
@@ -801,11 +801,11 @@ validate_agents_dir() {
         if ! grep -Fq 'scripts/validate-copilot-customizations.sh' "$file"; then
           record_issue "$semantic_severity" "Global customization builder should reference customization validator: ${file}"
         fi
-        if ! grep -Fq 'TechAIGlobalCustomizationAuditor' "$file"; then
-          record_issue "$semantic_severity" "Global customization builder should hand off to TechAIGlobalCustomizationAuditor: ${file}"
+        if ! grep -Fq 'TechAIStandardsRepoConfigAuditor' "$file"; then
+          record_issue "$semantic_severity" "Global customization builder should hand off to TechAIStandardsRepoConfigAuditor: ${file}"
         fi
         ;;
-      tech-ai-global-customization-auditor.agent.md)
+      tech-ai-standards-repo-config-auditor.agent.md)
         if ! has_heading_exact "$file" '## Audit protocol'; then
           record_issue "$semantic_severity" "Global customization auditor missing '## Audit protocol' section: ${file}"
         fi
@@ -821,8 +821,8 @@ validate_agents_dir() {
         if ! grep -Fq 'scripts/validate-copilot-customizations.sh' "$file"; then
           record_issue "$semantic_severity" "Global customization auditor should reference customization validator: ${file}"
         fi
-        if ! grep -Fq 'TechAIGlobalCustomizationBuilder' "$file"; then
-          record_issue "$semantic_severity" "Global customization auditor should route major findings to TechAIGlobalCustomizationBuilder: ${file}"
+        if ! grep -Fq 'TechAIStandardsRepoConfigBuilder' "$file"; then
+          record_issue "$semantic_severity" "Global customization auditor should route major findings to TechAIStandardsRepoConfigBuilder: ${file}"
         fi
         ;;
     esac
@@ -1063,18 +1063,25 @@ validate_workflow_permissions() {
 
 validate_pr_template_consistency() {
   local github_dir="$1"
-  local lower_template="${github_dir}/pull_request_template.md"
-  local upper_template="${github_dir}/PULL_REQUEST_TEMPLATE.md"
+  local lower_template
+  local upper_template
   local severity="error"
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
-  if [[ ! -f "$lower_template" && ! -f "$upper_template" ]]; then
-    record_issue "$severity" "Missing PR template in ${github_dir} (expected pull_request_template.md or PULL_REQUEST_TEMPLATE.md)"
+  lower_template="$(find "$github_dir" -maxdepth 1 -type f -name 'pull_request_template.md' -print -quit)"
+  upper_template="$(find "$github_dir" -maxdepth 1 -type f -name 'PULL_REQUEST_TEMPLATE.md' -print -quit)"
+
+  if [[ -z "$lower_template" && -z "$upper_template" ]]; then
+    record_issue "$severity" "Missing PR template in ${github_dir} (expected PULL_REQUEST_TEMPLATE.md)"
     return 0
   fi
 
-  if [[ -f "$lower_template" && -f "$upper_template" ]] && ! cmp -s "$lower_template" "$upper_template"; then
+  if [[ -n "$lower_template" ]]; then
+    record_issue "$severity" "PR template filename must be uppercase in ${github_dir}: rename pull_request_template.md to PULL_REQUEST_TEMPLATE.md"
+  fi
+
+  if [[ -n "$lower_template" && -n "$upper_template" ]] && ! cmp -s "$lower_template" "$upper_template"; then
     record_issue "$severity" "PR template files diverge in ${github_dir}: pull_request_template.md vs PULL_REQUEST_TEMPLATE.md"
   fi
 

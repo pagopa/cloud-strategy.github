@@ -91,7 +91,7 @@ This is a standards repository that other teams consume. Without contribution gu
 - How to add a new agent (naming, tools, restrictions)
 - Naming conventions (`tech-ai-*` for canonical, `local-*` for consumer-local, `TechAIGlobal*` for repo-only)
 - Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
-- Review process (use `TechAIGlobalCustomizationBuilder` → `TechAIGlobalCustomizationAuditor`)
+- Review process (use `TechAIStandardsRepoConfigBuilder` → `TechAIStandardsRepoConfigAuditor`)
 
 ---
 
@@ -252,15 +252,15 @@ The ANALYSIS_REPORT (item 4.4) flagged inconsistent input variable naming. Promp
 
 **File**: `.github/agents/README.md`
 
-The agents README lists routing for all agents including repo-only ones (`TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`), but does not explicitly mark them as non-syncable. This information is in `AGENTS.md` but should also be in the agents README for clarity.
+The agents README lists routing for all agents including repo-only ones (`TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`), but does not explicitly mark them as non-syncable. This information is in `AGENTS.md` but should also be in the agents README for clarity.
 
 **Fix**: Add a note to the README:
 ```markdown
 ## Repo-only agents (not synced to consumers)
-- `TechAIGlobalCustomizationBuilder`
-- `TechAIGlobalCustomizationAuditor`
+- `TechAIStandardsRepoConfigBuilder`
+- `TechAIStandardsRepoConfigAuditor`
 - `TechAIScriptReviewer`
-- `TechAISyncCopilotConfigs`
+- `TechAISyncGlobalCopilotConfigsIntoRepo`
 - `TechAICustomizationAuditor` (deprecated alias)
 ```
 
@@ -375,7 +375,7 @@ Each preferred prompt/skill includes a one-line description. These descriptions 
 ### Preferred prompts
 - `TechAICodeReview`
 - `TechAIGitHubAction`
-- `TechAISyncCopilotConfigs`
+- `TechAISyncGlobalCopilotConfigsIntoRepo`
 - `TechAIPRDescription`
 - `TechAIAddUnitTests`
 - `TechAITerraform`
@@ -485,7 +485,7 @@ Seven "Do not use X when..." bullets are excellent guidance but could be more to
 
 **Fix**: In `AGENTS.md` inventory, annotate:
 ```markdown
-- `.github/agents/tech-ai-customization-auditor.agent.md` *(deprecated — use TechAIGlobalCustomizationAuditor)*
+- `.github/agents/tech-ai-customization-auditor.agent.md` *(deprecated — use TechAIStandardsRepoConfigAuditor)*
 ```
 
 ---

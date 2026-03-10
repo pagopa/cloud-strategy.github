@@ -11,17 +11,17 @@ This folder contains optional custom agents for focused tasks.
 ## Recommended routing
 - Read-only: `TechAIPlanner`, `TechAIReviewer`, `TechAISecurityReviewer`, `TechAIWorkflowSupplyChain`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`.
 - Analysis-to-plan: `TechAIPairArchitectAnalysisExecutor` (takes `TechAIPairArchitect` output, re-evaluates, produces execution plan).
-- PR-focused: `TechAIPRWriter`.
+- PR-focused: `TechAIPREditor`.
 - Write-capable: `TechAIImplementer`.
-- Repo-only standards specialists: `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`.
-- Repo-only consumer-repository specialist: `TechAIInternalCopilotCustomizationBuilder`.
+- Repo-only standards specialists: `TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`.
+- Repo-only consumer-repository specialist: `TechAIRepoCopilotExtender`.
 
 ## Repo-only agents (not synced to consumers)
-- `TechAIGlobalCustomizationBuilder`
-- `TechAIGlobalCustomizationAuditor`
-- `TechAIInternalCopilotCustomizationBuilder`
+- `TechAIStandardsRepoConfigBuilder`
+- `TechAIStandardsRepoConfigAuditor`
+- `TechAIRepoCopilotExtender`
 - `TechAIScriptReviewer`
-- `TechAISyncCopilotConfigs`
+- `TechAISyncGlobalCopilotConfigsIntoRepo`
 - `TechAICustomizationAuditor` (deprecated compatibility alias)
 
 ## Why generic core agents
@@ -35,10 +35,10 @@ This folder contains optional custom agents for focused tasks.
 3. Use `TechAIReviewer` for non-security quality gates.
 4. Use `TechAITerraformGuardrails` and `TechAIIAMLeastPrivilege` on policy/infrastructure changes.
 5. Use `TechAIWorkflowSupplyChain` on workflow changes.
-6. Use `TechAIPRWriter` to create or update PR title/body from template and diff.
+6. Use `TechAIPREditor` to create or update PR title/body from template and diff.
 7. Use `TechAISecurityReviewer` as final security gate.
-8. Use `TechAIGlobalCustomizationBuilder` for GitHub Copilot customization assets in this standards repository.
-9. Use `TechAIGlobalCustomizationAuditor` as the final gate for those customization changes.
-10. Use `TechAISyncCopilotConfigs` to align a consumer baseline before creating repo-owned internal assets.
-11. Use `TechAIInternalCopilotCustomizationBuilder` for repo-owned `internal-*` prompts, skills, agents, and `AGENTS.md` updates that should stay consumer-repository.
+8. Use `TechAIStandardsRepoConfigBuilder` for GitHub Copilot customization assets in this standards repository.
+9. Use `TechAIStandardsRepoConfigAuditor` as the final gate for those customization changes.
+10. Use `TechAISyncGlobalCopilotConfigsIntoRepo` to align a consumer baseline before creating repo-owned internal assets.
+11. Use `TechAIRepoCopilotExtender` for repo-owned `internal-*` prompts, skills, agents, and `AGENTS.md` updates that should stay consumer-repository.
 12. Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` to re-evaluate findings, produce a validated execution plan with per-finding decision tables, extract lessons learned, and prepare work packages for `TechAIImplementer`.

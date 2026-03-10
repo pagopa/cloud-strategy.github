@@ -1,6 +1,6 @@
 ---
-description: Create or update repository-owned internal GitHub Copilot customization assets in a consumer repo while preserving the shared baseline
-name: TechAIInternalCopilotCustomizationBuilder
+description: Add repo-specific internal-* Copilot assets to a consumer repo extending the shared baseline without duplicating it
+name: TechAIRepoCopilotExtender
 agent: agent
 argument-hint: target_repo=<path> change=<summary> [internal_asset_type=<prompt|skill|agent|triad>] [promote_to_source=<yes|no>]
 ---
@@ -17,8 +17,8 @@ Use this prompt to create or refine repository-owned `internal-*` Copilot assets
 - **Promote to source**: ${input:promote_to_source:no}
 
 ## Instructions
-1. Use `.github/skills/tech-ai-internal-copilot-customization-builder/SKILL.md` as the workflow definition.
-2. If the target baseline is missing or stale, run `TechAISyncCopilotConfigs` in `plan` mode first.
+1. Use `.github/skills/tech-ai-repo-copilot-extender/SKILL.md` as the workflow definition.
+2. If the target baseline is missing or stale, run `TechAISyncGlobalCopilotConfigsIntoRepo` in `plan` mode first.
 3. Inspect one or more concrete target files that the internal asset will operate on, then derive schema, naming conventions, identity formats, examples, and validations from those files.
 4. If no suitable target file exists, stop and report the missing grounding instead of inventing schema fields, examples, or naming rules.
 5. Create only the narrowest internal asset set that solves the request.

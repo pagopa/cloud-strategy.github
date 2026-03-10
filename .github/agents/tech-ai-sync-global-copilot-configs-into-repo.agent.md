@@ -1,6 +1,6 @@
 ---
-description: Analyze a local repository and conservatively align the minimum Copilot customization assets from this standards repository.
-name: TechAISyncCopilotConfigs
+description: Propagate the shared Copilot baseline from this standards repo into a consumer repo (e.g. onemail, oneidentity). Plans and applies minimum required assets with conflict detection.
+name: TechAISyncGlobalCopilotConfigsIntoRepo
 tools: ["search", "fetch", "editFiles", "runTerminal", "problems"]
 ---
 
@@ -17,7 +17,7 @@ Analyze a local target repository, select the minimum Copilot customization asse
 
 ## Routing
 - Use this agent only for cross-repository Copilot-core alignment work.
-- Treat `.github/skills/tech-ai-sync-copilot-configs/SKILL.md` as the single workflow definition.
+- Treat `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md` as the single workflow definition.
 - Treat `.github/scripts/tech-ai-sync-copilot-configs.py` as the deterministic execution path.
 - Start with `plan` mode and move to `apply` only on explicit request and only when the plan is conflict-safe.
 

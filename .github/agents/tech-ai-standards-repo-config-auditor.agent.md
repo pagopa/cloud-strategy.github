@@ -1,6 +1,6 @@
 ---
-description: Audit repo-only GitHub Copilot customization changes for this global standards repository with concise, severity-ordered findings.
-name: TechAIGlobalCustomizationAuditor
+description: Validate Copilot configuration changes inside this standards repo for portability, naming consistency, sync safety, and validator compliance. Final quality gate before merge.
+name: TechAIStandardsRepoConfigAuditor
 tools: ["search", "problems", "fetch", "runTerminal"]
 ---
 
@@ -45,4 +45,4 @@ Review GitHub Copilot customization changes in this global standards repository 
 
 ## Handoff
 - If no findings remain, explicitly report `No issues found`.
-- If findings exist, route `Critical` and `Major` findings back to `TechAIGlobalCustomizationBuilder` with the minimal corrective action.
+- If findings exist, route `Critical` and `Major` findings back to `TechAIStandardsRepoConfigBuilder` with the minimal corrective action.

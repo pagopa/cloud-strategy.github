@@ -1,6 +1,6 @@
 ---
-description: Build and normalize GitHub Copilot customization assets for this global standards repository with minimal token usage.
-name: TechAIGlobalCustomizationBuilder
+description: Create and update Copilot configuration assets (instructions, prompts, skills, agents) inside this standards repo (cloud-strategy.github). Does NOT operate on consumer repos.
+name: TechAIStandardsRepoConfigBuilder
 tools: ["search", "usages", "problems", "editFiles", "runTerminal", "fetch"]
 ---
 
@@ -62,4 +62,4 @@ Create and update GitHub Copilot customization assets for this global standards 
 
 ## Handoff
 - Report changed files, conventions applied, validation results, residual risks, and the minimal rationale for any token-saving consolidation.
-- Route the final review to `TechAIGlobalCustomizationAuditor`.
+- Route the final review to `TechAIStandardsRepoConfigAuditor`.

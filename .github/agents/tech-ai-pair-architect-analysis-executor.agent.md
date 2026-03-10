@@ -56,7 +56,7 @@ This agent produces the plan only — it does not execute.
 - Workflows → `TechAIWorkflowSupplyChain`
 - Security → `TechAISecurityReviewer`
 - Line-level review → `TechAIScriptReviewer`
-- Copilot assets → `TechAIGlobalCustomizationBuilder`
+- Copilot assets → `TechAIStandardsRepoConfigBuilder`
 
 ## Handoff
 
