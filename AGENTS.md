@@ -34,42 +34,45 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `TechAIReviewer` for quality gates and defect or regression findings.
 - Use `TechAIScriptReviewer` for exhaustive, nit-level reviews on Python, Bash, and Terraform.
 - Use `TechAIPairArchitect` for deep change-impact analysis with DDD focus, blind-spot detection, and structured Markdown report generation.
-- Use `TechAIGlobalCustomizationBuilder` as the default specialist for creating or updating GitHub Copilot customization assets in this repository.
-- Use `TechAIGlobalCustomizationAuditor` as the final quality gate for GitHub Copilot customization changes in this repository.
+- Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` when the user wants a validated execution plan from `ANALYSIS_REPORT.md` before implementation.
+- Use `TechAIStandardsRepoConfigBuilder` as the default specialist for creating or updating GitHub Copilot customization assets in this repository.
+- Use `TechAIStandardsRepoConfigAuditor` as the final quality gate for GitHub Copilot customization changes in this repository.
 - Use `TechAICustomizationAuditor` only as a deprecated compatibility alias while older references are migrated.
-- Use `TechAISyncCopilotConfigs` for cross-repository Copilot-core alignment and source or target redundancy audits.
-- Use `TechAIInternalCopilotCustomizationBuilder` when a consumer repository needs repo-owned `internal-*` prompts, skills, agents, or `AGENTS.md` wiring that should remain internal instead of entering the shared baseline.
-- Use specialist agents (`TechAIWorkflowSupplyChain`, `TechAISecurityReviewer`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`, `TechAIPRWriter`) only when their domain matches the task.
-- The `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`, and `TechAIInternalCopilotCustomizationBuilder` agents are repo-only and must not be synced to consumer repositories.
+- Use `TechAISyncGlobalCopilotConfigsIntoRepo` for cross-repository Copilot-core alignment and source or target redundancy audits.
+- Use `TechAIRepoCopilotExtender` when a consumer repository needs repo-owned `internal-*` prompts, skills, agents, or `AGENTS.md` wiring that should remain internal instead of entering the shared baseline.
+- Use specialist agents (`TechAIWorkflowSupplyChain`, `TechAISecurityReviewer`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`, `TechAIPREditor`) only when their domain matches the task.
+- The `TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`, and `TechAIRepoCopilotExtender` agents are repo-only and must not be synced to consumer repositories.
 
 ### Anti-patterns
 
 - Do not use `TechAIPlanner` for trivial single-file changes with clear requirements; go directly to `TechAIImplementer`.
 - Do not use `TechAIImplementer` when requirements are ambiguous or scope is unclear; use `TechAIPlanner` first.
-- Do not use `TechAIImplementer` as the primary authoring agent for GitHub Copilot customization assets in this repository; use `TechAIGlobalCustomizationBuilder`.
+- Do not use `TechAIImplementer` as the primary authoring agent for GitHub Copilot customization assets in this repository; use `TechAIStandardsRepoConfigBuilder`.
 - Do not use generic `TechAIReviewer` when the change is purely Terraform, IAM, workflows, or security; use the matching specialist instead.
 - Do not use generic `TechAIReviewer` when you need exhaustive per-language nit-level review; use `TechAIScriptReviewer` instead.
-- Do not use `TechAICustomizationAuditor` for new work; use `TechAIGlobalCustomizationAuditor`.
-- Do not use `TechAIImplementer` alone when the task is cross-repository Copilot configuration alignment; use `TechAISyncCopilotConfigs`.
-- Do not use `TechAISyncCopilotConfigs` alone when the task is to author new repository-owned `internal-*` assets in a consumer repository; use `TechAIInternalCopilotCustomizationBuilder` after baseline alignment.
-- Do not use `TechAIInternalCopilotCustomizationBuilder` to add new shared `tech-ai-*` assets in this standards repository; use `TechAIGlobalCustomizationBuilder`.
+- Do not use `TechAICustomizationAuditor` for new work; use `TechAIStandardsRepoConfigAuditor`.
+- Do not use `TechAIImplementer` alone when the task is cross-repository Copilot configuration alignment; use `TechAISyncGlobalCopilotConfigsIntoRepo`.
+- Do not use `TechAISyncGlobalCopilotConfigsIntoRepo` alone when the task is to author new repository-owned `internal-*` assets in a consumer repository; use `TechAIRepoCopilotExtender` after baseline alignment.
+- Do not use `TechAIRepoCopilotExtender` to add new shared `tech-ai-*` assets in this standards repository; use `TechAIStandardsRepoConfigBuilder`.
 - Do not use `TechAIPairArchitect` for quick line-level nit reviews; use `TechAIScriptReviewer` or `TechAICodeReview` instead.
 - Do not use `TechAIReviewer` when you need holistic change-set impact analysis with DDD, architecture, and blind spots; use `TechAIPairArchitect`.
 - Do not use `TechAIPairArchitect` for exhaustive per-language anti-pattern scanning; use `TechAIScriptReviewer` and then `TechAIPairArchitect` for the bigger picture.
+- Do not send a complex `ANALYSIS_REPORT.md` straight to `TechAIImplementer` when the user first needs a validated remediation plan; use `TechAIPairArchitectAnalysisExecutor`.
 
 ### Composition and Handoffs
 
 - For changes spanning multiple specialist domains, run each relevant specialist and aggregate findings.
 - The standard chain for non-trivial work is `TechAIPlanner` -> `TechAIImplementer` -> `TechAIReviewer` or a matching specialist.
-- For GitHub Copilot customization changes in this repository, use `TechAIGlobalCustomizationBuilder` first and `TechAIGlobalCustomizationAuditor` before final handoff.
-- For consumer-repository Copilot customization work, use `TechAISyncCopilotConfigs` first if the target baseline is unknown, then use `TechAIInternalCopilotCustomizationBuilder` for repo-owned `internal-*` assets.
+- For GitHub Copilot customization changes in this repository, use `TechAIStandardsRepoConfigBuilder` first and `TechAIStandardsRepoConfigAuditor` before final handoff.
+- For consumer-repository Copilot customization work, use `TechAISyncGlobalCopilotConfigsIntoRepo` first if the target baseline is unknown, then use `TechAIRepoCopilotExtender` for repo-owned `internal-*` assets.
 - `TechAIPlanner` output is input context for `TechAIImplementer`.
 - `TechAIImplementer` output is input context for `TechAIReviewer`.
 - `TechAIReviewer` findings flagged as `Critical` or `Major` route back to `TechAIImplementer` for remediation.
-- `TechAIGlobalCustomizationBuilder` output is input context for `TechAIGlobalCustomizationAuditor`.
-- `TechAIGlobalCustomizationAuditor` findings flagged as `Critical` or `Major` route back to `TechAIGlobalCustomizationBuilder` for remediation.
-- `TechAIPairArchitect` output (`ANALYSIS_REPORT.md`) is input context for `TechAIImplementer` when remediation is needed.
-- For thorough pre-merge validation, the recommended chain is `TechAIImplementer` -> `TechAIPairArchitect` -> `TechAIImplementer` (remediation).
+- `TechAIStandardsRepoConfigBuilder` output is input context for `TechAIStandardsRepoConfigAuditor`.
+- `TechAIStandardsRepoConfigAuditor` findings flagged as `Critical` or `Major` route back to `TechAIStandardsRepoConfigBuilder` for remediation.
+- `TechAIPairArchitect` output (`ANALYSIS_REPORT.md`) is input context for `TechAIPairArchitectAnalysisExecutor` when a validated execution plan is needed.
+- `TechAIPairArchitectAnalysisExecutor` output (`EXECUTION_PLAN.md`) is input context for `TechAIImplementer` after the user approves execution.
+- For thorough pre-merge validation, the recommended chain is `TechAIImplementer` -> `TechAIPairArchitect` -> `TechAIPairArchitectAnalysisExecutor` -> `TechAIImplementer`.
 
 ## Governance References
 
@@ -137,8 +140,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 - `TechAICodeReview`: exhaustive, nit-level code review.
 - `TechAIGitHubAction`: GitHub Actions workflow authoring.
-- `TechAIInternalCopilotCustomizationBuilder`: consumer-repository `internal-*` customization authoring.
-- `TechAISyncCopilotConfigs`: cross-repository alignment and redundancy analysis.
+- `TechAIRepoCopilotExtender`: consumer-repository `internal-*` customization authoring.
+- `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
 - `TechAIPRDescription`: pull request body generation.
 - `TechAIAddUnitTests`: test authoring and improvement.
 - `TechAITerraform`: Terraform feature or module authoring.
@@ -148,12 +151,13 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 - `TechAICodeReview`: strict review workflow and anti-pattern catalog.
 - `TechAICICDWorkflow`: CI or CD workflow design patterns.
-- `TechAIInternalCopilotCustomizationBuilder`: consumer-repository Copilot customization workflow.
-- `TechAISyncCopilotConfigs`: deterministic sync planning and reporting.
-- `TechAIPRWriting`: PR writing conventions aligned to the repository template.
+- `TechAIRepoCopilotExtender`: consumer-repository Copilot customization workflow.
+- `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
+- `TechAIPREditor`: PR description templates and diff-to-description mapping patterns.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
 - `TechAITerraformModule`: reusable Terraform module design.
 - `TechAIPairArchitect`: change-set-level impact, DDD smell catalog, health scoring, risk matrix, and blind-spot detection.
+- `TechAIPairArchitectAnalysisExecutor`: per-finding re-evaluation, decision tables, lessons learned, and validated execution planning.
 
 ### Required validations before PR
 
@@ -193,49 +197,51 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/tech-ai-data-registry.prompt.md`
 - `.github/prompts/tech-ai-github-action.prompt.md`
 - `.github/prompts/tech-ai-github-composite-action.prompt.md`
-- `.github/prompts/tech-ai-github-pr-description.prompt.md`
+- `.github/prompts/tech-ai-pr-description.prompt.md`
 - `.github/prompts/tech-ai-java.prompt.md`
-- `.github/prompts/tech-ai-internal-copilot-customization-builder.prompt.md`
+- `.github/prompts/tech-ai-repo-copilot-extender.prompt.md`
 - `.github/prompts/tech-ai-nodejs.prompt.md`
 - `.github/prompts/tech-ai-python-script.prompt.md`
 - `.github/prompts/tech-ai-python.prompt.md`
-- `.github/prompts/tech-ai-sync-copilot-configs.prompt.md`
+- `.github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md`
 - `.github/prompts/tech-ai-terraform-module.prompt.md`
 - `.github/prompts/tech-ai-terraform.prompt.md`
 
 ### Skills
 
+- `.github/skills/tech-ai-pair-architect-analysis-executor/SKILL.md`
 - `.github/skills/tech-ai-pair-architect/SKILL.md`
 - `.github/skills/tech-ai-cicd-workflow/SKILL.md`
 - `.github/skills/tech-ai-cloud-policy/SKILL.md`
 - `.github/skills/tech-ai-code-review/SKILL.md`
 - `.github/skills/tech-ai-composite-action/SKILL.md`
 - `.github/skills/tech-ai-data-registry/SKILL.md`
-- `.github/skills/tech-ai-internal-copilot-customization-builder/SKILL.md`
-- `.github/skills/tech-ai-pr-writing/SKILL.md`
+- `.github/skills/tech-ai-repo-copilot-extender/SKILL.md`
+- `.github/skills/tech-ai-pr-editor/SKILL.md`
 - `.github/skills/tech-ai-project-java/SKILL.md`
 - `.github/skills/tech-ai-project-nodejs/SKILL.md`
 - `.github/skills/tech-ai-project-python/SKILL.md`
 - `.github/skills/tech-ai-script-bash/SKILL.md`
 - `.github/skills/tech-ai-script-python/SKILL.md`
-- `.github/skills/tech-ai-sync-copilot-configs/SKILL.md`
+- `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/tech-ai-terraform-feature/SKILL.md`
 - `.github/skills/tech-ai-terraform-module/SKILL.md`
 
 ### Agents
 
+- `.github/agents/tech-ai-pair-architect-analysis-executor.agent.md`
 - `.github/agents/tech-ai-pair-architect.agent.md`
 - `.github/agents/tech-ai-customization-auditor.agent.md`
-- `.github/agents/tech-ai-github-pr-writer.agent.md`
+- `.github/agents/tech-ai-pr-editor.agent.md`
 - `.github/agents/tech-ai-github-workflow-supply-chain.agent.md`
-- `.github/agents/tech-ai-global-customization-auditor.agent.md`
-- `.github/agents/tech-ai-global-customization-builder.agent.md`
-- `.github/agents/tech-ai-internal-copilot-customization-builder.agent.md`
+- `.github/agents/tech-ai-standards-repo-config-auditor.agent.md`
+- `.github/agents/tech-ai-standards-repo-config-builder.agent.md`
+- `.github/agents/tech-ai-repo-copilot-extender.agent.md`
 - `.github/agents/tech-ai-iam-least-privilege.agent.md`
 - `.github/agents/tech-ai-implementer.agent.md`
 - `.github/agents/tech-ai-planner.agent.md`
 - `.github/agents/tech-ai-reviewer.agent.md`
 - `.github/agents/tech-ai-script-reviewer.agent.md`
 - `.github/agents/tech-ai-security-reviewer.agent.md`
-- `.github/agents/tech-ai-sync-copilot-configs.agent.md`
+- `.github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`
 - `.github/agents/tech-ai-terraform-guardrails.agent.md`

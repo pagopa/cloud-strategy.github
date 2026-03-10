@@ -161,7 +161,7 @@ def test_tech_ai_validator_enforces_global_builder_semantic_sections(tmp_path: P
     target_root = tmp_path / "invalid-global-builder"
     copy_copilot_config(target_root)
 
-    builder_path = target_root / ".github" / "agents" / "tech-ai-global-customization-builder.agent.md"
+    builder_path = target_root / ".github" / "agents" / "tech-ai-standards-repo-config-builder.agent.md"
     builder_text = builder_path.read_text(encoding="utf-8").replace("## Token discipline", "## Token notes")
     builder_path.write_text(builder_text, encoding="utf-8")
 
@@ -269,9 +269,9 @@ def test_tech_ai_validator_requires_release_comment_for_workflow_sha_pins(tmp_pa
 def test_root_agents_routes_customization_work_to_global_and_local_customization_agents() -> None:
     agents_text = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
-    assert "TechAIGlobalCustomizationBuilder" in agents_text
-    assert "TechAIGlobalCustomizationAuditor" in agents_text
-    assert "TechAIInternalCopilotCustomizationBuilder" in agents_text
+    assert "TechAIStandardsRepoConfigBuilder" in agents_text
+    assert "TechAIStandardsRepoConfigAuditor" in agents_text
+    assert "TechAIRepoCopilotExtender" in agents_text
     assert "repo-only" in agents_text
     assert "## Available Skills" not in agents_text
     assert "## Available Prompts" not in agents_text
@@ -279,7 +279,7 @@ def test_root_agents_routes_customization_work_to_global_and_local_customization
 
 def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated() -> None:
     builder_text = (
-        REPO_ROOT / ".github" / "agents" / "tech-ai-global-customization-builder.agent.md"
+        REPO_ROOT / ".github" / "agents" / "tech-ai-standards-repo-config-builder.agent.md"
     ).read_text(encoding="utf-8")
     legacy_auditor_text = (
         REPO_ROOT / ".github" / "agents" / "tech-ai-customization-auditor.agent.md"
@@ -292,18 +292,18 @@ def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated
     assert "DEPRECATION.md" in builder_text
     assert "validate-copilot-customizations.sh" in builder_text
     assert "Deprecated compatibility alias" in legacy_auditor_text
-    assert "TechAIGlobalCustomizationAuditor" in legacy_auditor_text
+    assert "TechAIStandardsRepoConfigAuditor" in legacy_auditor_text
 
 
 def test_internal_builder_requires_grounding_against_concrete_target_files() -> None:
     agent_text = (
-        REPO_ROOT / ".github" / "agents" / "tech-ai-internal-copilot-customization-builder.agent.md"
+        REPO_ROOT / ".github" / "agents" / "tech-ai-repo-copilot-extender.agent.md"
     ).read_text(encoding="utf-8")
     prompt_text = (
-        REPO_ROOT / ".github" / "prompts" / "tech-ai-internal-copilot-customization-builder.prompt.md"
+        REPO_ROOT / ".github" / "prompts" / "tech-ai-repo-copilot-extender.prompt.md"
     ).read_text(encoding="utf-8")
     skill_text = (
-        REPO_ROOT / ".github" / "skills" / "tech-ai-internal-copilot-customization-builder" / "SKILL.md"
+        REPO_ROOT / ".github" / "skills" / "tech-ai-repo-copilot-extender" / "SKILL.md"
     ).read_text(encoding="utf-8")
 
     assert "inspect concrete target files first" in agent_text

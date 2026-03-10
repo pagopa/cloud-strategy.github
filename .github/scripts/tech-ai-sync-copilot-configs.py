@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-SCRIPT_NAME = "TechAISyncCopilotConfigs"
+SCRIPT_NAME = "TechAISyncGlobalCopilotConfigsIntoRepo"
 MANIFEST_RELATIVE_PATH = ".github/tech-ai-sync-copilot-configs.manifest.json"
 SUPPORTED_SCOPE = "copilot-core"
 SUPPORTED_CONFLICT_POLICY = "conservative-merge"
@@ -36,23 +36,23 @@ MANAGED_ALWAYS = (
 )
 SOURCE_ONLY_AGENT_PATHS = {
     ".github/agents/tech-ai-customization-auditor.agent.md",
-    ".github/agents/tech-ai-global-customization-auditor.agent.md",
-    ".github/agents/tech-ai-global-customization-builder.agent.md",
-    ".github/agents/tech-ai-internal-copilot-customization-builder.agent.md",
+    ".github/agents/tech-ai-standards-repo-config-auditor.agent.md",
+    ".github/agents/tech-ai-standards-repo-config-builder.agent.md",
+    ".github/agents/tech-ai-repo-copilot-extender.agent.md",
     ".github/agents/tech-ai-script-reviewer.agent.md",
-    ".github/agents/tech-ai-sync-copilot-configs.agent.md",
+    ".github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md",
 }
 SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/tech-ai-add-platform.prompt.md",
     ".github/prompts/tech-ai-add-report-script.prompt.md",
     ".github/prompts/tech-ai-code-review.prompt.md",
-    ".github/prompts/tech-ai-internal-copilot-customization-builder.prompt.md",
-    ".github/prompts/tech-ai-sync-copilot-configs.prompt.md",
+    ".github/prompts/tech-ai-repo-copilot-extender.prompt.md",
+    ".github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/tech-ai-code-review/SKILL.md",
-    ".github/skills/tech-ai-internal-copilot-customization-builder/SKILL.md",
-    ".github/skills/tech-ai-sync-copilot-configs/SKILL.md",
+    ".github/skills/tech-ai-repo-copilot-extender/SKILL.md",
+    ".github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md",
 }
 CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-bash-script.prompt.md"
 CANONICAL_PYTHON_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-python-script.prompt.md"
@@ -95,7 +95,7 @@ PROMPT_NAME_OVERRIDES = {
     "tech-ai-add-report-script.prompt.md": "TechAIAddReportScript",
     "tech-ai-cicd-workflow.prompt.md": "TechAICICDWorkflow",
     "tech-ai-github-composite-action.prompt.md": "TechAICompositeAction",
-    "tech-ai-github-pr-description.prompt.md": "TechAIPRDescription",
+    "tech-ai-pr-description.prompt.md": "TechAIPRDescription",
     "tech-ai-terraform-module.prompt.md": "TechAITerraformModule",
 }
 VALIDATION_WORKFLOW_RELATIVE_PATH = ".github/workflows/github-validate-copilot-customizations.yml"
@@ -1194,7 +1194,7 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if repo_needs_data_registry(analysis.repo_root, analysis):
         prompts.add(".github/prompts/tech-ai-data-registry.prompt.md")
     if target_has_pr_template(analysis.repo_root):
-        prompts.add(".github/prompts/tech-ai-github-pr-description.prompt.md")
+        prompts.add(".github/prompts/tech-ai-pr-description.prompt.md")
 
     prompts = {
         prompt
@@ -1226,7 +1226,7 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if repo_needs_iam_review(analysis.repo_root):
         agents.add(".github/agents/tech-ai-iam-least-privilege.agent.md")
     if target_has_pr_template(analysis.repo_root):
-        agents.add(".github/agents/tech-ai-github-pr-writer.agent.md")
+        agents.add(".github/agents/tech-ai-pr-editor.agent.md")
 
     agents = {agent for agent in agents if agent not in SOURCE_ONLY_AGENT_PATHS and (source_root / agent).is_file()}
 
@@ -1932,8 +1932,8 @@ def agent_routing_lines(agent_paths: list[str]) -> list[str]:
         lines.append("- Use `TechAIWorkflowSupplyChain` for workflow supply-chain hardening and CI checks.")
     if "tech-ai-security-reviewer.agent.md" in agent_names:
         lines.append("- Use `TechAISecurityReviewer` as the security-focused review gate.")
-    if "tech-ai-github-pr-writer.agent.md" in agent_names:
-        lines.append("- Use `TechAIPRWriter` when generating pull request content from the repository template.")
+    if "tech-ai-pr-editor.agent.md" in agent_names:
+        lines.append("- Use `TechAIPREditor` when generating pull request content from the repository template.")
     return lines
 
 
@@ -2108,7 +2108,7 @@ def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFil
 
 def render_markdown_report(plan: SyncPlan) -> str:
     lines = [
-        "# TechAISyncCopilotConfigs Report",
+        "# TechAISyncGlobalCopilotConfigsIntoRepo Report",
         "",
         "## Target analysis summary",
         f"- Source repo: `{plan.selection.profile.name}` profile from the current standards repository",

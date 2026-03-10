@@ -109,11 +109,11 @@ def build_source_audit_fixture(path: Path) -> None:
         "3. Report redundant aliases before rendering AGENTS inventory.",
     ]
     write_file(
-        path / ".github" / "agents" / "tech-ai-sync-copilot-configs.agent.md",
+        path / ".github" / "agents" / "tech-ai-sync-global-copilot-configs-into-repo.agent.md",
         "\n".join(
             [
                 "---",
-                "name: TechAISyncCopilotConfigs",
+                "name: TechAISyncGlobalCopilotConfigsIntoRepo",
                 "description: sync agent",
                 'tools: ["search"]',
                 "---",
@@ -127,11 +127,11 @@ def build_source_audit_fixture(path: Path) -> None:
         ),
     )
     write_file(
-        path / ".github" / "skills" / "tech-ai-sync-copilot-configs" / "SKILL.md",
+        path / ".github" / "skills" / "tech-ai-sync-global-copilot-configs-into-repo" / "SKILL.md",
         "\n".join(
             [
                 "---",
-                "name: TechAISyncCopilotConfigs",
+                "name: TechAISyncGlobalCopilotConfigsIntoRepo",
                 "description: sync skill",
                 "---",
                 "",
@@ -144,11 +144,11 @@ def build_source_audit_fixture(path: Path) -> None:
         ),
     )
     write_file(
-        path / ".github" / "prompts" / "tech-ai-sync-copilot-configs.prompt.md",
+        path / ".github" / "prompts" / "tech-ai-sync-global-copilot-configs-into-repo.prompt.md",
         "\n".join(
             [
                 "---",
-                "name: TechAISyncCopilotConfigs",
+                "name: TechAISyncGlobalCopilotConfigsIntoRepo",
                 "description: sync prompt",
                 "agent: agent",
                 "argument-hint: target_repo=<path>",
@@ -584,21 +584,21 @@ def test_build_plan_excludes_repo_only_global_customization_agents_from_consumer
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/agents/tech-ai-global-customization-builder.agent.md" not in plan.selection.agents
-    assert ".github/agents/tech-ai-global-customization-auditor.agent.md" not in plan.selection.agents
+    assert ".github/agents/tech-ai-standards-repo-config-builder.agent.md" not in plan.selection.agents
+    assert ".github/agents/tech-ai-standards-repo-config-auditor.agent.md" not in plan.selection.agents
 
 
 def test_internal_builder_triads_are_source_only_and_excluded_from_consumer_sync() -> None:
     assert (
-        ".github/agents/tech-ai-internal-copilot-customization-builder.agent.md"
+        ".github/agents/tech-ai-repo-copilot-extender.agent.md"
         in MODULE.SOURCE_ONLY_AGENT_PATHS
     )
     assert (
-        ".github/prompts/tech-ai-internal-copilot-customization-builder.prompt.md"
+        ".github/prompts/tech-ai-repo-copilot-extender.prompt.md"
         in MODULE.SOURCE_ONLY_PROMPT_PATHS
     )
     assert (
-        ".github/skills/tech-ai-internal-copilot-customization-builder/SKILL.md"
+        ".github/skills/tech-ai-repo-copilot-extender/SKILL.md"
         in MODULE.SOURCE_ONLY_SKILL_PATHS
     )
 
@@ -719,7 +719,7 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
 
     payload = json.loads(report_file.read_text(encoding="utf-8"))
     assert result == 0
-    assert payload["tool"] == "TechAISyncCopilotConfigs"
+    assert payload["tool"] == "TechAISyncGlobalCopilotConfigsIntoRepo"
     assert payload["analysis"]["profile"] == "backend-python"
     assert ".github/prompts/tech-ai-python.prompt.md" in payload["selection"]["prompts"]
     assert "redundant_assets" in payload["analysis"]

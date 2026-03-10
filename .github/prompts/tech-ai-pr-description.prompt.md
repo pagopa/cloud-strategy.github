@@ -1,14 +1,14 @@
 ---
-description: Build a complete pull request body using the existing repository PR template
+description: Generate a structured PR description from the repo template and the current diff context
 name: TechAIPRDescription
-agent: TechAIPRWriter
+agent: TechAIPREditor
 argument-hint: title=<text> intent=<text> changed_files=<comma-separated paths> [validation=<commands/results>] [risk=<Low|Medium|High>] [links=<issue/docs/runbook>] [target_branch=<name>] [pr_number=<number>]
 ---
 
 # Pull Request Description Task
 
 ## Context
-Create or update a pull request body using the repository template (`.github/pull_request_template.md` or `pull_request_template.md`), including a short list of key changes.
+Create or update a pull request body using the repository template (`.github/PULL_REQUEST_TEMPLATE.md` or `PULL_REQUEST_TEMPLATE.md`), including a short list of key changes.
 
 ## Required inputs
 - **Title**: ${input:title}
@@ -25,12 +25,12 @@ Create or update a pull request body using the repository template (`.github/pul
 - Do not add extra sections unless the template already includes them.
 
 ## Instructions
-1. Use `.github/skills/tech-ai-pr-writing/SKILL.md`.
+1. Use `.github/skills/tech-ai-pr-editor/SKILL.md`.
 2. Resolve the template path in this order:
-   - `.github/pull_request_template.md`
    - `.github/PULL_REQUEST_TEMPLATE.md`
-   - `pull_request_template.md`
+   - `.github/pull_request_template.md`
    - `PULL_REQUEST_TEMPLATE.md`
+   - `pull_request_template.md`
 3. Follow template section order and headings exactly as defined by the resolved template.
 4. Answer every prompt/question line from the template explicitly with repository facts.
 5. Preserve checklist items and mark each one intentionally (`[x]` or `[ ]`) based on real scope.

@@ -7,7 +7,7 @@ tools: ["search", "problems", "fetch"]
 # TechAI Customization Auditor Agent
 
 ## Status
-Deprecated compatibility alias for `TechAIGlobalCustomizationAuditor`. Use the global auditor for new customization work in this repository.
+Deprecated compatibility alias for `TechAIStandardsRepoConfigAuditor`. Use the global auditor for new customization work in this repository.
 
 ## Objective
 Keep this repository portable and coherent by checking that customization assets are generic, internally consistent, and validator-compliant.

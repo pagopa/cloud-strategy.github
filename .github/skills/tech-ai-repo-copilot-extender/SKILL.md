@@ -1,9 +1,9 @@
 ---
-name: TechAIInternalCopilotCustomizationBuilder
-description: Create or update repository-owned internal GitHub Copilot customization assets in a consumer repository while preserving the shared synced baseline.
+name: TechAIRepoCopilotExtender
+description: Generation patterns for repo-specific internal-* Copilot assets in consumer repos — naming rules, baseline preservation, and AGENTS.md integration.
 ---
 
-# TechAI Internal Copilot Customization Builder Skill
+# TechAI Repo Copilot Extender — Skill
 
 ## When to use
 - Create or update repository-owned `internal-*` prompts, skills, agents, or `AGENTS.md` wiring in a consumer repo.
@@ -14,7 +14,7 @@ description: Create or update repository-owned internal GitHub Copilot customiza
 1. Inspect the target repository layout, `.github` contents, root `AGENTS.md`, git state, and existing internal Copilot assets.
 2. Identify at least one representative target file for each requested internal capability and extract the actual schema field names, naming patterns, identity formats, and validation commands from those files before drafting any `internal-*` asset.
 3. Confirm the baseline is current enough for internal customization work:
-   - if `copilot-instructions.md`, the validator script, or expected synced assets are missing or stale, run `TechAISyncCopilotConfigs` in `plan` mode first;
+   - if `copilot-instructions.md`, the validator script, or expected synced assets are missing or stale, run `TechAISyncGlobalCopilotConfigsIntoRepo` in `plan` mode first;
    - use the sync report to avoid creating an `internal-*` asset that duplicates an available shared baseline capability.
 4. Decide the narrowest asset type that solves the request:
    - create or update an `internal-*.prompt.md` when the behavior is mostly task instructions;
@@ -48,10 +48,10 @@ description: Create or update repository-owned internal GitHub Copilot customiza
 - Manage consumer-repository Copilot assets only.
 - Keep source-repository assets and shared baseline definitions unchanged unless promotion is explicitly requested.
 - Prefer one internal capability per repo-specific workflow; consolidate or deprecate duplicates instead of multiplying near-identical internal prompts.
-- Do not create internal copies of source-only repo agents such as `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`, or `TechAISyncCopilotConfigs`.
+- Do not create internal copies of source-only repo agents such as `TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`, or `TechAISyncGlobalCopilotConfigsIntoRepo`.
 
 ## Validation
 - Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` in the target repo after internal customization changes.
 - Run `bash -n` and `shellcheck -s bash` for changed Bash files when available.
 - Run `python -m compileall <changed_python_paths>` and relevant `pytest` checks for changed Python files.
-- Re-run `TechAISyncCopilotConfigs` in `plan` mode when you need to confirm that the new internal assets remain clearly separated from the managed shared baseline.
+- Re-run `TechAISyncGlobalCopilotConfigsIntoRepo` in `plan` mode when you need to confirm that the new internal assets remain clearly separated from the managed shared baseline.

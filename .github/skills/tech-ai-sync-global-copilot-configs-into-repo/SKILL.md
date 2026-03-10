@@ -1,12 +1,12 @@
 ---
-name: TechAISyncCopilotConfigs
-description: Analyze a local repository, select the minimum Copilot customization assets, tailor them, and align them conservatively with a final report.
+name: TechAISyncGlobalCopilotConfigsIntoRepo
+description: Manifest-based sync logic for propagating the shared Copilot baseline into consumer repos — asset selection, SHA256 checksums, conflict detection, and reporting.
 ---
 
-# TechAI Sync Copilot Configs Skill
+# TechAI Sync Global Copilot Configs Into Repo — Skill
 
 ## When to use
-- Create or update the `TechAISyncCopilotConfigs` alignment workflow.
+- Create or update the `TechAISyncGlobalCopilotConfigsIntoRepo` alignment workflow.
 - Align a local target repository with portable Copilot customization assets from this standards repository.
 - Produce deterministic dry-run or apply reports for Copilot-core alignment only.
 
@@ -45,5 +45,5 @@ description: Analyze a local repository, select the minimum Copilot customizatio
 
 ## Validation
 - Run `python -m compileall .github/scripts tests`.
-- Run `pytest` for the `TechAISyncCopilotConfigs` test suite.
+- Run `pytest` for the `TechAISyncGlobalCopilotConfigsIntoRepo` test suite.
 - Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.

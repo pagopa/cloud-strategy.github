@@ -31,4 +31,16 @@ After generating the report:
 - Print the summary statistics and health score to the conversation.
 - If Critical errors exist, recommend routing to `TechAIImplementer` for remediation.
 - If the change set is clean, state it explicitly.
+- If the user wants a validated execution plan from the report, hand off to `.github/skills/tech-ai-pair-architect-analysis-executor/SKILL.md` via `TechAIPairArchitectAnalysisExecutor`.
 
+## Minimal example
+- Input: `target=HEAD~3..HEAD output=ANALYSIS_REPORT.md depth=full mode=devil`
+- Expected output:
+  - `ANALYSIS_REPORT.md` written at repository root.
+  - Health score, verdict, and severity-ordered findings backed by concrete file references.
+  - A clear next-step recommendation for remediation or peer review.
+
+## Validation
+- Keep `.github/skills/tech-ai-pair-architect/SKILL.md` as the referenced analysis framework.
+- Generate a valid Markdown report with all mandatory sections required by that skill.
+- Cite concrete file paths and line numbers for every finding.

@@ -1,6 +1,6 @@
 ---
-description: Create or update pull request title/body using repository template and real diff context.
-name: TechAIPRWriter
+description: Generate or refine PR title and body from the repo PR template and the real diff. Produces structured, review-ready PR descriptions.
+name: TechAIPREditor
 tools: ["search", "usages", "problems", "fetch", "githubRepo"]
 ---
 
@@ -19,10 +19,10 @@ Produce and apply a complete PR title/body aligned with the repository template,
 
 ## Execution workflow
 1. Resolve the PR template path in this order:
-   - `.github/pull_request_template.md`
    - `.github/PULL_REQUEST_TEMPLATE.md`
-   - `pull_request_template.md`
+   - `.github/pull_request_template.md`
    - `PULL_REQUEST_TEMPLATE.md`
+   - `pull_request_template.md`
 2. Detect whether an open PR already exists for the branch.
 3. If a PR exists, update title/body directly.
 4. If no PR exists, create a draft PR first, then update title/body.

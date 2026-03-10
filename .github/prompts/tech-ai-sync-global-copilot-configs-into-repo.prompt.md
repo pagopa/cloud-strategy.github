@@ -1,6 +1,6 @@
 ---
-description: Analyze and conservatively align a local repository with the minimum Copilot customization assets from this standards repo
-name: TechAISyncCopilotConfigs
+description: Propagate the shared Copilot baseline from this standards repo into a target consumer repo with conflict detection and reporting
+name: TechAISyncGlobalCopilotConfigsIntoRepo
 agent: agent
 argument-hint: target_repo=<path> [source_repo=<path>] [mode=<plan|apply>] [report_format=<md|json>] [report_file=<path>]
 ---
@@ -18,7 +18,7 @@ Use this prompt to analyze a local repository, select the minimum Copilot custom
 - **Report file**: ${input:report_file}
 
 ## Instructions
-1. Use `.github/skills/tech-ai-sync-copilot-configs/SKILL.md` as the workflow definition.
+1. Use `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md` as the workflow definition.
 2. Use `.github/scripts/tech-ai-sync-copilot-configs.py` for deterministic execution.
 3. Start with `mode=plan`; use `mode=apply` only when explicitly requested and only after a conflict-safe plan.
 4. Keep scope limited to Copilot core assets only.
