@@ -88,3 +88,8 @@ When disagreeing with a finding:
 - [ ] Effort estimates are realistic.
 - [ ] Lessons Learned contains systemic insights, not finding repetitions.
 - [ ] Work packages are grouped by logical affinity, not listed 1:1 per finding.
+
+## Validation
+- Every finding from `ANALYSIS_REPORT.md` must appear exactly once in `EXECUTION_PLAN.md`.
+- Every disagreement must cite repository evidence.
+- `EXECUTION_PLAN.md` must include all five mandatory sections and complete decision tables.
