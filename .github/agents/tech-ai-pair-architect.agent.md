@@ -74,6 +74,7 @@ Do not duplicate those definitions here — defer to the skill file at runtime.
 
 - The generated `ANALYSIS_REPORT.md` is the primary deliverable.
 - Always report the health score and verdict in the handoff message.
-- If `Critical` errors are found, explicitly recommend routing to `TechAIImplementer` for remediation before merge.
+- For validated execution planning, route to `TechAIPairArchitectAnalysisExecutor` — it will re-evaluate each finding, produce per-finding decision tables, extract lessons learned, and generate a sequenced execution plan for user validation.
+- If `Critical` errors are found, explicitly recommend routing to `TechAIPairArchitectAnalysisExecutor` for plan generation, then to `TechAIImplementer` for remediation before merge.
 - If the analysis is clean, state it explicitly: "No blocking issues found. Change set is ready for peer review."
 

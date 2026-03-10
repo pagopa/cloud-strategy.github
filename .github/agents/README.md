@@ -10,6 +10,7 @@ This folder contains optional custom agents for focused tasks.
 
 ## Recommended routing
 - Read-only: `TechAIPlanner`, `TechAIReviewer`, `TechAISecurityReviewer`, `TechAIWorkflowSupplyChain`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`.
+- Analysis-to-plan: `TechAIPairArchitectAnalysisExecutor` (takes `TechAIPairArchitect` output, re-evaluates, produces execution plan).
 - PR-focused: `TechAIPRWriter`.
 - Write-capable: `TechAIImplementer`.
 - Repo-only standards specialists: `TechAIGlobalCustomizationBuilder`, `TechAIGlobalCustomizationAuditor`.
@@ -40,3 +41,4 @@ This folder contains optional custom agents for focused tasks.
 9. Use `TechAIGlobalCustomizationAuditor` as the final gate for those customization changes.
 10. Use `TechAISyncCopilotConfigs` to align a consumer baseline before creating repo-owned internal assets.
 11. Use `TechAIInternalCopilotCustomizationBuilder` for repo-owned `internal-*` prompts, skills, agents, and `AGENTS.md` updates that should stay consumer-repository.
+12. Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` to re-evaluate findings, produce a validated execution plan with per-finding decision tables, extract lessons learned, and prepare work packages for `TechAIImplementer`.
