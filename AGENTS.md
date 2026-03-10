@@ -34,6 +34,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `TechAIReviewer` for quality gates and defect or regression findings.
 - Use `TechAIScriptReviewer` for exhaustive, nit-level reviews on Python, Bash, and Terraform.
 - Use `TechAIPairArchitect` for deep change-impact analysis with DDD focus, blind-spot detection, and structured Markdown report generation.
+- Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` when the user wants a validated execution plan from `ANALYSIS_REPORT.md` before implementation.
 - Use `TechAIGlobalCustomizationBuilder` as the default specialist for creating or updating GitHub Copilot customization assets in this repository.
 - Use `TechAIGlobalCustomizationAuditor` as the final quality gate for GitHub Copilot customization changes in this repository.
 - Use `TechAICustomizationAuditor` only as a deprecated compatibility alias while older references are migrated.
@@ -56,6 +57,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Do not use `TechAIPairArchitect` for quick line-level nit reviews; use `TechAIScriptReviewer` or `TechAICodeReview` instead.
 - Do not use `TechAIReviewer` when you need holistic change-set impact analysis with DDD, architecture, and blind spots; use `TechAIPairArchitect`.
 - Do not use `TechAIPairArchitect` for exhaustive per-language anti-pattern scanning; use `TechAIScriptReviewer` and then `TechAIPairArchitect` for the bigger picture.
+- Do not send a complex `ANALYSIS_REPORT.md` straight to `TechAIImplementer` when the user first needs a validated remediation plan; use `TechAIPairArchitectAnalysisExecutor`.
 
 ### Composition and Handoffs
 
@@ -68,8 +70,9 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAIReviewer` findings flagged as `Critical` or `Major` route back to `TechAIImplementer` for remediation.
 - `TechAIGlobalCustomizationBuilder` output is input context for `TechAIGlobalCustomizationAuditor`.
 - `TechAIGlobalCustomizationAuditor` findings flagged as `Critical` or `Major` route back to `TechAIGlobalCustomizationBuilder` for remediation.
-- `TechAIPairArchitect` output (`ANALYSIS_REPORT.md`) is input context for `TechAIImplementer` when remediation is needed.
-- For thorough pre-merge validation, the recommended chain is `TechAIImplementer` -> `TechAIPairArchitect` -> `TechAIImplementer` (remediation).
+- `TechAIPairArchitect` output (`ANALYSIS_REPORT.md`) is input context for `TechAIPairArchitectAnalysisExecutor` when a validated execution plan is needed.
+- `TechAIPairArchitectAnalysisExecutor` output (`EXECUTION_PLAN.md`) is input context for `TechAIImplementer` after the user approves execution.
+- For thorough pre-merge validation, the recommended chain is `TechAIImplementer` -> `TechAIPairArchitect` -> `TechAIPairArchitectAnalysisExecutor` -> `TechAIImplementer`.
 
 ## Governance References
 
@@ -154,6 +157,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
 - `TechAITerraformModule`: reusable Terraform module design.
 - `TechAIPairArchitect`: change-set-level impact, DDD smell catalog, health scoring, risk matrix, and blind-spot detection.
+- `TechAIPairArchitectAnalysisExecutor`: per-finding re-evaluation, decision tables, lessons learned, and validated execution planning.
 
 ### Required validations before PR
 
@@ -205,6 +209,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Skills
 
+- `.github/skills/tech-ai-pair-architect-analysis-executor/SKILL.md`
 - `.github/skills/tech-ai-pair-architect/SKILL.md`
 - `.github/skills/tech-ai-cicd-workflow/SKILL.md`
 - `.github/skills/tech-ai-cloud-policy/SKILL.md`
@@ -224,6 +229,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Agents
 
+- `.github/agents/tech-ai-pair-architect-analysis-executor.agent.md`
 - `.github/agents/tech-ai-pair-architect.agent.md`
 - `.github/agents/tech-ai-customization-auditor.agent.md`
 - `.github/agents/tech-ai-github-pr-writer.agent.md`
