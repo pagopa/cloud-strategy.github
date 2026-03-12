@@ -376,7 +376,7 @@ Each preferred prompt/skill includes a one-line description. These descriptions 
 - `TechAICodeReview`
 - `TechAIGitHubAction`
 - `TechAISyncGlobalCopilotConfigsIntoRepo`
-- `TechAIPRDescription`
+- `TechAIPREditor`
 - `TechAIAddUnitTests`
 - `TechAITerraform`
 ```

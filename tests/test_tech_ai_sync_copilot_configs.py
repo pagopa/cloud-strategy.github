@@ -422,6 +422,48 @@ def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:
     assert len(manifest["source_commit"]) == 40
 
 
+def test_apply_plan_deletes_manifest_managed_files_removed_from_baseline(tmp_path: Path) -> None:
+    target_root = tmp_path / "legacy-managed-target"
+    build_python_service_target(target_root)
+    legacy_prompt_relative_path = ".github/prompts/tech-ai-pr-description.prompt.md"
+    legacy_prompt_content = "---\nname: TechAIPRDescription\n---\n"
+    write_file(target_root / legacy_prompt_relative_path, legacy_prompt_content)
+    write_file(
+        target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json",
+        json.dumps(
+            {
+                "managed_files": {
+                    legacy_prompt_relative_path: {
+                        "sha256": MODULE.sha256_text(legacy_prompt_content),
+                        "source_relative_path": legacy_prompt_relative_path,
+                        "generated": False,
+                    }
+                }
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    )
+
+    plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+    delete_action = next(action for action in plan.actions if action.target_relative_path == legacy_prompt_relative_path)
+
+    assert delete_action.status == "delete"
+    assert legacy_prompt_relative_path not in plan.analysis.target_only_assets["prompts"]
+    assert all(issue.target_relative_path != legacy_prompt_relative_path for issue in plan.target_asset_issues)
+
+    MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
+
+    assert not (target_root / legacy_prompt_relative_path).exists()
+    assert (target_root / ".github" / "prompts" / "tech-ai-pr-editor.prompt.md").is_file()
+    manifest = json.loads(
+        (target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json").read_text(encoding="utf-8")
+    )
+    assert legacy_prompt_relative_path not in manifest["managed_files"]
+    assert ".github/prompts/tech-ai-pr-editor.prompt.md" in manifest["managed_files"]
+
+
 def test_rendered_agents_markdown_keeps_github_copilot_wording(tmp_path: Path) -> None:
     target_root = tmp_path / "wording-target"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
@@ -615,7 +657,7 @@ def test_audit_source_configuration_detects_legacy_aliases_role_overlaps_and_age
     audit = MODULE.audit_source_configuration(source_root)
 
     assert any(alias.canonical_path == ".github/prompts/tech-ai-python.prompt.md" for alias in audit.legacy_aliases)
-    assert any(overlap.family == "sync-copilot-configs" for overlap in audit.role_overlaps)
+    assert any(overlap.family == "sync-global-copilot-configs-into-repo" for overlap in audit.role_overlaps)
     assert any(repeat.reference == ".github/prompts/tech-ai-python.prompt.md" for repeat in audit.agents_md_repeats)
 
 
@@ -642,6 +684,49 @@ def test_build_plan_excludes_repo_only_global_customization_agents_from_consumer
 
     assert ".github/agents/tech-ai-standards-repo-config-builder.agent.md" not in plan.selection.agents
     assert ".github/agents/tech-ai-standards-repo-config-auditor.agent.md" not in plan.selection.agents
+
+
+def test_build_plan_includes_source_preferred_assets_and_portable_agents(tmp_path: Path) -> None:
+    target_root = tmp_path / "portable-assets"
+    build_python_service_target(target_root)
+
+    plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+    agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
+
+    assert ".github/agents/tech-ai-pair-architect.agent.md" in plan.selection.agents
+    assert ".github/agents/tech-ai-pair-architect-analysis-executor.agent.md" in plan.selection.agents
+    assert ".github/agents/tech-ai-script-reviewer.agent.md" not in plan.selection.agents
+    assert ".github/prompts/tech-ai-pair-architect-analysis.prompt.md" in plan.selection.prompts
+    assert ".github/skills/tech-ai-pair-architect/SKILL.md" in plan.selection.skills
+    assert ".github/skills/tech-ai-pair-architect-analysis-executor/SKILL.md" in plan.selection.skills
+    assert ".github/prompts/tech-ai-repo-copilot-extender.prompt.md" not in plan.selection.prompts
+    assert ".github/skills/tech-ai-repo-copilot-extender/SKILL.md" not in plan.selection.skills
+    assert ".github/agents/tech-ai-standards-repo-config-builder.agent.md" not in plan.selection.agents
+    assert "`TechAIPairArchitect`" in agents_file.desired_content
+    assert "`TechAIPairArchitectAnalysisExecutor`" in agents_file.desired_content
+
+
+def test_build_plan_uses_pr_editor_prompt_for_targets_with_pr_templates(tmp_path: Path) -> None:
+    target_root = tmp_path / "pr-template-target"
+    build_python_service_target(target_root)
+
+    plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+    agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
+
+    assert ".github/prompts/tech-ai-pr-editor.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/tech-ai-pr-description.prompt.md" not in plan.selection.prompts
+    assert "`TechAIPREditor`" in agents_file.desired_content
+    assert "`TechAIPRDescription`" not in agents_file.desired_content
+
+
+def test_build_plan_detects_instruction_apply_to_patterns_without_profile_changes(tmp_path: Path) -> None:
+    target_root = tmp_path / "lambda-target"
+    write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(target_root / "functions" / "billing-lambda.py", 'def handler(event, context):\n    return {"ok": True}\n')
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert ".github/instructions/lambda.instructions.md" in plan.selection.instructions
 
 
 def test_internal_builder_triads_are_source_only_and_excluded_from_consumer_sync() -> None:

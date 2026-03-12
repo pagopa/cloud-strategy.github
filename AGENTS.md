@@ -142,7 +142,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAIGitHubAction`: GitHub Actions workflow authoring.
 - `TechAIRepoCopilotExtender`: consumer-repository `internal-*` customization authoring.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
-- `TechAIPRDescription`: pull request body generation.
+- `TechAIPREditor`: pull request body generation.
 - `TechAIAddUnitTests`: test authoring and improvement.
 - `TechAITerraform`: Terraform feature or module authoring.
 - `TechAIPairArchitectAnalysis`: deep change-impact analysis with DDD focus, health score, risk matrix, and devil's advocate mode.
@@ -153,7 +153,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAICICDWorkflow`: CI or CD workflow design patterns.
 - `TechAIRepoCopilotExtender`: consumer-repository Copilot customization workflow.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
-- `TechAIPREditor`: PR description templates and diff-to-description mapping patterns.
+- `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
 - `TechAITerraformModule`: reusable Terraform module design.
 - `TechAIPairArchitect`: change-set-level impact, DDD smell catalog, health scoring, risk matrix, and blind-spot detection.
@@ -197,7 +197,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/tech-ai-data-registry.prompt.md`
 - `.github/prompts/tech-ai-github-action.prompt.md`
 - `.github/prompts/tech-ai-github-composite-action.prompt.md`
-- `.github/prompts/tech-ai-pr-description.prompt.md`
+- `.github/prompts/tech-ai-pr-editor.prompt.md`
 - `.github/prompts/tech-ai-java.prompt.md`
 - `.github/prompts/tech-ai-repo-copilot-extender.prompt.md`
 - `.github/prompts/tech-ai-nodejs.prompt.md`

@@ -306,8 +306,8 @@ prompt_expected_name() {
     tech-ai-github-composite-action.prompt.md)
       printf '%s' "TechAICompositeAction"
       ;;
-    tech-ai-pr-description.prompt.md)
-      printf '%s' "TechAIPRDescription"
+    tech-ai-pr-editor.prompt.md)
+      printf '%s' "TechAIPREditor"
       ;;
     tech-ai-add-platform.prompt.md)
       printf '%s' "TechAIAddPlatform"

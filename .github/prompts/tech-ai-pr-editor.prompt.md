@@ -1,11 +1,11 @@
 ---
-description: Generate a structured PR description from the repo template and the current diff context
-name: TechAIPRDescription
+description: Create or update structured PR body content from the repo template and the current diff context
+name: TechAIPREditor
 agent: TechAIPREditor
 argument-hint: title=<text> intent=<text> changed_files=<comma-separated paths> [validation=<commands/results>] [risk=<Low|Medium|High>] [links=<issue/docs/runbook>] [target_branch=<name>] [pr_number=<number>]
 ---
 
-# Pull Request Description Task
+# Pull Request Editor Task
 
 ## Context
 Create or update a pull request body using the repository template (`.github/PULL_REQUEST_TEMPLATE.md` or `PULL_REQUEST_TEMPLATE.md`), including a short list of key changes.

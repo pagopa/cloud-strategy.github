@@ -6,7 +6,12 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-03-12
+- Renamed the canonical PR prompt from `tech-ai-pr-description.prompt.md` / `TechAIPRDescription` to `tech-ai-pr-editor.prompt.md` / `TechAIPREditor`, and updated `AGENTS.md`, the validator, and review notes to use the new canonical name consistently.
+- Updated `scripts/tech-ai-sync-copilot-configs.py` and its tests so sync plans now delete manifest-managed files that were removed from the desired baseline, allowing canonical renames to cleanly remove deprecated managed assets in consumer repositories.
+
 ## 2026-03-11
+- Updated `scripts/tech-ai-sync-copilot-configs.py` so consumer sync now discovers new instructions from `applyTo`, automatically includes all portable consumer-facing agents, and merges consumer-facing prompt/skill capabilities declared in the source `AGENTS.md` preferred sections. This prevents newly added shared assets such as the PAIR analysis flow from being silently skipped in downstream repos.
 - Updated `scripts/tech-ai-sync-copilot-configs.py` and `tests/test_tech_ai_sync_copilot_configs.py` so consumer alignment now reports a target-side gap when `.vscode/settings.json` is missing or does not set `githubPullRequests.pullRequestDescription` to `Copilot`, making the VS Code PR-form Copilot dependency visible in sync reports.
 
 ## 2026-03-09

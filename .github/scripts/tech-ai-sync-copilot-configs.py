@@ -18,7 +18,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 SCRIPT_NAME = "TechAISyncGlobalCopilotConfigsIntoRepo"
@@ -53,7 +53,6 @@ SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
-    ".github/skills/tech-ai-code-review/SKILL.md",
     ".github/skills/tech-ai-repo-copilot-extender/SKILL.md",
     ".github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md",
 }
@@ -98,7 +97,7 @@ PROMPT_NAME_OVERRIDES = {
     "tech-ai-add-report-script.prompt.md": "TechAIAddReportScript",
     "tech-ai-cicd-workflow.prompt.md": "TechAICICDWorkflow",
     "tech-ai-github-composite-action.prompt.md": "TechAICompositeAction",
-    "tech-ai-pr-description.prompt.md": "TechAIPRDescription",
+    "tech-ai-pr-editor.prompt.md": "TechAIPREditor",
     "tech-ai-terraform-module.prompt.md": "TechAITerraformModule",
 }
 VALIDATION_WORKFLOW_RELATIVE_PATH = ".github/workflows/github-validate-copilot-customizations.yml"
@@ -311,6 +310,16 @@ def sha256_path(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def prune_empty_parent_dirs(path: Path, stop_at: Path) -> None:
+    current = path.parent
+    while current != stop_at and current.is_dir():
+        try:
+            current.rmdir()
+        except OSError:
+            break
+        current = current.parent
+
+
 def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -497,6 +506,93 @@ def prompt_skill_refs(path: Path) -> list[str]:
             else:
                 refs.add(f"{PROMPT_SKILL_REFERENCE_PREFIX}{token}")
     return sorted(refs)
+
+
+def source_asset_paths(source_root: Path, category: str) -> list[str]:
+    category_root = source_root / ".github" / category
+    if not category_root.is_dir():
+        return []
+
+    if category == "skills":
+        return sorted(str(path.relative_to(source_root)) for path in category_root.rglob("SKILL.md"))
+
+    suffix_map = {
+        "agents": ".agent.md",
+        "instructions": ".instructions.md",
+        "prompts": ".prompt.md",
+    }
+    suffix = suffix_map.get(category)
+    if not suffix:
+        return []
+
+    return sorted(str(path.relative_to(source_root)) for path in category_root.rglob(f"*{suffix}"))
+
+
+def source_named_assets(source_root: Path, category: str) -> dict[str, str]:
+    assets: dict[str, str] = {}
+    for relative_path in source_asset_paths(source_root, category):
+        display_name = asset_display_name(source_root, relative_path)
+        if display_name:
+            assets[display_name] = relative_path
+    return assets
+
+
+def markdown_named_section_items(path: Path, heading: str) -> list[str]:
+    items: list[str] = []
+    inside_section = False
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        stripped = raw_line.strip()
+        if stripped == heading:
+            inside_section = True
+            continue
+
+        if not inside_section:
+            continue
+
+        if stripped.startswith("## ") or stripped.startswith("### "):
+            break
+
+        match = re.match(r"^- `([^`]+)`", stripped)
+        if match:
+            items.append(match.group(1))
+
+    return items
+
+
+def source_preferred_assets_from_agents_md(source_root: Path, category: str) -> list[str]:
+    agents_md_path = source_root / "AGENTS.md"
+    if not agents_md_path.is_file():
+        return []
+
+    heading_map = {
+        "prompts": "### Preferred prompts",
+        "skills": "### Preferred skills",
+    }
+    heading = heading_map.get(category)
+    if not heading:
+        return []
+
+    named_assets = source_named_assets(source_root, category)
+    preferred_names = markdown_named_section_items(agents_md_path, heading)
+    return sorted(
+        {
+            named_assets[name]
+            for name in preferred_names
+            if name in named_assets
+        }
+    )
+
+
+def repo_matches_apply_to(repo_root: Path, apply_to: str) -> bool:
+    patterns = [pattern.strip() for pattern in apply_to.split(",") if pattern.strip()]
+    if not patterns:
+        return False
+
+    repo_paths = [
+        PurePosixPath(path.relative_to(repo_root).as_posix())
+        for path in scan_repo_files(repo_root)
+    ]
+    return any(repo_path.match(pattern) for repo_path in repo_paths for pattern in patterns)
 
 
 def markdown_headings(path: Path) -> list[str]:
@@ -787,6 +883,7 @@ def collect_target_config_assets(target_root: Path) -> dict[str, list[str]]:
 def detect_target_only_assets(source_root: Path, target_root: Path) -> dict[str, list[str]]:
     result: dict[str, list[str]] = {"prompts": [], "skills": [], "agents": []}
     known_aliases = known_legacy_alias_paths(source_root)
+    manifest_paths = manifest_managed_paths(load_manifest(target_root))
     for category, pattern in (("prompts", "*.prompt.md"), ("skills", "SKILL.md"), ("agents", "*.agent.md")):
         target_dir = target_root / ".github" / category
         source_dir = source_root / ".github" / category
@@ -799,6 +896,8 @@ def detect_target_only_assets(source_root: Path, target_root: Path) -> dict[str,
         for path in sorted(target_dir.rglob(pattern)):
             relative_path = str(path.relative_to(target_root))
             if relative_path in known_aliases:
+                continue
+            if relative_path in manifest_paths:
                 continue
             if relative_path not in source_relative_paths:
                 result[category].append(relative_path)
@@ -1130,6 +1229,14 @@ def build_analysis(source_root: Path, target_root: Path, profiles: dict[str, Rep
 def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[str, RepoProfile]) -> AssetSelection:
     profile = profiles[analysis.profile_name]
     stacks = set(analysis.stacks)
+    source_preferred_prompts = source_preferred_assets_from_agents_md(source_root, "prompts")
+    source_preferred_skills = source_preferred_assets_from_agents_md(source_root, "skills")
+    portable_source_instructions = source_asset_paths(source_root, "instructions")
+    portable_source_agents = {
+        agent
+        for agent in source_asset_paths(source_root, "agents")
+        if agent not in SOURCE_ONLY_AGENT_PATHS
+    }
     instructions = {
         ".github/instructions/markdown.instructions.md",
         ".github/instructions/yaml.instructions.md",
@@ -1167,6 +1274,11 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
         elif prefixed != recommended and (source_root / recommended).is_file():
             instructions.add(recommended)
 
+    for instruction_path in portable_source_instructions:
+        apply_to = frontmatter_value(source_root / instruction_path, "applyTo")
+        if apply_to and repo_matches_apply_to(analysis.repo_root, apply_to):
+            instructions.add(instruction_path)
+
     profile_expected = {ensure_github_prefix(item) for item in profile.recommended_instructions}
     for item in instructions:
         if item not in profile_expected:
@@ -1177,6 +1289,7 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
         prefixed = ensure_github_prefix(recommended)
         if (source_root / prefixed).is_file():
             prompts.add(prefixed)
+    prompts.update(source_preferred_prompts)
 
     if "bash" in stacks:
         prompts.add(CANONICAL_BASH_SCRIPT_PROMPT_PATH)
@@ -1197,7 +1310,7 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if repo_needs_data_registry(analysis.repo_root, analysis):
         prompts.add(".github/prompts/tech-ai-data-registry.prompt.md")
     if target_has_pr_template(analysis.repo_root):
-        prompts.add(".github/prompts/tech-ai-pr-description.prompt.md")
+        prompts.add(".github/prompts/tech-ai-pr-editor.prompt.md")
 
     prompts = {
         prompt
@@ -1210,6 +1323,7 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
         prefixed = ensure_github_prefix(recommended)
         if (source_root / prefixed).is_file():
             skills.add(prefixed)
+    skills.update(source_preferred_skills)
 
     for prompt in prompts:
         skills.update(path for path in prompt_skill_refs(source_root / prompt) if (source_root / path).is_file())
@@ -1230,17 +1344,20 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
         agents.add(".github/agents/tech-ai-iam-least-privilege.agent.md")
     if target_has_pr_template(analysis.repo_root):
         agents.add(".github/agents/tech-ai-pr-editor.agent.md")
+    agents.update(portable_source_agents)
 
     agents = {agent for agent in agents if agent not in SOURCE_ONLY_AGENT_PATHS and (source_root / agent).is_file()}
 
     baseline_files = [path for path in MANAGED_ALWAYS if (source_root / path).is_file()]
     validation_commands = build_validation_commands(analysis, instructions)
 
-    preferred_prompts = [path for path in sorted(prompts) if path in {ensure_github_prefix(item) for item in profile.recommended_prompts}]
+    preferred_prompt_candidates = {ensure_github_prefix(item) for item in profile.recommended_prompts} | set(source_preferred_prompts)
+    preferred_prompts = [path for path in sorted(prompts) if path in preferred_prompt_candidates]
     if not preferred_prompts:
         preferred_prompts = sorted(prompts)[:5]
 
-    preferred_skills = [path for path in sorted(skills) if path in {ensure_github_prefix(item) for item in profile.recommended_skills}]
+    preferred_skill_candidates = {ensure_github_prefix(item) for item in profile.recommended_skills} | set(source_preferred_skills)
+    preferred_skills = [path for path in sorted(skills) if path in preferred_skill_candidates]
     if not preferred_skills:
         preferred_skills = sorted(skills)[:5]
 
@@ -1483,6 +1600,7 @@ def detect_unmanaged_target_asset_issues(
 ) -> list[TargetAssetIssue]:
     alias_map = known_legacy_alias_map(source_root)
     managed_paths = set(selection.managed_source_paths)
+    managed_paths.update(manifest_managed_paths(load_manifest(target_root)))
     validators = {
         "instructions": validate_unmanaged_instruction_asset,
         "prompts": validate_unmanaged_prompt_asset,
@@ -1756,11 +1874,19 @@ def load_manifest(target_root: Path) -> dict[str, object]:
         raise CliError(f"Invalid JSON manifest at {manifest_path}: {error}") from error
 
 
+def manifest_managed_paths(manifest: dict[str, object]) -> set[str]:
+    managed_files = manifest.get("managed_files", {})
+    if not isinstance(managed_files, dict):
+        return set()
+    return {relative_path for relative_path, entry in managed_files.items() if isinstance(relative_path, str) and isinstance(entry, dict)}
+
+
 def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: dict[str, object]) -> list[FileAction]:
     actions: list[FileAction] = []
     managed_files = manifest.get("managed_files", {})
     if not isinstance(managed_files, dict):
         managed_files = {}
+    planned_target_paths = {planned_file.target_relative_path for planned_file in planned_files}
 
     for planned_file in planned_files:
         target_path = target_root / planned_file.target_relative_path
@@ -1860,6 +1986,46 @@ def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: 
             )
         )
 
+    for managed_relative_path, managed_entry in sorted(managed_files.items()):
+        if managed_relative_path in planned_target_paths or managed_relative_path == MANIFEST_RELATIVE_PATH:
+            continue
+        if not isinstance(managed_entry, dict):
+            continue
+
+        target_path = target_root / managed_relative_path
+        if not target_path.is_file():
+            continue
+
+        current_sha256 = sha256_path(target_path)
+        recorded_sha256 = str(managed_entry.get("sha256", ""))
+        if current_sha256 != recorded_sha256:
+            actions.append(
+                FileAction(
+                    target_relative_path=managed_relative_path,
+                    source_relative_path=managed_entry.get("source_relative_path"),
+                    status="conflict",
+                    category=asset_category(managed_relative_path),
+                    reason="Source-managed file was removed from the desired baseline but changed locally after the last sync.",
+                    desired_sha256="",
+                    current_sha256=current_sha256,
+                    generated=bool(managed_entry.get("generated", False)),
+                )
+            )
+            continue
+
+        actions.append(
+            FileAction(
+                target_relative_path=managed_relative_path,
+                source_relative_path=managed_entry.get("source_relative_path"),
+                status="delete",
+                category=asset_category(managed_relative_path),
+                reason="Remove a source-managed file that is no longer part of the desired baseline.",
+                desired_sha256="",
+                current_sha256=current_sha256,
+                generated=bool(managed_entry.get("generated", False)),
+            )
+        )
+
     return actions
 
 
@@ -1900,7 +2066,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         "",
         "### When to use each agent",
     ]
-    lines.extend(agent_routing_lines(selection.agents))
+    lines.extend(agent_routing_lines(source_root, selection.agents))
     lines.extend(
         [
             "",
@@ -1992,25 +2158,37 @@ def asset_display_name(source_root: Path, relative_path: str) -> str:
     return Path(strip_github_prefix(relative_path)).name
 
 
-def agent_routing_lines(agent_paths: list[str]) -> list[str]:
+def agent_routing_lines(source_root: Path, agent_paths: list[str]) -> list[str]:
+    explicit_lines = {
+        "tech-ai-planner.agent.md": "- Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.",
+        "tech-ai-implementer.agent.md": "- Use `TechAIImplementer` for direct code/config changes and validation-first delivery.",
+        "tech-ai-reviewer.agent.md": "- Use `TechAIReviewer` for quality gates and defect/regression findings.",
+        "tech-ai-terraform-guardrails.agent.md": "- Use `TechAITerraformGuardrails` for Terraform safety and policy guardrail reviews.",
+        "tech-ai-iam-least-privilege.agent.md": "- Use `TechAIIAMLeastPrivilege` for role and permission scoping checks.",
+        "tech-ai-github-workflow-supply-chain.agent.md": "- Use `TechAIWorkflowSupplyChain` for workflow supply-chain hardening and CI checks.",
+        "tech-ai-security-reviewer.agent.md": "- Use `TechAISecurityReviewer` as the security-focused review gate.",
+        "tech-ai-pr-editor.agent.md": "- Use `TechAIPREditor` when generating pull request content from the repository template.",
+    }
     lines: list[str] = []
-    agent_names = {Path(path).name for path in agent_paths}
-    if "tech-ai-planner.agent.md" in agent_names:
-        lines.append("- Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.")
-    if "tech-ai-implementer.agent.md" in agent_names:
-        lines.append("- Use `TechAIImplementer` for direct code/config changes and validation-first delivery.")
-    if "tech-ai-reviewer.agent.md" in agent_names:
-        lines.append("- Use `TechAIReviewer` for quality gates and defect/regression findings.")
-    if "tech-ai-terraform-guardrails.agent.md" in agent_names:
-        lines.append("- Use `TechAITerraformGuardrails` for Terraform safety and policy guardrail reviews.")
-    if "tech-ai-iam-least-privilege.agent.md" in agent_names:
-        lines.append("- Use `TechAIIAMLeastPrivilege` for role and permission scoping checks.")
-    if "tech-ai-github-workflow-supply-chain.agent.md" in agent_names:
-        lines.append("- Use `TechAIWorkflowSupplyChain` for workflow supply-chain hardening and CI checks.")
-    if "tech-ai-security-reviewer.agent.md" in agent_names:
-        lines.append("- Use `TechAISecurityReviewer` as the security-focused review gate.")
-    if "tech-ai-pr-editor.agent.md" in agent_names:
-        lines.append("- Use `TechAIPREditor` when generating pull request content from the repository template.")
+    for relative_path in sorted(agent_paths):
+        filename = Path(relative_path).name
+        if filename in explicit_lines:
+            lines.append(explicit_lines[filename])
+            continue
+
+        asset_path = source_root / relative_path
+        name = frontmatter_value(asset_path, "name") or asset_path.stem
+        description = frontmatter_value(asset_path, "description").strip()
+        if not description:
+            lines.append(f"- Use `{name}` when its specialization matches the task.")
+            continue
+
+        first_sentence = description.split(".", 1)[0].strip().rstrip(".")
+        if first_sentence:
+            first_sentence = f"{first_sentence[0].lower()}{first_sentence[1:]}"
+            lines.append(f"- Use `{name}` to {first_sentence}.")
+        else:
+            lines.append(f"- Use `{name}` when its specialization matches the task.")
     return lines
 
 
@@ -2155,13 +2333,16 @@ def write_report(path: Path, content: str) -> None:
 def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFile], source_root: Path) -> None:
     content_map = {item.target_relative_path: item for item in planned_files}
     for action in plan.actions:
-        if action.status not in {"create", "update"}:
+        target_path = target_root / action.target_relative_path
+        if action.status in {"create", "update"}:
+            planned_file = content_map[action.target_relative_path]
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            target_path.write_text(planned_file.desired_content, encoding="utf-8")
             continue
 
-        planned_file = content_map[action.target_relative_path]
-        target_path = target_root / action.target_relative_path
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        target_path.write_text(planned_file.desired_content, encoding="utf-8")
+        if action.status == "delete" and target_path.is_file():
+            target_path.unlink()
+            prune_empty_parent_dirs(target_path, target_root)
 
     manifest = {
         "tool": SCRIPT_NAME,
@@ -2254,7 +2435,7 @@ def render_markdown_report(plan: SyncPlan) -> str:
         "## Planned or applied actions",
         ]
     )
-    for status in ("create", "update", "adopt", "unchanged", "conflict"):
+    for status in ("create", "update", "delete", "adopt", "unchanged", "conflict"):
         matching = [action for action in plan.actions if action.status == status]
         lines.append(f"### {status.title()}")
         if not matching:
