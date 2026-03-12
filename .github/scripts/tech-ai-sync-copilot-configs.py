@@ -25,6 +25,9 @@ SCRIPT_NAME = "TechAISyncGlobalCopilotConfigsIntoRepo"
 MANIFEST_RELATIVE_PATH = ".github/tech-ai-sync-copilot-configs.manifest.json"
 SUPPORTED_SCOPE = "copilot-core"
 SUPPORTED_CONFLICT_POLICY = "conservative-merge"
+VSCODE_SETTINGS_RELATIVE_PATH = ".vscode/settings.json"
+PR_DESCRIPTION_SETTING_KEY = "githubPullRequests.pullRequestDescription"
+PR_DESCRIPTION_SETTING_VALUE = "Copilot"
 MANAGED_ALWAYS = (
     ".github/copilot-instructions.md",
     ".github/copilot-commit-message-instructions.md",
@@ -1527,6 +1530,80 @@ def detect_unmanaged_target_asset_issues(
     return sorted(issues, key=lambda item: (item.category, item.target_relative_path))
 
 
+def detect_editor_integration_issues(target_root: Path) -> list[TargetAssetIssue]:
+    settings_path = target_root / VSCODE_SETTINGS_RELATIVE_PATH
+    if not settings_path.is_file():
+        return [
+            TargetAssetIssue(
+                category="editor",
+                target_relative_path=VSCODE_SETTINGS_RELATIVE_PATH,
+                issue_types=["editor_integration"],
+                details=[
+                    "Missing VS Code workspace settings; add "
+                    f"`{PR_DESCRIPTION_SETTING_KEY}` set to `{PR_DESCRIPTION_SETTING_VALUE}` "
+                    "to enable Copilot PR body generation in the GitHub Pull Requests form."
+                ],
+                severity="warn",
+            )
+        ]
+
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return [
+            TargetAssetIssue(
+                category="editor",
+                target_relative_path=VSCODE_SETTINGS_RELATIVE_PATH,
+                issue_types=["editor_integration", "validation"],
+                details=[
+                    "Invalid JSON in VS Code workspace settings: "
+                    f"{error.msg} (line {error.lineno}, column {error.colno})."
+                ],
+                severity="error",
+            )
+        ]
+
+    if not isinstance(settings, dict):
+        return [
+            TargetAssetIssue(
+                category="editor",
+                target_relative_path=VSCODE_SETTINGS_RELATIVE_PATH,
+                issue_types=["editor_integration", "validation"],
+                details=[
+                    "VS Code workspace settings must be a JSON object so "
+                    f"`{PR_DESCRIPTION_SETTING_KEY}` can be resolved."
+                ],
+                severity="error",
+            )
+        ]
+
+    configured_value = settings.get(PR_DESCRIPTION_SETTING_KEY)
+    if configured_value == PR_DESCRIPTION_SETTING_VALUE:
+        return []
+
+    if configured_value is None:
+        detail = (
+            f"Missing `{PR_DESCRIPTION_SETTING_KEY}` in VS Code workspace settings; set it to "
+            f"`{PR_DESCRIPTION_SETTING_VALUE}` to enable Copilot PR body generation in the GitHub Pull "
+            "Requests form."
+        )
+    else:
+        detail = (
+            f"`{PR_DESCRIPTION_SETTING_KEY}` must be `{PR_DESCRIPTION_SETTING_VALUE}`, found "
+            f"{json.dumps(configured_value, sort_keys=True)}."
+        )
+
+    return [
+        TargetAssetIssue(
+            category="editor",
+            target_relative_path=VSCODE_SETTINGS_RELATIVE_PATH,
+            issue_types=["editor_integration"],
+            details=[detail],
+            severity="warn",
+        )
+    ]
+
+
 def build_planned_files(
     source_root: Path,
     target_root: Path,
@@ -2011,6 +2088,16 @@ def build_recommendations(
             f"`name:` values: {', '.join(internal_naming_issue_paths)}."
         )
 
+    editor_integration_issue_paths = [
+        issue.target_relative_path for issue in target_asset_issues if "editor_integration" in issue.issue_types
+    ]
+    if editor_integration_issue_paths:
+        recommendations["missing consumer-facing validation or onboarding guidance"].append(
+            "The target repository is missing the VS Code GitHub Pull Requests setting "
+            f"`{PR_DESCRIPTION_SETTING_KEY} = \"{PR_DESCRIPTION_SETTING_VALUE}\"`; add it in "
+            f"`{VSCODE_SETTINGS_RELATIVE_PATH}` to enable Copilot PR body generation from the PR form."
+        )
+
     if not target_has_validation_workflow(analysis.repo_root):
         recommendations["missing consumer-facing validation or onboarding guidance"].append(
             "The target repository is missing `.github/workflows/github-validate-copilot-customizations.yml`; "
@@ -2353,6 +2440,8 @@ def build_plan(source_root: Path, target_root: Path) -> tuple[SyncPlan, list[Pla
     actions = plan_actions(target_root, planned_files, manifest)
     redundant_assets = detect_redundant_assets(source_root, target_root, selection)
     target_asset_issues = detect_unmanaged_target_asset_issues(source_root, target_root, selection)
+    target_asset_issues.extend(detect_editor_integration_issues(target_root))
+    target_asset_issues = sorted(target_asset_issues, key=lambda item: (item.category, item.target_relative_path))
     source_audit = audit_source_configuration(source_root)
     actions = apply_redundancy_conflicts(actions, redundant_assets, analysis.agents_relative_path)
     recommendations = build_recommendations(

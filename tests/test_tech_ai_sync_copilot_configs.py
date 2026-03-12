@@ -476,6 +476,62 @@ def test_build_plan_detects_backend_python_profile_and_python_validation_command
     assert ".github/prompts/tech-ai-python.prompt.md" in plan.selection.prompts
 
 
+def test_build_plan_reports_missing_vscode_pr_description_setting(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service"
+    build_python_service_target(target_root)
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    issue = next(
+        issue
+        for issue in plan.target_asset_issues
+        if issue.target_relative_path == MODULE.VSCODE_SETTINGS_RELATIVE_PATH
+    )
+
+    assert issue.category == "editor"
+    assert issue.issue_types == ["editor_integration"]
+    assert issue.severity == "warn"
+    assert MODULE.PR_DESCRIPTION_SETTING_KEY in issue.details[0]
+    assert MODULE.PR_DESCRIPTION_SETTING_VALUE in issue.details[0]
+    guidance = "\n".join(plan.recommendations["missing consumer-facing validation or onboarding guidance"])
+    assert MODULE.PR_DESCRIPTION_SETTING_KEY in guidance
+
+
+def test_build_plan_accepts_vscode_pr_description_setting_when_enabled(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service-with-vscode"
+    build_python_service_target(target_root)
+    write_file(
+        target_root / ".vscode" / "settings.json",
+        json.dumps({MODULE.PR_DESCRIPTION_SETTING_KEY: MODULE.PR_DESCRIPTION_SETTING_VALUE}, indent=2) + "\n",
+    )
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert all(
+        issue.target_relative_path != MODULE.VSCODE_SETTINGS_RELATIVE_PATH for issue in plan.target_asset_issues
+    )
+
+
+def test_build_plan_reports_invalid_vscode_settings_json(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service-invalid-vscode"
+    build_python_service_target(target_root)
+    write_file(target_root / ".vscode" / "settings.json", "{invalid-json}\n")
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    issue = next(
+        issue
+        for issue in plan.target_asset_issues
+        if issue.target_relative_path == MODULE.VSCODE_SETTINGS_RELATIVE_PATH
+    )
+
+    assert issue.category == "editor"
+    assert "editor_integration" in issue.issue_types
+    assert "validation" in issue.issue_types
+    assert issue.severity == "error"
+    assert "Invalid JSON" in issue.details[0]
+
+
 def test_build_plan_adds_pytest_only_when_repo_contains_pytest_tests(tmp_path: Path) -> None:
     target_root = tmp_path / "python-service-with-tests"
     build_python_service_target(target_root)
@@ -727,6 +783,11 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
     assert any(
         issue["target_relative_path"] == ".github/prompts/add-external-user.prompt.md"
         and "validation" in issue["issue_types"]
+        for issue in payload["analysis"]["unmanaged_target_asset_issues"]
+    )
+    assert any(
+        issue["target_relative_path"] == MODULE.VSCODE_SETTINGS_RELATIVE_PATH
+        and "editor_integration" in issue["issue_types"]
         for issue in payload["analysis"]["unmanaged_target_asset_issues"]
     )
     assert any(
