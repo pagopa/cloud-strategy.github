@@ -7,9 +7,8 @@ applyTo: "**/*.java"
 
 ## Mandatory rules
 - Treat work as project-oriented (services/modules/components), not script-oriented.
-- Apply DDD boundaries: keep domain logic inside domain services/entities/value objects.
-- Keep infrastructure details (I/O, SDK calls, persistence wiring) outside core domain logic.
-- Use ubiquitous language in class names, methods, and domain-level exceptions.
+- Keep business logic separated from I/O and infrastructure concerns (SDK calls, persistence, external APIs).
+- Use clear, domain-relevant naming in class names, methods, and exceptions.
 - Add concise purpose JavaDoc for new/changed core classes when intent is not obvious.
 - Use emoji logs for key runtime transitions when logging is touched.
 - Prefer early return and guard clauses.

@@ -19,10 +19,9 @@ applyTo: "**/*.py"
 - Keep template content complete and externalize only values intentionally passed by the caller.
 
 ## Application code (non-script)
-- Apply DDD boundaries for non-trivial features: domain, application, and infrastructure concerns must stay separated.
-- Keep business rules in domain entities/value objects/domain services.
-- Keep infrastructure concerns (DB, API clients, cloud SDK) in adapters and repositories.
-- Use ubiquitous language in domain classes, method names, and errors.
+- For non-trivial features, keep business logic separated from I/O and infrastructure concerns.
+- Keep module boundaries clear: business rules in one place, external integrations in another.
+- Use clear, domain-relevant naming in classes, methods, and errors.
 
 ## Script code
 - Start scripts with a module docstring containing purpose and usage examples.

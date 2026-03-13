@@ -11,6 +11,23 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 - Validate `.github/**` content in CI using `.github/scripts/validate-copilot-customizations.sh`.
 - Run `shellcheck` on Bash scripts under `.github/scripts/`.
 
+## IAM and least privilege
+- Apply least privilege across all clouds: scope roles, policies, and bindings to the narrowest effective target.
+- AWS: no `"Action": "*"` or `"Resource": "*"` without documented justification; use permission boundaries on human roles; align with SCPs.
+- Azure: no Owner at subscription level without justification; scope role assignments narrowly; prefer managed identities over service principal secrets.
+- GCP: no primitive roles (`roles/editor`, `roles/owner`); no `allUsers`/`allAuthenticatedUsers` bindings; prefer Workload Identity over SA keys.
+- Flag privilege escalation chains (e.g., `iam:PassRole` + `lambda:CreateFunction` on AWS).
+- Review blast radius: what is the worst-case impact if this identity is compromised?
+
+## Supply chain and CI/CD security
+- Pin every GitHub Action to a full-length commit SHA with adjacent release/tag comment.
+- Pin `docker://` references by digest instead of floating tags.
+- Require OIDC for cloud authentication in workflows — no long-lived secrets.
+- Use minimal `permissions` on every workflow and job.
+- Never use `pull_request_target` with untrusted code execution.
+- Protect production environments with required reviewers and deployment rules.
+- Set explicit `timeout-minutes` and `concurrency` on jobs.
+
 ## Prompt and instruction safety
 - Avoid instructions that request hidden or sensitive data.
 - Prohibit plaintext tokens, keys, and passwords in examples.
@@ -32,13 +49,15 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 | --- | --- | --- |
 | Third-party action SHA pinning | Automated | `validate-copilot-customizations.sh` |
 | Minimal workflow permissions | Automated | `validate-copilot-customizations.sh` |
+| Docker image digest pinning | Automated | `validate-copilot-customizations.sh` |
 | Validate `.github/**` in CI | Automated | `github-validate-copilot-customizations.yml` |
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
 | Secret placeholder avoidance in prompts/examples | Partial | pre-commit hooks + review |
 | OIDC over long-lived secrets | Manual review | `github-actions.instructions.md` |
+| IAM least privilege (AWS/Azure/GCP) | Manual review | `TechAISecurityReviewer` + `TechAITerraformReviewer` |
+| Supply chain hardening | Manual review | `TechAISecurityReviewer` |
 | Branch protection for `.github/**` | Manual review | repository settings |
-| Read-only agents as default | Manual review | agent review |
-| Scoped write-capable agents | Manual review | agent review |
+| Read-only reviewer agents | Manual review | agent review |
 | CHANGELOG-based change governance | Manual review | PR review |
 
 ## Optional hardening
