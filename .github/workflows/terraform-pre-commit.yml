@@ -11,7 +11,7 @@ on:
         description: "Docker image for pre-commit-terraform"
         required: false
         type: string
-        default: "ghcr.io/antonbabenko/pre-commit-terraform:v1.105.0@sha256:4ef4b8323b27fc263535ad88c9d2f20488fcb3b520258e5e7f0553ed5f6692b5"
+        default: "ghcr.io/antonbabenko/pre-commit-terraform:v1.105.0@sha256:4ef4b8323b27fc263535ad88c9d2f20488fcb3b520258e5e7f0553ed5f6692b5" # pre-commit-terraform v1.105.0
       pre-commit-config:
         description: "Path to the pre-commit config file"
         required: false
@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 env:
-  PRE_COMMIT_IMAGE: ${{ inputs.pre-commit-image || 'ghcr.io/antonbabenko/pre-commit-terraform:v1.105.0@sha256:4ef4b8323b27fc263535ad88c9d2f20488fcb3b520258e5e7f0553ed5f6692b5' }}
+  PRE_COMMIT_IMAGE: ${{ inputs.pre-commit-image || 'ghcr.io/antonbabenko/pre-commit-terraform:v1.105.0@sha256:4ef4b8323b27fc263535ad88c9d2f20488fcb3b520258e5e7f0553ed5f6692b5' }} # pre-commit-terraform v1.105.0
   PRE_COMMIT_CONFIG: ${{ inputs.pre-commit-config || '.pre-commit-config.yaml' }}
 
 concurrency:

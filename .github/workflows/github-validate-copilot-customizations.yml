@@ -50,11 +50,20 @@ concurrency:
 jobs:
   validate:
     name: Validate Files
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # latest stable GitHub-hosted Ubuntu runner
     timeout-minutes: 10
+    env:
+      PYTHON_VERSION: "3.14.3" # Python v3.14.3
+      PIP_VERSION: "26.0.1" # pip v26.0.1
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 https://github.com/actions/checkout/releases/tag/v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 https://github.com/actions/setup-python/releases/tag/v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
 
       - name: Detect config root
         id: config-root
@@ -65,13 +74,10 @@ jobs:
             echo "root=." >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install shellcheck
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y shellcheck
-
       - name: Install TechAI Python test dependencies
-        run: python3 -m pip install -r .github/tech-ai-requirements-dev.txt
+        run: |
+          python -m pip install --upgrade "pip==${PIP_VERSION}"
+          python -m pip install -r .github/tech-ai-requirements-dev.txt
 
       - name: Lint validator script
         run: |
@@ -83,5 +89,5 @@ jobs:
 
       - name: Run TechAI Python checks
         run: |
-          python3 -m compileall .github/scripts tests
-          pytest -q
+          python -m compileall .github/scripts tests
+          python -m pytest -q
