@@ -744,7 +744,7 @@ def test_internal_builder_triads_are_source_only_and_excluded_from_consumer_sync
     )
 
 
-def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> None:
+def test_build_plan_reports_only_remaining_unsupported_stacks_when_docker_is_supported(tmp_path: Path) -> None:
     target_root = tmp_path / "polyglot"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
     write_file(target_root / "Dockerfile", "FROM alpine:3.21\n")
@@ -752,9 +752,10 @@ def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> 
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert plan.analysis.unsupported_stacks == ["docker", "go"]
+    assert "docker" in plan.analysis.stacks
+    assert plan.analysis.unsupported_stacks == ["go"]
     recommendations = "\n".join(plan.recommendations["missing instructions/prompts/skills"])
-    assert "unsupported target stacks: docker, go" in recommendations
+    assert "unsupported target stacks: go" in recommendations
 
 
 def test_build_plan_detects_composite_actions_under_workflows_tree(tmp_path: Path) -> None:

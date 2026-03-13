@@ -77,7 +77,7 @@ jobs:
       - name: Install TechAI Python test dependencies
         run: |
           python -m pip install --upgrade "pip==${PIP_VERSION}"
-          python -m pip install -r .github/tech-ai-requirements-dev.txt
+          python -m pip install --require-hashes --requirement .github/tech-ai-requirements-dev.txt
 
       - name: Lint validator script
         run: |

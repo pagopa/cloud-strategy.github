@@ -50,7 +50,12 @@ You are an expert software/platform engineer. Optimize for secure, consistent, a
 - Use simple control flow and early returns.
 - Bash: always `#!/usr/bin/env bash` (never POSIX `sh`).
 - Python: add unit tests for testable logic.
-- Python: if external dependencies are used, pin versions in `requirements.txt`.
+- Python: if external dependencies are used, prefer a compiled lock file with hashes in `requirements.txt`; when hashes are not feasible, use exact `==` pins and document why.
+
+## Supply chain pinning
+- Terraform: pin providers and external modules to exact versions or immutable refs; for registry modules prefer exact `version`, for git sources prefer immutable `?ref=` values.
+- Docker and container images: pin images by digest and keep an adjacent comment or companion reference that states the human-readable tag/version.
+- Workflow-local containers and `docker://` references must use immutable digests rather than floating tags.
 
 ## Java and Node.js standards
 - Treat as project work (services/modules/components), not script work.

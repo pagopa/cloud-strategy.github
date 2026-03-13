@@ -38,7 +38,8 @@ applyTo: "**/*.py"
 - Docstrings, logs, exceptions, and CLI output must be in English.
 
 ## Dependencies
-- If external libraries are needed, pin versions in `requirements.txt`.
+- If external libraries are needed, prefer a compiled `requirements.txt` with hashes.
+- When hash-locked requirements are not feasible, use exact `==` pins and document the reason in the closest technical note or workflow comment.
 
 ## Testing defaults
 - Use `pytest` as default unit-test framework.

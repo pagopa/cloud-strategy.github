@@ -18,6 +18,7 @@ description: Create or modify Python application components using DDD boundaries
 - Prefer early return and guard clauses.
 - Keep code explicit and readability-first.
 - Add unit tests for testable logic.
+- Prefer compiled hash-locked requirements for external dependencies; if hashes are not feasible, use exact `==` pins and document the exception.
 
 ## Testing
 - Use `pytest`.

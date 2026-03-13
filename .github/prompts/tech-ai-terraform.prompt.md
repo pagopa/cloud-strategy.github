@@ -27,7 +27,8 @@ Create or modify Terraform resources, modules, variables, outputs, or data sourc
    - `description` for variables/outputs
    - no hardcoded values
    - tags where supported
-6. Keep technical output and documentation in English.
+6. Pin providers and external modules to exact versions or immutable refs; when git sources are used, keep the matching release/tag visible in a nearby comment when known.
+7. Keep technical output and documentation in English.
 
 ## Minimal example
 - Input: `action=create type=module description="Reusable role module" target_dir=src/modules/iam-role`

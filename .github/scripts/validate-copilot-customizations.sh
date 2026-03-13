@@ -1017,7 +1017,14 @@ validate_workflow_pinning() {
       token="$(printf '%s\n' "$line_text" | sed -E 's/.*uses:[[:space:]]*([^[:space:]]+).*/\1/')"
       [[ -n "$token" ]] || continue
 
-      if [[ "$token" == ./* || "$token" == .github/actions/* || "$token" == docker://* ]]; then
+      if [[ "$token" == ./* || "$token" == .github/actions/* ]]; then
+        continue
+      fi
+
+      if [[ "$token" == docker://* ]]; then
+        if [[ "$token" != *"@sha256:"* ]]; then
+          record_issue "$severity" "Workflow docker reference is not pinned by digest: ${file}:${line_number} -> ${token}"
+        fi
         continue
       fi
 

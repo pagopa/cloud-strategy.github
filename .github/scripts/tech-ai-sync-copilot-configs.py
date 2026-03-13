@@ -76,7 +76,7 @@ ALWAYS_EXCLUDED_DIRECTORIES = {
     "build",
     "__pycache__",
 }
-STACK_PRIORITY = ("terraform", "python", "nodejs", "java", "bash")
+STACK_PRIORITY = ("terraform", "python", "nodejs", "java", "docker", "bash")
 PROMPT_SKILL_REFERENCE_PREFIX = ".github/"
 EXTRA_LEGACY_ALIAS_PATHS = {
     ".github/prompts/tech-ai-bash-script.prompt.md": (
@@ -711,7 +711,7 @@ def detect_stacks(repo_root: Path, files: list[Path]) -> tuple[list[str], list[s
             unsupported.add("dotnet")
 
         if name.startswith("Dockerfile"):
-            unsupported.add("docker")
+            stacks.add("docker")
         if is_composite_action_file(path):
             stacks.add("composite-action")
 

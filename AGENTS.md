@@ -103,10 +103,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - PR content must follow `PULL_REQUEST_TEMPLATE.md` in exact section order.
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with release or tag reference.
 
-## Backlog Triggers
-
-- Add `instructions/docker.instructions.md` when the first Dockerfile is introduced in this repository.
-
 ## Repository Defaults
 
 - Primary focus: reusable, repository-agnostic Copilot customization standards.
@@ -123,6 +119,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Default instruction routing
 
 - `**/*.py` -> `python.instructions.md`
+- `**/Dockerfile,**/Dockerfile.*,**/.dockerignore,**/docker-compose*.yml,**/compose*.yml` -> `docker.instructions.md`
 - `**/*.sh` -> `bash.instructions.md`
 - `**/*.tf` -> `terraform.instructions.md`
 - `**/*.java` -> `java.instructions.md`
@@ -144,6 +141,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
 - `TechAIPREditor`: pull request body generation.
 - `TechAIAddUnitTests`: test authoring and improvement.
+- `TechAIDocker`: Docker and container authoring.
 - `TechAITerraform`: Terraform feature or module authoring.
 - `TechAIPairArchitectAnalysis`: deep change-impact analysis with DDD focus, health score, risk matrix, and devil's advocate mode.
 
@@ -155,6 +153,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
 - `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
+- `TechAIDocker`: Docker and container build patterns.
 - `TechAITerraformModule`: reusable Terraform module design.
 - `TechAIPairArchitect`: change-set-level impact, DDD smell catalog, health scoring, risk matrix, and blind-spot detection.
 - `TechAIPairArchitectAnalysisExecutor`: per-finding re-evaluation, decision tables, lessons learned, and validated execution planning.
@@ -171,6 +170,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Instructions
 
 - `.github/instructions/bash.instructions.md`
+- `.github/instructions/docker.instructions.md`
 - `.github/instructions/github-action-composite.instructions.md`
 - `.github/instructions/github-actions.instructions.md`
 - `.github/instructions/java.instructions.md`
@@ -195,6 +195,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/tech-ai-cloud-policy.prompt.md`
 - `.github/prompts/tech-ai-code-review.prompt.md`
 - `.github/prompts/tech-ai-data-registry.prompt.md`
+- `.github/prompts/tech-ai-docker.prompt.md`
 - `.github/prompts/tech-ai-github-action.prompt.md`
 - `.github/prompts/tech-ai-github-composite-action.prompt.md`
 - `.github/prompts/tech-ai-pr-editor.prompt.md`
@@ -216,6 +217,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/tech-ai-code-review/SKILL.md`
 - `.github/skills/tech-ai-composite-action/SKILL.md`
 - `.github/skills/tech-ai-data-registry/SKILL.md`
+- `.github/skills/tech-ai-docker/SKILL.md`
 - `.github/skills/tech-ai-repo-copilot-extender/SKILL.md`
 - `.github/skills/tech-ai-pr-editor/SKILL.md`
 - `.github/skills/tech-ai-project-java/SKILL.md`

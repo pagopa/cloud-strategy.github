@@ -18,8 +18,9 @@ argument-hint: action=<create|modify> workflow_name=<name> purpose=<purpose> [tr
 2. Reuse existing workflow conventions in `.github/workflows/`.
 3. Enforce OIDC, minimal `permissions`, and SHA-pinned actions.
 4. For every SHA-pinned action, add an adjacent comment with release/tag and release URL.
-5. Keep step names in English.
-6. If `action=modify`, preserve existing behavior unless explicitly changed.
+5. Pin container images and `docker://` references by digest, keeping the corresponding tag/version visible in a nearby comment or reference.
+6. Keep step names in English.
+7. If `action=modify`, preserve existing behavior unless explicitly changed.
 
 ## Minimal example
 - Input: `action=create workflow_name=terraform-ci purpose="Validate terraform on PR" triggers=pull_request`

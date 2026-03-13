@@ -22,6 +22,7 @@ description: Create or modify reusable Terraform modules with standard file layo
 - Use outputs with `description`.
 - Avoid hardcoded IDs and secrets.
 - Preserve stable module input/output contracts.
+- Pin external module dependencies to exact versions or immutable refs.
 
 ## Minimal example
 ```hcl

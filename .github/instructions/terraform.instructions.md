@@ -31,6 +31,9 @@ applyTo: "**/*.tf"
 
 ## Multi-cloud baseline
 - Pin provider versions in `required_providers`.
+- Pin external module sources to exact versions or immutable refs.
+- For registry modules, prefer exact `version = "= x.y.z"` constraints over floating ranges.
+- For git-based module sources, use immutable `?ref=` values and add a short comment with the corresponding release/tag when known.
 - Keep provider configuration explicit for region/subscription/project scope.
 - Reuse repository-specific provider conventions for AWS, Azure, and GCP.
 

@@ -30,6 +30,7 @@ Create or modify Python application components with DDD boundaries, early-return
 7. If the task includes Python templates, use Jinja templates named `<file-name>.<extension>.j2`.
 8. If `action=modify` and tests already exist, run existing tests before editing test files.
 9. Add or update deterministic `pytest` unit tests only after the first test run, and only for intentional behavior changes or uncovered new behavior.
+10. If the change introduces external Python dependencies, prefer a compiled hash-locked `requirements.txt`; if that is not feasible, use exact `==` pins and document why.
 
 ## Minimal example
 - Input: `action=create component_type=domain_service component_name=PolicyEvaluator purpose="Evaluate policy eligibility"`

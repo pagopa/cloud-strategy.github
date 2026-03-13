@@ -21,6 +21,7 @@ Define consistent standards for reusable composite actions under `.github/action
 - Avoid `eval` and untrusted command execution.
 - Minimize permissions in calling workflows.
 - Document expected trust model in the action description.
+- Pin any `docker://` or container image reference by digest and keep the human-readable tag/version nearby.
 
 ## Minimal example
 ```yaml

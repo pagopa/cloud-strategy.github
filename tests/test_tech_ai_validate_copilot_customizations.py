@@ -266,15 +266,62 @@ def test_tech_ai_validator_requires_release_comment_for_workflow_sha_pins(tmp_pa
     assert any("Workflow SHA pin is missing adjacent release URL comment" in message for message in messages)
 
 
+def test_tech_ai_validator_requires_digest_for_workflow_docker_references(tmp_path: Path) -> None:
+    target_root = tmp_path / "workflow-docker-digest"
+    copy_copilot_config(target_root)
+
+    workflow_path = target_root / ".github" / "workflows" / "custom.yml"
+    workflow_path.parent.mkdir(parents=True, exist_ok=True)
+    workflow_path.write_text(
+        "\n".join(
+            [
+                "name: custom",
+                "on: push",
+                "permissions:",
+                "  contents: read",
+                "jobs:",
+                "  validate:",
+                "    runs-on: ubuntu-latest",
+                "    steps:",
+                "      - uses: docker://alpine:3.21",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report_file = tmp_path / "tech-ai-validator-workflow-docker-digest.json"
+    result = run_validator(target_root, report_file)
+
+    payload = json.loads(report_file.read_text(encoding="utf-8"))
+    messages = [finding["message"] for finding in payload["findings"]]
+    assert result.returncode == 1
+    assert payload["status"] == "failed"
+    assert any("Workflow docker reference is not pinned by digest" in message for message in messages)
+
+
 def test_root_agents_routes_customization_work_to_global_and_local_customization_agents() -> None:
     agents_text = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
     assert "TechAIStandardsRepoConfigBuilder" in agents_text
     assert "TechAIStandardsRepoConfigAuditor" in agents_text
     assert "TechAIRepoCopilotExtender" in agents_text
+    assert "TechAIDocker" in agents_text
     assert "repo-only" in agents_text
     assert "## Available Skills" not in agents_text
     assert "## Available Prompts" not in agents_text
+
+
+def test_pinning_guidance_covers_hashes_modules_and_docker_digests() -> None:
+    global_text = (REPO_ROOT / ".github" / "copilot-instructions.md").read_text(encoding="utf-8")
+    python_text = (REPO_ROOT / ".github" / "instructions" / "python.instructions.md").read_text(encoding="utf-8")
+    terraform_text = (REPO_ROOT / ".github" / "instructions" / "terraform.instructions.md").read_text(encoding="utf-8")
+    docker_text = (REPO_ROOT / ".github" / "instructions" / "docker.instructions.md").read_text(encoding="utf-8")
+
+    assert "compiled lock file with hashes" in global_text
+    assert "compiled `requirements.txt` with hashes" in python_text
+    assert "Pin external module sources to exact versions or immutable refs" in terraform_text
+    assert "Pin base images and runtime images by digest" in docker_text
 
 
 def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated() -> None:

@@ -25,7 +25,7 @@ Create or modify a Python script while keeping interfaces explicit, behavior det
 4. If `action=modify` and tests already exist, run the existing tests before editing them.
 5. Add or update deterministic tests only for intentional behavior changes or uncovered new behavior when `test_scope=unit`.
 6. Use Jinja templates named `<file-name>.<extension>.j2` when the task includes Python-managed templates.
-7. If external libraries are required, create or update `requirements.txt` with pinned versions.
+7. If external libraries are required, prefer a compiled `requirements.txt` with hashes; when hashes are not feasible, use exact `==` pins and document why.
 
 ## Minimal example
 - Input: `action=modify script_name=inventory_report purpose="Summarize customization assets" target_file=.github/scripts/inventory_report.py test_scope=unit`
