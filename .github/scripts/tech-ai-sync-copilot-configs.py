@@ -100,7 +100,6 @@ PROMPT_NAME_OVERRIDES = {
     "tech-ai-pr-editor.prompt.md": "TechAIPREditor",
     "tech-ai-terraform-module.prompt.md": "TechAITerraformModule",
 }
-VALIDATION_WORKFLOW_RELATIVE_PATH = ".github/workflows/github-validate-copilot-customizations.yml"
 SOURCE_ONLY_TARGET_RESIDUE_PATHS = (
     ".github/README.md",
     ".github/agents/README.md",
@@ -1438,10 +1437,6 @@ def repo_has_pytest_tests(repo_root: Path) -> bool:
     return False
 
 
-def target_has_validation_workflow(repo_root: Path) -> bool:
-    return (repo_root / VALIDATION_WORKFLOW_RELATIVE_PATH).is_file()
-
-
 def detect_source_only_residues(target_root: Path) -> list[str]:
     residues: list[str] = []
 
@@ -2274,12 +2269,6 @@ def build_recommendations(
             "The target repository is missing the VS Code GitHub Pull Requests setting "
             f"`{PR_DESCRIPTION_SETTING_KEY} = \"{PR_DESCRIPTION_SETTING_VALUE}\"`; add it in "
             f"`{VSCODE_SETTINGS_RELATIVE_PATH}` to enable Copilot PR body generation from the PR form."
-        )
-
-    if not target_has_validation_workflow(analysis.repo_root):
-        recommendations["missing consumer-facing validation or onboarding guidance"].append(
-            "The target repository is missing `.github/workflows/github-validate-copilot-customizations.yml`; "
-            "add it manually if the consumer wants Copilot customization CI enforcement."
         )
 
     source_only_residues = detect_source_only_residues(analysis.repo_root)

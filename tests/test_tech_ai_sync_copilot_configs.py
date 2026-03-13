@@ -810,7 +810,7 @@ def test_rendered_agents_markdown_uses_explicit_github_paths_and_table_routing(t
     assert ": Add or improve unit tests for Python code" not in agents_file.desired_content
 
 
-def test_build_plan_reports_missing_validation_workflow_and_source_only_residues(tmp_path: Path) -> None:
+def test_build_plan_reports_source_only_residues_without_requiring_validation_workflow(tmp_path: Path) -> None:
     target_root = tmp_path / "consumer-residue"
     build_python_service_target(target_root)
     write_file(target_root / ".github" / "README.md", "# source-only\n")
@@ -821,7 +821,6 @@ def test_build_plan_reports_missing_validation_workflow_and_source_only_residues
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
     guidance = "\n".join(plan.recommendations["missing consumer-facing validation or onboarding guidance"])
-    assert "github-validate-copilot-customizations.yml" in guidance
     assert ".github/README.md" in guidance
     assert ".github/agents/README.md" in guidance
     assert ".github/templates/**" in guidance
@@ -875,10 +874,6 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
         issue["target_relative_path"] == MODULE.VSCODE_SETTINGS_RELATIVE_PATH
         and "editor_integration" in issue["issue_types"]
         for issue in payload["analysis"]["unmanaged_target_asset_issues"]
-    )
-    assert any(
-        "github-validate-copilot-customizations.yml" in item
-        for item in payload["recommendations"]["missing consumer-facing validation or onboarding guidance"]
     )
     assert sorted(payload["source_audit"].keys()) == [
         "agents_md_repeats",
