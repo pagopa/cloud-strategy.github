@@ -11,11 +11,8 @@ description: Create or modify Docker assets with digest-pinned images, secure ru
 - Hardening container build and runtime configuration.
 
 ## Mandatory rules
-- Pin external images by digest and keep the human-readable tag/version nearby.
-- Prefer multi-stage builds so build dependencies stay out of the runtime image.
-- Use a non-root runtime user unless a documented exception is required.
-- Keep build steps deterministic and minimize leftover package-manager caches.
-- Maintain `.dockerignore` so secrets, VCS metadata, caches, and local environments are excluded.
+- Follow `.github/instructions/docker.instructions.md` for digest pinning and runtime hardening.
+- Keep examples repo-neutral and minimize build/runtime noise.
 
 ## Minimal example
 ```dockerfile

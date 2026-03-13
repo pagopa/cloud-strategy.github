@@ -23,7 +23,7 @@ Use this prompt to create or modify Terraform modules/components while keeping t
 3. Avoid hardcoded tenant/account/subscription/project identifiers.
 4. Document assumptions and provider requirements explicitly.
 5. Keep module interfaces stable unless a breaking change is requested.
-6. When wiring external modules, pin registry sources to exact versions and git sources to immutable refs with a nearby release/tag reference when known.
+6. Follow `.github/instructions/terraform.instructions.md` for provider and external module pinning.
 
 ## Minimal example
 - Input: `action=create module_name=storage_baseline change_type=module purpose="Provide portable object-storage baseline" target_path=infra/terraform/modules`

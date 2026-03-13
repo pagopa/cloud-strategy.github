@@ -15,8 +15,7 @@ description: Create or modify Python scripts with purpose docstring, emoji logs,
 - Prefer early return and guard clauses.
 - Keep implementation explicit and readable.
 - Add unit tests for testable behavior.
-- If external libraries are needed, prefer a compiled `requirements.txt` with hashes.
-- If hashes are not feasible, use exact `==` pins and document the exception.
+- Follow `.github/instructions/python.instructions.md` for dependency locking.
 - For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
 
 ## Minimal template

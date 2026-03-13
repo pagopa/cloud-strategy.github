@@ -20,9 +20,7 @@ Create or modify Docker-related assets while keeping image references immutable,
 ## Instructions
 1. Use `.github/skills/tech-ai-docker/SKILL.md` and `.github/instructions/docker.instructions.md`.
 2. Reuse existing repository patterns before introducing new Docker structure.
-3. Pin every external image by digest and keep the matching tag/version visible in a nearby comment or reference.
-4. Prefer multi-stage builds, non-root execution, and minimal runtime images.
-5. If `action=modify`, preserve existing behavior unless the task explicitly changes the container contract.
+3. Preserve existing behavior unless the task explicitly changes the container contract.
 
 ## Minimal example
 - Input: `action=modify artifact_type=dockerfile purpose="Pin the runtime image and reduce attack surface" target_file=Dockerfile`

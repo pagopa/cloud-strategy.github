@@ -306,7 +306,9 @@ def test_root_agents_routes_customization_work_to_global_and_local_customization
     assert "TechAIStandardsRepoConfigBuilder" in agents_text
     assert "TechAIStandardsRepoConfigAuditor" in agents_text
     assert "TechAIRepoCopilotExtender" in agents_text
-    assert "TechAIDocker" in agents_text
+    assert ".github/instructions/docker.instructions.md" in agents_text
+    assert ".github/prompts/tech-ai-docker.prompt.md" in agents_text
+    assert ".github/skills/tech-ai-docker/SKILL.md" in agents_text
     assert "repo-only" in agents_text
     assert "## Available Skills" not in agents_text
     assert "## Available Prompts" not in agents_text
@@ -318,7 +320,7 @@ def test_pinning_guidance_covers_hashes_modules_and_docker_digests() -> None:
     terraform_text = (REPO_ROOT / ".github" / "instructions" / "terraform.instructions.md").read_text(encoding="utf-8")
     docker_text = (REPO_ROOT / ".github" / "instructions" / "docker.instructions.md").read_text(encoding="utf-8")
 
-    assert "compiled lock file with hashes" in global_text
+    assert "immutable dependency and image pins" in global_text
     assert "compiled `requirements.txt` with hashes" in python_text
     assert "Pin external module sources to exact versions or immutable refs" in terraform_text
     assert "Pin base images and runtime images by digest" in docker_text

@@ -17,7 +17,7 @@ description: Add or modify Terraform resources, variables, outputs, and data sou
 - Add `description` to outputs.
 - Avoid hardcoded values.
 - Apply tags where supported.
-- Pin providers and external modules to exact versions or immutable refs.
+- Follow `.github/instructions/terraform.instructions.md` for provider and external module pinning.
 
 ## Minimal example
 ```hcl

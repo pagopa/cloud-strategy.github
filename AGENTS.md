@@ -141,7 +141,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
 - `TechAIPREditor`: pull request body generation.
 - `TechAIAddUnitTests`: test authoring and improvement.
-- `TechAIDocker`: Docker and container authoring.
 - `TechAITerraform`: Terraform feature or module authoring.
 - `TechAIPairArchitectAnalysis`: deep change-impact analysis with DDD focus, health score, risk matrix, and devil's advocate mode.
 
@@ -153,7 +152,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
 - `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
-- `TechAIDocker`: Docker and container build patterns.
 - `TechAITerraformModule`: reusable Terraform module design.
 - `TechAIPairArchitect`: change-set-level impact, DDD smell catalog, health scoring, risk matrix, and blind-spot detection.
 - `TechAIPairArchitectAnalysisExecutor`: per-finding re-evaluation, decision tables, lessons learned, and validated execution planning.
