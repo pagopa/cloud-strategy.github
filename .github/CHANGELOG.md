@@ -12,6 +12,7 @@ Use this format for new updates:
 - Annotated `.github/workflows/terraform-pre-commit.yml` image digest references with the corresponding `pre-commit-terraform` release version to make the SHA-based pin self-describing.
 - Strengthened the Copilot baseline so Python guidance prefers hash-locked requirements, Terraform guidance pins external modules as well as providers, GitHub Actions guidance pins container images by digest, and Docker now has dedicated instruction/prompt/skill coverage across `AGENTS.md`, the sync planner, and validation tests.
 - Removed `.github/workflows/github-validate-copilot-customizations.yml` from the source baseline and stopped the sync planner from recommending that workflow to consumer repositories.
+- Updated `.github/scripts/tech-ai-sync-copilot-configs.py` so the default VS Code PR description mode expected during consumer alignment is now `template` instead of `Copilot`.
 
 ## 2026-03-12
 - Renamed the canonical PR prompt from `tech-ai-pr-description.prompt.md` / `TechAIPRDescription` to `tech-ai-pr-editor.prompt.md` / `TechAIPREditor`, and updated `AGENTS.md`, the validator, and review notes to use the new canonical name consistently.

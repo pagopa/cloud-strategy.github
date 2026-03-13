@@ -27,7 +27,7 @@ SUPPORTED_SCOPE = "copilot-core"
 SUPPORTED_CONFLICT_POLICY = "conservative-merge"
 VSCODE_SETTINGS_RELATIVE_PATH = ".vscode/settings.json"
 PR_DESCRIPTION_SETTING_KEY = "githubPullRequests.pullRequestDescription"
-PR_DESCRIPTION_SETTING_VALUE = "Copilot"
+PR_DESCRIPTION_SETTING_VALUE = "template"
 MANAGED_ALWAYS = (
     ".github/copilot-instructions.md",
     ".github/copilot-commit-message-instructions.md",
@@ -1654,7 +1654,7 @@ def detect_editor_integration_issues(target_root: Path) -> list[TargetAssetIssue
                 details=[
                     "Missing VS Code workspace settings; add "
                     f"`{PR_DESCRIPTION_SETTING_KEY}` set to `{PR_DESCRIPTION_SETTING_VALUE}` "
-                    "to enable Copilot PR body generation in the GitHub Pull Requests form."
+                    "to default the GitHub Pull Requests form to the repository template."
                 ],
                 severity="warn",
             )
@@ -1697,8 +1697,8 @@ def detect_editor_integration_issues(target_root: Path) -> list[TargetAssetIssue
     if configured_value is None:
         detail = (
             f"Missing `{PR_DESCRIPTION_SETTING_KEY}` in VS Code workspace settings; set it to "
-            f"`{PR_DESCRIPTION_SETTING_VALUE}` to enable Copilot PR body generation in the GitHub Pull "
-            "Requests form."
+            f"`{PR_DESCRIPTION_SETTING_VALUE}` to default the GitHub Pull Requests form to the "
+            "repository template."
         )
     else:
         detail = (
@@ -2268,7 +2268,7 @@ def build_recommendations(
         recommendations["missing consumer-facing validation or onboarding guidance"].append(
             "The target repository is missing the VS Code GitHub Pull Requests setting "
             f"`{PR_DESCRIPTION_SETTING_KEY} = \"{PR_DESCRIPTION_SETTING_VALUE}\"`; add it in "
-            f"`{VSCODE_SETTINGS_RELATIVE_PATH}` to enable Copilot PR body generation from the PR form."
+            f"`{VSCODE_SETTINGS_RELATIVE_PATH}` to use the repository PR template by default in the PR form."
         )
 
     source_only_residues = detect_source_only_residues(analysis.repo_root)
