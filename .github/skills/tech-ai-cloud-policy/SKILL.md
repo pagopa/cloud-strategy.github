@@ -1,6 +1,6 @@
 ---
 name: TechAICloudPolicy
-description: Create or modify governance policies for AWS SCP, Azure Policy, and GCP Org Policy.
+description: Create or modify governance policies for AWS SCP, Azure Policy, and GCP Org Policy. Use this skill when the user mentions cloud policies, organization policies, guardrails, service control policies, policy-as-code, deny rules, or compliance rules for any cloud provider.
 ---
 
 # Cloud Policy Skill

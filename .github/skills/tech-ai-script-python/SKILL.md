@@ -1,6 +1,6 @@
 ---
 name: TechAIScriptPython
-description: Create or modify Python scripts with purpose docstring, emoji logs, tests, and pinned dependencies when needed.
+description: Create or modify Python scripts with purpose docstring, emoji logs, tests, and pinned dependencies when needed. Use when the user needs standalone Python utilities, automation scripts, CLI tools, data processing scripts, or any Python helper that is not part of a larger application.
 ---
 
 # Python Script Skill

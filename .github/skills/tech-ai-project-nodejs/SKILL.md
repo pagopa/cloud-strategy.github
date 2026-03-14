@@ -1,6 +1,6 @@
 ---
 name: TechAIProjectNodejs
-description: Create or modify Node.js project modules with purpose comments and simple BDD-like unit tests.
+description: Create or modify Node.js/TypeScript project modules with purpose comments and simple BDD-like unit tests. Use when building Express services, TypeScript libraries, Node.js APIs, or when the user needs module scaffolding, middleware patterns, async handler structures, or Node.js project layout guidance.
 ---
 
 # Node.js Project Skill
@@ -10,10 +10,9 @@ description: Create or modify Node.js project modules with purpose comments and 
 - Refactoring or extending existing Node.js components.
 
 ## Mandatory rules
-- Apply DDD boundaries: keep domain behavior in domain modules/services.
-- Keep transport and infrastructure logic in handlers/adapters.
-- Use ubiquitous language for domain concepts and errors.
-- Add a concise top purpose comment for new/changed core modules.
+- Keep business logic in focused modules, separate from transport adapters and infrastructure wiring.
+- Use clear, domain-relevant naming for core modules and errors.
+- Add a concise top purpose comment for new/changed core modules when intent is not obvious.
 - Use emoji logs for key runtime states when logging is touched.
 - Prefer early return and guard clauses.
 - Keep code readable and straightforward.

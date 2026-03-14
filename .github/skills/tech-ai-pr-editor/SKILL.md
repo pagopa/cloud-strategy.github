@@ -1,6 +1,6 @@
 ---
 name: TechAIPREditor
-description: PR description templates, section structure, and diff-to-description mapping patterns for generating review-ready PR bodies.
+description: Generate review-ready PR descriptions from diffs using structured templates with section order and diff-to-description mapping. Use this skill whenever the user needs to write, update, or format a pull request body, summarize code changes for reviewers, or generate a PR description from a git diff.
 ---
 
 # TechAI PR Editor — Skill

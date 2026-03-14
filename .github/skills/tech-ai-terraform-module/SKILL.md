@@ -1,6 +1,6 @@
 ---
 name: TechAITerraformModule
-description: Create or modify reusable Terraform modules with standard file layout and validation.
+description: Create or modify reusable Terraform modules with standard file layout and validation. Use when the user wants to create a new Terraform module from scratch, refactor inline resources into a module, improve a module interface with proper variables and outputs, or needs module design guidance.
 ---
 
 # Terraform Module Skill

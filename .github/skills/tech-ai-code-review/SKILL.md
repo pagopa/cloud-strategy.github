@@ -1,14 +1,14 @@
 ---
 name: TechAICodeReview
-description: Exhaustive per-language anti-pattern catalogs and severity mappings for strict code reviews of Python, Bash, and Terraform.
+description: Exhaustive per-language anti-pattern catalogs and severity mappings for strict code reviews of Python, Bash, Terraform, Java, and Node.js/TypeScript. Use this skill whenever a code review is requested, a PR needs reviewing, or the user wants anti-pattern checks, lint-level scrutiny, or quality gate enforcement on any supported language.
 ---
 
 # Code Review Skill
 
 ## When to use
-- Perform an exhaustive, nit-level code review on Python, Bash, or Terraform files.
+- Perform an exhaustive, nit-level code review on Python, Bash, Terraform, Java, or Node.js/TypeScript files.
 - Provide structured findings with per-language anti-pattern detection.
-- Complement the generic `TechAIReviewer` agent with deep language-specific checks.
+- Complement specialist reviewer agents with deep language-specific checks.
 
 ## Severity levels
 | Level | Meaning | Action |
@@ -271,6 +271,154 @@ variable "env" {
 
 ---
 
+## Java anti-patterns
+
+Reference: `instructions/java.instructions.md`
+
+### Critical
+| ID | Anti-pattern | Why |
+|---|---|---|
+| JV-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
+| JV-C02 | Deserialization of untrusted data (`ObjectInputStream`) | Remote code execution risk |
+| JV-C03 | SQL string concatenation instead of parameterized queries | SQL injection |
+
+### Major
+| ID | Anti-pattern | Why |
+|---|---|---|
+| JV-M01 | Bare `catch (Exception e)` that swallows without re-throw or logging | Silent failures |
+| JV-M02 | Missing `try-with-resources` for `AutoCloseable` | Resource leak |
+| JV-M03 | Mutable shared state without synchronization | Race conditions |
+| JV-M04 | `null` return from public methods without `@Nullable` or `Optional` | NullPointerException traps |
+| JV-M05 | Method body longer than 40 lines | Complexity and testability concern |
+| JV-M06 | Missing unit tests for new public methods | Coverage mandate |
+| JV-M07 | Raw types or unchecked casts without justification | Type safety erosion |
+| JV-M08 | `System.out.println` in application/library code | No log level control |
+
+### Minor
+| ID | Anti-pattern | Why |
+|---|---|---|
+| JV-m01 | Unused imports | Dead code noise |
+| JV-m02 | Missing purpose JavaDoc on public classes | Discoverability gap |
+| JV-m03 | Field injection (`@Autowired` on fields) instead of constructor injection | Testability and immutability |
+| JV-m04 | `@SuppressWarnings` without inline justification | Hides real issues |
+| JV-m05 | Dead code (unreachable branches, commented-out blocks) | Maintenance burden |
+| JV-m06 | Mutable collections returned from public API without wrapping | Encapsulation leak |
+
+### Nit
+| ID | Anti-pattern | Why |
+|---|---|---|
+| JV-N01 | Non-standard naming (camelCase for methods, PascalCase for classes) | Convention consistency |
+| JV-N02 | Missing trailing newline at end of file | POSIX convention |
+| JV-N03 | Inconsistent brace style within a file | Style consistency |
+| JV-N04 | Import not organized (java → javax → third-party → project) | Convention |
+
+### Good vs bad examples
+
+```java
+// BAD (JV-M02): resource leak
+public String readFile(Path path) throws IOException {
+    BufferedReader reader = new BufferedReader(new FileReader(path.toFile()));
+    return reader.readLine();
+}
+
+// GOOD: try-with-resources
+public String readFile(Path path) throws IOException {
+    try (var reader = new BufferedReader(new FileReader(path.toFile()))) {
+        return reader.readLine();
+    }
+}
+```
+
+```java
+// BAD (JV-M04): null return trap
+public User findUser(String id) {
+    return userMap.get(id);
+}
+
+// GOOD: Optional return
+public Optional<User> findUser(String id) {
+    return Optional.ofNullable(userMap.get(id));
+}
+```
+
+---
+
+## Node.js / TypeScript anti-patterns
+
+Reference: `instructions/nodejs.instructions.md`
+
+### Critical
+| ID | Anti-pattern | Why |
+|---|---|---|
+| ND-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
+| ND-C02 | `eval()` or `new Function()` on untrusted input | Arbitrary code execution |
+| ND-C03 | User input in `child_process.exec()` without sanitization | Command injection |
+
+### Major
+| ID | Anti-pattern | Why |
+|---|---|---|
+| ND-M01 | Unhandled promise rejection (missing `.catch()` or `try/catch` on `await`) | Silent crash or process exit |
+| ND-M02 | Synchronous file I/O (`readFileSync`) in request path | Event loop blocking |
+| ND-M03 | Missing `AbortController` or timeout on outbound HTTP/fetch | Unbounded resource consumption |
+| ND-M04 | `any` type used without justification in TypeScript | Type safety erosion |
+| ND-M05 | Missing error handling on stream/event emitter `error` events | Uncaught exception crash |
+| ND-M06 | `console.log` in application/library code instead of structured logger | No log level control |
+| ND-M07 | Missing unit tests for new exported functions | Coverage mandate |
+| ND-M08 | Callback-based patterns where async/await is available | Readability and error propagation |
+
+### Minor
+| ID | Anti-pattern | Why |
+|---|---|---|
+| ND-m01 | Unused imports or variables | Dead code noise |
+| ND-m02 | Missing purpose comment on exported modules | Discoverability gap |
+| ND-m03 | `require()` in ESM context or mixed module systems | Import consistency |
+| ND-m04 | `// @ts-ignore` without inline justification | Hides real issues |
+| ND-m05 | Dead code (unreachable branches, commented-out blocks) | Maintenance burden |
+| ND-m06 | Event listener without corresponding cleanup/removal | Memory leak risk |
+
+### Nit
+| ID | Anti-pattern | Why |
+|---|---|---|
+| ND-N01 | Non-standard naming (camelCase for functions, PascalCase for classes/types) | Convention consistency |
+| ND-N02 | Missing trailing newline at end of file | POSIX convention |
+| ND-N03 | Inconsistent use of semicolons within a project | Style consistency |
+| ND-N04 | Import order not organized (node builtins → third-party → local) | Convention |
+
+### Good vs bad examples
+
+```typescript
+// BAD (ND-M01): unhandled rejection
+async function fetchUser(id: string) {
+  const res = await fetch(`/api/users/${id}`);
+  return res.json();
+}
+
+// GOOD: error handling + timeout
+async function fetchUser(id: string): Promise<User> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const res = await fetch(`/api/users/${id}`, { signal: controller.signal });
+    if (!res.ok) throw new Error(`⚠️ User fetch failed: ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+```
+
+```javascript
+// BAD (ND-M02): blocking the event loop
+const data = fs.readFileSync('/path/to/file');
+processRequest(data);
+
+// GOOD: async I/O
+const data = await fs.promises.readFile('/path/to/file');
+processRequest(data);
+```
+
+---
+
 ## Cross-language checks
 
 These apply regardless of language:
@@ -289,11 +437,12 @@ These apply regardless of language:
 1. **Identify languages** in the diff (auto-detect from file extensions).
 2. **Load applicable checklists** from the sections above.
 3. **Scan each changed file** against the relevant anti-pattern catalog.
-4. **Apply escalation rules** for repeated violations.
-5. **Group findings** by severity: `Critical` → `Major` → `Minor` → `Nit` → `Notes`.
-6. **Include file path and line reference** for every finding.
-7. **Suggest a concrete fix** or reference the "good" example for each finding.
-8. **Summarize** total finding count per severity at the end.
+4. **Self-question each finding**: Is this really wrong, or am I misunderstanding the context? Could the author have a valid reason?
+5. **Apply escalation rules** for repeated violations.
+6. **Group findings** by severity: `Critical` → `Major` → `Minor` → `Nit` → `Notes`.
+7. **Include file path and line reference** for every finding.
+8. **Suggest a concrete fix** or reference the "good" example for each finding.
+9. **Summarize** total finding count per severity at the end.
 
 ## Validation
 - Verify every finding references a real file path and line from the diff.

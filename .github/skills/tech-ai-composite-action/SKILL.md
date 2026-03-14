@@ -1,6 +1,6 @@
 ---
 name: TechAICompositeAction
-description: Create or modify reusable GitHub composite actions with secure Bash and deterministic behavior.
+description: Create or modify reusable GitHub composite actions with secure Bash and deterministic behavior. Use this skill when the user wants to build a composite action, write an action.yml with composite runs, create shared reusable action steps, or mentions action authoring.
 ---
 
 # Composite Action Skill

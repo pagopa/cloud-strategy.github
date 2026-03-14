@@ -24,7 +24,6 @@ Perform a thorough, opinionated code review using per-language anti-pattern cata
    - Python: `.github/instructions/python.instructions.md`
    - Bash: `.github/instructions/bash.instructions.md`
    - Terraform: `.github/instructions/terraform.instructions.md`
-   - Scripts overlay: `.github/instructions/scripts.instructions.md`
 5. Apply `security-baseline.md` controls as minimum baseline.
 6. When `strictness=strict` (default):
    - Flag every anti-pattern from the catalog, including `Nit` level.

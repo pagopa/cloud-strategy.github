@@ -1,6 +1,6 @@
 ---
 name: TechAIDataRegistry
-description: Safely update structured JSON/YAML registry files (users, groups, teams, repositories, or policy maps).
+description: Safely update structured JSON/YAML registry files such as users, groups, teams, repositories, or policy maps. Use this skill whenever the user needs to add, remove, or modify entries in authorization registries, team configurations, permission maps, or any structured data file that follows a registry pattern.
 ---
 
 # Data Registry Skill

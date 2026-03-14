@@ -1,6 +1,6 @@
 ---
 name: TechAIProjectJava
-description: Create or modify Java project components with purpose JavaDoc and simple BDD-like unit tests.
+description: Create or modify Java project components with purpose JavaDoc and simple BDD-like unit tests. Use when building Java services, Spring Boot apps, Java libraries, or when the user needs class scaffolding, service layers, repository patterns, or Java-specific project structure guidance.
 ---
 
 # Java Project Skill
@@ -10,10 +10,9 @@ description: Create or modify Java project components with purpose JavaDoc and s
 - Refactoring or extending existing Java components.
 
 ## Mandatory rules
-- Apply DDD boundaries: keep domain logic in domain services/entities/value objects.
-- Keep infrastructure concerns outside domain classes.
-- Use ubiquitous language for domain classes, methods, and exceptions.
-- Add concise purpose JavaDoc for new/changed core classes.
+- Keep business logic separated from I/O and infrastructure concerns (SDK calls, persistence, external APIs).
+- Use clear, domain-relevant naming for classes, methods, and exceptions.
+- Add concise purpose JavaDoc for new/changed core classes when intent is not obvious.
 - Use emoji logs for key runtime transitions when logging is touched.
 - Prefer early return and guard clauses.
 - Keep code readable and avoid over-engineering.

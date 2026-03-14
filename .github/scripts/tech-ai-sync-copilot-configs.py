@@ -38,11 +38,9 @@ MANAGED_ALWAYS = (
     ".github/scripts/validate-copilot-customizations.sh",
 )
 SOURCE_ONLY_AGENT_PATHS = {
-    ".github/agents/tech-ai-customization-auditor.agent.md",
     ".github/agents/tech-ai-standards-repo-config-auditor.agent.md",
     ".github/agents/tech-ai-standards-repo-config-builder.agent.md",
     ".github/agents/tech-ai-repo-copilot-extender.agent.md",
-    ".github/agents/tech-ai-script-reviewer.agent.md",
     ".github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md",
 }
 SOURCE_ONLY_PROMPT_PATHS = {
@@ -54,6 +52,7 @@ SOURCE_ONLY_PROMPT_PATHS = {
 }
 SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/tech-ai-repo-copilot-extender/SKILL.md",
+    ".github/skills/tech-ai-skill-creator/SKILL.md",
     ".github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md",
 }
 CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-bash-script.prompt.md"
@@ -1245,12 +1244,7 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if "json" in stacks:
         instructions.add(".github/instructions/json.instructions.md")
     if "bash" in stacks:
-        instructions.update(
-            {
-                ".github/instructions/bash.instructions.md",
-                ".github/instructions/scripts.instructions.md",
-            }
-        )
+        instructions.add(".github/instructions/bash.instructions.md")
     if "python" in stacks:
         instructions.add(".github/instructions/python.instructions.md")
     if "terraform" in stacks:

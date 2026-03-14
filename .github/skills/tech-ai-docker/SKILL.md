@@ -1,6 +1,6 @@
 ---
 name: TechAIDocker
-description: Create or modify Docker assets with digest-pinned images, secure runtime defaults, and reproducible builds.
+description: Create or modify Docker assets with digest-pinned images, secure runtime defaults, and reproducible builds. Use this skill when the user mentions Dockerfiles, container images, Docker Compose, multi-stage builds, .dockerignore, or container security hardening.
 ---
 
 # Docker Skill

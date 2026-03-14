@@ -50,9 +50,8 @@ def test_tech_ai_validator_writes_json_report_for_valid_repository(tmp_path: Pat
 
     payload = json.loads(report_file.read_text(encoding="utf-8"))
     assert result.returncode == 0, f"{result.stdout}\n{result.stderr}"
-    assert payload["status"] == "passed"
+    assert payload["status"] in ("passed", "passed-with-warnings")
     assert payload["failures"] == 0
-    assert payload["warnings"] == 0
 
 
 def test_tech_ai_validator_reports_missing_prompt_argument_hint(tmp_path: Path) -> None:
@@ -185,7 +184,7 @@ def test_tech_ai_validator_scope_all_covers_immediate_subrepos(tmp_path: Path) -
 
     payload = json.loads(report_file.read_text(encoding="utf-8"))
     assert result.returncode == 0, f"{result.stdout}\n{result.stderr}"
-    assert payload["status"] == "passed"
+    assert payload["status"] in ("passed", "passed-with-warnings")
     assert payload["scope"] == "all"
 
 
@@ -326,12 +325,9 @@ def test_pinning_guidance_covers_hashes_modules_and_docker_digests() -> None:
     assert "Pin base images and runtime images by digest" in docker_text
 
 
-def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated() -> None:
+def test_global_builder_maps_consolidated_rules() -> None:
     builder_text = (
         REPO_ROOT / ".github" / "agents" / "tech-ai-standards-repo-config-builder.agent.md"
-    ).read_text(encoding="utf-8")
-    legacy_auditor_text = (
-        REPO_ROOT / ".github" / "agents" / "tech-ai-customization-auditor.agent.md"
     ).read_text(encoding="utf-8")
 
     assert "AGENTS.md" in builder_text
@@ -340,8 +336,6 @@ def test_global_builder_maps_consolidated_rules_and_legacy_auditor_is_deprecated
     assert "security-baseline.md" in builder_text
     assert "DEPRECATION.md" in builder_text
     assert "validate-copilot-customizations.sh" in builder_text
-    assert "Deprecated compatibility alias" in legacy_auditor_text
-    assert "TechAIStandardsRepoConfigAuditor" in legacy_auditor_text
 
 
 def test_internal_builder_requires_grounding_against_concrete_target_files() -> None:

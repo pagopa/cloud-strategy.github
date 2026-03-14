@@ -1,6 +1,6 @@
 ---
 name: TechAISyncGlobalCopilotConfigsIntoRepo
-description: Manifest-based sync logic for propagating the shared Copilot baseline into consumer repos — asset selection, SHA256 checksums, conflict detection, and reporting.
+description: Manifest-based sync logic for propagating the shared Copilot baseline into consumer repos — asset selection, SHA256 checksums, conflict detection, and reporting. Use when the user mentions syncing Copilot configs, aligning consumer repos with the baseline, running the sync script, or cross-repo Copilot configuration alignment.
 ---
 
 # TechAI Sync Global Copilot Configs Into Repo — Skill

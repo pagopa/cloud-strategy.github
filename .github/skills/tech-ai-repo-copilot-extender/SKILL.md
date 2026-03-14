@@ -1,6 +1,6 @@
 ---
 name: TechAIRepoCopilotExtender
-description: Generation patterns for repo-specific internal-* Copilot assets in consumer repos — naming rules, baseline preservation, and AGENTS.md integration.
+description: Generation patterns for repo-specific internal-* Copilot assets in consumer repos — naming rules, baseline preservation, and AGENTS.md integration. Use when a consumer repository needs its own internal prompts, skills, agents, or AGENTS.md wiring that must stay internal and not enter the shared baseline.
 ---
 
 # TechAI Repo Copilot Extender — Skill

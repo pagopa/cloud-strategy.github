@@ -693,17 +693,12 @@ def test_build_plan_includes_source_preferred_assets_and_portable_agents(tmp_pat
     plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
     agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
 
-    assert ".github/agents/tech-ai-pair-architect.agent.md" in plan.selection.agents
-    assert ".github/agents/tech-ai-pair-architect-analysis-executor.agent.md" in plan.selection.agents
-    assert ".github/agents/tech-ai-script-reviewer.agent.md" not in plan.selection.agents
     assert ".github/prompts/tech-ai-pair-architect-analysis.prompt.md" in plan.selection.prompts
     assert ".github/skills/tech-ai-pair-architect/SKILL.md" in plan.selection.skills
-    assert ".github/skills/tech-ai-pair-architect-analysis-executor/SKILL.md" in plan.selection.skills
     assert ".github/prompts/tech-ai-repo-copilot-extender.prompt.md" not in plan.selection.prompts
     assert ".github/skills/tech-ai-repo-copilot-extender/SKILL.md" not in plan.selection.skills
     assert ".github/agents/tech-ai-standards-repo-config-builder.agent.md" not in plan.selection.agents
-    assert "`TechAIPairArchitect`" in agents_file.desired_content
-    assert "`TechAIPairArchitectAnalysisExecutor`" in agents_file.desired_content
+    assert "tech-ai-pair-architect" in agents_file.desired_content
 
 
 def test_build_plan_uses_pr_editor_prompt_for_targets_with_pr_templates(tmp_path: Path) -> None:

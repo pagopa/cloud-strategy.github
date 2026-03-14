@@ -1,20 +1,19 @@
 ---
 name: TechAIProjectPython
-description: Create or modify Python application components using DDD boundaries, early returns, and deterministic pytest coverage.
+description: Create or modify Python application components with clear separation of concerns, early returns, and deterministic pytest coverage. Use when building Python services, FastAPI or Flask apps, Python libraries, or when the user needs module scaffolding, service layers, or Python project structure guidance.
 ---
 
 # Python Project Skill
 
 ## When to use
-- Services, use cases, adapters, repositories, and domain modules in Python applications.
+- Services, use cases, adapters, and modules in Python applications.
 - Refactoring or extending existing Python application components.
-- Non-script Python code that contains domain behavior.
+- Non-script Python code that contains business behavior.
 
 ## Mandatory rules
-- Apply DDD boundaries: domain, application, and infrastructure concerns must be separated.
-- Keep business rules in domain entities/value objects/domain services.
-- Keep I/O and SDK clients in infrastructure adapters.
-- Use ubiquitous language in domain classes, methods, and exceptions.
+- Keep business logic separated from I/O and infrastructure concerns.
+- Keep module boundaries clear: business rules in one place, external integrations in another.
+- Use clear, domain-relevant naming in classes, methods, and errors.
 - Prefer early return and guard clauses.
 - Keep code explicit and readability-first.
 - Add unit tests for testable logic.

@@ -1,6 +1,6 @@
 ---
 name: TechAICICDWorkflow
-description: Create or modify secure GitHub Actions workflows for CI/CD pipelines.
+description: Create or modify secure GitHub Actions workflows for CI/CD pipelines. Use this skill whenever the user mentions CI/CD, continuous integration, deployment pipelines, GitHub Actions workflow files, automated testing workflows, or wants to add steps like linting, testing, or deploying in a .github/workflows/ YAML file.
 ---
 
 # CI/CD Workflow Skill

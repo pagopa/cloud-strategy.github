@@ -1,6 +1,6 @@
 ---
 name: TechAIScriptBash
-description: Create or modify Bash scripts with purpose header, emoji logs, and readable guard-clause flow.
+description: Create or modify Bash scripts with purpose header, emoji logs, and readable guard-clause flow. Use when the user needs shell scripts, automation scripts, helper bash utilities, or any standalone .sh file with proper error handling and structured output.
 ---
 
 # Bash Script Skill

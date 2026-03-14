@@ -1,6 +1,6 @@
 ---
 name: TechAITerraformFeature
-description: Add or modify Terraform resources, variables, outputs, and data sources.
+description: Add or modify Terraform resources, variables, outputs, and data sources within existing configurations. Use when the user needs to add cloud resources, modify infrastructure, create variables or outputs, update existing .tf files, or make feature-level Terraform changes that do not require a new reusable module.
 ---
 
 # Terraform Feature Skill
