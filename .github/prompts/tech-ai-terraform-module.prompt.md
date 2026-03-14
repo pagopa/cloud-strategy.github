@@ -18,11 +18,12 @@ Use this prompt to create or modify Terraform modules/components while keeping t
 - **Target path**: ${input:target_path:infra/terraform}
 
 ## Instructions
-1. Use `.github/skills/tech-ai-terraform-module/SKILL.md` and `.github/instructions/terraform.instructions.md`.
+1. Use `.github/skills/tech-ai-terraform/SKILL.md` and `.github/instructions/terraform.instructions.md`.
 2. Keep variable names, outputs, and descriptions domain-neutral.
 3. Avoid hardcoded tenant/account/subscription/project identifiers.
 4. Document assumptions and provider requirements explicitly.
 5. Keep module interfaces stable unless a breaking change is requested.
+6. Follow `.github/instructions/terraform.instructions.md` for provider and external module pinning.
 
 ## Minimal example
 - Input: `action=create module_name=storage_baseline change_type=module purpose="Provide portable object-storage baseline" target_path=infra/terraform/modules`

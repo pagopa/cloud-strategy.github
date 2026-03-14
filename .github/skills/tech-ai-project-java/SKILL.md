@@ -1,6 +1,6 @@
 ---
 name: TechAIProjectJava
-description: Create or modify Java project components with purpose JavaDoc and simple BDD-like unit tests.
+description: Create or modify Java project components with purpose JavaDoc and BDD-like unit tests. Use when building Java services, Spring Boot apps, Java libraries, class scaffolding, service layers, or repository patterns.
 ---
 
 # Java Project Skill
@@ -10,10 +10,9 @@ description: Create or modify Java project components with purpose JavaDoc and s
 - Refactoring or extending existing Java components.
 
 ## Mandatory rules
-- Apply DDD boundaries: keep domain logic in domain services/entities/value objects.
-- Keep infrastructure concerns outside domain classes.
-- Use ubiquitous language for domain classes, methods, and exceptions.
-- Add concise purpose JavaDoc for new/changed core classes.
+- Keep business logic separated from I/O and infrastructure concerns.
+- Use clear, domain-relevant naming for classes, methods, and exceptions.
+- Add concise purpose JavaDoc for new/changed core classes when intent is not obvious.
 - Use emoji logs for key runtime transitions when logging is touched.
 - Prefer early return and guard clauses.
 - Keep code readable and avoid over-engineering.
@@ -33,9 +32,8 @@ public final class UserService {
 ```
 
 ## Test stack
-- JUnit 5.
-- BDD-like naming with `@DisplayName` and `given_when_then`.
-- For modify tasks with existing tests: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
+- JUnit 5 with `@DisplayName` and `given_when_then` naming.
+- For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Minimal test example
 ```java
@@ -52,3 +50,23 @@ class UserServiceTest {
     }
 }
 ```
+
+## Common mistakes
+
+| Mistake | Why it matters | Instead |
+|---|---|---|
+| Business logic inside controller/handler | Untestable, tightly coupled to framework | Extract to a service class, inject via constructor |
+| Catching `Exception` everywhere | Swallows unexpected errors, hides bugs | Catch specific exceptions; let runtime errors propagate |
+| Mutable shared state in service classes | Thread-safety bugs in concurrent environments | Use immutable objects or proper synchronization |
+| No null checks on external input | NullPointerException at runtime | Validate at entry point with guard clauses |
+| Test names like `test1`, `testMethod` | No documentation value, hard to diagnose failures | Use `given_when_then` naming with `@DisplayName` |
+| Over-using inheritance for code reuse | Rigid hierarchies, fragile base class problem | Prefer composition and delegation |
+
+## Cross-references
+- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Java code (see `references/anti-patterns-java.md`).
+- **TechAIDocker** (`.github/skills/tech-ai-docker/SKILL.md`): for containerizing Java apps.
+
+## Validation
+- Compile with `mvn compile` or `gradle build`.
+- Run tests with `mvn test` or `gradle test`.
+- Check code style with project linter when available.

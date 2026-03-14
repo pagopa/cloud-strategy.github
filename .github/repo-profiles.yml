@@ -2,8 +2,27 @@
 # Notes:
 # - Keep this file generic so it can be copied to unrelated teams.
 # - Profiles are advisory and can be consumed by automation later.
+# - Cross-cutting workflow skills (brainstorming, TDD, debugging, verification, etc.)
+#   are included in every profile via the _common_skills anchor.
 
 version: 1
+
+_common_skills: &common_skills
+  - skills/tech-ai-brainstorming/SKILL.md
+  - skills/tech-ai-code-review/SKILL.md
+  - skills/tech-ai-dispatching-parallel-agents/SKILL.md
+  - skills/tech-ai-executing-plans/SKILL.md
+  - skills/tech-ai-finishing-dev-branch/SKILL.md
+  - skills/tech-ai-git-worktrees/SKILL.md
+  - skills/tech-ai-receiving-code-review/SKILL.md
+  - skills/tech-ai-requesting-code-review/SKILL.md
+  - skills/tech-ai-subagent-driven-dev/SKILL.md
+  - skills/tech-ai-systematic-debugging/SKILL.md
+  - skills/tech-ai-test-driven-dev/SKILL.md
+  - skills/tech-ai-using-superpowers/SKILL.md
+  - skills/tech-ai-verification/SKILL.md
+  - skills/tech-ai-writing-plans/SKILL.md
+
 profiles:
   minimal:
     description: Baseline setup for small repositories.
@@ -65,8 +84,7 @@ profiles:
       - prompts/tech-ai-terraform.prompt.md
       - prompts/tech-ai-cloud-policy.prompt.md
     recommended_skills:
-      - skills/tech-ai-terraform-feature/SKILL.md
-      - skills/tech-ai-terraform-module/SKILL.md
+      - skills/tech-ai-terraform/SKILL.md
       - skills/tech-ai-cloud-policy/SKILL.md
 
   mixed-platform:
@@ -85,4 +103,4 @@ profiles:
       - skills/tech-ai-project-java/SKILL.md
       - skills/tech-ai-project-nodejs/SKILL.md
       - skills/tech-ai-cicd-workflow/SKILL.md
-      - skills/tech-ai-terraform-feature/SKILL.md
+      - skills/tech-ai-terraform/SKILL.md

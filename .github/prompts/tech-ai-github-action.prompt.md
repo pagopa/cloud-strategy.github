@@ -16,10 +16,9 @@ argument-hint: action=<create|modify> workflow_name=<name> purpose=<purpose> [tr
 ## Instructions
 1. Use `.github/skills/tech-ai-cicd-workflow/SKILL.md`.
 2. Reuse existing workflow conventions in `.github/workflows/`.
-3. Enforce OIDC, minimal `permissions`, and SHA-pinned actions.
-4. For every SHA-pinned action, add an adjacent comment with release/tag and release URL.
-5. Keep step names in English.
-6. If `action=modify`, preserve existing behavior unless explicitly changed.
+3. Follow `.github/instructions/github-actions.instructions.md` for OIDC, minimal `permissions`, SHA pinning, and image digest pinning.
+4. Keep step names in English.
+5. If `action=modify`, preserve existing behavior unless explicitly changed.
 
 ## Minimal example
 - Input: `action=create workflow_name=terraform-ci purpose="Validate terraform on PR" triggers=pull_request`

@@ -422,6 +422,48 @@ def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:
     assert len(manifest["source_commit"]) == 40
 
 
+def test_apply_plan_deletes_manifest_managed_files_removed_from_baseline(tmp_path: Path) -> None:
+    target_root = tmp_path / "legacy-managed-target"
+    build_python_service_target(target_root)
+    legacy_prompt_relative_path = ".github/prompts/tech-ai-pr-description.prompt.md"
+    legacy_prompt_content = "---\nname: TechAIPRDescription\n---\n"
+    write_file(target_root / legacy_prompt_relative_path, legacy_prompt_content)
+    write_file(
+        target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json",
+        json.dumps(
+            {
+                "managed_files": {
+                    legacy_prompt_relative_path: {
+                        "sha256": MODULE.sha256_text(legacy_prompt_content),
+                        "source_relative_path": legacy_prompt_relative_path,
+                        "generated": False,
+                    }
+                }
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    )
+
+    plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+    delete_action = next(action for action in plan.actions if action.target_relative_path == legacy_prompt_relative_path)
+
+    assert delete_action.status == "delete"
+    assert legacy_prompt_relative_path not in plan.analysis.target_only_assets["prompts"]
+    assert all(issue.target_relative_path != legacy_prompt_relative_path for issue in plan.target_asset_issues)
+
+    MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
+
+    assert not (target_root / legacy_prompt_relative_path).exists()
+    assert (target_root / ".github" / "prompts" / "tech-ai-pr-editor.prompt.md").is_file()
+    manifest = json.loads(
+        (target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json").read_text(encoding="utf-8")
+    )
+    assert legacy_prompt_relative_path not in manifest["managed_files"]
+    assert ".github/prompts/tech-ai-pr-editor.prompt.md" in manifest["managed_files"]
+
+
 def test_rendered_agents_markdown_keeps_github_copilot_wording(tmp_path: Path) -> None:
     target_root = tmp_path / "wording-target"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
@@ -474,6 +516,62 @@ def test_build_plan_detects_backend_python_profile_and_python_validation_command
     assert "python -m compileall <changed_python_paths>" in plan.selection.validation_commands
     assert "pytest" not in plan.selection.validation_commands
     assert ".github/prompts/tech-ai-python.prompt.md" in plan.selection.prompts
+
+
+def test_build_plan_reports_missing_vscode_pr_description_setting(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service"
+    build_python_service_target(target_root)
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    issue = next(
+        issue
+        for issue in plan.target_asset_issues
+        if issue.target_relative_path == MODULE.VSCODE_SETTINGS_RELATIVE_PATH
+    )
+
+    assert issue.category == "editor"
+    assert issue.issue_types == ["editor_integration"]
+    assert issue.severity == "warn"
+    assert MODULE.PR_DESCRIPTION_SETTING_KEY in issue.details[0]
+    assert MODULE.PR_DESCRIPTION_SETTING_VALUE in issue.details[0]
+    guidance = "\n".join(plan.recommendations["missing consumer-facing validation or onboarding guidance"])
+    assert MODULE.PR_DESCRIPTION_SETTING_KEY in guidance
+
+
+def test_build_plan_accepts_vscode_pr_description_setting_when_enabled(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service-with-vscode"
+    build_python_service_target(target_root)
+    write_file(
+        target_root / ".vscode" / "settings.json",
+        json.dumps({MODULE.PR_DESCRIPTION_SETTING_KEY: MODULE.PR_DESCRIPTION_SETTING_VALUE}, indent=2) + "\n",
+    )
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert all(
+        issue.target_relative_path != MODULE.VSCODE_SETTINGS_RELATIVE_PATH for issue in plan.target_asset_issues
+    )
+
+
+def test_build_plan_reports_invalid_vscode_settings_json(tmp_path: Path) -> None:
+    target_root = tmp_path / "python-service-invalid-vscode"
+    build_python_service_target(target_root)
+    write_file(target_root / ".vscode" / "settings.json", "{invalid-json}\n")
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    issue = next(
+        issue
+        for issue in plan.target_asset_issues
+        if issue.target_relative_path == MODULE.VSCODE_SETTINGS_RELATIVE_PATH
+    )
+
+    assert issue.category == "editor"
+    assert "editor_integration" in issue.issue_types
+    assert "validation" in issue.issue_types
+    assert issue.severity == "error"
+    assert "Invalid JSON" in issue.details[0]
 
 
 def test_build_plan_adds_pytest_only_when_repo_contains_pytest_tests(tmp_path: Path) -> None:
@@ -559,7 +657,7 @@ def test_audit_source_configuration_detects_legacy_aliases_role_overlaps_and_age
     audit = MODULE.audit_source_configuration(source_root)
 
     assert any(alias.canonical_path == ".github/prompts/tech-ai-python.prompt.md" for alias in audit.legacy_aliases)
-    assert any(overlap.family == "sync-copilot-configs" for overlap in audit.role_overlaps)
+    assert any(overlap.family == "sync-global-copilot-configs-into-repo" for overlap in audit.role_overlaps)
     assert any(repeat.reference == ".github/prompts/tech-ai-python.prompt.md" for repeat in audit.agents_md_repeats)
 
 
@@ -584,26 +682,45 @@ def test_build_plan_excludes_repo_only_global_customization_agents_from_consumer
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/agents/tech-ai-standards-repo-config-builder.agent.md" not in plan.selection.agents
-    assert ".github/agents/tech-ai-standards-repo-config-auditor.agent.md" not in plan.selection.agents
+    assert ".github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md" not in plan.selection.agents
 
 
-def test_internal_builder_triads_are_source_only_and_excluded_from_consumer_sync() -> None:
-    assert (
-        ".github/agents/tech-ai-repo-copilot-extender.agent.md"
-        in MODULE.SOURCE_ONLY_AGENT_PATHS
-    )
-    assert (
-        ".github/prompts/tech-ai-repo-copilot-extender.prompt.md"
-        in MODULE.SOURCE_ONLY_PROMPT_PATHS
-    )
-    assert (
-        ".github/skills/tech-ai-repo-copilot-extender/SKILL.md"
-        in MODULE.SOURCE_ONLY_SKILL_PATHS
-    )
+def test_build_plan_includes_source_preferred_assets_and_portable_agents(tmp_path: Path) -> None:
+    target_root = tmp_path / "portable-assets"
+    build_python_service_target(target_root)
+
+    plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+    agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
+
+    assert ".github/prompts/tech-ai-pair-architect-analysis.prompt.md" in plan.selection.prompts
+    assert ".github/skills/tech-ai-pair-architect/SKILL.md" in plan.selection.skills
+    assert "tech-ai-pair-architect" in agents_file.desired_content
 
 
-def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> None:
+def test_build_plan_uses_pr_editor_prompt_for_targets_with_pr_templates(tmp_path: Path) -> None:
+    target_root = tmp_path / "pr-template-target"
+    build_python_service_target(target_root)
+
+    plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+    agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
+
+    assert ".github/prompts/tech-ai-pr-editor.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/tech-ai-pr-description.prompt.md" not in plan.selection.prompts
+    assert "`TechAIPREditor`" in agents_file.desired_content
+    assert "`TechAIPRDescription`" not in agents_file.desired_content
+
+
+def test_build_plan_detects_instruction_apply_to_patterns_without_profile_changes(tmp_path: Path) -> None:
+    target_root = tmp_path / "lambda-target"
+    write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(target_root / "functions" / "billing-lambda.py", 'def handler(event, context):\n    return {"ok": True}\n')
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    assert ".github/instructions/lambda.instructions.md" in plan.selection.instructions
+
+
+def test_build_plan_reports_only_remaining_unsupported_stacks_when_docker_is_supported(tmp_path: Path) -> None:
     target_root = tmp_path / "polyglot"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
     write_file(target_root / "Dockerfile", "FROM alpine:3.21\n")
@@ -611,9 +728,10 @@ def test_build_plan_reports_unsupported_go_and_docker_stacks(tmp_path: Path) -> 
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert plan.analysis.unsupported_stacks == ["docker", "go"]
+    assert "docker" in plan.analysis.stacks
+    assert plan.analysis.unsupported_stacks == ["go"]
     recommendations = "\n".join(plan.recommendations["missing instructions/prompts/skills"])
-    assert "unsupported target stacks: docker, go" in recommendations
+    assert "unsupported target stacks: go" in recommendations
 
 
 def test_build_plan_detects_composite_actions_under_workflows_tree(tmp_path: Path) -> None:
@@ -668,7 +786,7 @@ def test_rendered_agents_markdown_uses_explicit_github_paths_and_table_routing(t
     assert ": Add or improve unit tests for Python code" not in agents_file.desired_content
 
 
-def test_build_plan_reports_missing_validation_workflow_and_source_only_residues(tmp_path: Path) -> None:
+def test_build_plan_reports_source_only_residues_without_requiring_validation_workflow(tmp_path: Path) -> None:
     target_root = tmp_path / "consumer-residue"
     build_python_service_target(target_root)
     write_file(target_root / ".github" / "README.md", "# source-only\n")
@@ -679,7 +797,6 @@ def test_build_plan_reports_missing_validation_workflow_and_source_only_residues
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
     guidance = "\n".join(plan.recommendations["missing consumer-facing validation or onboarding guidance"])
-    assert "github-validate-copilot-customizations.yml" in guidance
     assert ".github/README.md" in guidance
     assert ".github/agents/README.md" in guidance
     assert ".github/templates/**" in guidance
@@ -730,8 +847,9 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
         for issue in payload["analysis"]["unmanaged_target_asset_issues"]
     )
     assert any(
-        "github-validate-copilot-customizations.yml" in item
-        for item in payload["recommendations"]["missing consumer-facing validation or onboarding guidance"]
+        issue["target_relative_path"] == MODULE.VSCODE_SETTINGS_RELATIVE_PATH
+        and "editor_integration" in issue["issue_types"]
+        for issue in payload["analysis"]["unmanaged_target_asset_issues"]
     )
     assert sorted(payload["source_audit"].keys()) == [
         "agents_md_repeats",

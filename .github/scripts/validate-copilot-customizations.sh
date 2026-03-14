@@ -306,8 +306,8 @@ prompt_expected_name() {
     tech-ai-github-composite-action.prompt.md)
       printf '%s' "TechAICompositeAction"
       ;;
-    tech-ai-pr-description.prompt.md)
-      printf '%s' "TechAIPRDescription"
+    tech-ai-pr-editor.prompt.md)
+      printf '%s' "TechAIPREditor"
       ;;
     tech-ai-add-platform.prompt.md)
       printf '%s' "TechAIAddPlatform"
@@ -773,58 +773,6 @@ validate_agents_dir() {
           record_issue "$semantic_severity" "Reviewer agent should reference code review instructions: ${file}"
         fi
         ;;
-      tech-ai-standards-repo-config-builder.agent.md)
-        if ! has_heading_exact "$file" '## Source of truth'; then
-          record_issue "$semantic_severity" "Global customization builder missing '## Source of truth' section: ${file}"
-        fi
-        if ! has_heading_exact "$file" '## Creation protocol'; then
-          record_issue "$semantic_severity" "Global customization builder missing '## Creation protocol' section: ${file}"
-        fi
-        if ! has_heading_exact "$file" '## Token discipline'; then
-          record_issue "$semantic_severity" "Global customization builder missing '## Token discipline' section: ${file}"
-        fi
-        if ! has_heading_exact "$file" '## Validation'; then
-          record_issue "$semantic_severity" "Global customization builder missing '## Validation' section: ${file}"
-        fi
-        if ! has_heading_exact "$file" '## Handoff'; then
-          record_issue "$semantic_severity" "Global customization builder missing '## Handoff' section: ${file}"
-        fi
-        if ! grep -Fq 'AGENTS.md' "$file"; then
-          record_issue "$semantic_severity" "Global customization builder should reference root AGENTS.md: ${file}"
-        fi
-        if ! grep -Fq 'security-baseline.md' "$file"; then
-          record_issue "$semantic_severity" "Global customization builder should reference security baseline: ${file}"
-        fi
-        if ! grep -Fq 'DEPRECATION.md' "$file"; then
-          record_issue "$semantic_severity" "Global customization builder should reference deprecation policy: ${file}"
-        fi
-        if ! grep -Fq 'scripts/validate-copilot-customizations.sh' "$file"; then
-          record_issue "$semantic_severity" "Global customization builder should reference customization validator: ${file}"
-        fi
-        if ! grep -Fq 'TechAIStandardsRepoConfigAuditor' "$file"; then
-          record_issue "$semantic_severity" "Global customization builder should hand off to TechAIStandardsRepoConfigAuditor: ${file}"
-        fi
-        ;;
-      tech-ai-standards-repo-config-auditor.agent.md)
-        if ! has_heading_exact "$file" '## Audit protocol'; then
-          record_issue "$semantic_severity" "Global customization auditor missing '## Audit protocol' section: ${file}"
-        fi
-        if ! has_heading_exact "$file" '## Severity output'; then
-          record_issue "$semantic_severity" "Global customization auditor missing '## Severity output' section: ${file}"
-        fi
-        if ! has_heading_exact "$file" '## Validation'; then
-          record_issue "$semantic_severity" "Global customization auditor missing '## Validation' section: ${file}"
-        fi
-        if ! has_heading_exact "$file" '## Handoff'; then
-          record_issue "$semantic_severity" "Global customization auditor missing '## Handoff' section: ${file}"
-        fi
-        if ! grep -Fq 'scripts/validate-copilot-customizations.sh' "$file"; then
-          record_issue "$semantic_severity" "Global customization auditor should reference customization validator: ${file}"
-        fi
-        if ! grep -Fq 'TechAIStandardsRepoConfigBuilder' "$file"; then
-          record_issue "$semantic_severity" "Global customization auditor should route major findings to TechAIStandardsRepoConfigBuilder: ${file}"
-        fi
-        ;;
     esac
   done < <(find "$agents_dir" -type f -name '*.agent.md' | sort)
 
@@ -1017,7 +965,14 @@ validate_workflow_pinning() {
       token="$(printf '%s\n' "$line_text" | sed -E 's/.*uses:[[:space:]]*([^[:space:]]+).*/\1/')"
       [[ -n "$token" ]] || continue
 
-      if [[ "$token" == ./* || "$token" == .github/actions/* || "$token" == docker://* ]]; then
+      if [[ "$token" == ./* || "$token" == .github/actions/* ]]; then
+        continue
+      fi
+
+      if [[ "$token" == docker://* ]]; then
+        if [[ "$token" != *"@sha256:"* ]]; then
+          record_issue "$severity" "Workflow docker reference is not pinned by digest: ${file}:${line_number} -> ${token}"
+        fi
         continue
       fi
 

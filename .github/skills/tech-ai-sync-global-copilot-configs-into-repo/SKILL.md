@@ -1,49 +1,92 @@
 ---
 name: TechAISyncGlobalCopilotConfigsIntoRepo
-description: Manifest-based sync logic for propagating the shared Copilot baseline into consumer repos — asset selection, SHA256 checksums, conflict detection, and reporting.
+description: Sync shared Copilot baseline into consumer repos — dynamic stack detection, manifest-based conservative merge, conflict detection, and deterministic reporting. Use when syncing Copilot configs, aligning repos with the baseline, or running the sync script.
 ---
 
 # TechAI Sync Global Copilot Configs Into Repo — Skill
 
 ## When to use
-- Create or update the `TechAISyncGlobalCopilotConfigsIntoRepo` alignment workflow.
-- Align a local target repository with portable Copilot customization assets from this standards repository.
-- Produce deterministic dry-run or apply reports for Copilot-core alignment only.
+- Align a consumer repository with shared Copilot assets from this standards repository.
+- Audit source-side or target-side asset health before or after sync.
+- Produce deterministic dry-run or apply reports for Copilot-core alignment.
 
-## Workflow
-1. Inspect the target repository layout, manifests, `.github` contents, `AGENTS.md` location, and git state.
-2. Audit the source standards repository before syncing:
-   - classify canonical instructions, prompts, skills, and agents;
-   - detect source-side legacy aliases such as `cs-*` and unprefixed equivalents;
-   - detect operational overlap across prompt/skill/agent triads;
-   - detect repeated asset references across `AGENTS.md` sections.
-3. Classify the repository against `repo-profiles.yml`, then extend the profile with stack-specific rules only when needed.
-4. Select the minimum Copilot core assets that the target repository actually needs.
-5. Prefer canonical prompt families when multiple prompts cover the same workflow so consumer repositories keep the same capability with fewer tokens.
-6. Detect redundant legacy aliases for canonical prompt/skill/agent families, including families that are not part of the selected minimum baseline, so `cs-*` and unprefixed leftovers still appear in the plan.
-7. Audit target-local instructions, prompts, skills, and agents that are outside the selected sync baseline:
-   - report strict validation gaps for unmanaged files;
-   - require repository-owned prompts, skills, and agents to use `internal-*` in both filenames and `name:` values so they are visually distinct from synced global assets;
-   - report legacy aliases even when the canonical family is not selected;
-   - keep target-only custom assets visible instead of silently omitting them.
-8. Treat redundant canonical-vs-legacy overlaps as conflicts instead of silently creating duplicate configuration families.
-9. Render a target-specific `AGENTS.md` only when the selected inventory is conflict-safe:
-   - keep `Preferred prompts` and `Preferred skills` as a curated shortlist;
-   - keep asset path references in `Repository Inventory (Auto-generated)` only;
-   - build the inventory from the desired managed baseline plus existing target-local instructions/prompts/skills/agents so the rendered inventory reflects the real target state;
-   - avoid descriptive prompt/skill catalogs that duplicate the inventory.
-10. Apply conservative merge rules through the manifest file and never overwrite unmanaged divergent files.
-11. Produce a final report that separates source-side redundancy from target-side unmanaged asset issues, legacy alias drift, conflicts, and file actions.
+## Three-phase sync model
+
+### Phase 1 — Analyze
+1. Inspect target repository: `.github` contents, `AGENTS.md`, git state.
+2. Detect stacks dynamically from file extensions and project manifests (no hardcoded profiles — detect `*.tf`, `*.py`, `*.java`, `*.js`, `*.ts`, `Dockerfile`, `*.sh`, etc.).
+3. Classify target assets into: managed (synced baseline), internal (`internal-*`), and unmanaged (everything else).
+4. Audit source standards repository: detect legacy aliases, canonical overlaps, and source-only assets.
+
+### Phase 2 — Plan
+1. Select minimum Copilot-core assets the target actually needs based on detected stacks.
+2. Compute SHA-256 checksums for both source and target versions of each managed file.
+3. Flag conflicts: target file diverged from last-synced version (manifest mismatch).
+4. Flag redundancies: legacy aliases coexisting with canonical assets.
+5. Flag internal naming violations: repo-owned assets missing `internal-*` prefix.
+6. Generate plan report (JSON or Markdown).
+
+### Phase 3 — Apply (opt-in)
+1. Copy selected assets using conservative merge (never overwrite unmanaged divergent files).
+2. Update manifest with new SHA-256 checksums and timestamp.
+3. Render target-specific `AGENTS.md` from managed baseline + existing internal assets.
+4. Produce final report: actions taken, conflicts skipped, recommendations.
+
+## Managed always-sync files
+These files are always synced regardless of detected stacks:
+- `copilot-instructions.md`
+- `copilot-commit-message-instructions.md`
+- `copilot-code-review-instructions.md`
+- `security-baseline.md`
+- `DEPRECATION.md`
+- `scripts/validate-copilot-customizations.sh`
+
+## Stack-to-asset mapping
+The sync script detects stacks dynamically and selects assets accordingly:
+
+| Detected stack | Instructions | Skills | Prompts |
+|---|---|---|---|
+| Terraform (`*.tf`) | `terraform.instructions.md` | `tech-ai-terraform`, `tech-ai-cloud-policy` | `tech-ai-terraform.prompt.md` |
+| Python (`*.py`) | `python.instructions.md` | `tech-ai-project-python`, `tech-ai-script-python` | `tech-ai-python.prompt.md` |
+| Java (`*.java`) | `java.instructions.md` | `tech-ai-project-java` | `tech-ai-java.prompt.md` |
+| Node.js (`*.js`, `*.ts`) | `nodejs.instructions.md` | `tech-ai-project-nodejs` | `tech-ai-nodejs.prompt.md` |
+| Docker (`Dockerfile`) | `docker.instructions.md` | `tech-ai-docker` | `tech-ai-docker.prompt.md` |
+| Bash (`*.sh`) | `bash.instructions.md` | `tech-ai-script-bash` | `tech-ai-bash-script.prompt.md` |
+| GitHub Actions (`workflows/`) | `github-actions.instructions.md` | `tech-ai-cicd-workflow` | `tech-ai-github-action.prompt.md` |
+
+Always included: `markdown.instructions.md`, `yaml.instructions.md`, `json.instructions.md`.
+
+## Source-only assets (never synced)
+These assets exist only in this standards repository:
+- Agents: `tech-ai-sync-global-copilot-configs-into-repo`
+- Skills: `tech-ai-skill-creator`, `tech-ai-sync-global-copilot-configs-into-repo`
+- Prompts: `tech-ai-add-platform`, `tech-ai-add-report-script`, `tech-ai-code-review`, `tech-ai-sync-global-copilot-configs-into-repo`
 
 ## Scope rules
-- Manage Copilot core assets only.
-- Exclude README, changelog, templates, workflows, bootstrap helpers, and source-only review/audit agents from consumer sync.
-- Prefer an existing root `AGENTS.md` over creating a second managed AGENTS file under `.github/`.
-- Keep recommendation categories fixed and comparable across runs.
-- Keep legacy alias logic in code and tests instead of repeating the same rules across prompt, skill, and agent prose.
-- Do not omit existing target-local Copilot assets from the rendered AGENTS inventory just because they are outside the selected sync baseline.
+- Manage Copilot-core assets only.
+- Exclude README, changelog, templates, workflows, and source-only agents from sync.
+- Prefer existing root `AGENTS.md` over creating a second managed file under `.github/`.
+- Keep `internal-*` assets visible in rendered AGENTS.md inventory.
+- Never overwrite unmanaged divergent files — flag as conflicts instead.
+
+## Common mistakes
+
+| Mistake | Why it matters | Instead |
+|---|---|---|
+| Running apply without reviewing the plan first | Unintended overwrites or deletions | Always run plan mode first, review the report |
+| Syncing source-only agents to consumer repos | Consumer gets assets meant for standards repo only | Check exclusion lists |
+| Ignoring manifest checksum mismatches | Target edits get silently overwritten | Flag as conflict, require manual resolution |
+| Not updating AGENTS.md after sync | Inventory drifts from actual file state | Always regenerate AGENTS.md from current state |
+| Hardcoding profiles instead of detecting stacks | New stacks in target repo get no coverage | Detect dynamically from file extensions |
+
+## Cross-references
+- **TechAIPairArchitect** (`.github/skills/tech-ai-pair-architect/SKILL.md`): for impact analysis when sync changes baseline behavior.
+
+## Tooling
+- Script: `.github/scripts/tech-ai-sync-copilot-configs.py`
+- Manifest: `.github/tech-ai-sync-copilot-configs.manifest.json` (in target repo)
 
 ## Validation
-- Run `python -m compileall .github/scripts tests`.
-- Run `pytest` for the `TechAISyncGlobalCopilotConfigsIntoRepo` test suite.
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
+- `python -m compileall .github/scripts tests`
+- `pytest` for the sync test suite.
+- `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`

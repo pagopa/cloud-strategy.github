@@ -23,56 +23,39 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 4. Apply matching files under `instructions/*.instructions.md` using `applyTo`.
 5. Apply selected prompt constraints from `prompts/*.prompt.md`.
 6. Apply implementation details from referenced `skills/*/SKILL.md`.
-7. If no agent is explicitly selected, default to `TechAIImplementer`.
+7. If no agent is explicitly selected, use the default agent with matching language instructions.
 
 ## Agent Routing
 
 ### When to use each agent
 
+#### Specialist Reviewers (per-language, nit-level review)
+- Use `TechAIBashReviewer` for exhaustive, nit-level Bash script reviews.
+- Use `TechAIJavaReviewer` for exhaustive, nit-level Java code reviews.
+- Use `TechAINodejsReviewer` for exhaustive, nit-level Node.js code reviews.
+- Use `TechAIPythonReviewer` for exhaustive, nit-level Python code reviews.
+- Use `TechAITerraformReviewer` for exhaustive, nit-level Terraform code reviews.
+- Use `TechAISecurityReviewer` for security-focused review across all languages.
+
+#### Planning and Architecture
 - Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.
-- Use `TechAIImplementer` for direct code or configuration changes and validation-first delivery.
-- Use `TechAIReviewer` for quality gates and defect or regression findings.
-- Use `TechAIScriptReviewer` for exhaustive, nit-level reviews on Python, Bash, and Terraform.
-- Use `TechAIPairArchitect` for deep change-impact analysis with DDD focus, blind-spot detection, and structured Markdown report generation.
-- Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` when the user wants a validated execution plan from `ANALYSIS_REPORT.md` before implementation.
-- Use `TechAIStandardsRepoConfigBuilder` as the default specialist for creating or updating GitHub Copilot customization assets in this repository.
-- Use `TechAIStandardsRepoConfigAuditor` as the final quality gate for GitHub Copilot customization changes in this repository.
-- Use `TechAICustomizationAuditor` only as a deprecated compatibility alias while older references are migrated.
+- Use `TechAIPairArchitectAnalysis` prompt with the `TechAIPairArchitect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
+
+#### Editing and Delivery
+- Use `TechAIPREditor` for pull request body generation from diffs.
+
+#### Repository Configuration (source-only, not synced to consumers)
 - Use `TechAISyncGlobalCopilotConfigsIntoRepo` for cross-repository Copilot-core alignment and source or target redundancy audits.
-- Use `TechAIRepoCopilotExtender` when a consumer repository needs repo-owned `internal-*` prompts, skills, agents, or `AGENTS.md` wiring that should remain internal instead of entering the shared baseline.
-- Use specialist agents (`TechAIWorkflowSupplyChain`, `TechAISecurityReviewer`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`, `TechAIPREditor`) only when their domain matches the task.
-- The `TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`, and `TechAIRepoCopilotExtender` agents are repo-only and must not be synced to consumer repositories.
 
 ### Anti-patterns
 
-- Do not use `TechAIPlanner` for trivial single-file changes with clear requirements; go directly to `TechAIImplementer`.
-- Do not use `TechAIImplementer` when requirements are ambiguous or scope is unclear; use `TechAIPlanner` first.
-- Do not use `TechAIImplementer` as the primary authoring agent for GitHub Copilot customization assets in this repository; use `TechAIStandardsRepoConfigBuilder`.
-- Do not use generic `TechAIReviewer` when the change is purely Terraform, IAM, workflows, or security; use the matching specialist instead.
-- Do not use generic `TechAIReviewer` when you need exhaustive per-language nit-level review; use `TechAIScriptReviewer` instead.
-- Do not use `TechAICustomizationAuditor` for new work; use `TechAIStandardsRepoConfigAuditor`.
-- Do not use `TechAIImplementer` alone when the task is cross-repository Copilot configuration alignment; use `TechAISyncGlobalCopilotConfigsIntoRepo`.
-- Do not use `TechAISyncGlobalCopilotConfigsIntoRepo` alone when the task is to author new repository-owned `internal-*` assets in a consumer repository; use `TechAIRepoCopilotExtender` after baseline alignment.
-- Do not use `TechAIRepoCopilotExtender` to add new shared `tech-ai-*` assets in this standards repository; use `TechAIStandardsRepoConfigBuilder`.
-- Do not use `TechAIPairArchitect` for quick line-level nit reviews; use `TechAIScriptReviewer` or `TechAICodeReview` instead.
-- Do not use `TechAIReviewer` when you need holistic change-set impact analysis with DDD, architecture, and blind spots; use `TechAIPairArchitect`.
-- Do not use `TechAIPairArchitect` for exhaustive per-language anti-pattern scanning; use `TechAIScriptReviewer` and then `TechAIPairArchitect` for the bigger picture.
-- Do not send a complex `ANALYSIS_REPORT.md` straight to `TechAIImplementer` when the user first needs a validated remediation plan; use `TechAIPairArchitectAnalysisExecutor`.
+- Do not use `TechAIPlanner` for trivial single-file changes with clear requirements; work directly.
+- Do not use a specialist reviewer outside its language domain; pick the matching one.
+
 
 ### Composition and Handoffs
 
-- For changes spanning multiple specialist domains, run each relevant specialist and aggregate findings.
-- The standard chain for non-trivial work is `TechAIPlanner` -> `TechAIImplementer` -> `TechAIReviewer` or a matching specialist.
-- For GitHub Copilot customization changes in this repository, use `TechAIStandardsRepoConfigBuilder` first and `TechAIStandardsRepoConfigAuditor` before final handoff.
-- For consumer-repository Copilot customization work, use `TechAISyncGlobalCopilotConfigsIntoRepo` first if the target baseline is unknown, then use `TechAIRepoCopilotExtender` for repo-owned `internal-*` assets.
-- `TechAIPlanner` output is input context for `TechAIImplementer`.
-- `TechAIImplementer` output is input context for `TechAIReviewer`.
-- `TechAIReviewer` findings flagged as `Critical` or `Major` route back to `TechAIImplementer` for remediation.
-- `TechAIStandardsRepoConfigBuilder` output is input context for `TechAIStandardsRepoConfigAuditor`.
-- `TechAIStandardsRepoConfigAuditor` findings flagged as `Critical` or `Major` route back to `TechAIStandardsRepoConfigBuilder` for remediation.
-- `TechAIPairArchitect` output (`ANALYSIS_REPORT.md`) is input context for `TechAIPairArchitectAnalysisExecutor` when a validated execution plan is needed.
-- `TechAIPairArchitectAnalysisExecutor` output (`EXECUTION_PLAN.md`) is input context for `TechAIImplementer` after the user approves execution.
-- For thorough pre-merge validation, the recommended chain is `TechAIImplementer` -> `TechAIPairArchitect` -> `TechAIPairArchitectAnalysisExecutor` -> `TechAIImplementer`.
+- For changes spanning multiple specialist domains, run each relevant specialist reviewer and aggregate findings.
 
 ## Governance References
 
@@ -103,10 +86,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - PR content must follow `PULL_REQUEST_TEMPLATE.md` in exact section order.
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with release or tag reference.
 
-## Backlog Triggers
-
-- Add `instructions/docker.instructions.md` when the first Dockerfile is introduced in this repository.
-
 ## Repository Defaults
 
 - Primary focus: reusable, repository-agnostic Copilot customization standards.
@@ -123,6 +102,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Default instruction routing
 
 - `**/*.py` -> `python.instructions.md`
+- `**/Dockerfile,**/Dockerfile.*,**/.dockerignore,**/docker-compose*.yml,**/compose*.yml` -> `docker.instructions.md`
 - `**/*.sh` -> `bash.instructions.md`
 - `**/*.tf` -> `terraform.instructions.md`
 - `**/*.java` -> `java.instructions.md`
@@ -134,30 +114,44 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `**/workflows/**` -> `github-actions.instructions.md`
 - `**/actions/**/action.y*ml` -> `github-action-composite.instructions.md`
 - `**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json` -> `json.instructions.md`
-- `**/*.sh,**/scripts/**/*.py,**/scripts/**/*.sh` -> `scripts.instructions.md` as an overlay
 
 ### Preferred prompts
 
 - `TechAICodeReview`: exhaustive, nit-level code review.
 - `TechAIGitHubAction`: GitHub Actions workflow authoring.
-- `TechAIRepoCopilotExtender`: consumer-repository `internal-*` customization authoring.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
-- `TechAIPRDescription`: pull request body generation.
+- `TechAIPREditor`: pull request body generation.
 - `TechAIAddUnitTests`: test authoring and improvement.
 - `TechAITerraform`: Terraform feature or module authoring.
-- `TechAIPairArchitectAnalysis`: deep change-impact analysis with DDD focus, health score, risk matrix, and devil's advocate mode.
+- `TechAIPairArchitectAnalysis`: deep change-impact analysis with health score, risk matrix, and devil's advocate mode.
 
 ### Preferred skills
 
+#### Domain-Specific Skills
 - `TechAICodeReview`: strict review workflow and anti-pattern catalog.
 - `TechAICICDWorkflow`: CI or CD workflow design patterns.
-- `TechAIRepoCopilotExtender`: consumer-repository Copilot customization workflow.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
-- `TechAIPREditor`: PR description templates and diff-to-description mapping patterns.
+- `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
-- `TechAITerraformModule`: reusable Terraform module design.
-- `TechAIPairArchitect`: change-set-level impact, DDD smell catalog, health scoring, risk matrix, and blind-spot detection.
-- `TechAIPairArchitectAnalysisExecutor`: per-finding re-evaluation, decision tables, lessons learned, and validated execution planning.
+- `TechAITerraform`: unified Terraform skill for features and modules.
+- `TechAIPairArchitect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
+
+#### Workflow Skills (obra/superpowers)
+- `TechAIBrainstorming`: structured creative exploration before implementation.
+- `TechAIDispatchingParallelAgents`: coordinating parallel sub-agent work.
+- `TechAIExecutingPlans`: structured plan execution with checkpoints.
+- `TechAIFinishingDevBranch`: pre-merge checklist and branch cleanup.
+- `TechAIGitWorktrees`: efficient multi-branch work with git worktrees.
+- `TechAIReceivingCodeReview`: processing and addressing review feedback.
+- `TechAIRequestingCodeReview`: preparing changes for effective review.
+- `TechAISubagentDrivenDev`: delegating implementation to focused sub-agents.
+- `TechAISystematicDebugging`: root-cause-first debugging with 4-phase process.
+- `TechAITestDrivenDev`: TDD red-green-refactor workflow.
+- `TechAIUsingSuperpowers`: agent capability awareness and best practices.
+- `TechAIVerification`: evidence-based verification before claiming completion.
+- `TechAIWritingPlans`: structured plan authoring.
+- `TechAIWritingSkills`: skill authoring and improvement.
+- `TechAISkillCreator`: meta-skill for creating, testing, and improving skills (source-only).
 
 ### Required validations before PR
 
@@ -171,6 +165,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Instructions
 
 - `.github/instructions/bash.instructions.md`
+- `.github/instructions/docker.instructions.md`
 - `.github/instructions/github-action-composite.instructions.md`
 - `.github/instructions/github-actions.instructions.md`
 - `.github/instructions/java.instructions.md`
@@ -180,7 +175,9 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/instructions/markdown.instructions.md`
 - `.github/instructions/nodejs.instructions.md`
 - `.github/instructions/python.instructions.md`
-- `.github/instructions/scripts.instructions.md`
+- `.github/instructions/terraform-aws.instructions.md`
+- `.github/instructions/terraform-azure.instructions.md`
+- `.github/instructions/terraform-gcp.instructions.md`
 - `.github/instructions/terraform.instructions.md`
 - `.github/instructions/yaml.instructions.md`
 
@@ -190,17 +187,17 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/tech-ai-add-report-script.prompt.md`
 - `.github/prompts/tech-ai-add-unit-tests.prompt.md`
 - `.github/prompts/tech-ai-bash-script.prompt.md`
-- `.github/prompts/tech-ai-pair-architect-analysis.prompt.md`
 - `.github/prompts/tech-ai-cicd-workflow.prompt.md`
 - `.github/prompts/tech-ai-cloud-policy.prompt.md`
 - `.github/prompts/tech-ai-code-review.prompt.md`
 - `.github/prompts/tech-ai-data-registry.prompt.md`
+- `.github/prompts/tech-ai-docker.prompt.md`
 - `.github/prompts/tech-ai-github-action.prompt.md`
 - `.github/prompts/tech-ai-github-composite-action.prompt.md`
-- `.github/prompts/tech-ai-pr-description.prompt.md`
 - `.github/prompts/tech-ai-java.prompt.md`
-- `.github/prompts/tech-ai-repo-copilot-extender.prompt.md`
 - `.github/prompts/tech-ai-nodejs.prompt.md`
+- `.github/prompts/tech-ai-pair-architect-analysis.prompt.md`
+- `.github/prompts/tech-ai-pr-editor.prompt.md`
 - `.github/prompts/tech-ai-python-script.prompt.md`
 - `.github/prompts/tech-ai-python.prompt.md`
 - `.github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md`
@@ -209,39 +206,45 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Skills
 
-- `.github/skills/tech-ai-pair-architect-analysis-executor/SKILL.md`
-- `.github/skills/tech-ai-pair-architect/SKILL.md`
+- `.github/skills/tech-ai-brainstorming/SKILL.md`
 - `.github/skills/tech-ai-cicd-workflow/SKILL.md`
 - `.github/skills/tech-ai-cloud-policy/SKILL.md`
 - `.github/skills/tech-ai-code-review/SKILL.md`
 - `.github/skills/tech-ai-composite-action/SKILL.md`
 - `.github/skills/tech-ai-data-registry/SKILL.md`
-- `.github/skills/tech-ai-repo-copilot-extender/SKILL.md`
+- `.github/skills/tech-ai-dispatching-parallel-agents/SKILL.md`
+- `.github/skills/tech-ai-docker/SKILL.md`
+- `.github/skills/tech-ai-executing-plans/SKILL.md`
+- `.github/skills/tech-ai-finishing-dev-branch/SKILL.md`
+- `.github/skills/tech-ai-git-worktrees/SKILL.md`
+- `.github/skills/tech-ai-pair-architect/SKILL.md`
 - `.github/skills/tech-ai-pr-editor/SKILL.md`
 - `.github/skills/tech-ai-project-java/SKILL.md`
 - `.github/skills/tech-ai-project-nodejs/SKILL.md`
 - `.github/skills/tech-ai-project-python/SKILL.md`
+- `.github/skills/tech-ai-receiving-code-review/SKILL.md`
+- `.github/skills/tech-ai-requesting-code-review/SKILL.md`
 - `.github/skills/tech-ai-script-bash/SKILL.md`
 - `.github/skills/tech-ai-script-python/SKILL.md`
+- `.github/skills/tech-ai-skill-creator/SKILL.md`
+- `.github/skills/tech-ai-subagent-driven-dev/SKILL.md`
 - `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`
-- `.github/skills/tech-ai-terraform-feature/SKILL.md`
-- `.github/skills/tech-ai-terraform-module/SKILL.md`
+- `.github/skills/tech-ai-systematic-debugging/SKILL.md`
+- `.github/skills/tech-ai-terraform/SKILL.md`
+- `.github/skills/tech-ai-test-driven-dev/SKILL.md`
+- `.github/skills/tech-ai-using-superpowers/SKILL.md`
+- `.github/skills/tech-ai-verification/SKILL.md`
+- `.github/skills/tech-ai-writing-plans/SKILL.md`
+- `.github/skills/tech-ai-writing-skills/SKILL.md`
 
 ### Agents
 
-- `.github/agents/tech-ai-pair-architect-analysis-executor.agent.md`
-- `.github/agents/tech-ai-pair-architect.agent.md`
-- `.github/agents/tech-ai-customization-auditor.agent.md`
-- `.github/agents/tech-ai-pr-editor.agent.md`
-- `.github/agents/tech-ai-github-workflow-supply-chain.agent.md`
-- `.github/agents/tech-ai-standards-repo-config-auditor.agent.md`
-- `.github/agents/tech-ai-standards-repo-config-builder.agent.md`
-- `.github/agents/tech-ai-repo-copilot-extender.agent.md`
-- `.github/agents/tech-ai-iam-least-privilege.agent.md`
-- `.github/agents/tech-ai-implementer.agent.md`
+- `.github/agents/tech-ai-bash-reviewer.agent.md`
+- `.github/agents/tech-ai-java-reviewer.agent.md`
+- `.github/agents/tech-ai-nodejs-reviewer.agent.md`
 - `.github/agents/tech-ai-planner.agent.md`
-- `.github/agents/tech-ai-reviewer.agent.md`
-- `.github/agents/tech-ai-script-reviewer.agent.md`
+- `.github/agents/tech-ai-pr-editor.agent.md`
+- `.github/agents/tech-ai-python-reviewer.agent.md`
 - `.github/agents/tech-ai-security-reviewer.agent.md`
 - `.github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`
-- `.github/agents/tech-ai-terraform-guardrails.agent.md`
+- `.github/agents/tech-ai-terraform-reviewer.agent.md`

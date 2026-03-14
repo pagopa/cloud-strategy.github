@@ -9,6 +9,8 @@ applyTo: "**/workflows/**"
 - Prefer OIDC over long-lived secrets.
 - Pin actions to full-length commit SHAs.
 - For each pinned SHA, add an adjacent comment with release/tag and upstream release URL.
+- Pin `docker://` references and workflow container images by digest instead of floating tags.
+- When an image is pinned by digest, keep the human-readable tag/version in an adjacent comment or nearby reference.
 - Keep `permissions` minimal.
 - Avoid `pull_request_target` for untrusted code.
 

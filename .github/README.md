@@ -98,13 +98,7 @@ Slash-command prompts invoked via `/` in Copilot chat for structured, repeatable
 | `tech-ai-add-platform` | Add or update a reusable platform/profile definition for repo standards. | `/tech-ai-add-platform action=add platform_id=ml-training primary_stack=python goal="ML training pipelines"` |
 | `tech-ai-sync-global-copilot-configs-into-repo` | Analyze and align a consumer repo with the minimum Copilot customization assets from this standards repo. | `/tech-ai-sync-global-copilot-configs-into-repo target_repo=../oneidentity mode=plan` |
 
-#### Copilot customization (consumer repos)
-
-| Prompt | Purpose | Example trigger |
-| --- | --- | --- |
-| `tech-ai-repo-copilot-extender` | Create or update repo-owned `internal-*` Copilot assets in a consumer repo without duplicating the shared baseline. | `/tech-ai-repo-copilot-extender target_repo=../onemail change="add internal prompt for email templates" internal_asset_type=prompt` |
-
-### Skills (`skills/`)
+### Agents (`agents/`)
 
 Implementation knowledge bases loaded on demand by agents and prompts. They contain templates, anti-pattern catalogs, and generation patterns. You rarely invoke skills directly — they are consumed automatically when you use the matching prompt or agent.
 
@@ -129,7 +123,6 @@ Implementation knowledge bases loaded on demand by agents and prompts. They cont
 | `tech-ai-composite-action` | Composite action patterns: secure Bash steps, input/output contracts, deterministic behavior. | Prompt `tech-ai-github-composite-action` |
 | `tech-ai-data-registry` | JSON/YAML registry update patterns: safe mutations, key validation, schema consistency. | Prompt `tech-ai-data-registry` |
 | `tech-ai-sync-global-copilot-configs-into-repo` | Manifest-based sync logic for propagating the shared baseline into consumer repos — asset selection, SHA256 checksums, conflict detection, and reporting. | Agent `TechAISyncGlobalCopilotConfigsIntoRepo`, prompt `tech-ai-sync-global-copilot-configs-into-repo` |
-| `tech-ai-repo-copilot-extender` | Generation patterns for repo-specific `internal-*` Copilot assets in consumer repos — naming rules, baseline preservation, `AGENTS.md` integration. | Agent `TechAIRepoCopilotExtender`, prompt `tech-ai-repo-copilot-extender` |
 
 ### Agents (`agents/`)
 
@@ -177,16 +170,13 @@ Three complementary levels of review — they do NOT overlap.
 
 #### Copilot customization lifecycle agents (this repo only)
 
-These four agents manage the **lifecycle** of Copilot customization assets. They are repo-only (not synced to consumers) and each handles a distinct stage:
+These agents manage the **lifecycle** of Copilot customization assets. They are repo-only (not synced to consumers):
 
 | Agent | Lifecycle stage | Purpose | Example trigger |
 | --- | --- | --- | --- |
-| `TechAIStandardsRepoConfigBuilder` | **Create/Update** | Create and update Copilot config assets (instructions, prompts, skills, agents) inside this standards repo. Does NOT operate on consumer repos. | "Create a new prompt for Docker image scanning." |
-| `TechAIStandardsRepoConfigAuditor` | **Validate** | Validate Copilot config changes inside this standards repo for portability, naming, sync safety, and validator compliance. Final quality gate before merge. | "Audit the new pair-architect-analysis-executor agent for compliance." |
 | `TechAISyncGlobalCopilotConfigsIntoRepo` | **Propagate** | Push the shared Copilot baseline from this standards repo into a consumer repo (e.g. onemail, oneidentity) with conflict detection and SHA256 checksums. | "Sync the baseline config to the oneidentity repo." |
-| `TechAIRepoCopilotExtender` | **Extend (consumer)** | Add repo-specific `internal-*` Copilot assets to a consumer repo, extending the shared baseline without duplicating it. Run Sync first. | "Add an internal prompt for email template generation in the onemail repo." |
 
-> **How they differ**: Builder creates in this repo → Auditor validates in this repo → Sync pushes baseline to consumer repos → Extender adds repo-specific assets in consumer repos. They form a pipeline, not overlapping alternatives.
+> **How they differ**: Sync pushes the shared baseline to consumer repos. They form a pipeline, not overlapping alternatives.
 
 #### Overlap analysis
 
@@ -194,8 +184,6 @@ These four agents manage the **lifecycle** of Copilot customization assets. They
 | --- | --- | --- |
 | `TechAIPairArchitect` vs `TechAIReviewer` | **Different scope** | PairArchitect does cross-cutting architecture/DDD analysis of the full change set. Reviewer does per-file defect-focused PR review. Use PairArchitect for design-level assessment, Reviewer for merge readiness. |
 | `TechAIReviewer` vs `TechAIScriptReviewer` | **Different depth** | Reviewer is broad and delegates to specialists. ScriptReviewer is exhaustive nit-level for Python/Bash/Terraform only. Use Reviewer first; use ScriptReviewer when you want zero findings missed. |
-| `TechAIStandardsRepoConfigAuditor` vs `TechAIReviewer` | **Different domain** | Auditor validates Copilot customization assets (frontmatter, naming, sync safety). Reviewer validates application/infrastructure code. Never interchangeable. |
-| `TechAICustomizationAuditor` vs `TechAIStandardsRepoConfigAuditor` | **Deprecated alias** | `TechAICustomizationAuditor` is a deprecated compatibility alias. Use `TechAIStandardsRepoConfigAuditor` for all new work. See [Deprecated assets](#deprecated-assets). |
 | `TechAIPlanner` vs `TechAIPairArchitectAnalysisExecutor` | **Different input** | Planner works from requirements/user intent. Executor works from an existing `ANALYSIS_REPORT.md`. Planner is upstream (before code); Executor is downstream (after analysis). |
 
 ### Scripts (`scripts/`)
@@ -237,7 +225,7 @@ These four agents manage the **lifecycle** of Copilot customization assets. They
 
 - `repo-profiles.yml` is advisory-only (human-readable profile catalog, not enforced by validators).
 - The canonical project `AGENTS.md` belongs at repository root, not under `.github/`.
-- **Repo-only agents** (not synced to consumers): `TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`, `TechAIRepoCopilotExtender`, `TechAISyncGlobalCopilotConfigsIntoRepo`, `TechAIScriptReviewer`, `TechAICustomizationAuditor` (deprecated alias).
+- **Repo-only agents** (not synced to consumers): `TechAISyncGlobalCopilotConfigsIntoRepo`, `TechAIScriptReviewer`.
 - **Source-only assets** (excluded from consumer baselines): `.github/README.md`, `agents/README.md`, `templates/**`, `scripts/bootstrap-copilot-config.sh`, `tech-ai-requirements-dev.txt`, `.bootstrap-ignore`.
 - Use `templates/copilot-quickstart.md` for onboarding new consumer repos.
 
@@ -248,4 +236,3 @@ These four agents manage the **lifecycle** of Copilot customization assets. They
 | Asset | Deprecated in favor of | Status | Notes |
 | --- | --- | --- | --- |
 | `scripts/bootstrap-copilot-config.sh` | `scripts/tech-ai-sync-copilot-configs.py` | Deprecated — pending removal after migration window | See `DEPRECATION.md` for timeline. |
-| `TechAICustomizationAuditor` agent | `TechAIStandardsRepoConfigAuditor` | Deprecated compatibility alias | Will be removed after 30-day window. |

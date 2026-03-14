@@ -29,9 +29,8 @@ Perform a deep, cross-cutting analysis of repository changes. Goes beyond line-l
 
 After generating the report:
 - Print the summary statistics and health score to the conversation.
-- If Critical errors exist, recommend routing to `TechAIImplementer` for remediation.
+- If Critical errors exist, recommend concrete remediation steps.
 - If the change set is clean, state it explicitly.
-- If the user wants a validated execution plan from the report, hand off to `.github/skills/tech-ai-pair-architect-analysis-executor/SKILL.md` via `TechAIPairArchitectAnalysisExecutor`.
 
 ## Minimal example
 - Input: `target=HEAD~3..HEAD output=ANALYSIS_REPORT.md depth=full mode=devil`
