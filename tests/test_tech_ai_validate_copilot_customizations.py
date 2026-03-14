@@ -156,24 +156,6 @@ def test_tech_ai_validator_requires_root_agents_file(tmp_path: Path) -> None:
     assert any("AGENTS.md must live in repository root" in message for message in messages)
 
 
-def test_tech_ai_validator_enforces_global_builder_semantic_sections(tmp_path: Path) -> None:
-    target_root = tmp_path / "invalid-global-builder"
-    copy_copilot_config(target_root)
-
-    builder_path = target_root / ".github" / "agents" / "tech-ai-standards-repo-config-builder.agent.md"
-    builder_text = builder_path.read_text(encoding="utf-8").replace("## Token discipline", "## Token notes")
-    builder_path.write_text(builder_text, encoding="utf-8")
-
-    report_file = tmp_path / "tech-ai-validator-global-builder.json"
-    result = run_validator(target_root, report_file)
-
-    payload = json.loads(report_file.read_text(encoding="utf-8"))
-    messages = [finding["message"] for finding in payload["findings"]]
-    assert result.returncode == 1
-    assert payload["status"] == "failed"
-    assert any("Global customization builder missing '## Token discipline' section" in message for message in messages)
-
-
 def test_tech_ai_validator_scope_all_covers_immediate_subrepos(tmp_path: Path) -> None:
     workspace_root = tmp_path / "workspace"
     copy_copilot_config(workspace_root)
@@ -302,13 +284,11 @@ def test_tech_ai_validator_requires_digest_for_workflow_docker_references(tmp_pa
 def test_root_agents_routes_customization_work_to_global_and_local_customization_agents() -> None:
     agents_text = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
-    assert "TechAIStandardsRepoConfigBuilder" in agents_text
-    assert "TechAIStandardsRepoConfigAuditor" in agents_text
-    assert "TechAIRepoCopilotExtender" in agents_text
+    assert "TechAISyncGlobalCopilotConfigsIntoRepo" in agents_text
     assert ".github/instructions/docker.instructions.md" in agents_text
     assert ".github/prompts/tech-ai-docker.prompt.md" in agents_text
     assert ".github/skills/tech-ai-docker/SKILL.md" in agents_text
-    assert "repo-only" in agents_text
+    assert "repo-only" not in agents_text or "source-only" in agents_text
     assert "## Available Skills" not in agents_text
     assert "## Available Prompts" not in agents_text
 
@@ -325,33 +305,3 @@ def test_pinning_guidance_covers_hashes_modules_and_docker_digests() -> None:
     assert "Pin base images and runtime images by digest" in docker_text
 
 
-def test_global_builder_maps_consolidated_rules() -> None:
-    builder_text = (
-        REPO_ROOT / ".github" / "agents" / "tech-ai-standards-repo-config-builder.agent.md"
-    ).read_text(encoding="utf-8")
-
-    assert "AGENTS.md" in builder_text
-    assert "copilot-instructions.md" in builder_text
-    assert "copilot-code-review-instructions.md" in builder_text
-    assert "security-baseline.md" in builder_text
-    assert "DEPRECATION.md" in builder_text
-    assert "validate-copilot-customizations.sh" in builder_text
-
-
-def test_internal_builder_requires_grounding_against_concrete_target_files() -> None:
-    agent_text = (
-        REPO_ROOT / ".github" / "agents" / "tech-ai-repo-copilot-extender.agent.md"
-    ).read_text(encoding="utf-8")
-    prompt_text = (
-        REPO_ROOT / ".github" / "prompts" / "tech-ai-repo-copilot-extender.prompt.md"
-    ).read_text(encoding="utf-8")
-    skill_text = (
-        REPO_ROOT / ".github" / "skills" / "tech-ai-repo-copilot-extender" / "SKILL.md"
-    ).read_text(encoding="utf-8")
-
-    assert "inspect concrete target files first" in agent_text
-    assert "`Target evidence`" in agent_text
-    assert "Inspect one or more concrete target files" in prompt_text
-    assert "stop and report the missing grounding" in prompt_text
-    assert "Identify at least one representative target file" in skill_text
-    assert "do not invent fields, object shapes, identity suffixes, or naming conventions" in skill_text

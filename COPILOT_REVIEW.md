@@ -91,7 +91,7 @@ This is a standards repository that other teams consume. Without contribution gu
 - How to add a new agent (naming, tools, restrictions)
 - Naming conventions (`tech-ai-*` for canonical, `local-*` for consumer-local, `TechAIGlobal*` for repo-only)
 - Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
-- Review process (use `TechAIStandardsRepoConfigBuilder` → `TechAIStandardsRepoConfigAuditor`)
+- Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
 
 ---
 
@@ -252,16 +252,13 @@ The ANALYSIS_REPORT (item 4.4) flagged inconsistent input variable naming. Promp
 
 **File**: `.github/agents/README.md`
 
-The agents README lists routing for all agents including repo-only ones (`TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`), but does not explicitly mark them as non-syncable. This information is in `AGENTS.md` but should also be in the agents README for clarity.
+The agents README lists routing for all agents including repo-only ones (`TechAISyncGlobalCopilotConfigsIntoRepo`), but does not explicitly mark them as non-syncable. This information is in `AGENTS.md` but should also be in the agents README for clarity.
 
 **Fix**: Add a note to the README:
 ```markdown
 ## Repo-only agents (not synced to consumers)
-- `TechAIStandardsRepoConfigBuilder`
-- `TechAIStandardsRepoConfigAuditor`
-- `TechAIScriptReviewer`
 - `TechAISyncGlobalCopilotConfigsIntoRepo`
-- `TechAICustomizationAuditor` (deprecated alias)
+- `TechAIScriptReviewer`
 ```
 
 ---
@@ -483,10 +480,7 @@ Seven "Do not use X when..." bullets are excellent guidance but could be more to
 
 `tech-ai-customization-auditor.agent.md` is in `SOURCE_ONLY_AGENT_PATHS` set. Good. But verify the deprecated alias is also in the `AGENTS.md` inventory with a deprecation note. The current inventory lists it without a deprecation marker.
 
-**Fix**: In `AGENTS.md` inventory, annotate:
-```markdown
-- `.github/agents/tech-ai-customization-auditor.agent.md` *(deprecated — use TechAIStandardsRepoConfigAuditor)*
-```
+**Fix**: Deprecated aliases for removed agents should also be cleaned up from inventory.
 
 ---
 

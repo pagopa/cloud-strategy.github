@@ -23,9 +23,7 @@ This repository is the source baseline for reusable GitHub Copilot customization
 - Run any additional stack-specific validation relevant to the touched assets.
 
 ## Review flow
-- Author customization changes with `TechAIStandardsRepoConfigBuilder`.
-- Review them with `TechAIStandardsRepoConfigAuditor`.
-- Record notable lifecycle or behavior changes in `.github/CHANGELOG.md`.
+- Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
 
 ## Release and sync metadata
 - Update `VERSION` when publishing a standards release with consumer-facing impact.

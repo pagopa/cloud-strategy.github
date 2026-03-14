@@ -45,26 +45,17 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `TechAIPREditor` for pull request body generation from diffs.
 
 #### Repository Configuration (source-only, not synced to consumers)
-- Use `TechAIStandardsRepoConfigBuilder` for creating or updating GitHub Copilot customization assets in this repository.
-- Use `TechAIStandardsRepoConfigAuditor` as the final quality gate for GitHub Copilot customization changes in this repository.
 - Use `TechAISyncGlobalCopilotConfigsIntoRepo` for cross-repository Copilot-core alignment and source or target redundancy audits.
-- Use `TechAIRepoCopilotExtender` when a consumer repository needs repo-owned `internal-*` prompts, skills, agents, or `AGENTS.md` wiring that should remain internal instead of entering the shared baseline.
 
 ### Anti-patterns
 
 - Do not use `TechAIPlanner` for trivial single-file changes with clear requirements; work directly.
 - Do not use a specialist reviewer outside its language domain; pick the matching one.
-- Do not use `TechAIStandardsRepoConfigBuilder` in consumer repos; it is source-only for this repository.
-- Do not use `TechAISyncGlobalCopilotConfigsIntoRepo` alone when the task is to author new repository-owned `internal-*` assets; use `TechAIRepoCopilotExtender` after baseline alignment.
-- Do not use `TechAIRepoCopilotExtender` to add new shared `tech-ai-*` assets in this standards repository; use `TechAIStandardsRepoConfigBuilder`.
+
 
 ### Composition and Handoffs
 
 - For changes spanning multiple specialist domains, run each relevant specialist reviewer and aggregate findings.
-- For GitHub Copilot customization changes in this repository, use `TechAIStandardsRepoConfigBuilder` first and `TechAIStandardsRepoConfigAuditor` before final handoff.
-- For consumer-repository Copilot customization work, use `TechAISyncGlobalCopilotConfigsIntoRepo` first if the target baseline is unknown, then use `TechAIRepoCopilotExtender` for repo-owned `internal-*` assets.
-- `TechAIStandardsRepoConfigBuilder` output is input context for `TechAIStandardsRepoConfigAuditor`.
-- `TechAIStandardsRepoConfigAuditor` findings flagged as `Critical` or `Major` route back to `TechAIStandardsRepoConfigBuilder` for remediation.
 
 ## Governance References
 
@@ -128,7 +119,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 - `TechAICodeReview`: exhaustive, nit-level code review.
 - `TechAIGitHubAction`: GitHub Actions workflow authoring.
-- `TechAIRepoCopilotExtender`: consumer-repository `internal-*` customization authoring.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
 - `TechAIPREditor`: pull request body generation.
 - `TechAIAddUnitTests`: test authoring and improvement.
@@ -140,7 +130,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 #### Domain-Specific Skills
 - `TechAICodeReview`: strict review workflow and anti-pattern catalog.
 - `TechAICICDWorkflow`: CI or CD workflow design patterns.
-- `TechAIRepoCopilotExtender`: consumer-repository Copilot customization workflow.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
 - `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
@@ -211,7 +200,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/tech-ai-pr-editor.prompt.md`
 - `.github/prompts/tech-ai-python-script.prompt.md`
 - `.github/prompts/tech-ai-python.prompt.md`
-- `.github/prompts/tech-ai-repo-copilot-extender.prompt.md`
 - `.github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md`
 - `.github/prompts/tech-ai-terraform-module.prompt.md`
 - `.github/prompts/tech-ai-terraform.prompt.md`
@@ -235,7 +223,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/tech-ai-project-nodejs/SKILL.md`
 - `.github/skills/tech-ai-project-python/SKILL.md`
 - `.github/skills/tech-ai-receiving-code-review/SKILL.md`
-- `.github/skills/tech-ai-repo-copilot-extender/SKILL.md`
 - `.github/skills/tech-ai-requesting-code-review/SKILL.md`
 - `.github/skills/tech-ai-script-bash/SKILL.md`
 - `.github/skills/tech-ai-script-python/SKILL.md`
@@ -258,9 +245,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/agents/tech-ai-planner.agent.md`
 - `.github/agents/tech-ai-pr-editor.agent.md`
 - `.github/agents/tech-ai-python-reviewer.agent.md`
-- `.github/agents/tech-ai-repo-copilot-extender.agent.md`
 - `.github/agents/tech-ai-security-reviewer.agent.md`
-- `.github/agents/tech-ai-standards-repo-config-auditor.agent.md`
-- `.github/agents/tech-ai-standards-repo-config-builder.agent.md`
 - `.github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`
 - `.github/agents/tech-ai-terraform-reviewer.agent.md`

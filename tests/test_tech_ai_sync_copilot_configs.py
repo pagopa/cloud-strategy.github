@@ -682,8 +682,7 @@ def test_build_plan_excludes_repo_only_global_customization_agents_from_consumer
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/agents/tech-ai-standards-repo-config-builder.agent.md" not in plan.selection.agents
-    assert ".github/agents/tech-ai-standards-repo-config-auditor.agent.md" not in plan.selection.agents
+    assert ".github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md" not in plan.selection.agents
 
 
 def test_build_plan_includes_source_preferred_assets_and_portable_agents(tmp_path: Path) -> None:
@@ -695,9 +694,6 @@ def test_build_plan_includes_source_preferred_assets_and_portable_agents(tmp_pat
 
     assert ".github/prompts/tech-ai-pair-architect-analysis.prompt.md" in plan.selection.prompts
     assert ".github/skills/tech-ai-pair-architect/SKILL.md" in plan.selection.skills
-    assert ".github/prompts/tech-ai-repo-copilot-extender.prompt.md" not in plan.selection.prompts
-    assert ".github/skills/tech-ai-repo-copilot-extender/SKILL.md" not in plan.selection.skills
-    assert ".github/agents/tech-ai-standards-repo-config-builder.agent.md" not in plan.selection.agents
     assert "tech-ai-pair-architect" in agents_file.desired_content
 
 
@@ -722,21 +718,6 @@ def test_build_plan_detects_instruction_apply_to_patterns_without_profile_change
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
     assert ".github/instructions/lambda.instructions.md" in plan.selection.instructions
-
-
-def test_internal_builder_triads_are_source_only_and_excluded_from_consumer_sync() -> None:
-    assert (
-        ".github/agents/tech-ai-repo-copilot-extender.agent.md"
-        in MODULE.SOURCE_ONLY_AGENT_PATHS
-    )
-    assert (
-        ".github/prompts/tech-ai-repo-copilot-extender.prompt.md"
-        in MODULE.SOURCE_ONLY_PROMPT_PATHS
-    )
-    assert (
-        ".github/skills/tech-ai-repo-copilot-extender/SKILL.md"
-        in MODULE.SOURCE_ONLY_SKILL_PATHS
-    )
 
 
 def test_build_plan_reports_only_remaining_unsupported_stacks_when_docker_is_supported(tmp_path: Path) -> None:

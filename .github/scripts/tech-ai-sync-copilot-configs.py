@@ -38,20 +38,15 @@ MANAGED_ALWAYS = (
     ".github/scripts/validate-copilot-customizations.sh",
 )
 SOURCE_ONLY_AGENT_PATHS = {
-    ".github/agents/tech-ai-standards-repo-config-auditor.agent.md",
-    ".github/agents/tech-ai-standards-repo-config-builder.agent.md",
-    ".github/agents/tech-ai-repo-copilot-extender.agent.md",
     ".github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md",
 }
 SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/tech-ai-add-platform.prompt.md",
     ".github/prompts/tech-ai-add-report-script.prompt.md",
     ".github/prompts/tech-ai-code-review.prompt.md",
-    ".github/prompts/tech-ai-repo-copilot-extender.prompt.md",
     ".github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
-    ".github/skills/tech-ai-repo-copilot-extender/SKILL.md",
     ".github/skills/tech-ai-skill-creator/SKILL.md",
     ".github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md",
 }

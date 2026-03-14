@@ -58,9 +58,9 @@ Always included: `markdown.instructions.md`, `yaml.instructions.md`, `json.instr
 
 ## Source-only assets (never synced)
 These assets exist only in this standards repository:
-- Agents: `tech-ai-standards-repo-config-builder`, `tech-ai-standards-repo-config-auditor`, `tech-ai-sync-global-copilot-configs-into-repo`, `tech-ai-repo-copilot-extender`
-- Skills: `tech-ai-repo-copilot-extender`, `tech-ai-skill-creator`, `tech-ai-sync-global-copilot-configs-into-repo`
-- Prompts: `tech-ai-add-platform`, `tech-ai-add-report-script`, `tech-ai-code-review`, `tech-ai-repo-copilot-extender`, `tech-ai-sync-global-copilot-configs-into-repo`
+- Agents: `tech-ai-sync-global-copilot-configs-into-repo`
+- Skills: `tech-ai-skill-creator`, `tech-ai-sync-global-copilot-configs-into-repo`
+- Prompts: `tech-ai-add-platform`, `tech-ai-add-report-script`, `tech-ai-code-review`, `tech-ai-sync-global-copilot-configs-into-repo`
 
 ## Scope rules
 - Manage Copilot-core assets only.
@@ -80,7 +80,6 @@ These assets exist only in this standards repository:
 | Hardcoding profiles instead of detecting stacks | New stacks in target repo get no coverage | Detect dynamically from file extensions |
 
 ## Cross-references
-- **TechAIRepoCopilotExtender** (`.github/skills/tech-ai-repo-copilot-extender/SKILL.md`): for creating repo-owned `internal-*` assets after sync.
 - **TechAIPairArchitect** (`.github/skills/tech-ai-pair-architect/SKILL.md`): for impact analysis when sync changes baseline behavior.
 
 ## Tooling

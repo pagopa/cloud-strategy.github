@@ -13,16 +13,10 @@ This folder contains optional custom agents for focused tasks.
 - Analysis-to-plan: `TechAIPairArchitectAnalysisExecutor` (takes `TechAIPairArchitect` output, re-evaluates, produces execution plan).
 - PR-focused: `TechAIPREditor`.
 - Write-capable: `TechAIImplementer`.
-- Repo-only standards specialists: `TechAIStandardsRepoConfigBuilder`, `TechAIStandardsRepoConfigAuditor`.
-- Repo-only consumer-repository specialist: `TechAIRepoCopilotExtender`.
 
 ## Repo-only agents (not synced to consumers)
-- `TechAIStandardsRepoConfigBuilder`
-- `TechAIStandardsRepoConfigAuditor`
-- `TechAIRepoCopilotExtender`
 - `TechAIScriptReviewer`
 - `TechAISyncGlobalCopilotConfigsIntoRepo`
-- `TechAICustomizationAuditor` (deprecated compatibility alias)
 
 ## Why generic core agents
 - `TechAIPlanner`, `TechAIImplementer`, and `TechAIReviewer` are workflow roles, not language roles.
@@ -37,8 +31,5 @@ This folder contains optional custom agents for focused tasks.
 5. Use `TechAIWorkflowSupplyChain` on workflow changes.
 6. Use `TechAIPREditor` to create or update PR title/body from template and diff.
 7. Use `TechAISecurityReviewer` as final security gate.
-8. Use `TechAIStandardsRepoConfigBuilder` for GitHub Copilot customization assets in this standards repository.
-9. Use `TechAIStandardsRepoConfigAuditor` as the final gate for those customization changes.
-10. Use `TechAISyncGlobalCopilotConfigsIntoRepo` to align a consumer baseline before creating repo-owned internal assets.
-11. Use `TechAIRepoCopilotExtender` for repo-owned `internal-*` prompts, skills, agents, and `AGENTS.md` updates that should stay consumer-repository.
-12. Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` to re-evaluate findings, produce a validated execution plan with per-finding decision tables, extract lessons learned, and prepare work packages for `TechAIImplementer`.
+8. Use `TechAISyncGlobalCopilotConfigsIntoRepo` to align a consumer baseline before creating repo-owned internal assets.
+9. Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` to re-evaluate findings, produce a validated execution plan with per-finding decision tables, extract lessons learned, and prepare work packages for `TechAIImplementer`.
