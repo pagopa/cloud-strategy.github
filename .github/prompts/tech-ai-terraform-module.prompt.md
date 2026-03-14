@@ -18,7 +18,7 @@ Use this prompt to create or modify Terraform modules/components while keeping t
 - **Target path**: ${input:target_path:infra/terraform}
 
 ## Instructions
-1. Use `.github/skills/tech-ai-terraform-module/SKILL.md` and `.github/instructions/terraform.instructions.md`.
+1. Use `.github/skills/tech-ai-terraform/SKILL.md` and `.github/instructions/terraform.instructions.md`.
 2. Keep variable names, outputs, and descriptions domain-neutral.
 3. Avoid hardcoded tenant/account/subscription/project identifiers.
 4. Document assumptions and provider requirements explicitly.

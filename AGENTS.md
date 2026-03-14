@@ -144,8 +144,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
 - `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
 - `TechAICloudPolicy`: reusable cloud policy authoring patterns.
-- `TechAITerraformModule`: reusable Terraform module design.
-- `TechAIChangeImpactAnalysis`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
+- `TechAITerraform`: unified Terraform skill for features and modules.
+- `TechAIPairArchitect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
 
 #### Workflow Skills (obra/superpowers)
 - `TechAIBrainstorming`: structured creative exploration before implementation.
@@ -243,8 +243,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/tech-ai-subagent-driven-dev/SKILL.md`
 - `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/tech-ai-systematic-debugging/SKILL.md`
-- `.github/skills/tech-ai-terraform-feature/SKILL.md`
-- `.github/skills/tech-ai-terraform-module/SKILL.md`
+- `.github/skills/tech-ai-terraform/SKILL.md`
 - `.github/skills/tech-ai-test-driven-dev/SKILL.md`
 - `.github/skills/tech-ai-using-superpowers/SKILL.md`
 - `.github/skills/tech-ai-verification/SKILL.md`

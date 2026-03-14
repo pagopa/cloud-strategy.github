@@ -1,6 +1,6 @@
 ---
 name: TechAIPREditor
-description: Generate review-ready PR descriptions from diffs using structured templates with section order and diff-to-description mapping. Use this skill whenever the user needs to write, update, or format a pull request body, summarize code changes for reviewers, or generate a PR description from a git diff.
+description: Generate review-ready PR descriptions from diffs using structured templates with section order and diff-to-description mapping. Use when the user needs to write, update, or format a pull request body, summarize code changes, or generate a PR description from a git diff.
 ---
 
 # TechAI PR Editor — Skill
@@ -17,46 +17,51 @@ description: Generate review-ready PR descriptions from diffs using structured t
 - Provide a short bullet list of key changes.
 - Include validation commands and results.
 - Explicitly state risk level and rollback plan.
-- If PR tools are available, apply updates to the PR (do not stop at generated markdown only).
-- Do not modify any `README.md` file unless explicitly requested by the user.
+- If PR tools are available, apply updates to the PR directly.
+- Do not modify any `README.md` file unless explicitly requested.
 
-## Template alignment
-- Resolve and use one existing repository template path:
-  - `.github/PULL_REQUEST_TEMPLATE.md`
-  - `.github/pull_request_template.md`
-  - `PULL_REQUEST_TEMPLATE.md`
-  - `pull_request_template.md`
-- Keep headings and section order unchanged.
-- If a section is not applicable, write `N/A`.
-- Avoid leaving placeholders empty.
+## Template resolution
+Resolve and use one existing repository template:
+1. `.github/PULL_REQUEST_TEMPLATE.md`
+2. `.github/pull_request_template.md`
+3. `PULL_REQUEST_TEMPLATE.md`
+4. `pull_request_template.md`
 
-## Tool-driven workflow (VS Code / JetBrains)
+Keep headings and section order unchanged. If a section is not applicable, write `N/A`.
+
+## Tool-driven workflow
 1. Detect whether an open PR exists for the current branch.
-2. If PR exists, update title/body directly.
-3. If PR does not exist, create a draft PR first.
+2. If PR exists → update title/body directly.
+3. If PR does not exist → create a draft PR first.
 4. Update PR title/body using template-compliant content.
-5. Re-fetch PR and verify required section headings exist in persisted body.
-6. Return PR URL and a concise confirmation summary.
-7. If PR tools are unavailable, return ready-to-paste markdown plus exact CLI fallback commands.
-
-## Template-derived structure
-- Use the exact section headings from the resolved repository template.
-- Keep section order unchanged.
-- Preserve checklist items and prompt questions from the template.
-- Do not add or remove template sections unless explicitly requested.
+5. Re-fetch PR and verify required section headings exist.
+6. Return PR URL and a concise confirmation.
+7. If PR tools are unavailable → return ready-to-paste markdown plus CLI fallback commands.
 
 ## Minimal example
 - Input:
   - title: "Harden Copilot validator"
   - changed_files: ".github/scripts/validate-copilot-customizations.sh, .github/workflows/github-validate-copilot-customizations.yml"
   - validation: "bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh"
-- Expected output:
-  - Complete PR body with all required template sections.
-  - A brief and accurate bullet list under `Changes`.
+- Expected output: Complete PR body with all required template sections and concise change bullets.
+
+## Common mistakes
+
+| Mistake | Why it matters | Instead |
+|---|---|---|
+| Generic summary ("Various improvements") | Reviewers cannot assess impact or scope | Write specific outcome: "Adds region validation to SCP deploy pipeline" |
+| Missing risk level or rollback plan | Reviewers approve without understanding blast radius | Always fill Risk and Rollback sections explicitly |
+| Adding sections not in the repo template | Breaks template consistency across PRs | Use only the sections from the resolved template |
+| Leaving placeholder text (`TODO`, `fill in`) | Looks unfinished, blocks approval | Fill every section with real content or `N/A` |
+| Listing every changed file instead of summarizing | Noisy description that obscures intent | Group changes by purpose; detail only non-obvious changes |
+| Not including validation commands and output | Reviewer has no confidence that code was tested | Always include the exact commands and their results |
+
+## Cross-references
+- **TechAIPairArchitect** (`.github/skills/tech-ai-pair-architect/SKILL.md`): for change-impact analysis that feeds the risk section.
+- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for the review that follows the PR.
 
 ## Validation
-- Ensure every template-defined section heading is present.
-- Ensure `Changes` has concise bullets describing the real diff.
-- Ensure repository-specific scope or target fields are explicit when applicable.
-- Ensure risk and rollback are explicit and actionable.
-- Ensure final PR body is persisted when tooling supports PR updates.
+- Every template-defined section heading is present.
+- `Changes` has concise bullets describing the real diff.
+- Risk and rollback are explicit and actionable.
+- Final PR body is persisted when tooling supports PR updates.

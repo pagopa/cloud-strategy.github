@@ -84,8 +84,7 @@ profiles:
       - prompts/tech-ai-terraform.prompt.md
       - prompts/tech-ai-cloud-policy.prompt.md
     recommended_skills:
-      - skills/tech-ai-terraform-feature/SKILL.md
-      - skills/tech-ai-terraform-module/SKILL.md
+      - skills/tech-ai-terraform/SKILL.md
       - skills/tech-ai-cloud-policy/SKILL.md
 
   mixed-platform:
@@ -104,4 +103,4 @@ profiles:
       - skills/tech-ai-project-java/SKILL.md
       - skills/tech-ai-project-nodejs/SKILL.md
       - skills/tech-ai-cicd-workflow/SKILL.md
-      - skills/tech-ai-terraform-feature/SKILL.md
+      - skills/tech-ai-terraform/SKILL.md

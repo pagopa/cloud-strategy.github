@@ -18,8 +18,8 @@ Create or modify Terraform resources, modules, variables, outputs, or data sourc
 
 ## Instructions
 
-1. Use `.github/skills/tech-ai-terraform-feature/SKILL.md` for resource-level changes.
-2. If `type=module`, also use `.github/skills/tech-ai-terraform-module/SKILL.md`.
+1. Use `.github/skills/tech-ai-terraform/SKILL.md` for all Terraform changes.
+2. If `type=module`, follow the module creation section in the skill.
 3. Search existing `.tf` files in the target directory.
 4. Follow existing naming conventions and patterns.
 5. Apply the task with:

@@ -64,7 +64,6 @@ ALWAYS_EXCLUDED_RELATIVE_PATHS = {
     ".github/CODEOWNERS",
     ".github/pull_request_template.md",
     ".github/PULL_REQUEST_TEMPLATE.md",
-    ".github/scripts/bootstrap-copilot-config.sh",
 }
 ALWAYS_EXCLUDED_DIRECTORIES = {
     ".git",
@@ -97,12 +96,10 @@ PROMPT_NAME_OVERRIDES = {
     "tech-ai-cicd-workflow.prompt.md": "TechAICICDWorkflow",
     "tech-ai-github-composite-action.prompt.md": "TechAICompositeAction",
     "tech-ai-pr-editor.prompt.md": "TechAIPREditor",
-    "tech-ai-terraform-module.prompt.md": "TechAITerraformModule",
 }
 SOURCE_ONLY_TARGET_RESIDUE_PATHS = (
     ".github/README.md",
     ".github/agents/README.md",
-    ".github/scripts/bootstrap-copilot-config.sh",
 )
 SOURCE_ONLY_TARGET_RESIDUE_DIRECTORIES = (".github/templates",)
 
