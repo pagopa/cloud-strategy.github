@@ -26,6 +26,9 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - Follow `.github/instructions/terraform.instructions.md` for provider and external module pinning.
 - Use `snake_case` for all Terraform identifiers.
 - Add `description` and `type` to every variable.
+- Avoid `default` values in variables for non-module components; pass configurations via `.tfvars`.
+- Avoid using `locals` for hardcoded configuration; use direct values in the code unless they need to be configurable.
+- *Note:* The above two rules on avoiding defaults and restricting locals do not apply to reusable standalone modules.
 - Add `description` to every output.
 - Avoid hardcoded values (IDs, ARNs, subscription IDs, secrets).
 - Apply tags on all taggable resources.

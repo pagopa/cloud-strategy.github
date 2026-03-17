@@ -13,7 +13,13 @@ applyTo: "**/*.tf"
 ## Naming conventions
 - Resources: `snake_case` (for example `aws_iam_role.lambda_execution`).
 - Variables: `snake_case` with `description`.
-- Locals: `snake_case`, grouped by domain.
+- Locals: `snake_case`, grouped by domain. Avoid using locals for hardcoded variables.
+
+## Variables and Values (Non-Module code)
+- Avoid using `default` values in variables as much as possible (except for Terraform modules).
+- Configuration values must be defined in `.tfvars` files.
+- For resources configurations, use direct hardcoded values in the code unless they change per environment (and thus require a variable).
+- These rules do not apply to reusable standalone modules.
 
 ## Structure
 - Always add `description` to variables.
