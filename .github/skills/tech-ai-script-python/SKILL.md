@@ -20,15 +20,29 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Prefer early return and guard clauses.
 - Keep implementation explicit and readable.
 - Add unit tests for testable behavior.
+- New standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
+- The folder should include the Python entry point, local `requirements.txt`, a `run.sh` launcher, and `tests/` when test scope applies.
+- If external packages are used, keep them in the local `requirements.txt` with exact pins, `--hash` entries, and short comment lines that make pinned versions readable.
+- Recommend third-party libraries when they materially simplify parsing, validation, HTTP, CLI, serialization, or retry behavior; do not replace a simpler standard-library solution just to satisfy the preference.
+- Make new `run.sh` launchers executable.
 - For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
 
-## Minimal template
+## Default layout
+```text
+{script_name}/
+├── requirements.txt
+├── run.sh
+├── {script_name}.py
+└── tests/
+```
+
+## Minimal Python entry point
 ```python
 #!/usr/bin/env python3
 """Purpose: {description}
 
 Usage examples:
-  python {script_name}.py --help
+  ./run.sh --help
 """
 import argparse
 import sys
@@ -37,8 +51,10 @@ import sys
 def log_info(msg: str) -> None:
     print(f"ℹ️  {msg}")
 
+
 def log_error(msg: str) -> None:
     print(f"❌ {msg}", file=sys.stderr)
+
 
 def log_success(msg: str) -> None:
     print(f"✅ {msg}")
@@ -58,6 +74,37 @@ if __name__ == "__main__":
     main()
 ```
 
+## Minimal requirements example
+```text
+# requests 2.32.3
+requests==2.32.3 \
+    --hash=sha256:<hash1> \
+    --hash=sha256:<hash2>
+```
+
+## Minimal launcher example
+```bash
+#!/usr/bin/env bash
+#
+# Purpose: Run the {script_name} standalone Python tool.
+# Usage examples:
+#   ./run.sh --help
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$SCRIPT_DIR/.venv"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+if [[ ! -d "$VENV_DIR" ]]; then
+  "$PYTHON_BIN" -m venv "$VENV_DIR"
+fi
+
+# Install exactly the locally locked dependencies before execution.
+"$VENV_DIR/bin/pip" install --require-hashes -r "$SCRIPT_DIR/requirements.txt"
+exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
+```
+
 ## Testing
 - Put tests under `tests/`.
 - Use `pytest` as default test framework.
@@ -73,13 +120,15 @@ if __name__ == "__main__":
 | Bare `except:` or `except Exception:` at top level | Swallows all errors including KeyboardInterrupt | Catch specific exceptions; let unexpected ones propagate |
 | Hardcoded file paths | Non-portable across machines | Use `argparse`, `pathlib`, or environment variables |
 | No argument parsing | Caller has to modify script source to change behavior | Use `argparse` for any configurable parameter |
-| Installing deps globally without version pinning | Non-reproducible environment | Pin in `requirements.txt` or inline `pip install pkg==x.y.z` |
+| Installing deps globally or without hash-locked version pinning | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins and hashes |
+| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to create the environment and run the tool | Generate a self-contained folder with `requirements.txt` and `run.sh` |
 
 ## Cross-references
 - **TechAIProjectPython** (`.github/skills/tech-ai-project-python/SKILL.md`): for structured application code.
 - **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Python code (see `references/anti-patterns-python.md`).
 
 ## Validation
-- `python -m py_compile script.py` (syntax check)
+- `python -m py_compile <script_name>.py` (syntax check)
+- `bash -n run.sh` (launcher syntax check)
 - `pytest tests/` (run tests)
 - `python -m compileall <changed_paths>` (batch syntax check)

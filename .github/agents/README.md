@@ -15,7 +15,6 @@ This folder contains optional custom agents for focused tasks.
 - Write-capable: `TechAIImplementer`.
 
 ## Repo-only agents (not synced to consumers)
-- `TechAIScriptReviewer`
 - `TechAISyncGlobalCopilotConfigsIntoRepo`
 
 ## Why generic core agents

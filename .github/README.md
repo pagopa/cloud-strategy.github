@@ -12,7 +12,7 @@ This folder is the **single source of truth** for GitHub Copilot customization a
 | --- | --- | --- | --- |
 | `copilot-instructions.md` | Global non-negotiable rules: language policy, least privilege, DDD preference, test execution order, script standards, validation baseline. | Every Copilot interaction — this is the root of the instruction chain. | Never skip — it's always loaded first. |
 | `copilot-commit-message-instructions.md` | Commit message format: `<type>(<scope>): <summary>`, imperative mood, 72-char limit. | Writing commits via Copilot or reviewing commit messages. | Manual commits that follow the same convention already. |
-| `copilot-code-review-instructions.md` | Review severity levels, baseline checks, escalation rules. References `tech-ai-code-review/SKILL.md` for anti-pattern catalogs. | Running Copilot code review or configuring review agents. | Deep per-line review (use `TechAIScriptReviewer` instead). |
+| `copilot-code-review-instructions.md` | Review severity levels, baseline checks, escalation rules. References `tech-ai-code-review/SKILL.md` for anti-pattern catalogs. | Running Copilot code review or configuring review agents. | General implementation guidance (see reviewer agents for specialized reviews). |
 | `security-baseline.md` | Portable security checklist: SHA-pinned actions, minimal permissions, OIDC, branch protection, prompt/agent safety. | Every infrastructure or workflow change. Referenced by all agents as a minimum bar. | Application-only code changes with no infra impact. |
 
 ### Configuration and governance
@@ -109,7 +109,7 @@ Implementation knowledge bases loaded on demand by agents and prompts. They cont
 | --- | --- | --- |
 | `tech-ai-pair-architect` | DDD analysis dimensions, severity mappings, health score, risk matrix format, report template for change-impact analysis. | Agent `TechAIPairArchitect`, prompt `tech-ai-pair-architect-analysis` |
 | `tech-ai-pair-architect-analysis-executor` | Decision-table format, execution plan template, disagreement protocol, quality checklist for re-evaluating analysis reports. | Agent `TechAIPairArchitectAnalysisExecutor` |
-| `tech-ai-code-review` | Per-language anti-pattern catalogs (Python, Bash, Terraform), severity mappings, escalation rules for exhaustive code review. | Agents `TechAIScriptReviewer`, `TechAIPairArchitect`; prompt `tech-ai-code-review` |
+| `tech-ai-code-review` | Per-language anti-pattern catalogs (Python, Bash, Terraform), severity mappings, escalation rules for exhaustive code review. | Agents `TechAIBashReviewer`, `TechAIPythonReviewer`, `TechAITerraformReviewer`, `TechAIPairArchitect`; prompt `tech-ai-code-review` |
 | `tech-ai-pr-editor` | PR description templates, section structure, and diff-to-description mapping for generating review-ready PR bodies. | Agent `TechAIPREditor`, prompt `tech-ai-pr-description` |
 | `tech-ai-project-java` | Java component scaffolding: purpose JavaDoc, BDD-like JUnit 5 tests, module conventions. | Prompt `tech-ai-java` |
 | `tech-ai-project-nodejs` | Node.js module scaffolding: purpose comments, `node:test` tests, adapter patterns. | Prompt `tech-ai-nodejs` |
@@ -149,10 +149,9 @@ Three complementary levels of review — they do NOT overlap.
 | Agent | Purpose | Scope | Example trigger | When to use instead of the others |
 | --- | --- | --- | --- | --- |
 | `TechAIReviewer` | Structured code review: defects, regressions, maintainability. Diff-first, broad. | Any language, any change | "Review this PR for quality before merge." | **Default choice** for general PR review. Delegates to specialists when needed. |
-| `TechAIScriptReviewer` | Exhaustive nit-level review with per-language anti-pattern catalogs + architecture assessment. | Python, Bash, Terraform only | "Deep review of the new sync script — catch every anti-pattern." | When you want **every possible finding** on scripts/infra code, including Nits and architecture verdict. |
 | `TechAISecurityReviewer` | Security-focused review: secrets, permissions, attack surface, compliance. | Any change with security impact | "Security review of the new IAM module and workflow changes." | When the change touches **security-sensitive** code (IAM, secrets, auth, networking). |
 
-> **How they differ**: `TechAIReviewer` is the broad quality gate (like a senior engineer's PR review). `TechAIScriptReviewer` is the exhaustive deep-dive (like a specialized linter on steroids — only for Python/Bash/Terraform). `TechAISecurityReviewer` focuses exclusively on security concerns. Use `TechAIReviewer` first; it will recommend routing to a specialist when needed.
+> **How they differ**: `TechAIReviewer` is the broad quality gate (like a senior engineer's PR review). `TechAISecurityReviewer` focuses exclusively on security concerns. Use `TechAIReviewer` first; it will recommend routing to a specialist when needed.
 
 #### Infrastructure specialist agents
 
@@ -183,7 +182,6 @@ These agents manage the **lifecycle** of Copilot customization assets. They are 
 | Potential confusion | Verdict | Distinction |
 | --- | --- | --- |
 | `TechAIPairArchitect` vs `TechAIReviewer` | **Different scope** | PairArchitect does cross-cutting architecture/DDD analysis of the full change set. Reviewer does per-file defect-focused PR review. Use PairArchitect for design-level assessment, Reviewer for merge readiness. |
-| `TechAIReviewer` vs `TechAIScriptReviewer` | **Different depth** | Reviewer is broad and delegates to specialists. ScriptReviewer is exhaustive nit-level for Python/Bash/Terraform only. Use Reviewer first; use ScriptReviewer when you want zero findings missed. |
 | `TechAIPlanner` vs `TechAIPairArchitectAnalysisExecutor` | **Different input** | Planner works from requirements/user intent. Executor works from an existing `ANALYSIS_REPORT.md`. Planner is upstream (before code); Executor is downstream (after analysis). |
 
 ### Scripts (`scripts/`)
@@ -225,7 +223,7 @@ These agents manage the **lifecycle** of Copilot customization assets. They are 
 
 - `repo-profiles.yml` is advisory-only (human-readable profile catalog, not enforced by validators).
 - The canonical project `AGENTS.md` belongs at repository root, not under `.github/`.
-- **Repo-only agents** (not synced to consumers): `TechAISyncGlobalCopilotConfigsIntoRepo`, `TechAIScriptReviewer`.
+- **Repo-only agents** (not synced to consumers): `TechAISyncGlobalCopilotConfigsIntoRepo`.
 - **Source-only assets** (excluded from consumer baselines): `.github/README.md`, `agents/README.md`, `templates/**`, `scripts/bootstrap-copilot-config.sh`, `tech-ai-requirements-dev.txt`, `.bootstrap-ignore`.
 - Use `templates/copilot-quickstart.md` for onboarding new consumer repos.
 

@@ -30,7 +30,8 @@ Create or modify Python application components with clear separation of concerns
 7. If the task includes Python templates, use Jinja templates named `<file-name>.<extension>.j2`.
 8. If `action=modify` and tests already exist, run existing tests before editing test files.
 9. Add or update deterministic `pytest` unit tests only after the first test run, and only for intentional behavior changes or uncovered new behavior.
-10. Follow `.github/instructions/python.instructions.md` for dependency locking.
+10. Follow `.github/instructions/python.instructions.md` for dependency locking and external-library selection.
+11. If external packages are introduced, update the owning Python dependency lock artifact so new packages use exact pins with hashes and short human-readable version comments.
 
 ## Minimal example
 - Input: `action=create component_type=service component_name=PolicyEvaluator purpose="Evaluate policy eligibility"`

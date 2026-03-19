@@ -37,8 +37,19 @@ applyTo: "**/*.py"
 - Docstrings, logs, exceptions, and CLI output must be in English.
 
 ## Dependencies
-- If external libraries are needed, prefer a compiled `requirements.txt` with hashes.
+- If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins and `--hash` entries.
+- Keep a short comment above each introduced dependency block so the pinned version is readable without parsing the full hash line.
+- Recommend third-party libraries when they materially reduce custom parsing, validation, HTTP, CLI, serialization, or retry code.
+- Do not force third-party libraries over the standard library when the standard library is simpler, clearer, or safer.
 - When hash-locked requirements are not feasible, use exact `==` pins and document the reason in the closest technical note or workflow comment.
+
+## Dependency example
+```text
+# requests 2.32.3
+requests==2.32.3 \
+    --hash=sha256:<hash1> \
+    --hash=sha256:<hash2>
+```
 
 ## Testing defaults
 - Use `pytest` as default unit-test framework.
