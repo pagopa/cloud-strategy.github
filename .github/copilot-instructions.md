@@ -64,9 +64,9 @@ These apply to every code change, regardless of language or technology:
 - Use simple control flow and early returns.
 - Bash: always `#!/usr/bin/env bash` (never POSIX `sh`).
 - Python: add unit tests for testable logic.
-- Python dependencies: when external packages are introduced, prefer a compiled `requirements.txt` with exact pins and `--hash` entries, plus short comment lines that make the pinned versions readable to humans.
+- Python dependencies: when external packages are introduced, standardize on a compiled `requirements.txt` with exact pins, full transitive dependency closure, and `--hash` entries, plus short comment lines that make the pinned versions readable to humans.
 - Python dependencies: third-party libraries are recommended when they materially simplify parsing, validation, HTTP, CLI, serialization, or retry logic; keep the standard library when it is simpler and safer.
-- New standalone Python scripts should default to a self-contained folder that includes the Python entry point, local `requirements.txt`, and a Bash launcher that bootstraps `.venv` before execution.
+- New standalone Python scripts should default to a self-contained folder that includes the Python entry point, a Bash launcher, and a local `requirements.txt` only when external packages are required. The launcher should bootstrap `.venv` and install from `requirements.txt` only when that file exists.
 - Prefer immutable dependency and image pins; keep stack-specific locking details in the matching instruction file.
 
 ## Java and Node.js standards

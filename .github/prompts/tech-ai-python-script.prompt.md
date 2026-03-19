@@ -26,16 +26,16 @@ Create or modify a standalone Python script while keeping interfaces explicit, b
 5. Add or update deterministic tests only for intentional behavior changes or uncovered new behavior when `test_scope=unit`.
 6. Use Jinja templates named `<file-name>.<extension>.j2` when the task includes Python-managed templates.
 7. For new standalone scripts, prefer a dedicated folder at `<target_path>/<script_name>/` instead of a loose single `.py` file.
-8. The standalone script folder should contain the Python entry point, a local `requirements.txt` with exact pins and hashes when external packages are used, and a `run.sh` launcher that bootstraps or reuses `.venv`, installs dependencies, and invokes the Python entry point.
-9. Keep a short comment above each introduced requirement block so pinned package versions are easy to read.
+8. The standalone script folder should contain the Python entry point and a `run.sh` launcher. Add a local `requirements.txt` only when external packages are used.
+9. When external packages are used, standardize on `requirements.txt` with exact pins, full transitive dependency closure, hashes, and short comment lines that keep pinned versions readable.
 10. External libraries are recommended when they materially simplify the script, but they are not mandatory if the standard library is simpler.
 11. Follow `.github/instructions/python.instructions.md` for dependency locking.
-12. Make new `run.sh` launchers executable.
+12. Make new `run.sh` launchers executable, and ensure they bootstrap or reuse `.venv`, install from the local `requirements.txt` when present, and invoke the Python entry point.
 
 ## Minimal example
 - Input: `action=modify script_name=inventory_report purpose="Summarize customization assets" target_file=.github/scripts/inventory_report.py test_scope=unit`
 - Expected output:
-  - Updated standalone Python script package with explicit CLI behavior, local dependency lock data, a Bash launcher, and focused deterministic tests.
+  - Updated standalone Python script package with explicit CLI behavior, a Bash launcher, optional local dependency lock data when external packages are required, and focused deterministic tests.
 
 ## Validation
 - Run `python -m compileall <changed_python_paths>`.

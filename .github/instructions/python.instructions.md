@@ -9,8 +9,8 @@ applyTo: "**/*.py"
 - Use emoji logs for key execution states.
 - Prefer early return and clear guard clauses.
 - Keep code explicit and readable.
-- Prefer well-maintained libraries (stdlib first, then approved third-party) when they simplify code and reduce custom logic.
-- Do not reinvent common parsing/validation/serialization behavior when a library provides a clear solution.
+- Prefer the standard library first. Introduce well-maintained third-party libraries when they materially simplify code and reduce custom logic.
+- Do not reinvent common parsing/validation/serialization behavior when the standard library or a well-maintained library provides a clearer solution.
 - Prefer simple, readable, and easily modifiable code over clever abstractions.
 - Accept additional lines or mild redundancy when it improves clarity, maintainability, and safe future changes.
 - Unit tests are required for testable logic.
@@ -37,11 +37,12 @@ applyTo: "**/*.py"
 - Docstrings, logs, exceptions, and CLI output must be in English.
 
 ## Dependencies
-- If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins and `--hash` entries.
+- Standardize on `requirements.txt` as the Python dependency lock artifact in this baseline.
+- If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins, full transitive dependency closure, and `--hash` entries for every locked requirement.
 - Keep a short comment above each introduced dependency block so the pinned version is readable without parsing the full hash line.
 - Recommend third-party libraries when they materially reduce custom parsing, validation, HTTP, CLI, serialization, or retry code.
 - Do not force third-party libraries over the standard library when the standard library is simpler, clearer, or safer.
-- When hash-locked requirements are not feasible, use exact `==` pins and document the reason in the closest technical note or workflow comment.
+- When a fully hash-locked `requirements.txt` is not feasible, use exact `==` pins in `requirements.txt` and document the reason in the closest technical note or workflow comment.
 
 ## Dependency example
 ```text
@@ -50,6 +51,8 @@ requests==2.32.3 \
     --hash=sha256:<hash1> \
     --hash=sha256:<hash2>
 ```
+
+- Generate the locked file with `pip-compile --generate-hashes` or an equivalent workflow that captures the full dependency closure.
 
 ## Testing defaults
 - Use `pytest` as default unit-test framework.

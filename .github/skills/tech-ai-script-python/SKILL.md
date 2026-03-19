@@ -21,16 +21,16 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Keep implementation explicit and readable.
 - Add unit tests for testable behavior.
 - New standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
-- The folder should include the Python entry point, local `requirements.txt`, a `run.sh` launcher, and `tests/` when test scope applies.
-- If external packages are used, keep them in the local `requirements.txt` with exact pins, `--hash` entries, and short comment lines that make pinned versions readable.
+- The folder should include the Python entry point, a `run.sh` launcher, and `tests/` when test scope applies. Add a local `requirements.txt` only when external packages are used.
+- If external packages are used, keep them in the local `requirements.txt` with exact pins, full transitive dependency closure, `--hash` entries, and short comment lines that make pinned versions readable.
 - Recommend third-party libraries when they materially simplify parsing, validation, HTTP, CLI, serialization, or retry behavior; do not replace a simpler standard-library solution just to satisfy the preference.
-- Make new `run.sh` launchers executable.
+- Make new `run.sh` launchers executable, and make them install from `requirements.txt` only when that file exists.
 - For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
 
 ## Default layout
 ```text
 {script_name}/
-├── requirements.txt
+├── requirements.txt  # only when external packages are used
 ├── run.sh
 ├── {script_name}.py
 └── tests/
@@ -82,6 +82,8 @@ requests==2.32.3 \
     --hash=sha256:<hash2>
 ```
 
+Generate `requirements.txt` with `pip-compile --generate-hashes` or an equivalent workflow that locks the full dependency closure.
+
 ## Minimal launcher example
 ```bash
 #!/usr/bin/env bash
@@ -95,13 +97,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$SCRIPT_DIR/.venv"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
+REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 
 if [[ ! -d "$VENV_DIR" ]]; then
   "$PYTHON_BIN" -m venv "$VENV_DIR"
 fi
 
-# Install exactly the locally locked dependencies before execution.
-"$VENV_DIR/bin/pip" install --require-hashes -r "$SCRIPT_DIR/requirements.txt"
+# Install exactly the locally locked dependencies before execution when needed.
+if [[ -f "$REQUIREMENTS_FILE" ]]; then
+  "$VENV_DIR/bin/pip" install --require-hashes -r "$REQUIREMENTS_FILE"
+fi
+
 exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 ```
 
@@ -121,7 +127,8 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 | Hardcoded file paths | Non-portable across machines | Use `argparse`, `pathlib`, or environment variables |
 | No argument parsing | Caller has to modify script source to change behavior | Use `argparse` for any configurable parameter |
 | Installing deps globally or without hash-locked version pinning | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins and hashes |
-| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to create the environment and run the tool | Generate a self-contained folder with `requirements.txt` and `run.sh` |
+| Adding an empty `requirements.txt` to a stdlib-only tool | Adds noise and implies missing setup steps | Omit `requirements.txt` when the script uses only the standard library |
+| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to create the environment and run the tool | Generate a self-contained folder with `run.sh` and add `requirements.txt` only when external packages are needed |
 
 ## Cross-references
 - **TechAIProjectPython** (`.github/skills/tech-ai-project-python/SKILL.md`): for structured application code.
