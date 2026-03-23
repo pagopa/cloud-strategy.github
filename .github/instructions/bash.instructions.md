@@ -35,6 +35,7 @@ set -euo pipefail
 - Use `getopts` for argument parsing.
 - Keep logic simple and avoid unnecessary complexity.
 - Validate inputs and handle errors gracefully.
+- When the Bash script is a launcher for a standalone Python tool, resolve its own directory, create or reuse a sibling `.venv`, install from the local hash-locked `requirements.txt` if it exists, and execute the sibling Python entry point.
 
 ## Validation
 - `bash -n <script>.sh`

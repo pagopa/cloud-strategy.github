@@ -6,6 +6,10 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-03-19
+- Updated `.github/copilot-instructions.md`, `.github/instructions/python.instructions.md`, and `.github/prompts/tech-ai-python.prompt.md` so Python tasks now standardize on human-readable hash-locked `requirements.txt` files for external dependencies, clarify that the lock file should capture the full dependency closure, and treat third-party libraries as a recommendation only when they materially simplify the code.
+- Updated `.github/prompts/tech-ai-python-script.prompt.md`, `.github/skills/tech-ai-script-python/SKILL.md`, and `.github/instructions/bash.instructions.md` so new standalone Python tools default to a self-contained folder with a `run.sh` launcher, add a local `requirements.txt` only when external packages are used, and bootstrap `.venv` plus locked dependency installation only when that file exists.
+
 ## 2026-03-13
 - Updated `.pre-commit-config.yaml` to pin `pre-commit-hooks` `v6.0.0`, keep `pre-commit-terraform` explicitly annotated at `v1.105.0`, and move `shellcheck-py` to `v0.11.0.1`, adding inline release comments for each pinned revision.
 - Updated `.github/workflows/github-validate-copilot-customizations.yml` to pin the runner to `ubuntu-24.04`, add `actions/setup-python` pinned by SHA for Python `3.14.3`, pin `pip` to `26.0.1`, and replace the unpinned `apt` shellcheck install with the pinned Python dependency set from `.github/tech-ai-requirements-dev.txt`.
