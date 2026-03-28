@@ -10,6 +10,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = REPO_ROOT / "INTERNAL_CONTRACT.md"
 SYNC_MODULE_PATH = REPO_ROOT / ".github" / "scripts" / "tech-ai-sync-copilot-configs.py"
+
+
 def load_sync_module():
     module_name = "tech_ai_sync_copilot_configs"
     spec = importlib.util.spec_from_file_location(module_name, SYNC_MODULE_PATH)
@@ -48,26 +50,81 @@ def build_conflict_target(path: Path) -> None:
 def parse_tested_cases() -> list[str]:
     content = CONTRACT_PATH.read_text(encoding="utf-8").splitlines()
     cases: list[str] = []
-    in_tested = False
     for line in content:
-        if line == "## Tested":
-            in_tested = True
-            continue
-        if in_tested and line.startswith("## ") and line != "## Tested":
-            break
-        if in_tested and line.startswith("#### "):
+        if line.startswith("#### "):
             cases.append(line.removeprefix("#### ").strip().strip("`"))
     return cases
 
 
+def parse_frontmatter_name(path: Path) -> str:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0] != "---":
+        return ""
+
+    for line in lines[1:]:
+        if line == "---":
+            break
+        if line.startswith("name:"):
+            return line.split(":", 1)[1].strip().strip('"')
+    return ""
+
+
+def canonical_resource_identifier(path: Path) -> str:
+    if path.name.endswith(".prompt.md"):
+        return path.name[: -len(".prompt.md")]
+    if path.name.endswith(".agent.md"):
+        return path.name[: -len(".agent.md")]
+    if path.name == "SKILL.md":
+        return path.parent.name
+    if path.name.endswith(".instructions.md"):
+        return path.name[: -len(".instructions.md")]
+    return ""
+
+
+def resource_paths() -> list[Path]:
+    paths = []
+    paths.extend(sorted((REPO_ROOT / ".github" / "prompts").glob("*.prompt.md")))
+    paths.extend(sorted((REPO_ROOT / ".github" / "agents").glob("*.agent.md")))
+    paths.extend(sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md")))
+    paths.extend(sorted((REPO_ROOT / ".github" / "instructions").glob("*.instructions.md")))
+    return paths
+
+
+def has_supported_origin_prefix(identifier: str) -> bool:
+    return identifier.startswith(("internal-", "local-", "claude-", "obra-", "terraform-"))
+
+
 def test_contract_cases_are_known() -> None:
     expected = {
+        "resource-governance-uses-supported-origin-naming",
+        "resource-governance-named-resources-declare-name",
         "sync-plan-detects-root-agents-conflict",
         "sync-plan-selects-python-assets",
         "sync-plan-preserves-manual-target-assets",
         "sync-apply-writes-manifest-and-agents",
     }
     assert set(parse_tested_cases()) == expected
+
+
+def test_resource_governance_uses_supported_origin_naming() -> None:
+    for path in resource_paths():
+        identifier = canonical_resource_identifier(path)
+        assert identifier, f"Missing canonical identifier for {path}"
+        assert has_supported_origin_prefix(identifier), f"Unsupported resource origin prefix for {path}: {identifier}"
+
+
+def test_resource_governance_named_resources_declare_name() -> None:
+    named_resource_paths = []
+    named_resource_paths.extend(sorted((REPO_ROOT / ".github" / "prompts").glob("*.prompt.md")))
+    named_resource_paths.extend(sorted((REPO_ROOT / ".github" / "agents").glob("*.agent.md")))
+    named_resource_paths.extend(sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md")))
+
+    for path in named_resource_paths:
+        identifier = canonical_resource_identifier(path)
+        actual_name = parse_frontmatter_name(path)
+        assert identifier, f"Missing canonical identifier for {path}"
+        assert actual_name, f"Missing explicit name for {path}"
+        assert actual_name == identifier, f"Resource name mismatch for {path}: {actual_name} != {identifier}"
 
 
 def test_sync_plan_detects_root_agents_conflict(tmp_path: Path) -> None:

@@ -10,7 +10,49 @@ Anything not listed here is intentionally out of scope for the Python contract r
 - Do not add tests that parse or enforce the internal structure of prompts, skills, agents, or instructions.
 - Use Python only for the contract runner and its fixtures.
 
+## Global Resource Rules
+
+These rules apply to all repository resources, including prompts, skills, instructions, agents, plugins, and similar assets.
+
+### Naming By Origin
+
+- External resource: `<short-repo>-<original-resource-name>`
+- Resource created locally in `cloud-strategy.github`: `internal-<resource-name>`
+- Resource created locally in another repository: `local-<resource-name>`
+
+### Naming Presence
+
+- Every resource must have a name.
+- The resource name must match the canonical identifier used for that resource.
+
 ## Contract Categories
+
+### Resource Governance
+
+#### `resource-governance-uses-supported-origin-naming`
+
+- Goal: ensure repository resources follow the naming convention defined by origin.
+- Scope:
+  - prompts
+  - skills
+  - agents
+  - instructions
+- Expected behavior:
+  - every repository-local resource uses `internal-*`
+  - every external imported resource uses `<short-repo>-*`
+  - every local cross-repository resource uses `local-*`
+
+#### `resource-governance-named-resources-declare-name`
+
+- Goal: ensure resources that support explicit naming metadata actually declare it.
+- Scope:
+  - prompts
+  - skills
+  - agents
+- Expected behavior:
+  - every resource has a non-empty canonical identifier
+  - every prompt, skill, and agent declares a non-empty `name:`
+  - every declared `name:` matches the canonical resource identifier
 
 ### Sync Planning
 
