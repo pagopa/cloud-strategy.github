@@ -220,7 +220,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/tech-ai-project-python/SKILL.md`
 - `.github/skills/tech-ai-script-bash/SKILL.md`
 - `.github/skills/tech-ai-script-python/SKILL.md`
-- `.github/skills/tech-ai-skill-creator/SKILL.md`
+- `.github/skills/skill-creator-techai-claude/SKILL.md`
 - `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/tech-ai-terraform/SKILL.md`
 

@@ -1,28 +1,11 @@
 ---
-name: TechAISkillCreator
-description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy. Always use this skill whenever skills authoring, skill creation, skill improvement, or skill evaluation is mentioned.
+name: skill-creator-techai-claude
+description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
 ---
 
 # Skill Creator
 
 A skill for creating new skills and iteratively improving them.
-
-## Phase 0: Read existing skills landscape
-
-Before creating or modifying a skill, scan the existing skill ecosystem in this repository. This helps you avoid duplicates, understand conventions, and build on what exists.
-
-1. **Scan `.github/skills/`** to list all skill folders and read each SKILL.md frontmatter (`name:` + `description:`).
-2. **Skim repo conventions**: `copilot-instructions.md` (global rules), `security-baseline.md` (security controls), `AGENTS.md` (routing and agent inventory).
-3. **Check for overlap**: If an existing skill already covers the domain, propose extending it instead of creating a new one.
-4. **Naming conventions** (this repo):
-   - Shared skill folders: `tech-ai-<name>/`, frontmatter name: PascalCase `TechAI*` (e.g., `TechAICodeReview`).
-   - Repo-internal skills: `internal-<name>/`, frontmatter name: `internal-*`.
-   - Don't overthink this — the `quick_validate.py` script catches naming issues.
-5. **Share the landscape overview** with the user before proceeding.
-
-This step takes 30 seconds and saves hours of rework.
-
----
 
 At a high level, the process of creating a skill goes like this:
 
@@ -80,21 +63,17 @@ Check available MCPs - if useful for research (searching docs, finding similar s
 
 Based on the user interview, fill in these components:
 
-- **name**: Skill identifier. This repo uses PascalCase `TechAI*` for shared skills (e.g., `TechAICodeReview`) and `internal-*` for repo-owned skills. The folder name is the kebab equivalent (`tech-ai-code-review/`).
-- **description**: When to trigger, what it does. This is the primary triggering mechanism — include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. Note: currently there's a tendency to "undertrigger" skills — to not use them when they'd be useful. To combat this, make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal data.", you might write "How to build a simple fast dashboard to display internal data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of data, even if they don't explicitly ask for a 'dashboard.'" Keep under 1024 characters.
+- **name**: Skill identifier
+- **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
 - **compatibility**: Required tools, dependencies (optional, rarely needed)
 - **the rest of the skill :)**
-
-**Repo conventions** (helpful, not blocking):
-- Content in English (user chat may be in other languages).
-- Run `python3 .github/skills/tech-ai-skill-creator/scripts/quick_validate.py <skill-dir>` to verify frontmatter before finalizing.
 
 ### Skill Writing Guide
 
 #### Anatomy of a Skill
 
 ```
-tech-ai-<name>/          (shared skill folder)
+skill-name/
 ├── SKILL.md (required)
 │   ├── YAML frontmatter (name, description required)
 │   └── Markdown instructions
@@ -504,11 +483,3 @@ Repeating one more time the core loop here for emphasis:
 Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" in your TodoList to make sure it happens.
 
 Good luck!
-
-## When to use
-
-Refer to the description in the frontmatter for trigger conditions.
-
-## Validation
-
-Follow the validation steps described in the skill workflow above.

@@ -61,14 +61,10 @@ def validate_skill(skill_path):
         return False, f"Name must be a string, got {type(name).__name__}"
     name = name.strip()
     if name:
-        # Accept two naming conventions:
-        # 1. kebab-case: lowercase with hyphens (e.g., tech-ai-skill-creator)
-        # 2. PascalCase with TechAI prefix (e.g., TechAICodeReview) — repo convention
-        is_kebab = bool(re.match(r'^[a-z0-9-]+$', name))
-        is_pascal = bool(re.match(r'^TechAI[A-Za-z0-9]+$', name))
-        if not is_kebab and not is_pascal:
-            return False, f"Name '{name}' must be kebab-case (e.g., tech-ai-my-skill) or PascalCase with TechAI prefix (e.g., TechAIMySkill)"
-        if is_kebab and (name.startswith('-') or name.endswith('-') or '--' in name):
+        # Check naming convention (kebab-case: lowercase with hyphens)
+        if not re.match(r'^[a-z0-9-]+$', name):
+            return False, f"Name '{name}' should be kebab-case (lowercase letters, digits, and hyphens only)"
+        if name.startswith('-') or name.endswith('-') or '--' in name:
             return False, f"Name '{name}' cannot start/end with hyphen or contain consecutive hyphens"
         # Check name length (max 64 characters per spec)
         if len(name) > 64:
