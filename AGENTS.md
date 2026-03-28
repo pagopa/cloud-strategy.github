@@ -206,36 +206,23 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Skills
 
-- `.github/skills/tech-ai-brainstorming/SKILL.md`
 - `.github/skills/tech-ai-cicd-workflow/SKILL.md`
 - `.github/skills/tech-ai-cloud-policy/SKILL.md`
 - `.github/skills/tech-ai-code-review/SKILL.md`
 - `.github/skills/tech-ai-composite-action/SKILL.md`
 - `.github/skills/tech-ai-data-registry/SKILL.md`
-- `.github/skills/tech-ai-dispatching-parallel-agents/SKILL.md`
+- `.github/skills/agent-development-techai-claude/SKILL.md`
 - `.github/skills/tech-ai-docker/SKILL.md`
-- `.github/skills/tech-ai-executing-plans/SKILL.md`
-- `.github/skills/tech-ai-finishing-dev-branch/SKILL.md`
-- `.github/skills/tech-ai-git-worktrees/SKILL.md`
 - `.github/skills/tech-ai-pair-architect/SKILL.md`
 - `.github/skills/tech-ai-pr-editor/SKILL.md`
 - `.github/skills/tech-ai-project-java/SKILL.md`
 - `.github/skills/tech-ai-project-nodejs/SKILL.md`
 - `.github/skills/tech-ai-project-python/SKILL.md`
-- `.github/skills/tech-ai-receiving-code-review/SKILL.md`
-- `.github/skills/tech-ai-requesting-code-review/SKILL.md`
 - `.github/skills/tech-ai-script-bash/SKILL.md`
 - `.github/skills/tech-ai-script-python/SKILL.md`
 - `.github/skills/tech-ai-skill-creator/SKILL.md`
-- `.github/skills/tech-ai-subagent-driven-dev/SKILL.md`
 - `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`
-- `.github/skills/tech-ai-systematic-debugging/SKILL.md`
 - `.github/skills/tech-ai-terraform/SKILL.md`
-- `.github/skills/tech-ai-test-driven-dev/SKILL.md`
-- `.github/skills/tech-ai-using-superpowers/SKILL.md`
-- `.github/skills/tech-ai-verification/SKILL.md`
-- `.github/skills/tech-ai-writing-plans/SKILL.md`
-- `.github/skills/tech-ai-writing-skills/SKILL.md`
 
 ### Agents
 
