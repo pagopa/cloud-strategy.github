@@ -1,6 +1,6 @@
 # Bash Anti-Patterns
 
-Reference: `instructions/bash.instructions.md`
+Reference: `instructions/internal-bash.instructions.md`
 
 ## Critical
 | ID | Anti-pattern | Why |

@@ -1,6 +1,6 @@
 # Python Anti-Patterns
 
-Reference: `instructions/python.instructions.md`
+Reference: `instructions/internal-python.instructions.md`
 
 ## Critical
 | ID | Anti-pattern | Why |

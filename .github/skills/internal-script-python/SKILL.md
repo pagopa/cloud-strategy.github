@@ -10,9 +10,9 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Existing Python scripts that need updates.
 - CLI tools, one-off automation, data processing.
 
-## Boundary with TechAIProjectPython
+## Boundary with internal-project-python
 - **This skill**: standalone scripts (`scripts/`, CLI tools, automation). Single-file or small utility scope.
-- **TechAIProjectPython**: application components (services, use cases, adapters) inside a structured project with package layout.
+- **internal-project-python**: application components (services, use cases, adapters) inside a structured project with package layout.
 
 ## Mandatory rules
 - Module docstring must include purpose and usage examples.
@@ -131,8 +131,8 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 | Shipping a loose `.py` file with undocumented setup steps | Users must guess how to create the environment and run the tool | Generate a self-contained folder with `run.sh` and add `requirements.txt` only when external packages are needed |
 
 ## Cross-references
-- **TechAIProjectPython** (`.github/skills/tech-ai-project-python/SKILL.md`): for structured application code.
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Python code (see `references/anti-patterns-python.md`).
+- **internal-project-python** (`.github/skills/internal-project-python/SKILL.md`): for structured application code.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `references/anti-patterns-python.md`).
 
 ## Validation
 - `python -m py_compile <script_name>.py` (syntax check)

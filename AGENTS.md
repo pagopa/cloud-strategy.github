@@ -7,13 +7,12 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use GitHub Copilot terminology in repository-facing content.
 - Do not mention internal runtime names in repository artifacts.
 - Treat prompt frontmatter `name:` as the canonical command identifier.
-- Canonical repository-owned prompt, agent, and instruction filenames should use the `tech-ai-` prefix when introduced or renamed.
-- Canonical prompt, skill, and agent `name:` values should use the `TechAI` prefix.
-- Repository-owned prompt, skill, and agent filenames in consumer repositories should use the `internal-` prefix.
-- Repository-owned prompt, skill, and agent `name:` values in consumer repositories should also use the `internal-` prefix.
+- External resources must use `<short-repo>-<original-resource-name>` in filenames and `name:` values.
+- Resources created locally in `cloud-strategy.github` must use the `internal-` prefix in filenames and `name:` values.
+- Resources created locally in other repositories must use the `local-` prefix in filenames and `name:` values.
 - Reserve the `TechAIGlobal` prefix only for repo-only agents that encode standards for this global configuration repository.
 - The canonical project-owned `AGENTS.md` file must live in repository root as `AGENTS.md`.
-- Keep legacy aliases only when required for backward compatibility, and prefer canonical `tech-ai-*` assets in docs, examples, and sync selection.
+- Keep legacy aliases only when required for backward compatibility.
 
 ## Decision Priority
 
@@ -30,26 +29,26 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### When to use each agent
 
 #### Specialist Reviewers (per-language, nit-level review)
-- Use `TechAIBashReviewer` for exhaustive, nit-level Bash script reviews.
-- Use `TechAIJavaReviewer` for exhaustive, nit-level Java code reviews.
-- Use `TechAINodejsReviewer` for exhaustive, nit-level Node.js code reviews.
-- Use `TechAIPythonReviewer` for exhaustive, nit-level Python code reviews.
-- Use `TechAITerraformReviewer` for exhaustive, nit-level Terraform code reviews.
-- Use `TechAISecurityReviewer` for security-focused review across all languages.
+- Use `internal-bash-reviewer` for exhaustive, nit-level Bash script reviews.
+- Use `internal-java-reviewer` for exhaustive, nit-level Java code reviews.
+- Use `internal-nodejs-reviewer` for exhaustive, nit-level Node.js code reviews.
+- Use `internal-python-reviewer` for exhaustive, nit-level Python code reviews.
+- Use `internal-terraform-reviewer` for exhaustive, nit-level Terraform code reviews.
+- Use `internal-security-reviewer` for security-focused review across all languages.
 
 #### Planning and Architecture
-- Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.
-- Use `TechAIPairArchitectAnalysis` prompt with the `TechAIPairArchitect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
+- Use `internal-planner` for ambiguous scope, tradeoff analysis, or multi-step design.
+- Use `internal-pair-architect-analysis` prompt with the `internal-pair-architect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
 
 #### Editing and Delivery
-- Use `TechAIPREditor` for pull request body generation from diffs.
+- Use `internal-pr-editor` for pull request body generation from diffs.
 
 #### Repository Configuration (source-only, not synced to consumers)
-- Use `TechAISyncGlobalCopilotConfigsIntoRepo` for cross-repository Copilot-core alignment and source or target redundancy audits.
+- Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
 
 ### Anti-patterns
 
-- Do not use `TechAIPlanner` for trivial single-file changes with clear requirements; work directly.
+- Do not use `internal-planner` for trivial single-file changes with clear requirements; work directly.
 - Do not use a specialist reviewer outside its language domain; pick the matching one.
 
 
@@ -101,40 +100,40 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Default instruction routing
 
-- `**/*.py` -> `python.instructions.md`
-- `**/Dockerfile,**/Dockerfile.*,**/.dockerignore,**/docker-compose*.yml,**/compose*.yml` -> `docker.instructions.md`
-- `**/*.sh` -> `bash.instructions.md`
-- `**/*.tf` -> `terraform.instructions.md`
-- `**/*.java` -> `java.instructions.md`
-- `**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx` -> `nodejs.instructions.md`
-- `**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts` -> `lambda.instructions.md`
-- `**/*.yml,**/*.yaml` -> `yaml.instructions.md`
-- `**/*.md` -> `markdown.instructions.md`
-- `**/Makefile,**/*.mk` -> `makefile.instructions.md`
-- `**/workflows/**` -> `github-actions.instructions.md`
-- `**/actions/**/action.y*ml` -> `github-action-composite.instructions.md`
-- `**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json` -> `json.instructions.md`
+- `**/*.py` -> `internal-python.instructions.md`
+- `**/Dockerfile,**/Dockerfile.*,**/.dockerignore,**/docker-compose*.yml,**/compose*.yml` -> `internal-docker.instructions.md`
+- `**/*.sh` -> `internal-bash.instructions.md`
+- `**/*.tf` -> `internal-terraform.instructions.md`
+- `**/*.java` -> `internal-java.instructions.md`
+- `**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx` -> `internal-nodejs.instructions.md`
+- `**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts` -> `internal-lambda.instructions.md`
+- `**/*.yml,**/*.yaml` -> `internal-yaml.instructions.md`
+- `**/*.md` -> `internal-markdown.instructions.md`
+- `**/Makefile,**/*.mk` -> `internal-makefile.instructions.md`
+- `**/workflows/**` -> `internal-github-actions.instructions.md`
+- `**/actions/**/action.y*ml` -> `internal-github-action-composite.instructions.md`
+- `**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json` -> `internal-json.instructions.md`
 
 ### Preferred prompts
 
-- `TechAICodeReview`: exhaustive, nit-level code review.
-- `TechAIGitHubAction`: GitHub Actions workflow authoring.
-- `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
-- `TechAIPREditor`: pull request body generation.
-- `TechAIAddUnitTests`: test authoring and improvement.
-- `TechAITerraform`: Terraform feature or module authoring.
-- `TechAIPairArchitectAnalysis`: deep change-impact analysis with health score, risk matrix, and devil's advocate mode.
+- `internal-code-review`: exhaustive, nit-level code review.
+- `internal-github-action`: GitHub Actions workflow authoring.
+- `internal-sync-global-copilot-configs-into-repo`: cross-repository alignment and redundancy analysis.
+- `internal-pr-editor`: pull request body generation.
+- `internal-add-unit-tests`: test authoring and improvement.
+- `internal-terraform`: Terraform feature or module authoring.
+- `internal-pair-architect-analysis`: deep change-impact analysis with health score, risk matrix, and devil's advocate mode.
 
 ### Preferred skills
 
 #### Domain-Specific Skills
-- `TechAICodeReview`: strict review workflow and anti-pattern catalog.
-- `TechAICICDWorkflow`: CI or CD workflow design patterns.
-- `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
-- `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
-- `TechAICloudPolicy`: reusable cloud policy authoring patterns.
-- `TechAITerraform`: unified Terraform skill for features and modules.
-- `TechAIPairArchitect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
+- `internal-code-review`: strict review workflow and anti-pattern catalog.
+- `internal-cicd-workflow`: CI or CD workflow design patterns.
+- `internal-sync-global-copilot-configs-into-repo`: deterministic sync planning and reporting.
+- `internal-pr-editor`: PR body templates and diff-to-body mapping patterns.
+- `internal-cloud-policy`: reusable cloud policy authoring patterns.
+- `internal-terraform`: unified Terraform skill for features and modules.
+- `internal-pair-architect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
 
 #### Workflow Skills (obra/superpowers)
 - `TechAIBrainstorming`: structured creative exploration before implementation.
@@ -164,45 +163,45 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Instructions
 
-- `.github/instructions/bash.instructions.md`
-- `.github/instructions/docker.instructions.md`
-- `.github/instructions/github-action-composite.instructions.md`
-- `.github/instructions/github-actions.instructions.md`
-- `.github/instructions/java.instructions.md`
-- `.github/instructions/json.instructions.md`
-- `.github/instructions/lambda.instructions.md`
-- `.github/instructions/makefile.instructions.md`
-- `.github/instructions/markdown.instructions.md`
-- `.github/instructions/nodejs.instructions.md`
-- `.github/instructions/python.instructions.md`
-- `.github/instructions/terraform-aws.instructions.md`
-- `.github/instructions/terraform-azure.instructions.md`
-- `.github/instructions/terraform-gcp.instructions.md`
-- `.github/instructions/terraform.instructions.md`
-- `.github/instructions/yaml.instructions.md`
+- `.github/instructions/internal-bash.instructions.md`
+- `.github/instructions/internal-docker.instructions.md`
+- `.github/instructions/internal-github-action-composite.instructions.md`
+- `.github/instructions/internal-github-actions.instructions.md`
+- `.github/instructions/internal-java.instructions.md`
+- `.github/instructions/internal-json.instructions.md`
+- `.github/instructions/internal-lambda.instructions.md`
+- `.github/instructions/internal-makefile.instructions.md`
+- `.github/instructions/internal-markdown.instructions.md`
+- `.github/instructions/internal-nodejs.instructions.md`
+- `.github/instructions/internal-python.instructions.md`
+- `.github/instructions/internal-terraform-aws.instructions.md`
+- `.github/instructions/internal-terraform-azure.instructions.md`
+- `.github/instructions/internal-terraform-gcp.instructions.md`
+- `.github/instructions/internal-terraform.instructions.md`
+- `.github/instructions/internal-yaml.instructions.md`
 
 ### Prompts
 
-- `.github/prompts/tech-ai-add-platform.prompt.md`
-- `.github/prompts/tech-ai-add-report-script.prompt.md`
-- `.github/prompts/tech-ai-add-unit-tests.prompt.md`
-- `.github/prompts/tech-ai-bash-script.prompt.md`
-- `.github/prompts/tech-ai-cicd-workflow.prompt.md`
-- `.github/prompts/tech-ai-cloud-policy.prompt.md`
-- `.github/prompts/tech-ai-code-review.prompt.md`
-- `.github/prompts/tech-ai-data-registry.prompt.md`
-- `.github/prompts/tech-ai-docker.prompt.md`
-- `.github/prompts/tech-ai-github-action.prompt.md`
-- `.github/prompts/tech-ai-github-composite-action.prompt.md`
-- `.github/prompts/tech-ai-java.prompt.md`
-- `.github/prompts/tech-ai-nodejs.prompt.md`
-- `.github/prompts/tech-ai-pair-architect-analysis.prompt.md`
-- `.github/prompts/tech-ai-pr-editor.prompt.md`
-- `.github/prompts/tech-ai-python-script.prompt.md`
-- `.github/prompts/tech-ai-python.prompt.md`
-- `.github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md`
-- `.github/prompts/tech-ai-terraform-module.prompt.md`
-- `.github/prompts/tech-ai-terraform.prompt.md`
+- `.github/prompts/internal-add-platform.prompt.md`
+- `.github/prompts/internal-add-report-script.prompt.md`
+- `.github/prompts/internal-add-unit-tests.prompt.md`
+- `.github/prompts/internal-bash-script.prompt.md`
+- `.github/prompts/internal-cicd-workflow.prompt.md`
+- `.github/prompts/internal-cloud-policy.prompt.md`
+- `.github/prompts/internal-code-review.prompt.md`
+- `.github/prompts/internal-data-registry.prompt.md`
+- `.github/prompts/internal-docker.prompt.md`
+- `.github/prompts/internal-github-action.prompt.md`
+- `.github/prompts/internal-github-composite-action.prompt.md`
+- `.github/prompts/internal-java.prompt.md`
+- `.github/prompts/internal-nodejs.prompt.md`
+- `.github/prompts/internal-pair-architect-analysis.prompt.md`
+- `.github/prompts/internal-pr-editor.prompt.md`
+- `.github/prompts/internal-python-script.prompt.md`
+- `.github/prompts/internal-python.prompt.md`
+- `.github/prompts/internal-sync-global-copilot-configs-into-repo.prompt.md`
+- `.github/prompts/internal-terraform-module.prompt.md`
+- `.github/prompts/internal-terraform.prompt.md`
 
 ### Skills
 
@@ -211,7 +210,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-composite-action/SKILL.md`
 - `.github/skills/internal-data-registry/SKILL.md`
-- `.github/skills/claude-agent-development-techai/SKILL.md`
+- `.github/skills/claude-agent-development/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-pair-architect/SKILL.md`
 - `.github/skills/internal-pr-editor/SKILL.md`
@@ -220,18 +219,19 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
-- `.github/skills/claude-skill-creator-techai/SKILL.md`
+- `.github/skills/claude-skill-creator/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 
 ### Agents
 
-- `.github/agents/tech-ai-bash-reviewer.agent.md`
-- `.github/agents/tech-ai-java-reviewer.agent.md`
-- `.github/agents/tech-ai-nodejs-reviewer.agent.md`
-- `.github/agents/tech-ai-planner.agent.md`
-- `.github/agents/tech-ai-pr-editor.agent.md`
-- `.github/agents/tech-ai-python-reviewer.agent.md`
-- `.github/agents/tech-ai-security-reviewer.agent.md`
-- `.github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`
-- `.github/agents/tech-ai-terraform-reviewer.agent.md`
+- `.github/agents/internal-bash-reviewer.agent.md`
+- `.github/agents/internal-agent-sync.agent.md`
+- `.github/agents/internal-java-reviewer.agent.md`
+- `.github/agents/internal-nodejs-reviewer.agent.md`
+- `.github/agents/internal-planner.agent.md`
+- `.github/agents/internal-pr-editor.agent.md`
+- `.github/agents/internal-python-reviewer.agent.md`
+- `.github/agents/internal-security-reviewer.agent.md`
+- `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
+- `.github/agents/internal-terraform-reviewer.agent.md`

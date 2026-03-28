@@ -61,22 +61,22 @@ def build_source_audit_fixture(path: Path) -> None:
                 "# AGENTS.md - fixture",
                 "",
                 "## Preferred prompts",
-                "- `prompts/tech-ai-python.prompt.md`",
+                "- `prompts/internal-python.prompt.md`",
                 "",
                 "## Repository Inventory (Auto-generated)",
                 "",
                 "### Prompts",
-                "- `.github/prompts/tech-ai-python.prompt.md`",
+                "- `.github/prompts/internal-python.prompt.md`",
                 "",
             ]
         ),
     )
     write_file(
-        path / ".github" / "prompts" / "tech-ai-python.prompt.md",
+        path / ".github" / "prompts" / "internal-python.prompt.md",
         "\n".join(
             [
                 "---",
-                "name: TechAIPython",
+                "name: internal-python",
                 "description: canonical",
                 "agent: agent",
                 "argument-hint: target=python",
@@ -109,11 +109,11 @@ def build_source_audit_fixture(path: Path) -> None:
         "3. Report redundant aliases before rendering AGENTS inventory.",
     ]
     write_file(
-        path / ".github" / "agents" / "tech-ai-sync-global-copilot-configs-into-repo.agent.md",
+        path / ".github" / "agents" / "internal-sync-global-copilot-configs-into-repo.agent.md",
         "\n".join(
             [
                 "---",
-                "name: TechAISyncGlobalCopilotConfigsIntoRepo",
+                "name: internal-sync-global-copilot-configs-into-repo",
                 "description: sync agent",
                 'tools: ["search"]',
                 "---",
@@ -127,11 +127,11 @@ def build_source_audit_fixture(path: Path) -> None:
         ),
     )
     write_file(
-        path / ".github" / "skills" / "tech-ai-sync-global-copilot-configs-into-repo" / "SKILL.md",
+        path / ".github" / "skills" / "internal-sync-global-copilot-configs-into-repo" / "SKILL.md",
         "\n".join(
             [
                 "---",
-                "name: TechAISyncGlobalCopilotConfigsIntoRepo",
+                "name: internal-sync-global-copilot-configs-into-repo",
                 "description: sync skill",
                 "---",
                 "",
@@ -144,11 +144,11 @@ def build_source_audit_fixture(path: Path) -> None:
         ),
     )
     write_file(
-        path / ".github" / "prompts" / "tech-ai-sync-global-copilot-configs-into-repo.prompt.md",
+        path / ".github" / "prompts" / "internal-sync-global-copilot-configs-into-repo.prompt.md",
         "\n".join(
             [
                 "---",
-                "name: TechAISyncGlobalCopilotConfigsIntoRepo",
+                "name: internal-sync-global-copilot-configs-into-repo",
                 "description: sync prompt",
                 "agent: agent",
                 "argument-hint: target_repo=<path>",
@@ -309,33 +309,17 @@ def test_build_plan_reports_unmanaged_target_assets_and_legacy_aliases_outside_s
     agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
 
     assert ".github/prompts/add-external-user.prompt.md" in plan.analysis.target_only_assets["prompts"]
+    assert ".github/prompts/cs-data-registry.prompt.md" in plan.analysis.target_only_assets["prompts"]
+    assert ".github/skills/data-registry/SKILL.md" in plan.analysis.target_only_assets["skills"]
     assert ".github/skills/internal-registry/SKILL.md" in plan.analysis.target_only_assets["skills"]
-    assert ".github/prompts/cs-data-registry.prompt.md" not in plan.analysis.target_only_assets["prompts"]
-    assert ".github/skills/data-registry/SKILL.md" not in plan.analysis.target_only_assets["skills"]
-
-    assert any(
-        asset.canonical_target_path == ".github/prompts/tech-ai-data-registry.prompt.md"
-        and asset.issue_type == "legacy_alias_only"
-        for asset in plan.redundant_assets
-    )
-    assert any(
-        asset.canonical_target_path == ".github/skills/tech-ai-data-registry/SKILL.md"
-        and asset.issue_type == "legacy_alias_only"
-        for asset in plan.redundant_assets
-    )
 
     assert "validation" in issue_by_path[".github/prompts/add-external-user.prompt.md"].issue_types
-    assert "internal_naming" in issue_by_path[".github/prompts/add-external-user.prompt.md"].issue_types
     assert "Missing frontmatter key `name`." in issue_by_path[".github/prompts/add-external-user.prompt.md"].details
-    assert (
-        "Repository-internal prompt filename must start with `internal-`."
-        in issue_by_path[".github/prompts/add-external-user.prompt.md"].details
+    assert any(
+        "Repository-owned prompt filename must use a supported origin prefix" in detail
+        for detail in issue_by_path[".github/prompts/add-external-user.prompt.md"].details
     )
-    assert "legacy_alias" in issue_by_path[".github/prompts/cs-data-registry.prompt.md"].issue_types
-    assert (
-        issue_by_path[".github/prompts/cs-data-registry.prompt.md"].canonical_source_path
-        == ".github/prompts/tech-ai-data-registry.prompt.md"
-    )
+    assert ".github/prompts/cs-data-registry.prompt.md" in issue_by_path
     assert ".github/skills/internal-registry/SKILL.md" not in issue_by_path
 
     assert ".github/prompts/add-external-user.prompt.md" in agents_file.desired_content
@@ -400,6 +384,84 @@ def test_build_plan_accepts_internal_prefixed_repo_owned_assets(tmp_path: Path) 
     assert ".github/skills/internal-entra-access/SKILL.md" not in issue_paths
 
 
+def test_build_plan_accepts_supported_external_and_local_prefixed_repo_owned_assets(tmp_path: Path) -> None:
+    target_root = tmp_path / "origin-prefixed-assets"
+    build_python_service_target(target_root)
+    write_file(
+        target_root / ".github" / "prompts" / "claude-docx.prompt.md",
+        "\n".join(
+            [
+                "---",
+                "name: claude-docx",
+                "description: Use Anthropic docx workflow conventions.",
+                "agent: agent",
+                "argument-hint: task=<summary>",
+                "---",
+                "",
+                "# Claude DOCX",
+                "",
+                "## Instructions",
+                "1. Use `.github/skills/claude-docx/SKILL.md`.",
+                "",
+                "## Validation",
+                "- Validate the synchronized skill metadata.",
+                "",
+                "## Minimal example",
+                "- Input: `task=sync the docx skill`",
+                "",
+            ]
+        ),
+    )
+    write_file(
+        target_root / ".github" / "skills" / "claude-docx" / "SKILL.md",
+        "\n".join(
+            [
+                "---",
+                "name: claude-docx",
+                "description: Synced from the Claude skills repository.",
+                "---",
+                "",
+                "# Claude DOCX",
+                "",
+                "## When to use",
+                "- Manage the synced Claude docx skill.",
+                "",
+                "## Validation",
+                "- Validate synchronized upstream metadata.",
+                "",
+            ]
+        ),
+    )
+    write_file(
+        target_root / ".github" / "agents" / "local-agent-sync.agent.md",
+        "\n".join(
+            [
+                "---",
+                "name: local-agent-sync",
+                "description: Handle repo-local synchronization workflows.",
+                'tools: ["search"]',
+                "---",
+                "",
+                "# Local Agent Sync",
+                "",
+                "## Objective",
+                "Keep local synchronization workflows aligned.",
+                "",
+                "## Restrictions",
+                "- Keep repository-facing text in English.",
+                "",
+            ]
+        ),
+    )
+
+    plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
+
+    issue_paths = {issue.target_relative_path for issue in plan.target_asset_issues}
+    assert ".github/prompts/claude-docx.prompt.md" not in issue_paths
+    assert ".github/skills/claude-docx/SKILL.md" not in issue_paths
+    assert ".github/agents/local-agent-sync.agent.md" not in issue_paths
+
+
 def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:
     target_root = tmp_path / "fresh-target"
     write_file(target_root / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
@@ -425,8 +487,8 @@ def test_apply_plan_writes_manifest_and_managed_files(tmp_path: Path) -> None:
 def test_apply_plan_deletes_manifest_managed_files_removed_from_baseline(tmp_path: Path) -> None:
     target_root = tmp_path / "legacy-managed-target"
     build_python_service_target(target_root)
-    legacy_prompt_relative_path = ".github/prompts/tech-ai-pr-description.prompt.md"
-    legacy_prompt_content = "---\nname: TechAIPRDescription\n---\n"
+    legacy_prompt_relative_path = ".github/prompts/internal-pr-description.prompt.md"
+    legacy_prompt_content = "---\nname: internal-pr-description\n---\n"
     write_file(target_root / legacy_prompt_relative_path, legacy_prompt_content)
     write_file(
         target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json",
@@ -456,12 +518,12 @@ def test_apply_plan_deletes_manifest_managed_files_removed_from_baseline(tmp_pat
     MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
 
     assert not (target_root / legacy_prompt_relative_path).exists()
-    assert (target_root / ".github" / "prompts" / "tech-ai-pr-editor.prompt.md").is_file()
+    assert (target_root / ".github" / "prompts" / "internal-pr-editor.prompt.md").is_file()
     manifest = json.loads(
         (target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json").read_text(encoding="utf-8")
     )
     assert legacy_prompt_relative_path not in manifest["managed_files"]
-    assert ".github/prompts/tech-ai-pr-editor.prompt.md" in manifest["managed_files"]
+    assert ".github/prompts/internal-pr-editor.prompt.md" in manifest["managed_files"]
 
 
 def test_rendered_agents_markdown_keeps_github_copilot_wording(tmp_path: Path) -> None:
@@ -515,7 +577,7 @@ def test_build_plan_detects_backend_python_profile_and_python_validation_command
     assert plan.analysis.profile_name == "backend-python"
     assert "python -m compileall <changed_python_paths>" in plan.selection.validation_commands
     assert "pytest" not in plan.selection.validation_commands
-    assert ".github/prompts/tech-ai-python.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/internal-python.prompt.md" in plan.selection.prompts
 
 
 def test_build_plan_reports_missing_vscode_pr_description_setting(tmp_path: Path) -> None:
@@ -590,9 +652,9 @@ def test_build_plan_prefers_tech_ai_script_prompts_to_reduce_prompt_duplication(
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/prompts/tech-ai-bash-script.prompt.md" in plan.selection.prompts
-    assert ".github/prompts/tech-ai-python-script.prompt.md" in plan.selection.prompts
-    assert ".github/prompts/tech-ai-add-unit-tests.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/internal-bash-script.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/internal-python-script.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/internal-add-unit-tests.prompt.md" in plan.selection.prompts
     assert ".github/prompts/script-bash.prompt.md" not in plan.selection.prompts
     assert ".github/prompts/script-python.prompt.md" not in plan.selection.prompts
 
@@ -608,7 +670,7 @@ def test_build_plan_flags_legacy_prompt_aliases_before_creating_canonical_duplic
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
     prompt_action = next(
-        action for action in plan.actions if action.target_relative_path == ".github/prompts/tech-ai-python.prompt.md"
+        action for action in plan.actions if action.target_relative_path == ".github/prompts/internal-python.prompt.md"
     )
     agents_action = next(action for action in plan.actions if action.target_relative_path == "AGENTS.md")
 
@@ -617,7 +679,7 @@ def test_build_plan_flags_legacy_prompt_aliases_before_creating_canonical_duplic
     assert agents_action.status == "conflict"
     assert ".github/prompts/cs-python.prompt.md" not in plan.analysis.target_only_assets["prompts"]
     assert any(
-        asset.canonical_target_path == ".github/prompts/tech-ai-python.prompt.md"
+        asset.canonical_target_path == ".github/prompts/internal-python.prompt.md"
         and asset.issue_type == "sync_would_duplicate"
         for asset in plan.redundant_assets
     )
@@ -627,8 +689,8 @@ def test_build_plan_flags_existing_canonical_and_legacy_agent_aliases_as_redunda
     target_root = tmp_path / "duplicate-agents"
     build_python_service_target(target_root)
     write_file(
-        target_root / ".github" / "agents" / "tech-ai-planner.agent.md",
-        (REPO_ROOT / ".github" / "agents" / "tech-ai-planner.agent.md").read_text(encoding="utf-8"),
+        target_root / ".github" / "agents" / "internal-planner.agent.md",
+        (REPO_ROOT / ".github" / "agents" / "internal-planner.agent.md").read_text(encoding="utf-8"),
     )
     write_file(
         target_root / ".github" / "agents" / "planner.agent.md",
@@ -638,13 +700,13 @@ def test_build_plan_flags_existing_canonical_and_legacy_agent_aliases_as_redunda
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
     action = next(
-        action for action in plan.actions if action.target_relative_path == ".github/agents/tech-ai-planner.agent.md"
+        action for action in plan.actions if action.target_relative_path == ".github/agents/internal-planner.agent.md"
     )
 
     assert action.status == "conflict"
     assert ".github/agents/planner.agent.md" in action.reason
     assert any(
-        asset.canonical_target_path == ".github/agents/tech-ai-planner.agent.md"
+        asset.canonical_target_path == ".github/agents/internal-planner.agent.md"
         and asset.issue_type == "existing_redundancy"
         for asset in plan.redundant_assets
     )
@@ -656,17 +718,17 @@ def test_audit_source_configuration_detects_legacy_aliases_role_overlaps_and_age
 
     audit = MODULE.audit_source_configuration(source_root)
 
-    assert any(alias.canonical_path == ".github/prompts/tech-ai-python.prompt.md" for alias in audit.legacy_aliases)
+    assert any(alias.canonical_path == ".github/prompts/internal-python.prompt.md" for alias in audit.legacy_aliases)
     assert any(overlap.family == "sync-global-copilot-configs-into-repo" for overlap in audit.role_overlaps)
-    assert any(repeat.reference == ".github/prompts/tech-ai-python.prompt.md" for repeat in audit.agents_md_repeats)
+    assert any(repeat.reference == ".github/prompts/internal-python.prompt.md" for repeat in audit.agents_md_repeats)
 
 
 def test_audit_source_configuration_does_not_flag_canonical_only_assets(tmp_path: Path) -> None:
     source_root = tmp_path / "canonical-only"
     write_file(source_root / "AGENTS.md", "# AGENTS.md - fixture\n")
     write_file(
-        source_root / ".github" / "prompts" / "tech-ai-python.prompt.md",
-        "---\nname: TechAIPython\ndescription: canonical\nagent: agent\nargument-hint: target=python\n---\n",
+        source_root / ".github" / "prompts" / "internal-python.prompt.md",
+        "---\nname: internal-python\ndescription: canonical\nagent: agent\nargument-hint: target=python\n---\n",
     )
 
     audit = MODULE.audit_source_configuration(source_root)
@@ -682,7 +744,7 @@ def test_build_plan_excludes_repo_only_global_customization_agents_from_consumer
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md" not in plan.selection.agents
+    assert ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md" not in plan.selection.agents
 
 
 def test_build_plan_includes_source_preferred_assets_and_portable_agents(tmp_path: Path) -> None:
@@ -692,8 +754,8 @@ def test_build_plan_includes_source_preferred_assets_and_portable_agents(tmp_pat
     plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
     agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
 
-    assert ".github/prompts/tech-ai-pair-architect-analysis.prompt.md" in plan.selection.prompts
-    assert ".github/skills/tech-ai-pair-architect/SKILL.md" in plan.selection.skills
+    assert ".github/prompts/internal-pair-architect-analysis.prompt.md" in plan.selection.prompts
+    assert ".github/skills/internal-pair-architect/SKILL.md" in plan.selection.skills
     assert "tech-ai-pair-architect" in agents_file.desired_content
 
 
@@ -704,10 +766,10 @@ def test_build_plan_uses_pr_editor_prompt_for_targets_with_pr_templates(tmp_path
     plan, planned_files = MODULE.build_plan(REPO_ROOT, target_root)
     agents_file = next(item for item in planned_files if item.target_relative_path == "AGENTS.md")
 
-    assert ".github/prompts/tech-ai-pr-editor.prompt.md" in plan.selection.prompts
-    assert ".github/prompts/tech-ai-pr-description.prompt.md" not in plan.selection.prompts
-    assert "`TechAIPREditor`" in agents_file.desired_content
-    assert "`TechAIPRDescription`" not in agents_file.desired_content
+    assert ".github/prompts/internal-pr-editor.prompt.md" in plan.selection.prompts
+    assert ".github/prompts/internal-pr-description.prompt.md" not in plan.selection.prompts
+    assert "`internal-pr-editor`" in agents_file.desired_content
+    assert "`internal-pr-description`" not in agents_file.desired_content
 
 
 def test_build_plan_detects_instruction_apply_to_patterns_without_profile_changes(tmp_path: Path) -> None:
@@ -717,7 +779,7 @@ def test_build_plan_detects_instruction_apply_to_patterns_without_profile_change
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/instructions/lambda.instructions.md" in plan.selection.instructions
+    assert ".github/instructions/internal-lambda.instructions.md" in plan.selection.instructions
 
 
 def test_build_plan_reports_only_remaining_unsupported_stacks_when_docker_is_supported(tmp_path: Path) -> None:
@@ -755,8 +817,8 @@ def test_build_plan_detects_composite_actions_under_workflows_tree(tmp_path: Pat
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
     assert "composite-action" in plan.analysis.stacks
-    assert ".github/instructions/github-action-composite.instructions.md" in plan.selection.instructions
-    assert ".github/prompts/tech-ai-github-composite-action.prompt.md" in plan.selection.prompts
+    assert ".github/instructions/internal-github-action-composite.instructions.md" in plan.selection.instructions
+    assert ".github/prompts/internal-github-composite-action.prompt.md" in plan.selection.prompts
 
 
 def test_build_plan_adds_data_registry_assets_for_json_heavy_repositories(tmp_path: Path) -> None:
@@ -767,8 +829,8 @@ def test_build_plan_adds_data_registry_assets_for_json_heavy_repositories(tmp_pa
 
     plan, _planned_files = MODULE.build_plan(REPO_ROOT, target_root)
 
-    assert ".github/prompts/tech-ai-data-registry.prompt.md" in plan.selection.prompts
-    assert ".github/skills/tech-ai-data-registry/SKILL.md" in plan.selection.skills
+    assert ".github/prompts/internal-data-registry.prompt.md" in plan.selection.prompts
+    assert ".github/skills/internal-data-registry/SKILL.md" in plan.selection.skills
 
 
 def test_rendered_agents_markdown_uses_explicit_github_paths_and_table_routing(tmp_path: Path) -> None:
@@ -781,8 +843,8 @@ def test_rendered_agents_markdown_uses_explicit_github_paths_and_table_routing(t
     assert "Apply repository non-negotiables from `.github/copilot-instructions.md`." in agents_file.desired_content
     assert "| Pattern | Instruction |" in agents_file.desired_content
     assert "Apply all non-negotiables from `.github/copilot-instructions.md` plus:" in agents_file.desired_content
-    assert "- `TechAIAddUnitTests`" in agents_file.desired_content
-    assert "- `TechAICICDWorkflow`" in agents_file.desired_content
+    assert "- `internal-add-unit-tests`" in agents_file.desired_content
+    assert "- `internal-cicd-workflow`" in agents_file.desired_content
     assert ": Add or improve unit tests for Python code" not in agents_file.desired_content
 
 
@@ -820,7 +882,7 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
         "---\nagent: edit\ndescription: invalid custom prompt\n---\n# Add External User\n\n## Instructions\n- Update registry.\n",
     )
 
-    report_file = tmp_path / "tech-ai-sync-report.json"
+    report_file = tmp_path / "internal-sync-report.json"
     result = MODULE.main(
         [
             "--target",
@@ -836,9 +898,9 @@ def test_main_writes_json_report_with_selection_and_actions(tmp_path: Path) -> N
 
     payload = json.loads(report_file.read_text(encoding="utf-8"))
     assert result == 0
-    assert payload["tool"] == "TechAISyncGlobalCopilotConfigsIntoRepo"
+    assert payload["tool"] == "internal-sync-global-copilot-configs-into-repo"
     assert payload["analysis"]["profile"] == "backend-python"
-    assert ".github/prompts/tech-ai-python.prompt.md" in payload["selection"]["prompts"]
+    assert ".github/prompts/internal-python.prompt.md" in payload["selection"]["prompts"]
     assert "redundant_assets" in payload["analysis"]
     assert "unmanaged_target_asset_issues" in payload["analysis"]
     assert any(

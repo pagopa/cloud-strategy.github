@@ -60,8 +60,8 @@ CMD ["python", "main.py"]
 | Missing `--no-cache-dir` on pip install | Wasted space from pip cache in layer | Always `pip install --no-cache-dir` |
 
 ## Cross-references
-- **TechAICICDWorkflow** (`.github/skills/tech-ai-cicd-workflow/SKILL.md`): for CI/CD pipelines that build and push images.
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Dockerfile changes.
+- **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for CI/CD pipelines that build and push images.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Dockerfile changes.
 
 ## Validation
 - Verify image references use digests.

@@ -8,99 +8,99 @@
 version: 1
 
 _common_skills: &common_skills
-  - skills/tech-ai-brainstorming/SKILL.md
-  - skills/tech-ai-code-review/SKILL.md
-  - skills/tech-ai-dispatching-parallel-agents/SKILL.md
-  - skills/tech-ai-executing-plans/SKILL.md
-  - skills/tech-ai-finishing-dev-branch/SKILL.md
-  - skills/tech-ai-git-worktrees/SKILL.md
-  - skills/tech-ai-receiving-code-review/SKILL.md
-  - skills/tech-ai-requesting-code-review/SKILL.md
-  - skills/tech-ai-subagent-driven-dev/SKILL.md
-  - skills/tech-ai-systematic-debugging/SKILL.md
-  - skills/tech-ai-test-driven-dev/SKILL.md
-  - skills/tech-ai-using-superpowers/SKILL.md
-  - skills/tech-ai-verification/SKILL.md
-  - skills/tech-ai-writing-plans/SKILL.md
+  - skills/internal-brainstorming/SKILL.md
+  - skills/internal-code-review/SKILL.md
+  - skills/internal-dispatching-parallel-agents/SKILL.md
+  - skills/internal-executing-plans/SKILL.md
+  - skills/internal-finishing-dev-branch/SKILL.md
+  - skills/internal-git-worktrees/SKILL.md
+  - skills/internal-receiving-code-review/SKILL.md
+  - skills/internal-requesting-code-review/SKILL.md
+  - skills/internal-subagent-driven-dev/SKILL.md
+  - skills/internal-systematic-debugging/SKILL.md
+  - skills/internal-test-driven-dev/SKILL.md
+  - skills/internal-using-superpowers/SKILL.md
+  - skills/internal-verification/SKILL.md
+  - skills/internal-writing-plans/SKILL.md
 
 profiles:
   minimal:
     description: Baseline setup for small repositories.
     recommended_instructions:
-      - instructions/markdown.instructions.md
-      - instructions/yaml.instructions.md
-      - instructions/json.instructions.md
+      - instructions/internal-markdown.instructions.md
+      - instructions/internal-yaml.instructions.md
+      - instructions/internal-json.instructions.md
     recommended_prompts:
-      - prompts/tech-ai-github-action.prompt.md
+      - prompts/internal-github-action.prompt.md
     recommended_skills:
-      - skills/tech-ai-cicd-workflow/SKILL.md
+      - skills/internal-cicd-workflow/SKILL.md
 
   backend-java:
     description: Java service repositories.
     recommended_instructions:
-      - instructions/java.instructions.md
-      - instructions/github-actions.instructions.md
-      - instructions/markdown.instructions.md
+      - instructions/internal-java.instructions.md
+      - instructions/internal-github-actions.instructions.md
+      - instructions/internal-markdown.instructions.md
     recommended_prompts:
-      - prompts/tech-ai-java.prompt.md
-      - prompts/tech-ai-add-unit-tests.prompt.md
+      - prompts/internal-java.prompt.md
+      - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
-      - skills/tech-ai-project-java/SKILL.md
-      - skills/tech-ai-cicd-workflow/SKILL.md
+      - skills/internal-project-java/SKILL.md
+      - skills/internal-cicd-workflow/SKILL.md
 
   backend-nodejs:
     description: Node.js service repositories.
     recommended_instructions:
-      - instructions/nodejs.instructions.md
-      - instructions/github-actions.instructions.md
-      - instructions/markdown.instructions.md
+      - instructions/internal-nodejs.instructions.md
+      - instructions/internal-github-actions.instructions.md
+      - instructions/internal-markdown.instructions.md
     recommended_prompts:
-      - prompts/tech-ai-nodejs.prompt.md
-      - prompts/tech-ai-add-unit-tests.prompt.md
+      - prompts/internal-nodejs.prompt.md
+      - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
-      - skills/tech-ai-project-nodejs/SKILL.md
-      - skills/tech-ai-cicd-workflow/SKILL.md
+      - skills/internal-project-nodejs/SKILL.md
+      - skills/internal-cicd-workflow/SKILL.md
 
   backend-python:
     description: Python service repositories.
     recommended_instructions:
-      - instructions/python.instructions.md
-      - instructions/github-actions.instructions.md
-      - instructions/markdown.instructions.md
+      - instructions/internal-python.instructions.md
+      - instructions/internal-github-actions.instructions.md
+      - instructions/internal-markdown.instructions.md
     recommended_prompts:
-      - prompts/tech-ai-python.prompt.md
-      - prompts/tech-ai-add-unit-tests.prompt.md
+      - prompts/internal-python.prompt.md
+      - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
-      - skills/tech-ai-project-python/SKILL.md
-      - skills/tech-ai-cicd-workflow/SKILL.md
+      - skills/internal-project-python/SKILL.md
+      - skills/internal-cicd-workflow/SKILL.md
 
   infrastructure-heavy:
     description: Infrastructure repositories with Terraform as primary language.
     recommended_instructions:
-      - instructions/terraform.instructions.md
-      - instructions/github-actions.instructions.md
-      - instructions/yaml.instructions.md
+      - instructions/internal-terraform.instructions.md
+      - instructions/internal-github-actions.instructions.md
+      - instructions/internal-yaml.instructions.md
     recommended_prompts:
-      - prompts/tech-ai-terraform.prompt.md
-      - prompts/tech-ai-cloud-policy.prompt.md
+      - prompts/internal-terraform.prompt.md
+      - prompts/internal-cloud-policy.prompt.md
     recommended_skills:
-      - skills/tech-ai-terraform/SKILL.md
-      - skills/tech-ai-cloud-policy/SKILL.md
+      - skills/internal-terraform/SKILL.md
+      - skills/internal-cloud-policy/SKILL.md
 
   mixed-platform:
     description: Repositories mixing app code, CI/CD, and some infrastructure.
     recommended_instructions:
-      - instructions/java.instructions.md
-      - instructions/nodejs.instructions.md
-      - instructions/github-actions.instructions.md
-      - instructions/terraform.instructions.md
+      - instructions/internal-java.instructions.md
+      - instructions/internal-nodejs.instructions.md
+      - instructions/internal-github-actions.instructions.md
+      - instructions/internal-terraform.instructions.md
     recommended_prompts:
-      - prompts/tech-ai-java.prompt.md
-      - prompts/tech-ai-nodejs.prompt.md
-      - prompts/tech-ai-github-action.prompt.md
-      - prompts/tech-ai-terraform.prompt.md
+      - prompts/internal-java.prompt.md
+      - prompts/internal-nodejs.prompt.md
+      - prompts/internal-github-action.prompt.md
+      - prompts/internal-terraform.prompt.md
     recommended_skills:
-      - skills/tech-ai-project-java/SKILL.md
-      - skills/tech-ai-project-nodejs/SKILL.md
-      - skills/tech-ai-cicd-workflow/SKILL.md
-      - skills/tech-ai-terraform/SKILL.md
+      - skills/internal-project-java/SKILL.md
+      - skills/internal-project-nodejs/SKILL.md
+      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-terraform/SKILL.md

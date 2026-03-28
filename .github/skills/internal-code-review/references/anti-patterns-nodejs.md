@@ -1,6 +1,6 @@
 # Node.js / TypeScript Anti-Patterns
 
-Reference: `instructions/nodejs.instructions.md`
+Reference: `instructions/internal-nodejs.instructions.md`
 
 ## Critical
 | ID | Anti-pattern | Why |

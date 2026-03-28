@@ -300,30 +300,6 @@ prompt_expected_name() {
   name="$(basename "$file")"
 
   case "$name" in
-    tech-ai-github-action.prompt.md)
-      printf '%s' "TechAIGitHubAction"
-      ;;
-    tech-ai-github-composite-action.prompt.md)
-      printf '%s' "TechAICompositeAction"
-      ;;
-    tech-ai-pr-editor.prompt.md)
-      printf '%s' "TechAIPREditor"
-      ;;
-    tech-ai-add-platform.prompt.md)
-      printf '%s' "TechAIAddPlatform"
-      ;;
-    tech-ai-add-report-script.prompt.md)
-      printf '%s' "TechAIAddReportScript"
-      ;;
-    tech-ai-cicd-workflow.prompt.md)
-      printf '%s' "TechAICICDWorkflow"
-      ;;
-    tech-ai-terraform-module.prompt.md)
-      printf '%s' "TechAITerraformModule"
-      ;;
-    tech-ai-*.prompt.md)
-      tech_ai_prompt_name "${name%.prompt.md}"
-      ;;
     *.prompt.md)
       printf '%s' "${name%.prompt.md}"
       ;;
@@ -375,34 +351,43 @@ internal_asset_identifier() {
   esac
 }
 
+has_supported_origin_prefix() {
+  local value="$1"
+
+  case "$value" in
+    internal-*|local-*|claude-*|obra-*|terraform-*|tech-ai-*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 validate_repo_local_prompt_naming() {
   local file="$1"
   local severity="error"
   local actual_name=""
-  local expected_internal_name=""
+  local expected_asset_name=""
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
   actual_name="$(frontmatter_value "$file" "name")"
-  expected_internal_name="$(internal_asset_identifier "$file" || true)"
+  expected_asset_name="$(internal_asset_identifier "$file" || true)"
 
   case "$(basename "$file")" in
     tech-ai-*.prompt.md)
       return 0
       ;;
-    internal-*.prompt.md)
-      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
-        record_issue "$severity" "Repository-internal prompt name must start with 'internal-': ${file}"
-      fi
-      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
-        record_issue "$severity" "Repository-internal prompt name must match filename stem '${expected_internal_name}': ${file}"
-      fi
-      return 0
-      ;;
     *)
-      record_issue "$severity" "Repository-internal prompt filename must start with 'internal-': ${file}"
-      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
-        record_issue "$severity" "Repository-internal prompt name must start with 'internal-': ${file}"
+      if ! has_supported_origin_prefix "$(basename "$file" .prompt.md)"; then
+        record_issue "$severity" "Repository-owned prompt filename must use a supported origin prefix ('internal-', 'local-', 'claude-', 'obra-', or 'terraform-'): ${file}"
+      fi
+      if [[ -n "$actual_name" ]] && ! has_supported_origin_prefix "$actual_name"; then
+        record_issue "$severity" "Repository-owned prompt name must use a supported origin prefix ('internal-', 'local-', 'claude-', 'obra-', or 'terraform-'): ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_asset_name" && "$actual_name" != "$expected_asset_name" ]]; then
+        record_issue "$severity" "Repository-owned prompt name must match filename stem '${expected_asset_name}': ${file}"
       fi
       ;;
   esac
@@ -412,32 +397,28 @@ validate_repo_local_skill_naming() {
   local file="$1"
   local severity="error"
   local actual_name=""
-  local expected_internal_name=""
+  local expected_asset_name=""
   local skill_dir
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
   actual_name="$(frontmatter_value "$file" "name")"
-  expected_internal_name="$(internal_asset_identifier "$file" || true)"
+  expected_asset_name="$(internal_asset_identifier "$file" || true)"
   skill_dir="$(basename "$(dirname "$file")")"
 
   case "$skill_dir" in
     tech-ai-*)
       return 0
       ;;
-    internal-*)
-      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
-        record_issue "$severity" "Repository-internal skill name must start with 'internal-': ${file}"
-      fi
-      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
-        record_issue "$severity" "Repository-internal skill name must match directory name '${expected_internal_name}': ${file}"
-      fi
-      return 0
-      ;;
     *)
-      record_issue "$severity" "Repository-internal skill directory must start with 'internal-': ${file}"
-      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
-        record_issue "$severity" "Repository-internal skill name must start with 'internal-': ${file}"
+      if ! has_supported_origin_prefix "$skill_dir"; then
+        record_issue "$severity" "Repository-owned skill directory must use a supported origin prefix ('internal-', 'local-', 'claude-', 'obra-', or 'terraform-'): ${file}"
+      fi
+      if [[ -n "$actual_name" ]] && ! has_supported_origin_prefix "$actual_name"; then
+        record_issue "$severity" "Repository-owned skill name must use a supported origin prefix ('internal-', 'local-', 'claude-', 'obra-', or 'terraform-'): ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_asset_name" && "$actual_name" != "$expected_asset_name" ]]; then
+        record_issue "$severity" "Repository-owned skill name must match directory name '${expected_asset_name}': ${file}"
       fi
       ;;
   esac
@@ -447,30 +428,26 @@ validate_repo_local_agent_naming() {
   local file="$1"
   local severity="error"
   local actual_name=""
-  local expected_internal_name=""
+  local expected_asset_name=""
 
   [[ "$MODE" == "legacy-compatible" ]] && severity="warn"
 
   actual_name="$(frontmatter_value "$file" "name")"
-  expected_internal_name="$(internal_asset_identifier "$file" || true)"
+  expected_asset_name="$(internal_asset_identifier "$file" || true)"
 
   case "$(basename "$file")" in
     tech-ai-*.agent.md)
       return 0
       ;;
-    internal-*.agent.md)
-      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
-        record_issue "$severity" "Repository-internal agent name must start with 'internal-': ${file}"
-      fi
-      if [[ -n "$actual_name" && -n "$expected_internal_name" && "$actual_name" != "$expected_internal_name" ]]; then
-        record_issue "$severity" "Repository-internal agent name must match filename stem '${expected_internal_name}': ${file}"
-      fi
-      return 0
-      ;;
     *)
-      record_issue "$severity" "Repository-internal agent filename must start with 'internal-': ${file}"
-      if [[ -n "$actual_name" && "$actual_name" != internal-* ]]; then
-        record_issue "$severity" "Repository-internal agent name must start with 'internal-': ${file}"
+      if ! has_supported_origin_prefix "$(basename "$file" .agent.md)"; then
+        record_issue "$severity" "Repository-owned agent filename must use a supported origin prefix ('internal-', 'local-', 'claude-', 'obra-', or 'terraform-'): ${file}"
+      fi
+      if [[ -n "$actual_name" ]] && ! has_supported_origin_prefix "$actual_name"; then
+        record_issue "$severity" "Repository-owned agent name must use a supported origin prefix ('internal-', 'local-', 'claude-', 'obra-', or 'terraform-'): ${file}"
+      fi
+      if [[ -n "$actual_name" && -n "$expected_asset_name" && "$actual_name" != "$expected_asset_name" ]]; then
+        record_issue "$severity" "Repository-owned agent name must match filename stem '${expected_asset_name}': ${file}"
       fi
       ;;
   esac

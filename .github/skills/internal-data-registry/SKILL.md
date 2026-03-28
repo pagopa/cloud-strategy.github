@@ -44,8 +44,8 @@ description: Safely update structured JSON/YAML registry files such as users, gr
 | Leaving placeholder values (`TODO`, `TBD`, `example@`) | Passes validation but causes runtime failures | Use real values or omit optional fields |
 
 ## Cross-references
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing registry change PRs.
-- **TechAIPairArchitect** (`.github/skills/tech-ai-pair-architect/SKILL.md`): for impact analysis when modifying authorization registries.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing registry change PRs.
+- **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for impact analysis when modifying authorization registries.
 
 ## Validation
 - Run repository checks for JSON/YAML syntax.

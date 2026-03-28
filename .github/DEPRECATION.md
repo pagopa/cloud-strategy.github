@@ -26,5 +26,5 @@ Immediate removal is allowed only for security or compliance issues. The removal
 
 ## Current deprecations
 - `scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by `scripts/tech-ai-sync-copilot-configs.py`.
-- `skills/tech-ai-terraform-feature/SKILL.md`: **Removed**. Merged into `skills/tech-ai-terraform/SKILL.md`.
-- `skills/tech-ai-terraform-module/SKILL.md`: **Removed**. Merged into `skills/tech-ai-terraform/SKILL.md`.
+- `skills/internal-terraform-feature/SKILL.md`: **Removed**. Merged into `skills/internal-terraform/SKILL.md`.
+- `skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into `skills/internal-terraform/SKILL.md`.

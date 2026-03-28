@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
 
-SCRIPT_NAME = "TechAISyncGlobalCopilotConfigsIntoRepo"
+SCRIPT_NAME = "internal-sync-global-copilot-configs-into-repo"
 MANIFEST_RELATIVE_PATH = ".github/tech-ai-sync-copilot-configs.manifest.json"
 SUPPORTED_SCOPE = "copilot-core"
 SUPPORTED_CONFLICT_POLICY = "conservative-merge"
@@ -38,20 +38,20 @@ MANAGED_ALWAYS = (
     ".github/scripts/validate-copilot-customizations.sh",
 )
 SOURCE_ONLY_AGENT_PATHS = {
-    ".github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md",
+    ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md",
 }
 SOURCE_ONLY_PROMPT_PATHS = {
-    ".github/prompts/tech-ai-add-platform.prompt.md",
-    ".github/prompts/tech-ai-add-report-script.prompt.md",
-    ".github/prompts/tech-ai-code-review.prompt.md",
-    ".github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md",
+    ".github/prompts/internal-add-platform.prompt.md",
+    ".github/prompts/internal-add-report-script.prompt.md",
+    ".github/prompts/internal-code-review.prompt.md",
+    ".github/prompts/internal-sync-global-copilot-configs-into-repo.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
-    ".github/skills/tech-ai-skill-creator/SKILL.md",
-    ".github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md",
+    ".github/skills/claude-skill-creator/SKILL.md",
+    ".github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md",
 }
-CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-bash-script.prompt.md"
-CANONICAL_PYTHON_SCRIPT_PROMPT_PATH = ".github/prompts/tech-ai-python-script.prompt.md"
+CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/internal-bash-script.prompt.md"
+CANONICAL_PYTHON_SCRIPT_PROMPT_PATH = ".github/prompts/internal-python-script.prompt.md"
 ALWAYS_EXCLUDED_RELATIVE_PATHS = {
     ".github/README.md",
     ".github/CHANGELOG.md",
@@ -72,26 +72,20 @@ ALWAYS_EXCLUDED_DIRECTORIES = {
 STACK_PRIORITY = ("terraform", "python", "nodejs", "java", "docker", "bash")
 PROMPT_SKILL_REFERENCE_PREFIX = ".github/"
 EXTRA_LEGACY_ALIAS_PATHS = {
-    ".github/prompts/tech-ai-bash-script.prompt.md": (
+    ".github/prompts/internal-bash-script.prompt.md": (
         ".github/prompts/script-bash.prompt.md",
     ),
-    ".github/prompts/tech-ai-python-script.prompt.md": (
+    ".github/prompts/internal-python-script.prompt.md": (
         ".github/prompts/script-python.prompt.md",
     ),
-    ".github/prompts/tech-ai-github-action.prompt.md": (
+    ".github/prompts/internal-github-action.prompt.md": (
         ".github/prompts/cicd-workflow.prompt.md",
     ),
 }
 ROLE_OVERLAP_SECTION_PREFIXES = ("workflow", "instructions", "validation")
 ROLE_OVERLAP_LINE_THRESHOLD = 3
 AGENTS_INVENTORY_CATEGORIES = ("instructions", "prompts", "skills", "agents")
-PROMPT_NAME_OVERRIDES = {
-    "tech-ai-add-platform.prompt.md": "TechAIAddPlatform",
-    "tech-ai-add-report-script.prompt.md": "TechAIAddReportScript",
-    "tech-ai-cicd-workflow.prompt.md": "TechAICICDWorkflow",
-    "tech-ai-github-composite-action.prompt.md": "TechAICompositeAction",
-    "tech-ai-pr-editor.prompt.md": "TechAIPREditor",
-}
+PROMPT_NAME_OVERRIDES: dict[str, str] = {}
 SOURCE_ONLY_TARGET_RESIDUE_PATHS = (
     ".github/README.md",
     ".github/agents/README.md",
@@ -637,9 +631,13 @@ def internal_asset_identifier(relative_path: str) -> str | None:
     return None
 
 
+def has_supported_origin_prefix(identifier: str) -> bool:
+    return identifier.startswith(("internal-", "local-", "claude-", "obra-", "terraform-", "tech-ai-"))
+
+
 def is_internal_asset_path(relative_path: str) -> bool:
     identifier = internal_asset_identifier(relative_path)
-    return bool(identifier and identifier.startswith("internal-"))
+    return bool(identifier and has_supported_origin_prefix(identifier))
 
 
 def scan_repo_files(repo_root: Path) -> list[Path]:
@@ -1228,29 +1226,29 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
         if agent not in SOURCE_ONLY_AGENT_PATHS
     }
     instructions = {
-        ".github/instructions/markdown.instructions.md",
-        ".github/instructions/yaml.instructions.md",
+        ".github/instructions/internal-markdown.instructions.md",
+        ".github/instructions/internal-yaml.instructions.md",
     }
     profile_extra_instructions: set[str] = set()
 
     if "json" in stacks:
-        instructions.add(".github/instructions/json.instructions.md")
+        instructions.add(".github/instructions/internal-json.instructions.md")
     if "bash" in stacks:
-        instructions.add(".github/instructions/bash.instructions.md")
+        instructions.add(".github/instructions/internal-bash.instructions.md")
     if "python" in stacks:
-        instructions.add(".github/instructions/python.instructions.md")
+        instructions.add(".github/instructions/internal-python.instructions.md")
     if "terraform" in stacks:
-        instructions.add(".github/instructions/terraform.instructions.md")
+        instructions.add(".github/instructions/internal-terraform.instructions.md")
     if "github-actions" in stacks:
-        instructions.add(".github/instructions/github-actions.instructions.md")
+        instructions.add(".github/instructions/internal-github-actions.instructions.md")
     if "composite-action" in stacks:
-        instructions.add(".github/instructions/github-action-composite.instructions.md")
+        instructions.add(".github/instructions/internal-github-action-composite.instructions.md")
     if "makefile" in stacks:
-        instructions.add(".github/instructions/makefile.instructions.md")
-    if "nodejs" in stacks and (source_root / ".github" / "instructions" / "nodejs.instructions.md").is_file():
-        instructions.add(".github/instructions/nodejs.instructions.md")
-    if "java" in stacks and (source_root / ".github" / "instructions" / "java.instructions.md").is_file():
-        instructions.add(".github/instructions/java.instructions.md")
+        instructions.add(".github/instructions/internal-makefile.instructions.md")
+    if "nodejs" in stacks and (source_root / ".github" / "instructions" / "internal-nodejs.instructions.md").is_file():
+        instructions.add(".github/instructions/internal-nodejs.instructions.md")
+    if "java" in stacks and (source_root / ".github" / "instructions" / "internal-java.instructions.md").is_file():
+        instructions.add(".github/instructions/internal-java.instructions.md")
 
     for recommended in profile.recommended_instructions:
         prefixed = ensure_github_prefix(recommended)
@@ -1281,21 +1279,21 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if "python" in stacks:
         prompts.update(
             {
-                ".github/prompts/tech-ai-python.prompt.md",
+                ".github/prompts/internal-python.prompt.md",
                 CANONICAL_PYTHON_SCRIPT_PROMPT_PATH,
-                ".github/prompts/tech-ai-add-unit-tests.prompt.md",
+                ".github/prompts/internal-add-unit-tests.prompt.md",
             }
         )
     if "terraform" in stacks:
-        prompts.add(".github/prompts/tech-ai-terraform.prompt.md")
+        prompts.add(".github/prompts/internal-terraform.prompt.md")
     if "github-actions" in stacks:
-        prompts.add(".github/prompts/tech-ai-github-action.prompt.md")
+        prompts.add(".github/prompts/internal-github-action.prompt.md")
     if "composite-action" in stacks:
-        prompts.add(".github/prompts/tech-ai-github-composite-action.prompt.md")
+        prompts.add(".github/prompts/internal-github-composite-action.prompt.md")
     if repo_needs_data_registry(analysis.repo_root, analysis):
-        prompts.add(".github/prompts/tech-ai-data-registry.prompt.md")
+        prompts.add(".github/prompts/internal-data-registry.prompt.md")
     if target_has_pr_template(analysis.repo_root):
-        prompts.add(".github/prompts/tech-ai-pr-editor.prompt.md")
+        prompts.add(".github/prompts/internal-pr-editor.prompt.md")
 
     prompts = {
         prompt
@@ -1316,19 +1314,19 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     skills = {skill for skill in skills if skill not in SOURCE_ONLY_SKILL_PATHS}
 
     agents: set[str] = {
-        ".github/agents/tech-ai-planner.agent.md",
-        ".github/agents/tech-ai-implementer.agent.md",
-        ".github/agents/tech-ai-reviewer.agent.md",
-        ".github/agents/tech-ai-security-reviewer.agent.md",
+        ".github/agents/internal-planner.agent.md",
+        ".github/agents/internal-implementer.agent.md",
+        ".github/agents/internal-reviewer.agent.md",
+        ".github/agents/internal-security-reviewer.agent.md",
     }
     if "github-actions" in stacks:
-        agents.add(".github/agents/tech-ai-github-workflow-supply-chain.agent.md")
+        agents.add(".github/agents/internal-github-workflow-supply-chain.agent.md")
     if "terraform" in stacks:
-        agents.add(".github/agents/tech-ai-terraform-guardrails.agent.md")
+        agents.add(".github/agents/internal-terraform-guardrails.agent.md")
     if repo_needs_iam_review(analysis.repo_root):
-        agents.add(".github/agents/tech-ai-iam-least-privilege.agent.md")
+        agents.add(".github/agents/internal-iam-least-privilege.agent.md")
     if target_has_pr_template(analysis.repo_root):
-        agents.add(".github/agents/tech-ai-pr-editor.agent.md")
+        agents.add(".github/agents/internal-pr-editor.agent.md")
     agents.update(portable_source_agents)
 
     agents = {agent for agent in agents if agent not in SOURCE_ONLY_AGENT_PATHS and (source_root / agent).is_file()}
@@ -1480,12 +1478,16 @@ def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str, repo_
 
     if repo_local:
         if not is_internal_asset_path(relative_path):
-            issues.append("Repository-internal prompt filename must start with `internal-`.")
-        if actual_name and not actual_name.startswith("internal-"):
-            issues.append("Repository-internal prompt `name` must start with `internal-`.")
+            issues.append(
+                "Repository-owned prompt filename must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+            )
+        if actual_name and not has_supported_origin_prefix(actual_name):
+            issues.append(
+                "Repository-owned prompt `name` must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+            )
         internal_identifier = internal_asset_identifier(relative_path)
-        if internal_identifier and internal_identifier.startswith("internal-") and actual_name and actual_name != internal_identifier:
-            issues.append(f"Repository-internal prompt `name` should match filename stem `{internal_identifier}`.")
+        if internal_identifier and has_supported_origin_prefix(internal_identifier) and actual_name and actual_name != internal_identifier:
+            issues.append(f"Repository-owned prompt `name` should match filename stem `{internal_identifier}`.")
 
     for heading in ("## Instructions", "## Validation", "## Minimal example"):
         if not has_heading_exact(path, heading):
@@ -1521,11 +1523,15 @@ def validate_unmanaged_skill_asset(target_root: Path, relative_path: str, repo_l
         internal_identifier = internal_asset_identifier(relative_path)
         actual_name = frontmatter.get("name", "")
         if not is_internal_asset_path(relative_path):
-            issues.append("Repository-internal skill directory must start with `internal-`.")
-        if actual_name and not actual_name.startswith("internal-"):
-            issues.append("Repository-internal skill `name` must start with `internal-`.")
-        if internal_identifier and internal_identifier.startswith("internal-") and actual_name and actual_name != internal_identifier:
-            issues.append(f"Repository-internal skill `name` should match directory name `{internal_identifier}`.")
+            issues.append(
+                "Repository-owned skill directory must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+            )
+        if actual_name and not has_supported_origin_prefix(actual_name):
+            issues.append(
+                "Repository-owned skill `name` must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+            )
+        if internal_identifier and has_supported_origin_prefix(internal_identifier) and actual_name and actual_name != internal_identifier:
+            issues.append(f"Repository-owned skill `name` should match directory name `{internal_identifier}`.")
 
     return issues
 
@@ -1550,11 +1556,15 @@ def validate_unmanaged_agent_asset(target_root: Path, relative_path: str, repo_l
         internal_identifier = internal_asset_identifier(relative_path)
         actual_name = frontmatter.get("name", "")
         if not is_internal_asset_path(relative_path):
-            issues.append("Repository-internal agent filename must start with `internal-`.")
-        if actual_name and not actual_name.startswith("internal-"):
-            issues.append("Repository-internal agent `name` must start with `internal-`.")
-        if internal_identifier and internal_identifier.startswith("internal-") and actual_name and actual_name != internal_identifier:
-            issues.append(f"Repository-internal agent `name` should match filename stem `{internal_identifier}`.")
+            issues.append(
+                "Repository-owned agent filename must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+            )
+        if actual_name and not has_supported_origin_prefix(actual_name):
+            issues.append(
+                "Repository-owned agent `name` must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+            )
+        if internal_identifier and has_supported_origin_prefix(internal_identifier) and actual_name and actual_name != internal_identifier:
+            issues.append(f"Repository-owned agent `name` should match filename stem `{internal_identifier}`.")
 
     return issues
 
@@ -2031,8 +2041,10 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         "- Use GitHub Copilot terminology in repository-facing content.",
         "- Do not mention internal runtime names in repository artifacts.",
         "- Treat prompt frontmatter `name:` as the canonical command identifier.",
-        "- Repository-internal prompt, skill, and agent filenames must start with `internal-`.",
-        "- Repository-internal prompt, skill, and agent `name:` values must also start with `internal-`.",
+        "- External resources must use `<short-repo>-<original-resource-name>` in filenames and `name:` values.",
+        "- Resources created in `cloud-strategy.github` must use the `internal-` prefix in filenames and `name:` values.",
+        "- Resources created in other local repositories must use the `local-` prefix in filenames and `name:` values.",
+        "- Keep legacy prefixes only when required for backward compatibility.",
         "",
         "## Decision Priority",
         "1. Apply repository non-negotiables from `.github/copilot-instructions.md`.",
@@ -2053,7 +2065,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
             "",
             "### Agent composition",
             "- For changes spanning multiple specialist domains, run each relevant specialist and aggregate findings.",
-            "- The standard chain for non-trivial work is: `TechAIPlanner` -> `TechAIImplementer` -> `TechAIReviewer` or a matching specialist.",
+            "- The standard chain for non-trivial work is: `internal-planner` -> `TechAIImplementer` -> `TechAIReviewer` or a matching specialist.",
             "",
             "## Governance References",
         ]
@@ -2141,14 +2153,14 @@ def asset_display_name(source_root: Path, relative_path: str) -> str:
 
 def agent_routing_lines(source_root: Path, agent_paths: list[str]) -> list[str]:
     explicit_lines = {
-        "tech-ai-planner.agent.md": "- Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.",
+        "tech-ai-planner.agent.md": "- Use `internal-planner` for ambiguous scope, tradeoff analysis, or multi-step design.",
         "tech-ai-implementer.agent.md": "- Use `TechAIImplementer` for direct code/config changes and validation-first delivery.",
         "tech-ai-reviewer.agent.md": "- Use `TechAIReviewer` for quality gates and defect/regression findings.",
-        "tech-ai-terraform-guardrails.agent.md": "- Use `TechAITerraformGuardrails` for Terraform safety and policy guardrail reviews.",
+        "tech-ai-terraform-guardrails.agent.md": "- Use `internal-terraformGuardrails` for Terraform safety and policy guardrail reviews.",
         "tech-ai-iam-least-privilege.agent.md": "- Use `TechAIIAMLeastPrivilege` for role and permission scoping checks.",
         "tech-ai-github-workflow-supply-chain.agent.md": "- Use `TechAIWorkflowSupplyChain` for workflow supply-chain hardening and CI checks.",
-        "tech-ai-security-reviewer.agent.md": "- Use `TechAISecurityReviewer` as the security-focused review gate.",
-        "tech-ai-pr-editor.agent.md": "- Use `TechAIPREditor` when generating pull request content from the repository template.",
+        "tech-ai-security-reviewer.agent.md": "- Use `internal-security-reviewer` as the security-focused review gate.",
+        "tech-ai-pr-editor.agent.md": "- Use `internal-pr-editor` when generating pull request content from the repository template.",
     }
     lines: list[str] = []
     for relative_path in sorted(agent_paths):
@@ -2243,8 +2255,9 @@ def build_recommendations(
     ]
     if internal_naming_issue_paths:
         recommendations["missing consumer-facing validation or onboarding guidance"].append(
-            "Repository-internal Copilot prompts, skills, and agents should use `internal-*` in both filenames and "
-            f"`name:` values: {', '.join(internal_naming_issue_paths)}."
+            "Repository-owned Copilot prompts, skills, and agents should use origin-based prefixes in both filenames "
+            "and `name:` values (`internal-*`, `local-*`, or the supported external short-repo prefixes): "
+            f"{', '.join(internal_naming_issue_paths)}."
         )
 
     editor_integration_issue_paths = [
@@ -2351,7 +2364,7 @@ def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFil
 
 def render_markdown_report(plan: SyncPlan) -> str:
     lines = [
-        "# TechAISyncGlobalCopilotConfigsIntoRepo Report",
+        "# internal-sync-global-copilot-configs-into-repo Report",
         "",
         "## Target analysis summary",
         f"- Source repo: `{plan.selection.profile.name}` profile from the current standards repository",

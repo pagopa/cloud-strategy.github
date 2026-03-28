@@ -56,8 +56,8 @@ test("given missing id when building profile then throws", () => {
 | Callback-style code in modern Node.js | Hard to read, callback hell | Use async/await with Promises |
 
 ## Cross-references
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Node.js code (see `references/anti-patterns-nodejs.md`).
-- **TechAIDocker** (`.github/skills/tech-ai-docker/SKILL.md`): for containerizing Node.js apps.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Node.js code (see `references/anti-patterns-nodejs.md`).
+- **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Node.js apps.
 
 ## Validation
 - Run tests: `node --test` or `npm test`.

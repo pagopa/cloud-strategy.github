@@ -23,7 +23,7 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 | One-off resource for a single environment | Feature (inline) |
 
 ## Mandatory rules
-- Follow `.github/instructions/terraform.instructions.md` for provider and external module pinning.
+- Follow `.github/instructions/internal-terraform.instructions.md` for provider and external module pinning.
 - Use `snake_case` for all Terraform identifiers.
 - Add `description` and `type` to every variable.
 - Avoid `default` values in variables for non-module components; pass configurations via `.tfvars`.
@@ -114,8 +114,8 @@ output "bucket_id" {
 | `default = ""` instead of `default = null` for optional strings | Empty string passes validation but means "no value" ambiguously | Use `null` for truly optional inputs |
 
 ## Cross-references
-- **TechAICloudPolicy** (`.github/skills/tech-ai-cloud-policy/SKILL.md`): for governance policies (SCP, Azure Policy, GCP Org Policy) applied alongside Terraform infra.
-- **TechAICICDWorkflow** (`.github/skills/tech-ai-cicd-workflow/SKILL.md`): for CI/CD pipelines that run `terraform plan/apply`.
+- **internal-cloud-policy** (`.github/skills/internal-cloud-policy/SKILL.md`): for governance policies (SCP, Azure Policy, GCP Org Policy) applied alongside Terraform infra.
+- **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for CI/CD pipelines that run `terraform plan/apply`.
 
 ## Validation
 - `terraform fmt -check -recursive`

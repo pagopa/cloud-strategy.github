@@ -81,8 +81,8 @@ resource "google_org_policy_policy" "disable_sa_key_creation" {
 | Hardcoded account/subscription/project IDs in policy | Non-portable across environments | Use variables or parameters |
 
 ## Cross-references
-- **TechAITerraform** (`.github/skills/tech-ai-terraform/SKILL.md`): for Terraform resources that deploy policies.
-- **TechAICICDWorkflow** (`.github/skills/tech-ai-cicd-workflow/SKILL.md`): for CI/CD pipelines that validate and apply policies.
+- **internal-terraform** (`.github/skills/internal-terraform/SKILL.md`): for Terraform resources that deploy policies.
+- **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for CI/CD pipelines that validate and apply policies.
 
 ## Validation
 - Validate syntax in the target format (JSON / HCL).

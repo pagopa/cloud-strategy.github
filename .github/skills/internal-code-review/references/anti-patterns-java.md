@@ -1,6 +1,6 @@
 # Java Anti-Patterns
 
-Reference: `instructions/java.instructions.md`
+Reference: `instructions/internal-java.instructions.md`
 
 ## Critical
 | ID | Anti-pattern | Why |

@@ -57,8 +57,8 @@ Keep headings and section order unchanged. If a section is not applicable, write
 | Not including validation commands and output | Reviewer has no confidence that code was tested | Always include the exact commands and their results |
 
 ## Cross-references
-- **TechAIPairArchitect** (`.github/skills/tech-ai-pair-architect/SKILL.md`): for change-impact analysis that feeds the risk section.
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for the review that follows the PR.
+- **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for change-impact analysis that feeds the risk section.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for the review that follows the PR.
 
 ## Validation
 - Every template-defined section heading is present.

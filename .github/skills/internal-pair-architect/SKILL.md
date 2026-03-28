@@ -11,9 +11,9 @@ description: Use when the user wants to understand the ripple effects of a chang
 - Complement line-level code review with systems-level and business-level thinking.
 
 ## Relationship to other skills
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): per-line anti-patterns, severity catalogs, nit-level scanning.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): per-line anti-patterns, severity catalogs, nit-level scanning.
 - **This skill**: change-set-level impact, architectural implications, unconsidered aspects.
-- Use both together: run `TechAICodeReview` first for detailed findings, then this skill for the bigger picture.
+- Use both together: run `internal-code-review` first for detailed findings, then this skill for the bigger picture.
 
 ## Analysis dimensions
 
@@ -59,7 +59,7 @@ For empty sections, state "No findings in this category."
 
 | Mistake | Why it matters | Instead |
 |---|---|---|
-| Flagging code style as an architectural issue | Inflates findings, dilutes trust | Use `TechAICodeReview` for nit-level checks |
+| Flagging code style as an architectural issue | Inflates findings, dilutes trust | Use `internal-code-review` for nit-level checks |
 | Making ungrounded findings ("this might break X") | Speculation ≠ evidence | Every finding must cite a concrete file and line from the diff |
 | Scope creep — analyzing the entire codebase | The user asked about a specific change | Analyze only changed files and their immediate dependencies |
 | Reporting without effort estimation | Leaves the author without prioritization signal | Always include Low/Medium/High effort per finding |

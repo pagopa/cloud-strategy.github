@@ -15,7 +15,7 @@ description: Sync shared Copilot baseline into consumer repos — dynamic stack 
 ### Phase 1 — Analyze
 1. Inspect target repository: `.github` contents, `AGENTS.md`, git state.
 2. Detect stacks dynamically from file extensions and project manifests (no hardcoded profiles — detect `*.tf`, `*.py`, `*.java`, `*.js`, `*.ts`, `Dockerfile`, `*.sh`, etc.).
-3. Classify target assets into: managed (synced baseline), internal (`internal-*`), and unmanaged (everything else).
+3. Classify target assets into: managed (synced baseline), origin-prefixed (`internal-*`, `local-*`, or supported external prefixes), and unmanaged (everything else).
 4. Audit source standards repository: detect legacy aliases, canonical overlaps, and source-only assets.
 
 ### Phase 2 — Plan
@@ -23,7 +23,7 @@ description: Sync shared Copilot baseline into consumer repos — dynamic stack 
 2. Compute SHA-256 checksums for both source and target versions of each managed file.
 3. Flag conflicts: target file diverged from last-synced version (manifest mismatch).
 4. Flag redundancies: legacy aliases coexisting with canonical assets.
-5. Flag internal naming violations: repo-owned assets missing `internal-*` prefix.
+5. Flag origin-prefix violations: repo-owned assets missing `internal-*`, `local-*`, or a supported external short-repo prefix.
 6. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)
@@ -46,27 +46,27 @@ The sync script detects stacks dynamically and selects assets accordingly:
 
 | Detected stack | Instructions | Skills | Prompts |
 |---|---|---|---|
-| Terraform (`*.tf`) | `terraform.instructions.md` | `tech-ai-terraform`, `tech-ai-cloud-policy` | `tech-ai-terraform.prompt.md` |
-| Python (`*.py`) | `python.instructions.md` | `tech-ai-project-python`, `tech-ai-script-python` | `tech-ai-python.prompt.md` |
-| Java (`*.java`) | `java.instructions.md` | `tech-ai-project-java` | `tech-ai-java.prompt.md` |
-| Node.js (`*.js`, `*.ts`) | `nodejs.instructions.md` | `tech-ai-project-nodejs` | `tech-ai-nodejs.prompt.md` |
-| Docker (`Dockerfile`) | `docker.instructions.md` | `tech-ai-docker` | `tech-ai-docker.prompt.md` |
-| Bash (`*.sh`) | `bash.instructions.md` | `tech-ai-script-bash` | `tech-ai-bash-script.prompt.md` |
-| GitHub Actions (`workflows/`) | `github-actions.instructions.md` | `tech-ai-cicd-workflow` | `tech-ai-github-action.prompt.md` |
+| Terraform (`*.tf`) | `internal-terraform.instructions.md` | `internal-terraform`, `internal-cloud-policy` | `internal-terraform.prompt.md` |
+| Python (`*.py`) | `internal-python.instructions.md` | `internal-project-python`, `internal-script-python` | `internal-python.prompt.md` |
+| Java (`*.java`) | `internal-java.instructions.md` | `internal-project-java` | `internal-java.prompt.md` |
+| Node.js (`*.js`, `*.ts`) | `internal-nodejs.instructions.md` | `internal-project-nodejs` | `internal-nodejs.prompt.md` |
+| Docker (`Dockerfile`) | `internal-docker.instructions.md` | `internal-docker` | `internal-docker.prompt.md` |
+| Bash (`*.sh`) | `internal-bash.instructions.md` | `internal-script-bash` | `internal-bash-script.prompt.md` |
+| GitHub Actions (`workflows/`) | `internal-github-actions.instructions.md` | `internal-cicd-workflow` | `internal-github-action.prompt.md` |
 
-Always included: `markdown.instructions.md`, `yaml.instructions.md`, `json.instructions.md`.
+Always included: `internal-markdown.instructions.md`, `internal-yaml.instructions.md`, `internal-json.instructions.md`.
 
 ## Source-only assets (never synced)
 These assets exist only in this standards repository:
-- Agents: `tech-ai-sync-global-copilot-configs-into-repo`
-- Skills: `tech-ai-skill-creator`, `tech-ai-sync-global-copilot-configs-into-repo`
-- Prompts: `tech-ai-add-platform`, `tech-ai-add-report-script`, `tech-ai-code-review`, `tech-ai-sync-global-copilot-configs-into-repo`
+- Agents: `internal-sync-global-copilot-configs-into-repo`
+- Skills: `tech-ai-skill-creator`, `internal-sync-global-copilot-configs-into-repo`
+- Prompts: `internal-add-platform`, `internal-add-report-script`, `internal-code-review`, `internal-sync-global-copilot-configs-into-repo`
 
 ## Scope rules
 - Manage Copilot-core assets only.
 - Exclude README, changelog, templates, workflows, and source-only agents from sync.
 - Prefer existing root `AGENTS.md` over creating a second managed file under `.github/`.
-- Keep `internal-*` assets visible in rendered AGENTS.md inventory.
+- Keep origin-prefixed assets visible in rendered AGENTS.md inventory.
 - Never overwrite unmanaged divergent files — flag as conflicts instead.
 
 ## Common mistakes
@@ -80,7 +80,7 @@ These assets exist only in this standards repository:
 | Hardcoding profiles instead of detecting stacks | New stacks in target repo get no coverage | Detect dynamically from file extensions |
 
 ## Cross-references
-- **TechAIPairArchitect** (`.github/skills/tech-ai-pair-architect/SKILL.md`): for impact analysis when sync changes baseline behavior.
+- **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for impact analysis when sync changes baseline behavior.
 
 ## Tooling
 - Script: `.github/scripts/tech-ai-sync-copilot-configs.py`

@@ -63,8 +63,8 @@ class UserServiceTest {
 | Over-using inheritance for code reuse | Rigid hierarchies, fragile base class problem | Prefer composition and delegation |
 
 ## Cross-references
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Java code (see `references/anti-patterns-java.md`).
-- **TechAIDocker** (`.github/skills/tech-ai-docker/SKILL.md`): for containerizing Java apps.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Java code (see `references/anti-patterns-java.md`).
+- **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Java apps.
 
 ## Validation
 - Compile with `mvn compile` or `gradle build`.

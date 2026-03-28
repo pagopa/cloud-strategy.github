@@ -15,7 +15,7 @@ description: Use when the user mentions CI/CD, continuous integration, deploymen
 - Pin every action to a full-length SHA.
 - Keep `permissions` least-privilege — declare only what the job actually needs.
 - Keep step names and operational output in English.
-- Follow `.github/instructions/github-actions.instructions.md`.
+- Follow `.github/instructions/internal-github-actions.instructions.md`.
 
 ## Workflow patterns
 
@@ -25,7 +25,7 @@ description: Use when the user mentions CI/CD, continuous integration, deploymen
 |---|---|
 | Simple job sequence (build → test → deploy) | Single workflow with dependent jobs |
 | Shared steps across 3+ workflows in the same repo | Reusable workflow (`workflow_call`) |
-| Shared steps across multiple repositories | Composite action (see `TechAICompositeAction`) |
+| Shared steps across multiple repositories | Composite action (see `internal-composite-action`) |
 | Conditional deployment per environment | Environment protection rules + manual approval |
 
 ## Cloud auth snippets
@@ -87,8 +87,8 @@ jobs:
 | Duplicating steps across workflows instead of reusable workflow or composite | Maintenance burden grows with every copy | Extract to reusable workflow (same repo) or composite action (cross-repo) |
 
 ## Cross-references
-- **TechAICompositeAction** (`.github/skills/tech-ai-composite-action/SKILL.md`): for reusable composite actions shared across repos.
-- **TechAITerraform** (`.github/skills/tech-ai-terraform/SKILL.md`): for the Terraform resources deployed by CI/CD.
+- **internal-composite-action** (`.github/skills/internal-composite-action/SKILL.md`): for reusable composite actions shared across repos.
+- **internal-terraform** (`.github/skills/internal-terraform/SKILL.md`): for the Terraform resources deployed by CI/CD.
 
 ## Checklist
 - [ ] OIDC configured for cloud auth.

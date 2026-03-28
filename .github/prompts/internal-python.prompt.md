@@ -1,0 +1,45 @@
+---
+description: Create or modify Python application components with clear responsibilities and tests
+name: internal-python
+agent: agent
+argument-hint: action=<create|modify> component_type=<service|adapter|repository|module> component_name=<name> purpose=<purpose> [target_path=<path>]
+---
+
+# Python Project Task
+
+## Context
+Create or modify Python application components with clear separation of concerns, early-return flow, and test coverage.
+
+## Required inputs
+- **Action**: ${input:action:create,modify}
+- **Component type**: ${input:component_type:service,adapter,repository,module}
+- **Component name**: ${input:component_name}
+- **Purpose**: ${input:purpose}
+- **Target path**: ${input:target_path:src}
+
+## Instructions
+1. Use the skill in `.github/skills/internal-project-python/SKILL.md`.
+2. Reuse repository naming and folder conventions.
+3. Organize code with clear separation of concerns:
+   - Core logic in service modules
+   - Request/response handling in adapters
+   - Data access in repository modules
+4. Use early return and guard clauses.
+5. Keep all code comments, logs, and exceptions in English.
+6. If `action=modify`, preserve existing behavior unless explicit changes are requested.
+7. If the task includes Python templates, use Jinja templates named `<file-name>.<extension>.j2`.
+8. If `action=modify` and tests already exist, run existing tests before editing test files.
+9. Add or update deterministic `pytest` unit tests only after the first test run, and only for intentional behavior changes or uncovered new behavior.
+10. Follow `.github/instructions/internal-python.instructions.md` for dependency locking, `requirements.txt` standardization, and external-library selection.
+11. If external packages are introduced, create or update `requirements.txt` so it uses exact pins, full transitive dependency closure, hashes, and short human-readable version comments.
+
+## Minimal example
+- Input: `action=create component_type=service component_name=PolicyEvaluator purpose="Evaluate policy eligibility"`
+- Expected output:
+  - New/updated Python component with clear boundaries and guard clauses.
+  - Deterministic pytest tests aligned with repository style.
+  - No unintended behavioral drift outside requested changes.
+
+## Validation
+- Run lint/type checks when present.
+- Run relevant `pytest` tests.

@@ -10,9 +10,9 @@ description: Create or modify Python application components with clear separatio
 - Refactoring or extending existing Python application components.
 - Non-script Python code that contains business behavior.
 
-## Boundary with TechAIScriptPython
+## Boundary with internal-script-python
 - **This skill**: application components inside a structured project with package layout (services, use cases, adapters).
-- **TechAIScriptPython**: standalone scripts (`scripts/`, CLI tools, one-off automation).
+- **internal-script-python**: standalone scripts (`scripts/`, CLI tools, one-off automation).
 
 ## Mandatory rules
 - Keep business logic separated from I/O and infrastructure concerns.
@@ -70,9 +70,9 @@ def test_given_blank_account_id_when_creating_then_raises_value_error() -> None:
 | God classes with 10+ methods | Hard to test, hard to reason about | Split by responsibility into focused classes |
 
 ## Cross-references
-- **TechAIScriptPython** (`.github/skills/tech-ai-script-python/SKILL.md`): for standalone scripts.
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Python code (see `references/anti-patterns-python.md`).
-- **TechAIDocker** (`.github/skills/tech-ai-docker/SKILL.md`): for containerizing Python apps.
+- **internal-script-python** (`.github/skills/internal-script-python/SKILL.md`): for standalone scripts.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `references/anti-patterns-python.md`).
+- **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Python apps.
 
 ## Validation
 - `python -m compileall <paths>` (syntax check)

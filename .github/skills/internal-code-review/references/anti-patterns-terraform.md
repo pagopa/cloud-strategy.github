@@ -1,6 +1,6 @@
 # Terraform Anti-Patterns
 
-Reference: `instructions/terraform.instructions.md`
+Reference: `instructions/internal-terraform.instructions.md`
 
 ## Critical
 | ID | Anti-pattern | Why |

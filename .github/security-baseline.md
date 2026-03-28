@@ -53,9 +53,9 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 | Validate `.github/**` in CI | Automated | `github-validate-copilot-customizations.yml` |
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
 | Secret placeholder avoidance in prompts/examples | Partial | pre-commit hooks + review |
-| OIDC over long-lived secrets | Manual review | `github-actions.instructions.md` |
-| IAM least privilege (AWS/Azure/GCP) | Manual review | `TechAISecurityReviewer` + `TechAITerraformReviewer` |
-| Supply chain hardening | Manual review | `TechAISecurityReviewer` |
+| OIDC over long-lived secrets | Manual review | `internal-github-actions.instructions.md` |
+| IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-security-reviewer` + `internal-terraform-reviewer` |
+| Supply chain hardening | Manual review | `internal-security-reviewer` |
 | Branch protection for `.github/**` | Manual review | repository settings |
 | Read-only reviewer agents | Manual review | agent review |
 | CHANGELOG-based change governance | Manual review | PR review |

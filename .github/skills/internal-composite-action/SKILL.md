@@ -66,8 +66,8 @@ runs:
 | Breaking existing input contract | Callers silently break without warning | Add new inputs with defaults; deprecate old ones gradually |
 
 ## Cross-references
-- **TechAICICDWorkflow** (`.github/skills/tech-ai-cicd-workflow/SKILL.md`): for workflows that call composite actions.
-- **TechAIScriptBash** (`.github/skills/tech-ai-script-bash/SKILL.md`): for extracted shell scripts inside the action.
+- **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for workflows that call composite actions.
+- **internal-script-bash** (`.github/skills/internal-script-bash/SKILL.md`): for extracted shell scripts inside the action.
 
 ## Validation
 - Inputs documented and validated.

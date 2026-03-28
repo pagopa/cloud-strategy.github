@@ -68,8 +68,8 @@ done
 | Hardcoded paths | Non-portable across environments | Use variables or `dirname "$0"` for relative paths |
 
 ## Cross-references
-- **TechAICompositeAction** (`.github/skills/tech-ai-composite-action/SKILL.md`): for Bash inside composite actions.
-- **TechAICodeReview** (`.github/skills/tech-ai-code-review/SKILL.md`): for reviewing Bash code (see `references/anti-patterns-bash.md`).
+- **internal-composite-action** (`.github/skills/internal-composite-action/SKILL.md`): for Bash inside composite actions.
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Bash code (see `references/anti-patterns-bash.md`).
 
 ## Validation
 - `bash -n script.sh` (syntax check)
