@@ -61,7 +61,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `security-baseline.md`: portable security controls baseline for all Copilot customization.
 - `DEPRECATION.md`: lifecycle and deprecation policy for all customization assets.
 - `repo-profiles.yml`: advisory profile catalog for different repository types.
-- `.github/scripts/validate-copilot-customizations.sh`: validation gate for customization changes.
 - `.github/templates/AGENTS.template.md`: slimmer onboarding template that keeps asset paths in the inventory section only.
 - `.github/templates/copilot-quickstart.md`: quick start guide for new teams.
 
@@ -154,7 +153,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Required validations before PR
 
-- `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
 - `bash -n` and `shellcheck -s bash` for changed Bash scripts when available.
 - `python -m compileall <changed_python_paths>` and relevant `pytest` checks for Python changes.
 - `terraform fmt` and `terraform validate` for Terraform changes.

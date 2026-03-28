@@ -90,8 +90,8 @@ This is a standards repository that other teams consume. Without contribution gu
 - How to add a new skill (directory structure, SKILL.md template)
 - How to add a new agent (naming, tools, restrictions)
 - Naming conventions (`tech-ai-*` for canonical, `local-*` for consumer-local, `TechAIGlobal*` for repo-only)
-- Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
-- Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
+- Required validation before PR (`make lint`, `make test`, and stack-specific checks)
+- Required validation before PR (`make lint`, `make test`, and stack-specific checks)
 
 ---
 
@@ -113,8 +113,8 @@ lint: ## Run shellcheck and bash syntax checks
 	shellcheck -s bash .github/scripts/*.sh
 	python3 -m compileall .github/scripts tests
 
-validate: ## Run Copilot customization validator
-	bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict
+validate: ## Show repository validation guidance
+	@printf '%s\n' 'No repository-wide Copilot customization validator is configured.'
 
 test: ## Run Python test suite
 	pytest -q
@@ -127,27 +127,16 @@ all: lint validate test ## Run all checks
 
 ---
 
-### M-04: Validator bash script has zero dedicated tests
+### M-04: Repository validation guidance should stay aligned with the actual toolchain
 
-**File**: `.github/scripts/validate-copilot-customizations.sh` (1184 lines)
+**Files**: `Makefile`, `CONTRIBUTING.md`, `AGENTS.md`
 
-The test file `tests/test_tech_ai_validate_copilot_customizations.py` has 7 tests, which is good but covers only basic happy path + a few semantic checks. The 1184-line validator itself has many code paths not covered:
-- `--scope all` and `--scope repo=<name>` modes
-- `--mode legacy-compatible` vs `--mode strict` behavioral differences
-- JSON report output format and structure
-- Error handling for malformed frontmatter
-- Edge cases: empty instruction files, missing `applyTo`, overlapping agent names
-- Correct SHA pinning detection in workflows
+The repository should document only the validation steps that actually exist. Stale references to removed validators create false expectations for contributors and automation.
 
 **Fix**:
-1. Expand `tests/test_tech_ai_validate_copilot_customizations.py` with:
-   - Test for `--scope all` with multiple sub-repos
-   - Test for `--mode legacy-compatible` accepting relaxed conventions
-   - Test for JSON report output correctness
-   - Test for malformed frontmatter detection
-   - Test for SHA pinning detection
-2. Consider adding `bats-core` tests for direct bash testing of the validator's internal functions.
-3. Target ~15-20 total validator tests.
+1. Keep `make lint` and `make test` current with the real local checks.
+2. Update repository documentation whenever validation steps are added or removed.
+3. Avoid documenting repository-wide validators that no longer exist.
 
 ---
 
@@ -315,7 +304,7 @@ graph TD
     F[AGENTS.md] --> A
     F --> E
     
-    G[validate-copilot-customizations.sh] --> A
+    G[make lint and make test] --> A
     G --> B
     G --> C
     G --> D
@@ -353,7 +342,7 @@ The ANALYSIS_REPORT (item 5.1) flagged partial enforcement. The security baselin
 ## Enforcement status
 | Control | Status | Tool |
 |---------|--------|------|
-| SHA pinning | Automated | `validate-copilot-customizations.sh` |
+| SHA pinning | Manual review | — |
 | Minimal permissions | Manual review | — |
 | OIDC over secrets | Manual review | — |
 | ...
