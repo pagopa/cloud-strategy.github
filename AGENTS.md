@@ -206,23 +206,23 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Skills
 
-- `.github/skills/tech-ai-cicd-workflow/SKILL.md`
-- `.github/skills/tech-ai-cloud-policy/SKILL.md`
-- `.github/skills/tech-ai-code-review/SKILL.md`
-- `.github/skills/tech-ai-composite-action/SKILL.md`
-- `.github/skills/tech-ai-data-registry/SKILL.md`
-- `.github/skills/agent-development-techai-claude/SKILL.md`
-- `.github/skills/tech-ai-docker/SKILL.md`
-- `.github/skills/tech-ai-pair-architect/SKILL.md`
-- `.github/skills/tech-ai-pr-editor/SKILL.md`
-- `.github/skills/tech-ai-project-java/SKILL.md`
-- `.github/skills/tech-ai-project-nodejs/SKILL.md`
-- `.github/skills/tech-ai-project-python/SKILL.md`
-- `.github/skills/tech-ai-script-bash/SKILL.md`
-- `.github/skills/tech-ai-script-python/SKILL.md`
-- `.github/skills/skill-creator-techai-claude/SKILL.md`
-- `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`
-- `.github/skills/tech-ai-terraform/SKILL.md`
+- `.github/skills/internal-cicd-workflow/SKILL.md`
+- `.github/skills/internal-cloud-policy/SKILL.md`
+- `.github/skills/internal-code-review/SKILL.md`
+- `.github/skills/internal-composite-action/SKILL.md`
+- `.github/skills/internal-data-registry/SKILL.md`
+- `.github/skills/claude-agent-development-techai/SKILL.md`
+- `.github/skills/internal-docker/SKILL.md`
+- `.github/skills/internal-pair-architect/SKILL.md`
+- `.github/skills/internal-pr-editor/SKILL.md`
+- `.github/skills/internal-project-java/SKILL.md`
+- `.github/skills/internal-project-nodejs/SKILL.md`
+- `.github/skills/internal-project-python/SKILL.md`
+- `.github/skills/internal-script-bash/SKILL.md`
+- `.github/skills/internal-script-python/SKILL.md`
+- `.github/skills/claude-skill-creator-techai/SKILL.md`
+- `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
+- `.github/skills/internal-terraform/SKILL.md`
 
 ### Agents
 
