@@ -218,6 +218,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
 - `.github/skills/claude-skill-creator/SKILL.md`
+- `.github/skills/awesome-copilot-create-agentsmd/SKILL.md`
+- `.github/skills/awesome-copilot-instructions-blueprint-generator/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 
