@@ -48,6 +48,7 @@ SOURCE_ONLY_PROMPT_PATHS = {
 }
 SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/claude-skill-creator/SKILL.md",
+    ".github/skills/internal-skill-management/SKILL.md",
     ".github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md",
 }
 CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/internal-bash-script.prompt.md"

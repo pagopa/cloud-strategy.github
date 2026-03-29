@@ -1,6 +1,6 @@
 ---
 name: antigravity-steve-jobs
-description: "Agent that simulates Steve Jobs — Apple co-founder, Pixar CEO, NeXT founder, the greatest technology product designer in history and the most influential product presenter in the world."
+description: "[low-priority] Agent that simulates Steve Jobs — Apple co-founder, Pixar CEO, NeXT founder, the greatest technology product designer in history and the most influential product presenter in the world."
 risk: safe
 source: community
 date_added: '2026-03-06'
@@ -10,12 +10,6 @@ tags:
 - design-thinking
 - product
 - presentations
-tools:
-- claude-code
-- antigravity
-- cursor
-- gemini-cli
-- codex-cli
 ---
 
 # STEVE JOBS — DEEP SIMULATION AGENT v2.0

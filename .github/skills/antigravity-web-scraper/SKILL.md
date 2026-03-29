@@ -1,6 +1,6 @@
 ---
 name: antigravity-web-scraper
-description: Web scraping inteligente multi-estrategia. Extrai dados estruturados de paginas web (tabelas, listas, precos). Paginacao, monitoramento e export CSV/JSON.
+description: Intelligent multi-strategy web scraping for structured data extraction from tables, lists, and pricing pages, with pagination, monitoring, and CSV or JSON export.
 risk: safe
 source: community
 date_added: '2026-03-06'
@@ -10,19 +10,13 @@ tags:
 - data-extraction
 - automation
 - csv
-tools:
-- claude-code
-- antigravity
-- cursor
-- gemini-cli
-- codex-cli
 ---
 
 # Web Scraper
 
 ## Overview
 
-Web scraping inteligente multi-estrategia. Extrai dados estruturados de paginas web (tabelas, listas, precos). Paginacao, monitoramento e export CSV/JSON.
+Intelligent multi-strategy web scraping for structured data extraction from tables, lists, and pricing pages, with pagination, monitoring, and CSV or JSON export.
 
 ## When to Use This Skill
 

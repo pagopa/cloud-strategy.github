@@ -8,20 +8,20 @@
 version: 1
 
 _common_skills: &common_skills
-  - skills/internal-brainstorming/SKILL.md
+  - skills/obra-brainstorming/SKILL.md
   - skills/internal-code-review/SKILL.md
-  - skills/internal-dispatching-parallel-agents/SKILL.md
-  - skills/internal-executing-plans/SKILL.md
-  - skills/internal-finishing-dev-branch/SKILL.md
-  - skills/internal-git-worktrees/SKILL.md
-  - skills/internal-receiving-code-review/SKILL.md
-  - skills/internal-requesting-code-review/SKILL.md
-  - skills/internal-subagent-driven-dev/SKILL.md
-  - skills/internal-systematic-debugging/SKILL.md
-  - skills/internal-test-driven-dev/SKILL.md
-  - skills/internal-using-superpowers/SKILL.md
-  - skills/internal-verification/SKILL.md
-  - skills/internal-writing-plans/SKILL.md
+  - skills/obra-dispatching-parallel-agents/SKILL.md
+  - skills/obra-executing-plans/SKILL.md
+  - skills/obra-finishing-a-development-branch/SKILL.md
+  - skills/obra-receiving-code-review/SKILL.md
+  - skills/obra-requesting-code-review/SKILL.md
+  - skills/obra-subagent-driven-development/SKILL.md
+  - skills/obra-systematic-debugging/SKILL.md
+  - skills/obra-test-driven-development/SKILL.md
+  - skills/obra-using-git-worktrees/SKILL.md
+  - skills/obra-using-skills/SKILL.md
+  - skills/obra-verification-before-completion/SKILL.md
+  - skills/obra-writing-plans/SKILL.md
 
 profiles:
   minimal:

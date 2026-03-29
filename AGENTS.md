@@ -28,7 +28,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### When to use each agent
 
 #### Installed agents
-- Use `internal-agent-sync` for synchronizing approved upstream skills or instructions, detecting drift, and enforcing origin-based naming.
+- Use `internal-agent-sync` for synchronizing approved upstream skills or instructions, detecting drift, enforcing origin-based naming, consolidating overlapping skills, and retiring weaker catalog entries.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
 
 #### Planning and Architecture
@@ -119,9 +119,14 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 #### Domain-Specific Skills
 - `internal-code-review`: strict review workflow and anti-pattern catalog.
 - `internal-cicd-workflow`: CI or CD workflow design patterns.
+- `internal-changelog-automation`: changelog generation, release notes, and semver-aware release documentation.
 - `internal-sync-global-copilot-configs-into-repo`: deterministic sync planning and reporting.
 - `internal-pr-editor`: PR body templates and diff-to-body mapping patterns.
 - `internal-cloud-policy`: reusable cloud policy authoring patterns.
+- `internal-devops-core-principles`: DevOps operating model, CALMS, and DORA-driven delivery guidance.
+- `internal-performance-optimization`: cross-stack profiling and performance decision framework.
+- `internal-kubernetes-deployment`: production Kubernetes deployment and rollout guidance.
+- `internal-skill-management`: skill creation, import, deduplication, and lifecycle governance.
 - `internal-terraform`: unified Terraform skill for features and modules.
 - `internal-pair-architect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
 
@@ -153,14 +158,11 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
 - `.github/instructions/awesome-copilot-containerization-docker-best-practices.instructions.md`
 - `.github/instructions/awesome-copilot-copilot-sdk-python.instructions.md`
-- `.github/instructions/awesome-copilot-devops-core-principles.instructions.md`
 - `.github/instructions/awesome-copilot-github-actions-ci-cd-best-practices.instructions.md`
 - `.github/instructions/awesome-copilot-go.instructions.md`
 - `.github/instructions/awesome-copilot-instructions.instructions.md`
-- `.github/instructions/awesome-copilot-kubernetes-deployment-best-practices.instructions.md`
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
 - `.github/instructions/awesome-copilot-oop-design-patterns.instructions.md`
-- `.github/instructions/awesome-copilot-performance-optimization.instructions.md`
 - `.github/instructions/awesome-copilot-shell.instructions.md`
 - `.github/instructions/awesome-copilot-springboot.instructions.md`
 - `.github/instructions/awesome-copilot-terraform-azure.instructions.md`
@@ -207,8 +209,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Skills
 
-- `.github/skills/antigravity-async-python-patterns/SKILL.md`
-- `.github/skills/antigravity-aws-cost-cleanup/SKILL.md`
+- `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
 - `.github/skills/antigravity-aws-penetration-testing/SKILL.md`
 - `.github/skills/antigravity-aws-serverless/SKILL.md`
@@ -216,22 +217,14 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/antigravity-backend-architect/SKILL.md`
 - `.github/skills/antigravity-bash-pro/SKILL.md`
 - `.github/skills/antigravity-bash-scripting/SKILL.md`
-- `.github/skills/antigravity-changelog-automation/SKILL.md`
 - `.github/skills/antigravity-clean-code/SKILL.md`
 - `.github/skills/antigravity-cloud-architect/SKILL.md`
 - `.github/skills/antigravity-cloud-devops/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
 - `.github/skills/antigravity-code-refactoring-refactor-clean/SKILL.md`
 - `.github/skills/antigravity-code-refactoring-tech-debt/SKILL.md`
-- `.github/skills/antigravity-code-review-ai-ai-review/SKILL.md`
 - `.github/skills/antigravity-code-review-checklist/SKILL.md`
-- `.github/skills/antigravity-code-review-excellence/SKILL.md`
-- `.github/skills/antigravity-code-reviewer/SKILL.md`
 - `.github/skills/antigravity-code-simplifier/SKILL.md`
-- `.github/skills/antigravity-codebase-audit-pre-push/SKILL.md`
-- `.github/skills/antigravity-codebase-cleanup-deps-audit/SKILL.md`
-- `.github/skills/antigravity-codebase-cleanup-refactor-clean/SKILL.md`
-- `.github/skills/antigravity-codebase-cleanup-tech-debt/SKILL.md`
 - `.github/skills/antigravity-ddd-context-mapping/SKILL.md`
 - `.github/skills/antigravity-ddd-strategic-design/SKILL.md`
 - `.github/skills/antigravity-ddd-tactical-patterns/SKILL.md`
@@ -239,20 +232,18 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/antigravity-elon-musk/SKILL.md`
 - `.github/skills/antigravity-error-detective/SKILL.md`
 - `.github/skills/antigravity-github/SKILL.md`
+- `.github/skills/antigravity-golang-pro/SKILL.md`
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
 - `.github/skills/antigravity-java-pro/SKILL.md`
 - `.github/skills/antigravity-javascript-mastery/SKILL.md`
 - `.github/skills/antigravity-javascript-pro/SKILL.md`
-- `.github/skills/antigravity-javascript-testing-patterns/SKILL.md`
 - `.github/skills/antigravity-kaizen/SKILL.md`
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
 - `.github/skills/antigravity-kubernetes-deployment/SKILL.md`
 - `.github/skills/antigravity-network-101/SKILL.md`
 - `.github/skills/antigravity-network-engineer/SKILL.md`
-- `.github/skills/antigravity-nodejs-backend-patterns/SKILL.md`
 - `.github/skills/antigravity-nodejs-best-practices/SKILL.md`
 - `.github/skills/antigravity-python-patterns/SKILL.md`
-- `.github/skills/antigravity-python-performance-optimization/SKILL.md`
 - `.github/skills/antigravity-python-pro/SKILL.md`
 - `.github/skills/antigravity-python-testing-patterns/SKILL.md`
 - `.github/skills/antigravity-simplify-code/SKILL.md`
@@ -271,36 +262,46 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-azure-resource-health-diagnose/SKILL.md`
 - `.github/skills/awesome-copilot-azure-role-selector/SKILL.md`
 - `.github/skills/awesome-copilot-cloud-design-patterns/SKILL.md`
+- `.github/skills/awesome-copilot-codeql/SKILL.md`
 - `.github/skills/awesome-copilot-create-agentsmd/SKILL.md`
 - `.github/skills/awesome-copilot-create-github-action-workflow-specification/SKILL.md`
 - `.github/skills/awesome-copilot-create-github-pull-request-from-specification/SKILL.md`
 - `.github/skills/awesome-copilot-create-implementation-plan/SKILL.md`
 - `.github/skills/awesome-copilot-create-readme/SKILL.md`
+- `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-documentation-writer/SKILL.md`
 - `.github/skills/awesome-copilot-instructions-blueprint-generator/SKILL.md`
 - `.github/skills/awesome-copilot-java-junit/SKILL.md`
 - `.github/skills/awesome-copilot-java-springboot/SKILL.md`
 - `.github/skills/awesome-copilot-javascript-typescript-jest/SKILL.md`
+- `.github/skills/awesome-copilot-postgresql-optimization/SKILL.md`
 - `.github/skills/awesome-copilot-pytest-coverage/SKILL.md`
 - `.github/skills/awesome-copilot-refactor-plan/SKILL.md`
+- `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
+- `.github/skills/awesome-copilot-sql-optimization/SKILL.md`
 - `.github/skills/claude-agent-development/SKILL.md`
 - `.github/skills/claude-docx/SKILL.md`
 - `.github/skills/claude-pdf/SKILL.md`
 - `.github/skills/claude-pptx/SKILL.md`
 - `.github/skills/claude-skill-creator/SKILL.md`
 - `.github/skills/internal-cicd-workflow/SKILL.md`
+- `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-composite-action/SKILL.md`
 - `.github/skills/internal-data-registry/SKILL.md`
+- `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
+- `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-pair-architect/SKILL.md`
+- `.github/skills/internal-performance-optimization/SKILL.md`
 - `.github/skills/internal-pr-editor/SKILL.md`
 - `.github/skills/internal-project-java/SKILL.md`
 - `.github/skills/internal-project-nodejs/SKILL.md`
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
+- `.github/skills/internal-skill-management/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`

@@ -1,6 +1,6 @@
 ---
 name: antigravity-elon-musk
-description: "Agent that simulates Elon Musk with high-fidelity psychological and communicational depth. Activated for: \"speak like Elon\", \"simulate Elon Musk\", \"what would Elon say about X\", \"first principles thinking\", \"think like Elon\", character roleplay/simulation."
+description: "[low-priority] Agent that simulates Elon Musk with high-fidelity psychological and communicational depth. Activated for: \"speak like Elon\", \"simulate Elon Musk\", \"what would Elon say about X\", \"first principles thinking\", \"think like Elon\", character roleplay/simulation."
 risk: safe
 source: community
 date_added: '2026-03-06'
@@ -10,12 +10,6 @@ tags:
 - first-principles
 - innovation
 - strategy
-tools:
-- claude-code
-- antigravity
-- cursor
-- gemini-cli
-- codex-cli
 ---
 
 # ELON MUSK — DEEP SIMULATION AGENT v3.0
