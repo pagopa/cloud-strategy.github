@@ -24,13 +24,16 @@ description: Sync shared Copilot baseline into consumer repos — dynamic stack 
 3. Flag conflicts: target file diverged from last-synced version (manifest mismatch).
 4. Flag redundancies: legacy aliases coexisting with canonical assets.
 5. Flag origin-prefix violations: repo-owned assets missing `internal-*`, `local-*`, or a supported external short-repo prefix.
-6. Generate plan report (JSON or Markdown).
+6. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via `awesome-copilot-instructions-blueprint-generator`, then target root `AGENTS.md` via `awesome-copilot-create-agentsmd`.
+7. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)
 1. Copy selected assets using conservative merge (never overwrite unmanaged divergent files).
 2. Update manifest with new SHA-256 checksums and timestamp.
-3. Render target-specific `AGENTS.md` from managed baseline + existing internal assets.
-4. Produce final report: actions taken, conflicts skipped, recommendations.
+3. Refresh target `.github/copilot-instructions.md` as the primary detailed Copilot policy file, preserving target-local rules that are still valid and do not conflict with the managed baseline.
+4. Refresh target-specific root `AGENTS.md` from the managed baseline plus existing target-local assets, keeping it concise and bridge-oriented instead of duplicating Copilot policy text.
+5. Preserve target-local unmanaged resources, prompts, skills, agents, and configuration unless the approved plan explicitly migrates them.
+6. Produce final report: actions taken, conflicts skipped, preserved local assets, and recommendations.
 
 ## Managed always-sync files
 These files are always synced regardless of detected stacks:
@@ -68,6 +71,9 @@ These assets exist only in this standards repository:
 - Prefer existing root `AGENTS.md` over creating a second managed file under `.github/`.
 - Keep origin-prefixed assets visible in rendered AGENTS.md inventory.
 - Never overwrite unmanaged divergent files — flag as conflicts instead.
+- Treat target `.github/copilot-instructions.md` as the primary home for detailed behavioral, validation, and implementation guidance.
+- Treat target root `AGENTS.md` as a thin bridge for generic assistants: routing, naming, priority, and discovery of the Copilot-owned `.github` assets.
+- Preserve target-local unmanaged resources and configuration even when they are not part of the selected sync baseline; report them instead of deleting or folding them into managed files.
 
 ## Common mistakes
 
@@ -76,7 +82,9 @@ These assets exist only in this standards repository:
 | Running apply without reviewing the plan first | Unintended overwrites or deletions | Always run plan mode first, review the report |
 | Syncing source-only agents to consumer repos | Consumer gets assets meant for standards repo only | Check exclusion lists |
 | Ignoring manifest checksum mismatches | Target edits get silently overwritten | Flag as conflict, require manual resolution |
-| Not updating AGENTS.md after sync | Inventory drifts from actual file state | Always regenerate AGENTS.md from current state |
+| Updating root AGENTS.md before copilot-instructions.md | The bridge can drift from the source policy | Refresh target `.github/copilot-instructions.md` first, then regenerate root `AGENTS.md` |
+| Copying detailed Copilot policy into root AGENTS.md | The root bridge becomes redundant and harder to maintain | Keep detailed policy in `.github/copilot-instructions.md` and keep `AGENTS.md` concise |
+| Treating target-local unmanaged assets as disposable noise | Local configuration gets lost during alignment | Preserve unmanaged local assets and surface them in the report or as conflicts |
 | Hardcoding profiles instead of detecting stacks | New stacks in target repo get no coverage | Detect dynamically from file extensions |
 
 ## Cross-references
