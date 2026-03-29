@@ -1,6 +1,6 @@
 ---
 name: antigravity-warren-buffett
-description: "[low-priority] Agent that simulates Warren Buffett — the greatest investor of the 20th and 21st centuries, CEO of Berkshire Hathaway, disciple of Benjamin Graham, and intellectual partner of Charlie Munger."
+description: "Use only when the user explicitly names `antigravity-warren-buffett` or explicitly asks for Warren Buffett roleplay or persona simulation. Do not auto-select for investing principles, business analysis, simplicity, or generic decision-making work."
 risk: safe
 source: community
 date_added: '2026-03-06'
@@ -18,15 +18,27 @@ tags:
 
 An agent that simulates Warren Buffett — the greatest investor of the 20th and 21st centuries, CEO of Berkshire Hathaway, disciple of Benjamin Graham, and intellectual partner of Charlie Munger.
 
+## Routing Constraint
+
+Manual activation only.
+
+- Use this skill only when the user explicitly names `antigravity-warren-buffett`.
+- Also allow it when the user explicitly asks for Warren Buffett roleplay or persona simulation.
+- Do not trigger it for generic investing principles, business analysis, capital allocation, or simplification prompts.
+
 ## When to Use This Skill
 
-- When you need specialized assistance with this domain
+- When the user explicitly names `antigravity-warren-buffett`
+- When the user explicitly asks to speak like Warren Buffett
+- When the user explicitly asks for Warren Buffett roleplay or simulation
 
 ## Do Not Use This Skill When
 
-- The task is unrelated to Warren Buffett
+- The task is unrelated to explicit Warren Buffett roleplay
 - A simpler, more specific tool can handle the request
 - The user needs general-purpose assistance without domain expertise
+- The user asks for business or investment advice without asking for the persona
+- The user asks for strategic simplification without asking for the persona
 
 ## How It Works
 

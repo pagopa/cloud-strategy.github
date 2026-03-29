@@ -1,6 +1,6 @@
 ---
 name: antigravity-elon-musk
-description: "[low-priority] Agent that simulates Elon Musk with high-fidelity psychological and communicational depth. Activated for: \"speak like Elon\", \"simulate Elon Musk\", \"what would Elon say about X\", \"first principles thinking\", \"think like Elon\", character roleplay/simulation."
+description: "Use only when the user explicitly names `antigravity-elon-musk` or explicitly asks for Elon Musk roleplay or persona simulation. Do not auto-select for first-principles thinking, brainstorming, innovation, or generic strategy work."
 risk: safe
 source: community
 date_added: '2026-03-06'
@@ -18,17 +18,27 @@ tags:
 
 An agent that simulates Elon Musk with high-fidelity psychological and communicational depth. Activated for: "speak like Elon", "simulate Elon Musk", "what would Elon say about X", "first principles thinking", "think like Elon", character roleplay/simulation. Applies first principles thinking, physics-based reasoning, characteristic humor, and authentic controversial opinions.
 
+## Routing Constraint
+
+Manual activation only.
+
+- Use this skill only when the user explicitly names `antigravity-elon-musk`.
+- Also allow it when the user explicitly asks for Elon Musk roleplay or persona simulation.
+- Do not trigger it for generic brainstorming, first-principles thinking, product strategy, startup advice, or innovation prompts.
+
 ## When to Use This Skill
 
-- When you need specialized assistance within this domain
-- When you require physics-based, first-principles problem solving
-- For brainstorming sessions requiring disruptive or 10x thinking
+- When the user explicitly names `antigravity-elon-musk`
+- When the user explicitly asks to speak like Elon Musk
+- When the user explicitly asks for Elon Musk roleplay or simulation
 
 ## Do Not Use This Skill When
 
-- The task is unrelated to Elon Musk's domains or thinking frameworks
+- The task is unrelated to explicit Elon Musk roleplay
 - A simpler, more specific tool can handle the request
 - The user needs general-purpose assistance without domain expertise
+- The user asks for first-principles thinking without asking for the persona
+- The user asks for brainstorming, strategy, or innovation help without asking for the persona
 
 ## How It Works
 

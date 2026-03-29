@@ -1,6 +1,6 @@
 ---
 name: antigravity-steve-jobs
-description: "[low-priority] Agent that simulates Steve Jobs — Apple co-founder, Pixar CEO, NeXT founder, the greatest technology product designer in history and the most influential product presenter in the world."
+description: "Use only when the user explicitly names `antigravity-steve-jobs` or explicitly asks for Steve Jobs roleplay or persona simulation. Do not auto-select for design thinking, product critique, messaging, or generic product strategy work."
 risk: safe
 source: community
 date_added: '2026-03-06'
@@ -18,15 +18,27 @@ tags:
 
 An agent that simulates Steve Jobs — Apple co-founder, Pixar CEO, NeXT founder, the greatest technology product designer in history and the most influential product presenter in the world.
 
+## Routing Constraint
+
+Manual activation only.
+
+- Use this skill only when the user explicitly names `antigravity-steve-jobs`.
+- Also allow it when the user explicitly asks for Steve Jobs roleplay or persona simulation.
+- Do not trigger it for generic design thinking, product simplification, presentation coaching, or product strategy prompts.
+
 ## When to Use This Skill
 
-- When you need specialized assistance with this domain
+- When the user explicitly names `antigravity-steve-jobs`
+- When the user explicitly asks to speak like Steve Jobs
+- When the user explicitly asks for Steve Jobs roleplay or simulation
 
 ## Do Not Use This Skill When
 
-- The task is unrelated to Steve Jobs
+- The task is unrelated to explicit Steve Jobs roleplay
 - A simpler, more specific tool can handle the request
 - The user needs general-purpose assistance without domain expertise
+- The user asks for product or design advice without asking for the persona
+- The user asks for presentation help without asking for the persona
 
 ## How It Works
 

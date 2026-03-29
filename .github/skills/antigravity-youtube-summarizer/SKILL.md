@@ -1,6 +1,6 @@
 ---
 name: antigravity-youtube-summarizer
-description: "Extract transcripts from YouTube videos and generate comprehensive, detailed summaries using intelligent analysis frameworks"
+description: "Use only when the user explicitly names `antigravity-youtube-summarizer` or explicitly asks to summarize a specific YouTube video URL. Do not auto-select for generic summarization, transcription, note-taking, or research requests."
 category: content
 risk: safe
 source: community
@@ -16,16 +16,21 @@ This skill extracts transcripts from YouTube videos and generates comprehensive,
 
 The skill is designed for users who need thorough content analysis and reference documentation from educational videos, lectures, tutorials, or informational content.
 
+## Routing Constraint
+
+Manual activation only.
+
+- Use this skill only when the user explicitly names `antigravity-youtube-summarizer`.
+- Also allow it when the user explicitly asks to summarize a specific YouTube video URL.
+- Do not trigger it for generic summarization, transcript extraction, meeting notes, article summaries, or broad research tasks.
+
 ## When to Use This Skill
 
 This skill should be used when:
 
-- User provides a YouTube video URL and wants a detailed summary
-- User needs to document video content for reference without rewatching
-- User wants to extract insights, key points, and arguments from educational content
-- User needs transcripts from YouTube videos for analysis
-- User asks to "summarize", "resume", or "extract content" from YouTube videos
-- User wants comprehensive documentation prioritizing completeness over brevity
+- User explicitly names `antigravity-youtube-summarizer`
+- User provides a specific YouTube video URL and explicitly asks for a summary
+- User provides a specific YouTube video URL and explicitly asks for transcript-based analysis
 
 ## Step 0: Discovery & Setup
 
