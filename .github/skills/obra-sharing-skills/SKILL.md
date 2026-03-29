@@ -20,7 +20,7 @@ Contribute skills from your local branch back to the upstream repository.
 - Skill applies broadly (not project-specific)
 - Pattern/technique others would benefit from
 - Well-tested and documented
-- Follows `obra-writing-skills` guidelines
+- Follows `internal-skill-development` guidelines
 
 **Keep personal when:**
 - Project-specific or organization-specific
@@ -32,7 +32,7 @@ Contribute skills from your local branch back to the upstream repository.
 
 - `gh` CLI installed and authenticated
 - Working directory is `~/.config/superpowers/skills/` (your local clone)
-- Skill has been tested (see `obra-writing-skills` for the skill authoring and hardening process)
+- Skill has been tested (see `internal-skill-development` for the skill authoring and hardening process)
 
 ## Sharing Workflow
 
@@ -194,4 +194,4 @@ Each skill should:
 
 ## Related Skills
 
-- `obra-writing-skills` - how to create and harden well-tested skills
+- `internal-skill-development` - how to create and harden well-tested skills

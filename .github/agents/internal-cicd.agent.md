@@ -1,9 +1,9 @@
 ---
-name: internal-agent-cicd
+name: internal-cicd
 description: Use this agent for CI/CD workflow design, GitHub Actions delivery, composite actions, deployment stages, and release automation when the task needs a dedicated delivery-pipeline command center.
 ---
 
-# Internal Agent CI/CD
+# Internal CI/CD
 
 ## Role
 

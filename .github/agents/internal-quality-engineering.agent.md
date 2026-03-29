@@ -1,9 +1,9 @@
 ---
-name: internal-agent-quality
-description: Use this agent for test strategy, coverage improvement, performance diagnosis, SQL or PostgreSQL tuning, and observability design when the repository needs a quality and reliability command center.
+name: internal-quality-engineering
+description: Use this agent for test strategy, coverage improvement, performance diagnosis, SQL or PostgreSQL tuning, and observability design when the repository needs a quality-engineering and reliability command center.
 ---
 
-# Internal Agent Quality
+# Internal Quality Engineering
 
 ## Role
 

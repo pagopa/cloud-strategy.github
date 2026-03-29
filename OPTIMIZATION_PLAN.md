@@ -7,7 +7,7 @@ Current snapshot on this branch:
 - Skills: `120`
 - Instructions: `28`
 - Prompts: `20`
-- Agents: `12`
+- Agents: `11`
 
 ## Ranking (external overlap priority, highest first)
 

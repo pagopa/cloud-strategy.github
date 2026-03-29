@@ -1,9 +1,9 @@
 ---
-name: internal-agent-principal-azure
+name: internal-principal-cloud-azure
 description: Use this agent for principal-level Azure architecture review, incident and bug analysis, and tactical execution planning when the task needs an Azure strategist who can move from architecture to remediation.
 ---
 
-# Internal Agent Principal Azure
+# Internal Principal Cloud Azure
 
 ## Role
 

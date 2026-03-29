@@ -1,9 +1,9 @@
 ---
-name: internal-agent-principal-aws
+name: internal-principal-cloud-aws
 description: Use this agent for principal-level AWS architecture review, incident and bug analysis, and tactical execution planning when the task needs an AWS strategist who can move from architecture to remediation.
 ---
 
-# Internal Agent Principal AWS
+# Internal Principal Cloud AWS
 
 ## Role
 

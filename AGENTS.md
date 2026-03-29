@@ -28,21 +28,21 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### When to use each agent
 
 #### Installed agents
-- Use `internal-agent-sync` for synchronizing approved upstream skills or instructions, detecting drift, enforcing origin-based naming, consolidating overlapping skills, and retiring weaker catalog entries.
+- Use `internal-sync-control-center` for synchronizing approved upstream skills or instructions, detecting drift, enforcing origin-based naming, consolidating overlapping skills, retiring weaker catalog entries, and governing `.github/` Copilot assets.
+  This command center absorbs the former standalone Copilot-governance role.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
-- Use `internal-agent-copilot-governance` for `AGENTS.md`, prompt, skill, agent, and naming-policy governance inside `.github/`.
-- Use `internal-agent-cicd` for CI/CD workflows, composite actions, release automation, and deployment-pipeline design.
+- Use `internal-cicd` for CI/CD workflows, composite actions, release automation, and deployment-pipeline design.
 
 #### Planning and Architecture
-- Use `internal-agent-architect` for strategic software and platform architecture decisions.
+- Use `internal-architect` for strategic software and platform architecture decisions.
 - Use `internal-pair-architect-analysis` prompt with the `internal-pair-architect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
-- Use `internal-agent-principal-aws`, `internal-agent-principal-azure`, and `internal-agent-principal-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
+- Use `internal-principal-cloud-aws`, `internal-principal-cloud-azure`, and `internal-principal-cloud-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
 
 #### Editing and Delivery
-- Use `internal-agent-developer` for polyglot implementation work in Java, Node.js, Python, and Bash.
-- Use `internal-agent-infrastructure` for Terraform, Docker, Kubernetes, and infrastructure delivery.
-- Use `internal-agent-quality` for test strategy, performance, SQL or PostgreSQL tuning, and observability.
-- Use `internal-agent-code-review` for defect-first code review and merge-readiness checks.
+- Use `internal-developer` for polyglot implementation work in Java, Node.js, Python, and Bash.
+- Use `internal-infrastructure` for Terraform, Docker, Kubernetes, and infrastructure delivery.
+- Use `internal-quality-engineering` for test strategy, performance, SQL or PostgreSQL tuning, and observability.
+- Use `internal-code-review` for defect-first code review and merge-readiness checks.
 - Use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation from diffs.
 
 ### Anti-patterns
@@ -137,7 +137,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `internal-agent-development`: repository-owned agent creation and agent-splitting guidance.
 - `internal-agents-md-bridge`: lightweight `AGENTS.md` bridge design to `.github/copilot-instructions.md`.
 - `internal-copilot-audit`: catalog overlap, hollow-reference, and bridge-quality auditing.
-- `internal-skill-management`: skill creation, import, deduplication, and lifecycle governance.
+- `internal-skill-development`: repository-owned skill creation, evaluation, and trigger-hardening guidance.
+- `internal-skill-management`: catalog import, deduplication, normalization, and lifecycle governance.
 - `internal-terraform`: unified Terraform skill for features and modules.
 - `internal-pair-architect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
 
@@ -154,7 +155,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `obra-test-driven-development`: TDD red-green-refactor workflow.
 - `obra-using-skills`: skill capability awareness and reuse best practices.
 - `obra-verification-before-completion`: evidence-based verification before claiming completion.
-- `obra-writing-skills`: skill authoring, discoverability, and hardening guidance.
 - `obra-writing-plans`: structured plan authoring.
 
 ### Required validations before PR
@@ -304,6 +304,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
+- `.github/skills/internal-skill-development/SKILL.md`
 - `.github/skills/internal-skill-management/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
@@ -337,22 +338,20 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/obra-verification-before-completion/SKILL.md`
 - `.github/skills/obra-when-stuck/SKILL.md`
 - `.github/skills/obra-writing-plans/SKILL.md`
-- `.github/skills/obra-writing-skills/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-style-guide/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
 
 ### Agents
 
-- `.github/agents/internal-agent-architect.agent.md`
-- `.github/agents/internal-agent-cicd.agent.md`
-- `.github/agents/internal-agent-code-review.agent.md`
-- `.github/agents/internal-agent-copilot-governance.agent.md`
-- `.github/agents/internal-agent-developer.agent.md`
-- `.github/agents/internal-agent-infrastructure.agent.md`
-- `.github/agents/internal-agent-principal-aws.agent.md`
-- `.github/agents/internal-agent-principal-azure.agent.md`
-- `.github/agents/internal-agent-principal-gcp.agent.md`
-- `.github/agents/internal-agent-quality.agent.md`
-- `.github/agents/internal-agent-sync.agent.md`
+- `.github/agents/internal-architect.agent.md`
+- `.github/agents/internal-cicd.agent.md`
+- `.github/agents/internal-code-review.agent.md`
+- `.github/agents/internal-developer.agent.md`
+- `.github/agents/internal-infrastructure.agent.md`
+- `.github/agents/internal-principal-cloud-aws.agent.md`
+- `.github/agents/internal-principal-cloud-azure.agent.md`
+- `.github/agents/internal-principal-cloud-gcp.agent.md`
+- `.github/agents/internal-quality-engineering.agent.md`
+- `.github/agents/internal-sync-control-center.agent.md`
 - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`

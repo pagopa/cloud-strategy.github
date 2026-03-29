@@ -1,11 +1,13 @@
 ---
 name: internal-skill-management
-description: Audit, create, improve, import, consolidate, and retire Copilot skills with strict naming, trigger, evaluation, and overlap control. Use when creating a new SKILL.md, importing upstream skills, extracting agent logic into a skill, tuning skill descriptions, testing trigger quality, deleting overlapping skills, or validating skill lifecycle quality in this repository.
+description: Govern the repository skill catalog: audit, import, consolidate, normalize, and retire Copilot skills with strict naming, trigger, and overlap control. Use when deciding which skills should exist, replacing weaker skills, extracting repo-owned governance logic, or validating skill lifecycle quality across the catalog.
 ---
 
 # Internal Skill Management
 
-Use this skill for repository-owned skill governance. It is the operating manual behind `internal-agent-sync` whenever the work involves skill creation, import, consolidation, or retirement.
+Use this skill for repository-owned skill governance. It is the operating manual behind `internal-sync-control-center` whenever the work involves import, consolidation, naming normalization, or retirement.
+
+Use `internal-skill-development` when drafting or iterating the content of one specific skill.
 
 ## Goals
 
@@ -70,24 +72,13 @@ Rules:
 - Do not keep runtime-specific clutter that weakens portability.
 - If adapting an upstream skill, normalize wording to GitHub Copilot terminology where needed.
 
-### 3.1 Skill Authoring Loop
+### 3.1 Skill Authoring Handoff
 
-When creating or improving a skill, use this loop:
+When the decision is to create or improve one specific skill:
 
-1. Capture intent, trigger phrases, output shape, and exclusions.
-2. Draft the frontmatter and the smallest useful workflow body.
-3. Test the description against realistic prompts from this repository's domains.
-4. Tighten the trigger language when the skill under-triggers or collides with nearby skills.
-5. Expand only after the workflow is already coherent.
-
-Prefer lightweight local evaluation:
-
-- Compare the new skill against nearby competing skills.
-- Use 2-5 realistic prompts that resemble actual user requests.
-- Judge whether the skill should trigger, not only whether the body looks polished.
-- Record structural gaps in the skill itself instead of relying on external eval tooling.
-
-Do not depend on Claude-only benchmarking flows, subagent-only evaluators, or viewer-specific tooling.
+1. Use `internal-skill-development` for the authoring and evaluation loop.
+2. Return here to confirm the new or changed skill still belongs in the catalog.
+3. Re-check overlap, naming, references, and downstream governance after the draft is ready.
 
 ### 4. Keep the Body High Signal
 
@@ -133,7 +124,7 @@ When an agent is turning into a knowledge dump:
 3. Point the agent at that skill explicitly.
 4. Keep the skill reusable outside the single current task.
 
-This is the preferred pattern for `internal-agent-sync`.
+This is the preferred pattern for `internal-sync-control-center`.
 
 ## Validation
 
@@ -158,7 +149,7 @@ Before finishing:
 
 ## Handoff
 
-When this skill is used from `internal-agent-sync`:
+When this skill is used from `internal-sync-control-center`:
 
 1. Audit the catalog.
 2. Decide keep, import, replace, extract, or retire.

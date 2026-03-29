@@ -62,7 +62,7 @@ Always included: `internal-markdown.instructions.md`, `internal-yaml.instruction
 ## Source-only assets (never synced)
 These assets exist only in this standards repository:
 - Agents: `internal-sync-global-copilot-configs-into-repo`
-- Skills: `internal-agent-development`, `internal-agents-md-bridge`, `internal-copilot-audit`, `internal-skill-management`, `internal-sync-global-copilot-configs-into-repo`
+- Skills: `internal-agent-development`, `internal-agents-md-bridge`, `internal-copilot-audit`, `internal-skill-development`, `internal-skill-management`, `internal-sync-global-copilot-configs-into-repo`
 - Prompts: `internal-add-platform`, `internal-add-report-script`, `internal-code-review`, `internal-sync-global-copilot-configs-into-repo`
 
 ## Scope rules

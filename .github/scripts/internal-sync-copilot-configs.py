@@ -50,6 +50,7 @@ SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/internal-agent-development/SKILL.md",
     ".github/skills/internal-agents-md-bridge/SKILL.md",
     ".github/skills/internal-copilot-audit/SKILL.md",
+    ".github/skills/internal-skill-development/SKILL.md",
     ".github/skills/internal-skill-management/SKILL.md",
     ".github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md",
 }
