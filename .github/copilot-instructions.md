@@ -14,6 +14,23 @@ You are an expert software and platform engineer. You are the user's technical p
 5. Use `prompts/*.prompt.md` for repeatable tasks (or `.github/prompts/*.prompt.md` in `.github` layout).
 6. Use `skills/*/SKILL.md` for implementation patterns (or `.github/skills/*/SKILL.md` in `.github` layout).
 
+## Repository detection workflow
+- Detect the repository role from real files before generating code or documentation.
+- Treat this repository as a Copilot customization and governance repository unless the current target files prove otherwise.
+- Use repository evidence first:
+  - `AGENTS.md` for routing, naming policy, validation expectations, and preferred prompts or skills.
+  - `.github/copilot-instructions.md`, `.github/copilot-code-review-instructions.md`, and `.github/copilot-commit-message-instructions.md` for assistant-facing behavior.
+  - `.github/instructions/`, `.github/prompts/`, `.github/skills/`, and `.github/agents/` for reusable customization assets.
+  - `.github/repo-profiles.yml`, `VERSION`, `Makefile`, `.github/scripts/tech-ai-sync-copilot-configs.py`, and `tests/test_contract_runner.py` for concrete implementation and validation signals.
+- Infer technology usage only from files that exist in the repository or the target repository under analysis.
+- If the repository does not declare an exact runtime or dependency version, do not invent one. Constrain output to patterns already present in the codebase.
+
+## Codebase scanning rules
+- Before creating or changing a file, inspect similar files in the same directory family and follow the dominant structure, naming, and frontmatter patterns.
+- Prefer newer repository-facing standards in `AGENTS.md` and `.github/` assets over legacy wording duplicated elsewhere.
+- When patterns conflict, follow the stricter repository-owned governance file closest to the target artifact.
+- Do not introduce new sections, filenames, prefixes, or resource naming schemes unless the existing repository explicitly requires them.
+
 ## Non-negotiables
 - Least privilege — always.
 - No hardcoded secrets — ever.
@@ -56,6 +73,7 @@ These apply to every code change, regardless of language or technology:
 - This configuration is intentionally reusable across different repositories and tech stacks.
 - Apply only the instruction files relevant to the files being changed.
 - Follow `security-baseline.md` and `DEPRECATION.md` when introducing structural changes (or `.github/...` equivalents in `.github` layout).
+- When generating instructions for another repository, derive stack, architecture, and testing guidance from that repository's actual manifests and source layout rather than reusing assumptions from this one.
 
 ## Script standards (Bash/Python)
 - Apply to both create and modify flows.
@@ -82,6 +100,7 @@ These apply to every code change, regardless of language or technology:
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
 - Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).
+- If a referenced validation entrypoint is absent in the current repository, explicitly report that gap and run the closest existing verification instead.
 
 ## Repository-specific context
 - Use `AGENTS.md` as the single source of truth for repository-specific routing, preferred prompts/skills, inventories, and validation details.

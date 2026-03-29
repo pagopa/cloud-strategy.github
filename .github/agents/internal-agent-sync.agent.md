@@ -47,6 +47,7 @@ You keep skill assets synchronized across `cloud-strategy.github`, approved exte
 - Do not silently keep a non-canonical directory name, file name, or frontmatter `name:` when the asset should be normalized.
 
 ## Approved Upstream Scope
+- `awesome`: sync only the approved `github/awesome-copilot` skills `copilot-instructions-blueprint-generator` and `create-agentsmd`.
 - `claude`: sync from Anthropic skill sources used by this repository, including `anthropics/claude-code` plugin skills and the approved `anthropics/skills` assets for `docx`, `pdf`, `pptx`, and `skill-creator`.
 - `obra`: sync all skills from `obra/superpowers` except `writing-skills`, which must stay sourced from the approved Claude-origin variant instead.
 - `terraform`: sync all skills from `hashicorp/agent-skills` under `terraform/code-generation/skills` except `azure-verified-modules`.
@@ -62,6 +63,12 @@ You keep skill assets synchronized across `cloud-strategy.github`, approved exte
   - Asset created in `cloud-strategy.github`: `internal-<resource-name>`
   - Asset created in another local repository: `local-<resource-name>`
 - Keep legacy prefixes only when backward compatibility requires them.
+- For approved `awesome` imports, use `awesome` as the short-repo prefix for both directory names and frontmatter `name:` values.
+
+## Source-specific guidance
+- For `awesome-copilot/copilot-instructions-blueprint-generator`, preserve the upstream intent that generated `copilot-instructions.md` guidance must be grounded in actual repository patterns, exact detected technology versions, and existing architectural boundaries. Do not retain wording that encourages assumptions or generic best practices that are not evidenced in the target repository.
+- For `awesome-copilot/create-agentsmd`, preserve the upstream intent that `AGENTS.md` content must be actionable, repository-rooted, command-specific, and validated against the real project workflow. Keep monorepo precedence guidance only when the target repository structure actually needs it.
+- When syncing either approved `awesome` skill, normalize repository-facing wording to GitHub Copilot terminology and align file references with this repository's canonical paths and naming rules.
 
 ## Execution workflow
 1. Identify the asset origin: approved external repository, this repository, or another local repository.
