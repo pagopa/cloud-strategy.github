@@ -15,7 +15,7 @@ You are a code agent. Your task is to create a complete, accurate `AGENTS.md` at
 
 - **Agent-focused**: Contains detailed technical instructions for automated tools
 - **Complements README.md**: Doesn't replace human documentation but adds agent-specific context
-- **Standardized location**: Placed at repository root (or subproject roots for monorepos)
+- **Standardized location**: Placed at repository root, with nested `AGENTS.md` files only when the inspected repository is actually a monorepo
 - **Open format**: Uses standard Markdown with flexible structure
 - **Ecosystem compatibility**: Works across 20+ different AI coding tools and agents
 
@@ -210,11 +210,11 @@ Use this as a starting template and customize based on the specific project:
 - **Include context**: Explain why certain steps are needed
 - **Stay current**: Update as the project evolves
 - **Test commands**: Ensure all listed commands actually work
-- **Consider nested files**: For monorepos, create `AGENTS.md` files in subprojects as needed
+- **Consider nested files**: Only add nested `AGENTS.md` files when the inspected repository genuinely has monorepo-style subprojects that need local overrides
 
 ## Monorepo Considerations
 
-For large monorepos:
+If the inspected repository is a large monorepo:
 
 - Place a main `AGENTS.md` at the repository root
 - Create additional `AGENTS.md` files in subproject directories

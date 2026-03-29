@@ -1,6 +1,6 @@
 ---
 name: awesome-copilot-instructions-blueprint-generator
-description: 'Technology-agnostic blueprint generator for creating comprehensive copilot-instructions.md files that guide GitHub Copilot to produce code consistent with project standards, architecture patterns, and exact technology versions by analyzing existing codebase patterns and avoiding assumptions.'
+description: 'Technology-agnostic blueprint generator for creating comprehensive `.github/copilot-instructions.md` guidance that directs GitHub Copilot to follow project standards, architecture patterns, and exact technology versions by analyzing real codebase patterns and avoiding assumptions.'
 ---
 
 # Copilot Instructions Blueprint Generator
@@ -15,7 +15,7 @@ ${VERSIONING="Semantic|CalVer|Custom"} <!-- Versioning approach -->
 
 ## Generated Prompt
 
-"Generate a comprehensive copilot-instructions.md file that will guide GitHub Copilot to produce code consistent with our project's standards, architecture, and technology versions. The instructions must be strictly based on actual code patterns in our codebase and avoid making any assumptions. Follow this approach:
+"Generate a comprehensive `.github/copilot-instructions.md` file that will guide GitHub Copilot to produce code consistent with our project's standards, architecture, and technology versions. The instructions must be strictly based on actual code patterns in our codebase and avoid making any assumptions. Follow this approach:
 
 ### 1. Core Instruction Structure
 
@@ -27,7 +27,7 @@ ${VERSIONING="Semantic|CalVer|Custom"} <!-- Versioning approach -->
 When generating code for this repository:
 
 1. **Version Compatibility**: Always detect and respect the exact versions of languages, frameworks, and libraries used in this project
-2. **Context Files**: Prioritize patterns and standards defined in the .github/copilot directory
+2. **Context Files**: Prioritize patterns and standards defined in repository-owned `.github` Copilot context files
 3. **Codebase Patterns**: When context files don't provide specific guidance, scan the codebase for established patterns
 4. **Architectural Consistency**: Maintain our ${ARCHITECTURE_STYLE} architectural style and established boundaries
 5. **Code Quality**: Prioritize ${CODE_QUALITY_FOCUS == "All" ? "maintainability, performance, security, accessibility, and testability" : CODE_QUALITY_FOCUS} in all generated code
@@ -52,13 +52,14 @@ Before generating code, scan the codebase to identify:
 
 ## Context Files
 
-Prioritize the following files in .github/copilot directory (if they exist):
+Prioritize the following repository-owned files in `.github` (if they exist):
 
-- **architecture.md**: System architecture guidelines
-- **tech-stack.md**: Technology versions and framework details
-- **coding-standards.md**: Code style and formatting standards
-- **folder-structure.md**: Project organization guidelines
-- **exemplars.md**: Exemplary code patterns to follow
+- **copilot-instructions.md**: Core assistant-facing rules and repository-wide non-negotiables
+- **copilot-code-review-instructions.md**: Review-specific guidance and quality gates
+- **copilot-commit-message-instructions.md**: Commit message standards
+- **instructions/*.instructions.md**: File-pattern-specific implementation guidance
+- **prompts/*.prompt.md**: Repeatable task prompts and output constraints
+- **skills/*/SKILL.md**: Reusable workflow and implementation patterns
 
 ## Codebase Scanning Instructions
 
