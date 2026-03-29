@@ -174,37 +174,6 @@ The repository-owned replacements below should be kept as internal skills rather
 - Keep `.github/copilot-instructions.md` primary and keep root `AGENTS.md` intentionally light.
 - Never keep the upstream capability under a `claude-*` identifier once it is imported into this repository.
 
-## Retired or Unapproved-for-Reimport Skills
-
-Do not re-import or preserve these unless the user explicitly asks:
-
-- `antigravity-async-python-patterns`
-- `antigravity-aws-cost-cleanup`
-- `antigravity-bash-scripting`
-- `antigravity-changelog-automation`
-- `antigravity-cloud-devops`
-- `antigravity-code-review-ai-ai-review`
-- `antigravity-code-review-excellence`
-- `antigravity-code-reviewer`
-- `antigravity-codebase-audit-pre-push`
-- `antigravity-codebase-cleanup-deps-audit`
-- `antigravity-codebase-cleanup-refactor-clean`
-- `antigravity-codebase-cleanup-tech-debt`
-- `antigravity-ddd-context-mapping`
-- `antigravity-ddd-strategic-design`
-- `antigravity-ddd-tactical-patterns`
-- `antigravity-error-detective`
-- `antigravity-javascript-testing-patterns`
-- `antigravity-nodejs-backend-patterns`
-- `antigravity-python-performance-optimization`
-- `awesome-copilot-create-agentsmd`
-- `claude-docx`
-- `claude-pdf`
-- `claude-pptx`
-- `claude-agent-development`
-- `claude-skill-creator`
-- `obra-writing-skills`
-
 ## Routing
 
 - Use this agent when creating, importing, renaming, refreshing, or retiring skills.
