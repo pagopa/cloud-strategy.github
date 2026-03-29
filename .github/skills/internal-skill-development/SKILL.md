@@ -1,6 +1,6 @@
 ---
 name: internal-skill-development
-description: Create, revise, evaluate, and harden repository-owned Copilot skills. Use when drafting a new SKILL.md, converting upstream skill-authoring guidance into an internal skill, improving trigger quality, building bundled references or scripts, or testing whether a skill is strong enough to keep.
+description: Create, revise, evaluate, and harden repository-owned Copilot skills. Use when drafting a new SKILL.md, improving trigger quality, building bundled references or scripts, or testing whether a skill is strong enough to keep.
 ---
 
 # Internal Skill Development
@@ -9,9 +9,9 @@ Use this skill when the output is a skill, not an agent.
 
 ## Purpose
 
-This is the repository-owned Copilot-safe conversion of upstream skill-authoring guidance. It focuses on writing and improving one skill at a time.
+This skill defines the current repository standard for writing and improving one skill at a time.
 
-Use `internal-skill-management` when the work is about catalog governance, imports, deduplication, retirement, or overlap decisions across multiple skills.
+Use `internal-skill-management` when the work is about catalog governance, targeted refresh, deduplication, retirement, or overlap decisions across multiple skills.
 
 ## Core repository inputs
 
@@ -63,10 +63,11 @@ Weak descriptions:
 - Explain why a rule matters instead of relying on rigid all-caps wording.
 - Bundle helper scripts only when repeated work shows they would pay off.
 - Prefer one strong internal skill over multiple overlapping aliases.
+- Do not carry forward historical conversion notes or compatibility language unless the user explicitly asks for them.
 
 ## Copilot-safe evaluation loop
 
-Use a local evaluation loop that does not depend on Claude-specific viewers or runtime hooks:
+Use a local evaluation loop that does not depend on runtime-specific viewers or hooks:
 
 1. Create 2-5 realistic prompts a real repository user might write.
 2. Include near misses that should not trigger the skill.
@@ -89,7 +90,7 @@ Do not create bundled files just to imitate a richer upstream package.
 
 - Writing a skill before checking whether the repository already has one for the same trigger space
 - Keeping `description:` vague and compensating with a giant body
-- Importing upstream skill text unchanged when it assumes a different runtime
+- Carrying forward imported wording that no longer matches the current repository
 - Adding reference or script files that no part of `SKILL.md` actually uses
 - Leaving a stronger internal and a weaker external skill active for the same intent
 

@@ -11,7 +11,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Resources created locally in `cloud-strategy.github` must use the `internal-` prefix in filenames and `name:` values.
 - Resources created locally in other repositories must use the `local-` prefix in filenames and `name:` values.
 - The canonical project-owned `AGENTS.md` file must live in repository root as `AGENTS.md`.
-- Keep legacy aliases only when required for backward compatibility.
+- Do not keep legacy aliases, fallback copies, or deprecated variants. Preserve an alias only when an active backward-compatibility requirement is explicitly documented.
 
 ## Decision Priority
 
@@ -29,7 +29,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 #### Installed agents
 - Use `internal-ai-resource-development` for creating or refining repository-owned Copilot agents, skills, prompts, and instructions when the task is focused on authoring one resource rather than synchronizing the whole catalog.
-- Use `internal-sync-control-center` for synchronizing approved upstream skills or instructions, detecting drift, enforcing origin-based naming, consolidating overlapping skills, retiring weaker catalog entries, and governing `.github/` Copilot assets.
+- Use `internal-sync-control-center` for governing the managed `.github/` Copilot catalog in this repository: use repo state as the starting point for drift analysis, refresh declared approved external assets, enforce origin-based naming, consolidate overlapping skills, retire obsolete catalog entries, and align downstream governance files.
   This command center absorbs the former standalone Copilot-governance role.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
 - Use `internal-cicd` for CI/CD workflows, composite actions, release automation, and deployment-pipeline design.

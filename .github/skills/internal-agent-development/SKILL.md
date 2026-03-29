@@ -1,6 +1,6 @@
 ---
 name: internal-agent-development
-description: Create, refine, split, or convert repository-owned Copilot agents with focused routing, concise system prompts, and command-center responsibilities. Use when adding a new `.github/agents/*.agent.md`, renaming agents to canonical internal identifiers, splitting broad agents, or converting upstream agent-development guidance into a Copilot-safe internal skill.
+description: Create, refine, split, or realign repository-owned Copilot agents with focused routing, concise system prompts, and command-center responsibilities. Use when adding or updating a `.github/agents/*.agent.md`, renaming agents to canonical internal identifiers, or splitting broad agents into narrower command centers.
 ---
 
 # Internal Agent Development
@@ -9,7 +9,7 @@ Use this skill when designing or updating repository-owned agents.
 
 ## Purpose
 
-This is the repository-owned Copilot-safe conversion of upstream `agent-development` guidance. It defines how to build command-center agents for GitHub Copilot without deprecated frontmatter or runtime-specific assumptions.
+This skill defines the current repository standard for building command-center agents for GitHub Copilot without deprecated frontmatter or runtime-specific assumptions.
 
 Use `internal-skill-development` when the work is about writing a skill. Use this skill when the output is an agent.
 
@@ -21,7 +21,7 @@ Read these assets before finalizing an internal agent:
 - `.github/copilot-instructions.md` for the non-negotiable behavior layer
 - `.github/scripts/validate-copilot-customizations.sh` for canonical validation expectations
 - `references/agent-template.md` for the standard internal agent skeleton
-- `references/conversion-checklist.md` for upstream-to-internal conversion rules
+- `references/conversion-checklist.md` for normalizing imported or older agent patterns into the current repository standard
 
 ## Agent Design Rules
 
@@ -101,15 +101,16 @@ Do not create a new agent when a prompt plus a skill already gives enough routin
 6. Write routing rules that make the selection boundaries obvious.
 7. Validate naming, references, and overlap before finishing.
 
-## Upstream conversion workflow
+## Imported Pattern Normalization
 
-When converting an upstream agent-authoring pattern:
+When adapting an external or older agent-authoring pattern:
 
 1. Preserve the useful conceptual guidance.
 2. Remove runtime-specific instructions and deprecated frontmatter.
 3. Rewrite the naming rules to this repository's `internal-*` contract.
 4. Replace tool-specific assumptions with repo-local references and validations.
-5. Keep examples and templates only if they still map cleanly to GitHub Copilot behavior.
+5. Drop historical context that no longer affects current routing.
+6. Keep examples and templates only if they still map cleanly to GitHub Copilot behavior.
 
 ## Splitting Rule
 

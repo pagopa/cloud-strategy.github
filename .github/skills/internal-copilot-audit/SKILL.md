@@ -1,11 +1,13 @@
 ---
 name: internal-copilot-audit
-description: Audit Copilot customization health for overlap, hollow references, deprecated frontmatter, weak bridge design, naming violations, and redundant command-center assets. Use when reviewing the quality of `.github/` customization assets in this repository.
+description: Audit Copilot customization health for overlap, hollow references, deprecated frontmatter, weak bridge design, naming violations, stale governance references, and redundant command-center assets. Use when reviewing the quality of `.github/` customization assets in this repository.
 ---
 
 # Internal Copilot Audit
 
 Use this skill when auditing the health of the Copilot customization catalog.
+
+Treat the declared governance contract in the relevant agent, root `AGENTS.md`, and `.github/copilot-instructions.md` as the policy source of truth. Treat the current `.github/` catalog on disk as evidence to compare against that policy.
 
 ## Audit Goals
 
@@ -14,6 +16,7 @@ Use this skill when auditing the health of the Copilot customization catalog.
 - Detect deprecated frontmatter and stale runtime-specific wording.
 - Detect weak `AGENTS.md` bridge design.
 - Detect naming violations and stale inventory references.
+- Detect governance files that still describe removed, renamed, or retired assets.
 
 ## Audit Order
 
@@ -22,6 +25,7 @@ Use this skill when auditing the health of the Copilot customization catalog.
 3. Check trigger overlap.
 4. Check bridge coherence between `AGENTS.md` and `.github/copilot-instructions.md`.
 5. Check whether prompts, skills, or agents became redundant after internal replacements were added.
+6. Check whether governance files still describe superseded or removed assets.
 
 ## What To Flag
 
