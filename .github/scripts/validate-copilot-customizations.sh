@@ -23,6 +23,7 @@ DEFAULT_MODE = "strict"
 SUPPORTED_SCOPES = {"root", "all"}
 SUPPORTED_MODES = {"strict", "basic", "legacy-compatible"}
 DEPRECATED_FRONTMATTER_KEYS = ("tools", "model", "color")
+DEPRECATED_AGENT_SECTION_HEADINGS = ("## Primary Skill Stack",)
 
 
 @dataclass
@@ -71,6 +72,43 @@ def extract_frontmatter_name(text: str) -> str:
     return match.group(1).strip().strip("\"'")
 
 
+def extract_markdown_h2_section(text: str, heading: str) -> str | None:
+    lines = text.splitlines()
+    inside_section = False
+    collected: list[str] = []
+
+    for line in lines:
+        if re.match(r"^##\s+", line):
+            if line.strip() == heading:
+                inside_section = True
+                collected = []
+                continue
+            if inside_section:
+                break
+
+        if inside_section:
+            collected.append(line)
+
+    if not inside_section:
+        return None
+
+    return "\n".join(collected).strip()
+
+
+def extract_declared_skills(text: str) -> list[str] | None:
+    section = extract_markdown_h2_section(text, "## Declared Skills")
+    if section is None:
+        return None
+
+    declared_skills: list[str] = []
+    for raw_line in section.splitlines():
+        match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", raw_line)
+        if match:
+            declared_skills.append(match.group(1))
+
+    return declared_skills
+
+
 def extract_inventory_paths() -> list[str]:
     inventory_paths: list[str] = []
 
@@ -96,6 +134,8 @@ def extract_inventory_paths() -> list[str]:
 
 
 def validate_named_resources(errors: list[str]) -> None:
+    skill_names: set[str] = set()
+
     for skill_dir in sorted((REPO_ROOT / ".github" / "skills").iterdir()):
         if not skill_dir.is_dir():
             continue
@@ -104,6 +144,7 @@ def validate_named_resources(errors: list[str]) -> None:
             errors.append(f"Missing skill file: {skill_file}")
             continue
 
+        skill_names.add(skill_dir.name)
         text = read_text(skill_file)
         name = extract_frontmatter_name(text)
         if not name:
@@ -136,6 +177,23 @@ def validate_named_resources(errors: list[str]) -> None:
         for key in DEPRECATED_FRONTMATTER_KEYS:
             if re.search(rf"^{key}:\s*", text, re.M):
                 errors.append(f"Deprecated frontmatter key `{key}:` found in {agent_file}")
+
+        for heading in DEPRECATED_AGENT_SECTION_HEADINGS:
+            if re.search(rf"^{re.escape(heading)}\s*$", text, re.M):
+                errors.append(f"Deprecated agent section `{heading}` found in {agent_file}")
+
+        declared_skills = extract_declared_skills(text)
+        if declared_skills is None:
+            errors.append(f"Missing `## Declared Skills` section: {agent_file}")
+            continue
+
+        if not declared_skills:
+            errors.append(f"Declared skills section must list at least one skill: {agent_file}")
+            continue
+
+        for skill_name in declared_skills:
+            if skill_name not in skill_names:
+                errors.append(f"Unknown declared skill `{skill_name}` referenced in {agent_file}")
 
 
 def validate_inventory(errors: list[str]) -> None:

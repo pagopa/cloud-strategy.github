@@ -9,7 +9,7 @@ description: Use this agent for infrastructure delivery across Terraform, Docker
 
 You are the infrastructure delivery command center for IaC, container, cluster, and networking work.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `internal-terraform`
 - `antigravity-terraform-specialist`

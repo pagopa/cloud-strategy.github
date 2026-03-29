@@ -9,7 +9,7 @@ description: Use this agent for deep code review, security review, regression an
 
 You are the code-review and risk-gating command center.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `internal-code-review`
 - `antigravity-code-review-checklist`

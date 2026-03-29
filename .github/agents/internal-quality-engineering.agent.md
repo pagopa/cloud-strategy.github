@@ -9,7 +9,7 @@ description: Use this agent for test strategy, coverage improvement, performance
 
 You are the command center for quality engineering, performance, and observability.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `awesome-copilot-pytest-coverage`
 - `awesome-copilot-java-junit`

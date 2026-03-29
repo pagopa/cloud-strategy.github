@@ -13,7 +13,7 @@ Use the current repository state as the bootstrap input for catalog analysis, no
 
 Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflow for catalog decisions. Use the other internal skills only for targeted authoring or bridge updates that fall out of those decisions.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `internal-skill-management`
 - `internal-copilot-audit`

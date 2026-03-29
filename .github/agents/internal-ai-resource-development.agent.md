@@ -9,7 +9,7 @@ description: Use this agent when creating or refining repository-owned Copilot a
 
 You are the repository's focused authoring command center for Copilot customization resources.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `internal-agent-development`
 - `internal-skill-development`

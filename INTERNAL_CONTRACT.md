@@ -7,7 +7,7 @@ Anything not listed here is intentionally out of scope for the Python contract r
 
 - Verify behavior, not resource formatting details.
 - Keep checks high level and resilient to internal refactors.
-- Do not add tests that parse or enforce the internal structure of prompts, skills, agents, or instructions.
+- Do not add tests that parse or enforce the internal structure of prompts, skills, agents, or instructions unless an explicit repository contract below requires it.
 - Use Python only for the contract runner and its fixtures.
 
 ## Global Resource Rules
@@ -53,6 +53,16 @@ These rules apply to all repository resources, including prompts, skills, instru
   - every resource has a non-empty canonical identifier
   - every prompt, skill, and agent declares a non-empty `name:`
   - every declared `name:` matches the canonical resource identifier
+
+#### `resource-governance-agents-declare-skills`
+
+- Goal: ensure agents publish an explicit reusable skill contract instead of implying skill usage only in prose.
+- Scope:
+  - agents
+- Expected behavior:
+  - every agent includes a `## Declared Skills` section
+  - every agent declares at least one skill in that section
+  - agents do not use the deprecated `## Primary Skill Stack` heading
 
 ### Sync Planning
 
@@ -100,7 +110,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 
 - prompt frontmatter formatting
 - skill section structure
-- agent body wording
+- agent body wording beyond the required `## Declared Skills` contract
 - inventory wording details
 - cross-link completeness between resources
 

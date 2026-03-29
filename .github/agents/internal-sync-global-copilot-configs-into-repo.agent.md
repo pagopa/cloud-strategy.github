@@ -8,6 +8,11 @@ name: internal-sync-global-copilot-configs-into-repo
 ## Objective
 Analyze a local target repository, select the minimum Copilot customization assets from this standards repository, and align them with conservative merge rules plus a final report that also audits unmanaged target-local Copilot assets. For target-repository root guidance, keep `.github/copilot-instructions.md` as the primary detailed policy file and keep root `AGENTS.md` intentionally light as a bridge that helps generic coding assistants discover and apply the Copilot configuration without duplicating it.
 
+## Declared Skills
+- `internal-sync-global-copilot-configs-into-repo`
+- `awesome-copilot-instructions-blueprint-generator`
+- `internal-agents-md-bridge`
+
 ## Restrictions
 - Do not modify `README.md` files unless explicitly requested.
 - Do not sync workflows, templates, changelog files, or bootstrap helpers in v1.

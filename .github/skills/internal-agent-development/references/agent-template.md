@@ -14,7 +14,7 @@ description: Use this agent when the repository needs ...
 
 You are the command center for ...
 
-## Primary Skill Stack
+## Declared Skills
 
 - `internal-skill-a`
 - `external-skill-b`

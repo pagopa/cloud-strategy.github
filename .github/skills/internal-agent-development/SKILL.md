@@ -29,7 +29,11 @@ Read these assets before finalizing an internal agent:
 - `name:` must match the filename stem exactly.
 - Internal agent files must use the canonical pattern `internal-<agent-name>.agent.md`.
 - The `description:` must explain when the agent should be selected.
-- The body should define role, routing rules, skill composition, and output expectations.
+- The body should define role, declared skills, routing rules, and output expectations.
+- Every agent must include a `## Declared Skills` section.
+- The `## Declared Skills` section is the explicit skill contract for the agent.
+- List each skill by its exact canonical identifier in backticks, one per bullet.
+- Do not rely on narrative references alone when an agent is expected to use a skill.
 - Keep the agent focused on orchestration and decision-making. Put long reusable procedures into skills.
 - Never use deprecated agent frontmatter such as `tools:`, `model:`, or `color:`.
 
@@ -49,7 +53,7 @@ description: Use this agent when ...
 
 You are ...
 
-## Primary Skill Stack
+## Declared Skills
 
 - `internal-skill-a`
 - `external-skill-b`
@@ -67,6 +71,7 @@ You are ...
 ```
 
 Do not invent extra frontmatter or hidden runtime fields.
+The `## Declared Skills` section is mandatory for repository-owned agents.
 
 ## Description design
 
@@ -97,7 +102,7 @@ Do not create a new agent when a prompt plus a skill already gives enough routin
 2. Check whether the repository already has an agent, prompt, or skill that should own the intent.
 3. Pick the canonical name and file path.
 4. Draft the `description:` for routing before writing the body.
-5. Build a narrow primary skill stack instead of a kitchen-sink list.
+5. Build a narrow declared skill list instead of a kitchen-sink list.
 6. Write routing rules that make the selection boundaries obvious.
 7. Validate naming, references, and overlap before finishing.
 
@@ -138,6 +143,7 @@ For principal cloud agents:
 - Deprecated frontmatter keys
 - Agents that just restate a skill body
 - Runtime-specific tool instructions in repository-facing agents
+- Agent bodies that only imply skill usage in prose without a `## Declared Skills` section
 - Overloaded platform agents with unrelated governance and delivery duties
 - Agent names that repeat `agent` in both the canonical identifier and the `.agent.md` suffix
 - Bodies that never explain when not to use the agent
@@ -147,6 +153,7 @@ For principal cloud agents:
 
 - Confirm the agent filename stem, frontmatter `name:`, and command identifier are identical.
 - Confirm the `description:` says when to use the agent instead of restating its workflow.
+- Confirm the agent includes `## Declared Skills` and that the list matches the intended reusable procedures.
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
 - Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` after changes that affect agent naming or inventory.

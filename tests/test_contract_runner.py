@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -81,6 +82,29 @@ def canonical_resource_identifier(path: Path) -> str:
     return ""
 
 
+def extract_markdown_h2_section(text: str, heading: str) -> str | None:
+    lines = text.splitlines()
+    inside_section = False
+    collected: list[str] = []
+
+    for line in lines:
+        if re.match(r"^##\s+", line):
+            if line.strip() == heading:
+                inside_section = True
+                collected = []
+                continue
+            if inside_section:
+                break
+
+        if inside_section:
+            collected.append(line)
+
+    if not inside_section:
+        return None
+
+    return "\n".join(collected).strip()
+
+
 def resource_paths() -> list[Path]:
     paths = []
     paths.extend(sorted((REPO_ROOT / ".github" / "prompts").glob("*.prompt.md")))
@@ -91,13 +115,24 @@ def resource_paths() -> list[Path]:
 
 
 def has_supported_origin_prefix(identifier: str) -> bool:
-    return identifier.startswith(("internal-", "local-", "claude-", "obra-", "terraform-"))
+    return identifier.startswith(
+        (
+            "internal-",
+            "local-",
+            "claude-",
+            "obra-",
+            "terraform-",
+            "antigravity-",
+            "awesome-copilot-",
+        )
+    )
 
 
 def test_contract_cases_are_known() -> None:
     expected = {
         "resource-governance-uses-supported-origin-naming",
         "resource-governance-named-resources-declare-name",
+        "resource-governance-agents-declare-skills",
         "sync-plan-detects-root-agents-conflict",
         "sync-plan-selects-python-assets",
         "sync-plan-preserves-manual-target-assets",
@@ -125,6 +160,22 @@ def test_resource_governance_named_resources_declare_name() -> None:
         assert identifier, f"Missing canonical identifier for {path}"
         assert actual_name, f"Missing explicit name for {path}"
         assert actual_name == identifier, f"Resource name mismatch for {path}: {actual_name} != {identifier}"
+
+
+def test_resource_governance_agents_declare_skills() -> None:
+    for path in sorted((REPO_ROOT / ".github" / "agents").glob("*.agent.md")):
+        content = path.read_text(encoding="utf-8")
+        declared_skills = extract_markdown_h2_section(content, "## Declared Skills")
+
+        assert declared_skills is not None, f"Missing declared skills section for {path}"
+        assert "## Primary Skill Stack" not in content, f"Deprecated skill section heading still present in {path}"
+
+        declared_skill_lines = [
+            line
+            for line in declared_skills.splitlines()
+            if re.fullmatch(r"\s*-\s+`[^`]+`\s*", line)
+        ]
+        assert declared_skill_lines, f"Declared skills section must include at least one skill for {path}"
 
 
 def test_sync_plan_detects_root_agents_conflict(tmp_path: Path) -> None:

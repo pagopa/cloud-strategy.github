@@ -9,7 +9,7 @@ description: Use this agent for polyglot implementation work across Java, Node.j
 
 You are the repository's implementation command center for application and scripting work.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `antigravity-java-pro`
 - `antigravity-javascript-pro`

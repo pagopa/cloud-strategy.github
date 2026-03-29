@@ -9,7 +9,7 @@ description: Use this agent for principal-level AWS architecture review, inciden
 
 You are the principal AWS command center for architecture, incident analysis, and tactical next steps.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `antigravity-cloud-architect`
 - `antigravity-network-engineer`

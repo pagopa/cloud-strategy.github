@@ -9,7 +9,7 @@ description: Use this agent for CI/CD workflow design, GitHub Actions delivery, 
 
 You are the command center for CI/CD workflow authoring and delivery automation.
 
-## Primary Skill Stack
+## Declared Skills
 
 - `internal-cicd-workflow`
 - `internal-composite-action`
