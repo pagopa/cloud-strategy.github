@@ -10,7 +10,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - External resources must use `<short-repo>-<original-resource-name>` in filenames and `name:` values.
 - Resources created locally in `cloud-strategy.github` must use the `internal-` prefix in filenames and `name:` values.
 - Resources created locally in other repositories must use the `local-` prefix in filenames and `name:` values.
-- Reserve the `TechAIGlobal` prefix only for repo-only agents that encode standards for this global configuration repository.
 - The canonical project-owned `AGENTS.md` file must live in repository root as `AGENTS.md`.
 - Keep legacy aliases only when required for backward compatibility.
 
@@ -229,9 +228,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-javascript-typescript-jest/SKILL.md`
 - `.github/skills/awesome-copilot-pytest-coverage/SKILL.md`
 - `.github/skills/awesome-copilot-refactor-plan/SKILL.md`
-- `.github/skills/awesome-copilot-suggest-awesome-github-copilot-agents/SKILL.md`
-- `.github/skills/awesome-copilot-suggest-awesome-github-copilot-instructions/SKILL.md`
-- `.github/skills/awesome-copilot-suggest-awesome-github-copilot-skills/SKILL.md`
 - `.github/skills/claude-agent-development/SKILL.md`
 - `.github/skills/claude-docx/SKILL.md`
 - `.github/skills/claude-pdf/SKILL.md`

@@ -189,8 +189,8 @@ These agents manage the **lifecycle** of Copilot customization assets. They are 
 | Script | Purpose | Use when | Do NOT use when |
 | --- | --- | --- | --- |
 | `validate-copilot-customizations.sh` | Validates frontmatter, section structure, agent metadata, inventory consistency, and SHA-pinning across all customization assets. | After any change to `.github/` — run with `--scope root --mode strict`. | Validating application code (run linters instead). |
-| `tech-ai-sync-copilot-configs.py` | Manifest-based conservative sync with conflict detection, SHA256 checksums, and reporting. Preferred tool for aligning consumer repos. | Propagating config updates to consumer repos — run with `--mode plan` first, then `--mode apply`. | This repo itself — it's the source, not a target. |
-| `bootstrap-copilot-config.sh` | ⚠️ **Deprecated** — rsync-based simple copy. See `DEPRECATION.md`. | Only as a legacy fallback for consumers not yet migrated to the sync script. | New consumers — use `tech-ai-sync-copilot-configs.py` instead. |
+| `internal-sync-copilot-configs.py` | Manifest-based conservative sync with conflict detection, SHA256 checksums, and reporting. Preferred tool for aligning consumer repos. | Propagating config updates to consumer repos — run with `--mode plan` first, then `--mode apply`. | This repo itself — it's the source, not a target. |
+| `bootstrap-copilot-config.sh` | ⚠️ **Deprecated** — rsync-based simple copy. See `DEPRECATION.md`. | Only as a legacy fallback for consumers not yet migrated to the sync script. | New consumers — use `internal-sync-copilot-configs.py` instead. |
 
 ### Templates (`templates/`)
 
@@ -212,7 +212,7 @@ These agents manage the **lifecycle** of Copilot customization assets. They are 
 1. Edit files under `.github/`.
 2. Run validation: `./scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 3. Optional JSON report: `./scripts/validate-copilot-customizations.sh --scope root --mode strict --report json --report-file /tmp/copilot-report.json`.
-4. Cross-repo alignment: `python scripts/tech-ai-sync-copilot-configs.py --target <repo-path> --mode plan` → review → `--mode apply`.
+4. Cross-repo alignment: `python scripts/internal-sync-copilot-configs.py --target <repo-path> --mode plan` → review → `--mode apply`.
 5. Optional cross-repo assessment: `./scripts/validate-copilot-customizations.sh --scope all --mode legacy-compatible`.
 6. Ensure CI workflow passes.
 7. Update `CHANGELOG.md` for notable changes.
@@ -233,4 +233,4 @@ These agents manage the **lifecycle** of Copilot customization assets. They are 
 
 | Asset | Deprecated in favor of | Status | Notes |
 | --- | --- | --- | --- |
-| `scripts/bootstrap-copilot-config.sh` | `scripts/tech-ai-sync-copilot-configs.py` | Deprecated — pending removal after migration window | See `DEPRECATION.md` for timeline. |
+| `scripts/bootstrap-copilot-config.sh` | `scripts/internal-sync-copilot-configs.py` | Deprecated — pending removal after migration window | See `DEPRECATION.md` for timeline. |

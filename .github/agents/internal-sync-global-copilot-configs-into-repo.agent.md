@@ -20,7 +20,7 @@ Analyze a local target repository, select the minimum Copilot customization asse
 ## Routing
 - Use this agent only for cross-repository Copilot-core alignment work.
 - Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the single workflow definition.
-- Treat `.github/scripts/tech-ai-sync-copilot-configs.py` as the deterministic execution path.
+- Treat `.github/scripts/internal-sync-copilot-configs.py` as the deterministic execution path.
 - Start with `plan` mode and move to `apply` only on explicit request and only when the plan is conflict-safe.
 - When the target sync includes root guidance files, refresh the dedicated `awesome-copilot-instructions-blueprint-generator` skill before updating target `.github/copilot-instructions.md`, then refresh the dedicated `awesome-copilot-create-agentsmd` skill before updating target root `AGENTS.md`.
 - In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep target-local unmanaged assets visible and preserved in the final plan or apply report.

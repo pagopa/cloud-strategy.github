@@ -91,8 +91,8 @@ These assets exist only in this standards repository:
 - **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for impact analysis when sync changes baseline behavior.
 
 ## Tooling
-- Script: `.github/scripts/tech-ai-sync-copilot-configs.py`
-- Manifest: `.github/tech-ai-sync-copilot-configs.manifest.json` (in target repo)
+- Script: `.github/scripts/internal-sync-copilot-configs.py`
+- Manifest: `.github/internal-sync-copilot-configs.manifest.json` (in target repo)
 
 ## Validation
 - `python -m compileall .github/scripts tests`

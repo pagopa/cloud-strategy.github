@@ -9,11 +9,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = REPO_ROOT / "INTERNAL_CONTRACT.md"
-SYNC_MODULE_PATH = REPO_ROOT / ".github" / "scripts" / "tech-ai-sync-copilot-configs.py"
+SYNC_MODULE_PATH = REPO_ROOT / ".github" / "scripts" / "internal-sync-copilot-configs.py"
 
 
 def load_sync_module():
-    module_name = "tech_ai_sync_copilot_configs"
+    module_name = "internal_sync_copilot_configs"
     spec = importlib.util.spec_from_file_location(module_name, SYNC_MODULE_PATH)
     assert spec is not None
     assert spec.loader is not None
@@ -172,7 +172,7 @@ def test_sync_apply_writes_manifest_and_agents(tmp_path: Path) -> None:
 
     SYNC_MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
 
-    manifest_path = target_root / ".github" / "tech-ai-sync-copilot-configs.manifest.json"
+    manifest_path = target_root / ".github" / "internal-sync-copilot-configs.manifest.json"
     agents_path = target_root / "AGENTS.md"
     assert manifest_path.is_file()
     assert agents_path.is_file()

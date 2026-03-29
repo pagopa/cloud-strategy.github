@@ -74,9 +74,6 @@ You keep skill and instruction assets synchronized across `cloud-strategy.github
   - `javascript-typescript-jest`
   - `pytest-coverage`
   - `refactor-plan`
-  - `suggest-awesome-github-copilot-agents`
-  - `suggest-awesome-github-copilot-instructions`
-  - `suggest-awesome-github-copilot-skills`
 - `claude`: sync from Anthropic skill sources used by this repository:
   - `anthropics/claude-code` plugin skills
   - approved `anthropics/skills` assets:

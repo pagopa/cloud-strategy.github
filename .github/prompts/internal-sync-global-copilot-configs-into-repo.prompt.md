@@ -19,7 +19,7 @@ Use this prompt to analyze a local repository, select the minimum Copilot custom
 
 ## Instructions
 1. Use `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the workflow definition.
-2. Use `.github/scripts/tech-ai-sync-copilot-configs.py` for deterministic execution.
+2. Use `.github/scripts/internal-sync-copilot-configs.py` for deterministic execution.
 3. Start with `mode=plan`; use `mode=apply` only when explicitly requested and only after a conflict-safe plan.
 4. Keep scope limited to Copilot core assets only.
 5. Preserve unmanaged target files and report conflicts instead of overwriting them.

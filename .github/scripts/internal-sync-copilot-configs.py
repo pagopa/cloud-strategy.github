@@ -2,9 +2,9 @@
 """Purpose: Align portable Copilot customization assets with a local target repository.
 
 Usage examples:
-  python .github/scripts/tech-ai-sync-copilot-configs.py --target /path/to/repo
-  python .github/scripts/tech-ai-sync-copilot-configs.py --target /path/to/repo --mode apply
-  python .github/scripts/tech-ai-sync-copilot-configs.py --target /path/to/repo --report-format json
+  python .github/scripts/internal-sync-copilot-configs.py --target /path/to/repo
+  python .github/scripts/internal-sync-copilot-configs.py --target /path/to/repo --mode apply
+  python .github/scripts/internal-sync-copilot-configs.py --target /path/to/repo --report-format json
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from pathlib import Path, PurePosixPath
 
 
 SCRIPT_NAME = "internal-sync-global-copilot-configs-into-repo"
-MANIFEST_RELATIVE_PATH = ".github/tech-ai-sync-copilot-configs.manifest.json"
+MANIFEST_RELATIVE_PATH = ".github/internal-sync-copilot-configs.manifest.json"
 SUPPORTED_SCOPE = "copilot-core"
 SUPPORTED_CONFLICT_POLICY = "conservative-merge"
 VSCODE_SETTINGS_RELATIVE_PATH = ".vscode/settings.json"
@@ -2053,7 +2053,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         "4. Apply matching files under `.github/instructions/*.instructions.md` using `applyTo`.",
         "5. Apply selected prompt constraints from `.github/prompts/*.prompt.md`.",
         "6. Apply implementation details from referenced `.github/skills/*/SKILL.md`.",
-        "7. If no agent is explicitly selected, default to `TechAIImplementer`.",
+        "7. If no agent is explicitly selected, use the matching instructions, prompts, and skills directly.",
         "",
         "## Agent Routing",
         "",
@@ -2065,7 +2065,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
             "",
             "### Agent composition",
             "- For changes spanning multiple specialist domains, run each relevant specialist and aggregate findings.",
-            "- The standard chain for non-trivial work is: `internal-planner` -> `TechAIImplementer` -> `TechAIReviewer` or a matching specialist.",
+            "- The standard path for non-trivial work is: planning capability -> implementation capability -> review capability, or a matching specialist.",
             "",
             "## Governance References",
         ]
@@ -2153,14 +2153,14 @@ def asset_display_name(source_root: Path, relative_path: str) -> str:
 
 def agent_routing_lines(source_root: Path, agent_paths: list[str]) -> list[str]:
     explicit_lines = {
-        "tech-ai-planner.agent.md": "- Use `internal-planner` for ambiguous scope, tradeoff analysis, or multi-step design.",
-        "tech-ai-implementer.agent.md": "- Use `TechAIImplementer` for direct code/config changes and validation-first delivery.",
-        "tech-ai-reviewer.agent.md": "- Use `TechAIReviewer` for quality gates and defect/regression findings.",
-        "tech-ai-terraform-guardrails.agent.md": "- Use `internal-terraformGuardrails` for Terraform safety and policy guardrail reviews.",
-        "tech-ai-iam-least-privilege.agent.md": "- Use `TechAIIAMLeastPrivilege` for role and permission scoping checks.",
-        "tech-ai-github-workflow-supply-chain.agent.md": "- Use `TechAIWorkflowSupplyChain` for workflow supply-chain hardening and CI checks.",
-        "tech-ai-security-reviewer.agent.md": "- Use `internal-security-reviewer` as the security-focused review gate.",
-        "tech-ai-pr-editor.agent.md": "- Use `internal-pr-editor` when generating pull request content from the repository template.",
+        "tech-ai-planner.agent.md": "- Use the installed planning capability for ambiguous scope, tradeoff analysis, or multi-step design.",
+        "tech-ai-implementer.agent.md": "- Use the installed implementation capability for direct code/config changes and validation-first delivery.",
+        "tech-ai-reviewer.agent.md": "- Use the installed review capability for quality gates and defect/regression findings.",
+        "tech-ai-terraform-guardrails.agent.md": "- Use the installed Terraform guardrail reviewer for Terraform safety and policy checks.",
+        "tech-ai-iam-least-privilege.agent.md": "- Use the installed IAM least-privilege reviewer for role and permission scoping checks.",
+        "tech-ai-github-workflow-supply-chain.agent.md": "- Use the installed workflow supply-chain reviewer for CI and workflow hardening checks.",
+        "tech-ai-security-reviewer.agent.md": "- Use the installed security review capability as the security-focused gate.",
+        "tech-ai-pr-editor.agent.md": "- Use the installed PR editor capability when generating pull request content from the repository template.",
     }
     lines: list[str] = []
     for relative_path in sorted(agent_paths):

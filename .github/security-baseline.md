@@ -50,12 +50,12 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 | Third-party action SHA pinning | Automated | `validate-copilot-customizations.sh` |
 | Minimal workflow permissions | Automated | `validate-copilot-customizations.sh` |
 | Docker image digest pinning | Automated | `validate-copilot-customizations.sh` |
-| Validate `.github/**` in CI | Automated | `github-validate-copilot-customizations.yml` |
+| Validate `.github/**` in CI | Automated | `validate-copilot-customizations.sh` |
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
 | Secret placeholder avoidance in prompts/examples | Partial | pre-commit hooks + review |
 | OIDC over long-lived secrets | Manual review | `internal-github-actions.instructions.md` |
-| IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-security-reviewer` + `internal-terraform-reviewer` |
-| Supply chain hardening | Manual review | `internal-security-reviewer` |
+| IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-code-review` + `internal-terraform` |
+| Supply chain hardening | Manual review | `awesome-copilot-github-actions-ci-cd-best-practices.instructions.md` + `internal-code-review` |
 | Branch protection for `.github/**` | Manual review | repository settings |
 | Read-only reviewer agents | Manual review | agent review |
 | CHANGELOG-based change governance | Manual review | PR review |

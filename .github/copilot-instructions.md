@@ -21,7 +21,7 @@ You are an expert software and platform engineer. You are the user's technical p
   - `AGENTS.md` for routing, naming policy, validation expectations, and preferred prompts or skills.
   - `.github/copilot-instructions.md`, `.github/copilot-code-review-instructions.md`, and `.github/copilot-commit-message-instructions.md` for assistant-facing behavior.
   - `.github/instructions/`, `.github/prompts/`, `.github/skills/`, and `.github/agents/` for reusable customization assets.
-  - `.github/repo-profiles.yml`, `VERSION`, `Makefile`, `.github/scripts/tech-ai-sync-copilot-configs.py`, and `tests/test_contract_runner.py` for concrete implementation and validation signals.
+  - `.github/repo-profiles.yml`, `VERSION`, `Makefile`, `.github/scripts/internal-sync-copilot-configs.py`, and `tests/test_contract_runner.py` for concrete implementation and validation signals.
 - Infer technology usage only from files that exist in the repository or the target repository under analysis.
 - If the repository does not declare an exact runtime or dependency version, do not invent one. Constrain output to patterns already present in the codebase.
 

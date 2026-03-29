@@ -4,10 +4,10 @@
 This repository is the source baseline for reusable GitHub Copilot customization assets synced into consumer repositories.
 
 ## Naming conventions
-- Canonical source-owned instructions, prompts, skills, and agents use the `tech-ai-` filename prefix.
-- Canonical prompt, skill, and agent `name:` values use the `TechAI` prefix.
-- Repo-only standards agents use the `TechAIGlobal` prefix and must stay source-only.
-- Consumer-repository assets use the `internal-` prefix in both filenames and `name:` values.
+- External upstream assets use `<short-repo>-<original-resource-name>` in both filenames and `name:` values.
+- Source-owned assets created in this repository use the `internal-` prefix in both filenames and `name:` values.
+- Source-owned assets created in other local repositories use the `local-` prefix in both filenames and `name:` values.
+- Keep legacy aliases only when backward compatibility requires them, and document them explicitly in the sync flow.
 
 ## Adding or updating assets
 - Instructions: keep frontmatter `description` and `applyTo`, use repository-agnostic wording, and avoid stack duplication already covered by a skill.
