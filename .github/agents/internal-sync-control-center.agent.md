@@ -20,6 +20,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflo
 - `internal-agent-development`
 - `internal-skill-development`
 - `internal-agents-md-bridge`
+- `awesome-copilot-instructions-blueprint-generator`
 
 ## Core Rules
 
@@ -34,6 +35,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflo
 - Keep agents focused on routing and orchestration. Move reusable procedures into skills.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
+- When `.github/copilot-instructions.md` is created or materially revised, use `awesome-copilot-instructions-blueprint-generator` as the default blueprinting skill before final repo-specific alignment.
 
 ## Managed External Resource Map
 
@@ -48,30 +50,30 @@ Source repositories:
 
 Managed skills:
 
-- `awesome-copilot-agent-governance`
-- `awesome-copilot-agentic-eval`
-- `awesome-copilot-architecture-blueprint-generator`
-- `awesome-copilot-azure-devops-cli`
-- `awesome-copilot-azure-pricing`
-- `awesome-copilot-azure-resource-health-diagnose`
-- `awesome-copilot-azure-role-selector`
-- `awesome-copilot-cloud-design-patterns`
-- `awesome-copilot-codeql`
-- `awesome-copilot-create-github-action-workflow-specification`
-- `awesome-copilot-create-github-pull-request-from-specification`
-- `awesome-copilot-create-implementation-plan`
-- `awesome-copilot-create-readme`
-- `awesome-copilot-dependabot`
-- `awesome-copilot-documentation-writer`
-- `awesome-copilot-instructions-blueprint-generator`
-- `awesome-copilot-java-junit`
-- `awesome-copilot-java-springboot`
-- `awesome-copilot-javascript-typescript-jest`
-- `awesome-copilot-postgresql-optimization`
-- `awesome-copilot-pytest-coverage`
-- `awesome-copilot-refactor-plan`
-- `awesome-copilot-secret-scanning`
-- `awesome-copilot-sql-optimization`
+- `agent-governance` -> `awesome-copilot-agent-governance`
+- `agentic-eval` -> `awesome-copilot-agentic-eval`
+- `architecture-blueprint-generator` -> `awesome-copilot-architecture-blueprint-generator`
+- `azure-devops-cli` -> `awesome-copilot-azure-devops-cli`
+- `azure-pricing` -> `awesome-copilot-azure-pricing`
+- `azure-resource-health-diagnose` -> `awesome-copilot-azure-resource-health-diagnose`
+- `azure-role-selector` -> `awesome-copilot-azure-role-selector`
+- `cloud-design-patterns` -> `awesome-copilot-cloud-design-patterns`
+- `codeql` -> `awesome-copilot-codeql`
+- `copilot-instructions-blueprint-generator` -> `awesome-copilot-instructions-blueprint-generator`
+- `create-github-action-workflow-specification` -> `awesome-copilot-create-github-action-workflow-specification`
+- `create-github-pull-request-from-specification` -> `awesome-copilot-create-github-pull-request-from-specification`
+- `create-implementation-plan` -> `awesome-copilot-create-implementation-plan`
+- `create-readme` -> `awesome-copilot-create-readme`
+- `dependabot` -> `awesome-copilot-dependabot`
+- `documentation-writer` -> `awesome-copilot-documentation-writer`
+- `java-junit` -> `awesome-copilot-java-junit`
+- `java-springboot` -> `awesome-copilot-java-springboot`
+- `javascript-typescript-jest` -> `awesome-copilot-javascript-typescript-jest`
+- `postgresql-optimization` -> `awesome-copilot-postgresql-optimization`
+- `pytest-coverage` -> `awesome-copilot-pytest-coverage`
+- `refactor-plan` -> `awesome-copilot-refactor-plan`
+- `secret-scanning` -> `awesome-copilot-secret-scanning`
+- `sql-optimization` -> `awesome-copilot-sql-optimization`
 
 Managed instructions:
 
@@ -96,36 +98,36 @@ Source repository:
 
 Managed skills:
 
-- `obra-brainstorming`
-- `obra-collision-zone-thinking`
-- `obra-condition-based-waiting`
-- `obra-defense-in-depth`
-- `obra-dispatching-parallel-agents`
-- `obra-executing-plans`
-- `obra-finishing-a-development-branch`
-- `obra-gardening-skills-wiki`
-- `obra-inversion-exercise`
-- `obra-meta-pattern-recognition`
-- `obra-preserving-productive-tensions`
-- `obra-pulling-updates-from-skills-repository`
-- `obra-receiving-code-review`
-- `obra-remembering-conversations`
-- `obra-requesting-code-review`
-- `obra-root-cause-tracing`
-- `obra-scale-game`
-- `obra-sharing-skills`
-- `obra-simplification-cascades`
-- `obra-subagent-driven-development`
-- `obra-systematic-debugging`
-- `obra-test-driven-development`
-- `obra-testing-anti-patterns`
-- `obra-testing-skills-with-subagents`
-- `obra-tracing-knowledge-lineages`
-- `obra-using-git-worktrees`
-- `obra-using-skills`
-- `obra-verification-before-completion`
-- `obra-when-stuck`
-- `obra-writing-plans`
+- `brainstorming` -> `obra-brainstorming`
+- `collision-zone-thinking` -> `obra-collision-zone-thinking`
+- `condition-based-waiting` -> `obra-condition-based-waiting`
+- `defense-in-depth` -> `obra-defense-in-depth`
+- `dispatching-parallel-agents` -> `obra-dispatching-parallel-agents`
+- `executing-plans` -> `obra-executing-plans`
+- `finishing-a-development-branch` -> `obra-finishing-a-development-branch`
+- `gardening-skills-wiki` -> `obra-gardening-skills-wiki`
+- `inversion-exercise` -> `obra-inversion-exercise`
+- `meta-pattern-recognition` -> `obra-meta-pattern-recognition`
+- `preserving-productive-tensions` -> `obra-preserving-productive-tensions`
+- `pulling-updates-from-skills-repository` -> `obra-pulling-updates-from-skills-repository`
+- `receiving-code-review` -> `obra-receiving-code-review`
+- `remembering-conversations` -> `obra-remembering-conversations`
+- `requesting-code-review` -> `obra-requesting-code-review`
+- `root-cause-tracing` -> `obra-root-cause-tracing`
+- `scale-game` -> `obra-scale-game`
+- `sharing-skills` -> `obra-sharing-skills`
+- `simplification-cascades` -> `obra-simplification-cascades`
+- `subagent-driven-development` -> `obra-subagent-driven-development`
+- `systematic-debugging` -> `obra-systematic-debugging`
+- `test-driven-development` -> `obra-test-driven-development`
+- `testing-anti-patterns` -> `obra-testing-anti-patterns`
+- `testing-skills-with-subagents` -> `obra-testing-skills-with-subagents`
+- `tracing-knowledge-lineages` -> `obra-tracing-knowledge-lineages`
+- `using-git-worktrees` -> `obra-using-git-worktrees`
+- `using-skills` -> `obra-using-skills`
+- `verification-before-completion` -> `obra-verification-before-completion`
+- `when-stuck` -> `obra-when-stuck`
+- `writing-plans` -> `obra-writing-plans`
 
 ### `hashicorp/agent-skills`
 
@@ -135,9 +137,9 @@ Source repository:
 
 Managed skills:
 
-- `terraform-terraform-search-import`
-- `terraform-terraform-style-guide`
-- `terraform-terraform-test`
+- `terraform-search-import` -> `terraform-terraform-search-import`
+- `terraform-style-guide` -> `terraform-terraform-style-guide`
+- `terraform-test` -> `terraform-terraform-test`
 
 ### `sickn33/antigravity-awesome-skills`
 
@@ -147,42 +149,42 @@ Source repository:
 
 Managed skills:
 
-- `antigravity-api-design-principles`
-- `antigravity-aws-cost-optimizer`
-- `antigravity-aws-penetration-testing`
-- `antigravity-aws-serverless`
-- `antigravity-aws-skills`
-- `antigravity-backend-architect`
-- `antigravity-bash-pro`
-- `antigravity-clean-code`
-- `antigravity-cloud-architect`
-- `antigravity-cloudformation-best-practices`
-- `antigravity-code-refactoring-refactor-clean`
-- `antigravity-code-refactoring-tech-debt`
-- `antigravity-code-review-checklist`
-- `antigravity-domain-driven-design`
-- `antigravity-elon-musk`
-- `antigravity-github`
-- `antigravity-golang-pro`
-- `antigravity-grafana-dashboards`
-- `antigravity-java-pro`
-- `antigravity-javascript-pro`
-- `antigravity-kaizen`
-- `antigravity-kubernetes-architect`
-- `antigravity-kubernetes-deployment`
-- `antigravity-network-101`
-- `antigravity-network-engineer`
-- `antigravity-nodejs-best-practices`
-- `antigravity-python-patterns`
-- `antigravity-python-pro`
-- `antigravity-python-testing-patterns`
-- `antigravity-simplify-code`
-- `antigravity-software-architecture`
-- `antigravity-steve-jobs`
-- `antigravity-terraform-specialist`
-- `antigravity-warren-buffett`
-- `antigravity-web-scraper`
-- `antigravity-youtube-summarizer`
+- `api-design-principles` -> `antigravity-api-design-principles`
+- `aws-cost-optimizer` -> `antigravity-aws-cost-optimizer`
+- `aws-penetration-testing` -> `antigravity-aws-penetration-testing`
+- `aws-serverless` -> `antigravity-aws-serverless`
+- `aws-skills` -> `antigravity-aws-skills`
+- `backend-architect` -> `antigravity-backend-architect`
+- `bash-pro` -> `antigravity-bash-pro`
+- `clean-code` -> `antigravity-clean-code`
+- `cloud-architect` -> `antigravity-cloud-architect`
+- `cloudformation-best-practices` -> `antigravity-cloudformation-best-practices`
+- `code-refactoring-refactor-clean` -> `antigravity-code-refactoring-refactor-clean`
+- `code-refactoring-tech-debt` -> `antigravity-code-refactoring-tech-debt`
+- `code-review-checklist` -> `antigravity-code-review-checklist`
+- `domain-driven-design` -> `antigravity-domain-driven-design`
+- `elon-musk` -> `antigravity-elon-musk`
+- `github` -> `antigravity-github`
+- `golang-pro` -> `antigravity-golang-pro`
+- `grafana-dashboards` -> `antigravity-grafana-dashboards`
+- `java-pro` -> `antigravity-java-pro`
+- `javascript-pro` -> `antigravity-javascript-pro`
+- `kaizen` -> `antigravity-kaizen`
+- `kubernetes-architect` -> `antigravity-kubernetes-architect`
+- `kubernetes-deployment` -> `antigravity-kubernetes-deployment`
+- `network-101` -> `antigravity-network-101`
+- `network-engineer` -> `antigravity-network-engineer`
+- `nodejs-best-practices` -> `antigravity-nodejs-best-practices`
+- `python-patterns` -> `antigravity-python-patterns`
+- `python-pro` -> `antigravity-python-pro`
+- `python-testing-patterns` -> `antigravity-python-testing-patterns`
+- `simplify-code` -> `antigravity-simplify-code`
+- `software-architecture` -> `antigravity-software-architecture`
+- `steve-jobs` -> `antigravity-steve-jobs`
+- `terraform-specialist` -> `antigravity-terraform-specialist`
+- `warren-buffett` -> `antigravity-warren-buffett`
+- `web-scraper` -> `antigravity-web-scraper`
+- `youtube-summarizer` -> `antigravity-youtube-summarizer`
 
 ## Canonical Governance Inputs
 
@@ -209,8 +211,9 @@ When repository state drifts from the declared governance contract, treat the dr
 2. Inventory the relevant local assets and nearby overlaps against the declared governance contract.
 3. Decide `keep`, `update`, `extract`, or `retire` using the declared managed scope as the baseline and the current repo state as evidence.
 4. Apply the canonical change first. Remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
-5. Update downstream governance files that describe the changed catalog, including this agent file, `AGENTS.md`, and `.github/agents/README.md` when needed.
-6. Run repository validation and report any remaining gaps.
+5. When `copilot-instructions.md` changes, regenerate or realign it through `awesome-copilot-instructions-blueprint-generator` before updating bridge or inventory files.
+6. Update downstream governance files that describe the changed catalog, including this agent file, `AGENTS.md`, and `.github/agents/README.md` when needed.
+7. Run repository validation and report any remaining gaps.
 
 ## Decision Standard
 
