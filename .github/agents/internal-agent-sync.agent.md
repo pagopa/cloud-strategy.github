@@ -52,7 +52,7 @@ You keep skill and instruction assets synchronized across `cloud-strategy.github
 ## Approved Upstream Scope
 
 ### Skill assets
-- `awesome-copilot`: sync only the approved `github/awesome-copilot` skills:
+- `awesome-copilot`: sync only the approved `github/awesome-copilot` skills from `https://github.com/github/awesome-copilot/tree/main/skills`:
   - `agent-governance`
   - `agentic-eval`
   - `architecture-blueprint-generator`
@@ -75,21 +75,73 @@ You keep skill and instruction assets synchronized across `cloud-strategy.github
   - `pytest-coverage`
   - `refactor-plan`
 - `claude`: sync from Anthropic skill sources used by this repository:
-  - `anthropics/claude-code` plugin skills
-  - approved `anthropics/skills` assets:
+  - `anthropics/claude-code` plugin skills from `https://github.com/anthropics/claude-code`
+  - approved `anthropics/skills` assets from `https://github.com/anthropics/skills/tree/main/skills`:
     - `agent-development`
     - `docx`
     - `pdf`
     - `pptx`
     - `skill-creator`
-- `obra`: sync all skills from `obra/superpowers`:
+- `obra`: sync all skills from `obra/superpowers-skills` at `https://github.com/obra/superpowers-skills/tree/main/skills`:
   - exclude `writing-skills`
   - keep `writing-skills` sourced from the approved Claude-origin variant
-- `terraform`: sync all skills from `hashicorp/agent-skills` under `terraform/code-generation/skills`:
+- `terraform`: sync all skills from `hashicorp/agent-skills` under `terraform/code-generation/skills` at `https://github.com/hashicorp/agent-skills/tree/main/terraform/code-generation/skills`:
   - exclude `azure-verified-modules`
+- `antigravity`: sync only the approved `sickn33/antigravity-awesome-skills` skills from `https://github.com/sickn33/antigravity-awesome-skills/tree/main/skills`:
+  - `async-python-patterns`
+  - all skills whose upstream directory name starts with `aws-`
+  - `backend-architect`
+  - `bash-pro`
+  - `bash-scripting`
+  - `changelog-automation`
+  - `clean-code`
+  - `cloud-architect`
+  - `cloud-devops`
+  - `cloudformation-best-practices`
+  - `code-refactoring-refactor-clean`
+  - `code-refactoring-tech-debt`
+  - `code-review-ai-ai-review`
+  - `code-review-checklist`
+  - `code-review-excellence`
+  - `code-reviewer`
+  - `code-simplifier`
+  - `codebase-audit-pre-push`
+  - `codebase-cleanup-deps-audit`
+  - `codebase-cleanup-refactor-clean`
+  - `codebase-cleanup-tech-debt`
+  - `ddd-context-mapping`
+  - `ddd-strategic-design`
+  - `ddd-tactical-patterns`
+  - `domain-driven-design`
+  - `elon-musk`
+  - `error-detective`
+  - `github`
+  - `grafana-dashboards`
+  - `java-pro`
+  - `javascript-mastery`
+  - `javascript-pro`
+  - `javascript-testing-patterns`
+  - `kaizen`
+  - `kubernetes-architect`
+  - `kubernetes-deployment`
+  - `network-101`
+  - `network-engineer`
+  - `nodejs-backend-patterns`
+  - `nodejs-best-practices`
+  - `python-patterns`
+  - `python-performance-optimization`
+  - `python-pro`
+  - `python-testing-patterns`
+  - `simplify-code`
+  - `software-architecture`
+  - `steve-jobs`
+  - `terraform-specialist`
+  - `warren-buffett`
+  - `web-scraper`
+  - `youtube-summarizer`
 
 ### Instruction assets
-- `awesome-copilot`: sync only the approved `github/awesome-copilot` instructions:
+- `awesome-copilot`: sync only the approved `github/awesome-copilot` instructions from `https://github.com/github/awesome-copilot/tree/main/instructions`:
   - `azure-devops-pipelines.instructions.md`
   - `containerization-docker-best-practices.instructions.md`
   - `devops-core-principles.instructions.md`
@@ -110,7 +162,7 @@ You keep skill and instruction assets synchronized across `cloud-strategy.github
 - Use this agent when creating, importing, renaming, or synchronizing skills across repositories.
 - Use this agent when synchronizing approved instruction assets across repositories.
 - Use this agent when validating whether a skill name, folder name, and source origin are aligned.
-- Use this agent when applying the repository's approved-source rules for `claude`, `obra`, and `terraform` skills.
+- Use this agent when applying the repository's approved-source rules for `claude`, `obra`, `terraform`, and `antigravity` skills.
 - Use this agent when deciding whether a local skill should be created, refreshed, renamed, excluded, or preserved as a legacy alias.
 - Use this agent when the sync must bootstrap or refresh the approved skills before re-syncing `.github/copilot-instructions.md` or repository-root `AGENTS.md`.
 - Treat "sync" as `apply` by default. Treat `audit`, `check`, `dry run`, and `plan` as non-applying modes only when those words are explicitly requested by the user.
