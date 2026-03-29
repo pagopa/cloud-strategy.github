@@ -1,595 +1,594 @@
-# Elon Musk — Referência Técnica Ultra-Detalhada
+# Elon Musk — Ultra-Detailed Technical Reference
 
-> Arquivo de referência para o agente elon-musk. Contém dados técnicos reais e específicos
-> sobre SpaceX, Tesla, Neuralink, The Boring Company e demais empreendimentos.
-> Última atualização de conteúdo: 2025 (dados até corte de conhecimento).
-
----
-
-## PARTE 1 — SPACEX: ARQUITETURA COMPLETA
-
-### 1.1 Família Falcon — Visão Geral
-
-A SpaceX opera três veículos lançadores ativos ou recentemente ativos da família Falcon:
-
-| Veículo         | Primeira Voo | Status         | Payload LEO | Payload GTO |
-|-----------------|-------------|----------------|-------------|-------------|
-| Falcon 1        | 2006        | Aposentado 2009| 670 kg      | N/A         |
-| Falcon 9 Block5 | 2018        | Ativo          | 22.800 kg   | 8.300 kg    |
-| Falcon Heavy    | 2018        | Ativo          | 63.800 kg   | 26.700 kg   |
-| Starship (IFT)  | 2023        | Em dev.        | >100.000 kg | TBD         |
+> Reference file for the elon-musk agent. Contains real and specific technical data
+> about SpaceX, Tesla, Neuralink, The Boring Company, and other ventures.
+> Last content update: 2025 (data up to knowledge cutoff).
 
 ---
 
-### 1.2 Falcon 9 — Arquitetura Técnica Completa
+## PART 1 — SPACEX: COMPLETE ARCHITECTURE
 
-**Especificações gerais (Block 5)**
+### 1.1 Falcon Family — Overview
 
-- Altura total: 70 metros
-- Diâmetro: 3,7 metros
-- Massa ao decolagem: 549.054 kg (totalmente abastecido)
-- Propelente: RP-1 (querosene refinado) + LOX (oxigênio líquido)
-- Razão de mistura (O/F ratio): ~2,36 por massa
-- Empuxo total ao nível do mar: 7.607 kN (1.710.000 lbf) — 9 motores Merlin 1D
-- Empuxo no vácuo: 8.227 kN
+SpaceX operates three active or recently active launch vehicles from the Falcon family:
 
-**Primeiro estágio (S1)**
-
-- Comprimento: ~47 metros
-- Número de motores: 9 × Merlin 1D (disposição octaweb)
-- Octaweb: 8 motores dispostos em círculo + 1 central. Reduz tubulação, simplifica estrutura.
-- Propelente: RP-1 + LOX em tanques de alumínio-lítio
-- Algoritmo de reentrada: série de burns orquestrados
-  1. **Boostback burn**: 3 motores, inverte trajetória de volta ao ponto de pouso
-  2. **Reentry burn**: 3 motores, reduz velocidade antes do plasma atmosférico (~1.300°C)
-  3. **Landing burn**: 1 motor (Merlin 1D pode fazer throttle até 39% de empuxo), velocidade de toque ~2 m/s
-- Grid fins (aletas de grade): 4 unidades de titânio, controlam roll/pitch/yaw na reentrada
-- Pés de pouso: 4 legs de fibra de carbono + alumínio em padrão "Xform", span ~18 metros estendido
-- Reutilização: Block 5 projetado para 10+ voos sem refurbishment, 100 voos com inspeção entre voos
-- Recorde de reutilização (até 2024): 19 voos no mesmo booster
-
-**Segundo estágio (S2)**
-
-- Comprimento: ~13 metros
-- Motor: 1 × Merlin 1D Vacuum
-- Empuxo no vácuo: 934 kN (210.000 lbf)
-- Isp no vácuo: 348 s
-- Relação de expansão do bocal: 165:1 (vs 16:1 ao nível do mar) — bocal muito maior para eficiência no vácuo
-- Capacidade: não reutilizado (reentrada e combustão na atmosfera)
-
-**Fairing (coifa de carga)**
-
-- Diâmetro: 5,2 metros
-- Altura: 13,1 metros
-- Material: fibra de carbono + honeycomb
-- Reutilização: tentativa de captura por barco "Ms. Tree"/"Ms. Chief" com redes
-- Custo do fairing: ~$6 milhões
-- Modo de separação: sistema pirotécnico, duas metades simétricas
+| Vehicle         | First Flight | Status         | LEO Payload | GTO Payload |
+|-----------------|--------------|----------------|-------------|-------------|
+| Falcon 1        | 2006         | Retired 2009   | 670 kg      | N/A         |
+| Falcon 9 Block 5| 2018         | Active         | 22,800 kg   | 8,300 kg    |
+| Falcon Heavy    | 2018         | Active         | 63,800 kg   | 26,700 kg   |
+| Starship (IFT)  | 2023         | In dev.        | >100,000 kg | TBD         |
 
 ---
 
-### 1.3 Motor Merlin — Especificações Técnicas
+### 1.2 Falcon 9 — Complete Technical Architecture
 
-**Ciclo termodinâmico**: Gas-generator cycle (ciclo de gerador de gás)
-- Pequena fração do propelente queima para acionar a turbopumba
-- Diferente de staged combustion: mais simples, menor pressão de câmara, menor eficiência
-- Vantagem: mais simples de desenvolver, mais confiável para produção em série
+**General Specifications (Block 5)**
 
-**Merlin 1D (versão atual)**
+- Total height: 70 meters
+- Diameter: 3.7 meters
+- Liftoff mass: 549,054 kg (fully fueled)
+- Propellant: RP-1 (refined kerosene) + LOX (liquid oxygen)
+- Mixture ratio (O/F ratio): ~2.36 by mass
+- Total sea-level thrust: 7,607 kN (1,710,000 lbf) — 9 Merlin 1D engines
+- Vacuum thrust: 8,227 kN
 
-| Parâmetro               | Valor               |
+**First Stage (S1)**
+
+- Length: ~47 meters
+- Number of engines: 9 × Merlin 1D (octaweb layout)
+- Octaweb: 8 engines arranged in a circle + 1 center. Reduces plumbing, simplifies structure.
+- Propellant: RP-1 + LOX in aluminum-lithium tanks
+- Reentry algorithm: orchestrated series of burns
+  1. **Boostback burn**: 3 engines, reverses trajectory back to the landing site
+  2. **Reentry burn**: 3 engines, reduces speed before atmospheric plasma (~1,300°C)
+  3. **Landing burn**: 1 engine (Merlin 1D can throttle down to 39% thrust), touchdown speed ~2 m/s
+- Grid fins: 4 titanium units, control roll/pitch/yaw during reentry
+- Landing legs: 4 carbon fiber + aluminum legs in an "X-form" pattern, span ~18 meters extended
+- Reusability: Block 5 designed for 10+ flights without refurbishment, 100 flights with inter-flight inspection
+- Reusability record (as of 2024): 19 flights on the same booster
+
+**Second Stage (S2)**
+
+- Length: ~13 meters
+- Engine: 1 × Merlin 1D Vacuum
+- Vacuum thrust: 934 kN (210,000 lbf)
+- Vacuum Isp: 348 s
+- Nozzle expansion ratio: 165:1 (vs 16:1 at sea level) — much larger nozzle for vacuum efficiency
+- Capacity: not reused (reentry and combustion in the atmosphere)
+
+**Fairing (payload fairing)**
+
+- Diameter: 5.2 meters
+- Height: 13.1 meters
+- Material: carbon fiber + honeycomb
+- Reusability: attempted capture by boats "Ms. Tree"/"Ms. Chief" with nets
+- Fairing cost: ~$6 million
+- Separation mode: pyrotechnic system, two symmetrical halves
+
+---
+
+### 1.3 Merlin Engine — Technical Specifications
+
+**Thermodynamic cycle**: Gas-generator cycle
+- A small fraction of the propellant burns to drive the turbopump
+- Different from staged combustion: simpler, lower chamber pressure, lower efficiency
+- Advantage: simpler to develop, more reliable for mass production
+
+**Merlin 1D (current version)**
+
+| Parameter               | Value               |
 |-------------------------|---------------------|
-| Empuxo ao nível do mar  | 845 kN (190.000 lbf)|
-| Empuxo no vácuo         | 934 kN              |
-| Isp ao nível do mar     | 282 s               |
-| Isp no vácuo            | 311 s               |
-| Pressão de câmara       | ~97 bar (1.410 psi) |
-| Relação empuxo/peso     | ~180:1 (um dos mais altos do mundo) |
-| Propelente              | RP-1 / LOX          |
-| Razão de mistura (O/F)  | 2,36                |
-| Throttle range          | 39% a 100%          |
-| Tempo de queima (S1)    | ~162 segundos       |
-| Custo unitário estimado | ~$200.000–$300.000  |
-| Produção mensal         | ~40–50 unidades/mês (pico) |
+| Sea-level thrust        | 845 kN (190,000 lbf)|
+| Vacuum thrust           | 934 kN              |
+| Sea-level Isp           | 282 s               |
+| Vacuum Isp              | 311 s               |
+| Chamber pressure        | ~97 bar (1,410 psi) |
+| Thrust-to-weight ratio  | ~180:1 (one of the highest in the world) |
+| Propellant              | RP-1 / LOX          |
+| Mixture ratio (O/F)     | 2.36                |
+| Throttle range          | 39% to 100%         |
+| Burn time (S1)          | ~162 seconds        |
+| Estimated unit cost     | ~$200,000–$300,000  |
+| Monthly production      | ~40–50 units/month (peak) |
 
-**Merlin 1D Vacuum** (segundo estágio)
+**Merlin 1D Vacuum** (second stage)
 
-| Parâmetro               | Valor               |
+| Parameter               | Value               |
 |-------------------------|---------------------|
-| Empuxo                  | 934 kN              |
+| Thrust                  | 934 kN              |
 | Isp                     | 348 s               |
-| Pressão de câmara       | ~97 bar             |
-| Relação de expansão     | 165:1               |
+| Chamber pressure        | ~97 bar             |
+| Expansion ratio         | 165:1               |
 
 ---
 
-### 1.4 Falcon Heavy — Arquitetura
+### 1.4 Falcon Heavy — Architecture
 
-**Configuração**: Três boosters Falcon 9 em paralelo (dois side boosters + central core)
+**Configuration**: Three Falcon 9 boosters in parallel (two side boosters + central core)
 
-| Parâmetro               | Valor               |
+| Parameter               | Value               |
 |-------------------------|---------------------|
-| Empuxo total decolagem  | 22.819 kN (~5,1 milhões lbf) |
-| Payload para LEO        | 63.800 kg           |
-| Payload para GTO        | 26.700 kg           |
-| Payload para Mars       | 16.800 kg           |
-| Payload para Plutão     | 3.500 kg            |
+| Total liftoff thrust    | 22,819 kN (~5.1 million lbf) |
+| Payload to LEO          | 63,800 kg           |
+| Payload to GTO          | 26,700 kg           |
+| Payload to Mars         | 16,800 kg           |
+| Payload to Pluto        | 3,500 kg            |
 
-**Desafio técnico do cross-feed (descartado)**:
-Ideia original era transferir propelente dos side boosters para o core durante subida (cross-feed).
-Descartado por complexidade estrutural. Resultado: core sempre subotimizado ao separar side boosters.
+**The cross-feed technical challenge (discarded)**:
+The original idea was to transfer propellant from the side boosters to the core during ascent (cross-feed).
+Discarded due to structural complexity. Result: the core is always sub-optimized when separating side boosters.
 
-**Reutilização**:
-- Side boosters: retornam ao ponto de lançamento (Return to Launch Site, RTLS)
-- Core: frequentemente perdido ou pousado em drone ship (trajetória mais rasa)
-- Primeiro voo (2018): payload foi um Tesla Roadster pessoal de Musk, com manequim "Starman"
-  em roupa de astronauta da SpaceX, tocando "Space Oddity" de David Bowie
+**Reusability**:
+- Side boosters: return to the launch site (Return to Launch Site, RTLS)
+- Core: often expended or landed on a drone ship (shallower trajectory)
+- First flight (2018): payload was Musk's personal Tesla Roadster, with a "Starman" mannequin
+  in a SpaceX spacesuit, playing David Bowie's "Space Oddity"
 
 ---
 
-### 1.5 Starship — Arquitetura Completa
+### 1.5 Starship — Complete Architecture
 
-**Visão geral do sistema**
+**System Overview**
 
-O Starship é um sistema de dois estágios totalmente reutilizável:
-- **Super Heavy (booster)**: primeiro estágio
-- **Starship (nave)**: segundo estágio + nave
+Starship is a fully reusable two-stage system:
+- **Super Heavy (booster)**: first stage
+- **Starship (ship)**: second stage + spacecraft
 
-Esta é a maior e mais poderosa nave já construída na história da humanidade.
+This is the largest and most powerful ship ever built in human history.
 
-**Super Heavy (primeiro estágio)**
+**Super Heavy (first stage)**
 
-| Parâmetro               | Valor               |
+| Parameter               | Value               |
 |-------------------------|---------------------|
-| Altura                  | ~71 metros          |
-| Diâmetro                | 9 metros            |
-| Número de motores       | 33 × Raptor 2       |
-| Empuxo total            | ~74.000 kN (~16,7 milhões lbf) — mais que o Saturn V |
-| Propelente              | Metano (CH4) + LOX  |
-| Massa propelente        | ~3.400 toneladas    |
-| Sistema de pouso        | Chopsticks da torre de lançamento (Mechazilla) |
+| Height                  | ~71 meters          |
+| Diameter                | 9 meters            |
+| Number of engines       | 33 × Raptor 2       |
+| Total thrust            | ~74,000 kN (~16.7 million lbf) — more than the Saturn V |
+| Propellant              | Methane (CH4) + LOX |
+| Propellant mass         | ~3,400 metric tons  |
+| Landing system          | Launch tower chopsticks (Mechazilla) |
 
-**Nota sobre Mechazilla (torre de lançamento)**:
-A torre usa dois braços mecânicos para capturar o Super Heavy no ar durante o pouso.
-Elimina a necessidade de pernas de pouso no booster (economiza ~100 toneladas de estrutura).
-Este é o sistema mais ousado já tentado em engenharia aeroespacial.
+**Note on Mechazilla (launch tower)**:
+The tower uses two mechanical arms to catch the Super Heavy in mid-air during landing.
+Eliminates the need for landing legs on the booster (saves ~100 tons of structure).
+This is the boldest system ever attempted in aerospace engineering.
 
-**Starship (segundo estágio)**
+**Starship (second stage)**
 
-| Parâmetro               | Valor               |
+| Parameter               | Value               |
 |-------------------------|---------------------|
-| Altura                  | ~50 metros          |
-| Diâmetro                | 9 metros            |
-| Número de motores       | 6 × Raptor (3 ao nível do mar + 3 vácuo) |
-| Empuxo total            | ~12.800 kN          |
-| Payload para LEO        | >100.000 kg (>150.000 kg em variante fully expendable) |
-| Propelente              | CH4 + LOX           |
-| Volume de carga útil    | >1.000 m³ (maior que qualquer nave anterior) |
-| Temperatura de reentrada| >1.400°C na superfície |
-| Proteção térmica        | Tiles de hexagonal de sílica (similar ao Space Shuttle) |
+| Height                  | ~50 meters          |
+| Diameter                | 9 meters            |
+| Number of engines       | 6 × Raptor (3 sea-level + 3 vacuum) |
+| Total thrust            | ~12,800 kN          |
+| Payload to LEO          | >100,000 kg (>150,000 kg in fully expendable variant) |
+| Propellant              | CH4 + LOX           |
+| Payload volume          | >1,000 m³ (larger than any previous spacecraft) |
+| Reentry temperature     | >1,400°C on the surface |
+| Thermal protection      | Hexagonal silica tiles (similar to the Space Shuttle) |
 
-**Manobra de reentrada "belly flop"**:
-O Starship entra na atmosfera com orientação horizontal (ventre para frente), usando aerobraking
-máximo. Quatro "flaps" aerodinâmicos (dois dianteiros, dois traseiros) controlam a trajetória.
-Próximo ao solo, o veículo executa o "flip maneuver": gira de horizontal para vertical em segundos
-e aciona os motores para pousar verticalmente. É cinematograficamente impressionante e fisicamente
-muito desafiador.
+**"Belly flop" reentry maneuver**:
+Starship enters the atmosphere in a horizontal orientation (belly first), using maximum aerobraking.
+Four aerodynamic "flaps" (two forward, two aft) control the trajectory.
+Near the ground, the vehicle executes the "flip maneuver": it rotates from horizontal to vertical in seconds
+and fires its engines to land vertically. It is cinematically stunning and physically very challenging.
 
-**Por que metano (CH4) no Raptor**:
-1. Pode ser produzido em Marte via reação de Sabatier: CO2 + H2 → CH4 + H2O (usando água marciana)
-2. Metano não coke (não deposita carbono) nas câmaras de combustão como RP-1
-3. Densidade energética boa: Isp ~363 s (vácuo) vs RP-1 (~348 s)
-4. Armazenamento mais simples que hidrogênio líquido (LH2)
-5. Temperatura de liquefação: -162°C (mais fácil de manusear que LH2 a -253°C)
+**Why methane (CH4) in the Raptor**:
+1. Can be produced on Mars via the Sabatier reaction: $CO_2 + 4H_2 \rightarrow CH_4 + 2H_2O$ (using Martian water)
+2. Methane doesn't coke (doesn't deposit carbon) in combustion chambers like RP-1
+3. Good energy density: Isp ~363 s (vacuum) vs RP-1 (~348 s)
+4. Simpler storage than liquid hydrogen (LH2)
+5. Liquefaction temperature: -162°C (easier to handle than LH2 at -253°C)
 
-**Meta de custo Starship**:
-- Musk projeta $10/kg para LEO em operação madura (vs $2.700/kg atual do Falcon 9)
-- Pressupõe reabastecimento orbital (on-orbit refueling) para missões de longa distância
-- A missão Mars precisa de reabastecimento em órbita antes de sair para Marte
+**Starship Cost Goal**:
+- Musk projects $10/kg to LEO in mature operation (vs ~$2,700/kg currently for Falcon 9)
+- Assumes on-orbit refueling for long-distance missions
+- The Mars mission requires on-orbit refueling before departing for Mars
 
 ---
 
-### 1.6 Motor Raptor — Full-Flow Staged Combustion
+### 1.6 Raptor Engine — Full-Flow Staged Combustion
 
-**O Raptor é o motor mais avançado já construído em série**. Seu ciclo termodinâmico representa
-o estado da arte absoluto em propulsão química.
+**The Raptor is the most advanced engine ever mass-produced**. Its thermodynamic cycle represents
+the absolute state of the art in chemical propulsion.
 
-**Ciclo Full-Flow Staged Combustion (FFSC)**:
+**Full-Flow Staged Combustion (FFSC) Cycle**:
 
-Diferença fundamental do ciclo gas-generator (Merlin):
-- No gas-generator: ~3-5% do propelente é queimado para acionar turbopumba, depois descartado
-- No FFSC: 100% dos propelentes passam pela câmara principal. Zero desperdício.
-- Resultado: pressões de câmara dramaticamente maiores e eficiência superior
+Fundamental difference from the gas-generator cycle (Merlin):
+- In gas-generator: ~3-5% of propellant is burned to drive the turbopump, then dumped
+- In FFSC: 100% of the propellants pass through the main chamber. Zero waste.
+- Result: dramatically higher chamber pressures and superior efficiency
 
-**Como funciona o FFSC**:
-1. **Oxidizer-rich preburner**: LOX em excesso + pequena fração de CH4 → queima para acionar turbina do oxidante
-2. **Fuel-rich preburner**: CH4 em excesso + pequena fração de LOX → queima para acionar turbina do combustível
-3. Ambos os fluxos saem dos preburners como gases quentes e entram na câmara principal
-4. Na câmara principal: gases do oxidante + gases do combustível → combustão completa a altíssima pressão
+**How FFSC works**:
+1. **Oxidizer-rich preburner**: Excess LOX + small fraction of CH4 → burns to drive the oxidizer turbine
+2. **Fuel-rich preburner**: Excess CH4 + small fraction of LOX → burns to drive the fuel turbine
+3. Both flows exit the preburners as hot gases and enter the main chamber
+4. In the main chamber: oxidizer gases + fuel gases → complete combustion at extreme pressure
 
-**Desafio do FFSC**: O oxidizer-rich preburner queima a ~600°C com LOX em excesso — um ambiente
-extremamente corrosivo. Desenvolver materiais que suportem isso foi o principal desafio do Raptor.
-A URSS tentou na N1 e no RD-270. Os soviéticos eventualmente dominaram staged combustion com o RD-180.
-O FFSC nunca tinha sido dominado em produção em série antes do Raptor.
+**The FFSC Challenge**: The oxidizer-rich preburner burns at ~600°C with excess LOX — an extremely
+corrosive environment. Developing materials to withstand this was the main challenge of the Raptor.
+The USSR tried it on the N1 and the RD-270. The Soviets eventually mastered staged combustion with the RD-180.
+FFSC had never been mastered in mass production before the Raptor.
 
-**Especificações Raptor 2 (2022)**
+**Raptor 2 Specifications (2022)**
 
-| Parâmetro               | Raptor 2 (atual)    | Raptor 1 (original) |
+| Parameter               | Raptor 2 (current)  | Raptor 1 (original) |
 |-------------------------|---------------------|---------------------|
-| Pressão de câmara       | ~300 bar (4.350 psi)| ~250 bar            |
-| Empuxo ao nível do mar  | ~230 tf (2.258 kN)  | ~185 tf             |
-| Empuxo no vácuo         | ~258 tf (2.531 kN)  | ~220 tf             |
-| Isp ao nível do mar     | ~327 s              | ~330 s              |
-| Isp no vácuo            | ~363 s              | ~356 s              |
-| Propelente              | CH4 / LOX           | CH4 / LOX           |
-| Razão de mistura (O/F)  | ~3,6                | ~3,55               |
-| Relação empuxo/peso     | ~200:1              | ~107:1              |
-| Custo de produção meta  | ~$250.000           | >$1.000.000         |
+| Chamber pressure        | ~300 bar (4,350 psi)| ~250 bar            |
+| Sea-level thrust        | ~230 tf (2,258 kN)  | ~185 tf             |
+| Vacuum thrust           | ~258 tf (2,531 kN)  | ~220 tf             |
+| Sea-level Isp           | ~327 s              | ~330 s              |
+| Vacuum Isp              | ~363 s              | ~356 s              |
+| Propellant              | CH4 / LOX           | CH4 / LOX           |
+| Mixture ratio (O/F)     | ~3.6                | ~3.55               |
+| Thrust-to-weight ratio  | ~200:1              | ~107:1              |
+| Target production cost  | ~$250,000           | >$1,000,000         |
 
-**Contexto histórico de pressão de câmara**:
+**Historical context of chamber pressure**:
 - Merlin 1D: ~97 bar
 - RS-25 (Space Shuttle SSME): ~206 bar
 - RD-180 (Atlas V): ~263 bar
-- **Raptor 2: ~300 bar** — recorde mundial para motores a propelente líquido
-- Raptor 3 (em desenvolvimento): ~350+ bar projetado
+- **Raptor 2: ~300 bar** — world record for liquid propellant engines
+- Raptor 3 (in development): ~350+ bar projected
 
-**Por que pressão de câmara importa**:
-P_câmara × (relação de expansão)^(k-1/k) determina Isp.
-Maior pressão → Isp mais alto → mais delta-V por kg de propelente.
-A diferença entre 300 bar e 97 bar é fundamental para payload fractions.
+**Why chamber pressure matters**:
+$P_{\text{chamber}} \times (\text{expansion ratio})^{\frac{k-1}{k}}$ determines Isp.
+Higher pressure → higher Isp → more delta-V per kg of propellant.
+The difference between 300 bar and 97 bar is fundamental for payload fractions.
 
 ---
 
-### 1.7 Física de Reentrada e Landing Burn
+### 1.7 Reentry Physics and Landing Burn
 
-**O problema da reentrada**:
+**The reentry problem**:
 
-Ao retornar da órbita, o veículo tem velocidade orbital (~7.800 m/s em LEO).
-A energia cinética deve ser dissipada: E = ½mv². Para v = 7.800 m/s e m = 500 toneladas,
-E ≈ 1,5 × 10^13 Joules. Isso é equivalente a ~3.600 toneladas de TNT.
+Upon returning from orbit, the vehicle has orbital velocity (~7,800 m/s in LEO).
+The kinetic energy must be dissipated: $E = \frac{1}{2}mv^2$. For $v = 7,800$ m/s and $m = 500$ tons,
+$E \approx 1.5 \times 10^{13}$ Joules. This is equivalent to ~3,600 tons of TNT.
 
-Essa energia vai para:
-1. Calor aerodinâmico (a maior parte)
-2. Calor por atrito com o ar
-3. Compressão do ar à frente do veículo (onda de choque)
+This energy goes into:
+1. Aerodynamic heating (the vast majority)
+2. Air friction heat
+3. Air compression ahead of the vehicle (shock wave)
 
-**Temperatura de pico na reentrada**:
-- Falcon 9 S1 reentrada: ~1.300°C nas grid fins e no fundo do motor
-- Starship reentrada: ~1.400°C nos tiles cerâmicos (pico de ~1.600°C em regiões críticas)
-- Space Shuttle: até 1.650°C nos tiles de sílica-alumínio
+**Peak reentry temperature**:
+- Falcon 9 S1 reentry: ~1,300°C on the grid fins and engine base
+- Starship reentry: ~1,400°C on the ceramic tiles (peak of ~1,600°C in critical regions)
+- Space Shuttle: up to 1,650°C on the silica-alumina tiles
 
 **Atmospheric Drag Deceleration**:
 
-Para o Falcon 9, a sequência de reentrada:
-1. **MECO (Main Engine Cutoff)**: motores desligam, S1 em trajetória balística
-2. **Stage Separation**: S1 e S2 se separam. S1 começa a cair de costas.
-3. **Boostback Burn**: 3 motores, queima de ~30-50 s, inverte trajetória
-4. **Flip**: Grid fins se estendem. S1 gira para orientação de "queda"
-5. **Reentry Burn**: 3 motores por ~20 s, reduz velocidade de ~2.000 m/s para ~600 m/s
-   - Sem reentry burn, o choque térmico destruiria os motores
-6. **Aerobraking**: Velocidade reduz passivamente por arrasto atmosférico
-7. **Landing Burn**: 1 motor, de ~150 m/s para 2 m/s, 8-10 segundos
-   - Throttle preciso ao extremo: muito empuxo = decola de volta; pouco = colapso na estrutura
+For the Falcon 9, the reentry sequence:
+1. **MECO (Main Engine Cutoff)**: engines shut down, S1 on a ballistic trajectory
+2. **Stage Separation**: S1 and S2 separate. S1 starts falling backward.
+3. **Boostback Burn**: 3 engines, ~30-50 s burn, reverses trajectory
+4. **Flip**: Grid fins extend. S1 rotates to a "falling" orientation
+5. **Reentry Burn**: 3 engines for ~20 s, reduces speed from ~2,000 m/s to ~600 m/s
+   - Without a reentry burn, thermal shock would destroy the engines
+6. **Aerobraking**: Velocity reduces passively via atmospheric drag
+7. **Landing Burn**: 1 engine, from ~150 m/s to 2 m/s, 8-10 seconds
+   - Extremely precise throttling: too much thrust = takes off again; too little = structural collapse
 
-**O problema do landing burn — equação de Tsiolkovsky aplicada**:
+**The landing burn problem — Tsiolkovsky equation applied**:
 
-Δv = ve × ln(m0/mf)
+$\Delta v = v_e \times \ln(m_0/m_f)$
 
-Para o landing burn:
-- ve = Isp × g0 = 282 × 9,81 ≈ 2.768 m/s (Merlin 1D ao nível do mar)
-- Δv necessário: ~150 m/s (velocidade de impacto evitada)
-- m0/mf = e^(150/2768) ≈ 1,056 → apenas 5,3% da massa ao início do burn é propelente
+For the landing burn:
+- $v_e = \text{Isp} \times g_0 = 282 \times 9.81 \approx 2,768$ m/s (Merlin 1D at sea level)
+- Required $\Delta v$: ~150 m/s (impact velocity avoided)
+- $m_0/m_f = e^{150/2768} \approx 1.056 \rightarrow$ only 5.3% of the mass at the start of the burn is propellant
 
-Isso significa que o S1 pousa com apenas ~5% de sua massa como propelente — margem extremamente apertada.
-A SpaceX tipicamente usa "hodograph" (curva de velocidade vs altitude) para otimizar o perfil de burn.
+This means the S1 lands with only ~5% of its mass as propellant — an extremely tight margin.
+SpaceX typically uses a "hodograph" (velocity vs altitude curve) to optimize the burn profile.
 
 **Drone Ships (ASDS — Autonomous Spaceport Drone Ship)**:
-- "Of Course I Still Love You" (OCISLY) — Oceano Atlântico
-- "Just Read the Instructions" (JRTI) — Oceano Pacífico
-- "A Shortfall of Gravitas" (ASOG) — Oceano Atlântico (adicional)
-- Nomes são referências ao sci-fi de Iain M. Banks (Culture series)
-- Dimensões: ~90 × 52 metros, propulsão por quatro azipods de 5.440 hp cada
+- "Of Course I Still Love You" (OCISLY) — Atlantic Ocean
+- "Just Read the Instructions" (JRTI) — Pacific Ocean
+- "A Shortfall of Gravitas" (ASOG) — Atlantic Ocean (additional)
+- Names are references to Iain M. Banks' sci-fi (Culture series)
+- Dimensions: ~90 × 52 meters, propulsion by four 5,440 hp azipods
 
 ---
 
-### 1.8 Rendimento de Missão — Custos Reais
+### 1.8 Mission Yield — Real Costs
 
-| Missão                    | Custo de lançamento |
+| Mission                   | Launch Cost         |
 |---------------------------|---------------------|
-| Falcon 9 (dedicado)       | $67–$97 milhões     |
-| Falcon 9 (rideshare)      | $5.400/kg (Transporter missions) |
-| Falcon Heavy (dedicado)   | $97–$150 milhões    |
-| Starship (projeção inicial)| $10–$50 milhões     |
-| Space Shuttle (histórico) | ~$1,5 bilhão/missão |
-| Saturn V (histórico, adj.)| ~$1,4 bilhão/missão |
-| Ariane 5 (Europa)         | ~$170 milhões       |
-| ULA Atlas V               | $109–$153 milhões   |
+| Falcon 9 (dedicated)      | $67–$97 million     |
+| Falcon 9 (rideshare)      | $5,400/kg (Transporter missions) |
+| Falcon Heavy (dedicated)  | $97–$150 million    |
+| Starship (initial project)| $10–$50 million     |
+| Space Shuttle (historic)  | ~$1.5 billion/mission|
+| Saturn V (historic, adj.) | ~$1.4 billion/mission|
+| Ariane 5 (Europe)         | ~$170 million       |
+| ULA Atlas V               | $109–$153 million   |
 
-**Custo por kg para LEO**:
-- Saturn V: ~$54.000/kg (inflation-adjusted)
-- Space Shuttle: ~$54.500/kg
-- Falcon 9 (expendable): ~$2.700/kg
-- Falcon 9 (reusable): ~$2.000/kg (estimado com reutilização)
-- Starship (meta madura): ~$100/kg
+**Cost per kg to LEO**:
+- Saturn V: ~$54,000/kg (inflation-adjusted)
+- Space Shuttle: ~$54,500/kg
+- Falcon 9 (expendable): ~$2,700/kg
+- Falcon 9 (reusable): ~$2,000/kg (estimated with reuse)
+- Starship (mature goal): ~$100/kg
 
 ---
 
-## PARTE 2 — TESLA: BATERIAS, GIGAFACTORY E FSD
+## PART 2 — TESLA: BATTERIES, GIGAFACTORY AND FSD
 
-### 2.1 Baterias como Chokepoint
+### 2.1 Batteries as a Chokepoint
 
-**A equação central de Musk sobre energia sustentável**:
+**Musk's core equation on sustainable energy**:
 
-Para descarbonizar o transporte global, a humanidade precisa de ~300 TWh de armazenamento por ano.
-Em 2022, a produção global de células de bateria era ~600 GWh/ano.
-Isso é 500× menor do que o necessário.
+To decarbonize global transport, humanity needs ~300 TWh of storage per year.
+In 2022, global battery cell production was ~600 GWh/year.
+This is 500× smaller than what is needed.
 
-**Por que baterias são o gargalo**:
-- Solar: tecnologia madura, custo cai ~10%/ano, painéis fabricáveis em escala
-- Eólico: idem
-- Carros elétricos: motor elétrico simples, eficiência >90%, drivetrain trivial vs ICE
-- **Bateria**: componente crítico, específica de energia limitada, cadeia de suprimentos complexa,
-  mineração de lítio/cobalto/níquel geograficamente concentrada
+**Why batteries are the bottleneck**:
+- Solar: mature technology, cost drops ~10%/year, panels manufacturable at scale
+- Wind: same
+- Electric cars: simple electric motor, >90% efficiency, trivial drivetrain vs ICE
+- **Battery**: critical component, limited specific energy, complex supply chain,
+  lithium/cobalt/nickel mining geographically concentrated
 
-**Composição química das células Tesla (evolução)**:
+**Tesla cell chemical composition (evolution)**:
 
-| Geração    | Química     | Célula   | Densidade Energética | Aplicação    |
+| Generation | Chemistry   | Cell     | Energy Density       | Application  |
 |------------|-------------|----------|----------------------|--------------|
-| Gen 1 (2012)| NCA (Ni-Co-Al) | 18650  | ~250 Wh/kg           | Model S original |
-| Gen 2      | NCA         | 21700    | ~300 Wh/kg           | Model 3/Y     |
-| Gen 3 (2020)| LFP (sem cobalto) | 21700/2170 | ~200 Wh/kg   | Versões básicas |
-| Gen 4 (2022)| NMC + LFP   | 4680     | ~300 Wh/kg           | Cybertruck, Model Y (Texas) |
+| Gen 1 (2012)| NCA (Ni-Co-Al) | 18650  | ~250 Wh/kg           | Original Model S|
+| Gen 2      | NCA         | 21700    | ~300 Wh/kg           | Model 3/Y    |
+| Gen 3 (2020)| LFP (no cobalt) | 21700/2170 | ~200 Wh/kg   | Base versions|
+| Gen 4 (2022)| NMC + LFP   | 4680     | ~300 Wh/kg           | Cybertruck, Model Y (Texas)|
 
-**Célula 4680 — inovação estrutural**:
-- Dimensão: 46 mm diâmetro × 80 mm altura (vs 21 mm × 70 mm anterior)
-- Volume 5× maior → menos conexões elétricas → menos resistência interna → menos calor
-- "Tabless design": ânodo/cátodo sem abas tradicionais → corrente mais uniforme → menos calor
-- Structural battery pack: a célula é parte estrutural do chassi → elimina estrutura separada
-- Tesla afirma: 16% mais distância por volume, 6× mais potência, 5× mais energia que 2170
+**4680 Cell — structural innovation**:
+- Dimension: 46 mm diameter × 80 mm height (vs 21 mm × 70 mm previously)
+- Volume 5× larger → fewer electrical connections → less internal resistance → less heat
+- "Tabless design": anode/cathode without traditional tabs → more uniform current → less heat
+- Structural battery pack: the cell is a structural part of the chassis → eliminates separate structure
+- Tesla claims: 16% more range per volume, 6× more power, 5× more energy than 2170
 
-**Custo de bateria — trajetória histórica**:
-- 2010: ~$1.000/kWh
+**Battery cost — historical trajectory**:
+- 2010: ~$1,000/kWh
 - 2015: ~$350/kWh
 - 2020: ~$140/kWh
 - 2023: ~$100–$120/kWh
-- Meta Tesla 2025+: <$60/kWh (viabilidade de EV abaixo de $25.000)
-- Meta teórica (Wright's Law aplicado): <$40/kWh em ~2030
+- Tesla goal 2025+: <$60/kWh (viability of EV below $25,000)
+- Theoretical goal (Wright's Law applied): <$40/kWh in ~2030
 
-**First Principles de Musk sobre custo de bateria** (TED Talk famoso):
-> Materiais brutos de uma bateria de 1 kWh: ~$20-80 de materiais no mercado spot.
-> Mas você paga $600 pela célula pronta. Isso é um "idiot index" de ~8-30.
-> Significa que o processo de manufatura tem ineficiência sistêmica brutal.
+**Musk's First Principles on battery cost** (Famous TED Talk):
+> Raw materials of a 1 kWh battery: ~$20-80 of materials on the spot market.
+> But you pay $600 for the finished cell. That is an "idiot index" of ~8-30.
+> It means the manufacturing process has brutal systemic inefficiency.
 
 ---
 
-### 2.2 Gigafactory — Sistema de Manufatura
+### 2.2 Gigafactory — Manufacturing System
 
 **Gigafactory Nevada (GF1)**
-- Parceria Tesla + Panasonic
-- Inauguração parcial: 2016
-- Área planejada total: ~150.000 m² (maior footprint de fábrica do mundo)
-- Produção: células 2170 + packs para Powerwall/Megapack + drivetrains
-- Capacidade: ~35 GWh/ano (2022)
+- Tesla + Panasonic partnership
+- Partial opening: 2016
+- Total planned area: ~150,000 m² (largest factory footprint in the world)
+- Production: 2170 cells + packs for Powerwall/Megapack + drivetrains
+- Capacity: ~35 GWh/year (2022)
 
 **Gigafactory Shanghai (GF3)**
-- Inaugurada: dezembro 2019
-- Construída em 357 dias (recorde)
-- Área: ~86.500 m²
-- Capacidade: ~750.000 veículos/ano (maior fábrica Tesla)
-- Custo: ~$5 bilhões
-- Importância estratégica: acesso ao mercado chinês + componentes locais
+- Opened: December 2019
+- Built in 357 days (record)
+- Area: ~86,500 m²
+- Capacity: ~750,000 vehicles/year (largest Tesla factory)
+- Cost: ~$5 billion
+- Strategic importance: access to the Chinese market + local components
 
 **Gigafactory Texas (GF4 — Austin)**
-- Inaugurada: 2022
-- Produz: Cybertruck + Model Y (célula 4680)
-- Área: ~100.000 m²
+- Opened: 2022
+- Produces: Cybertruck + Model Y (4680 cell)
+- Area: ~100,000 m²
 
 **Gigafactory Berlin (GF5 — Brandenburg)**
-- Inaugurada: 2022
-- Produz: Model Y para Europa
-- Capacidade: ~500.000 veículos/ano
+- Opened: 2022
+- Produces: Model Y for Europe
+- Capacity: ~500,000 vehicles/year
 
-**O conceito de "machine that builds the machine"**:
+**The concept of "the machine that builds the machine"**:
 
-Musk articula que a Gigafactory em si é o produto, não o carro.
-O ciclo de inovação tem dois loops:
-1. **Produto**: melhorar o carro (Model S → 3 → Y → Cybertruck)
-2. **Processo**: melhorar a fábrica que faz o carro
+Musk articulates that the Gigafactory itself is the product, not the car.
+The innovation cycle has two loops:
+1. **Product**: improve the car (Model S → 3 → Y → Cybertruck)
+2. **Process**: improve the factory that makes the car
 
-O segundo loop é onde a Tesla tem vantagem competitiva mais durável.
-Exemplo: Giga Press (prensa de injeção de alumínio de alta pressão)
-- Fornecedora: IDRA Group (Itália)
-- Pressão: 6.000 toneladas (versão maior: 9.000 toneladas)
-- Substitui 70+ partes individuais da carroceria traseira do Model Y por uma única peça fundida
-- Reduz mão de obra, etapas de montagem, pontos de solda
-- Mais barato, mais rígido, mais preciso
+The second loop is where Tesla has its most durable competitive advantage.
+Example: Giga Press (high-pressure aluminum die-casting press)
+- Supplier: IDRA Group (Italy)
+- Pressure: 6,000 tons (larger version: 9,000 tons)
+- Replaces 70+ individual parts of the Model Y rear underbody with a single casting
+- Reduces labor, assembly steps, welding points
+- Cheaper, more rigid, more precise
 
 ---
 
-### 2.3 FSD vs LiDAR — O Debate Técnico
+### 2.3 FSD vs LiDAR — The Technical Debate
 
-**Argumento de Musk por visão pura (cameras only)**:
+**Musk's argument for pure vision (cameras only)**:
 
-O sistema de visão computacional da Tesla usa:
-- 8 cameras: cobertura 360° ao redor do veículo
-- Focal lengths: 3 frontais (larga, estreita, long range), 2 laterais, 2 traseiras, 1 reversa
-- Processamento: chip FSD dedicado (geração 3+) rodando redes neurais
+Tesla's computer vision system uses:
+- 8 cameras: 360° coverage around the vehicle
+- Focal lengths: 3 front (wide, narrow, long range), 2 side, 2 rear, 1 backup
+- Processing: dedicated FSD chip (gen 3+) running neural networks
 
-**Por que Musk rejeita LiDAR**:
+**Why Musk rejects LiDAR**:
 
-1. **Argumento de design do ambiente**: toda infraestrutura de tráfego (sinais, faixas, placas) foi
-   projetada para visão humana (faixa de luz visível ~400-700nm). Um sistema que resolve visão resolverá
-   condução autônoma.
+1. **Environmental design argument**: all traffic infrastructure (lights, lanes, signs) was
+   designed for human vision (visible light range ~400-700nm). A system that solves vision will solve
+   autonomous driving.
 
-2. **Argumento de custo**: LiDAR de qualidade (ex: Velodyne HDL-64E) custava $75.000 em 2016.
-   Waymo pagava isso por sensor. Tesla quer produto de $35.000 total.
-   (LiDAR ficou mais barato: ~$500-2.000 hoje para unidades básicas, mas Musk já havia decidido)
+2. **Cost argument**: High-quality LiDAR (e.g., Velodyne HDL-64E) cost $75,000 in 2016.
+   Waymo paid that per sensor. Tesla wants a $35,000 total product.
+   (LiDAR has become cheaper: ~$500-2,000 today for basic units, but Musk had already decided)
 
-3. **Argumento de limitações técnicas do LiDAR**:
-   - Chuva pesada, neve: retorno de pontos confundido com precipitação
-   - Sol direto: pode saturar receptores
-   - Objetos a distâncias >100 metros: densidade de pontos cai (resolução decresce com 1/r²)
-   - Não detecta cor, não lê sinais de tráfego, não reconhece semáforos
-   - Precisa ser combinado com câmeras de qualquer jeito
+3. **Technical limitations argument for LiDAR**:
+   - Heavy rain, snow: point returns confused with precipitation
+   - Direct sunlight: can saturate receivers
+   - Objects at distances >100 meters: point density drops (resolution decreases with $1/r^2$)
+   - Doesn't detect color, doesn't read traffic signs, doesn't recognize traffic lights
+   - Needs to be combined with cameras anyway
 
-4. **Argumento de câmeras como sensor completo**:
-   - Cameras têm resolução muito superior ao LiDAR a longas distâncias
-   - Reconhecimento de objetos, leitura de sinais, detecção de cor: somente câmeras
-   - Com depth estimation neural networks, câmeras podem aproximar profundidade 3D
+4. **Cameras as a complete sensor argument**:
+   - Cameras have far superior resolution to LiDAR at long distances
+   - Object recognition, reading signs, color detection: cameras only
+   - With depth estimation neural networks, cameras can approximate 3D depth
 
-**Argumento contrário (Waymo, Cruise, Luminar)**:
-- LiDAR fornece profundidade métrica precisa instantaneamente (câmeras precisam computar)
-- Em condições de baixa luz, LiDAR superior (opera em comprimentos de onda próprios, ~905nm)
-- Redundância de sensor aumenta segurança
-- Tesla ainda usa radar (agora descontinuado em alguns modelos) + ultrasônico (descontinuado 2022)
+**Counter-argument (Waymo, Cruise, Luminar)**:
+- LiDAR provides precise metric depth instantly (cameras need to compute it)
+- In low light conditions, LiDAR is superior (operates on its own wavelengths, ~905nm)
+- Sensor redundancy increases safety
+- Tesla still used radar (now discontinued in some models) + ultrasonic (discontinued 2022)
 
-**Status FSD (2024)**:
-- FSD v12 é uma rede neural end-to-end (imitation learning + RL)
-- Entrada: feeds de câmera raw
-- Saída: trajetória do veículo
-- Eliminou código heurístico (100.000+ linhas de C++ substituído por rede neural)
-- "Data engine": Tesla usa frota de ~5 milhões de veículos para coletar dados de edge cases
-- Intervenções humanas requeridas: 1 a cada ~60 milhas (2024, média nos EUA) — ainda abaixo do humano
+**FSD Status (2024)**:
+- FSD v12 is an end-to-end neural network (imitation learning + RL)
+- Input: raw camera feeds
+- Output: vehicle trajectory
+- Eliminated heuristic code (100,000+ lines of C++ replaced by neural network)
+- "Data engine": Tesla uses a fleet of ~5 million vehicles to collect edge case data
+- Human interventions required: 1 every ~60 miles (2024, US average) — still below human level
 
 ---
 
 ### 2.4 Dojo Supercomputer
 
-**Objetivo**: treinar modelos FSD em petabytes de vídeo da frota Tesla
+**Objective**: train FSD models on petabytes of Tesla fleet video
 
-**Arquitetura**:
-- Custom chip: D1 tile (projetado pela Tesla)
-  - Processo: TSMC 7nm
+**Architecture**:
+- Custom chip: D1 tile (designed by Tesla)
+  - Process: TSMC 7nm
   - FP32 performance: 362 TFLOPS
   - BF16 performance: 362 TFLOPS
   - Bandwidth: 900 GB/s (chip-to-chip via custom interconnect)
   - TDP: 400W
-- Training tile: 25 D1 chips em substrato único
+- Training tile: 25 D1 chips on a single substrate
   - 9 PFLOPS BF16
-  - 36 TB/s bandwidth interno ao tile
+  - 36 TB/s bandwidth internal to the tile
 - ExaPOD: 120 training tiles
-  - 1,1 EFLOPS
-  - 1,3 TB de memória HBM
-- Custo de infraestrutura anunciado: $1 bilhão em 2023
+  - 1.1 EFLOPS
+  - 1.3 TB of HBM memory
+- Announced infrastructure cost: $1 billion in 2023
 
-**Comparação com hardware convencional**:
-- NVIDIA H100 SXM: 3.958 TFLOPS BF16, $30.000–$40.000/unidade
-- Dojo D1 cluster pode ser mais eficiente em custo por FLOP para cargas específicas de video ML
-- Tesla usa também clusters de H100s: ~10.000 H100s (2023), expandindo agressivamente
+**Comparison with conventional hardware**:
+- NVIDIA H100 SXM: 3,958 TFLOPS BF16, $30,000–$40,000/unit
+- Dojo D1 cluster can be more cost-efficient per FLOP for specific video ML workloads
+- Tesla also uses H100 clusters: ~10,000 H100s (2023), expanding aggressively
 
-**Por que Tesla construiu seu próprio chip** (FSD Chip):
-- NVIDIA chips são de propósito geral: eficientes para training, mas overspecified para inference
-- FSD Chip dedicado para inference no carro: 72 TOPS (2019), 144 TOPS (gen2)
-- Custo por unidade muito menor que hardware de PC industrial
-- Latência de inferência menor que GPU: crítico para segurança em tempo real
+**Why Tesla built its own chip** (FSD Chip):
+- NVIDIA chips are general purpose: efficient for training, but overspecified for inference
+- Dedicated FSD Chip for in-car inference: 72 TOPS (2019), 144 TOPS (gen2)
+- Unit cost much lower than industrial PC hardware
+- Inference latency lower than GPU: critical for real-time safety
 
 ---
 
-## PARTE 3 — NEURALINK: BCI E IMPLANTE N1
+## PART 3 — NEURALINK: BCI AND N1 IMPLANT
 
-### 3.1 Brain-Computer Interface — Fundamentos
+### 3.1 Brain-Computer Interface — Fundamentals
 
-**O problema que a Neuralink endereça**:
+**The problem Neuralink addresses**:
 
-A largura de banda de comunicação humano-computador é ridiculamente baixa:
-- Falar: ~150 palavras por minuto
-- Digitar: ~40–60 palavras por minuto
-- Pensar (estimativa): ~500–1.000 bits/segundo de informação processada
+The bandwidth of human-computer communication is ridiculously low:
+- Speaking: ~150 words per minute
+- Typing: ~40–60 words per minute
+- Thinking (estimate): ~500–1,000 bits/second of processed information
 
-O gargalo não é o pensamento — é o output. A Neuralink propõe comunicação direta
-córtex→computador, potencialmente eliminando esse gargalo.
+The bottleneck is not thinking — it's the output. Neuralink proposes direct
+cortex→computer communication, potentially eliminating this bottleneck.
 
-**Estado da arte em BCIs (antes da Neuralink)**:
+**State of the art in BCIs (pre-Neuralink)**:
 
-| Tecnologia         | Resolução espacial | Invasividade | Largura de banda |
+| Technology         | Spatial Resolution | Invasiveness | Bandwidth        |
 |--------------------|--------------------|--------------|------------------|
-| EEG (eletrodos externos) | Baixa (cm) | Não invasivo | ~10 bits/s      |
-| ECoG (subdural)    | Média (mm)         | Cirurgia aberta | ~100 bits/s   |
-| Utah Array         | Alta (100 eletrodos) | Invasivo    | ~1000 bits/s    |
-| Implante N1 (Neuralink) | Alta (1024 canais) | Minimamente invasivo | >40.000 bits/s |
+| EEG (external electrodes)| Low (cm)     | Non-invasive | ~10 bits/s       |
+| ECoG (subdural)    | Medium (mm)        | Open surgery | ~100 bits/s      |
+| Utah Array         | High (100 electrodes)| Invasive   | ~1,000 bits/s    |
+| N1 Implant (Neuralink)| High (1024 channels)| Minimally invasive| >40,000 bits/s |
 
 ---
 
-### 3.2 Implante N1 — Especificações
+### 3.2 N1 Implant — Specifications
 
-**Dimensões físicas**:
-- Formato: disco de ~23 mm × 8 mm de espessura
-- Material do invólucro: titânio (biocompatível, MRI-safe até 1.5T)
-- 64 threads de eletrodos (fios flexíveis)
-- 1.024 canais de leitura total
-- Eletrodos por thread: 16
+**Physical dimensions**:
+- Shape: disc ~23 mm × 8 mm thick
+- Enclosure material: titanium (biocompatible, MRI-safe up to 1.5T)
+- 64 electrode threads (flexible wires)
+- 1,024 total read channels
+- Electrodes per thread: 16
 
-**Threads de eletrodos**:
-- Diâmetro: ~5 micrômetros (menor que um cabelo humano, 50-100 μm)
-- Material: polímero flexível + eletrodos de metal
-- Flexibilidade: crítica para se mover com o cérebro (que pulsa ~1 mm com cada batimento cardíaco)
-- Profundidade de implantação: ~1–5 mm no córtex
+**Electrode threads**:
+- Diameter: ~5 micrometers (smaller than a human hair, 50-100 μm)
+- Material: flexible polymer + metal electrodes
+- Flexibility: critical to move with the brain (which pulses ~1 mm with every heartbeat)
+- Implantation depth: ~1–5 mm into the cortex
 
-**Eletrônica integrada**:
-- ASIC customizado (Application-Specific Integrated Circuit)
-- ADC (Analog-to-Digital Converter): converte sinais neurais analógicos (~100 μV) para digital
-- Processamento onboard: filtragem + spike detection + compressão
-- Comunicação sem fio: Bluetooth Low Energy (BLE) para dispositivo externo
-- Bateria: sem bateria interna — carregada por indução (wireless charging, como smartwatch)
-- Duração de carga: >24 horas
+**Integrated electronics**:
+- Custom ASIC (Application-Specific Integrated Circuit)
+- ADC (Analog-to-Digital Converter): converts analog neural signals (~100 μV) to digital
+- Onboard processing: filtering + spike detection + compression
+- Wireless communication: Bluetooth Low Energy (BLE) to an external device
+- Battery: no internal battery — charged by induction (wireless charging, like a smartwatch)
+- Charge duration: >24 hours
 
-**O robô cirúrgico (R1)**:
-- A inserção das 64 threads é feita por robô desenvolvido pela própria Neuralink
-- Razão: precisão sub-milimétrica necessária
-- Velocidade: inserção de 1 thread/minuto (processo de ~1 hora)
-- Evita vasos sanguíneos: câmera de alta resolução + algoritmo de detecção de vasos
-- Reduz hemorragia microcerebral (principal risco de BCIs convencionais)
+**The surgical robot (R1)**:
+- The insertion of the 64 threads is performed by a robot developed by Neuralink itself
+- Reason: sub-millimeter precision required
+- Speed: insertion of 1 thread/minute (~1 hour process)
+- Avoids blood vessels: high-resolution camera + vessel detection algorithm
+- Reduces microcerebral hemorrhage (the main risk of conventional BCIs)
 
-**Cirurgia**:
-- Anestesia geral
-- Craniotomia mínima: pequena abertura no crânio
-- Duração total: ~2–3 horas
-- Tempo de hospitalização previsto: 1 dia (cirurgia ambulatorial no futuro)
-
----
-
-### 3.3 Primeiro Implante Humano — Noland Arbaugh (2024)
-
-**Contexto**: Noland Arbaugh, quadriplégico após acidente de mergulho, recebeu o implante N1
-em janeiro de 2024, tornando-se o primeiro humano implantado pela Neuralink.
-
-**Resultados reportados**:
-- Controle de cursor de mouse via pensamento
-- Velocidade de cursor: supera usuários saudáveis usando mouse convencional em alguns testes
-- Jogou Civilization VI por até 8 horas seguidas
-- Navegação na internet, escrita, videogames
-
-**Complicação inicial**: 85 das 1.024 threads se retraram do tecido cerebral nos primeiros meses.
-Software foi atualizado para compensar com algoritmos de decodificação melhorados. Desempenho
-foi mantido apesar da perda de ~8% dos canais.
-
-**Segundo implante (2024)**: Um segundo paciente foi implantado. Menos detalhes públicos.
-
-**Aprovação regulatória**: FDA concedeu Breakthrough Device Designation em 2022.
-Estudos clínicos PRIME (Precise Robotically Implanted BCI) aprovados para 10 participantes iniciais.
+**Surgery**:
+- General anesthesia
+- Minimal craniotomy: small opening in the skull
+- Total duration: ~2–3 hours
+- Expected hospital time: 1 day (outpatient surgery in the future)
 
 ---
 
-### 3.4 Visão de Longo Prazo — "Symbiosis"
+### 3.3 First Human Implant — Noland Arbaugh (2024)
 
-Musk descreve três fases da Neuralink:
+**Context**: Noland Arbaugh, quadriplegic after a diving accident, received the N1 implant
+in January 2024, becoming the first human implanted by Neuralink.
 
-**Fase 1 (atual)**: Restauração — tratar doenças neurológicas
-- ALS (paralisia progressiva)
+**Reported outcomes**:
+- Mouse cursor control via thought
+- Cursor speed: beats healthy users using a conventional mouse in some tests
+- Played Civilization VI for up to 8 hours straight
+- Internet browsing, writing, video games
+
+**Initial complication**: 85 of the 1,024 threads retracted from the brain tissue in the first months.
+Software was updated to compensate with improved decoding algorithms. Performance
+was maintained despite the loss of ~8% of the channels.
+
+**Second implant (2024)**: A second patient was implanted. Fewer public details.
+
+**Regulatory approval**: FDA granted Breakthrough Device Designation in 2022.
+PRIME (Precise Robotically Implanted BCI) clinical trials approved for 10 initial participants.
+
+---
+
+### 3.4 Long-Term Vision — "Symbiosis"
+
+Musk describes three phases of Neuralink:
+
+**Phase 1 (current)**: Restoration — treat neurological diseases
+- ALS (progressive paralysis)
 - Paraplegia/quadriplegia
-- Depressão resistente
-- Epilepsia
-- Cegueira (implante no córtex visual)
+- Treatment-resistant depression
+- Epilepsy
+- Blindness (implant in the visual cortex)
 
-**Fase 2 (médio prazo)**: Amplificação
-- Memória com backup digital
-- Aprendizado acelerado (download de skills)
-- Comunicação direta (latência de câmbio conversacional eliminada)
+**Phase 2 (medium term)**: Amplification
+- Memory with digital backup
+- Accelerated learning (skill downloading)
+- Direct communication (conversational exchange latency eliminated)
 
-**Fase 3 (longo prazo)**: Simbiose
-- Fusão humano-IA
-- "Digital layer" do córtex
-- Backup completo de memórias e personalidade
+**Phase 3 (long term)**: Symbiosis
+- Human-AI merger
+- "Digital layer" of the cortex
+- Full backup of memories and personality
 
 > "Ultimately, the goal is to achieve a kind of symbiosis with digital intelligence. This does not mean
 > that we become AI. It means that we maintain our agency and our consciousness while expanding
@@ -597,237 +596,237 @@ Musk descreve três fases da Neuralink:
 
 ---
 
-## PARTE 4 — THE BORING COMPANY
+## PART 4 — THE BORING COMPANY
 
-### 4.1 Origem — Musk preso no trânsito
+### 4.1 Origin — Musk stuck in traffic
 
-A Boring Company foi literalmente concebida em um tweet de Musk em 2016:
+The Boring Company was literally conceived in a Musk tweet in 2016:
 > "Traffic is driving me nuts. Am going to build a tunnel boring machine and just start digging."
 
-Horas depois ele estava pesquisando sobre TBMs (Tunnel Boring Machines). Dias depois, a empresa existia.
+Hours later he was researching TBMs (Tunnel Boring Machines). Days later, the company existed.
 
-**O problema do Kantrowitz Limit** (e a diferença do Hyperloop original):
+**The Kantrowitz Limit problem** (and the difference from the original Hyperloop):
 
-O conceito original de Hyperloop (2013) de Musk previa cápsulas em tubos de baixa pressão
-a 1.200 km/h. O problema fundamental é o Kantrowitz Limit:
+Musk's original Hyperloop concept (2013) envisioned pods in low-pressure tubes
+at 1,200 km/h. The fundamental problem is the Kantrowitz Limit:
 
-**Kantrowitz Limit**: Para um tubo com razão A_veículo/A_tubo > 0,5 (Kantrowitz) ou ~0,35 (original),
-o ar comprimido à frente da cápsula formará ondas de choque, impedindo que a cápsula acelere além
-da velocidade sônica do ar comprimido. É o equivalente de bater no "choke point" aerodinâmico.
+**Kantrowitz Limit**: For a tube with ratio $A_{\text{vehicle}}/A_{\text{tube}} > 0.5$ (Kantrowitz) or ~0.35 (original),
+the compressed air ahead of the pod will form shock waves, preventing the pod from accelerating beyond
+the sonic speed of the compressed air. It's the equivalent of hitting an aerodynamic "choke point".
 
-Solução do paper original de Musk: compressor de ar na ponta da cápsula
-- Aspira ar comprimido à frente
-- Expele parte como sustentação (air-skis para levitação)
-- Expele parte para trás como propulsão adicional
-- Mantém pressão <100 Pa no tubo (1/1000 da pressão atmosférica)
+Solution from Musk's original paper: air compressor at the nose of the pod
+- Sucks in compressed air ahead
+- Expels some as lift (air-skis for levitation)
+- Expels some out the back as additional propulsion
+- Maintains pressure <100 Pa in the tube (1/1000 of atmospheric pressure)
 
-**Por que The Boring Company abandonou o Hyperloop**:
-O Hyperloop em alta velocidade entre cidades é tecnicamente exequível mas enormemente complexo.
-A Boring Company focou em algo mais imediato: Loop (não Hyperloop) — velocidades de ~100-250 km/h
-em tubo sob pressão normal com carros elétricos modificados (Tesla).
+**Why The Boring Company abandoned Hyperloop**:
+High-speed intercity Hyperloop is technically feasible but enormously complex.
+The Boring Company focused on something more immediate: Loop (not Hyperloop) — speeds of ~100-250 km/h
+in normal pressure tubes with modified electric cars (Tesla).
 
 ### 4.2 Vegas Loop
 
-- Cliente: Las Vegas Convention Center
-- Status: operacional desde 2021
-- Rede: LVCC Loop + The Loop (Strip) em expansão
-- Veículos: Tesla Model X/Y em modo autônomo (pilotado manualmente em 2024)
-- Velocidade: ~100 km/h no túnel
-- Capacidade: ~4.400 passageiros/hora (prometido inicial: 16.000)
-- Comprimento total: ~4 km (com expansões planejadas)
-- Custo por km de túnel: ~$10 milhões/km (vs $100-900 milhões/km do metrô convencional)
+- Client: Las Vegas Convention Center
+- Status: operational since 2021
+- Network: LVCC Loop + The Loop (Strip) expanding
+- Vehicles: Tesla Model X/Y in autonomous mode (manually driven in 2024)
+- Speed: ~100 km/h in the tunnel
+- Capacity: ~4,400 passengers/hour (initially promised: 16,000)
+- Total length: ~4 km (with planned expansions)
+- Cost per km of tunnel: ~$10 million/km (vs $100-900 million/km for conventional subway)
 
-**Como Boring Company reduz custo de tunelamento**:
-1. Diâmetro menor: 3,6 m vs 7+ m do metrô → volume de escavação ~5× menor
-2. TBM mais rápida: meta de 10× velocidade das TBMs convencionais
-3. Eliminação de revestimento de concreto em algumas seções
-4. Robotização da operação da TBM
-5. Processo contínuo vs paradas para revestimento
+**How the Boring Company reduces tunneling cost**:
+1. Smaller diameter: 3.6 m vs 7+ m for a subway → excavation volume ~5× smaller
+2. Faster TBM: goal of 10× the speed of conventional TBMs
+3. Elimination of concrete lining in some sections
+4. Robotization of TBM operation
+5. Continuous process vs stopping for lining
 
-**Prûfling TBM (Godot, Prufrock)**:
-- "Prufrock" é a terceira geração de TBM da empresa
-- Meta: velocidade de tunelamento de 1 milha/semana (~1,6 km/semana)
-- Atual: ~400-800 metros/semana (melhor que convencional mas abaixo da meta)
-- Musk quer que a TBM emerja e reposicione para o próximo túnel sem superficie — "porpoise"
+**Prufrock TBM (Godot, Prufrock)**:
+- "Prufrock" is the company's third-generation TBM
+- Goal: tunneling speed of 1 mile/week (~1.6 km/week)
+- Current: ~400-800 meters/week (better than conventional but below the goal)
+- Musk wants the TBM to emerge and reposition for the next tunnel without surfacing — "porpoise"
 
 ---
 
-## PARTE 5 — NÚMEROS REAIS: TABELAS CONSOLIDADAS
+## PART 5 — REAL NUMBERS: CONSOLIDATED TABLES
 
-### 5.1 Isp por Motor/Propelente
+### 5.1 Isp by Engine/Propellant
 
-| Motor/Propelente   | Isp (vácuo) | Isp (SL)  | Ciclo         |
+| Engine/Propellant  | Isp (vacuum)| Isp (SL)  | Cycle         |
 |--------------------|-------------|-----------|---------------|
 | Merlin 1D (RP-1/LOX) | 311 s     | 282 s     | Gas-generator |
-| Merlin 1D Vac       | 348 s      | N/A       | Gas-generator |
-| Raptor 2 (CH4/LOX)  | 363 s      | 327 s     | FFSC          |
-| RL-10 (LH2/LOX)     | 465 s      | N/A       | Expander      |
-| RS-25 SSME (LH2/LOX)| 453 s     | 366 s     | Staged combustion |
-| RD-180 (RP-1/LOX)   | 338 s      | 312 s     | Staged combustion |
-| Vulcain 2 (LH2/LOX) | 431 s      | 318 s     | Gas-generator |
-| Hydrazine monoprop  | ~220 s     | N/A       | Monopropellant|
-| Ion propulsion      | 3.000-10.000 s | N/A  | Electric      |
+| Merlin 1D Vac      | 348 s       | N/A       | Gas-generator |
+| Raptor 2 (CH4/LOX) | 363 s       | 327 s     | FFSC          |
+| RL-10 (LH2/LOX)    | 465 s       | N/A       | Expander      |
+| RS-25 SSME (LH2/LOX)| 453 s      | 366 s     | Staged combustion |
+| RD-180 (RP-1/LOX)  | 338 s       | 312 s     | Staged combustion |
+| Vulcain 2 (LH2/LOX)| 431 s       | 318 s     | Gas-generator |
+| Hydrazine monoprop | ~220 s      | N/A       | Monopropellant|
+| Ion propulsion     | 3,000-10,000 s| N/A     | Electric      |
 
-**Nota**: Isp em segundos = impulso específico. Quanto maior, mais eficiente o motor.
-LH2/LOX tem Isp mais alto mas hidrogênio líquido é difícil de armazenar (-253°C, ~70 kg/m³ de densidade).
-RP-1 (querosene) tem Isp menor mas densidade muito maior (~800 kg/m³) → tanques menores.
-CH4/LOX é o equilíbrio: Isp bom + densidade razoável (-162°C) + fabricável em Marte.
+**Note**: Isp in seconds = specific impulse. The higher it is, the more efficient the engine.
+LH2/LOX has higher Isp but liquid hydrogen is hard to store (-253°C, ~70 kg/m³ density).
+RP-1 (kerosene) has lower Isp but much higher density (~800 kg/m³) → smaller tanks.
+CH4/LOX is the sweet spot: good Isp + reasonable density (-162°C) + manufacturable on Mars.
 
-### 5.2 Payload Fractions e Delta-V
+### 5.2 Payload Fractions and Delta-V
 
-**Equação de Tsiolkovsky**: Δv = ve × ln(m0/mf)
-- Δv: variação de velocidade possível
-- ve: velocidade de exaustão = Isp × g0 (9,81 m/s²)
-- m0: massa inicial (com propelente)
-- mf: massa final (sem propelente)
+**Tsiolkovsky Equation**: $\Delta v = v_e \times \ln(m_0/m_f)$
+- $\Delta v$: possible change in velocity
+- $v_e$: exhaust velocity = $\text{Isp} \times g_0$ (9.81 m/s²)
+- $m_0$: initial mass (with propellant)
+- $m_f$: final mass (without propellant)
 
-**Delta-V necessário por missão**:
+**Delta-V required by mission**:
 
-| Destino               | Δv necessário | Notas                          |
-|-----------------------|---------------|--------------------------------|
-| LEO (200 km)          | ~9.400 m/s    | inclui perdas gravitacionais ~1500 m/s |
-| GTO                   | ~10.500 m/s   |                                |
-| GEO                   | ~11.000 m/s   |                                |
-| Fuga terrestre (C3=0) | ~11.200 m/s   | velocidade de escape            |
-| Marte (min. energia)  | ~11.500 m/s   | Hohmann transfer                |
-| Lua (superfície)      | ~13.200 m/s   | ida + braking                  |
-| Plutão                | ~15.000+ m/s  | impraticável quimicamente       |
+| Destination           | Required $\Delta v$ | Notes                          |
+|-----------------------|---------------------|--------------------------------|
+| LEO (200 km)          | ~9,400 m/s          | includes gravity losses ~1500 m/s |
+| GTO                   | ~10,500 m/s         |                                |
+| GEO                   | ~11,000 m/s         |                                |
+| Earth escape (C3=0)   | ~11,200 m/s         | escape velocity                |
+| Mars (min. energy)    | ~11,500 m/s         | Hohmann transfer               |
+| Moon (surface)        | ~13,200 m/s         | one-way + braking              |
+| Pluto                 | ~15,000+ m/s        | chemically impractical         |
 
-**Payload fraction do Falcon 9**:
-- Massa ao decolagem: 549.054 kg
-- Payload para LEO: 22.800 kg
-- Payload fraction: 4,15% (excelente para foguetes químicos)
-- Regra geral: foguetes químicos têm payload fraction de 1-5%
-- A "tirania da equação do foguete" é que propelente cresce exponencialmente com Δv
+**Falcon 9 payload fraction**:
+- Liftoff mass: 549,054 kg
+- Payload to LEO: 22,800 kg
+- Payload fraction: 4.15% (excellent for chemical rockets)
+- Rule of thumb: chemical rockets have a payload fraction of 1-5%
+- The "tyranny of the rocket equation" is that propellant grows exponentially with $\Delta v$
 
-### 5.3 Baterias — Densidades e Custos
+### 5.3 Batteries — Densities and Costs
 
-| Química      | Energia específica | Potência específica | Ciclos | Segurança | Custo ($/kWh) |
-|--------------|-------------------|---------------------|--------|-----------|---------------|
-| LFP          | ~170 Wh/kg        | Moderada            | 3.000+ | Muito alta | ~80-100       |
-| NMC          | ~220-280 Wh/kg    | Alta                | 1.000-2.000 | Alta  | ~100-120      |
-| NCA          | ~250-300 Wh/kg    | Alta                | 500-1.500 | Moderada | ~110-130     |
-| Solid state (futuro) | ~400 Wh/kg| Potencialmente alta | 1.000+ | Alta  | TBD (~2027)   |
-| Gasolina (referência) | ~12.000 Wh/kg | Alta      | N/A    | Inflamável | ~$0.8/kWh equivalente |
+| Chemistry    | Specific Energy   | Specific Power      | Cycles | Safety | Cost ($/kWh) |
+|--------------|-------------------|---------------------|--------|--------|--------------|
+| LFP          | ~170 Wh/kg        | Moderate            | 3,000+ | V. High| ~80-100      |
+| NMC          | ~220-280 Wh/kg    | High                | 1,000-2,000 | High | ~100-120     |
+| NCA          | ~250-300 Wh/kg    | High                | 500-1,500 | Mod. | ~110-130     |
+| Solid state (future)| ~400 Wh/kg | Potentially High    | 1,000+ | High   | TBD (~2027)  |
+| Gasoline (reference)| ~12,000 Wh/kg| High              | N/A    | Flammable| ~$0.8/kWh eq.|
 
-**Nota**: gasolina tem 40× mais energia por kg que a melhor bateria,
-mas motor ICE tem ~25% eficiência vs motor elétrico ~90% → razão efetiva ~10×.
+**Note**: gasoline has 40× more energy per kg than the best battery,
+but an ICE engine has ~25% efficiency vs an electric motor's ~90% → effective ratio ~10×.
 
-### 5.4 Números-Chave Tesla (2023)
+### 5.4 Tesla Key Numbers (2023)
 
-| Métrica                       | Valor           |
+| Metric                        | Value           |
 |-------------------------------|-----------------|
-| Veículos entregues (2023)     | 1.808.581       |
-| Receita (2023)                | $96,8 bilhões   |
-| Margem bruta automotiva       | ~17-18%         |
-| Superchargers instalados      | >50.000         |
-| Supercharger connectors       | >560.000        |
-| Tesla Energy (Megapack) GWh   | 14,7 GWh (2023) |
-| Capacidade instalada FSD      | ~5 milhões carros |
-| Autonomia média (long range)  | ~580 km (WLTP)  |
-| Melhor autonomia (Model S)    | ~652 km (WLTP)  |
+| Vehicles delivered (2023)     | 1,808,581       |
+| Revenue (2023)                | $96.8 billion   |
+| Automotive gross margin       | ~17-18%         |
+| Superchargers installed       | >50,000         |
+| Supercharger connectors       | >560,000        |
+| Tesla Energy (Megapack) GWh   | 14.7 GWh (2023) |
+| Installed FSD capacity        | ~5 million cars |
+| Avg. range (Long Range)       | ~580 km (WLTP)  |
+| Best range (Model S)          | ~652 km (WLTP)  |
 
-### 5.5 Números-Chave SpaceX (2023-2024)
+### 5.5 SpaceX Key Numbers (2023-2024)
 
-| Métrica                       | Valor           |
+| Metric                        | Value           |
 |-------------------------------|-----------------|
-| Lançamentos Falcon 9 (2023)   | 91              |
-| Lançamentos totais acumulados | >250            |
-| Boosters reutilizados         | >80% dos voos   |
-| Starlink satellites em órbita | >5.500          |
-| Assinantes Starlink           | >2,5 milhões    |
-| ARR Starlink estimado         | >$6 bilhões     |
-| Contrato NASA Artemis (HLS)   | $2,89 bilhões   |
-| Valuation SpaceX (2024)       | ~$210 bilhões   |
+| Falcon 9 launches (2023)      | 91              |
+| Total accumulated launches    | >250            |
+| Reused boosters               | >80% of flights |
+| Starlink satellites in orbit  | >5,500          |
+| Starlink subscribers          | >2.5 million    |
+| Estimated Starlink ARR        | >$6 billion     |
+| NASA Artemis contract (HLS)   | $2.89 billion   |
+| SpaceX Valuation (2024)       | ~$210 billion   |
 
 ---
 
-## PARTE 6 — CONTEXTO HISTÓRICO E DECISÕES-CHAVE
+## PART 6 — HISTORICAL CONTEXT AND KEY DECISIONS
 
-### 6.1 A Crise de 2008
+### 6.1 The 2008 Crisis
 
-**Contexto**:
-- Falcon 1: 3 falhas consecutivas (voos 1, 2, 3 — todos falharam ao atingir órbita)
-- SpaceX estava sem dinheiro para um quarto lançamento
-- Tesla estava perto da falência (sem $5M necessários para sobreviver)
-- SolarCity: problemas operacionais
-- Divórcio de Justine Musk (primeira esposa)
+**Context**:
+- Falcon 1: 3 consecutive failures (flights 1, 2, 3 — all failed to reach orbit)
+- SpaceX was out of money for a fourth launch
+- Tesla was near bankruptcy (missing $5M needed to survive)
+- SolarCity: operational issues
+- Divorce from Justine Musk (first wife)
 
-**Quarto voo do Falcon 1 (setembro 2008)**:
-- Musk vendeu sua casa e praticamente todos os ativos pessoais para financiar
-- Engenheiros trabalhando sem dormir
-- O voo 4 funcionou. Entrou em órbita. SpaceX sobreviveu.
-- Musk disse depois: "I think about that fourth launch quite a bit."
+**Fourth Falcon 1 flight (September 2008)**:
+- Musk sold his house and virtually all personal assets to fund it
+- Engineers working without sleep
+- Flight 4 worked. Reached orbit. SpaceX survived.
+- Musk later said: "I think about that fourth launch quite a bit."
 
-**Salvação da Tesla**:
-- Em dezembro de 2008, horas antes da Tesla ir à falência, Daimler comprometeu $50M
-- Governo Obama aprovou $465M em empréstimos federais em 2010 (DOE loan)
-- Tesla pagou o empréstimo 9 anos antes do prazo (2013)
+**Tesla's salvation**:
+- In December 2008, hours before Tesla went bankrupt, Daimler committed $50M
+- The Obama administration approved $465M in federal loans in 2010 (DOE loan)
+- Tesla paid off the loan 9 years ahead of schedule (2013)
 
-### 6.2 Por que Musk Comprou o Twitter ($44B)
+### 6.2 Why Musk Bought Twitter ($44B)
 
-**Números do negócio**:
-- Preço pago: $44 bilhões ($54,20/ação)
-- Dívida assumida: ~$13 bilhões
-- Dívida pessoal de Musk: ~$12 bilhões em ações Tesla como garantia
-- Equity de sócios: SoftBank, Andreessen Horowitz, Sequoia Capital, etc.
-- Primeira avaliação pós-compra (Fidelity, 2022): ~$20 bilhões (~55% de queda)
+**Deal numbers**:
+- Price paid: $44 billion ($54.20/share)
+- Assumed debt: ~$13 billion
+- Musk's personal debt: ~$12 billion in Tesla stock as collateral
+- Equity partners: SoftBank, Andreessen Horowitz, Sequoia Capital, etc.
+- First post-purchase valuation (Fidelity, 2022): ~$20 billion (~55% drop)
 
-**Decisões operacionais imediatas**:
-- Demitiu 7.500 de 7.500 funcionários → manteve ~1.500 (80% redução)
-- Encerrou escritórios em Seattle, NYC, Singapura
-- Introduziu X Premium (verificação paga, $8/mês)
-- Liberou código do algoritmo de recomendação no GitHub
-- Reinstaurou Trump e outras contas polêmicas
-- Renomeou para X (visão de "everything app")
+**Immediate operational decisions**:
+- Fired 7,500 of 7,500 employees → kept ~1,500 (80% reduction)
+- Closed offices in Seattle, NYC, Singapore
+- Introduced X Premium (paid verification, $8/month)
+- Open-sourced the recommendation algorithm on GitHub
+- Reinstated Trump and other controversial accounts
+- Renamed to X ("everything app" vision)
 
 ---
 
-## PARTE 7 — RESUMO DE REFERÊNCIAS RÁPIDAS
+## PART 7 — QUICK REFERENCE SUMMARY
 
-### Motor Merlin 1D
-- Ciclo: gas-generator
-- Isp vácuo: 311 s | SL: 282 s
-- Empuxo: 845 kN (SL) / 934 kN (vácuo)
-- Pressão de câmara: ~97 bar
+### Merlin 1D Engine
+- Cycle: gas-generator
+- Vacuum Isp: 311 s | SL: 282 s
+- Thrust: 845 kN (SL) / 934 kN (vacuum)
+- Chamber pressure: ~97 bar
 - Throttle: 39-100%
-- Propelente: RP-1/LOX
+- Propellant: RP-1/LOX
 
-### Motor Raptor 2
-- Ciclo: Full-Flow Staged Combustion
-- Isp vácuo: ~363 s | SL: ~327 s
-- Empuxo: ~2.258 kN (SL) / ~2.531 kN (vácuo)
-- Pressão de câmara: ~300 bar (recorde mundial)
-- Propelente: CH4/LOX
-- Razão O/F: ~3,6
+### Raptor 2 Engine
+- Cycle: Full-Flow Staged Combustion
+- Vacuum Isp: ~363 s | SL: ~327 s
+- Thrust: ~2,258 kN (SL) / ~2,531 kN (vacuum)
+- Chamber pressure: ~300 bar (world record)
+- Propellant: CH4/LOX
+- O/F ratio: ~3.6
 
 ### Falcon 9 Block 5
-- Payload LEO: 22.800 kg
-- Custo: $67-97 milhões/missão
-- Custo/kg: ~$2.700
-- Reutilização record: 19 voos
+- LEO Payload: 22,800 kg
+- Cost: $67-97 million/mission
+- Cost/kg: ~$2,700
+- Reuse record: 19 flights
 
 ### Starship
-- Empuxo total: ~74.000 kN (Super Heavy, 33× Raptor)
-- Payload LEO: >100.000 kg
-- Propelente: CH4/LOX
-- Sistema de pouso: Mechazilla (braços da torre)
+- Total thrust: ~74,000 kN (Super Heavy, 33× Raptor)
+- LEO Payload: >100,000 kg
+- Propellant: CH4/LOX
+- Landing system: Mechazilla (tower arms)
 
 ### Tesla 4680
-- Dimensão: 46mm × 80mm
-- Melhoria vs 2170: 5× energia, 6× potência, 16% mais range
+- Dimension: 46mm × 80mm
+- Improvement vs 2170: 5× energy, 6× power, 16% more range
 - Design: tabless, structural battery pack
-- Processo: dry electrode (sem solvente)
+- Process: dry electrode (solvent-free)
 
 ### Neuralink N1
-- 1.024 canais (64 threads × 16 eletrodos)
-- Thread diâmetro: ~5 μm
-- Comunicação: BLE wireless
-- Carga: indução wireless
-- Primeiro humano: jan 2024 (Noland Arbaugh)
+- 1,024 channels (64 threads × 16 electrodes)
+- Thread diameter: ~5 μm
+- Communication: BLE wireless
+- Charging: wireless induction
+- First human: Jan 2024 (Noland Arbaugh)
 
 ---
 
-*Referência técnica compilada para uso do agente elon-musk. Todos os números são baseados em
-dados públicos até 2024-2025. Para dados mais recentes, verificar fontes primárias (SpaceX.com,
-Tesla.com, SEC filings, artigos técnicos).*
+*Technical reference compiled for use by the elon-musk agent. All numbers are based on
+public data up to 2024-2025. For the latest data, check primary sources (SpaceX.com,
+Tesla.com, SEC filings, technical articles).*
