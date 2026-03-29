@@ -1,49 +1,20 @@
 # Remaining Optimization Plan
 
-Outstanding work only. Completed items were removed after re-auditing the current repository state.
+Outstanding work only.
 
 Current snapshot on this branch:
 
-- Skills: `122`
+- Skills: `120`
 - Instructions: `28`
 - Prompts: `20`
 - Agents: `12`
 
-Already completed and therefore removed from this plan:
+## Ranking (external overlap priority, highest first)
 
-- Creation of `internal-agents-md-bridge`
-- Creation of `internal-copilot-audit`
-- Creation of `internal-agent-authoring`
-- Split of the old platform command-center direction into `internal-agent-cicd` and `internal-agent-copilot-governance`
-- Creation of `internal-agent-developer`
-- Creation of `internal-agent-architect`
-- Creation of `internal-agent-infrastructure`
-- Creation of `internal-agent-code-review`
-- Creation of `internal-agent-quality`
-- Creation of `internal-agent-principal-aws`
-- Creation of `internal-agent-principal-azure`
-- Creation of `internal-agent-principal-gcp`
-- Python conversion of `.github/scripts/validate-copilot-customizations.sh`
-- Final deprecated frontmatter cleanup, including `antigravity-warren-buffett`
-- Removal of retired or overlapping skills:
-  - `claude-agent-development`
-  - `claude-skill-creator`
-  - `awesome-copilot-create-agentsmd`
-  - `antigravity-ddd-context-mapping`
-  - `antigravity-ddd-strategic-design`
-  - `antigravity-ddd-tactical-patterns`
-  - `antigravity-error-detective`
-  - `antigravity-cloud-devops`
-  - `antigravity-bash-scripting`
-
-## Ranking (truth priority, highest first)
-
-1. `claude` (Anthropic)
-2. `obra` (obra/superpowers-skills)
-3. `terraform` (hashicorp/agent-skills)
-4. `awesome-copilot` (github/awesome-copilot)
-5. `antigravity` (sickn33/antigravity-awesome-skills)
-6. `internal` (this repository)
+1. `obra` (obra/superpowers)
+2. `terraform` (hashicorp/agent-skills)
+3. `awesome-copilot` (github/awesome-copilot)
+4. `antigravity` (sickn33/antigravity-awesome-skills)
 
 Internals are the governance layer and are always kept.
 When two external skills overlap, delete the lower-ranked one.
@@ -124,22 +95,6 @@ Apply the same rule set:
 - no deprecated fallback assets
 - no hollow bundles
 - no weaker aliases kept beside a stronger internal or cleaner external skill
-
----
-
-## Phase 4 — Obra compatibility notes
-
-Add a compatibility warning after the frontmatter in:
-
-- `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
-- `.github/skills/obra-subagent-driven-development/SKILL.md`
-- `.github/skills/obra-remembering-conversations/SKILL.md`
-
-```markdown
-> **Compatibility note:** This skill was designed for Claude Code. Some features
-> (subagent dispatch, conversation search) are not available in VS Code Copilot.
-> The conceptual patterns remain useful as guidance.
-```
 
 ---
 

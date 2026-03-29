@@ -1,11 +1,15 @@
 ---
 name: obra-remembering-conversations
-description: Search previous Claude Code conversations for facts, patterns, decisions, and context using semantic or text search
+description: Search archived conversations for facts, patterns, decisions, and context using semantic or text search
 when_to_use: when partner mentions past discussions, debugging familiar issues, or seeking historical context about decisions and patterns
 version: 1.1.0
 ---
 
 # Remembering Conversations
+
+> **Compatibility note:** This skill was designed for Claude Code. Some features
+> (subagent dispatch, conversation search) are not available in VS Code Copilot.
+> The conceptual patterns remain useful as guidance.
 
 Search archived conversations using semantic similarity or exact text matching.
 

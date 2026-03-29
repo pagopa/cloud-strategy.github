@@ -48,7 +48,7 @@ If a skill has a checklist, YOU MUST create TodoWrite todos for EACH item.
 
 **Why:** Checklists without TodoWrite tracking = steps get skipped. Every time. The overhead of TodoWrite is tiny compared to the cost of missing steps.
 
-**Examples:** skills/testing/test-driven-development/SKILL.md, skills/debugging/systematic-debugging/SKILL.md, skills/meta/writing-skills/SKILL.md
+**Examples:** `obra-test-driven-development`, `obra-systematic-debugging`, `obra-writing-skills`
 
 ## Announcing Skill Usage
 

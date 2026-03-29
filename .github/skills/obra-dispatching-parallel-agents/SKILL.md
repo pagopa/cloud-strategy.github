@@ -9,6 +9,10 @@ context: AI-assisted development (Claude Code or similar)
 
 # Dispatching Parallel Agents
 
+> **Compatibility note:** This skill was designed for Claude Code. Some features
+> (subagent dispatch, conversation search) are not available in VS Code Copilot.
+> The conceptual patterns remain useful as guidance.
+
 ## Overview
 
 When you have multiple unrelated failures (different test files, different subsystems, different bugs), investigating them sequentially wastes time. Each investigation is independent and can happen in parallel.

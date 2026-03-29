@@ -47,7 +47,7 @@ SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/internal-sync-global-copilot-configs-into-repo.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
-    ".github/skills/internal-agent-authoring/SKILL.md",
+    ".github/skills/internal-agent-development/SKILL.md",
     ".github/skills/internal-agents-md-bridge/SKILL.md",
     ".github/skills/internal-copilot-audit/SKILL.md",
     ".github/skills/internal-skill-management/SKILL.md",
@@ -635,7 +635,7 @@ def internal_asset_identifier(relative_path: str) -> str | None:
 
 
 def has_supported_origin_prefix(identifier: str) -> bool:
-    return identifier.startswith(("internal-", "local-", "claude-", "obra-", "terraform-", "tech-ai-"))
+    return identifier.startswith(("internal-", "local-", "obra-", "terraform-", "tech-ai-"))
 
 
 def is_internal_asset_path(relative_path: str) -> bool:
@@ -1482,11 +1482,11 @@ def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str, repo_
     if repo_local:
         if not is_internal_asset_path(relative_path):
             issues.append(
-                "Repository-owned prompt filename must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+                "Repository-owned prompt filename must use a supported origin prefix (`internal-`, `local-`, `obra-`, or `terraform-`)."
             )
         if actual_name and not has_supported_origin_prefix(actual_name):
             issues.append(
-                "Repository-owned prompt `name` must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+                "Repository-owned prompt `name` must use a supported origin prefix (`internal-`, `local-`, `obra-`, or `terraform-`)."
             )
         internal_identifier = internal_asset_identifier(relative_path)
         if internal_identifier and has_supported_origin_prefix(internal_identifier) and actual_name and actual_name != internal_identifier:
@@ -1527,11 +1527,11 @@ def validate_unmanaged_skill_asset(target_root: Path, relative_path: str, repo_l
         actual_name = frontmatter.get("name", "")
         if not is_internal_asset_path(relative_path):
             issues.append(
-                "Repository-owned skill directory must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+                "Repository-owned skill directory must use a supported origin prefix (`internal-`, `local-`, `obra-`, or `terraform-`)."
             )
         if actual_name and not has_supported_origin_prefix(actual_name):
             issues.append(
-                "Repository-owned skill `name` must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+                "Repository-owned skill `name` must use a supported origin prefix (`internal-`, `local-`, `obra-`, or `terraform-`)."
             )
         if internal_identifier and has_supported_origin_prefix(internal_identifier) and actual_name and actual_name != internal_identifier:
             issues.append(f"Repository-owned skill `name` should match directory name `{internal_identifier}`.")
@@ -1560,11 +1560,11 @@ def validate_unmanaged_agent_asset(target_root: Path, relative_path: str, repo_l
         actual_name = frontmatter.get("name", "")
         if not is_internal_asset_path(relative_path):
             issues.append(
-                "Repository-owned agent filename must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+                "Repository-owned agent filename must use a supported origin prefix (`internal-`, `local-`, `obra-`, or `terraform-`)."
             )
         if actual_name and not has_supported_origin_prefix(actual_name):
             issues.append(
-                "Repository-owned agent `name` must use a supported origin prefix (`internal-`, `local-`, `claude-`, `obra-`, or `terraform-`)."
+                "Repository-owned agent `name` must use a supported origin prefix (`internal-`, `local-`, `obra-`, or `terraform-`)."
             )
         if internal_identifier and has_supported_origin_prefix(internal_identifier) and actual_name and actual_name != internal_identifier:
             issues.append(f"Repository-owned agent `name` should match filename stem `{internal_identifier}`.")

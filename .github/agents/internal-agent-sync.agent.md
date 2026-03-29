@@ -24,6 +24,7 @@ When skill governance becomes procedural or too detailed for the agent body, use
 - Keep all repository-facing text in English.
 - Do not modify `README.md` files unless explicitly requested.
 - Do not import assets outside the approved scope without explicit user approval.
+- Do not import `claude-*` skills directly; convert any still-useful guidance into repository-owned `internal-*` Copilot assets.
 - Do not silently preserve non-canonical naming when a safe normalization is available.
 - Do not keep duplicate fallback skills "just in case" when a stronger installed skill already covers the same intent.
 - Do not re-import retired skills unless the user explicitly asks for them back.
@@ -85,15 +86,11 @@ Retire an asset when any of these are true:
   - `refactor-plan`
   - `secret-scanning`
   - `sql-optimization`
-- `claude`: sync only the approved Anthropic-origin assets used here:
-  - `anthropics/claude-code` plugin skills from `https://github.com/anthropics/claude-code`
-  - approved `anthropics/skills` assets from `https://github.com/anthropics/skills/tree/main/skills`:
-    - `docx`
-    - `pdf`
-    - `pptx`
-- `obra`: sync all skills from `obra/superpowers-skills` at `https://github.com/obra/superpowers-skills/tree/main/skills`:
-  - exclude `writing-skills`
-  - keep `writing-skills` sourced from the approved Claude-origin variant
+- `obra`: sync the curated `obra/superpowers` skill set from `https://github.com/obra/superpowers/tree/main/skills`:
+  - keep the installed `obra-*` catalog aligned to this upstream when the skill remains useful in GitHub Copilot
+  - include `writing-skills`
+  - downgrade Claude-only capabilities to guidance-only notes or retire them when adaptation would still leave a broken skill
+
 - `terraform`: sync all skills from `hashicorp/agent-skills` under `terraform/code-generation/skills` at `https://github.com/hashicorp/agent-skills/tree/main/terraform/code-generation/skills`:
   - exclude `azure-verified-modules`
 - `antigravity`: sync only the approved `sickn33/antigravity-awesome-skills` skills from `https://github.com/sickn33/antigravity-awesome-skills/tree/main/skills`:
@@ -112,7 +109,6 @@ Retire an asset when any of these are true:
   - `code-review-checklist`
   - `code-simplifier`
   - `domain-driven-design`
-  - `elon-musk`
   - `github`
   - `golang-pro`
   - `grafana-dashboards`
@@ -130,9 +126,7 @@ Retire an asset when any of these are true:
   - `python-testing-patterns`
   - `simplify-code`
   - `software-architecture`
-  - `steve-jobs`
   - `terraform-specialist`
-  - `warren-buffett`
   - `web-scraper`
   - `youtube-summarizer`
 
@@ -158,6 +152,12 @@ The repository-owned replacements below should be kept as internal skills rather
 - `internal-performance-optimization`
 - `internal-kubernetes-deployment`
 
+### Mandatory conversions
+
+- Always convert `https://github.com/anthropics/claude-code/tree/main/plugins/plugin-dev/skills/agent-development` into the repository-owned skill `internal-agent-development`.
+- Preserve the useful authoring guidance, but rewrite it for GitHub Copilot naming, frontmatter, and command-center patterns.
+- Never keep the upstream capability under a `claude-*` identifier once it is imported into this repository.
+
 ## Retired or Unapproved-for-Reimport Skills
 
 Do not re-import or preserve these unless the user explicitly asks:
@@ -182,6 +182,9 @@ Do not re-import or preserve these unless the user explicitly asks:
 - `antigravity-nodejs-backend-patterns`
 - `antigravity-python-performance-optimization`
 - `awesome-copilot-create-agentsmd`
+- `claude-docx`
+- `claude-pdf`
+- `claude-pptx`
 - `claude-agent-development`
 - `claude-skill-creator`
 
@@ -214,7 +217,7 @@ Keep legacy aliases only when backward compatibility is real and intentional.
    - strip deprecated frontmatter keys `tools:`, `model:`, and `color:` from assets that remain in scope
    - flag any skill that references missing `resources/` or `references/` files as hollow
 5. Import or refresh only approved in-scope assets.
-6. If repo-owned logic is too large for the agent, extract it into an internal skill, usually `internal-skill-management`, `internal-agent-authoring`, `internal-agents-md-bridge`, or another domain-specific internal skill.
+6. If repo-owned logic is too large for the agent, extract it into an internal skill, usually `internal-skill-management`, `internal-agent-development`, `internal-agents-md-bridge`, or another domain-specific internal skill.
 7. Update downstream governance files after catalog changes:
    - `AGENTS.md`
    - `.github/agents/README.md`

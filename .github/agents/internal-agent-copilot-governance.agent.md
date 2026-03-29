@@ -12,7 +12,7 @@ You are the command center for repository-owned Copilot customization governance
 ## Primary Skill Stack
 
 - `internal-agents-md-bridge`
-- `internal-agent-authoring`
+- `internal-agent-development`
 - `internal-skill-management`
 - `internal-copilot-audit`
 - `internal-sync-global-copilot-configs-into-repo`

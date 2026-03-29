@@ -134,7 +134,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `internal-devops-core-principles`: DevOps operating model, CALMS, and DORA-driven delivery guidance.
 - `internal-performance-optimization`: cross-stack profiling and performance decision framework.
 - `internal-kubernetes-deployment`: production Kubernetes deployment and rollout guidance.
-- `internal-agent-authoring`: repository-owned agent creation and agent-splitting guidance.
+- `internal-agent-development`: repository-owned agent creation and agent-splitting guidance.
 - `internal-agents-md-bridge`: lightweight `AGENTS.md` bridge design to `.github/copilot-instructions.md`.
 - `internal-copilot-audit`: catalog overlap, hollow-reference, and bridge-quality auditing.
 - `internal-skill-management`: skill creation, import, deduplication, and lifecycle governance.
@@ -154,6 +154,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `obra-test-driven-development`: TDD red-green-refactor workflow.
 - `obra-using-skills`: skill capability awareness and reuse best practices.
 - `obra-verification-before-completion`: evidence-based verification before claiming completion.
+- `obra-writing-skills`: skill authoring, discoverability, and hardening guidance.
 - `obra-writing-plans`: structured plan authoring.
 
 ### Required validations before PR
@@ -283,10 +284,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-refactor-plan/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/awesome-copilot-sql-optimization/SKILL.md`
-- `.github/skills/claude-docx/SKILL.md`
-- `.github/skills/claude-pdf/SKILL.md`
-- `.github/skills/claude-pptx/SKILL.md`
-- `.github/skills/internal-agent-authoring/SKILL.md`
+- `.github/skills/internal-agent-development/SKILL.md`
 - `.github/skills/internal-agents-md-bridge/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cicd-workflow/SKILL.md`
@@ -339,6 +337,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/obra-verification-before-completion/SKILL.md`
 - `.github/skills/obra-when-stuck/SKILL.md`
 - `.github/skills/obra-writing-plans/SKILL.md`
+- `.github/skills/obra-writing-skills/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-style-guide/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`

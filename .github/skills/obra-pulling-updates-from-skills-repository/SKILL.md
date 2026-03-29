@@ -1,6 +1,6 @@
 ---
 name: obra-pulling-updates-from-skills-repository
-description: Sync local skills repository with upstream changes from obra/superpowers-skills
+description: Sync local skills repository with upstream changes from obra/superpowers
 when_to_use: when session start indicates new upstream skills available, or when manually updating to latest versions
 version: 1.2.0
 ---
@@ -9,7 +9,9 @@ version: 1.2.0
 
 ## Overview
 
-Pull and merge upstream changes from obra/superpowers-skills into your local skills repository while preserving your personal modifications.
+Pull and merge upstream changes from `obra/superpowers` into your local skills repository while preserving your personal modifications.
+
+Never use the deprecated `obra/superpowers-skills` repository as the upstream source.
 
 **Announce at start:** "I'm using the Updating Skills skill to sync with upstream."
 

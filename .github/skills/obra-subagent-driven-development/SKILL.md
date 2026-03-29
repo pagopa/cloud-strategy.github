@@ -7,6 +7,10 @@ version: 1.1.0
 
 # Subagent-Driven Development
 
+> **Compatibility note:** This skill was designed for Claude Code. Some features
+> (subagent dispatch, conversation search) are not available in VS Code Copilot.
+> The conceptual patterns remain useful as guidance.
+
 Execute plan by dispatching fresh subagent per task, with code review after each.
 
 **Core principle:** Fresh subagent per task + review between tasks = high quality, fast iteration

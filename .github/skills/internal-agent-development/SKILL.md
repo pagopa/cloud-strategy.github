@@ -1,15 +1,15 @@
 ---
-name: internal-agent-authoring
-description: Create or refine repository-owned Copilot agents with focused routing, concise system prompts, and command-center responsibilities. Use when adding a new `.github/agents/*.agent.md`, splitting broad agents, or replacing runtime-specific agent-authoring guidance with Copilot-safe patterns.
+name: internal-agent-development
+description: Create or refine repository-owned Copilot agents with focused routing, concise system prompts, and command-center responsibilities. Use when adding a new `.github/agents/*.agent.md`, splitting broad agents, or converting upstream agent-development guidance into a Copilot-safe internal skill.
 ---
 
-# Internal Agent Authoring
+# Internal Agent Development
 
 Use this skill when designing or updating repository-owned agents.
 
 ## Purpose
 
-This is the repository-owned replacement for Claude-only agent-authoring guidance. It defines how to build command-center agents for GitHub Copilot without deprecated frontmatter or runtime-specific assumptions.
+This is the repository-owned Copilot-safe conversion of upstream `agent-development` guidance. It defines how to build command-center agents for GitHub Copilot without deprecated frontmatter or runtime-specific assumptions.
 
 ## Agent Design Rules
 
@@ -18,6 +18,7 @@ This is the repository-owned replacement for Claude-only agent-authoring guidanc
 - The `description:` must explain when the agent should be selected.
 - The body should define role, routing rules, skill composition, and output expectations.
 - Keep the agent focused on orchestration and decision-making. Put long reusable procedures into skills.
+- Never use deprecated agent frontmatter such as `tools:`, `model:`, or `color:`.
 
 ## Command-Center Pattern
 
@@ -66,3 +67,9 @@ For principal cloud agents:
 - Agents that just restate a skill body
 - Runtime-specific tool instructions in repository-facing agents
 - Overloaded platform agents with unrelated governance and delivery duties
+
+## Validation
+
+- Confirm the agent filename stem, frontmatter `name:`, and command identifier are identical.
+- Confirm the `description:` says when to use the agent instead of restating its workflow.
+- Confirm reusable procedures live in skills, not in the agent body.
