@@ -38,6 +38,7 @@ MANAGED_ALWAYS = (
     ".github/scripts/validate-copilot-customizations.sh",
 )
 SOURCE_ONLY_AGENT_PATHS = {
+    ".github/agents/internal-ai-resource-development.agent.md",
     ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md",
 }
 SOURCE_ONLY_PROMPT_PATHS = {
