@@ -45,7 +45,7 @@ Create or update a pull request body using the repository template (`.github/PUL
 11. If PR tools are unavailable, return ready-to-paste markdown plus exact CLI fallback commands.
 
 ## Minimal example
-- Input: `title="Add JSON report support in validator" intent="Improve CI visibility" changed_files=".github/scripts/validate-copilot-customizations.sh, .github/workflows/github-validate-copilot-customizations.yml" validation="bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh; .github/scripts/validate-copilot-customizations.sh --scope root --mode strict" risk=Low links="Issue: N/A"`
+- Input: `title="Add JSON report support in validator" intent="Improve CI visibility" changed_files=".github/scripts/validate-copilot-customizations.sh, .github/workflows/github-validate-copilot-customizations.yml" validation="bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh; python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict" risk=Low links="Issue: N/A"`
 - Expected output:
   - Full PR markdown body aligned with repository template.
   - `Changes` section with short bullets summarizing the real modifications.

@@ -41,4 +41,4 @@ Create or modify a standalone Python script while keeping interfaces explicit, b
 - Run `python -m compileall <changed_python_paths>`.
 - Run `pytest` for the changed script/tests when present.
 - Run `bash -n` on generated or modified launcher scripts.
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` when changing Copilot assets.
+- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` when changing Copilot assets.

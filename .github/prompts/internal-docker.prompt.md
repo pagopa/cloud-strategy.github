@@ -31,4 +31,4 @@ Create or modify Docker-related assets while keeping image references immutable,
 ## Validation
 - Validate Dockerfile or Compose syntax when tooling is available.
 - Verify image references use digests instead of floating tags.
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` when changing Copilot assets.
+- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` when changing Copilot assets.

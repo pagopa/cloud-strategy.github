@@ -3,7 +3,7 @@ name: internal-sync-global-copilot-configs-into-repo
 description: Sync shared Copilot baseline into consumer repos — dynamic stack detection, manifest-based conservative merge, conflict detection, and deterministic reporting. Use when syncing Copilot configs, aligning repos with the baseline, or running the sync script.
 ---
 
-# TechAI Sync Global Copilot Configs Into Repo — Skill
+# Internal Sync Global Copilot Configs Into Repo
 
 ## When to use
 - Align a consumer repository with shared Copilot assets from this standards repository.
@@ -24,14 +24,14 @@ description: Sync shared Copilot baseline into consumer repos — dynamic stack 
 3. Flag conflicts: target file diverged from last-synced version (manifest mismatch).
 4. Flag redundancies: legacy aliases coexisting with canonical assets.
 5. Flag origin-prefix violations: repo-owned assets missing `internal-*`, `local-*`, or a supported external short-repo prefix.
-6. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via `awesome-copilot-instructions-blueprint-generator`, then target root `AGENTS.md` via `awesome-copilot-create-agentsmd`.
+6. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via `awesome-copilot-instructions-blueprint-generator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
 7. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)
 1. Copy selected assets using conservative merge (never overwrite unmanaged divergent files).
 2. Update manifest with new SHA-256 checksums and timestamp.
 3. Refresh target `.github/copilot-instructions.md` as the primary detailed Copilot policy file, preserving target-local rules that are still valid and do not conflict with the managed baseline.
-4. Refresh target-specific root `AGENTS.md` from the managed baseline plus existing target-local assets, keeping it concise and bridge-oriented instead of duplicating Copilot policy text.
+4. Refresh target-specific root `AGENTS.md` from the managed baseline plus existing target-local assets, keeping it concise, bridge-oriented, and runtime-agnostic instead of duplicating Copilot policy text.
 5. Preserve target-local unmanaged resources, prompts, skills, agents, and configuration unless the approved plan explicitly migrates them.
 6. Produce final report: actions taken, conflicts skipped, preserved local assets, and recommendations.
 
@@ -62,7 +62,7 @@ Always included: `internal-markdown.instructions.md`, `internal-yaml.instruction
 ## Source-only assets (never synced)
 These assets exist only in this standards repository:
 - Agents: `internal-sync-global-copilot-configs-into-repo`
-- Skills: `claude-skill-creator`, `internal-skill-management`, `internal-sync-global-copilot-configs-into-repo`
+- Skills: `internal-agent-authoring`, `internal-agents-md-bridge`, `internal-copilot-audit`, `internal-skill-management`, `internal-sync-global-copilot-configs-into-repo`
 - Prompts: `internal-add-platform`, `internal-add-report-script`, `internal-code-review`, `internal-sync-global-copilot-configs-into-repo`
 
 ## Scope rules
@@ -73,6 +73,7 @@ These assets exist only in this standards repository:
 - Never overwrite unmanaged divergent files — flag as conflicts instead.
 - Treat target `.github/copilot-instructions.md` as the primary home for detailed behavioral, validation, and implementation guidance.
 - Treat target root `AGENTS.md` as a thin bridge for generic assistants: routing, naming, priority, and discovery of the Copilot-owned `.github` assets.
+- Keep target root `AGENTS.md` light on purpose because some repositories cannot or should not declare a specific assistant runtime there.
 - Preserve target-local unmanaged resources and configuration even when they are not part of the selected sync baseline; report them instead of deleting or folding them into managed files.
 
 ## Common mistakes
@@ -97,4 +98,4 @@ These assets exist only in this standards repository:
 ## Validation
 - `python -m compileall .github/scripts tests`
 - `pytest` for the sync test suite.
-- `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
+- `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`

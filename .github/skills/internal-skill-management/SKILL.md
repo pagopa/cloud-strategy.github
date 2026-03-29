@@ -1,6 +1,6 @@
 ---
 name: internal-skill-management
-description: Audit, create, import, consolidate, and retire Copilot skills with strict naming, trigger, and overlap control. Use when creating a new SKILL.md, importing upstream skills, extracting agent logic into a skill, tuning skill descriptions, deleting overlapping skills, or validating skill lifecycle quality in this repository.
+description: Audit, create, improve, import, consolidate, and retire Copilot skills with strict naming, trigger, evaluation, and overlap control. Use when creating a new SKILL.md, importing upstream skills, extracting agent logic into a skill, tuning skill descriptions, testing trigger quality, deleting overlapping skills, or validating skill lifecycle quality in this repository.
 ---
 
 # Internal Skill Management
@@ -13,6 +13,7 @@ Use this skill for repository-owned skill governance. It is the operating manual
 - Prefer the best directly instead of keeping fallback duplicates.
 - Move repo-specific operational logic into internal skills when an agent becomes too large or too procedural.
 - Keep naming, frontmatter, links, and descriptions deterministic.
+- Replace Claude-only skill-authoring workflow with a portable Copilot-first process.
 
 ## Decision Order
 
@@ -69,6 +70,25 @@ Rules:
 - Do not keep runtime-specific clutter that weakens portability.
 - If adapting an upstream skill, normalize wording to GitHub Copilot terminology where needed.
 
+### 3.1 Skill Authoring Loop
+
+When creating or improving a skill, use this loop:
+
+1. Capture intent, trigger phrases, output shape, and exclusions.
+2. Draft the frontmatter and the smallest useful workflow body.
+3. Test the description against realistic prompts from this repository's domains.
+4. Tighten the trigger language when the skill under-triggers or collides with nearby skills.
+5. Expand only after the workflow is already coherent.
+
+Prefer lightweight local evaluation:
+
+- Compare the new skill against nearby competing skills.
+- Use 2-5 realistic prompts that resemble actual user requests.
+- Judge whether the skill should trigger, not only whether the body looks polished.
+- Record structural gaps in the skill itself instead of relying on external eval tooling.
+
+Do not depend on Claude-only benchmarking flows, subagent-only evaluators, or viewer-specific tooling.
+
 ### 4. Keep the Body High Signal
 
 A good skill body should contain:
@@ -78,6 +98,7 @@ A good skill body should contain:
 - Decision rules and anti-patterns.
 - Output expectations when the task benefits from structure.
 - References to bundled files only when those files actually exist.
+- A testing note when trigger accuracy or output shape is easy to verify.
 
 Do not fill the body with marketing language, roleplay framing, or vague expertise claims.
 
@@ -123,6 +144,8 @@ Before finishing:
 - Confirm the description is specific enough to trigger, but not so broad that it collides with half the catalog.
 - Confirm the skill is in English.
 - Confirm inventory or governance files do not point to removed paths.
+- Confirm the skill does not depend on runtime-specific tool names or deprecated frontmatter.
+- Confirm nearby prompts or agents are not now redundant because of the new skill.
 
 ## Anti-Patterns
 
@@ -131,6 +154,7 @@ Before finishing:
 - Creating internal skills that merely say "see another skill."
 - Leaving retired skills in approved sync scope.
 - Hiding important trigger words deep in the body instead of the description.
+- Treating body length as a substitute for trigger quality.
 
 ## Handoff
 

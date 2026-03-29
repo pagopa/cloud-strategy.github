@@ -30,11 +30,19 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 #### Installed agents
 - Use `internal-agent-sync` for synchronizing approved upstream skills or instructions, detecting drift, enforcing origin-based naming, consolidating overlapping skills, and retiring weaker catalog entries.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
+- Use `internal-agent-copilot-governance` for `AGENTS.md`, prompt, skill, agent, and naming-policy governance inside `.github/`.
+- Use `internal-agent-cicd` for CI/CD workflows, composite actions, release automation, and deployment-pipeline design.
 
 #### Planning and Architecture
+- Use `internal-agent-architect` for strategic software and platform architecture decisions.
 - Use `internal-pair-architect-analysis` prompt with the `internal-pair-architect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
+- Use `internal-agent-principal-aws`, `internal-agent-principal-azure`, and `internal-agent-principal-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
 
 #### Editing and Delivery
+- Use `internal-agent-developer` for polyglot implementation work in Java, Node.js, Python, and Bash.
+- Use `internal-agent-infrastructure` for Terraform, Docker, Kubernetes, and infrastructure delivery.
+- Use `internal-agent-quality` for test strategy, performance, SQL or PostgreSQL tuning, and observability.
+- Use `internal-agent-code-review` for defect-first code review and merge-readiness checks.
 - Use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation from diffs.
 
 ### Anti-patterns
@@ -126,11 +134,14 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `internal-devops-core-principles`: DevOps operating model, CALMS, and DORA-driven delivery guidance.
 - `internal-performance-optimization`: cross-stack profiling and performance decision framework.
 - `internal-kubernetes-deployment`: production Kubernetes deployment and rollout guidance.
+- `internal-agent-authoring`: repository-owned agent creation and agent-splitting guidance.
+- `internal-agents-md-bridge`: lightweight `AGENTS.md` bridge design to `.github/copilot-instructions.md`.
+- `internal-copilot-audit`: catalog overlap, hollow-reference, and bridge-quality auditing.
 - `internal-skill-management`: skill creation, import, deduplication, and lifecycle governance.
 - `internal-terraform`: unified Terraform skill for features and modules.
 - `internal-pair-architect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
 
-#### Workflow Skills (obra/superpowers + Claude)
+#### Workflow Skills (obra/superpowers)
 - `obra-brainstorming`: structured creative exploration before implementation.
 - `obra-dispatching-parallel-agents`: coordinating parallel sub-agent work.
 - `obra-executing-plans`: structured plan execution with checkpoints.
@@ -144,7 +155,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `obra-using-skills`: skill capability awareness and reuse best practices.
 - `obra-verification-before-completion`: evidence-based verification before claiming completion.
 - `obra-writing-plans`: structured plan authoring.
-- `claude-skill-creator`: creating, testing, and improving skills.
 
 ### Required validations before PR
 
@@ -153,6 +163,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `terraform fmt` and `terraform validate` for Terraform changes.
 
 ## Repository Inventory (Auto-generated)
+
 ### Instructions
 
 - `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
@@ -216,21 +227,15 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/antigravity-aws-skills/SKILL.md`
 - `.github/skills/antigravity-backend-architect/SKILL.md`
 - `.github/skills/antigravity-bash-pro/SKILL.md`
-- `.github/skills/antigravity-bash-scripting/SKILL.md`
 - `.github/skills/antigravity-clean-code/SKILL.md`
 - `.github/skills/antigravity-cloud-architect/SKILL.md`
-- `.github/skills/antigravity-cloud-devops/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
 - `.github/skills/antigravity-code-refactoring-refactor-clean/SKILL.md`
 - `.github/skills/antigravity-code-refactoring-tech-debt/SKILL.md`
 - `.github/skills/antigravity-code-review-checklist/SKILL.md`
 - `.github/skills/antigravity-code-simplifier/SKILL.md`
-- `.github/skills/antigravity-ddd-context-mapping/SKILL.md`
-- `.github/skills/antigravity-ddd-strategic-design/SKILL.md`
-- `.github/skills/antigravity-ddd-tactical-patterns/SKILL.md`
 - `.github/skills/antigravity-domain-driven-design/SKILL.md`
 - `.github/skills/antigravity-elon-musk/SKILL.md`
-- `.github/skills/antigravity-error-detective/SKILL.md`
 - `.github/skills/antigravity-github/SKILL.md`
 - `.github/skills/antigravity-golang-pro/SKILL.md`
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
@@ -263,7 +268,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-azure-role-selector/SKILL.md`
 - `.github/skills/awesome-copilot-cloud-design-patterns/SKILL.md`
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
-- `.github/skills/awesome-copilot-create-agentsmd/SKILL.md`
 - `.github/skills/awesome-copilot-create-github-action-workflow-specification/SKILL.md`
 - `.github/skills/awesome-copilot-create-github-pull-request-from-specification/SKILL.md`
 - `.github/skills/awesome-copilot-create-implementation-plan/SKILL.md`
@@ -279,16 +283,17 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-refactor-plan/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/awesome-copilot-sql-optimization/SKILL.md`
-- `.github/skills/claude-agent-development/SKILL.md`
 - `.github/skills/claude-docx/SKILL.md`
 - `.github/skills/claude-pdf/SKILL.md`
 - `.github/skills/claude-pptx/SKILL.md`
-- `.github/skills/claude-skill-creator/SKILL.md`
-- `.github/skills/internal-cicd-workflow/SKILL.md`
+- `.github/skills/internal-agent-authoring/SKILL.md`
+- `.github/skills/internal-agents-md-bridge/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
+- `.github/skills/internal-cicd-workflow/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-composite-action/SKILL.md`
+- `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-data-registry/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
@@ -340,5 +345,15 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Agents
 
+- `.github/agents/internal-agent-architect.agent.md`
+- `.github/agents/internal-agent-cicd.agent.md`
+- `.github/agents/internal-agent-code-review.agent.md`
+- `.github/agents/internal-agent-copilot-governance.agent.md`
+- `.github/agents/internal-agent-developer.agent.md`
+- `.github/agents/internal-agent-infrastructure.agent.md`
+- `.github/agents/internal-agent-principal-aws.agent.md`
+- `.github/agents/internal-agent-principal-azure.agent.md`
+- `.github/agents/internal-agent-principal-gcp.agent.md`
+- `.github/agents/internal-agent-quality.agent.md`
 - `.github/agents/internal-agent-sync.agent.md`
 - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`

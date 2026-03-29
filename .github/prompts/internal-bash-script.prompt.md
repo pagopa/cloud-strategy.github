@@ -33,4 +33,4 @@ Create or modify a Bash script while keeping behavior explicit, reusable, and ea
 ## Validation
 - Run `bash -n` on the changed script.
 - Run `shellcheck -s bash` when available.
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` when changing Copilot assets.
+- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` when changing Copilot assets.

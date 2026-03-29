@@ -47,7 +47,9 @@ SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/internal-sync-global-copilot-configs-into-repo.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
-    ".github/skills/claude-skill-creator/SKILL.md",
+    ".github/skills/internal-agent-authoring/SKILL.md",
+    ".github/skills/internal-agents-md-bridge/SKILL.md",
+    ".github/skills/internal-copilot-audit/SKILL.md",
     ".github/skills/internal-skill-management/SKILL.md",
     ".github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md",
 }
@@ -1446,7 +1448,7 @@ def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[s
         commands.append("python -m compileall <changed_python_paths>")
         if repo_has_pytest_tests(analysis.repo_root):
             commands.append("pytest")
-    commands.append("bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict")
+    commands.append("python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict")
     return commands
 
 

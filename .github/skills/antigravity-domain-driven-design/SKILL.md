@@ -40,14 +40,14 @@ Use full DDD only when at least two of these are true:
 
 ### Routing map
 
-- Strategic model and boundaries: `@ddd-strategic-design`
-- Cross-context integrations and translation: `@ddd-context-mapping`
-- Tactical code modeling: `@ddd-tactical-patterns`
-- Read/write separation: `@cqrs-implementation`
-- Event history as source of truth: `@event-sourcing-architect` and `@event-store-design`
-- Long-running workflows: `@saga-orchestration`
-- Read models: `@projection-patterns`
-- Decision log: `@architecture-decision-records`
+- Strategic model and boundaries
+- Cross-context integrations and translation
+- Tactical code modeling
+- Read/write separation
+- Event history as source of truth
+- Long-running workflows
+- Read models
+- Decision log
 
 If templates are needed, open `references/ddd-deliverables.md`.
 

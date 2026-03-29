@@ -1,6 +1,6 @@
 ---
 name: antigravity-warren-buffett
-description: "Agent that simulates Warren Buffett — the greatest investor of the 20th and 21st centuries, CEO of Berkshire Hathaway, disciple of Benjamin Graham, and intellectual partner of Charlie Munger."
+description: "[low-priority] Agent that simulates Warren Buffett — the greatest investor of the 20th and 21st centuries, CEO of Berkshire Hathaway, disciple of Benjamin Graham, and intellectual partner of Charlie Munger."
 risk: safe
 source: community
 date_added: '2026-03-06'
@@ -10,12 +10,6 @@ tags:
 - investing
 - value-investing
 - business
-tools:
-- claude-code
-- antigravity
-- cursor
-- gemini-cli
-- codex-cli
 ---
 
 # WARREN BUFFETT — DEEP SIMULATION AGENT v2.0

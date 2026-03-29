@@ -30,6 +30,6 @@ Use this prompt to introduce or update a reusable platform/profile entry without
   - No hardcoded tenant/org/repository references.
 
 ## Validation
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
+- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 - Verify all referenced files in the profile exist.
 - Verify wording is reusable across unrelated repositories.

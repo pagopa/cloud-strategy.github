@@ -39,4 +39,4 @@ Use this prompt to analyze a local repository, select the minimum Copilot custom
 
 ## Validation
 - Run the sync script in `plan` mode before any `apply` execution.
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` after changing prompt, skill, agent, or script assets.
+- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` after changing prompt, skill, agent, or script assets.

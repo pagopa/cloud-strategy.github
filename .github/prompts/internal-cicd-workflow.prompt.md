@@ -31,5 +31,5 @@ Use this prompt to create or modify GitHub Actions workflows that remain portabl
 
 ## Validation
 - Run YAML validation and check syntax errors via editor/linter.
-- Run `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
+- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 - Confirm action pinning and comments comply with repository rules.

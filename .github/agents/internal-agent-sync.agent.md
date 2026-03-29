@@ -1,8 +1,6 @@
 ---
 description: Use this agent when synchronizing, importing, refreshing, consolidating, or retiring Copilot customization assets in this repository. Treat "sync" as a full apply request by default: audit the catalog, remove lower-value overlap, install or refresh approved in-scope assets, extract reusable repo logic into internal skills when needed, and then align downstream governance files.
 name: internal-agent-sync
-model: inherit
-tools: ["search", "fetch", "editFiles", "runTerminal", "problems"]
 ---
 
 # Internal Agent Sync
@@ -31,6 +29,7 @@ When skill governance becomes procedural or too detailed for the agent body, use
 - Do not re-import retired skills unless the user explicitly asks for them back.
 - Do not describe `AGENTS.md` as runtime-specific; keep it as a thin repository bridge.
 - Do not leave broken local references inside imported or internal skills.
+- Do not keep deprecated or compatibility-only assets when a clear repository-owned replacement exists.
 
 ## Catalog Principles
 
@@ -72,7 +71,6 @@ Retire an asset when any of these are true:
   - `cloud-design-patterns`
   - `codeql`
   - `copilot-instructions-blueprint-generator`
-  - `create-agentsmd`
   - `create-github-action-workflow-specification`
   - `create-github-pull-request-from-specification`
   - `create-implementation-plan`
@@ -90,11 +88,9 @@ Retire an asset when any of these are true:
 - `claude`: sync only the approved Anthropic-origin assets used here:
   - `anthropics/claude-code` plugin skills from `https://github.com/anthropics/claude-code`
   - approved `anthropics/skills` assets from `https://github.com/anthropics/skills/tree/main/skills`:
-    - `agent-development`
     - `docx`
     - `pdf`
     - `pptx`
-    - `skill-creator`
 - `obra`: sync all skills from `obra/superpowers-skills` at `https://github.com/obra/superpowers-skills/tree/main/skills`:
   - exclude `writing-skills`
   - keep `writing-skills` sourced from the approved Claude-origin variant
@@ -108,18 +104,13 @@ Retire an asset when any of these are true:
   - `aws-skills`
   - `backend-architect`
   - `bash-pro`
-  - `bash-scripting`
   - `clean-code`
   - `cloud-architect`
-  - `cloud-devops`
   - `cloudformation-best-practices`
   - `code-refactoring-refactor-clean`
   - `code-refactoring-tech-debt`
   - `code-review-checklist`
   - `code-simplifier`
-  - `ddd-context-mapping`
-  - `ddd-strategic-design`
-  - `ddd-tactical-patterns`
   - `domain-driven-design`
   - `elon-musk`
   - `github`
@@ -173,7 +164,9 @@ Do not re-import or preserve these unless the user explicitly asks:
 
 - `antigravity-async-python-patterns`
 - `antigravity-aws-cost-cleanup`
+- `antigravity-bash-scripting`
 - `antigravity-changelog-automation`
+- `antigravity-cloud-devops`
 - `antigravity-code-review-ai-ai-review`
 - `antigravity-code-review-excellence`
 - `antigravity-code-reviewer`
@@ -181,9 +174,16 @@ Do not re-import or preserve these unless the user explicitly asks:
 - `antigravity-codebase-cleanup-deps-audit`
 - `antigravity-codebase-cleanup-refactor-clean`
 - `antigravity-codebase-cleanup-tech-debt`
+- `antigravity-ddd-context-mapping`
+- `antigravity-ddd-strategic-design`
+- `antigravity-ddd-tactical-patterns`
+- `antigravity-error-detective`
 - `antigravity-javascript-testing-patterns`
 - `antigravity-nodejs-backend-patterns`
 - `antigravity-python-performance-optimization`
+- `awesome-copilot-create-agentsmd`
+- `claude-agent-development`
+- `claude-skill-creator`
 
 ## Routing
 
@@ -207,17 +207,21 @@ Keep legacy aliases only when backward compatibility is real and intentional.
 
 0. Determine execution mode from the user's request.
 1. Build an inventory of the relevant assets and nearby overlaps.
-2. Detect catalog drift: naming issues, duplicate intent, stale links, retired assets still present, or missing upstream coverage.
+2. Detect catalog drift: naming issues, duplicate intent, stale links, hollow references, retired assets still present, or missing upstream coverage.
 3. Apply retire-or-keep decisions before importing new overlap.
-4. Import or refresh only approved in-scope assets.
-5. If repo-owned logic is too large for the agent, extract it into an internal skill, usually `internal-skill-management` or a domain-specific internal skill.
-6. Update downstream governance files after catalog changes:
+4. Before importing or refreshing, reject incompatible assets:
+   - skip any asset that depends on Claude Code-only features such as subagent dispatch, `Task`, `claude -p`, or `eval-viewer`
+   - strip deprecated frontmatter keys `tools:`, `model:`, and `color:` from assets that remain in scope
+   - flag any skill that references missing `resources/` or `references/` files as hollow
+5. Import or refresh only approved in-scope assets.
+6. If repo-owned logic is too large for the agent, extract it into an internal skill, usually `internal-skill-management`, `internal-agent-authoring`, `internal-agents-md-bridge`, or another domain-specific internal skill.
+7. Update downstream governance files after catalog changes:
    - `AGENTS.md`
    - `.github/agents/README.md`
    - `.github/repo-profiles.yml`
    - relevant `.github/skills/*`
    - relevant `.github/scripts/*`
-7. Run repository validation and report any remaining gaps.
+8. Run repository validation and report any remaining gaps.
 
 ## Source-Specific Guidance
 
@@ -230,7 +234,7 @@ Keep legacy aliases only when backward compatibility is real and intentional.
 ### Governance Files
 
 - Keep `.github/copilot-instructions.md` as the detailed policy layer.
-- Keep root `AGENTS.md` focused on routing, naming, and discovery.
+- Keep root `AGENTS.md` focused on routing, naming, discovery, and bridge behavior.
 - Keep `.github/agents/README.md` aligned with the actual command-center model in this repository.
 
 ## Quality Standard
