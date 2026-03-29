@@ -3,6 +3,10 @@ description: Azure-specific Terraform standards for RBAC, Management Groups, Pol
 applyTo: "**/eng-azure-*/**/*.tf,**/*azure*.tf,**/*azurerm*.tf"
 ---
 
+<!-- Core Knowledge Source: awesome-copilot-terraform-azure.instructions.md -->
+<!-- This internal instruction extends the external with governance-specific rules. -->
+<!-- Do not duplicate content from the core source; reference it instead. -->
+
 # Terraform Azure Instructions
 
 ## Provider conventions

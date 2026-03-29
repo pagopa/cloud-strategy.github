@@ -3,6 +3,10 @@ description: Terraform authoring standards for readability, typed interfaces, an
 applyTo: "**/*.tf"
 ---
 
+<!-- Core Knowledge Source: awesome-copilot-terraform.instructions.md -->
+<!-- This internal instruction extends the external with governance-specific rules. -->
+<!-- Do not duplicate content from the core source; reference it instead. -->
+
 # Terraform Instructions
 
 ## Formatting

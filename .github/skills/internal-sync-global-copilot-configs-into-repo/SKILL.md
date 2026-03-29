@@ -49,12 +49,12 @@ The sync script detects stacks dynamically and selects assets accordingly:
 
 | Detected stack | Instructions | Skills | Prompts |
 |---|---|---|---|
-| Terraform (`*.tf`) | `internal-terraform.instructions.md` | `internal-terraform`, `internal-cloud-policy` | `internal-terraform.prompt.md` |
-| Python (`*.py`) | `internal-python.instructions.md` | `internal-project-python`, `internal-script-python` | `internal-python.prompt.md` |
-| Java (`*.java`) | `internal-java.instructions.md` | `internal-project-java` | `internal-java.prompt.md` |
-| Node.js (`*.js`, `*.ts`) | `internal-nodejs.instructions.md` | `internal-project-nodejs` | `internal-nodejs.prompt.md` |
-| Docker (`Dockerfile`) | `internal-docker.instructions.md` | `internal-docker` | `internal-docker.prompt.md` |
-| Bash (`*.sh`) | `internal-bash.instructions.md` | `internal-script-bash` | `internal-bash-script.prompt.md` |
+| Terraform (`*.tf`) | `internal-terraform.instructions.md` | `internal-terraform`, `internal-cloud-policy` | `internal-terraform-module.prompt.md` |
+| Python (`*.py`) | `internal-python.instructions.md` | `internal-project-python`, `internal-script-python` | `internal-add-unit-tests.prompt.md` |
+| Java (`*.java`) | `internal-java.instructions.md` | `internal-project-java` | `internal-add-unit-tests.prompt.md` |
+| Node.js (`*.js`, `*.ts`) | `internal-nodejs.instructions.md` | `internal-project-nodejs` | `internal-add-unit-tests.prompt.md` |
+| Docker (`Dockerfile`) | `internal-docker.instructions.md` | `internal-docker` | none |
+| Bash (`*.sh`) | `internal-bash.instructions.md` | `internal-script-bash` | none |
 | GitHub Actions (`workflows/`) | `internal-github-actions.instructions.md` | `internal-cicd-workflow` | `internal-github-action.prompt.md` |
 
 Always included: `internal-markdown.instructions.md`, `internal-yaml.instructions.md`, `internal-json.instructions.md`.
@@ -63,7 +63,7 @@ Always included: `internal-markdown.instructions.md`, `internal-yaml.instruction
 These assets exist only in this standards repository:
 - Agents: `internal-sync-global-copilot-configs-into-repo`
 - Skills: `internal-agent-development`, `internal-agents-md-bridge`, `internal-copilot-audit`, `internal-skill-development`, `internal-skill-management`, `internal-sync-global-copilot-configs-into-repo`
-- Prompts: `internal-add-platform`, `internal-add-report-script`, `internal-code-review`, `internal-sync-global-copilot-configs-into-repo`
+- Prompts: `internal-add-platform`, `internal-add-report-script`
 
 ## Scope rules
 - Manage Copilot-core assets only.

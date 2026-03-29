@@ -1,116 +1,61 @@
-# Remaining Optimization Plan
+# Optimization Plan Completed
 
-Outstanding work only.
+All planned work on this branch has been applied and validated.
 
-Current snapshot on this branch:
+## Final snapshot
 
-- Skills: `120`
+- Skills: `117`
 - Instructions: `28`
-- Prompts: `20`
+- Prompts: `5`
 - Agents: `11`
 
-## Ranking (external overlap priority, highest first)
+## Completed phases
 
-1. `obra` (obra/superpowers)
-2. `terraform` (hashicorp/agent-skills)
-3. `awesome-copilot` (github/awesome-copilot)
-4. `antigravity` (sickn33/antigravity-awesome-skills)
+### Phase 1 — Internal instruction bridge headers
 
-Internals are the governance layer and are always kept.
-When two external skills overlap, delete the lower-ranked one.
+Added `Core Knowledge Source` bridge headers to:
 
----
+- `internal-terraform.instructions.md`
+- `internal-terraform-azure.instructions.md`
+- `internal-docker.instructions.md`
+- `internal-github-actions.instructions.md`
+- `internal-bash.instructions.md`
 
-## Phase 1 — Patch internal instructions (5 files)
+### Phase 2 — Prompt consolidation
 
-Add a "Core Knowledge Source" header to each internal instruction that overlaps with an external instruction.
+Retained only:
 
-| Internal instruction | Core Knowledge Source (external) |
-|---------------------|----------------------------------|
-| `internal-terraform.instructions.md` | `awesome-copilot-terraform.instructions.md` |
-| `internal-terraform-azure.instructions.md` | `awesome-copilot-terraform-azure.instructions.md` |
-| `internal-docker.instructions.md` | `awesome-copilot-containerization-docker-best-practices.instructions.md` |
-| `internal-github-actions.instructions.md` | `awesome-copilot-github-actions-ci-cd-best-practices.instructions.md` |
-| `internal-bash.instructions.md` | `awesome-copilot-shell.instructions.md` |
-
-Add this block immediately after the frontmatter closing `---`:
-
-```markdown
-<!-- Core Knowledge Source: <external-instruction-filename> -->
-<!-- This internal instruction extends the external with governance-specific rules. -->
-<!-- Do not duplicate content from the core source; reference it instead. -->
-```
-
----
-
-## Phase 2 — Delete prompts now superseded by skills or agents
-
-Delete these prompts:
-
-```bash
-rm .github/prompts/internal-code-review.prompt.md
-rm .github/prompts/internal-cicd-workflow.prompt.md
-rm .github/prompts/internal-cloud-policy.prompt.md
-rm .github/prompts/internal-docker.prompt.md
-rm .github/prompts/internal-pr-editor.prompt.md
-rm .github/prompts/internal-sync-global-copilot-configs-into-repo.prompt.md
-rm .github/prompts/internal-pair-architect-analysis.prompt.md
-rm .github/prompts/internal-python-script.prompt.md
-rm .github/prompts/internal-python.prompt.md
-rm .github/prompts/internal-bash-script.prompt.md
-rm .github/prompts/internal-java.prompt.md
-rm .github/prompts/internal-nodejs.prompt.md
-rm .github/prompts/internal-terraform.prompt.md
-rm .github/prompts/internal-data-registry.prompt.md
-rm .github/prompts/internal-github-composite-action.prompt.md
-```
-
-Keep only:
-
-- `internal-terraform-module.prompt.md`
-- `internal-github-action.prompt.md`
-- `internal-add-unit-tests.prompt.md`
 - `internal-add-platform.prompt.md`
 - `internal-add-report-script.prompt.md`
+- `internal-add-unit-tests.prompt.md`
+- `internal-github-action.prompt.md`
+- `internal-terraform-module.prompt.md`
 
-### Validation
+Updated the surrounding catalog so the reduced prompt set remains coherent:
 
-```bash
-ls .github/prompts/*.prompt.md | wc -l
-# Expected: 5
-```
+- `AGENTS.md` preferred prompts
+- `.github/repo-profiles.yml`
+- `.github/scripts/internal-sync-copilot-configs.py`
+- `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 
----
+### Phase 3 — Overlap pass
 
-## Phase 3 — Second overlap pass
+Retired these weaker or runtime-specific skills:
 
-Run a new audit with `internal-copilot-audit` and review these candidates specifically:
+- `antigravity-code-simplifier`
+- `antigravity-javascript-mastery`
+- `awesome-copilot-azure-architecture-autopilot`
 
-- `antigravity-simplify-code` vs `antigravity-code-simplifier`
-- `antigravity-javascript-mastery` vs `antigravity-javascript-pro`
-- `awesome-copilot-azure-architecture-autopilot` for runtime-specific assumptions that may justify internal replacement or retirement
+Kept the stronger replacements:
 
-Apply the same rule set:
+- `antigravity-simplify-code`
+- `antigravity-javascript-pro`
 
-- no deprecated fallback assets
-- no hollow bundles
-- no weaker aliases kept beside a stronger internal or cleaner external skill
-
----
-
-## Final validation checklist
-
-Run after the remaining phases are complete:
+## Final validation
 
 ```bash
-echo "Skills:" && ls -d .github/skills/*/ | wc -l
-echo "Instructions:" && ls .github/instructions/*.instructions.md | wc -l
-echo "Prompts:" && ls .github/prompts/*.prompt.md | wc -l
-echo "Agents:" && ls .github/agents/*.agent.md | wc -l
-
-echo "Deprecated tools:" && grep -rl "^tools:" .github/agents .github/skills | wc -l
-echo "Deprecated model:" && grep -rl "^model:" .github/agents | wc -l
-echo "Deprecated color:" && grep -rl "^color:" .github/agents | wc -l
-
+python3 -m compileall .github/scripts tests
+pytest tests/test_validate_copilot_customizations.py
+pytest tests/test_contract_runner.py -k 'sync_plan or sync_apply'
 python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict
 ```

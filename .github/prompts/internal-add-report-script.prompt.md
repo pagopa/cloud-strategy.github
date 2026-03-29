@@ -2,7 +2,7 @@
 description: Add or update a reusable reporting script for repository maintenance and governance
 name: internal-add-report-script
 agent: agent
-argument-hint: action=<create|modify> script_name=<name> purpose=<purpose> output_format=<json|yaml|md|txt> [target_path=<path>]
+argument-hint: action=<create|modify> script_name=<name> purpose=<purpose> output_format=<json|yaml|md|txt> [script_type=<auto|python|bash>] [target_path=<path>]
 ---
 
 # Add Reporting Script
@@ -15,10 +15,13 @@ Use this prompt to add or update a reporting script that supports governance and
 - **Script name**: ${input:script_name}
 - **Purpose**: ${input:purpose}
 - **Output format**: ${input:output_format:json,yaml,md,txt}
+- **Script type**: ${input:script_type:auto,python,bash}
 - **Target path**: ${input:target_path:.github/scripts}
 
 ## Instructions
-1. Use `.github/skills/internal-script-python/SKILL.md` as the implementation baseline.
+1. Choose the closest implementation baseline:
+   - Python: `.github/skills/internal-script-python/SKILL.md`
+   - Bash: `.github/skills/internal-script-bash/SKILL.md`
 2. Keep input/output contracts explicit and deterministic.
 3. Keep logs and messages in English.
 4. Avoid references to any specific consumer repository, tenant, subscription, or billing scope.

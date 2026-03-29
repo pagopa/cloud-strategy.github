@@ -3,6 +3,10 @@ description: Docker and container build standards for secure, reproducible image
 applyTo: "**/Dockerfile,**/Dockerfile.*,**/.dockerignore,**/docker-compose*.yml,**/compose*.yml"
 ---
 
+<!-- Core Knowledge Source: awesome-copilot-containerization-docker-best-practices.instructions.md -->
+<!-- This internal instruction extends the external with governance-specific rules. -->
+<!-- Do not duplicate content from the core source; reference it instead. -->
+
 # Docker Instructions
 
 ## Mandatory rules

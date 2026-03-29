@@ -21,7 +21,7 @@ You are the repository's implementation command center for application and scrip
 - `internal-script-bash`
 - `internal-script-python`
 - `antigravity-clean-code`
-- `antigravity-code-simplifier`
+- `antigravity-simplify-code`
 
 ## Routing Rules
 

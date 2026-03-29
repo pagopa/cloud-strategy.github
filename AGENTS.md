@@ -114,13 +114,11 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Preferred prompts
 
-- `internal-code-review`: exhaustive, nit-level code review.
+- `internal-add-platform`: reusable platform/profile definition updates.
+- `internal-add-report-script`: reusable governance and maintenance reporting scripts.
+- `internal-add-unit-tests`: unit test authoring and improvement.
 - `internal-github-action`: GitHub Actions workflow authoring.
-- `internal-sync-global-copilot-configs-into-repo`: cross-repository alignment and redundancy analysis.
-- `internal-pr-editor`: pull request body generation.
-- `internal-add-unit-tests`: test authoring and improvement.
-- `internal-terraform`: Terraform feature or module authoring.
-- `internal-pair-architect-analysis`: deep change-impact analysis with health score, risk matrix, and devil's advocate mode.
+- `internal-terraform-module`: reusable Terraform module and component authoring.
 
 ### Preferred skills
 
@@ -201,23 +199,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/prompts/internal-add-platform.prompt.md`
 - `.github/prompts/internal-add-report-script.prompt.md`
 - `.github/prompts/internal-add-unit-tests.prompt.md`
-- `.github/prompts/internal-bash-script.prompt.md`
-- `.github/prompts/internal-cicd-workflow.prompt.md`
-- `.github/prompts/internal-cloud-policy.prompt.md`
-- `.github/prompts/internal-code-review.prompt.md`
-- `.github/prompts/internal-data-registry.prompt.md`
-- `.github/prompts/internal-docker.prompt.md`
 - `.github/prompts/internal-github-action.prompt.md`
-- `.github/prompts/internal-github-composite-action.prompt.md`
-- `.github/prompts/internal-java.prompt.md`
-- `.github/prompts/internal-nodejs.prompt.md`
-- `.github/prompts/internal-pair-architect-analysis.prompt.md`
-- `.github/prompts/internal-pr-editor.prompt.md`
-- `.github/prompts/internal-python-script.prompt.md`
-- `.github/prompts/internal-python.prompt.md`
-- `.github/prompts/internal-sync-global-copilot-configs-into-repo.prompt.md`
 - `.github/prompts/internal-terraform-module.prompt.md`
-- `.github/prompts/internal-terraform.prompt.md`
 
 ### Skills
 
@@ -234,14 +217,12 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/antigravity-code-refactoring-refactor-clean/SKILL.md`
 - `.github/skills/antigravity-code-refactoring-tech-debt/SKILL.md`
 - `.github/skills/antigravity-code-review-checklist/SKILL.md`
-- `.github/skills/antigravity-code-simplifier/SKILL.md`
 - `.github/skills/antigravity-domain-driven-design/SKILL.md`
 - `.github/skills/antigravity-elon-musk/SKILL.md`
 - `.github/skills/antigravity-github/SKILL.md`
 - `.github/skills/antigravity-golang-pro/SKILL.md`
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
 - `.github/skills/antigravity-java-pro/SKILL.md`
-- `.github/skills/antigravity-javascript-mastery/SKILL.md`
 - `.github/skills/antigravity-javascript-pro/SKILL.md`
 - `.github/skills/antigravity-kaizen/SKILL.md`
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
@@ -262,7 +243,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-agent-governance/SKILL.md`
 - `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
 - `.github/skills/awesome-copilot-architecture-blueprint-generator/SKILL.md`
-- `.github/skills/awesome-copilot-azure-architecture-autopilot/SKILL.md`
 - `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
 - `.github/skills/awesome-copilot-azure-pricing/SKILL.md`
 - `.github/skills/awesome-copilot-azure-resource-health-diagnose/SKILL.md`

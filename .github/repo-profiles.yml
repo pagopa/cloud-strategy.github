@@ -42,7 +42,6 @@ profiles:
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-markdown.instructions.md
     recommended_prompts:
-      - prompts/internal-java.prompt.md
       - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
       - skills/internal-project-java/SKILL.md
@@ -55,7 +54,6 @@ profiles:
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-markdown.instructions.md
     recommended_prompts:
-      - prompts/internal-nodejs.prompt.md
       - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
       - skills/internal-project-nodejs/SKILL.md
@@ -68,7 +66,6 @@ profiles:
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-markdown.instructions.md
     recommended_prompts:
-      - prompts/internal-python.prompt.md
       - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
       - skills/internal-project-python/SKILL.md
@@ -81,8 +78,7 @@ profiles:
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-yaml.instructions.md
     recommended_prompts:
-      - prompts/internal-terraform.prompt.md
-      - prompts/internal-cloud-policy.prompt.md
+      - prompts/internal-terraform-module.prompt.md
     recommended_skills:
       - skills/internal-terraform/SKILL.md
       - skills/internal-cloud-policy/SKILL.md
@@ -95,10 +91,10 @@ profiles:
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-terraform.instructions.md
     recommended_prompts:
-      - prompts/internal-java.prompt.md
-      - prompts/internal-nodejs.prompt.md
+      - prompts/internal-add-platform.prompt.md
+      - prompts/internal-add-unit-tests.prompt.md
       - prompts/internal-github-action.prompt.md
-      - prompts/internal-terraform.prompt.md
+      - prompts/internal-terraform-module.prompt.md
     recommended_skills:
       - skills/internal-project-java/SKILL.md
       - skills/internal-project-nodejs/SKILL.md

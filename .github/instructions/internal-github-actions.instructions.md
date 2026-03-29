@@ -3,6 +3,10 @@ description: Security and reliability standards for GitHub Actions workflows wit
 applyTo: "**/workflows/**"
 ---
 
+<!-- Core Knowledge Source: awesome-copilot-github-actions-ci-cd-best-practices.instructions.md -->
+<!-- This internal instruction extends the external with governance-specific rules. -->
+<!-- Do not duplicate content from the core source; reference it instead. -->
+
 # GitHub Actions Instructions
 
 ## Security baseline

@@ -3,6 +3,10 @@ description: Bash scripting standards for safe execution, guard clauses, and con
 applyTo: "**/*.sh"
 ---
 
+<!-- Core Knowledge Source: awesome-copilot-shell.instructions.md -->
+<!-- This internal instruction extends the external with governance-specific rules. -->
+<!-- Do not duplicate content from the core source; reference it instead. -->
+
 # Bash Instructions
 
 ## Mandatory rules

@@ -43,8 +43,6 @@ SOURCE_ONLY_AGENT_PATHS = {
 SOURCE_ONLY_PROMPT_PATHS = {
     ".github/prompts/internal-add-platform.prompt.md",
     ".github/prompts/internal-add-report-script.prompt.md",
-    ".github/prompts/internal-code-review.prompt.md",
-    ".github/prompts/internal-sync-global-copilot-configs-into-repo.prompt.md",
 }
 SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/internal-agent-development/SKILL.md",
@@ -54,8 +52,6 @@ SOURCE_ONLY_SKILL_PATHS = {
     ".github/skills/internal-skill-management/SKILL.md",
     ".github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md",
 }
-CANONICAL_BASH_SCRIPT_PROMPT_PATH = ".github/prompts/internal-bash-script.prompt.md"
-CANONICAL_PYTHON_SCRIPT_PROMPT_PATH = ".github/prompts/internal-python-script.prompt.md"
 ALWAYS_EXCLUDED_RELATIVE_PATHS = {
     ".github/README.md",
     ".github/CHANGELOG.md",
@@ -76,12 +72,6 @@ ALWAYS_EXCLUDED_DIRECTORIES = {
 STACK_PRIORITY = ("terraform", "python", "nodejs", "java", "docker", "bash")
 PROMPT_SKILL_REFERENCE_PREFIX = ".github/"
 EXTRA_LEGACY_ALIAS_PATHS = {
-    ".github/prompts/internal-bash-script.prompt.md": (
-        ".github/prompts/script-bash.prompt.md",
-    ),
-    ".github/prompts/internal-python-script.prompt.md": (
-        ".github/prompts/script-python.prompt.md",
-    ),
     ".github/prompts/internal-github-action.prompt.md": (
         ".github/prompts/cicd-workflow.prompt.md",
     ),
@@ -1278,26 +1268,12 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
             prompts.add(prefixed)
     prompts.update(source_preferred_prompts)
 
-    if "bash" in stacks:
-        prompts.add(CANONICAL_BASH_SCRIPT_PROMPT_PATH)
-    if "python" in stacks:
-        prompts.update(
-            {
-                ".github/prompts/internal-python.prompt.md",
-                CANONICAL_PYTHON_SCRIPT_PROMPT_PATH,
-                ".github/prompts/internal-add-unit-tests.prompt.md",
-            }
-        )
+    if {"python", "java", "nodejs"} & set(stacks):
+        prompts.add(".github/prompts/internal-add-unit-tests.prompt.md")
     if "terraform" in stacks:
-        prompts.add(".github/prompts/internal-terraform.prompt.md")
-    if "github-actions" in stacks:
+        prompts.add(".github/prompts/internal-terraform-module.prompt.md")
+    if "github-actions" in stacks or "composite-action" in stacks:
         prompts.add(".github/prompts/internal-github-action.prompt.md")
-    if "composite-action" in stacks:
-        prompts.add(".github/prompts/internal-github-composite-action.prompt.md")
-    if repo_needs_data_registry(analysis.repo_root, analysis):
-        prompts.add(".github/prompts/internal-data-registry.prompt.md")
-    if target_has_pr_template(analysis.repo_root):
-        prompts.add(".github/prompts/internal-pr-editor.prompt.md")
 
     prompts = {
         prompt
