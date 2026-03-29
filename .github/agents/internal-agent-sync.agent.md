@@ -50,10 +50,64 @@ You keep skill assets synchronized across `cloud-strategy.github`, approved exte
 - Do not duplicate detailed behavioral guidance in `AGENTS.md` when the same rule can live in `.github/copilot-instructions.md` or another `.github` Copilot asset.
 
 ## Approved Upstream Scope
-- `awesome-copilot`: sync only the approved `github/awesome-copilot` skills `copilot-instructions-blueprint-generator` and `create-agentsmd`.
-- `claude`: sync from Anthropic skill sources used by this repository, including `anthropics/claude-code` plugin skills and the approved `anthropics/skills` assets for `docx`, `pdf`, `pptx`, and `skill-creator`.
-- `obra`: sync all skills from `obra/superpowers` except `writing-skills`, which must stay sourced from the approved Claude-origin variant instead.
-- `terraform`: sync all skills from `hashicorp/agent-skills` under `terraform/code-generation/skills` except `azure-verified-modules`.
+
+### Skill assets
+- `awesome-copilot`: sync only the approved `github/awesome-copilot` skills:
+  - `agent-governance`
+  - `agentic-eval`
+  - `architecture-blueprint-generator`
+  - `azure-architecture-autopilot`
+  - `azure-devops-cli`
+  - `azure-pricing`
+  - `azure-resource-health-diagnose`
+  - `azure-role-selector`
+  - `cloud-design-patterns`
+  - `copilot-instructions-blueprint-generator`
+  - `create-github-action-workflow-specification`
+  - `create-github-pull-request-from-specification`
+  - `create-implementation-plan`
+  - `create-readme`
+  - `create-agentsmd`
+  - `documentation-writer`
+  - `java-junit`
+  - `java-springboot`
+  - `javascript-typescript-jest`
+  - `pytest-coverage`
+  - `refactor-plan`
+  - `suggest-awesome-github-copilot-agents`
+  - `suggest-awesome-github-copilot-instructions`
+  - `suggest-awesome-github-copilot-skills`
+- `claude`: sync from Anthropic skill sources used by this repository:
+  - `anthropics/claude-code` plugin skills
+  - approved `anthropics/skills` assets:
+    - `agent-development`
+    - `docx`
+    - `pdf`
+    - `pptx`
+    - `skill-creator`
+- `obra`: sync all skills from `obra/superpowers`:
+  - exclude `writing-skills`
+  - keep `writing-skills` sourced from the approved Claude-origin variant
+- `terraform`: sync all skills from `hashicorp/agent-skills` under `terraform/code-generation/skills`:
+  - exclude `azure-verified-modules`
+
+### Instruction assets
+- `awesome-copilot`: sync only the approved `github/awesome-copilot` instructions:
+  - `azure-devops-pipelines.instructions.md`
+  - `containerization-docker-best-practices.instructions.md`
+  - `devops-core-principles.instructions.md`
+  - `github-actions-ci-cd-best-practices.instructions.md`
+  - `copilot-sdk-python.instructions.md`
+  - `go.instructions.md`
+  - `instructions.instructions.md`
+  - `kubernetes-deployment-best-practices.instructions.md`
+  - `kubernetes-manifests.instructions.md`
+  - `oop-design-patterns.instructions.md`
+  - `performance-optimization.instructions.md`
+  - `shell.instructions.md`
+  - `springboot.instructions.md`
+  - `terraform.instructions.md`
+  - `terraform-azure.instructions.md`
 
 ## Routing
 - Use this agent when creating, importing, renaming, or synchronizing skills across repositories.
@@ -68,26 +122,36 @@ You keep skill assets synchronized across `cloud-strategy.github`, approved exte
   - Asset created in `cloud-strategy.github`: `internal-<resource-name>`
   - Asset created in another local repository: `local-<resource-name>`
 - Keep legacy prefixes only when backward compatibility requires them.
-- For approved `awesome` imports, use `awesome` as the short-repo prefix for both directory names and frontmatter `name:` values.
+- For approved `awesome-copilot` imports, use `awesome-copilot` as the short-repo prefix for both directory names and frontmatter `name:` values.
 
 ## Source-specific guidance
+### Skill assets
 - For `awesome-copilot/copilot-instructions-blueprint-generator`, preserve the upstream intent that generated `copilot-instructions.md` guidance must be grounded in actual repository patterns, exact detected technology versions, and existing architectural boundaries. Do not retain wording that encourages assumptions or generic best practices that are not evidenced in the target repository.
 - For `awesome-copilot/create-agentsmd`, preserve the upstream intent that `AGENTS.md` content must be actionable, repository-rooted, command-specific, and validated against the real project workflow. Keep monorepo precedence guidance only when the target repository structure actually needs it.
-- When syncing either approved `awesome` skill, normalize repository-facing wording to GitHub Copilot terminology and align file references with this repository's canonical paths and naming rules.
-- When both approved `awesome` skills are in play, refresh `awesome-copilot-instructions-blueprint-generator` before `awesome-copilot-create-agentsmd` so that `.github/copilot-instructions.md` becomes the detailed source and `AGENTS.md` can stay focused on routing, naming, and bridge responsibilities.
+- When both approved `awesome-copilot` skills are in play, refresh `awesome-copilot-instructions-blueprint-generator` before `awesome-copilot-create-agentsmd` so that `.github/copilot-instructions.md` becomes the detailed source and `AGENTS.md` can stay focused on routing, naming, and bridge responsibilities.
+
+### Instruction assets
+- For approved `awesome-copilot` instructions, install them with the `awesome-copilot-` prefix while preserving the upstream filename stem after the prefix. Apply the same canonical identifier to the filename stem and frontmatter `name:` when the instruction defines one.
+
+### Shared guidance
+- When syncing any approved `awesome-copilot` asset, normalize repository-facing wording to GitHub Copilot terminology and align file references with this repository's canonical paths and naming rules.
 - For repository-root `AGENTS.md`, keep assistant-runtime wording abstract. Use it as the external bridge for assistant behavior, but push detailed implementation policy, validations, and reusable rules into `.github/copilot-instructions.md` and the `.github` inventory wherever possible.
 
 ## Execution workflow
 1. Identify the asset origin: approved external repository, this repository, or another local repository.
 2. Confirm that the requested asset is in scope for that origin and apply any source-specific exclusions.
 3. Derive the canonical target identifier from the origin rule and the repository short name.
-4. Verify that the skill directory name, file path, and frontmatter `name:` all match the canonical identifier.
-5. If the folder name or frontmatter `name:` does not match the canonical identifier, auto-rename the folder and normalize the frontmatter when the target path is free, the origin is clear, and no required legacy alias would be broken.
-6. If the naming drift cannot be corrected safely, stop and report a conflict instead of preserving the non-canonical name.
-7. Compare the local asset against the upstream or source version and detect content drift, missing files, unmanaged divergence, and any remaining convention violations.
-8. If the sync includes repository-governance assets, install or refresh the required skills first and complete skill naming normalization before updating any downstream documentation.
+4. Verify that each asset path, filename stem, and frontmatter `name:` match the canonical identifier for that resource type.
+5. If naming drift can be corrected safely, auto-rename the asset and normalize the frontmatter. If not, stop and report a conflict instead of preserving a non-canonical name.
+6. Compare the local asset against the upstream or source version and detect content drift, missing files, unmanaged divergence, and any remaining convention violations.
+
+### Installation order by resource type
+7. Install or refresh approved skill assets first when the sync touches repository-governance assets or downstream files that depend on those skills.
+8. Install or refresh approved instruction assets as a separate step after the required skills are in place, keeping instruction naming normalization independent from skill normalization.
 9. Use the installed skills to update `.github/copilot-instructions.md` before touching repository-root `AGENTS.md`.
 10. Sync repository-root `AGENTS.md` last, keeping it concise, runtime-agnostic, and dependent on `.github/copilot-instructions.md` for detailed behavioral rules wherever possible.
+
+### Finalization
 11. Delegate bounded comparison, drift-detection, and file-generation work whenever possible so the root assistant context stays focused on decisions, conflicts, and final validation.
 12. Plan the minimum safe action: create, rename, update, exclude, keep as a documented legacy alias, or report conflict for manual resolution.
 13. Surface convention violations before applying content changes, especially folder-name and frontmatter mismatches.
@@ -110,3 +174,9 @@ You keep skill assets synchronized across `cloud-strategy.github`, approved exte
 - `Sync status`: up to date, drift detected, missing locally, or conflict.
 - `Required actions`: create, auto-rename applied, rename, update, exclude, keep as legacy alias, or manual resolution.
 - `Validation`: checks executed and any remaining gaps.
+- `Final report`: end every run with a short emoji-based summary that is easy to scan:
+  - `✅ Done`: what you completed.
+  - `🟡 Next`: what you recommend doing next.
+  - `⚪ Not done`: what you did not do.
+  - `🔴 Errors`: errors, validation failures, or conflicts you found.
+  - `ℹ️ Why`: why an item remains not done, skipped, blocked, or deferred.
