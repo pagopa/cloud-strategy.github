@@ -1,6 +1,6 @@
 ---
 name: awesome-copilot-instructions-blueprint-generator
-description: 'Technology-agnostic blueprint generator for creating comprehensive `.github/copilot-instructions.md` guidance that directs GitHub Copilot to follow project standards, architecture patterns, and exact technology versions by analyzing real codebase patterns and avoiding assumptions.'
+description: 'Technology-agnostic blueprint generator for creating comprehensive copilot-instructions.md files that guide GitHub Copilot to produce code consistent with project standards, architecture patterns, and exact technology versions by analyzing existing codebase patterns and avoiding assumptions.'
 ---
 
 # Copilot Instructions Blueprint Generator
@@ -15,7 +15,7 @@ ${VERSIONING="Semantic|CalVer|Custom"} <!-- Versioning approach -->
 
 ## Generated Prompt
 
-"Generate a comprehensive `.github/copilot-instructions.md` file that will guide GitHub Copilot to produce code consistent with our project's standards, architecture, and technology versions. The instructions must be strictly based on actual code patterns in our codebase and avoid making any assumptions. Follow this approach:
+"Generate a comprehensive copilot-instructions.md file that will guide GitHub Copilot to produce code consistent with our project's standards, architecture, and technology versions. The instructions must be strictly based on actual code patterns in our codebase and avoid making any assumptions. Follow this approach:
 
 ### 1. Core Instruction Structure
 
@@ -27,7 +27,7 @@ ${VERSIONING="Semantic|CalVer|Custom"} <!-- Versioning approach -->
 When generating code for this repository:
 
 1. **Version Compatibility**: Always detect and respect the exact versions of languages, frameworks, and libraries used in this project
-2. **Context Files**: Prioritize patterns and standards defined in repository-owned `.github` Copilot context files
+2. **Context Files**: Prioritize patterns and standards defined in the .github/copilot directory
 3. **Codebase Patterns**: When context files don't provide specific guidance, scan the codebase for established patterns
 4. **Architectural Consistency**: Maintain our ${ARCHITECTURE_STYLE} architectural style and established boundaries
 5. **Code Quality**: Prioritize ${CODE_QUALITY_FOCUS == "All" ? "maintainability, performance, security, accessibility, and testability" : CODE_QUALITY_FOCUS} in all generated code
@@ -52,14 +52,13 @@ Before generating code, scan the codebase to identify:
 
 ## Context Files
 
-Prioritize the following repository-owned files in `.github` (if they exist):
+Prioritize the following files in .github/copilot directory (if they exist):
 
-- **copilot-instructions.md**: Core assistant-facing rules and repository-wide non-negotiables
-- **copilot-code-review-instructions.md**: Review-specific guidance and quality gates
-- **copilot-commit-message-instructions.md**: Commit message standards
-- **instructions/*.instructions.md**: File-pattern-specific implementation guidance
-- **prompts/*.prompt.md**: Repeatable task prompts and output constraints
-- **skills/*/SKILL.md**: Reusable workflow and implementation patterns
+- **architecture.md**: System architecture guidelines
+- **tech-stack.md**: Technology versions and framework details
+- **coding-standards.md**: Code style and formatting standards
+- **folder-structure.md**: Project organization guidelines
+- **exemplars.md**: Exemplary code patterns to follow
 
 ## Codebase Scanning Instructions
 
@@ -218,3 +217,78 @@ ${PROJECT_TYPE == "Python" || PROJECT_TYPE == "Auto-detect" || PROJECT_TYPE == "
 - Follow the same module organization patterns` : ""}
 
 ## Version Control Guidelines
+
+${VERSIONING == "Semantic" ? 
+`- Follow Semantic Versioning patterns as applied in the codebase
+- Match existing patterns for documenting breaking changes
+- Follow the same approach for deprecation notices` : ""}
+
+${VERSIONING == "CalVer" ? 
+`- Follow Calendar Versioning patterns as applied in the codebase
+- Match existing patterns for documenting changes
+- Follow the same approach for highlighting significant changes` : ""}
+
+${VERSIONING == "Custom" ? 
+`- Match the exact versioning pattern observed in the codebase
+- Follow the same changelog format used in existing documentation
+- Apply the same tagging conventions used in the project` : ""}
+
+## General Best Practices
+
+- Follow naming conventions exactly as they appear in existing code
+- Match code organization patterns from similar files
+- Apply error handling consistent with existing patterns
+- Follow the same approach to testing as seen in the codebase
+- Match logging patterns from existing code
+- Use the same approach to configuration as seen in the codebase
+
+## Project-Specific Guidance
+
+- Scan the codebase thoroughly before generating any code
+- Respect existing architectural boundaries without exception
+- Match the style and patterns of surrounding code
+- When in doubt, prioritize consistency with existing code over external best practices
+```
+
+### 2. Codebase Analysis Instructions
+
+To create the copilot-instructions.md file, first analyze the codebase to:
+
+1. **Identify Exact Technology Versions**:
+   - ${PROJECT_TYPE == "Auto-detect" ? "Detect all programming languages, frameworks, and libraries by scanning file extensions and configuration files" : `Focus on ${PROJECT_TYPE} technologies`}
+   - Extract precise version information from project files, package.json, .csproj, etc.
+   - Document version constraints and compatibility requirements
+
+2. **Understand Architecture**:
+   - Analyze folder structure and module organization
+   - Identify clear layer boundaries and component relationships
+   - Document communication patterns between components
+
+3. **Document Code Patterns**:
+   - Catalog naming conventions for different code elements
+   - Note documentation styles and completeness
+   - Document error handling patterns
+   - Map testing approaches and coverage
+
+4. **Note Quality Standards**:
+   - Identify performance optimization techniques actually used
+   - Document security practices implemented in the code
+   - Note accessibility features present (if applicable)
+   - Document code quality patterns evident in the codebase
+
+### 3. Implementation Notes
+
+The final copilot-instructions.md should:
+- Be placed in the .github/copilot directory
+- Reference only patterns and standards that exist in the codebase
+- Include explicit version compatibility requirements
+- Avoid prescribing any practices not evident in the code
+- Provide concrete examples from the codebase
+- Be comprehensive yet concise enough for Copilot to effectively use
+
+Important: Only include guidance based on patterns actually observed in the codebase. Explicitly instruct Copilot to prioritize consistency with existing code over external best practices or newer language features.
+"
+
+## Expected Output
+
+A comprehensive copilot-instructions.md file that will guide GitHub Copilot to produce code that is perfectly compatible with your existing technology versions and follows your established patterns and architecture.

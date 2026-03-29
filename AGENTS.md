@@ -126,22 +126,21 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `internal-terraform`: unified Terraform skill for features and modules.
 - `internal-pair-architect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
 
-#### Workflow Skills (obra/superpowers)
-- `TechAIBrainstorming`: structured creative exploration before implementation.
-- `TechAIDispatchingParallelAgents`: coordinating parallel sub-agent work.
-- `TechAIExecutingPlans`: structured plan execution with checkpoints.
-- `TechAIFinishingDevBranch`: pre-merge checklist and branch cleanup.
-- `TechAIGitWorktrees`: efficient multi-branch work with git worktrees.
-- `TechAIReceivingCodeReview`: processing and addressing review feedback.
-- `TechAIRequestingCodeReview`: preparing changes for effective review.
-- `TechAISubagentDrivenDev`: delegating implementation to focused sub-agents.
-- `TechAISystematicDebugging`: root-cause-first debugging with 4-phase process.
-- `TechAITestDrivenDev`: TDD red-green-refactor workflow.
-- `TechAIUsingSuperpowers`: agent capability awareness and best practices.
-- `TechAIVerification`: evidence-based verification before claiming completion.
-- `TechAIWritingPlans`: structured plan authoring.
-- `TechAIWritingSkills`: skill authoring and improvement.
-- `TechAISkillCreator`: meta-skill for creating, testing, and improving skills (source-only).
+#### Workflow Skills (obra/superpowers + Claude)
+- `obra-brainstorming`: structured creative exploration before implementation.
+- `obra-dispatching-parallel-agents`: coordinating parallel sub-agent work.
+- `obra-executing-plans`: structured plan execution with checkpoints.
+- `obra-finishing-a-development-branch`: pre-merge checklist and branch cleanup.
+- `obra-using-git-worktrees`: efficient multi-branch work with git worktrees.
+- `obra-receiving-code-review`: processing and addressing review feedback.
+- `obra-requesting-code-review`: preparing changes for effective review.
+- `obra-subagent-driven-development`: delegating implementation to focused sub-agents.
+- `obra-systematic-debugging`: root-cause-first debugging with 4-phase process.
+- `obra-test-driven-development`: TDD red-green-refactor workflow.
+- `obra-using-skills`: skill capability awareness and reuse best practices.
+- `obra-verification-before-completion`: evidence-based verification before claiming completion.
+- `obra-writing-plans`: structured plan authoring.
+- `claude-skill-creator`: creating, testing, and improving skills.
 
 ### Required validations before PR
 
@@ -150,9 +149,23 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `terraform fmt` and `terraform validate` for Terraform changes.
 
 ## Repository Inventory (Auto-generated)
-
 ### Instructions
 
+- `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
+- `.github/instructions/awesome-copilot-containerization-docker-best-practices.instructions.md`
+- `.github/instructions/awesome-copilot-copilot-sdk-python.instructions.md`
+- `.github/instructions/awesome-copilot-devops-core-principles.instructions.md`
+- `.github/instructions/awesome-copilot-github-actions-ci-cd-best-practices.instructions.md`
+- `.github/instructions/awesome-copilot-go.instructions.md`
+- `.github/instructions/awesome-copilot-instructions.instructions.md`
+- `.github/instructions/awesome-copilot-kubernetes-deployment-best-practices.instructions.md`
+- `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
+- `.github/instructions/awesome-copilot-oop-design-patterns.instructions.md`
+- `.github/instructions/awesome-copilot-performance-optimization.instructions.md`
+- `.github/instructions/awesome-copilot-shell.instructions.md`
+- `.github/instructions/awesome-copilot-springboot.instructions.md`
+- `.github/instructions/awesome-copilot-terraform-azure.instructions.md`
+- `.github/instructions/awesome-copilot-terraform.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
 - `.github/instructions/internal-github-action-composite.instructions.md`
@@ -195,12 +208,40 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Skills
 
+- `.github/skills/awesome-copilot-agent-governance/SKILL.md`
+- `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
+- `.github/skills/awesome-copilot-architecture-blueprint-generator/SKILL.md`
+- `.github/skills/awesome-copilot-azure-architecture-autopilot/SKILL.md`
+- `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
+- `.github/skills/awesome-copilot-azure-pricing/SKILL.md`
+- `.github/skills/awesome-copilot-azure-resource-health-diagnose/SKILL.md`
+- `.github/skills/awesome-copilot-azure-role-selector/SKILL.md`
+- `.github/skills/awesome-copilot-cloud-design-patterns/SKILL.md`
+- `.github/skills/awesome-copilot-create-agentsmd/SKILL.md`
+- `.github/skills/awesome-copilot-create-github-action-workflow-specification/SKILL.md`
+- `.github/skills/awesome-copilot-create-github-pull-request-from-specification/SKILL.md`
+- `.github/skills/awesome-copilot-create-implementation-plan/SKILL.md`
+- `.github/skills/awesome-copilot-create-readme/SKILL.md`
+- `.github/skills/awesome-copilot-documentation-writer/SKILL.md`
+- `.github/skills/awesome-copilot-instructions-blueprint-generator/SKILL.md`
+- `.github/skills/awesome-copilot-java-junit/SKILL.md`
+- `.github/skills/awesome-copilot-java-springboot/SKILL.md`
+- `.github/skills/awesome-copilot-javascript-typescript-jest/SKILL.md`
+- `.github/skills/awesome-copilot-pytest-coverage/SKILL.md`
+- `.github/skills/awesome-copilot-refactor-plan/SKILL.md`
+- `.github/skills/awesome-copilot-suggest-awesome-github-copilot-agents/SKILL.md`
+- `.github/skills/awesome-copilot-suggest-awesome-github-copilot-instructions/SKILL.md`
+- `.github/skills/awesome-copilot-suggest-awesome-github-copilot-skills/SKILL.md`
+- `.github/skills/claude-agent-development/SKILL.md`
+- `.github/skills/claude-docx/SKILL.md`
+- `.github/skills/claude-pdf/SKILL.md`
+- `.github/skills/claude-pptx/SKILL.md`
+- `.github/skills/claude-skill-creator/SKILL.md`
 - `.github/skills/internal-cicd-workflow/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-composite-action/SKILL.md`
 - `.github/skills/internal-data-registry/SKILL.md`
-- `.github/skills/claude-agent-development/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-pair-architect/SKILL.md`
 - `.github/skills/internal-pr-editor/SKILL.md`
@@ -209,11 +250,41 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
-- `.github/skills/claude-skill-creator/SKILL.md`
-- `.github/skills/awesome-copilot-create-agentsmd/SKILL.md`
-- `.github/skills/awesome-copilot-instructions-blueprint-generator/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
+- `.github/skills/obra-brainstorming/SKILL.md`
+- `.github/skills/obra-collision-zone-thinking/SKILL.md`
+- `.github/skills/obra-condition-based-waiting/SKILL.md`
+- `.github/skills/obra-defense-in-depth/SKILL.md`
+- `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
+- `.github/skills/obra-executing-plans/SKILL.md`
+- `.github/skills/obra-finishing-a-development-branch/SKILL.md`
+- `.github/skills/obra-gardening-skills-wiki/SKILL.md`
+- `.github/skills/obra-inversion-exercise/SKILL.md`
+- `.github/skills/obra-meta-pattern-recognition/SKILL.md`
+- `.github/skills/obra-preserving-productive-tensions/SKILL.md`
+- `.github/skills/obra-pulling-updates-from-skills-repository/SKILL.md`
+- `.github/skills/obra-receiving-code-review/SKILL.md`
+- `.github/skills/obra-remembering-conversations/SKILL.md`
+- `.github/skills/obra-requesting-code-review/SKILL.md`
+- `.github/skills/obra-root-cause-tracing/SKILL.md`
+- `.github/skills/obra-scale-game/SKILL.md`
+- `.github/skills/obra-sharing-skills/SKILL.md`
+- `.github/skills/obra-simplification-cascades/SKILL.md`
+- `.github/skills/obra-subagent-driven-development/SKILL.md`
+- `.github/skills/obra-systematic-debugging/SKILL.md`
+- `.github/skills/obra-test-driven-development/SKILL.md`
+- `.github/skills/obra-testing-anti-patterns/SKILL.md`
+- `.github/skills/obra-testing-skills-with-subagents/SKILL.md`
+- `.github/skills/obra-tracing-knowledge-lineages/SKILL.md`
+- `.github/skills/obra-using-git-worktrees/SKILL.md`
+- `.github/skills/obra-using-skills/SKILL.md`
+- `.github/skills/obra-verification-before-completion/SKILL.md`
+- `.github/skills/obra-when-stuck/SKILL.md`
+- `.github/skills/obra-writing-plans/SKILL.md`
+- `.github/skills/terraform-terraform-search-import/SKILL.md`
+- `.github/skills/terraform-terraform-style-guide/SKILL.md`
+- `.github/skills/terraform-terraform-test/SKILL.md`
 
 ### Agents
 
