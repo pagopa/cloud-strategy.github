@@ -28,33 +28,25 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### When to use each agent
 
-#### Specialist Reviewers (per-language, nit-level review)
-- Use `internal-bash-reviewer` for exhaustive, nit-level Bash script reviews.
-- Use `internal-java-reviewer` for exhaustive, nit-level Java code reviews.
-- Use `internal-nodejs-reviewer` for exhaustive, nit-level Node.js code reviews.
-- Use `internal-python-reviewer` for exhaustive, nit-level Python code reviews.
-- Use `internal-terraform-reviewer` for exhaustive, nit-level Terraform code reviews.
-- Use `internal-security-reviewer` for security-focused review across all languages.
+#### Installed agents
+- Use `internal-agent-sync` for synchronizing approved upstream skills or instructions, detecting drift, and enforcing origin-based naming.
+- Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
 
 #### Planning and Architecture
-- Use `internal-planner` for ambiguous scope, tradeoff analysis, or multi-step design.
 - Use `internal-pair-architect-analysis` prompt with the `internal-pair-architect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
 
 #### Editing and Delivery
-- Use `internal-pr-editor` for pull request body generation from diffs.
-
-#### Repository Configuration (source-only, not synced to consumers)
-- Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
+- Use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation from diffs.
 
 ### Anti-patterns
 
-- Do not use `internal-planner` for trivial single-file changes with clear requirements; work directly.
-- Do not use a specialist reviewer outside its language domain; pick the matching one.
+- Do not reference agents that are not present in `.github/agents/`; prefer installed agents plus prompts and skills that exist in the repository.
+- Do not route PR editing through a missing agent when the repository provides the prompt and skill directly.
 
 
 ### Composition and Handoffs
 
-- For changes spanning multiple specialist domains, run each relevant specialist reviewer and aggregate findings.
+- For changes spanning multiple domains, combine the installed agent with the matching repository prompt and skill rather than referencing legacy missing agents.
 
 ## Governance References
 
@@ -225,13 +217,5 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Agents
 
-- `.github/agents/internal-bash-reviewer.agent.md`
 - `.github/agents/internal-agent-sync.agent.md`
-- `.github/agents/internal-java-reviewer.agent.md`
-- `.github/agents/internal-nodejs-reviewer.agent.md`
-- `.github/agents/internal-planner.agent.md`
-- `.github/agents/internal-pr-editor.agent.md`
-- `.github/agents/internal-python-reviewer.agent.md`
-- `.github/agents/internal-security-reviewer.agent.md`
 - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
-- `.github/agents/internal-terraform-reviewer.agent.md`
