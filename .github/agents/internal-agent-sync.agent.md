@@ -89,7 +89,11 @@ You keep skill and instruction assets synchronized across `cloud-strategy.github
   - exclude `azure-verified-modules`
 - `antigravity`: sync only the approved `sickn33/antigravity-awesome-skills` skills from `https://github.com/sickn33/antigravity-awesome-skills/tree/main/skills`:
   - `async-python-patterns`
-  - all skills whose upstream directory name starts with `aws-`
+  - `aws-cost-cleanup`
+  - `aws-cost-optimizer`
+  - `aws-penetration-testing`
+  - `aws-serverless`
+  - `aws-skills`
   - `backend-architect`
   - `bash-pro`
   - `bash-scripting`
