@@ -44,25 +44,36 @@ These rules apply to all repository resources, including prompts, skills, instru
 
 #### `resource-governance-named-resources-declare-name`
 
-- Goal: ensure resources that support explicit naming metadata actually declare it.
+- Goal: ensure repository-owned resources that support explicit naming metadata actually declare it.
 - Scope:
-  - prompts
-  - skills
-  - agents
+  - internal prompts
+  - internal skills
+  - internal agents
 - Expected behavior:
-  - every resource has a non-empty canonical identifier
-  - every prompt, skill, and agent declares a non-empty `name:`
+  - every repository-owned internal resource has a non-empty canonical identifier
+  - every internal prompt, skill, and agent declares a non-empty `name:`
   - every declared `name:` matches the canonical resource identifier
+  - imported non-`internal-*` resources may remain verbatim and are not normalized by this contract
 
 #### `resource-governance-agents-declare-skills`
 
 - Goal: ensure agents publish an explicit reusable skill contract instead of implying skill usage only in prose.
 - Scope:
-  - agents
+  - internal agents
 - Expected behavior:
-  - every agent includes a `## Declared Skills` section
-  - every agent declares at least one skill in that section
-  - agents do not use the deprecated `## Primary Skill Stack` heading
+  - every internal agent includes a `## Declared Skills` section
+  - every internal agent declares at least one skill in that section
+  - internal agents do not use the deprecated `## Primary Skill Stack` heading
+
+#### `resource-governance-agents-declared-skills-resolve-on-disk`
+
+- Goal: ensure agent skill contracts point to real reusable skills rather than stale or decorative identifiers.
+- Scope:
+  - internal agents
+  - skills
+- Expected behavior:
+  - every skill listed under an internal agent `## Declared Skills` section resolves to an existing `.github/skills/<name>/SKILL.md`
+  - internal agents do not declare agent identifiers, aliases, or missing skills as if they were reusable skill contracts
 
 ### Sync Planning
 

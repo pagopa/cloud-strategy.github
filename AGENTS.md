@@ -13,6 +13,13 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - The canonical project-owned `AGENTS.md` file must live in repository root as `AGENTS.md`.
 - Do not keep legacy aliases, fallback copies, or deprecated variants. Preserve an alias only when an active backward-compatibility requirement is explicitly documented.
 
+## Imported Resource Policy
+
+- Treat every non-`internal-*` resource in this repository as an imported upstream asset that should remain verbatim unless the user explicitly asks to refresh, replace, or fork that import.
+- Do not normalize, rewrite, trim, or delete imported non-`internal-*` resources as part of local optimization work.
+- Express repository-specific behavior through `internal-*` resources only.
+- Use `internal-*` resources as wrappers, extensions, adapters, or routing layers that map imported upstream resources to this repository's local needs.
+
 ## Decision Priority
 
 1. Apply repository non-negotiables from `copilot-instructions.md`.
@@ -32,10 +39,11 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `internal-sync-control-center` for governing the managed `.github/` Copilot catalog in this repository: use repo state as the starting point for drift analysis, refresh declared approved external assets, enforce origin-based naming, consolidate overlapping skills, retire obsolete catalog entries, and keep downstream governance files including `.github/copilot-instructions.md` and root `AGENTS.md` aligned with the catalog.
   This command center absorbs the former standalone Copilot-governance role.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
+  Use it when propagating this repository baseline into another repository, or when comparing source and target drift across repositories. Do not use it for single-resource editing inside this repository.
 - Use `internal-cicd` for CI/CD workflows, composite actions, release automation, and deployment-pipeline design.
 
 #### Planning and Architecture
-- Use `internal-architect` for strategic software and platform architecture decisions.
+- Use `internal-architect` for cloud-agnostic strategic software and platform architecture decisions.
 - Use `internal-pair-architect-analysis` prompt with the `internal-pair-architect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
 - Use `internal-aws-org-governance` for strategic AWS organization governance: org structure, payer and management-account boundaries, delegated administration, SCP and IAM operating model, StackSets across the organization, and high-level process design.
   Examples: OU design, management-account responsibility split, delegated-admin placement, SCP exception model, org-wide StackSet rollout.
@@ -55,6 +63,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `internal-infrastructure` for Terraform, Docker, Kubernetes, and infrastructure delivery.
 - Use `internal-quality-engineering` for test strategy, performance, SQL or PostgreSQL tuning, and observability.
 - Use `internal-code-review` for defect-first code review and merge-readiness checks.
+  Use `internal-pair-architect` after line-level review when the question is change impact, ripple effects, or architecture risk rather than code defects alone.
 - Use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation from diffs.
 
 ### Anti-patterns
@@ -68,6 +77,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - For changes spanning multiple domains, combine the installed agent with the matching repository prompt and skill rather than referencing legacy missing agents.
 - Prefer cohesive command-center agents over artificially tiny agents.
 - Split an agent only when responsibilities are disjoint, routing becomes ambiguous, or the instructions would conflict across tasks.
+- Route cloud-specific governance or platform decisions to the matching cloud agent first; use `internal-architect` only when the decision is intentionally cloud-agnostic.
+- Route in-repo catalog governance to `internal-sync-control-center`; route cross-repository baseline propagation to `internal-sync-global-copilot-configs-into-repo`.
 
 ## Governance References
 

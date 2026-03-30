@@ -66,7 +66,7 @@ def parse_frontmatter_name(path: Path) -> str:
         if line == "---":
             break
         if line.startswith("name:"):
-            return line.split(":", 1)[1].strip().strip('"')
+            return line.split(":", 1)[1].strip().strip("\"'")
     return ""
 
 
@@ -115,17 +115,9 @@ def resource_paths() -> list[Path]:
 
 
 def has_supported_origin_prefix(identifier: str) -> bool:
-    return identifier.startswith(
-        (
-            "internal-",
-            "local-",
-            "claude-",
-            "obra-",
-            "terraform-",
-            "antigravity-",
-            "awesome-copilot-",
-        )
-    )
+    if identifier.startswith(("internal-", "local-")):
+        return True
+    return re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)+", identifier) is not None
 
 
 def test_contract_cases_are_known() -> None:
@@ -133,6 +125,7 @@ def test_contract_cases_are_known() -> None:
         "resource-governance-uses-supported-origin-naming",
         "resource-governance-named-resources-declare-name",
         "resource-governance-agents-declare-skills",
+        "resource-governance-agents-declared-skills-resolve-on-disk",
         "sync-plan-detects-root-agents-conflict",
         "sync-plan-selects-python-assets",
         "sync-plan-preserves-manual-target-assets",
@@ -150,9 +143,15 @@ def test_resource_governance_uses_supported_origin_naming() -> None:
 
 def test_resource_governance_named_resources_declare_name() -> None:
     named_resource_paths = []
-    named_resource_paths.extend(sorted((REPO_ROOT / ".github" / "prompts").glob("*.prompt.md")))
-    named_resource_paths.extend(sorted((REPO_ROOT / ".github" / "agents").glob("*.agent.md")))
-    named_resource_paths.extend(sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md")))
+    named_resource_paths.extend(
+        sorted((REPO_ROOT / ".github" / "prompts").glob("internal-*.prompt.md"))
+    )
+    named_resource_paths.extend(
+        sorted((REPO_ROOT / ".github" / "agents").glob("internal-*.agent.md"))
+    )
+    named_resource_paths.extend(
+        sorted((REPO_ROOT / ".github" / "skills").glob("internal-*/SKILL.md"))
+    )
 
     for path in named_resource_paths:
         identifier = canonical_resource_identifier(path)
@@ -163,7 +162,7 @@ def test_resource_governance_named_resources_declare_name() -> None:
 
 
 def test_resource_governance_agents_declare_skills() -> None:
-    for path in sorted((REPO_ROOT / ".github" / "agents").glob("*.agent.md")):
+    for path in sorted((REPO_ROOT / ".github" / "agents").glob("internal-*.agent.md")):
         content = path.read_text(encoding="utf-8")
         declared_skills = extract_markdown_h2_section(content, "## Declared Skills")
 
@@ -176,6 +175,27 @@ def test_resource_governance_agents_declare_skills() -> None:
             if re.fullmatch(r"\s*-\s+`[^`]+`\s*", line)
         ]
         assert declared_skill_lines, f"Declared skills section must include at least one skill for {path}"
+
+
+def test_resource_governance_agents_declared_skills_resolve_on_disk() -> None:
+    available_skills = {
+        skill_path.parent.name for skill_path in sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md"))
+    }
+
+    for path in sorted((REPO_ROOT / ".github" / "agents").glob("internal-*.agent.md")):
+        content = path.read_text(encoding="utf-8")
+        declared_skills = extract_markdown_h2_section(content, "## Declared Skills")
+        assert declared_skills is not None, f"Missing declared skills section for {path}"
+
+        for line in declared_skills.splitlines():
+            match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", line)
+            if not match:
+                continue
+            skill_name = match.group(1)
+            assert skill_name in available_skills, (
+                f"Declared skill {skill_name} in {path} does not resolve to "
+                ".github/skills/<name>/SKILL.md"
+            )
 
 
 def test_sync_plan_detects_root_agents_conflict(tmp_path: Path) -> None:

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import PurePosixPath
 import re
 import sys
 from dataclasses import dataclass
@@ -39,13 +40,14 @@ LEGACY_SKILL_IDENTIFIER = "internal-skill-development"
 @dataclass
 class ValidationReport:
     errors: list[str]
+    warnings: list[str]
 
     @property
     def valid(self) -> bool:
         return not self.errors
 
     def to_dict(self) -> dict[str, object]:
-        return {"valid": self.valid, "errors": self.errors}
+        return {"valid": self.valid, "errors": self.errors, "warnings": self.warnings}
 
 
 def parse_args() -> argparse.Namespace:
@@ -80,6 +82,15 @@ def extract_frontmatter_name(text: str) -> str:
     if not match:
         return ""
     return match.group(1).strip().strip("\"'")
+
+
+def extract_frontmatter_apply_to(text: str) -> list[str]:
+    match = re.search(r"^applyTo:\s*(.+)$", text, re.M)
+    if not match:
+        return []
+
+    raw_value = match.group(1).strip().strip("\"'")
+    return [pattern.strip() for pattern in raw_value.split(",") if pattern.strip()]
 
 
 def extract_markdown_h2_section(text: str, heading: str) -> str | None:
@@ -157,6 +168,64 @@ def extract_inventory_paths() -> list[str]:
     return sorted(set(inventory_paths))
 
 
+def instruction_files() -> list[Path]:
+    instructions_dir = REPO_ROOT / ".github" / "instructions"
+    if not instructions_dir.exists():
+        return []
+    return sorted(instructions_dir.glob("*.instructions.md"))
+
+
+def count_file_lines(path: Path) -> int:
+    return len(read_text(path).splitlines())
+
+
+def instruction_load_samples() -> list[str]:
+    return [
+        ".github/workflows/ci.yml",
+        ".github/actions/example/action.yml",
+        "Dockerfile",
+        "compose.yaml",
+        "infra/main.tf",
+        "infra/eng-azure-platform/main.tf",
+        "infra/eng-aws-platform/main.tf",
+        "infra/eng-gcp-platform/main.tf",
+    ]
+
+
+def matching_instructions_for_path(sample_path: str) -> list[tuple[str, int]]:
+    sample = PurePosixPath(sample_path)
+    matches: list[tuple[str, int]] = []
+
+    for instruction_path in instruction_files():
+        patterns = extract_frontmatter_apply_to(read_text(instruction_path))
+        if any(sample.match(pattern) for pattern in patterns):
+            matches.append((instruction_path.name, count_file_lines(instruction_path)))
+
+    return matches
+
+
+def build_instruction_load_warnings() -> list[str]:
+    warnings: list[str] = []
+
+    for sample_path in instruction_load_samples():
+        matches = matching_instructions_for_path(sample_path)
+        if len(matches) < 2:
+            continue
+
+        total_lines = sum(line_count for _name, line_count in matches)
+        if total_lines < 300:
+            continue
+
+        joined_names = ", ".join(name for name, _line_count in matches)
+        warnings.append(
+            "Instruction load hotspot for "
+            f"`{sample_path}`: {len(matches)} instructions / {total_lines} lines "
+            f"({joined_names})"
+        )
+
+    return warnings
+
+
 def validate_named_resources(errors: list[str]) -> None:
     skill_names: set[str] = set()
 
@@ -198,6 +267,9 @@ def validate_named_resources(errors: list[str]) -> None:
             errors.append(f"Missing frontmatter name: {agent_file}")
         elif is_internal_agent and name != expected:
             errors.append(f"Agent name mismatch: {expected} != {name}")
+
+        if not is_internal_agent:
+            continue
 
         for key in DEPRECATED_FRONTMATTER_KEYS:
             if re.search(rf"^{key}:\s*", text, re.M):
@@ -303,12 +375,14 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     normalize_mode(mode)
 
     errors: list[str] = []
+    warnings: list[str] = []
     validate_required_paths(errors)
     validate_named_resources(errors)
     validate_inventory(errors)
     validate_internal_sync_control_center_contract(errors)
     validate_legacy_skill_references(errors)
-    return ValidationReport(errors=errors)
+    warnings.extend(build_instruction_load_warnings())
+    return ValidationReport(errors=errors, warnings=warnings)
 
 
 def emit_report(report: ValidationReport, fmt: str, report_file: str | None) -> None:
@@ -321,9 +395,15 @@ def emit_report(report: ValidationReport, fmt: str, report_file: str | None) -> 
         return
 
     if report.valid:
+        if report.warnings:
+            warning_output = "\n".join(f"WARNING: {warning}" for warning in report.warnings) + "\n"
+            sys.stdout.write(warning_output)
+            if report_file:
+                Path(report_file).write_text(warning_output, encoding="utf-8")
         print("Validation passed.")
         if report_file:
-            Path(report_file).write_text("Validation passed.\n", encoding="utf-8")
+            with Path(report_file).open("a", encoding="utf-8") as handle:
+                handle.write("Validation passed.\n")
         return
 
     output = "\n".join(f"ERROR: {error}" for error in report.errors) + "\n"
