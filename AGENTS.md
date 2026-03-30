@@ -41,7 +41,11 @@ This file is for GitHub Copilot and AI assistants working in this repository.
   Examples: OU design, management-account responsibility split, delegated-admin placement, SCP exception model, org-wide StackSet rollout.
 - Use `internal-aws-platform-engineering` for tactical AWS platform engineering: service architecture, incident and bug analysis, remediation planning, runtime tradeoffs, and platform-team execution inside an established governance model.
   Examples: Lambda or ECS incident triage, VPC or DNS troubleshooting, workload cost or performance analysis, Terraform or rollout implementation guidance.
-- Use `internal-principal-cloud-azure` and `internal-principal-cloud-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
+- Use `internal-principal-cloud-azure-strategy` for strategic Azure platform and governance decisions: landing-zone shape, management-group and subscription boundaries, identity and policy operating model, resilience posture, cost-governance direction, and high-level process design.
+  Examples: landing-zone topology, subscription placement, RBAC operating model, policy placement, strategic resilience posture.
+- Use `internal-principal-cloud-azure` for tactical Azure platform engineering: service architecture, incident and bug analysis, remediation planning, runtime tradeoffs, and platform-team execution inside an established Azure strategy.
+  Examples: AKS or App Service incident triage, VNet or private connectivity troubleshooting, workload cost or performance analysis, Terraform or rollout implementation guidance.
+- Use `internal-principal-cloud-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
 
 #### Editing and Delivery
 - Use `internal-developer` for polyglot implementation work in Java, Node.js, Python, and Bash.
@@ -346,6 +350,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/agents/internal-code-review.agent.md`
 - `.github/agents/internal-developer.agent.md`
 - `.github/agents/internal-infrastructure.agent.md`
+- `.github/agents/internal-principal-cloud-azure-strategy.agent.md`
 - `.github/agents/internal-principal-cloud-azure.agent.md`
 - `.github/agents/internal-principal-cloud-gcp.agent.md`
 - `.github/agents/internal-quality-engineering.agent.md`
