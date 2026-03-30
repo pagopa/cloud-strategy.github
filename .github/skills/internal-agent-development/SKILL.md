@@ -31,6 +31,14 @@ Load these inputs before finalizing an internal agent:
 - `references/example-transformations.md` when you need before-and-after conversion examples
 - `references/review-checklist.md` before final validation or when reviewing an existing agent
 
+If the work is being routed through an existing agent, load that agent's `## Declared Skills` next and open the skill files that are directly relevant to the task before editing any target agent. Do not treat declared skills as optional background context when they govern the kind of resource being changed.
+
+Prefer role-based matching over identifier memorization:
+
+- When the selected agent is being used to create, revise, split, or normalize agents, load the declared skill that governs agent authoring before drafting or editing the target agent.
+- When the selected agent declares a research or documentation-verification skill and the task depends on current vendor guidance, load that skill before finalizing routing or domain claims.
+- When multiple declared skills are present, load the ones that directly constrain the artifact being changed before treating the rest as optional supporting context.
+
 ## Decision Gate
 
 Pick the right artifact before drafting:
@@ -62,23 +70,25 @@ Choose an agent only when the repository benefits from a stable command center o
 
 1. Define the operating role in one sentence.
    Use behavioral scope, not prestige language.
-2. Scan neighboring agents and trigger overlap.
+2. If the work is routed through an existing agent, read its `## Declared Skills` and load the skills that directly govern the task.
+   Treat those skills as part of the execution contract, not as optional follow-up reading.
+3. Scan neighboring agents and trigger overlap.
    Compare `description:` lines first. If two descriptions trigger on the same request, resolve the overlap before drafting.
-3. Decide whether the behavior belongs in an agent, a skill, or both.
+4. Decide whether the behavior belongs in an agent, a skill, or both.
    Extract reusable procedure into a skill if the draft starts becoming a playbook.
-4. Draft the `description:` before the body.
+5. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
-5. Translate capabilities into repo-local building blocks.
+6. Translate capabilities into repo-local building blocks.
    Map tool lists, expertise claims, and workflows into declared skills, role language, routing rules, and output expectations.
-6. Build a cohesive `## Declared Skills` list.
+7. Build a cohesive `## Declared Skills` list.
    Keep skills that reinforce the same operating role. Delete kitchen-sink additions.
-7. Write routing rules with a real boundary.
+8. Write routing rules with a real boundary.
    State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases.
-8. Add output expectations that match the role.
+9. Add output expectations that match the role.
    Ask what a successful response from this command center should reliably contain.
-9. Normalize imported patterns and remove runtime baggage.
+10. Normalize imported patterns and remove runtime baggage.
    Preserve the decision model; remove platform-specific frontmatter, command syntax, and UI-only metadata.
-10. Validate and de-duplicate.
+11. Validate and de-duplicate.
     Run repository validation and re-check whether the new agent makes another one redundant.
 
 ## Capability Translation Rules
@@ -138,6 +148,7 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Prestige-first descriptions that never say when the agent wins routing.
 - Imported agents copied almost verbatim with platform-specific frontmatter.
 - `## Declared Skills` as a dumping ground for unrelated capabilities.
+- Starting from the selected agent file alone and skipping the directly relevant declared skills that define how that agent should be applied.
 - Agent bodies that hide important constraints in long narrative prose.
 - Specialist agents that are really just long procedures and should be skills.
 - Command centers that own unrelated domains because splitting was deferred.
@@ -148,6 +159,7 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm the agent filename stem, frontmatter `name:`, and command identifier are identical.
 - Confirm the `description:` says when to use the agent instead of restating its workflow.
 - Confirm the agent includes `## Declared Skills` and that the list matches the intended reusable procedures.
+- Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
 - Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
