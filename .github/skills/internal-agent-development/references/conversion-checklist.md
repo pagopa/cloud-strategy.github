@@ -2,11 +2,41 @@
 
 Use this checklist when converting an upstream agent or agent-authoring pattern into a repository-owned internal agent.
 
-1. Preserve the underlying decision model or workflow value.
-2. Remove deprecated frontmatter such as `tools:`, `model:`, and `color:`.
-3. Rewrite the name into the canonical internal agent contract: `internal-<name>.agent.md`.
-4. Rewrite the `description:` so it explains when the internal agent should be selected.
-5. Add a `## Declared Skills` section that lists the exact canonical skill identifiers the agent is expected to use.
-6. Replace runtime-specific tool assumptions with repository-local files, skills, prompts, and validators.
-7. Check whether the converted content belongs in an agent body or should move into an internal skill.
-8. Remove weaker external aliases when the new internal agent clearly supersedes them.
+## Preserve
+
+1. Keep the underlying decision model or workflow value.
+2. Keep distinct routing boundaries that still matter in this repository.
+3. Keep output shape only when users benefit from that structure.
+4. Keep discovery logic only when it changes decisions, not when it is generic interviewing.
+
+## Rewrite
+
+1. Rename into the canonical internal contract: `internal-<name>.agent.md`.
+2. Rewrite the `description:` so it explains when the internal agent should be selected.
+3. Add a `## Declared Skills` section that lists exact canonical skill identifiers.
+4. Replace runtime-specific tool assumptions with repository-local files, skills, prompts, and validators.
+5. Convert expertise lists into routing rules, role focus, or output expectations.
+6. Convert multi-step command flows into `## Execution Workflow` only when recurring orchestration is core to the role.
+
+## Remove
+
+1. Deprecated frontmatter such as `tools:`, `model:`, and `color:`.
+2. UI-only metadata, slash-command syntax, or platform-specific tool catalogs.
+3. Marketing language, prestige claims, or generic "world-class expert" phrasing.
+4. Historical context that no longer affects routing or governance.
+5. Technology encyclopedias that belong in a skill or reference instead of an agent body.
+
+## Decide
+
+1. If most of the value is reusable procedure, strengthen or create a skill instead.
+2. If the imported role overlaps a current internal agent, merge or narrow the route.
+3. If one imported agent spans unrelated roles, split or extract instead of keeping a kitchen-sink rewrite.
+4. If the output stays vague after cleanup, the routing contract is still wrong.
+
+## Final Checks
+
+1. Confirm `## Declared Skills` is present and exact.
+2. Confirm the agent says when not to use it.
+3. Confirm output expectations are observable.
+4. Confirm the imported pattern no longer depends on external runtime behavior.
+5. Run repository validation before finishing.

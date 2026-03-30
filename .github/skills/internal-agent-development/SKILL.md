@@ -1,166 +1,151 @@
 ---
 name: internal-agent-development
-description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, modular skill composition, and cohesive command-center responsibilities. Use when adding or updating a `.github/agents/*.agent.md`, renaming agents to canonical internal identifiers, or splitting agents whose responsibilities no longer share one operating role.
+description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, explicit declared-skill contracts, reusable command-center patterns, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
 ---
 
 # Internal Agent Development
 
-Use this skill when designing or updating repository-owned agents.
+Use this skill when authoring or materially revising repository-owned agents in `.github/agents/`.
 
-## Purpose
+Use `openai-skill-creator` when the main output is a skill. Use `internal-skill-management` when deciding keep, refresh, replace, or retire outcomes across the catalog rather than improving one agent.
 
-This skill defines the current repository standard for building command-center agents for GitHub Copilot without deprecated frontmatter or runtime-specific assumptions.
+## Goals
 
-Use `openai-skill-creator` when the work is about writing or materially rewriting a skill. Use this skill when the output is an agent.
+- Build agents that are easy to route to.
+- Keep one cohesive operating role per agent.
+- Translate imported agent value into repo-local GitHub Copilot form.
+- Move reusable procedures into skills instead of bloating agent bodies.
+- Make declared-skill contracts explicit and reviewable.
 
-## Core repository inputs
+## Read First
 
-Read these assets before finalizing an internal agent:
+Load these inputs before finalizing an internal agent:
 
 - `AGENTS.md` for routing language and repository inventory
 - `.github/copilot-instructions.md` for the non-negotiable behavior layer
 - `.github/scripts/validate-copilot-customizations.sh` for canonical validation expectations
-- `references/agent-template.md` for the standard internal agent skeleton
-- `references/conversion-checklist.md` for normalizing imported or older agent patterns into the current repository standard
+- `references/agent-template.md` when drafting a new agent from scratch
+- `references/conversion-checklist.md` when normalizing an imported or legacy agent
+- `references/design-patterns.md` when broadening, splitting, or strengthening an agent
+- `references/example-transformations.md` when you need before-and-after conversion examples
+- `references/review-checklist.md` before final validation or when reviewing an existing agent
 
-## Agent Design Rules
+## Decision Gate
+
+Pick the right artifact before drafting:
+
+| Need | Prefer |
+| --- | --- |
+| Named operating role with routing responsibility | Agent |
+| Reusable procedure, checklist, or domain workflow | Skill |
+| Short repeatable drafting aid | Prompt |
+| File-type or stack-wide coding rule | Instruction |
+
+Choose an agent only when the repository benefits from a stable command center or specialist persona. If the draft is mostly procedure, move the procedure into a skill and keep the agent short.
+
+## Non-Negotiable Agent Contract
 
 - Frontmatter must contain `name:` and `description:` only.
 - `name:` must match the filename stem exactly.
-- Internal agent files must use the canonical pattern `internal-<agent-name>.agent.md`.
-- The `description:` must explain when the agent should be selected.
-- The body should define role, declared skills, routing rules, and output expectations.
-- Every agent must include a `## Declared Skills` section.
-- The `## Declared Skills` section is the explicit skill contract for the agent.
-- List each skill by its exact canonical identifier in backticks, one per bullet.
-- Do not rely on narrative references alone when an agent is expected to use a skill.
-- Keep the agent cohesive around orchestration and decision-making. Put long reusable procedures into skills, but do not split an agent purely to minimize file size or token count when one operating role still holds.
-- Never use deprecated agent frontmatter such as `tools:`, `model:`, or `color:`.
+- Repository-owned agents must use the canonical pattern `internal-<agent-name>.agent.md`.
+- `description:` is the routing contract and should start with `Use this agent when ...`.
+- Every agent must include `## Declared Skills`.
+- `## Declared Skills` is the explicit skill contract. List exact canonical skill identifiers, one per bullet, in backticks.
+- Every agent must explain both positive routing and at least one meaningful boundary.
+- Every agent must define `## Output Expectations`.
+- Add `## Skill Usage Contract` only when the agent is a broader command center whose declared skills are used conditionally.
+- Keep long reusable workflows in skills, not in the agent body.
+- Never use deprecated frontmatter such as `tools:`, `model:`, or `color:`.
 
-## File structure
+## Authoring Workflow
 
-Use this structure:
+1. Define the operating role in one sentence.
+   Use behavioral scope, not prestige language.
+2. Scan neighboring agents and trigger overlap.
+   Compare `description:` lines first. If two descriptions trigger on the same request, resolve the overlap before drafting.
+3. Decide whether the behavior belongs in an agent, a skill, or both.
+   Extract reusable procedure into a skill if the draft starts becoming a playbook.
+4. Draft the `description:` before the body.
+   If the routing sentence is vague, the rest of the agent will stay vague.
+5. Translate capabilities into repo-local building blocks.
+   Map tool lists, expertise claims, and workflows into declared skills, role language, routing rules, and output expectations.
+6. Build a cohesive `## Declared Skills` list.
+   Keep skills that reinforce the same operating role. Delete kitchen-sink additions.
+7. Write routing rules with a real boundary.
+   State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases.
+8. Add output expectations that match the role.
+   Ask what a successful response from this command center should reliably contain.
+9. Normalize imported patterns and remove runtime baggage.
+   Preserve the decision model; remove platform-specific frontmatter, command syntax, and UI-only metadata.
+10. Validate and de-duplicate.
+    Run repository validation and re-check whether the new agent makes another one redundant.
 
-```markdown
----
-name: internal-example
-description: Use this agent when ...
----
+## Capability Translation Rules
 
-# Internal Example
+When learning from richer upstream agents, keep the signal and drop the scaffolding.
 
-## Role
+- Translate tool lists into skills or repo inputs, not frontmatter.
+- Translate expertise lists into routing rules, role focus, or output expectations.
+- Translate multi-step workflows into a short execution order only when the agent truly orchestrates a recurring command-center flow.
+- Translate exhaustive question banks into a few high-value discovery priorities unless the branching logic is unique and reusable.
+- Translate platform-specific setup or deployment details into repo-local references only if this repository actually needs them.
+- Keep only examples that clarify routing or output shape; move broader examples into references.
 
-You are ...
+## Cohesion and Splitting
 
-## Declared Skills
+Split an agent when one file mixes disjoint operating roles, conflicting instructions, or different winning routes.
 
-- `internal-skill-a`
-- `external-skill-b`
+Good reasons to split:
 
-## Routing Rules
+- The same agent tries to own both governance and delivery.
+- The routing sentence needs `and/or` across unrelated domains.
+- The declared skills fall into separate clusters with different triggers.
+- Different outcomes are expected by different users.
 
-- Use this agent when ...
-- Do not use this agent when ...
+Do not split only because the file is long. First ask whether the reusable procedure belongs in a skill.
 
-## Output Expectations
+## Command-Center Heuristics
 
-- Scope or objective
-- Main risks or constraints
-- Recommended next action
-```
+A strong internal agent usually has:
 
-Do not invent extra frontmatter or hidden runtime fields.
-The `## Declared Skills` section is mandatory for repository-owned agents.
+- a precise routing sentence
+- a short role statement that defines its operating stance
+- a declared skill list that matches the role
+- routing boundaries against nearby agents
+- output expectations that make success observable
 
-## Description design
-
-The `description:` line is the routing contract.
-
-- Start with `Use this agent when ...`
-- Describe the situations where the command center should be selected
-- Mention boundaries when ambiguity is likely
-- Keep it behavioral, not language-specific, unless the agent is intentionally provider-specific
-
-Weak descriptions describe prestige, expertise, or generic capability. Strong descriptions describe selection conditions.
-
-## Command-Center Pattern
-
-Use an agent when the repository benefits from a named orchestration role such as:
-
-- CI/CD command center
-- Copilot governance command center
-- principal cloud strategist for a provider
-- code review gate
-- architecture lead
-
-Do not create a new agent when a prompt plus a skill already gives enough routing clarity.
-
-## Cohesion Standard
-
-- Prefer cohesive command-center agents over artificially tiny agents.
-- A broader agent is acceptable when its declared skills reinforce the same recurring workflow or decision surface.
-- Split an agent when its responsibilities are disjoint, routing becomes ambiguous, or its instructions would conflict across tasks.
-- Keep reusable procedures inside skills so the agent can stay modular even when the role is broad.
-
-## Agent authoring workflow
-
-1. Define the exact operating role and what command center problem it solves.
-2. Check whether the repository already has an agent, prompt, or skill that should own the intent.
-3. Pick the canonical name and file path.
-4. Draft the `description:` for routing before writing the body.
-5. Build a cohesive declared skill list. A broader list is acceptable when every skill reinforces the same operating role; avoid kitchen-sink mixtures of unrelated duties.
-6. Write routing rules that make the selection boundaries obvious.
-7. Validate naming, references, and overlap before finishing.
+Load `references/design-patterns.md` when deciding how much workflow, discovery, or governance logic belongs in the agent body.
 
 ## Imported Pattern Normalization
 
-When adapting an external or older agent-authoring pattern:
+When adapting external agents:
 
-1. Preserve the useful conceptual guidance.
-2. Remove runtime-specific instructions and deprecated frontmatter.
-3. Rewrite the naming rules to this repository's `internal-*` contract.
-4. Replace tool-specific assumptions with repo-local references and validations.
-5. Drop historical context that no longer affects current routing.
-6. Keep examples and templates only if they still map cleanly to GitHub Copilot behavior.
+1. Keep the useful mental model or decision sequence.
+2. Delete runtime-specific frontmatter and tool catalog details.
+3. Rewrite naming into the canonical `internal-*` contract.
+4. Replace platform assumptions with repo-local files, prompts, skills, and validations.
+5. Convert broad expertise claims into concrete routing or output rules.
+6. Remove historical or marketing language that does not change selection behavior.
 
-## Splitting Rule
-
-Split an agent when one file is trying to do more than one of these at once:
-
-- CI/CD delivery
-- Copilot catalog governance
-- architecture strategy
-- implementation delivery
-- provider-specific cloud strategy
-
-Prefer separate command centers only when the responsibilities are disjoint or the routing boundaries become unclear. Do not split purely to chase smaller files if one cohesive agent still maps to a recurring workflow.
-
-## Principal Cloud Agent Pattern
-
-For principal cloud agents:
-
-- start with architecture and operating-model analysis
-- include bug and incident triage responsibilities
-- end with tactical next steps, not just high-level advice
-- combine provider knowledge with cross-cutting skills such as networking, performance, code review, and IaC
+Load `references/example-transformations.md` if you need side-by-side conversion examples.
 
 ## Anti-Patterns
 
-- Deprecated frontmatter keys
-- Agents that just restate a skill body
-- Runtime-specific tool instructions in repository-facing agents
-- Agent bodies that only imply skill usage in prose without a `## Declared Skills` section
-- Overloaded platform agents with unrelated governance and delivery duties
-- Agent names that repeat `agent` in both the canonical identifier and the `.agent.md` suffix
-- Bodies that never explain when not to use the agent
-- Command centers that own both catalog governance and unrelated delivery work
+- Prestige-first descriptions that never say when the agent wins routing.
+- Imported agents copied almost verbatim with platform-specific frontmatter.
+- `## Declared Skills` as a dumping ground for unrelated capabilities.
+- Agent bodies that hide important constraints in long narrative prose.
+- Specialist agents that are really just long procedures and should be skills.
+- Command centers that own unrelated domains because splitting was deferred.
+- Output sections that say nothing measurable about a successful response.
 
 ## Validation
 
 - Confirm the agent filename stem, frontmatter `name:`, and command identifier are identical.
 - Confirm the `description:` says when to use the agent instead of restating its workflow.
 - Confirm the agent includes `## Declared Skills` and that the list matches the intended reusable procedures.
+- Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
+- Use `references/review-checklist.md` for a final pass when the change broadens scope or imports external patterns.
 - Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` after changes that affect agent naming or inventory.
