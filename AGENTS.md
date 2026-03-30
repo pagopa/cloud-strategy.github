@@ -37,7 +37,9 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 #### Planning and Architecture
 - Use `internal-architect` for strategic software and platform architecture decisions.
 - Use `internal-pair-architect-analysis` prompt with the `internal-pair-architect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
-- Use `internal-principal-cloud-aws`, `internal-principal-cloud-azure`, and `internal-principal-cloud-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
+- Use `internal-aws-org-governance` for strategic AWS organization governance: org structure, payer and management-account boundaries, delegated administration, SCP and IAM operating model, StackSets across the organization, and high-level process design.
+- Use `internal-aws-platform-engineering` for tactical AWS platform engineering: service architecture, incident and bug analysis, remediation planning, runtime tradeoffs, and platform-team execution inside an established governance model.
+- Use `internal-principal-cloud-azure` and `internal-principal-cloud-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
 
 #### Editing and Delivery
 - Use `internal-developer` for polyglot implementation work in Java, Node.js, Python, and Bash.
@@ -336,11 +338,12 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 - `.github/agents/internal-ai-resource-creator.agent.md`
 - `.github/agents/internal-architect.agent.md`
+- `.github/agents/internal-aws-org-governance.agent.md`
+- `.github/agents/internal-aws-platform-engineering.agent.md`
 - `.github/agents/internal-cicd.agent.md`
 - `.github/agents/internal-code-review.agent.md`
 - `.github/agents/internal-developer.agent.md`
 - `.github/agents/internal-infrastructure.agent.md`
-- `.github/agents/internal-principal-cloud-aws.agent.md`
 - `.github/agents/internal-principal-cloud-azure.agent.md`
 - `.github/agents/internal-principal-cloud-gcp.agent.md`
 - `.github/agents/internal-quality-engineering.agent.md`
