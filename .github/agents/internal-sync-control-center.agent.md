@@ -33,7 +33,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflo
 - Do not preserve fallback assets, compatibility aliases, or deprecated variants unless `AGENTS.md` explicitly requires them.
 - Do not introduce new prefixes, naming schemes, or external asset families unless the user explicitly expands scope.
 - Do not leave stale references in `AGENTS.md`, `.github/agents/README.md`, prompts, skills, agents, instructions, or scripts after catalog changes.
-- Keep agents focused on routing and orchestration. Move reusable procedures into skills.
+- Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
 - When `.github/copilot-instructions.md` is created or materially revised, use `awesome-copilot-instructions-blueprint-generator` as the default blueprinting skill before final repo-specific alignment.

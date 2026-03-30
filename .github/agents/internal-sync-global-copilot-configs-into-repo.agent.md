@@ -10,6 +10,8 @@ Analyze a local target repository, select the minimum Copilot customization asse
 
 ## Declared Skills
 - `internal-sync-global-copilot-configs-into-repo`
+- `internal-copilot-audit`
+- `internal-copilot-docs-research`
 - `awesome-copilot-instructions-blueprint-generator`
 - `internal-agents-md-bridge`
 
@@ -25,6 +27,8 @@ Analyze a local target repository, select the minimum Copilot customization asse
 ## Routing
 - Use this agent only for cross-repository Copilot-core alignment work.
 - Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the single workflow definition.
+- Use `internal-copilot-audit` when source-side overlap, hollow references, or bridge drift affect the baseline you plan to propagate.
+- When source or target decisions depend on current GitHub Copilot or MCP behavior, validate them through `internal-copilot-docs-research` before updating policy files.
 - Treat `.github/scripts/internal-sync-copilot-configs.py` as the deterministic execution path.
 - Start with `plan` mode and move to `apply` only on explicit request and only when the plan is conflict-safe.
 - When the target sync includes root guidance files, refresh the dedicated `awesome-copilot-instructions-blueprint-generator` skill before updating target `.github/copilot-instructions.md`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.

@@ -111,6 +111,8 @@ These rules apply to all repository resources, including prompts, skills, instru
 - prompt frontmatter formatting
 - skill section structure
 - agent body wording beyond the required `## Declared Skills` contract
+- agent cohesion, routing breadth, and declared-skill breadth beyond the required explicit skill contract
+- exact one-to-one mapping between preferred skills and specific agents
 - inventory wording details
 - cross-link completeness between resources
 

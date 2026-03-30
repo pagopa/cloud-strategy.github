@@ -127,10 +127,12 @@ When refreshing an installed external-prefixed skill:
 
 When an agent is turning into a knowledge dump:
 
-1. Keep the agent focused on routing, scope, and orchestration.
+1. Keep the agent cohesive around routing, scope, and orchestration.
 2. Move long reusable procedures into an internal skill.
 3. Point the agent at that skill explicitly.
 4. Keep the skill reusable outside the single current task.
+
+Apply the same standard when broadening an agent: keep the operating role cohesive, and do not split purely to minimize file size or token count.
 
 This is the preferred pattern for `internal-sync-control-center`.
 
