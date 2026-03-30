@@ -8,6 +8,7 @@ Use this checklist before finalizing a new or revised internal agent.
 - Could a reader tell when this agent wins over neighboring agents?
 - Does the agent include at least one real negative boundary?
 - Is the route behavioral rather than prestige-based?
+- If the agent works in a fast-moving vendor domain, does the route make current-documentation verification visible?
 
 ## Cohesion
 
@@ -28,6 +29,7 @@ Use this checklist before finalizing a new or revised internal agent.
 - Does `## Output Expectations` make success observable?
 - Are the expected outputs specific to the role?
 - Would a reviewer know what is missing from a weak response?
+- For architecture specialists, do outputs make requirement gaps, tradeoffs, or evidence-backed facts visible?
 
 ## Imported Pattern Normalization
 

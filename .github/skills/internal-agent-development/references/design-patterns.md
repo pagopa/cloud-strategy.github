@@ -6,12 +6,30 @@ It distills reusable patterns from richer external agents without carrying over 
 
 ## Table of Contents
 
+- Docs-first specialist
 - Discovery-first specialist
+- Requirement gate and decision lens
 - Capability-to-skill translation
 - Command-center workflow
 - Negative boundaries
 - Output contracts
 - Split vs extract
+
+## Docs-First Specialist
+
+Use this pattern when the domain changes quickly and the agent is expected to recommend provider-specific services, limits, or best practices.
+
+Good docs-first characteristics:
+
+- the route says the agent should confirm current official guidance before finalizing recommendations
+- tool-specific vendor search is translated into a repo-local research skill or a routing rule about official documentation or configured MCP sources
+- the final answer separates documented facts from inferred recommendations
+
+Bad docs-first characteristics:
+
+- copied tool ids or runtime wiring in frontmatter
+- claims about "latest guidance" with no evidence or verification rule
+- provider-specific commands embedded in the agent body
 
 ## Discovery-First Specialist
 
@@ -25,6 +43,24 @@ Keep only the discovery priorities that materially improve decisions:
 - recommend the next action in the correct order
 
 Do not copy long question banks into the agent body. If the questioning logic is reusable and detailed, move it into a skill or prompt.
+
+## Requirement Gate and Decision Lens
+
+Use this pattern when an external specialist is strong because it asks for the right inputs and evaluates options through a stable framework.
+
+Keep the requirement gate compact:
+
+- performance, scale, or availability targets
+- security, compliance, or residency constraints
+- budget or cost posture
+- operational maturity or ownership boundaries
+- integration or migration constraints
+
+Translate large framework matrices into a short decision lens:
+
+- state which dimension is being optimized
+- state the main tradeoff explicitly
+- keep the lens in routing rules or output expectations instead of copying long handbooks
 
 ## Capability-to-Skill Translation
 

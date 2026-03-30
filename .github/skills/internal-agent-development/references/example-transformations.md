@@ -155,3 +155,63 @@ Skill owns:
 ### Smell
 
 If the agent body reads like a long handbook, it is probably a skill pretending to be an agent.
+
+## Example 4: Provider Architect with Tool Catalog to Evidence-First Internal Cloud Agent
+
+### Situation
+
+An imported cloud architect agent has:
+
+- vendor-specific MCP or documentation tools in frontmatter
+- a large best-practice checklist
+- a framework matrix such as Well-Architected pillars
+- a long list of clarifying questions
+
+### Keep
+
+- the docs-first decision model
+- the critical requirement gate
+- the expected tradeoff-heavy output shape
+
+### Rewrite
+
+- move tool dependencies into repo-local research skills or routing rules about official documentation
+- turn the framework matrix into a short decision lens in routing rules or output expectations
+- compress the clarifying questions into a short list of critical constraints
+- keep the route focused on when the provider-specific agent wins
+
+### Internal Pattern
+
+```markdown
+---
+name: internal-example-cloud
+description: Use this agent when the task needs provider-specific architecture guidance backed by current official guidance.
+---
+
+# Internal Example Cloud
+
+## Role
+
+You are the provider-specific cloud command center for architecture tradeoffs, incident diagnosis, and tactical next steps.
+
+## Declared Skills
+
+- `internal-provider-research`
+- `internal-pair-architect`
+- `awesome-copilot-cloud-design-patterns`
+
+## Routing Rules
+
+- Clarify the critical requirements first: scale, resilience, compliance, budget, and operating constraints.
+- Confirm current provider facts with official documentation before finalizing recommendations.
+- State the main tradeoff explicitly across security, reliability, performance, cost, or operations.
+- Do not use this agent when the question is still provider-agnostic; prefer `internal-architect`.
+
+## Output Expectations
+
+- Requirement gaps or confirmed constraints
+- Confirmed provider facts or documented patterns
+- Main tradeoff
+- Main risks
+- Recommended next action
+```

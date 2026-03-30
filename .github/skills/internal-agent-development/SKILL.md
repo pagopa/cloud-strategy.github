@@ -16,6 +16,7 @@ Use `openai-skill-creator` when the main output is a skill. Use `internal-skill-
 - Translate imported agent value into repo-local GitHub Copilot form.
 - Move reusable procedures into skills instead of bloating agent bodies.
 - Make declared-skill contracts explicit and reviewable.
+- Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without copying runtime-specific tool wiring.
 
 ## Read First
 
@@ -85,7 +86,10 @@ Choose an agent only when the repository benefits from a stable command center o
 When learning from richer upstream agents, keep the signal and drop the scaffolding.
 
 - Translate tool lists into skills or repo inputs, not frontmatter.
+- Translate vendor documentation tools or MCP endpoints into docs-first routing rules or dedicated research skills, not copied tool catalogs.
 - Translate expertise lists into routing rules, role focus, or output expectations.
+- Translate framework pillars or evaluation matrices into a short decision lens in routing rules or output expectations.
+- Translate long clarification question banks into a compact list of critical requirements that must be confirmed before strong recommendations.
 - Translate multi-step workflows into a short execution order only when the agent truly orchestrates a recurring command-center flow.
 - Translate exhaustive question banks into a few high-value discovery priorities unless the branching logic is unique and reusable.
 - Translate platform-specific setup or deployment details into repo-local references only if this repository actually needs them.
