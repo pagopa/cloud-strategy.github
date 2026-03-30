@@ -18,7 +18,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflo
 - `internal-skill-management`
 - `internal-copilot-audit`
 - `internal-agent-development`
-- `internal-skill-development`
+- `openai-skill-creator`
 - `internal-copilot-docs-research`
 - `internal-agents-md-bridge`
 - `awesome-copilot-instructions-blueprint-generator`
