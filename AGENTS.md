@@ -132,6 +132,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `internal-sync-global-copilot-configs-into-repo`: deterministic sync planning and reporting.
 - `internal-pr-editor`: PR body templates and diff-to-body mapping patterns.
 - `internal-cloud-policy`: reusable cloud policy authoring patterns.
+- `internal-aws-control-plane-governance`: principal-level AWS organization, delegated-admin, SCP, IAM, and StackSets control-plane strategy.
+- `internal-aws-mcp-research`: AWS-docs and AWS MCP-first research workflow for current AWS guidance and safe IAM inspection.
 - `internal-devops-core-principles`: DevOps operating model, CALMS, and DORA-driven delivery guidance.
 - `internal-performance-optimization`: cross-stack profiling and performance decision framework.
 - `internal-kubernetes-deployment`: production Kubernetes deployment and rollout guidance.
@@ -269,6 +271,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-sql-optimization/SKILL.md`
 - `.github/skills/internal-agent-development/SKILL.md`
 - `.github/skills/internal-agents-md-bridge/SKILL.md`
+- `.github/skills/internal-aws-control-plane-governance/SKILL.md`
+- `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cicd-workflow/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
