@@ -98,11 +98,12 @@ When learning from richer upstream agents, keep the signal and drop the scaffold
 - Translate tool lists into skills or repo inputs, not frontmatter.
 - Translate vendor documentation tools or MCP endpoints into docs-first routing rules or dedicated research skills, not copied tool catalogs.
 - Translate expertise lists into routing rules, role focus, or output expectations.
-- Translate framework pillars or evaluation matrices into a short decision lens in routing rules or output expectations.
+- Translate framework pillars or evaluation matrices into a compact but explicit decision lens. Keep the named dimensions when they help users reason, compare options, or understand tradeoffs quickly.
 - Translate long clarification question banks into a compact list of critical requirements that must be confirmed before strong recommendations.
-- Translate multi-step workflows into a short execution order only when the agent truly orchestrates a recurring command-center flow.
+- Preserve ordered execution flow when the upstream agent is genuinely easier to use because it sequences the work well. A clear `## Execution Workflow` is often worth keeping for architecture, governance, investigation, or rollout agents.
 - Translate exhaustive question banks into a few high-value discovery priorities unless the branching logic is unique and reusable.
 - Translate platform-specific setup or deployment details into repo-local references only if this repository actually needs them.
+- Preserve strong response organization when it improves operator usability. If an upstream agent is effective because it has a clear requirement gate, decision lens, and response structure, keep those advantages in repo-local form instead of compressing them away.
 - Keep only examples that clarify routing or output shape; move broader examples into references.
 
 ## Cohesion and Splitting
@@ -128,6 +129,13 @@ A strong internal agent usually has:
 - routing boundaries against nearby agents
 - output expectations that make success observable
 
+Many strong specialist agents also benefit from:
+
+- an explicit decision lens that names the evaluation dimensions
+- a compact requirement gate that prevents weak assumptions
+- an execution workflow when ordered reasoning materially improves answer quality
+- a response shape that makes evidence, tradeoffs, and next steps easy to scan
+
 Load `references/design-patterns.md` when deciding how much workflow, discovery, or governance logic belongs in the agent body.
 
 ## Imported Pattern Normalization
@@ -141,6 +149,8 @@ When adapting external agents:
 5. Convert broad expertise claims into concrete routing or output rules.
 6. Remove historical or marketing language that does not change selection behavior.
 
+Do not over-compress a well-structured upstream agent. If its strength comes from a clear requirement gate, decision lens, execution order, or response structure, preserve those patterns in repo-local form instead of reducing everything to flat bullets.
+
 Load `references/example-transformations.md` if you need side-by-side conversion examples.
 
 ## Anti-Patterns
@@ -149,6 +159,7 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Imported agents copied almost verbatim with platform-specific frontmatter.
 - `## Declared Skills` as a dumping ground for unrelated capabilities.
 - Starting from the selected agent file alone and skipping the directly relevant declared skills that define how that agent should be applied.
+- Preserving the route but throwing away the upstream agent's best structure, leaving a compliant internal agent that is harder to use and less decisive.
 - Agent bodies that hide important constraints in long narrative prose.
 - Specialist agents that are really just long procedures and should be skills.
 - Command centers that own unrelated domains because splitting was deferred.
@@ -161,6 +172,7 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm the agent includes `## Declared Skills` and that the list matches the intended reusable procedures.
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
 - Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
+- Confirm the final internal agent preserved the strongest usable structure from the source pattern when that structure improved requirement discovery, tradeoff analysis, or response quality.
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
 - Use `references/review-checklist.md` for a final pass when the change broadens scope or imports external patterns.
