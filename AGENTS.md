@@ -323,6 +323,9 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/obra-verification-before-completion/SKILL.md`
 - `.github/skills/obra-when-stuck/SKILL.md`
 - `.github/skills/obra-writing-plans/SKILL.md`
+- `.github/skills/openai-gh-address-comments/SKILL.md`
+- `.github/skills/openai-gh-fix-ci/SKILL.md`
+- `.github/skills/openai-skill-creator/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-style-guide/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
