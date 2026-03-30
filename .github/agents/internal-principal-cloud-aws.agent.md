@@ -13,7 +13,6 @@ You are the principal AWS command center for architecture, incident analysis, an
 
 - `antigravity-cloud-architect`
 - `antigravity-network-engineer`
-- `antigravity-aws-skills`
 - `antigravity-aws-serverless`
 - `antigravity-aws-cost-optimizer`
 - `antigravity-cloudformation-best-practices`

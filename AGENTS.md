@@ -28,7 +28,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### When to use each agent
 
 #### Installed agents
-- Use `internal-ai-resource-development` for creating or refining repository-owned Copilot agents, skills, prompts, and instructions when the task is focused on authoring one resource rather than synchronizing the whole catalog.
+- Use `internal-ai-resource-creator` for creating or refining repository-owned Copilot agents, skills, prompts, and instructions when the task is focused on authoring one resource rather than synchronizing the whole catalog.
 - Use `internal-sync-control-center` for governing the managed `.github/` Copilot catalog in this repository: use repo state as the starting point for drift analysis, refresh declared approved external assets, enforce origin-based naming, consolidate overlapping skills, retire obsolete catalog entries, and keep downstream governance files including `.github/copilot-instructions.md` and root `AGENTS.md` aligned with the catalog.
   This command center absorbs the former standalone Copilot-governance role.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
@@ -212,7 +212,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
 - `.github/skills/antigravity-aws-penetration-testing/SKILL.md`
 - `.github/skills/antigravity-aws-serverless/SKILL.md`
-- `.github/skills/antigravity-aws-skills/SKILL.md`
 - `.github/skills/antigravity-backend-architect/SKILL.md`
 - `.github/skills/antigravity-bash-pro/SKILL.md`
 - `.github/skills/antigravity-clean-code/SKILL.md`
@@ -331,7 +330,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Agents
 
-- `.github/agents/internal-ai-resource-development.agent.md`
+- `.github/agents/internal-ai-resource-creator.agent.md`
 - `.github/agents/internal-architect.agent.md`
 - `.github/agents/internal-cicd.agent.md`
 - `.github/agents/internal-code-review.agent.md`

@@ -1,9 +1,9 @@
 ---
-name: internal-ai-resource-development
+name: internal-ai-resource-creator
 description: Use this agent when creating or refining repository-owned Copilot agents, skills, prompts, or instructions and the task needs focused authoring rather than full catalog synchronization or retirement governance.
 ---
 
-# Internal AI Resource Development
+# Internal AI Resource Creator
 
 ## Role
 
