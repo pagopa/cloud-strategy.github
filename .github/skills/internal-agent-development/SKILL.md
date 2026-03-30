@@ -55,8 +55,9 @@ Choose an agent only when the repository benefits from a stable command center o
 ## Non-Negotiable Agent Contract
 
 - Frontmatter must contain `name:` and `description:` only.
-- `name:` must match the filename stem exactly.
-- Repository-owned agents must use the canonical pattern `internal-<agent-name>.agent.md`.
+- Repository-owned internal agents must have a `name:` that matches the filename stem exactly.
+- Repository-owned agents that are intentionally non-internal may use a different `name:` when their route, origin, or compatibility contract requires it.
+- Repository-owned internal agents must use the canonical pattern `internal-<agent-name>.agent.md`.
 - `description:` is the routing contract and should start with `Use this agent when ...`.
 - Every agent must include `## Declared Skills`.
 - `## Declared Skills` is the explicit skill contract. List exact canonical skill identifiers, one per bullet, in backticks.
@@ -168,6 +169,8 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 ## Validation
 
 - Confirm the agent filename stem, frontmatter `name:`, and command identifier are identical.
+- Confirm internal agents keep filename stem, frontmatter `name:`, and command identifier identical.
+- Confirm any intentionally non-internal agent has an explicit reason to keep a different external-facing `name:`.
 - Confirm the `description:` says when to use the agent instead of restating its workflow.
 - Confirm the agent includes `## Declared Skills` and that the list matches the intended reusable procedures.
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.

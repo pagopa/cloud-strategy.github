@@ -193,9 +193,10 @@ def validate_named_resources(errors: list[str]) -> None:
         text = read_text(agent_file)
         name = extract_frontmatter_name(text)
         expected = agent_file.name[: -len(".agent.md")]
+        is_internal_agent = expected.startswith("internal-")
         if not name:
             errors.append(f"Missing frontmatter name: {agent_file}")
-        elif name != expected:
+        elif is_internal_agent and name != expected:
             errors.append(f"Agent name mismatch: {expected} != {name}")
 
         for key in DEPRECATED_FRONTMATTER_KEYS:
