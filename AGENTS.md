@@ -55,6 +55,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Composition and Handoffs
 
 - For changes spanning multiple domains, combine the installed agent with the matching repository prompt and skill rather than referencing legacy missing agents.
+- Prefer cohesive command-center agents over artificially tiny agents.
+- Split an agent only when responsibilities are disjoint, routing becomes ambiguous, or the instructions would conflict across tasks.
 
 ## Governance References
 
@@ -136,6 +138,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `internal-agent-development`: repository-owned agent creation and agent-splitting guidance.
 - `internal-agents-md-bridge`: lightweight `AGENTS.md` bridge design to `.github/copilot-instructions.md`.
 - `internal-copilot-audit`: catalog overlap, hollow-reference, and bridge-quality auditing.
+- `internal-copilot-docs-research`: official GitHub Copilot documentation and MCP-aware research workflow for validating customization decisions.
 - `internal-skill-development`: repository-owned skill creation, evaluation, and trigger-hardening guidance.
 - `internal-skill-management`: catalog import, deduplication, normalization, and lifecycle governance.
 - `internal-terraform`: unified Terraform skill for features and modules.
@@ -273,6 +276,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-composite-action/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
+- `.github/skills/internal-copilot-docs-research/SKILL.md`
 - `.github/skills/internal-data-registry/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`

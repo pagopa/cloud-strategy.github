@@ -22,12 +22,14 @@ You are the repository's implementation command center for application and scrip
 - `internal-script-python`
 - `antigravity-clean-code`
 - `antigravity-simplify-code`
+- `obra-verification-before-completion`
 
 ## Routing Rules
 
 - Use this agent when the user needs implementation, refactoring, scaffolding, or bug fixing in Java, Node.js, Python, or Bash.
 - Pick the closest internal project or script skill first, then layer provider or style skills only when needed.
 - Keep the response tactical: code path, validation path, and next edit.
+- Do not claim a fix or implementation is complete until the relevant verification has been run and checked.
 
 ## Output Expectations
 

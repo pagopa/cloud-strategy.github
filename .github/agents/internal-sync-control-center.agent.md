@@ -19,6 +19,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflo
 - `internal-copilot-audit`
 - `internal-agent-development`
 - `internal-skill-development`
+- `internal-copilot-docs-research`
 - `internal-agents-md-bridge`
 - `awesome-copilot-instructions-blueprint-generator`
 
@@ -201,6 +202,7 @@ When repository state drifts from the declared governance contract, treat the dr
 - Use this agent when creating, refreshing, renaming, consolidating, or retiring `.github/` Copilot assets in this repository.
 - Use this agent when the task is about catalog coherence, naming normalization, overlap removal, governance drift, or repo-owned replacements.
 - Use this agent when declared approved external-prefixed assets need to be refreshed, reduced, or normalized without expanding scope.
+- When a governance change depends on current GitHub Copilot or MCP platform behavior, validate it through `internal-copilot-docs-research` before hardening the repo policy.
 - Treat `sync` as `apply` by default unless the user explicitly asks for an audit, plan, or dry run.
 - Do not use this agent for one-resource authoring when `internal-ai-resource-development` is sufficient.
 - Do not use this agent for target-repository baseline propagation.

@@ -1,6 +1,6 @@
 ---
 name: internal-agent-development
-description: Create, refine, split, or realign repository-owned Copilot agents with focused routing, concise system prompts, and command-center responsibilities. Use when adding or updating a `.github/agents/*.agent.md`, renaming agents to canonical internal identifiers, or splitting broad agents into narrower command centers.
+description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, modular skill composition, and cohesive command-center responsibilities. Use when adding or updating a `.github/agents/*.agent.md`, renaming agents to canonical internal identifiers, or splitting agents whose responsibilities no longer share one operating role.
 ---
 
 # Internal Agent Development
@@ -34,7 +34,7 @@ Read these assets before finalizing an internal agent:
 - The `## Declared Skills` section is the explicit skill contract for the agent.
 - List each skill by its exact canonical identifier in backticks, one per bullet.
 - Do not rely on narrative references alone when an agent is expected to use a skill.
-- Keep the agent focused on orchestration and decision-making. Put long reusable procedures into skills.
+- Keep the agent cohesive around orchestration and decision-making. Put long reusable procedures into skills, but do not split an agent purely to minimize file size or token count when one operating role still holds.
 - Never use deprecated agent frontmatter such as `tools:`, `model:`, or `color:`.
 
 ## File structure
@@ -96,13 +96,20 @@ Use an agent when the repository benefits from a named orchestration role such a
 
 Do not create a new agent when a prompt plus a skill already gives enough routing clarity.
 
+## Cohesion Standard
+
+- Prefer cohesive command-center agents over artificially tiny agents.
+- A broader agent is acceptable when its declared skills reinforce the same recurring workflow or decision surface.
+- Split an agent when its responsibilities are disjoint, routing becomes ambiguous, or its instructions would conflict across tasks.
+- Keep reusable procedures inside skills so the agent can stay modular even when the role is broad.
+
 ## Agent authoring workflow
 
 1. Define the exact operating role and what command center problem it solves.
 2. Check whether the repository already has an agent, prompt, or skill that should own the intent.
 3. Pick the canonical name and file path.
 4. Draft the `description:` for routing before writing the body.
-5. Build a narrow declared skill list instead of a kitchen-sink list.
+5. Build a cohesive declared skill list. A broader list is acceptable when every skill reinforces the same operating role; avoid kitchen-sink mixtures of unrelated duties.
 6. Write routing rules that make the selection boundaries obvious.
 7. Validate naming, references, and overlap before finishing.
 
@@ -127,7 +134,7 @@ Split an agent when one file is trying to do more than one of these at once:
 - implementation delivery
 - provider-specific cloud strategy
 
-Prefer two narrow command centers over one overloaded "platform" agent.
+Prefer separate command centers only when the responsibilities are disjoint or the routing boundaries become unclear. Do not split purely to chase smaller files if one cohesive agent still maps to a recurring workflow.
 
 ## Principal Cloud Agent Pattern
 
