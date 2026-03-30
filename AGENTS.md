@@ -45,7 +45,10 @@ This file is for GitHub Copilot and AI assistants working in this repository.
   Examples: landing-zone topology, subscription placement, RBAC operating model, policy placement, strategic resilience posture.
 - Use `internal-azure-platform-engineering` for tactical Azure platform engineering: service architecture, incident and bug analysis, remediation planning, runtime tradeoffs, and platform-team execution inside an established Azure strategy.
   Examples: AKS or App Service incident triage, VNet or private connectivity troubleshooting, workload cost or performance analysis, Terraform or rollout implementation guidance.
-- Use `internal-principal-cloud-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
+- Use `internal-gcp-platform-strategy` for strategic GCP platform and governance decisions: organization and folder structure, project boundaries, identity and policy operating model, resilience posture, cost-governance direction, and high-level process design.
+  Examples: organization topology, project placement, IAM operating model, policy placement, strategic resilience posture.
+- Use `internal-gcp-platform-engineering` for tactical GCP platform engineering: service architecture, incident and bug analysis, remediation planning, runtime tradeoffs, and platform-team execution inside an established GCP strategy.
+  Examples: GKE or Cloud Run incident triage, VPC or private connectivity troubleshooting, workload cost or performance analysis, Terraform or rollout implementation guidance.
 
 #### Editing and Delivery
 - Use `internal-developer` for polyglot implementation work in Java, Node.js, Python, and Bash.
@@ -352,7 +355,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/agents/internal-infrastructure.agent.md`
 - `.github/agents/internal-azure-platform-strategy.agent.md`
 - `.github/agents/internal-azure-platform-engineering.agent.md`
-- `.github/agents/internal-principal-cloud-gcp.agent.md`
+- `.github/agents/internal-gcp-platform-strategy.agent.md`
+- `.github/agents/internal-gcp-platform-engineering.agent.md`
 - `.github/agents/internal-quality-engineering.agent.md`
 - `.github/agents/internal-sync-control-center.agent.md`
 - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
