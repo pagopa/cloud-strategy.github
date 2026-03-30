@@ -38,7 +38,9 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - Use `internal-architect` for strategic software and platform architecture decisions.
 - Use `internal-pair-architect-analysis` prompt with the `internal-pair-architect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
 - Use `internal-aws-org-governance` for strategic AWS organization governance: org structure, payer and management-account boundaries, delegated administration, SCP and IAM operating model, StackSets across the organization, and high-level process design.
+  Examples: OU design, management-account responsibility split, delegated-admin placement, SCP exception model, org-wide StackSet rollout.
 - Use `internal-aws-platform-engineering` for tactical AWS platform engineering: service architecture, incident and bug analysis, remediation planning, runtime tradeoffs, and platform-team execution inside an established governance model.
+  Examples: Lambda or ECS incident triage, VPC or DNS troubleshooting, workload cost or performance analysis, Terraform or rollout implementation guidance.
 - Use `internal-principal-cloud-azure` and `internal-principal-cloud-gcp` for provider-specific principal cloud analysis that goes from architecture review to bug triage and tactical next steps.
 
 #### Editing and Delivery
