@@ -32,6 +32,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflo
 - Within an approved family, only the resources explicitly declared in this file are in scope by default. Do not add siblings just because an upstream repository has them or because they happen to exist on disk.
 - Do not preserve fallback assets, compatibility aliases, or deprecated variants unless `AGENTS.md` explicitly requires them.
 - Do not introduce new prefixes, naming schemes, or external asset families unless the user explicitly expands scope.
+- When a managed `openai/skills` asset is declared below, install or refresh only the mapped skills into `.github/skills/` using the required `openai-` prefix. Do not keep unprefixed copies or add sibling OpenAI skills unless the user explicitly expands scope.
 - Do not leave stale references in `AGENTS.md`, `.github/agents/README.md`, prompts, skills, agents, instructions, or scripts after catalog changes.
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
@@ -141,6 +142,19 @@ Managed skills:
 - `terraform-search-import` -> `terraform-terraform-search-import`
 - `terraform-style-guide` -> `terraform-terraform-style-guide`
 - `terraform-test` -> `terraform-terraform-test`
+
+### `openai/skills`
+
+Source repositories:
+
+- Curated skills: `https://github.com/openai/skills/tree/main/skills/.curated`
+- System skills: `https://github.com/openai/skills/tree/main/skills/.system`
+
+Managed skills:
+
+- `gh-address-comments` -> `openai-gh-address-comments`
+- `gh-fix-ci` -> `openai-gh-fix-ci`
+- `skill-creator` -> `openai-skill-creator`
 
 ### `sickn33/antigravity-awesome-skills`
 
