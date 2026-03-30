@@ -194,9 +194,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 ### Instructions
 
 - `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
-- `.github/instructions/awesome-copilot-containerization-docker-best-practices.instructions.md`
 - `.github/instructions/awesome-copilot-copilot-sdk-python.instructions.md`
-- `.github/instructions/awesome-copilot-github-actions-ci-cd-best-practices.instructions.md`
 - `.github/instructions/awesome-copilot-go.instructions.md`
 - `.github/instructions/awesome-copilot-instructions.instructions.md`
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
@@ -204,7 +202,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/instructions/awesome-copilot-shell.instructions.md`
 - `.github/instructions/awesome-copilot-springboot.instructions.md`
 - `.github/instructions/awesome-copilot-terraform-azure.instructions.md`
-- `.github/instructions/awesome-copilot-terraform.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
 - `.github/instructions/internal-github-action-composite.instructions.md`
