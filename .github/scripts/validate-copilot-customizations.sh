@@ -24,6 +24,16 @@ SUPPORTED_SCOPES = {"root", "all"}
 SUPPORTED_MODES = {"strict", "basic", "legacy-compatible"}
 DEPRECATED_FRONTMATTER_KEYS = ("tools", "model", "color")
 DEPRECATED_AGENT_SECTION_HEADINGS = ("## Primary Skill Stack",)
+INTERNAL_SYNC_CONTROL_CENTER_AGENT = Path(".github/agents/internal-sync-control-center.agent.md")
+INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS = {
+    "internal-skill-management",
+    "internal-copilot-audit",
+    "internal-agent-development",
+    "internal-copilot-docs-research",
+    "internal-agents-md-bridge",
+    "awesome-copilot-instructions-blueprint-generator",
+}
+LEGACY_SKILL_IDENTIFIER = "internal-skill-development"
 
 
 @dataclass
@@ -103,6 +113,20 @@ def extract_declared_skills(text: str) -> list[str] | None:
     declared_skills: list[str] = []
     for raw_line in section.splitlines():
         match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", raw_line)
+        if match:
+            declared_skills.append(match.group(1))
+
+    return declared_skills
+
+
+def extract_skill_usage_contract(text: str) -> list[str] | None:
+    section = extract_markdown_h2_section(text, "## Skill Usage Contract")
+    if section is None:
+        return None
+
+    declared_skills: list[str] = []
+    for raw_line in section.splitlines():
+        match = re.fullmatch(r"\s*-\s+`([^`]+)`:\s+.+", raw_line)
         if match:
             declared_skills.append(match.group(1))
 
@@ -216,6 +240,63 @@ def validate_required_paths(errors: list[str]) -> None:
         errors.append("Legacy .github/AGENTS.md exists; root AGENTS.md must be canonical.")
 
 
+def validate_internal_sync_control_center_contract(errors: list[str]) -> None:
+    agent_path = REPO_ROOT / INTERNAL_SYNC_CONTROL_CENTER_AGENT
+    if not agent_path.exists():
+        return
+
+    text = read_text(agent_path)
+    declared_skills = extract_declared_skills(text) or []
+    skill_usage_contract = extract_skill_usage_contract(text)
+
+    if skill_usage_contract is None:
+        errors.append(
+            f"Missing `## Skill Usage Contract` section: {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
+        )
+        skill_usage_contract = []
+
+    for skill_name in declared_skills:
+        if skill_name not in skill_usage_contract:
+            errors.append(
+                "Declared skill "
+                f"`{skill_name}` missing from `## Skill Usage Contract`: {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
+            )
+
+    missing_required_skills = sorted(
+        INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS - set(declared_skills)
+    )
+    for skill_name in missing_required_skills:
+        errors.append(
+            f"Required declared skill `{skill_name}` missing from {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
+        )
+
+    if "Governance files reviewed" not in text:
+        errors.append(
+            "Missing `Governance files reviewed` output requirement in "
+            f"{INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
+        )
+
+    if ".github/copilot-instructions.md" not in text or "root `AGENTS.md`" not in text:
+        errors.append(
+            "Missing explicit governance-review language for `.github/copilot-instructions.md` "
+            f"and root `AGENTS.md` in {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
+        )
+
+
+def validate_legacy_skill_references(errors: list[str]) -> None:
+    files_to_check = [
+        REPO_ROOT / "AGENTS.md",
+        REPO_ROOT / ".github" / "copilot-instructions.md",
+    ]
+    files_to_check.extend(sorted((REPO_ROOT / ".github" / "agents").glob("*.agent.md")))
+
+    for path in files_to_check:
+        if not path.exists():
+            continue
+        if LEGACY_SKILL_IDENTIFIER in read_text(path):
+            errors.append(f"Legacy skill reference `{LEGACY_SKILL_IDENTIFIER}` found in {path}")
+
+
 def build_report(scope: str, mode: str) -> ValidationReport:
     normalize_scope(scope)
     normalize_mode(mode)
@@ -224,6 +305,8 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     validate_required_paths(errors)
     validate_named_resources(errors)
     validate_inventory(errors)
+    validate_internal_sync_control_center_contract(errors)
+    validate_legacy_skill_references(errors)
     return ValidationReport(errors=errors)
 
 

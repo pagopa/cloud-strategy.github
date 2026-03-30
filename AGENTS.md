@@ -29,7 +29,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 #### Installed agents
 - Use `internal-ai-resource-development` for creating or refining repository-owned Copilot agents, skills, prompts, and instructions when the task is focused on authoring one resource rather than synchronizing the whole catalog.
-- Use `internal-sync-control-center` for governing the managed `.github/` Copilot catalog in this repository: use repo state as the starting point for drift analysis, refresh declared approved external assets, enforce origin-based naming, consolidate overlapping skills, retire obsolete catalog entries, and align downstream governance files.
+- Use `internal-sync-control-center` for governing the managed `.github/` Copilot catalog in this repository: use repo state as the starting point for drift analysis, refresh declared approved external assets, enforce origin-based naming, consolidate overlapping skills, retire obsolete catalog entries, and keep downstream governance files including `.github/copilot-instructions.md` and root `AGENTS.md` aligned with the catalog.
   This command center absorbs the former standalone Copilot-governance role.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.
 - Use `internal-cicd` for CI/CD workflows, composite actions, release automation, and deployment-pipeline design.
@@ -139,7 +139,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `internal-agents-md-bridge`: lightweight `AGENTS.md` bridge design to `.github/copilot-instructions.md`.
 - `internal-copilot-audit`: catalog overlap, hollow-reference, and bridge-quality auditing.
 - `internal-copilot-docs-research`: official GitHub Copilot documentation and MCP-aware research workflow for validating customization decisions.
-- `internal-skill-development`: repository-owned skill creation, evaluation, and trigger-hardening guidance.
+- `openai-skill-creator`: canonical skill creation, evaluation, and trigger-hardening guidance for this repository.
 - `internal-skill-management`: catalog import, deduplication, normalization, and lifecycle governance.
 - `internal-terraform`: unified Terraform skill for features and modules.
 - `internal-pair-architect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
@@ -289,7 +289,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
-- `.github/skills/internal-skill-development/SKILL.md`
 - `.github/skills/internal-skill-management/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`

@@ -11,7 +11,7 @@ Use this skill when designing or updating repository-owned agents.
 
 This skill defines the current repository standard for building command-center agents for GitHub Copilot without deprecated frontmatter or runtime-specific assumptions.
 
-Use `internal-skill-development` when the work is about writing a skill. Use this skill when the output is an agent.
+Use `openai-skill-creator` when the work is about writing or materially rewriting a skill. Use this skill when the output is an agent.
 
 ## Core repository inputs
 

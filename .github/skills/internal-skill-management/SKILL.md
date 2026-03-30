@@ -9,7 +9,7 @@ Use this skill for source-side governance of `.github/skills/`. It is the operat
 
 Use the current repository state as evidence and starting context, but keep decisions anchored to the declared governance contract in the relevant agent and root governance files.
 
-Use `internal-skill-development` when drafting or iterating the content of one specific skill.
+Use `openai-skill-creator` when drafting or iterating the content of one specific skill.
 
 ## Goals
 
@@ -27,6 +27,7 @@ Use `internal-skill-development` when drafting or iterating the content of one s
 3. Prefer consolidation over coexistence when two skills compete for the same trigger space.
 4. Repair broken references only when the skill still adds distinct value.
 5. Update downstream governance immediately after catalog changes.
+6. When catalog changes touch managed resources or their references, re-check `.github/copilot-instructions.md` and root `AGENTS.md` in the same workflow and update them whenever drift or stale routing remains.
 
 ## Classification Matrix
 
@@ -84,7 +85,7 @@ Rules:
 
 When the decision is to create or improve one specific skill:
 
-1. Use `internal-skill-development` for the authoring and evaluation loop.
+1. Use `openai-skill-creator` for the authoring and evaluation loop.
 2. Return here to confirm the new or changed skill still belongs in the catalog.
 3. Re-check overlap, naming, references, and downstream governance after the draft is ready.
 
@@ -166,5 +167,5 @@ When this skill is used from `internal-sync-control-center`:
 1. Audit the catalog.
 2. Decide keep, refresh, replace, extract, or retire.
 3. Apply the catalog changes.
-4. Update dependent governance artifacts.
+4. Re-check `.github/copilot-instructions.md` and root `AGENTS.md`, then update dependent governance artifacts.
 5. Run repository validation.
