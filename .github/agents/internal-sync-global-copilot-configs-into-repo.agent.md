@@ -1,6 +1,7 @@
 ---
 description: Propagate the shared Copilot baseline from this standards repo into a consumer repo. Keep `.github/copilot-instructions.md` as the primary policy layer and keep root `AGENTS.md` intentionally light as a bridge that routes assistants to the Copilot-owned configuration.
 name: internal-sync-global-copilot-configs-into-repo
+tools: ["read", "edit", "search", "execute", "web", "agent"]
 ---
 
 # Internal Sync Copilot Configs Agent

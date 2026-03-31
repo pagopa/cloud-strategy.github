@@ -42,7 +42,7 @@ These files are always synced regardless of detected stacks:
 - `copilot-code-review-instructions.md`
 - `security-baseline.md`
 - `DEPRECATION.md`
-- `scripts/validate-copilot-customizations.sh`
+- `scripts/validate-copilot-customizations.py`
 
 ## Stack-to-asset mapping
 The sync script detects stacks dynamically and selects assets accordingly:
@@ -98,4 +98,4 @@ These assets exist only in this standards repository:
 ## Validation
 - `python -m compileall .github/scripts tests`
 - `pytest` for the sync test suite.
-- `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
+- `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`

@@ -25,7 +25,7 @@ An imported agent has:
 
 - make `description:` say when the route wins
 - turn expertise bullets into routing priorities or output expectations
-- normalize copied tool ids to canonical aliases or omit `tools:` when explicit scoping is unnecessary
+- normalize copied tool ids to canonical aliases and declare a short explicit `tools:` contract
 
 ### Internal Pattern
 
@@ -166,7 +166,7 @@ An imported cloud architect agent has:
 
 ### Rewrite
 
-- move stale tool dependencies into repo-local research skills, routing rules about official documentation, or a short current `tools:` list when explicit scoping still matters
+- move stale tool dependencies into repo-local research skills, routing rules about official documentation, or a short current `tools:` list that stays explicit and role-shaped
 - turn the framework matrix into a short decision lens in routing rules or output expectations
 - compress the clarifying questions into a short list of critical constraints
 - keep the route focused on when the provider-specific agent wins

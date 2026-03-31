@@ -101,7 +101,7 @@ These apply to every code change, regardless of language or technology:
 - Terraform: `terraform fmt` and `terraform validate`.
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
-- Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).
+- Run `scripts/validate-copilot-customizations.py` for customization changes (or `.github/scripts/...` in `.github` layout).
 - If a referenced validation entrypoint is absent in the current repository, explicitly report that gap and run the closest existing verification instead.
 
 ## Repository-specific context

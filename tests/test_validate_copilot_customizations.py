@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR_PATH = REPO_ROOT / ".github" / "scripts" / "validate-copilot-customizations.sh"
+VALIDATOR_PATH = REPO_ROOT / ".github" / "scripts" / "validate-copilot-customizations.py"
 
 
 def load_validator_module():
@@ -92,6 +92,7 @@ def test_build_report_accepts_agent_with_preferred_optional_skills(tmp_path: Pat
         """---
 name: internal-example
 description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal Example
@@ -127,6 +128,7 @@ def test_build_report_accepts_agent_without_skill_guidance_section(tmp_path: Pat
         """---
 name: internal-example
 description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal Example
@@ -190,12 +192,44 @@ You are the example command center.
     assert report.errors == []
 
 
+def test_build_report_rejects_internal_agent_without_tools(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert "Missing required frontmatter key `tools:` in" in "\n".join(report.errors)
+
+
 def test_build_report_rejects_retired_agent_frontmatter(tmp_path: Path) -> None:
     build_minimal_repo(
         tmp_path,
         """---
 name: internal-example
 description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
 infer: false
 ---
 
@@ -228,6 +262,7 @@ def test_build_report_rejects_unknown_preferred_optional_skill(tmp_path: Path) -
         """---
 name: internal-example
 description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal Example

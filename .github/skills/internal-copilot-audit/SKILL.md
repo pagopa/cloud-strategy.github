@@ -54,12 +54,13 @@ Flag an asset when:
 
 Flag a repository-owned internal agent when:
 
+- it omits `tools:` and therefore relies on implicit all-tools access instead of the repository's explicit tool-contract policy for internal agents
 - its prompt or routing rules depend on explicit least-privilege or MCP-only behavior, but the frontmatter never declares the corresponding `tools:` or `mcp-servers:` contract
 - it copies legacy product-specific tool ids such as `terminalCommand`, `search/codebase`, `search/searchResults`, `search/usages`, `edit/editFiles`, `execute/runInTerminal`, `web/fetch`, or `read/problems` when canonical aliases such as `execute`, `search`, `edit`, `web`, or `read` would express the intent more clearly
 - it names MCP tools without `server/tool` or `server/*` namespacing
-- it carries a long copied tool catalog even though omitting `tools:` or using a short canonical alias list would be clearer
+- it carries a long copied tool catalog even though a short canonical alias list would be clearer
 
-Do not flag omitted `tools:` by itself. In current GitHub Copilot custom agents, omission means all available tools remain enabled.
+Current GitHub Copilot custom agents allow omitted `tools:` and would then expose all available tools, but repository-owned internal agents in this repository must not rely on that implicit fallback.
 
 Do not flag legacy tool catalogs inside imported non-`internal-*` assets unless the task is explicitly to refresh, replace, or fork that import.
 

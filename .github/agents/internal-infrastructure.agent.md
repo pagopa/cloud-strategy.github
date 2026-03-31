@@ -1,6 +1,7 @@
 ---
 name: internal-infrastructure
 description: Use this agent for infrastructure delivery across Terraform, Docker, Kubernetes, networking, and cloud platform administration when the task needs an IaC and operations command center.
+tools: ["read", "edit", "search", "execute", "web", "agent"]
 ---
 
 # Internal Infrastructure

@@ -35,7 +35,7 @@ MANAGED_ALWAYS = (
     ".github/security-baseline.md",
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",
-    ".github/scripts/validate-copilot-customizations.sh",
+    ".github/scripts/validate-copilot-customizations.py",
 )
 SOURCE_ONLY_AGENT_PATHS = {
     ".github/agents/internal-ai-resource-development.agent.md",
@@ -1426,7 +1426,7 @@ def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[s
         commands.append("python -m compileall <changed_python_paths>")
         if repo_has_pytest_tests(analysis.repo_root):
             commands.append("pytest")
-    commands.append("python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict")
+    commands.append("python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict")
     return commands
 
 
@@ -2010,7 +2010,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         ".github/security-baseline.md",
         ".github/DEPRECATION.md",
         ".github/repo-profiles.yml",
-        ".github/scripts/validate-copilot-customizations.sh",
+        ".github/scripts/validate-copilot-customizations.py",
     ]
 
     lines: list[str] = [

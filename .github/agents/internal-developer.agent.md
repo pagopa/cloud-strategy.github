@@ -1,6 +1,7 @@
 ---
 name: internal-developer
 description: Use this agent for polyglot implementation work across Java, Node.js, Python, and Bash when the task needs a command center that can route to the right project or script skill and carry changes through validation.
+tools: ["read", "edit", "search", "execute", "web", "agent"]
 ---
 
 # Internal Developer

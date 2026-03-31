@@ -1,6 +1,7 @@
 ---
 name: internal-sync-control-center
 description: Use this agent when governing or synchronizing the Copilot customization catalog in this repository. Use the current repo state as the starting point for drift analysis, but treat the governance contract declared here and in `AGENTS.md` as the canonical scope over time, remove obsolete overlap instead of keeping fallbacks, and align downstream governance after catalog changes.
+tools: ["read", "edit", "search", "execute", "web", "agent"]
 ---
 
 # Internal Sync Control Center
@@ -177,7 +178,7 @@ Managed skills:
 - This agent file, including the managed resource map above
 - Root `AGENTS.md` for routing, naming, and inventory
 - `.github/copilot-instructions.md` for non-negotiable policy
-- `.github/scripts/validate-copilot-customizations.sh` for structural validation
+- `.github/scripts/validate-copilot-customizations.py` for structural validation
 - The actual `.github/` catalog on disk as audit input and execution target
 
 When repository state drifts from the declared governance contract, treat the drift as a finding to resolve instead of silently redefining policy from disk.

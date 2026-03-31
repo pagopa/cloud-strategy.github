@@ -34,4 +34,4 @@ Use this prompt to create or modify Terraform modules/components while keeping t
 ## Validation
 - Run `terraform fmt` on changed files.
 - Run `terraform validate` in the affected module/root.
-- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
+- Run `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`.

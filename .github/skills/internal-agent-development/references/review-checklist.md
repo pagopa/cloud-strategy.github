@@ -33,8 +33,9 @@ Use this checklist before finalizing a new or revised internal agent.
 ## Imported Pattern Normalization
 
 - Have retired frontmatter keys such as `infer:` and `color:` been removed?
+- Does the repository-owned internal agent declare `tools:` explicitly?
 - If the agent declares `tools:`, does it use canonical aliases or explicit MCP namespaces?
-- If the agent omits `tools:`, is that omission intentional?
+- Is the `tools:` list role-shaped rather than an implicit or copied all-tools contract?
 - Have broad expertise claims been translated into routing or output rules?
 - Has UI-only or platform-only content been deleted?
 - Is the converted content now repo-local and reusable?
@@ -44,7 +45,7 @@ Use this checklist before finalizing a new or revised internal agent.
 - Does the filename stem match frontmatter `name:`?
 - Do all referenced local files exist?
 - Does the agent avoid making a neighboring agent redundant?
-- Has `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` been run?
+- Has `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict` been run?
 
 ## Red Flags
 

@@ -1,6 +1,7 @@
 ---
 name: internal-azure-platform-strategy
 description: Use this agent for strategic Azure platform and governance decisions: landing-zone shape, management-group and subscription boundaries, identity and policy operating model, resilience posture, cost-governance direction, and high-level platform process design backed by current Microsoft guidance.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal Azure Platform Strategy

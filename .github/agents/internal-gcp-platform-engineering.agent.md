@@ -1,6 +1,7 @@
 ---
 name: internal-gcp-platform-engineering
 description: Use this agent for tactical GCP platform engineering work: service architecture, incident and bug diagnosis, remediation planning, runtime tradeoffs, and platform-team execution guidance inside an established GCP strategy backed by current Google Cloud guidance.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal GCP Platform Engineering

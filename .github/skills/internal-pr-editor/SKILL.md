@@ -51,7 +51,7 @@ If the user provides a specification, issue, or acceptance outline:
 ## Minimal example
 - Input:
   - title: "Harden Copilot validator"
-  - changed_files: ".github/scripts/validate-copilot-customizations.sh, .github/workflows/github-validate-copilot-customizations.yml"
+  - changed_files: ".github/scripts/validate-copilot-customizations.py, .github/workflows/github-validate-copilot-customizations.yml"
   - validation: "bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh"
 - Expected output: Complete PR body with all required template sections and concise change bullets.
 

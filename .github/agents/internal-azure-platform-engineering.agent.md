@@ -1,6 +1,7 @@
 ---
 name: internal-azure-platform-engineering
 description: Use this agent for tactical Azure platform engineering work: service architecture, incident and bug diagnosis, remediation planning, runtime tradeoffs, and platform-team execution guidance inside an established Azure strategy backed by current Microsoft guidance.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal Azure Platform Engineering

@@ -78,7 +78,7 @@ description: Use this agent when the repository needs ...
 
 - `## Skill Usage Contract` is optional. Add it only when the agent owns conditional use of multiple declared skills.
 - `## Core Rules` is optional. Add it when the agent governs policy, scope, or sync behavior.
-- Add `tools:` only when explicit tool scoping improves safety, portability, or clarity. Prefer canonical aliases such as `read`, `edit`, `search`, `execute`, `agent`, and `web`.
-- If `tools:` is omitted, the agent keeps access to all available tools in current GitHub Copilot custom agents.
+- Repository-owned internal agents should declare `tools:` explicitly. Prefer canonical aliases such as `read`, `edit`, `search`, `execute`, `agent`, and `web`.
+- Keep `tools:` short and role-shaped instead of copying long product-specific tool catalogs.
 - If you can remove a section without losing routing clarity, remove it.
 - `description:` should describe selection conditions, not prestige or generic expertise.

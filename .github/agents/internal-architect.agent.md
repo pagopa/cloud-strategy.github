@@ -1,6 +1,7 @@
 ---
 name: internal-architect
 description: Use this agent for architecture strategy, change-impact analysis, bounded-context design, and API or platform tradeoff decisions when the repository needs a principal-level software architect.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal Architect

@@ -2,9 +2,9 @@
 """Validate core Copilot customization invariants for this repository.
 
 Usage examples:
-  python3 .github/scripts/validate-copilot-customizations.sh
-  python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict
-  python3 .github/scripts/validate-copilot-customizations.sh --report json
+  python3 .github/scripts/validate-copilot-customizations.py
+  python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict
+  python3 .github/scripts/validate-copilot-customizations.py --report json
 """
 
 from __future__ import annotations
@@ -98,6 +98,10 @@ def extract_frontmatter_apply_to(text: str) -> list[str]:
 
     raw_value = match.group(1).strip().strip("\"'")
     return [pattern.strip() for pattern in raw_value.split(",") if pattern.strip()]
+
+
+def has_frontmatter_key(text: str, key: str) -> bool:
+    return re.search(rf"^{re.escape(key)}:\s*", text, re.M) is not None
 
 
 def extract_markdown_h2_section(text: str, heading: str) -> str | None:
@@ -281,6 +285,9 @@ def validate_named_resources(errors: list[str]) -> None:
 
         if not is_internal_agent:
             continue
+
+        if not has_frontmatter_key(text, "tools"):
+            errors.append(f"Missing required frontmatter key `tools:` in {agent_file}")
 
         for key in RETIRED_FRONTMATTER_KEYS:
             if re.search(rf"^{key}:\s*", text, re.M):

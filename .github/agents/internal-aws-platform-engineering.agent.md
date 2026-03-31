@@ -1,6 +1,7 @@
 ---
 name: internal-aws-platform-engineering
 description: Use this agent for tactical AWS platform engineering work: service architecture, incident analysis, remediation planning, runtime tradeoffs, and platform-team delivery guidance inside an established AWS governance model.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal AWS Platform Engineering

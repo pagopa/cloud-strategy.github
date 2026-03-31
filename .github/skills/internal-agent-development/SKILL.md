@@ -26,7 +26,7 @@ Load these inputs before finalizing an internal agent:
 
 - `AGENTS.md` for routing language and repository inventory
 - `.github/copilot-instructions.md` for the non-negotiable behavior layer
-- `.github/scripts/validate-copilot-customizations.sh` for canonical validation expectations
+- `.github/scripts/validate-copilot-customizations.py` for canonical validation expectations
 - `references/agent-template.md` when drafting a new agent from scratch
 - `references/conversion-checklist.md` when normalizing an imported or legacy agent
 - `references/design-patterns.md` when broadening, splitting, or strengthening an agent
@@ -62,9 +62,10 @@ Choose an agent only when the repository benefits from a stable command center o
 - Repository-owned internal agents must use the canonical pattern `internal-<agent-name>.agent.md`.
 - `description:` is the routing contract and should start with `Use this agent when ...`.
 - Keep `name:` and `description:` in every repository-owned internal agent even though GitHub Copilot treats `name:` as optional.
-- Add optional frontmatter only when it materially changes tool scope, environment behavior, selection behavior, or execution model.
-- `tools:` is optional. If it is omitted, GitHub Copilot exposes all available tools to the agent.
+- Repository-owned internal agents must declare `tools:` explicitly. Do not rely on GitHub Copilot's implicit all-tools behavior for internal agents in this repository.
+- Add other optional frontmatter only when it materially changes environment behavior, selection behavior, or execution model.
 - When `tools:` is present, prefer canonical aliases such as `read`, `edit`, `search`, `execute`, `agent`, and `web`, plus explicit MCP namespaces such as `github/*`, `playwright/*`, `server/tool`, or `server/*`.
+- Keep `tools:` short and role-shaped. Prefer one deliberate contract per agent family instead of copied kitchen-sink catalogs.
 - Do not cargo-cult legacy product-specific tool ids such as `terminalCommand`, `search/codebase`, `search/searchResults`, `search/usages`, `edit/editFiles`, `execute/runInTerminal`, `web/fetch`, or `read/problems` into repository-owned internal agents.
 - Use `target:` only when the agent should behave differently between GitHub Copilot on GitHub.com and IDE environments.
 - Use `mcp-servers:` only when the agent truly needs agent-local MCP server configuration; do not add it as decoration.
@@ -95,7 +96,7 @@ Choose an agent only when the repository benefits from a stable command center o
 5. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
 6. Choose the frontmatter strategy intentionally.
-   Decide whether `tools:` should be omitted, kept narrow with canonical aliases, or expanded with MCP namespaces. Add `target:`, `mcp-servers:`, or model-selection properties only when they change real behavior.
+   Define the explicit `tools:` contract first using canonical aliases and the smallest role-shaped set. Add `target:`, `mcp-servers:`, or model-selection properties only when they change real behavior.
 7. Translate capabilities into repo-local building blocks.
    Map expertise claims, workflow logic, and any remaining tool dependencies into declared skills, role language, routing rules, output expectations, and a deliberate frontmatter contract.
 8. If a skill-list section will help the agent, build a cohesive one.
@@ -113,9 +114,9 @@ Choose an agent only when the repository benefits from a stable command center o
 
 When learning from richer upstream agents, keep the signal and drop the scaffolding.
 
-- Translate copied legacy tool catalogs into either a short modern `tools:` contract with canonical aliases or into skills and repo inputs when explicit tool scoping is unnecessary.
+- Translate copied legacy tool catalogs into a short modern `tools:` contract with canonical aliases.
 - Translate vendor documentation tools or MCP endpoints into docs-first routing rules, dedicated research skills, or explicit MCP namespaces only when the agent truly depends on those tools.
-- Keep `tools:` only when least-privilege, curated MCP access, or clearer cross-environment behavior materially improves the agent contract. Otherwise omit it.
+- Keep `tools:` explicit and least-privilege for every repository-owned internal agent.
 - Translate governance or trust patterns into concrete approval rules, audit expectations, and routing boundaries instead of framework-specific policy code.
 - Translate expertise lists into routing rules, role focus, or output expectations.
 - Translate framework pillars or evaluation matrices into a compact but explicit decision lens. Keep the named dimensions when they help users reason, compare options, or understand tradeoffs quickly.
@@ -191,7 +192,8 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Treating preferred or optional skills as a fake platform-enforced toolchain or as an origin-based priority ladder.
 - Preserving the route but throwing away the upstream agent's best structure, leaving a compliant internal agent that is harder to use and less decisive.
 - Treating `tools:` or `model:` as deprecated in current GitHub Copilot custom agents.
-- Copying multi-screen tool lists from older examples instead of normalizing them to canonical aliases or omitting them intentionally.
+- Copying multi-screen tool lists from older examples instead of normalizing them to canonical aliases and an explicit minimal contract.
+- Relying on implicit all-tools access instead of declaring the internal agent's actual tool contract.
 - Using retired frontmatter such as `infer:` or unsupported decoration such as `color:`.
 - Agent bodies that hide important constraints in long narrative prose.
 - Specialist agents that are really just long procedures and should be skills.
@@ -204,8 +206,9 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm internal agents keep filename stem, frontmatter `name:`, and command identifier identical.
 - Confirm any intentionally non-internal agent has an explicit reason to keep a different external-facing `name:`.
 - Confirm the `description:` says when to use the agent instead of restating its workflow.
+- Confirm `tools:` exists in every repository-owned internal agent.
 - Confirm any explicit `tools:` list uses canonical aliases or MCP namespaces and that the scope is intentional.
-- Confirm omitted `tools:` is an intentional choice rather than an outdated assumption that tools must be removed.
+- Confirm the `tools:` list is role-shaped and does not rely on implicit all-tools access.
 - Confirm retired `infer:` is absent and that `disable-model-invocation` or `user-invocable` is used when selection behavior needs control.
 - If the agent includes a skill-list section, confirm the list matches the intended reusable procedures.
 - If the agent includes a skill-list section, confirm the wording does not imply that `internal-*` skills automatically outrank imported skills.
@@ -215,4 +218,4 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
 - Use `references/review-checklist.md` for a final pass when the change broadens scope or imports external patterns.
-- Run `python3 .github/scripts/validate-copilot-customizations.sh --scope root --mode strict` after changes that affect agent naming or inventory.
+- Run `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict` after changes that affect agent naming or inventory.

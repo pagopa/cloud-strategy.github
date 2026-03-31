@@ -13,7 +13,7 @@ Use this checklist when converting an upstream agent or agent-authoring pattern 
 
 1. Rename into the canonical internal contract: `internal-<name>.agent.md`.
 2. Rewrite the `description:` so it explains when the internal agent should be selected.
-3. Normalize copied tool catalogs to canonical aliases or omit `tools:` intentionally when explicit scoping adds no value.
+3. Normalize copied tool catalogs to canonical aliases and declare an explicit `tools:` contract for the internal agent.
 4. Replace stale runtime-specific tool assumptions with repository-local files, skills, prompts, validators, or current GitHub Copilot frontmatter.
 5. Convert expertise lists into routing rules, role focus, or output expectations.
 6. Convert multi-step command flows into `## Execution Workflow` only when recurring orchestration is core to the role.
@@ -35,7 +35,7 @@ Use this checklist when converting an upstream agent or agent-authoring pattern 
 
 ## Final Checks
 
-1. Confirm optional frontmatter is still supported by current GitHub Copilot docs and that any `tools:` list uses canonical aliases or MCP namespaces.
+1. Confirm optional frontmatter is still supported by current GitHub Copilot docs and that the internal agent declares `tools:` with canonical aliases or MCP namespaces.
 2. Confirm the agent says when not to use it.
 3. Confirm output expectations are observable.
 4. Confirm the imported pattern no longer depends on stale runtime behavior or obsolete tool ids.

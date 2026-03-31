@@ -1,6 +1,7 @@
 ---
 name: internal-gcp-platform-strategy
 description: Use this agent for strategic GCP platform and governance decisions: organization and folder structure, project boundaries, identity and policy operating model, resilience posture, cost-governance direction, and high-level platform process design backed by current Google Cloud guidance.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal GCP Platform Strategy

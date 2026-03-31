@@ -69,7 +69,7 @@ External agents often expose long tool lists, framework matrices, or expertise c
 | Upstream signal | Internal rewrite |
 | --- | --- |
 | Expertise bullets | `## Role`, `## Routing Rules`, or `## Output Expectations` |
-| Tool catalogs | Short `tools:` list with canonical aliases when scope matters; otherwise omit `tools:` and express the dependency in routing rules or skills |
+| Tool catalogs | Short explicit `tools:` list with canonical aliases that matches the internal agent's role |
 | Platform setup steps | Reference file or skill |
 | Slash commands | `## Execution Workflow` when the sequence is core to the role |
 | Generic quality checklist | Skill or reference |

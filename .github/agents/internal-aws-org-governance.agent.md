@@ -1,6 +1,7 @@
 ---
 name: internal-aws-org-governance
 description: Use this agent for strategic AWS organization governance: org structure, payer and management-account boundaries, delegated administration, SCP and IAM operating model, StackSets across the organization, and the platform process needed to govern AWS at scale.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal AWS Org Governance

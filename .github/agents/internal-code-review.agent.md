@@ -1,6 +1,7 @@
 ---
 name: internal-code-review
 description: Use this agent for deep code review, safe simplification review, security review, regression analysis, and merge-readiness checks when the repository needs a defect-first command center.
+tools: ["read", "search", "execute", "web", "agent"]
 ---
 
 # Internal Code Review
