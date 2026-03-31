@@ -35,6 +35,13 @@ INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS = {
     "awesome-copilot-instructions-blueprint-generator",
 }
 LEGACY_SKILL_IDENTIFIER = "internal-skill-development"
+INTERNAL_CODE_REVIEW_REFERENCE_PATHS = (
+    Path(".github/skills/internal-code-review/references/anti-patterns-python.md"),
+    Path(".github/skills/internal-code-review/references/anti-patterns-bash.md"),
+    Path(".github/skills/internal-code-review/references/anti-patterns-terraform.md"),
+    Path(".github/skills/internal-code-review/references/anti-patterns-java.md"),
+    Path(".github/skills/internal-code-review/references/anti-patterns-nodejs.md"),
+)
 
 
 @dataclass
@@ -370,6 +377,15 @@ def validate_legacy_skill_references(errors: list[str]) -> None:
             errors.append(f"Legacy skill reference `{LEGACY_SKILL_IDENTIFIER}` found in {path}")
 
 
+def validate_internal_skill_reference_files(errors: list[str]) -> None:
+    for reference_path in INTERNAL_CODE_REVIEW_REFERENCE_PATHS:
+        if not (REPO_ROOT / reference_path).exists():
+            errors.append(
+                "Missing internal code review reference file: "
+                f"{reference_path}"
+            )
+
+
 def build_report(scope: str, mode: str) -> ValidationReport:
     normalize_scope(scope)
     normalize_mode(mode)
@@ -381,6 +397,7 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     validate_inventory(errors)
     validate_internal_sync_control_center_contract(errors)
     validate_legacy_skill_references(errors)
+    validate_internal_skill_reference_files(errors)
     warnings.extend(build_instruction_load_warnings())
     return ValidationReport(errors=errors, warnings=warnings)
 

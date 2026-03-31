@@ -59,6 +59,10 @@ requests==2.32.3 \
 - Keep tests under `tests/` with deterministic behavior.
 - For modify tasks with existing tests: edit code first, run existing tests, then update tests only if behavior changes are intentional.
 
+## Cross-references
+- For structured application code, use `.github/skills/internal-project-python/SKILL.md`.
+- For standalone scripts and CLI-oriented automation, use `.github/skills/internal-script-python/SKILL.md`.
+
 ## Minimal skeleton
 ```python
 #!/usr/bin/env python3

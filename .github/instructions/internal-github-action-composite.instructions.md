@@ -23,6 +23,10 @@ Define consistent standards for reusable composite actions under `.github/action
 - Document expected trust model in the action description.
 - Pin any `docker://` or container image reference by digest and keep the human-readable tag/version nearby.
 
+## Shell guidance
+- Keep shell snippets inside composite actions aligned with `.github/instructions/internal-bash.instructions.md`.
+- When shell logic grows beyond a short validation or orchestration step, move it into a dedicated Bash script under `.github/scripts/`.
+
 ## Minimal example
 ```yaml
 name: "Validate Input"

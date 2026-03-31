@@ -201,7 +201,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/instructions/awesome-copilot-oop-design-patterns.instructions.md`
 - `.github/instructions/awesome-copilot-shell.instructions.md`
 - `.github/instructions/awesome-copilot-springboot.instructions.md`
-- `.github/instructions/awesome-copilot-terraform-azure.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
 - `.github/instructions/internal-github-action-composite.instructions.md`
@@ -213,9 +212,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/instructions/internal-markdown.instructions.md`
 - `.github/instructions/internal-nodejs.instructions.md`
 - `.github/instructions/internal-python.instructions.md`
-- `.github/instructions/internal-terraform-aws.instructions.md`
-- `.github/instructions/internal-terraform-azure.instructions.md`
-- `.github/instructions/internal-terraform-gcp.instructions.md`
 - `.github/instructions/internal-terraform.instructions.md`
 - `.github/instructions/internal-yaml.instructions.md`
 

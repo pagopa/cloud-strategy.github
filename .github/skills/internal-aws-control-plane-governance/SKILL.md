@@ -46,6 +46,26 @@ Use `internal-aws-mcp-research` whenever the decision depends on current AWS doc
 | Reduce routine use of the management account | Trusted access plus delegated admin | Management account to enable, delegated admin to operate | Lowers blast radius in the control plane |
 | Separate financial oversight from platform execution | Account ownership model plus delegated services | Management account and dedicated member accounts | Cleaner accountability and safer operations |
 
+## Decision examples
+
+- You need a preventive org-wide deny on unsupported regions:
+  - Prefer an SCP at root or OU scope.
+  - Validate against exception accounts first.
+  - Roll out OU by OU with a rollback path that removes or narrows the SCP.
+- You need Security Hub or Config operated centrally across many accounts:
+  - Prefer trusted access plus delegated administrator rather than daily operations from the management account.
+  - Document which account owns operations and which account only enables the org integration.
+- You need a baseline IAM role or logging stack across many accounts:
+  - Prefer CloudFormation StackSets with service-managed permissions when supported by the target service and org model.
+  - Call out whether any template resource has global or organization-sensitive blast radius.
+
+## Flagging examples
+
+- Flag recommendations that say "apply this in the management account" without proving management-account necessity.
+- Flag designs that mix SCP decisions and IAM grant decisions into one undifferentiated policy answer.
+- Flag org-wide rollout plans that skip a staging OU, simulation step, or rollback instructions.
+- Flag proposals that treat delegated admin as optional convenience when it materially reduces control-plane blast radius.
+
 ## Workflow
 
 1. Frame the strategic question.

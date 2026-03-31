@@ -116,6 +116,7 @@ output "bucket_id" {
 ## Cross-references
 - **internal-cloud-policy** (`.github/skills/internal-cloud-policy/SKILL.md`): for governance policies (SCP, Azure Policy, GCP Org Policy) applied alongside Terraform infra.
 - **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for CI/CD pipelines that run `terraform plan/apply`.
+- **terraform-terraform-test** (`.github/skills/terraform-terraform-test/SKILL.md`): for `.tftest.hcl` authoring and Terraform native test workflows.
 
 ## Validation
 - `terraform fmt -check -recursive`

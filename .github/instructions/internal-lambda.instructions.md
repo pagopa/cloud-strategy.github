@@ -20,6 +20,10 @@ applyTo: "**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts"
 - Use layers only for shared dependencies with clear versioning.
 - Keep environment variables configuration-only; secrets must come from managed secret stores.
 
+## Runtime cross-references
+- For Python Lambdas, also follow `.github/instructions/internal-python.instructions.md`.
+- For JavaScript or TypeScript Lambdas, also follow `.github/instructions/internal-nodejs.instructions.md`.
+
 ## Observability
 - Log key lifecycle events in English with stable fields for filtering.
 - Prefer structured logs for production workloads.

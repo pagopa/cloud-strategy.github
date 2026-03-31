@@ -83,6 +83,14 @@ Flag a sync workflow when:
 - it marks work as `apply` even though governance review was skipped
 - it proceeds to `apply` while `blocking` findings remain
 
+## Flagging examples
+
+- `blocking` / `Patch`: an internal agent declares `internal-foo` in `## Declared Skills`, but `.github/skills/internal-foo/SKILL.md` does not exist.
+- `blocking` / `Patch`: a skill references `references/example.md`, but that file is missing on disk.
+- `non-blocking` / `Patch`: `AGENTS.md` still inventories a path that was deleted from `.github/`.
+- `non-blocking` / `Keep`: two assets are adjacent in topic area, but their descriptions and trigger boundaries remain distinct.
+- `blocking` / `Replace`: a repository-owned internal asset fully supersedes a weaker local fallback that still broadens trigger space.
+
 ## Recommended Outputs
 
 Produce findings with both severity and action:
