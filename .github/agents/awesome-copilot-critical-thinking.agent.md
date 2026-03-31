@@ -1,6 +1,7 @@
 ---
 description: 'Challenge assumptions and encourage critical thinking to ensure the best possible solution and outcomes.'
 name: 'Critical thinking mode instructions'
+tools: ['search/codebase', 'vscode/extensions', 'web/fetch', 'findTestFiles', 'web/githubRepo', 'read/problems', 'azure-mcp/search', 'search/searchResults', 'search/usages']
 ---
 # Critical thinking mode instructions
 
