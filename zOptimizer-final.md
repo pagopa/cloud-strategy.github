@@ -2,48 +2,6 @@
 
 > Decision-oriented rewrite of `zOptimizer.md`, preserving its full analytical surface while reorganizing it around the outcome you actually want: a smaller catalog with `obra-*` as the strategic thinking layer, `internal-*` as the tactical/canonical execution layer, and external-prefixed skills kept only when they add narrow support value.
 
-## 1. Decision Hierarchy
-
-### Canonical operating model
-
-1. `obra-*` should remain the strategic and meta-analytical layer.
-2. `internal-*` should remain the tactical and canonical layer.
-3. External-prefixed skills should not compete as peers with the above two layers.
-4. External-prefixed skills should survive only in one of three roles:
-   - merge source for a stronger `internal-*` skill
-   - narrow support-only specialist
-   - removable noise
-
-### Corrected factual baseline from disk
-
-- The live repository currently has `85` skills, down from `117` before the completed first prune batch and the completed merge-source retirements so far.
-- Family counts on disk are:
-  - `26` `internal-*`
-  - `9` `antigravity-*`
-  - `14` `awesome-copilot-*`
-  - `30` `obra-*`
-  - `3` `openai-*`
-  - `3` `terraform-*`
-- The repository currently has `20` agents.
-- The repository still contains `5` imported agents with deprecated `tools:` frontmatter:
-  - `awesome-copilot-azure-principal-architect.agent.md`
-  - `awesome-copilot-critical-thinking.agent.md`
-  - `awesome-copilot-devils-advocate.agent.md`
-  - `awesome-copilot-devops-expert.agent.md`
-  - `awesome-copilot-plan.agent.md`
-
-### Core interpretation
-
-The original `zOptimizer.md` is directionally right about overlap, activation noise, and agent overload. The main revision I make is this:
-
-- I do not think “keep both and sharpen triggers” is the right default for the broad external skills anymore.
-- Under your preferred operating model, the better default is:
-  - absorb the best reusable tactical content into `internal-*`
-  - delete the external peer
-  - keep only a small, explicitly-invoked support tier
-
-That is the simplest way to make `obra-*` win at strategy, `internal-*` win at execution, and externals stop broadening the activation space.
-
 ## 2. Main Catalog Decision Plan
 
 ### 2.1 Merge Into `internal-*`, Then Delete The External Source
@@ -101,7 +59,7 @@ After the completed `Delete Now` batch, the next cleanup order should be:
 
 ## 3. Full Carry-Over Of `zOptimizer.md`, Reorganized But Not Lost
 
-This section preserves the pre-prune `117`-skill baseline so the original reasoning is not lost. Section `1` reflects the current live post-prune state.
+This section preserves the pre-prune `117`-skill baseline so the original reasoning is not lost.
 
 ### 3.1 Opening Thesis From `zOptimizer.md`
 
@@ -793,7 +751,7 @@ This is the explicit map showing that the content of `zOptimizer.md` was not dro
 
 | Original `zOptimizer.md` section | Preserved in this file |
 |---|---|
-| Opening thesis and overcrowding premise | Sections `1` and `3.1` |
+| Opening thesis and overcrowding premise | Section `3.1` |
 | Phase 1, Step 1.1 Domain Taxonomy | Section `3.2`, Step `1.1` |
 | Phase 1, Step 1.2 Internal vs External Quality Matrix | Section `3.2`, Step `1.2` |
 | Phase 1, Step 1.3 High-Risk Overlap Pairs | Section `3.2`, Step `1.3` |
