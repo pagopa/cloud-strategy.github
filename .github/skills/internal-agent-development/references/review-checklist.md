@@ -19,7 +19,6 @@ Use this checklist before finalizing a new or revised internal agent.
 
 ## Skill Contract
 
-- Does `## Declared Skills` exist?
 - Are the skill identifiers exact and canonical?
 - Do all declared skills reinforce the same operating role?
 - Does the agent need `## Skill Usage Contract`, or would that add noise?

@@ -13,9 +13,9 @@ Use the current repository state as the bootstrap input for catalog analysis, no
 
 Treat root `AGENTS.md` and `.github/copilot-instructions.md` as governed sync targets, not just reference inputs. When managed catalog changes create drift or stale policy references, update those files in the same sync pass.
 
-Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflow for catalog decisions. Use the other declared skills only when their trigger in `## Skill Usage Contract` applies.
+Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflow for catalog decisions in this agent's narrow governance scope. Do not treat `internal-*` origin as a general priority rule outside the explicit trigger logic in `## Skill Usage Contract`.
 
-## Declared Skills
+## Preferred/Optional Skills
 
 - `internal-skill-management`
 - `internal-copilot-audit`
@@ -46,9 +46,10 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the primary workflo
 
 ## Skill Usage Contract
 
+- Treat preferred or optional skills as conditional routing options, not as a blanket execution order. Outside the explicit triggers below, do not prioritize `internal-*` skills over imported ones by default.
 - `internal-skill-management`: Default operating workflow for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
-- `internal-agent-development`: Use only when the sync changes an agent file, modifies agent routing boundaries, or rewrites declared-skill contracts.
+- `internal-agent-development`: Use only when the sync changes an agent file, modifies agent routing boundaries, or rewrites skill-guidance sections or contracts.
 - `openai-skill-creator`: Use only when a `replace` or `extract` decision requires creating or materially rewriting a skill as part of catalog governance.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `internal-agents-md-bridge`: Use whenever root `AGENTS.md` changes.

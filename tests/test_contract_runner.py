@@ -124,8 +124,8 @@ def test_contract_cases_are_known() -> None:
     expected = {
         "resource-governance-uses-supported-origin-naming",
         "resource-governance-named-resources-declare-name",
-        "resource-governance-agents-declare-skills",
-        "resource-governance-agents-declared-skills-resolve-on-disk",
+        "resource-governance-agents-preferred-optional-skills-are-well-formed",
+        "resource-governance-agent-preferred-optional-skills-resolve-on-disk",
         "sync-plan-detects-root-agents-conflict",
         "sync-plan-selects-python-assets",
         "sync-plan-preserves-manual-target-assets",
@@ -161,39 +161,43 @@ def test_resource_governance_named_resources_declare_name() -> None:
         assert actual_name == identifier, f"Resource name mismatch for {path}: {actual_name} != {identifier}"
 
 
-def test_resource_governance_agents_declare_skills() -> None:
+def test_resource_governance_agents_preferred_optional_skills_are_well_formed() -> None:
     for path in sorted((REPO_ROOT / ".github" / "agents").glob("internal-*.agent.md")):
         content = path.read_text(encoding="utf-8")
-        declared_skills = extract_markdown_h2_section(content, "## Declared Skills")
+        preferred_skills = extract_markdown_h2_section(content, "## Preferred/Optional Skills")
 
-        assert declared_skills is not None, f"Missing declared skills section for {path}"
         assert "## Primary Skill Stack" not in content, f"Deprecated skill section heading still present in {path}"
+        if preferred_skills is None:
+            continue
 
         declared_skill_lines = [
             line
-            for line in declared_skills.splitlines()
+            for line in preferred_skills.splitlines()
             if re.fullmatch(r"\s*-\s+`[^`]+`\s*", line)
         ]
-        assert declared_skill_lines, f"Declared skills section must include at least one skill for {path}"
+        assert declared_skill_lines, (
+            f"Preferred/Optional Skills section must include at least one skill for {path}"
+        )
 
 
-def test_resource_governance_agents_declared_skills_resolve_on_disk() -> None:
+def test_resource_governance_agent_preferred_optional_skills_resolve_on_disk() -> None:
     available_skills = {
         skill_path.parent.name for skill_path in sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md"))
     }
 
     for path in sorted((REPO_ROOT / ".github" / "agents").glob("internal-*.agent.md")):
         content = path.read_text(encoding="utf-8")
-        declared_skills = extract_markdown_h2_section(content, "## Declared Skills")
-        assert declared_skills is not None, f"Missing declared skills section for {path}"
+        preferred_skills = extract_markdown_h2_section(content, "## Preferred/Optional Skills")
+        if preferred_skills is None:
+            continue
 
-        for line in declared_skills.splitlines():
+        for line in preferred_skills.splitlines():
             match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", line)
             if not match:
                 continue
             skill_name = match.group(1)
             assert skill_name in available_skills, (
-                f"Declared skill {skill_name} in {path} does not resolve to "
+                f"Preferred or optional skill {skill_name} in {path} does not resolve to "
                 ".github/skills/<name>/SKILL.md"
             )
 

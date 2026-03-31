@@ -68,7 +68,6 @@ External agents often expose long tool lists, framework matrices, or expertise c
 
 | Upstream signal | Internal rewrite |
 | --- | --- |
-| Tool list | `## Declared Skills` or repo inputs |
 | Expertise bullets | `## Role`, `## Routing Rules`, or `## Output Expectations` |
 | Platform setup steps | Reference file or skill |
 | Slash commands | `## Execution Workflow` when the sequence is core to the role |

@@ -55,6 +55,18 @@ description: Example skill.
 # Internal Example
 """,
     )
+    write_file(
+        root / ".github" / "skills" / "internal-code-review" / "SKILL.md",
+        """---
+name: internal-code-review
+description: Example internal code review skill.
+---
+
+# Internal Code Review
+""",
+    )
+    for reference_path in VALIDATOR.INTERNAL_CODE_REVIEW_REFERENCE_PATHS:
+        write_file(root / reference_path, "# Reference\n")
     write_file(root / ".github" / "agents" / "internal-example.agent.md", agent_content)
 
 
@@ -74,7 +86,7 @@ def test_build_report_detects_current_repo_state() -> None:
     assert isinstance(report.errors, list)
 
 
-def test_build_report_accepts_agent_with_declared_skills(tmp_path: Path) -> None:
+def test_build_report_accepts_agent_with_preferred_optional_skills(tmp_path: Path) -> None:
     build_minimal_repo(
         tmp_path,
         """---
@@ -88,7 +100,7 @@ description: Use this agent when the repository needs an example command center.
 
 You are the example command center.
 
-## Declared Skills
+## Preferred/Optional Skills
 
 - `internal-example`
 
@@ -109,7 +121,7 @@ You are the example command center.
     assert report.errors == []
 
 
-def test_build_report_rejects_agent_without_declared_skills_section(tmp_path: Path) -> None:
+def test_build_report_accepts_agent_without_skill_guidance_section(tmp_path: Path) -> None:
     build_minimal_repo(
         tmp_path,
         """---
@@ -122,10 +134,6 @@ description: Use this agent when the repository needs an example command center.
 ## Role
 
 You are the example command center.
-
-## Primary Skill Stack
-
-- `internal-example`
 
 ## Routing Rules
 
@@ -140,12 +148,10 @@ You are the example command center.
     with validator_repo(tmp_path):
         report = VALIDATOR.build_report("root", "strict")
 
-    assert not report.valid
-    assert "Deprecated agent section `## Primary Skill Stack` found in" in "\n".join(report.errors)
-    assert "Missing `## Declared Skills` section:" in "\n".join(report.errors)
+    assert report.valid
+    assert report.errors == []
 
-
-def test_build_report_rejects_unknown_declared_skill(tmp_path: Path) -> None:
+def test_build_report_rejects_unknown_preferred_optional_skill(tmp_path: Path) -> None:
     build_minimal_repo(
         tmp_path,
         """---
@@ -159,7 +165,7 @@ description: Use this agent when the repository needs an example command center.
 
 You are the example command center.
 
-## Declared Skills
+## Preferred/Optional Skills
 
 - `internal-missing`
 
@@ -177,4 +183,7 @@ You are the example command center.
         report = VALIDATOR.build_report("root", "strict")
 
     assert not report.valid
-    assert "Unknown declared skill `internal-missing` referenced in" in "\n".join(report.errors)
+    assert (
+        "Unknown preferred or optional skill `internal-missing` referenced in"
+        in "\n".join(report.errors)
+    )

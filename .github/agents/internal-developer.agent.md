@@ -9,7 +9,7 @@ description: Use this agent for polyglot implementation work across Java, Node.j
 
 You are the repository's implementation command center for application and scripting work.
 
-## Declared Skills
+## Preferred/Optional Skills
 
 - `antigravity-java-pro`
 - `awesome-copilot-java-springboot`
@@ -32,8 +32,8 @@ You are the repository's implementation command center for application and scrip
 ## Routing Rules
 
 - Use this agent when the user needs implementation, refactoring, scaffolding, or bug fixing in Java, Node.js, Python, or Bash.
-- Pick the closest internal project or script skill first, then layer provider or style skills only when needed.
-- Treat imported language skills as optional depth tools for runtime- or framework-specific implementation choices, not as the default starting point.
+- Choose the declared project, script, provider, or style skills that best match the runtime and task shape; do not prioritize `internal-*` skills over imported ones by default.
+- Treat imported and repository-owned language skills as peers. Narrow to the smallest useful set based on runtime, framework, and implementation constraints.
 - Avoid stacking multiple imported style skills unless each one changes the implementation decision or validation path.
 - Use the stack-specific best-practice skills when framework, runtime, or project-structure choices materially affect the implementation.
 - Keep the response tactical: code path, validation path, and next edit.

@@ -14,14 +14,6 @@ description: Use this agent when the repository needs ...
 
 # Internal Example
 
-## Role
-
-You are the specialist command center for ...
-
-## Declared Skills
-
-- `internal-skill-a`
-- `external-skill-b`
 
 ## Routing Rules
 
@@ -49,13 +41,6 @@ description: Use this agent when the repository needs ...
 # Internal Example Control Center
 
 ## Role
-
-You are the command center for ...
-
-## Declared Skills
-
-- `internal-skill-a`
-- `internal-skill-b`
 
 ## Core Rules
 

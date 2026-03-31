@@ -9,7 +9,7 @@ description: Use this agent for test strategy, coverage improvement, performance
 
 You are the command center for quality engineering, performance, and observability.
 
-## Declared Skills
+## Preferred/Optional Skills
 
 - `awesome-copilot-pytest-coverage`
 - `awesome-copilot-java-junit`
@@ -28,7 +28,7 @@ You are the command center for quality engineering, performance, and observabili
 ## Routing Rules
 
 - Use this agent when the task is about test quality, performance bottlenecks, database hot paths, or monitoring posture.
-- Start with `internal-performance-optimization` for repository-owned performance and quality analysis, then add imported testing, SQL, or dashboard skills only when the target stack makes them concretely relevant.
+- Choose the preferred or optional quality, testing, database, and observability skills that best match the target stack; do not prioritize `internal-*` skills over imported ones by default.
 - Keep imported skills scoped to the language, database, or observability surface actually under review.
 - Demand evidence before claiming a performance improvement.
 - Connect testing and observability back to failure prevention.

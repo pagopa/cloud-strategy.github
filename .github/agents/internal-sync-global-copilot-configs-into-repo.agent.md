@@ -8,7 +8,7 @@ name: internal-sync-global-copilot-configs-into-repo
 ## Objective
 Analyze a local target repository, select the minimum Copilot customization assets from this standards repository, and align them with conservative merge rules plus a final report that also audits unmanaged target-local Copilot assets. For target-repository root guidance, keep `.github/copilot-instructions.md` as the primary detailed policy file and keep root `AGENTS.md` intentionally light as a bridge that helps generic coding assistants discover and apply the Copilot configuration without duplicating it.
 
-## Declared Skills
+## Preferred/Optional Skills
 - `internal-sync-global-copilot-configs-into-repo`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
@@ -26,7 +26,7 @@ Analyze a local target repository, select the minimum Copilot customization asse
 
 ## Routing
 - Use this agent only for cross-repository Copilot-core alignment work.
-- Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the single workflow definition.
+- Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the workflow anchor for this agent, but do not infer a general priority rule from `internal-*` origin alone.
 - Use `internal-copilot-audit` when source-side overlap, hollow references, or bridge drift affect the baseline you plan to propagate.
 - When source or target decisions depend on current GitHub Copilot or MCP behavior, validate them through `internal-copilot-docs-research` before updating policy files.
 - Treat `.github/scripts/internal-sync-copilot-configs.py` as the deterministic execution path.

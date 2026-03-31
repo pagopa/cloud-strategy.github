@@ -25,6 +25,7 @@ SUPPORTED_SCOPES = {"root", "all"}
 SUPPORTED_MODES = {"strict", "basic", "legacy-compatible"}
 DEPRECATED_FRONTMATTER_KEYS = ("tools", "model", "color")
 DEPRECATED_AGENT_SECTION_HEADINGS = ("## Primary Skill Stack",)
+AGENT_SKILL_SECTION_HEADINGS = ("## Preferred/Optional Skills",)
 INTERNAL_SYNC_CONTROL_CENTER_AGENT = Path(".github/agents/internal-sync-control-center.agent.md")
 INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS = {
     "internal-skill-management",
@@ -123,8 +124,12 @@ def extract_markdown_h2_section(text: str, heading: str) -> str | None:
     return "\n".join(collected).strip()
 
 
-def extract_declared_skills(text: str) -> list[str] | None:
-    section = extract_markdown_h2_section(text, "## Declared Skills")
+def extract_agent_skill_guidance(text: str) -> list[str] | None:
+    section = None
+    for heading in AGENT_SKILL_SECTION_HEADINGS:
+        section = extract_markdown_h2_section(text, heading)
+        if section is not None:
+            break
     if section is None:
         return None
 
@@ -286,18 +291,19 @@ def validate_named_resources(errors: list[str]) -> None:
             if re.search(rf"^{re.escape(heading)}\s*$", text, re.M):
                 errors.append(f"Deprecated agent section `{heading}` found in {agent_file}")
 
-        declared_skills = extract_declared_skills(text)
-        if declared_skills is None:
-            errors.append(f"Missing `## Declared Skills` section: {agent_file}")
+        listed_skills = extract_agent_skill_guidance(text)
+        if listed_skills is None:
             continue
 
-        if not declared_skills:
-            errors.append(f"Declared skills section must list at least one skill: {agent_file}")
+        if not listed_skills:
+            errors.append(f"`## Preferred/Optional Skills` must list at least one skill: {agent_file}")
             continue
 
-        for skill_name in declared_skills:
+        for skill_name in listed_skills:
             if skill_name not in skill_names:
-                errors.append(f"Unknown declared skill `{skill_name}` referenced in {agent_file}")
+                errors.append(
+                    f"Unknown preferred or optional skill `{skill_name}` referenced in {agent_file}"
+                )
 
 
 def validate_inventory(errors: list[str]) -> None:
@@ -326,7 +332,7 @@ def validate_internal_sync_control_center_contract(errors: list[str]) -> None:
         return
 
     text = read_text(agent_path)
-    declared_skills = extract_declared_skills(text) or []
+    listed_skills = extract_agent_skill_guidance(text) or []
     skill_usage_contract = extract_skill_usage_contract(text)
 
     if skill_usage_contract is None:
@@ -335,19 +341,19 @@ def validate_internal_sync_control_center_contract(errors: list[str]) -> None:
         )
         skill_usage_contract = []
 
-    for skill_name in declared_skills:
+    for skill_name in listed_skills:
         if skill_name not in skill_usage_contract:
             errors.append(
-                "Declared skill "
+                "Preferred or optional skill "
                 f"`{skill_name}` missing from `## Skill Usage Contract`: {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
             )
 
     missing_required_skills = sorted(
-        INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS - set(declared_skills)
+        INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS - set(listed_skills)
     )
     for skill_name in missing_required_skills:
         errors.append(
-            f"Required declared skill `{skill_name}` missing from {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
+            f"Required preferred or optional skill `{skill_name}` missing from {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
         )
 
     if "Governance files reviewed" not in text:

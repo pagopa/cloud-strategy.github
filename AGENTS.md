@@ -36,6 +36,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 #### Installed agents
 - Use `internal-ai-resource-creator` for creating or refining repository-owned Copilot agents, skills, prompts, and instructions when the task is focused on authoring one resource rather than synchronizing the whole catalog.
+  Skill lists inside agent bodies are optional repository convention only, not a required agent contract.
 - Use `internal-sync-control-center` for governing the managed `.github/` Copilot catalog in this repository: use repo state as the starting point for drift analysis, refresh declared approved external assets, enforce origin-based naming, consolidate overlapping skills, retire obsolete catalog entries, and keep downstream governance files including `.github/copilot-instructions.md` and root `AGENTS.md` aligned with the catalog.
   This command center absorbs the former standalone Copilot-governance role.
 - Use `internal-sync-global-copilot-configs-into-repo` for cross-repository Copilot-core alignment and source or target redundancy audits.

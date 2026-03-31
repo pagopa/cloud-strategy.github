@@ -13,7 +13,6 @@ Use this checklist when converting an upstream agent or agent-authoring pattern 
 
 1. Rename into the canonical internal contract: `internal-<name>.agent.md`.
 2. Rewrite the `description:` so it explains when the internal agent should be selected.
-3. Add a `## Declared Skills` section that lists exact canonical skill identifiers.
 4. Replace runtime-specific tool assumptions with repository-local files, skills, prompts, and validators.
 5. Convert expertise lists into routing rules, role focus, or output expectations.
 6. Convert multi-step command flows into `## Execution Workflow` only when recurring orchestration is core to the role.
@@ -35,7 +34,6 @@ Use this checklist when converting an upstream agent or agent-authoring pattern 
 
 ## Final Checks
 
-1. Confirm `## Declared Skills` is present and exact.
 2. Confirm the agent says when not to use it.
 3. Confirm output expectations are observable.
 4. Confirm the imported pattern no longer depends on external runtime behavior.

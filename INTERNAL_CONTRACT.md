@@ -55,24 +55,22 @@ These rules apply to all repository resources, including prompts, skills, instru
   - every declared `name:` matches the canonical resource identifier
   - imported non-`internal-*` resources may remain verbatim and are not normalized by this contract
 
-#### `resource-governance-agents-declare-skills`
+#### `resource-governance-agents-preferred-optional-skills-are-well-formed`
 
 - Goal: ensure agents publish an explicit reusable skill contract instead of implying skill usage only in prose.
 - Scope:
   - internal agents
 - Expected behavior:
-  - every internal agent includes a `## Declared Skills` section
   - every internal agent declares at least one skill in that section
   - internal agents do not use the deprecated `## Primary Skill Stack` heading
 
-#### `resource-governance-agents-declared-skills-resolve-on-disk`
+#### `resource-governance-agent-preferred-optional-skills-resolve-on-disk`
 
 - Goal: ensure agent skill contracts point to real reusable skills rather than stale or decorative identifiers.
 - Scope:
   - internal agents
   - skills
 - Expected behavior:
-  - every skill listed under an internal agent `## Declared Skills` section resolves to an existing `.github/skills/<name>/SKILL.md`
   - internal agents do not declare agent identifiers, aliases, or missing skills as if they were reusable skill contracts
 
 ### Sync Planning
@@ -121,7 +119,6 @@ These rules apply to all repository resources, including prompts, skills, instru
 
 - prompt frontmatter formatting
 - skill section structure
-- agent body wording beyond the required `## Declared Skills` contract
 - agent cohesion, routing breadth, and declared-skill breadth beyond the required explicit skill contract
 - exact one-to-one mapping between preferred skills and specific agents
 - inventory wording details

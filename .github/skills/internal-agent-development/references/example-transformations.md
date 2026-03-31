@@ -23,7 +23,6 @@ An imported agent has:
 ### Rewrite
 
 - make `description:` say when the route wins
-- move capability lists into `## Declared Skills`
 - turn expertise bullets into routing priorities or output expectations
 - drop platform-specific tool wiring
 
@@ -40,11 +39,6 @@ description: Use this agent when the repository needs domain-specific strategy, 
 ## Role
 
 You are the specialist command center for ...
-
-## Declared Skills
-
-- `internal-domain-skill`
-- `internal-cross-cutting-skill`
 
 ## Routing Rules
 
@@ -92,10 +86,6 @@ description: Use this agent when the repository needs ...
 
 You are the command center for ...
 
-## Declared Skills
-
-- `internal-audit-skill`
-- `internal-authoring-skill`
 
 ## Core Rules
 
@@ -194,11 +184,6 @@ description: Use this agent when the task needs provider-specific architecture g
 
 You are the provider-specific cloud command center for architecture tradeoffs, incident diagnosis, and tactical next steps.
 
-## Declared Skills
-
-- `internal-provider-research`
-- `internal-pair-architect`
-- `awesome-copilot-cloud-design-patterns`
 
 ## Routing Rules
 

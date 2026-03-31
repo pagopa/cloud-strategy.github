@@ -1,6 +1,6 @@
 ---
 name: internal-agent-development
-description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, explicit declared-skill contracts, reusable command-center patterns, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
+description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, optional skill guidance, reusable command-center patterns, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
 ---
 
 # Internal Agent Development
@@ -15,7 +15,7 @@ Use `openai-skill-creator` when the main output is a skill. Use `internal-skill-
 - Keep one cohesive operating role per agent.
 - Translate imported agent value into repo-local GitHub Copilot form.
 - Move reusable procedures into skills instead of bloating agent bodies.
-- Make declared-skill contracts explicit and reviewable.
+- Keep any skill guidance explicit and reviewable when it adds value, without implying platform-enforced execution order.
 - Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without copying runtime-specific tool wiring.
 
 ## Read First
@@ -31,13 +31,13 @@ Load these inputs before finalizing an internal agent:
 - `references/example-transformations.md` when you need before-and-after conversion examples
 - `references/review-checklist.md` before final validation or when reviewing an existing agent
 
-If the work is being routed through an existing agent, load that agent's `## Declared Skills` next and open the skill files that are directly relevant to the task before editing any target agent. Do not treat declared skills as optional background context when they govern the kind of resource being changed.
+If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints for which skills may matter, not as a platform-enforced requirement to use every listed skill or to prioritize `internal-*` skills by default.
 
 Prefer role-based matching over identifier memorization:
 
-- When the selected agent is being used to create, revise, split, or normalize agents, load the declared skill that governs agent authoring before drafting or editing the target agent.
-- When the selected agent declares a research or documentation-verification skill and the task depends on current vendor guidance, load that skill before finalizing routing or domain claims.
-- When multiple declared skills are present, load the ones that directly constrain the artifact being changed before treating the rest as optional supporting context.
+- When the selected agent includes a skill-guidance section and is being used to create, revise, split, or normalize agents, load the listed skill that best governs agent authoring for the task before drafting or editing the target agent.
+- When the selected agent includes a research or documentation-verification skill and the task depends on current vendor guidance, load that skill before finalizing routing or domain claims.
+- When multiple listed skills are present, choose the ones whose trigger most directly constrains the artifact being changed; do not infer priority from origin alone.
 
 ## Decision Gate
 
@@ -59,11 +59,14 @@ Choose an agent only when the repository benefits from a stable command center o
 - Repository-owned agents that are intentionally non-internal may use a different `name:` when their route, origin, or compatibility contract requires it.
 - Repository-owned internal agents must use the canonical pattern `internal-<agent-name>.agent.md`.
 - `description:` is the routing contract and should start with `Use this agent when ...`.
-- Every agent must include `## Declared Skills`.
-- `## Declared Skills` is the explicit skill contract. List exact canonical skill identifiers, one per bullet, in backticks.
+- Skill-guidance sections such as `## Preferred/Optional Skills` are optional. Use them only when they materially improve routing clarity, discovery, or command-center usability.
+- When present, a skill-list section is a curated routing and discovery list. List exact canonical skill identifiers, one per bullet, in backticks.
+- Do not present a skill-list section as a native GitHub Copilot agent property or as a guarantee that every listed skill will be invoked automatically.
+- Do not imply that repository-owned `internal-*` skills outrank imported skills by default. Any prioritization must come from concrete task fit, not origin.
 - Every agent must explain both positive routing and at least one meaningful boundary.
 - Every agent must define `## Output Expectations`.
-- Add `## Skill Usage Contract` only when the agent is a broader command center whose declared skills are used conditionally.
+- Add `## Skill Usage Contract` only when the agent is a broader command center whose listed skills are used conditionally.
+- When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order.
 - Keep long reusable workflows in skills, not in the agent body.
 - Never use deprecated frontmatter such as `tools:`, `model:`, or `color:`.
 
@@ -71,8 +74,8 @@ Choose an agent only when the repository benefits from a stable command center o
 
 1. Define the operating role in one sentence.
    Use behavioral scope, not prestige language.
-2. If the work is routed through an existing agent, read its `## Declared Skills` and load the skills that directly govern the task.
-   Treat those skills as part of the execution contract, not as optional follow-up reading.
+2. If the work is routed through an existing agent and that agent has a skill-guidance section, read it and load the skills that directly govern the task.
+   Treat those skills as the best candidate inputs for the task, not as an instruction to use every listed skill.
 3. Scan neighboring agents and trigger overlap.
    Compare `description:` lines first. If two descriptions trigger on the same request, resolve the overlap before drafting.
 4. Decide whether the behavior belongs in an agent, a skill, or both.
@@ -81,8 +84,8 @@ Choose an agent only when the repository benefits from a stable command center o
    If the routing sentence is vague, the rest of the agent will stay vague.
 6. Translate capabilities into repo-local building blocks.
    Map tool lists, expertise claims, and workflows into declared skills, role language, routing rules, and output expectations.
-7. Build a cohesive `## Declared Skills` list.
-   Keep skills that reinforce the same operating role. Delete kitchen-sink additions.
+7. If a skill-list section will help the agent, build a cohesive one.
+   Keep skills that reinforce the same operating role. Delete kitchen-sink additions and avoid ordering that implies origin-based priority.
 8. Write routing rules with a real boundary.
    State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases.
 9. Add output expectations that match the role.
@@ -158,8 +161,9 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 
 - Prestige-first descriptions that never say when the agent wins routing.
 - Imported agents copied almost verbatim with platform-specific frontmatter.
-- `## Declared Skills` as a dumping ground for unrelated capabilities.
-- Starting from the selected agent file alone and skipping the directly relevant declared skills that define how that agent should be applied.
+- A skill-list section as a dumping ground for unrelated capabilities.
+- Starting from the selected agent file alone and skipping the directly relevant preferred or optional skills that define how that agent should be applied.
+- Treating preferred or optional skills as a fake platform-enforced toolchain or as an origin-based priority ladder.
 - Preserving the route but throwing away the upstream agent's best structure, leaving a compliant internal agent that is harder to use and less decisive.
 - Agent bodies that hide important constraints in long narrative prose.
 - Specialist agents that are really just long procedures and should be skills.
@@ -172,7 +176,8 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm internal agents keep filename stem, frontmatter `name:`, and command identifier identical.
 - Confirm any intentionally non-internal agent has an explicit reason to keep a different external-facing `name:`.
 - Confirm the `description:` says when to use the agent instead of restating its workflow.
-- Confirm the agent includes `## Declared Skills` and that the list matches the intended reusable procedures.
+- If the agent includes a skill-list section, confirm the list matches the intended reusable procedures.
+- If the agent includes a skill-list section, confirm the wording does not imply that `internal-*` skills automatically outrank imported skills.
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
 - Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
 - Confirm the final internal agent preserved the strongest usable structure from the source pattern when that structure improved requirement discovery, tradeoff analysis, or response quality.
