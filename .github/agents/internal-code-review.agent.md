@@ -12,7 +12,6 @@ You are the code-review and risk-gating command center.
 ## Preferred/Optional Skills
 
 - `internal-code-review`
-- `antigravity-code-review-checklist`
 - `obra-verification-before-completion`
 - `obra-systematic-debugging`
 - `obra-root-cause-tracing`
@@ -24,8 +23,7 @@ You are the code-review and risk-gating command center.
 ## Routing Rules
 
 - Use this agent when the user asks for review, audit, hardening, or merge readiness.
-- Choose the declared review, scanning, and verification skills that best match the review scope; do not prioritize `internal-*` skills over imported ones by default.
-- Use `internal-code-review` when the request specifically needs the repository-owned defect-first workflow, not as an automatic starting point for every review.
+- Start with `internal-code-review` as the default defect-first workflow, then add scanning or verification skills only when they materially widen coverage.
 - Findings come before summaries.
 - Prioritize defects, regressions, missing validation, and security exposure.
 - Trace regressions back to the originating change or assumption, not only the failing symptom.

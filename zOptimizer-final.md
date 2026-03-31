@@ -16,10 +16,10 @@
 
 ### Corrected factual baseline from disk
 
-- The live repository currently has `100` skills, down from `117` before the completed first prune batch.
+- The live repository currently has `98` skills, down from `117` before the completed first prune batch and first merge-source retirements.
 - Family counts on disk are:
   - `26` `internal-*`
-  - `20` `antigravity-*`
+  - `18` `antigravity-*`
   - `18` `awesome-copilot-*`
   - `30` `obra-*`
   - `3` `openai-*`
@@ -52,8 +52,6 @@ These are the best candidates for “take the good parts, make the internal skil
 
 | External Skill | Target Internal Owner | What To Absorb | Why This Is Better |
 |---|---|---|---|
-| `antigravity-bash-pro` | `internal-script-bash` | Stronger defensive shell patterns: `set -Eeuo pipefail`, safe traps, `mktemp`, dry-run/idempotency, portability caveats, optional Bats/shfmt references | Bash should have one canonical tactical owner. |
-| `antigravity-code-review-checklist` | `internal-code-review` | Useful onboarding checklist dimensions and generic review sequencing | `internal-code-review` already wins the domain and should own it fully. |
 | `antigravity-java-pro` | `internal-project-java` | Selective modern-Java depth: Java 21 concerns, virtual threads, Spring Boot 3, Testcontainers, performance caveats | Avoid keeping a broad external Java peer beside the internal Java owner. |
 | `antigravity-javascript-pro` | `internal-project-nodejs` | Runtime/module-system judgment and stronger event-loop awareness | Collapse JS/Node general guidance into the internal Node owner. |
 | `antigravity-kubernetes-deployment` | `internal-kubernetes-deployment` | Any deployment-specific operational patterns still missing from the internal K8s workflow | Keep one tactical Kubernetes deployment owner. |
@@ -156,22 +154,6 @@ My revisions are:
 #### Step 1.2: Internal vs External Quality Matrix
 
 The original matrix says “complementary” in several places. That is an accurate description of the current state, but not the best target state for your preferred operating model.
-
-##### Bash
-
-Original conclusion: complementary.
-
-My conclusion:
-
-- true today
-- not desirable long-term
-- `internal-script-bash` should absorb the best defensive shell patterns from `antigravity-bash-pro`
-- after absorption, `antigravity-bash-pro` should be removable
-
-Reason:
-
-- keeping both creates unnecessary overlap for any “write/update bash script” request
-- the internal Bash skill already has the stronger repo-local structure and validation posture
 
 ##### Python script and Python project
 
@@ -285,10 +267,7 @@ My conclusion:
 
 - fully agree
 - `internal-code-review` should stay the canonical owner
-- merge any genuinely useful checklist fragments from:
-  - `antigravity-code-review-checklist`
-  - `antigravity-simplify-code`
-- delete the external peers afterward
+- the remaining open question is whether the reuse/clarity rubric inside `antigravity-simplify-code` is worth selective absorption or full retirement
 
 ##### Performance
 
@@ -338,17 +317,6 @@ My decision:
   - `internal-quality-engineering` when the task is testing/performance-heavy
 - the rest should be merged or deleted
 
-##### Bash cluster
-
-Original collision set:
-
-- `internal-script-bash`
-- `antigravity-bash-pro`
-
-My decision:
-
-- collapse to `internal-script-bash`
-
 ##### Terraform cluster
 
 Original collision set:
@@ -390,13 +358,12 @@ My decision:
 
 ##### Code review cluster
 
-Original collision set:
+Remaining collision set:
 
 - `internal-code-review`
-- `antigravity-code-review-checklist`
-- `antigravity-clean-code`
 - `antigravity-simplify-code`
-- `antigravity-kaizen`
+- `obra-verification-before-completion`
+- `obra-requesting-code-review`
 
 My decision:
 
@@ -404,8 +371,8 @@ My decision:
   - `internal-code-review`
 - adjacent internal partner:
   - `internal-pair-architect`
-- external peers:
-  - merge useful fragments or delete
+- remaining peer:
+  - selectively absorb the simplification rubric from `antigravity-simplify-code` or retire it
 
 ##### Kubernetes cluster
 
@@ -531,13 +498,10 @@ My fix:
 
 ##### “Review this code”
 
-Still a severe collision zone:
+Still a meaningful collision zone:
 
 - `internal-code-review`
-- `antigravity-code-review-checklist`
-- `antigravity-clean-code`
 - `antigravity-simplify-code`
-- `antigravity-kaizen`
 - `obra-verification-before-completion`
 - `obra-requesting-code-review`
 
@@ -848,8 +812,6 @@ This is exactly why “merge into internal and delete the external” is such a 
 
 I agree, and I would make the following concrete consolidation set the first one:
 
-- `antigravity-code-review-checklist` -> `internal-code-review`
-- `antigravity-bash-pro` -> `internal-script-bash`
 - `antigravity-python-pro` + `antigravity-python-patterns` + `antigravity-python-testing-patterns` + `awesome-copilot-pytest-coverage` -> internal Python owners
 - `antigravity-java-pro` + `awesome-copilot-java-junit` + `awesome-copilot-java-springboot` -> `internal-project-java`
 - `antigravity-javascript-pro` + `antigravity-nodejs-best-practices` + `awesome-copilot-javascript-typescript-jest` -> `internal-project-nodejs`
@@ -941,15 +903,18 @@ The original file proposes:
 5. run structural validation
 6. re-run collision simulation after changes
 
-For this analysis, I actually verified:
+For this analysis and first cleanup pass, I actually verified:
 
 - skill families and counts on disk
 - agent count on disk
 - selected skill descriptions and bodies for the major collision groups
 - imported-agent `tools:` frontmatter
 - skill-reference counts for internal agents
+- structural validation after retiring the first two merge-source externals
 
-I did not perform the full post-cleanup validation because this document is analysis-only and no catalog resources were changed yet.
+Validation run for this pass:
+
+- `python3 .github/scripts/validate-copilot-customizations.sh`
 
 #### Decisions
 

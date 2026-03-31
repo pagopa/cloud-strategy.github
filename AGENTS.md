@@ -229,9 +229,7 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
 - `.github/skills/antigravity-aws-serverless/SKILL.md`
-- `.github/skills/antigravity-bash-pro/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
-- `.github/skills/antigravity-code-review-checklist/SKILL.md`
 - `.github/skills/antigravity-domain-driven-design/SKILL.md`
 - `.github/skills/antigravity-golang-pro/SKILL.md`
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`

@@ -1,6 +1,6 @@
 ---
 name: internal-code-review
-description: Use when a code review is requested, a PR needs reviewing, or the user wants anti-pattern checks, lint-level scrutiny, or quality gate enforcement on Python, Bash, Terraform, Java, or Node.js/TypeScript.
+description: Use when a code review is requested, a PR needs reviewing, or the user wants defect-first checks across functionality, security, performance, maintainability, and tests on Python, Bash, Terraform, Java, or Node.js/TypeScript.
 ---
 
 # Code Review Skill
@@ -9,6 +9,15 @@ description: Use when a code review is requested, a PR needs reviewing, or the u
 - Perform an exhaustive, nit-level code review on Python, Bash, Terraform, Java, or Node.js/TypeScript files.
 - Provide structured findings with per-language anti-pattern detection.
 - Complement specialist reviewer agents with deep language-specific checks.
+
+## Context checklist
+
+Establish these review inputs before grading the diff:
+
+- What behavior, requirement, or defect is the change trying to address?
+- Which files, tests, or runtime paths carry the change?
+- Are there rollout, backward-compatibility, or migration constraints?
+- What is the expected validation path, and what is still unverified?
 
 ## Severity levels
 | Level | Meaning | Action |
@@ -49,17 +58,29 @@ These apply regardless of language:
 | `Minor` | TODO/FIXME/HACK without linked issue or ticket |
 | `Nit` | Trailing whitespace or inconsistent EOF newlines |
 
+## Review lenses
+
+Always cover these dimensions, even when the language-specific catalog is the primary tool:
+
+- Functionality: correctness, edge cases, failure handling, and requirement fit
+- Security: input validation, secret handling, privilege boundaries, unsafe interpolation, and dependency risk
+- Performance: unnecessary loops, repeated work, hot-path regressions, or avoidable I/O
+- Tests: meaningful coverage, edge-case coverage, and whether the validation actually exercises the changed behavior
+- Maintainability: naming, cohesion, complexity, dead code, and local convention fit
+
 ## Review workflow
 
-1. **Identify languages** in the diff (auto-detect from file extensions).
-2. **Load applicable anti-pattern catalogs** from `references/`.
-3. **Scan each changed file** against the relevant catalog.
-4. **Self-question each finding**: Is this really wrong, or am I misunderstanding the context? Could the author have a valid reason?
-5. **Apply escalation rules** for repeated violations.
-6. **Group findings** by severity: `Critical` → `Major` → `Minor` → `Nit` → `Notes`.
-7. **Include file path and line reference** for every finding.
-8. **Suggest a concrete fix** or reference the "good" example for each finding.
-9. **Summarize** total finding count per severity at the end.
+1. **Identify languages and changed surfaces** in the diff (auto-detect from file extensions and changed paths).
+2. **Read enough nearby context** to understand intent, requirements, and test strategy before judging style or structure.
+3. **Load applicable anti-pattern catalogs** from `references/`.
+4. **Scan each changed file** against the relevant catalog.
+5. **Cross-check the review lenses** for functionality, security, performance, tests, and maintainability.
+6. **Self-question each finding**: Is this really wrong, or am I misunderstanding the context? Could the author have a valid reason?
+7. **Apply escalation rules** for repeated violations.
+8. **Group findings** by severity: `Critical` → `Major` → `Minor` → `Nit` → `Notes`.
+9. **Include file path and line reference** for every finding.
+10. **Suggest a concrete fix** or reference the "good" example for each finding.
+11. **Summarize** total finding count per severity at the end.
 
 ## Common mistakes
 
@@ -67,6 +88,7 @@ These apply regardless of language:
 |---|---|---|
 | Flagging style issues as Major | Dilutes urgency of real problems | Use severity mappings strictly |
 | Reviewing only the diff without reading surrounding context | Missing that the "bad" pattern is intentional for backward compat | Read 20-30 lines before/after each change |
+| Skipping the requirements or test strategy first | You can flag a deliberate tradeoff as a defect | Establish the context checklist before scoring findings |
 | Applying Python rules to Bash or vice versa | Different idioms, different expectations | Always check the file extension first |
 | Reporting "missing tests" without checking if tests exist elsewhere | False findings erode trust | Search for test files before flagging |
 | Skipping cross-language checks | Secrets and validation gaps cross all languages | Always run the cross-language table |

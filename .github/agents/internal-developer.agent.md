@@ -17,7 +17,6 @@ You are the repository's implementation command center for application and scrip
 - `antigravity-nodejs-best-practices`
 - `antigravity-python-pro`
 - `antigravity-python-patterns`
-- `antigravity-bash-pro`
 - `internal-project-java`
 - `internal-project-nodejs`
 - `internal-project-python`
@@ -31,7 +30,7 @@ You are the repository's implementation command center for application and scrip
 ## Routing Rules
 
 - Use this agent when the user needs implementation, refactoring, scaffolding, or bug fixing in Java, Node.js, Python, or Bash.
-- Choose the declared project, script, provider, or style skills that best match the runtime and task shape; do not prioritize `internal-*` skills over imported ones by default.
+- Start with the repository-owned project or script skill that directly owns the runtime. For Bash work, use `internal-script-bash` as the canonical script owner.
 - Treat imported and repository-owned language skills as peers. Narrow to the smallest useful set based on runtime, framework, and implementation constraints.
 - Avoid stacking multiple imported style skills unless each one changes the implementation decision or validation path.
 - Use the stack-specific best-practice skills when framework, runtime, or project-structure choices materially affect the implementation.
