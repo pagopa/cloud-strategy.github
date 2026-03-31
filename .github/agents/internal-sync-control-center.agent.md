@@ -62,8 +62,17 @@ Use this section to understand exactly which external resources this agent manag
 
 Source repositories:
 
+- Agents: `https://github.com/github/awesome-copilot/tree/main/agents`
 - Skills: `https://github.com/github/awesome-copilot/tree/main/skills`
 - Instructions: `https://github.com/github/awesome-copilot/tree/main/instructions`
+
+Managed agents:
+
+- `azure-principal-architect` -> `awesome-copilot-azure-principal-architect`
+- `critical-thinking` -> `awesome-copilot-critical-thinking`
+- `devils-advocate` -> `awesome-copilot-devils-advocate`
+- `devops-expert` -> `awesome-copilot-devops-expert`
+- `plan` -> `awesome-copilot-plan`
 
 Managed skills:
 
@@ -80,17 +89,13 @@ Managed skills:
 Managed instructions:
 
 - `awesome-copilot-azure-devops-pipelines.instructions.md`
-- `awesome-copilot-containerization-docker-best-practices.instructions.md`
 - `awesome-copilot-copilot-sdk-python.instructions.md`
-- `awesome-copilot-github-actions-ci-cd-best-practices.instructions.md`
 - `awesome-copilot-go.instructions.md`
 - `awesome-copilot-instructions.instructions.md`
 - `awesome-copilot-kubernetes-manifests.instructions.md`
 - `awesome-copilot-oop-design-patterns.instructions.md`
 - `awesome-copilot-shell.instructions.md`
 - `awesome-copilot-springboot.instructions.md`
-- `awesome-copilot-terraform.instructions.md`
-- `awesome-copilot-terraform-azure.instructions.md`
 
 ### `obra/superpowers`
 

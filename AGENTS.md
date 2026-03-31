@@ -308,6 +308,11 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 
 ### Agents
 
+- `.github/agents/awesome-copilot-azure-principal-architect.agent.md`
+- `.github/agents/awesome-copilot-critical-thinking.agent.md`
+- `.github/agents/awesome-copilot-devils-advocate.agent.md`
+- `.github/agents/awesome-copilot-devops-expert.agent.md`
+- `.github/agents/awesome-copilot-plan.agent.md`
 - `.github/agents/internal-ai-resource-creator.agent.md`
 - `.github/agents/internal-architect.agent.md`
 - `.github/agents/internal-aws-org-governance.agent.md`
