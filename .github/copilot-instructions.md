@@ -14,11 +14,18 @@ You are an expert software and platform engineer. You are the user's technical p
 5. Use `prompts/*.prompt.md` for repeatable tasks (or `.github/prompts/*.prompt.md` in `.github` layout).
 6. Use `skills/*/SKILL.md` for implementation patterns (or `.github/skills/*/SKILL.md` in `.github` layout).
 
+## Root bridge contract
+- `.github/copilot-instructions.md` is the primary detailed policy file for this repository.
+- Root `AGENTS.md` is the GitHub Copilot bridge for naming, routing, discovery, and inventory only.
+- When both files need changes, update `.github/copilot-instructions.md` first and refresh root `AGENTS.md` second.
+- Keep repository-facing wording GitHub Copilot-based and do not make repository artifacts say or imply that the repository uses a different assistant runtime.
+- If detailed policy, validation, or workflow guidance is duplicated in root `AGENTS.md`, move that detail here and keep only the bridge-level pointer there.
+
 ## Repository detection workflow
 - Detect the repository role from real files before generating code or documentation.
 - Treat this repository as a Copilot customization and governance repository unless the current target files prove otherwise.
 - Use repository evidence first:
-  - `AGENTS.md` for routing, naming policy, validation expectations, and preferred prompts or skills.
+  - `AGENTS.md` for routing, naming policy, discovery, and inventory.
   - `.github/copilot-instructions.md`, `.github/copilot-code-review-instructions.md`, and `.github/copilot-commit-message-instructions.md` for assistant-facing behavior.
   - `.github/instructions/`, `.github/prompts/`, `.github/skills/`, and `.github/agents/` for reusable customization assets.
   - `.github/repo-profiles.yml`, `VERSION`, `Makefile`, `.github/scripts/internal-sync-copilot-configs.py`, and `tests/test_contract_runner.py` for concrete implementation and validation signals.
@@ -77,6 +84,11 @@ These apply to every code change, regardless of language or technology:
 - Follow `security-baseline.md` and `DEPRECATION.md` when introducing structural changes (or `.github/...` equivalents in `.github` layout).
 - When generating instructions for another repository, derive stack, architecture, and testing guidance from that repository's actual manifests and source layout rather than reusing assumptions from this one.
 
+## Repository workflow policy
+- PR content must follow `.github/PULL_REQUEST_TEMPLATE.md` in exact section order.
+- For GitHub Actions pinning, each full SHA must include an adjacent comment with a release or tag reference.
+- `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
+
 ## Script standards (Bash/Python)
 - Apply to both create and modify flows.
 - Start with purpose + usage examples.
@@ -98,13 +110,16 @@ These apply to every code change, regardless of language or technology:
 - Node default: built-in `node:test` + `node:assert/strict` (`describe`/`it` when available).
 
 ## Validation baseline
+- For Copilot customization changes, run `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`.
 - Terraform: `terraform fmt` and `terraform validate`.
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
+- Changed Python automation or scripts: run `python -m compileall <changed_python_paths>` and relevant `pytest` checks.
 - Run `scripts/validate-copilot-customizations.py` for customization changes (or `.github/scripts/...` in `.github` layout).
 - If a referenced validation entrypoint is absent in the current repository, explicitly report that gap and run the closest existing verification instead.
 
 ## Repository-specific context
-- Use `AGENTS.md` as the single source of truth for repository-specific routing, preferred prompts/skills, inventories, and validation details.
-- Avoid repeating large prompt/skill catalogs here; load only the files needed for the current task.
+- Use root `AGENTS.md` as the thin bridge for repository-specific routing, naming, discovery, and inventory.
+- Keep detailed validation, workflow policy, and implementation guardrails here instead of duplicating them in root `AGENTS.md`.
+- Load only the prompts, skills, instructions, or agents needed for the current task.
 - Keep assistant-facing language mapped through `AGENTS.md` and avoid mentioning internal runtime names.

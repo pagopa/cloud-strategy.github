@@ -14,13 +14,14 @@ Use this skill when creating or updating a repository-root `AGENTS.md`.
 - tells assistants where the real Copilot policy lives
 - explains routing, naming, and discovery
 - points to prompts, skills, instructions, and agents
-- stays light enough to remain portable across assistant runtimes
+- stays light enough to remain portable across assistant runtimes while keeping repository-facing wording anchored to GitHub Copilot
 
 ## Core Rule
 
 Keep `.github/copilot-instructions.md` as the primary detailed policy layer.
 Keep root `AGENTS.md` short, navigational, and runtime-agnostic.
 When both files change in the same workflow, finalize `.github/copilot-instructions.md` first and refresh `AGENTS.md` second.
+If detailed policy currently lives in root `AGENTS.md`, move it into `.github/copilot-instructions.md` before slimming the bridge.
 
 Do not make root `AGENTS.md` say or imply that the repository uses a specific internal assistant runtime. Some consumer repositories cannot make that claim and should not encode it.
 
@@ -37,17 +38,19 @@ Do not make root `AGENTS.md` say or imply that the repository uses a specific in
 
 - Full implementation standards already defined in `.github/copilot-instructions.md`
 - Repeated language-specific coding rules already covered by instructions
+- Detailed validation baselines, PR workflow rules, or implementation guardrails that belong in `.github/copilot-instructions.md`
 - Runtime-specific tool internals
 - Large duplicated prompt or skill bodies
 
 ## Authoring Workflow
 
-1. Read the existing root `AGENTS.md`.
-2. Read `.github/copilot-instructions.md`.
+1. Read `.github/copilot-instructions.md` first.
+2. Read the existing root `AGENTS.md`.
 3. Identify what belongs in the bridge versus the Copilot policy layer.
-4. Keep only the bridge-owned content in `AGENTS.md`.
-5. Ensure references to instructions, prompts, skills, agents, and scripts are correct.
-6. Regenerate inventory paths if the repository keeps inline inventory.
+4. Move detailed policy out of `AGENTS.md` and into `.github/copilot-instructions.md` when needed.
+5. Keep only the bridge-owned content in `AGENTS.md`.
+6. Ensure references to instructions, prompts, skills, agents, and scripts are correct.
+7. Regenerate inventory paths if the repository keeps inline inventory.
 
 ## Bridge Style
 
@@ -89,6 +92,8 @@ If the inventory is externalized:
 When updating `AGENTS.md`, ensure:
 
 - the bridge-to-policy relationship is explicit
+- `.github/copilot-instructions.md` was reviewed first and updated first when the policy contract changed
 - the file remains lightweight
 - all listed assets exist
+- repository-facing wording remains GitHub Copilot-based
 - agent routing points only to agents that actually exist in `.github/agents/`

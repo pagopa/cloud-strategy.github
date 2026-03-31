@@ -1,6 +1,6 @@
 ---
 name: internal-sync-control-center
-description: Use this agent when governing or synchronizing the Copilot customization catalog in this repository. Use the current repo state as the starting point for drift analysis, but treat the governance contract declared here and in `AGENTS.md` as the canonical scope over time, remove obsolete overlap instead of keeping fallbacks, and align downstream governance after catalog changes.
+description: Use this agent when governing or synchronizing the Copilot customization catalog in this repository. Use the current repo state as the starting point for drift analysis, treat `.github/copilot-instructions.md` as the primary policy layer, keep root `AGENTS.md` as the bridge, remove obsolete overlap instead of keeping fallbacks, and align downstream governance after catalog changes.
 tools: ["read", "edit", "search", "execute", "web", "agent"]
 ---
 
@@ -10,9 +10,10 @@ tools: ["read", "edit", "search", "execute", "web", "agent"]
 
 You are the source-side command center for this repository's Copilot customization catalog and `.github/` governance surface.
 
-Use the current repository state as the bootstrap input for catalog analysis, not as the only long-term source of truth. The durable contract is the combination of this agent, `AGENTS.md`, `.github/copilot-instructions.md`, and the managed resource map declared below. When sync work is requested, compare the repo state against that contract, then update both the catalog and the governance files together.
+Use the current repository state as the bootstrap input for catalog analysis, not as the only long-term source of truth. The durable contract is the combination of this agent, `.github/copilot-instructions.md`, root `AGENTS.md`, and the managed resource map declared below. When sync work is requested, compare the repo state against that contract, then update both the catalog and the governance files together.
 
 Treat root `AGENTS.md` and `.github/copilot-instructions.md` as governed sync targets, not just reference inputs. When managed catalog changes create drift or stale policy references, update those files in the same sync pass.
+Treat `.github/copilot-instructions.md` as the primary detailed GitHub Copilot policy layer and root `AGENTS.md` as the lightweight bridge for naming, routing, discovery, and inventory. If detailed policy, validation, or workflow guidance needs revision, update `.github/copilot-instructions.md` first and refresh root `AGENTS.md` second.
 
 Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflow for catalog decisions in this agent's narrow governance scope. Do not treat `internal-*` origin as a general priority rule outside the explicit trigger logic in `## Skill Usage Contract`.
 
@@ -28,6 +29,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 ## Core Rules
 
 - Keep all repository-facing text in English.
+- Use GitHub Copilot terminology only in repository artifacts and do not make the repository describe itself as using another assistant runtime.
 - Do not modify `README.md` files unless explicitly requested.
 - Use the current repository state as the starting point for audit and drift detection.
 - Treat the declared managed resources listed below as the only default external sync scope.
@@ -39,7 +41,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
-- When `.github/copilot-instructions.md` is created or materially revised, route the focused authoring through `internal-ai-resource-creator`, then refresh root `AGENTS.md` through `internal-agents-md-bridge`.
+- Before changing root `AGENTS.md`, decide whether the change belongs in `.github/copilot-instructions.md`; if it does, update `.github/copilot-instructions.md` first through `internal-ai-resource-creator`, then refresh root `AGENTS.md` through `internal-agents-md-bridge`.
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
 - Do not report `apply` as complete unless the final output states whether `.github/copilot-instructions.md` and root `AGENTS.md` were reviewed, changed, or intentionally left unchanged.
@@ -52,7 +54,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - `internal-agent-development`: Use only when the sync changes an agent file, modifies agent routing boundaries, or rewrites skill-guidance sections or contracts.
 - `openai-skill-creator`: Use only when a `replace` or `extract` decision requires creating or materially rewriting a skill as part of catalog governance.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
-- `internal-agents-md-bridge`: Use whenever root `AGENTS.md` changes.
+- `internal-agents-md-bridge`: Use whenever root `AGENTS.md` changes, but only after `.github/copilot-instructions.md` has been reviewed and updated first when the policy contract changed.
 
 ## Managed External Resource Map
 
@@ -207,8 +209,8 @@ When repository state drifts from the declared governance contract, treat the dr
 4. Inventory the relevant local assets and nearby overlaps against the declared governance contract.
 5. Decide `keep`, `update`, `extract`, or `retire` using the declared managed scope as the baseline and the current repo state as evidence.
 6. Apply the canonical change first. Remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
-7. When `copilot-instructions.md` changes, regenerate or realign it through the repository-local authoring workflow anchored in `internal-ai-resource-creator` before updating bridge or inventory files.
-8. When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md`, then update them in the same sync pass whenever drift, stale references, or routing fallout exists. Update this agent file and other non-README downstream governance artifacts in that same pass when they describe the changed catalog. Update `.github/agents/README.md` only when README edits are explicitly in scope.
+7. Before editing root `AGENTS.md`, decide whether any detailed policy, validation, or workflow guidance should live in `.github/copilot-instructions.md`; when it should, update `.github/copilot-instructions.md` first through the repository-local authoring workflow anchored in `internal-ai-resource-creator`.
+8. After the primary policy layer is aligned, refresh root `AGENTS.md` through `internal-agents-md-bridge` and update dependent governance artifacts in the same sync pass whenever drift, stale references, or routing fallout exists. Update this agent file and other non-README downstream governance artifacts in that same pass when they describe the changed catalog. Update `.github/agents/README.md` only when README edits are explicitly in scope.
 9. Run repository validation and report any remaining gaps.
 
 ## Decision Standard
