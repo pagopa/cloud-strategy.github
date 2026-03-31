@@ -8,7 +8,7 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 - Keep `permissions` minimal in workflows (default to read-only unless write is required).
 - Prefer OIDC short-lived credentials over long-lived static secrets.
 - Require branch protection and pull request reviews for `.github/**` changes.
-- Validate `.github/**` content in CI using `.github/scripts/validate-copilot-customizations.sh`.
+- Validate `.github/**` content in CI using `.github/scripts/validate-copilot-customizations.py`.
 - Run `shellcheck` on Bash scripts under `.github/scripts/`.
 
 ## IAM and least privilege
@@ -47,15 +47,15 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 ## Enforcement status
 | Control | Status | Tool |
 | --- | --- | --- |
-| Third-party action SHA pinning | Automated | `validate-copilot-customizations.sh` |
-| Minimal workflow permissions | Automated | `validate-copilot-customizations.sh` |
-| Docker image digest pinning | Automated | `validate-copilot-customizations.sh` |
-| Validate `.github/**` in CI | Automated | `github-validate-copilot-customizations.yml` |
+| Third-party action SHA pinning | Automated | `validate-copilot-customizations.py` |
+| Minimal workflow permissions | Automated | `validate-copilot-customizations.py` |
+| Docker image digest pinning | Automated | `validate-copilot-customizations.py` |
+| Validate `.github/**` in CI | Automated | `validate-copilot-customizations.py` |
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
 | Secret placeholder avoidance in prompts/examples | Partial | pre-commit hooks + review |
-| OIDC over long-lived secrets | Manual review | `github-actions.instructions.md` |
-| IAM least privilege (AWS/Azure/GCP) | Manual review | `TechAISecurityReviewer` + `TechAITerraformReviewer` |
-| Supply chain hardening | Manual review | `TechAISecurityReviewer` |
+| OIDC over long-lived secrets | Manual review | `internal-github-actions.instructions.md` |
+| IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-code-review` + `internal-terraform` |
+| Supply chain hardening | Manual review | `awesome-copilot-github-actions-ci-cd-best-practices.instructions.md` + `internal-code-review` |
 | Branch protection for `.github/**` | Manual review | repository settings |
 | Read-only reviewer agents | Manual review | agent review |
 | CHANGELOG-based change governance | Manual review | PR review |

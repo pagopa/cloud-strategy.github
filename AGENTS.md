@@ -1,97 +1,57 @@
 # AGENTS.md - customization-standards
 
-This file is for GitHub Copilot and AI assistants working in this repository.
+This file is the repository-root bridge for GitHub Copilot customization resources.
+
+`.github/copilot-instructions.md` is the primary detailed policy file.
+Update `.github/copilot-instructions.md` first when policy, validation, or workflow guidance changes, then refresh root `AGENTS.md` only for routing, naming, discovery, or inventory alignment.
 
 ## Naming Policy
 
 - Use GitHub Copilot terminology in repository-facing content.
-- Do not mention internal runtime names in repository artifacts.
+- Do not mention internal or alternative assistant runtimes in repository artifacts.
 - Treat prompt frontmatter `name:` as the canonical command identifier.
-- Canonical repository-owned prompt, agent, and instruction filenames should use the `tech-ai-` prefix when introduced or renamed.
-- Canonical prompt, skill, and agent `name:` values should use the `TechAI` prefix.
-- Repository-owned prompt, skill, and agent filenames in consumer repositories should use the `internal-` prefix.
-- Repository-owned prompt, skill, and agent `name:` values in consumer repositories should also use the `internal-` prefix.
-- Reserve the `TechAIGlobal` prefix only for repo-only agents that encode standards for this global configuration repository.
-- The canonical project-owned `AGENTS.md` file must live in repository root as `AGENTS.md`.
-- Keep legacy aliases only when required for backward compatibility, and prefer canonical `tech-ai-*` assets in docs, examples, and sync selection.
+- External resources must use `<short-repo>-<original-resource-name>` in filenames and `name:` values.
+- Resources created locally in `cloud-strategy.github` must use the `internal-` prefix in filenames and `name:` values.
+- Resources created locally in other repositories must use the `local-` prefix in filenames and `name:` values.
+- Root `AGENTS.md` is the canonical project-owned bridge file.
+- Do not keep legacy aliases, fallback copies, or deprecated variants. Preserve an alias only when an active backward-compatibility requirement is explicitly documented.
+
+## Imported Resource Policy
+
+- Treat every non-`internal-*` resource in this repository as an imported upstream asset that should remain verbatim unless the user explicitly asks to refresh, replace, or fork that import.
+- Express repository-specific behavior through `internal-*` resources only.
+- Use `internal-*` resources as wrappers, extensions, adapters, or routing layers that map imported upstream resources to this repository's local needs.
 
 ## Decision Priority
 
-1. Apply repository non-negotiables from `copilot-instructions.md`.
+1. Apply `.github/copilot-instructions.md` as the primary detailed policy layer.
 2. Apply explicit user requirements for the current task.
 3. Apply the selected agent behavior.
-4. Apply matching files under `instructions/*.instructions.md` using `applyTo`.
-5. Apply selected prompt constraints from `prompts/*.prompt.md`.
-6. Apply implementation details from referenced `skills/*/SKILL.md`.
-7. If no agent is explicitly selected, use the default agent with matching language instructions.
+4. Apply matching `.github/instructions/*.instructions.md` using `applyTo`.
+5. Apply selected `.github/prompts/*.prompt.md`.
+6. Apply implementation details from referenced `.github/skills/*/SKILL.md`.
+7. Use the inventory below for discovery only; do not duplicate detailed policy in this file.
 
 ## Agent Routing
 
-### When to use each agent
-
-#### Specialist Reviewers (per-language, nit-level review)
-- Use `TechAIBashReviewer` for exhaustive, nit-level Bash script reviews.
-- Use `TechAIJavaReviewer` for exhaustive, nit-level Java code reviews.
-- Use `TechAINodejsReviewer` for exhaustive, nit-level Node.js code reviews.
-- Use `TechAIPythonReviewer` for exhaustive, nit-level Python code reviews.
-- Use `TechAITerraformReviewer` for exhaustive, nit-level Terraform code reviews.
-- Use `TechAISecurityReviewer` for security-focused review across all languages.
-
-#### Planning and Architecture
-- Use `TechAIPlanner` for ambiguous scope, tradeoff analysis, or multi-step design.
-- Use `TechAIPairArchitectAnalysis` prompt with the `TechAIPairArchitect` skill for deep change-impact analysis with health scoring, blind-spot detection, and structured Markdown reports.
-
-#### Editing and Delivery
-- Use `TechAIPREditor` for pull request body generation from diffs.
-
-#### Repository Configuration (source-only, not synced to consumers)
-- Use `TechAISyncGlobalCopilotConfigsIntoRepo` for cross-repository Copilot-core alignment and source or target redundancy audits.
-
-### Anti-patterns
-
-- Do not use `TechAIPlanner` for trivial single-file changes with clear requirements; work directly.
-- Do not use a specialist reviewer outside its language domain; pick the matching one.
-
-
-### Composition and Handoffs
-
-- For changes spanning multiple specialist domains, run each relevant specialist reviewer and aggregate findings.
-
-## Governance References
-
-- `security-baseline.md`: portable security controls baseline for all Copilot customization.
-- `DEPRECATION.md`: lifecycle and deprecation policy for all customization assets.
-- `repo-profiles.yml`: advisory profile catalog for different repository types.
-- `.github/scripts/validate-copilot-customizations.sh`: validation gate for customization changes.
-- `.github/templates/AGENTS.template.md`: slimmer onboarding template that keeps asset paths in the inventory section only.
-- `.github/templates/copilot-quickstart.md`: quick start guide for new teams.
-
-## Template Placeholders
-
-- `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories.
-- Consumer repositories must replace placeholder owners before enabling review enforcement.
-- The validator should warn when the placeholder owner is still present.
-
-## Prohibitions
-
-- Never hardcode secrets, tokens, or credentials.
-- Never modify `README.md` files unless explicitly requested by the user.
-- Never introduce new patterns when existing repository conventions exist.
-- Keep all repository artifacts in English (user chat may be in other languages).
-- Never run destructive commands unless explicitly requested.
-- Never skip validation after making changes.
-
-## PR and Workflow Conventions
-
-- PR content must follow `PULL_REQUEST_TEMPLATE.md` in exact section order.
-- For GitHub Actions pinning, each full SHA must include an adjacent comment with release or tag reference.
+- `internal-sync-control-center`: source-side governance of the live `.github/` Copilot catalog in this repository.
+- `internal-ai-resource-creator`: focused authoring or revision of one repository-owned Copilot resource.
+- `internal-sync-global-copilot-configs-into-repo`: cross-repository Copilot-core alignment and redundancy audits.
+- `internal-cicd`: CI/CD workflows, composite actions, release automation, and deployment-pipeline design.
+- `internal-architect`: cloud-agnostic architecture decisions.
+- `internal-aws-org-governance`, `internal-azure-platform-strategy`, `internal-gcp-platform-strategy`: cloud governance strategy.
+- `internal-aws-platform-engineering`, `internal-azure-platform-engineering`, `internal-gcp-platform-engineering`: cloud platform engineering.
+- `internal-developer`, `internal-infrastructure`, `internal-quality-engineering`: implementation, infrastructure delivery, and quality or observability work.
+- `internal-code-review`: defect-first review and merge-readiness checks.
+- Use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation.
+- Do not reference agents that are not present in `.github/agents/`.
 
 ## Repository Defaults
 
-- Primary focus: reusable, repository-agnostic Copilot customization standards.
+- Primary focus: reusable, repository-agnostic GitHub Copilot customization standards.
 - Profile hint: `minimal`
-- AGENTS.md is the external bridge for assistant behavior and naming; keep runtime references abstract.
-- Resolve stack from target files and explicit prompt inputs; the agent role remains behavioral, not language-specific.
+- Keep root `AGENTS.md` light: naming, routing, discovery, and inventory only.
+- Keep detailed behavior, validation, PR or workflow policy, and implementation guardrails in `.github/copilot-instructions.md`.
 - Prioritize these paths:
   - `.github/instructions`
   - `.github/prompts`
@@ -99,152 +59,141 @@ This file is for GitHub Copilot and AI assistants working in this repository.
   - `.github/agents`
   - `.github/scripts`
 
-### Default instruction routing
-
-- `**/*.py` -> `python.instructions.md`
-- `**/Dockerfile,**/Dockerfile.*,**/.dockerignore,**/docker-compose*.yml,**/compose*.yml` -> `docker.instructions.md`
-- `**/*.sh` -> `bash.instructions.md`
-- `**/*.tf` -> `terraform.instructions.md`
-- `**/*.java` -> `java.instructions.md`
-- `**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx` -> `nodejs.instructions.md`
-- `**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts` -> `lambda.instructions.md`
-- `**/*.yml,**/*.yaml` -> `yaml.instructions.md`
-- `**/*.md` -> `markdown.instructions.md`
-- `**/Makefile,**/*.mk` -> `makefile.instructions.md`
-- `**/workflows/**` -> `github-actions.instructions.md`
-- `**/actions/**/action.y*ml` -> `github-action-composite.instructions.md`
-- `**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json` -> `json.instructions.md`
-
-### Preferred prompts
-
-- `TechAICodeReview`: exhaustive, nit-level code review.
-- `TechAIGitHubAction`: GitHub Actions workflow authoring.
-- `TechAISyncGlobalCopilotConfigsIntoRepo`: cross-repository alignment and redundancy analysis.
-- `TechAIPREditor`: pull request body generation.
-- `TechAIAddUnitTests`: test authoring and improvement.
-- `TechAITerraform`: Terraform feature or module authoring.
-- `TechAIPairArchitectAnalysis`: deep change-impact analysis with health score, risk matrix, and devil's advocate mode.
-
-### Preferred skills
-
-#### Domain-Specific Skills
-- `TechAICodeReview`: strict review workflow and anti-pattern catalog.
-- `TechAICICDWorkflow`: CI or CD workflow design patterns.
-- `TechAISyncGlobalCopilotConfigsIntoRepo`: deterministic sync planning and reporting.
-- `TechAIPREditor`: PR body templates and diff-to-body mapping patterns.
-- `TechAICloudPolicy`: reusable cloud policy authoring patterns.
-- `TechAITerraform`: unified Terraform skill for features and modules.
-- `TechAIPairArchitect`: change-set-level impact, health scoring, risk matrix, and blind-spot detection.
-
-#### Workflow Skills (obra/superpowers)
-- `TechAIBrainstorming`: structured creative exploration before implementation.
-- `TechAIDispatchingParallelAgents`: coordinating parallel sub-agent work.
-- `TechAIExecutingPlans`: structured plan execution with checkpoints.
-- `TechAIFinishingDevBranch`: pre-merge checklist and branch cleanup.
-- `TechAIGitWorktrees`: efficient multi-branch work with git worktrees.
-- `TechAIReceivingCodeReview`: processing and addressing review feedback.
-- `TechAIRequestingCodeReview`: preparing changes for effective review.
-- `TechAISubagentDrivenDev`: delegating implementation to focused sub-agents.
-- `TechAISystematicDebugging`: root-cause-first debugging with 4-phase process.
-- `TechAITestDrivenDev`: TDD red-green-refactor workflow.
-- `TechAIUsingSuperpowers`: agent capability awareness and best practices.
-- `TechAIVerification`: evidence-based verification before claiming completion.
-- `TechAIWritingPlans`: structured plan authoring.
-- `TechAIWritingSkills`: skill authoring and improvement.
-- `TechAISkillCreator`: meta-skill for creating, testing, and improving skills (source-only).
-
-### Required validations before PR
-
-- `bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
-- `bash -n` and `shellcheck -s bash` for changed Bash scripts when available.
-- `python -m compileall <changed_python_paths>` and relevant `pytest` checks for Python changes.
-- `terraform fmt` and `terraform validate` for Terraform changes.
-
 ## Repository Inventory (Auto-generated)
 
 ### Instructions
 
-- `.github/instructions/bash.instructions.md`
-- `.github/instructions/docker.instructions.md`
-- `.github/instructions/github-action-composite.instructions.md`
-- `.github/instructions/github-actions.instructions.md`
-- `.github/instructions/java.instructions.md`
-- `.github/instructions/json.instructions.md`
-- `.github/instructions/lambda.instructions.md`
-- `.github/instructions/makefile.instructions.md`
-- `.github/instructions/markdown.instructions.md`
-- `.github/instructions/nodejs.instructions.md`
-- `.github/instructions/python.instructions.md`
-- `.github/instructions/terraform-aws.instructions.md`
-- `.github/instructions/terraform-azure.instructions.md`
-- `.github/instructions/terraform-gcp.instructions.md`
-- `.github/instructions/terraform.instructions.md`
-- `.github/instructions/yaml.instructions.md`
+- `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
+- `.github/instructions/awesome-copilot-copilot-sdk-python.instructions.md`
+- `.github/instructions/awesome-copilot-go.instructions.md`
+- `.github/instructions/awesome-copilot-instructions.instructions.md`
+- `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
+- `.github/instructions/awesome-copilot-oop-design-patterns.instructions.md`
+- `.github/instructions/awesome-copilot-shell.instructions.md`
+- `.github/instructions/awesome-copilot-springboot.instructions.md`
+- `.github/instructions/internal-bash.instructions.md`
+- `.github/instructions/internal-docker.instructions.md`
+- `.github/instructions/internal-github-action-composite.instructions.md`
+- `.github/instructions/internal-github-actions.instructions.md`
+- `.github/instructions/internal-java.instructions.md`
+- `.github/instructions/internal-json.instructions.md`
+- `.github/instructions/internal-lambda.instructions.md`
+- `.github/instructions/internal-makefile.instructions.md`
+- `.github/instructions/internal-markdown.instructions.md`
+- `.github/instructions/internal-nodejs.instructions.md`
+- `.github/instructions/internal-python.instructions.md`
+- `.github/instructions/internal-terraform.instructions.md`
+- `.github/instructions/internal-yaml.instructions.md`
 
 ### Prompts
 
-- `.github/prompts/tech-ai-add-platform.prompt.md`
-- `.github/prompts/tech-ai-add-report-script.prompt.md`
-- `.github/prompts/tech-ai-add-unit-tests.prompt.md`
-- `.github/prompts/tech-ai-bash-script.prompt.md`
-- `.github/prompts/tech-ai-cicd-workflow.prompt.md`
-- `.github/prompts/tech-ai-cloud-policy.prompt.md`
-- `.github/prompts/tech-ai-code-review.prompt.md`
-- `.github/prompts/tech-ai-data-registry.prompt.md`
-- `.github/prompts/tech-ai-docker.prompt.md`
-- `.github/prompts/tech-ai-github-action.prompt.md`
-- `.github/prompts/tech-ai-github-composite-action.prompt.md`
-- `.github/prompts/tech-ai-java.prompt.md`
-- `.github/prompts/tech-ai-nodejs.prompt.md`
-- `.github/prompts/tech-ai-pair-architect-analysis.prompt.md`
-- `.github/prompts/tech-ai-pr-editor.prompt.md`
-- `.github/prompts/tech-ai-python-script.prompt.md`
-- `.github/prompts/tech-ai-python.prompt.md`
-- `.github/prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md`
-- `.github/prompts/tech-ai-terraform-module.prompt.md`
-- `.github/prompts/tech-ai-terraform.prompt.md`
+- `.github/prompts/internal-add-platform.prompt.md`
+- `.github/prompts/internal-add-report-script.prompt.md`
+- `.github/prompts/internal-add-unit-tests.prompt.md`
+- `.github/prompts/internal-github-action.prompt.md`
+- `.github/prompts/internal-terraform-module.prompt.md`
 
 ### Skills
 
-- `.github/skills/tech-ai-brainstorming/SKILL.md`
-- `.github/skills/tech-ai-cicd-workflow/SKILL.md`
-- `.github/skills/tech-ai-cloud-policy/SKILL.md`
-- `.github/skills/tech-ai-code-review/SKILL.md`
-- `.github/skills/tech-ai-composite-action/SKILL.md`
-- `.github/skills/tech-ai-data-registry/SKILL.md`
-- `.github/skills/tech-ai-dispatching-parallel-agents/SKILL.md`
-- `.github/skills/tech-ai-docker/SKILL.md`
-- `.github/skills/tech-ai-executing-plans/SKILL.md`
-- `.github/skills/tech-ai-finishing-dev-branch/SKILL.md`
-- `.github/skills/tech-ai-git-worktrees/SKILL.md`
-- `.github/skills/tech-ai-pair-architect/SKILL.md`
-- `.github/skills/tech-ai-pr-editor/SKILL.md`
-- `.github/skills/tech-ai-project-java/SKILL.md`
-- `.github/skills/tech-ai-project-nodejs/SKILL.md`
-- `.github/skills/tech-ai-project-python/SKILL.md`
-- `.github/skills/tech-ai-receiving-code-review/SKILL.md`
-- `.github/skills/tech-ai-requesting-code-review/SKILL.md`
-- `.github/skills/tech-ai-script-bash/SKILL.md`
-- `.github/skills/tech-ai-script-python/SKILL.md`
-- `.github/skills/tech-ai-skill-creator/SKILL.md`
-- `.github/skills/tech-ai-subagent-driven-dev/SKILL.md`
-- `.github/skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md`
-- `.github/skills/tech-ai-systematic-debugging/SKILL.md`
-- `.github/skills/tech-ai-terraform/SKILL.md`
-- `.github/skills/tech-ai-test-driven-dev/SKILL.md`
-- `.github/skills/tech-ai-using-superpowers/SKILL.md`
-- `.github/skills/tech-ai-verification/SKILL.md`
-- `.github/skills/tech-ai-writing-plans/SKILL.md`
-- `.github/skills/tech-ai-writing-skills/SKILL.md`
+- `.github/skills/antigravity-api-design-principles/SKILL.md`
+- `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
+- `.github/skills/antigravity-aws-serverless/SKILL.md`
+- `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
+- `.github/skills/antigravity-domain-driven-design/SKILL.md`
+- `.github/skills/antigravity-golang-pro/SKILL.md`
+- `.github/skills/antigravity-grafana-dashboards/SKILL.md`
+- `.github/skills/antigravity-kubernetes-architect/SKILL.md`
+- `.github/skills/antigravity-network-engineer/SKILL.md`
+- `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
+- `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
+- `.github/skills/awesome-copilot-azure-pricing/SKILL.md`
+- `.github/skills/awesome-copilot-azure-resource-health-diagnose/SKILL.md`
+- `.github/skills/awesome-copilot-azure-role-selector/SKILL.md`
+- `.github/skills/awesome-copilot-cloud-design-patterns/SKILL.md`
+- `.github/skills/awesome-copilot-codeql/SKILL.md`
+- `.github/skills/awesome-copilot-dependabot/SKILL.md`
+- `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
+- `.github/skills/internal-agent-development/SKILL.md`
+- `.github/skills/internal-agents-md-bridge/SKILL.md`
+- `.github/skills/internal-aws-control-plane-governance/SKILL.md`
+- `.github/skills/internal-aws-mcp-research/SKILL.md`
+- `.github/skills/internal-changelog-automation/SKILL.md`
+- `.github/skills/internal-cicd-workflow/SKILL.md`
+- `.github/skills/internal-cloud-policy/SKILL.md`
+- `.github/skills/internal-code-review/SKILL.md`
+- `.github/skills/internal-composite-action/SKILL.md`
+- `.github/skills/internal-copilot-audit/SKILL.md`
+- `.github/skills/internal-copilot-docs-research/SKILL.md`
+- `.github/skills/internal-data-registry/SKILL.md`
+- `.github/skills/internal-devops-core-principles/SKILL.md`
+- `.github/skills/internal-docker/SKILL.md`
+- `.github/skills/internal-kubernetes-deployment/SKILL.md`
+- `.github/skills/internal-pair-architect/SKILL.md`
+- `.github/skills/internal-performance-optimization/SKILL.md`
+- `.github/skills/internal-pr-editor/SKILL.md`
+- `.github/skills/internal-project-java/SKILL.md`
+- `.github/skills/internal-project-nodejs/SKILL.md`
+- `.github/skills/internal-project-python/SKILL.md`
+- `.github/skills/internal-script-bash/SKILL.md`
+- `.github/skills/internal-script-python/SKILL.md`
+- `.github/skills/internal-skill-management/SKILL.md`
+- `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
+- `.github/skills/internal-terraform/SKILL.md`
+- `.github/skills/obra-brainstorming/SKILL.md`
+- `.github/skills/obra-collision-zone-thinking/SKILL.md`
+- `.github/skills/obra-condition-based-waiting/SKILL.md`
+- `.github/skills/obra-defense-in-depth/SKILL.md`
+- `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
+- `.github/skills/obra-executing-plans/SKILL.md`
+- `.github/skills/obra-finishing-a-development-branch/SKILL.md`
+- `.github/skills/obra-gardening-skills-wiki/SKILL.md`
+- `.github/skills/obra-inversion-exercise/SKILL.md`
+- `.github/skills/obra-meta-pattern-recognition/SKILL.md`
+- `.github/skills/obra-preserving-productive-tensions/SKILL.md`
+- `.github/skills/obra-pulling-updates-from-skills-repository/SKILL.md`
+- `.github/skills/obra-receiving-code-review/SKILL.md`
+- `.github/skills/obra-remembering-conversations/SKILL.md`
+- `.github/skills/obra-requesting-code-review/SKILL.md`
+- `.github/skills/obra-root-cause-tracing/SKILL.md`
+- `.github/skills/obra-scale-game/SKILL.md`
+- `.github/skills/obra-sharing-skills/SKILL.md`
+- `.github/skills/obra-simplification-cascades/SKILL.md`
+- `.github/skills/obra-subagent-driven-development/SKILL.md`
+- `.github/skills/obra-systematic-debugging/SKILL.md`
+- `.github/skills/obra-test-driven-development/SKILL.md`
+- `.github/skills/obra-testing-anti-patterns/SKILL.md`
+- `.github/skills/obra-testing-skills-with-subagents/SKILL.md`
+- `.github/skills/obra-tracing-knowledge-lineages/SKILL.md`
+- `.github/skills/obra-using-git-worktrees/SKILL.md`
+- `.github/skills/obra-using-skills/SKILL.md`
+- `.github/skills/obra-verification-before-completion/SKILL.md`
+- `.github/skills/obra-when-stuck/SKILL.md`
+- `.github/skills/obra-writing-plans/SKILL.md`
+- `.github/skills/openai-gh-address-comments/SKILL.md`
+- `.github/skills/openai-gh-fix-ci/SKILL.md`
+- `.github/skills/openai-skill-creator/SKILL.md`
+- `.github/skills/terraform-terraform-search-import/SKILL.md`
+- `.github/skills/terraform-terraform-test/SKILL.md`
 
 ### Agents
 
-- `.github/agents/tech-ai-bash-reviewer.agent.md`
-- `.github/agents/tech-ai-java-reviewer.agent.md`
-- `.github/agents/tech-ai-nodejs-reviewer.agent.md`
-- `.github/agents/tech-ai-planner.agent.md`
-- `.github/agents/tech-ai-pr-editor.agent.md`
-- `.github/agents/tech-ai-python-reviewer.agent.md`
-- `.github/agents/tech-ai-security-reviewer.agent.md`
-- `.github/agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`
-- `.github/agents/tech-ai-terraform-reviewer.agent.md`
+- `.github/agents/awesome-copilot-azure-principal-architect.agent.md`
+- `.github/agents/awesome-copilot-critical-thinking.agent.md`
+- `.github/agents/awesome-copilot-devils-advocate.agent.md`
+- `.github/agents/awesome-copilot-devops-expert.agent.md`
+- `.github/agents/awesome-copilot-plan.agent.md`
+- `.github/agents/internal-ai-resource-creator.agent.md`
+- `.github/agents/internal-architect.agent.md`
+- `.github/agents/internal-aws-org-governance.agent.md`
+- `.github/agents/internal-aws-platform-engineering.agent.md`
+- `.github/agents/internal-cicd.agent.md`
+- `.github/agents/internal-code-review.agent.md`
+- `.github/agents/internal-developer.agent.md`
+- `.github/agents/internal-infrastructure.agent.md`
+- `.github/agents/internal-azure-platform-strategy.agent.md`
+- `.github/agents/internal-azure-platform-engineering.agent.md`
+- `.github/agents/internal-gcp-platform-strategy.agent.md`
+- `.github/agents/internal-gcp-platform-engineering.agent.md`
+- `.github/agents/internal-quality-engineering.agent.md`
+- `.github/agents/internal-sync-control-center.agent.md`
+- `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`

@@ -22,7 +22,7 @@
 
 ## Executive Summary
 
-The `cloud-strategy.github` repository is an impressive and well-thought-out framework for managing GitHub Copilot customization at scale. Since the original ANALYSIS_REPORT (July 2025), significant improvements have been made: prompt duplication has been consolidated to canonical `tech-ai-*` names, the sync script has grown to 2300+ lines with 20 tests, repo-only global agents have been properly isolated, and the validator is robust at ~1200 lines. The framework is clearly production-grade.
+The `cloud-strategy.github` repository is an impressive and well-thought-out framework for managing GitHub Copilot customization at scale. Since the original ANALYSIS_REPORT (July 2025), significant improvements have been made: prompt duplication has been consolidated to canonical origin-prefixed names, the sync script has grown to 2300+ lines with 20 tests, repo-only agents have been properly isolated, and the validator is robust at ~1200 lines. The framework is clearly production-grade.
 
 However, this review identifies areas where Codex effectiveness can be further improved: **token budget waste from redundant content**, **missing infrastructure for key consumer stacks**, **test coverage gaps for the validator bash script**, and **governance enforcement blind spots** that reduce the framework's reliability at scale.
 
@@ -41,14 +41,14 @@ However, this review identifies areas where Codex effectiveness can be further i
 
 **File**: `.github/scripts/bootstrap-copilot-config.sh`
 
-The rsync-based bootstrap script and the manifest-based sync script (`tech-ai-sync-copilot-configs.py`) serve overlapping purposes. The sync script is far superior (SHA tracking, conflict detection, profile-aware selection, JSON reports, conservative merge). The bootstrap script does destructive `--clean` syncs with no manifest tracking, no conflict detection, and no reporting. This creates confusion for Codex about which tool to use and risks destructive operations on consumer repos.
+The rsync-based bootstrap script and the manifest-based sync script (`internal-sync-copilot-configs.py`) serve overlapping purposes. The sync script is far superior (SHA tracking, conflict detection, profile-aware selection, JSON reports, conservative merge). The bootstrap script does destructive `--clean` syncs with no manifest tracking, no conflict detection, and no reporting. This creates confusion for Codex about which tool to use and risks destructive operations on consumer repos.
 
 The ANALYSIS_REPORT (item 2.4) flagged this in July 2025 but it remains unresolved.
 
 **Fix**:
 1. Add a deprecation notice to the header of `bootstrap-copilot-config.sh`:
 ```bash
-# ⚠️ DEPRECATED: Prefer tech-ai-sync-copilot-configs.py for all consumer alignment.
+# ⚠️ DEPRECATED: Prefer internal-sync-copilot-configs.py for all consumer alignment.
 # This script is maintained for backward compatibility only.
 # See .github/DEPRECATION.md for lifecycle policy.
 ```
@@ -57,7 +57,7 @@ The ANALYSIS_REPORT (item 2.4) flagged this in July 2025 but it remains unresolv
 4. Add the deprecation to `DEPRECATION.md` under "Current deprecations":
 ```markdown
 ## Current deprecations
-- `scripts/bootstrap-copilot-config.sh`: Deprecated in favor of `scripts/tech-ai-sync-copilot-configs.py`. Removal planned after all consumers migrate to sync-based alignment.
+- `scripts/bootstrap-copilot-config.sh`: Deprecated in favor of `scripts/internal-sync-copilot-configs.py`. Removal planned after all consumers migrate to sync-based alignment.
 ```
 
 ---
@@ -73,7 +73,7 @@ The ANALYSIS_REPORT (item 2.1) flagged this as Major. It is still unresolved. Co
 **Fix**:
 1. Create a `VERSION` file at the root with initial content: `1.0.0`
 2. Add git tags at meaningful milestones (e.g., `v1.0.0` for the current stable state).
-3. Update `tech-ai-sync-copilot-configs.py` to include the source version in the manifest JSON.
+3. Update `internal-sync-copilot-configs.py` to include the source version in the manifest JSON.
 4. Document the release process in a new `RELEASING.md` or in `CONTRIBUTING.md`.
 
 ---
@@ -89,9 +89,9 @@ This is a standards repository that other teams consume. Without contribution gu
 - How to add a new prompt (naming, frontmatter keys, skill reference)
 - How to add a new skill (directory structure, SKILL.md template)
 - How to add a new agent (naming, tools, restrictions)
-- Naming conventions (`tech-ai-*` for canonical, `local-*` for consumer-local, `TechAIGlobal*` for repo-only)
-- Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
-- Required validation before PR (`validate-copilot-customizations.sh`, `pytest`, `shellcheck`)
+- Naming conventions (origin-prefixed canonical names, `local-*` for consumer-local, `internal-*` for repo-owned assets)
+- Required validation before PR (`make lint`, `make test`, and stack-specific checks)
+- Required validation before PR (`make lint`, `make test`, and stack-specific checks)
 
 ---
 
@@ -113,8 +113,8 @@ lint: ## Run shellcheck and bash syntax checks
 	shellcheck -s bash .github/scripts/*.sh
 	python3 -m compileall .github/scripts tests
 
-validate: ## Run Copilot customization validator
-	bash .github/scripts/validate-copilot-customizations.sh --scope root --mode strict
+validate: ## Show repository validation guidance
+	@printf '%s\n' 'No repository-wide Copilot customization validator is configured.'
 
 test: ## Run Python test suite
 	pytest -q
@@ -127,27 +127,16 @@ all: lint validate test ## Run all checks
 
 ---
 
-### M-04: Validator bash script has zero dedicated tests
+### M-04: Repository validation guidance should stay aligned with the actual toolchain
 
-**File**: `.github/scripts/validate-copilot-customizations.sh` (1184 lines)
+**Files**: `Makefile`, `CONTRIBUTING.md`, `AGENTS.md`
 
-The test file `tests/test_tech_ai_validate_copilot_customizations.py` has 7 tests, which is good but covers only basic happy path + a few semantic checks. The 1184-line validator itself has many code paths not covered:
-- `--scope all` and `--scope repo=<name>` modes
-- `--mode legacy-compatible` vs `--mode strict` behavioral differences
-- JSON report output format and structure
-- Error handling for malformed frontmatter
-- Edge cases: empty instruction files, missing `applyTo`, overlapping agent names
-- Correct SHA pinning detection in workflows
+The repository should document only the validation steps that actually exist. Stale references to removed validators create false expectations for contributors and automation.
 
 **Fix**:
-1. Expand `tests/test_tech_ai_validate_copilot_customizations.py` with:
-   - Test for `--scope all` with multiple sub-repos
-   - Test for `--mode legacy-compatible` accepting relaxed conventions
-   - Test for JSON report output correctness
-   - Test for malformed frontmatter detection
-   - Test for SHA pinning detection
-2. Consider adding `bats-core` tests for direct bash testing of the validator's internal functions.
-3. Target ~15-20 total validator tests.
+1. Keep `make lint` and `make test` current with the real local checks.
+2. Update repository documentation whenever validation steps are added or removed.
+3. Avoid documenting repository-wide validators that no longer exist.
 
 ---
 
@@ -193,7 +182,7 @@ applyTo: "**/Dockerfile,**/Dockerfile.*,**/.dockerignore,**/docker-compose*.yml"
 - Use health checks in orchestrated environments.
 ```
 
-Also create a corresponding `prompts/tech-ai-docker.prompt.md` and `skills/tech-ai-docker/SKILL.md`.
+Also create a corresponding `prompts/internal-docker.prompt.md` and `skills/internal-docker/SKILL.md`.
 
 ---
 
@@ -201,14 +190,14 @@ Also create a corresponding `prompts/tech-ai-docker.prompt.md` and `skills/tech-
 
 **File**: `.github/templates/copilot-quickstart.md`
 
-The quickstart guide's "Alignment strategy" section recommends `bootstrap-copilot-config.sh` first and `tech-ai-sync-copilot-configs.py` second. Given C-01 (bootstrap deprecation), the order should be reversed and the bootstrap should be mentioned only as a legacy option.
+The quickstart guide's "Alignment strategy" section recommends `bootstrap-copilot-config.sh` first and `internal-sync-copilot-configs.py` second. Given C-01 (bootstrap deprecation), the order should be reversed and the bootstrap should be mentioned only as a legacy option.
 
 **Fix**: In the "Alignment strategy" section, change:
 ```markdown
 ## Alignment strategy
-- Use `python .github/scripts/tech-ai-sync-copilot-configs.py --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection (recommended).
+- Use `python .github/scripts/internal-sync-copilot-configs.py --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection (recommended).
 - Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` only as a legacy quick-copy fallback.
-- Prefer canonical `tech-ai-*` script prompts in consumer repositories.
+- Prefer canonical origin-prefixed script prompts in consumer repositories.
 ```
 
 ---
@@ -252,13 +241,13 @@ The ANALYSIS_REPORT (item 4.4) flagged inconsistent input variable naming. Promp
 
 **File**: `.github/agents/README.md`
 
-The agents README lists routing for all agents including repo-only ones (`TechAISyncGlobalCopilotConfigsIntoRepo`), but does not explicitly mark them as non-syncable. This information is in `AGENTS.md` but should also be in the agents README for clarity.
+The agents README lists routing for all agents including repo-only ones (`internal-sync-global-copilot-configs-into-repo`), but does not explicitly mark them as non-syncable. This information is in `AGENTS.md` but should also be in the agents README for clarity.
 
 **Fix**: Add a note to the README:
 ```markdown
 ## Repo-only agents (not synced to consumers)
-- `TechAISyncGlobalCopilotConfigsIntoRepo`
-- `TechAIScriptReviewer`
+- `internal-sync-global-copilot-configs-into-repo`
+- `internal-agent-sync`
 ```
 
 ---
@@ -280,9 +269,9 @@ The ANALYSIS_REPORT (item 5.2) flagged this. The CI installs shellcheck but deve
 
 ---
 
-### m-03: `tech-ai-requirements-dev.txt` pins only `pytest` — add type checking
+### m-03: `requirements-dev.txt` pins only `pytest` — add type checking
 
-**File**: `.github/tech-ai-requirements-dev.txt`
+**File**: `.github/requirements-dev.txt`
 
 Currently only `pytest==8.3.3`. The 2300-line sync script and 1200-line validator would benefit from type-checking support.
 
@@ -311,17 +300,17 @@ graph TD
     B --> C[prompts/*.prompt.md]
     C --> D[skills/*/SKILL.md]
     D --> E[agents/*.agent.md]
-    
+
     F[AGENTS.md] --> A
     F --> E
-    
-    G[validate-copilot-customizations.sh] --> A
+
+    G[make lint and make test] --> A
     G --> B
     G --> C
     G --> D
     G --> E
-    
-    H[tech-ai-sync-copilot-configs.py] -->|plan/apply| I[Consumer Repos]
+
+    H[internal-sync-copilot-configs.py] -->|plan/apply| I[Consumer Repos]
     I --> J[Consumer AGENTS.md]
 ```
 ```
@@ -353,7 +342,7 @@ The ANALYSIS_REPORT (item 5.1) flagged partial enforcement. The security baselin
 ## Enforcement status
 | Control | Status | Tool |
 |---------|--------|------|
-| SHA pinning | Automated | `validate-copilot-customizations.sh` |
+| SHA pinning | Manual review | — |
 | Minimal permissions | Manual review | — |
 | OIDC over secrets | Manual review | — |
 | ...
@@ -370,12 +359,12 @@ Each preferred prompt/skill includes a one-line description. These descriptions 
 **Fix**: Reduce to just the name, and let Codex resolve the description from the frontmatter:
 ```markdown
 ### Preferred prompts
-- `TechAICodeReview`
-- `TechAIGitHubAction`
-- `TechAISyncGlobalCopilotConfigsIntoRepo`
-- `TechAIPREditor`
-- `TechAIAddUnitTests`
-- `TechAITerraform`
+- `internal-code-review`
+- `internal-github-action`
+- `internal-sync-global-copilot-configs-into-repo`
+- `internal-pr-editor`
+- `internal-add-unit-tests`
+- `internal-terraform`
 ```
 
 Or keep descriptions only for prompts where the name is ambiguous.
@@ -408,11 +397,11 @@ Pre-commit has `detect-private-key` but there's no CI-level secret scanning (e.g
 
 ---
 
-### m-09: `tech-ai-sync-copilot-configs.py` — `PROMPT_NAME_OVERRIDES` is a maintenance burden
+### m-09: `internal-sync-copilot-configs.py` — `PROMPT_NAME_OVERRIDES` is a maintenance burden
 
-**File**: `.github/scripts/tech-ai-sync-copilot-configs.py`, `PROMPT_NAME_OVERRIDES` dict
+**File**: `.github/scripts/internal-sync-copilot-configs.py`, `PROMPT_NAME_OVERRIDES` dict
 
-This dict maps 6 prompt filenames to canonical `TechAI*` name values. Every new prompt with a non-obvious name mapping needs a manual entry. This is fragile.
+This dict maps prompt filenames to legacy canonical name values. Every new prompt with a non-obvious name mapping needs a manual entry. This is fragile.
 
 **Fix**: Consider deriving the canonical name from the filename automatically using a naming convention function, and only using overrides for genuinely irregular cases. Or add a comment explaining the naming derivation rule and when an override is needed.
 
@@ -431,7 +420,7 @@ templates/
 tests/
 ANALYSIS_REPORT.md
 COPILOT_REVIEW.md
-tech-ai-requirements-dev.txt
+requirements-dev.txt
 __pycache__/
 .pytest_cache/
 ```
@@ -466,19 +455,19 @@ Seven "Do not use X when..." bullets are excellent guidance but could be more to
 ### Anti-patterns
 | Don't | Instead |
 |-------|---------|
-| `TechAIPlanner` for trivial single-file changes | `TechAIImplementer` directly |
-| `TechAIImplementer` for ambiguous scope | `TechAIPlanner` first |
-| Generic `TechAIReviewer` for domain-specific changes | Use matching specialist |
+| Planning capability for trivial single-file changes | Implementation capability directly |
+| Implementation capability for ambiguous scope | Planning capability first |
+| Generic review capability for domain-specific changes | Use matching specialist |
 | ...
 ```
 
 ---
 
-### N-03: Sync script `SOURCE_ONLY_AGENT_PATHS` should include `tech-ai-customization-auditor`
+### N-03: Sync script `SOURCE_ONLY_AGENT_PATHS` should include the deprecated customization-auditor alias
 
-**File**: `.github/scripts/tech-ai-sync-copilot-configs.py`
+**File**: `.github/scripts/internal-sync-copilot-configs.py`
 
-`tech-ai-customization-auditor.agent.md` is in `SOURCE_ONLY_AGENT_PATHS` set. Good. But verify the deprecated alias is also in the `AGENTS.md` inventory with a deprecation note. The current inventory lists it without a deprecation marker.
+The deprecated customization-auditor alias is in `SOURCE_ONLY_AGENT_PATHS`. Good. But verify the deprecated alias is also in the `AGENTS.md` inventory with a deprecation note. The current inventory lists it without a deprecation marker.
 
 **Fix**: Deprecated aliases for removed agents should also be cleaned up from inventory.
 
@@ -503,7 +492,7 @@ The ANALYSIS_REPORT (item 4.1) recommended a `dependencies:` frontmatter field f
 **Fix**: Long-term improvement. Add `dependencies:` to skill frontmatter:
 ```yaml
 ---
-name: TechAITerraformFeature
+name: internal-terraform
 description: ...
 dependencies:
   - instructions/terraform.instructions.md
@@ -536,7 +525,7 @@ The "Suggested starter sets" section recommends instructions + prompts + skills 
 
 **Fix**: Add agent recommendations to each starter set:
 ```markdown
-- Java repositories: `java.instructions.md`, `tech-ai-java.prompt.md`, `tech-ai-project-java/SKILL.md`, plus core agents (Planner, Implementer, Reviewer)
+- Java repositories: `java.instructions.md`, `internal-java.prompt.md`, `internal-project-java/SKILL.md`, plus planning, implementation, and review capabilities
 ```
 
 ---
@@ -561,7 +550,7 @@ These are strategic recommendations to maximize Codex's context window efficienc
 **Recommendation**: Add `when:` frontmatter for quick matching:
 ```yaml
 ---
-name: TechAITerraformFeature
+name: internal-terraform
 description: Add or modify Terraform resources
 when: Creating or modifying .tf files with resource, variable, output, or data blocks
 ---
@@ -577,8 +566,8 @@ when: Creating or modifying .tf files with resource, variable, output, or data b
 | `Makefile` | No standardized developer commands | High |
 | `VERSION` file | No versioning for consumer pinning | High |
 | `instructions/docker.instructions.md` | Consumer repos use Docker | Medium |
-| `prompts/tech-ai-docker.prompt.md` | Pair with Docker instructions | Medium |
-| `skills/tech-ai-docker/SKILL.md` | Docker skill reference | Medium |
+| `prompts/internal-docker.prompt.md` | Pair with Docker instructions | Medium |
+| `skills/internal-docker/SKILL.md` | Docker skill reference | Medium |
 | Architecture Mermaid diagram | Visual aid for framework understanding | Medium |
 | `instructions/sql.instructions.md` | DB migration safety | Low |
 | `instructions/observability.instructions.md` | Cross-cutting logging standards | Low |

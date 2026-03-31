@@ -1,6 +1,6 @@
 # Agents Catalog
 
-This folder contains optional custom agents for focused tasks.
+This folder contains optional custom agents for deliberate command-center tasks.
 
 ## Resolution order
 1. Apply repository non-negotiables from `copilot-instructions.md`.
@@ -9,26 +9,22 @@ This folder contains optional custom agents for focused tasks.
 4. Apply prompt and referenced skill details.
 
 ## Recommended routing
-- Read-only: `TechAIPlanner`, `TechAIReviewer`, `TechAISecurityReviewer`, `TechAIWorkflowSupplyChain`, `TechAITerraformGuardrails`, `TechAIIAMLeastPrivilege`.
-- Analysis-to-plan: `TechAIPairArchitectAnalysisExecutor` (takes `TechAIPairArchitect` output, re-evaluates, produces execution plan).
-- PR-focused: `TechAIPREditor`.
-- Write-capable: `TechAIImplementer`.
+- Source-side catalog sync, rationalization, overlap cleanup, and governance drift correction in this repository: `internal-sync-control-center`.
+- Cross-repository baseline propagation: `internal-sync-global-copilot-configs-into-repo`.
+- PR-focused work should use the `internal-pr-editor` prompt and skill because this repository does not currently ship a dedicated PR editor agent.
 
 ## Repo-only agents (not synced to consumers)
-- `TechAISyncGlobalCopilotConfigsIntoRepo`
+- `internal-sync-control-center`
+- `internal-sync-global-copilot-configs-into-repo`
 
-## Why generic core agents
-- `TechAIPlanner`, `TechAIImplementer`, and `TechAIReviewer` are workflow roles, not language roles.
+## Why this catalog stays deliberate
+- This repository keeps a deliberate set of source-side command-center agents under `.github/agents/`.
+- Prefer one cohesive agent per recurring command-center workflow. A broader agent is acceptable when its skills reinforce the same operating role.
+- Split agents when routing becomes ambiguous or the file mixes disjoint responsibilities. Do not split purely to minimize file size or token count.
 - Technology is resolved from file paths and prompt inputs (for example, `**/*.py` -> Python instructions).
-- Avoid creating per-language triplets unless repeated failures justify a dedicated specialist.
+- Prefer prompts and skills for detailed task procedures unless a dedicated agent file is present.
 
 ## Selection guide
-1. Use `TechAIPlanner` at design stage.
-2. Use `TechAIImplementer` for execution after requirements are stable.
-3. Use `TechAIReviewer` for non-security quality gates.
-4. Use `TechAITerraformGuardrails` and `TechAIIAMLeastPrivilege` on policy/infrastructure changes.
-5. Use `TechAIWorkflowSupplyChain` on workflow changes.
-6. Use `TechAIPREditor` to create or update PR title/body from template and diff.
-7. Use `TechAISecurityReviewer` as final security gate.
-8. Use `TechAISyncGlobalCopilotConfigsIntoRepo` to align a consumer baseline before creating repo-owned internal assets.
-9. Use `TechAIPairArchitectAnalysisExecutor` after `TechAIPairArchitect` to re-evaluate findings, produce a validated execution plan with per-finding decision tables, extract lessons learned, and prepare work packages for `TechAIImplementer`.
+1. Use `internal-sync-control-center` when governing the live `.github/` catalog in this repository: refresh installed approved external assets, align naming, consolidate overlap, retire obsolete entries, and clean up downstream governance references. Unless the user explicitly asks for an audit or plan first, treat `sync` as a full apply request.
+2. Use `internal-sync-global-copilot-configs-into-repo` when aligning a consumer repository with the managed Copilot baseline from this standards repository.
+3. Use prompts and skills from `.github/prompts/` and `.github/skills/` for planning, editing, review, and implementation work that does not have a dedicated agent file.

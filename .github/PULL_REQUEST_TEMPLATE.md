@@ -49,6 +49,6 @@
 
 - [ ] No secrets/tokens/credentials committed
 - [ ] Repository artifacts remain in English
-- [ ] `validate-copilot-customizations.sh --mode strict` executed successfully
+- [ ] `validate-copilot-customizations.py --mode strict` executed successfully
 - [ ] Workflow action pins use full SHA with adjacent release/tag reference
 - [ ] References remain repository-agnostic and reusable
