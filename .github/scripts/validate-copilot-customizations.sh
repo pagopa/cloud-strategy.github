@@ -33,7 +33,6 @@ INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS = {
     "internal-agent-development",
     "internal-copilot-docs-research",
     "internal-agents-md-bridge",
-    "awesome-copilot-instructions-blueprint-generator",
 }
 LEGACY_SKILL_IDENTIFIER = "internal-skill-development"
 INTERNAL_CODE_REVIEW_REFERENCE_PATHS = (

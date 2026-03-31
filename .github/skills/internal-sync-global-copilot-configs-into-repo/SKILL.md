@@ -24,7 +24,7 @@ description: Sync shared Copilot baseline into consumer repos — dynamic stack 
 3. Flag conflicts: target file diverged from last-synced version (manifest mismatch).
 4. Flag redundancies: legacy aliases coexisting with canonical assets.
 5. Flag origin-prefix violations: repo-owned assets missing `internal-*`, `local-*`, or a supported external short-repo prefix.
-6. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via `awesome-copilot-instructions-blueprint-generator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
+6. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
 7. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)

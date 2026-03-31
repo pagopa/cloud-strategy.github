@@ -1,6 +1,6 @@
 ---
 name: internal-performance-optimization
-description: Performance profiling, latency reduction, throughput tuning, rendering efficiency, memory control, SQL/query tuning, caching strategy, and regression prevention. Use when the task is to diagnose slowness, optimize runtime behavior, improve responsiveness, or design performance-focused changes across frontend, backend, or database layers.
+description: Performance profiling, latency reduction, throughput tuning, rendering efficiency, memory control, SQL and PostgreSQL query tuning, caching strategy, and regression prevention. Use when the task is to diagnose slowness, optimize runtime behavior, improve responsiveness, or design performance-focused changes across frontend, backend, or database layers.
 ---
 
 # Internal Performance Optimization
@@ -41,11 +41,20 @@ Use this skill when performance is the primary constraint. Start from evidence, 
 
 ## Database Checks
 
+- Execution plan shape and row-estimate mismatches
 - Missing or badly ordered indexes
 - Functions on indexed columns in predicates
 - Over-fetching
 - Offset pagination on large tables
 - Repeated aggregations that should be consolidated
+
+## PostgreSQL-Specific Checks
+
+- `EXPLAIN ANALYZE` and `pg_stat_statements`
+- JSONB with GIN indexes only when the workload truly benefits
+- Partial and expression indexes for selective predicates
+- Full-text search when text filtering outgrows `LIKE`
+- Extension choices only when they are explicit, justified, and operationally supportable
 
 ## Memory and CPU
 
@@ -68,5 +77,7 @@ After a fix, add at least one of:
 - Premature optimization before profiling
 - Using `SELECT *` in hot paths
 - Adding cache layers to hide broken query shapes
+- Using JSONB as a catch-all when relational modeling is clearer
+- Adopting PostgreSQL extensions or indexes without plan evidence and write-cost awareness
 - Optimizing cold code because it is easy to touch
 - Claiming performance gains without measurements

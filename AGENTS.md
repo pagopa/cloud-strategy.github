@@ -235,7 +235,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
 - `.github/skills/antigravity-network-engineer/SKILL.md`
-- `.github/skills/awesome-copilot-agent-governance/SKILL.md`
 - `.github/skills/awesome-copilot-agentic-eval/SKILL.md`
 - `.github/skills/awesome-copilot-azure-devops-cli/SKILL.md`
 - `.github/skills/awesome-copilot-azure-pricing/SKILL.md`
@@ -243,12 +242,8 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/awesome-copilot-azure-role-selector/SKILL.md`
 - `.github/skills/awesome-copilot-cloud-design-patterns/SKILL.md`
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
-- `.github/skills/awesome-copilot-create-github-pull-request-from-specification/SKILL.md`
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
-- `.github/skills/awesome-copilot-instructions-blueprint-generator/SKILL.md`
-- `.github/skills/awesome-copilot-postgresql-optimization/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
-- `.github/skills/awesome-copilot-sql-optimization/SKILL.md`
 - `.github/skills/internal-agent-development/SKILL.md`
 - `.github/skills/internal-agents-md-bridge/SKILL.md`
 - `.github/skills/internal-aws-control-plane-governance/SKILL.md`
@@ -309,7 +304,6 @@ This file is for GitHub Copilot and AI assistants working in this repository.
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
 - `.github/skills/openai-skill-creator/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
-- `.github/skills/terraform-terraform-style-guide/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
 
 ### Agents

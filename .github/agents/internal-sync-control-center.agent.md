@@ -23,7 +23,6 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - `openai-skill-creator`
 - `internal-copilot-docs-research`
 - `internal-agents-md-bridge`
-- `awesome-copilot-instructions-blueprint-generator`
 
 ## Core Rules
 
@@ -39,21 +38,20 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
-- When `.github/copilot-instructions.md` is created or materially revised, use `awesome-copilot-instructions-blueprint-generator` as the default blueprinting skill before final repo-specific alignment.
+- When `.github/copilot-instructions.md` is created or materially revised, route the focused authoring through `internal-ai-resource-creator`, then refresh root `AGENTS.md` through `internal-agents-md-bridge`.
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
 - Do not report `apply` as complete unless the final output states whether `.github/copilot-instructions.md` and root `AGENTS.md` were reviewed, changed, or intentionally left unchanged.
 
 ## Skill Usage Contract
 
-- Treat preferred or optional skills as conditional routing options, not as a blanket execution order. Outside the explicit triggers below, do not prioritize `internal-*` skills over imported ones by default.
+- Treat preferred or optional skills as conditional routing options, not as a blanket execution order. Prefer repository-owned internal skills when this repository already declares them as the canonical owner for the capability under change; use imported skills only when the managed external scope still keeps a distinct support role.
 - `internal-skill-management`: Default operating workflow for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
 - `internal-agent-development`: Use only when the sync changes an agent file, modifies agent routing boundaries, or rewrites skill-guidance sections or contracts.
 - `openai-skill-creator`: Use only when a `replace` or `extract` decision requires creating or materially rewriting a skill as part of catalog governance.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `internal-agents-md-bridge`: Use whenever root `AGENTS.md` changes.
-- `awesome-copilot-instructions-blueprint-generator`: Use whenever `.github/copilot-instructions.md` is created or materially revised.
 
 ## Managed External Resource Map
 
@@ -68,7 +66,6 @@ Source repositories:
 
 Managed skills:
 
-- `agent-governance` -> `awesome-copilot-agent-governance`
 - `agentic-eval` -> `awesome-copilot-agentic-eval`
 - `azure-devops-cli` -> `awesome-copilot-azure-devops-cli`
 - `azure-pricing` -> `awesome-copilot-azure-pricing`
@@ -76,12 +73,8 @@ Managed skills:
 - `azure-role-selector` -> `awesome-copilot-azure-role-selector`
 - `cloud-design-patterns` -> `awesome-copilot-cloud-design-patterns`
 - `codeql` -> `awesome-copilot-codeql`
-- `copilot-instructions-blueprint-generator` -> `awesome-copilot-instructions-blueprint-generator`
-- `create-github-pull-request-from-specification` -> `awesome-copilot-create-github-pull-request-from-specification`
 - `dependabot` -> `awesome-copilot-dependabot`
-- `postgresql-optimization` -> `awesome-copilot-postgresql-optimization`
 - `secret-scanning` -> `awesome-copilot-secret-scanning`
-- `sql-optimization` -> `awesome-copilot-sql-optimization`
 
 Managed instructions:
 
@@ -146,7 +139,6 @@ Source repository:
 Managed skills:
 
 - `terraform-search-import` -> `terraform-terraform-search-import`
-- `terraform-style-guide` -> `terraform-terraform-style-guide`
 - `terraform-test` -> `terraform-terraform-test`
 
 ### `openai/skills`
@@ -209,7 +201,7 @@ When repository state drifts from the declared governance contract, treat the dr
 4. Inventory the relevant local assets and nearby overlaps against the declared governance contract.
 5. Decide `keep`, `update`, `extract`, or `retire` using the declared managed scope as the baseline and the current repo state as evidence.
 6. Apply the canonical change first. Remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
-7. When `copilot-instructions.md` changes, regenerate or realign it through `awesome-copilot-instructions-blueprint-generator` before updating bridge or inventory files.
+7. When `copilot-instructions.md` changes, regenerate or realign it through the repository-local authoring workflow anchored in `internal-ai-resource-creator` before updating bridge or inventory files.
 8. When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md`, then update them in the same sync pass whenever drift, stale references, or routing fallout exists. Update this agent file and other non-README downstream governance artifacts in that same pass when they describe the changed catalog. Update `.github/agents/README.md` only when README edits are explicitly in scope.
 9. Run repository validation and report any remaining gaps.
 

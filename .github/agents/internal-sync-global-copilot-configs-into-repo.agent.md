@@ -12,7 +12,6 @@ Analyze a local target repository, select the minimum Copilot customization asse
 - `internal-sync-global-copilot-configs-into-repo`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
-- `awesome-copilot-instructions-blueprint-generator`
 - `internal-agents-md-bridge`
 
 ## Restrictions
@@ -31,7 +30,7 @@ Analyze a local target repository, select the minimum Copilot customization asse
 - When source or target decisions depend on current GitHub Copilot or MCP behavior, validate them through `internal-copilot-docs-research` before updating policy files.
 - Treat `.github/scripts/internal-sync-copilot-configs.py` as the deterministic execution path.
 - Start with `plan` mode and move to `apply` only on explicit request and only when the plan is conflict-safe.
-- When the target sync includes root guidance files, refresh the dedicated `awesome-copilot-instructions-blueprint-generator` skill before updating target `.github/copilot-instructions.md`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.
+- When the target sync includes root guidance files, refresh target `.github/copilot-instructions.md` through the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.
 - In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep target-local unmanaged assets visible and preserved in the final plan or apply report.
 
 ## Output Contract

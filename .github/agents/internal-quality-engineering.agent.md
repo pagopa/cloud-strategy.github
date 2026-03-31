@@ -16,8 +16,6 @@ You are the command center for quality engineering, performance, and observabili
 - `internal-project-nodejs`
 - `internal-project-python`
 - `internal-performance-optimization`
-- `awesome-copilot-sql-optimization`
-- `awesome-copilot-postgresql-optimization`
 - `obra-verification-before-completion`
 - `obra-systematic-debugging`
 - `obra-root-cause-tracing`
@@ -27,11 +25,12 @@ You are the command center for quality engineering, performance, and observabili
 ## Routing Rules
 
 - Use this agent when the task is about test quality, performance bottlenecks, database hot paths, or monitoring posture.
-- Start with the repository-owned quality or runtime owner when one exists, then add imported testing, database, or observability specialists only when they materially improve the answer.
+- Use `internal-performance-optimization` as the canonical owner for SQL, PostgreSQL, and general runtime performance work in this repository.
+- Start with the repository-owned quality or runtime owner when one exists, then add imported testing or observability specialists only when they materially improve the answer.
 - For Java testing or Spring Boot test-shape decisions, align with `internal-project-java` before adding broader quality or performance guidance.
 - For Node.js or TypeScript test-shape decisions, align with `internal-project-nodejs` before adding broader quality or performance guidance.
 - For Python test-shape or coverage-gap work, align with `internal-project-python` before adding broader quality or performance guidance.
-- Keep imported skills scoped to the language, database, or observability surface actually under review.
+- Keep imported skills scoped to the language or observability surface actually under review.
 - Treat coverage as evidence for missing behavior, not as a mandatory 100% target.
 - Demand evidence before claiming a performance improvement.
 - Connect testing and observability back to failure prevention.

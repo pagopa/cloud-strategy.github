@@ -20,6 +20,7 @@ Use this skill when creating or updating a repository-root `AGENTS.md`.
 
 Keep `.github/copilot-instructions.md` as the primary detailed policy layer.
 Keep root `AGENTS.md` short, navigational, and runtime-agnostic.
+When both files change in the same workflow, finalize `.github/copilot-instructions.md` first and refresh `AGENTS.md` second.
 
 Do not make root `AGENTS.md` say or imply that the repository uses a specific internal assistant runtime. Some consumer repositories cannot make that claim and should not encode it.
 

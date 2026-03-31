@@ -1,6 +1,6 @@
 ---
 name: internal-terraform
-description: Use when the user needs to add, modify, or refactor Terraform resources, variables, outputs, data sources, or modules. Covers both feature-level changes within existing configurations and creation of reusable modules, plus remote state hygiene, drift review, module versioning, and policy-aware plan/apply workflows.
+description: Use when the user needs to add, modify, refactor, or review Terraform resources, variables, outputs, data sources, or modules. Covers both feature-level changes within existing configurations and creation of reusable modules, plus style-consistent HCL authoring, remote state hygiene, drift review, module versioning, and policy-aware plan/apply workflows.
 ---
 
 # Terraform Skill
@@ -34,6 +34,7 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - Apply tags on all taggable resources.
 - Preserve naming and folder conventions of the target repository.
 - Preserve stable module input/output contracts when modifying existing modules.
+- Keep Terraform formatting and file splits consistent with the target directory; when the repo already separates `providers.tf`, `terraform.tf`, `variables.tf`, or `outputs.tf`, preserve that structure.
 
 ## State and delivery controls
 
@@ -43,6 +44,13 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - Pin external modules and provider versions intentionally; when changing constraints, state the upgrade or compatibility reason.
 - Run policy or compliance gates when the repository or delivery pipeline already depends on them.
 - Stay Terraform/OpenTofu compatible unless the target repository explicitly standardizes on OpenTofu-only features.
+
+## Style Conventions
+
+- Use two spaces for indentation and no tabs.
+- Place meta-arguments before normal arguments, keep arguments before nested blocks, and keep lifecycle-style control blocks last.
+- Use descriptive singular `snake_case` identifiers; use `main` only when there is one obvious instance and a more specific name adds no clarity.
+- When `variables.tf` or `outputs.tf` exist as dedicated files, keep entries deterministic and easy to scan, typically alphabetical by identifier.
 
 ## Module standard layout
 - `main.tf` — resources and data sources

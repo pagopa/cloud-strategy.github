@@ -1,6 +1,6 @@
 ---
 name: internal-pr-editor
-description: Generate review-ready PR descriptions from diffs using structured templates with section order and diff-to-description mapping. Use when the user needs to write, update, or format a pull request body, summarize code changes, or generate a PR description from a git diff.
+description: Generate review-ready PR descriptions from diffs, specifications, or template-driven requirements using structured templates with section order and diff-to-description mapping. Use when the user needs to write, update, or format a pull request body, summarize code changes, or turn a specification into PR-ready text that still matches the actual diff.
 ---
 
 # TechAI PR Editor — Skill
@@ -9,6 +9,7 @@ description: Generate review-ready PR descriptions from diffs using structured t
 - Create a new pull request description.
 - Improve an incomplete pull request body.
 - Summarize changes from modified files and checks.
+- Map a specification, issue, or template-driven request into a PR title and body without overstating what the diff actually delivers.
 
 ## Mandatory rules
 - Use English for all PR content.
@@ -28,6 +29,15 @@ Resolve and use one existing repository template:
 4. `pull_request_template.md`
 
 Keep headings and section order unchanged. If a section is not applicable, write `N/A`.
+
+## Specification-aware drafting
+
+If the user provides a specification, issue, or acceptance outline:
+
+- Extract the required outcomes, constraints, and acceptance points first.
+- Map the actual diff to that requested scope instead of inventing completion.
+- Call out anything requested by the specification that is not present in the diff as a gap, follow-up, or `N/A`.
+- Keep the PR body grounded in the repository template, not in the source specification's original formatting.
 
 ## Tool-driven workflow
 1. Detect whether an open PR exists for the current branch.

@@ -17,6 +17,7 @@ Use `openai-skill-creator` when the main output is a skill. Use `internal-skill-
 - Move reusable procedures into skills instead of bloating agent bodies.
 - Keep any skill guidance explicit and reviewable when it adds value, without implying platform-enforced execution order.
 - Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without copying runtime-specific tool wiring.
+- Make approval boundaries, auditability, and dangerous-operation gates explicit when an agent or nearby workflow needs them.
 
 ## Read First
 
@@ -67,6 +68,7 @@ Choose an agent only when the repository benefits from a stable command center o
 - Every agent must define `## Output Expectations`.
 - Add `## Skill Usage Contract` only when the agent is a broader command center whose listed skills are used conditionally.
 - When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order.
+- When an agent can influence external actions, call out where human approval, escalation, or review gates apply.
 - Keep long reusable workflows in skills, not in the agent body.
 - Never use deprecated frontmatter such as `tools:`, `model:`, or `color:`.
 
@@ -101,6 +103,7 @@ When learning from richer upstream agents, keep the signal and drop the scaffold
 
 - Translate tool lists into skills or repo inputs, not frontmatter.
 - Translate vendor documentation tools or MCP endpoints into docs-first routing rules or dedicated research skills, not copied tool catalogs.
+- Translate governance or trust patterns into concrete approval rules, audit expectations, and routing boundaries instead of framework-specific policy code.
 - Translate expertise lists into routing rules, role focus, or output expectations.
 - Translate framework pillars or evaluation matrices into a compact but explicit decision lens. Keep the named dimensions when they help users reason, compare options, or understand tradeoffs quickly.
 - Translate long clarification question banks into a compact list of critical requirements that must be confirmed before strong recommendations.
@@ -109,6 +112,15 @@ When learning from richer upstream agents, keep the signal and drop the scaffold
 - Translate platform-specific setup or deployment details into repo-local references only if this repository actually needs them.
 - Preserve strong response organization when it improves operator usability. If an upstream agent is effective because it has a clear requirement gate, decision lens, and response structure, keep those advantages in repo-local form instead of compressing them away.
 - Keep only examples that clarify routing or output shape; move broader examples into references.
+
+## Governance And Trust Boundaries
+
+When the agent being authored can influence risky actions:
+
+- Separate routing scope from execution permissions.
+- Prefer explicit allow, deny, or approval boundaries for destructive, privileged, or externally connected actions.
+- State when auditability matters, especially for production changes, data access, credentials, or multi-agent delegation.
+- Call out the neighboring command center or human review step when the agent should stop before execution.
 
 ## Cohesion and Splitting
 
