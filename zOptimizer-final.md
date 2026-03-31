@@ -16,11 +16,11 @@
 
 ### Corrected factual baseline from disk
 
-- The live repository currently has `98` skills, down from `117` before the completed first prune batch and first merge-source retirements.
+- The live repository currently has `88` skills, down from `117` before the completed first prune batch and the completed merge-source retirements so far.
 - Family counts on disk are:
   - `26` `internal-*`
-  - `18` `antigravity-*`
-  - `18` `awesome-copilot-*`
+  - `12` `antigravity-*`
+  - `14` `awesome-copilot-*`
   - `30` `obra-*`
   - `3` `openai-*`
   - `3` `terraform-*`
@@ -52,23 +52,13 @@ These are the best candidates for “take the good parts, make the internal skil
 
 | External Skill | Target Internal Owner | What To Absorb | Why This Is Better |
 |---|---|---|---|
-| `antigravity-java-pro` | `internal-project-java` | Selective modern-Java depth: Java 21 concerns, virtual threads, Spring Boot 3, Testcontainers, performance caveats | Avoid keeping a broad external Java peer beside the internal Java owner. |
-| `antigravity-javascript-pro` | `internal-project-nodejs` | Runtime/module-system judgment and stronger event-loop awareness | Collapse JS/Node general guidance into the internal Node owner. |
 | `antigravity-kubernetes-deployment` | `internal-kubernetes-deployment` | Any deployment-specific operational patterns still missing from the internal K8s workflow | Keep one tactical Kubernetes deployment owner. |
-| `antigravity-nodejs-best-practices` | `internal-project-nodejs` | Framework-selection heuristics, async decision rules, boundary validation patterns | Same domain, better as internal canon than external peer. |
-| `antigravity-python-patterns` | `internal-project-python` | Framework, async, and project-structure decision heuristics | Python application decisions should be owned by the internal Python project skill. |
-| `antigravity-python-pro` | `internal-project-python` and `internal-script-python` | Modern Python depth where actually useful: async, tooling, profiling, runtime-specific caveats | Removes one of the noisiest Python peers. |
-| `antigravity-python-testing-patterns` | `internal-project-python` and `internal-quality-engineering` | Pytest fixtures, mocking, async-testing patterns, property-based testing references where relevant | Python testing guidance should sit under internal tactical owners. |
 | `antigravity-simplify-code` | `internal-code-review` and `internal-quality-engineering` | Reuse/quality/efficiency/clarity simplification rubric, not the whole sub-agent workflow | Keep the evaluation lens, remove the competing skill. |
 | `antigravity-terraform-specialist` | `internal-terraform` | Remote state concerns, drift posture, module versioning, policy gates, OpenTofu note where needed | Terraform needs one tactical internal owner. |
 | `awesome-copilot-agent-governance` | `internal-agent-development` and `internal-sync-control-center` | Agent-policy, trust-boundary, audit-trail, tool-approval concepts | Highly relevant to this repo, but it belongs in the internal governance layer. |
 | `awesome-copilot-create-github-pull-request-from-specification` | `internal-pr-editor` | The narrow “spec-to-PR-body mapping” idea if you still value it | PR authoring should have one internal owner. |
 | `awesome-copilot-instructions-blueprint-generator` | `internal-ai-resource-creator` and `internal-agents-md-bridge` | Better blueprint extraction prompts for repo-local instructions generation | This repo already has internal owners for Copilot asset authoring. |
-| `awesome-copilot-java-junit` | `internal-project-java` | Parameterized tests, `assertAll`, tags, nested tests, stronger JUnit tactical patterns | Java testing guidance should live in the internal Java owner. |
-| `awesome-copilot-java-springboot` | `internal-project-java` | Spring Boot-specific tactical patterns only if you want Java internal guidance to truly cover Spring | Avoid keeping a second Java peer. |
-| `awesome-copilot-javascript-typescript-jest` | `internal-project-nodejs` | “If the repo already uses Jest, follow local Jest patterns” plus targeted mocking guidance | Better absorbed as an exception path inside the internal Node owner. |
 | `awesome-copilot-postgresql-optimization` | `internal-performance-optimization` | `EXPLAIN ANALYZE`, JSONB/GIN, partial indexes, extension discipline, Postgres-specific guardrails | DB performance should have one internal owner, not a generic and DB-specific split. |
-| `awesome-copilot-pytest-coverage` | `internal-quality-engineering` and `internal-project-python` | Coverage workflow and gap inspection, but without the rigid “100%” absolutism as the default doctrine | Better as tactical internal guidance than as a standalone broad Python trigger. |
 | `awesome-copilot-sql-optimization` | `internal-performance-optimization` | Query-shape, indexing, batching, pagination, and plan-based tuning workflow | Same owner as broader performance work. |
 | `terraform-terraform-style-guide` | `internal-terraform` | Formatting and structure conventions only where they match repo conventions | Reduces Terraform collision space without losing useful style guidance. |
 
@@ -155,67 +145,6 @@ My revisions are:
 
 The original matrix says “complementary” in several places. That is an accurate description of the current state, but not the best target state for your preferred operating model.
 
-##### Python script and Python project
-
-Original conclusion: complementary.
-
-My conclusion:
-
-- true today
-- not desirable long-term
-- the active Python ownership should collapse to:
-  - `internal-script-python`
-  - `internal-project-python`
-  - optional `internal-quality-engineering` support for deeper testing/performance
-
-The externals to harvest and remove are:
-
-- `antigravity-python-pro`
-- `antigravity-python-patterns`
-- `antigravity-python-testing-patterns`
-- `awesome-copilot-pytest-coverage`
-
-Reason:
-
-- Python is one of the largest collision clusters in the repository
-- the repo already has internal tactical owners, so the better move is to strengthen them instead of keeping external peers
-
-##### Java
-
-Original conclusion: complementary.
-
-My conclusion:
-
-- same pattern as Python
-- absorb the best Java 21, Spring Boot, and JUnit tactical depth into `internal-project-java`
-- remove the external peers:
-  - `antigravity-java-pro`
-  - `awesome-copilot-java-junit`
-  - `awesome-copilot-java-springboot`
-
-Reason:
-
-- `internal-project-java` already claims Spring Boot apps in its description
-- once that is true, leaving broad Java peers just broadens the trigger space
-
-##### Node.js
-
-Original conclusion: complementary.
-
-My conclusion:
-
-- the internal Node owner should become the canonical tactical owner
-- absorb the best of:
-  - `antigravity-javascript-pro`
-  - `antigravity-nodejs-best-practices`
-  - `awesome-copilot-javascript-typescript-jest`
-- then remove the external peers
-
-Reason:
-
-- `internal-project-nodejs` is already the right canonical place for this repo
-- the external Node/JS set currently competes on exactly the same class of requests
-
 ##### Terraform
 
 Original conclusion: complementary.
@@ -298,25 +227,6 @@ My conclusion:
 
 The original collision groups are correct. My action decisions for each are:
 
-##### Python cluster
-
-Original collision set:
-
-- `internal-script-python`
-- `internal-project-python`
-- `antigravity-python-pro`
-- `antigravity-python-patterns`
-- `antigravity-python-testing-patterns`
-- `awesome-copilot-pytest-coverage`
-
-My decision:
-
-- active owners should become:
-  - `internal-script-python`
-  - `internal-project-python`
-  - `internal-quality-engineering` when the task is testing/performance-heavy
-- the rest should be merged or deleted
-
 ##### Terraform cluster
 
 Original collision set:
@@ -388,33 +298,6 @@ My decision:
 - keep the external strategic K8s architect only as support
 - remove the duplicate external deployment skill
 
-##### Java cluster
-
-Original collision set:
-
-- `internal-project-java`
-- `antigravity-java-pro`
-- `awesome-copilot-java-springboot`
-- `awesome-copilot-java-junit`
-
-My decision:
-
-- collapse to `internal-project-java`
-- absorb the valuable specifics
-
-##### Node.js cluster
-
-Original collision set:
-
-- `internal-project-nodejs`
-- `antigravity-javascript-pro`
-- `antigravity-nodejs-best-practices`
-- `awesome-copilot-javascript-typescript-jest`
-
-My decision:
-
-- collapse to `internal-project-nodejs`
-
 ##### SQL/DB cluster
 
 Original collision set:
@@ -482,12 +365,10 @@ The original example intents are useful and still hold:
 
 ##### “Write a Python script”
 
-Still too many plausible matches:
+Still a layered routing space:
 
 - `internal-script-python`
 - `internal-project-python`
-- `antigravity-python-pro`
-- `antigravity-python-patterns`
 - `obra-test-driven-development`
 - `obra-writing-plans`
 
@@ -637,26 +518,26 @@ Verified counts from disk:
 
 | Agent | Verified Skill References | My Assessment |
 |---|---|---|
-| `internal-developer` | `17` | Overloaded |
-| `internal-architect` | `11` | Borderline and overly peer-oriented toward imported architecture skills |
-| `internal-aws-org-governance` | `16` | Overloaded |
-| `internal-infrastructure` | `13` | Borderline |
-| `internal-code-review` | `10` | Acceptable but still contains removable external peers indirectly in the surrounding ecosystem |
-| `internal-quality-engineering` | `13` | Acceptable but could narrow after SQL/Python merge work |
-| `internal-aws-platform-engineering` | `14` | Borderline |
-| `internal-azure-platform-engineering` | `13` | Acceptable |
+| `internal-developer` | `9` | Much leaner after the Java, Node.js, and Python retirements |
+| `internal-architect` | `8` | Much tighter than the earlier snapshot, though architecture overlap still exists outside the agent |
+| `internal-aws-org-governance` | `15` | Overloaded |
+| `internal-infrastructure` | `12` | Borderline |
+| `internal-code-review` | `8` | Acceptable and cleaner after the first merge-source retirements |
+| `internal-quality-engineering` | `12` | Acceptable and cleaner after the Python testing and coverage merge work |
+| `internal-aws-platform-engineering` | `13` | Borderline |
+| `internal-azure-platform-engineering` | `12` | Acceptable |
 | `internal-azure-platform-strategy` | `11` | Good |
-| `internal-gcp-platform-strategy` | `10` | Good |
-| `internal-gcp-platform-engineering` | `11` | Acceptable |
-| `internal-cicd` | `9` | Good |
-| `internal-sync-control-center` | `19` | Heavier than the original plan suggested; not “7”, and this matters |
+| `internal-gcp-platform-strategy` | `9` | Good |
+| `internal-gcp-platform-engineering` | `10` | Acceptable |
+| `internal-cicd` | `7` | Good |
+| `internal-sync-control-center` | `7` | Focused in its declared skill stack, even though its governance scope remains broad |
 | `internal-sync-global-copilot-configs-into-repo` | `5` | Good |
 | `internal-ai-resource-creator` | `10` | Acceptable |
 
 The two most important takeaways are:
 
-- `internal-developer` is genuinely overloaded
-- `internal-sync-control-center` is more loaded than the original file claimed, which means governance cleanup pressure is even higher there
+- `internal-developer` is now meaningfully leaner, though it still spans multiple stacks and should keep shrinking as remaining peers disappear
+- the cloud governance and engineering agents remain the biggest dense stacks after the first retirements
 
 #### Step 4.2: Agent Routing Precision Issues
 
@@ -812,9 +693,6 @@ This is exactly why “merge into internal and delete the external” is such a 
 
 I agree, and I would make the following concrete consolidation set the first one:
 
-- `antigravity-python-pro` + `antigravity-python-patterns` + `antigravity-python-testing-patterns` + `awesome-copilot-pytest-coverage` -> internal Python owners
-- `antigravity-java-pro` + `awesome-copilot-java-junit` + `awesome-copilot-java-springboot` -> `internal-project-java`
-- `antigravity-javascript-pro` + `antigravity-nodejs-best-practices` + `awesome-copilot-javascript-typescript-jest` -> `internal-project-nodejs`
 - `antigravity-terraform-specialist` + `terraform-terraform-style-guide` -> `internal-terraform`
 - `awesome-copilot-sql-optimization` + `awesome-copilot-postgresql-optimization` -> `internal-performance-optimization`
 
@@ -903,7 +781,7 @@ The original file proposes:
 5. run structural validation
 6. re-run collision simulation after changes
 
-For this analysis and first cleanup pass, I actually verified:
+For this analysis and applied cleanup passes, I actually verified:
 
 - skill families and counts on disk
 - agent count on disk

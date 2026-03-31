@@ -1,6 +1,6 @@
 ---
 name: internal-script-python
-description: Create or modify standalone Python scripts with purpose docstring, emoji logs, and pinned dependencies. Use for automation scripts, CLI tools, data processing scripts, or any Python helper that is NOT part of a larger application.
+description: Create or modify standalone Python scripts with purpose docstring, emoji logs, pinned dependencies, and pragmatic runtime choices. Use for automation scripts, CLI tools, data processing scripts, or any Python helper that is NOT part of a larger application.
 ---
 
 # Python Script Skill
@@ -19,6 +19,7 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Use emoji logs for execution states.
 - Prefer early return and guard clauses.
 - Keep implementation explicit and readable.
+- Use type hints on non-trivial public helpers and CLI-facing boundaries.
 - Add unit tests for testable behavior.
 - New standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
 - The folder should include the Python entry point, a `run.sh` launcher, and `tests/` when test scope applies. Add a local `requirements.txt` only when external packages are used.
@@ -115,7 +116,13 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 - Put tests under `tests/`.
 - Use `pytest` as default test framework.
 - Keep tests deterministic and isolated.
+- Use coverage reports to inspect missing behavior on touched code, not to force blanket 100% coverage.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
+
+## Runtime guidance
+- Prefer the standard library first for simple scripts; add third-party packages only when they materially simplify parsing, validation, HTTP, CLI, or serialization work.
+- Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
+- Reach for `pathlib`, context managers, and small helper functions before adding framework-like structure to a script.
 
 ## Common mistakes
 
@@ -129,6 +136,7 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 | Installing deps globally or without hash-locked version pinning | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins and hashes |
 | Adding an empty `requirements.txt` to a stdlib-only tool | Adds noise and implies missing setup steps | Omit `requirements.txt` when the script uses only the standard library |
 | Shipping a loose `.py` file with undocumented setup steps | Users must guess how to create the environment and run the tool | Generate a self-contained folder with `run.sh` and add `requirements.txt` only when external packages are needed |
+| Forcing async or framework abstractions into a simple tool | Raises complexity without improving the script | Keep the script synchronous and direct unless concurrency is essential |
 
 ## Cross-references
 - **internal-project-python** (`.github/skills/internal-project-python/SKILL.md`): for structured application code.

@@ -79,11 +79,7 @@ Managed skills:
 - `copilot-instructions-blueprint-generator` -> `awesome-copilot-instructions-blueprint-generator`
 - `create-github-pull-request-from-specification` -> `awesome-copilot-create-github-pull-request-from-specification`
 - `dependabot` -> `awesome-copilot-dependabot`
-- `java-junit` -> `awesome-copilot-java-junit`
-- `java-springboot` -> `awesome-copilot-java-springboot`
-- `javascript-typescript-jest` -> `awesome-copilot-javascript-typescript-jest`
 - `postgresql-optimization` -> `awesome-copilot-postgresql-optimization`
-- `pytest-coverage` -> `awesome-copilot-pytest-coverage`
 - `secret-scanning` -> `awesome-copilot-secret-scanning`
 - `sql-optimization` -> `awesome-copilot-sql-optimization`
 
@@ -181,15 +177,9 @@ Managed skills:
 - `domain-driven-design` -> `antigravity-domain-driven-design`
 - `golang-pro` -> `antigravity-golang-pro`
 - `grafana-dashboards` -> `antigravity-grafana-dashboards`
-- `java-pro` -> `antigravity-java-pro`
-- `javascript-pro` -> `antigravity-javascript-pro`
 - `kubernetes-architect` -> `antigravity-kubernetes-architect`
 - `kubernetes-deployment` -> `antigravity-kubernetes-deployment`
 - `network-engineer` -> `antigravity-network-engineer`
-- `nodejs-best-practices` -> `antigravity-nodejs-best-practices`
-- `python-patterns` -> `antigravity-python-patterns`
-- `python-pro` -> `antigravity-python-pro`
-- `python-testing-patterns` -> `antigravity-python-testing-patterns`
 - `simplify-code` -> `antigravity-simplify-code`
 - `terraform-specialist` -> `antigravity-terraform-specialist`
 

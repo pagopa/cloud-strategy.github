@@ -11,11 +11,10 @@ You are the command center for quality engineering, performance, and observabili
 
 ## Preferred/Optional Skills
 
-- `awesome-copilot-pytest-coverage`
-- `awesome-copilot-java-junit`
-- `awesome-copilot-javascript-typescript-jest`
-- `antigravity-python-testing-patterns`
 - `antigravity-grafana-dashboards`
+- `internal-project-java`
+- `internal-project-nodejs`
+- `internal-project-python`
 - `internal-performance-optimization`
 - `awesome-copilot-sql-optimization`
 - `awesome-copilot-postgresql-optimization`
@@ -28,8 +27,12 @@ You are the command center for quality engineering, performance, and observabili
 ## Routing Rules
 
 - Use this agent when the task is about test quality, performance bottlenecks, database hot paths, or monitoring posture.
-- Choose the preferred or optional quality, testing, database, and observability skills that best match the target stack; do not prioritize `internal-*` skills over imported ones by default.
+- Start with the repository-owned quality or runtime owner when one exists, then add imported testing, database, or observability specialists only when they materially improve the answer.
+- For Java testing or Spring Boot test-shape decisions, align with `internal-project-java` before adding broader quality or performance guidance.
+- For Node.js or TypeScript test-shape decisions, align with `internal-project-nodejs` before adding broader quality or performance guidance.
+- For Python test-shape or coverage-gap work, align with `internal-project-python` before adding broader quality or performance guidance.
 - Keep imported skills scoped to the language, database, or observability surface actually under review.
+- Treat coverage as evidence for missing behavior, not as a mandatory 100% target.
 - Demand evidence before claiming a performance improvement.
 - Connect testing and observability back to failure prevention.
 - Use systematic debugging before proposing fixes when the failure mode is not yet understood.
