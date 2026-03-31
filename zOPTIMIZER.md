@@ -137,12 +137,11 @@ The real need is to keep validating that declared skills resolve on disk and to 
 - Added contract coverage for agent declared skills resolving on disk.
 - Clarified routing boundaries in `AGENTS.md`.
 - Recorded the imported-resource rule in repository knowledge.
+- Added a repository-owned usage reporting entrypoint with explicit telemetry schema and JSON plus Markdown outputs.
 
 ### Next internal-only actions
 
-1. Review `internal-*` instruction `applyTo` patterns where they stack on top of broad imported instructions and reduce local overlap only when the internal wrapper is too broad.
-2. Review internal routing assets and prompts so imported skills are loaded only when they add clear value for the task.
-3. Keep imported non-`internal-*` resources unchanged; if one becomes unusable, handle it through explicit refresh or local wrappering, not inline edits.
+1. Keep imported non-`internal-*` resources unchanged; if one becomes unusable, handle it through explicit refresh or local wrappering, not inline edits.
 
 ---
 
@@ -198,55 +197,6 @@ Action:
 Reason:
 
 - this is an architecture decision, not a conservative cleanup item
-
-### Phase 5. Usage metrics and analytics
-
-#### 5.1 Add repository-owned usage reporting
-
-Need:
-
-- optimization should be driven by observed resource usage, not intuition
-- the current repo validates catalog contracts and instruction-load hotspots, but it does not track actual resource use frequency
-
-Action:
-
-- add a repository-owned reporting workflow for resource usage analytics
-- start with a new internal reporting script rather than overloading the validator
-
-Suggested outputs:
-
-- agent invocation counts
-- skill load counts
-- prompt and instruction reference counts where observable
-- co-usage mappings such as agent -> declared skills actually used
-- zero-use or near-zero-use assets over a chosen time window
-- top resources by 30-day and 90-day windows
-
-Suggested implementation shape:
-
-- keep `validate-copilot-customizations.sh` focused on structural validation
-- add a separate reporting entrypoint such as `report-copilot-usage.py`
-- support machine-readable JSON output plus a Markdown summary
-- treat telemetry ingestion format as explicit input data, not an implied runtime capability
-
-Success criteria:
-
-- we can identify which agents, skills, prompts, and instructions are actually used
-- we can distinguish declared catalog breadth from observed utility
-- future pruning or consolidation proposals can cite measured evidence
-
-#### 5.2 Deferred implementation task for the next pass
-
-Action:
-
-- implement an initial repository-owned usage analytics entrypoint in a later pass, likely as `.github/scripts/report-copilot-usage.py`
-- define the input event schema explicitly before coding
-- emit both JSON and Markdown summaries
-- keep this work separate from the validator so structural validation and usage reporting stay decoupled
-
-Status:
-
-- deferred by choice for a follow-up implementation pass
 
 ---
 
