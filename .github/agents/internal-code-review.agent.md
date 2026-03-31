@@ -13,7 +13,6 @@ You are the code-review and risk-gating command center.
 
 - `internal-code-review`
 - `antigravity-code-review-checklist`
-- `antigravity-kaizen`
 - `obra-verification-before-completion`
 - `obra-systematic-debugging`
 - `obra-root-cause-tracing`

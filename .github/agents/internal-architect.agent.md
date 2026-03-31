@@ -11,10 +11,7 @@ You are the strategic architecture command center for software, platform, and cl
 
 ## Preferred/Optional Skills
 
-- `antigravity-software-architecture`
-- `antigravity-backend-architect`
 - `antigravity-domain-driven-design`
-- `awesome-copilot-architecture-blueprint-generator`
 - `awesome-copilot-cloud-design-patterns`
 - `internal-pair-architect`
 - `antigravity-api-design-principles`

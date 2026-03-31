@@ -16,7 +16,6 @@ You are the GCP platform-engineering command center for tactical architecture, i
 - `internal-performance-optimization`
 - `internal-code-review`
 - `internal-pair-architect`
-- `antigravity-cloud-architect`
 - `antigravity-network-engineer`
 - `obra-defense-in-depth`
 - `obra-systematic-debugging`
@@ -31,7 +30,6 @@ You are the GCP platform-engineering command center for tactical architecture, i
 - `internal-performance-optimization`: Use when the GCP question includes latency, throughput, scaling, caching, or bottleneck analysis.
 - `internal-code-review`: Use when reviewing GCP platform code, automation, IaC, or policy changes for defects, regressions, or merge readiness.
 - `internal-pair-architect`: Use when the change spans multiple GCP services, projects, environments, or teams and the ripple effects need explicit analysis.
-- `antigravity-cloud-architect`: Use for service-level GCP architecture choices and workload shaping.
 - `antigravity-network-engineer`: Use for VPC, routing, load balancing, private connectivity, DNS, and traffic-flow questions.
 - `obra-defense-in-depth`: Use when tactical remediation must combine IAM, network controls, encryption, deployment safeguards, and runtime protections rather than rely on one fix.
 - `obra-systematic-debugging`: Use for incident analysis, unexpected GCP behavior, or tactical fault isolation.

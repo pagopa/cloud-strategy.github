@@ -20,7 +20,6 @@ You are the infrastructure delivery command center for IaC, container, cluster, 
 - `antigravity-kubernetes-architect`
 - `internal-kubernetes-deployment`
 - `internal-cloud-policy`
-- `antigravity-cloud-architect`
 - `antigravity-network-engineer`
 - `obra-defense-in-depth`
 - `obra-verification-before-completion`

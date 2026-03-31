@@ -15,7 +15,6 @@ You are the strategic GCP command center for platform topology, governance direc
 - `internal-terraform`
 - `internal-devops-core-principles`
 - `internal-pair-architect`
-- `antigravity-cloud-architect`
 - `obra-brainstorming`
 - `obra-preserving-productive-tensions`
 - `obra-defense-in-depth`
@@ -29,7 +28,6 @@ You are the strategic GCP command center for platform topology, governance direc
 - `internal-terraform`: Use when the strategic target state must become landing-zone rollout guidance, policy deployment sequencing, or infrastructure delivery guardrails.
 - `internal-devops-core-principles`: Use when the question depends on ownership boundaries, platform operating model, exception flow, release process, or governance-process quality.
 - `internal-pair-architect`: Use when the GCP decision changes multiple projects, folders, environments, regions, or teams and the ripple effects need explicit analysis.
-- `antigravity-cloud-architect`: Use for high-level GCP architecture decisions that affect platform shape, shared-service placement, or operating-model structure.
 - `obra-brainstorming`: Use when the GCP strategy question is exploratory or under-specified and viable options need to be surfaced before convergence.
 - `obra-preserving-productive-tensions`: Use when multiple valid GCP operating models remain viable, such as stronger centralization versus team autonomy or tighter guardrails versus faster delivery.
 - `obra-defense-in-depth`: Use when the strategic answer must layer organization policy, IAM boundaries, network segmentation, detective controls, and rollout protections rather than rely on one control surface.

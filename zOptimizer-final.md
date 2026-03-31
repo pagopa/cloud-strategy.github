@@ -16,11 +16,11 @@
 
 ### Corrected factual baseline from disk
 
-- The repository currently has `121` skills, not `118`.
+- The live repository currently has `100` skills, down from `117` before the completed first prune batch.
 - Family counts on disk are:
   - `26` `internal-*`
-  - `35` `antigravity-*`
-  - `24` `awesome-copilot-*`
+  - `20` `antigravity-*`
+  - `18` `awesome-copilot-*`
   - `30` `obra-*`
   - `3` `openai-*`
   - `3` `terraform-*`
@@ -46,31 +46,7 @@ That is the simplest way to make `obra-*` win at strategy, `internal-*` win at e
 
 ## 2. Main Catalog Decision Plan
 
-### 2.1 Delete Now
-
-These are the highest-confidence removals because they are generic, persona-based, risky, off-focus, or already superseded enough that keeping them mainly adds collision space.
-
-| Skill | Decision | Why |
-|---|---|---|
-| `antigravity-aws-penetration-testing` | Delete | Offensive scope, high-risk content, and not aligned with the repository’s Copilot-governance focus. |
-| `antigravity-backend-architect` | Delete | Too broad; overlaps `internal-architect`, `internal-pair-architect`, `antigravity-api-design-principles`, and `antigravity-domain-driven-design`. |
-| `antigravity-clean-code` | Delete | Generic code-quality doctrine that broadens trigger space without repo-local workflow value. |
-| `antigravity-cloud-architect` | Delete | Broad multi-cloud peer to existing internal cloud strategy and infrastructure agents. |
-| `antigravity-code-refactoring-refactor-clean` | Delete | Generic refactor guidance already covered by internal review/quality patterns. |
-| `antigravity-code-refactoring-tech-debt` | Delete | Same collision space as internal review/quality work, but less repo-specific and less structured. |
-| `antigravity-github` | Delete | GitHub plugin plus `openai-gh-*` skills cover the concrete workflows more cleanly. |
-| `antigravity-kaizen` | Delete | Generic process-improvement language that collides with review/refactor requests. |
-| `antigravity-network-101` | Delete | Lab-oriented security/network setup content, narrow but off-focus and not worth catalog space. |
-| `antigravity-software-architecture` | Delete | One of the broadest collision sources in the whole catalog; description can match nearly any software-development request. |
-| `antigravity-web-scraper` | Delete | Broad web-data extraction capability that is unrelated to the core governance mission and adds noisy trigger keywords. |
-| `awesome-copilot-architecture-blueprint-generator` | Delete | Documentation-heavy architecture generator that competes with `internal-architect` instead of supporting it. |
-| `awesome-copilot-create-github-action-workflow-specification` | Delete | Peripheral workflow-spec output, not a core operator path next to `internal-cicd-workflow`. |
-| `awesome-copilot-create-implementation-plan` | Delete | Direct collision with `obra-writing-plans` and your preferred strategic planning layer. |
-| `awesome-copilot-create-readme` | Delete | Narrow and noisy, and the repo explicitly forbids README edits unless requested. |
-| `awesome-copilot-documentation-writer` | Delete | Generic documentation-writing role that broadens matching more than it adds reusable repo logic. |
-| `awesome-copilot-refactor-plan` | Delete | Direct collision with `obra-writing-plans` and `obra-executing-plans`; weaker than keeping the obra planning system. |
-
-### 2.2 Merge Into `internal-*`, Then Delete The External Source
+### 2.1 Merge Into `internal-*`, Then Delete The External Source
 
 These are the best candidates for “take the good parts, make the internal skill stronger, then remove the competing external skill.”
 
@@ -98,7 +74,7 @@ These are the best candidates for “take the good parts, make the internal skil
 | `awesome-copilot-sql-optimization` | `internal-performance-optimization` | Query-shape, indexing, batching, pagination, and plan-based tuning workflow | Same owner as broader performance work. |
 | `terraform-terraform-style-guide` | `internal-terraform` | Formatting and structure conventions only where they match repo conventions | Reduces Terraform collision space without losing useful style guidance. |
 
-### 2.3 Keep As Support-Only Specialists
+### 2.2 Keep As Support-Only Specialists
 
 These skills still add value, but they should stop acting like equal peers to `obra-*` and `internal-*`. Keep them narrow, explicit, and preferably out of broad default routing.
 
@@ -130,23 +106,23 @@ These skills still add value, but they should stop acting like equal peers to `o
 
 
 
-### 2.5 Practical Prune Order
+### 2.3 Practical Prune Order
 
-If you want the highest impact first, the cleanup order should be:
+After the completed `Delete Now` batch, the next cleanup order should be:
 
-1. Delete persona, risky, and obviously off-focus skills.
-2. Delete or merge the generic planning/review/refactor/documentation externals.
-3. Merge language/runtime externals into the matching `internal-*` owners.
-4. Merge Terraform, SQL, PostgreSQL, and agent-governance externals into the internal tactical owners.
-5. Demote the remaining externals to support-only and remove them from broad default routing.
+1. Merge language/runtime externals into the matching `internal-*` owners.
+2. Merge Terraform, SQL, PostgreSQL, and agent-governance externals into the internal tactical owners.
+3. Demote the remaining externals to support-only and remove them from broad default routing.
 
 ## 3. Full Carry-Over Of `zOptimizer.md`, Reorganized But Not Lost
+
+This section preserves the pre-prune `117`-skill baseline so the original reasoning is not lost. Section `1` reflects the current live post-prune state.
 
 ### 3.1 Opening Thesis From `zOptimizer.md`
 
 The original file opens with the claim that the catalog is overcrowded and likely degrading skill activation accuracy. I keep that thesis, but with two corrections:
 
-- the catalog is even more crowded than stated because the real skill count is `121`, not `118`
+- before the current prune pass, the catalog was even more crowded than stated because the real skill count was `117`, not `118`
 - the more important issue is not just count, but flat-namespace competition between:
   - broad external skills
   - broad obra meta skills
@@ -170,7 +146,7 @@ The taxonomy is still worth keeping because it explains why some removals matter
 
 My revisions are:
 
-- the total skill count must be corrected to `121`
+- the total skill count must be corrected to `117`
 - the `awesome-copilot-*` family count must be corrected to `24`
 - the architecture and quality/review domains should be treated as the most dangerous for activation collisions because they contain multiple broad, generic descriptions
 - the workflow/meta domain should be split mentally into:
@@ -521,7 +497,7 @@ The original file says:
 
 My corrected version is:
 
-- `121` visible skills
+- `117` visible skills before the current prune pass
 - the flat description problem is real
 - the obra count is still `30`
 - but the most important change is that your external generic peers should stop competing with obra and internal assets as equals
@@ -884,14 +860,14 @@ I agree, and I would make the following concrete consolidation set the first one
 
 The original file already self-challenges well. I preserve that and sharpen it.
 
-#### Question: Is `121` skills automatically too many?
+#### Question: Is `117` skills automatically too many?
 
 My answer:
 
 - not automatically
 - but it is too many for this specific flat, overlapping, peer-like structure
 
-If the catalog were strongly tiered and descriptions were narrow, `121` would be less alarming.
+If the catalog were strongly tiered and descriptions were narrow, `117` would be less alarming.
 The current problem is the combination of count, overlap, and peer-status competition.
 
 #### Question: Are obra skills really the main problem?

@@ -17,7 +17,6 @@ You are the Azure platform-engineering command center for tactical architecture,
 - `internal-performance-optimization`
 - `internal-code-review`
 - `internal-pair-architect`
-- `antigravity-cloud-architect`
 - `antigravity-network-engineer`
 - `awesome-copilot-azure-pricing`
 - `obra-defense-in-depth`
@@ -34,7 +33,6 @@ You are the Azure platform-engineering command center for tactical architecture,
 - `internal-performance-optimization`: Use when the Azure question includes latency, throughput, scaling, caching, or bottleneck analysis.
 - `internal-code-review`: Use when reviewing Azure platform code, automation, IaC, or policy changes for defects, regressions, or merge readiness.
 - `internal-pair-architect`: Use when the change spans multiple Azure services, subscriptions, environments, or teams and the ripple effects need explicit analysis.
-- `antigravity-cloud-architect`: Use for service-level Azure architecture choices and workload shaping.
 - `antigravity-network-engineer`: Use for virtual network, routing, private connectivity, ingress, DNS, and traffic-flow questions.
 - `awesome-copilot-azure-pricing`: Use when the tactical recommendation depends on Azure pricing shape, cost drivers, or cost-aware remediation choices.
 - `obra-defense-in-depth`: Use when tactical remediation must combine identity, network controls, encryption, deployment checks, and runtime protections rather than rely on one fix.

@@ -70,7 +70,6 @@ Managed skills:
 
 - `agent-governance` -> `awesome-copilot-agent-governance`
 - `agentic-eval` -> `awesome-copilot-agentic-eval`
-- `architecture-blueprint-generator` -> `awesome-copilot-architecture-blueprint-generator`
 - `azure-devops-cli` -> `awesome-copilot-azure-devops-cli`
 - `azure-pricing` -> `awesome-copilot-azure-pricing`
 - `azure-resource-health-diagnose` -> `awesome-copilot-azure-resource-health-diagnose`
@@ -78,18 +77,13 @@ Managed skills:
 - `cloud-design-patterns` -> `awesome-copilot-cloud-design-patterns`
 - `codeql` -> `awesome-copilot-codeql`
 - `copilot-instructions-blueprint-generator` -> `awesome-copilot-instructions-blueprint-generator`
-- `create-github-action-workflow-specification` -> `awesome-copilot-create-github-action-workflow-specification`
 - `create-github-pull-request-from-specification` -> `awesome-copilot-create-github-pull-request-from-specification`
-- `create-implementation-plan` -> `awesome-copilot-create-implementation-plan`
-- `create-readme` -> `awesome-copilot-create-readme`
 - `dependabot` -> `awesome-copilot-dependabot`
-- `documentation-writer` -> `awesome-copilot-documentation-writer`
 - `java-junit` -> `awesome-copilot-java-junit`
 - `java-springboot` -> `awesome-copilot-java-springboot`
 - `javascript-typescript-jest` -> `awesome-copilot-javascript-typescript-jest`
 - `postgresql-optimization` -> `awesome-copilot-postgresql-optimization`
 - `pytest-coverage` -> `awesome-copilot-pytest-coverage`
-- `refactor-plan` -> `awesome-copilot-refactor-plan`
 - `secret-scanning` -> `awesome-copilot-secret-scanning`
 - `sql-optimization` -> `awesome-copilot-sql-optimization`
 
@@ -182,39 +176,24 @@ Managed skills:
 
 - `api-design-principles` -> `antigravity-api-design-principles`
 - `aws-cost-optimizer` -> `antigravity-aws-cost-optimizer`
-- `aws-penetration-testing` -> `antigravity-aws-penetration-testing`
 - `aws-serverless` -> `antigravity-aws-serverless`
-- `backend-architect` -> `antigravity-backend-architect`
 - `bash-pro` -> `antigravity-bash-pro`
-- `clean-code` -> `antigravity-clean-code`
-- `cloud-architect` -> `antigravity-cloud-architect`
 - `cloudformation-best-practices` -> `antigravity-cloudformation-best-practices`
-- `code-refactoring-refactor-clean` -> `antigravity-code-refactoring-refactor-clean`
-- `code-refactoring-tech-debt` -> `antigravity-code-refactoring-tech-debt`
 - `code-review-checklist` -> `antigravity-code-review-checklist`
 - `domain-driven-design` -> `antigravity-domain-driven-design`
-- `elon-musk` -> `antigravity-elon-musk`
-- `github` -> `antigravity-github`
 - `golang-pro` -> `antigravity-golang-pro`
 - `grafana-dashboards` -> `antigravity-grafana-dashboards`
 - `java-pro` -> `antigravity-java-pro`
 - `javascript-pro` -> `antigravity-javascript-pro`
-- `kaizen` -> `antigravity-kaizen`
 - `kubernetes-architect` -> `antigravity-kubernetes-architect`
 - `kubernetes-deployment` -> `antigravity-kubernetes-deployment`
-- `network-101` -> `antigravity-network-101`
 - `network-engineer` -> `antigravity-network-engineer`
 - `nodejs-best-practices` -> `antigravity-nodejs-best-practices`
 - `python-patterns` -> `antigravity-python-patterns`
 - `python-pro` -> `antigravity-python-pro`
 - `python-testing-patterns` -> `antigravity-python-testing-patterns`
 - `simplify-code` -> `antigravity-simplify-code`
-- `software-architecture` -> `antigravity-software-architecture`
-- `steve-jobs` -> `antigravity-steve-jobs`
 - `terraform-specialist` -> `antigravity-terraform-specialist`
-- `warren-buffett` -> `antigravity-warren-buffett`
-- `web-scraper` -> `antigravity-web-scraper`
-- `youtube-summarizer` -> `antigravity-youtube-summarizer`
 
 ## Canonical Governance Inputs
 

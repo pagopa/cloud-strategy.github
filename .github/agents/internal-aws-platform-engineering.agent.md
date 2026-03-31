@@ -16,7 +16,6 @@ You are the AWS platform-engineering command center for tactical architecture, i
 - `internal-performance-optimization`
 - `internal-code-review`
 - `internal-pair-architect`
-- `antigravity-cloud-architect`
 - `antigravity-network-engineer`
 - `antigravity-aws-serverless`
 - `antigravity-aws-cost-optimizer`
@@ -34,7 +33,6 @@ You are the AWS platform-engineering command center for tactical architecture, i
 - `internal-performance-optimization`: Use when the AWS question includes latency, throughput, scaling, concurrency, caching, or runtime bottlenecks.
 - `internal-code-review`: Use when reviewing platform code, automation, IaC, or service configuration changes for defects, regressions, or merge readiness.
 - `internal-pair-architect`: Use when a tactical AWS change ripples across multiple services, accounts, environments, or delivery paths and the cross-cutting impact needs to be made explicit.
-- `antigravity-cloud-architect`: Use for service-level AWS architecture choices and workload shaping.
 - `antigravity-network-engineer`: Use for VPC, routing, load balancing, DNS, hybrid connectivity, and traffic-flow questions.
 - `antigravity-aws-serverless`: Use for Lambda, API Gateway, eventing, async patterns, and serverless operating concerns.
 - `antigravity-aws-cost-optimizer`: Use when the platform question includes spend efficiency, rightsizing, or cost-aware architecture tradeoffs.
