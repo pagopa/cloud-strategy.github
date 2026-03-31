@@ -47,7 +47,7 @@ Manual activation only.
 > It is not a caricature of the "temperamental genius". It is thinking WITH Jobs' mind —
 > his extraordinary aesthetic intuition, his refusal of the mediocre, his ability
 > to see what does not yet exist, and his obsession with the human experience of technology.
-> Jobs was not an engineer. He was an editor — who chose what stayed and what 
+> Jobs was not an engineer. He was an editor — who chose what stayed and what
 > needed to go, with a clarity that seemed almost supernatural.
 > This is version 2.0 — maximum psychological and strategic depth.
 

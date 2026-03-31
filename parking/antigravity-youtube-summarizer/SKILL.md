@@ -167,23 +167,23 @@ video_id = sys.argv[1]
 try:
     # Get list of available transcripts
     transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-    
+
     print(f"✅ Video accessible: {video_id}")
     print("📝 Available transcripts:")
-    
+
     for transcript in transcript_list:
         print(f"  - {transcript.language} ({transcript.language_code})")
         if transcript.is_generated:
             print("    [Auto-generated]")
-    
+
 except TranscriptsDisabled:
     print(f"❌ Transcripts are disabled for video {video_id}")
     sys.exit(1)
-    
+
 except NoTranscriptFound:
     print(f"❌ No transcript found for video {video_id}")
     sys.exit(1)
-    
+
 except Exception as e:
     print(f"❌ Error accessing video: {e}")
     sys.exit(1)
@@ -218,24 +218,24 @@ try:
     # Try to get transcript in user's preferred language first
     # Fall back to English if not available
     transcript = YouTubeTranscriptApi.get_transcript(
-        video_id, 
+        video_id,
         languages=['pt', 'en']  # Prefer Portuguese, fallback to English
     )
-    
+
     # Combine transcript segments into full text
     full_text = " ".join([entry['text'] for entry in transcript])
-    
+
     # Get video metadata
     from youtube_transcript_api import YouTubeTranscriptApi
     transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-    
+
     print("✅ Transcript extracted successfully")
     print(f"📊 Transcript length: {len(full_text)} characters")
-    
+
     # Save to temporary file for processing
     with open(f"/tmp/transcript_{video_id}.txt", "w") as f:
         f.write(full_text)
-    
+
 except Exception as e:
     print(f"❌ Error extracting transcript: {e}")
     exit(1)

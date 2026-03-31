@@ -300,16 +300,16 @@ graph TD
     B --> C[prompts/*.prompt.md]
     C --> D[skills/*/SKILL.md]
     D --> E[agents/*.agent.md]
-    
+
     F[AGENTS.md] --> A
     F --> E
-    
+
     G[make lint and make test] --> A
     G --> B
     G --> C
     G --> D
     G --> E
-    
+
     H[internal-sync-copilot-configs.py] -->|plan/apply| I[Consumer Repos]
     I --> J[Consumer AGENTS.md]
 ```

@@ -135,13 +135,13 @@ stages:
             displayName: 'Use .NET SDK'
             inputs:
               version: '8.x'
-          
+
           - task: DotNetCoreCLI@2
             displayName: 'Restore dependencies'
             inputs:
               command: 'restore'
               projects: '**/*.csproj'
-          
+
           - task: DotNetCoreCLI@2
             displayName: 'Build application'
             inputs:
