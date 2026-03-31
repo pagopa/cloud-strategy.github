@@ -1,6 +1,6 @@
 ---
 name: internal-copilot-docs-research
-description: Research current GitHub Copilot behavior and customization guidance using official GitHub documentation first and MCP servers or tools when available. Use when validating repository-owned Copilot agents, skills, prompts, instructions, custom agents, agent skills, or MCP integration behavior before changing `.github/` assets.
+description: Research current GitHub Copilot behavior and customization guidance using official GitHub documentation first, then session-specific MCP capability when needed. Use when validating repository-owned Copilot agents, skills, prompts, instructions, custom agents, agent skills, tool contracts, or MCP integration behavior before changing `.github/` assets.
 ---
 
 # Internal Copilot Docs Research
@@ -18,6 +18,8 @@ It is especially useful when the question touches:
 - prompt files
 - agent skills
 - custom agents
+- custom-agent frontmatter fields and environment support
+- custom-agent tool aliases and MCP namespacing
 - MCP support or MCP server behavior
 - environment-specific feature support across GitHub, IDEs, and Copilot CLI
 
@@ -35,22 +37,23 @@ Read the local contract before deciding that the platform should change the repo
 Use sources in this order:
 
 1. Local repository contract for repo-specific policy and naming
-2. MCP resources, templates, or tools that are actually available in the current session
-3. Official GitHub documentation on `docs.github.com`
-4. GitHub-owned references explicitly linked from the official docs, such as the GitHub MCP Registry, only when needed
+2. Official GitHub documentation on `docs.github.com`
+3. GitHub-owned references explicitly linked from the official docs, such as GitHub-maintained customization examples, only when needed
+4. MCP resources, templates, or tools that are actually available in the current session, but only to confirm live session capability or repository-local configuration
 
 Do not assume MCP is configured just because GitHub Copilot supports it.
 
 ## Research Workflow
 
 1. Read the local contract first.
-2. Detect live MCP capability in the current session.
-3. If a relevant MCP server, tool, resource, or template is available, use it for live capability facts or server-specific behavior.
-4. If no relevant MCP capability is available, state that explicitly and continue with official documentation.
-5. Search `docs.github.com` for the exact GitHub Copilot surface involved.
-6. Re-check feature scope, preview status, and environment differences before drawing conclusions.
-7. Reconcile the platform behavior with this repository's intentionally narrower implementation contract.
-8. Convert the conclusion into precise repo changes and run validation after structural edits.
+2. Open the official GitHub documentation page that is authoritative for the surface involved.
+3. For custom agents, prefer the custom-agent configuration reference for frontmatter, tool aliases, retired keys, MCP namespacing, and environment-specific behavior.
+4. Re-check feature scope, preview status, and GitHub.com versus IDE differences before drawing conclusions.
+5. Detect live MCP capability in the current session only if the change depends on what is configured right now rather than on the product contract.
+6. If a relevant MCP server, tool, resource, or template is available, use it for live capability facts or server-specific behavior.
+7. If no relevant MCP capability is available, state that explicitly and continue with official documentation.
+8. Reconcile the platform behavior with this repository's intentionally narrower implementation contract.
+9. Convert the conclusion into precise repo changes and run validation after structural edits.
 
 ## Decision Heuristics
 
@@ -59,6 +62,10 @@ Do not assume MCP is configured just because GitHub Copilot supports it.
 - Use skills for detailed, reusable task workflows that should load only when relevant.
 - Use agents for recurring orchestration roles with stable routing boundaries.
 - Use MCP for live tools, external context, or server-backed workflows only when the current session actually exposes the needed capability.
+- When researching custom agents, treat `tools:` as supported, not deprecated. Omitting `tools:` means the agent keeps access to all available tools.
+- Prefer canonical tool aliases such as `read`, `edit`, `search`, `execute`, `agent`, and `web` over legacy product-specific tool ids from older examples.
+- Treat `infer:` as retired. Use `disable-model-invocation` and `user-invocable` when selection behavior must be constrained.
+- Treat `mcp-servers:` as GitHub.com and Copilot CLI configuration, not as an IDE-wide guarantee.
 
 ## Reconciliation Rule
 
@@ -75,5 +82,6 @@ When that happens:
 - Confirmed platform facts with source links
 - Any MCP capability found and whether it was actually used
 - Clear distinction between official behavior and repo-local policy
+- Frontmatter or tool-contract implications for the target agent or skill
 - Specific file updates required to align the repository
 - Validation command to run after changes

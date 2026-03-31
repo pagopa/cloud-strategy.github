@@ -32,7 +32,9 @@ Use this checklist before finalizing a new or revised internal agent.
 
 ## Imported Pattern Normalization
 
-- Have deprecated frontmatter keys and runtime-specific tool references been removed?
+- Have retired frontmatter keys such as `infer:` and `color:` been removed?
+- If the agent declares `tools:`, does it use canonical aliases or explicit MCP namespaces?
+- If the agent omits `tools:`, is that omission intentional?
 - Have broad expertise claims been translated into routing or output rules?
 - Has UI-only or platform-only content been deleted?
 - Is the converted content now repo-local and reusable?

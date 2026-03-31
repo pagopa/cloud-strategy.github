@@ -1,6 +1,6 @@
 ---
 name: internal-copilot-audit
-description: Audit Copilot customization health for overlap, hollow references, deprecated frontmatter, weak bridge design, naming violations, stale governance references, and redundant command-center assets. Use when reviewing the quality of `.github/` customization assets in this repository.
+description: Audit Copilot customization health for overlap, hollow references, retired frontmatter, stale tool contracts, weak bridge design, naming violations, stale governance references, and redundant command-center assets. Use when reviewing the quality of `.github/` customization assets in this repository.
 ---
 
 # Internal Copilot Audit
@@ -14,7 +14,8 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 - Detect overlapping skills, prompts, and agents.
 - Detect hollow assets that point to missing local files or missing companion skills.
 - Detect declared skills that have no concrete workflow role in the agent or prompt that declares them.
-- Detect deprecated frontmatter and stale runtime-specific wording.
+- Detect retired frontmatter and stale runtime-specific wording.
+- Detect stale or misleading tool contracts in repository-owned internal agents.
 - Detect weak `AGENTS.md` bridge design.
 - Detect sync workflows that skip or fail to report governance review for `.github/copilot-instructions.md` and root `AGENTS.md`.
 - Detect naming violations and stale inventory references.
@@ -23,12 +24,13 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 ## Audit Order
 
 1. Check naming and frontmatter.
-2. Check broken local references.
-3. Check declared skill contracts and decorative skill usage.
-4. Check trigger overlap.
-5. Check bridge coherence between `AGENTS.md` and `.github/copilot-instructions.md`.
-6. Check whether prompts, skills, or agents became redundant after internal replacements were added.
-7. Check whether governance files still describe superseded or removed assets.
+2. Check tool and MCP contract clarity for repository-owned internal agents.
+3. Check broken local references.
+4. Check declared skill contracts and decorative skill usage.
+5. Check trigger overlap.
+6. Check bridge coherence between `AGENTS.md` and `.github/copilot-instructions.md`.
+7. Check whether prompts, skills, or agents became redundant after internal replacements were added.
+8. Check whether governance files still describe superseded or removed assets.
 
 ## What To Flag
 
@@ -48,14 +50,28 @@ Flag an asset when:
 - it keeps a broad toolbox-style skill list without routing or trigger boundaries
 - it treats a skill as available context rather than an expected procedure
 
-### Deprecated patterns
+### Tool contract problems
+
+Flag a repository-owned internal agent when:
+
+- its prompt or routing rules depend on explicit least-privilege or MCP-only behavior, but the frontmatter never declares the corresponding `tools:` or `mcp-servers:` contract
+- it copies legacy product-specific tool ids such as `terminalCommand`, `search/codebase`, `search/searchResults`, `search/usages`, `edit/editFiles`, `execute/runInTerminal`, `web/fetch`, or `read/problems` when canonical aliases such as `execute`, `search`, `edit`, `web`, or `read` would express the intent more clearly
+- it names MCP tools without `server/tool` or `server/*` namespacing
+- it carries a long copied tool catalog even though omitting `tools:` or using a short canonical alias list would be clearer
+
+Do not flag omitted `tools:` by itself. In current GitHub Copilot custom agents, omission means all available tools remain enabled.
+
+Do not flag legacy tool catalogs inside imported non-`internal-*` assets unless the task is explicitly to refresh, replace, or fork that import.
+
+### Retired patterns
 
 Flag an asset when it still contains:
 
-- `tools:`
-- `model:`
+- `infer:`
 - `color:`
 - runtime-specific wording that should have been normalized to GitHub Copilot terminology
+
+Do not flag `tools:` or `model:` by themselves. Current GitHub Copilot custom agents support both.
 
 ### Overlap problems
 
@@ -105,6 +121,7 @@ For each finding, include:
 - issue type
 - why it matters
 - proposed replacement or fix
+- tool-contract note when the issue involves explicit tool scope, MCP access, or legacy tool ids
 
 ## No-Fallback Rule
 

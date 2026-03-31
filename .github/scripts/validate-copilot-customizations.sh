@@ -23,7 +23,7 @@ DEFAULT_SCOPE = "root"
 DEFAULT_MODE = "strict"
 SUPPORTED_SCOPES = {"root", "all"}
 SUPPORTED_MODES = {"strict", "basic", "legacy-compatible"}
-DEPRECATED_FRONTMATTER_KEYS = ("tools", "model", "color")
+RETIRED_FRONTMATTER_KEYS = ("infer", "color")
 DEPRECATED_AGENT_SECTION_HEADINGS = ("## Primary Skill Stack",)
 AGENT_SKILL_SECTION_HEADINGS = ("## Preferred/Optional Skills",)
 INTERNAL_SYNC_CONTROL_CENTER_AGENT = Path(".github/agents/internal-sync-control-center.agent.md")
@@ -256,9 +256,9 @@ def validate_named_resources(errors: list[str]) -> None:
         elif name != skill_dir.name:
             errors.append(f"Skill name mismatch: {skill_dir.name} != {name}")
 
-        for key in DEPRECATED_FRONTMATTER_KEYS:
+        for key in RETIRED_FRONTMATTER_KEYS:
             if re.search(rf"^{key}:\s*", text, re.M):
-                errors.append(f"Deprecated frontmatter key `{key}:` found in {skill_file}")
+                errors.append(f"Retired frontmatter key `{key}:` found in {skill_file}")
 
     for prompt_file in sorted((REPO_ROOT / ".github" / "prompts").glob("*.prompt.md")):
         text = read_text(prompt_file)
@@ -282,9 +282,9 @@ def validate_named_resources(errors: list[str]) -> None:
         if not is_internal_agent:
             continue
 
-        for key in DEPRECATED_FRONTMATTER_KEYS:
+        for key in RETIRED_FRONTMATTER_KEYS:
             if re.search(rf"^{key}:\s*", text, re.M):
-                errors.append(f"Deprecated frontmatter key `{key}:` found in {agent_file}")
+                errors.append(f"Retired frontmatter key `{key}:` found in {agent_file}")
 
         for heading in DEPRECATED_AGENT_SECTION_HEADINGS:
             if re.search(rf"^{re.escape(heading)}\s*$", text, re.M):

@@ -14,11 +14,15 @@ Use this file as a starting map, not as a substitute for opening the live docs.
 ## Custom agents and skills
 
 - `https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents`
-  - Use for what custom agents are and where they are supported.
+  - Use for what custom agents are, where they are supported, and the high-level model that custom agents can specify prompts, tools, and MCP servers.
+- `https://docs.github.com/en/copilot/reference/custom-agents-configuration`
+  - Use as the primary source for supported frontmatter fields, current tool aliases, MCP tool namespacing, retired `infer`, and environment-specific behavior.
 - `https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents`
-  - Use for custom agent structure, fields, and behavior.
+  - Use for custom agent structure, authoring workflow, and current GitHub-managed examples.
 - `https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-skills`
   - Use for agent skills and for the skill-versus-custom-instructions boundary.
+- `https://docs.github.com/en/copilot/tutorials/customization-library/custom-agents/your-first-custom-agent`
+  - Use for GitHub-maintained example patterns after the schema and tool rules have been verified in the reference docs.
 
 ## MCP
 

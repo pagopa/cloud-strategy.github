@@ -10,7 +10,8 @@ They show how to convert richer external agent ideas into repository-owned inter
 
 An imported agent has:
 
-- deprecated frontmatter such as `model:` and `tools:`
+- retired frontmatter such as `infer:` or unsupported decoration such as `color:`
+- copied legacy tool catalogs from older product examples
 - long expertise catalogs
 - broad claims about being an expert in a domain
 
@@ -24,7 +25,7 @@ An imported agent has:
 
 - make `description:` say when the route wins
 - turn expertise bullets into routing priorities or output expectations
-- drop platform-specific tool wiring
+- normalize copied tool ids to canonical aliases or omit `tools:` when explicit scoping is unnecessary
 
 ### Internal Pattern
 
@@ -165,7 +166,7 @@ An imported cloud architect agent has:
 
 ### Rewrite
 
-- move tool dependencies into repo-local research skills or routing rules about official documentation
+- move stale tool dependencies into repo-local research skills, routing rules about official documentation, or a short current `tools:` list when explicit scoping still matters
 - turn the framework matrix into a short decision lens in routing rules or output expectations
 - compress the clarifying questions into a short list of critical constraints
 - keep the route focused on when the provider-specific agent wins

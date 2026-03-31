@@ -151,6 +151,77 @@ You are the example command center.
     assert report.valid
     assert report.errors == []
 
+
+def test_build_report_accepts_supported_agent_frontmatter(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "edit", "search", "execute"]
+model: gpt-5
+target: github-copilot
+disable-model-invocation: false
+user-invocable: true
+metadata:
+  owner: platform
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert report.valid
+    assert report.errors == []
+
+
+def test_build_report_rejects_retired_agent_frontmatter(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+infer: false
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert "Retired frontmatter key `infer:` found in" in "\n".join(report.errors)
+
+
 def test_build_report_rejects_unknown_preferred_optional_skill(tmp_path: Path) -> None:
     build_minimal_repo(
         tmp_path,

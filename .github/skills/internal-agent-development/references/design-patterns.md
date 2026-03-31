@@ -2,7 +2,7 @@
 
 Use this file when you need stronger internal agent structure than the base template provides.
 
-It distills reusable patterns from richer external agents without carrying over their runtime-specific frontmatter or tool assumptions.
+It distills reusable patterns from richer external agents without carrying over stale frontmatter or obsolete tool assumptions.
 
 ## Table of Contents
 
@@ -27,7 +27,7 @@ Good docs-first characteristics:
 
 Bad docs-first characteristics:
 
-- copied tool ids or runtime wiring in frontmatter
+- copied legacy tool ids or stale runtime wiring in frontmatter
 - claims about "latest guidance" with no evidence or verification rule
 - provider-specific commands embedded in the agent body
 
@@ -69,6 +69,7 @@ External agents often expose long tool lists, framework matrices, or expertise c
 | Upstream signal | Internal rewrite |
 | --- | --- |
 | Expertise bullets | `## Role`, `## Routing Rules`, or `## Output Expectations` |
+| Tool catalogs | Short `tools:` list with canonical aliases when scope matters; otherwise omit `tools:` and express the dependency in routing rules or skills |
 | Platform setup steps | Reference file or skill |
 | Slash commands | `## Execution Workflow` when the sequence is core to the role |
 | Generic quality checklist | Skill or reference |
