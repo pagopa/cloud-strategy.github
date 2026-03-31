@@ -1,6 +1,6 @@
 ---
 name: internal-code-review
-description: Use when a code review is requested, a PR needs reviewing, or the user wants defect-first checks across functionality, security, performance, maintainability, and tests on Python, Bash, Terraform, Java, or Node.js/TypeScript.
+description: Use when a code review is requested, a PR needs reviewing, or the user wants defect-first checks or safe simplification guidance across functionality, security, performance, maintainability, and tests on Python, Bash, Terraform, Java, or Node.js/TypeScript.
 ---
 
 # Code Review Skill
@@ -67,6 +67,17 @@ Always cover these dimensions, even when the language-specific catalog is the pr
 - Performance: unnecessary loops, repeated work, hot-path regressions, or avoidable I/O
 - Tests: meaningful coverage, edge-case coverage, and whether the validation actually exercises the changed behavior
 - Maintainability: naming, cohesion, complexity, dead code, and local convention fit
+
+## Simplification rubric
+
+When the review also asks whether the change can be simplified safely, use this rubric and keep every recommendation behavior-preserving:
+
+- Reuse: prefer an existing helper or shared abstraction over new near-duplicate logic.
+- Quality: flag redundant state, parameter sprawl, copy-paste branches, and stringly-typed values when a stronger local contract already exists.
+- Efficiency: flag repeated work, duplicate reads, unnecessary recomputation, and overly broad scans that add cost without benefit.
+- Clarity: flag deep nesting, weak naming, dead code, redundant comments, and indirection that no longer earns its keep.
+
+Only elevate simplification suggestions when they materially improve maintainability, correctness, or cost. Do not churn code for aesthetic reasons alone.
 
 ## Review workflow
 

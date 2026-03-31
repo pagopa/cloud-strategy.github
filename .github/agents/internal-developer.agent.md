@@ -16,7 +16,6 @@ You are the repository's implementation command center for application and scrip
 - `internal-project-python`
 - `internal-script-bash`
 - `internal-script-python`
-- `antigravity-simplify-code`
 - `obra-systematic-debugging`
 - `obra-root-cause-tracing`
 - `obra-verification-before-completion`

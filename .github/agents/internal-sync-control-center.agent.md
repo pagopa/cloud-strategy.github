@@ -178,10 +178,7 @@ Managed skills:
 - `golang-pro` -> `antigravity-golang-pro`
 - `grafana-dashboards` -> `antigravity-grafana-dashboards`
 - `kubernetes-architect` -> `antigravity-kubernetes-architect`
-- `kubernetes-deployment` -> `antigravity-kubernetes-deployment`
 - `network-engineer` -> `antigravity-network-engineer`
-- `simplify-code` -> `antigravity-simplify-code`
-- `terraform-specialist` -> `antigravity-terraform-specialist`
 
 ## Canonical Governance Inputs
 

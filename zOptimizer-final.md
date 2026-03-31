@@ -16,10 +16,10 @@
 
 ### Corrected factual baseline from disk
 
-- The live repository currently has `88` skills, down from `117` before the completed first prune batch and the completed merge-source retirements so far.
+- The live repository currently has `85` skills, down from `117` before the completed first prune batch and the completed merge-source retirements so far.
 - Family counts on disk are:
   - `26` `internal-*`
-  - `12` `antigravity-*`
+  - `9` `antigravity-*`
   - `14` `awesome-copilot-*`
   - `30` `obra-*`
   - `3` `openai-*`
@@ -52,9 +52,6 @@ These are the best candidates for “take the good parts, make the internal skil
 
 | External Skill | Target Internal Owner | What To Absorb | Why This Is Better |
 |---|---|---|---|
-| `antigravity-kubernetes-deployment` | `internal-kubernetes-deployment` | Any deployment-specific operational patterns still missing from the internal K8s workflow | Keep one tactical Kubernetes deployment owner. |
-| `antigravity-simplify-code` | `internal-code-review` and `internal-quality-engineering` | Reuse/quality/efficiency/clarity simplification rubric, not the whole sub-agent workflow | Keep the evaluation lens, remove the competing skill. |
-| `antigravity-terraform-specialist` | `internal-terraform` | Remote state concerns, drift posture, module versioning, policy gates, OpenTofu note where needed | Terraform needs one tactical internal owner. |
 | `awesome-copilot-agent-governance` | `internal-agent-development` and `internal-sync-control-center` | Agent-policy, trust-boundary, audit-trail, tool-approval concepts | Highly relevant to this repo, but it belongs in the internal governance layer. |
 | `awesome-copilot-create-github-pull-request-from-specification` | `internal-pr-editor` | The narrow “spec-to-PR-body mapping” idea if you still value it | PR authoring should have one internal owner. |
 | `awesome-copilot-instructions-blueprint-generator` | `internal-ai-resource-creator` and `internal-agents-md-bridge` | Better blueprint extraction prompts for repo-local instructions generation | This repo already has internal owners for Copilot asset authoring. |
@@ -98,8 +95,8 @@ These skills still add value, but they should stop acting like equal peers to `o
 
 After the completed `Delete Now` batch, the next cleanup order should be:
 
-1. Merge language/runtime externals into the matching `internal-*` owners.
-2. Merge Terraform, SQL, PostgreSQL, and agent-governance externals into the internal tactical owners.
+1. Merge agent-governance, SQL, PostgreSQL, and PR-authoring externals into the internal tactical owners.
+2. Merge the remaining Terraform style-guide external into the internal Terraform owner.
 3. Demote the remaining externals to support-only and remove them from broad default routing.
 
 ## 3. Full Carry-Over Of `zOptimizer.md`, Reorganized But Not Lost
@@ -153,7 +150,6 @@ My conclusion:
 
 - `internal-terraform` should become the single tactical owner
 - absorb from:
-  - `antigravity-terraform-specialist`
   - `terraform-terraform-style-guide`
 - keep as support-only:
   - `terraform-terraform-test`
@@ -162,7 +158,7 @@ My conclusion:
 Reason:
 
 - `terraform-terraform-test` and `terraform-terraform-search-import` are narrow enough to survive as explicit support
-- `antigravity-terraform-specialist` and `terraform-terraform-style-guide` are broad enough to compete directly with `internal-terraform`
+- `terraform-terraform-style-guide` is still broad enough to compete directly with `internal-terraform`
 
 ##### Docker
 
@@ -173,21 +169,6 @@ My conclusion:
 - keep as-is
 - no external Docker peer exists that is strong enough to change the current structure
 
-##### Kubernetes
-
-Original conclusion: complementary.
-
-My conclusion:
-
-- keep `internal-kubernetes-deployment` as the tactical owner
-- keep `antigravity-kubernetes-architect` only as strategic support
-- remove `antigravity-kubernetes-deployment` after harvesting any missing deployment-specific value
-
-Reason:
-
-- the internal skill covers rollout, probes, autoscaling, ingress, and hardening
-- the remaining external value is primarily strategic/platform-level, not tactical deployment ownership
-
 ##### Code review
 
 Original conclusion: internal wins.
@@ -196,7 +177,6 @@ My conclusion:
 
 - fully agree
 - `internal-code-review` should stay the canonical owner
-- the remaining open question is whether the reuse/clarity rubric inside `antigravity-simplify-code` is worth selective absorption or full retirement
 
 ##### Performance
 
@@ -232,7 +212,6 @@ The original collision groups are correct. My action decisions for each are:
 Original collision set:
 
 - `internal-terraform`
-- `antigravity-terraform-specialist`
 - `terraform-terraform-style-guide`
 - `terraform-terraform-test`
 - `terraform-terraform-search-import`
@@ -265,38 +244,6 @@ My decision:
   - `antigravity-domain-driven-design`
   - `awesome-copilot-cloud-design-patterns`
 - the broad generic externals in the original cluster should be removed
-
-##### Code review cluster
-
-Remaining collision set:
-
-- `internal-code-review`
-- `antigravity-simplify-code`
-- `obra-verification-before-completion`
-- `obra-requesting-code-review`
-
-My decision:
-
-- active owner:
-  - `internal-code-review`
-- adjacent internal partner:
-  - `internal-pair-architect`
-- remaining peer:
-  - selectively absorb the simplification rubric from `antigravity-simplify-code` or retire it
-
-##### Kubernetes cluster
-
-Original collision set:
-
-- `internal-kubernetes-deployment`
-- `antigravity-kubernetes-architect`
-- `antigravity-kubernetes-deployment`
-
-My decision:
-
-- keep the internal tactical deployment owner
-- keep the external strategic K8s architect only as support
-- remove the duplicate external deployment skill
 
 ##### SQL/DB cluster
 
@@ -377,43 +324,11 @@ My fix:
 - collapse Python externals into the internal owners
 - keep obra as the method layer, not a Python domain owner
 
-##### “Review this code”
-
-Still a meaningful collision zone:
-
-- `internal-code-review`
-- `antigravity-simplify-code`
-- `obra-verification-before-completion`
-- `obra-requesting-code-review`
-
-My fix:
-
-- keep `internal-code-review` as the owner
-- keep `obra-verification-before-completion` as method discipline
-- remove or merge the generic external review peers
-
-##### “Deploy to Kubernetes”
-
-Still too many plausible matches:
-
-- `internal-kubernetes-deployment`
-- `antigravity-kubernetes-architect`
-- `antigravity-kubernetes-deployment`
-- `internal-docker`
-- `obra-executing-plans`
-
-My fix:
-
-- one tactical deployment owner
-- one optional strategic K8s support skill
-- obra only as method
-
 ##### “Write Terraform”
 
 Still too many plausible matches:
 
 - `internal-terraform`
-- `antigravity-terraform-specialist`
 - `terraform-terraform-style-guide`
 - `terraform-terraform-test`
 - `terraform-terraform-search-import`
@@ -693,7 +608,7 @@ This is exactly why “merge into internal and delete the external” is such a 
 
 I agree, and I would make the following concrete consolidation set the first one:
 
-- `antigravity-terraform-specialist` + `terraform-terraform-style-guide` -> `internal-terraform`
+- `terraform-terraform-style-guide` -> `internal-terraform`
 - `awesome-copilot-sql-optimization` + `awesome-copilot-postgresql-optimization` -> `internal-performance-optimization`
 
 ### 3.7 Phase 6: Critical Thinking And Devil’s Advocate Self-Challenge

@@ -1,6 +1,6 @@
 ---
 name: internal-terraform
-description: Use when the user needs to add, modify, or refactor Terraform resources, variables, outputs, data sources, or modules. Covers both feature-level changes within existing configurations and creation of reusable modules.
+description: Use when the user needs to add, modify, or refactor Terraform resources, variables, outputs, data sources, or modules. Covers both feature-level changes within existing configurations and creation of reusable modules, plus remote state hygiene, drift review, module versioning, and policy-aware plan/apply workflows.
 ---
 
 # Terraform Skill
@@ -34,6 +34,15 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - Apply tags on all taggable resources.
 - Preserve naming and folder conventions of the target repository.
 - Preserve stable module input/output contracts when modifying existing modules.
+
+## State and delivery controls
+
+- Prefer remote state with locking and encryption for shared environments; do not normalize team workflows around local shared state files.
+- Treat `terraform import`, `terraform state mv`, and `terraform state rm` as explicit migration steps that must be documented alongside address or module refactors.
+- Review drift before structural changes, especially when renaming resources, changing `for_each` keys, or splitting code into modules.
+- Pin external modules and provider versions intentionally; when changing constraints, state the upgrade or compatibility reason.
+- Run policy or compliance gates when the repository or delivery pipeline already depends on them.
+- Stay Terraform/OpenTofu compatible unless the target repository explicitly standardizes on OpenTofu-only features.
 
 ## Module standard layout
 - `main.tf` — resources and data sources

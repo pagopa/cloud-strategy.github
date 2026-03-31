@@ -12,7 +12,6 @@ You are the infrastructure delivery command center for IaC, container, cluster, 
 ## Preferred/Optional Skills
 
 - `internal-terraform`
-- `antigravity-terraform-specialist`
 - `terraform-terraform-style-guide`
 - `terraform-terraform-test`
 - `terraform-terraform-search-import`

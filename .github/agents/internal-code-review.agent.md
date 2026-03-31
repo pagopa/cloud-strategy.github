@@ -1,6 +1,6 @@
 ---
 name: internal-code-review
-description: Use this agent for deep code review, security review, regression analysis, and merge-readiness checks when the repository needs a defect-first command center.
+description: Use this agent for deep code review, safe simplification review, security review, regression analysis, and merge-readiness checks when the repository needs a defect-first command center.
 ---
 
 # Internal Code Review
@@ -22,7 +22,7 @@ You are the code-review and risk-gating command center.
 
 ## Routing Rules
 
-- Use this agent when the user asks for review, audit, hardening, or merge readiness.
+- Use this agent when the user asks for review, audit, hardening, safe simplification, or merge readiness.
 - Start with `internal-code-review` as the default defect-first workflow, then add scanning or verification skills only when they materially widen coverage.
 - Findings come before summaries.
 - Prioritize defects, regressions, missing validation, and security exposure.
