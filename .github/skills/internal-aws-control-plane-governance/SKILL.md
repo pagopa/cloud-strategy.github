@@ -1,6 +1,6 @@
 ---
 name: internal-aws-control-plane-governance
-description: Use when the user needs principal-level AWS governance for the organization control plane: management account or payer responsibilities, delegated administrators, service control policies, IAM operating model, account access strategy, or CloudFormation StackSets across the organization.
+description: Use when the user needs principal-level AWS governance for the organization control plane management account or payer responsibilities, delegated administrators, service control policies, IAM operating model, account access strategy, or CloudFormation StackSets across the organization.
 ---
 
 # Internal AWS Control Plane Governance
