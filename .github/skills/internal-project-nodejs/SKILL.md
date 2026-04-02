@@ -74,7 +74,7 @@ test("given missing id when building profile then throws", () => {
 | Using `Promise.all` on dependent work | Masks ordering assumptions and makes failures harder to interpret | Keep dependent async steps sequential |
 
 ## Cross-references
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Node.js code (see `references/anti-patterns-nodejs.md`).
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Node.js code (see `.github/skills/internal-code-review/references/anti-patterns-nodejs.md`).
 - **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Node.js apps.
 
 ## Validation

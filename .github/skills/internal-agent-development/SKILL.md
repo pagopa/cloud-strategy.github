@@ -33,13 +33,13 @@ Load these inputs before finalizing an internal agent:
 - `references/example-transformations.md` when you need before-and-after conversion examples
 - `references/review-checklist.md` before final validation or when reviewing an existing agent
 
-If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints for which skills may matter, not as a platform-enforced requirement to use every listed skill or to prioritize `internal-*` skills by default.
+If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints shaped by the repository layered contract, not as a platform-enforced requirement to use every listed skill.
 
 Prefer role-based matching over identifier memorization:
 
 - When the selected agent includes a skill-guidance section and is being used to create, revise, split, or normalize agents, load the listed skill that best governs agent authoring for the task before drafting or editing the target agent.
 - When the selected agent includes a research or documentation-verification skill and the task depends on current vendor guidance, load that skill before finalizing routing or domain claims.
-- When multiple listed skills are present, choose the ones whose trigger most directly constrains the artifact being changed; do not infer priority from origin alone.
+- When multiple listed skills are present, select according to the declared layered contract: `obra-*` for strategic framing, `internal-*` for repository-owned tactical ownership, and imported skills for support-only depth. If no internal owner exists for a capability, imported specialists may be used directly.
 
 ## Decision Gate
 
@@ -74,7 +74,7 @@ Choose an agent only when the repository benefits from a stable command center o
 - Skill-guidance sections such as `## Preferred/Optional Skills` are optional. Use them only when they materially improve routing clarity, discovery, or command-center usability.
 - When present, a skill-list section is a curated routing and discovery list. List exact canonical skill identifiers, one per bullet, in backticks.
 - Do not present a skill-list section as a native GitHub Copilot agent property or as a guarantee that every listed skill will be invoked automatically.
-- Do not imply that repository-owned `internal-*` skills outrank imported skills by default. Any prioritization must come from concrete task fit, not origin.
+- When a skill-list section expresses the repository layered model, make `obra-*` the strategic lane, `internal-*` the tactical owner, and imported skills the support-only lane. If no internal owner exists for a capability, it is valid to use imported specialists directly.
 - Every agent must explain both positive routing and at least one meaningful boundary.
 - Every agent must define `## Output Expectations`.
 - Add `## Skill Usage Contract` only when the agent is a broader command center whose listed skills are used conditionally.

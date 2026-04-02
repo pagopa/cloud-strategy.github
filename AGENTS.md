@@ -22,6 +22,12 @@ Update `.github/copilot-instructions.md` first when policy, validation, or workf
 - Express repository-specific behavior through `internal-*` resources only.
 - Use `internal-*` resources as wrappers, extensions, adapters, or routing layers that map imported upstream resources to this repository's local needs.
 
+## Layered Routing Model
+
+- `obra-*` skills are the strategic lane for framing, planning, simplification, tradeoff handling, and verification.
+- `internal-*` skills are the tactical lane and the default repository-owned execution or governance owners.
+- Imported non-`internal-*` skills remain support-only unless no internal owner exists for the capability.
+
 ## Decision Priority
 
 1. Apply `.github/copilot-instructions.md` as the primary detailed policy layer.
@@ -43,7 +49,8 @@ Update `.github/copilot-instructions.md` first when policy, validation, or workf
 - `internal-aws-platform-engineering`, `internal-azure-platform-engineering`, `internal-gcp-platform-engineering`: cloud platform engineering.
 - `internal-developer`, `internal-infrastructure`, `internal-quality-engineering`: implementation, infrastructure delivery, and quality or observability work.
 - `internal-code-review`: defect-first review and merge-readiness checks.
-- Use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation.
+- `internal-pr-editor` is intentionally prompt-routed; use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation.
+- `internal-data-registry` remains installed as intentionally dormant tactical capacity until a dedicated routing owner is added.
 - Do not reference agents that are not present in `.github/agents/`.
 
 ## Repository Defaults

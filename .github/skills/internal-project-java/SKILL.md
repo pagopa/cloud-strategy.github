@@ -86,7 +86,7 @@ class UserServiceTest {
 | Over-using inheritance for code reuse | Rigid hierarchies, fragile base class problem | Prefer composition and delegation |
 
 ## Cross-references
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Java code (see `references/anti-patterns-java.md`).
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Java code (see `.github/skills/internal-code-review/references/anti-patterns-java.md`).
 - **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Java apps.
 
 ## Validation

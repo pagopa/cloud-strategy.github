@@ -140,7 +140,7 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 
 ## Cross-references
 - **internal-project-python** (`.github/skills/internal-project-python/SKILL.md`): for structured application code.
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `references/anti-patterns-python.md`).
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `.github/skills/internal-code-review/references/anti-patterns-python.md`).
 
 ## Validation
 - `python -m py_compile <script_name>.py` (syntax check)

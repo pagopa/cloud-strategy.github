@@ -1,6 +1,6 @@
 ---
 name: internal-skill-management
-description: Govern the repository skill catalog as a declared managed system: audit overlap, normalize naming, refresh approved in-scope skills, extract reusable repo logic, and retire obsolete skills. Use when deciding which skills should remain in `.github/skills/` and removing fallback or deprecated variants.
+description: Govern the repository skill catalog as a declared managed system audit overlap, normalize naming, refresh approved in-scope skills, extract reusable repo logic, and retire obsolete skills. Use when deciding which skills should remain in `.github/skills/` and removing fallback or deprecated variants.
 ---
 
 # Internal Skill Management

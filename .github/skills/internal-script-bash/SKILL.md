@@ -97,7 +97,7 @@ trap cleanup EXIT
 
 ## Cross-references
 - **internal-composite-action** (`.github/skills/internal-composite-action/SKILL.md`): for Bash inside composite actions.
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Bash code (see `references/anti-patterns-bash.md`).
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Bash code (see `.github/skills/internal-code-review/references/anti-patterns-bash.md`).
 
 ## Validation
 - `bash -n script.sh` (syntax check)
