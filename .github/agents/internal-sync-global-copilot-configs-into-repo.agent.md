@@ -15,6 +15,13 @@ Analyze a local target repository, select the minimum Copilot customization asse
 - `internal-copilot-docs-research`
 - `internal-agents-md-bridge`
 
+## Skill Usage Contract
+- Treat preferred or optional skills as support roles for sync analysis. Choose only the skills that materially change the sync plan; do not infer a general priority rule from `internal-*` origin alone.
+- `internal-sync-global-copilot-configs-into-repo`: Use as the workflow anchor for stack detection, manifest rules, conflict analysis, and conservative merge behavior.
+- `internal-copilot-audit`: Use when source or target catalogs show overlap, hollow references, stale inventory, or bridge drift that changes the sync recommendation.
+- `internal-copilot-docs-research`: Use when source or target decisions depend on current GitHub Copilot or MCP behavior rather than repository-local policy alone.
+- `internal-agents-md-bridge`: Use when root `AGENTS.md` needs to be generated, reviewed, or refreshed as a thin bridge after `.github/copilot-instructions.md` is updated.
+
 ## Restrictions
 - Do not modify `README.md` files unless explicitly requested.
 - Do not sync workflows, templates, changelog files, or bootstrap helpers in v1.

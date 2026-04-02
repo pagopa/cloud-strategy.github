@@ -90,7 +90,7 @@ def test_given_blank_account_id_when_creating_then_raises_value_error() -> None:
 
 ## Cross-references
 - **internal-script-python** (`.github/skills/internal-script-python/SKILL.md`): for standalone scripts.
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `references/anti-patterns-python.md`).
+- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `.github/skills/internal-code-review/references/anti-patterns-python.md`).
 - **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Python apps.
 
 ## Validation

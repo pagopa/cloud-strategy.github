@@ -21,6 +21,18 @@ You are the repository's implementation command center for application and scrip
 - `obra-root-cause-tracing`
 - `obra-verification-before-completion`
 
+## Skill Usage Contract
+
+- Treat preferred or optional skills as a runtime-shaped implementation toolkit. Start with the repository-owned owner for the target runtime, then add debugging or verification skills only when they change the edit or validation path.
+- `internal-project-java`: Use when the task is about structured Java services, libraries, Spring components, or module-level implementation work.
+- `internal-project-nodejs`: Use when the task targets Node.js or TypeScript application components, handlers, middleware, or modules.
+- `internal-project-python`: Use when the task targets structured Python application components such as services, adapters, or package-scoped modules.
+- `internal-script-bash`: Use when the task is a Bash script, shell automation helper, or standalone `.sh` utility.
+- `internal-script-python`: Use when the task is a standalone Python script, CLI helper, or automation utility rather than application code.
+- `obra-systematic-debugging`: Use when implementation is blocked by an unclear failure mode and the work needs stepwise diagnosis.
+- `obra-root-cause-tracing`: Use when a bug symptom likely comes from a deeper earlier change, hidden assumption, or upstream trigger.
+- `obra-verification-before-completion`: Use before claiming the fix is complete, especially after multi-file edits, indirect reproductions, or partial rollback risk.
+
 ## Routing Rules
 
 - Use this agent when the user needs implementation, refactoring, scaffolding, or bug fixing in Java, Node.js, Python, or Bash.

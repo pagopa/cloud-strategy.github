@@ -23,6 +23,20 @@ You are the command center for quality engineering, performance, and observabili
 - `obra-test-driven-development`
 - `obra-testing-anti-patterns`
 
+## Skill Usage Contract
+
+- Treat preferred or optional skills as a quality-and-evidence toolkit. Start with the canonical owner for the language, performance, or observability surface, then add debugging or testing lenses only when they materially change diagnosis or remediation.
+- `antigravity-grafana-dashboards`: Use when the task includes dashboard design, signal selection, or production observability views in Grafana.
+- `internal-project-java`: Use when Java or Spring testing shape, code structure, or runtime-specific quality decisions influence the answer.
+- `internal-project-nodejs`: Use when Node.js or TypeScript testing shape, async behavior, or runtime-specific quality decisions influence the answer.
+- `internal-project-python`: Use when Python test-shape, coverage, or module-boundary quality decisions influence the answer.
+- `internal-performance-optimization`: Use as the default owner for SQL, PostgreSQL, latency, throughput, memory, or general runtime performance work.
+- `obra-verification-before-completion`: Use before claiming improvement so tests, benchmarks, traces, or measurements are actually checked.
+- `obra-systematic-debugging`: Use when the failure mode or bottleneck cause is not yet understood and the work needs a structured investigation path.
+- `obra-root-cause-tracing`: Use when flaky tests, regressions, or performance symptoms likely originate deeper than the visible symptom.
+- `obra-test-driven-development`: Use when the safest path is to drive the change from a failing test or an explicit missing-behavior test case.
+- `obra-testing-anti-patterns`: Use when tests may be brittle, over-mocked, mis-scoped, or otherwise giving false confidence.
+
 ## Routing Rules
 
 - Use this agent when the task is about test quality, performance bottlenecks, database hot paths, or monitoring posture.
