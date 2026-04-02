@@ -19,6 +19,9 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 
 ## Preferred/Optional Skills
 
+- `obra-simplification-cascades`
+- `obra-meta-pattern-recognition`
+- `obra-executing-plans`
 - `internal-skill-management`
 - `internal-copilot-audit`
 - `internal-agent-development`
@@ -41,6 +44,9 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
+- Govern the catalog with the declared three-layer model: `obra-*` for strategic framing, `internal-*` for tactical ownership, and imported non-`internal-*` assets for support-only depth.
+- Treat `internal-pr-editor` as intentionally prompt-routed and `internal-data-registry` as intentionally dormant tactical capacity until a concrete routing owner is declared.
+- Treat explicitly dormant `obra-*` skills as installed-but-unrouted on purpose; do not paper over that state with decorative routing.
 - Before changing root `AGENTS.md`, decide whether the change belongs in `.github/copilot-instructions.md`; if it does, update `.github/copilot-instructions.md` first through `internal-ai-resource-creator`, then refresh root `AGENTS.md` through `internal-agents-md-bridge`.
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
@@ -48,13 +54,16 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 
 ## Skill Usage Contract
 
-- Treat preferred or optional skills as conditional routing options, not as a blanket execution order. Prefer repository-owned internal skills when this repository already declares them as the canonical owner for the capability under change; use imported skills only when the managed external scope still keeps a distinct support role.
+- Treat preferred or optional skills as a three-lane governance toolkit: use `obra-*` to simplify the catalog model, surface recurring drift patterns, and execute approved plans deliberately; use `internal-*` as the repository-owned tactical owners; use imported skills only for the narrow support role still declared by managed scope.
+- `obra-simplification-cascades`: Use when one stronger governance rule can eliminate multiple overlaps, aliases, or decorative routing cases.
+- `obra-meta-pattern-recognition`: Use when the same drift or layering problem appears across agents, skills, prompts, and governance files and should collapse into one reusable rule.
+- `obra-executing-plans`: Use when the user already supplied a concrete catalog plan and the sync should apply it in deliberate batches instead of ad hoc edits.
 - `internal-skill-management`: Default operating workflow for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
 - `internal-agent-development`: Use only when the sync changes an agent file, modifies agent routing boundaries, or rewrites skill-guidance sections or contracts.
-- `openai-skill-creator`: Use only when a `replace` or `extract` decision requires creating or materially rewriting a skill as part of catalog governance.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `internal-agents-md-bridge`: Use whenever root `AGENTS.md` changes, but only after `.github/copilot-instructions.md` has been reviewed and updated first when the policy contract changed.
+- `openai-skill-creator`: Support-only; use only when a `replace` or `extract` decision requires creating or materially rewriting a skill as part of catalog governance.
 
 ## Managed External Resource Map
 
@@ -195,6 +204,7 @@ When repository state drifts from the declared governance contract, treat the dr
 - Use this agent when creating, refreshing, renaming, consolidating, or retiring `.github/` Copilot assets in this repository.
 - Use this agent when the task is about catalog coherence, naming normalization, overlap removal, governance drift, or repo-owned replacements.
 - Use this agent when declared approved external-prefixed assets need to be refreshed, reduced, or normalized without expanding scope.
+- Start with the strategic lane when the catalog problem is really about recurring overlap, excessive exceptions, or a user-supplied multi-step remediation plan.
 - When a governance change depends on current GitHub Copilot or MCP platform behavior, validate it through `internal-copilot-docs-research` before hardening the repo policy.
 - Treat `sync` as `apply` by default unless the user explicitly asks for an audit, plan, or dry run.
 - Treat `apply` as invalid until `internal-copilot-audit` has completed its preflight and any remaining `blocking` findings are resolved.

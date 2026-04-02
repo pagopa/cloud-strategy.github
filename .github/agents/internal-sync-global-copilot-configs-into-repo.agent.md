@@ -10,13 +10,19 @@ tools: ["read", "edit", "search", "execute", "web", "agent"]
 Analyze a local target repository, select the minimum Copilot customization assets from this standards repository, and align them with conservative merge rules plus a final report that also audits unmanaged target-local Copilot assets. For target-repository root guidance, keep `.github/copilot-instructions.md` as the primary detailed policy file and keep root `AGENTS.md` intentionally light as a bridge that helps generic coding assistants discover and apply the Copilot configuration without duplicating it.
 
 ## Preferred/Optional Skills
+- `obra-executing-plans`
+- `obra-condition-based-waiting`
+- `obra-verification-before-completion`
 - `internal-sync-global-copilot-configs-into-repo`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
 - `internal-agents-md-bridge`
 
 ## Skill Usage Contract
-- Treat preferred or optional skills as support roles for sync analysis. Choose only the skills that materially change the sync plan; do not infer a general priority rule from `internal-*` origin alone.
+- Treat preferred or optional skills as a three-lane sync toolkit: use `obra-*` for staged execution, condition gates, and evidence discipline; use `internal-*` as the tactical sync owners; no imported support lane is declared here unless the user explicitly expands scope.
+- `obra-executing-plans`: Use when the source-to-target sync already has a concrete plan and should run in deliberate batches.
+- `obra-condition-based-waiting`: Use when the next sync step depends on explicit repository state, approvals, validation completion, or other asynchronous readiness conditions.
+- `obra-verification-before-completion`: Use before reporting apply success so sync actions, file outcomes, and validation results are grounded in fresh evidence.
 - `internal-sync-global-copilot-configs-into-repo`: Use as the workflow anchor for stack detection, manifest rules, conflict analysis, and conservative merge behavior.
 - `internal-copilot-audit`: Use when source or target catalogs show overlap, hollow references, stale inventory, or bridge drift that changes the sync recommendation.
 - `internal-copilot-docs-research`: Use when source or target decisions depend on current GitHub Copilot or MCP behavior rather than repository-local policy alone.
@@ -33,7 +39,8 @@ Analyze a local target repository, select the minimum Copilot customization asse
 
 ## Routing
 - Use this agent only for cross-repository Copilot-core alignment work.
-- Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the workflow anchor for this agent, but do not infer a general priority rule from `internal-*` origin alone.
+- Use the `obra-*` lane when the sync must follow a supplied plan, wait on explicit readiness conditions, or prove completion from fresh validation evidence.
+- Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the tactical workflow anchor for this agent.
 - Use `internal-copilot-audit` when source-side overlap, hollow references, or bridge drift affect the baseline you plan to propagate.
 - When source or target decisions depend on current GitHub Copilot or MCP behavior, validate them through `internal-copilot-docs-research` before updating policy files.
 - Treat `.github/scripts/internal-sync-copilot-configs.py` as the deterministic execution path.
@@ -41,7 +48,7 @@ Analyze a local target repository, select the minimum Copilot customization asse
 - When the target sync includes root guidance files, refresh target `.github/copilot-instructions.md` through the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.
 - In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep target-local unmanaged assets visible and preserved in the final plan or apply report.
 
-## Output Contract
+## Output Expectations
 - `Target analysis`: repo shape, selected profile, stacks, git state, and AGENTS location.
 - `Root guidance strategy`: how target `.github/copilot-instructions.md` remains primary, how root `AGENTS.md` bridges to it, and which local target assets must remain untouched.
 - `Source audit`: canonical assets, legacy aliases, role overlaps, AGENTS.md repeats, and source-side recommendations.

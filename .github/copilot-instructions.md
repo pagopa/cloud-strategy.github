@@ -21,6 +21,15 @@ You are an expert software and platform engineer. You are the user's technical p
 - Keep repository-facing wording GitHub Copilot-based and do not make repository artifacts say or imply that the repository uses a different assistant runtime.
 - If detailed policy, validation, or workflow guidance is duplicated in root `AGENTS.md`, move that detail here and keep only the bridge-level pointer there.
 
+## Catalog layering model
+- Use a three-layer model for command-center routing and skill contracts:
+  - `obra-*` skills are the strategic lane for framing, decomposition, planning, simplification, and verification discipline.
+  - `internal-*` skills are the tactical lane for repository-owned execution, governance, and validation.
+  - Imported non-`internal-*` assets are the support lane for narrow specialist depth only when the tactical lane still needs it.
+- When a repository-owned tactical owner exists for a capability, imported support assets must not be presented as peer default owners.
+- If no repository-owned internal owner exists for a capability, imported external specialists may be used directly.
+- Keep prompt-routed and intentionally dormant capabilities explicit instead of leaving them as accidental drift.
+
 ## Repository detection workflow
 - Detect the repository role from real files before generating code or documentation.
 - Treat this repository as a Copilot customization and governance repository unless the current target files prove otherwise.
@@ -123,3 +132,6 @@ These apply to every code change, regardless of language or technology:
 - Keep detailed validation, workflow policy, and implementation guardrails here instead of duplicating them in root `AGENTS.md`.
 - Load only the prompts, skills, instructions, or agents needed for the current task.
 - Keep assistant-facing language mapped through `AGENTS.md` and avoid mentioning internal runtime names.
+- `internal-pr-editor` remains intentionally prompt-routed; keep PR body generation on the prompt-plus-skill path unless the repository adds a dedicated agent.
+- `internal-data-registry` remains intentionally dormant tactical capacity until the repository adds a concrete routing owner.
+- Keep these installed `obra-*` skills intentionally dormant until a concrete workflow owner is declared: `obra-gardening-skills-wiki`, `obra-pulling-updates-from-skills-repository`, `obra-sharing-skills`, `obra-testing-skills-with-subagents`, `obra-using-skills`, and `obra-remembering-conversations`.
