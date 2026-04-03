@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Purpose: Align portable Copilot customization assets with a local target repository.
+"""Purpose: Mirror Copilot customization assets from the standards repository into a local target repository.
 
 Usage examples:
   python .github/scripts/internal-sync-copilot-configs.py --target /path/to/repo
@@ -23,8 +23,10 @@ from pathlib import Path, PurePosixPath
 
 SCRIPT_NAME = "internal-sync-global-copilot-configs-into-repo"
 MANIFEST_RELATIVE_PATH = ".github/internal-sync-copilot-configs.manifest.json"
+PLAN_RELATIVE_PATH = ".github/internal-sync-copilot-configs.plan.md"
 SUPPORTED_SCOPE = "copilot-core"
-SUPPORTED_CONFLICT_POLICY = "conservative-merge"
+DEFAULT_CONFLICT_POLICY = "source-authoritative-preserve-local"
+LEGACY_CONFLICT_POLICY = "conservative-merge"
 VSCODE_SETTINGS_RELATIVE_PATH = ".vscode/settings.json"
 PR_DESCRIPTION_SETTING_KEY = "githubPullRequests.pullRequestDescription"
 PR_DESCRIPTION_SETTING_VALUE = "template"
@@ -37,22 +39,6 @@ MANAGED_ALWAYS = (
     ".github/repo-profiles.yml",
     ".github/scripts/validate-copilot-customizations.py",
 )
-SOURCE_ONLY_AGENT_PATHS = {
-    ".github/agents/internal-ai-resource-development.agent.md",
-    ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md",
-}
-SOURCE_ONLY_PROMPT_PATHS = {
-    ".github/prompts/internal-add-platform.prompt.md",
-    ".github/prompts/internal-add-report-script.prompt.md",
-}
-SOURCE_ONLY_SKILL_PATHS = {
-    ".github/skills/internal-agent-development/SKILL.md",
-    ".github/skills/internal-agents-md-bridge/SKILL.md",
-    ".github/skills/internal-copilot-audit/SKILL.md",
-    ".github/skills/internal-skill-management/SKILL.md",
-    ".github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md",
-    ".github/skills/openai-skill-creator/SKILL.md",
-}
 ALWAYS_EXCLUDED_RELATIVE_PATHS = {
     ".github/README.md",
     ".github/CHANGELOG.md",
@@ -144,6 +130,7 @@ class AssetSelection:
     prompts: list[str]
     skills: list[str]
     agents: list[str]
+    supporting_files: list[str]
     baseline_files: list[str]
     validation_commands: list[str]
     preferred_prompts: list[str]
@@ -158,6 +145,7 @@ class AssetSelection:
             | set(self.prompts)
             | set(self.skills)
             | set(self.agents)
+            | set(self.supporting_files)
         )
 
 
@@ -165,7 +153,7 @@ class AssetSelection:
 class PlannedFile:
     source_relative_path: str | None
     target_relative_path: str
-    desired_content: str
+    desired_bytes: bytes
     category: str
     generated: bool = False
 
@@ -199,6 +187,22 @@ class SyncPlan:
         for action in self.actions:
             counts[action.status] = counts.get(action.status, 0) + 1
         return counts
+
+
+@dataclass
+class PlanTrackingState:
+    pending_sync_actions: list[str]
+    pending_validation_checks: list[str]
+    pending_manual_follow_up: list[str]
+    relative_path: str = PLAN_RELATIVE_PATH
+
+    @property
+    def has_pending_items(self) -> bool:
+        return bool(
+            self.pending_sync_actions
+            or self.pending_validation_checks
+            or self.pending_manual_follow_up
+        )
 
 
 @dataclass
@@ -281,8 +285,8 @@ class SourceAudit:
     recommendations: list[str]
 
 
-def sha256_text(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+def sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
 
 
 def sha256_path(path: Path) -> str:
@@ -358,8 +362,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--conflict-policy",
-        default=SUPPORTED_CONFLICT_POLICY,
-        help=f"Supported value: {SUPPORTED_CONFLICT_POLICY}.",
+        default=DEFAULT_CONFLICT_POLICY,
+        help=(
+            "Supported values: "
+            f"{DEFAULT_CONFLICT_POLICY} (default), {LEGACY_CONFLICT_POLICY} (legacy alias)."
+        ),
     )
     parser.add_argument(
         "--report-format",
@@ -373,10 +380,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     if args.scope != SUPPORTED_SCOPE:
         raise CliError(f"Unsupported scope '{args.scope}'. Expected '{SUPPORTED_SCOPE}'.")
 
-    if args.conflict_policy != SUPPORTED_CONFLICT_POLICY:
+    if args.conflict_policy == LEGACY_CONFLICT_POLICY:
+        args.conflict_policy = DEFAULT_CONFLICT_POLICY
+
+    if args.conflict_policy != DEFAULT_CONFLICT_POLICY:
         raise CliError(
             "Unsupported conflict policy "
-            f"'{args.conflict_policy}'. Expected '{SUPPORTED_CONFLICT_POLICY}'."
+            f"'{args.conflict_policy}'. Expected '{DEFAULT_CONFLICT_POLICY}'."
         )
 
     return args
@@ -487,6 +497,53 @@ def prompt_skill_refs(path: Path) -> list[str]:
     return sorted(refs)
 
 
+def extract_markdown_h2_section(text: str, heading: str) -> str | None:
+    lines = text.splitlines()
+    inside_section = False
+    collected: list[str] = []
+
+    for line in lines:
+        if re.match(r"^##\s+", line):
+            if line.strip() == heading:
+                inside_section = True
+                collected = []
+                continue
+            if inside_section:
+                break
+
+        if inside_section:
+            collected.append(line)
+
+    if not inside_section:
+        return None
+
+    return "\n".join(collected).strip()
+
+
+def agent_skill_refs(path: Path) -> list[str] | None:
+    section = extract_markdown_h2_section(path.read_text(encoding="utf-8"), "## Preferred/Optional Skills")
+    if section is None:
+        return None
+
+    refs: list[str] = []
+    for raw_line in section.splitlines():
+        match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", raw_line)
+        if match:
+            refs.append(match.group(1))
+    return refs
+
+
+def skill_names_from_selection(relative_paths: set[str]) -> set[str]:
+    return {Path(relative_path).parent.name for relative_path in relative_paths if relative_path.endswith("/SKILL.md")}
+
+
+def agent_supported_by_selection(source_root: Path, relative_path: str, selected_skill_names: set[str]) -> bool:
+    required_skills = agent_skill_refs(source_root / relative_path)
+    if required_skills is None:
+        return True
+    return all(skill_name in selected_skill_names for skill_name in required_skills)
+
+
 def source_asset_paths(source_root: Path, category: str) -> list[str]:
     category_root = source_root / ".github" / category
     if not category_root.is_dir():
@@ -514,6 +571,20 @@ def source_named_assets(source_root: Path, category: str) -> dict[str, str]:
         if display_name:
             assets[display_name] = relative_path
     return assets
+
+
+def source_skill_support_paths(source_root: Path) -> list[str]:
+    skills_root = source_root / ".github" / "skills"
+    if not skills_root.is_dir():
+        return []
+
+    support_paths: list[str] = []
+    for path in skills_root.rglob("*"):
+        if not path.is_file() or path.name == "SKILL.md":
+            continue
+        support_paths.append(str(path.relative_to(source_root)))
+
+    return sorted(support_paths)
 
 
 def markdown_named_section_items(path: Path, heading: str) -> list[str]:
@@ -617,6 +688,8 @@ def internal_asset_identifier(relative_path: str) -> str | None:
     path = Path(relative_path)
     category = asset_category(relative_path)
 
+    if category == "instructions" and path.name.endswith(".instructions.md"):
+        return path.name[: -len(".instructions.md")]
     if category == "prompts" and path.name.endswith(".prompt.md"):
         return path.name[: -len(".prompt.md")]
     if category == "agents" and path.name.endswith(".agent.md"):
@@ -626,6 +699,10 @@ def internal_asset_identifier(relative_path: str) -> str | None:
     return None
 
 
+def is_local_asset_identifier(identifier: str | None) -> bool:
+    return bool(identifier and identifier.startswith("local-"))
+
+
 def has_supported_origin_prefix(identifier: str) -> bool:
     return identifier.startswith(("internal-", "local-", "obra-", "terraform-", "tech-ai-"))
 
@@ -633,6 +710,29 @@ def has_supported_origin_prefix(identifier: str) -> bool:
 def is_internal_asset_path(relative_path: str) -> bool:
     identifier = internal_asset_identifier(relative_path)
     return bool(identifier and has_supported_origin_prefix(identifier))
+
+
+def is_local_asset_path(relative_path: str) -> bool:
+    path = Path(relative_path)
+    category = asset_category(relative_path)
+
+    if category == "skills":
+        parts = path.parts
+        if len(parts) >= 3 and parts[0] == ".github" and parts[1] == "skills":
+            return parts[2].startswith("local-")
+        return False
+
+    return is_local_asset_identifier(internal_asset_identifier(relative_path))
+
+
+def is_mirrored_resource_path(relative_path: str) -> bool:
+    if relative_path in MANAGED_ALWAYS:
+        return True
+    if relative_path == "AGENTS.md":
+        return True
+
+    parts = Path(relative_path).parts
+    return len(parts) >= 3 and parts[0] == ".github" and parts[1] in AGENTS_INVENTORY_CATEGORIES
 
 
 def scan_repo_files(repo_root: Path) -> list[Path]:
@@ -646,6 +746,29 @@ def scan_repo_files(repo_root: Path) -> list[Path]:
             continue
         files.append(path)
     return files
+
+
+def is_target_analysis_path(relative_path: str) -> bool:
+    if relative_path == "AGENTS.md":
+        return False
+    if relative_path in MANAGED_ALWAYS:
+        return False
+    if relative_path in {MANIFEST_RELATIVE_PATH, PLAN_RELATIVE_PATH}:
+        return False
+
+    parts = Path(relative_path).parts
+    if len(parts) >= 3 and parts[0] == ".github" and parts[1] in AGENTS_INVENTORY_CATEGORIES:
+        return False
+
+    return True
+
+
+def scan_target_analysis_files(repo_root: Path) -> list[Path]:
+    return [
+        path
+        for path in scan_repo_files(repo_root)
+        if is_target_analysis_path(str(path.relative_to(repo_root)))
+    ]
 
 
 def detect_stacks(repo_root: Path, files: list[Path]) -> tuple[list[str], list[str], dict[str, int]]:
@@ -774,7 +897,7 @@ def detect_priority_paths(repo_root: Path, stacks: list[str]) -> list[str]:
 
 def rank_content_paths(repo_root: Path) -> list[str]:
     scores: dict[str, int] = {}
-    for path in scan_repo_files(repo_root):
+    for path in scan_target_analysis_files(repo_root):
         relative = path.relative_to(repo_root)
         if relative.parts[0].startswith("."):
             continue
@@ -881,6 +1004,8 @@ def detect_target_only_assets(source_root: Path, target_root: Path) -> dict[str,
             if relative_path in known_aliases:
                 continue
             if relative_path in manifest_paths:
+                continue
+            if is_local_asset_path(relative_path):
                 continue
             if relative_path not in source_relative_paths:
                 result[category].append(relative_path)
@@ -1172,7 +1297,7 @@ def audit_source_configuration(source_root: Path) -> SourceAudit:
 
 
 def build_analysis(source_root: Path, target_root: Path, profiles: dict[str, RepoProfile]) -> TargetAnalysis:
-    files = scan_repo_files(target_root)
+    files = scan_target_analysis_files(target_root)
     stacks, unsupported_stacks, extension_counts = detect_stacks(target_root, files)
     profile_name = detect_profile_name(stacks)
     if profile_name not in profiles:
@@ -1211,106 +1336,13 @@ def build_analysis(source_root: Path, target_root: Path, profiles: dict[str, Rep
 
 def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[str, RepoProfile]) -> AssetSelection:
     profile = profiles[analysis.profile_name]
-    stacks = set(analysis.stacks)
     source_preferred_prompts = source_preferred_assets_from_agents_md(source_root, "prompts")
     source_preferred_skills = source_preferred_assets_from_agents_md(source_root, "skills")
-    portable_source_instructions = source_asset_paths(source_root, "instructions")
-    portable_source_agents = {
-        agent
-        for agent in source_asset_paths(source_root, "agents")
-        if agent not in SOURCE_ONLY_AGENT_PATHS
-    }
-    instructions = {
-        ".github/instructions/internal-markdown.instructions.md",
-        ".github/instructions/internal-yaml.instructions.md",
-    }
-    profile_extra_instructions: set[str] = set()
-
-    if "json" in stacks:
-        instructions.add(".github/instructions/internal-json.instructions.md")
-    if "bash" in stacks:
-        instructions.add(".github/instructions/internal-bash.instructions.md")
-    if "python" in stacks:
-        instructions.add(".github/instructions/internal-python.instructions.md")
-    if "terraform" in stacks:
-        instructions.add(".github/instructions/internal-terraform.instructions.md")
-    if "github-actions" in stacks:
-        instructions.add(".github/instructions/internal-github-actions.instructions.md")
-    if "composite-action" in stacks:
-        instructions.add(".github/instructions/internal-github-action-composite.instructions.md")
-    if "makefile" in stacks:
-        instructions.add(".github/instructions/internal-makefile.instructions.md")
-    if "nodejs" in stacks and (source_root / ".github" / "instructions" / "internal-nodejs.instructions.md").is_file():
-        instructions.add(".github/instructions/internal-nodejs.instructions.md")
-    if "java" in stacks and (source_root / ".github" / "instructions" / "internal-java.instructions.md").is_file():
-        instructions.add(".github/instructions/internal-java.instructions.md")
-
-    for recommended in profile.recommended_instructions:
-        prefixed = ensure_github_prefix(recommended)
-        if (source_root / prefixed).is_file():
-            instructions.add(prefixed)
-        elif prefixed != recommended and (source_root / recommended).is_file():
-            instructions.add(recommended)
-
-    for instruction_path in portable_source_instructions:
-        apply_to = frontmatter_value(source_root / instruction_path, "applyTo")
-        if apply_to and repo_matches_apply_to(analysis.repo_root, apply_to):
-            instructions.add(instruction_path)
-
-    profile_expected = {ensure_github_prefix(item) for item in profile.recommended_instructions}
-    for item in instructions:
-        if item not in profile_expected:
-            profile_extra_instructions.add(item)
-
-    prompts: set[str] = set()
-    for recommended in profile.recommended_prompts:
-        prefixed = ensure_github_prefix(recommended)
-        if (source_root / prefixed).is_file():
-            prompts.add(prefixed)
-    prompts.update(source_preferred_prompts)
-
-    if {"python", "java", "nodejs"} & set(stacks):
-        prompts.add(".github/prompts/internal-add-unit-tests.prompt.md")
-    if "terraform" in stacks:
-        prompts.add(".github/prompts/internal-terraform-module.prompt.md")
-    if "github-actions" in stacks or "composite-action" in stacks:
-        prompts.add(".github/prompts/internal-github-action.prompt.md")
-
-    prompts = {
-        prompt
-        for prompt in prompts
-        if prompt not in SOURCE_ONLY_PROMPT_PATHS and (source_root / prompt).is_file()
-    }
-
-    skills: set[str] = set()
-    for recommended in profile.recommended_skills:
-        prefixed = ensure_github_prefix(recommended)
-        if (source_root / prefixed).is_file():
-            skills.add(prefixed)
-    skills.update(source_preferred_skills)
-
-    for prompt in prompts:
-        skills.update(path for path in prompt_skill_refs(source_root / prompt) if (source_root / path).is_file())
-
-    skills = {skill for skill in skills if skill not in SOURCE_ONLY_SKILL_PATHS}
-
-    agents: set[str] = {
-        ".github/agents/internal-planner.agent.md",
-        ".github/agents/internal-implementer.agent.md",
-        ".github/agents/internal-reviewer.agent.md",
-        ".github/agents/internal-security-reviewer.agent.md",
-    }
-    if "github-actions" in stacks:
-        agents.add(".github/agents/internal-github-workflow-supply-chain.agent.md")
-    if "terraform" in stacks:
-        agents.add(".github/agents/internal-terraform-guardrails.agent.md")
-    if repo_needs_iam_review(analysis.repo_root):
-        agents.add(".github/agents/internal-iam-least-privilege.agent.md")
-    if target_has_pr_template(analysis.repo_root):
-        agents.add(".github/agents/internal-pr-editor.agent.md")
-    agents.update(portable_source_agents)
-
-    agents = {agent for agent in agents if agent not in SOURCE_ONLY_AGENT_PATHS and (source_root / agent).is_file()}
+    instructions = set(source_asset_paths(source_root, "instructions"))
+    prompts = set(source_asset_paths(source_root, "prompts"))
+    skills = set(source_asset_paths(source_root, "skills"))
+    agents = set(source_asset_paths(source_root, "agents"))
+    supporting_files = source_skill_support_paths(source_root)
 
     baseline_files = [path for path in MANAGED_ALWAYS if (source_root / path).is_file()]
     validation_commands = build_validation_commands(analysis, instructions)
@@ -1331,11 +1363,12 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
         prompts=sorted(prompts),
         skills=sorted(skills),
         agents=sorted(agents),
+        supporting_files=supporting_files,
         baseline_files=baseline_files,
         validation_commands=validation_commands,
         preferred_prompts=preferred_prompts,
         preferred_skills=preferred_skills,
-        profile_extra_instructions=sorted(profile_extra_instructions),
+        profile_extra_instructions=[],
     )
 
 
@@ -1432,11 +1465,15 @@ def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[s
 
 def merged_inventory_paths(target_root: Path, selection: AssetSelection) -> dict[str, list[str]]:
     target_assets = collect_target_config_assets(target_root)
+
+    def preserved_local_assets(category: str) -> set[str]:
+        return {path for path in target_assets[category] if is_local_asset_path(path)}
+
     return {
-        "instructions": sorted(set(selection.instructions) | set(target_assets["instructions"])),
-        "prompts": sorted(set(selection.prompts) | set(target_assets["prompts"])),
-        "skills": sorted(set(selection.skills) | set(target_assets["skills"])),
-        "agents": sorted(set(selection.agents) | set(target_assets["agents"])),
+        "instructions": sorted(set(selection.instructions) | preserved_local_assets("instructions")),
+        "prompts": sorted(set(selection.prompts) | preserved_local_assets("prompts")),
+        "skills": sorted(set(selection.skills) | preserved_local_assets("skills")),
+        "agents": sorted(set(selection.agents) | preserved_local_assets("agents")),
     }
 
 
@@ -1570,7 +1607,6 @@ def detect_unmanaged_target_asset_issues(
     target_root: Path,
     selection: AssetSelection,
 ) -> list[TargetAssetIssue]:
-    alias_map = known_legacy_alias_map(source_root)
     managed_paths = set(selection.managed_source_paths)
     managed_paths.update(manifest_managed_paths(load_manifest(target_root)))
     validators = {
@@ -1587,14 +1623,13 @@ def detect_unmanaged_target_asset_issues(
             if relative_path in managed_paths:
                 continue
 
+            if not is_local_asset_path(relative_path):
+                continue
+
             issue_types: list[str] = []
             details: list[str] = []
-            canonical_source_path = alias_map.get(relative_path)
-            repo_local = canonical_source_path is None and not (source_root / relative_path).is_file()
-
-            if canonical_source_path:
-                issue_types.append("legacy_alias")
-                details.append(f"Legacy alias of `{canonical_source_path}`.")
+            canonical_source_path = None
+            repo_local = True
 
             validation_issues = validator(target_root, relative_path, repo_local=repo_local)
             if validation_issues:
@@ -1705,12 +1740,11 @@ def build_planned_files(
         if source_relative_path == ".github/AGENTS.md":
             continue
 
-        desired_content = (source_root / source_relative_path).read_text(encoding="utf-8")
         planned_files.append(
             PlannedFile(
                 source_relative_path=source_relative_path,
                 target_relative_path=source_relative_path,
-                desired_content=desired_content,
+                desired_bytes=(source_root / source_relative_path).read_bytes(),
                 category=asset_category(source_relative_path),
             )
         )
@@ -1719,7 +1753,7 @@ def build_planned_files(
         PlannedFile(
             source_relative_path=None,
             target_relative_path=analysis.agents_relative_path,
-            desired_content=render_agents_markdown(analysis, selection, source_root),
+            desired_bytes=render_agents_markdown(analysis, selection, source_root).encode("utf-8"),
             category="agents",
             generated=True,
         )
@@ -1796,35 +1830,6 @@ def apply_redundancy_conflicts(
     redundant_assets: list[RedundantAsset],
     agents_relative_path: str,
 ) -> list[FileAction]:
-    action_by_target_path = {action.target_relative_path: action for action in actions}
-    blocks_agents_inventory = False
-
-    for redundant_asset in redundant_assets:
-        if not redundant_asset.selected_for_sync:
-            continue
-
-        action = action_by_target_path.get(redundant_asset.canonical_target_path)
-        if action is None:
-            continue
-
-        if action.status == "conflict":
-            action.reason = f"{action.reason} Also, {redundant_asset.reason}"
-        else:
-            action.status = "conflict"
-            action.reason = redundant_asset.reason
-        blocks_agents_inventory = True
-
-    if not blocks_agents_inventory:
-        return actions
-
-    agents_action = action_by_target_path.get(agents_relative_path)
-    if agents_action is not None and agents_action.status != "conflict":
-        agents_action.status = "conflict"
-        agents_action.reason = (
-            "Redundant legacy prompt, skill, or agent aliases were detected in the target. Resolve duplicate "
-            "configuration families before regenerating `AGENTS.md` inventory."
-        )
-
     return actions
 
 
@@ -1862,7 +1867,7 @@ def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: 
 
     for planned_file in planned_files:
         target_path = target_root / planned_file.target_relative_path
-        desired_sha256 = sha256_text(planned_file.desired_content)
+        desired_sha256 = sha256_bytes(planned_file.desired_bytes)
         current_sha256 = sha256_path(target_path) if target_path.is_file() else None
         managed_entry = managed_files.get(planned_file.target_relative_path)
 
@@ -1871,21 +1876,6 @@ def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: 
 
         if managed_entry:
             recorded_sha256 = str(managed_entry.get("sha256", ""))
-            if current_sha256 and current_sha256 != recorded_sha256 and current_sha256 != desired_sha256:
-                actions.append(
-                    FileAction(
-                        target_relative_path=planned_file.target_relative_path,
-                        source_relative_path=planned_file.source_relative_path,
-                        status="conflict",
-                        category=planned_file.category,
-                        reason="Source-managed file changed locally after the last sync.",
-                        desired_sha256=desired_sha256,
-                        current_sha256=current_sha256,
-                        generated=planned_file.generated,
-                    )
-                )
-                continue
-
             if current_sha256 == desired_sha256:
                 actions.append(
                     FileAction(
@@ -1893,7 +1883,7 @@ def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: 
                         source_relative_path=planned_file.source_relative_path,
                         status="unchanged",
                         category=planned_file.category,
-                        reason="Target content already matches the desired content.",
+                        reason="Target content already matches the mirrored source content.",
                         desired_sha256=desired_sha256,
                         current_sha256=current_sha256,
                         generated=planned_file.generated,
@@ -1901,13 +1891,18 @@ def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: 
                 )
                 continue
 
+            reason = (
+                "Overwrite target drift to restore the source-authoritative mirrored catalog."
+                if current_sha256 != recorded_sha256
+                else "Update an existing source-managed file to the latest mirrored source content."
+            )
             actions.append(
                 FileAction(
                     target_relative_path=planned_file.target_relative_path,
                     source_relative_path=planned_file.source_relative_path,
                     status="update",
                     category=planned_file.category,
-                    reason="Update an existing source-managed file.",
+                    reason=reason,
                     desired_sha256=desired_sha256,
                     current_sha256=current_sha256,
                     generated=planned_file.generated,
@@ -1945,56 +1940,67 @@ def plan_actions(target_root: Path, planned_files: list[PlannedFile], manifest: 
             )
             continue
 
+        if planned_file.generated:
+            reason = "Regenerate governed file from the current mirrored source catalog."
+        else:
+            reason = "Replace target file with the source-authoritative mirrored catalog version."
+
         actions.append(
             FileAction(
                 target_relative_path=planned_file.target_relative_path,
                 source_relative_path=planned_file.source_relative_path,
-                status="conflict",
+                status="update",
                 category=planned_file.category,
-                reason="Existing target file differs and is not source-managed yet.",
+                reason=reason,
                 desired_sha256=desired_sha256,
                 current_sha256=current_sha256,
                 generated=planned_file.generated,
             )
         )
 
-    for managed_relative_path, managed_entry in sorted(managed_files.items()):
-        if managed_relative_path in planned_target_paths or managed_relative_path == MANIFEST_RELATIVE_PATH:
+    target_mirrored_files: set[str] = set()
+    for category in AGENTS_INVENTORY_CATEGORIES:
+        category_root = target_root / ".github" / category
+        if not category_root.is_dir():
             continue
-        if not isinstance(managed_entry, dict):
+        target_mirrored_files.update(
+            str(path.relative_to(target_root))
+            for path in category_root.rglob("*")
+            if path.is_file()
+        )
+
+    deletion_candidates = (set(managed_files) | target_mirrored_files) - planned_target_paths
+    for managed_relative_path in sorted(deletion_candidates):
+        if managed_relative_path == MANIFEST_RELATIVE_PATH:
             continue
+        if not is_mirrored_resource_path(managed_relative_path):
+            continue
+        if is_local_asset_path(managed_relative_path):
+            continue
+
+        managed_entry = managed_files.get(managed_relative_path)
+        if managed_entry is not None and not isinstance(managed_entry, dict):
+            managed_entry = None
 
         target_path = target_root / managed_relative_path
         if not target_path.is_file():
             continue
 
         current_sha256 = sha256_path(target_path)
-        recorded_sha256 = str(managed_entry.get("sha256", ""))
-        if current_sha256 != recorded_sha256:
-            actions.append(
-                FileAction(
-                    target_relative_path=managed_relative_path,
-                    source_relative_path=managed_entry.get("source_relative_path"),
-                    status="conflict",
-                    category=asset_category(managed_relative_path),
-                    reason="Source-managed file was removed from the desired baseline but changed locally after the last sync.",
-                    desired_sha256="",
-                    current_sha256=current_sha256,
-                    generated=bool(managed_entry.get("generated", False)),
-                )
-            )
-            continue
-
         actions.append(
             FileAction(
                 target_relative_path=managed_relative_path,
-                source_relative_path=managed_entry.get("source_relative_path"),
+                source_relative_path=(managed_entry or {}).get("source_relative_path") if isinstance(managed_entry, dict) else None,
                 status="delete",
                 category=asset_category(managed_relative_path),
-                reason="Remove a source-managed file that is no longer part of the desired baseline.",
+                reason=(
+                    "Remove a file that is no longer present in the mirrored source catalog."
+                    if managed_entry
+                    else "Remove a target-only file outside the preserved local-* namespace."
+                ),
                 desired_sha256="",
                 current_sha256=current_sha256,
-                generated=bool(managed_entry.get("generated", False)),
+                generated=bool((managed_entry or {}).get("generated", False)) if isinstance(managed_entry, dict) else False,
             )
         )
 
@@ -2081,7 +2087,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         [
             "",
             "## Repository Inventory (Auto-generated)",
-            "This inventory reflects the desired managed baseline plus repository-owned internal Copilot assets already present in the target repository.",
+            "This inventory reflects the mirrored source catalog plus preserved target local-* Copilot assets.",
             "",
             "### Instructions",
         ]
@@ -2299,6 +2305,130 @@ def write_report(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def build_tracking_state(
+    plan: SyncPlan,
+    validation_errors: list[str] | None = None,
+    validation_performed: bool = False,
+) -> PlanTrackingState:
+    pending_sync_actions = [
+        f"`{action.status}` `{action.target_relative_path}`: {action.reason}"
+        for action in plan.actions
+        if action.status in {"create", "update", "delete", "adopt", "conflict"}
+    ]
+
+    pending_validation_checks: list[str] = []
+    manifest_path = plan.analysis.repo_root / MANIFEST_RELATIVE_PATH
+    agents_path = plan.analysis.repo_root / plan.analysis.agents_relative_path
+    if not validation_performed:
+        pending_validation_checks.extend(
+            [
+                f"Confirm `{MANIFEST_RELATIVE_PATH}` is written after apply.",
+                f"Confirm `{plan.analysis.agents_relative_path}` exists and reflects the mirrored catalog.",
+                "Run strict Copilot validation: `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`.",
+            ]
+        )
+    else:
+        if not manifest_path.is_file():
+            pending_validation_checks.append(f"Missing `{MANIFEST_RELATIVE_PATH}` after apply.")
+        if not agents_path.is_file():
+            pending_validation_checks.append(
+                f"Missing `{plan.analysis.agents_relative_path}` after apply."
+            )
+        pending_validation_checks.extend(validation_errors or [])
+
+    pending_manual_follow_up: list[str] = []
+    for issue in plan.target_asset_issues:
+        if issue.severity != "error":
+            continue
+        details = "; ".join(issue.details)
+        pending_manual_follow_up.append(
+            f"`{issue.target_relative_path}` [{issue.severity}]: {details}"
+        )
+
+    for redundant_asset in plan.redundant_assets:
+        pending_manual_follow_up.append(redundant_asset.reason)
+
+    return PlanTrackingState(
+        pending_sync_actions=pending_sync_actions,
+        pending_validation_checks=pending_validation_checks,
+        pending_manual_follow_up=pending_manual_follow_up,
+    )
+
+
+def render_tracking_plan(target_root: Path, tracking: PlanTrackingState) -> str:
+    lines = [
+        f"# Internal Sync Plan - {target_root.name}",
+        "",
+        f"- Tool: `{SCRIPT_NAME}`",
+        f"- Updated at: `{utc_now()}`",
+        "- This file is pruned automatically as sections are satisfied.",
+        "- If all sections disappear, the file is deleted automatically.",
+        "",
+    ]
+
+    if tracking.pending_sync_actions:
+        lines.extend(["## Pending synchronization actions"])
+        lines.extend(f"- {item}" for item in tracking.pending_sync_actions)
+        lines.append("")
+
+    if tracking.pending_validation_checks:
+        lines.extend(["## Pending validation checks"])
+        lines.extend(f"- {item}" for item in tracking.pending_validation_checks)
+        lines.append("")
+
+    if tracking.pending_manual_follow_up:
+        lines.extend(["## Pending manual follow-up"])
+        lines.extend(f"- {item}" for item in tracking.pending_manual_follow_up)
+        lines.append("")
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def update_tracking_plan_file(target_root: Path, tracking: PlanTrackingState) -> bool:
+    plan_path = target_root / tracking.relative_path
+    if not tracking.has_pending_items:
+        if plan_path.is_file():
+            plan_path.unlink()
+        return False
+
+    write_report(plan_path, render_tracking_plan(target_root, tracking))
+    return True
+
+
+def run_strict_target_validation(target_root: Path) -> list[str]:
+    validator_path = target_root / ".github" / "scripts" / "validate-copilot-customizations.py"
+    if not validator_path.is_file():
+        return [
+            "Missing `.github/scripts/validate-copilot-customizations.py`; strict Copilot validation could not run."
+        ]
+
+    result = subprocess.run(
+        [
+            "python3",
+            ".github/scripts/validate-copilot-customizations.py",
+            "--scope",
+            "root",
+            "--mode",
+            "strict",
+        ],
+        cwd=target_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode == 0:
+        return []
+
+    combined_output = [
+        line.strip()
+        for line in f"{result.stdout}\n{result.stderr}".splitlines()
+        if line.strip()
+    ]
+    if not combined_output:
+        combined_output = [f"Strict Copilot validation failed with exit code {result.returncode}."]
+    return combined_output[:20]
+
+
 def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFile], source_root: Path) -> None:
     content_map = {item.target_relative_path: item for item in planned_files}
     for action in plan.actions:
@@ -2306,7 +2436,7 @@ def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFil
         if action.status in {"create", "update"}:
             planned_file = content_map[action.target_relative_path]
             target_path.parent.mkdir(parents=True, exist_ok=True)
-            target_path.write_text(planned_file.desired_content, encoding="utf-8")
+            target_path.write_bytes(planned_file.desired_bytes)
             continue
 
         if action.status == "delete" and target_path.is_file():
@@ -2315,7 +2445,7 @@ def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFil
 
     manifest = {
         "tool": SCRIPT_NAME,
-        "version": 1,
+        "version": 2,
         "generated_at_utc": utc_now(),
         "target_repo": str(target_root),
         "profile": plan.selection.profile.name,
@@ -2354,6 +2484,7 @@ def render_markdown_report(plan: SyncPlan) -> str:
         f"- Detected stacks: {', '.join(plan.analysis.stacks) if plan.analysis.stacks else 'none'}",
         f"- Unsupported stacks: {', '.join(plan.analysis.unsupported_stacks) if plan.analysis.unsupported_stacks else 'none'}",
         f"- AGENTS location: `{plan.analysis.agents_relative_path}`",
+        f"- Tracking plan: `{PLAN_RELATIVE_PATH}`",
         f"- Git worktree state: {'dirty' if plan.analysis.git_dirty else 'clean'}",
         f"- Priority paths: {', '.join(plan.analysis.priority_paths)}",
         "",
@@ -2363,6 +2494,7 @@ def render_markdown_report(plan: SyncPlan) -> str:
         f"- Prompts: {', '.join(plan.selection.prompts)}",
         f"- Skills: {', '.join(plan.selection.skills)}",
         f"- Agents: {', '.join(plan.selection.agents)}",
+        f"- Skill support files: {len(plan.selection.supporting_files)} mirrored file(s)",
         "",
     ]
     lines.extend(render_source_audit_markdown(plan.source_audit))
@@ -2563,6 +2695,7 @@ def render_json_report(plan: SyncPlan) -> str:
             "prompts": plan.selection.prompts,
             "skills": plan.selection.skills,
             "agents": plan.selection.agents,
+            "supporting_files": plan.selection.supporting_files,
             "validation_commands": plan.selection.validation_commands,
         },
         "actions": [
@@ -2576,6 +2709,7 @@ def render_json_report(plan: SyncPlan) -> str:
             for action in plan.actions
         ],
         "recommendations": plan.recommendations,
+        "plan_relative_path": PLAN_RELATIVE_PATH,
         "manifest_relative_path": plan.manifest_relative_path,
     }
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
@@ -2644,12 +2778,40 @@ def main(argv: list[str] | None = None) -> int:
         log_error(str(error))
         return 2
 
+    tracking_path = target_root / PLAN_RELATIVE_PATH
+    update_tracking_plan_file(target_root, build_tracking_state(plan))
+    log_info(f"Tracking plan written to {tracking_path}")
+
     if args.mode == "apply":
-        log_info("Applying conservative merge for source-managed files.")
+        log_info("Applying source-authoritative mirror for managed Copilot files.")
         apply_plan(target_root, plan, planned_files, source_root)
         log_success(f"Manifest written to {target_root / MANIFEST_RELATIVE_PATH}")
+
+        try:
+            post_apply_plan, _post_apply_files = build_plan(source_root, target_root)
+        except CliError as error:
+            log_error(str(error))
+            return 2
+
+        validation_errors = run_strict_target_validation(target_root)
+        tracking_written = update_tracking_plan_file(
+            target_root,
+            build_tracking_state(
+                post_apply_plan,
+                validation_errors=validation_errors,
+                validation_performed=True,
+            ),
+        )
+        if validation_errors:
+            log_warn("Strict Copilot validation left pending items in the tracking plan.")
+        if tracking_written:
+            log_warn(f"Tracking plan retained at {tracking_path}")
+        else:
+            log_success(f"Tracking plan completed and removed from {tracking_path}")
     else:
-        log_info("Plan mode selected - no repository files will be changed.")
+        log_info(
+            "Plan mode selected - mirrored files will not be changed, but the tracking plan is written to the target repository."
+        )
 
     report = emit_report(plan, args.report_format)
     sys.stdout.write(report)

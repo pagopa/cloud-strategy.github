@@ -1,6 +1,6 @@
 ---
 name: internal-sync-global-copilot-configs-into-repo
-description: Sync shared Copilot baseline into consumer repos — dynamic stack detection, manifest-based conservative merge, conflict detection, and deterministic reporting. Use when syncing Copilot configs, aligning repos with the baseline, or running the sync script.
+description: Mirror the shared Copilot catalog into consumer repos — dynamic repo analysis, source-authoritative mirroring, local-* preservation, full skill-bundle copying, and deterministic reporting. Use when syncing Copilot configs, aligning repos with the standards repo, or running the sync script.
 ---
 
 # Internal Sync Global Copilot Configs Into Repo
@@ -9,31 +9,37 @@ description: Sync shared Copilot baseline into consumer repos — dynamic stack 
 - Align a consumer repository with shared Copilot assets from this standards repository.
 - Audit source-side or target-side asset health before or after sync.
 - Produce deterministic dry-run or apply reports for Copilot-core alignment.
+- Rebuild target `.github/copilot-instructions.md` and then refresh root `AGENTS.md` after a raw mirror completes.
 
 ## Three-phase sync model
 
 ### Phase 1 — Analyze
 1. Inspect target repository: `.github` contents, `AGENTS.md`, git state.
-2. Detect stacks dynamically from file extensions and project manifests (no hardcoded profiles — detect `*.tf`, `*.py`, `*.java`, `*.js`, `*.ts`, `Dockerfile`, `*.sh`, etc.).
-3. Classify target assets into: managed (synced baseline), origin-prefixed (`internal-*`, `local-*`, or supported external prefixes), and unmanaged (everything else).
-4. Audit source standards repository: detect legacy aliases, canonical overlaps, and source-only assets.
+2. Detect stacks dynamically from file extensions and project manifests so reporting and validation stay target-aware even though mirroring is full-catalog.
+3. Classify target assets into: mirrored source-managed, preserved `local-*`, and target-only non-local assets that must be removed during apply.
+4. Audit source standards repository: detect legacy aliases, canonical overlaps, and stale governance references.
 
 ### Phase 2 — Plan
-1. Select minimum Copilot-core assets the target actually needs based on detected stacks.
-2. Compute SHA-256 checksums for both source and target versions of each managed file.
-3. Flag conflicts: target file diverged from last-synced version (manifest mismatch).
-4. Flag redundancies: legacy aliases coexisting with canonical assets.
-5. Flag origin-prefix violations: repo-owned assets missing `internal-*`, `local-*`, or a supported external short-repo prefix.
-6. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
-7. Generate plan report (JSON or Markdown).
+1. Select every source asset under `.github/agents`, `.github/instructions`, `.github/prompts`, and `.github/skills`.
+2. Expand each mirrored skill to include bundled support files such as `references/`, `assets/`, `scripts/`, licenses, and other on-disk resources.
+3. Compute SHA-256 checksums for both source and target versions of each mirrored file.
+4. Plan source-authoritative updates for every mirrored non-local target file that differs from source.
+5. Plan deletions for target-only non-local assets inside mirrored categories.
+6. Preserve target `local-*` assets and validate them as unmanaged local extensions.
+7. Write `.github/internal-sync-copilot-configs.plan.md` in the target repo with the pending sync actions, checks, and manual follow-up items.
+8. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
+9. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)
-1. Copy selected assets using conservative merge (never overwrite unmanaged divergent files).
-2. Update manifest with new SHA-256 checksums and timestamp.
-3. Refresh target `.github/copilot-instructions.md` as the primary detailed Copilot policy file, preserving target-local rules that are still valid and do not conflict with the managed baseline.
-4. Refresh target-specific root `AGENTS.md` from the managed baseline plus existing target-local assets, keeping it concise, bridge-oriented, and runtime-agnostic instead of duplicating Copilot policy text.
-5. Preserve target-local unmanaged resources, prompts, skills, agents, and configuration unless the approved plan explicitly migrates them.
-6. Produce final report: actions taken, conflicts skipped, preserved local assets, and recommendations.
+1. Copy every mirrored source asset, including binary skill support files.
+2. Overwrite non-local target drift inside mirrored categories so the source catalog remains authoritative.
+3. Delete target-only non-local assets inside mirrored categories.
+4. Update manifest with new SHA-256 checksums and timestamp.
+5. Refresh target `.github/copilot-instructions.md` as the primary detailed Copilot policy file, deriving target-specific content from repository evidence when needed.
+6. Refresh target-specific root `AGENTS.md` from the mirrored baseline plus preserved target-local assets, keeping it concise, bridge-oriented, and runtime-agnostic instead of duplicating Copilot policy text.
+7. Re-check the objectives recorded in `.github/internal-sync-copilot-configs.plan.md`; remove sections whose checks now pass and delete the file only when nothing remains pending.
+8. Preserve target-local `local-*` resources and configuration unless the approved plan explicitly migrates them.
+9. Produce final report: actions taken, preserved local assets, deleted target-only assets, and recommendations.
 
 ## Managed always-sync files
 These files are always synced regardless of detected stacks:
@@ -42,51 +48,45 @@ These files are always synced regardless of detected stacks:
 - `copilot-code-review-instructions.md`
 - `security-baseline.md`
 - `DEPRECATION.md`
+- `repo-profiles.yml`
 - `scripts/validate-copilot-customizations.py`
 
-## Stack-to-asset mapping
-The sync script detects stacks dynamically and selects assets accordingly:
+## Target assumptions
+- The source of truth is always this `cloud-strategy.github` repository.
+- The target stores Copilot customization under `.github/`.
+- The target keeps `AGENTS.md` in repository root.
+- Stack detection still matters for reporting, validation commands, and target-specific `copilot-instructions` authoring, but not for mirror selection.
 
-| Detected stack | Instructions | Skills | Prompts |
-|---|---|---|---|
-| Terraform (`*.tf`) | `internal-terraform.instructions.md` | `internal-terraform`, `internal-cloud-policy` | `internal-terraform-module.prompt.md` |
-| Python (`*.py`) | `internal-python.instructions.md` | `internal-project-python`, `internal-script-python` | `internal-add-unit-tests.prompt.md` |
-| Java (`*.java`) | `internal-java.instructions.md` | `internal-project-java` | `internal-add-unit-tests.prompt.md` |
-| Node.js (`*.js`, `*.ts`) | `internal-nodejs.instructions.md` | `internal-project-nodejs` | `internal-add-unit-tests.prompt.md` |
-| Docker (`Dockerfile`) | `internal-docker.instructions.md` | `internal-docker` | none |
-| Bash (`*.sh`) | `internal-bash.instructions.md` | `internal-script-bash` | none |
-| GitHub Actions (`workflows/`) | `internal-github-actions.instructions.md` | `internal-cicd-workflow` | `internal-github-action.prompt.md` |
-
-Always included: `internal-markdown.instructions.md`, `internal-yaml.instructions.md`, `internal-json.instructions.md`.
-
-## Source-only assets (never synced)
-These assets exist only in this standards repository:
-- Agents: `internal-sync-global-copilot-configs-into-repo`
-- Skills: `internal-agent-development`, `internal-agents-md-bridge`, `internal-copilot-audit`, `openai-skill-creator`, `internal-skill-management`, `internal-sync-global-copilot-configs-into-repo`
-- Prompts: `internal-add-platform`, `internal-add-report-script`
+## Mirrored categories
+- `.github/agents/**/*.agent.md`
+- `.github/instructions/**/*.instructions.md`
+- `.github/prompts/**/*.prompt.md`
+- `.github/skills/**`, including `SKILL.md` and bundled support files
+- Tracking artifact: `.github/internal-sync-copilot-configs.plan.md`
 
 ## Scope rules
 - Manage Copilot-core assets only.
 - Exclude README, changelog, templates, workflows, and source-only agents from sync.
 - Prefer existing root `AGENTS.md` over creating a second managed file under `.github/`.
-- Keep origin-prefixed assets visible in rendered AGENTS.md inventory.
-- Never overwrite unmanaged divergent files — flag as conflicts instead.
+- Keep preserved `local-*` assets visible in rendered AGENTS.md inventory.
+- Overwrite non-local divergent files inside mirrored categories.
 - Treat target `.github/copilot-instructions.md` as the primary home for detailed behavioral, validation, and implementation guidance.
 - Treat target root `AGENTS.md` as a thin bridge for generic assistants: routing, naming, priority, and discovery of the Copilot-owned `.github` assets.
 - Keep target root `AGENTS.md` light on purpose because some repositories cannot or should not declare a specific assistant runtime there.
-- Preserve target-local unmanaged resources and configuration even when they are not part of the selected sync baseline; report them instead of deleting or folding them into managed files.
+- Preserve target-local `local-*` resources and configuration even when they are not part of the mirrored source catalog; report them instead of deleting or folding them into managed files.
 
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
 |---|---|---|
 | Running apply without reviewing the plan first | Unintended overwrites or deletions | Always run plan mode first, review the report |
-| Syncing source-only agents to consumer repos | Consumer gets assets meant for standards repo only | Check exclusion lists |
-| Ignoring manifest checksum mismatches | Target edits get silently overwritten | Flag as conflict, require manual resolution |
+| Treating skill bundles as `SKILL.md` only | Mirrored skills break because references, assets, or scripts are missing | Mirror the full skill directory contents |
+| Preserving target-owned non-local assets under mirrored categories | The target drifts away from the standards catalog | Delete non-local target-only assets during apply |
+| Generating a plan only in stdout | The user loses visibility on pending or failed sync steps after the run ends | Persist `.github/internal-sync-copilot-configs.plan.md` until every section is cleared |
 | Updating root AGENTS.md before copilot-instructions.md | The bridge can drift from the source policy | Refresh target `.github/copilot-instructions.md` first, then regenerate root `AGENTS.md` |
 | Copying detailed Copilot policy into root AGENTS.md | The root bridge becomes redundant and harder to maintain | Keep detailed policy in `.github/copilot-instructions.md` and keep `AGENTS.md` concise |
-| Treating target-local unmanaged assets as disposable noise | Local configuration gets lost during alignment | Preserve unmanaged local assets and surface them in the report or as conflicts |
-| Hardcoding profiles instead of detecting stacks | New stacks in target repo get no coverage | Detect dynamically from file extensions |
+| Treating target `local-*` assets as disposable noise | Local configuration gets lost during alignment | Preserve `local-*` assets and surface them in the report |
+| Hardcoding target assumptions beyond `.github/` and root `AGENTS.md` | The sync agent becomes repo-specific and brittle | Keep the agent target-agnostic and derive everything else from the repository state |
 
 ## Cross-references
 - **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for impact analysis when sync changes baseline behavior.

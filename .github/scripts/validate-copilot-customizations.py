@@ -390,6 +390,9 @@ def validate_legacy_skill_references(errors: list[str]) -> None:
 
 
 def validate_internal_skill_reference_files(errors: list[str]) -> None:
+    if not (REPO_ROOT / ".github" / "skills" / "internal-code-review" / "SKILL.md").exists():
+        return
+
     for reference_path in INTERNAL_CODE_REVIEW_REFERENCE_PATHS:
         if not (REPO_ROOT / reference_path).exists():
             errors.append(
