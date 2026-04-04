@@ -56,6 +56,10 @@ COMPLETION_REPORT_UNUSED_REASON = (
 AGENTS_COMPLETION_REPORT_POINTER = (
     "Completion-report details live in `.github/copilot-instructions.md`"
 )
+SYNC_AGENT_COMPLETION_REPORT_PATHS = (
+    Path(".github/agents/internal-sync-control-center.agent.md"),
+    Path(".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"),
+)
 
 
 @dataclass
@@ -453,6 +457,29 @@ def validate_operation_completion_report_contract(errors: list[str]) -> None:
             )
 
 
+def validate_sync_agent_completion_report_contract(errors: list[str]) -> None:
+    for relative_path in SYNC_AGENT_COMPLETION_REPORT_PATHS:
+        agent_path = REPO_ROOT / relative_path
+        if not agent_path.exists():
+            continue
+
+        text = read_text(agent_path)
+        if "## Output Expectations" not in text:
+            errors.append(f"Missing `## Output Expectations` in {relative_path}")
+
+        for heading in COMPLETION_REPORT_CATEGORY_HEADINGS:
+            if heading not in text:
+                errors.append(
+                    f"Missing completion report category `{heading}` in {relative_path}"
+                )
+
+        if COMPLETION_REPORT_UNUSED_REASON not in text:
+            errors.append(
+                "Missing unused-category explanation requirement in "
+                f"{relative_path}"
+            )
+
+
 def build_report(scope: str, mode: str) -> ValidationReport:
     normalize_scope(scope)
     normalize_mode(mode)
@@ -466,6 +493,7 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     validate_legacy_skill_references(errors)
     validate_internal_skill_reference_files(errors)
     validate_operation_completion_report_contract(errors)
+    validate_sync_agent_completion_report_contract(errors)
     warnings.extend(build_instruction_load_warnings())
     return ValidationReport(errors=errors, warnings=warnings)
 

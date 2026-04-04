@@ -36,6 +36,7 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - Do not remove, flatten, or silently rewrite target `local-*` resources or target-local configuration that sit outside the mirrored source catalog; preserve them unless an explicit migration is part of the plan.
 - Do not let root `AGENTS.md` become a second full copy of `.github/copilot-instructions.md`; keep detailed operational policy in the Copilot files first and use `AGENTS.md` only as the bridge layer that points assistants to them.
 - Do not describe the target repository as using a specific assistant runtime inside `AGENTS.md`; keep the bridge tool-agnostic and lightweight.
+- Do not report a completed sync unless the final response ends with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`. If a category was not used, explicitly say so and explain why.
 
 ## Routing
 - Use this agent only for cross-repository Copilot-core alignment work.
@@ -53,6 +54,12 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep preserved target `local-*` assets visible in the final plan or apply report.
 
 ## Output Expectations
+
+End every completed run with the completion-report contract below.
+If a category was not used, explicitly say so and explain why.
+
+### ✅ Outcome
+
 - `Target analysis`: repo shape, selected profile, stacks, git state, and AGENTS location.
 - `Root guidance strategy`: how target `.github/copilot-instructions.md` remains primary, how root `AGENTS.md` bridges to it, and which target `local-*` assets must remain untouched.
 - `Tracking plan`: the content and lifecycle of `.github/internal-sync-copilot-configs.plan.md` for the target repository.
@@ -62,3 +69,15 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - `Redundant target assets`: legacy aliases or duplicates found in the target catalog before cleanup.
 - `File actions`: create, update, adopt, unchanged, and delete results.
 - `Recommendations`: categorized source-repository improvements.
+
+### 🤖 Agents
+
+- `Agents used`: which agents were used during the sync workflow and why. If none were used, say so and explain why.
+
+### 📘 Instructions
+
+- `Instructions used`: which instruction or policy files shaped the sync or target-guidance refresh and why. If none were used, say so and explain why.
+
+### 🧩 Skills
+
+- `Skills invoked`: which declared skills were used and why. If none were used, say so and explain why.

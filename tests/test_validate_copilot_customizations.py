@@ -385,3 +385,54 @@ You are the example command center.
 
     assert not report.valid
     assert "Missing completion-report bridge pointer in" in "\n".join(report.errors)
+
+
+def test_build_report_rejects_sync_agent_without_completion_report_categories(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+    write_file(
+        tmp_path / ".github" / "agents" / "internal-sync-global-copilot-configs-into-repo.agent.md",
+        """---
+name: internal-sync-global-copilot-configs-into-repo
+description: Use this agent when syncing a shared Copilot catalog into a consumer repository.
+tools: ["read", "edit", "search", "execute"]
+---
+
+# Sync Agent
+
+## Output Expectations
+
+- Target analysis
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    joined_errors = "\n".join(report.errors)
+    assert (
+        "Missing completion report category `### ✅ Outcome` in "
+        ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"
+    ) in joined_errors

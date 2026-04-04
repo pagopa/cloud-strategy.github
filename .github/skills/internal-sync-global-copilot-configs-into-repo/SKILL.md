@@ -39,7 +39,7 @@ description: Mirror the shared Copilot catalog into consumer repos — dynamic r
 6. Refresh target-specific root `AGENTS.md` from the mirrored baseline plus preserved target-local assets, keeping it concise, bridge-oriented, and runtime-agnostic instead of duplicating Copilot policy text.
 7. Re-check the objectives recorded in `.github/internal-sync-copilot-configs.plan.md`; remove sections whose checks now pass and delete the file only when nothing remains pending.
 8. Preserve target-local `local-*` resources and configuration unless the approved plan explicitly migrates them.
-9. Produce final report: actions taken, preserved local assets, deleted target-only assets, and recommendations.
+9. Produce final report: actions taken, preserved local assets, deleted target-only assets, and recommendations. End the report with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`; if a category was not used, explicitly say so and explain why.
 
 ## Managed always-sync files
 These files are always synced regardless of detected stacks:

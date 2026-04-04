@@ -88,6 +88,17 @@ These rules apply to all repository resources, including prompts, skills, instru
   - root `AGENTS.md` points to `.github/copilot-instructions.md` as the owner of detailed completion-report behavior
   - `.github/README.md` documents the same completion-report contract for maintainers
 
+#### `reporting-sync-agents-publish-completion-report-categories`
+
+- Goal: keep the source-side governance agent and the cross-repository sync agent aligned with the repository completion-report contract.
+- Scope:
+  - `.github/agents/internal-sync-control-center.agent.md`
+  - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
+- Expected behavior:
+  - both agents require completed runs to end with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
+  - both agents require an explicit explanation when a category was not used
+  - the source-side governance agent still reports `Governance files reviewed`
+
 ### Sync Planning
 
 #### `sync-plan-regenerates-root-agents`

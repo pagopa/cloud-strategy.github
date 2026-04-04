@@ -51,6 +51,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
 - Do not report `apply` as complete unless the final output states whether `.github/copilot-instructions.md` and root `AGENTS.md` were reviewed, changed, or intentionally left unchanged.
+- Do not report any completed governance or sync operation unless the final response ends with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`. If a category was not used, explicitly say so and explain why.
 
 ## Skill Usage Contract
 
@@ -233,10 +234,26 @@ If a rule exists only to preserve history, remove it unless the current reposito
 
 ## Output Expectations
 
+End every completed run with the completion-report contract below.
+If a category was not used, explicitly say so and explain why.
+
+### ✅ Outcome
+
 - `Mode`: `apply`, `audit`, or `plan`
 - `Catalog scope`: files reviewed and why
-- `Skills invoked`: which declared skills were used and why
 - `Governance files reviewed`: whether `.github/copilot-instructions.md` and root `AGENTS.md` were reviewed, changed, or intentionally left unchanged
 - `Canonical decisions`: `keep`, `update`, `extract`, `retire`
 - `Validation`: commands run and remaining gaps
 - `Remaining blockers or drift`: unresolved issues that prevent or narrow `apply`
+
+### 🤖 Agents
+
+- `Agents used`: which agents were used and why. If none were used, say so and explain why.
+
+### 📘 Instructions
+
+- `Instructions used`: which instruction or policy files shaped the run and why. If none were used, say so and explain why.
+
+### 🧩 Skills
+
+- `Skills invoked`: which declared skills were used and why. If none were used, say so and explain why.

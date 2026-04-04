@@ -160,6 +160,7 @@ def test_contract_cases_are_known() -> None:
         "resource-governance-agents-preferred-optional-skills-are-well-formed",
         "resource-governance-agent-preferred-optional-skills-resolve-on-disk",
         "reporting-operation-completion-report-contract-is-documented",
+        "reporting-sync-agents-publish-completion-report-categories",
         "sync-plan-regenerates-root-agents",
         "sync-plan-mirrors-source-catalog",
         "sync-plan-preserves-local-target-assets",
@@ -258,6 +259,28 @@ def test_reporting_operation_completion_report_contract_is_documented() -> None:
     ):
         assert heading in copilot_instructions_text
         assert heading in readme_text
+
+
+def test_reporting_sync_agents_publish_completion_report_categories() -> None:
+    for path in (
+        REPO_ROOT / ".github" / "agents" / "internal-sync-control-center.agent.md",
+        REPO_ROOT / ".github" / "agents" / "internal-sync-global-copilot-configs-into-repo.agent.md",
+    ):
+        text = path.read_text(encoding="utf-8")
+        assert "## Output Expectations" in text
+        assert "If a category was not used, explicitly say so and explain why." in text
+        for heading in (
+            "### ✅ Outcome",
+            "### 🤖 Agents",
+            "### 📘 Instructions",
+            "### 🧩 Skills",
+        ):
+            assert heading in text
+
+    control_center_text = (
+        REPO_ROOT / ".github" / "agents" / "internal-sync-control-center.agent.md"
+    ).read_text(encoding="utf-8")
+    assert "Governance files reviewed" in control_center_text
 
 
 def test_sync_plan_regenerates_root_agents(tmp_path: Path) -> None:
