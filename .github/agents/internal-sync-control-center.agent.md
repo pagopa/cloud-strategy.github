@@ -51,6 +51,7 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
 - Do not report `apply` as complete unless the final output states whether `.github/copilot-instructions.md` and root `AGENTS.md` were reviewed, changed, or intentionally left unchanged.
+- When a sync workflow needs a retained plan or auxiliary support file, write it under repository-root `tmp/` and create the directory if it does not exist.
 - Do not report any completed governance or sync operation unless the final response ends with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`. If a category was not used, explicitly say so and explain why.
 
 ## Skill Usage Contract

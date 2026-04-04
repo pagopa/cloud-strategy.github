@@ -26,9 +26,10 @@ description: Mirror the shared Copilot catalog into consumer repos — dynamic r
 4. Plan source-authoritative updates for every mirrored non-local target file that differs from source.
 5. Plan deletions for target-only non-local assets inside mirrored categories.
 6. Preserve target `local-*` assets and validate them as unmanaged local extensions.
-7. Write `.github/internal-sync-copilot-configs.plan.md` in the target repo with the pending sync actions, checks, and manual follow-up items.
-8. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
-9. Generate plan report (JSON or Markdown).
+7. Write `tmp/internal-sync-copilot-configs.plan.md` in the target repo with the pending sync actions, checks, and manual follow-up items.
+8. When the sync needs retained auxiliary files such as saved reports, place them under target-root `tmp/` and create that directory if it does not exist.
+9. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
+10. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)
 1. Copy every mirrored source asset, including binary skill support files.
@@ -37,7 +38,7 @@ description: Mirror the shared Copilot catalog into consumer repos — dynamic r
 4. Update manifest with new SHA-256 checksums and timestamp.
 5. Refresh target `.github/copilot-instructions.md` as the primary detailed Copilot policy file, deriving target-specific content from repository evidence when needed.
 6. Refresh target-specific root `AGENTS.md` from the mirrored baseline plus preserved target-local assets, keeping it concise, bridge-oriented, and runtime-agnostic instead of duplicating Copilot policy text.
-7. Re-check the objectives recorded in `.github/internal-sync-copilot-configs.plan.md`; remove sections whose checks now pass and delete the file only when nothing remains pending.
+7. Re-check the objectives recorded in `tmp/internal-sync-copilot-configs.plan.md`; remove sections whose checks now pass and delete the file only when nothing remains pending.
 8. Preserve target-local `local-*` resources and configuration unless the approved plan explicitly migrates them.
 9. Produce final report: actions taken, preserved local assets, deleted target-only assets, and recommendations. End the report with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`; if a category was not used, explicitly say so and explain why.
 
@@ -62,7 +63,7 @@ These files are always synced regardless of detected stacks:
 - `.github/instructions/**/*.instructions.md`
 - `.github/prompts/**/*.prompt.md`
 - `.github/skills/**`, including `SKILL.md` and bundled support files
-- Tracking artifact: `.github/internal-sync-copilot-configs.plan.md`
+- Tracking artifact: `tmp/internal-sync-copilot-configs.plan.md`
 
 ## Scope rules
 - Manage Copilot-core assets only.
@@ -82,7 +83,7 @@ These files are always synced regardless of detected stacks:
 | Running apply without reviewing the plan first | Unintended overwrites or deletions | Always run plan mode first, review the report |
 | Treating skill bundles as `SKILL.md` only | Mirrored skills break because references, assets, or scripts are missing | Mirror the full skill directory contents |
 | Preserving target-owned non-local assets under mirrored categories | The target drifts away from the standards catalog | Delete non-local target-only assets during apply |
-| Generating a plan only in stdout | The user loses visibility on pending or failed sync steps after the run ends | Persist `.github/internal-sync-copilot-configs.plan.md` until every section is cleared |
+| Generating a plan only in stdout | The user loses visibility on pending or failed sync steps after the run ends | Persist `tmp/internal-sync-copilot-configs.plan.md` until every section is cleared |
 | Updating root AGENTS.md before copilot-instructions.md | The bridge can drift from the source policy | Refresh target `.github/copilot-instructions.md` first, then regenerate root `AGENTS.md` |
 | Copying detailed Copilot policy into root AGENTS.md | The root bridge becomes redundant and harder to maintain | Keep detailed policy in `.github/copilot-instructions.md` and keep `AGENTS.md` concise |
 | Treating target `local-*` assets as disposable noise | Local configuration gets lost during alignment | Preserve `local-*` assets and surface them in the report |

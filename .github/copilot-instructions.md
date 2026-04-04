@@ -153,3 +153,4 @@ These apply to every code change, regardless of language or technology:
 - `internal-pr-editor` remains intentionally prompt-routed; keep PR body generation on the prompt-plus-skill path unless the repository adds a dedicated agent.
 - `internal-data-registry` remains intentionally dormant tactical capacity until the repository adds a concrete routing owner.
 - Keep these installed `obra-*` skills intentionally dormant until a concrete workflow owner is declared: `obra-gardening-skills-wiki`, `obra-pulling-updates-from-skills-repository`, `obra-sharing-skills`, `obra-testing-skills-with-subagents`, `obra-using-skills`, and `obra-remembering-conversations`.
+- For sync workflows that need retained plans or auxiliary output files, use repository-root `tmp/` and create it if missing instead of scattering those artifacts under governed `.github/` paths.

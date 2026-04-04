@@ -23,7 +23,8 @@ from pathlib import Path, PurePosixPath
 
 SCRIPT_NAME = "internal-sync-global-copilot-configs-into-repo"
 MANIFEST_RELATIVE_PATH = ".github/internal-sync-copilot-configs.manifest.json"
-PLAN_RELATIVE_PATH = ".github/internal-sync-copilot-configs.plan.md"
+TMP_OUTPUT_DIRECTORY = "tmp"
+PLAN_RELATIVE_PATH = f"{TMP_OUTPUT_DIRECTORY}/internal-sync-copilot-configs.plan.md"
 SUPPORTED_SCOPE = "copilot-core"
 DEFAULT_CONFLICT_POLICY = "source-authoritative-preserve-local"
 LEGACY_CONFLICT_POLICY = "conservative-merge"

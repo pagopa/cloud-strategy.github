@@ -130,11 +130,12 @@ These rules apply to all repository resources, including prompts, skills, instru
 
 #### `sync-plan-writes-tracking-file`
 
-- Goal: create a persistent per-target sync plan inside `.github` before apply runs.
+- Goal: create a persistent per-target sync plan inside repository-root `tmp/` before apply runs.
 - Fixture:
   - target repository with a minimal supported stack
 - Expected behavior:
-  - plan mode writes `.github/internal-sync-copilot-configs.plan.md`
+  - plan mode writes `tmp/internal-sync-copilot-configs.plan.md`
+  - the run creates `tmp/` when the target repo does not already have it
   - the file contains pending synchronization and validation sections
 
 ### Sync Application
@@ -164,7 +165,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 - Fixture:
   - fresh target repository with a minimal supported stack
 - Expected behavior:
-  - apply removes `.github/internal-sync-copilot-configs.plan.md` after sync and strict validation complete successfully
+  - apply removes `tmp/internal-sync-copilot-configs.plan.md` after sync and strict validation complete successfully
 
 #### `sync-apply-keeps-tracking-file-for-local-follow-up`
 
@@ -172,7 +173,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 - Fixture:
   - target repository with an invalid local Copilot asset
 - Expected behavior:
-  - apply keeps `.github/internal-sync-copilot-configs.plan.md`
+  - apply keeps `tmp/internal-sync-copilot-configs.plan.md`
   - the file contains a pending manual follow-up section describing the local issue
 
 ## Explicitly Out Of Scope

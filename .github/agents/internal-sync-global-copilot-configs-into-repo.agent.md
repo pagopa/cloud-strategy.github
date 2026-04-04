@@ -48,8 +48,9 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - Start with `plan` mode and move to `apply` only on explicit request and only when the plan is conflict-safe.
 - Mirror every source asset under `.github/agents`, `.github/instructions`, `.github/prompts`, and `.github/skills`, including skill support files such as `references/`, `assets/`, and `scripts/`.
 - Preserve only target `local-*` assets under mirrored categories; delete other target-only assets under those categories during apply.
-- Before changing mirrored target assets, write `.github/internal-sync-copilot-configs.plan.md` in the target repository with the planned operations and checks.
-- After apply, re-check the plan objectives; remove completed sections from `.github/internal-sync-copilot-configs.plan.md`, delete the whole file only when nothing remains pending, otherwise keep it for user follow-up.
+- Before changing mirrored target assets, write `tmp/internal-sync-copilot-configs.plan.md` in the target repository with the planned operations and checks.
+- When the sync needs retained auxiliary support files in addition to the tracking plan, place them under repository-root `tmp/` and create the directory if it does not exist.
+- After apply, re-check the plan objectives; remove completed sections from `tmp/internal-sync-copilot-configs.plan.md`, delete the whole file only when nothing remains pending, otherwise keep it for user follow-up.
 - When the target sync includes root guidance files, rebuild target `.github/copilot-instructions.md` through the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.
 - In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep preserved target `local-*` assets visible in the final plan or apply report.
 
@@ -62,7 +63,7 @@ If a category was not used, explicitly say so and explain why.
 
 - `Target analysis`: repo shape, selected profile, stacks, git state, and AGENTS location.
 - `Root guidance strategy`: how target `.github/copilot-instructions.md` remains primary, how root `AGENTS.md` bridges to it, and which target `local-*` assets must remain untouched.
-- `Tracking plan`: the content and lifecycle of `.github/internal-sync-copilot-configs.plan.md` for the target repository.
+- `Tracking plan`: the content and lifecycle of `tmp/internal-sync-copilot-configs.plan.md` for the target repository.
 - `Source audit`: canonical assets, legacy aliases, role overlaps, AGENTS.md repeats, and source-side recommendations.
 - `Asset selection`: all mirrored instructions, prompts, skills, skill support files, agents, and baseline files sourced from the standards repository.
 - `Unmanaged target asset issues`: preserved target `local-*` instructions, prompts, skills, or agents, including strict validation gaps and origin-prefix naming violations.

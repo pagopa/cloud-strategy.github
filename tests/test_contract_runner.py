@@ -348,8 +348,11 @@ def test_sync_plan_writes_tracking_file(tmp_path: Path) -> None:
 
     result = SYNC_MODULE.main(["--target", str(target_root)])
 
-    tracking_path = target_root / ".github" / "internal-sync-copilot-configs.plan.md"
+    tracking_path = target_root / SYNC_MODULE.PLAN_RELATIVE_PATH
     assert result == 0
+    assert SYNC_MODULE.PLAN_RELATIVE_PATH.startswith("tmp/")
+    assert tracking_path.parent == target_root / "tmp"
+    assert tracking_path.parent.is_dir()
     assert tracking_path.is_file()
     tracking_text = tracking_path.read_text(encoding="utf-8")
     assert "## Pending synchronization actions" in tracking_text
@@ -397,7 +400,7 @@ def test_sync_apply_removes_tracking_file_when_complete(tmp_path: Path) -> None:
     result = SYNC_MODULE.main(["--target", str(target_root), "--mode", "apply"])
 
     assert result == 0
-    assert not (target_root / ".github" / "internal-sync-copilot-configs.plan.md").exists()
+    assert not (target_root / SYNC_MODULE.PLAN_RELATIVE_PATH).exists()
 
 
 def test_sync_apply_keeps_tracking_file_for_local_follow_up(tmp_path: Path) -> None:
@@ -416,7 +419,7 @@ name: local-broken
 
     result = SYNC_MODULE.main(["--target", str(target_root), "--mode", "apply"])
 
-    tracking_path = target_root / ".github" / "internal-sync-copilot-configs.plan.md"
+    tracking_path = target_root / SYNC_MODULE.PLAN_RELATIVE_PATH
     assert result == 0
     assert tracking_path.is_file()
     tracking_text = tracking_path.read_text(encoding="utf-8")
