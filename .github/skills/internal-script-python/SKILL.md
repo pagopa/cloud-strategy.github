@@ -23,10 +23,29 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Add unit tests for testable behavior.
 - New standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
 - The folder should include the Python entry point, a `run.sh` launcher, and `tests/` when test scope applies. Add a local `requirements.txt` only when external packages are used.
+- For new scripts, do an explicit dependency decision before implementation; do not assume `stdlib-first` as the automatic default.
+- Prefer mature, well-maintained, widely used third-party libraries when they clearly reduce boilerplate, edge cases, or custom logic in the finished script.
+- Keep the standard library only when the final code is genuinely simpler, more readable, and safer than the third-party alternative.
+- Optimize for less bespoke code and a simpler final script, not for the fewest possible dependencies.
 - If external packages are used, keep them in the local `requirements.txt` with exact pins, full transitive dependency closure, `--hash` entries, and short comment lines that make pinned versions readable.
-- Recommend third-party libraries when they materially simplify parsing, validation, HTTP, CLI, serialization, or retry behavior; do not replace a simpler standard-library solution just to satisfy the preference.
+- Recommend third-party libraries when they materially simplify parsing, validation, CLI handling, serialization, HTTP, retry behavior, date handling, table rendering, Excel/CSV processing, or formatting; do not replace a simpler standard-library solution just to satisfy the preference.
+- Avoid weak or marginal dependencies; every package should have a clear value-versus-setup justification.
 - Make new `run.sh` launchers executable, and make them install from `requirements.txt` only when that file exists.
 - For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
+
+## Dependency decision note
+Before writing a new script, include a short dependency decision note such as:
+
+```text
+Dependency decision note
+- Candidates: argparse (stdlib), click, typer
+- Final choice: typer
+- Why: cleaner CLI structure, less boilerplate, better help output, and less custom parsing code than argparse for this script.
+```
+
+- Keep the note short and task-specific.
+- Compare the standard library with realistic third-party candidates.
+- If the final choice uses external libraries, create or update the local `requirements.txt` before finishing the task.
 
 ## Default layout
 ```text
@@ -120,7 +139,10 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Runtime guidance
-- Prefer the standard library first for simple scripts; add third-party packages only when they materially simplify parsing, validation, HTTP, CLI, or serialization work.
+- Evaluate stdlib and third-party options explicitly for each new script instead of defaulting blindly to stdlib.
+- Prefer mature third-party packages when they clearly produce a smaller, safer, easier-to-maintain script than a custom stdlib-based implementation.
+- Keep stdlib when it wins on simplicity, clarity, and safety in the final result.
+- Reach for libraries instead of custom logic when they solve parsing, validation, CLI handling, serialization, HTTP, retry, date handling, table rendering, Excel/CSV, or formatting better.
 - Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
 - Reach for `pathlib`, context managers, and small helper functions before adding framework-like structure to a script.
 
@@ -136,6 +158,8 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 | Installing deps globally or without hash-locked version pinning | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins and hashes |
 | Adding an empty `requirements.txt` to a stdlib-only tool | Adds noise and implies missing setup steps | Omit `requirements.txt` when the script uses only the standard library |
 | Shipping a loose `.py` file with undocumented setup steps | Users must guess how to create the environment and run the tool | Generate a self-contained folder with `run.sh` and add `requirements.txt` only when external packages are needed |
+| Defaulting to stdlib without comparing mature libraries | Leaves avoidable boilerplate, edge cases, and custom parsing logic in the script | Write the dependency decision note first and choose the option that makes the final code simpler |
+| Rejecting a useful dependency just to keep dependency count low | Optimizes the wrong thing and increases custom code | Optimize for simpler final code and justified value, not dependency minimization |
 | Forcing async or framework abstractions into a simple tool | Raises complexity without improving the script | Keep the script synchronous and direct unless concurrency is essential |
 
 ## Cross-references
