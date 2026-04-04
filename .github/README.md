@@ -219,6 +219,29 @@ These agents manage the **lifecycle** of Copilot customization assets. They are 
 
 ---
 
+## Completion Report Contract
+
+Completed operations must end with a concise recap.
+If a category was not used, explicitly say so and explain why.
+
+### ✅ Outcome
+
+- Summarize the completed operation and any relevant validation status or blockers.
+
+### 🤖 Agents
+
+- State which agents were used and why they were relevant.
+
+### 📘 Instructions
+
+- State which instructions were used and why they mattered.
+
+### 🧩 Skills
+
+- State which skills were used and why they were relevant.
+
+---
+
 ## Notes
 
 - `repo-profiles.yml` is advisory-only (human-readable profile catalog, not enforced by validators).

@@ -21,6 +21,24 @@ You are an expert software and platform engineer. You are the user's technical p
 - Keep repository-facing wording GitHub Copilot-based and do not make repository artifacts say or imply that the repository uses a different assistant runtime.
 - If detailed policy, validation, or workflow guidance is duplicated in root `AGENTS.md`, move that detail here and keep only the bridge-level pointer there.
 
+## Operation Completion Report
+- After every completed operation, end with a concise completion report.
+- The completion report may follow the user's chat language.
+- If a category was not used, explicitly say so and explain why.
+- Keep the report specific to the completed operation; do not paste full repository inventories.
+
+### ✅ Outcome
+- Summarize what changed, what was verified, or what remains blocked.
+
+### 🤖 Agents
+- State which agents were used and why they were relevant to the completed operation.
+
+### 📘 Instructions
+- State which instructions were used and why they mattered, including `.github/copilot-instructions.md` when it materially shaped the work.
+
+### 🧩 Skills
+- State which skills were used and why they were relevant to the completed operation.
+
 ## Catalog layering model
 - Use a three-layer model for command-center routing and skill contracts:
   - `obra-*` skills are the strategic lane for framing, decomposition, planning, simplification, and verification discipline.

@@ -159,6 +159,7 @@ def test_contract_cases_are_known() -> None:
         "resource-governance-named-resources-declare-name",
         "resource-governance-agents-preferred-optional-skills-are-well-formed",
         "resource-governance-agent-preferred-optional-skills-resolve-on-disk",
+        "reporting-operation-completion-report-contract-is-documented",
         "sync-plan-regenerates-root-agents",
         "sync-plan-mirrors-source-catalog",
         "sync-plan-preserves-local-target-assets",
@@ -237,6 +238,26 @@ def test_resource_governance_agent_preferred_optional_skills_resolve_on_disk() -
                 f"Preferred or optional skill {skill_name} in {path} does not resolve to "
                 ".github/skills/<name>/SKILL.md"
             )
+
+
+def test_reporting_operation_completion_report_contract_is_documented() -> None:
+    copilot_instructions_text = (REPO_ROOT / ".github" / "copilot-instructions.md").read_text(encoding="utf-8")
+    agents_text = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    readme_text = (REPO_ROOT / ".github" / "README.md").read_text(encoding="utf-8")
+
+    assert "## Operation Completion Report" in copilot_instructions_text
+    assert "If a category was not used, explicitly say so and explain why." in copilot_instructions_text
+    assert "Completion-report details live in `.github/copilot-instructions.md`" in agents_text
+    assert "## Completion Report Contract" in readme_text
+
+    for heading in (
+        "### ✅ Outcome",
+        "### 🤖 Agents",
+        "### 📘 Instructions",
+        "### 🧩 Skills",
+    ):
+        assert heading in copilot_instructions_text
+        assert heading in readme_text
 
 
 def test_sync_plan_regenerates_root_agents(tmp_path: Path) -> None:

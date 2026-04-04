@@ -73,6 +73,21 @@ These rules apply to all repository resources, including prompts, skills, instru
 - Expected behavior:
   - internal agents do not declare agent identifiers, aliases, or missing skills as if they were reusable skill contracts
 
+### Reporting
+
+#### `reporting-operation-completion-report-contract-is-documented`
+
+- Goal: keep the end-of-operation reporting contract visible in the primary Copilot policy layer and source-side documentation.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.github/README.md`
+- Expected behavior:
+  - `.github/copilot-instructions.md` defines the mandatory completion report macro categories `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
+  - the policy requires an explicit explanation when a resource category was not used
+  - root `AGENTS.md` points to `.github/copilot-instructions.md` as the owner of detailed completion-report behavior
+  - `.github/README.md` documents the same completion-report contract for maintainers
+
 ### Sync Planning
 
 #### `sync-plan-regenerates-root-agents`

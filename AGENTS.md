@@ -59,6 +59,7 @@ Update `.github/copilot-instructions.md` first when policy, validation, or workf
 - Profile hint: `minimal`
 - Keep root `AGENTS.md` light: naming, routing, discovery, and inventory only.
 - Keep detailed behavior, validation, PR or workflow policy, and implementation guardrails in `.github/copilot-instructions.md`.
+- Completion-report details live in `.github/copilot-instructions.md`; keep only the bridge-level pointer here.
 - Prioritize these paths:
   - `.github/instructions`
   - `.github/prompts`

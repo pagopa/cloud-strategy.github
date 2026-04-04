@@ -2070,6 +2070,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
             f"- Primary focus: {analysis.focus}",
             f"- Profile hint: `{selection.profile.name}`",
             "- AGENTS.md is the external bridge for assistant behavior and naming; keep runtime references abstract.",
+            "- Completion-report details live in `.github/copilot-instructions.md`; keep the category schema there, not in this bridge.",
             "- Resolve stack from target files and explicit prompt inputs; the agent role remains behavioral, not language-specific.",
             "- Prioritize these paths:",
         ]

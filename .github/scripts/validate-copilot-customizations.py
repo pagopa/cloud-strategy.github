@@ -42,6 +42,20 @@ INTERNAL_CODE_REVIEW_REFERENCE_PATHS = (
     Path(".github/skills/internal-code-review/references/anti-patterns-java.md"),
     Path(".github/skills/internal-code-review/references/anti-patterns-nodejs.md"),
 )
+OPERATION_COMPLETION_REPORT_SECTION = "## Operation Completion Report"
+COMPLETION_REPORT_CONTRACT_SECTION = "## Completion Report Contract"
+COMPLETION_REPORT_CATEGORY_HEADINGS = (
+    "### ✅ Outcome",
+    "### 🤖 Agents",
+    "### 📘 Instructions",
+    "### 🧩 Skills",
+)
+COMPLETION_REPORT_UNUSED_REASON = (
+    "If a category was not used, explicitly say so and explain why."
+)
+AGENTS_COMPLETION_REPORT_POINTER = (
+    "Completion-report details live in `.github/copilot-instructions.md`"
+)
 
 
 @dataclass
@@ -401,6 +415,44 @@ def validate_internal_skill_reference_files(errors: list[str]) -> None:
             )
 
 
+def validate_operation_completion_report_contract(errors: list[str]) -> None:
+    copilot_instructions_path = REPO_ROOT / ".github" / "copilot-instructions.md"
+    if copilot_instructions_path.exists():
+        text = read_text(copilot_instructions_path)
+        if OPERATION_COMPLETION_REPORT_SECTION not in text:
+            errors.append(
+                f"Missing `{OPERATION_COMPLETION_REPORT_SECTION}` in {copilot_instructions_path}"
+            )
+        for heading in COMPLETION_REPORT_CATEGORY_HEADINGS:
+            if heading not in text:
+                errors.append(
+                    f"Missing completion report category `{heading}` in {copilot_instructions_path}"
+                )
+        if COMPLETION_REPORT_UNUSED_REASON not in text:
+            errors.append(
+                "Missing unused-category explanation requirement in "
+                f"{copilot_instructions_path}"
+            )
+
+    agents_path = REPO_ROOT / "AGENTS.md"
+    if agents_path.exists() and AGENTS_COMPLETION_REPORT_POINTER not in read_text(agents_path):
+        errors.append(f"Missing completion-report bridge pointer in {agents_path}")
+
+    readme_path = REPO_ROOT / ".github" / "README.md"
+    if readme_path.exists():
+        text = read_text(readme_path)
+        if COMPLETION_REPORT_CONTRACT_SECTION not in text:
+            errors.append(f"Missing `{COMPLETION_REPORT_CONTRACT_SECTION}` in {readme_path}")
+        for heading in COMPLETION_REPORT_CATEGORY_HEADINGS:
+            if heading not in text:
+                errors.append(f"Missing completion report category `{heading}` in {readme_path}")
+        if COMPLETION_REPORT_UNUSED_REASON not in text:
+            errors.append(
+                "Missing unused-category explanation requirement in "
+                f"{readme_path}"
+            )
+
+
 def build_report(scope: str, mode: str) -> ValidationReport:
     normalize_scope(scope)
     normalize_mode(mode)
@@ -413,6 +465,7 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     validate_internal_sync_control_center_contract(errors)
     validate_legacy_skill_references(errors)
     validate_internal_skill_reference_files(errors)
+    validate_operation_completion_report_contract(errors)
     warnings.extend(build_instruction_load_warnings())
     return ValidationReport(errors=errors, warnings=warnings)
 
