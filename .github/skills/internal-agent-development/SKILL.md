@@ -1,6 +1,6 @@
 ---
 name: internal-agent-development
-description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, deliberate tool contracts, optional skill guidance, reusable command-center patterns, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
+description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, deliberate tool contracts, mandatory engine skills where justified, optional support skills, reusable command-center patterns, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
 ---
 
 # Internal Agent Development
@@ -9,12 +9,19 @@ Use this skill when authoring or materially revising repository-owned agents in 
 
 Use `openai-skill-creator` when the main output is a skill. Use `internal-skill-management` when deciding keep, refresh, replace, or retire outcomes across the catalog rather than improving one agent.
 
+Prefer explicit engine-skill architecture for routers and broader command centers:
+
+- keep routing contract, tool contract, boundaries, escalation entry points, and output shape in the agent
+- move long decision matrices, threshold rules, ownership maps, and reusable operating logic into repo-owned engine skills
+- when that engine is required for the agent's core behavior, declare it explicitly instead of burying it in optional skill guidance
+
 ## Goals
 
 - Build agents that are easy to route to.
 - Keep one cohesive operating role per agent.
 - Translate imported agent value into repo-local GitHub Copilot form.
 - Move reusable procedures into skills instead of bloating agent bodies.
+- Prefer explicit mandatory engine skills when an agent depends on reusable routing or decision logic.
 - Keep any skill guidance explicit and reviewable when it adds value, without implying platform-enforced execution order.
 - Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without cargo-culting obsolete tool wiring.
 - Use current GitHub Copilot custom-agent frontmatter deliberately instead of stripping supported properties by default.
@@ -48,6 +55,7 @@ Pick the right artifact before drafting:
 | Need | Prefer |
 | --- | --- |
 | Named operating role with routing responsibility | Agent |
+| Front-door router or broad command center with reusable decision logic | Agent + mandatory engine skill |
 | Reusable procedure, checklist, or domain workflow | Skill |
 | Short repeatable drafting aid | Prompt |
 | File-type or stack-wide coding rule | Instruction |
@@ -71,10 +79,16 @@ Choose an agent only when the repository benefits from a stable command center o
 - Use `mcp-servers:` only when the agent truly needs agent-local MCP server configuration; do not add it as decoration.
 - Prefer `disable-model-invocation` and `user-invocable` over the retired `infer:` property.
 - Never use `color:`.
+- When an internal agent depends on one or more repo-owned skills as its required operating engine, add a dedicated `## Mandatory Engine Skills` section.
+- `## Mandatory Engine Skills` is a repository-owned contract for the skill or skills that must be loaded before the agent's core routing or decision logic runs.
+- Keep `## Mandatory Engine Skills` short and role-defining. One shared engine or one shared plus one existing tactical engine is normal; kitchen-sink engine lists are not.
 - Skill-guidance sections such as `## Preferred/Optional Skills` are optional. Use them only when they materially improve routing clarity, discovery, or command-center usability.
+- Use `## Preferred/Optional Skills` only for conditional support skills, not for the agent's required engine.
 - When present, a skill-list section is a curated routing and discovery list. List exact canonical skill identifiers, one per bullet, in backticks.
 - Do not present a skill-list section as a native GitHub Copilot agent property or as a guarantee that every listed skill will be invoked automatically.
 - When a skill-list section expresses the repository layered model, make `obra-*` the strategic lane, `internal-*` the tactical owner, and imported skills the support-only lane. If no internal owner exists for a capability, it is valid to use imported specialists directly.
+- Do not create a 1:1 dedicated skill per agent just for symmetry. Create an engine skill only when it owns real reusable logic that would otherwise bloat the agent or drift across multiple agents.
+- Router agents are the strongest default candidate for a dedicated engine skill because their classification matrix, fallback rules, and old-to-new ownership mapping are procedural, reusable, and easy to let drift.
 - Every agent must explain both positive routing and at least one meaningful boundary.
 - Every agent must define `## Output Expectations`.
 - Add `## Skill Usage Contract` only when the agent is a broader command center whose listed skills are used conditionally.
@@ -82,6 +96,44 @@ Choose an agent only when the repository benefits from a stable command center o
 - When an agent can influence external actions, call out where human approval, escalation, or review gates apply.
 - Keep long reusable workflows in skills, not in the agent body.
 - Do not depend on `argument-hint` or `handoffs` for GitHub.com compatibility; those properties are ignored there.
+
+## Engine-Skill Pattern
+
+Use this split when authoring command-center agents:
+
+- Agent body:
+  - routing sentence
+  - role and stance
+  - boundary with neighboring agents
+  - tool contract
+  - escalation entry points
+  - output expectations
+- Engine skill:
+  - decision matrix
+  - threshold rules for medium or ambiguous tasks
+  - old-to-new ownership mapping
+  - anti-overlap checklist
+  - shared workflow steps that would otherwise be duplicated
+
+Good candidates for a dedicated or shared engine skill:
+
+- front-door routers
+- planning leaders
+- any command center whose main value is ordered classification or procedural reasoning
+
+Weak candidates for a dedicated engine skill:
+
+- small local executors whose behavior is already well covered by OBRA plus domain skills
+- lightweight challengers that do not yet have a real reusable framework
+- agents where the proposed skill would mostly restate the agent body
+
+An agent may legitimately use:
+
+- no dedicated engine skill
+- one shared engine skill
+- one shared engine skill plus one existing tactical engine skill
+
+That asymmetry is a feature, not a defect, when it reduces drift.
 
 ## Authoring Workflow
 
@@ -93,21 +145,27 @@ Choose an agent only when the repository benefits from a stable command center o
    Compare `description:` lines first. If two descriptions trigger on the same request, resolve the overlap before drafting.
 4. Decide whether the behavior belongs in an agent, a skill, or both.
    Extract reusable procedure into a skill if the draft starts becoming a playbook.
-5. Draft the `description:` before the body.
+5. If the behavior belongs in both, define the split explicitly.
+   Decide what stays in the agent body and what becomes the engine skill before drafting sections.
+6. Decide whether the agent needs `## Mandatory Engine Skills`, `## Preferred/Optional Skills`, or both.
+   Mandatory engines own required decision logic; optional skills add conditional support.
+7. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
-6. Choose the frontmatter strategy intentionally.
+8. Choose the frontmatter strategy intentionally.
    Define the explicit `tools:` contract first using canonical aliases and the smallest role-shaped set. Add `target:`, `mcp-servers:`, or model-selection properties only when they change real behavior.
-7. Translate capabilities into repo-local building blocks.
+9. Translate capabilities into repo-local building blocks.
    Map expertise claims, workflow logic, and any remaining tool dependencies into declared skills, role language, routing rules, output expectations, and a deliberate frontmatter contract.
-8. If a skill-list section will help the agent, build a cohesive one.
+10. If the agent needs engine skills, keep them explicit and small.
+   Prefer one dedicated engine for routers and one shared engine for cross-agent operating logic before inventing parallel skill mirrors.
+11. If a support-skill section will help the agent, build a cohesive one.
    Keep skills that reinforce the same operating role. Delete kitchen-sink additions and avoid ordering that implies origin-based priority.
-9. Write routing rules with a real boundary.
+12. Write routing rules with a real boundary.
    State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases.
-10. Add output expectations that match the role.
+13. Add output expectations that match the role.
    Ask what a successful response from this command center should reliably contain.
-11. Normalize imported patterns and remove stale baggage.
+14. Normalize imported patterns and remove stale baggage.
    Preserve the decision model; remove retired frontmatter, obsolete tool ids, irrelevant command syntax, and UI-only metadata.
-12. Validate and de-duplicate.
+15. Validate and de-duplicate.
     Run repository validation and re-check whether the new agent makes another one redundant.
 
 ## Capability Translation Rules
@@ -166,6 +224,12 @@ Many strong specialist agents also benefit from:
 - an execution workflow when ordered reasoning materially improves answer quality
 - a response shape that makes evidence, tradeoffs, and next steps easy to scan
 
+Many strong command-center agents also benefit from:
+
+- one explicit mandatory engine skill
+- a clear split between core routing prose and reusable operating logic
+- a validation rule that confirms the engine exists and is not decorative
+
 Load `references/design-patterns.md` when deciding how much workflow, discovery, or governance logic belongs in the agent body.
 
 ## Imported Pattern Normalization
@@ -188,8 +252,11 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Prestige-first descriptions that never say when the agent wins routing.
 - Imported agents copied almost verbatim with stale platform-specific frontmatter or obsolete tool ids.
 - A skill-list section as a dumping ground for unrelated capabilities.
+- A `## Mandatory Engine Skills` section that merely mirrors the agent body without owning real reusable logic.
+- Creating one dedicated skill per agent for visual symmetry even when shared or existing engines already solve the problem.
 - Starting from the selected agent file alone and skipping the directly relevant preferred or optional skills that define how that agent should be applied.
 - Treating preferred or optional skills as a fake platform-enforced toolchain or as an origin-based priority ladder.
+- Treating optional support skills as if they were the required engine.
 - Preserving the route but throwing away the upstream agent's best structure, leaving a compliant internal agent that is harder to use and less decisive.
 - Treating `tools:` or `model:` as deprecated in current GitHub Copilot custom agents.
 - Copying multi-screen tool lists from older examples instead of normalizing them to canonical aliases and an explicit minimal contract.
@@ -210,10 +277,14 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm any explicit `tools:` list uses canonical aliases or MCP namespaces and that the scope is intentional.
 - Confirm the `tools:` list is role-shaped and does not rely on implicit all-tools access.
 - Confirm retired `infer:` is absent and that `disable-model-invocation` or `user-invocable` is used when selection behavior needs control.
+- If the agent includes `## Mandatory Engine Skills`, confirm every listed skill exists on disk and is truly required for the agent's core behavior.
+- If the agent includes `## Mandatory Engine Skills`, confirm the engine owns reusable logic that would otherwise bloat the agent or drift across multiple agents.
+- Confirm `## Preferred/Optional Skills` does not duplicate `## Mandatory Engine Skills`.
 - If the agent includes a skill-list section, confirm the list matches the intended reusable procedures.
 - If the agent includes a skill-list section, confirm the wording does not imply that `internal-*` skills automatically outrank imported skills.
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
 - Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
+- Confirm routers keep classification matrices, fallback rules, and old-to-new ownership mapping in an engine skill instead of long body prose when that logic is substantial.
 - Confirm the final internal agent preserved the strongest usable structure from the source pattern when that structure improved requirement discovery, tradeoff analysis, or response quality.
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
