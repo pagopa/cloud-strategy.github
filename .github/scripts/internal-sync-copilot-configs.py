@@ -523,7 +523,10 @@ def extract_markdown_h2_section(text: str, heading: str) -> str | None:
 
 
 def agent_skill_refs(path: Path) -> list[str] | None:
-    section = extract_markdown_h2_section(path.read_text(encoding="utf-8"), "## Preferred/Optional Skills")
+    text = path.read_text(encoding="utf-8")
+    section = extract_markdown_h2_section(text, "## Mandatory Engine Skills")
+    if section is None:
+        section = extract_markdown_h2_section(text, "## Preferred/Optional Skills")
     if section is None:
         return None
 

@@ -138,6 +138,47 @@ def extract_markdown_h2_section(text: str, heading: str) -> str | None:
     return "\n".join(collected).strip()
 
 
+def extract_skill_list(text: str, heading: str) -> list[str] | None:
+    section = extract_markdown_h2_section(text, heading)
+    if section is None:
+        return None
+
+    declared_skills: list[str] = []
+    for raw_line in section.splitlines():
+        match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", raw_line)
+        if match:
+            declared_skills.append(match.group(1))
+
+    return declared_skills
+
+
+def has_standalone_identifier(text: str, identifier: str) -> bool:
+    pattern = rf"(?<![a-z0-9-]){re.escape(identifier)}(?![a-z0-9-])"
+    return re.search(pattern, text) is not None
+
+
+def retired_operational_reference_paths() -> list[Path]:
+    paths: set[Path] = set()
+    for relative_path in (
+        Path("AGENTS.md"),
+        Path(".github/copilot-instructions.md"),
+        Path(".github/agents/README.md"),
+    ):
+        paths.add(REPO_ROOT / relative_path)
+
+    for directory, pattern in (
+        (REPO_ROOT / ".github" / "agents", "*.md"),
+        (REPO_ROOT / ".github" / "prompts", "*.md"),
+        (REPO_ROOT / ".github" / "instructions", "*.md"),
+        (REPO_ROOT / ".github" / "skills", "*.md"),
+    ):
+        if not directory.exists():
+            continue
+        paths.update(directory.rglob(pattern))
+
+    return sorted(path for path in paths if path.exists())
+
+
 def resource_paths() -> list[Path]:
     paths = []
     paths.extend(sorted((REPO_ROOT / ".github" / "prompts").glob("*.prompt.md")))
@@ -159,6 +200,8 @@ def test_contract_cases_are_known() -> None:
         "resource-governance-named-resources-declare-name",
         "resource-governance-agents-preferred-optional-skills-are-well-formed",
         "resource-governance-agent-preferred-optional-skills-resolve-on-disk",
+        "resource-governance-canonical-operational-agents-publish-engine-contracts",
+        "resource-governance-retired-operational-agents-do-not-regrow",
         "reporting-operation-completion-report-contract-is-documented",
         "reporting-sync-agents-publish-completion-report-categories",
         "sync-plan-regenerates-root-agents",
@@ -238,6 +281,57 @@ def test_resource_governance_agent_preferred_optional_skills_resolve_on_disk() -
             assert skill_name in available_skills, (
                 f"Preferred or optional skill {skill_name} in {path} does not resolve to "
                 ".github/skills/<name>/SKILL.md"
+            )
+
+
+def test_resource_governance_canonical_operational_agents_publish_engine_contracts() -> None:
+    available_skills = {
+        skill_path.parent.name
+        for skill_path in sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md"))
+    }
+
+    for agent_name, expected_engine_skills in VALIDATOR.CANONICAL_OPERATIONAL_AGENT_ENGINES.items():
+        path = REPO_ROOT / ".github" / "agents" / f"{agent_name}.agent.md"
+        assert path.is_file(), f"Missing canonical operational agent {path}"
+
+        text = path.read_text(encoding="utf-8")
+        mandatory_engine_skills = extract_skill_list(text, VALIDATOR.MANDATORY_ENGINE_SECTION_HEADING)
+        optional_support_skills = extract_skill_list(text, VALIDATOR.OPTIONAL_SUPPORT_SECTION_HEADING)
+
+        assert mandatory_engine_skills is not None, f"Missing mandatory engine section in {path}"
+        assert set(mandatory_engine_skills) == expected_engine_skills, (
+            f"Unexpected mandatory engine skills in {path}: {mandatory_engine_skills}"
+        )
+        assert optional_support_skills, f"Missing optional support skills in {path}"
+        assert "## Escalation / Routing" in text, f"Missing escalation section in {path}"
+        assert VALIDATOR.PREFERRED_OPTIONAL_SECTION_HEADING not in text, (
+            f"Canonical operational agent should not use legacy preferred/optional heading in {path}"
+        )
+
+        for skill_name in mandatory_engine_skills + optional_support_skills:
+            assert skill_name in available_skills, (
+                f"Skill {skill_name} in {path} does not resolve to .github/skills/<name>/SKILL.md"
+            )
+
+
+def test_resource_governance_retired_operational_agents_do_not_regrow() -> None:
+    for retired_path in VALIDATOR.RETIRED_OPERATIONAL_AGENT_PATHS:
+        assert not (REPO_ROOT / retired_path).exists(), f"Retired agent still exists: {retired_path}"
+
+    for path in retired_operational_reference_paths():
+        relative_path = path.relative_to(REPO_ROOT)
+        if relative_path in VALIDATOR.ALLOWED_RETIRED_OPERATIONAL_REFERENCE_PATHS:
+            continue
+
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for identifier in VALIDATOR.RETIRED_OPERATIONAL_AGENT_IDENTIFIERS:
+            assert not has_standalone_identifier(text, identifier), (
+                f"Stale retired operational agent reference {identifier} found in {relative_path}"
+            )
+
+        for pattern in VALIDATOR.RETIRED_CODE_REVIEW_AGENT_PATTERNS:
+            assert pattern not in text, (
+                f"Stale retired operational agent reference internal-code-review found in {relative_path}: {pattern}"
             )
 
 

@@ -51,7 +51,7 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - Before changing mirrored target assets, write `tmp/internal-sync-copilot-configs.plan.md` in the target repository with the planned operations and checks.
 - When the sync needs retained auxiliary support files in addition to the tracking plan, place them under repository-root `tmp/` and create the directory if it does not exist.
 - After apply, re-check the plan objectives; remove completed sections from `tmp/internal-sync-copilot-configs.plan.md`, delete the whole file only when nothing remains pending, otherwise keep it for user follow-up.
-- When the target sync includes root guidance files, rebuild target `.github/copilot-instructions.md` through the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.
+- When the target sync includes root guidance files, rebuild target `.github/copilot-instructions.md` through the repository-local planning and authoring workflow anchored in `internal-planning-leader`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.
 - In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep preserved target `local-*` assets visible in the final plan or apply report.
 
 ## Output Expectations

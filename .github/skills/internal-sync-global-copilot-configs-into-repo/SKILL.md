@@ -28,7 +28,7 @@ description: Mirror the shared Copilot catalog into consumer repos — dynamic r
 6. Preserve target `local-*` assets and validate them as unmanaged local extensions.
 7. Write `tmp/internal-sync-copilot-configs.plan.md` in the target repo with the pending sync actions, checks, and manual follow-up items.
 8. When the sync needs retained auxiliary files such as saved reports, place them under target-root `tmp/` and create that directory if it does not exist.
-9. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local authoring workflow anchored in `internal-ai-resource-creator`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
+9. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local planning and authoring workflow anchored in `internal-planning-leader`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
 10. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)

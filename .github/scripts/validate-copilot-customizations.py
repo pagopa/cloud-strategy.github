@@ -24,8 +24,65 @@ DEFAULT_MODE = "strict"
 SUPPORTED_SCOPES = {"root", "all"}
 SUPPORTED_MODES = {"strict", "basic", "legacy-compatible"}
 RETIRED_FRONTMATTER_KEYS = ("infer", "color")
+MANDATORY_ENGINE_SECTION_HEADING = "## Mandatory Engine Skills"
+OPTIONAL_SUPPORT_SECTION_HEADING = "## Optional Support Skills"
+PREFERRED_OPTIONAL_SECTION_HEADING = "## Preferred/Optional Skills"
 DEPRECATED_AGENT_SECTION_HEADINGS = ("## Primary Skill Stack",)
-AGENT_SKILL_SECTION_HEADINGS = ("## Preferred/Optional Skills",)
+AGENT_SKILL_SECTION_HEADINGS = (
+    OPTIONAL_SUPPORT_SECTION_HEADING,
+    PREFERRED_OPTIONAL_SECTION_HEADING,
+)
+CANONICAL_OPERATIONAL_AGENT_ENGINES = {
+    "internal-router": {"internal-agent-routing-engine"},
+    "internal-fast-executor": {"internal-agent-operating-model-engine"},
+    "internal-planning-leader": {"internal-agent-operating-model-engine"},
+    "internal-review-guard": {
+        "internal-agent-operating-model-engine",
+        "internal-code-review",
+    },
+    "internal-critical-challenger": {"internal-agent-operating-model-engine"},
+}
+RETIRED_OPERATIONAL_AGENT_PATHS = (
+    Path(".github/agents/internal-ai-resource-creator.agent.md"),
+    Path(".github/agents/internal-architect.agent.md"),
+    Path(".github/agents/internal-aws-org-governance.agent.md"),
+    Path(".github/agents/internal-aws-platform-engineering.agent.md"),
+    Path(".github/agents/internal-azure-platform-engineering.agent.md"),
+    Path(".github/agents/internal-azure-platform-strategy.agent.md"),
+    Path(".github/agents/internal-cicd.agent.md"),
+    Path(".github/agents/internal-code-review.agent.md"),
+    Path(".github/agents/internal-developer.agent.md"),
+    Path(".github/agents/internal-gcp-platform-engineering.agent.md"),
+    Path(".github/agents/internal-gcp-platform-strategy.agent.md"),
+    Path(".github/agents/internal-infrastructure.agent.md"),
+    Path(".github/agents/internal-quality-engineering.agent.md"),
+)
+RETIRED_OPERATIONAL_AGENT_IDENTIFIERS = (
+    "internal-ai-resource-creator",
+    "internal-architect",
+    "internal-aws-org-governance",
+    "internal-aws-platform-engineering",
+    "internal-azure-platform-engineering",
+    "internal-azure-platform-strategy",
+    "internal-cicd",
+    "internal-developer",
+    "internal-gcp-platform-engineering",
+    "internal-gcp-platform-strategy",
+    "internal-infrastructure",
+    "internal-quality-engineering",
+)
+RETIRED_CODE_REVIEW_AGENT_PATTERNS = (
+    "internal-code-review subagent",
+    "Task tool (internal-code-review)",
+    "Task tool with internal-code-review type",
+    "named agent types like `internal-code-review`",
+    "Named plugin agents (e.g. `internal-code-review`)",
+    ".github/agents/internal-code-review.agent.md",
+)
+ALLOWED_RETIRED_OPERATIONAL_REFERENCE_PATHS = {
+    Path(".github/skills/internal-agent-routing-engine/SKILL.md"),
+    Path(".github/skills/internal-agent-operating-model-engine/SKILL.md"),
+}
 INTERNAL_SYNC_CONTROL_CENTER_AGENT = Path(".github/agents/internal-sync-control-center.agent.md")
 INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS = {
     "internal-skill-management",
@@ -174,21 +231,46 @@ def extract_markdown_h3_section(text: str, heading: str) -> str | None:
     return "\n".join(collected).strip()
 
 
-def extract_agent_skill_guidance(text: str) -> list[str] | None:
-    section = None
-    for heading in AGENT_SKILL_SECTION_HEADINGS:
+def has_standalone_identifier(text: str, identifier: str) -> bool:
+    pattern = rf"(?<![a-z0-9-]){re.escape(identifier)}(?![a-z0-9-])"
+    return re.search(pattern, text) is not None
+
+
+def extract_markdown_skill_list(
+    text: str, headings: tuple[str, ...]
+) -> tuple[str | None, list[str] | None]:
+    for heading in headings:
         section = extract_markdown_h2_section(text, heading)
-        if section is not None:
-            break
-    if section is None:
-        return None
+        if section is None:
+            continue
 
-    declared_skills: list[str] = []
-    for raw_line in section.splitlines():
-        match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", raw_line)
-        if match:
-            declared_skills.append(match.group(1))
+        declared_skills: list[str] = []
+        for raw_line in section.splitlines():
+            match = re.fullmatch(r"\s*-\s+`([^`]+)`\s*", raw_line)
+            if match:
+                declared_skills.append(match.group(1))
 
+        return heading, declared_skills
+
+    return None, None
+
+
+def extract_agent_skill_guidance(text: str) -> list[str] | None:
+    _heading, declared_skills = extract_markdown_skill_list(text, AGENT_SKILL_SECTION_HEADINGS)
+    return declared_skills
+
+
+def extract_optional_support_skills(text: str) -> list[str] | None:
+    _heading, declared_skills = extract_markdown_skill_list(
+        text, (OPTIONAL_SUPPORT_SECTION_HEADING,)
+    )
+    return declared_skills
+
+
+def extract_mandatory_engine_skills(text: str) -> list[str] | None:
+    _heading, declared_skills = extract_markdown_skill_list(
+        text, (MANDATORY_ENGINE_SECTION_HEADING,)
+    )
     return declared_skills
 
 
@@ -397,17 +479,147 @@ def validate_named_resources(errors: list[str]) -> None:
                 errors.append(f"Deprecated agent section `{heading}` found in {agent_file}")
 
         listed_skills = extract_agent_skill_guidance(text)
+        if listed_skills is not None:
+            if not listed_skills:
+                errors.append(
+                    "`## Optional Support Skills` or `## Preferred/Optional Skills` must list at least one skill: "
+                    f"{agent_file}"
+                )
+            for skill_name in listed_skills:
+                if skill_name not in skill_names:
+                    errors.append(
+                        f"Unknown preferred, optional, or support skill `{skill_name}` referenced in {agent_file}"
+                    )
+
+        mandatory_engine_skills = extract_mandatory_engine_skills(text)
+        if mandatory_engine_skills is None:
+            continue
+
+        if not mandatory_engine_skills:
+            errors.append(f"`{MANDATORY_ENGINE_SECTION_HEADING}` must list at least one skill: {agent_file}")
+            continue
+
+        for skill_name in mandatory_engine_skills:
+            if skill_name not in skill_names:
+                errors.append(
+                    f"Unknown mandatory engine skill `{skill_name}` referenced in {agent_file}"
+                )
+
         if listed_skills is None:
             continue
 
-        if not listed_skills:
-            errors.append(f"`## Preferred/Optional Skills` must list at least one skill: {agent_file}")
+        duplicated_skills = sorted(set(mandatory_engine_skills) & set(listed_skills))
+        for skill_name in duplicated_skills:
+            errors.append(
+                f"Skill `{skill_name}` cannot appear in both mandatory and optional sections: {agent_file}"
+            )
+
+
+def should_validate_canonical_operational_model() -> bool:
+    guidance_paths = (
+        REPO_ROOT / "AGENTS.md",
+        REPO_ROOT / ".github" / "copilot-instructions.md",
+    )
+    if any(path.exists() and "internal-router" in read_text(path) for path in guidance_paths):
+        return True
+
+    return any(
+        (REPO_ROOT / ".github" / "agents" / f"{agent_name}.agent.md").exists()
+        for agent_name in CANONICAL_OPERATIONAL_AGENT_ENGINES
+    )
+
+
+def validate_canonical_operational_agent_contract(errors: list[str]) -> None:
+    if not should_validate_canonical_operational_model():
+        return
+
+    for agent_name, expected_engine_skills in CANONICAL_OPERATIONAL_AGENT_ENGINES.items():
+        agent_path = REPO_ROOT / ".github" / "agents" / f"{agent_name}.agent.md"
+        if not agent_path.exists():
+            errors.append(f"Missing canonical operational agent: {agent_path}")
             continue
 
-        for skill_name in listed_skills:
-            if skill_name not in skill_names:
+        text = read_text(agent_path)
+        mandatory_engine_skills = extract_mandatory_engine_skills(text)
+        if mandatory_engine_skills is None:
+            errors.append(f"Missing `{MANDATORY_ENGINE_SECTION_HEADING}` in {agent_path}")
+            continue
+
+        if set(mandatory_engine_skills) != expected_engine_skills or len(
+            mandatory_engine_skills
+        ) != len(expected_engine_skills):
+            expected_display = ", ".join(f"`{skill}`" for skill in sorted(expected_engine_skills))
+            actual_display = ", ".join(f"`{skill}`" for skill in mandatory_engine_skills)
+            errors.append(
+                f"Canonical agent engine mismatch in {agent_path}: expected {expected_display}; got {actual_display}"
+            )
+
+        optional_support_skills = extract_optional_support_skills(text)
+        if optional_support_skills is None:
+            errors.append(f"Missing `{OPTIONAL_SUPPORT_SECTION_HEADING}` in {agent_path}")
+        elif not optional_support_skills:
+            errors.append(f"`{OPTIONAL_SUPPORT_SECTION_HEADING}` must list at least one skill: {agent_path}")
+
+        if re.search(rf"^{re.escape(PREFERRED_OPTIONAL_SECTION_HEADING)}\s*$", text, re.M):
+            errors.append(
+                f"Canonical operational agent must use `{OPTIONAL_SUPPORT_SECTION_HEADING}` instead of `{PREFERRED_OPTIONAL_SECTION_HEADING}`: {agent_path}"
+            )
+
+        if "## Escalation / Routing" not in text:
+            errors.append(f"Missing `## Escalation / Routing` in {agent_path}")
+
+
+def retired_operational_reference_files() -> list[Path]:
+    paths: set[Path] = set()
+
+    for relative_path in (
+        Path("AGENTS.md"),
+        Path(".github/copilot-instructions.md"),
+        Path(".github/agents/README.md"),
+    ):
+        absolute_path = REPO_ROOT / relative_path
+        if absolute_path.exists():
+            paths.add(absolute_path)
+
+    for pattern in (
+        (REPO_ROOT / ".github" / "agents", "*.md"),
+        (REPO_ROOT / ".github" / "prompts", "*.md"),
+        (REPO_ROOT / ".github" / "instructions", "*.md"),
+        (REPO_ROOT / ".github" / "skills", "*.md"),
+    ):
+        directory, glob_pattern = pattern
+        if not directory.exists():
+            continue
+        paths.update(directory.rglob(glob_pattern))
+
+    return sorted(paths)
+
+
+def validate_retired_operational_agents(errors: list[str]) -> None:
+    if not should_validate_canonical_operational_model():
+        return
+
+    for retired_path in RETIRED_OPERATIONAL_AGENT_PATHS:
+        if (REPO_ROOT / retired_path).exists():
+            errors.append(f"Retired operational agent still present on disk: {retired_path}")
+
+    for path in retired_operational_reference_files():
+        relative_path = path.relative_to(REPO_ROOT)
+        if relative_path in ALLOWED_RETIRED_OPERATIONAL_REFERENCE_PATHS:
+            continue
+
+        text = read_text(path)
+        for identifier in RETIRED_OPERATIONAL_AGENT_IDENTIFIERS:
+            if has_standalone_identifier(text, identifier):
                 errors.append(
-                    f"Unknown preferred or optional skill `{skill_name}` referenced in {agent_file}"
+                    f"Stale retired operational agent reference `{identifier}` found in {relative_path}"
+                )
+
+        for pattern in RETIRED_CODE_REVIEW_AGENT_PATTERNS:
+            if pattern in text:
+                errors.append(
+                    "Stale retired operational agent reference `internal-code-review` found in "
+                    f"{relative_path}: {pattern}"
                 )
 
 
@@ -718,6 +930,8 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     warnings: list[str] = []
     validate_required_paths(errors)
     validate_named_resources(errors)
+    validate_canonical_operational_agent_contract(errors)
+    validate_retired_operational_agents(errors)
     validate_inventory(errors)
     validate_repo_profile_references(errors)
     validate_obra_source_of_truth(errors)

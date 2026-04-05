@@ -40,7 +40,7 @@ Load these inputs before finalizing an internal agent:
 - `references/example-transformations.md` when you need before-and-after conversion examples
 - `references/review-checklist.md` before final validation or when reviewing an existing agent
 
-If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints shaped by the repository layered contract, not as a platform-enforced requirement to use every listed skill.
+If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints shaped by the repository layered contract, not as a platform-enforced requirement to use every listed skill.
 
 Prefer role-based matching over identifier memorization:
 
@@ -82,8 +82,9 @@ Choose an agent only when the repository benefits from a stable command center o
 - When an internal agent depends on one or more repo-owned skills as its required operating engine, add a dedicated `## Mandatory Engine Skills` section.
 - `## Mandatory Engine Skills` is a repository-owned contract for the skill or skills that must be loaded before the agent's core routing or decision logic runs.
 - Keep `## Mandatory Engine Skills` short and role-defining. One shared engine or one shared plus one existing tactical engine is normal; kitchen-sink engine lists are not.
-- Skill-guidance sections such as `## Preferred/Optional Skills` are optional. Use them only when they materially improve routing clarity, discovery, or command-center usability.
-- Use `## Preferred/Optional Skills` only for conditional support skills, not for the agent's required engine.
+- Skill-guidance sections such as `## Optional Support Skills` are optional. Use them only when they materially improve routing clarity, discovery, or command-center usability.
+- Prefer `## Optional Support Skills` as the canonical heading for conditional support skills. Keep `## Preferred/Optional Skills` only for legacy agent contracts that have not yet been migrated.
+- Use `## Optional Support Skills` only for conditional support skills, not for the agent's required engine.
 - When present, a skill-list section is a curated routing and discovery list. List exact canonical skill identifiers, one per bullet, in backticks.
 - Do not present a skill-list section as a native GitHub Copilot agent property or as a guarantee that every listed skill will be invoked automatically.
 - When a skill-list section expresses the repository layered model, make `obra-*` the strategic lane, `internal-*` the tactical owner, and imported skills the support-only lane. If no internal owner exists for a capability, it is valid to use imported specialists directly.
@@ -147,8 +148,8 @@ That asymmetry is a feature, not a defect, when it reduces drift.
    Extract reusable procedure into a skill if the draft starts becoming a playbook.
 5. If the behavior belongs in both, define the split explicitly.
    Decide what stays in the agent body and what becomes the engine skill before drafting sections.
-6. Decide whether the agent needs `## Mandatory Engine Skills`, `## Preferred/Optional Skills`, or both.
-   Mandatory engines own required decision logic; optional skills add conditional support.
+6. Decide whether the agent needs `## Mandatory Engine Skills`, `## Optional Support Skills`, or both.
+   Mandatory engines own required decision logic; optional support skills add conditional help without redefining the route.
 7. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
 8. Choose the frontmatter strategy intentionally.
@@ -227,6 +228,7 @@ Many strong specialist agents also benefit from:
 Many strong command-center agents also benefit from:
 
 - one explicit mandatory engine skill
+- one non-kitchen-sink optional support section when conditional support really improves routing
 - a clear split between core routing prose and reusable operating logic
 - a validation rule that confirms the engine exists and is not decorative
 
@@ -254,9 +256,10 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - A skill-list section as a dumping ground for unrelated capabilities.
 - A `## Mandatory Engine Skills` section that merely mirrors the agent body without owning real reusable logic.
 - Creating one dedicated skill per agent for visual symmetry even when shared or existing engines already solve the problem.
-- Starting from the selected agent file alone and skipping the directly relevant preferred or optional skills that define how that agent should be applied.
+- Starting from the selected agent file alone and skipping the directly relevant optional support or preferred skills that define how that agent should be applied.
 - Treating preferred or optional skills as a fake platform-enforced toolchain or as an origin-based priority ladder.
 - Treating optional support skills as if they were the required engine.
+- Creating a dedicated mirror skill for `internal-fast-executor` or `internal-critical-challenger` when the shared operating-model engine already carries the reusable logic.
 - Preserving the route but throwing away the upstream agent's best structure, leaving a compliant internal agent that is harder to use and less decisive.
 - Treating `tools:` or `model:` as deprecated in current GitHub Copilot custom agents.
 - Copying multi-screen tool lists from older examples instead of normalizing them to canonical aliases and an explicit minimal contract.
@@ -279,12 +282,14 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm retired `infer:` is absent and that `disable-model-invocation` or `user-invocable` is used when selection behavior needs control.
 - If the agent includes `## Mandatory Engine Skills`, confirm every listed skill exists on disk and is truly required for the agent's core behavior.
 - If the agent includes `## Mandatory Engine Skills`, confirm the engine owns reusable logic that would otherwise bloat the agent or drift across multiple agents.
-- Confirm `## Preferred/Optional Skills` does not duplicate `## Mandatory Engine Skills`.
+- Confirm `## Optional Support Skills` does not duplicate `## Mandatory Engine Skills`.
+- For canonical operational agents, confirm `## Optional Support Skills` is used instead of `## Preferred/Optional Skills`.
 - If the agent includes a skill-list section, confirm the list matches the intended reusable procedures.
 - If the agent includes a skill-list section, confirm the wording does not imply that `internal-*` skills automatically outrank imported skills.
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
 - Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
 - Confirm routers keep classification matrices, fallback rules, and old-to-new ownership mapping in an engine skill instead of long body prose when that logic is substantial.
+- Confirm routers are treated as the strongest case for a dedicated engine and that shared operational logic for the four canonical owners stays in a shared engine instead of branching into decorative mirrors.
 - Confirm the final internal agent preserved the strongest usable structure from the source pattern when that structure improved requirement discovery, tradeoff analysis, or response quality.
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.

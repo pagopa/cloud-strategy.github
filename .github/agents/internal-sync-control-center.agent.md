@@ -47,9 +47,10 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
 - Govern the catalog with the declared three-layer model: `obra-*` for strategic framing, `internal-*` for tactical ownership, and imported non-`internal-*` assets for support-only depth.
+- Treat `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` as the only canonical repository-owned operational agents; `internal-sync-*` stays outside that model.
 - Treat `internal-pr-editor` as intentionally prompt-routed and `internal-data-registry` as intentionally dormant tactical capacity until a concrete routing owner is declared.
 - Use `.github/obra-superpowers-source-of-truth.json` as the pinned OBRA scope contract and treat any stale OBRA mapping or reference as blocking drift.
-- Before changing root `AGENTS.md`, decide whether the change belongs in `.github/copilot-instructions.md`; if it does, update `.github/copilot-instructions.md` first through `internal-ai-resource-creator`, then refresh root `AGENTS.md` through `internal-agents-md-bridge`.
+- Before changing root `AGENTS.md`, decide whether the change belongs in `.github/copilot-instructions.md`; if it does, update `.github/copilot-instructions.md` first through `internal-planning-leader`, then refresh root `AGENTS.md` through `internal-agents-md-bridge`.
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
 - Do not report `apply` as complete unless the final output states whether `.github/copilot-instructions.md` and root `AGENTS.md` were reviewed, changed, or intentionally left unchanged.
@@ -203,7 +204,7 @@ When repository state drifts from the declared governance contract, treat the dr
 - When a governance change depends on current GitHub Copilot or MCP platform behavior, validate it through `internal-copilot-docs-research` before hardening the repo policy.
 - Treat `sync` as `apply` by default unless the user explicitly asks for an audit, plan, or dry run.
 - Treat `apply` as invalid until `internal-copilot-audit` has completed its preflight and any remaining `blocking` findings are resolved.
-- Do not use this agent for one-resource authoring when `internal-ai-resource-creator` is sufficient.
+- Do not use this agent for one-resource authoring or non-trivial repository-owned planning work when `internal-planning-leader` is sufficient.
 - Do not use this agent for target-repository baseline propagation.
 
 ## Execution Workflow
@@ -214,7 +215,7 @@ When repository state drifts from the declared governance contract, treat the dr
 4. Inventory the relevant local assets and nearby overlaps against the declared governance contract.
 5. Decide `keep`, `update`, `extract`, or `retire` using the declared managed scope as the baseline and the current repo state as evidence.
 6. Apply the canonical change first. Remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
-7. Before editing root `AGENTS.md`, decide whether any detailed policy, validation, or workflow guidance should live in `.github/copilot-instructions.md`; when it should, update `.github/copilot-instructions.md` first through the repository-local authoring workflow anchored in `internal-ai-resource-creator`.
+7. Before editing root `AGENTS.md`, decide whether any detailed policy, validation, or workflow guidance should live in `.github/copilot-instructions.md`; when it should, update `.github/copilot-instructions.md` first through the repository-local planning and authoring workflow anchored in `internal-planning-leader`.
 8. After the primary policy layer is aligned, refresh root `AGENTS.md` through `internal-agents-md-bridge` and update dependent governance artifacts in the same sync pass whenever drift, stale references, or routing fallout exists. Update this agent file and other non-README downstream governance artifacts in that same pass when they describe the changed catalog. Update `.github/agents/README.md` only when README edits are explicitly in scope.
 9. Run repository validation and report any remaining gaps.
 

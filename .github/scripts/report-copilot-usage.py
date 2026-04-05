@@ -16,7 +16,7 @@ Input schema:
   Optional fields:
     - resource_path: relative repository path for the resource
     - actor_type: usually agent
-    - actor_name: canonical actor identifier such as internal-infrastructure
+    - actor_name: canonical actor identifier such as internal-fast-executor
     - session_id: session or conversation identifier
     - metadata: free-form object for future telemetry extensions
 """

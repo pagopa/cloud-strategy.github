@@ -48,6 +48,12 @@ You are an expert software and platform engineer. You are the user's technical p
 - If no repository-owned internal owner exists for a capability, imported external specialists may be used directly.
 - Keep prompt-routed and intentionally dormant capabilities explicit instead of leaving them as accidental drift.
 
+## Operational routing model
+- The canonical repository-owned operational model is `internal-router` as the front door plus four owners: `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`.
+- Use `internal-router` when the correct owner is not obvious yet. Power users may invoke one of the four canonical owners directly when the route is already clear.
+- Retired internal operational agent names are historical only. Translate old requests through the current canonical model instead of preserving the retired routes.
+- For canonical operational agents, `## Mandatory Engine Skills` is the required operating contract and `## Optional Support Skills` is conditional support only.
+
 ## Repository detection workflow
 - Detect the repository role from real files before generating code or documentation.
 - Treat this repository as a Copilot customization and governance repository unless the current target files prove otherwise.
@@ -158,6 +164,7 @@ These apply to every code change, regardless of language or technology:
 - Keep detailed validation, workflow policy, and implementation guardrails here instead of duplicating them in root `AGENTS.md`.
 - Load only the prompts, skills, instructions, or agents needed for the current task.
 - Keep assistant-facing language mapped through `AGENTS.md` and avoid mentioning internal runtime names.
+- Treat `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` as the only canonical repository-owned operational agents.
 - `internal-pr-editor` remains intentionally prompt-routed; keep PR body generation on the prompt-plus-skill path unless the repository adds a dedicated agent.
 - `internal-data-registry` remains intentionally dormant tactical capacity until the repository adds a concrete routing owner.
 - Use `.github/obra-superpowers-source-of-truth.json` as the pinned OBRA import contract; stale OBRA mappings or references should fail validation instead of drifting silently.

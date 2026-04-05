@@ -148,6 +148,46 @@ You are the example command center.
     assert report.errors == []
 
 
+def test_build_report_accepts_agent_with_mandatory_engine_and_optional_support(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Mandatory Engine Skills
+
+- `internal-example`
+
+## Optional Support Skills
+
+- `internal-code-review`
+
+## Escalation / Routing
+
+- Escalate when an example stops being an example.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert report.valid
+    assert report.errors == []
+
+
 def test_build_report_accepts_agent_without_skill_guidance_section(tmp_path: Path) -> None:
     build_minimal_repo(
         tmp_path,
@@ -316,7 +356,95 @@ You are the example command center.
 
     assert not report.valid
     assert (
-        "Unknown preferred or optional skill `internal-missing` referenced in"
+        "Unknown preferred, optional, or support skill `internal-missing` referenced in"
+        in "\n".join(report.errors)
+    )
+
+
+def test_build_report_rejects_unknown_mandatory_engine_skill(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Mandatory Engine Skills
+
+- `internal-missing`
+
+## Optional Support Skills
+
+- `internal-example`
+
+## Escalation / Routing
+
+- Escalate when needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert (
+        "Unknown mandatory engine skill `internal-missing` referenced in"
+        in "\n".join(report.errors)
+    )
+
+
+def test_build_report_rejects_skill_duplicated_between_mandatory_and_optional_sections(
+    tmp_path: Path,
+) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Mandatory Engine Skills
+
+- `internal-example`
+
+## Optional Support Skills
+
+- `internal-example`
+
+## Escalation / Routing
+
+- Escalate when needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert (
+        "Skill `internal-example` cannot appear in both mandatory and optional sections"
         in "\n".join(report.errors)
     )
 

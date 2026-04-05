@@ -73,6 +73,30 @@ These rules apply to all repository resources, including prompts, skills, instru
 - Expected behavior:
   - internal agents do not declare agent identifiers, aliases, or missing skills as if they were reusable skill contracts
 
+#### `resource-governance-canonical-operational-agents-publish-engine-contracts`
+
+- Goal: enforce the canonical repository-owned operational model through explicit mandatory engines, optional support sections, and escalation boundaries.
+- Scope:
+  - canonical operational agents
+  - skills
+- Expected behavior:
+  - the canonical operational agents `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` exist
+  - each canonical operational agent declares `## Mandatory Engine Skills` with the repository-defined engine mapping
+  - each canonical operational agent declares a non-empty `## Optional Support Skills` section
+  - each canonical operational agent publishes `## Escalation / Routing`
+  - canonical operational agents do not fall back to the legacy `## Preferred/Optional Skills` heading
+
+#### `resource-governance-retired-operational-agents-do-not-regrow`
+
+- Goal: prevent the retired non-sync operational catalog from reappearing on disk or through downstream routing references.
+- Scope:
+  - `.github/agents/`
+  - repository routing and workflow references
+- Expected behavior:
+  - retired internal operational agent files are absent from `.github/agents/`
+  - repository-owned routing references do not point users back to retired operational agent routes
+  - old-to-new mapping remains only in the dedicated routing or operating-model engine skills
+
 ### Reporting
 
 #### `reporting-operation-completion-report-contract-is-documented`

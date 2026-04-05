@@ -40,17 +40,16 @@ Update `.github/copilot-instructions.md` first when policy, validation, or workf
 
 ## Agent Routing
 
+- `internal-router`: recommended operational front door when the correct owner is not obvious yet.
+- `internal-fast-executor`: clear, local, execution-owned work with concrete verification.
+- `internal-planning-leader`: ambiguity resolution, non-trivial repository-owned authoring, and strategy or rollout decisions.
+- `internal-review-guard`: defect-first review, merge readiness, regression risk, and evidence-based validation.
+- `internal-critical-challenger`: pre-mortems, reasoning stress tests, and failure-mode analysis.
 - `internal-sync-control-center`: source-side governance of the live `.github/` Copilot catalog in this repository.
-- `internal-ai-resource-creator`: focused authoring or revision of one repository-owned Copilot resource.
 - `internal-sync-global-copilot-configs-into-repo`: cross-repository Copilot-core alignment and redundancy audits.
-- `internal-cicd`: CI/CD workflows, composite actions, release automation, and deployment-pipeline design.
-- `internal-architect`: cloud-agnostic architecture decisions.
-- `internal-aws-org-governance`, `internal-azure-platform-strategy`, `internal-gcp-platform-strategy`: cloud governance strategy.
-- `internal-aws-platform-engineering`, `internal-azure-platform-engineering`, `internal-gcp-platform-engineering`: cloud platform engineering.
-- `internal-developer`, `internal-infrastructure`, `internal-quality-engineering`: implementation, infrastructure delivery, and quality or observability work.
-- `internal-code-review`: defect-first review and merge-readiness checks.
 - `internal-pr-editor` is intentionally prompt-routed; use the `internal-pr-editor` prompt with the `internal-pr-editor` skill for pull request body generation.
 - `internal-data-registry` remains installed as intentionally dormant tactical capacity until a dedicated routing owner is added.
+- Imported `awesome-*` agents and repo-only `internal-sync-*` agents stay outside the canonical operational ownership model.
 - Do not reference agents that are not present in `.github/agents/`.
 
 ## Repository Defaults
@@ -122,6 +121,8 @@ Update `.github/copilot-instructions.md` first when policy, validation, or workf
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/internal-agent-development/SKILL.md`
+- `.github/skills/internal-agent-operating-model-engine/SKILL.md`
+- `.github/skills/internal-agent-routing-engine/SKILL.md`
 - `.github/skills/internal-agents-md-bridge/SKILL.md`
 - `.github/skills/internal-aws-control-plane-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
@@ -174,18 +175,10 @@ Update `.github/copilot-instructions.md` first when policy, validation, or workf
 - `.github/agents/awesome-copilot-devils-advocate.agent.md`
 - `.github/agents/awesome-copilot-devops-expert.agent.md`
 - `.github/agents/awesome-copilot-plan.agent.md`
-- `.github/agents/internal-ai-resource-creator.agent.md`
-- `.github/agents/internal-architect.agent.md`
-- `.github/agents/internal-aws-org-governance.agent.md`
-- `.github/agents/internal-aws-platform-engineering.agent.md`
-- `.github/agents/internal-cicd.agent.md`
-- `.github/agents/internal-code-review.agent.md`
-- `.github/agents/internal-developer.agent.md`
-- `.github/agents/internal-infrastructure.agent.md`
-- `.github/agents/internal-azure-platform-strategy.agent.md`
-- `.github/agents/internal-azure-platform-engineering.agent.md`
-- `.github/agents/internal-gcp-platform-strategy.agent.md`
-- `.github/agents/internal-gcp-platform-engineering.agent.md`
-- `.github/agents/internal-quality-engineering.agent.md`
+- `.github/agents/internal-critical-challenger.agent.md`
+- `.github/agents/internal-fast-executor.agent.md`
+- `.github/agents/internal-planning-leader.agent.md`
+- `.github/agents/internal-review-guard.agent.md`
+- `.github/agents/internal-router.agent.md`
 - `.github/agents/internal-sync-control-center.agent.md`
 - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
