@@ -190,7 +190,7 @@ Managed skills:
 - Root `AGENTS.md` for routing, naming, and inventory
 - `.github/copilot-instructions.md` for non-negotiable policy
 - `.github/obra-superpowers-source-of-truth.json` for the pinned OBRA skill scope
-- `.github/scripts/validate-copilot-customizations.py` for structural validation
+- `.github/scripts/validate-copilot-customizations.sh` for structural validation
 - The actual `.github/` catalog on disk as audit input and execution target
 
 When repository state drifts from the declared governance contract, treat the drift as a finding to resolve instead of silently redefining policy from disk.

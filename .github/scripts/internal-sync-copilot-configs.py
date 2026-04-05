@@ -2,9 +2,9 @@
 """Purpose: Mirror Copilot customization assets from the standards repository into a local target repository.
 
 Usage examples:
-  python .github/scripts/internal-sync-copilot-configs.py --target /path/to/repo
-  python .github/scripts/internal-sync-copilot-configs.py --target /path/to/repo --mode apply
-  python .github/scripts/internal-sync-copilot-configs.py --target /path/to/repo --report-format json
+  ./.github/scripts/internal-sync-copilot-configs.sh --target /path/to/repo
+  ./.github/scripts/internal-sync-copilot-configs.sh --target /path/to/repo --mode apply
+  ./.github/scripts/internal-sync-copilot-configs.sh --target /path/to/repo --report-format json
 """
 
 from __future__ import annotations
@@ -39,6 +39,8 @@ MANAGED_ALWAYS = (
     ".github/security-baseline.md",
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",
+    ".github/scripts/internal-python-runner.sh",
+    ".github/scripts/validate-copilot-customizations.sh",
     ".github/scripts/validate-copilot-customizations.py",
 )
 ALWAYS_EXCLUDED_RELATIVE_PATHS = {
@@ -161,6 +163,7 @@ class PlannedFile:
     desired_bytes: bytes
     category: str
     generated: bool = False
+    mode: int | None = None
 
 
 @dataclass
@@ -1506,7 +1509,7 @@ def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[s
         commands.append("python -m compileall <changed_python_paths>")
         if repo_has_pytest_tests(analysis.repo_root):
             commands.append("pytest")
-    commands.append("python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict")
+    commands.append("./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict")
     return commands
 
 
@@ -1787,12 +1790,14 @@ def build_planned_files(
         if source_relative_path == ".github/AGENTS.md":
             continue
 
+        source_path = source_root / source_relative_path
         planned_files.append(
             PlannedFile(
                 source_relative_path=source_relative_path,
                 target_relative_path=source_relative_path,
-                desired_bytes=(source_root / source_relative_path).read_bytes(),
+                desired_bytes=source_path.read_bytes(),
                 category=asset_category(source_relative_path),
+                mode=source_path.stat().st_mode & 0o777,
             )
         )
 
@@ -1803,6 +1808,7 @@ def build_planned_files(
             desired_bytes=render_agents_markdown(analysis, selection, source_root).encode("utf-8"),
             category="agents",
             generated=True,
+            mode=0o644,
         )
     )
 
@@ -2063,7 +2069,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
         ".github/security-baseline.md",
         ".github/DEPRECATION.md",
         ".github/repo-profiles.yml",
-        ".github/scripts/validate-copilot-customizations.py",
+        ".github/scripts/validate-copilot-customizations.sh",
     ]
 
     lines: list[str] = [
@@ -2372,7 +2378,7 @@ def build_tracking_state(
             [
                 f"Confirm `{MANIFEST_RELATIVE_PATH}` is written after apply.",
                 f"Confirm `{plan.analysis.agents_relative_path}` exists and reflects the mirrored catalog.",
-                "Run strict Copilot validation: `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`.",
+                "Run strict Copilot validation: `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.",
             ]
         )
     else:
@@ -2444,16 +2450,16 @@ def update_tracking_plan_file(target_root: Path, tracking: PlanTrackingState) ->
 
 
 def run_strict_target_validation(target_root: Path) -> list[str]:
-    validator_path = target_root / ".github" / "scripts" / "validate-copilot-customizations.py"
+    validator_path = target_root / ".github" / "scripts" / "validate-copilot-customizations.sh"
     if not validator_path.is_file():
         return [
-            "Missing `.github/scripts/validate-copilot-customizations.py`; strict Copilot validation could not run."
+            "Missing `.github/scripts/validate-copilot-customizations.sh`; strict Copilot validation could not run."
         ]
 
     result = subprocess.run(
         [
-            "python3",
-            ".github/scripts/validate-copilot-customizations.py",
+            "bash",
+            ".github/scripts/validate-copilot-customizations.sh",
             "--scope",
             "root",
             "--mode",
@@ -2485,6 +2491,8 @@ def apply_plan(target_root: Path, plan: SyncPlan, planned_files: list[PlannedFil
             planned_file = content_map[action.target_relative_path]
             target_path.parent.mkdir(parents=True, exist_ok=True)
             target_path.write_bytes(planned_file.desired_bytes)
+            if planned_file.mode is not None:
+                target_path.chmod(planned_file.mode)
             continue
 
         if action.status == "delete" and target_path.is_file():

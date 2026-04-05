@@ -41,6 +41,7 @@ Update `.github/copilot-instructions.md` first when policy, validation, or workf
 ## Agent Routing
 
 - `internal-router`: recommended operational front door when the correct owner is not obvious yet.
+- Only `internal-router` actively delegates between canonical owners. The four canonical owners stay boundary-driven and recommend a better owner when the request no longer fits.
 - `internal-fast-executor`: clear, local, execution-owned work with concrete verification.
 - `internal-planning-leader`: ambiguity resolution, non-trivial repository-owned authoring, and strategy or rollout decisions.
 - `internal-review-guard`: defect-first review, merge readiness, regression risk, and evidence-based validation.

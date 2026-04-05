@@ -44,7 +44,7 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the tactical workflow anchor for this agent.
 - Use `internal-copilot-audit` when source-side overlap, hollow references, or bridge drift affect the baseline you plan to propagate.
 - When source or target decisions depend on current GitHub Copilot or MCP behavior, validate them through `internal-copilot-docs-research` before updating policy files.
-- Treat `.github/scripts/internal-sync-copilot-configs.py` as the deterministic execution path.
+- Treat `.github/scripts/internal-sync-copilot-configs.sh` as the deterministic execution path.
 - Start with `plan` mode and move to `apply` only on explicit request and only when the plan is conflict-safe.
 - Mirror every source asset under `.github/agents`, `.github/instructions`, `.github/prompts`, and `.github/skills`, including skill support files such as `references/`, `assets/`, and `scripts/`.
 - Preserve only target `local-*` assets under mirrored categories; delete other target-only assets under those categories during apply.

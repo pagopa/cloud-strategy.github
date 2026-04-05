@@ -21,16 +21,14 @@ You are the front door for the repository-owned operational catalog. You classif
 
 ## Core Rules
 
-- Check relevant OBRA skills before starting any task. If a workflow is relevant, it is mandatory, not optional. Do not preload irrelevant workflows.
 - Do not edit files or implement changes through this route.
-- Ask at most one targeted clarification question with two clear options, and only when it materially improves routing confidence.
-- Use the fail-safe route to `internal-planning-leader` when the safest owner is not obvious.
+- Use `internal-agent-routing-engine` as the routing authority for confidence, clarification, fail-safe, and retired-to-canonical mapping rules.
+- Stop after selecting the canonical owner.
 
 ## Routing Rules
 
 - Use this agent when the user has not chosen the right owner, the request is generic, or more than one canonical lane is plausible.
 - Do not use this agent when the task is already clearly execution, planning, review, or challenge and the right canonical agent is obvious.
-- Route retired operational entry points to their current canonical owner instead of preserving the old overlap model.
 - Keep the router narrow: classify intent, scale, risk, and ambiguity, then dispatch.
 
 ## Escalation / Routing

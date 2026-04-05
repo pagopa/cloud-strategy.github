@@ -11,7 +11,7 @@ Use `openai-skill-creator` when the main output is a skill. Use `internal-skill-
 
 Prefer explicit engine-skill architecture for routers and broader command centers:
 
-- keep routing contract, tool contract, boundaries, escalation entry points, and output shape in the agent
+- keep routing contract, tool contract, boundaries, boundary recommendations, and output shape in the agent
 - move long decision matrices, threshold rules, ownership maps, and reusable operating logic into repo-owned engine skills
 - when that engine is required for the agent's core behavior, declare it explicitly instead of burying it in optional skill guidance
 
@@ -90,11 +90,12 @@ Choose an agent only when the repository benefits from a stable command center o
 - When a skill-list section expresses the repository layered model, make `obra-*` the strategic lane, `internal-*` the tactical owner, and imported skills the support-only lane. If no internal owner exists for a capability, it is valid to use imported specialists directly.
 - Do not create a 1:1 dedicated skill per agent just for symmetry. Create an engine skill only when it owns real reusable logic that would otherwise bloat the agent or drift across multiple agents.
 - Router agents are the strongest default candidate for a dedicated engine skill because their classification matrix, fallback rules, and old-to-new ownership mapping are procedural, reusable, and easy to let drift.
+- Only router agents should own active delegation logic. Canonical non-router agents should define boundaries and recommend a better owner to the user instead of routing on the user's behalf.
 - Every agent must explain both positive routing and at least one meaningful boundary.
 - Every agent must define `## Output Expectations`.
 - Add `## Skill Usage Contract` only when the agent is a broader command center whose listed skills are used conditionally.
 - When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order.
-- When an agent can influence external actions, call out where human approval, escalation, or review gates apply.
+- When an agent can influence external actions, call out where human approval or review gates apply.
 - Keep long reusable workflows in skills, not in the agent body.
 - Do not depend on `argument-hint` or `handoffs` for GitHub.com compatibility; those properties are ignored there.
 
@@ -107,7 +108,7 @@ Use this split when authoring command-center agents:
   - role and stance
   - boundary with neighboring agents
   - tool contract
-  - escalation entry points
+  - boundary definition and user-facing recommendation pattern
   - output expectations
 - Engine skill:
   - decision matrix
@@ -161,7 +162,7 @@ That asymmetry is a feature, not a defect, when it reduces drift.
 11. If a support-skill section will help the agent, build a cohesive one.
    Keep skills that reinforce the same operating role. Delete kitchen-sink additions and avoid ordering that implies origin-based priority.
 12. Write routing rules with a real boundary.
-   State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases.
+    State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases. If the agent is not a router, recommend that neighboring owner to the user instead of actively handing off.
 13. Add output expectations that match the role.
    Ask what a successful response from this command center should reliably contain.
 14. Normalize imported patterns and remove stale baggage.
@@ -294,4 +295,4 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
 - Use `references/review-checklist.md` for a final pass when the change broadens scope or imports external patterns.
-- Run `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict` after changes that affect agent naming or inventory.
+- Run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict` after changes that affect agent naming or inventory.

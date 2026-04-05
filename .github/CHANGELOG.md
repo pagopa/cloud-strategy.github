@@ -7,6 +7,8 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-05
+- Enforced router-only delegation across `internal-router`, the four canonical operational agents, `internal-agent-operating-model-engine`, `internal-agent-development`, `INTERNAL_CONTRACT.md`, and the validator/tests so non-router agents now define boundaries and recommend owners instead of routing actively.
+- Added `internal-python-runner.sh`, Bash wrappers for every executable repository Python entrypoint, explicit `PyYAML` requirements for `openai-skill-creator`, and wrapper-first invocation guidance across prompts, skills, scripts, security docs, and maintainer workflow references.
 - Hardened `.github/scripts/validate-copilot-customizations.py`, `tests/test_contract_runner.py`, and `tests/test_validate_copilot_customizations.py` so canonical operational agents must point only to real canonical escalation targets, must not self-route, and stale retired-agent references are caught case-insensitively.
 - Clarified `internal-router` and `internal-agent-routing-engine` so medium-confidence routing asks at most one targeted clarification question with two clear options before falling back to `internal-planning-leader`.
 - Strengthened `.github/skills/internal-code-review/SKILL.md` with a standalone quick-start so the skill stays usable directly as a tactical review asset, not only as the review guard's engine.

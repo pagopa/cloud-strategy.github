@@ -104,13 +104,21 @@ def render_internal_agent(
     name: str,
     mandatory_engine_skills: list[str],
     optional_support_skills: list[str],
-    escalation_targets: list[str],
+    routing_targets: list[str] | None = None,
+    boundary_lines: list[str] | None = None,
 ) -> str:
     mandatory_engine_section = "\n".join(f"- `{skill}`" for skill in mandatory_engine_skills)
     optional_support_section = "\n".join(f"- `{skill}`" for skill in optional_support_skills)
-    escalation_section = "\n".join(
-        f"- Route to `{target}` when the handoff belongs there." for target in escalation_targets
-    )
+    extra_sections: list[str] = []
+    if routing_targets is not None:
+        routing_section = "\n".join(
+            f"- Route to `{target}` when the handoff belongs there." for target in routing_targets
+        )
+        extra_sections.append(f"## Escalation / Routing\n\n{routing_section}")
+    if boundary_lines is not None:
+        boundary_section = "\n".join(f"- {line}" for line in boundary_lines)
+        extra_sections.append(f"## Boundary Definition\n\n{boundary_section}")
+    extra_body = "\n\n".join(extra_sections)
 
     return f"""---
 name: {name}
@@ -132,9 +140,7 @@ You are the example command center for `{name}`.
 
 {optional_support_section}
 
-## Escalation / Routing
-
-{escalation_section}
+{extra_body}
 
 ## Output Expectations
 
@@ -161,6 +167,7 @@ def build_minimal_canonical_operational_repo(
 
 ## Operational routing model
 - The canonical repository-owned operational model is `internal-router` as the front door plus four owners.
+- Only `internal-router` actively routes or delegates; the other four owners stay boundary-driven.
 - Source-side sync must keep the canonical mandatory engine skills explicit in the source-side preferred-skills baseline; do not rely on agent bodies alone for the engine layer.
 
 ## Operation Completion Report
@@ -229,7 +236,7 @@ description: Example internal code review skill.
             name="internal-router",
             mandatory_engine_skills=["internal-agent-routing-engine"],
             optional_support_skills=["internal-agent-operating-model-engine"],
-            escalation_targets=[
+            routing_targets=[
                 "internal-fast-executor",
                 "internal-planning-leader",
                 "internal-review-guard",
@@ -240,13 +247,19 @@ description: Example internal code review skill.
             name="internal-fast-executor",
             mandatory_engine_skills=["internal-agent-operating-model-engine"],
             optional_support_skills=["internal-example"],
-            escalation_targets=["internal-planning-leader"],
+            boundary_lines=[
+                "Stay in this lane while the work remains clear, local, and execution-owned.",
+                "If the boundary breaks, recommend `internal-planning-leader`.",
+            ],
         ),
         "internal-planning-leader": render_internal_agent(
             name="internal-planning-leader",
             mandatory_engine_skills=["internal-agent-operating-model-engine"],
             optional_support_skills=["internal-example"],
-            escalation_targets=["internal-fast-executor"],
+            boundary_lines=[
+                "Stay in this lane while ambiguity or repository-owned authoring remains active.",
+                "If execution becomes routine and local, recommend `internal-fast-executor`.",
+            ],
         ),
         "internal-review-guard": render_internal_agent(
             name="internal-review-guard",
@@ -255,16 +268,20 @@ description: Example internal code review skill.
                 "internal-code-review",
             ],
             optional_support_skills=["internal-example"],
-            escalation_targets=[
-                "internal-planning-leader",
-                "internal-critical-challenger",
+            boundary_lines=[
+                "Stay in this lane while the work is review-owned and evidence-first.",
+                "If design gaps dominate, recommend `internal-planning-leader`.",
+                "If weak reasoning dominates, recommend `internal-critical-challenger`.",
             ],
         ),
         "internal-critical-challenger": render_internal_agent(
             name="internal-critical-challenger",
             mandatory_engine_skills=["internal-agent-operating-model-engine"],
             optional_support_skills=["internal-example"],
-            escalation_targets=["internal-planning-leader"],
+            boundary_lines=[
+                "Stay in this lane while pressure-testing assumptions is the primary need.",
+                "If reformulation is needed, recommend `internal-planning-leader`.",
+            ],
         ),
     }
     if agent_overrides:
@@ -796,7 +813,7 @@ profiles:
     )
 
 
-def test_build_report_rejects_non_canonical_escalation_target_in_canonical_agent(
+def test_build_report_rejects_routing_section_in_non_router_canonical_agent(
     tmp_path: Path,
 ) -> None:
     build_minimal_canonical_operational_repo(
@@ -806,7 +823,7 @@ def test_build_report_rejects_non_canonical_escalation_target_in_canonical_agent
                 name="internal-fast-executor",
                 mandatory_engine_skills=["internal-agent-operating-model-engine"],
                 optional_support_skills=["internal-example"],
-                escalation_targets=["internal-example"],
+                routing_targets=["internal-example"],
             )
         },
     )
@@ -816,20 +833,20 @@ def test_build_report_rejects_non_canonical_escalation_target_in_canonical_agent
 
     assert not report.valid
     assert (
-        "Non-canonical escalation target `internal-example` found in"
+        "Only `internal-router` may publish `## Escalation / Routing`"
         in "\n".join(report.errors)
     )
 
 
-def test_build_report_rejects_self_route_in_canonical_agent(tmp_path: Path) -> None:
+def test_build_report_rejects_self_route_in_router_agent(tmp_path: Path) -> None:
     build_minimal_canonical_operational_repo(
         tmp_path,
         agent_overrides={
-            "internal-fast-executor": render_internal_agent(
-                name="internal-fast-executor",
-                mandatory_engine_skills=["internal-agent-operating-model-engine"],
-                optional_support_skills=["internal-example"],
-                escalation_targets=["internal-fast-executor"],
+            "internal-router": render_internal_agent(
+                name="internal-router",
+                mandatory_engine_skills=["internal-agent-routing-engine"],
+                optional_support_skills=["internal-agent-operating-model-engine"],
+                routing_targets=["internal-router"],
             )
         },
     )
@@ -838,7 +855,48 @@ def test_build_report_rejects_self_route_in_canonical_agent(tmp_path: Path) -> N
         report = VALIDATOR.build_report("root", "strict")
 
     assert not report.valid
-    assert "Self-route `internal-fast-executor` found in" in "\n".join(report.errors)
+    assert "Self-route `internal-router` found in" in "\n".join(report.errors)
+
+
+def test_build_report_rejects_missing_boundary_definition_in_non_router_canonical_agent(
+    tmp_path: Path,
+) -> None:
+    build_minimal_canonical_operational_repo(
+        tmp_path,
+        agent_overrides={
+            "internal-fast-executor": render_internal_agent(
+                name="internal-fast-executor",
+                mandatory_engine_skills=["internal-agent-operating-model-engine"],
+                optional_support_skills=["internal-example"],
+            )
+        },
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert "Missing `## Boundary Definition` in" in "\n".join(report.errors)
+
+
+def test_build_report_requires_router_routing_targets(tmp_path: Path) -> None:
+    build_minimal_canonical_operational_repo(
+        tmp_path,
+        agent_overrides={
+            "internal-router": render_internal_agent(
+                name="internal-router",
+                mandatory_engine_skills=["internal-agent-routing-engine"],
+                optional_support_skills=["internal-agent-operating-model-engine"],
+                routing_targets=[],
+            )
+        },
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert "Missing canonical routing target references in" in "\n".join(report.errors)
 
 
 def test_build_report_rejects_case_insensitive_retired_operational_reference(

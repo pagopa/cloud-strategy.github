@@ -2,9 +2,9 @@
 """Validate core Copilot customization invariants for this repository.
 
 Usage examples:
-  python3 .github/scripts/validate-copilot-customizations.py
-  python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict
-  python3 .github/scripts/validate-copilot-customizations.py --report json
+  ./.github/scripts/validate-copilot-customizations.sh
+  ./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict
+  ./.github/scripts/validate-copilot-customizations.sh --report json
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ MANDATORY_ENGINE_SECTION_HEADING = "## Mandatory Engine Skills"
 OPTIONAL_SUPPORT_SECTION_HEADING = "## Optional Support Skills"
 PREFERRED_OPTIONAL_SECTION_HEADING = "## Preferred/Optional Skills"
 ESCALATION_SECTION_HEADING = "## Escalation / Routing"
+BOUNDARY_SECTION_HEADING = "## Boundary Definition"
 DEPRECATED_AGENT_SECTION_HEADINGS = ("## Primary Skill Stack",)
 AGENT_SKILL_SECTION_HEADINGS = (
     OPTIONAL_SUPPORT_SECTION_HEADING,
@@ -308,6 +309,14 @@ def extract_skill_usage_contract(text: str) -> list[str] | None:
     return declared_skills
 
 
+def has_active_routing_instruction(text: str) -> bool:
+    return re.search(
+        r"^\s*-\s*(route|escalate|dispatch|hand off|hand the task back|delegate)\b",
+        text,
+        re.IGNORECASE | re.MULTILINE,
+    ) is not None
+
+
 def extract_managed_skill_mappings(text: str, resource_heading: str) -> list[tuple[str, str]] | None:
     section = extract_markdown_h3_section(text, resource_heading)
     if section is None:
@@ -585,35 +594,52 @@ def validate_canonical_operational_agent_contract(errors: list[str]) -> None:
                 f"Canonical operational agent must use `{OPTIONAL_SUPPORT_SECTION_HEADING}` instead of `{PREFERRED_OPTIONAL_SECTION_HEADING}`: {agent_path}"
             )
 
-        escalation_section = extract_markdown_h2_section(text, ESCALATION_SECTION_HEADING)
-        if escalation_section is None:
-            errors.append(f"Missing `{ESCALATION_SECTION_HEADING}` in {agent_path}")
+        routing_section = extract_markdown_h2_section(text, ESCALATION_SECTION_HEADING)
+        if agent_name == "internal-router":
+            if routing_section is None:
+                errors.append(f"Missing `{ESCALATION_SECTION_HEADING}` in {agent_path}")
+                continue
+
+            routing_targets = extract_internal_identifiers(routing_section)
+            if not routing_targets:
+                errors.append(
+                    "Missing canonical routing target references in "
+                    f"`{ESCALATION_SECTION_HEADING}`: {agent_path}"
+                )
+                continue
+
+            for target in routing_targets:
+                if target not in CANONICAL_OPERATIONAL_AGENT_NAMES:
+                    errors.append(
+                        f"Non-canonical routing target `{target}` found in {agent_path}"
+                    )
+                    continue
+
+                if target == agent_name:
+                    errors.append(f"Self-route `{target}` found in {agent_path}")
+                    continue
+
+                target_path = REPO_ROOT / ".github" / "agents" / f"{target}.agent.md"
+                if not target_path.exists():
+                    errors.append(
+                        f"Routing target `{target}` missing on disk for {agent_path}"
+                    )
             continue
 
-        escalation_targets = extract_internal_identifiers(escalation_section)
-        if not escalation_targets:
+        boundary_section = extract_markdown_h2_section(text, BOUNDARY_SECTION_HEADING)
+        if boundary_section is None:
+            errors.append(f"Missing `{BOUNDARY_SECTION_HEADING}` in {agent_path}")
+        elif not boundary_section:
+            errors.append(f"`{BOUNDARY_SECTION_HEADING}` must include guidance: {agent_path}")
+        elif has_active_routing_instruction(boundary_section):
             errors.append(
-                "Missing canonical escalation target references in "
-                f"`{ESCALATION_SECTION_HEADING}`: {agent_path}"
+                f"`{BOUNDARY_SECTION_HEADING}` must recommend owners without active routing verbs in {agent_path}"
             )
-            continue
 
-        for target in escalation_targets:
-            if target not in CANONICAL_OPERATIONAL_AGENT_NAMES:
-                errors.append(
-                    f"Non-canonical escalation target `{target}` found in {agent_path}"
-                )
-                continue
-
-            if target == agent_name:
-                errors.append(f"Self-route `{target}` found in {agent_path}")
-                continue
-
-            target_path = REPO_ROOT / ".github" / "agents" / f"{target}.agent.md"
-            if not target_path.exists():
-                errors.append(
-                    f"Escalation target `{target}` missing on disk for {agent_path}"
-                )
+        if routing_section is not None:
+            errors.append(
+                f"Only `internal-router` may publish `{ESCALATION_SECTION_HEADING}`: {agent_path}"
+            )
 
 
 def validate_copilot_instruction_operational_engine_policy(errors: list[str]) -> None:

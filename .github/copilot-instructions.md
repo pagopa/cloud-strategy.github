@@ -51,6 +51,7 @@ You are an expert software and platform engineer. You are the user's technical p
 ## Operational routing model
 - The canonical repository-owned operational model is `internal-router` as the front door plus four owners: `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`.
 - Use `internal-router` when the correct owner is not obvious yet. Power users may invoke one of the four canonical owners directly when the route is already clear.
+- Only `internal-router` actively routes or delegates between owners. The four canonical owners define boundaries, recommend a better owner when the boundary breaks, and let the user decide whether to switch.
 - Retired internal operational agent names are historical only. Translate old requests through the current canonical model instead of preserving the retired routes.
 - For canonical operational agents, `## Mandatory Engine Skills` is the required operating contract and `## Optional Support Skills` is conditional support only.
 - Source-side sync must keep the canonical mandatory engine skills explicit in the source-side preferred-skills baseline; do not rely on agent bodies alone for the engine layer.
@@ -140,7 +141,8 @@ These apply to every code change, regardless of language or technology:
 - Python dependencies: if the dependency decision note selects external packages, create or update the local `requirements.txt` consistently with the repository lock-file policy.
 - Python dependencies: third-party libraries are recommended when they materially simplify parsing, validation, HTTP, CLI, serialization, retry logic, date handling, table rendering, Excel/CSV processing, or formatting; keep the standard library when it is simpler and safer.
 - Python dependencies: avoid marginal or unjustified packages; each dependency should earn its place through a clear value-versus-setup tradeoff.
-- New standalone Python scripts should default to a self-contained folder that includes the Python entry point, a Bash launcher, and a local `requirements.txt` only when external packages are required. The launcher should bootstrap `.venv` and install from `requirements.txt` only when that file exists.
+- Standalone Python scripts should keep a self-contained folder that includes the Python entry point, a Bash launcher, and a local `requirements.txt` only when external packages are required. The launcher should bootstrap `.venv` and install from `requirements.txt` only when that file exists.
+- When modifying an existing standalone Python script, add or preserve the Bash launcher and update nearby usage examples, prompts, and workflow docs to invoke the launcher instead of `python <script>.py`.
 - Prefer immutable dependency and image pins; keep stack-specific locking details in the matching instruction file.
 
 ## Java and Node.js standards
@@ -152,12 +154,12 @@ These apply to every code change, regardless of language or technology:
 - Node default: built-in `node:test` + `node:assert/strict` (`describe`/`it` when available).
 
 ## Validation baseline
-- For Copilot customization changes, run `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`.
+- For Copilot customization changes, run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 - Terraform: `terraform fmt` and `terraform validate`.
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
 - Changed Python automation or scripts: run `python -m compileall <changed_python_paths>` and relevant `pytest` checks.
-- Run `scripts/validate-copilot-customizations.py` for customization changes (or `.github/scripts/...` in `.github` layout).
+- Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).
 - If a referenced validation entrypoint is absent in the current repository, explicitly report that gap and run the closest existing verification instead.
 
 ## Repository-specific context

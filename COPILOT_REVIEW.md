@@ -195,7 +195,7 @@ The quickstart guide's "Alignment strategy" section recommends `bootstrap-copilo
 **Fix**: In the "Alignment strategy" section, change:
 ```markdown
 ## Alignment strategy
-- Use `python .github/scripts/internal-sync-copilot-configs.py --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection (recommended).
+- Use `./.github/scripts/internal-sync-copilot-configs.sh --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection (recommended).
 - Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` only as a legacy quick-copy fallback.
 - Prefer canonical origin-prefixed script prompts in consumer repositories.
 ```

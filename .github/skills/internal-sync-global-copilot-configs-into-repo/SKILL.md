@@ -50,6 +50,7 @@ These files are always synced regardless of detected stacks:
 - `security-baseline.md`
 - `DEPRECATION.md`
 - `repo-profiles.yml`
+- `scripts/validate-copilot-customizations.sh`
 - `scripts/validate-copilot-customizations.py`
 
 ## Target assumptions
@@ -93,10 +94,10 @@ These files are always synced regardless of detected stacks:
 - **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for impact analysis when sync changes baseline behavior.
 
 ## Tooling
-- Script: `.github/scripts/internal-sync-copilot-configs.py`
+- Script: `.github/scripts/internal-sync-copilot-configs.sh`
 - Manifest: `.github/internal-sync-copilot-configs.manifest.json` (in target repo)
 
 ## Validation
 - `python -m compileall .github/scripts tests`
 - `pytest` for the sync test suite.
-- `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`
+- `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`

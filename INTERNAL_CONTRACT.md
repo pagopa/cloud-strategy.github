@@ -75,7 +75,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 
 #### `resource-governance-canonical-operational-agents-publish-engine-contracts`
 
-- Goal: enforce the canonical repository-owned operational model through explicit mandatory engines, optional support sections, and escalation boundaries.
+- Goal: enforce the canonical repository-owned operational model through explicit mandatory engines, optional support sections, router-only delegation, and canonical boundary definitions.
 - Scope:
   - canonical operational agents
   - skills
@@ -83,9 +83,12 @@ These rules apply to all repository resources, including prompts, skills, instru
   - the canonical operational agents `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` exist
   - each canonical operational agent declares `## Mandatory Engine Skills` with the repository-defined engine mapping
   - each canonical operational agent declares a non-empty `## Optional Support Skills` section
-  - each canonical operational agent publishes `## Escalation / Routing`
-  - each canonical operational agent references only real canonical operational-agent targets inside `## Escalation / Routing`
-  - canonical operational agents do not self-route inside `## Escalation / Routing`
+  - `internal-router` publishes `## Escalation / Routing`
+  - `internal-router` references only real canonical operational-agent targets inside `## Escalation / Routing`
+  - `internal-router` does not self-route inside `## Escalation / Routing`
+  - the four canonical non-router agents publish `## Boundary Definition`
+  - canonical non-router agents do not publish `## Escalation / Routing`
+  - canonical non-router agents may recommend other canonical owners, but they do not actively route, dispatch, escalate, or hand off
   - canonical operational agents do not fall back to the legacy `## Preferred/Optional Skills` heading
   - `.github/copilot-instructions.md` defines the source-side mandatory-engine baseline policy without making that rule depend on root `AGENTS.md`
 

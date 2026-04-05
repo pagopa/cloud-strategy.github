@@ -35,5 +35,5 @@ Use this prompt to add or update a reporting script that supports governance and
 
 ## Validation
 - Run relevant script checks (`python -m compileall`, `pytest` if tests exist).
-- Run `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`.
+- Run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 - Verify script output does not leak secrets or environment-specific identifiers.

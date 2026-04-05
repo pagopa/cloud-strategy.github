@@ -1,6 +1,6 @@
 ---
 name: internal-agent-operating-model-engine
-description: Share the canonical boundary model, escalation protocol, medium-task thresholds, OBRA workflow policy, skill ownership rules, and anti-overlap checks for the repository-owned operational agents. Use when `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, or `internal-critical-challenger` need the same operating model.
+description: Share the canonical boundary model, recommendation protocol, medium-task thresholds, OBRA workflow policy, skill ownership rules, and anti-overlap checks for the repository-owned operational agents. Use when `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, or `internal-critical-challenger` need the same operating model.
 ---
 
 # Internal Agent Operating Model Engine
@@ -46,17 +46,20 @@ Implications:
 - Rollout, regressions, governance, or rollback need a real decision.
 - The task creates a new repository-owned resource instead of a banal local update.
 
-## Escalation Protocol
+## Boundary Recommendation Protocol
 
-| From | To | Trigger |
-| --- | --- | --- |
-| `internal-fast-executor` | `internal-planning-leader` | The task crosses medium-task thresholds, exposes non-obvious tradeoffs, or changes routing or ownership. |
-| `internal-planning-leader` | `internal-fast-executor` | The design is decided and the next step is a local execution task. |
-| `internal-review-guard` | `internal-planning-leader` | Review findings show missing design, weak boundaries, or no credible plan. |
-| `internal-review-guard` | `internal-critical-challenger` | The problem is not code quality but weak reasoning that needs a pressure test. |
-| `internal-critical-challenger` | `internal-planning-leader` | The challenge shows the plan or framing must be reformulated. |
+Only `internal-router` actively routes between owners. The four canonical owners stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating.
 
-Escalation should name the reason, not only the target.
+| Agent | Stay owner when | Boundary breaks when | Recommend |
+| --- | --- | --- | --- |
+| `internal-fast-executor` | The task is clear, local, low-risk, and concretely verifiable. | Medium-task thresholds, non-obvious tradeoffs, or routing and ownership changes appear. | `internal-planning-leader` |
+| `internal-planning-leader` | Ambiguity, cross-boundary tradeoffs, repository-owned authoring, or rollout decisions still need active ownership. | The design is settled and the next step is routine local execution. | `internal-fast-executor` |
+| `internal-review-guard` | The task is defect-first review, merge readiness, regression analysis, or evidence gathering. | Findings reveal missing design or weak boundaries. | `internal-planning-leader` |
+| `internal-review-guard` | The task is still review-owned but weak reasoning becomes the dominant gap. | Pressure-testing the reasoning matters more than technical review. | `internal-critical-challenger` |
+| `internal-critical-challenger` | The task is assumption testing, a pre-mortem, or failure-mode analysis. | The framing or plan must be reformulated. | `internal-planning-leader` |
+| `internal-critical-challenger` | The task remains challenge-owned until the reasoning survives scrutiny. | Evidence-based validation becomes the next need. | `internal-review-guard` |
+
+Recommendation should name the reason, not only the suggested owner, and the user decides whether to switch.
 
 ## Mandatory Engine vs Optional Support
 
@@ -73,7 +76,7 @@ Use this policy across all canonical agents:
 | Skill | Primary owner | When it wins |
 | --- | --- | --- |
 | `internal-agent-routing-engine` | `internal-router` | Front-door classification and dispatch |
-| `internal-agent-operating-model-engine` | Shared by the four canonical agents | Shared boundary, escalation, and anti-overlap logic |
+| `internal-agent-operating-model-engine` | Shared by the four canonical agents | Shared boundary, recommendation, and anti-overlap logic |
 | `internal-code-review` | `internal-review-guard` | Tactical review engine for findings and defect-first analysis |
 | `internal-agent-development` | `internal-planning-leader` | Non-trivial repository-owned agent authoring |
 | `internal-agents-md-bridge` | `internal-planning-leader` | Root bridge changes and AGENTS alignment |
@@ -89,7 +92,7 @@ Use this policy across all canonical agents:
 - `internal-planning-leader` absorbs the role previously covered by `internal-ai-resource-creator` when the work is non-trivial repository-owned authoring.
 - `internal-review-guard` must reuse `internal-code-review` instead of restating the review playbook in the agent body.
 - `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.
-- `internal-critical-challenger` should stay narrow: challenge the reasoning, synthesize the pressure test, and hand planning back when reformulation is needed.
+- `internal-critical-challenger` should stay narrow: challenge the reasoning, synthesize the pressure test, and tell the user when planning should resume.
 - `internal-sync-*` and `awesome-*` assets stay outside this canonical operational model.
 
 ## Retired To Canonical Ownership Mapping
@@ -123,8 +126,8 @@ If any answer points to overlap, narrow the agent or move the shared logic into 
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Letting `internal-fast-executor` keep medium tasks by momentum | Execution becomes accidental planning | Escalate on the first medium-task threshold hit |
-| Letting `internal-planning-leader` execute by default | The planner becomes a catch-all generalist | Dispatch to `internal-fast-executor` once the design is settled |
+| Letting `internal-fast-executor` keep medium tasks by momentum | Execution becomes accidental planning | Tell the user the boundary broke and recommend `internal-planning-leader` on the first medium-task threshold hit |
+| Letting `internal-planning-leader` execute by default | The planner becomes a catch-all generalist | Tell the user when the design is settled and recommend `internal-fast-executor` |
 | Rewriting the review playbook inside `internal-review-guard` | Review logic drifts from the tactical skill | Reuse `internal-code-review` as the mandatory tactical engine |
 | Treating challenge as generic negativity | The agent stops producing useful decision pressure | Keep one challenge thread, then synthesize clear failure modes |
 | Creating one dedicated engine skill per agent for symmetry | The catalog grows without adding real structure | Use shared engines or existing skills unless a real gap exists |
@@ -132,6 +135,6 @@ If any answer points to overlap, narrow the agent or move the shared logic into 
 ## Output Expectations
 
 - Current owner and boundary rationale
-- Whether escalation is required and why
+- Whether the boundary still holds and why
 - Which OBRA workflows are relevant for this task
 - Which tactical internal skill should be loaded next, if any

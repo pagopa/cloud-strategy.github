@@ -78,7 +78,7 @@ Keep only the minimum content needed for routing and operating stance inside the
 
 ## Command-Center Workflow
 
-Use `## Execution Workflow` only when the agent repeatedly governs a multi-step operating flow such as sync, audit, or rollout guidance.
+Use `## Execution Workflow` only when the agent repeatedly governs a multi-step operating flow such as sync, audit, rollout guidance, or front-door routing.
 
 Good workflow characteristics:
 
@@ -101,6 +101,7 @@ Include at least one real boundary:
 
 - `Do not use this agent when ...`
 - `Prefer \`internal-other-agent\` when ...`
+- `If this lane no longer fits, tell the user why and recommend \`internal-other-agent\` instead of routing automatically`
 - `Use the matching skill instead when the work is procedural rather than routing-heavy`
 
 If you cannot write a strong negative boundary, the route is probably still too broad.

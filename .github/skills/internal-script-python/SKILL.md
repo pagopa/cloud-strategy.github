@@ -21,8 +21,9 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Keep implementation explicit and readable.
 - Use type hints on non-trivial public helpers and CLI-facing boundaries.
 - Add unit tests for testable behavior.
-- New standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
+- Standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
 - The folder should include the Python entry point, a `run.sh` launcher, and `tests/` when test scope applies. Add a local `requirements.txt` only when external packages are used.
+- Existing standalone Python entry points must add or preserve a sibling Bash launcher and update nearby docs, prompts, or usage examples to invoke the launcher instead of `python <script>.py`.
 - For new scripts, do an explicit dependency decision before implementation; do not assume `stdlib-first` as the automatic default.
 - Prefer mature, well-maintained, widely used third-party libraries when they clearly reduce boilerplate, edge cases, or custom logic in the finished script.
 - Keep the standard library only when the final code is genuinely simpler, more readable, and safer than the third-party alternative.

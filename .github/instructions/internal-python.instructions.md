@@ -31,6 +31,8 @@ applyTo: "**/*.py"
 - Avoid embedding domain rules that belong to reusable application modules.
 - Before writing a new script, produce a short dependency decision note with candidate libraries, the final choice, and the reason for the choice.
 - Optimize for the simplest final script, not for the smallest dependency list.
+- Every standalone Python entry point must have a sibling Bash launcher that bootstraps a local `.venv` and installs local dependencies when needed.
+- When modifying an existing standalone Python script, add or preserve that launcher and update usage examples or workflow docs to invoke the launcher instead of `python <script>.py`.
 
 ## Style
 - Follow PEP8.
@@ -76,7 +78,7 @@ requests==2.32.3 \
 """Purpose: Explain what this script does.
 
 Usage examples:
-  python script.py --help
+  ./script.sh --help
 """
 ```
 

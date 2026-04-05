@@ -12,7 +12,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 - Prompts: 5 total (`5 internal-*`)
 - Skills: 65 total (`28 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `3 openai-*`, `2 terraform-*`)
 - Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
-- Scripts: 3 total
+- Scripts: 7 total
 - Workflows: 1 total
 
 ## Structure
@@ -85,14 +85,19 @@ See [`agents/README.md`](agents/README.md) for the selection guide.
 - Imported support agents: `awesome-copilot-azure-principal-architect`, `awesome-copilot-critical-thinking`, `awesome-copilot-devils-advocate`, `awesome-copilot-devops-expert`, `awesome-copilot-plan`
 
 The current repository-owned operating model is the internal router plus the four canonical internal owners. Do not document retired operational routes here.
+Only `internal-router` actively routes between canonical owners; the four canonical owners stay boundary-driven and user-directed.
 
 ### Scripts and workflow
 
 | Path | Purpose |
 | --- | --- |
-| `scripts/validate-copilot-customizations.py` | Strict validator for naming, inventory, routing contracts, and completion-report governance. |
-| `scripts/internal-sync-copilot-configs.py` | Source-to-consumer sync planner and apply workflow. |
-| `scripts/report-copilot-usage.py` | Reporting helper for Copilot catalog usage analysis. |
+| `scripts/internal-python-runner.sh` | Shared Bash bootstrap for local `.venv` setup and optional `requirements.txt` installation before running repository Python entrypoints. |
+| `scripts/validate-copilot-customizations.sh` | Supported strict validator entrypoint for naming, inventory, routing contracts, and completion-report governance. |
+| `scripts/validate-copilot-customizations.py` | Validator implementation used by the wrapper and test suite. |
+| `scripts/internal-sync-copilot-configs.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |
+| `scripts/internal-sync-copilot-configs.py` | Sync planner implementation used by the wrapper and test suite. |
+| `scripts/report-copilot-usage.sh` | Supported reporting entrypoint for Copilot catalog telemetry aggregation. |
+| `scripts/report-copilot-usage.py` | Reporting implementation used by the wrapper. |
 | `workflows/terraform-pre-commit.yml` | Source repository workflow for Terraform-focused pre-commit checks. |
 
 ## Source-of-Truth Rules
@@ -107,7 +112,7 @@ The current repository-owned operating model is the internal router plus the fou
 1. Inspect the real target files first.
 2. Update the relevant asset under `.github/`.
 3. If routing, naming, discovery, or inventory changed, refresh root `AGENTS.md`.
-4. Run `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict`.
+4. Run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
 5. Run targeted tests when script or validator behavior changes.
 6. Update `CHANGELOG.md` for meaningful `.github/` changes.
 

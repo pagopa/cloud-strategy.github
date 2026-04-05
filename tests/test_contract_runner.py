@@ -315,24 +315,32 @@ def test_resource_governance_canonical_operational_agents_publish_engine_contrac
             f"Unexpected mandatory engine skills in {path}: {mandatory_engine_skills}"
         )
         assert optional_support_skills, f"Missing optional support skills in {path}"
-        assert "## Escalation / Routing" in text, f"Missing escalation section in {path}"
         assert VALIDATOR.PREFERRED_OPTIONAL_SECTION_HEADING not in text, (
             f"Canonical operational agent should not use legacy preferred/optional heading in {path}"
         )
 
-        escalation_section = extract_markdown_h2_section(text, VALIDATOR.ESCALATION_SECTION_HEADING)
-        assert escalation_section is not None, f"Missing escalation section in {path}"
-        escalation_targets = extract_internal_identifiers(escalation_section)
-        assert escalation_targets, f"Missing canonical escalation targets in {path}"
+        if agent_name == "internal-router":
+            assert "## Escalation / Routing" in text, f"Missing routing section in {path}"
+            escalation_section = extract_markdown_h2_section(text, VALIDATOR.ESCALATION_SECTION_HEADING)
+            assert escalation_section is not None, f"Missing routing section in {path}"
+            escalation_targets = extract_internal_identifiers(escalation_section)
+            assert escalation_targets, f"Missing canonical routing targets in {path}"
 
-        for target in escalation_targets:
-            assert target in VALIDATOR.CANONICAL_OPERATIONAL_AGENT_ENGINES, (
-                f"Non-canonical escalation target {target} found in {path}"
+            for target in escalation_targets:
+                assert target in VALIDATOR.CANONICAL_OPERATIONAL_AGENT_ENGINES, (
+                    f"Non-canonical routing target {target} found in {path}"
+                )
+                assert target != agent_name, f"Self-route {target} found in {path}"
+                assert (REPO_ROOT / ".github" / "agents" / f"{target}.agent.md").is_file(), (
+                    f"Routing target {target} missing on disk for {path}"
+                )
+        else:
+            assert "## Escalation / Routing" not in text, (
+                f"Non-router canonical agent must not publish routing targets in {path}"
             )
-            assert target != agent_name, f"Self-route {target} found in {path}"
-            assert (REPO_ROOT / ".github" / "agents" / f"{target}.agent.md").is_file(), (
-                f"Escalation target {target} missing on disk for {path}"
-            )
+            boundary_section = extract_markdown_h2_section(text, VALIDATOR.BOUNDARY_SECTION_HEADING)
+            assert boundary_section is not None, f"Missing boundary section in {path}"
+            assert boundary_section.strip(), f"Empty boundary section in {path}"
 
         for skill_name in mandatory_engine_skills + optional_support_skills:
             assert skill_name in available_skills, (
@@ -517,6 +525,20 @@ def test_sync_apply_mirrors_skill_support_files(tmp_path: Path) -> None:
     SYNC_MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
 
     assert (target_root / support_file).read_bytes() == (REPO_ROOT / support_file).read_bytes()
+
+
+def test_sync_apply_preserves_shell_wrapper_permissions(tmp_path: Path) -> None:
+    target_root = tmp_path / "wrapper-permissions"
+    build_python_target(target_root)
+
+    plan, planned_files = SYNC_MODULE.build_plan(REPO_ROOT, target_root)
+    SYNC_MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
+
+    for relative_path in (
+        ".github/scripts/internal-python-runner.sh",
+        ".github/scripts/validate-copilot-customizations.sh",
+    ):
+        assert (target_root / relative_path).stat().st_mode & 0o111, f"{relative_path} should remain executable"
 
 
 def test_sync_apply_removes_tracking_file_when_complete(tmp_path: Path) -> None:
