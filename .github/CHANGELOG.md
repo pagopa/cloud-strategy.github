@@ -6,6 +6,9 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-05
+- Refreshed `.github/README.md` so the maintainer-facing catalog now matches the live `internal-*`, `obra-*`, and imported support families, the canonical internal agent model, and the actual scripts and workflow present on disk after recent repository restructuring.
+
 ## 2026-04-04
 - Added a mandatory end-of-operation completion report contract to `.github/copilot-instructions.md`, documented the same emoji-based `Outcome` / `Agents` / `Instructions` / `Skills` structure in `.github/README.md`, and kept root `AGENTS.md` on a thin bridge pointer to the detailed policy.
 - Extended `INTERNAL_CONTRACT.md`, `tests/test_contract_runner.py`, `tests/test_validate_copilot_customizations.py`, and `.github/scripts/validate-copilot-customizations.py` so the completion-report contract is now source-governed and strict-validator enforced.
