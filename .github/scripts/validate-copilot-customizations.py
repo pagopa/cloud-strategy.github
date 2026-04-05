@@ -35,12 +35,36 @@ INTERNAL_SYNC_CONTROL_CENTER_REQUIRED_SKILLS = {
     "internal-agents-md-bridge",
 }
 LEGACY_SKILL_IDENTIFIER = "internal-skill-development"
+OBRA_SOURCE_OF_TRUTH_PATH = Path(".github/obra-superpowers-source-of-truth.json")
+OBRA_MANAGED_RESOURCE_SECTION = "### `obra/superpowers`"
+OBRA_GOVERNANCE_REFERENCE_PATHS = (
+    Path("AGENTS.md"),
+    Path(".github/copilot-instructions.md"),
+)
 INTERNAL_CODE_REVIEW_REFERENCE_PATHS = (
     Path(".github/skills/internal-code-review/references/anti-patterns-python.md"),
     Path(".github/skills/internal-code-review/references/anti-patterns-bash.md"),
     Path(".github/skills/internal-code-review/references/anti-patterns-terraform.md"),
     Path(".github/skills/internal-code-review/references/anti-patterns-java.md"),
     Path(".github/skills/internal-code-review/references/anti-patterns-nodejs.md"),
+)
+OPERATION_COMPLETION_REPORT_SECTION = "## Operation Completion Report"
+COMPLETION_REPORT_CONTRACT_SECTION = "## Completion Report Contract"
+COMPLETION_REPORT_CATEGORY_HEADINGS = (
+    "### ✅ Outcome",
+    "### 🤖 Agents",
+    "### 📘 Instructions",
+    "### 🧩 Skills",
+)
+COMPLETION_REPORT_UNUSED_REASON = (
+    "If a category was not used, explicitly say so and explain why."
+)
+AGENTS_COMPLETION_REPORT_POINTER = (
+    "Completion-report details live in `.github/copilot-instructions.md`"
+)
+SYNC_AGENT_COMPLETION_REPORT_PATHS = (
+    Path(".github/agents/internal-sync-control-center.agent.md"),
+    Path(".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"),
 )
 
 
@@ -127,6 +151,29 @@ def extract_markdown_h2_section(text: str, heading: str) -> str | None:
     return "\n".join(collected).strip()
 
 
+def extract_markdown_h3_section(text: str, heading: str) -> str | None:
+    lines = text.splitlines()
+    inside_section = False
+    collected: list[str] = []
+
+    for line in lines:
+        if re.match(r"^###\s+", line):
+            if line.strip() == heading:
+                inside_section = True
+                collected = []
+                continue
+            if inside_section:
+                break
+
+        if inside_section:
+            collected.append(line)
+
+    if not inside_section:
+        return None
+
+    return "\n".join(collected).strip()
+
+
 def extract_agent_skill_guidance(text: str) -> list[str] | None:
     section = None
     for heading in AGENT_SKILL_SECTION_HEADINGS:
@@ -159,6 +206,30 @@ def extract_skill_usage_contract(text: str) -> list[str] | None:
     return declared_skills
 
 
+def extract_managed_skill_mappings(text: str, resource_heading: str) -> list[tuple[str, str]] | None:
+    section = extract_markdown_h3_section(text, resource_heading)
+    if section is None:
+        return None
+
+    inside_managed_skills = False
+    mappings: list[tuple[str, str]] = []
+
+    for raw_line in section.splitlines():
+        stripped = raw_line.strip()
+        if stripped == "Managed skills:":
+            inside_managed_skills = True
+            continue
+
+        if not inside_managed_skills:
+            continue
+
+        match = re.fullmatch(r"-\s+`([^`]+)`\s+->\s+`([^`]+)`", stripped)
+        if match:
+            mappings.append((match.group(1), match.group(2)))
+
+    return mappings
+
+
 def extract_inventory_paths() -> list[str]:
     inventory_paths: list[str] = []
 
@@ -181,6 +252,34 @@ def extract_inventory_paths() -> list[str]:
                 inventory_paths.append(raw_line[3:-1])
 
     return sorted(set(inventory_paths))
+
+
+def local_catalog_inventory_paths() -> set[str]:
+    paths: set[str] = set()
+    paths.update(
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in instruction_files()
+    )
+    paths.update(
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in sorted((REPO_ROOT / ".github" / "prompts").glob("*.prompt.md"))
+    )
+    paths.update(
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md"))
+    )
+    paths.update(
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in sorted((REPO_ROOT / ".github" / "agents").glob("*.agent.md"))
+    )
+    return paths
+
+
+def has_declared_inventory() -> bool:
+    agents_path = REPO_ROOT / "AGENTS.md"
+    if agents_path.exists() and "## Repository Inventory" in read_text(agents_path):
+        return True
+    return (REPO_ROOT / ".github" / "INVENTORY.md").exists()
 
 
 def instruction_files() -> list[Path]:
@@ -313,9 +412,158 @@ def validate_named_resources(errors: list[str]) -> None:
 
 
 def validate_inventory(errors: list[str]) -> None:
-    for relative in extract_inventory_paths():
+    inventory_paths = set(extract_inventory_paths())
+
+    for relative in sorted(inventory_paths):
         if not (REPO_ROOT / relative).exists():
             errors.append(f"Inventory path missing on disk: {relative}")
+
+    if not has_declared_inventory():
+        return
+
+    for relative in sorted(local_catalog_inventory_paths() - inventory_paths):
+        errors.append(f"Inventory path missing from declared inventory: {relative}")
+
+
+def validate_repo_profile_references(errors: list[str]) -> None:
+    repo_profiles_path = REPO_ROOT / ".github" / "repo-profiles.yml"
+    if not repo_profiles_path.exists():
+        return
+
+    for raw_line in read_text(repo_profiles_path).splitlines():
+        stripped = raw_line.split("#", 1)[0].strip()
+        if not stripped.startswith("- "):
+            continue
+
+        candidate = stripped[2:].strip().strip("\"'")
+        if not candidate.startswith(("instructions/", "prompts/", "skills/")):
+            continue
+
+        absolute_path = REPO_ROOT / ".github" / candidate
+        if not absolute_path.exists():
+            errors.append(f"Repo profile path missing on disk: .github/{candidate}")
+
+
+def should_validate_obra_source_of_truth() -> bool:
+    if (REPO_ROOT / OBRA_SOURCE_OF_TRUTH_PATH).exists():
+        return True
+
+    if (REPO_ROOT / INTERNAL_SYNC_CONTROL_CENTER_AGENT).exists():
+        return True
+
+    return any((REPO_ROOT / ".github" / "skills").glob("obra-*/SKILL.md"))
+
+
+def validate_obra_source_of_truth(errors: list[str]) -> None:
+    if not should_validate_obra_source_of_truth():
+        return
+
+    source_of_truth_path = REPO_ROOT / OBRA_SOURCE_OF_TRUTH_PATH
+    if not source_of_truth_path.exists():
+        errors.append(f"Missing OBRA source-of-truth file: {OBRA_SOURCE_OF_TRUTH_PATH}")
+        return
+
+    try:
+        source_of_truth = json.loads(read_text(source_of_truth_path))
+    except json.JSONDecodeError as error:
+        errors.append(f"Invalid JSON in {OBRA_SOURCE_OF_TRUTH_PATH}: {error}")
+        return
+
+    if not isinstance(source_of_truth, dict):
+        errors.append(f"Invalid OBRA source-of-truth payload in {OBRA_SOURCE_OF_TRUTH_PATH}")
+        return
+
+    if not isinstance(source_of_truth.get("source_repository"), str) or not source_of_truth.get(
+        "source_repository"
+    ):
+        errors.append(
+            f"Missing `source_repository` string in {OBRA_SOURCE_OF_TRUTH_PATH}"
+        )
+
+    if not isinstance(source_of_truth.get("source_ref"), str) or not source_of_truth.get(
+        "source_ref"
+    ):
+        errors.append(f"Missing `source_ref` string in {OBRA_SOURCE_OF_TRUTH_PATH}")
+
+    raw_managed_skills = source_of_truth.get("managed_skills")
+    if not isinstance(raw_managed_skills, list) or not raw_managed_skills:
+        errors.append(f"Missing `managed_skills` list in {OBRA_SOURCE_OF_TRUTH_PATH}")
+        return
+
+    expected_mappings: set[tuple[str, str]] = set()
+    for entry in raw_managed_skills:
+        if not isinstance(entry, dict):
+            errors.append(f"Invalid managed skill entry in {OBRA_SOURCE_OF_TRUTH_PATH}: {entry!r}")
+            continue
+
+        upstream = entry.get("upstream")
+        local = entry.get("local")
+        if not isinstance(upstream, str) or not upstream or not isinstance(local, str) or not local:
+            errors.append(
+                "Managed skill entries must contain non-empty `upstream` and `local` strings in "
+                f"{OBRA_SOURCE_OF_TRUTH_PATH}"
+            )
+            continue
+
+        expected_mappings.add((upstream, local))
+
+    expected_local_skills = {local for _upstream, local in expected_mappings}
+    actual_local_skills = {
+        path.parent.name
+        for path in sorted((REPO_ROOT / ".github" / "skills").glob("obra-*/SKILL.md"))
+    }
+
+    for skill_name in sorted(expected_local_skills - actual_local_skills):
+        errors.append(
+            f"OBRA source-of-truth skill missing on disk: {skill_name} ({OBRA_SOURCE_OF_TRUTH_PATH})"
+        )
+
+    for skill_name in sorted(actual_local_skills - expected_local_skills):
+        errors.append(
+            f"Unexpected local OBRA skill outside source-of-truth: {skill_name} ({OBRA_SOURCE_OF_TRUTH_PATH})"
+        )
+
+    control_center_path = REPO_ROOT / INTERNAL_SYNC_CONTROL_CENTER_AGENT
+    if not control_center_path.exists():
+        return
+
+    managed_mappings = extract_managed_skill_mappings(read_text(control_center_path), OBRA_MANAGED_RESOURCE_SECTION)
+    if managed_mappings is None:
+        errors.append(
+            f"Missing `{OBRA_MANAGED_RESOURCE_SECTION}` section: {INTERNAL_SYNC_CONTROL_CENTER_AGENT}"
+        )
+        return
+
+    managed_mapping_set = set(managed_mappings)
+    for upstream, local in sorted(expected_mappings - managed_mapping_set):
+        errors.append(
+            "OBRA managed skill mapping missing from "
+            f"{INTERNAL_SYNC_CONTROL_CENTER_AGENT}: `{upstream}` -> `{local}`"
+        )
+
+    for upstream, local in sorted(managed_mapping_set - expected_mappings):
+        errors.append(
+            "Unexpected OBRA managed skill mapping in "
+            f"{INTERNAL_SYNC_CONTROL_CENTER_AGENT}: `{upstream}` -> `{local}`"
+        )
+
+
+def validate_governance_obra_skill_references(errors: list[str]) -> None:
+    available_obra_skills = {
+        path.parent.name
+        for path in sorted((REPO_ROOT / ".github" / "skills").glob("obra-*/SKILL.md"))
+    }
+    if not available_obra_skills:
+        return
+
+    for relative_path in OBRA_GOVERNANCE_REFERENCE_PATHS:
+        absolute_path = REPO_ROOT / relative_path
+        if not absolute_path.exists():
+            continue
+
+        for skill_name in sorted(set(re.findall(r"`(obra-[a-z0-9-]+)`", read_text(absolute_path)))):
+            if skill_name not in available_obra_skills:
+                errors.append(f"Unknown obra skill `{skill_name}` referenced in {relative_path}")
 
 
 def validate_required_paths(errors: list[str]) -> None:
@@ -390,11 +638,75 @@ def validate_legacy_skill_references(errors: list[str]) -> None:
 
 
 def validate_internal_skill_reference_files(errors: list[str]) -> None:
+    if not (REPO_ROOT / ".github" / "skills" / "internal-code-review" / "SKILL.md").exists():
+        return
+
     for reference_path in INTERNAL_CODE_REVIEW_REFERENCE_PATHS:
         if not (REPO_ROOT / reference_path).exists():
             errors.append(
                 "Missing internal code review reference file: "
                 f"{reference_path}"
+            )
+
+
+def validate_operation_completion_report_contract(errors: list[str]) -> None:
+    copilot_instructions_path = REPO_ROOT / ".github" / "copilot-instructions.md"
+    if copilot_instructions_path.exists():
+        text = read_text(copilot_instructions_path)
+        if OPERATION_COMPLETION_REPORT_SECTION not in text:
+            errors.append(
+                f"Missing `{OPERATION_COMPLETION_REPORT_SECTION}` in {copilot_instructions_path}"
+            )
+        for heading in COMPLETION_REPORT_CATEGORY_HEADINGS:
+            if heading not in text:
+                errors.append(
+                    f"Missing completion report category `{heading}` in {copilot_instructions_path}"
+                )
+        if COMPLETION_REPORT_UNUSED_REASON not in text:
+            errors.append(
+                "Missing unused-category explanation requirement in "
+                f"{copilot_instructions_path}"
+            )
+
+    agents_path = REPO_ROOT / "AGENTS.md"
+    if agents_path.exists() and AGENTS_COMPLETION_REPORT_POINTER not in read_text(agents_path):
+        errors.append(f"Missing completion-report bridge pointer in {agents_path}")
+
+    readme_path = REPO_ROOT / ".github" / "README.md"
+    if readme_path.exists():
+        text = read_text(readme_path)
+        if COMPLETION_REPORT_CONTRACT_SECTION not in text:
+            errors.append(f"Missing `{COMPLETION_REPORT_CONTRACT_SECTION}` in {readme_path}")
+        for heading in COMPLETION_REPORT_CATEGORY_HEADINGS:
+            if heading not in text:
+                errors.append(f"Missing completion report category `{heading}` in {readme_path}")
+        if COMPLETION_REPORT_UNUSED_REASON not in text:
+            errors.append(
+                "Missing unused-category explanation requirement in "
+                f"{readme_path}"
+            )
+
+
+def validate_sync_agent_completion_report_contract(errors: list[str]) -> None:
+    for relative_path in SYNC_AGENT_COMPLETION_REPORT_PATHS:
+        agent_path = REPO_ROOT / relative_path
+        if not agent_path.exists():
+            continue
+
+        text = read_text(agent_path)
+        if "## Output Expectations" not in text:
+            errors.append(f"Missing `## Output Expectations` in {relative_path}")
+
+        for heading in COMPLETION_REPORT_CATEGORY_HEADINGS:
+            if heading not in text:
+                errors.append(
+                    f"Missing completion report category `{heading}` in {relative_path}"
+                )
+
+        if COMPLETION_REPORT_UNUSED_REASON not in text:
+            errors.append(
+                "Missing unused-category explanation requirement in "
+                f"{relative_path}"
             )
 
 
@@ -407,9 +719,14 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     validate_required_paths(errors)
     validate_named_resources(errors)
     validate_inventory(errors)
+    validate_repo_profile_references(errors)
+    validate_obra_source_of_truth(errors)
+    validate_governance_obra_skill_references(errors)
     validate_internal_sync_control_center_contract(errors)
     validate_legacy_skill_references(errors)
     validate_internal_skill_reference_files(errors)
+    validate_operation_completion_report_contract(errors)
+    validate_sync_agent_completion_report_contract(errors)
     warnings.extend(build_instruction_load_warnings())
     return ValidationReport(errors=errors, warnings=warnings)
 

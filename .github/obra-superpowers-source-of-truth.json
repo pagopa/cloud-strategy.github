@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "source_repository": "https://github.com/obra/superpowers",
+  "source_ref": "v5.0.7",
+  "managed_skills": [
+    {
+      "upstream": "brainstorming",
+      "local": "obra-brainstorming"
+    },
+    {
+      "upstream": "dispatching-parallel-agents",
+      "local": "obra-dispatching-parallel-agents"
+    },
+    {
+      "upstream": "executing-plans",
+      "local": "obra-executing-plans"
+    },
+    {
+      "upstream": "finishing-a-development-branch",
+      "local": "obra-finishing-a-development-branch"
+    },
+    {
+      "upstream": "receiving-code-review",
+      "local": "obra-receiving-code-review"
+    },
+    {
+      "upstream": "requesting-code-review",
+      "local": "obra-requesting-code-review"
+    },
+    {
+      "upstream": "subagent-driven-development",
+      "local": "obra-subagent-driven-development"
+    },
+    {
+      "upstream": "systematic-debugging",
+      "local": "obra-systematic-debugging"
+    },
+    {
+      "upstream": "test-driven-development",
+      "local": "obra-test-driven-development"
+    },
+    {
+      "upstream": "using-git-worktrees",
+      "local": "obra-using-git-worktrees"
+    },
+    {
+      "upstream": "using-superpowers",
+      "local": "obra-using-superpowers"
+    },
+    {
+      "upstream": "verification-before-completion",
+      "local": "obra-verification-before-completion"
+    },
+    {
+      "upstream": "writing-plans",
+      "local": "obra-writing-plans"
+    },
+    {
+      "upstream": "writing-skills",
+      "local": "obra-writing-skills"
+    }
+  ]
+}

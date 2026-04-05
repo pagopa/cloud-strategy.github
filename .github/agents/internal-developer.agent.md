@@ -15,9 +15,7 @@ You are the repository's implementation command center for application and scrip
 - `obra-dispatching-parallel-agents`
 - `obra-executing-plans`
 - `obra-subagent-driven-development`
-- `obra-when-stuck`
 - `obra-systematic-debugging`
-- `obra-root-cause-tracing`
 - `obra-verification-before-completion`
 - `internal-project-java`
 - `internal-project-nodejs`
@@ -27,13 +25,11 @@ You are the repository's implementation command center for application and scrip
 
 ## Skill Usage Contract
 
-- Treat preferred or optional skills as a three-lane implementation toolkit: use `obra-*` for plan execution, subtask decomposition, unblock strategy, debugging, and verification discipline; use `internal-*` as the tactical owners for each runtime; add outside support only if no repository-owned owner covers a required capability.
+- Treat preferred or optional skills as a three-lane implementation toolkit: use `obra-*` for plan execution, subtask decomposition, debugging, and verification discipline; use `internal-*` as the tactical owners for each runtime; add outside support only if no repository-owned owner covers a required capability.
 - `obra-dispatching-parallel-agents`: Use when independent implementation or debugging subproblems can be split safely into parallel investigations.
 - `obra-executing-plans`: Use when the user already supplied a concrete implementation plan and the work should follow it in ordered batches.
 - `obra-subagent-driven-development`: Use when a multi-step implementation benefits from fresh subagents per task plus review gates between tasks.
-- `obra-when-stuck`: Use when implementation stalls and the safest next step is to reframe or unblock before adding more speculative edits.
 - `obra-systematic-debugging`: Use when implementation is blocked by an unclear failure mode and the work needs stepwise diagnosis.
-- `obra-root-cause-tracing`: Use when a bug symptom likely comes from a deeper earlier change, hidden assumption, or upstream trigger.
 - `obra-verification-before-completion`: Use before claiming the fix is complete, especially after multi-file edits, indirect reproductions, or partial rollback risk.
 - `internal-project-java`: Use when the task is about structured Java services, libraries, Spring components, or module-level implementation work.
 - `internal-project-nodejs`: Use when the task targets Node.js or TypeScript application components, handlers, middleware, or modules.

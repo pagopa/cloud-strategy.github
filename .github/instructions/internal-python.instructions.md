@@ -9,8 +9,10 @@ applyTo: "**/*.py"
 - Use emoji logs for key execution states.
 - Prefer early return and clear guard clauses.
 - Keep code explicit and readable.
-- Prefer the standard library first. Introduce well-maintained third-party libraries when they materially simplify code and reduce custom logic.
-- Do not reinvent common parsing/validation/serialization behavior when the standard library or a well-maintained library provides a clearer solution.
+- For new Python scripts, explicitly evaluate the standard library versus mature third-party libraries before implementation; `stdlib-first` is not an absolute default.
+- Prefer a mature, well-maintained, widely used third-party library when it materially reduces boilerplate, edge cases, or custom logic in the final code.
+- Keep the standard library only when the final implementation is genuinely simpler, more readable, and safer.
+- Do not reinvent common parsing, validation, CLI handling, serialization, HTTP, retry, date handling, table rendering, Excel/CSV processing, or formatting behavior when a standard-library or mature third-party solution is clearer.
 - Prefer simple, readable, and easily modifiable code over clever abstractions.
 - Accept additional lines or mild redundancy when it improves clarity, maintainability, and safe future changes.
 - Unit tests are required for testable logic.
@@ -27,6 +29,8 @@ applyTo: "**/*.py"
 - Start scripts with a module docstring containing purpose and usage examples.
 - Keep CLI parsing and orchestration explicit.
 - Avoid embedding domain rules that belong to reusable application modules.
+- Before writing a new script, produce a short dependency decision note with candidate libraries, the final choice, and the reason for the choice.
+- Optimize for the simplest final script, not for the smallest dependency list.
 
 ## Style
 - Follow PEP8.
@@ -38,10 +42,13 @@ applyTo: "**/*.py"
 
 ## Dependencies
 - Standardize on `requirements.txt` as the Python dependency lock artifact in this baseline.
+- For new scripts, evaluate stdlib versus third-party options explicitly before coding and record that choice in the dependency decision note.
 - If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins, full transitive dependency closure, and `--hash` entries for every locked requirement.
 - Keep a short comment above each introduced dependency block so the pinned version is readable without parsing the full hash line.
-- Recommend third-party libraries when they materially reduce custom parsing, validation, HTTP, CLI, serialization, or retry code.
-- Do not force third-party libraries over the standard library when the standard library is simpler, clearer, or safer.
+- Recommend third-party libraries when they materially reduce custom parsing, validation, HTTP, CLI, serialization, retry, date handling, table rendering, Excel/CSV, or formatting code.
+- If the dependency decision note selects external libraries, create or update the local `requirements.txt` accordingly.
+- Do not force third-party libraries over the standard library when the standard library is simpler, clearer, or safer in the final implementation.
+- Avoid marginal dependencies whose setup cost exceeds their practical simplification value.
 - When a fully hash-locked `requirements.txt` is not feasible, use exact `==` pins in `requirements.txt` and document the reason in the closest technical note or workflow comment.
 
 ## Dependency example

@@ -21,6 +21,24 @@ You are an expert software and platform engineer. You are the user's technical p
 - Keep repository-facing wording GitHub Copilot-based and do not make repository artifacts say or imply that the repository uses a different assistant runtime.
 - If detailed policy, validation, or workflow guidance is duplicated in root `AGENTS.md`, move that detail here and keep only the bridge-level pointer there.
 
+## Operation Completion Report
+- After every completed operation, end with a concise completion report.
+- The completion report may follow the user's chat language.
+- If a category was not used, explicitly say so and explain why.
+- Keep the report specific to the completed operation; do not paste full repository inventories.
+
+### ✅ Outcome
+- Summarize what changed, what was verified, or what remains blocked.
+
+### 🤖 Agents
+- State which agents were used and why they were relevant to the completed operation.
+
+### 📘 Instructions
+- State which instructions were used and why they mattered, including `.github/copilot-instructions.md` when it materially shaped the work.
+
+### 🧩 Skills
+- State which skills were used and why they were relevant to the completed operation.
+
 ## Catalog layering model
 - Use a three-layer model for command-center routing and skill contracts:
   - `obra-*` skills are the strategic lane for framing, decomposition, planning, simplification, and verification discipline.
@@ -105,8 +123,16 @@ These apply to every code change, regardless of language or technology:
 - Use simple control flow and early returns.
 - Bash: always `#!/usr/bin/env bash` (never POSIX `sh`).
 - Python: add unit tests for testable logic.
+- Python dependency choice for new scripts: evaluate standard library vs mature third-party libraries explicitly before implementation. Do not treat `stdlib-first` as an absolute default.
+- Python dependency choice for new scripts: prefer a mature, well-maintained, widely used third-party library when it clearly reduces boilerplate, edge-case handling, or custom logic in the final code.
+- Python dependency choice for new scripts: keep the standard library only when the resulting implementation is genuinely simpler, more readable, and safer than the third-party alternative.
+- Python dependency choice for new scripts: optimize for simpler final code and less bespoke logic, not for the lowest possible dependency count.
+- Python dependency choice for new scripts: do not hand-roll parsing, validation, CLI handling, serialization, HTTP clients, retry behavior, date handling, table rendering, Excel/CSV processing, or formatting when a mature library is the clearer solution.
+- Python dependency choice for new scripts: before writing code, include a short dependency decision note that lists candidate libraries, the final choice, and the reason for that choice.
 - Python dependencies: when external packages are introduced, standardize on a compiled `requirements.txt` with exact pins, full transitive dependency closure, and `--hash` entries, plus short comment lines that make the pinned versions readable to humans.
-- Python dependencies: third-party libraries are recommended when they materially simplify parsing, validation, HTTP, CLI, serialization, or retry logic; keep the standard library when it is simpler and safer.
+- Python dependencies: if the dependency decision note selects external packages, create or update the local `requirements.txt` consistently with the repository lock-file policy.
+- Python dependencies: third-party libraries are recommended when they materially simplify parsing, validation, HTTP, CLI, serialization, retry logic, date handling, table rendering, Excel/CSV processing, or formatting; keep the standard library when it is simpler and safer.
+- Python dependencies: avoid marginal or unjustified packages; each dependency should earn its place through a clear value-versus-setup tradeoff.
 - New standalone Python scripts should default to a self-contained folder that includes the Python entry point, a Bash launcher, and a local `requirements.txt` only when external packages are required. The launcher should bootstrap `.venv` and install from `requirements.txt` only when that file exists.
 - Prefer immutable dependency and image pins; keep stack-specific locking details in the matching instruction file.
 
@@ -134,4 +160,6 @@ These apply to every code change, regardless of language or technology:
 - Keep assistant-facing language mapped through `AGENTS.md` and avoid mentioning internal runtime names.
 - `internal-pr-editor` remains intentionally prompt-routed; keep PR body generation on the prompt-plus-skill path unless the repository adds a dedicated agent.
 - `internal-data-registry` remains intentionally dormant tactical capacity until the repository adds a concrete routing owner.
-- Keep these installed `obra-*` skills intentionally dormant until a concrete workflow owner is declared: `obra-gardening-skills-wiki`, `obra-pulling-updates-from-skills-repository`, `obra-sharing-skills`, `obra-testing-skills-with-subagents`, `obra-using-skills`, and `obra-remembering-conversations`.
+- Use `.github/obra-superpowers-source-of-truth.json` as the pinned OBRA import contract; stale OBRA mappings or references should fail validation instead of drifting silently.
+- Keep `obra-using-superpowers` as the repository-wide OBRA bootstrap reference and `obra-writing-skills` as the skill-authoring reference; do not pad unrelated agent skill lists with them decoratively.
+- For sync workflows that need retained plans or auxiliary output files, use repository-root `tmp/` and create it if missing instead of scattering those artifacts under governed `.github/` paths.

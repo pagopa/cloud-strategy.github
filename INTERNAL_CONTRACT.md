@@ -73,33 +73,70 @@ These rules apply to all repository resources, including prompts, skills, instru
 - Expected behavior:
   - internal agents do not declare agent identifiers, aliases, or missing skills as if they were reusable skill contracts
 
+### Reporting
+
+#### `reporting-operation-completion-report-contract-is-documented`
+
+- Goal: keep the end-of-operation reporting contract visible in the primary Copilot policy layer and source-side documentation.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.github/README.md`
+- Expected behavior:
+  - `.github/copilot-instructions.md` defines the mandatory completion report macro categories `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
+  - the policy requires an explicit explanation when a resource category was not used
+  - root `AGENTS.md` points to `.github/copilot-instructions.md` as the owner of detailed completion-report behavior
+  - `.github/README.md` documents the same completion-report contract for maintainers
+
+#### `reporting-sync-agents-publish-completion-report-categories`
+
+- Goal: keep the source-side governance agent and the cross-repository sync agent aligned with the repository completion-report contract.
+- Scope:
+  - `.github/agents/internal-sync-control-center.agent.md`
+  - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
+- Expected behavior:
+  - both agents require completed runs to end with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
+  - both agents require an explicit explanation when a category was not used
+  - the source-side governance agent still reports `Governance files reviewed`
+
 ### Sync Planning
 
-#### `sync-plan-detects-root-agents-conflict`
+#### `sync-plan-regenerates-root-agents`
 
-- Goal: protect manually managed root `AGENTS.md` files from accidental overwrite.
+- Goal: keep root `AGENTS.md` aligned as a governed bridge after catalog changes.
 - Fixture:
   - target repository with a root `AGENTS.md`
   - minimal infrastructure footprint
 - Expected behavior:
-  - the generated sync plan reports a `conflict` action for `AGENTS.md`
+  - the generated sync plan reports an `update` action for `AGENTS.md`
 
-#### `sync-plan-selects-python-assets`
+#### `sync-plan-mirrors-source-catalog`
 
-- Goal: ensure Python repositories still receive a Python-oriented shared baseline.
+- Goal: ensure target repositories receive the complete mirrored source catalog for Copilot resources.
 - Fixture:
   - target repository with a Python source file
 - Expected behavior:
   - the generated sync plan identifies the repository as Python-oriented
-  - the generated sync plan selects at least one managed prompt for that stack
+  - the generated sync plan selects every source instruction, prompt, skill, and agent
+  - the generated sync plan includes skill support files outside `SKILL.md`
 
-#### `sync-plan-preserves-manual-target-assets`
+#### `sync-plan-preserves-local-target-assets`
 
-- Goal: keep target-local unmanaged assets visible instead of silently absorbing them into the baseline.
+- Goal: keep target-local `local-*` assets visible instead of deleting them during mirror alignment.
 - Fixture:
-  - target repository with a manual custom Copilot asset outside the managed baseline
+  - target repository with a target-local `local-*` Copilot asset outside the mirrored source catalog
 - Expected behavior:
-  - sync apply does not overwrite or delete that manual asset
+  - sync apply does not overwrite or delete that `local-*` asset
+
+#### `sync-plan-writes-tracking-file`
+
+- Goal: create a persistent per-target sync plan inside repository-root `tmp/` before apply runs.
+- Fixture:
+  - target repository with a minimal supported stack
+- Expected behavior:
+  - plan mode writes `tmp/internal-sync-copilot-configs.plan.md`
+  - the run creates `tmp/` when the target repo does not already have it
+  - the file contains pending synchronization and validation sections
 
 ### Sync Application
 
@@ -112,6 +149,32 @@ These rules apply to all repository resources, including prompts, skills, instru
   - apply writes the sync manifest
   - apply writes `AGENTS.md`
   - manifest records managed files for the apply result
+
+#### `sync-apply-mirrors-skill-support-files`
+
+- Goal: ensure skill bundles are mirrored as complete directories instead of `SKILL.md` only.
+- Fixture:
+  - fresh target repository with a minimal supported stack
+- Expected behavior:
+  - apply copies non-`SKILL.md` files from mirrored skill directories
+  - copied support files preserve byte-for-byte content
+
+#### `sync-apply-removes-tracking-file-when-complete`
+
+- Goal: delete the per-target sync plan when apply and post-checks close every planned objective.
+- Fixture:
+  - fresh target repository with a minimal supported stack
+- Expected behavior:
+  - apply removes `tmp/internal-sync-copilot-configs.plan.md` after sync and strict validation complete successfully
+
+#### `sync-apply-keeps-tracking-file-for-local-follow-up`
+
+- Goal: keep the per-target sync plan visible when preserved local assets still need manual action.
+- Fixture:
+  - target repository with an invalid local Copilot asset
+- Expected behavior:
+  - apply keeps `tmp/internal-sync-copilot-configs.plan.md`
+  - the file contains a pending manual follow-up section describing the local issue
 
 ## Explicitly Out Of Scope
 
@@ -142,3 +205,4 @@ Add a new contract only when a regression would materially break:
 - sync application
 - target repository safety
 - baseline selection behavior
+- full source mirroring behavior

@@ -42,8 +42,34 @@ def validator_repo(root: Path):
 
 
 def build_minimal_repo(root: Path, agent_content: str) -> None:
-    write_file(root / "AGENTS.md", "# AGENTS\n")
-    write_file(root / ".github" / "copilot-instructions.md", "# Copilot Instructions\n")
+    write_file(
+        root / "AGENTS.md",
+        """# AGENTS
+
+- Completion-report details live in `.github/copilot-instructions.md`; keep only the bridge pointer here.
+""",
+    )
+    write_file(
+        root / ".github" / "copilot-instructions.md",
+        """# Copilot Instructions
+
+## Operation Completion Report
+- After every completed operation, end with a concise completion report.
+- If a category was not used, explicitly say so and explain why.
+
+### ✅ Outcome
+- Summarize what changed.
+
+### 🤖 Agents
+- State which agents were used and why.
+
+### 📘 Instructions
+- State which instructions were used and why.
+
+### 🧩 Skills
+- State which skills were used and why.
+""",
+    )
     write_file(root / ".github" / "security-baseline.md", "# Security Baseline\n")
     write_file(
         root / ".github" / "skills" / "internal-example" / "SKILL.md",
@@ -291,5 +317,168 @@ You are the example command center.
     assert not report.valid
     assert (
         "Unknown preferred or optional skill `internal-missing` referenced in"
+        in "\n".join(report.errors)
+    )
+
+
+def test_build_report_rejects_missing_operation_completion_report_contract(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+    write_file(tmp_path / ".github" / "copilot-instructions.md", "# Copilot Instructions\n")
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert "Missing `## Operation Completion Report` in" in "\n".join(report.errors)
+
+
+def test_build_report_rejects_missing_agents_completion_report_pointer(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert "Missing completion-report bridge pointer in" in "\n".join(report.errors)
+
+
+def test_build_report_rejects_sync_agent_without_completion_report_categories(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: ["read", "search", "execute", "web", "agent"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+    write_file(
+        tmp_path / ".github" / "agents" / "internal-sync-global-copilot-configs-into-repo.agent.md",
+        """---
+name: internal-sync-global-copilot-configs-into-repo
+description: Use this agent when syncing a shared Copilot catalog into a consumer repository.
+tools: ["read", "edit", "search", "execute"]
+---
+
+# Sync Agent
+
+## Output Expectations
+
+- Target analysis
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    joined_errors = "\n".join(report.errors)
+    assert (
+        "Missing completion report category `### ✅ Outcome` in "
+        ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"
+    ) in joined_errors
+
+
+def test_build_report_rejects_repo_profile_reference_missing_on_disk(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: [\"read\", \"search\", \"execute\", \"web\", \"agent\"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+    write_file(
+        tmp_path / ".github" / "repo-profiles.yml",
+        """version: 1
+
+profiles:
+  minimal:
+    description: Example profile.
+    recommended_skills:
+      - skills/internal-missing/SKILL.md
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert (
+        "Repo profile path missing on disk: .github/skills/internal-missing/SKILL.md"
         in "\n".join(report.errors)
     )

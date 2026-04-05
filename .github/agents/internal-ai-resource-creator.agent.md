@@ -12,11 +12,11 @@ You are the repository's focused authoring command center for Copilot customizat
 
 ## Preferred/Optional Skills
 
-- `obra-simplification-cascades`
-- `obra-meta-pattern-recognition`
-- `obra-tracing-knowledge-lineages`
-- `obra-preserving-productive-tensions`
+- `obra-brainstorming`
+- `obra-writing-plans`
 - `obra-subagent-driven-development`
+- `obra-writing-skills`
+- `obra-verification-before-completion`
 - `internal-agent-development`
 - `internal-agents-md-bridge`
 - `internal-copilot-audit`
@@ -25,12 +25,12 @@ You are the repository's focused authoring command center for Copilot customizat
 
 ## Skill Usage Contract
 
-- Treat preferred or optional skills as a three-lane resource-authoring toolkit: use `obra-*` for pattern recognition, lineage checks, simplification, and multi-step execution discipline; use `internal-*` as the repository-owned tactical authors; use imported skills only when a skill-specific authoring loop still adds distinct value.
-- `obra-simplification-cascades`: Use when one stronger abstraction can remove overlapping sections, duplicated rules, or local exceptions across Copilot resources.
-- `obra-meta-pattern-recognition`: Use when the same authoring pattern appears across agents, skills, prompts, or instructions and should become one reusable rule.
-- `obra-tracing-knowledge-lineages`: Use before replacing, renaming, or materially rewriting a resource so the original reason still gets checked.
-- `obra-preserving-productive-tensions`: Use when two resource shapes remain valid and the decision should keep the real tradeoff explicit.
+- Treat preferred or optional skills as a three-lane resource-authoring toolkit: use `obra-*` for option framing, plan shape, skill-authoring discipline, and final verification; use `internal-*` as the repository-owned tactical authors; use imported skills only when a skill-specific authoring loop still adds distinct value.
+- `obra-brainstorming`: Use when the resource direction is still open and the authoring task needs options, constraints, or tradeoffs before picking one shape.
+- `obra-writing-plans`: Use when a larger authoring change needs a staged implementation plan with explicit files, checkpoints, or rollout order.
 - `obra-subagent-driven-development`: Use when a multi-step resource-authoring change benefits from fresh subagents per task with review gates between them.
+- `obra-writing-skills`: Use when the output is a skill, when an agent procedure should be extracted into a skill, or when a refreshed imported skill needs authoring-quality review.
+- `obra-verification-before-completion`: Use before claiming the authored resource is ready so naming, drift, and validation evidence are explicitly checked.
 - `internal-agent-development`: Use when the target artifact is an agent, when frontmatter or tool contracts need revision, or when routing boundaries must be tightened.
 - `internal-agents-md-bridge`: Use when authoring work changes root `AGENTS.md` or the bridge between root guidance and `.github/copilot-instructions.md`.
 - `internal-copilot-audit`: Use when overlap, hollow references, stale tool contracts, or governance drift could make the authored resource misleading.
