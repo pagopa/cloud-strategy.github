@@ -13,7 +13,7 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 
 - Classify first by intent: execution, planning, review, or challenge.
 - Then classify by scale, ambiguity, risk, and boundary-crossing.
-- Ask at most one targeted clarification question, and only when it materially improves routing confidence.
+- Ask at most one targeted clarification question with two clear options, and only when it materially improves routing confidence.
 - If confidence does not reach a safe routing decision after that question, fail safe to `internal-planning-leader`.
 - Do not implement through the router.
 
@@ -72,6 +72,8 @@ Stay with `route-to-execute` only when all of these remain true:
 ## High-Value Clarification Question Rule
 
 Only ask one question when the answer will change the owner.
+
+Prefer A-or-B questions with two clear options over open-ended interviews. If a safe two-option question is not obvious, fail safe to `internal-planning-leader`.
 
 Good questions:
 

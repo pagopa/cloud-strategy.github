@@ -99,6 +99,181 @@ description: Example internal code review skill.
     write_file(root / ".github" / "agents" / "internal-example.agent.md", agent_content)
 
 
+def render_internal_agent(
+    *,
+    name: str,
+    mandatory_engine_skills: list[str],
+    optional_support_skills: list[str],
+    escalation_targets: list[str],
+) -> str:
+    mandatory_engine_section = "\n".join(f"- `{skill}`" for skill in mandatory_engine_skills)
+    optional_support_section = "\n".join(f"- `{skill}`" for skill in optional_support_skills)
+    escalation_section = "\n".join(
+        f"- Route to `{target}` when the handoff belongs there." for target in escalation_targets
+    )
+
+    return f"""---
+name: {name}
+description: Use this agent when the repository needs `{name}` behavior.
+tools: [\"read\", \"search\", \"execute\", \"web\", \"agent\"]
+---
+
+# {name}
+
+## Role
+
+You are the example command center for `{name}`.
+
+## Mandatory Engine Skills
+
+{mandatory_engine_section}
+
+## Optional Support Skills
+
+{optional_support_section}
+
+## Escalation / Routing
+
+{escalation_section}
+
+## Output Expectations
+
+- Example output
+"""
+
+
+def build_minimal_canonical_operational_repo(
+    root: Path,
+    *,
+    agent_overrides: dict[str, str] | None = None,
+) -> None:
+    write_file(
+        root / "AGENTS.md",
+        """# AGENTS
+
+- `internal-router` is the front door.
+- Completion-report details live in `.github/copilot-instructions.md`; keep only the bridge pointer here.
+""",
+    )
+    write_file(
+        root / ".github" / "copilot-instructions.md",
+        """# Copilot Instructions
+
+## Operational routing model
+- The canonical repository-owned operational model is `internal-router` as the front door plus four owners.
+- Source-side sync must keep the canonical mandatory engine skills explicit in the source-side preferred-skills baseline; do not rely on agent bodies alone for the engine layer.
+
+## Operation Completion Report
+- After every completed operation, end with a concise completion report.
+- If a category was not used, explicitly say so and explain why.
+
+### ✅ Outcome
+- Summarize what changed.
+
+### 🤖 Agents
+- State which agents were used and why.
+
+### 📘 Instructions
+- State which instructions were used and why.
+
+### 🧩 Skills
+- State which skills were used and why.
+""",
+    )
+    write_file(root / ".github" / "security-baseline.md", "# Security Baseline\n")
+    write_file(
+        root / ".github" / "skills" / "internal-example" / "SKILL.md",
+        """---
+name: internal-example
+description: Example skill.
+---
+
+# Internal Example
+""",
+    )
+    write_file(
+        root / ".github" / "skills" / "internal-agent-routing-engine" / "SKILL.md",
+        """---
+name: internal-agent-routing-engine
+description: Example routing engine.
+---
+
+# Internal Agent Routing Engine
+""",
+    )
+    write_file(
+        root / ".github" / "skills" / "internal-agent-operating-model-engine" / "SKILL.md",
+        """---
+name: internal-agent-operating-model-engine
+description: Example operating model engine.
+---
+
+# Internal Agent Operating Model Engine
+""",
+    )
+    write_file(
+        root / ".github" / "skills" / "internal-code-review" / "SKILL.md",
+        """---
+name: internal-code-review
+description: Example internal code review skill.
+---
+
+# Internal Code Review
+""",
+    )
+    for reference_path in VALIDATOR.INTERNAL_CODE_REVIEW_REFERENCE_PATHS:
+        write_file(root / reference_path, "# Reference\n")
+
+    agent_contents = {
+        "internal-router": render_internal_agent(
+            name="internal-router",
+            mandatory_engine_skills=["internal-agent-routing-engine"],
+            optional_support_skills=["internal-agent-operating-model-engine"],
+            escalation_targets=[
+                "internal-fast-executor",
+                "internal-planning-leader",
+                "internal-review-guard",
+                "internal-critical-challenger",
+            ],
+        ),
+        "internal-fast-executor": render_internal_agent(
+            name="internal-fast-executor",
+            mandatory_engine_skills=["internal-agent-operating-model-engine"],
+            optional_support_skills=["internal-example"],
+            escalation_targets=["internal-planning-leader"],
+        ),
+        "internal-planning-leader": render_internal_agent(
+            name="internal-planning-leader",
+            mandatory_engine_skills=["internal-agent-operating-model-engine"],
+            optional_support_skills=["internal-example"],
+            escalation_targets=["internal-fast-executor"],
+        ),
+        "internal-review-guard": render_internal_agent(
+            name="internal-review-guard",
+            mandatory_engine_skills=[
+                "internal-agent-operating-model-engine",
+                "internal-code-review",
+            ],
+            optional_support_skills=["internal-example"],
+            escalation_targets=[
+                "internal-planning-leader",
+                "internal-critical-challenger",
+            ],
+        ),
+        "internal-critical-challenger": render_internal_agent(
+            name="internal-critical-challenger",
+            mandatory_engine_skills=["internal-agent-operating-model-engine"],
+            optional_support_skills=["internal-example"],
+            escalation_targets=["internal-planning-leader"],
+        ),
+    }
+    if agent_overrides:
+        agent_contents.update(agent_overrides)
+
+    for agent_name, agent_content in agent_contents.items():
+        write_file(root / ".github" / "agents" / f"{agent_name}.agent.md", agent_content)
+
+
 def test_normalize_scope_accepts_root_and_all() -> None:
     assert VALIDATOR.normalize_scope("root") == "root"
     assert VALIDATOR.normalize_scope("all") == "root"
@@ -107,6 +282,12 @@ def test_normalize_scope_accepts_root_and_all() -> None:
 def test_normalize_mode_supports_legacy_alias() -> None:
     assert VALIDATOR.normalize_mode("strict") == "strict"
     assert VALIDATOR.normalize_mode("legacy-compatible") == "basic"
+
+
+def test_has_standalone_identifier_is_case_insensitive() -> None:
+    assert VALIDATOR.has_standalone_identifier(
+        "Legacy INTERNAL-ARCHITECT routing.", "internal-architect"
+    )
 
 
 def test_build_report_detects_current_repo_state() -> None:
@@ -613,3 +794,67 @@ profiles:
         "Repo profile path missing on disk: .github/skills/internal-missing/SKILL.md"
         in "\n".join(report.errors)
     )
+
+
+def test_build_report_rejects_non_canonical_escalation_target_in_canonical_agent(
+    tmp_path: Path,
+) -> None:
+    build_minimal_canonical_operational_repo(
+        tmp_path,
+        agent_overrides={
+            "internal-fast-executor": render_internal_agent(
+                name="internal-fast-executor",
+                mandatory_engine_skills=["internal-agent-operating-model-engine"],
+                optional_support_skills=["internal-example"],
+                escalation_targets=["internal-example"],
+            )
+        },
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert (
+        "Non-canonical escalation target `internal-example` found in"
+        in "\n".join(report.errors)
+    )
+
+
+def test_build_report_rejects_self_route_in_canonical_agent(tmp_path: Path) -> None:
+    build_minimal_canonical_operational_repo(
+        tmp_path,
+        agent_overrides={
+            "internal-fast-executor": render_internal_agent(
+                name="internal-fast-executor",
+                mandatory_engine_skills=["internal-agent-operating-model-engine"],
+                optional_support_skills=["internal-example"],
+                escalation_targets=["internal-fast-executor"],
+            )
+        },
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert "Self-route `internal-fast-executor` found in" in "\n".join(report.errors)
+
+
+def test_build_report_rejects_case_insensitive_retired_operational_reference(
+    tmp_path: Path,
+) -> None:
+    build_minimal_canonical_operational_repo(tmp_path)
+    write_file(
+        tmp_path / ".github" / "skills" / "internal-example" / "notes.md",
+        "Legacy INTERNAL-ARCHITECT reference.\n",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert (
+        "Stale retired operational agent reference `internal-architect` found in "
+        ".github/skills/internal-example/notes.md"
+    ) in "\n".join(report.errors)

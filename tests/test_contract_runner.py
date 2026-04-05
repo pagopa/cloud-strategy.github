@@ -157,6 +157,15 @@ def has_standalone_identifier(text: str, identifier: str) -> bool:
     return re.search(pattern, text) is not None
 
 
+def extract_internal_identifiers(text: str) -> list[str]:
+    return sorted(
+        {
+            match.group(0).lower()
+            for match in re.finditer(r"(?<![a-z0-9-])internal-[a-z0-9-]+(?![a-z0-9-])", text, re.IGNORECASE)
+        }
+    )
+
+
 def retired_operational_reference_paths() -> list[Path]:
     paths: set[Path] = set()
     for relative_path in (
@@ -310,6 +319,20 @@ def test_resource_governance_canonical_operational_agents_publish_engine_contrac
         assert VALIDATOR.PREFERRED_OPTIONAL_SECTION_HEADING not in text, (
             f"Canonical operational agent should not use legacy preferred/optional heading in {path}"
         )
+
+        escalation_section = extract_markdown_h2_section(text, VALIDATOR.ESCALATION_SECTION_HEADING)
+        assert escalation_section is not None, f"Missing escalation section in {path}"
+        escalation_targets = extract_internal_identifiers(escalation_section)
+        assert escalation_targets, f"Missing canonical escalation targets in {path}"
+
+        for target in escalation_targets:
+            assert target in VALIDATOR.CANONICAL_OPERATIONAL_AGENT_ENGINES, (
+                f"Non-canonical escalation target {target} found in {path}"
+            )
+            assert target != agent_name, f"Self-route {target} found in {path}"
+            assert (REPO_ROOT / ".github" / "agents" / f"{target}.agent.md").is_file(), (
+                f"Escalation target {target} missing on disk for {path}"
+            )
 
         for skill_name in mandatory_engine_skills + optional_support_skills:
             assert skill_name in available_skills, (

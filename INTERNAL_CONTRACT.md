@@ -84,6 +84,8 @@ These rules apply to all repository resources, including prompts, skills, instru
   - each canonical operational agent declares `## Mandatory Engine Skills` with the repository-defined engine mapping
   - each canonical operational agent declares a non-empty `## Optional Support Skills` section
   - each canonical operational agent publishes `## Escalation / Routing`
+  - each canonical operational agent references only real canonical operational-agent targets inside `## Escalation / Routing`
+  - canonical operational agents do not self-route inside `## Escalation / Routing`
   - canonical operational agents do not fall back to the legacy `## Preferred/Optional Skills` heading
   - `.github/copilot-instructions.md` defines the source-side mandatory-engine baseline policy without making that rule depend on root `AGENTS.md`
 

@@ -27,6 +27,7 @@ RETIRED_FRONTMATTER_KEYS = ("infer", "color")
 MANDATORY_ENGINE_SECTION_HEADING = "## Mandatory Engine Skills"
 OPTIONAL_SUPPORT_SECTION_HEADING = "## Optional Support Skills"
 PREFERRED_OPTIONAL_SECTION_HEADING = "## Preferred/Optional Skills"
+ESCALATION_SECTION_HEADING = "## Escalation / Routing"
 DEPRECATED_AGENT_SECTION_HEADINGS = ("## Primary Skill Stack",)
 AGENT_SKILL_SECTION_HEADINGS = (
     OPTIONAL_SUPPORT_SECTION_HEADING,
@@ -42,6 +43,7 @@ CANONICAL_OPERATIONAL_AGENT_ENGINES = {
     },
     "internal-critical-challenger": {"internal-agent-operating-model-engine"},
 }
+CANONICAL_OPERATIONAL_AGENT_NAMES = frozenset(CANONICAL_OPERATIONAL_AGENT_ENGINES)
 RETIRED_OPERATIONAL_AGENT_PATHS = (
     Path(".github/agents/internal-ai-resource-creator.agent.md"),
     Path(".github/agents/internal-architect.agent.md"),
@@ -238,7 +240,20 @@ def extract_markdown_h3_section(text: str, heading: str) -> str | None:
 
 def has_standalone_identifier(text: str, identifier: str) -> bool:
     pattern = rf"(?<![a-z0-9-]){re.escape(identifier)}(?![a-z0-9-])"
-    return re.search(pattern, text) is not None
+    return re.search(pattern, text, re.IGNORECASE) is not None
+
+
+def extract_internal_identifiers(text: str) -> list[str]:
+    return sorted(
+        {
+            match.group(0).lower()
+            for match in re.finditer(r"(?<![a-z0-9-])internal-[a-z0-9-]+(?![a-z0-9-])", text, re.IGNORECASE)
+        }
+    )
+
+
+def contains_case_insensitive(text: str, fragment: str) -> bool:
+    return re.search(re.escape(fragment), text, re.IGNORECASE) is not None
 
 
 def extract_markdown_skill_list(
@@ -570,8 +585,35 @@ def validate_canonical_operational_agent_contract(errors: list[str]) -> None:
                 f"Canonical operational agent must use `{OPTIONAL_SUPPORT_SECTION_HEADING}` instead of `{PREFERRED_OPTIONAL_SECTION_HEADING}`: {agent_path}"
             )
 
-        if "## Escalation / Routing" not in text:
-            errors.append(f"Missing `## Escalation / Routing` in {agent_path}")
+        escalation_section = extract_markdown_h2_section(text, ESCALATION_SECTION_HEADING)
+        if escalation_section is None:
+            errors.append(f"Missing `{ESCALATION_SECTION_HEADING}` in {agent_path}")
+            continue
+
+        escalation_targets = extract_internal_identifiers(escalation_section)
+        if not escalation_targets:
+            errors.append(
+                "Missing canonical escalation target references in "
+                f"`{ESCALATION_SECTION_HEADING}`: {agent_path}"
+            )
+            continue
+
+        for target in escalation_targets:
+            if target not in CANONICAL_OPERATIONAL_AGENT_NAMES:
+                errors.append(
+                    f"Non-canonical escalation target `{target}` found in {agent_path}"
+                )
+                continue
+
+            if target == agent_name:
+                errors.append(f"Self-route `{target}` found in {agent_path}")
+                continue
+
+            target_path = REPO_ROOT / ".github" / "agents" / f"{target}.agent.md"
+            if not target_path.exists():
+                errors.append(
+                    f"Escalation target `{target}` missing on disk for {agent_path}"
+                )
 
 
 def validate_copilot_instruction_operational_engine_policy(errors: list[str]) -> None:
@@ -637,7 +679,7 @@ def validate_retired_operational_agents(errors: list[str]) -> None:
                 )
 
         for pattern in RETIRED_CODE_REVIEW_AGENT_PATTERNS:
-            if pattern in text:
+            if contains_case_insensitive(text, pattern):
                 errors.append(
                     "Stale retired operational agent reference `internal-code-review` found in "
                     f"{relative_path}: {pattern}"

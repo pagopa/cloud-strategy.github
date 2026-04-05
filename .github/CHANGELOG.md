@@ -7,6 +7,9 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-05
+- Hardened `.github/scripts/validate-copilot-customizations.py`, `tests/test_contract_runner.py`, and `tests/test_validate_copilot_customizations.py` so canonical operational agents must point only to real canonical escalation targets, must not self-route, and stale retired-agent references are caught case-insensitively.
+- Clarified `internal-router` and `internal-agent-routing-engine` so medium-confidence routing asks at most one targeted clarification question with two clear options before falling back to `internal-planning-leader`.
+- Strengthened `.github/skills/internal-code-review/SKILL.md` with a standalone quick-start so the skill stays usable directly as a tactical review asset, not only as the review guard's engine.
 - Refreshed `.github/README.md` so the maintainer-facing catalog now matches the live `internal-*`, `obra-*`, and imported support families, the canonical internal agent model, and the actual scripts and workflow present on disk after recent repository restructuring.
 
 ## 2026-04-04
