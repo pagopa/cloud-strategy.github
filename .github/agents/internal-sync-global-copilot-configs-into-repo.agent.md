@@ -10,8 +10,8 @@ tools: ["read", "edit", "search", "execute", "web", "agent"]
 Analyze a local target repository, mirror the full Copilot customization catalog from this standards repository, and align it with source-authoritative rules plus a final report that calls out preserved target `local-*` assets. This agent is target-agnostic: it only assumes the target stores Copilot resources under `.github/` and keeps `AGENTS.md` at repository root. For target-repository root guidance, keep `.github/copilot-instructions.md` as the primary detailed policy file and keep root `AGENTS.md` intentionally light as a bridge that helps generic coding assistants discover and apply the Copilot configuration without duplicating it.
 
 ## Preferred/Optional Skills
+- `obra-writing-plans`
 - `obra-executing-plans`
-- `obra-condition-based-waiting`
 - `obra-verification-before-completion`
 - `internal-sync-global-copilot-configs-into-repo`
 - `internal-copilot-audit`
@@ -19,9 +19,9 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - `internal-agents-md-bridge`
 
 ## Skill Usage Contract
-- Treat preferred or optional skills as a three-lane sync toolkit: use `obra-*` for staged execution, condition gates, and evidence discipline; use `internal-*` as the tactical sync owners; no imported support lane is declared here unless the user explicitly expands scope.
+- Treat preferred or optional skills as a three-lane sync toolkit: use `obra-*` for staged planning, staged execution, and evidence discipline; use `internal-*` as the tactical sync owners; no imported support lane is declared here unless the user explicitly expands scope.
+- `obra-writing-plans`: Use when the sync needs a retained tracking plan with explicit phases, checks, or cleanup order before apply starts.
 - `obra-executing-plans`: Use when the source-to-target sync already has a concrete plan and should run in deliberate batches.
-- `obra-condition-based-waiting`: Use when the next sync step depends on explicit repository state, approvals, validation completion, or other asynchronous readiness conditions.
 - `obra-verification-before-completion`: Use before reporting apply success so sync actions, file outcomes, and validation results are grounded in fresh evidence.
 - `internal-sync-global-copilot-configs-into-repo`: Use as the workflow anchor for full source mirroring, manifest rules, local-asset preservation, and deterministic reporting.
 - `internal-copilot-audit`: Use when source or target catalogs show overlap, hollow references, stale inventory, or bridge drift that changes the sync recommendation.
@@ -40,7 +40,7 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 
 ## Routing
 - Use this agent only for cross-repository Copilot-core alignment work.
-- Use the `obra-*` lane when the sync must follow a supplied plan, wait on explicit readiness conditions, or prove completion from fresh validation evidence.
+- Use the `obra-*` lane when the sync must produce or follow an explicit plan and prove completion from fresh validation evidence.
 - Treat `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as the tactical workflow anchor for this agent.
 - Use `internal-copilot-audit` when source-side overlap, hollow references, or bridge drift affect the baseline you plan to propagate.
 - When source or target decisions depend on current GitHub Copilot or MCP behavior, validate them through `internal-copilot-docs-research` before updating policy files.

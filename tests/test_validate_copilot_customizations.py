@@ -436,3 +436,49 @@ tools: ["read", "edit", "search", "execute"]
         "Missing completion report category `### ✅ Outcome` in "
         ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"
     ) in joined_errors
+
+
+def test_build_report_rejects_repo_profile_reference_missing_on_disk(tmp_path: Path) -> None:
+    build_minimal_repo(
+        tmp_path,
+        """---
+name: internal-example
+description: Use this agent when the repository needs an example command center.
+tools: [\"read\", \"search\", \"execute\", \"web\", \"agent\"]
+---
+
+# Internal Example
+
+## Role
+
+You are the example command center.
+
+## Routing Rules
+
+- Use this agent when an example is needed.
+
+## Output Expectations
+
+- Example output
+""",
+    )
+    write_file(
+        tmp_path / ".github" / "repo-profiles.yml",
+        """version: 1
+
+profiles:
+  minimal:
+    description: Example profile.
+    recommended_skills:
+      - skills/internal-missing/SKILL.md
+""",
+    )
+
+    with validator_repo(tmp_path):
+        report = VALIDATOR.build_report("root", "strict")
+
+    assert not report.valid
+    assert (
+        "Repo profile path missing on disk: .github/skills/internal-missing/SKILL.md"
+        in "\n".join(report.errors)
+    )

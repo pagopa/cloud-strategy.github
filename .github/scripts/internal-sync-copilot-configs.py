@@ -35,6 +35,7 @@ MANAGED_ALWAYS = (
     ".github/copilot-instructions.md",
     ".github/copilot-commit-message-instructions.md",
     ".github/copilot-code-review-instructions.md",
+    ".github/obra-superpowers-source-of-truth.json",
     ".github/security-baseline.md",
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",

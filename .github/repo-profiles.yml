@@ -19,7 +19,7 @@ _common_skills: &common_skills
   - skills/obra-systematic-debugging/SKILL.md
   - skills/obra-test-driven-development/SKILL.md
   - skills/obra-using-git-worktrees/SKILL.md
-  - skills/obra-using-skills/SKILL.md
+  - skills/obra-using-superpowers/SKILL.md
   - skills/obra-verification-before-completion/SKILL.md
   - skills/obra-writing-plans/SKILL.md
 

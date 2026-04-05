@@ -160,5 +160,6 @@ These apply to every code change, regardless of language or technology:
 - Keep assistant-facing language mapped through `AGENTS.md` and avoid mentioning internal runtime names.
 - `internal-pr-editor` remains intentionally prompt-routed; keep PR body generation on the prompt-plus-skill path unless the repository adds a dedicated agent.
 - `internal-data-registry` remains intentionally dormant tactical capacity until the repository adds a concrete routing owner.
-- Keep these installed `obra-*` skills intentionally dormant until a concrete workflow owner is declared: `obra-gardening-skills-wiki`, `obra-pulling-updates-from-skills-repository`, `obra-sharing-skills`, `obra-testing-skills-with-subagents`, `obra-using-skills`, and `obra-remembering-conversations`.
+- Use `.github/obra-superpowers-source-of-truth.json` as the pinned OBRA import contract; stale OBRA mappings or references should fail validation instead of drifting silently.
+- Keep `obra-using-superpowers` as the repository-wide OBRA bootstrap reference and `obra-writing-skills` as the skill-authoring reference; do not pad unrelated agent skill lists with them decoratively.
 - For sync workflows that need retained plans or auxiliary output files, use repository-root `tmp/` and create it if missing instead of scattering those artifacts under governed `.github/` paths.

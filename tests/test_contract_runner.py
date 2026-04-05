@@ -438,3 +438,56 @@ def test_sync_apply_finops_like_target_passes_validation(tmp_path: Path) -> None
         report = VALIDATOR.build_report("root", "strict")
 
     assert report.valid, "\n".join(report.errors)
+
+
+def test_resource_governance_inventory_covers_catalog() -> None:
+    inventory_paths = set(VALIDATOR.extract_inventory_paths())
+    actual_paths = {
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in resource_paths()
+    }
+
+    assert actual_paths <= inventory_paths
+
+
+def test_resource_governance_repo_profiles_resolve_on_disk() -> None:
+    repo_profiles_path = REPO_ROOT / ".github" / "repo-profiles.yml"
+    for raw_line in repo_profiles_path.read_text(encoding="utf-8").splitlines():
+        stripped = raw_line.split("#", 1)[0].strip()
+        if not stripped.startswith("- "):
+            continue
+
+        candidate = stripped[2:].strip().strip("\"'")
+        if not candidate.startswith(("instructions/", "prompts/", "skills/")):
+            continue
+
+        assert (REPO_ROOT / ".github" / candidate).exists(), candidate
+
+
+def test_resource_governance_obra_source_of_truth_matches_local_catalog() -> None:
+    source_of_truth_path = REPO_ROOT / ".github" / "obra-superpowers-source-of-truth.json"
+    source_of_truth = json.loads(source_of_truth_path.read_text(encoding="utf-8"))
+    expected_mappings = {
+        (entry["upstream"], entry["local"])
+        for entry in source_of_truth["managed_skills"]
+    }
+    expected_locals = {local for _upstream, local in expected_mappings}
+    actual_locals = {
+        path.parent.name
+        for path in sorted((REPO_ROOT / ".github" / "skills").glob("obra-*/SKILL.md"))
+    }
+
+    assert expected_locals == actual_locals
+
+    control_center_text = (
+        REPO_ROOT / ".github" / "agents" / "internal-sync-control-center.agent.md"
+    ).read_text(encoding="utf-8")
+    declared_mappings = set(
+        VALIDATOR.extract_managed_skill_mappings(
+            control_center_text,
+            VALIDATOR.OBRA_MANAGED_RESOURCE_SECTION,
+        )
+        or []
+    )
+
+    assert expected_mappings == declared_mappings
