@@ -123,6 +123,11 @@ SYNC_AGENT_COMPLETION_REPORT_PATHS = (
     Path(".github/agents/internal-sync-control-center.agent.md"),
     Path(".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"),
 )
+MANDATORY_ENGINE_BASELINE_POLICY_LINE = (
+    "Source-side sync must keep the canonical mandatory engine skills explicit in the "
+    "source-side preferred-skills baseline; do not rely on agent bodies alone for the "
+    "engine layer."
+)
 
 
 @dataclass
@@ -569,6 +574,22 @@ def validate_canonical_operational_agent_contract(errors: list[str]) -> None:
             errors.append(f"Missing `## Escalation / Routing` in {agent_path}")
 
 
+def validate_copilot_instruction_operational_engine_policy(errors: list[str]) -> None:
+    if not should_validate_canonical_operational_model():
+        return
+
+    copilot_instructions_path = REPO_ROOT / ".github" / "copilot-instructions.md"
+    if not copilot_instructions_path.exists():
+        return
+
+    text = read_text(copilot_instructions_path)
+    if MANDATORY_ENGINE_BASELINE_POLICY_LINE not in text:
+        errors.append(
+            "Missing canonical mandatory-engine baseline policy line in "
+            f"{copilot_instructions_path}"
+        )
+
+
 def retired_operational_reference_files() -> list[Path]:
     paths: set[Path] = set()
 
@@ -931,6 +952,7 @@ def build_report(scope: str, mode: str) -> ValidationReport:
     validate_required_paths(errors)
     validate_named_resources(errors)
     validate_canonical_operational_agent_contract(errors)
+    validate_copilot_instruction_operational_engine_policy(errors)
     validate_retired_operational_agents(errors)
     validate_inventory(errors)
     validate_repo_profile_references(errors)

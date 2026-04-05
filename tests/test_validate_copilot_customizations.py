@@ -53,6 +53,9 @@ def build_minimal_repo(root: Path, agent_content: str) -> None:
         root / ".github" / "copilot-instructions.md",
         """# Copilot Instructions
 
+## Operational routing model
+- Source-side sync must keep the canonical mandatory engine skills explicit in the source-side preferred-skills baseline; do not rely on agent bodies alone for the engine layer.
+
 ## Operation Completion Report
 - After every completed operation, end with a concise completion report.
 - If a category was not used, explicitly say so and explain why.

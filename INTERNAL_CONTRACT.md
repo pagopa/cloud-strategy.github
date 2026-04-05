@@ -85,6 +85,7 @@ These rules apply to all repository resources, including prompts, skills, instru
   - each canonical operational agent declares a non-empty `## Optional Support Skills` section
   - each canonical operational agent publishes `## Escalation / Routing`
   - canonical operational agents do not fall back to the legacy `## Preferred/Optional Skills` heading
+  - `.github/copilot-instructions.md` defines the source-side mandatory-engine baseline policy without making that rule depend on root `AGENTS.md`
 
 #### `resource-governance-retired-operational-agents-do-not-regrow`
 
@@ -143,6 +144,7 @@ These rules apply to all repository resources, including prompts, skills, instru
   - the generated sync plan identifies the repository as Python-oriented
   - the generated sync plan selects every source instruction, prompt, skill, and agent
   - the generated sync plan includes skill support files outside `SKILL.md`
+  - the generated sync plan keeps the canonical mandatory engine skills in the preferred-skills selection baseline
 
 #### `sync-plan-preserves-local-target-assets`
 

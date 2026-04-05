@@ -96,6 +96,9 @@ class CliError(RuntimeError):
     """Raised when the CLI input is invalid."""
 
 
+MANDATORY_ENGINE_SECTION_HEADING = "## Mandatory Engine Skills"
+
+
 @dataclass
 class RepoProfile:
     name: str
@@ -522,11 +525,8 @@ def extract_markdown_h2_section(text: str, heading: str) -> str | None:
     return "\n".join(collected).strip()
 
 
-def agent_skill_refs(path: Path) -> list[str] | None:
-    text = path.read_text(encoding="utf-8")
-    section = extract_markdown_h2_section(text, "## Mandatory Engine Skills")
-    if section is None:
-        section = extract_markdown_h2_section(text, "## Preferred/Optional Skills")
+def markdown_skill_refs(text: str, heading: str) -> list[str] | None:
+    section = extract_markdown_h2_section(text, heading)
     if section is None:
         return None
 
@@ -536,6 +536,37 @@ def agent_skill_refs(path: Path) -> list[str] | None:
         if match:
             refs.append(match.group(1))
     return refs
+
+
+def agent_skill_refs(path: Path) -> list[str] | None:
+    text = path.read_text(encoding="utf-8")
+    refs = markdown_skill_refs(text, MANDATORY_ENGINE_SECTION_HEADING)
+    if refs is not None:
+        return refs
+    return markdown_skill_refs(text, "## Preferred/Optional Skills")
+
+
+def source_mandatory_engine_skill_paths(
+    source_root: Path,
+    agent_relative_paths: list[str],
+    skill_relative_paths: set[str],
+) -> list[str]:
+    skill_paths_by_name = {
+        Path(relative_path).parent.name: relative_path
+        for relative_path in skill_relative_paths
+        if relative_path.endswith("/SKILL.md")
+    }
+    required_paths: set[str] = set()
+
+    for relative_path in agent_relative_paths:
+        agent_path = source_root / relative_path
+        refs = markdown_skill_refs(agent_path.read_text(encoding="utf-8"), MANDATORY_ENGINE_SECTION_HEADING) or []
+        for skill_name in refs:
+            skill_path = skill_paths_by_name.get(skill_name)
+            if skill_path:
+                required_paths.add(skill_path)
+
+    return sorted(required_paths)
 
 
 def skill_names_from_selection(relative_paths: set[str]) -> set[str]:
@@ -1357,8 +1388,19 @@ def select_assets(source_root: Path, analysis: TargetAnalysis, profiles: dict[st
     if not preferred_prompts:
         preferred_prompts = sorted(prompts)[:5]
 
-    preferred_skill_candidates = {ensure_github_prefix(item) for item in profile.recommended_skills} | set(source_preferred_skills)
-    preferred_skills = [path for path in sorted(skills) if path in preferred_skill_candidates]
+    mandatory_engine_skill_paths = source_mandatory_engine_skill_paths(
+        source_root, sorted(agents), skills
+    )
+    preferred_skill_candidates = (
+        {ensure_github_prefix(item) for item in profile.recommended_skills}
+        | set(source_preferred_skills)
+        | set(mandatory_engine_skill_paths)
+    )
+    preferred_skills = mandatory_engine_skill_paths + [
+        path
+        for path in sorted(skills)
+        if path in preferred_skill_candidates and path not in set(mandatory_engine_skill_paths)
+    ]
     if not preferred_skills:
         preferred_skills = sorted(skills)[:5]
 

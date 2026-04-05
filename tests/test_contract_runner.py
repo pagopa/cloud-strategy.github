@@ -289,6 +289,9 @@ def test_resource_governance_canonical_operational_agents_publish_engine_contrac
         skill_path.parent.name
         for skill_path in sorted((REPO_ROOT / ".github" / "skills").glob("*/SKILL.md"))
     }
+    copilot_instructions_text = (REPO_ROOT / ".github" / "copilot-instructions.md").read_text(encoding="utf-8")
+
+    assert VALIDATOR.MANDATORY_ENGINE_BASELINE_POLICY_LINE in copilot_instructions_text
 
     for agent_name, expected_engine_skills in VALIDATOR.CANONICAL_OPERATIONAL_AGENT_ENGINES.items():
         path = REPO_ROOT / ".github" / "agents" / f"{agent_name}.agent.md"
@@ -401,6 +404,12 @@ def test_sync_plan_mirrors_source_catalog(tmp_path: Path) -> None:
     assert plan.selection.skills == SYNC_MODULE.source_asset_paths(REPO_ROOT, "skills")
     assert plan.selection.agents == SYNC_MODULE.source_asset_paths(REPO_ROOT, "agents")
     assert plan.selection.supporting_files == SYNC_MODULE.source_skill_support_paths(REPO_ROOT)
+
+    expected_engine_skill_paths = {
+        f".github/skills/{skill_name}/SKILL.md"
+        for skill_name in set().union(*VALIDATOR.CANONICAL_OPERATIONAL_AGENT_ENGINES.values())
+    }
+    assert expected_engine_skill_paths.issubset(set(plan.selection.preferred_skills))
 
 
 def test_sync_plan_keeps_finops_like_selection_stack_specific(tmp_path: Path) -> None:
