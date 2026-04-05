@@ -114,39 +114,22 @@ Managed instructions:
 
 Source repository:
 
-- Skills: `https://github.com/obra/superpowers/tree/main/skills`
+- Skills: `https://github.com/obra/superpowers/tree/v5.0.7`
 
 Managed skills:
 
 - `brainstorming` -> `obra-brainstorming`
-- `collision-zone-thinking` -> `obra-collision-zone-thinking`
-- `condition-based-waiting` -> `obra-condition-based-waiting`
-- `defense-in-depth` -> `obra-defense-in-depth`
 - `dispatching-parallel-agents` -> `obra-dispatching-parallel-agents`
 - `executing-plans` -> `obra-executing-plans`
 - `finishing-a-development-branch` -> `obra-finishing-a-development-branch`
-- `gardening-skills-wiki` -> `obra-gardening-skills-wiki`
-- `inversion-exercise` -> `obra-inversion-exercise`
-- `meta-pattern-recognition` -> `obra-meta-pattern-recognition`
-- `preserving-productive-tensions` -> `obra-preserving-productive-tensions`
-- `pulling-updates-from-skills-repository` -> `obra-pulling-updates-from-skills-repository`
 - `receiving-code-review` -> `obra-receiving-code-review`
-- `remembering-conversations` -> `obra-remembering-conversations`
 - `requesting-code-review` -> `obra-requesting-code-review`
-- `root-cause-tracing` -> `obra-root-cause-tracing`
-- `scale-game` -> `obra-scale-game`
-- `sharing-skills` -> `obra-sharing-skills`
-- `simplification-cascades` -> `obra-simplification-cascades`
 - `subagent-driven-development` -> `obra-subagent-driven-development`
 - `systematic-debugging` -> `obra-systematic-debugging`
 - `test-driven-development` -> `obra-test-driven-development`
-- `testing-anti-patterns` -> `obra-testing-anti-patterns`
-- `testing-skills-with-subagents` -> `obra-testing-skills-with-subagents`
-- `tracing-knowledge-lineages` -> `obra-tracing-knowledge-lineages`
 - `using-git-worktrees` -> `obra-using-git-worktrees`
-- `using-skills` -> `obra-using-skills`
+- `using-superpowers` -> `obra-using-superpowers`
 - `verification-before-completion` -> `obra-verification-before-completion`
-- `when-stuck` -> `obra-when-stuck`
 - `writing-plans` -> `obra-writing-plans`
 
 ### `hashicorp/agent-skills`
