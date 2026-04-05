@@ -33,18 +33,18 @@ Implications:
 `internal-fast-executor` stays owner only when all of these are true:
 
 - The likely change touches `<= 2` files.
-- The work stays inside one directory family or one logical boundary.
+- The work stays within one directory family or one logical boundary.
 - Routing, ownership, naming contracts, and catalog boundaries stay unchanged.
-- No real multi-option strategic comparison is needed.
+- The task does not require a real strategic comparison.
 
 `internal-planning-leader` becomes owner when at least one of these is true:
 
 - The change touches `>= 3` files with lateral impact.
-- The work crosses multiple directory families or logical boundaries.
-- The task changes routing, ownership, or boundaries between agents, skills, prompts, or instructions.
-- There are `>= 2` credible options with non-trivial tradeoffs.
-- Rollout, regressions, governance, or rollback need a real decision.
-- The task creates a new repository-owned resource instead of a banal local update.
+- The change crosses more than one directory family or logical boundary.
+- The change affects routing, ownership, naming contracts, or catalog boundaries.
+- There are `>= 2` credible solution paths with non-trivial tradeoffs.
+- The task needs rollout, regression, governance, or rollback decisions.
+- The task creates a new repository-owned resource instead of a banal update to an existing one.
 
 ## Boundary Recommendation Protocol
 

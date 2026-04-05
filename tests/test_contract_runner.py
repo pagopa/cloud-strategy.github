@@ -612,6 +612,64 @@ def test_resource_governance_repo_profiles_resolve_on_disk() -> None:
         assert (REPO_ROOT / ".github" / candidate).exists(), candidate
 
 
+def test_sync_load_profiles_supports_yaml_aliases(tmp_path: Path) -> None:
+    profiles_path = tmp_path / "repo-profiles.yml"
+    write_file(
+        profiles_path,
+        """common_instructions: &common_instructions
+  - instructions/internal-markdown.instructions.md
+common_skills: &common_skills
+  - skills/internal-code-review/SKILL.md
+profiles:
+  minimal:
+    description: Baseline setup for a small repository.
+    recommended_instructions: *common_instructions
+    recommended_prompts:
+      - prompts/internal-github-action.prompt.md
+    recommended_skills: *common_skills
+""",
+    )
+
+    profiles = SYNC_MODULE.load_profiles(profiles_path)
+
+    assert profiles["minimal"].description == "Baseline setup for a small repository."
+    assert profiles["minimal"].recommended_instructions == [
+        "instructions/internal-markdown.instructions.md"
+    ]
+    assert profiles["minimal"].recommended_prompts == [
+        "prompts/internal-github-action.prompt.md"
+    ]
+    assert profiles["minimal"].recommended_skills == [
+        "skills/internal-code-review/SKILL.md"
+    ]
+
+
+def test_sync_parse_frontmatter_supports_yaml_lists(tmp_path: Path) -> None:
+    asset_path = tmp_path / "example.instructions.md"
+    write_file(
+        asset_path,
+        """---
+name: internal-example
+description: "Example: keep the colon"
+applyTo:
+  - "**/*.py"
+  - "**/*.pyi"
+metadata:
+  owner: platform
+---
+
+# Example
+""",
+    )
+
+    frontmatter = SYNC_MODULE.parse_frontmatter(asset_path)
+
+    assert frontmatter["name"] == "internal-example"
+    assert frontmatter["description"] == "Example: keep the colon"
+    assert frontmatter["applyTo"] == "**/*.py, **/*.pyi"
+    assert frontmatter["metadata"] == ""
+
+
 def test_resource_governance_obra_source_of_truth_matches_local_catalog() -> None:
     source_of_truth_path = REPO_ROOT / ".github" / "obra-superpowers-source-of-truth.json"
     source_of_truth = json.loads(source_of_truth_path.read_text(encoding="utf-8"))

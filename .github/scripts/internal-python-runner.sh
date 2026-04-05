@@ -7,8 +7,23 @@
 
 set -euo pipefail
 
+log_info() {
+  printf '%s\n' "ℹ️  $*" >&2
+}
+
+log_error() {
+  printf '%s\n' "❌ $*" >&2
+}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    log_error "Missing required command: $1"
+    exit 1
+  fi
+}
+
 if [[ $# -lt 1 ]]; then
-  printf '%s\n' "❌ Usage: $0 <python-entrypoint> [args ...]" >&2
+  log_error "Usage: $0 <python-entrypoint> [args ...]"
   exit 1
 fi
 
@@ -22,7 +37,7 @@ else
 fi
 
 if [[ ! -f "$ENTRYPOINT_PATH" ]]; then
-  printf '%s\n' "❌ Python entrypoint not found: $ENTRYPOINT_PATH" >&2
+  log_error "Python entrypoint not found: $ENTRYPOINT_PATH"
   exit 1
 fi
 
@@ -33,11 +48,13 @@ REQUIREMENTS_STAMP="$VENV_DIR/.requirements.sha256"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 if [[ ! -d "$VENV_DIR" ]]; then
-  printf '%s\n' "ℹ️  Creating local virtual environment in $VENV_DIR" >&2
+  require_command "$PYTHON_BIN"
+  log_info "Creating local virtual environment in $VENV_DIR"
   "$PYTHON_BIN" -m venv "$VENV_DIR"
 fi
 
 if [[ -f "$REQUIREMENTS_FILE" ]]; then
+  require_command shasum
   current_requirements_hash="$(shasum -a 256 "$REQUIREMENTS_FILE" | awk '{print $1}')"
   installed_requirements_hash=""
   if [[ -f "$REQUIREMENTS_STAMP" ]]; then
@@ -45,14 +62,20 @@ if [[ -f "$REQUIREMENTS_FILE" ]]; then
   fi
 
   if [[ "$current_requirements_hash" != "$installed_requirements_hash" ]]; then
-    printf '%s\n' "ℹ️  Installing local Python dependencies from $REQUIREMENTS_FILE" >&2
-    if grep -q -- "--hash=" "$REQUIREMENTS_FILE"; then
-      "$VENV_DIR/bin/pip" install --require-hashes -r "$REQUIREMENTS_FILE"
-    else
-      "$VENV_DIR/bin/pip" install -r "$REQUIREMENTS_FILE"
+    if [[ ! -x "$VENV_DIR/bin/pip" ]]; then
+      log_error "Virtual environment pip not found: $VENV_DIR/bin/pip"
+      exit 1
     fi
+
+    log_info "Installing local Python dependencies from $REQUIREMENTS_FILE"
+    "$VENV_DIR/bin/pip" install -r "$REQUIREMENTS_FILE"
     printf '%s\n' "$current_requirements_hash" > "$REQUIREMENTS_STAMP"
   fi
+fi
+
+if [[ ! -x "$VENV_DIR/bin/python" ]]; then
+  log_error "Virtual environment python not found: $VENV_DIR/bin/python"
+  exit 1
 fi
 
 exec "$VENV_DIR/bin/python" "$ENTRYPOINT_PATH" "$@"

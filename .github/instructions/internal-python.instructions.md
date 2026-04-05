@@ -45,23 +45,20 @@ applyTo: "**/*.py"
 ## Dependencies
 - Standardize on `requirements.txt` as the Python dependency lock artifact in this baseline.
 - For new scripts, evaluate stdlib versus third-party options explicitly before coding and record that choice in the dependency decision note.
-- If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins, full transitive dependency closure, and `--hash` entries for every locked requirement.
+- If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins and full transitive dependency closure.
 - Keep a short comment above each introduced dependency block so the pinned version is readable without parsing the full hash line.
 - Recommend third-party libraries when they materially reduce custom parsing, validation, HTTP, CLI, serialization, retry, date handling, table rendering, Excel/CSV, or formatting code.
 - If the dependency decision note selects external libraries, create or update the local `requirements.txt` accordingly.
 - Do not force third-party libraries over the standard library when the standard library is simpler, clearer, or safer in the final implementation.
 - Avoid marginal dependencies whose setup cost exceeds their practical simplification value.
-- When a fully hash-locked `requirements.txt` is not feasible, use exact `==` pins in `requirements.txt` and document the reason in the closest technical note or workflow comment.
 
 ## Dependency example
 ```text
 # requests 2.32.3
-requests==2.32.3 \
-    --hash=sha256:<hash1> \
-    --hash=sha256:<hash2>
+requests==2.32.3
 ```
 
-- Generate the locked file with `pip-compile --generate-hashes` or an equivalent workflow that captures the full dependency closure.
+- Generate the locked file with `pip-compile` or an equivalent workflow that captures the full dependency closure.
 
 ## Testing defaults
 - Use `pytest` as default unit-test framework.

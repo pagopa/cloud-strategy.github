@@ -9,7 +9,7 @@ This folder contains deliberate custom agents for repository-owned operational r
 4. Apply prompt and referenced skill details.
 
 ## Recommended routing
-- Default operational front door: `internal-router`.
+- Default operational front door: `internal-router` (routes only; it does not edit files or implement changes).
 - Direct canonical owners: `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-challenger`.
 - Source-side catalog sync, rationalization, overlap cleanup, and governance drift correction in this repository: `internal-sync-control-center`.
 - Cross-repository baseline propagation: `internal-sync-global-copilot-configs-into-repo`.
@@ -28,7 +28,7 @@ This folder contains deliberate custom agents for repository-owned operational r
 - Prefer prompts and skills for detailed task procedures unless a dedicated agent file is present.
 
 ## Selection guide
-1. Use `internal-router` when the user has not yet chosen the right owner or the request could plausibly be execution, planning, review, or challenge.
+1. Use `internal-router` when the user has not yet chosen the right owner or the request could plausibly be execution, planning, review, or challenge. Treat it as dispatch-only.
 2. Use `internal-fast-executor` for clear, local execution work with concrete verification and no non-trivial strategic tradeoffs.
 3. Use `internal-planning-leader` for ambiguity resolution, non-trivial repository-owned authoring, design decisions, and rollout or governance planning.
 4. Use `internal-review-guard` for defect-first review, merge readiness, regression analysis, and evidence-based validation.

@@ -20,6 +20,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
+import yaml
+
 
 SCRIPT_NAME = "internal-sync-global-copilot-configs-into-repo"
 MANIFEST_RELATIVE_PATH = ".github/internal-sync-copilot-configs.manifest.json"
@@ -99,6 +101,65 @@ class CliError(RuntimeError):
 
 
 MANDATORY_ENGINE_SECTION_HEADING = "## Mandatory Engine Skills"
+
+
+def load_yaml_document(path: Path) -> object:
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise CliError(f"Failed to read YAML file {path}: {exc}") from exc
+
+    if not content.strip():
+        return {}
+
+    try:
+        loaded = yaml.safe_load(content)
+    except yaml.YAMLError as exc:
+        raise CliError(f"Invalid YAML in {path}: {exc}") from exc
+
+    if loaded is None:
+        return {}
+
+    return loaded
+
+
+def coerce_frontmatter_value(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (str, int, float)):
+        return str(value)
+    if isinstance(value, list):
+        rendered_items = [coerce_frontmatter_value(item).strip() for item in value]
+        return ", ".join(item for item in rendered_items if item)
+    return ""
+
+
+def normalize_profile_string_list(
+    raw_value: object,
+    *,
+    field_name: str,
+    profile_name: str,
+    source_path: Path,
+) -> list[str]:
+    if raw_value in (None, ""):
+        return []
+    if not isinstance(raw_value, list):
+        raise CliError(
+            f"Expected `{field_name}` to be a list for profile `{profile_name}` in {source_path}"
+        )
+
+    normalized: list[str] = []
+    for item in raw_value:
+        if not isinstance(item, str):
+            raise CliError(
+                f"Expected `{field_name}` entries to be strings for profile `{profile_name}` in {source_path}"
+            )
+        stripped = item.strip()
+        if stripped:
+            normalized.append(stripped)
+    return normalized
 
 
 @dataclass
@@ -427,62 +488,78 @@ def resolve_target_repo_root(input_path: str) -> Path:
 
 
 def load_profiles(path: Path) -> dict[str, RepoProfile]:
+    loaded = load_yaml_document(path)
+    if not isinstance(loaded, dict):
+        raise CliError(f"Expected a YAML mapping in {path}")
+
+    raw_profiles = loaded.get("profiles")
+    if raw_profiles in (None, ""):
+        return {}
+    if not isinstance(raw_profiles, dict):
+        raise CliError(f"Expected `profiles` to be a mapping in {path}")
+
     profiles: dict[str, RepoProfile] = {}
-    current_profile: RepoProfile | None = None
-    current_list: list[str] | None = None
+    for profile_name, raw_profile in raw_profiles.items():
+        if not isinstance(profile_name, str) or not profile_name.strip():
+            raise CliError(f"Expected every profile name to be a non-empty string in {path}")
+        if not isinstance(raw_profile, dict):
+            raise CliError(f"Expected profile `{profile_name}` to be a mapping in {path}")
 
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
-            continue
+        raw_description = raw_profile.get("description", "")
+        if raw_description is None:
+            description = ""
+        elif isinstance(raw_description, str):
+            description = raw_description.strip()
+        else:
+            raise CliError(f"Expected `description` to be a string for profile `{profile_name}` in {path}")
 
-        if raw_line.startswith("  ") and not raw_line.startswith("    ") and raw_line.rstrip().endswith(":"):
-            profile_name = raw_line.strip()[:-1]
-            if profile_name == "profiles":
-                continue
-            current_profile = RepoProfile(name=profile_name, description="")
-            profiles[profile_name] = current_profile
-            current_list = None
-            continue
-
-        if current_profile is None:
-            continue
-
-        stripped = raw_line.strip()
-        if stripped.startswith("description:"):
-            current_profile.description = stripped.split(":", 1)[1].strip()
-            current_list = None
-            continue
-
-        if stripped.startswith("recommended_") and stripped.endswith(":"):
-            key = stripped[:-1]
-            current_list = getattr(current_profile, key)
-            continue
-
-        if stripped.startswith("- ") and current_list is not None:
-            current_list.append(stripped[2:].strip())
+        profiles[profile_name] = RepoProfile(
+            name=profile_name,
+            description=description,
+            recommended_instructions=normalize_profile_string_list(
+                raw_profile.get("recommended_instructions"),
+                field_name="recommended_instructions",
+                profile_name=profile_name,
+                source_path=path,
+            ),
+            recommended_prompts=normalize_profile_string_list(
+                raw_profile.get("recommended_prompts"),
+                field_name="recommended_prompts",
+                profile_name=profile_name,
+                source_path=path,
+            ),
+            recommended_skills=normalize_profile_string_list(
+                raw_profile.get("recommended_skills"),
+                field_name="recommended_skills",
+                profile_name=profile_name,
+                source_path=path,
+            ),
+        )
 
     return profiles
 
 
 def parse_frontmatter(path: Path) -> dict[str, str]:
+    content = path.read_text(encoding="utf-8")
+    match = re.match(r"(?s)\A---\n(.*?)\n---(?:\n|\Z)", content)
+    if not match:
+        return {}
+
+    try:
+        loaded = yaml.safe_load(match.group(1))
+    except yaml.YAMLError as exc:
+        raise CliError(f"Invalid frontmatter YAML in {path}: {exc}") from exc
+
+    if loaded is None:
+        return {}
+    if not isinstance(loaded, dict):
+        raise CliError(f"Expected frontmatter to be a YAML mapping in {path}")
+
     frontmatter: dict[str, str] = {}
-    inside_frontmatter = False
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        stripped = raw_line.strip()
-        if stripped == "---":
-            if inside_frontmatter:
-                break
-            inside_frontmatter = True
+    for key, value in loaded.items():
+        if not isinstance(key, str) or not key or " " in key:
             continue
-
-        if not inside_frontmatter or ":" not in raw_line:
-            continue
-
-        key, value = raw_line.split(":", 1)
-        key = key.strip()
-        if not key or " " in key:
-            continue
-        frontmatter[key] = value.strip().strip('"')
+        frontmatter[key] = coerce_frontmatter_value(value).strip()
 
     return frontmatter
 

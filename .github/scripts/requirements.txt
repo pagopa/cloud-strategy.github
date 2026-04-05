@@ -1,0 +1,5 @@
+# Dependency decision note
+# Candidates: manual stdlib parsing, PyYAML, ruamel.yaml
+# Final choice: PyYAML
+# Why: it removes bespoke YAML parsing from internal-sync-copilot-configs.py for repo-profiles and frontmatter without the heavier round-trip features of ruamel.yaml.
+PyYAML==6.0.2

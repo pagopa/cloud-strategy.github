@@ -92,6 +92,7 @@ Only `internal-router` actively routes between canonical owners; the four canoni
 | Path | Purpose |
 | --- | --- |
 | `scripts/internal-python-runner.sh` | Shared Bash bootstrap for local `.venv` setup and optional `requirements.txt` installation before running repository Python entrypoints. |
+| `scripts/requirements.txt` | Local pinned dependency set for repository-owned Python scripts under `.github/scripts/`. |
 | `scripts/validate-copilot-customizations.sh` | Supported strict validator entrypoint for naming, inventory, routing contracts, and completion-report governance. |
 | `scripts/validate-copilot-customizations.py` | Validator implementation used by the wrapper and test suite. |
 | `scripts/internal-sync-copilot-configs.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |

@@ -7,6 +7,9 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-05
+- Removed the hash-detection fallback from `scripts/internal-python-runner.sh`, switched repository-owned Python launcher guidance to install directly from `requirements.txt`, and deleted the internal Python-policy clause that allowed a non-locked fallback path.
+- Added `.github/scripts/requirements.txt` with a pinned `PyYAML` dependency and switched `internal-sync-copilot-configs.py` from bespoke YAML parsing to `PyYAML` for `repo-profiles.yml` and frontmatter handling in repository-owned scripts.
+- Aligned the medium-task threshold wording between `internal-agent-routing-engine` and `internal-agent-operating-model-engine`, clarified in `agents/README.md` that `internal-router` is dispatch-only, and hardened `scripts/internal-python-runner.sh` with explicit command and virtual-environment checks.
 - Enforced router-only delegation across `internal-router`, the four canonical operational agents, `internal-agent-operating-model-engine`, `internal-agent-development`, `INTERNAL_CONTRACT.md`, and the validator/tests so non-router agents now define boundaries and recommend owners instead of routing actively.
 - Added `internal-python-runner.sh`, Bash wrappers for every executable repository Python entrypoint, explicit `PyYAML` requirements for `openai-skill-creator`, and wrapper-first invocation guidance across prompts, skills, scripts, security docs, and maintainer workflow references.
 - Hardened `.github/scripts/validate-copilot-customizations.py`, `tests/test_contract_runner.py`, and `tests/test_validate_copilot_customizations.py` so canonical operational agents must point only to real canonical escalation targets, must not self-route, and stale retired-agent references are caught case-insensitively.
