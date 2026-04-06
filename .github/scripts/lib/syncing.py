@@ -226,7 +226,7 @@ def write_sync_manifest(plan: SyncPlan) -> Path:
     return manifest_path
 
 
-def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> None:
+def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
     if plan.target_dirty and not allow_dirty_target and any(
         operation.action in {"create", "update", "rebuild", "delete"} for operation in plan.operations
     ):
@@ -245,10 +245,7 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> None:
         elif operation.action == "rebuild" and operation.path == INVENTORY_PATH:
             write_text(target_path, plan.generated_inventory)
 
-    write_sync_manifest(plan)
-    plan_path = plan.target_root / "tmp/internal-sync-copilot-configs.plan.md"
-    if plan_path.exists():
-        plan_path.unlink()
+    return write_sync_manifest(plan)
 
 
 def cleanup_empty_parents(path: Path, stop_at: Path) -> None:

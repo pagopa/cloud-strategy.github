@@ -59,3 +59,29 @@ def test_run_consistency_checks_flags_inventory_drift_and_missing_tools(tmp_path
 
     assert "inventory-missing-entry" in finding_codes
     assert "internal-agent-missing-tools" in finding_codes
+
+
+def test_run_consistency_checks_flags_empty_and_invalid_tools_contracts(tmp_path: Path) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot Instructions\n\nSee `AGENTS.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/agents/internal-empty.agent.md",
+        "---\nname: internal-empty\ntools: []\n---\n\n# Empty\n",
+    )
+    write_file(
+        tmp_path / ".github/agents/internal-invalid.agent.md",
+        "---\nname: internal-invalid\ntools:\n  - read\n  - 1\n---\n\n# Invalid\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
+
+    findings = run_consistency_checks(tmp_path)
+    findings_by_path = {(finding.path, finding.code) for finding in findings}
+
+    assert (".github/agents/internal-empty.agent.md", "internal-agent-missing-tools") in findings_by_path
+    assert (".github/agents/internal-invalid.agent.md", "internal-agent-invalid-tools") in findings_by_path

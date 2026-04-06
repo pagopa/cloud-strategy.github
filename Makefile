@@ -1,6 +1,6 @@
 PYTHON ?= python3
 SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
-PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib .github/scripts/tests .github/skills
+PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests .github/skills
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
 
@@ -18,7 +18,7 @@ lint:
 	$(PYTHON) -m compileall $(PYTHON_PATHS)
 
 test: scripts-bootstrap
-	@$(SCRIPTS_VENV)/bin/python -m pytest .github/scripts/tests -q
+	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q
 
 catalog-check: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) check_catalog_consistency --root . --include-token-risks

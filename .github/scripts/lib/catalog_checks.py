@@ -138,15 +138,25 @@ def check_internal_agent_contracts(root: Path) -> list[Finding]:
     for path in sorted(agents_root.glob("internal-*.agent.md")):
         frontmatter = load_frontmatter(path)
         relative_path = path.relative_to(root).as_posix()
-        tools = frontmatter.get("tools")
-        if tools in (None, ""):
+        normalized_tools, tools_error = normalize_agent_tools(frontmatter.get("tools"))
+        if tools_error in {"missing", "empty"}:
             findings.append(
                 Finding(
                     severity="blocking",
                     code="internal-agent-missing-tools",
                     path=relative_path,
-                    message="Repository-owned internal agents must declare an explicit tools contract.",
+                    message="Repository-owned internal agents must declare a non-empty explicit tools contract.",
                     suggestion="Add a `tools:` frontmatter list with the minimum required scope.",
+                )
+            )
+        elif tools_error == "invalid":
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="internal-agent-invalid-tools",
+                    path=relative_path,
+                    message="The agent tools contract must be a string or a list of non-empty strings.",
+                    suggestion="Normalize `tools:` to a non-empty string or list of non-empty tool ids.",
                 )
             )
 
@@ -161,12 +171,6 @@ def check_internal_agent_contracts(root: Path) -> list[Finding]:
                     suggestion="Remove retired keys and keep only supported GitHub Copilot frontmatter fields.",
                 )
             )
-
-        normalized_tools = []
-        if isinstance(tools, list):
-            normalized_tools = [str(tool) for tool in tools]
-        elif isinstance(tools, str):
-            normalized_tools = [tools]
 
         for tool_name in normalized_tools:
             if tool_name in LEGACY_AGENT_TOOL_IDS:
@@ -211,6 +215,33 @@ def check_duplicate_frontmatter_names(root: Path) -> list[Finding]:
                 )
             )
     return findings
+
+
+def normalize_agent_tools(tools: object) -> tuple[list[str], str | None]:
+    if tools is None:
+        return [], "missing"
+
+    if isinstance(tools, str):
+        normalized = tools.strip()
+        if not normalized:
+            return [], "empty"
+        return [normalized], None
+
+    if not isinstance(tools, list):
+        return [], "invalid"
+
+    if not tools:
+        return [], "empty"
+
+    normalized_tools: list[str] = []
+    for tool in tools:
+        if not isinstance(tool, str):
+            return [], "invalid"
+        normalized = tool.strip()
+        if not normalized:
+            return [], "invalid"
+        normalized_tools.append(normalized)
+    return normalized_tools, None
 
 
 def check_source_local_assets(root: Path) -> list[Finding]:

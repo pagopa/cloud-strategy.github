@@ -43,14 +43,23 @@ def main() -> int:
 
     if args.command == "apply":
         try:
-            apply_sync_plan(plan, allow_dirty_target=args.allow_dirty_target)
+            manifest_path = apply_sync_plan(plan, allow_dirty_target=args.allow_dirty_target)
         except RuntimeError as error:
             log_error(str(error))
             return 1
         if args.format == "json":
-            print(render_json({"mode": "apply", "plan": plan.to_dict(), "plan_path": plan_path.as_posix()}))
+            print(
+                render_json(
+                    {
+                        "mode": "apply",
+                        "plan": plan.to_dict(),
+                        "plan_path": plan_path.as_posix(),
+                        "manifest_path": manifest_path.as_posix(),
+                    }
+                )
+            )
         else:
-            render_text("apply", plan, plan_path)
+            render_text("apply", plan, plan_path, manifest_path)
         log_success("Sync apply completed.")
         return 0
 
@@ -62,9 +71,14 @@ def main() -> int:
     return 0 if not blocking_source_findings else 1
 
 
-def render_text(mode: str, plan, plan_path: Path) -> None:
-    log_info(f"Sync {mode} ready for {plan.target_root.as_posix()}.")
+def render_text(mode: str, plan, plan_path: Path, manifest_path: Path | None = None) -> None:
+    if mode == "apply":
+        log_info(f"Sync apply completed for {plan.target_root.as_posix()}.")
+    else:
+        log_info(f"Sync {mode} ready for {plan.target_root.as_posix()}.")
     log_info(f"Plan file: {plan_path.as_posix()}")
+    if manifest_path is not None:
+        log_info(f"Manifest file: {manifest_path.as_posix()}")
     for operation in plan.operations:
         print(f"- {operation.action:9s} {operation.path} :: {operation.reason}")
 
