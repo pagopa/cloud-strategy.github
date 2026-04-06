@@ -5,8 +5,9 @@ applyTo: "**/*.md"
 
 # Markdown Instructions
 
-## Language policy
-- All repository documentation must be in English.
+## Scope
+- Use this file for Markdown structure, style, and maintenance rules.
+- Repository-wide language defaults live in `AGENTS.md` and `.github/copilot-instructions.md`.
 
 ## Structure
 - Use clear heading hierarchy.
@@ -17,6 +18,7 @@ applyTo: "**/*.md"
 - Prefer concise bullets over long paragraphs.
 - Use backticks for commands, paths, and identifiers.
 - Keep links explicit and maintainable.
+- Write Markdown in English unless a narrower scoped instruction explicitly allows another language.
 
 ## Maintenance
 - Update documentation when behavior or workflows change.

@@ -1,5 +1,5 @@
 ---
-description: Mirror the shared Copilot catalog from this standards repo into a consumer repo. Treat source assets under `.github/agents`, `.github/instructions`, `.github/prompts`, and `.github/skills` as authoritative, preserve only target `local-*` assets, keep `.github/copilot-instructions.md` primary, and keep root `AGENTS.md` as a light bridge.
+description: Mirror the shared Copilot catalog from this standards repo into a consumer repo. Treat source assets under `.github/agents`, `.github/instructions`, `.github/prompts`, and `.github/skills` as authoritative, preserve only target `local-*` assets, keep `AGENTS.md` as the strategic entrypoint, and keep `.github/copilot-instructions.md` as the repo-wide Copilot projection.
 name: internal-sync-global-copilot-configs-into-repo
 tools: ["read", "edit", "search", "execute", "web", "agent"]
 ---
@@ -7,9 +7,9 @@ tools: ["read", "edit", "search", "execute", "web", "agent"]
 # Internal Sync Copilot Configs Agent
 
 ## Objective
-Analyze a local target repository, mirror the full Copilot customization catalog from this standards repository, and align it with source-authoritative rules plus a final report that calls out preserved target `local-*` assets. This agent is target-agnostic: it only assumes the target stores Copilot resources under `.github/` and keeps `AGENTS.md` at repository root. For target-repository root guidance, keep `.github/copilot-instructions.md` as the primary detailed policy file and keep root `AGENTS.md` intentionally light as a bridge that helps generic coding assistants discover and apply the Copilot configuration without duplicating it.
+Analyze a local target repository, mirror the full Copilot customization catalog from this standards repository, and align it with source-authoritative rules plus a final report that calls out preserved target `local-*` assets. This agent is target-agnostic: it only assumes the target stores Copilot resources under `.github/` and keeps `AGENTS.md` at repository root. For target-repository root guidance, keep `AGENTS.md` as the strategic entrypoint, precedence anchor, and bridge, and keep `.github/copilot-instructions.md` as the repo-wide Copilot projection for native Copilot flows.
 
-## Preferred/Optional Skills
+## Optional Support Skills
 - `obra-writing-plans`
 - `obra-executing-plans`
 - `obra-verification-before-completion`
@@ -18,7 +18,7 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - `internal-copilot-docs-research`
 
 ## Skill Usage Contract
-- Treat preferred or optional skills as a three-lane sync toolkit: use `obra-*` for staged planning, staged execution, and evidence discipline; use `internal-*` as the tactical sync owners; no imported support lane is declared here unless the user explicitly expands scope.
+- Treat optional support skills as a three-lane sync toolkit: use `obra-*` for staged planning, staged execution, and evidence discipline; use `internal-*` as the tactical sync owners; no imported support lane is declared here unless the user explicitly expands scope.
 - `obra-writing-plans`: Use when the sync needs a retained tracking plan with explicit phases, checks, or cleanup order before apply starts.
 - `obra-executing-plans`: Use when the source-to-target sync already has a concrete plan and should run in deliberate batches.
 - `obra-verification-before-completion`: Use before reporting apply success so sync actions, file outcomes, and validation results are grounded in fresh evidence.
@@ -32,8 +32,8 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - Do not preserve target-owned non-`local-*` resources under mirrored categories; remove them so the mirrored source catalog stays authoritative.
 - Keep repository-facing text in English and use GitHub Copilot terminology only.
 - Do not remove, flatten, or silently rewrite target `local-*` resources or target-local configuration that sit outside the mirrored source catalog; preserve them unless an explicit migration is part of the plan.
-- Do not let root `AGENTS.md` become a second full copy of `.github/copilot-instructions.md`; keep detailed operational policy in the Copilot files first and use `AGENTS.md` only as the bridge layer that points assistants to them.
-- Do not describe the target repository as using a specific assistant runtime inside `AGENTS.md`; keep the bridge tool-agnostic and lightweight.
+- Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`; keep cross-surface defaults and precedence in `AGENTS.md`, keep repo-wide Copilot behavior in `.github/copilot-instructions.md`, and keep exact inventory in `.github/INVENTORY.md`.
+- Do not describe the target repository as using a specific assistant runtime inside `AGENTS.md`; keep the bridge tool-agnostic and strategic.
 - Do not report a completed sync unless the final response ends with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`. If a category was not used, explicitly say so and explain why.
 
 ## Routing
@@ -49,8 +49,8 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - Before changing mirrored target assets, write `tmp/internal-sync-copilot-configs.plan.md` in the target repository with the planned operations and checks.
 - When the sync needs retained auxiliary support files in addition to the tracking plan, place them under repository-root `tmp/` and create the directory if it does not exist.
 - After apply, re-check the plan objectives; remove completed sections from `tmp/internal-sync-copilot-configs.plan.md`, delete the whole file only when nothing remains pending, otherwise keep it for user follow-up.
-- When the target sync includes root guidance files, rebuild target `.github/copilot-instructions.md` through the repository-local planning and authoring workflow anchored in `internal-planning-leader`, then refresh target root `AGENTS.md` directly as the thin bridge after updating target `.github/INVENTORY.md`.
-- In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep preserved target `local-*` assets visible in the final plan or apply report.
+- When the target sync includes root guidance files, refresh target `AGENTS.md`, target `.github/copilot-instructions.md`, and target `.github/INVENTORY.md` around their canonical ownership: cross-surface defaults and precedence in `AGENTS.md`, repo-wide Copilot behavior in `.github/copilot-instructions.md`, and exact live catalog data in `.github/INVENTORY.md`.
+- In target repositories, keep preserved target `local-*` assets visible in the final plan or apply report and avoid reassigning scoped exceptions to the wrong guidance layer.
 
 ## Output Expectations
 
@@ -60,7 +60,7 @@ If a category was not used, explicitly say so and explain why.
 ### ✅ Outcome
 
 - `Target analysis`: repo shape, selected profile, stacks, git state, and AGENTS location.
-- `Root guidance strategy`: how target `.github/copilot-instructions.md` remains primary, how root `AGENTS.md` bridges to it, and which target `local-*` assets must remain untouched.
+- `Root guidance strategy`: how target `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` keep their separate roles and which target `local-*` assets must remain untouched.
 - `Tracking plan`: the content and lifecycle of `tmp/internal-sync-copilot-configs.plan.md` for the target repository.
 - `Source audit`: canonical assets, legacy aliases, role overlaps, AGENTS.md repeats, and source-side recommendations.
 - `Asset selection`: all mirrored instructions, prompts, skills, skill support files, agents, and baseline files sourced from the standards repository.

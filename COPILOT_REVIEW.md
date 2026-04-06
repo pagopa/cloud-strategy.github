@@ -1,5 +1,6 @@
 # Copilot Configuration Review — cloud-strategy.github
 
+> **Status**: Historical audit record. Some findings below refer to removed validators, removed sync scripts, removed tests, or earlier bridge architecture states. Use `AGENTS.md`, `.github/copilot-instructions.md`, and `INTERNAL_CONTRACT.md` as the current contract.
 > **Generated**: 2026-03-09
 > **Scope**: Full audit of GitHub Copilot customization assets in `cloud-strategy.github` (global standards repository)
 > **Purpose**: Actionable findings for Codex to fix. Each item includes the exact file, the problem, and the concrete fix required.
