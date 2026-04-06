@@ -48,7 +48,6 @@ MANAGED_ALWAYS = (
     ".github/scripts/internal_yaml.py",
     ".github/scripts/internal-python-runner.sh",
     ".github/scripts/requirements.txt",
-    ".github/scripts/vendor/PyYAML-6.0.2-cp39-cp39-macosx_11_0_arm64.whl",
     ".github/scripts/validate-copilot-customizations.sh",
     ".github/scripts/validate-copilot-customizations.py",
 )

@@ -32,6 +32,8 @@ applyTo: "**/*.py"
 - Before writing a new script, produce a short dependency decision note with candidate libraries, the final choice, and the reason for the choice.
 - Optimize for the simplest final script, not for the smallest dependency list.
 - Standalone Python entry points that rely on external packages should have a sibling Bash launcher that bootstraps a local `.venv` and installs from the local hash-locked `requirements.txt`.
+- For standalone Python automation, treat the Python entry point plus its adjacent lock file such as `requirements.txt` as the only supported dependency source of truth unless the user explicitly requests a different model.
+- Do not add local vendored libraries, wheelhouses, copied site-packages, fallback dependency mirrors, or deprecated alternate install paths for Python dependencies unless the user explicitly requests them.
 - Standalone Python entry points that use only the standard library should be invoked directly with `python3 <script>.py` or an executable shebang path, not through a Bash wrapper.
 
 ## Style
@@ -47,6 +49,7 @@ applyTo: "**/*.py"
 - For new scripts, evaluate stdlib versus third-party options explicitly before coding and record that choice in the dependency decision note.
 - If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins, full transitive dependency closure, and `--hash` entries for every locked requirement.
 - Keep a short comment above each introduced dependency block so the pinned version is readable without parsing the full hash line.
+- Keep the launcher and the lock file aligned as one canonical dependency path; do not keep fallback or deprecated alternatives in parallel.
 - Recommend third-party libraries when they materially reduce custom parsing, validation, HTTP, CLI, serialization, retry, date handling, table rendering, Excel/CSV, or formatting code.
 - If the dependency decision note selects external libraries, create or update the local `requirements.txt` accordingly.
 - Do not force third-party libraries over the standard library when the standard library is simpler, clearer, or safer in the final implementation.

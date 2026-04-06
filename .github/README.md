@@ -91,15 +91,14 @@ Only `internal-router` actively routes between canonical owners; the four canoni
 
 | Path | Purpose |
 | --- | --- |
-| `scripts/internal-python-runner.sh` | Shared Bash bootstrap for local `.venv` setup and optional `requirements.txt` installation before running repository Python entrypoints. |
+| `scripts/internal-python-runner.sh` | Shared Bash bootstrap for local `.venv` setup and `requirements.txt` installation before running repository Python entrypoints. |
 | `scripts/internal_yaml.py` | Shared repository-owned YAML and frontmatter helper used by internal Python automation. |
 | `scripts/requirements.txt` | Local pinned dependency set for repository-owned Python scripts under `.github/scripts/`. |
 | `scripts/validate-copilot-customizations.sh` | Supported strict validator entrypoint for naming, inventory, routing contracts, and completion-report governance. |
 | `scripts/validate-copilot-customizations.py` | Validator implementation used by the wrapper and test suite. |
 | `scripts/internal-sync-copilot-configs.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |
 | `scripts/internal-sync-copilot-configs.py` | Sync planner implementation used by the wrapper and test suite. |
-| `scripts/report-copilot-usage.sh` | Supported reporting entrypoint for Copilot catalog telemetry aggregation. |
-| `scripts/report-copilot-usage.py` | Reporting implementation used by the wrapper. |
+| `scripts/report-copilot-usage.py` | Reporting entrypoint for Copilot catalog telemetry aggregation. |
 | `workflows/terraform-pre-commit.yml` | Source repository workflow for Terraform-focused pre-commit checks. |
 
 ## Source-of-Truth Rules

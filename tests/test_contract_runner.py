@@ -63,6 +63,10 @@ def copy_copilot_config(target_root: Path) -> None:
 
 def build_python_target(path: Path) -> None:
     write_file(path / ".github" / "PULL_REQUEST_TEMPLATE.md", "# PR template\n")
+    write_file(
+        path / ".vscode" / "settings.json",
+        '{\n  "githubPullRequests.pullRequestDescription": "template"\n}\n',
+    )
     write_file(path / "src" / "app.py", 'def main() -> None:\n    print("hello")\n')
 
 
@@ -437,10 +441,7 @@ def test_sync_plan_mirrors_source_catalog(tmp_path: Path) -> None:
     assert plan.selection.supporting_files == SYNC_MODULE.source_skill_support_paths(REPO_ROOT)
     assert ".github/scripts/internal_yaml.py" in plan.selection.baseline_files
     assert ".github/scripts/requirements.txt" in plan.selection.baseline_files
-    assert (
-        ".github/scripts/vendor/PyYAML-6.0.2-cp39-cp39-macosx_11_0_arm64.whl"
-        in plan.selection.baseline_files
-    )
+    assert not any("vendor/" in path for path in plan.selection.baseline_files)
 
     expected_engine_skill_paths = {
         f".github/skills/{skill_name}/SKILL.md"
@@ -544,7 +545,6 @@ def test_sync_apply_preserves_shell_wrapper_permissions(tmp_path: Path) -> None:
         ".github/scripts/internal_yaml.py",
         ".github/scripts/internal-python-runner.sh",
         ".github/scripts/requirements.txt",
-        ".github/scripts/vendor/PyYAML-6.0.2-cp39-cp39-macosx_11_0_arm64.whl",
         ".github/scripts/validate-copilot-customizations.sh",
     ):
         assert (target_root / relative_path).exists(), f"{relative_path} should be mirrored into the target"
@@ -556,9 +556,10 @@ def test_sync_apply_preserves_shell_wrapper_permissions(tmp_path: Path) -> None:
         assert (target_root / relative_path).stat().st_mode & 0o111, f"{relative_path} should remain executable"
 
 
-def test_sync_apply_removes_tracking_file_when_complete(tmp_path: Path) -> None:
+def test_sync_apply_removes_tracking_file_when_complete(tmp_path: Path, monkeypatch) -> None:
     target_root = tmp_path / "tracking-complete"
     build_python_target(target_root)
+    monkeypatch.setattr(SYNC_MODULE, "run_strict_target_validation", lambda _target_root: [])
 
     result = SYNC_MODULE.main(["--target", str(target_root), "--mode", "apply"])
 
