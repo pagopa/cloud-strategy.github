@@ -12,7 +12,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 - Prompts: 5 total (`5 internal-*`)
 - Skills: 65 total (`28 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `3 openai-*`, `2 terraform-*`)
 - Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
-- Scripts: 7 total
+- Scripts: 8 total
 - Workflows: 1 total
 
 ## Structure
@@ -92,6 +92,7 @@ Only `internal-router` actively routes between canonical owners; the four canoni
 | Path | Purpose |
 | --- | --- |
 | `scripts/internal-python-runner.sh` | Shared Bash bootstrap for local `.venv` setup and optional `requirements.txt` installation before running repository Python entrypoints. |
+| `scripts/internal_yaml.py` | Shared repository-owned YAML and frontmatter helper used by internal Python automation. |
 | `scripts/requirements.txt` | Local pinned dependency set for repository-owned Python scripts under `.github/scripts/`. |
 | `scripts/validate-copilot-customizations.sh` | Supported strict validator entrypoint for naming, inventory, routing contracts, and completion-report governance. |
 | `scripts/validate-copilot-customizations.py` | Validator implementation used by the wrapper and test suite. |

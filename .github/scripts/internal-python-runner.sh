@@ -45,6 +45,7 @@ SCRIPT_DIR="$(cd "$(dirname "$ENTRYPOINT_PATH")" && pwd)"
 VENV_DIR="$SCRIPT_DIR/.venv"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 REQUIREMENTS_STAMP="$VENV_DIR/.requirements.sha256"
+WHEELHOUSE_DIR="$SCRIPT_DIR/vendor"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 if [[ ! -d "$VENV_DIR" ]]; then
@@ -66,9 +67,13 @@ if [[ -f "$REQUIREMENTS_FILE" ]]; then
       log_error "Virtual environment pip not found: $VENV_DIR/bin/pip"
       exit 1
     fi
+    if [[ ! -d "$WHEELHOUSE_DIR" ]]; then
+      log_error "Local wheelhouse not found: $WHEELHOUSE_DIR"
+      exit 1
+    fi
 
     log_info "Installing local Python dependencies from $REQUIREMENTS_FILE"
-    "$VENV_DIR/bin/pip" install -r "$REQUIREMENTS_FILE"
+    "$VENV_DIR/bin/pip" install --no-index --find-links "$WHEELHOUSE_DIR" --require-hashes -r "$REQUIREMENTS_FILE"
     printf '%s\n' "$current_requirements_hash" > "$REQUIREMENTS_STAMP"
   fi
 fi

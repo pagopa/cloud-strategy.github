@@ -137,7 +137,7 @@ These apply to every code change, regardless of language or technology:
 - Python dependency choice for new scripts: optimize for simpler final code and less bespoke logic, not for the lowest possible dependency count.
 - Python dependency choice for new scripts: do not hand-roll parsing, validation, CLI handling, serialization, HTTP clients, retry behavior, date handling, table rendering, Excel/CSV processing, or formatting when a mature library is the clearer solution.
 - Python dependency choice for new scripts: before writing code, include a short dependency decision note that lists candidate libraries, the final choice, and the reason for that choice.
-- Python dependencies: when external packages are introduced, standardize on a compiled `requirements.txt` with exact pins, full transitive dependency closure, and short comment lines that make the pinned versions readable to humans.
+- Python dependencies: when external packages are introduced, standardize on a compiled `requirements.txt` with exact pins, full transitive dependency closure, and `--hash` entries, plus short comment lines that make the pinned versions readable to humans.
 - Python dependencies: if the dependency decision note selects external packages, create or update the local `requirements.txt` consistently with the repository lock-file policy.
 - Python dependencies: third-party libraries are recommended when they materially simplify parsing, validation, HTTP, CLI, serialization, retry logic, date handling, table rendering, Excel/CSV processing, or formatting; keep the standard library when it is simpler and safer.
 - Python dependencies: avoid marginal or unjustified packages; each dependency should earn its place through a clear value-versus-setup tradeoff.

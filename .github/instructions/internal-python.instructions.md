@@ -31,8 +31,8 @@ applyTo: "**/*.py"
 - Avoid embedding domain rules that belong to reusable application modules.
 - Before writing a new script, produce a short dependency decision note with candidate libraries, the final choice, and the reason for the choice.
 - Optimize for the simplest final script, not for the smallest dependency list.
-- Every standalone Python entry point must have a sibling Bash launcher that bootstraps a local `.venv` and installs local dependencies when needed.
-- When modifying an existing standalone Python script, add or preserve that launcher and update usage examples or workflow docs to invoke the launcher instead of `python <script>.py`.
+- Standalone Python entry points that rely on external packages should have a sibling Bash launcher that bootstraps a local `.venv` and installs from the local hash-locked `requirements.txt`.
+- Standalone Python entry points that use only the standard library should be invoked directly with `python3 <script>.py` or an executable shebang path, not through a Bash wrapper.
 
 ## Style
 - Follow PEP8.
@@ -45,7 +45,7 @@ applyTo: "**/*.py"
 ## Dependencies
 - Standardize on `requirements.txt` as the Python dependency lock artifact in this baseline.
 - For new scripts, evaluate stdlib versus third-party options explicitly before coding and record that choice in the dependency decision note.
-- If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins and full transitive dependency closure.
+- If external libraries are introduced, prefer a compiled `requirements.txt` with exact `==` pins, full transitive dependency closure, and `--hash` entries for every locked requirement.
 - Keep a short comment above each introduced dependency block so the pinned version is readable without parsing the full hash line.
 - Recommend third-party libraries when they materially reduce custom parsing, validation, HTTP, CLI, serialization, retry, date handling, table rendering, Excel/CSV, or formatting code.
 - If the dependency decision note selects external libraries, create or update the local `requirements.txt` accordingly.
@@ -55,10 +55,12 @@ applyTo: "**/*.py"
 ## Dependency example
 ```text
 # requests 2.32.3
-requests==2.32.3
+requests==2.32.3 \
+    --hash=sha256:<hash1> \
+    --hash=sha256:<hash2>
 ```
 
-- Generate the locked file with `pip-compile` or an equivalent workflow that captures the full dependency closure.
+- Generate the locked file with `pip-compile --generate-hashes` or an equivalent workflow that captures the full dependency closure.
 
 ## Testing defaults
 - Use `pytest` as default unit-test framework.
@@ -75,7 +77,7 @@ requests==2.32.3
 """Purpose: Explain what this script does.
 
 Usage examples:
-  ./script.sh --help
+  python3 ./script.py --help
 """
 ```
 

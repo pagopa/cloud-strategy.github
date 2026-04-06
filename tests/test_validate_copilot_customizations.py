@@ -313,6 +313,30 @@ def test_build_report_detects_current_repo_state() -> None:
     assert isinstance(report.errors, list)
 
 
+def test_extract_frontmatter_apply_to_supports_yaml_lists() -> None:
+    text = """---
+name: internal-example
+applyTo:
+  - "**/*.py"
+  - "**/*.pyi"
+---
+"""
+
+    assert VALIDATOR.extract_frontmatter_apply_to(text) == ["**/*.py", "**/*.pyi"]
+
+
+def test_has_frontmatter_key_supports_yaml_sequence_values() -> None:
+    text = """---
+name: internal-example
+tools:
+  - read
+  - execute
+---
+"""
+
+    assert VALIDATOR.has_frontmatter_key(text, "tools")
+
+
 def test_build_report_accepts_agent_with_preferred_optional_skills(tmp_path: Path) -> None:
     build_minimal_repo(
         tmp_path,

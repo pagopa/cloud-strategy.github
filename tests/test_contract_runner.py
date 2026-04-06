@@ -435,6 +435,12 @@ def test_sync_plan_mirrors_source_catalog(tmp_path: Path) -> None:
     assert plan.selection.skills == SYNC_MODULE.source_asset_paths(REPO_ROOT, "skills")
     assert plan.selection.agents == SYNC_MODULE.source_asset_paths(REPO_ROOT, "agents")
     assert plan.selection.supporting_files == SYNC_MODULE.source_skill_support_paths(REPO_ROOT)
+    assert ".github/scripts/internal_yaml.py" in plan.selection.baseline_files
+    assert ".github/scripts/requirements.txt" in plan.selection.baseline_files
+    assert (
+        ".github/scripts/vendor/PyYAML-6.0.2-cp39-cp39-macosx_11_0_arm64.whl"
+        in plan.selection.baseline_files
+    )
 
     expected_engine_skill_paths = {
         f".github/skills/{skill_name}/SKILL.md"
@@ -533,6 +539,15 @@ def test_sync_apply_preserves_shell_wrapper_permissions(tmp_path: Path) -> None:
 
     plan, planned_files = SYNC_MODULE.build_plan(REPO_ROOT, target_root)
     SYNC_MODULE.apply_plan(target_root, plan, planned_files, REPO_ROOT)
+
+    for relative_path in (
+        ".github/scripts/internal_yaml.py",
+        ".github/scripts/internal-python-runner.sh",
+        ".github/scripts/requirements.txt",
+        ".github/scripts/vendor/PyYAML-6.0.2-cp39-cp39-macosx_11_0_arm64.whl",
+        ".github/scripts/validate-copilot-customizations.sh",
+    ):
+        assert (target_root / relative_path).exists(), f"{relative_path} should be mirrored into the target"
 
     for relative_path in (
         ".github/scripts/internal-python-runner.sh",

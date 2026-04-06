@@ -7,6 +7,8 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-05
+- Added `scripts/internal_yaml.py` and reused it from both `internal-sync-copilot-configs.py` and `validate-copilot-customizations.py` so repository-owned Python automation now shares one YAML/frontmatter parser instead of duplicating parsing logic.
+- Restored hash-locked Python dependency policy for repository-owned scripts: `scripts/requirements.txt` now carries the pinned `PyYAML` wheel hash and `internal-python-runner.sh` installs with `--require-hashes` without any fallback path.
 - Removed the hash-detection fallback from `scripts/internal-python-runner.sh`, switched repository-owned Python launcher guidance to install directly from `requirements.txt`, and deleted the internal Python-policy clause that allowed a non-locked fallback path.
 - Added `.github/scripts/requirements.txt` with a pinned `PyYAML` dependency and switched `internal-sync-copilot-configs.py` from bespoke YAML parsing to `PyYAML` for `repo-profiles.yml` and frontmatter handling in repository-owned scripts.
 - Aligned the medium-task threshold wording between `internal-agent-routing-engine` and `internal-agent-operating-model-engine`, clarified in `agents/README.md` that `internal-router` is dispatch-only, and hardened `scripts/internal-python-runner.sh` with explicit command and virtual-environment checks.

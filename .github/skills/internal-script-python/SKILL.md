@@ -22,13 +22,14 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Use type hints on non-trivial public helpers and CLI-facing boundaries.
 - Add unit tests for testable behavior.
 - Standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
-- The folder should include the Python entry point, a `run.sh` launcher, and `tests/` when test scope applies. Add a local `requirements.txt` only when external packages are used.
-- Existing standalone Python entry points must add or preserve a sibling Bash launcher and update nearby docs, prompts, or usage examples to invoke the launcher instead of `python <script>.py`.
+- The folder should include the Python entry point and `tests/` when test scope applies. Add a local `requirements.txt` and a `run.sh` launcher only when external packages are used.
+- Existing standalone Python entry points should keep a sibling Bash launcher only when that launcher is needed to bootstrap external packages or an isolated local environment.
+- Stdlib-only standalone Python entry points should be documented and invoked directly with `python3 <script>.py` or an executable shebang path.
 - For new scripts, do an explicit dependency decision before implementation; do not assume `stdlib-first` as the automatic default.
 - Prefer mature, well-maintained, widely used third-party libraries when they clearly reduce boilerplate, edge cases, or custom logic in the finished script.
 - Keep the standard library only when the final code is genuinely simpler, more readable, and safer than the third-party alternative.
 - Optimize for less bespoke code and a simpler final script, not for the fewest possible dependencies.
-- If external packages are used, keep them in the local `requirements.txt` with exact pins, full transitive dependency closure, and short comment lines that make pinned versions readable.
+- If external packages are used, keep them in the local `requirements.txt` with exact pins, full transitive dependency closure, `--hash` entries, and short comment lines that make pinned versions readable.
 - Recommend third-party libraries when they materially simplify parsing, validation, CLI handling, serialization, HTTP, retry behavior, date handling, table rendering, Excel/CSV processing, or formatting; do not replace a simpler standard-library solution just to satisfy the preference.
 - Avoid weak or marginal dependencies; every package should have a clear value-versus-setup justification.
 - Make new `run.sh` launchers executable, and make them install from `requirements.txt` only when that file exists.
@@ -51,9 +52,9 @@ Dependency decision note
 ## Default layout
 ```text
 {script_name}/
-├── requirements.txt  # only when external packages are used
-├── run.sh
 ├── {script_name}.py
+├── requirements.txt  # only when external packages are used
+├── run.sh            # only when external packages are used
 └── tests/
 ```
 
@@ -63,7 +64,7 @@ Dependency decision note
 """Purpose: {description}
 
 Usage examples:
-  ./run.sh --help
+  python3 ./{script_name}.py --help
 """
 import argparse
 import sys
@@ -98,12 +99,16 @@ if __name__ == "__main__":
 ## Minimal requirements example
 ```text
 # requests 2.32.3
-requests==2.32.3
+requests==2.32.3 \
+    --hash=sha256:<hash1> \
+    --hash=sha256:<hash2>
 ```
 
-Generate `requirements.txt` with `pip-compile` or an equivalent workflow that locks the full dependency closure.
+Generate `requirements.txt` with `pip-compile --generate-hashes` or an equivalent workflow that locks the full dependency closure.
 
 ## Minimal launcher example
+Use a launcher only when the tool depends on external packages.
+
 ```bash
 #!/usr/bin/env bash
 #
@@ -124,7 +129,7 @@ fi
 
 # Install exactly the locally locked dependencies before execution when needed.
 if [[ -f "$REQUIREMENTS_FILE" ]]; then
-  "$VENV_DIR/bin/pip" install -r "$REQUIREMENTS_FILE"
+  "$VENV_DIR/bin/pip" install --require-hashes -r "$REQUIREMENTS_FILE"
 fi
 
 exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
@@ -154,9 +159,10 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 | Bare `except:` or `except Exception:` at top level | Swallows all errors including KeyboardInterrupt | Catch specific exceptions; let unexpected ones propagate |
 | Hardcoded file paths | Non-portable across machines | Use `argparse`, `pathlib`, or environment variables |
 | No argument parsing | Caller has to modify script source to change behavior | Use `argparse` for any configurable parameter |
-| Installing deps globally or without pinned local requirements | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins |
+| Installing deps globally or without hash-locked version pinning | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins and hashes |
 | Adding an empty `requirements.txt` to a stdlib-only tool | Adds noise and implies missing setup steps | Omit `requirements.txt` when the script uses only the standard library |
-| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to create the environment and run the tool | Generate a self-contained folder with `run.sh` and add `requirements.txt` only when external packages are needed |
+| Wrapping a stdlib-only script in Bash | Adds setup indirection without solving a real dependency problem | Document direct `python3 <script>.py` execution and skip the wrapper |
+| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to run the tool safely | Generate a self-contained folder and add `run.sh` plus `requirements.txt` only when external packages are needed |
 | Defaulting to stdlib without comparing mature libraries | Leaves avoidable boilerplate, edge cases, and custom parsing logic in the script | Write the dependency decision note first and choose the option that makes the final code simpler |
 | Rejecting a useful dependency just to keep dependency count low | Optimizes the wrong thing and increases custom code | Optimize for simpler final code and justified value, not dependency minimization |
 | Forcing async or framework abstractions into a simple tool | Raises complexity without improving the script | Keep the script synchronous and direct unless concurrency is essential |
@@ -167,6 +173,6 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
 
 ## Validation
 - `python -m py_compile <script_name>.py` (syntax check)
-- `bash -n run.sh` (launcher syntax check)
+- `bash -n run.sh` (launcher syntax check, only when `run.sh` exists)
 - `pytest tests/` (run tests)
 - `python -m compileall <changed_paths>` (batch syntax check)

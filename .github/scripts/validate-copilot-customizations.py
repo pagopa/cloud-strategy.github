@@ -17,6 +17,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+SCRIPT_DIRECTORY = Path(__file__).resolve().parent
+if str(SCRIPT_DIRECTORY) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIRECTORY))
+
+from internal_yaml import parse_frontmatter_text, split_frontmatter_list
+
 
 REPO_ROOT = Path(".")
 DEFAULT_SCOPE = "root"
@@ -174,23 +180,25 @@ def read_text(path: Path) -> str:
 
 
 def extract_frontmatter_name(text: str) -> str:
-    match = re.search(r"^name:\s*(.+)$", text, re.M)
-    if not match:
+    try:
+        return parse_frontmatter_text(text).get("name", "")
+    except ValueError:
         return ""
-    return match.group(1).strip().strip("\"'")
 
 
 def extract_frontmatter_apply_to(text: str) -> list[str]:
-    match = re.search(r"^applyTo:\s*(.+)$", text, re.M)
-    if not match:
+    try:
+        raw_value = parse_frontmatter_text(text).get("applyTo", "")
+    except ValueError:
         return []
-
-    raw_value = match.group(1).strip().strip("\"'")
-    return [pattern.strip() for pattern in raw_value.split(",") if pattern.strip()]
+    return split_frontmatter_list(raw_value)
 
 
 def has_frontmatter_key(text: str, key: str) -> bool:
-    return re.search(rf"^{re.escape(key)}:\s*", text, re.M) is not None
+    try:
+        return key in parse_frontmatter_text(text)
+    except ValueError:
+        return False
 
 
 def extract_markdown_h2_section(text: str, heading: str) -> str | None:

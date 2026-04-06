@@ -20,7 +20,11 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
-import yaml
+SCRIPT_DIRECTORY = Path(__file__).resolve().parent
+if str(SCRIPT_DIRECTORY) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIRECTORY))
+
+from internal_yaml import load_frontmatter, load_yaml_document as shared_load_yaml_document
 
 
 SCRIPT_NAME = "internal-sync-global-copilot-configs-into-repo"
@@ -41,7 +45,10 @@ MANAGED_ALWAYS = (
     ".github/security-baseline.md",
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",
+    ".github/scripts/internal_yaml.py",
     ".github/scripts/internal-python-runner.sh",
+    ".github/scripts/requirements.txt",
+    ".github/scripts/vendor/PyYAML-6.0.2-cp39-cp39-macosx_11_0_arm64.whl",
     ".github/scripts/validate-copilot-customizations.sh",
     ".github/scripts/validate-copilot-customizations.py",
 )
@@ -101,39 +108,6 @@ class CliError(RuntimeError):
 
 
 MANDATORY_ENGINE_SECTION_HEADING = "## Mandatory Engine Skills"
-
-
-def load_yaml_document(path: Path) -> object:
-    try:
-        content = path.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise CliError(f"Failed to read YAML file {path}: {exc}") from exc
-
-    if not content.strip():
-        return {}
-
-    try:
-        loaded = yaml.safe_load(content)
-    except yaml.YAMLError as exc:
-        raise CliError(f"Invalid YAML in {path}: {exc}") from exc
-
-    if loaded is None:
-        return {}
-
-    return loaded
-
-
-def coerce_frontmatter_value(value: object) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, (str, int, float)):
-        return str(value)
-    if isinstance(value, list):
-        rendered_items = [coerce_frontmatter_value(item).strip() for item in value]
-        return ", ".join(item for item in rendered_items if item)
-    return ""
 
 
 def normalize_profile_string_list(
@@ -488,7 +462,11 @@ def resolve_target_repo_root(input_path: str) -> Path:
 
 
 def load_profiles(path: Path) -> dict[str, RepoProfile]:
-    loaded = load_yaml_document(path)
+    try:
+        loaded = shared_load_yaml_document(path)
+    except ValueError as exc:
+        raise CliError(str(exc)) from exc
+
     if not isinstance(loaded, dict):
         raise CliError(f"Expected a YAML mapping in {path}")
 
@@ -540,28 +518,10 @@ def load_profiles(path: Path) -> dict[str, RepoProfile]:
 
 
 def parse_frontmatter(path: Path) -> dict[str, str]:
-    content = path.read_text(encoding="utf-8")
-    match = re.match(r"(?s)\A---\n(.*?)\n---(?:\n|\Z)", content)
-    if not match:
-        return {}
-
     try:
-        loaded = yaml.safe_load(match.group(1))
-    except yaml.YAMLError as exc:
-        raise CliError(f"Invalid frontmatter YAML in {path}: {exc}") from exc
-
-    if loaded is None:
-        return {}
-    if not isinstance(loaded, dict):
-        raise CliError(f"Expected frontmatter to be a YAML mapping in {path}")
-
-    frontmatter: dict[str, str] = {}
-    for key, value in loaded.items():
-        if not isinstance(key, str) or not key or " " in key:
-            continue
-        frontmatter[key] = coerce_frontmatter_value(value).strip()
-
-    return frontmatter
+        return load_frontmatter(path)
+    except ValueError as exc:
+        raise CliError(str(exc)) from exc
 
 
 def frontmatter_value(path: Path, key: str) -> str:

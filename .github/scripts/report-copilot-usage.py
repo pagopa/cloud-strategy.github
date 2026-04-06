@@ -2,9 +2,9 @@
 """Purpose: Aggregate repository-owned Copilot resource usage telemetry into JSON and Markdown reports.
 
 Usage examples:
-  ./.github/scripts/report-copilot-usage.sh --input telemetry.jsonl
-  ./.github/scripts/report-copilot-usage.sh --input telemetry.json --markdown-out usage-report.md
-  ./.github/scripts/report-copilot-usage.sh --input telemetry.jsonl --json-out usage-report.json --near-zero-threshold 1
+  python3 ./.github/scripts/report-copilot-usage.py --input telemetry.jsonl
+  python3 ./.github/scripts/report-copilot-usage.py --input telemetry.json --markdown-out usage-report.md
+  python3 ./.github/scripts/report-copilot-usage.py --input telemetry.jsonl --json-out usage-report.json --near-zero-threshold 1
 
 Input schema:
   Accepts either a JSON array or JSONL where each event object contains:
