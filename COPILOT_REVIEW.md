@@ -1,5 +1,6 @@
 # Copilot Configuration Review — cloud-strategy.github
 
+> **Status**: Historical audit record. Some findings below refer to removed validators, removed sync scripts, removed tests, or earlier bridge architecture states. Use `AGENTS.md`, `.github/copilot-instructions.md`, and `INTERNAL_CONTRACT.md` as the current contract.
 > **Generated**: 2026-03-09
 > **Scope**: Full audit of GitHub Copilot customization assets in `cloud-strategy.github` (global standards repository)
 > **Purpose**: Actionable findings for Codex to fix. Each item includes the exact file, the problem, and the concrete fix required.
@@ -195,7 +196,7 @@ The quickstart guide's "Alignment strategy" section recommends `bootstrap-copilo
 **Fix**: In the "Alignment strategy" section, change:
 ```markdown
 ## Alignment strategy
-- Use `python .github/scripts/internal-sync-copilot-configs.py --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection (recommended).
+- Use `./.github/scripts/internal-sync-copilot-configs.sh --target <repo-path> --mode plan` for conservative alignment and minimum-asset selection (recommended).
 - Use `.github/scripts/bootstrap-copilot-config.sh --target <repo-path>` only as a legacy quick-copy fallback.
 - Prefer canonical origin-prefixed script prompts in consumer repositories.
 ```

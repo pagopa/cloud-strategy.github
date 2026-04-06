@@ -1,0 +1,77 @@
+# Sync Contract
+
+Use this reference when the paired agent or this skill needs the exact sync rules instead of the compact workflow summary.
+
+## Source-Managed Scope
+
+Mirror these source-managed paths into the consumer repository:
+
+- `AGENTS.md`
+- `.github/copilot-instructions.md`
+- `.github/copilot-code-review-instructions.md`
+- `.github/copilot-commit-message-instructions.md`
+- `.github/security-baseline.md`
+- `.github/DEPRECATION.md`
+- `.github/repo-profiles.yml`
+- `.github/agents/**`
+- `.github/instructions/**`
+- `.github/prompts/**`
+- `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
+
+Do not sync `README.md`, changelogs, workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
+
+## Target Rules
+
+- Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
+- Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
+- Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
+
+## Root Guidance Ownership
+
+When root guidance is in scope, keep the target files in these roles:
+
+- `AGENTS.md`: strategic bridge, precedence anchor, naming contract, and cross-surface routing guidance
+- `.github/copilot-instructions.md`: repo-wide GitHub Copilot projection
+- `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
+
+Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`.
+
+## Tracking Plan Lifecycle
+
+- Write `tmp/internal-sync-copilot-configs.plan.md` before any mirrored change.
+- Keep the plan in the target repository so the user can inspect pending sync work between runs.
+- When `apply` finishes and nothing remains pending, remove the plan file.
+- If `apply` stops early or manual follow-up remains, keep the plan file for the next run.
+
+## Automation Entry Points
+
+- Preferred wrapper: `.github/scripts/sync_copilot_catalog.sh`
+- Python entry point: `.github/scripts/sync_copilot_catalog.py`
+- Core implementation: `.github/scripts/lib/syncing.py`
+- Target manifest: `.github/internal-sync-copilot-configs.manifest.json`
+
+Prefer the shipped scripts when the request matches `plan`, `apply`, or a script-backed audit flow. Fall back to manual reasoning only when the request goes beyond the current automation contract.
+
+## Validation Sequence
+
+Use the closest existing checks for the touched behavior:
+
+1. `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks`
+2. `./.github/scripts/build_inventory.sh --root .`
+3. `./.github/scripts/sync_copilot_catalog.sh plan --target-repo <repo>`
+4. `pytest tests/test_sync_and_token_risks.py` when sync automation changes
+
+If a dedicated contract test is missing, call out the gap explicitly.
+
+## Reporting Contract
+
+Completed runs should make these facts visible:
+
+- target analysis and selected mode
+- root-guidance alignment strategy
+- preserved `local-*` assets
+- target-only cleanup decisions
+- plan-file status and lifecycle
+- validation results and remaining blockers
+
+End completed runs with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`.

@@ -1,33 +1,124 @@
 # Internal Contract
 
-This document defines the high-level repository behaviors that remain under automated verification.
-Anything not listed here is intentionally out of scope for the Python contract runner.
+This document defines the rule-level invariants that future validators, sync automation, and contract tests must preserve.
+Treat the current instruction architecture as the source of truth. Do not infer active policy from removed scripts, removed tests, or historical aliases.
 
 ## Principles
 
-- Verify behavior, not resource formatting details.
-- Keep checks high level and resilient to internal refactors.
-- Do not add tests that parse or enforce the internal structure of prompts, skills, agents, or instructions unless an explicit repository contract below requires it.
-- Use Python only for the contract runner and its fixtures.
-
-## Global Resource Rules
-
-These rules apply to all repository resources, including prompts, skills, instructions, agents, plugins, and similar assets.
-
-### Naming By Origin
-
-- External resource: `<short-repo>-<original-resource-name>`
-- Resource created locally in `cloud-strategy.github`: `internal-<resource-name>`
-- Resource created locally in another repository: `local-<resource-name>`
-
-### Naming Presence
-
-- Every resource must have a name.
-- The resource name must match the canonical identifier used for that resource.
+- Validate rules, not file size or historical implementation details.
+- Treat rules as canonical and files as projections for specific consumer surfaces.
+- Keep stable policy separate from volatile inventory.
+- Allow useful local self-containment when it improves the consumer experience.
+- Treat removed automation as historical context unless it exists on disk and is deliberately reintroduced.
 
 ## Contract Categories
 
-### Resource Governance
+### Instruction Architecture
+
+#### `instruction-architecture-root-agents-is-entrypoint`
+
+- Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface bridge.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `.github/INVENTORY.md`
+- Expected behavior:
+  - root `AGENTS.md` defines the strategic role of the instruction system, the precedence model, and the default language rule
+  - root `AGENTS.md` points to `.github/copilot-instructions.md` as the repo-wide Copilot projection and to `.github/INVENTORY.md` as the exact live catalog
+  - root `AGENTS.md` does not carry volatile inventory or long surface-specific playbooks
+
+#### `instruction-architecture-inventory-is-externalized`
+
+- Goal: keep policy and live catalog inventory decoupled.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/INVENTORY.md`
+- Expected behavior:
+  - exact live asset inventory lives in `.github/INVENTORY.md`
+  - policy files may point to the inventory but do not duplicate it
+
+#### `instruction-architecture-copilot-projection-stays-meaningful`
+
+- Goal: keep `.github/copilot-instructions.md` operationally significant for native Copilot surfaces.
+- Scope:
+  - `.github/copilot-instructions.md`
+- Expected behavior:
+  - the file stays compact, high-signal, and aligned with `AGENTS.md`
+  - the file projects repo-wide behavior needed by Copilot-native flows
+  - the file is not reduced to an empty shell or replaced by inventory text
+
+#### `instruction-architecture-local-projections-stay-scoped`
+
+- Goal: keep local instruction files concrete and consumer-aware.
+- Scope:
+  - `.github/instructions/**/*.instructions.md`
+- Expected behavior:
+  - local instructions keep only scoped, specialist, or exception-driven rules
+  - useful self-containment is allowed when it helps the target surface
+  - global rules are repeated locally only when the projection is deliberate and low-drift
+
+### Language Policy
+
+#### `language-default-is-centrally-governed`
+
+- Goal: centralize the repository language default.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - scoped instructions, prompts, skills, and agents
+- Expected behavior:
+  - root `AGENTS.md` states that the default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it
+  - `.github/copilot-instructions.md` may project that rule in compact form for Copilot flows
+  - local files do not restate the rule in broader or stricter terms than the canonical default without declaring an explicit scoped reason
+
+#### `language-exceptions-are-explicit-and-scoped`
+
+- Goal: make exceptions easy to add without weakening the default.
+- Scope:
+  - all instruction surfaces
+- Expected behavior:
+  - any non-English exception names its scope and stays local to the surface that needs it
+  - user chat language allowances are not treated as repository-wide authoring exceptions
+
+### Duplication And Drift
+
+#### `duplication-harmful-overlap-is-minimized`
+
+- Goal: remove contradictory or drift-prone duplication.
+- Scope:
+  - root guidance
+  - scoped instructions
+  - contract docs
+  - governance agents and skills
+- Expected behavior:
+  - contradictory copies of the same rule are removed
+  - policy files do not repeat volatile inventory
+  - historical recommendations do not remain framed as active requirements
+
+#### `duplication-useful-projections-are-allowed`
+
+- Goal: preserve local self-containment when it materially helps the consumer.
+- Scope:
+  - `.github/copilot-instructions.md`
+  - `.github/instructions/**/*.instructions.md`
+  - governance agents and skills
+- Expected behavior:
+  - compact repo-wide projections remain allowed
+  - scoped restatements remain allowed when they improve behavior for the target surface and stay aligned with the canonical rule
+
+#### `historical-automation-is-not-live-contract`
+
+- Goal: prevent deleted automation from shaping active policy.
+- Scope:
+  - documentation
+  - contract files
+  - governance assets
+- Expected behavior:
+  - removed validators, removed sync scripts, removed contract tests, and retired bridge-era assets are not described as active requirements
+  - when historical context is retained, it is clearly marked as historical rather than normative
+  - future automation is rebuilt from the current contract, not from stale references
+
+### Naming And Operating Model
 
 #### `resource-governance-uses-supported-origin-naming`
 
@@ -44,7 +135,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 
 #### `resource-governance-named-resources-declare-name`
 
-- Goal: ensure repository-owned resources that support explicit naming metadata actually declare it.
+- Goal: ensure repository-owned resources that support explicit naming metadata declare it correctly.
 - Scope:
   - internal prompts
   - internal skills
@@ -53,156 +144,70 @@ These rules apply to all repository resources, including prompts, skills, instru
   - every repository-owned internal resource has a non-empty canonical identifier
   - every internal prompt, skill, and agent declares a non-empty `name:`
   - every declared `name:` matches the canonical resource identifier
-  - imported non-`internal-*` resources may remain verbatim and are not normalized by this contract
+  - imported non-`internal-*` resources may remain verbatim
 
-#### `resource-governance-agents-preferred-optional-skills-are-well-formed`
+#### `resource-governance-canonical-operational-model-stays-explicit`
 
-- Goal: ensure agents publish an explicit reusable skill contract instead of implying skill usage only in prose.
+- Goal: keep the canonical repository-owned operating model clear across projections.
 - Scope:
-  - internal agents
+  - `.github/copilot-instructions.md`
+  - canonical operational agents
+  - shared operating-model skills
 - Expected behavior:
-  - every internal agent declares at least one skill in that section
-  - internal agents do not use the deprecated `## Primary Skill Stack` heading
-
-#### `resource-governance-agent-preferred-optional-skills-resolve-on-disk`
-
-- Goal: ensure agent skill contracts point to real reusable skills rather than stale or decorative identifiers.
-- Scope:
-  - internal agents
-  - skills
-- Expected behavior:
-  - internal agents do not declare agent identifiers, aliases, or missing skills as if they were reusable skill contracts
+  - `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` remain the canonical repository-owned operational agents
+  - only `internal-router` actively routes
+  - non-router canonical agents define boundaries and recommendations instead of active delegation
+  - mandatory and optional skill contracts remain explicit where the operating model depends on them
 
 ### Reporting
 
-#### `reporting-operation-completion-report-contract-is-documented`
+#### `reporting-completion-report-projection-stays-visible`
 
-- Goal: keep the end-of-operation reporting contract visible in the primary Copilot policy layer and source-side documentation.
+- Goal: keep the completion report contract visible on the surfaces that need it.
 - Scope:
-  - root `AGENTS.md`
   - `.github/copilot-instructions.md`
-  - `.github/README.md`
+  - relevant governance or sync agents
 - Expected behavior:
-  - `.github/copilot-instructions.md` defines the mandatory completion report macro categories `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
-  - the policy requires an explicit explanation when a resource category was not used
-  - root `AGENTS.md` points to `.github/copilot-instructions.md` as the owner of detailed completion-report behavior
-  - `.github/README.md` documents the same completion-report contract for maintainers
+  - completed runs end with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
+  - the contract stays projected where Copilot or governance flows rely on it
+  - root `AGENTS.md` may point to the repo-wide projection but does not need to carry the full formatting contract
 
-#### `reporting-sync-agents-publish-completion-report-categories`
+### Future Automation Constraints
 
-- Goal: keep the source-side governance agent and the cross-repository sync agent aligned with the repository completion-report contract.
+#### `future-automation-reads-canonical-ownership`
+
+- Goal: ensure rebuilt validators, sync automation, and contract tests enforce the current rule ownership model.
 - Scope:
-  - `.github/agents/internal-sync-control-center.agent.md`
-  - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
+  - future validator, sync, and test implementations
 - Expected behavior:
-  - both agents require completed runs to end with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
-  - both agents require an explicit explanation when a category was not used
-  - the source-side governance agent still reports `Governance files reviewed`
+  - automation reads `AGENTS.md` for cross-surface defaults and precedence
+  - automation reads `.github/copilot-instructions.md` for repo-wide Copilot projection behavior
+  - automation reads `.github/INVENTORY.md` for the live catalog
+  - automation treats scoped instructions as local projections rather than global policy owners
 
-### Sync Planning
+#### `future-automation-preserves-scoped-exceptions`
 
-#### `sync-plan-regenerates-root-agents`
-
-- Goal: keep root `AGENTS.md` aligned as a governed bridge after catalog changes.
-- Fixture:
-  - target repository with a root `AGENTS.md`
-  - minimal infrastructure footprint
+- Goal: keep future automation compatible with local projections and explicit exceptions.
+- Scope:
+  - future validator, sync, and test implementations
 - Expected behavior:
-  - the generated sync plan reports an `update` action for `AGENTS.md`
-
-#### `sync-plan-mirrors-source-catalog`
-
-- Goal: ensure target repositories receive the complete mirrored source catalog for Copilot resources.
-- Fixture:
-  - target repository with a Python source file
-- Expected behavior:
-  - the generated sync plan identifies the repository as Python-oriented
-  - the generated sync plan selects every source instruction, prompt, skill, and agent
-  - the generated sync plan includes skill support files outside `SKILL.md`
-
-#### `sync-plan-preserves-local-target-assets`
-
-- Goal: keep target-local `local-*` assets visible instead of deleting them during mirror alignment.
-- Fixture:
-  - target repository with a target-local `local-*` Copilot asset outside the mirrored source catalog
-- Expected behavior:
-  - sync apply does not overwrite or delete that `local-*` asset
-
-#### `sync-plan-writes-tracking-file`
-
-- Goal: create a persistent per-target sync plan inside repository-root `tmp/` before apply runs.
-- Fixture:
-  - target repository with a minimal supported stack
-- Expected behavior:
-  - plan mode writes `tmp/internal-sync-copilot-configs.plan.md`
-  - the run creates `tmp/` when the target repo does not already have it
-  - the file contains pending synchronization and validation sections
-
-### Sync Application
-
-#### `sync-apply-writes-manifest-and-agents`
-
-- Goal: ensure apply mode still produces the core synchronization artifacts.
-- Fixture:
-  - fresh target repository with a minimal supported stack
-- Expected behavior:
-  - apply writes the sync manifest
-  - apply writes `AGENTS.md`
-  - manifest records managed files for the apply result
-
-#### `sync-apply-mirrors-skill-support-files`
-
-- Goal: ensure skill bundles are mirrored as complete directories instead of `SKILL.md` only.
-- Fixture:
-  - fresh target repository with a minimal supported stack
-- Expected behavior:
-  - apply copies non-`SKILL.md` files from mirrored skill directories
-  - copied support files preserve byte-for-byte content
-
-#### `sync-apply-removes-tracking-file-when-complete`
-
-- Goal: delete the per-target sync plan when apply and post-checks close every planned objective.
-- Fixture:
-  - fresh target repository with a minimal supported stack
-- Expected behavior:
-  - apply removes `tmp/internal-sync-copilot-configs.plan.md` after sync and strict validation complete successfully
-
-#### `sync-apply-keeps-tracking-file-for-local-follow-up`
-
-- Goal: keep the per-target sync plan visible when preserved local assets still need manual action.
-- Fixture:
-  - target repository with an invalid local Copilot asset
-- Expected behavior:
-  - apply keeps `tmp/internal-sync-copilot-configs.plan.md`
-  - the file contains a pending manual follow-up section describing the local issue
+  - useful local projections are not rejected just because the same rule exists canonically elsewhere
+  - explicit scoped exceptions are allowed when they remain local and unambiguous
+  - retained tracking plans or similar follow-up artifacts live under repository-root `tmp/`
 
 ## Explicitly Out Of Scope
 
-### Resource Content And Layout
-
-- prompt frontmatter formatting
-- skill section structure
-- agent cohesion, routing breadth, and declared-skill breadth beyond the required explicit skill contract
-- exact one-to-one mapping between preferred skills and specific agents
-- inventory wording details
-- cross-link completeness between resources
-
-These are governed by repository conventions, skills, and dedicated validation workflows rather than this contract.
-
-### Legacy Migration Mechanics
-
-- alias mapping details
-- rename choreography
-- backwards-compatibility edge cases
-
-These may change over time and should not be locked by high-level contract tests.
+- exact file formatting unless a contract above requires it
+- wording-level duplication that does not change behavior or drift risk
+- historical migration choreography for removed assets
+- any validator, sync, or test implementation detail that is not needed to preserve the current rule ownership model
 
 ## Change Rule
 
-Add a new contract only when a regression would materially break:
+Add or tighten a contract only when a regression would materially break:
 
-- sync planning
-- sync application
-- target repository safety
-- baseline selection behavior
-- full source mirroring behavior
+- rule ownership and precedence
+- inventory separation
+- language-default governance
+- operational model clarity
+- future automation rebuild safety

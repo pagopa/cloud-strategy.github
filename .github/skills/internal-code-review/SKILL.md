@@ -10,6 +10,20 @@ description: Use when a code review is requested, a PR needs reviewing, or the u
 - Provide structured findings with per-language anti-pattern detection.
 - Complement specialist reviewer agents with deep language-specific checks.
 
+## Standalone quick start
+
+When this skill is used directly instead of through `internal-review-guard`, establish these inputs first:
+
+- the review question or requested scope
+- the changed files or diff being reviewed
+- the validation already run and the main evidence gaps that remain
+
+Then produce:
+
+- findings grouped by severity
+- a file path and line reference for every finding
+- a short residual-risk or unverified-area summary
+
 ## Context checklist
 
 Establish these review inputs before grading the diff:

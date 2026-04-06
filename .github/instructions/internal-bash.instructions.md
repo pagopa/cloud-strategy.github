@@ -30,16 +30,9 @@ applyTo: "**/*.sh"
 set -euo pipefail
 ```
 
-## Best practices
-- Quote variables (`"$var"`).
-- Use `[[ ... ]]` and `$(...)`.
-- Check dependencies with `command -v`.
-- Keep functions short and focused.
-- Keep logs informative and consistent.
-- Use `getopts` for argument parsing.
-- Keep logic simple and avoid unnecessary complexity.
-- Validate inputs and handle errors gracefully.
-- When the Bash script is a launcher for a standalone Python tool, resolve its own directory, create or reuse a sibling `.venv`, install from the local hash-locked `requirements.txt` if it exists, and execute the sibling Python entry point.
+## Repository-specific additions
+- When the Bash script is a launcher for a standalone Python tool, use it only when that tool needs external packages or an isolated local bootstrap path.
+- For those Python launchers, resolve the script directory, create or reuse a sibling `.venv`, install from the local hash-locked `requirements.txt`, and execute the sibling Python entry point.
 
 ## Validation
 - `bash -n <script>.sh`

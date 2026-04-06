@@ -50,9 +50,9 @@ If the user provides a specification, issue, or acceptance outline:
 
 ## Minimal example
 - Input:
-  - title: "Harden Copilot validator"
-  - changed_files: ".github/scripts/validate-copilot-customizations.py, .github/workflows/github-validate-copilot-customizations.yml"
-  - validation: "bash -n scripts/*.sh; shellcheck -s bash scripts/*.sh"
+  - title: "Externalize Copilot inventory"
+  - changed_files: "AGENTS.md, .github/INVENTORY.md, .github/copilot-instructions.md"
+  - validation: "make lint"
 - Expected output: Complete PR body with all required template sections and concise change bullets.
 
 ## Common mistakes

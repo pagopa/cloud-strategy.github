@@ -14,7 +14,7 @@
 - [ ] Prompt update
 - [ ] Skill update
 - [ ] Workflow/automation update
-- [ ] Validation script update
+- [ ] Verification/automation update
 - [ ] Documentation/configuration only
 - [ ] Other
 
@@ -36,7 +36,7 @@
 
 ## Validation Evidence
 
-- Customization validator result:
+- Repository-level checks result:
 - Stack-specific checks/tests result:
 - Security/supply-chain checks result:
 
@@ -49,6 +49,6 @@
 
 - [ ] No secrets/tokens/credentials committed
 - [ ] Repository artifacts remain in English
-- [ ] `validate-copilot-customizations.py --mode strict` executed successfully
+- [ ] Available repository checks executed as applicable
 - [ ] Workflow action pins use full SHA with adjacent release/tag reference
 - [ ] References remain repository-agnostic and reusable

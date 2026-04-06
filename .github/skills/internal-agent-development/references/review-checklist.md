@@ -7,6 +7,7 @@ Use this checklist before finalizing a new or revised internal agent.
 - Does `description:` start with `Use this agent when ...`?
 - Could a reader tell when this agent wins over neighboring agents?
 - Does the agent include at least one real negative boundary?
+- If the agent is not `internal-router`, does it avoid active delegation and recommend the next owner instead?
 - Is the route behavioral rather than prestige-based?
 - If the agent works in a fast-moving vendor domain, does the route make current-documentation verification visible?
 
@@ -45,7 +46,7 @@ Use this checklist before finalizing a new or revised internal agent.
 - Does the filename stem match frontmatter `name:`?
 - Do all referenced local files exist?
 - Does the agent avoid making a neighboring agent redundant?
-- Has `python3 .github/scripts/validate-copilot-customizations.py --scope root --mode strict` been run?
+- Have the repository validation entrypoints that currently exist been run, or has the validation gap been called out explicitly?
 
 ## Red Flags
 
