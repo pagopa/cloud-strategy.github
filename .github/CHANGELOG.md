@@ -7,6 +7,7 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-06
+- Slimmed `.github/copilot-instructions.md` by removing stack-owned Python template, script, Java, and Node guidance, and reduced `.github/instructions/internal-bash.instructions.md` to repo-local Bash additions so runtime-specific rules now stay with their matching instruction owners instead of the primary policy layer.
 - Removed the source-side `.github/scripts/vendor/` wheelhouse assumption from `scripts/internal-python-runner.sh`, `scripts/internal-sync-copilot-configs.py`, and `tests/test_contract_runner.py` so repository-owned Python wrappers now install only from pinned `requirements.txt` and no longer sync local vendored libraries into consumer repositories.
 - Added an explicit Python dependency policy to `.github/copilot-instructions.md` and `.github/instructions/internal-python.instructions.md`: the source of truth is the Python entrypoint plus its adjacent requirements lock file, with no local vendored libraries, no fallback mirrors, and no deprecation path unless the user explicitly requests an exception.
 - Corrected `.github/README.md` so the maintained script inventory matches the files that actually exist on disk and no longer advertises a nonexistent `scripts/report-copilot-usage.sh` wrapper.

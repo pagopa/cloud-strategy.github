@@ -100,11 +100,6 @@ These apply to every code change, regardless of language or technology:
 - **Validation-first delivery** — Run applicable validation checks before declaring a change complete. If validation fails, fix the issue and re-validate. Never skip validation to unblock delivery.
 - **No unrequested improvements** — Do not add error handling, logging, type annotations, or refactoring beyond what the task requires. Do not "improve" code the user did not ask you to change.
 
-## Python template policy
-- When asked to create templates for Python-related flows, use Jinja templates.
-- Template filenames must follow `<file-name>.<extension>.j2`.
-- Keep templates mostly complete and parameterize only values explicitly passed from the caller.
-
 ## Test execution sequence
 - For technologies with tests, follow this order on modify tasks:
   1. Edit implementation code first.
@@ -123,37 +118,6 @@ These apply to every code change, regardless of language or technology:
 - PR content must follow `.github/PULL_REQUEST_TEMPLATE.md` in exact section order.
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with a release or tag reference.
 - `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
-
-## Script standards (Bash/Python)
-- Apply to both create and modify flows.
-- Start with purpose + usage examples.
-- Use emoji logs for state transitions.
-- Use simple control flow and early returns.
-- Bash: always `#!/usr/bin/env bash` (never POSIX `sh`).
-- Python: add unit tests for testable logic.
-- Python dependency choice for new scripts: evaluate standard library vs mature third-party libraries explicitly before implementation. Do not treat `stdlib-first` as an absolute default.
-- Python dependency choice for new scripts: prefer a mature, well-maintained, widely used third-party library when it clearly reduces boilerplate, edge-case handling, or custom logic in the final code.
-- Python dependency choice for new scripts: keep the standard library only when the resulting implementation is genuinely simpler, more readable, and safer than the third-party alternative.
-- Python dependency choice for new scripts: optimize for simpler final code and less bespoke logic, not for the lowest possible dependency count.
-- Python dependency choice for new scripts: do not hand-roll parsing, validation, CLI handling, serialization, HTTP clients, retry behavior, date handling, table rendering, Excel/CSV processing, or formatting when a mature library is the clearer solution.
-- Python dependency choice for new scripts: before writing code, include a short dependency decision note that lists candidate libraries, the final choice, and the reason for that choice.
-- Python dependencies: when external packages are introduced, standardize on a compiled `requirements.txt` with exact pins, full transitive dependency closure, and `--hash` entries, plus short comment lines that make the pinned versions readable to humans.
-- Python dependencies: if the dependency decision note selects external packages, create or update the local `requirements.txt` consistently with the repository lock-file policy.
-- Python dependencies: the source of truth for standalone Python automation is always the Python entrypoint plus its adjacent lock file such as `requirements.txt` or another explicitly scoped requirements lock file; do not add local vendored libraries, wheelhouses, copied site-packages, or alternate local dependency mirrors unless the user explicitly requests that model.
-- Python dependencies: third-party libraries are recommended when they materially simplify parsing, validation, HTTP, CLI, serialization, retry logic, date handling, table rendering, Excel/CSV processing, or formatting; keep the standard library when it is simpler and safer.
-- Python dependencies: avoid marginal or unjustified packages; each dependency should earn its place through a clear value-versus-setup tradeoff.
-- Python dependencies: no fallback and no deprecation path for dependency sources. When the lock file or launcher strategy changes, update the canonical Python entrypoint and requirements file directly and remove the superseded path in the same change.
-- Standalone Python scripts should keep a self-contained folder that includes the Python entry point, a Bash launcher, and a local `requirements.txt` only when external packages are required. The launcher should bootstrap `.venv` and install from `requirements.txt` only when that file exists.
-- When modifying an existing standalone Python script, add or preserve the Bash launcher and update nearby usage examples, prompts, and workflow docs to invoke the launcher instead of `python <script>.py`.
-- Prefer immutable dependency and image pins; keep stack-specific locking details in the matching instruction file.
-
-## Java and Node.js standards
-- Treat as project work (services/modules/components), not script work.
-- Keep business logic separated from transport and infrastructure concerns.
-- Add a short purpose JavaDoc/comment when intent is not obvious.
-- Keep unit tests simple and BDD-like.
-- Java default: JUnit 5 with `@DisplayName` and `given_when_then` naming.
-- Node default: built-in `node:test` + `node:assert/strict` (`describe`/`it` when available).
 
 ## Validation baseline
 - For Copilot customization changes, run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
