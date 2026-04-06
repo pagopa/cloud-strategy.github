@@ -94,7 +94,13 @@ These files are always synced regardless of detected stacks:
 ## Tooling
 - Workflow anchor: `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
 - Manifest: `.github/internal-sync-copilot-configs.manifest.json` (in target repo)
+- Local planner/apply entry point: `.github/scripts/sync_copilot_catalog.sh`
+- Local source audit entry point: `.github/scripts/check_catalog_consistency.sh`
+- Local source deep audit entry point: `.github/scripts/audit_copilot_catalog.sh`
+- Local inventory rebuild entry point: `.github/scripts/build_inventory.sh`
+- Local token-risk entry point: `.github/scripts/detect_token_risks.sh`
 
 ## Validation
 - Run the repository checks that currently exist for the touched source files.
 - If the source repository does not ship a dedicated sync test suite, say so explicitly and use the closest existing verification instead.
+- Preferred local sequence for this repository: `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks`, `./.github/scripts/build_inventory.sh --root .`, and `./.github/scripts/sync_copilot_catalog.sh plan --target-repo <repo>`.

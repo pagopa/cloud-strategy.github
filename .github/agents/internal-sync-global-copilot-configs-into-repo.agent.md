@@ -52,6 +52,11 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - When the target sync includes root guidance files, refresh target `AGENTS.md`, target `.github/copilot-instructions.md`, and target `.github/INVENTORY.md` around their canonical ownership: cross-surface defaults and precedence in `AGENTS.md`, repo-wide Copilot behavior in `.github/copilot-instructions.md`, and exact live catalog data in `.github/INVENTORY.md`.
 - In target repositories, keep preserved target `local-*` assets visible in the final plan or apply report and avoid reassigning scoped exceptions to the wrong guidance layer.
 
+## Local Automation Support
+- Use `.github/scripts/sync_copilot_catalog.sh` for local `plan` and `apply` runs against consumer repositories.
+- Use `.github/scripts/check_catalog_consistency.sh --root . --include-token-risks` before reporting a completed source-side sync baseline.
+- Use `.github/scripts/build_inventory.sh --root .` when catalog changes require an updated source inventory.
+
 ## Output Expectations
 
 End every completed run with the completion-report contract below.
