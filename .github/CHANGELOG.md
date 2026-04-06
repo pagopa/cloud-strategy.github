@@ -12,6 +12,7 @@ Use this format for new updates:
 - Removed the source-side `.github/scripts/vendor/` wheelhouse assumption from `scripts/internal-python-runner.sh`, `scripts/internal-sync-copilot-configs.py`, and `tests/test_contract_runner.py` so repository-owned Python wrappers now install only from pinned `requirements.txt` and no longer sync local vendored libraries into consumer repositories.
 - Added an explicit Python dependency policy to `.github/copilot-instructions.md` and `.github/instructions/internal-python.instructions.md`: the source of truth is the Python entrypoint plus its adjacent requirements lock file, with no local vendored libraries, no fallback mirrors, and no deprecation path unless the user explicitly requests an exception.
 - Corrected `.github/README.md` so the maintained script inventory matches the files that actually exist on disk and no longer advertises a nonexistent `scripts/report-copilot-usage.sh` wrapper.
+- Tightened the active non-README governance layer after the refactor: reduced root `AGENTS.md` to a thinner bridge, refreshed `.github/INVENTORY.md` to match the live prompt catalog, removed stale prompt/script/source-of-truth references from active governance assets, and aligned the cross-repository sync agent/skill with the files that actually exist on disk.
 
 ## 2026-04-05
 - Added `scripts/internal_yaml.py` and reused it from both `internal-sync-copilot-configs.py` and `validate-copilot-customizations.py` so repository-owned Python automation now shares one YAML/frontmatter parser instead of duplicating parsing logic.

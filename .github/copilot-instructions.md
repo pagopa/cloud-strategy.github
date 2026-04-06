@@ -16,7 +16,8 @@ You are an expert software and platform engineer. You are the user's technical p
 
 ## Root bridge contract
 - `.github/copilot-instructions.md` is the primary detailed policy file for this repository.
-- Root `AGENTS.md` is the GitHub Copilot bridge for naming, routing, discovery, and inventory only.
+- Root `AGENTS.md` is the GitHub Copilot bridge for loading, naming, and discovery only.
+- Root `AGENTS.md` should do only three things: tell GitHub Copilot to load this file, point to `.github/INVENTORY.md` for exact live paths, and signal that `.github/instructions/`, `.github/prompts/`, `.github/skills/`, and `.github/agents/` exist for on-demand use.
 - When both files need changes, update `.github/copilot-instructions.md` first and refresh root `AGENTS.md` second.
 - When exact path inventory is externalized, keep it in `.github/INVENTORY.md` and keep root `AGENTS.md` as the bridge pointer to that file.
 - Keep repository-facing wording GitHub Copilot-based and do not make repository artifacts say or imply that the repository uses a different assistant runtime.
@@ -61,10 +62,10 @@ You are an expert software and platform engineer. You are the user's technical p
 - Detect the repository role from real files before generating code or documentation.
 - Treat this repository as a Copilot customization and governance repository unless the current target files prove otherwise.
 - Use repository evidence first:
-  - `AGENTS.md` for routing, naming policy, discovery, and inventory.
+  - `AGENTS.md` for bridge-level loading, naming, and discovery.
   - `.github/copilot-instructions.md`, `.github/copilot-code-review-instructions.md`, and `.github/copilot-commit-message-instructions.md` for assistant-facing behavior.
   - `.github/instructions/`, `.github/prompts/`, `.github/skills/`, and `.github/agents/` for reusable customization assets.
-  - `.github/repo-profiles.yml`, `VERSION`, `Makefile`, and `.github/scripts/internal-sync-copilot-configs.py` for concrete implementation and validation signals.
+  - `.github/INVENTORY.md`, `.github/repo-profiles.yml`, `VERSION`, `Makefile`, and `.github/workflows/terraform-pre-commit.yml` for concrete catalog and validation signals.
 - Infer technology usage only from files that exist in the repository or the target repository under analysis.
 - If the repository does not declare an exact runtime or dependency version, do not invent one. Constrain output to patterns already present in the codebase.
 
@@ -134,8 +135,8 @@ These apply to every code change, regardless of language or technology:
 - Load only the prompts, skills, instructions, or agents needed for the current task.
 - Keep assistant-facing language mapped through `AGENTS.md` and avoid mentioning internal runtime names.
 - Treat `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` as the only canonical repository-owned operational agents.
-- `internal-pr-editor` remains intentionally prompt-routed; keep PR body generation on the prompt-plus-skill path unless the repository adds a dedicated agent.
+- `internal-pr-editor` remains intentionally non-agent tactical capacity; keep PR body generation on the `internal-pr-editor` skill path unless the repository adds a dedicated prompt or agent.
 - `internal-data-registry` remains intentionally dormant tactical capacity until the repository adds a concrete routing owner.
-- Use `.github/obra-superpowers-source-of-truth.json` as the pinned OBRA import contract; stale OBRA mappings or references should fail validation instead of drifting silently.
+- Treat stale `obra-*` mappings or references as blocking drift instead of allowing silent catalog divergence.
 - Keep `obra-using-superpowers` as the repository-wide OBRA bootstrap reference and `obra-writing-skills` as the skill-authoring reference; do not pad unrelated agent skill lists with them decoratively.
 - For sync workflows that need retained plans or auxiliary output files, use repository-root `tmp/` and create it if missing instead of scattering those artifacts under governed `.github/` paths.

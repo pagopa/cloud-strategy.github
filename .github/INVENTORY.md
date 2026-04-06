@@ -28,11 +28,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 ## Prompts
 
-- `.github/prompts/internal-add-platform.prompt.md`
-- `.github/prompts/internal-add-report-script.prompt.md`
-- `.github/prompts/internal-add-unit-tests.prompt.md`
-- `.github/prompts/internal-github-action.prompt.md`
-- `.github/prompts/internal-terraform-module.prompt.md`
+No prompt files currently ship in the live catalog.
 
 ## Skills
 
