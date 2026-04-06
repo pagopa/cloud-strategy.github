@@ -23,6 +23,7 @@ from .shared import (
 )
 
 MANAGED_SKILL_DIR = ".github/skills"
+SYNC_PLAN_PATH = "tmp/internal-sync-copilot-configs.plan.md"
 
 
 def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
@@ -199,7 +200,7 @@ def render_sync_plan_markdown(plan: SyncPlan) -> str:
 
 
 def write_sync_plan(plan: SyncPlan) -> Path:
-    plan_path = plan.target_root / "tmp/internal-sync-copilot-configs.plan.md"
+    plan_path = plan.target_root / SYNC_PLAN_PATH
     write_text(plan_path, render_sync_plan_markdown(plan))
     return plan_path
 
@@ -245,7 +246,17 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
         elif operation.action == "rebuild" and operation.path == INVENTORY_PATH:
             write_text(target_path, plan.generated_inventory)
 
-    return write_sync_manifest(plan)
+    manifest_path = write_sync_manifest(plan)
+    clear_sync_plan(plan)
+    return manifest_path
+
+
+def clear_sync_plan(plan: SyncPlan) -> None:
+    plan_path = plan.target_root / SYNC_PLAN_PATH
+    if not plan_path.exists():
+        return
+    plan_path.unlink()
+    cleanup_empty_parents(plan_path, plan.target_root)
 
 
 def cleanup_empty_parents(path: Path, stop_at: Path) -> None:

@@ -76,7 +76,10 @@ def render_text(mode: str, plan, plan_path: Path, manifest_path: Path | None = N
         log_info(f"Sync apply completed for {plan.target_root.as_posix()}.")
     else:
         log_info(f"Sync {mode} ready for {plan.target_root.as_posix()}.")
-    log_info(f"Plan file: {plan_path.as_posix()}")
+    if plan_path.exists():
+        log_info(f"Plan file: {plan_path.as_posix()}")
+    else:
+        log_info(f"Plan file cleared: {plan_path.as_posix()}")
     if manifest_path is not None:
         log_info(f"Manifest file: {manifest_path.as_posix()}")
     for operation in plan.operations:
