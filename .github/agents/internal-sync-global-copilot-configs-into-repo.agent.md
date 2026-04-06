@@ -39,6 +39,7 @@ Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-
 - Keep target assumptions narrow: GitHub Copilot assets live under `.github/` and `AGENTS.md` stays at repository root.
 - Start in `plan` by default. Move to `apply` only on explicit request and only when the plan is conflict-safe.
 - Preserve target `local-*` assets under mirrored categories and report them clearly.
+- Exclude repository-owned sync-control resources named `internal-sync-*` from consumer-repository mirroring.
 - Remove target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - When root guidance is in scope, keep `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` aligned to their separate ownership layers instead of flattening them into one file.
 - Sync GitHub Copilot assets only unless the user explicitly expands scope.
@@ -55,7 +56,7 @@ Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-
 
 1. Confirm the mode: `plan`, `apply`, or source or target drift review.
 2. Load the mandatory sync skill and inspect the source baseline, the target bridge files, preserved `local-*` assets, and target git state.
-3. Write or refresh `tmp/internal-sync-copilot-configs.plan.md` in the target repository before any mirrored change.
+3. Write or refresh `tmp/copilot-sync.plan.md` in the target repository before any mirrored change.
 4. Apply only the approved plan, then validate the target result and clean the tracking-plan lifecycle according to the skill contract.
 
 ## Output Expectations

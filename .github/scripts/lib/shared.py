@@ -23,6 +23,7 @@ LEGACY_AGENT_TOOL_IDS = {
 }
 IGNORED_SYNC_FILENAMES = {"README.md", "CHANGELOG.md"}
 IGNORED_SYNC_PARTS = {"__pycache__", ".venv"}
+CONSUMER_SYNC_EXCLUDED_PREFIX = "internal-sync-"
 MANAGED_ROOT_FILES = (
     "AGENTS.md",
     ".github/copilot-instructions.md",
@@ -251,6 +252,11 @@ def is_local_asset(relative_path: str) -> bool:
     if parts[1] == "skills":
         return len(parts) >= 3 and parts[2].startswith("local-")
     return path.name.startswith("local-")
+
+
+def is_consumer_sync_excluded_path(relative_path: str) -> bool:
+    path = Path(relative_path)
+    return any(part.startswith(CONSUMER_SYNC_EXCLUDED_PREFIX) for part in path.parts)
 
 
 def resolve_markdown_target(root: Path, current_file: Path, target: str) -> Path | None:

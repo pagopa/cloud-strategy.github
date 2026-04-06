@@ -21,6 +21,7 @@ This skill owns the reusable sync procedure. Keep the paired agent short; do not
 - Treat this repository as the source of truth.
 - Keep target assumptions narrow: GitHub Copilot assets live under `.github/` and `AGENTS.md` stays at repository root.
 - Preserve target `local-*` assets under mirrored categories and delete target-only non-local assets there during `apply`.
+- Exclude source resources named `internal-sync-*` from consumer mirroring and remove any target copies of those resources during `apply`.
 - Keep root guidance layered: `AGENTS.md` is the bridge, `.github/copilot-instructions.md` is the repo-wide projection, and `.github/INVENTORY.md` is the live catalog.
 - Prefer the bundled sync automation when it matches the requested mode instead of re-deriving the workflow manually.
 - Keep detailed operating rules in `references/sync-contract.md` instead of re-expanding them in the agent body.
@@ -28,7 +29,7 @@ This skill owns the reusable sync procedure. Keep the paired agent short; do not
 ## Default Workflow
 
 1. Analyze the source baseline, target catalog, target git state, and preserved local assets.
-2. Write `tmp/internal-sync-copilot-configs.plan.md` in the target repository with the pending operations and any manual follow-up that remains outside automation.
+2. Write `tmp/copilot-sync.plan.md` in the target repository with the pending operations and any manual follow-up that remains outside automation.
 3. In `apply`, mirror source-managed assets, rebuild the target inventory, write the target manifest, and clear the tracking plan when nothing remains pending.
 4. Re-run the closest existing validation and report any blockers or gaps.
 

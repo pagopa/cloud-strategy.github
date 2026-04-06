@@ -14,6 +14,7 @@ from .shared import (
     action_sort_key,
     all_files_under,
     git_revision,
+    is_consumer_sync_excluded_path,
     is_git_dirty,
     is_ignored_sync_path,
     is_local_asset,
@@ -23,7 +24,12 @@ from .shared import (
 )
 
 MANAGED_SKILL_DIR = ".github/skills"
-SYNC_PLAN_PATH = "tmp/internal-sync-copilot-configs.plan.md"
+SYNC_PLAN_PATH = "tmp/copilot-sync.plan.md"
+SYNC_MANIFEST_PATH = ".github/copilot-sync.manifest.json"
+LEGACY_SYNC_ARTIFACT_PATHS = (
+    "tmp/internal-sync-copilot-configs.plan.md",
+    ".github/internal-sync-copilot-configs.manifest.json",
+)
 
 
 def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
@@ -32,6 +38,7 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
 
     source_files = discover_source_sync_files(source_root)
     target_files = discover_target_managed_files(target_root)
+    target_excluded_files = discover_target_excluded_sync_files(target_root)
     operations: list[SyncOperation] = []
 
     for relative_path in sorted(source_files):
@@ -87,6 +94,31 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
             )
         )
 
+    for relative_path in sorted(target_excluded_files):
+        operations.append(
+            SyncOperation(
+                action="delete",
+                path=relative_path,
+                reason="Target internal-sync resource must be removed from consumer repositories.",
+                source_hash=None,
+                target_hash=sha256_file(target_root / relative_path),
+            )
+        )
+
+    for relative_path in LEGACY_SYNC_ARTIFACT_PATHS:
+        legacy_path = target_root / relative_path
+        if not legacy_path.exists():
+            continue
+        operations.append(
+            SyncOperation(
+                action="delete",
+                path=relative_path,
+                reason="Legacy internal-sync tracking artifact must be removed from consumer repositories.",
+                source_hash=None,
+                target_hash=sha256_file(legacy_path),
+            )
+        )
+
     future_inventory_paths = sorted(
         catalog_path
         for catalog_path in source_files
@@ -132,7 +164,11 @@ def discover_source_sync_files(root: Path) -> set[str]:
     files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
-    return {relative_path for relative_path in files if not is_ignored_sync_path(relative_path)}
+    return {
+        relative_path
+        for relative_path in files
+        if not is_ignored_sync_path(relative_path) and not is_consumer_sync_excluded_path(relative_path)
+    }
 
 
 def discover_target_managed_files(root: Path) -> set[str]:
@@ -143,7 +179,24 @@ def discover_target_managed_files(root: Path) -> set[str]:
     files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
-    return {relative_path for relative_path in files if not is_ignored_sync_path(relative_path)}
+    return {
+        relative_path
+        for relative_path in files
+        if not is_ignored_sync_path(relative_path) and not is_consumer_sync_excluded_path(relative_path)
+    }
+
+
+def discover_target_excluded_sync_files(root: Path) -> set[str]:
+    files: set[str] = set()
+    files.update(all_files_under(root, ".github/agents"))
+    files.update(all_files_under(root, ".github/instructions"))
+    files.update(all_files_under(root, ".github/prompts"))
+    files.update(all_files_under(root, MANAGED_SKILL_DIR))
+    return {
+        relative_path
+        for relative_path in files
+        if not is_ignored_sync_path(relative_path) and is_consumer_sync_excluded_path(relative_path)
+    }
 
 
 def detect_target_stacks(root: Path) -> list[str]:
@@ -206,7 +259,7 @@ def write_sync_plan(plan: SyncPlan) -> Path:
 
 
 def write_sync_manifest(plan: SyncPlan) -> Path:
-    manifest_path = plan.target_root / ".github/internal-sync-copilot-configs.manifest.json"
+    manifest_path = plan.target_root / SYNC_MANIFEST_PATH
     managed_hashes: dict[str, str] = {}
     for operation in plan.operations:
         if operation.action in {"delete", "preserve"}:
