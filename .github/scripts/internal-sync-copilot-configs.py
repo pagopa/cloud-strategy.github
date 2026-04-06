@@ -29,6 +29,7 @@ from internal_yaml import load_frontmatter, load_yaml_document as shared_load_ya
 
 SCRIPT_NAME = "internal-sync-global-copilot-configs-into-repo"
 MANIFEST_RELATIVE_PATH = ".github/internal-sync-copilot-configs.manifest.json"
+INVENTORY_RELATIVE_PATH = ".github/INVENTORY.md"
 TMP_OUTPUT_DIRECTORY = "tmp"
 PLAN_RELATIVE_PATH = f"{TMP_OUTPUT_DIRECTORY}/internal-sync-copilot-configs.plan.md"
 SUPPORTED_SCOPE = "copilot-core"
@@ -48,8 +49,6 @@ MANAGED_ALWAYS = (
     ".github/scripts/internal_yaml.py",
     ".github/scripts/internal-python-runner.sh",
     ".github/scripts/requirements.txt",
-    ".github/scripts/validate-copilot-customizations.sh",
-    ".github/scripts/validate-copilot-customizations.py",
 )
 ALWAYS_EXCLUDED_RELATIVE_PATHS = {
     ".github/README.md",
@@ -803,7 +802,7 @@ def is_local_asset_path(relative_path: str) -> bool:
 def is_mirrored_resource_path(relative_path: str) -> bool:
     if relative_path in MANAGED_ALWAYS:
         return True
-    if relative_path == "AGENTS.md":
+    if relative_path in {"AGENTS.md", INVENTORY_RELATIVE_PATH}:
         return True
 
     parts = Path(relative_path).parts
@@ -828,7 +827,7 @@ def is_target_analysis_path(relative_path: str) -> bool:
         return False
     if relative_path in MANAGED_ALWAYS:
         return False
-    if relative_path in {MANIFEST_RELATIVE_PATH, PLAN_RELATIVE_PATH}:
+    if relative_path in {MANIFEST_RELATIVE_PATH, INVENTORY_RELATIVE_PATH, PLAN_RELATIVE_PATH}:
         return False
 
     parts = Path(relative_path).parts
@@ -1338,7 +1337,7 @@ def build_source_audit_recommendations(
     if agents_md_repeats:
         summary = ", ".join(repeat.reference for repeat in agents_md_repeats[:5])
         recommendations.append(
-            "Keep asset path references in `AGENTS.md` inventory only and use capability names elsewhere to avoid "
+            "Keep asset path references in the declared inventory only and use capability names elsewhere to avoid "
             f"documentation repeats: {summary}."
         )
 
@@ -1545,7 +1544,6 @@ def build_validation_commands(analysis: TargetAnalysis, instruction_paths: set[s
         commands.append("python -m compileall <changed_python_paths>")
         if repo_has_pytest_tests(analysis.repo_root):
             commands.append("pytest")
-    commands.append("./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict")
     return commands
 
 
@@ -1561,6 +1559,25 @@ def merged_inventory_paths(target_root: Path, selection: AssetSelection) -> dict
         "skills": sorted(set(selection.skills) | preserved_local_assets("skills")),
         "agents": sorted(set(selection.agents) | preserved_local_assets("agents")),
     }
+
+
+def render_inventory_markdown(inventory_paths: dict[str, list[str]]) -> str:
+    lines = [
+        "# Copilot Inventory",
+        "",
+        "This file is the exact path inventory for the mirrored GitHub Copilot catalog plus preserved target "
+        "`local-*` assets in this repository.",
+        "",
+        "## Instructions",
+    ]
+    lines.extend(f"- `{path}`" for path in inventory_paths["instructions"])
+    lines.extend(["", "## Prompts"])
+    lines.extend(f"- `{path}`" for path in inventory_paths["prompts"])
+    lines.extend(["", "## Skills"])
+    lines.extend(f"- `{path}`" for path in inventory_paths["skills"])
+    lines.extend(["", "## Agents"])
+    lines.extend(f"- `{path}`" for path in inventory_paths["agents"])
+    return "\n".join(lines) + "\n"
 
 
 def validate_unmanaged_prompt_asset(target_root: Path, relative_path: str, repo_local: bool = False) -> list[str]:
@@ -1822,6 +1839,7 @@ def build_planned_files(
     selection: AssetSelection,
 ) -> list[PlannedFile]:
     planned_files: list[PlannedFile] = []
+    inventory_paths = merged_inventory_paths(target_root, selection)
     for source_relative_path in selection.managed_source_paths:
         if source_relative_path == ".github/AGENTS.md":
             continue
@@ -1834,8 +1852,19 @@ def build_planned_files(
                 desired_bytes=source_path.read_bytes(),
                 category=asset_category(source_relative_path),
                 mode=source_path.stat().st_mode & 0o777,
-            )
         )
+    )
+
+    planned_files.append(
+        PlannedFile(
+            source_relative_path=None,
+            target_relative_path=INVENTORY_RELATIVE_PATH,
+            desired_bytes=render_inventory_markdown(inventory_paths).encode("utf-8"),
+            category="baseline",
+            generated=True,
+            mode=0o644,
+        )
+    )
 
     planned_files.append(
         PlannedFile(
@@ -2100,12 +2129,10 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
     instructions_apply_to = build_instruction_rule_pairs(source_root, selection.instructions)
     preferred_prompts = preferred_asset_lines(source_root, selection.preferred_prompts)
     preferred_skills = preferred_asset_lines(source_root, selection.preferred_skills)
-    inventory_paths = merged_inventory_paths(analysis.repo_root, selection)
     governance_references = [
         ".github/security-baseline.md",
         ".github/DEPRECATION.md",
         ".github/repo-profiles.yml",
-        ".github/scripts/validate-copilot-customizations.sh",
     ]
 
     lines: list[str] = [
@@ -2159,6 +2186,7 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
             f"- Primary focus: {analysis.focus}",
             f"- Profile hint: `{selection.profile.name}`",
             "- AGENTS.md is the external bridge for assistant behavior and naming; keep runtime references abstract.",
+            f"- Exact path inventory lives in `{INVENTORY_RELATIVE_PATH}`; keep only the bridge pointer here.",
             "- Completion-report details live in `.github/copilot-instructions.md`; keep the category schema there, not in this bridge.",
             "- Resolve stack from target files and explicit prompt inputs; the agent role remains behavioral, not language-specific.",
             "- Prioritize these paths:",
@@ -2171,24 +2199,10 @@ def render_agents_markdown(analysis: TargetAnalysis, selection: AssetSelection, 
     lines.extend(preferred_prompts)
     lines.extend(["", "### Preferred skills"])
     lines.extend(preferred_skills)
-    lines.extend(["", "### Required validations before PR"])
-    lines.extend(f"- `{command}`" for command in selection.validation_commands)
-    lines.extend(
-        [
-            "",
-            "## Repository Inventory (Auto-generated)",
-            "This inventory reflects the mirrored source catalog plus preserved target local-* Copilot assets.",
-            "",
-            "### Instructions",
-        ]
-    )
-    lines.extend(f"- `{path}`" for path in inventory_paths["instructions"])
-    lines.extend(["", "### Prompts"])
-    lines.extend(f"- `{path}`" for path in inventory_paths["prompts"])
-    lines.extend(["", "### Skills"])
-    lines.extend(f"- `{path}`" for path in inventory_paths["skills"])
-    lines.extend(["", "### Agents"])
-    lines.extend(f"- `{path}`" for path in inventory_paths["agents"])
+    if selection.validation_commands:
+        lines.extend(["", "### Required validations before PR"])
+        lines.extend(f"- `{command}`" for command in selection.validation_commands)
+    lines.extend(["", "## Inventory", f"- Exact path inventory lives in `{INVENTORY_RELATIVE_PATH}`."])
 
     return "\n".join(lines) + "\n"
 
@@ -2409,12 +2423,14 @@ def build_tracking_state(
     pending_validation_checks: list[str] = []
     manifest_path = plan.analysis.repo_root / MANIFEST_RELATIVE_PATH
     agents_path = plan.analysis.repo_root / plan.analysis.agents_relative_path
+    inventory_path = plan.analysis.repo_root / INVENTORY_RELATIVE_PATH
     if not validation_performed:
         pending_validation_checks.extend(
             [
                 f"Confirm `{MANIFEST_RELATIVE_PATH}` is written after apply.",
                 f"Confirm `{plan.analysis.agents_relative_path}` exists and reflects the mirrored catalog.",
-                "Run strict Copilot validation: `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.",
+                f"Confirm `{INVENTORY_RELATIVE_PATH}` exists and reflects the mirrored catalog plus preserved target `local-*` assets.",
+                "Run the repository's current post-apply checks, if any.",
             ]
         )
     else:
@@ -2424,6 +2440,8 @@ def build_tracking_state(
             pending_validation_checks.append(
                 f"Missing `{plan.analysis.agents_relative_path}` after apply."
             )
+        if not inventory_path.is_file():
+            pending_validation_checks.append(f"Missing `{INVENTORY_RELATIVE_PATH}` after apply.")
         pending_validation_checks.extend(validation_errors or [])
 
     pending_manual_follow_up: list[str] = []
@@ -2485,21 +2503,16 @@ def update_tracking_plan_file(target_root: Path, tracking: PlanTrackingState) ->
     return True
 
 
-def run_strict_target_validation(target_root: Path) -> list[str]:
-    validator_path = target_root / ".github" / "scripts" / "validate-copilot-customizations.sh"
-    if not validator_path.is_file():
-        return [
-            "Missing `.github/scripts/validate-copilot-customizations.sh`; strict Copilot validation could not run."
-        ]
-
+def run_target_post_apply_checks(target_root: Path) -> list[str]:
+    scripts_path = target_root / ".github" / "scripts"
+    if not scripts_path.is_dir():
+        return []
     result = subprocess.run(
         [
-            "bash",
-            ".github/scripts/validate-copilot-customizations.sh",
-            "--scope",
-            "root",
-            "--mode",
-            "strict",
+            sys.executable,
+            "-m",
+            "compileall",
+            ".github/scripts",
         ],
         cwd=target_root,
         capture_output=True,
@@ -2515,7 +2528,7 @@ def run_strict_target_validation(target_root: Path) -> list[str]:
         if line.strip()
     ]
     if not combined_output:
-        combined_output = [f"Strict Copilot validation failed with exit code {result.returncode}."]
+        combined_output = [f"Post-apply checks failed with exit code {result.returncode}."]
     return combined_output[:20]
 
 
@@ -2885,7 +2898,7 @@ def main(argv: list[str] | None = None) -> int:
             log_error(str(error))
             return 2
 
-        validation_errors = run_strict_target_validation(target_root)
+        validation_errors = run_target_post_apply_checks(target_root)
         tracking_written = update_tracking_plan_file(
             target_root,
             build_tracking_state(
@@ -2895,7 +2908,7 @@ def main(argv: list[str] | None = None) -> int:
             ),
         )
         if validation_errors:
-            log_warn("Strict Copilot validation left pending items in the tracking plan.")
+            log_warn("Post-apply checks left pending items in the tracking plan.")
         if tracking_written:
             log_warn(f"Tracking plan retained at {tracking_path}")
         else:

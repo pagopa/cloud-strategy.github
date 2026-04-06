@@ -28,7 +28,7 @@ description: Mirror the shared Copilot catalog into consumer repos — dynamic r
 6. Preserve target `local-*` assets and validate them as unmanaged local extensions.
 7. Write `tmp/internal-sync-copilot-configs.plan.md` in the target repo with the pending sync actions, checks, and manual follow-up items.
 8. When the sync needs retained auxiliary files such as saved reports, place them under target-root `tmp/` and create that directory if it does not exist.
-9. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local planning and authoring workflow anchored in `internal-planning-leader`, then target root `AGENTS.md` via `internal-agents-md-bridge`.
+9. Plan root-guidance refresh in this order: target `.github/copilot-instructions.md` first via the repository-local planning and authoring workflow anchored in `internal-planning-leader`, then target `.github/INVENTORY.md`, then target root `AGENTS.md` as the thin bridge.
 10. Generate plan report (JSON or Markdown).
 
 ### Phase 3 — Apply (opt-in)
@@ -50,8 +50,6 @@ These files are always synced regardless of detected stacks:
 - `security-baseline.md`
 - `DEPRECATION.md`
 - `repo-profiles.yml`
-- `scripts/validate-copilot-customizations.sh`
-- `scripts/validate-copilot-customizations.py`
 
 ## Target assumptions
 - The source of truth is always this `cloud-strategy.github` repository.
@@ -70,7 +68,7 @@ These files are always synced regardless of detected stacks:
 - Manage Copilot-core assets only.
 - Exclude README, changelog, templates, workflows, and source-only agents from sync.
 - Prefer existing root `AGENTS.md` over creating a second managed file under `.github/`.
-- Keep preserved `local-*` assets visible in rendered AGENTS.md inventory.
+- Keep preserved `local-*` assets visible in generated `.github/INVENTORY.md`.
 - Overwrite non-local divergent files inside mirrored categories.
 - Treat target `.github/copilot-instructions.md` as the primary home for detailed behavioral, validation, and implementation guidance.
 - Treat target root `AGENTS.md` as a thin bridge for generic assistants: routing, naming, priority, and discovery of the Copilot-owned `.github` assets.
@@ -100,4 +98,4 @@ These files are always synced regardless of detected stacks:
 ## Validation
 - `python -m compileall .github/scripts tests`
 - `pytest` for the sync test suite.
-- `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`
+- `python -m compileall .github/scripts`

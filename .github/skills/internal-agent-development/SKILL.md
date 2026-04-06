@@ -33,7 +33,6 @@ Load these inputs before finalizing an internal agent:
 
 - `AGENTS.md` for routing language and repository inventory
 - `.github/copilot-instructions.md` for the non-negotiable behavior layer
-- `.github/scripts/validate-copilot-customizations.py` for canonical validation expectations
 - `references/agent-template.md` when drafting a new agent from scratch
 - `references/conversion-checklist.md` when normalizing an imported or legacy agent
 - `references/design-patterns.md` when broadening, splitting, or strengthening an agent
@@ -295,4 +294,4 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm reusable procedures live in skills, not in the agent body.
 - Confirm the new or changed agent does not make an existing agent redundant.
 - Use `references/review-checklist.md` for a final pass when the change broadens scope or imports external patterns.
-- Run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict` after changes that affect agent naming or inventory.
+- Run the repository validation entrypoints that currently exist after changes that affect agent naming or inventory, and report the gap explicitly when no dedicated validator is present.

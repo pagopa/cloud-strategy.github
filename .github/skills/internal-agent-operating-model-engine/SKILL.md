@@ -79,7 +79,6 @@ Use this policy across all canonical agents:
 | `internal-agent-operating-model-engine` | Shared by the four canonical agents | Shared boundary, recommendation, and anti-overlap logic |
 | `internal-code-review` | `internal-review-guard` | Tactical review engine for findings and defect-first analysis |
 | `internal-agent-development` | `internal-planning-leader` | Non-trivial repository-owned agent authoring |
-| `internal-agents-md-bridge` | `internal-planning-leader` | Root bridge changes and AGENTS alignment |
 | `internal-copilot-audit` | `internal-planning-leader` | Catalog audit, drift analysis, and stale-reference review |
 | `internal-copilot-docs-research` | `internal-planning-leader` | Contract questions that depend on current GitHub Copilot or MCP behavior |
 | `internal-pair-architect` | `internal-planning-leader` | Change-impact and architecture-risk analysis |

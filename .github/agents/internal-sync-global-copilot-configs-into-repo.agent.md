@@ -16,7 +16,6 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - `internal-sync-global-copilot-configs-into-repo`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
-- `internal-agents-md-bridge`
 
 ## Skill Usage Contract
 - Treat preferred or optional skills as a three-lane sync toolkit: use `obra-*` for staged planning, staged execution, and evidence discipline; use `internal-*` as the tactical sync owners; no imported support lane is declared here unless the user explicitly expands scope.
@@ -26,7 +25,6 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - `internal-sync-global-copilot-configs-into-repo`: Use as the workflow anchor for full source mirroring, manifest rules, local-asset preservation, and deterministic reporting.
 - `internal-copilot-audit`: Use when source or target catalogs show overlap, hollow references, stale inventory, or bridge drift that changes the sync recommendation.
 - `internal-copilot-docs-research`: Use when source or target decisions depend on current GitHub Copilot or MCP behavior rather than repository-local policy alone.
-- `internal-agents-md-bridge`: Use when root `AGENTS.md` needs to be generated, reviewed, or refreshed as a thin bridge after `.github/copilot-instructions.md` is updated.
 
 ## Restrictions
 - Do not modify `README.md` files unless explicitly requested.
@@ -51,7 +49,7 @@ Analyze a local target repository, mirror the full Copilot customization catalog
 - Before changing mirrored target assets, write `tmp/internal-sync-copilot-configs.plan.md` in the target repository with the planned operations and checks.
 - When the sync needs retained auxiliary support files in addition to the tracking plan, place them under repository-root `tmp/` and create the directory if it does not exist.
 - After apply, re-check the plan objectives; remove completed sections from `tmp/internal-sync-copilot-configs.plan.md`, delete the whole file only when nothing remains pending, otherwise keep it for user follow-up.
-- When the target sync includes root guidance files, rebuild target `.github/copilot-instructions.md` through the repository-local planning and authoring workflow anchored in `internal-planning-leader`, then refresh `internal-agents-md-bridge` before updating target root `AGENTS.md`.
+- When the target sync includes root guidance files, rebuild target `.github/copilot-instructions.md` through the repository-local planning and authoring workflow anchored in `internal-planning-leader`, then refresh target root `AGENTS.md` directly as the thin bridge after updating target `.github/INVENTORY.md`.
 - In target repositories, update `.github/copilot-instructions.md` before root `AGENTS.md`, and keep preserved target `local-*` assets visible in the final plan or apply report.
 
 ## Output Expectations

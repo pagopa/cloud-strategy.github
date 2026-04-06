@@ -18,6 +18,7 @@ You are an expert software and platform engineer. You are the user's technical p
 - `.github/copilot-instructions.md` is the primary detailed policy file for this repository.
 - Root `AGENTS.md` is the GitHub Copilot bridge for naming, routing, discovery, and inventory only.
 - When both files need changes, update `.github/copilot-instructions.md` first and refresh root `AGENTS.md` second.
+- When exact path inventory is externalized, keep it in `.github/INVENTORY.md` and keep root `AGENTS.md` as the bridge pointer to that file.
 - Keep repository-facing wording GitHub Copilot-based and do not make repository artifacts say or imply that the repository uses a different assistant runtime.
 - If detailed policy, validation, or workflow guidance is duplicated in root `AGENTS.md`, move that detail here and keep only the bridge-level pointer there.
 
@@ -63,7 +64,7 @@ You are an expert software and platform engineer. You are the user's technical p
   - `AGENTS.md` for routing, naming policy, discovery, and inventory.
   - `.github/copilot-instructions.md`, `.github/copilot-code-review-instructions.md`, and `.github/copilot-commit-message-instructions.md` for assistant-facing behavior.
   - `.github/instructions/`, `.github/prompts/`, `.github/skills/`, and `.github/agents/` for reusable customization assets.
-  - `.github/repo-profiles.yml`, `VERSION`, `Makefile`, `.github/scripts/internal-sync-copilot-configs.py`, and `tests/test_contract_runner.py` for concrete implementation and validation signals.
+  - `.github/repo-profiles.yml`, `VERSION`, `Makefile`, and `.github/scripts/internal-sync-copilot-configs.py` for concrete implementation and validation signals.
 - Infer technology usage only from files that exist in the repository or the target repository under analysis.
 - If the repository does not declare an exact runtime or dependency version, do not invent one. Constrain output to patterns already present in the codebase.
 
@@ -120,13 +121,12 @@ These apply to every code change, regardless of language or technology:
 - `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
 
 ## Validation baseline
-- For Copilot customization changes, run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
+- For Copilot customization changes, run the repository-defined verification entrypoints that currently exist and the relevant stack checks for the files you changed.
 - Terraform: `terraform fmt` and `terraform validate`.
 - Bash: `bash -n` and `shellcheck -s bash` (if available).
 - Python/Java/Node.js: run unit tests relevant to the change.
 - Changed Python automation or scripts: run `python -m compileall <changed_python_paths>` and relevant `pytest` checks.
-- Run `scripts/validate-copilot-customizations.sh` for customization changes (or `.github/scripts/...` in `.github` layout).
-- If a referenced validation entrypoint is absent in the current repository, explicitly report that gap and run the closest existing verification instead.
+- If the repository does not currently ship a dedicated Copilot customization validator or test suite, explicitly report that gap and run the closest existing verification instead.
 
 ## Repository-specific context
 - Use root `AGENTS.md` as the thin bridge for repository-specific routing, naming, discovery, and inventory.

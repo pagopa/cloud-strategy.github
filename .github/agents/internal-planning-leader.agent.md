@@ -24,7 +24,6 @@ You are the planning, authoring, and decision owner for non-trivial operational 
 - `obra-requesting-code-review`
 - `obra-finishing-a-development-branch`
 - `internal-agent-development`
-- `internal-agents-md-bridge`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
 - `internal-pair-architect`

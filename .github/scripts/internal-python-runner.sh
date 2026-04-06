@@ -2,7 +2,7 @@
 #
 # Purpose: Bootstrap a local virtual environment for a Python entrypoint and run it consistently.
 # Usage examples:
-#   ./.github/scripts/internal-python-runner.sh ./.github/scripts/validate-copilot-customizations.py --scope root
+#   ./.github/scripts/internal-python-runner.sh ./.github/scripts/report-copilot-usage.py --help
 #   PYTHON_BIN=python3.12 ./.github/scripts/internal-python-runner.sh ./scripts/tool.py --help
 
 set -euo pipefail

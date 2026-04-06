@@ -46,7 +46,7 @@ Use this checklist before finalizing a new or revised internal agent.
 - Does the filename stem match frontmatter `name:`?
 - Do all referenced local files exist?
 - Does the agent avoid making a neighboring agent redundant?
-- Has `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict` been run?
+- Have the repository validation entrypoints that currently exist been run, or has the validation gap been called out explicitly?
 
 ## Red Flags
 

@@ -167,7 +167,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 - Expected behavior:
   - plan mode writes `tmp/internal-sync-copilot-configs.plan.md`
   - the run creates `tmp/` when the target repo does not already have it
-  - the file contains pending synchronization and validation sections
+  - the file contains pending synchronization and post-check sections
 
 ### Sync Application
 
@@ -196,7 +196,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 - Fixture:
   - fresh target repository with a minimal supported stack
 - Expected behavior:
-  - apply removes `tmp/internal-sync-copilot-configs.plan.md` after sync and strict validation complete successfully
+  - apply removes `tmp/internal-sync-copilot-configs.plan.md` after sync and post-apply checks complete successfully
 
 #### `sync-apply-keeps-tracking-file-for-local-follow-up`
 
@@ -218,7 +218,7 @@ These rules apply to all repository resources, including prompts, skills, instru
 - inventory wording details
 - cross-link completeness between resources
 
-These are governed by repository conventions, skills, and dedicated validation workflows rather than this contract.
+These are governed by repository conventions, skills, and repository-defined post-apply checks rather than this contract.
 
 ### Legacy Migration Mechanics
 

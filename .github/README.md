@@ -3,16 +3,17 @@
 This directory is the source-side catalog for reusable GitHub Copilot customization assets maintained in `cloud-strategy.github`.
 
 - `.github/copilot-instructions.md` is the primary detailed policy layer.
-- Root [`AGENTS.md`](../AGENTS.md) is the thin bridge for routing, naming, discovery, and exact path inventory.
+- Root [`AGENTS.md`](../AGENTS.md) is the thin bridge for routing, naming, discovery, and the pointer to exact path inventory.
+- [`INVENTORY.md`](INVENTORY.md) is the exact path inventory for the live catalog.
 - This README is an orientation guide for maintainers of the source catalog. It should describe the live on-disk catalog only.
 
 ## Live Catalog Summary
 
 - Instructions: 21 total (`13 internal-*`, `8 awesome-copilot-*`)
 - Prompts: 5 total (`5 internal-*`)
-- Skills: 65 total (`28 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `3 openai-*`, `2 terraform-*`)
+- Skills: 64 total (`27 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `3 openai-*`, `2 terraform-*`)
 - Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
-- Scripts: 8 total
+- Scripts: 6 total
 - Workflows: 1 total
 
 ## Structure
@@ -22,6 +23,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 | Path | Purpose |
 | --- | --- |
 | `copilot-instructions.md` | Primary detailed policy, validation baseline, routing model, and completion-report contract. |
+| `INVENTORY.md` | Exact path inventory for live instructions, prompts, skills, and agents. |
 | `copilot-code-review-instructions.md` | Review-specific severity and defect-first guidance. |
 | `copilot-commit-message-instructions.md` | Commit message conventions. |
 | `security-baseline.md` | Cross-cutting security bar for workflows and infrastructure changes. |
@@ -74,7 +76,7 @@ Some skill directories include support material beyond `SKILL.md`. Current bundl
 - `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-skill-creator`
 - `terraform-terraform-search-import`
 
-Use root [`AGENTS.md`](../AGENTS.md) for the exact path inventory. Use this README for family-level orientation only.
+Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery. Use this README for family-level orientation only.
 
 ### Agents (`agents/`)
 
@@ -94,16 +96,14 @@ Only `internal-router` actively routes between canonical owners; the four canoni
 | `scripts/internal-python-runner.sh` | Shared Bash bootstrap for local `.venv` setup and `requirements.txt` installation before running repository Python entrypoints. |
 | `scripts/internal_yaml.py` | Shared repository-owned YAML and frontmatter helper used by internal Python automation. |
 | `scripts/requirements.txt` | Local pinned dependency set for repository-owned Python scripts under `.github/scripts/`. |
-| `scripts/validate-copilot-customizations.sh` | Supported strict validator entrypoint for naming, inventory, routing contracts, and completion-report governance. |
-| `scripts/validate-copilot-customizations.py` | Validator implementation used by the wrapper and test suite. |
 | `scripts/internal-sync-copilot-configs.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |
-| `scripts/internal-sync-copilot-configs.py` | Sync planner implementation used by the wrapper and test suite. |
+| `scripts/internal-sync-copilot-configs.py` | Sync planner implementation used by the wrapper and source-side automation. |
 | `scripts/report-copilot-usage.py` | Reporting entrypoint for Copilot catalog telemetry aggregation. |
 | `workflows/terraform-pre-commit.yml` | Source repository workflow for Terraform-focused pre-commit checks. |
 
 ## Source-of-Truth Rules
 
-- Trust real on-disk paths and root [`AGENTS.md`](../AGENTS.md) inventory over remembered historical names.
+- Trust real on-disk paths and [`INVENTORY.md`](INVENTORY.md) over remembered historical names. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery.
 - Keep `.github/copilot-instructions.md` as the normative policy layer and update it before root `AGENTS.md` when both must change.
 - Treat this README as maintainer-facing orientation, not as the normative contract.
 - Historical documents such as `../COPILOT_REVIEW.md` and older changelog entries may intentionally mention removed legacy assets. Do not use them as live catalog references.
@@ -112,10 +112,9 @@ Only `internal-router` actively routes between canonical owners; the four canoni
 
 1. Inspect the real target files first.
 2. Update the relevant asset under `.github/`.
-3. If routing, naming, discovery, or inventory changed, refresh root `AGENTS.md`.
-4. Run `./.github/scripts/validate-copilot-customizations.sh --scope root --mode strict`.
-5. Run targeted tests when script or validator behavior changes.
-6. Update `CHANGELOG.md` for meaningful `.github/` changes.
+3. If routing, naming, discovery, or inventory changed, refresh root `AGENTS.md` and `.github/INVENTORY.md`.
+4. Run the repository checks that currently exist for the touched assets.
+5. Update `CHANGELOG.md` for meaningful `.github/` changes.
 
 ## Completion Report Contract
 
