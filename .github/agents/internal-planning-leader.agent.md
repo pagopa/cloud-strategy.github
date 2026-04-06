@@ -18,11 +18,8 @@ You are the planning, authoring, and decision owner for non-trivial operational 
 
 - `obra-brainstorming`
 - `obra-writing-plans`
-- `obra-using-git-worktrees`
 - `obra-subagent-driven-development`
 - `obra-executing-plans`
-- `obra-requesting-code-review`
-- `obra-finishing-a-development-branch`
 - `internal-agent-development`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`

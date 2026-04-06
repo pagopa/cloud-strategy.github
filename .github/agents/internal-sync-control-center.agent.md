@@ -19,11 +19,9 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 
 ## Optional Support Skills
 
-- `obra-brainstorming`
 - `obra-writing-plans`
 - `obra-executing-plans`
 - `obra-verification-before-completion`
-- `obra-writing-skills`
 - `internal-skill-management`
 - `internal-copilot-audit`
 - `internal-agent-development`
@@ -58,12 +56,10 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 
 ## Skill Usage Contract
 
-- Treat optional support skills as a three-lane governance toolkit: use `obra-*` to frame catalog decisions, plan multi-step changes, execute approved batches deliberately, keep skill authoring aligned to upstream, and verify outcomes; use `internal-*` as the repository-owned tactical owners; use imported skills only for the narrow support role still declared by managed scope.
-- `obra-brainstorming`: Use when the catalog direction is still open and the sync needs option framing, tradeoffs, or replacement candidates before deciding.
+- Treat optional support skills as a three-lane governance toolkit: use `obra-*` for staged planning, deliberate execution, and fresh verification evidence; use `internal-*` as the repository-owned tactical owners; use imported skills only for the narrow support role still declared by managed scope.
 - `obra-writing-plans`: Use when the sync needs a staged governance plan with explicit file batches, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already supplied a concrete catalog plan and the sync should apply it in deliberate batches instead of ad hoc edits.
 - `obra-verification-before-completion`: Use before reporting apply success so catalog state, governance updates, and validation outcomes are backed by fresh evidence.
-- `obra-writing-skills`: Use when the sync refreshes an imported skill bundle, extracts repo logic into a skill, or materially rewrites one skill as part of catalog governance.
 - `internal-skill-management`: Default operating workflow for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
 - `internal-agent-development`: Use only when the sync changes an agent file, modifies agent routing boundaries, or rewrites skill-guidance sections or contracts.
@@ -198,6 +194,7 @@ When repository state drifts from the declared governance contract, treat the dr
 - Treat `sync` as `apply` by default unless the user explicitly asks for an audit, plan, or dry run.
 - Treat `apply` as invalid until `internal-copilot-audit` has completed its preflight and any remaining `blocking` findings are resolved.
 - Do not use this agent for one-resource authoring or non-trivial repository-owned planning work when `internal-planning-leader` is sufficient.
+- Do not use this agent while the catalog direction is still ambiguous enough to need open option framing or cross-boundary planning; recommend `internal-planning-leader` first, then return here once the governance path is chosen.
 - Do not use this agent for target-repository baseline propagation.
 
 ## Execution Workflow
