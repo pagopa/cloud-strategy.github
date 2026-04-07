@@ -59,5 +59,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 ## Completion Report
 
-- End completed operations with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`.
-- If a category was not used, say so and explain why.
+- End completed operations with `✅ Outcome`.
+- When used, also include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources`.
+- In each included section, state which resources were used and why they were relevant.
+- Omit unused categories instead of adding empty or negative sections.

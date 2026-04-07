@@ -76,4 +76,5 @@ Completed runs should make these facts visible:
 - plan-file status and lifecycle
 - validation results and remaining blockers
 
-End completed runs with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`.
+End completed runs with `✅ Outcome`.
+Include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources` only when those categories were actually used, and state why each listed resource mattered.

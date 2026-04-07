@@ -66,3 +66,4 @@ Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-
 - Preserved `local-*` assets and target-only cleanup decisions
 - Plan-file status and lifecycle
 - Validation results, remaining blockers, and the completion-report sections
+- When present, the completion report should name the used agents, instructions, prompts, skills, and other resources and explain why they were relevant
