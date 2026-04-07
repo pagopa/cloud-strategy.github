@@ -1,4 +1,4 @@
-name: 🛂 terraform-pre-commit
+name: 10 🛂 terraform-pre-commit
 
 on:
   pull_request:
@@ -68,5 +68,6 @@ jobs:
             "${PRE_COMMIT_IMAGE}" run \
             --all-files \
             --config "${PRE_COMMIT_CONFIG}" \
+            --verbose \
             --show-diff-on-failure \
             --color always
