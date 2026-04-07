@@ -16,6 +16,8 @@ applyTo: "**/*.py"
 - Prefer simple, readable, and easily modifiable code over clever abstractions.
 - Accept additional lines or mild redundancy when it improves clarity, maintainability, and safe future changes.
 - Unit tests are required for testable logic.
+- Python tests must live under the repository-root `tests/` directory, never beside source files or inside standalone tool folders.
+- Mirror the covered source path under `tests/` so the owning script or module is obvious from the test location.
 - Apply these rules for both create and modify operations.
 - For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
 - Keep template content complete and externalize only values intentionally passed by the caller.
@@ -32,6 +34,7 @@ applyTo: "**/*.py"
 - Before writing a new script, produce a short dependency decision note with candidate libraries, the final choice, and the reason for the choice.
 - Optimize for the simplest final script, not for the smallest dependency list.
 - Standalone Python entry points that rely on external packages should have a sibling Bash launcher that bootstraps a local `.venv` and installs from the local hash-locked `requirements.txt`.
+- When a Bash launcher exists for a Python tool, it must run without parameters by using documented internal defaults and allow optional overrides through flags or environment variables.
 - For standalone Python automation, treat the Python entry point plus its adjacent lock file such as `requirements.txt` as the only supported dependency source of truth unless the user explicitly requests a different model.
 - Do not add local vendored libraries, wheelhouses, copied site-packages, fallback dependency mirrors, or deprecated alternate install paths for Python dependencies unless the user explicitly requests them.
 - Standalone Python entry points that use only the standard library should be invoked directly with `python3 <script>.py` or an executable shebang path, not through a Bash wrapper.
@@ -67,7 +70,9 @@ requests==2.32.3 \
 
 ## Testing defaults
 - Use `pytest` as default unit-test framework.
-- Keep tests under `tests/` with deterministic behavior.
+- Keep tests under the repository-root `tests/` tree with deterministic behavior.
+- Mirror the source path inside `tests/` so ownership is obvious. Example: `scripts/reporting/sync_accounts.py` maps to `tests/scripts/reporting/test_sync_accounts.py`.
+- For standalone script folders, keep tests in the repository-root `tests/` tree rather than in a local sibling `tests/` directory.
 - For modify tasks with existing tests: edit code first, run existing tests, then update tests only if behavior changes are intentional.
 
 ## Cross-references

@@ -20,6 +20,7 @@ Reference: `instructions/internal-python.instructions.md`
 | PY-M06 | Cyclomatic complexity > 10 per function | Hard to test and maintain |
 | PY-M07 | `print()` instead of `logging` in application/library code | No log level control in production |
 | PY-M08 | Missing unit tests for new public functions | Violates test coverage mandate |
+| PY-M09 | Python tests outside repository-root `tests/` or without mirrored source paths | Breaks repository test discoverability and ownership mapping |
 
 ## Minor
 | ID | Anti-pattern | Why |

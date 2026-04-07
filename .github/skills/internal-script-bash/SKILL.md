@@ -16,6 +16,8 @@ description: Create or modify Bash scripts with purpose header, emoji logs, read
 - Use emoji logs for runtime states.
 - Prefer early return and guard clauses.
 - Keep logic straightforward and readable.
+- Wrapper-style entry points must work with no arguments by using documented defaults for the common invocation path.
+- Optional flags or environment variables may override those defaults without editing the script.
 - Quote all variables: `"$var"`, never bare `$var`.
 - Prefer `printf` for formatted output and arrays for dynamic commands.
 - Use `mktemp` plus a cleanup trap for temporary files or directories.
@@ -29,9 +31,13 @@ description: Create or modify Bash scripts with purpose header, emoji logs, read
 #
 # Purpose: {description}
 # Usage examples:
+#   ./{script_name}.sh
 #   ./{script_name}.sh --help
+#   ./{script_name}.sh --target custom-target
 
 set -Eeuo pipefail
+
+DEFAULT_TARGET="default-target"
 
 log_info()    { echo "ℹ️  $*"; }
 log_warn()    { echo "⚠️  $*"; }
@@ -39,10 +45,26 @@ log_success() { echo "✅ $*"; }
 log_error()   { echo "❌ $*" >&2; }
 
 main() {
-  local target="${1:?❌ target argument is required}"
+  local target="$DEFAULT_TARGET"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --target) target="${2:?❌ --target requires a value}"; shift 2 ;;
+      --help) usage; exit 0 ;;
+      *) log_error "Unknown option: $1"; usage; exit 1 ;;
+    esac
+  done
+
   log_info "Processing $target"
   # ... logic ...
   log_success "Done"
+}
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./{script_name}.sh [--target value]
+EOF
 }
 
 main "$@"
@@ -50,6 +72,9 @@ main "$@"
 
 ## Argument parsing pattern
 ```bash
+DEFAULT_SCOPE="repo"
+SCOPE="$DEFAULT_SCOPE"
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --scope)  SCOPE="${2:?❌ --scope requires a value}"; shift 2 ;;
@@ -94,6 +119,7 @@ trap cleanup EXIT
 | Temporary files without cleanup | Leaks state and leaves partial artifacts behind | Use `mktemp` plus `trap cleanup EXIT` |
 | Destructive commands without rerun safety | Repeated execution can corrupt state or surprise operators | Add `--dry-run` and make the mutation idempotent |
 | Hardcoded paths | Non-portable across environments | Use variables or `dirname "$0"` for relative paths |
+| Wrapper requires positional arguments for the default path | Makes the common invocation brittle and hard to automate | Keep sane defaults in the script and expose optional overrides |
 
 ## Cross-references
 - **internal-composite-action** (`.github/skills/internal-composite-action/SKILL.md`): for Bash inside composite actions.

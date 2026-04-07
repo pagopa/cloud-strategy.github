@@ -23,6 +23,7 @@ description: Create or modify Python application components with clear separatio
 - Use type hints on public APIs and keep data contracts explicit.
 - Choose async only when the workload is I/O-bound and the surrounding stack supports it cleanly.
 - Add unit tests for testable logic.
+- Keep Python tests under the repository-root `tests/` tree and mirror the covered source path beneath it.
 
 ## Minimal module example
 ```python
@@ -48,6 +49,7 @@ def resolve_account_state(account_id: AccountId, is_locked: bool) -> str:
 
 ## Testing
 - Use `pytest`. Keep tests deterministic and isolated.
+- Put tests under the repository-root `tests/` tree and mirror the source path so ownership is obvious. Example: `src/accounts/service.py` maps to `tests/src/accounts/test_service.py`.
 - BDD-like names: `given_when_then` style.
 - Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
 - Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.

@@ -22,8 +22,10 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - Use type hints on non-trivial public helpers and CLI-facing boundaries.
 - Add unit tests for testable behavior.
 - Standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
-- The folder should include the Python entry point and `tests/` when test scope applies. Add a local `requirements.txt` and a `run.sh` launcher only when external packages are used.
+- The tool folder should include the Python entry point. Put matching tests under the repository-root `tests/` tree when test scope applies. Add a local `requirements.txt` and a `run.sh` launcher only when external packages are used.
+- Mirror the tool source path under the repository-root `tests/` tree so the owning script is obvious from the test path.
 - Existing standalone Python entry points should keep a sibling Bash launcher only when that launcher is needed to bootstrap external packages or an isolated local environment.
+- When a Bash launcher exists, `./run.sh` must work without parameters by using documented defaults, and optional flags or environment variables may override those defaults.
 - Stdlib-only standalone Python entry points should be documented and invoked directly with `python3 <script>.py` or an executable shebang path.
 - For new scripts, do an explicit dependency decision before implementation; do not assume `stdlib-first` as the automatic default.
 - Prefer mature, well-maintained, widely used third-party libraries when they clearly reduce boilerplate, edge cases, or custom logic in the finished script.
@@ -51,11 +53,14 @@ Dependency decision note
 
 ## Default layout
 ```text
-{script_name}/
-├── {script_name}.py
-├── requirements.txt  # only when external packages are used
-├── run.sh            # only when external packages are used
+repo-root/
+├── {script_path}/
+│   ├── {script_name}.py
+│   ├── requirements.txt  # only when external packages are used
+│   └── run.sh            # only when external packages are used
 └── tests/
+    └── {script_path}/
+        └── test_{script_name}.py
 ```
 
 ## Minimal Python entry point
@@ -114,7 +119,9 @@ Use a launcher only when the tool depends on external packages.
 #
 # Purpose: Run the {script_name} standalone Python tool.
 # Usage examples:
+#   ./run.sh
 #   ./run.sh --help
+#   ./run.sh --config ./config/custom.yaml
 
 set -euo pipefail
 
@@ -122,6 +129,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$SCRIPT_DIR/.venv"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
+DEFAULT_CONFIG="$SCRIPT_DIR/config/default.yaml"
+CONFIG_PATH="$DEFAULT_CONFIG"
+PASSTHROUGH_ARGS=()
 
 if [[ ! -d "$VENV_DIR" ]]; then
   "$PYTHON_BIN" -m venv "$VENV_DIR"
@@ -132,11 +142,34 @@ if [[ -f "$REQUIREMENTS_FILE" ]]; then
   "$VENV_DIR/bin/pip" install --require-hashes -r "$REQUIREMENTS_FILE"
 fi
 
-exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" "$@"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --config)
+      CONFIG_PATH="${2:?❌ --config requires a value}"
+      shift 2
+      ;;
+    --help)
+      PASSTHROUGH_ARGS+=("--help")
+      shift
+      ;;
+    --)
+      shift
+      PASSTHROUGH_ARGS+=("$@")
+      break
+      ;;
+    *)
+      PASSTHROUGH_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" --config "$CONFIG_PATH" "${PASSTHROUGH_ARGS[@]}"
 ```
 
 ## Testing
-- Put tests under `tests/`.
+- Put tests under the repository-root `tests/` tree.
+- Mirror the source path under `tests/`. Example: `tools/reporting/sync_accounts.py` maps to `tests/tools/reporting/test_sync_accounts.py`.
 - Use `pytest` as default test framework.
 - Keep tests deterministic and isolated.
 - Use coverage reports to inspect missing behavior on touched code, not to force blanket 100% coverage.
