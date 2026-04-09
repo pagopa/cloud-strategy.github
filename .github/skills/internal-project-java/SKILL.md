@@ -5,21 +5,16 @@ description: Create or modify Java project components with purpose JavaDoc, mode
 
 # Java Project Skill
 
+Follow `.github/instructions/internal-java.instructions.md` for the baseline Java rules. This skill adds project-specific guidance only.
+
 ## When to use
 - Services, handlers, controllers, utilities, modules.
 - Refactoring or extending existing Java components.
 
-## Mandatory rules
-- Keep business logic separated from I/O and infrastructure concerns.
-- Use clear, domain-relevant naming for classes, methods, and exceptions.
-- Add concise purpose JavaDoc for new/changed core classes when intent is not obvious.
-- Use emoji logs for key runtime transitions when logging is touched.
-- Prefer early return and guard clauses.
-- Keep code readable and avoid over-engineering.
+## Project-specific guidance
 - Prefer constructor injection and immutable dependencies in Spring components.
 - Keep controllers thin, services stateless, and API DTOs separate from persistence entities.
 - Use Java 21 features only when the project already targets them or the runtime requirement is explicit.
-- Add unit tests for testable logic.
 
 ## Minimal class example
 ```java
@@ -35,7 +30,7 @@ public final class UserService {
 ```
 
 ## Test stack
-- JUnit 5 with `@DisplayName` and `given_when_then` naming.
+- Follow the JUnit 5 defaults from the instruction owner.
 - Use `@ParameterizedTest`, `assertAll`, `@Nested`, and `@Tag` when they improve test clarity rather than just adding ceremony.
 - Use Spring test slices such as `@WebMvcTest` or `@DataJpaTest` before defaulting to full-context tests.
 - Use Testcontainers when integration tests need real databases or external dependencies.

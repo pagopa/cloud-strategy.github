@@ -18,6 +18,9 @@ You are an expert software and platform engineer. Protect correctness, security,
 5. Prompts, skills, and agents are on-demand operational assets; use them only when relevant.
 6. `.github/INVENTORY.md` is the live catalog of managed assets and is never replaced by `AGENTS.md`.
 
+- `internal-sync-*` assets stay sync-specific and must not become second canonical homes for repository-wide policy.
+- When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
+
 ## Language Projection
 
 - User chat may be Italian.
@@ -31,6 +34,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Imported non-`internal-*` assets are support-only depth when no repository-owned tactical owner exists.
 - `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` are the canonical repository-owned operational agents.
 - Only `internal-router` actively routes; non-router canonical agents define boundaries and recommend a better owner when needed.
+- `internal-sync-*` agents are specialized sync command centers and stay outside the canonical operational-owner model.
 
 ## Non-Negotiables
 

@@ -5,6 +5,8 @@ description: Create or modify Python application components with clear separatio
 
 # Python Project Skill
 
+Follow `.github/instructions/internal-python.instructions.md` for the baseline Python rules. This skill adds application-specific guidance only.
+
 ## When to use
 - Services, use cases, adapters, and modules in Python applications.
 - Refactoring or extending existing Python application components.
@@ -14,16 +16,10 @@ description: Create or modify Python application components with clear separatio
 - **This skill**: application components inside a structured project with package layout (services, use cases, adapters).
 - **internal-script-python**: standalone scripts (`scripts/`, CLI tools, one-off automation).
 
-## Mandatory rules
-- Keep business logic separated from I/O and infrastructure concerns.
-- Keep module boundaries clear: business rules in one place, external integrations in another.
-- Use clear, domain-relevant naming in classes, methods, and errors.
-- Prefer early return and guard clauses.
-- Keep code explicit and readability-first.
+## Application-specific guidance
 - Use type hints on public APIs and keep data contracts explicit.
 - Choose async only when the workload is I/O-bound and the surrounding stack supports it cleanly.
-- Add unit tests for testable logic.
-- Keep Python tests under the repository-root `tests/` tree and mirror the covered source path beneath it.
+- Keep request or transport models, domain logic, and persistence concerns in separate modules.
 
 ## Minimal module example
 ```python
@@ -48,8 +44,7 @@ def resolve_account_state(account_id: AccountId, is_locked: bool) -> str:
 ```
 
 ## Testing
-- Use `pytest`. Keep tests deterministic and isolated.
-- Put tests under the repository-root `tests/` tree and mirror the source path so ownership is obvious. Example: `src/accounts/service.py` maps to `tests/src/accounts/test_service.py`.
+- Follow the repository pytest defaults from the instruction owner.
 - BDD-like names: `given_when_then` style.
 - Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
 - Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.
@@ -66,7 +61,6 @@ def test_given_blank_account_id_when_creating_then_raises_value_error() -> None:
 
 ## Architecture and framework guidance
 - Follow the repository's existing framework before introducing FastAPI, Flask, Django, or a new dependency stack.
-- Keep request/transport models, domain logic, and persistence concerns in separate modules.
 - Use dataclasses or typed DTOs for internal contracts, and boundary-validation models where the framework already expects them.
 - Keep async flows end-to-end; do not mix blocking libraries into async request paths without an explicit bridge.
 

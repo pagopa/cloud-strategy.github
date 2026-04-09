@@ -15,6 +15,7 @@ Use `openai-skill-creator` when drafting or iterating the content of one specifi
 
 - Keep one clear canonical skill per intent.
 - Keep the local catalog aligned with the declared repo routing and naming contract.
+- Keep sync-control assets sync-specific and defer repository-wide bridge ownership to `AGENTS.md` and `.github/copilot-instructions.md`.
 - Refresh approved in-scope external-prefixed skills without expanding scope implicitly.
 - Move repo-specific operational logic into internal skills when an agent becomes too large or too procedural.
 - Keep naming, frontmatter, links, and descriptions deterministic.
@@ -136,6 +137,8 @@ When an agent is turning into a knowledge dump:
 Apply the same standard when broadening an agent: keep the operating role cohesive, and do not split purely to minimize file size or token count.
 
 This is the preferred pattern for `internal-sync-control-center`.
+
+For that agent specifically, keep managed scope, approval posture, and sync orchestration in the agent, keep reusable catalog procedure in skills, and keep repository-wide bridge policy in `AGENTS.md` plus `.github/copilot-instructions.md`.
 
 ## Validation
 
