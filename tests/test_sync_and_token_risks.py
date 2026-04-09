@@ -12,7 +12,9 @@ def write_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(tmp_path: Path) -> None:
+def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
+    tmp_path: Path,
+) -> None:
     source_root = tmp_path / "source"
     target_root = tmp_path / "target"
 
@@ -71,8 +73,12 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
         target_root / ".github/agents/internal-fast.agent.md",
         "---\nname: internal-fast\ntools: [read]\n---\n\n# Target\n",
     )
-    write_file(target_root / "tmp/internal-sync-copilot-configs.plan.md", "legacy plan\n")
-    write_file(target_root / ".github/internal-sync-copilot-configs.manifest.json", "{}\n")
+    write_file(
+        target_root / "tmp/internal-sync-copilot-configs.plan.md", "legacy plan\n"
+    )
+    write_file(
+        target_root / ".github/internal-sync-copilot-configs.manifest.json", "{}\n"
+    )
 
     plan = build_sync_plan(source_root, target_root)
     plan_path = write_sync_plan(plan)
@@ -84,14 +90,22 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert manifest_path.exists()
     assert manifest_path.name == "copilot-sync.manifest.json"
     assert not (target_root / "tmp/internal-sync-copilot-configs.plan.md").exists()
-    assert not (target_root / ".github/internal-sync-copilot-configs.manifest.json").exists()
+    assert not (
+        target_root / ".github/internal-sync-copilot-configs.manifest.json"
+    ).exists()
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
-    assert (target_root / "AGENTS.md").read_text(encoding="utf-8") == "# AGENTS\nsource\n"
-    assert (target_root / ".gitignore").read_text(encoding="utf-8") == "/docs/superpowers/\n"
+    assert (target_root / "AGENTS.md").read_text(
+        encoding="utf-8"
+    ) == "# AGENTS\nsource\n"
+    assert (target_root / ".gitignore").read_text(
+        encoding="utf-8"
+    ) == "/docs/superpowers/\n"
 
 
-def test_build_sync_plan_ensures_target_gitignore_entry_without_mirroring_source_gitignore(tmp_path: Path) -> None:
+def test_build_sync_plan_ensures_target_gitignore_entry_without_mirroring_source_gitignore(
+    tmp_path: Path,
+) -> None:
     source_root = tmp_path / "source"
     target_root = tmp_path / "target"
 
@@ -109,7 +123,9 @@ def test_build_sync_plan_ensures_target_gitignore_entry_without_mirroring_source
     assert plan.generated_gitignore == "node_modules/\n/docs/superpowers/\n"
 
 
-def test_build_sync_plan_accepts_existing_docs_superpowers_gitignore_entry(tmp_path: Path) -> None:
+def test_build_sync_plan_accepts_existing_docs_superpowers_gitignore_entry(
+    tmp_path: Path,
+) -> None:
     source_root = tmp_path / "source"
     target_root = tmp_path / "target"
 
@@ -140,7 +156,9 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     )
 
     write_file(tmp_path / "AGENTS.md", f"# AGENTS\n\n{repeated_lines}\n")
-    write_file(tmp_path / ".github/copilot-instructions.md", f"# Copilot\n\n{repeated_lines}\n")
+    write_file(
+        tmp_path / ".github/copilot-instructions.md", f"# Copilot\n\n{repeated_lines}\n"
+    )
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
 
     findings = detect_token_risks(tmp_path)
