@@ -42,6 +42,7 @@ Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-
 - Exclude repository-owned sync-control resources named `internal-sync-*` from consumer-repository mirroring.
 - Remove target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - When root guidance is in scope, keep `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` aligned to their separate ownership layers instead of flattening them into one file.
+- Ensure the target repository `.gitignore` contains an ignore entry for `docs/superpowers/`.
 - Sync GitHub Copilot assets only unless the user explicitly expands scope.
 
 ## Routing

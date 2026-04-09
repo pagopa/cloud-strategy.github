@@ -26,6 +26,8 @@ Do not sync consumer-facing resources whose file or directory name starts with `
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
+- Ensure the target root `.gitignore` contains an ignore entry for `docs/superpowers/`.
+- Treat the `.gitignore` update as target-local hygiene: ensure the required ignore entry exists without mirroring the source repository `.gitignore`.
 
 ## Root Guidance Ownership
 

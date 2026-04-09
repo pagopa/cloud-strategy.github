@@ -82,6 +82,7 @@ class SyncPlan:
     operations: tuple[SyncOperation, ...]
     local_assets: tuple[str, ...]
     generated_inventory: str
+    generated_gitignore: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -276,10 +277,11 @@ def action_sort_key(action: str) -> int:
     ordering = {
         "create": 0,
         "update": 1,
-        "rebuild": 2,
-        "delete": 3,
-        "preserve": 4,
-        "unchanged": 5,
+        "ensure": 2,
+        "rebuild": 3,
+        "delete": 4,
+        "preserve": 5,
+        "unchanged": 6,
     }
     return ordering.get(action, 99)
 

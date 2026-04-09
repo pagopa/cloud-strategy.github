@@ -30,6 +30,8 @@ LEGACY_SYNC_ARTIFACT_PATHS = (
     "tmp/internal-sync-copilot-configs.plan.md",
     ".github/internal-sync-copilot-configs.manifest.json",
 )
+TARGET_GITIGNORE_PATH = ".gitignore"
+TARGET_SUPERPOWERS_IGNORE_ENTRY = "/docs/superpowers/"
 
 
 def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
@@ -145,6 +147,25 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         )
     )
 
+    gitignore_path = target_root / TARGET_GITIGNORE_PATH
+    current_gitignore = read_text(gitignore_path) if gitignore_path.exists() else None
+    generated_gitignore = ensure_superpowers_gitignore_entry(current_gitignore)
+    gitignore_action = "unchanged" if current_gitignore == generated_gitignore else "ensure"
+    gitignore_reason = (
+        "Target .gitignore already ignores docs/superpowers."
+        if gitignore_action == "unchanged"
+        else "Target .gitignore must ignore docs/superpowers for Superpowers-generated docs artifacts."
+    )
+    operations.append(
+        SyncOperation(
+            action=gitignore_action,
+            path=TARGET_GITIGNORE_PATH,
+            reason=gitignore_reason,
+            source_hash=None,
+            target_hash=sha256_file(gitignore_path) if gitignore_path.exists() else None,
+        )
+    )
+
     ordered_operations = tuple(sorted(operations, key=lambda operation: (action_sort_key(operation.action), operation.path)))
     return SyncPlan(
         source_root=source_root,
@@ -155,6 +176,7 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         operations=ordered_operations,
         local_assets=tuple(sorted(local_assets)),
         generated_inventory=generated_inventory,
+        generated_gitignore=generated_gitignore,
     )
 
 
@@ -239,7 +261,7 @@ def render_sync_plan_markdown(plan: SyncPlan) -> str:
 
     lines.append("## Planned Operations")
     lines.append("")
-    for action in ["create", "update", "rebuild", "delete", "preserve", "unchanged"]:
+    for action in ["create", "update", "ensure", "rebuild", "delete", "preserve", "unchanged"]:
         group = action_groups.get(action, [])
         if not group:
             continue
@@ -256,6 +278,28 @@ def write_sync_plan(plan: SyncPlan) -> Path:
     plan_path = plan.target_root / SYNC_PLAN_PATH
     write_text(plan_path, render_sync_plan_markdown(plan))
     return plan_path
+
+
+def ensure_superpowers_gitignore_entry(current_content: str | None) -> str:
+    if current_content is None:
+        return f"{TARGET_SUPERPOWERS_IGNORE_ENTRY}\n"
+
+    lines = current_content.splitlines()
+    normalized_entries = {line.strip() for line in lines}
+    accepted_entries = {
+        "docs/superpowers",
+        "docs/superpowers/",
+        "/docs/superpowers",
+        "/docs/superpowers/",
+    }
+    if normalized_entries & accepted_entries:
+        return current_content if current_content.endswith("\n") else f"{current_content}\n"
+
+    updated = current_content
+    if updated and not updated.endswith("\n"):
+        updated += "\n"
+    updated += f"{TARGET_SUPERPOWERS_IGNORE_ENTRY}\n"
+    return updated
 
 
 def write_sync_manifest(plan: SyncPlan) -> Path:
@@ -282,7 +326,7 @@ def write_sync_manifest(plan: SyncPlan) -> Path:
 
 def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
     if plan.target_dirty and not allow_dirty_target and any(
-        operation.action in {"create", "update", "rebuild", "delete"} for operation in plan.operations
+        operation.action in {"create", "update", "ensure", "rebuild", "delete"} for operation in plan.operations
     ):
         raise RuntimeError("Target repository is dirty. Re-run with --allow-dirty-target if this is intentional.")
 
@@ -296,6 +340,10 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
             if target_path.exists():
                 target_path.unlink()
                 cleanup_empty_parents(target_path, plan.target_root)
+        elif operation.action == "ensure" and operation.path == TARGET_GITIGNORE_PATH:
+            if plan.generated_gitignore is None:
+                raise RuntimeError("Generated .gitignore content missing from sync plan.")
+            write_text(target_path, plan.generated_gitignore)
         elif operation.action == "rebuild" and operation.path == INVENTORY_PATH:
             write_text(target_path, plan.generated_inventory)
 

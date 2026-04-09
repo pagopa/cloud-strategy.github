@@ -88,6 +88,42 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
     assert (target_root / "AGENTS.md").read_text(encoding="utf-8") == "# AGENTS\nsource\n"
+    assert (target_root / ".gitignore").read_text(encoding="utf-8") == "/docs/superpowers/\n"
+
+
+def test_build_sync_plan_ensures_target_gitignore_entry_without_mirroring_source_gitignore(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / ".gitignore", "/tmp/\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / ".gitignore", "node_modules/\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    operations = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("ensure", ".gitignore") in operations
+    assert plan.generated_gitignore == "node_modules/\n/docs/superpowers/\n"
+
+
+def test_build_sync_plan_accepts_existing_docs_superpowers_gitignore_entry(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / ".gitignore", "node_modules/\ndocs/superpowers/\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("unchanged", ".gitignore") in actions
+    assert plan.generated_gitignore == "node_modules/\ndocs/superpowers/\n"
 
 
 def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
