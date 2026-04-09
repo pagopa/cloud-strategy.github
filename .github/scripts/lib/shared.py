@@ -23,6 +23,7 @@ LEGACY_AGENT_TOOL_IDS = {
 }
 IGNORED_SYNC_FILENAMES = {"README.md", "CHANGELOG.md"}
 IGNORED_SYNC_PARTS = {"__pycache__", ".venv"}
+CONSUMER_SYNC_EXCLUDED_PREFIX = "internal-sync-"
 MANAGED_ROOT_FILES = (
     "AGENTS.md",
     ".github/copilot-instructions.md",
@@ -81,6 +82,7 @@ class SyncPlan:
     operations: tuple[SyncOperation, ...]
     local_assets: tuple[str, ...]
     generated_inventory: str
+    generated_gitignore: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -253,6 +255,11 @@ def is_local_asset(relative_path: str) -> bool:
     return path.name.startswith("local-")
 
 
+def is_consumer_sync_excluded_path(relative_path: str) -> bool:
+    path = Path(relative_path)
+    return any(part.startswith(CONSUMER_SYNC_EXCLUDED_PREFIX) for part in path.parts)
+
+
 def resolve_markdown_target(root: Path, current_file: Path, target: str) -> Path | None:
     clean_target = target.split("#", maxsplit=1)[0].strip()
     if not clean_target:
@@ -270,10 +277,11 @@ def action_sort_key(action: str) -> int:
     ordering = {
         "create": 0,
         "update": 1,
-        "rebuild": 2,
-        "delete": 3,
-        "preserve": 4,
-        "unchanged": 5,
+        "ensure": 2,
+        "rebuild": 3,
+        "delete": 4,
+        "preserve": 5,
+        "unchanged": 6,
     }
     return ordering.get(action, 99)
 

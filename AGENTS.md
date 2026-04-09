@@ -41,3 +41,8 @@ This file is the stable entrypoint for the repository instruction architecture.
 - Keep local self-containment in scoped instruction files only when it improves the consumer experience and does not create drift.
 - Keep volatile inventory in `.github/INVENTORY.md`, never here.
 - Do not treat removed validators, sync scripts, contract tests, or historical aliases as active policy unless they exist on disk and are reintroduced deliberately.
+
+## Volatile Artifacts
+
+- Transient planning, brainstorming, and other Superpowers-generated working files must not be written under `docs/`.
+- When such artifacts are needed inside this repository, write them under `tmp/superpowers/`.

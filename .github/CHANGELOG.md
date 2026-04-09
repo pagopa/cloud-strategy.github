@@ -6,6 +6,9 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-07
+- Updated the completion-report policy in `.github/copilot-instructions.md`, `.github/README.md`, and the sync agent and skill contract so synced target repositories now inherit a summary format that lists only the actually used agents, instructions, prompts, skills, and other resources, each with a short reason.
+
 ## 2026-04-06
 - Externalized the exact path inventory into `.github/INVENTORY.md`, reduced root `AGENTS.md` to a bridge pointer, removed the current repository validator/test layer, and updated maintainer docs, templates, and governance text to stop depending on deleted validation assets and the removed `internal-agents-md-bridge` skill.
 - Refactored the instruction architecture around rule ownership: root `AGENTS.md` is now the strategic entrypoint and precedence anchor, `.github/copilot-instructions.md` is the compact repo-wide Copilot projection, `INTERNAL_CONTRACT.md` now captures rebuild-safe invariants instead of deleted automation behavior, scoped Markdown guidance now projects the central English-by-default rule, and sync governance assets were updated to stop treating root `AGENTS.md` as a subordinate thin bridge.

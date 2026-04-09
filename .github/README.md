@@ -119,7 +119,6 @@ Only `internal-router` actively routes between canonical owners; the four canoni
 ## Completion Report Contract
 
 Completed operations must end with a concise recap.
-If a category was not used, explicitly say so and explain why.
 
 ### ✅ Outcome
 
@@ -127,12 +126,25 @@ If a category was not used, explicitly say so and explain why.
 
 ### 🤖 Agents
 
+- Include this section only when agents were used.
 - State which agents were used and why they were relevant.
 
 ### 📘 Instructions
 
+- Include this section only when instructions were used.
 - State which instructions were used and why they mattered.
+
+### 📝 Prompts
+
+- Include this section only when prompts were used.
+- State which prompts were used and why they were relevant.
 
 ### 🧩 Skills
 
+- Include this section only when skills were used.
 - State which skills were used and why they were relevant.
+
+### 📦 Other Resources
+
+- Include this section only when other resources were used.
+- State which other resources were used and why they were relevant.

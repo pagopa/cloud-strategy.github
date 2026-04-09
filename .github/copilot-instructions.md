@@ -46,6 +46,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Prefer the simplest correct change.
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
+- Keep Python tests under the repository-root `tests/` tree with mirrored source paths, and make Bash wrappers runnable with internal defaults plus optional overrides.
 - Run the applicable validation that actually exists for the files you changed.
 - If a dedicated validator, sync script, or contract test suite does not exist, report the gap and use the closest existing verification instead.
 - Do not add unrequested abstractions, logging, or refactors.
@@ -58,5 +59,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 ## Completion Report
 
-- End completed operations with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`.
-- If a category was not used, say so and explain why.
+- End completed operations with `✅ Outcome`.
+- When used, also include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources`.
+- In each included section, state which resources were used and why they were relevant.
+- Omit unused categories instead of adding empty or negative sections.

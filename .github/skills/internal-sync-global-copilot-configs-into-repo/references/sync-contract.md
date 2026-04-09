@@ -19,12 +19,15 @@ Mirror these source-managed paths into the consumer repository:
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
 
 Do not sync `README.md`, changelogs, workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
+Do not sync consumer-facing resources whose file or directory name starts with `internal-sync-`; those remain source-only operational controls for the standards repository.
 
 ## Target Rules
 
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
+- Ensure the target root `.gitignore` contains an ignore entry for `docs/superpowers/`.
+- Treat the `.gitignore` update as target-local hygiene: ensure the required ignore entry exists without mirroring the source repository `.gitignore`.
 
 ## Root Guidance Ownership
 
@@ -38,17 +41,18 @@ Do not flatten these roles into one file. Do not let target `AGENTS.md` become a
 
 ## Tracking Plan Lifecycle
 
-- Write `tmp/internal-sync-copilot-configs.plan.md` before any mirrored change.
+- Write `tmp/copilot-sync.plan.md` before any mirrored change.
 - Keep the plan in the target repository so the user can inspect pending sync work between runs.
 - When `apply` finishes and nothing remains pending, remove the plan file.
 - If `apply` stops early or manual follow-up remains, keep the plan file for the next run.
+- Remove legacy tracking artifacts named `internal-sync-*` from the target during `apply`.
 
 ## Automation Entry Points
 
 - Preferred wrapper: `.github/scripts/sync_copilot_catalog.sh`
 - Python entry point: `.github/scripts/sync_copilot_catalog.py`
 - Core implementation: `.github/scripts/lib/syncing.py`
-- Target manifest: `.github/internal-sync-copilot-configs.manifest.json`
+- Target manifest: `.github/copilot-sync.manifest.json`
 
 Prefer the shipped scripts when the request matches `plan`, `apply`, or a script-backed audit flow. Fall back to manual reasoning only when the request goes beyond the current automation contract.
 
@@ -74,4 +78,5 @@ Completed runs should make these facts visible:
 - plan-file status and lifecycle
 - validation results and remaining blockers
 
-End completed runs with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`.
+End completed runs with `✅ Outcome`.
+Include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources` only when those categories were actually used, and state why each listed resource mattered.
