@@ -41,6 +41,22 @@ Use this checklist before finalizing a new or revised internal agent.
 - Has UI-only or platform-only content been deleted?
 - Is the converted content now repo-local and reusable?
 
+## Subagent and Orchestration
+
+- If the agent dispatches to subagents, does it declare `agents:` with an explicit target list instead of relying on the default `*`?
+- If the agent must not dispatch, does it declare `agents: []`?
+- If the agent should only be invoked as a subagent, is `user-invocable: false` set?
+- If the agent should never be invoked as a subagent, is `disable-model-invocation: true` set?
+- If `agents:` is present, is `agent` included in `tools:`?
+- Are `handoffs` used only for user-visible sequential transitions, not for autonomous within-turn delegation?
+- Has `references/subagent-patterns.md` been consulted for orchestration design?
+
+## Platform Verification
+
+- Has the agent author verified frontmatter properties against the live official documentation before making platform-behavior claims?
+- If a new or unfamiliar frontmatter property is used, has `internal-copilot-docs-research` been loaded and its source map consulted?
+- Are any unverified platform-behavior claims explicitly marked as unverified?
+
 ## Final Validation
 
 - Does the filename stem match frontmatter `name:`?

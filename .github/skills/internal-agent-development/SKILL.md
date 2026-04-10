@@ -1,6 +1,8 @@
 ---
 name: internal-agent-development
-description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, deliberate tool contracts, mandatory engine skills where justified, optional support skills, reusable command-center patterns, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
+description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, deliberate tool contracts, mandatory engine skills where justified, optional support skills, reusable command-center patterns, subagent orchestration, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, designing coordinator/worker delegation, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
+metadata:
+  short-description: Create, refine, or realign repository-owned Copilot agents
 ---
 
 # Internal Agent Development
@@ -39,6 +41,8 @@ Load these inputs before finalizing an internal agent:
 - `references/design-patterns.md` when broadening, splitting, or strengthening an agent
 - `references/example-transformations.md` when you need before-and-after conversion examples
 - `references/review-checklist.md` before final validation or when reviewing an existing agent
+- `references/subagent-patterns.md` when the agent needs to invoke or be invoked as a subagent, or when designing coordinator/worker workflows
+- `internal-copilot-docs-research` skill and its `references/official-source-map.md` when the change depends on current GitHub Copilot or VS Code platform behavior
 
 If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints shaped by the repository layered contract, not as a platform-enforced requirement to use every listed skill.
 
@@ -64,7 +68,7 @@ Choose an agent only when the repository benefits from a stable command center o
 
 ## Non-Negotiable Agent Contract
 
-- GitHub Copilot custom agents currently support `name`, `description`, `target`, `tools`, `model`, `disable-model-invocation`, `user-invocable`, `mcp-servers`, and `metadata` in frontmatter.
+- GitHub Copilot custom agents currently support `name`, `description`, `target`, `tools`, `model`, `disable-model-invocation`, `user-invocable`, `agents`, `handoffs`, `hooks`, `argument-hint`, `mcp-servers`, and `metadata` in frontmatter. Note that `handoffs`, `hooks`, and `argument-hint` are VS Code only; GitHub.com ignores them.
 - Repository-owned internal agents must have a `name:` that matches the filename stem exactly.
 - Repository-owned agents that are intentionally non-internal may use a different `name:` when their route, origin, or compatibility contract requires it.
 - Repository-owned internal agents must use the canonical pattern `internal-<agent-name>.agent.md`.
@@ -91,13 +95,30 @@ Choose an agent only when the repository benefits from a stable command center o
 - Do not create a 1:1 dedicated skill per agent just for symmetry. Create an engine skill only when it owns real reusable logic that would otherwise bloat the agent or drift across multiple agents.
 - Router agents are the strongest default candidate for a dedicated engine skill because their classification matrix, fallback rules, and old-to-new ownership mapping are procedural, reusable, and easy to let drift.
 - Only router agents should own active delegation logic. Canonical non-router agents should define boundaries and recommend a better owner to the user instead of routing on the user's behalf.
+- When an agent should dispatch to specific subagents, declare `agents:` with the explicit list of allowed targets. This makes the dispatch boundary platform-enforced, not just prose.
+- When an agent must not dispatch subagents, declare `agents: []` to enforce the recommendation-only boundary at the platform level.
+- When an agent should only be accessible as a subagent and not appear in the user dropdown, set `user-invocable: false`.
+- When an agent should never be invoked as a subagent by other agents, set `disable-model-invocation: true`.
+- Use `handoffs` when the workflow has clear sequential phases with user-visible transition buttons. Do not use `handoffs` for autonomous within-turn delegation; use `agents:` with the coordinator pattern instead.
+- Load `references/subagent-patterns.md` when designing coordinator/worker orchestration or restricting subagent access.
 - Every agent must explain both positive routing and at least one meaningful boundary.
 - Every agent must define `## Output Expectations`.
 - Add `## Skill Usage Contract` only when the agent is a broader command center whose listed skills are used conditionally.
 - When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order.
 - When an agent can influence external actions, call out where human approval or review gates apply.
 - Keep long reusable workflows in skills, not in the agent body.
-- Do not depend on `argument-hint` or `handoffs` for GitHub.com compatibility; those properties are ignored there.
+- Do not depend on `argument-hint`, `handoffs`, or `hooks` for GitHub.com compatibility; those properties are ignored there.
+
+## Platform Verification Gate
+
+Before claiming that a frontmatter property is supported, unsupported, deprecated, or behaves in a specific way, verify against the live official documentation.
+
+- Load `internal-copilot-docs-research` and its `references/official-source-map.md` to identify the authoritative page.
+- Open the authoritative page for the surface involved (VS Code custom agents, GitHub.com custom agents, or subagents).
+- If the live docs contradict your current assumption, stop and tell the user what changed before proceeding.
+- If you cannot verify because the docs are unreachable, state explicitly that the claim is unverified and proceed with caution.
+- This gate applies whenever the change depends on platform behavior: frontmatter fields, tool aliases, subagent invocation, MCP integration, or environment-specific feature support.
+- This gate does not apply when the work is purely repo-local convention with no platform-behavior dependency.
 
 ## Engine-Skill Pattern
 
