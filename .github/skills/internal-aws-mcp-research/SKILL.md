@@ -94,7 +94,10 @@ Prefer these operations when available:
 - Do not create, delete, attach, detach, or rotate IAM resources unless the user explicitly asks for a change and the blast radius is understood.
 - Prefer `simulate_principal_policy` before proposing policy rollout steps.
 - Distinguish clearly between documentation-backed statements and observations from a real AWS account.
-- When the answer affects SCPs, IAM, or StackSets, route the strategic recommendation back through `internal-aws-control-plane-governance`.
+- When the answer affects strategic framing, route the recommendation back through `internal-aws-strategic`.
+- When the answer affects account layout, delegated admin placement, or StackSets topology, route it through `internal-aws-organization-structure`.
+- When the answer affects SCPs, IAM, trust, or federation, route it through `internal-aws-governance`.
+- When the answer affects validation, backup, monitoring, or rollout evidence, route it through `internal-aws-operations`.
 
 ## Output expectations
 
@@ -109,4 +112,7 @@ Prefer these operations when available:
 
 - `references/official-source-map.md`
 - `references/mcp-capabilities.md`
-- `../internal-aws-control-plane-governance/SKILL.md`
+- `../internal-aws-strategic/SKILL.md`
+- `../internal-aws-organization-structure/SKILL.md`
+- `../internal-aws-governance/SKILL.md`
+- `../internal-aws-operations/SKILL.md`

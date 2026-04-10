@@ -53,8 +53,12 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-agent-development/SKILL.md`
 - `.github/skills/internal-agent-operating-model-engine/SKILL.md`
 - `.github/skills/internal-agent-routing-engine/SKILL.md`
-- `.github/skills/internal-aws-control-plane-governance/SKILL.md`
+- `.github/skills/internal-agent-sync-control-center/SKILL.md`
+- `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
+- `.github/skills/internal-aws-operations/SKILL.md`
+- `.github/skills/internal-aws-organization-structure/SKILL.md`
+- `.github/skills/internal-aws-strategic/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cicd-workflow/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
@@ -74,7 +78,6 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
-- `.github/skills/internal-agent-sync-control-center/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`

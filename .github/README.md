@@ -11,7 +11,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 
 - Instructions: 21 total (`13 internal-*`, `8 awesome-copilot-*`)
 - Prompts: 5 total (`5 internal-*`)
-- Skills: 64 total (`27 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `3 openai-*`, `2 terraform-*`)
+- Skills: 67 total (`30 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `3 openai-*`, `2 terraform-*`)
 - Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
 - Scripts: 6 total
 - Workflows: 1 total
@@ -71,7 +71,7 @@ Skills are grouped into three functional lanes plus imported support families.
 Some skill directories include support material beyond `SKILL.md`. Current bundles with extra support files are:
 
 - `antigravity-domain-driven-design`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-cloud-design-patterns`
-- `internal-agent-development`, `internal-aws-control-plane-governance`, `internal-aws-mcp-research`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-copilot-docs-research`, `internal-pair-architect`, `internal-terraform`
+- `internal-agent-development`, `internal-aws-governance`, `internal-aws-mcp-research`, `internal-aws-operations`, `internal-aws-organization-structure`, `internal-aws-strategic`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-copilot-docs-research`, `internal-pair-architect`, `internal-terraform`
 - `obra-brainstorming`, `obra-using-superpowers`, `obra-writing-skills`
 - `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-skill-creator`
 - `terraform-terraform-search-import`
