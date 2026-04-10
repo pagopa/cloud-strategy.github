@@ -165,3 +165,116 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     finding_codes = {finding.code for finding in findings}
 
     assert "bridge-overlap" in finding_codes
+
+
+def test_detect_token_risks_reports_internal_root_policy_overlap(
+    tmp_path: Path,
+) -> None:
+    root_policy_lines = "\n".join(
+        [
+            "- Keep policy separate from inventory.",
+            "- Keep AGENTS.md strategic and stable.",
+            "- Keep .github/copilot-instructions.md as the projection layer.",
+            "- Keep .github/INVENTORY.md as the exact catalog.",
+            "- Preserve explicit precedence rules.",
+            "- Remove overlap instead of keeping compatibility copies.",
+            "- Keep language exceptions explicit and local.",
+            "- Keep repository-wide defaults in one canonical place.",
+        ]
+    )
+
+    write_file(tmp_path / "AGENTS.md", f"# AGENTS\n\n{root_policy_lines}\n")
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot\n\n- Keep policy separate from inventory.\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/agents/internal-sync-control-center.agent.md",
+        "---\nname: internal-sync-control-center\ntools: [read]\n---\n\n"
+        "# Internal Sync Control Center\n\n"
+        "Use `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.\n\n"
+        f"{root_policy_lines}\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "internal-root-policy-overlap" in finding_codes
+
+
+def test_detect_token_risks_reports_instruction_skill_policy_overlap(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/instructions/internal-python.instructions.md",
+        "---\n"
+        "description: Python\n"
+        "applyTo: '**/*.py'\n"
+        "---\n\n"
+        "# Python Instructions\n\n"
+        "- Use emoji logs for key execution states.\n"
+        "- Prefer early return and clear guard clauses.\n"
+        "- Unit tests are required for testable logic.\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/internal-project-python/SKILL.md",
+        "---\n"
+        "name: internal-project-python\n"
+        "description: Python project skill\n"
+        "---\n\n"
+        "# Python Project Skill\n\n"
+        "- Use emoji logs for key execution states.\n"
+        "- Prefer early return and clear guard clauses.\n"
+        "- Unit tests are required for testable logic.\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "instruction-skill-policy-overlap" in finding_codes
+
+
+def test_detect_token_risks_reports_paired_agent_skill_overlap(tmp_path: Path) -> None:
+    shared_lines = "\n".join(
+        [
+            "- Keep the paired agent short.",
+            "- The skill owns the reusable sync procedure.",
+            "- Preserve target local assets during apply.",
+            "- Exclude internal-sync resources from consumer mirroring.",
+            "- Keep root-guidance files layered.",
+            "- Write the tracking plan before mirrored changes.",
+        ]
+    )
+
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/agents/internal-sync-example.agent.md",
+        "---\n"
+        "name: internal-sync-example\n"
+        "tools: [read]\n"
+        "---\n\n"
+        "# Internal Sync Example\n\n"
+        "## Mandatory Engine Skills\n\n"
+        "- `internal-sync-example`\n\n"
+        f"{shared_lines}\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/internal-sync-example/SKILL.md",
+        "---\n"
+        "name: internal-sync-example\n"
+        "description: Sync example\n"
+        "---\n\n"
+        "# Internal Sync Example\n\n"
+        f"{shared_lines}\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "paired-agent-skill-overlap" in finding_codes

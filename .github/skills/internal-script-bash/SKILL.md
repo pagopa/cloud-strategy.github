@@ -5,22 +5,16 @@ description: Create or modify Bash scripts with purpose header, emoji logs, read
 
 # Bash Script Skill
 
+Follow `.github/instructions/internal-bash.instructions.md` for the baseline Bash rules. This skill adds script-specific hardening guidance only.
+
 ## When to use
 - New Bash scripts.
 - Existing Bash scripts that need updates.
 
-## Mandatory rules
-- Use Bash (`#!/usr/bin/env bash`), never POSIX `sh`.
-- `set -Eeuo pipefail` immediately after shebang/header.
-- Header must include purpose and usage examples.
-- Use emoji logs for runtime states.
-- Prefer early return and guard clauses.
-- Keep logic straightforward and readable.
-- Wrapper-style entry points must work with no arguments by using documented defaults for the common invocation path.
-- Optional flags or environment variables may override those defaults without editing the script.
+## Script-specific hardening guidance
 - Quote all variables: `"$var"`, never bare `$var`.
 - Prefer `printf` for formatted output and arrays for dynamic commands.
-- Use `mktemp` plus a cleanup trap for temporary files or directories.
+- Use `mktemp` plus a cleanup trap for temporary files or directories when the script owns temporary state.
 - Destructive or repeatable scripts should be idempotent and expose `--dry-run` when operator risk is non-trivial.
 - Validate required external commands with `command -v` before first use.
 - Do not add unit tests unless explicitly requested.
@@ -35,7 +29,7 @@ description: Create or modify Bash scripts with purpose header, emoji logs, read
 #   ./{script_name}.sh --help
 #   ./{script_name}.sh --target custom-target
 
-set -Eeuo pipefail
+set -euo pipefail
 
 DEFAULT_TARGET="default-target"
 

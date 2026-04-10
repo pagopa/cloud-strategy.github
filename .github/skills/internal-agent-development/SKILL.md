@@ -31,7 +31,8 @@ Prefer explicit engine-skill architecture for routers and broader command center
 
 Load these inputs before finalizing an internal agent:
 
-- `AGENTS.md` for routing language and repository inventory
+- `AGENTS.md` for routing language and repository precedence
+- `.github/INVENTORY.md` for the live catalog of managed assets
 - `.github/copilot-instructions.md` for the non-negotiable behavior layer
 - `references/agent-template.md` when drafting a new agent from scratch
 - `references/conversion-checklist.md` when normalizing an imported or legacy agent

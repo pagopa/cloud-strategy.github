@@ -5,20 +5,16 @@ description: Create or modify Node.js/TypeScript project modules with purpose co
 
 # Node.js Project Skill
 
+Follow `.github/instructions/internal-nodejs.instructions.md` for the baseline Node.js rules. This skill adds project-specific guidance only.
+
 ## When to use
 - Services, handlers, adapters, and utility modules.
 - Refactoring or extending existing Node.js components.
 
-## Mandatory rules
-- Keep business logic in focused modules, separate from transport and infrastructure.
-- Use clear, domain-relevant naming for core modules and errors.
-- Add a concise top purpose comment for new/changed core modules when intent is not obvious.
-- Use emoji logs for key runtime states when logging is touched.
-- Prefer early return and guard clauses.
-- Keep code readable and straightforward.
+## Project-specific guidance
 - Follow the existing module system and runtime constraints before introducing ESM/CJS or build-tool changes.
 - Validate inputs at API or function boundaries and keep async error handling explicit.
-- Add unit tests for testable logic.
+- Keep framework wiring thin and move request-shaping logic out of transport handlers when reuse or testing would improve.
 
 ## Minimal module example
 ```javascript
@@ -32,8 +28,7 @@ function buildUserProfile(input) {
 ```
 
 ## Test stack
-- Built-in `node:test` + `node:assert/strict`.
-- BDD-like grouping (`describe`/`it`) when available.
+- Follow the repository test-stack defaults from the instruction owner.
 - If the repository already uses Jest, stay with local Jest conventions instead of introducing mixed test stacks.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 

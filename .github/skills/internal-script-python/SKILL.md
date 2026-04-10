@@ -5,6 +5,8 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 
 # Python Script Skill
 
+Follow `.github/instructions/internal-python.instructions.md` for the baseline Python rules. This skill adds standalone-script guidance only.
+
 ## When to use
 - New standalone Python scripts.
 - Existing Python scripts that need updates.
@@ -14,31 +16,17 @@ description: Create or modify standalone Python scripts with purpose docstring, 
 - **This skill**: standalone scripts (`scripts/`, CLI tools, automation). Single-file or small utility scope.
 - **internal-project-python**: application components (services, use cases, adapters) inside a structured project with package layout.
 
-## Mandatory rules
-- Module docstring must include purpose and usage examples.
-- Use emoji logs for execution states.
-- Prefer early return and guard clauses.
-- Keep implementation explicit and readable.
-- Use type hints on non-trivial public helpers and CLI-facing boundaries.
-- Add unit tests for testable behavior.
+## Script-specific guidance
 - Standalone tools should default to a dedicated folder, not a loose top-level `.py` file.
-- The tool folder should include the Python entry point. Put matching tests under the repository-root `tests/` tree when test scope applies. Add a local `requirements.txt` and a `run.sh` launcher only when external packages are used.
-- Mirror the tool source path under the repository-root `tests/` tree so the owning script is obvious from the test path.
+- The tool folder should include the Python entry point. Add a local `requirements.txt` and a `run.sh` launcher only when external packages are used.
 - Existing standalone Python entry points should keep a sibling Bash launcher only when that launcher is needed to bootstrap external packages or an isolated local environment.
-- When a Bash launcher exists, `./run.sh` must work without parameters by using documented defaults, and optional flags or environment variables may override those defaults.
 - Stdlib-only standalone Python entry points should be documented and invoked directly with `python3 <script>.py` or an executable shebang path.
-- For new scripts, do an explicit dependency decision before implementation; do not assume `stdlib-first` as the automatic default.
-- Prefer mature, well-maintained, widely used third-party libraries when they clearly reduce boilerplate, edge cases, or custom logic in the finished script.
-- Keep the standard library only when the final code is genuinely simpler, more readable, and safer than the third-party alternative.
-- Optimize for less bespoke code and a simpler final script, not for the fewest possible dependencies.
-- If external packages are used, keep them in the local `requirements.txt` with exact pins, full transitive dependency closure, `--hash` entries, and short comment lines that make pinned versions readable.
-- Recommend third-party libraries when they materially simplify parsing, validation, CLI handling, serialization, HTTP, retry behavior, date handling, table rendering, Excel/CSV processing, or formatting; do not replace a simpler standard-library solution just to satisfy the preference.
-- Avoid weak or marginal dependencies; every package should have a clear value-versus-setup justification.
-- Make new `run.sh` launchers executable, and make them install from `requirements.txt` only when that file exists.
-- For Python template tasks, use Jinja templates named `<file-name>.<extension>.j2`.
+- Use type hints on non-trivial public helpers and CLI-facing boundaries.
+- Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
+- Reach for `pathlib`, context managers, and small helper functions before adding framework-like structure to a script.
 
 ## Dependency decision note
-Before writing a new script, include a short dependency decision note such as:
+When the instruction owner requires a dependency decision note, keep it short, for example:
 
 ```text
 Dependency decision note
@@ -168,20 +156,13 @@ exec "$VENV_DIR/bin/python" "$SCRIPT_DIR/{script_name}.py" --config "$CONFIG_PAT
 ```
 
 ## Testing
-- Put tests under the repository-root `tests/` tree.
-- Mirror the source path under `tests/`. Example: `tools/reporting/sync_accounts.py` maps to `tests/tools/reporting/test_sync_accounts.py`.
-- Use `pytest` as default test framework.
-- Keep tests deterministic and isolated.
+- Follow the repository pytest defaults from the instruction owner.
 - Use coverage reports to inspect missing behavior on touched code, not to force blanket 100% coverage.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Runtime guidance
-- Evaluate stdlib and third-party options explicitly for each new script instead of defaulting blindly to stdlib.
-- Prefer mature third-party packages when they clearly produce a smaller, safer, easier-to-maintain script than a custom stdlib-based implementation.
-- Keep stdlib when it wins on simplicity, clarity, and safety in the final result.
-- Reach for libraries instead of custom logic when they solve parsing, validation, CLI handling, serialization, HTTP, retry, date handling, table rendering, Excel/CSV, or formatting better.
-- Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
-- Reach for `pathlib`, context managers, and small helper functions before adding framework-like structure to a script.
+- Prefer direct, readable orchestration over framework-like structure.
+- Reach for script-local helpers before introducing reusable application layering into a standalone tool.
 
 ## Common mistakes
 
