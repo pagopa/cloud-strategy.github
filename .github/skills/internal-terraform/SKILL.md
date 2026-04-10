@@ -59,61 +59,9 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - `versions.tf` — `required_version` and `required_providers` with pinned versions
 - `README.md` — usage example, inputs, outputs
 
-## Minimal feature example
-```hcl
-variable "project_id" {
-  description = "Project identifier"
-  type        = string
-}
+## Templates
 
-resource "aws_s3_bucket" "logs" {
-  bucket = "${var.project_id}-logs"
-
-  tags = {
-    Project = var.project_id
-  }
-}
-
-output "logs_bucket_id" {
-  description = "Logs bucket id"
-  value       = aws_s3_bucket.logs.id
-}
-```
-
-## Minimal module example
-```hcl
-# variables.tf
-variable "name" {
-  description = "Resource base name"
-  type        = string
-}
-
-variable "environment" {
-  description = "Deployment environment"
-  type        = string
-
-  validation {
-    condition     = contains(["dev", "uat", "prod"], var.environment)
-    error_message = "Must be one of: dev, uat, prod."
-  }
-}
-
-# main.tf
-resource "aws_s3_bucket" "this" {
-  bucket = "${var.name}-${var.environment}"
-
-  tags = {
-    Name        = var.name
-    Environment = var.environment
-  }
-}
-
-# outputs.tf
-output "bucket_id" {
-  description = "Created bucket id"
-  value       = aws_s3_bucket.this.id
-}
-```
+Load `references/template-examples.md` when you need a minimal inline feature example or a starter reusable module.
 
 ## Common mistakes
 

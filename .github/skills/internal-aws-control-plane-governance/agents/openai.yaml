@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Aws Control Plane Governance"
+  short_description: "Help with Internal Aws Control Plane Governance tasks"
+  default_prompt: "Use $internal-aws-control-plane-governance for this task and follow the repository-owned workflow in the skill."

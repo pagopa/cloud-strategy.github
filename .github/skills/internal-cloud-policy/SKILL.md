@@ -27,47 +27,9 @@ description: Use when the user mentions cloud policies, organization policies, g
 | Restrict regions | SCP condition `aws:RequestedRegion` | Azure Policy `allowedLocations` | `constraints/gcp.resourceLocations` |
 | Enforce encryption | SCP + resource policy | Azure Policy (deployIfNotExists) | Org Policy + constraint |
 
-## Minimal templates
+## Templates
 
-Load `references/policy-templates.md` for full templates. Quick examples:
-
-### AWS SCP
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Sid": "DenyUnapprovedRegions",
-    "Effect": "Deny",
-    "Action": "*",
-    "Resource": "*",
-    "Condition": {
-      "StringNotEquals": { "aws:RequestedRegion": ["eu-south-1", "eu-west-1"] }
-    }
-  }]
-}
-```
-
-### Azure Policy rule
-```json
-{
-  "if": {
-    "field": "type",
-    "equals": "Microsoft.Network/publicIPAddresses"
-  },
-  "then": { "effect": "deny" }
-}
-```
-
-### GCP Org Policy (Terraform)
-```hcl
-resource "google_org_policy_policy" "disable_sa_key_creation" {
-  name   = "organizations/${var.org_id}/policies/iam.disableServiceAccountKeyCreation"
-  parent = "organizations/${var.org_id}"
-  spec {
-    rules { enforce = true }
-  }
-}
-```
+Load `references/policy-templates.md` for AWS SCP, Azure Policy, GCP Org Policy, and rollout examples.
 
 ## Common mistakes
 

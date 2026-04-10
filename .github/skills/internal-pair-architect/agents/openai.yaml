@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Pair Architect"
+  short_description: "Help with Internal Pair Architect tasks"
+  default_prompt: "Use $internal-pair-architect for this task and follow the repository-owned workflow in the skill."
