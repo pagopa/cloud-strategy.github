@@ -151,6 +151,10 @@ Managed skills:
 - `gh-address-comments` -> `openai-gh-address-comments`
 - `gh-fix-ci` -> `openai-gh-fix-ci`
 - `skill-creator` -> `openai-skill-creator`
+- `spreadsheet` -> `openai-spreadsheet`
+- `slides` -> `openai-slides`
+- `pdf` -> `openai-pdf`
+- `doc` -> `openai-docx`
 
 ### `sickn33/antigravity-awesome-skills`
 

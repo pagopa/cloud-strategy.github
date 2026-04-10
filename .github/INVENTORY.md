@@ -91,9 +91,13 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/obra-verification-before-completion/SKILL.md`
 - `.github/skills/obra-writing-plans/SKILL.md`
 - `.github/skills/obra-writing-skills/SKILL.md`
+- `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
+- `.github/skills/openai-pdf/SKILL.md`
 - `.github/skills/openai-skill-creator/SKILL.md`
+- `.github/skills/openai-slides/SKILL.md`
+- `.github/skills/openai-spreadsheet/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
 
