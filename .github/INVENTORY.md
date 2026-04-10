@@ -74,7 +74,7 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
-- `.github/skills/internal-skill-management/SKILL.md`
+- `.github/skills/internal-agent-sync-control-center/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`

@@ -9,7 +9,7 @@ metadata:
 
 Use this skill when authoring or materially revising repository-owned agents in `.github/agents/`.
 
-Use `openai-skill-creator` when the main output is a skill. Use `internal-skill-management` when deciding keep, refresh, replace, or retire outcomes across the catalog rather than improving one agent.
+Use `openai-skill-creator` when the main output is a skill. Use `internal-agent-sync-control-center` when deciding keep, refresh, replace, or retire outcomes across the sync-managed catalog rather than improving one agent.
 
 Prefer explicit engine-skill architecture for routers and broader command centers:
 
