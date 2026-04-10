@@ -6,6 +6,10 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-10
+- Added the provider skill rollout beyond AWS by creating repository-owned Azure, GCP, and GitHub skill families under `.github/skills/internal-{azure,gcp,github}-*`, keeping the AWS boundary model as the baseline with short adaptive strategic skills, separate organization/governance/operations lanes where justified, minimal `references/`, and `agents/openai.yaml` metadata for every new skill.
+- Refreshed `.github/README.md` and `.github/INVENTORY.md` so the maintainer-facing catalog now matches the live provider-skill inventory and the current prompt, skill, and script counts on disk.
+
 ## 2026-04-07
 - Updated the completion-report policy in `.github/copilot-instructions.md`, `.github/README.md`, and the sync agent and skill contract so synced target repositories now inherit a summary format that lists only the actually used agents, instructions, prompts, skills, and other resources, each with a short reason.
 

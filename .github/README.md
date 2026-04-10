@@ -10,10 +10,10 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 ## Live Catalog Summary
 
 - Instructions: 21 total (`13 internal-*`, `8 awesome-copilot-*`)
-- Prompts: 5 total (`5 internal-*`)
-- Skills: 67 total (`30 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `3 openai-*`, `2 terraform-*`)
+- Prompts: 0 total
+- Skills: 82 total (`41 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `7 openai-*`, `2 terraform-*`)
 - Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
-- Scripts: 6 total
+- Scripts: 17 total
 - Workflows: 1 total
 
 ## Structure
@@ -46,21 +46,15 @@ Use instructions as automatic file-path guidance. Do not hardcode instruction re
 
 ### Prompts (`prompts/`)
 
-Prompts are explicit slash-command entry points for repeatable maintenance tasks.
+No prompt files currently ship in the live catalog.
 
-- `internal-add-platform`
-- `internal-add-report-script`
-- `internal-add-unit-tests`
-- `internal-github-action`
-- `internal-terraform-module`
-
-Each prompt must stay aligned with real files under `instructions/`, `skills/`, and `scripts/`.
+If prompt assets are reintroduced, they must stay aligned with real files under `instructions/`, `skills/`, and `scripts/`.
 
 ### Skills (`skills/`)
 
 Skills are grouped into three functional lanes plus imported support families.
 
-- `internal-*`: repository-owned tactical execution, governance, routing, review, project lanes, CI/CD, data registry, cloud policy, Docker, Terraform, and PR authoring support
+- `internal-*`: repository-owned tactical execution, governance, routing, review, project lanes, CI/CD, data registry, cloud policy, Docker, Terraform, PR authoring support, and provider skill families for AWS, Azure, GCP, and GitHub
 - `obra-*`: strategic workflow support for brainstorming, planning, debugging, verification, worktree usage, and skill authoring
 - Imported support families:
   - `awesome-copilot-*`
@@ -68,13 +62,12 @@ Skills are grouped into three functional lanes plus imported support families.
   - `openai-*`
   - `terraform-*`
 
-Some skill directories include support material beyond `SKILL.md`. Current bundles with extra support files are:
+Some skill directories include support material beyond `SKILL.md`. Current live examples include:
 
-- `antigravity-domain-driven-design`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-cloud-design-patterns`
-- `internal-agent-development`, `internal-aws-governance`, `internal-aws-mcp-research`, `internal-aws-operations`, `internal-aws-organization-structure`, `internal-aws-strategic`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-copilot-docs-research`, `internal-pair-architect`, `internal-terraform`
-- `obra-brainstorming`, `obra-using-superpowers`, `obra-writing-skills`
-- `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-skill-creator`
-- `terraform-terraform-search-import`
+- provider families with bundled references and UI metadata: `internal-aws-*`, `internal-azure-*`, `internal-gcp-*`, `internal-github-*`
+- repository-owned support bundles such as `internal-agent-*`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-copilot-*`, `internal-data-registry`, `internal-docker`, `internal-pair-architect`, `internal-performance-optimization`, `internal-pr-editor`, `internal-project-*`, `internal-script-*`, `internal-sync-global-copilot-configs-into-repo`, and `internal-terraform`
+- workflow packs with bundled references or helpers such as `obra-brainstorming`, `obra-requesting-code-review`, `obra-subagent-driven-development`, `obra-systematic-debugging`, `obra-test-driven-development`, `obra-using-superpowers`, `obra-writing-plans`, and `obra-writing-skills`
+- imported or upstream-derived bundles such as `antigravity-domain-driven-design`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-azure-role-selector`, `awesome-copilot-cloud-design-patterns`, `openai-docx`, `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-pdf`, `openai-skill-creator`, `openai-slides`, `openai-spreadsheet`, and `terraform-terraform-search-import`
 
 Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery. Use this README for family-level orientation only.
 
@@ -90,6 +83,8 @@ The current repository-owned operating model is the internal router plus the fou
 Only `internal-router` actively routes between canonical owners; the four canonical owners stay boundary-driven and user-directed.
 
 ### Scripts and workflow
+
+This table highlights the most commonly maintained source-side entrypoints rather than every helper under `.github/scripts/`.
 
 | Path | Purpose |
 | --- | --- |
