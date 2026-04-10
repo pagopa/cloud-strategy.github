@@ -35,6 +35,11 @@ This file is the stable entrypoint for the repository instruction architecture.
 - Repository-owned resources created in other repositories use the `local-*` prefix.
 - Imported upstream resources keep the `<short-repo>-<original-resource-name>` form.
 
+## Operational Owner Model
+
+- `internal-router` remains the only active front-door router for the canonical operational catalog.
+- `internal-router` may hand work to one selected canonical owner without becoming the domain owner itself; non-router canonical agents may be entered directly or by router handoff, but remain recommendation-only when their boundary breaks.
+
 ## Projection Rules
 
 - Keep repo-wide Copilot behavior in `.github/copilot-instructions.md`.

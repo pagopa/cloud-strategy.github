@@ -33,7 +33,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - `internal-*` skills are the repository-owned tactical lane.
 - Imported non-`internal-*` assets are support-only depth when no repository-owned tactical owner exists.
 - `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` are the canonical repository-owned operational agents.
-- Only `internal-router` actively routes; non-router canonical agents define boundaries and recommend a better owner when needed.
+- Only `internal-router` actively routes. It may hand work to one selected canonical owner without doing that owner's domain work itself, while non-router canonical agents stay boundary-driven and recommendation-only when a better owner is needed.
 - `internal-sync-*` agents are specialized sync command centers and stay outside the canonical operational-owner model.
 
 ## Non-Negotiables
