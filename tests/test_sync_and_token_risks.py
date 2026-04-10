@@ -167,7 +167,9 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     assert "bridge-overlap" in finding_codes
 
 
-def test_detect_token_risks_reports_internal_root_policy_overlap(tmp_path: Path) -> None:
+def test_detect_token_risks_reports_internal_root_policy_overlap(
+    tmp_path: Path,
+) -> None:
     root_policy_lines = "\n".join(
         [
             "- Keep policy separate from inventory.",
@@ -201,7 +203,9 @@ def test_detect_token_risks_reports_internal_root_policy_overlap(tmp_path: Path)
     assert "internal-root-policy-overlap" in finding_codes
 
 
-def test_detect_token_risks_reports_instruction_skill_policy_overlap(tmp_path: Path) -> None:
+def test_detect_token_risks_reports_instruction_skill_policy_overlap(
+    tmp_path: Path,
+) -> None:
     write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
     write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
