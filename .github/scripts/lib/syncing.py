@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import copy2
 
 from .inventory import render_inventory_markdown, sections_from_catalog_paths
+from .fingerprinting import HASH_ALGO, NORMALIZATION_VERSION, build_fingerprint
 from .shared import (
     INVENTORY_PATH,
     MANAGED_ROOT_FILES,
@@ -305,20 +306,31 @@ def ensure_superpowers_gitignore_entry(current_content: str | None) -> str:
 def write_sync_manifest(plan: SyncPlan) -> Path:
     manifest_path = plan.target_root / SYNC_MANIFEST_PATH
     managed_hashes: dict[str, str] = {}
+    managed_fingerprints: list[dict[str, object]] = []
     for operation in plan.operations:
         if operation.action in {"delete", "preserve"}:
             continue
         target_path = plan.target_root / operation.path
         if target_path.exists():
             managed_hashes[operation.path] = sha256_file(target_path)
+            managed_fingerprints.append(
+                build_fingerprint(
+                    plan.target_root,
+                    target_path,
+                    source_ref_base=plan.source_root.as_posix(),
+                ).to_dict()
+            )
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_root": plan.source_root.as_posix(),
         "target_root": plan.target_root.as_posix(),
         "source_revision": plan.source_revision,
+        "normalization_version": NORMALIZATION_VERSION,
+        "hash_algo": HASH_ALGO,
         "local_assets": list(plan.local_assets),
         "managed_hashes": managed_hashes,
+        "managed_fingerprints": managed_fingerprints,
     }
     write_text(manifest_path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return manifest_path

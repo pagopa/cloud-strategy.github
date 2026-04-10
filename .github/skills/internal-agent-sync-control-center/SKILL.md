@@ -1,6 +1,6 @@
 ---
 name: internal-agent-sync-control-center
-description: Operate the catalog-governance engine for `internal-sync-control-center`: audit the managed `.github/` catalog, decide keep/update/extract/retire outcomes, refresh approved in-scope external assets without widening scope, remove fallback drift, and keep governance files aligned after sync changes. Use when working inside or directly supporting `.github/agents/internal-sync-control-center.agent.md`.
+description: "Operate the catalog-governance engine for `internal-sync-control-center`: audit the managed `.github/` catalog, decide keep/update/extract/retire outcomes, refresh approved in-scope external assets without widening scope, remove fallback drift, and keep governance files aligned after sync changes. Use when working inside or directly supporting `.github/agents/internal-sync-control-center.agent.md`."
 ---
 
 # Internal Agent Sync Control Center
@@ -15,6 +15,8 @@ Use `openai-skill-creator` when improving this skill itself or when a sync decis
 
 Use `internal-agent-development` when the sync changes the control-center agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
 
+When deterministic change detection matters, read `references/fingerprinting-contract.md`, use the canonical repository implementation in `.github/scripts/lib/fingerprinting.py`, and use `scripts/sync_resource_fingerprint.py` from this skill only as a thin workflow wrapper.
+
 ## Goals
 
 - Keep one clear canonical asset per intent across the managed `.github/` catalog.
@@ -24,6 +26,7 @@ Use `internal-agent-development` when the sync changes the control-center agent,
 - Keep naming, frontmatter, links, descriptions, and governance references deterministic.
 - Remove fallback, alias, deprecated, or compatibility-only drift in the same pass that introduces the canonical replacement.
 - Keep governance review of root `AGENTS.md` and `.github/copilot-instructions.md` explicit, never implied.
+- Provide a deterministic fingerprinting workflow that distinguishes real content change from formatting noise.
 
 ## Agent Coupling Contract
 
@@ -102,10 +105,27 @@ Rules:
 When a sync workflow needs evidence that a managed resource truly changed:
 
 - Prefer deterministic comparison over visual or memory-based judgment.
+- Read `references/fingerprinting-contract.md` before changing the comparison contract.
+- Use `scripts/sync_resource_fingerprint.py snapshot ...` to build a retained manifest when the workflow benefits from repeatable evidence.
+- Use `scripts/sync_resource_fingerprint.py diff ...` to compare two manifests instead of hand-reviewing large file sets.
 - Compare normalized content, not only the raw fetched file.
 - Record source, target path, normalization version, and content hash when a retained manifest materially improves safety.
 - Keep any retained sync evidence under repository-root `tmp/` and treat it as auxiliary workflow output, not catalog policy.
 - Do not introduce hashing manifests or helper scripts as decorative machinery; add them only when they clearly reduce false positives, repeated work, or unsafe refresh decisions.
+
+Current fingerprinting contract:
+
+- Use `sha256` for both raw and normalized content.
+- Keep `source_hash` for raw bytes and `content_hash` for normalized content.
+- Normalize line endings, trailing whitespace, and final newline before hashing text resources.
+- Treat section order as meaningful in `v1`; do not silently reorder markdown or frontmatter content.
+- Include `resource_id`, `kind`, `target_path`, `source_ref`, `normalization_version`, and `metadata` in each manifest entry.
+
+Output paths:
+
+- Skill-level temporary manifests should default to `tmp/superpowers/internal-agent-sync-control-center.manifest.json`.
+- Additional ad hoc comparison outputs for this skill should stay under repository-root `tmp/superpowers/`.
+- The canonical repository sync manifest remains `.github/copilot-sync.manifest.json` and is owned by `.github/scripts/lib/syncing.py`, not by this skill.
 
 ### 5. Re-check Governance Immediately
 
@@ -154,6 +174,7 @@ Before finishing:
 
 - Confirm `name:` equals the folder name.
 - Confirm every referenced local file exists.
+- Confirm representative bundled scripts run successfully when added or changed.
 - Confirm the description is specific enough to trigger, but not broad enough to collide with half the catalog.
 - Confirm the skill remains in English.
 - Confirm inventory and governance files do not point to removed paths.
