@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from pathlib import Path
 
-from .shared import Finding, finding_sort_key, iter_markdown_assets, normalize_markdown_text, read_text, significant_text_lines
+from .shared import Finding, finding_sort_key, iter_markdown_assets, load_frontmatter, normalize_markdown_text, read_text, significant_text_lines
 
 ROOT_POLICY_MARKERS = ("AGENTS.md", ".github/copilot-instructions.md", ".github/INVENTORY.md")
 
@@ -16,6 +16,7 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_internal_agent_skill_list_size(root))
     findings.extend(check_internal_root_policy_overlap(root))
     findings.extend(check_instruction_skill_policy_overlap(root))
+    findings.extend(check_paired_agent_skill_overlap(root))
     return sorted(findings, key=finding_sort_key)
 
 
@@ -206,6 +207,57 @@ def check_instruction_skill_policy_overlap(root: Path) -> list[Finding]:
                     suggestion="Keep baseline policy in the matching instruction file and narrow the skill to examples, workflow, and specialization.",
                 )
             )
+    return findings
+
+
+def check_paired_agent_skill_overlap(root: Path) -> list[Finding]:
+    agents_root = root / ".github/agents"
+    skills_root = root / ".github/skills"
+    if not agents_root.exists() or not skills_root.exists():
+        return []
+
+    findings: list[Finding] = []
+    for agent_path in sorted(agents_root.glob("internal-*.agent.md")):
+        if not agent_path.is_file():
+            continue
+
+        agent_text = read_text(agent_path)
+        mandatory_skills = [bullet.strip("`") for bullet in extract_section_bullets(agent_text, "## Mandatory Engine Skills")]
+        if not mandatory_skills:
+            continue
+
+        frontmatter = load_frontmatter(agent_path)
+        agent_name = frontmatter.get("name")
+        if not isinstance(agent_name, str) or not agent_name.strip():
+            agent_name = agent_path.name.removesuffix(".agent.md")
+
+        if agent_name not in mandatory_skills:
+            continue
+
+        skill_path = skills_root / agent_name / "SKILL.md"
+        if not skill_path.exists():
+            continue
+
+        overlap = {
+            line
+            for line in significant_text_lines(agent_text) & significant_text_lines(read_text(skill_path))
+            if len(line) >= 24
+        }
+        if len(overlap) < 6:
+            continue
+
+        findings.append(
+            Finding(
+                severity="non-blocking",
+                code="paired-agent-skill-overlap",
+                path=agent_path.relative_to(root).as_posix(),
+                message=(
+                    "The agent repeats too much of the paired mandatory skill's guidance, "
+                    f"which weakens the engine-skill split ({len(overlap)} overlapping lines)."
+                ),
+                suggestion="Keep the paired agent boundary-focused and move reusable procedure back into the matching skill.",
+            )
+        )
     return findings
 
 
