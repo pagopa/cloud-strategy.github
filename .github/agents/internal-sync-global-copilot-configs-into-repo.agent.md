@@ -23,6 +23,7 @@ Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-
 - `obra-verification-before-completion`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
+- `internal-agent-development`
 
 ## Skill Usage Contract
 
@@ -32,6 +33,7 @@ Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-
 - Use `obra-verification-before-completion` before reporting success so target state, preserved local assets, and validation results are backed by fresh evidence.
 - Use `internal-copilot-audit` when source or target drift, hollow references, or bridge-policy overlap changes the recommended sync outcome.
 - Use `internal-copilot-docs-research` only when a sync decision depends on current GitHub Copilot or MCP behavior rather than repository-local contract.
+- Use `internal-agent-development` only when a consumer-repository sync must compare, preserve, or normalize repository-owned agent contracts instead of mirroring agent files mechanically.
 
 ## Core Rules
 

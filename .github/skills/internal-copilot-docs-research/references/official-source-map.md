@@ -31,6 +31,19 @@ Use this file as a starting map, not as a substitute for opening the live docs.
 - `https://docs.github.com/en/copilot/concepts/prompting/response-customization`
   - Also use for the relationship between repository customization and MCP-aware Copilot surfaces.
 
+## VS Code Copilot customization docs
+
+- `https://code.visualstudio.com/docs/copilot/customization/custom-agents`
+  - Use for VS Code custom agent file structure, frontmatter fields (`agents`, `handoffs`, `hooks`, `user-invocable`, `disable-model-invocation`), tool list priority, and agent sharing.
+- `https://code.visualstudio.com/docs/copilot/agents/subagents`
+  - Use for subagent invocation, coordinator/worker orchestration patterns, nested subagents, and `agents:` restriction.
+- `https://code.visualstudio.com/docs/copilot/copilot-customization`
+  - Use for the VS Code customization overview: instructions, prompt files, agents, and skills.
+- `https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode`
+  - Use for agent mode behavior, tool usage, and session-level agent configuration in VS Code.
+- `https://code.visualstudio.com/docs/copilot/customization/agent-skills`
+  - Use for VS Code agent skills structure and skill-versus-instruction boundary.
+
 ## Task-quality guidance
 
 - `https://docs.github.com/en/copilot/tutorials/coding-agent/get-the-best-results`

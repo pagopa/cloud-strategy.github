@@ -1,20 +1,22 @@
 ---
 name: internal-agent-routing-engine
-description: Route repository-owned operational requests between the four canonical owners using intent classification, confidence thresholds, medium-task rules, old-to-new mapping, and fail-safe dispatch. Use when a generic or ambiguous request must be routed to execute, plan, review, or challenge.
+description: Route repository-owned operational requests between the four canonical owners using intent classification, confidence thresholds, medium-task rules, old-to-new mapping, allowed dispatch targets, and handoff protocol. Use when a generic or ambiguous request must be routed to execute, plan, review, or challenge.
 ---
 
 # Internal Agent Routing Engine
 
 Use this skill as the mandatory engine for `internal-router`.
 
-This skill owns the reusable routing logic. The router stays short: classify, ask at most one high-value question when needed, hand off, and stop. The router never implements.
+This skill owns the reusable routing logic. The router stays short: classify, ask at most one high-value question when needed, hand off to one canonical owner, and stay out of the domain work. The router never implements.
 
 ## Core Rules
 
 - Classify first by intent: execution, planning, review, or challenge.
 - Then classify by scale, ambiguity, risk, and boundary-crossing.
 - Ask at most one targeted clarification question with two clear options, and only when it materially improves routing confidence.
-- If confidence does not reach a safe routing decision after that question, fail safe to `internal-planning-leader`.
+- If confidence does not reach a safe routing decision after that question, fail safe to `internal-planning-leader` and hand off there.
+- Dispatch only to the four canonical owners: `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`.
+- Preserve the user's exact request plus any already-collected evidence instead of forcing the selected owner to re-triage from scratch.
 - Do not implement through the router.
 
 ## Primary Route Labels
@@ -30,9 +32,9 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 
 | Confidence | Meaning | Router action |
 | --- | --- | --- |
-| `high` | The request has one clear owner and the boundary is stable. | Route immediately. |
-| `medium` | Two owners are plausible, but one short question could remove the ambiguity. | Ask one targeted question, then route or fail safe. |
-| `low` | The request is underspecified, cross-boundary, or risky enough that premature routing would be noise. | Route directly to `internal-planning-leader`. |
+| `high` | The request has one clear owner and the boundary is stable. | Select the owner and auto-dispatch there. |
+| `medium` | Two owners are plausible, but one short question could remove the ambiguity. | Ask one targeted question, then dispatch or fail safe. |
+| `low` | The request is underspecified, cross-boundary, or risky enough that premature routing would be noise. | Fail safe to `internal-planning-leader` and auto-dispatch there. |
 
 Use these heuristics:
 
@@ -86,6 +88,21 @@ Bad questions:
 - Broad interviews with multiple subquestions.
 - Questions that gather details the selected owner should inspect alone.
 - Questions that delay an already safe `route-to-plan` fail-safe.
+
+## Handoff Protocol
+
+After selecting the canonical owner, hand off a compact package that includes:
+
+- `selected_owner`
+- `route_label`
+- `confidence`
+- `routing_rationale`
+- `user_request`
+- `relevant_constraints`
+- `already_collected_evidence`
+- `expected_output_shape`
+
+Keep the handoff compact, preserve the user's wording, and include only the evidence that materially reduces re-triage.
 
 ## Retired To Canonical Mapping
 
@@ -164,8 +181,10 @@ Routing conservatively is cheaper than dispatching the user to the wrong owner a
 - Selected canonical owner
 - Confidence level
 - One-sentence routing rationale
+- Handoff package summary with preserved request, constraints, and already-collected evidence
+- Delegated owner's result, prefixed by a short routing note
 - Single clarification question only when the decision was medium confidence
-- Explicit confirmation that no implementation was performed
+- Explicit confirmation that the router delegated instead of performing the domain work
 
 ## Common Mistakes
 
@@ -175,4 +194,5 @@ Routing conservatively is cheaper than dispatching the user to the wrong owner a
 | Asking multiple clarification questions | The router becomes a hidden planner | Ask at most one question that changes the owner |
 | Treating review and challenge as the same lane | Findings and pressure tests have different outputs and escalation paths | Keep `review` and `challenge` distinct |
 | Letting retired agents stay mentally canonical | Users keep landing on the old overlap model | Translate old names through the old-to-new table and route to a canonical owner |
-| Continuing into implementation after routing | The router turns into a fifth generalist | Stop after dispatch |
+| Dispatching to non-canonical owners | The front door stops being predictable and enforceable | Dispatch only to the four canonical owners |
+| Continuing into implementation after routing | The router turns into a fifth generalist | Hand off to the selected owner and keep the router out of domain work |

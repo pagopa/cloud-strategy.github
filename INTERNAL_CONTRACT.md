@@ -155,7 +155,8 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - shared operating-model skills
 - Expected behavior:
   - `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` remain the canonical repository-owned operational agents
-  - only `internal-router` actively routes
+  - only `internal-router` actively routes and it may invoke one selected canonical owner
+  - non-router canonical agents may be entered directly by the user or by router handoff
   - non-router canonical agents define boundaries and recommendations instead of active delegation
   - mandatory and optional skill contracts remain explicit where the operating model depends on them
 

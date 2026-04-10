@@ -48,7 +48,7 @@ Implications:
 
 ## Boundary Recommendation Protocol
 
-Only `internal-router` actively routes between owners. The four canonical owners stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating.
+Only `internal-router` actively routes between owners and may dispatch to the selected canonical owner. The four canonical owners may be entered either directly by the user or by router handoff, but once active they stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating.
 
 | Agent | Stay owner when | Boundary breaks when | Recommend |
 | --- | --- | --- | --- |
@@ -75,7 +75,7 @@ Use this policy across all canonical agents:
 
 | Skill | Primary owner | When it wins |
 | --- | --- | --- |
-| `internal-agent-routing-engine` | `internal-router` | Front-door classification and dispatch |
+| `internal-agent-routing-engine` | `internal-router` | Front-door classification, fail-safe selection, and dispatch to one canonical owner |
 | `internal-agent-operating-model-engine` | Shared by the four canonical agents | Shared boundary, recommendation, and anti-overlap logic |
 | `internal-code-review` | `internal-review-guard` | Tactical review engine for findings and defect-first analysis |
 | `internal-agent-development` | `internal-planning-leader` | Non-trivial repository-owned agent authoring |
@@ -87,7 +87,8 @@ Use this policy across all canonical agents:
 
 ## Relationship Model
 
-- `internal-router` owns the front door only. It does not implement, plan, review, or challenge by itself.
+- `internal-router` owns the front door only. It may hand the task to one canonical owner, but it does not implement, plan, review, or challenge by itself.
+- The four canonical owners may be entered directly by the user or by router handoff; the entry path does not widen their boundary.
 - `internal-planning-leader` absorbs the role previously covered by `internal-ai-resource-creator` when the work is non-trivial repository-owned authoring.
 - `internal-review-guard` must reuse `internal-code-review` instead of restating the review playbook in the agent body.
 - `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.
