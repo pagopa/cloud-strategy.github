@@ -9,7 +9,7 @@ metadata:
 
 Use this skill when authoring or materially revising repository-owned agents in `.github/agents/`.
 
-Use `internal-skill-creator` first when the main output is a repository-owned skill under `.github/skills/`. It is the canonical local entrypoint for that work. Inside that wrapper, use `openai-skill-creator` as the core engine for bundle anatomy, helper scripts, `agents/openai.yaml`, and structural validation. Use `internal-agent-sync-control-center` when deciding keep, refresh, replace, or retire outcomes across the sync-managed catalog rather than improving one agent.
+Use `internal-skill-creator` first when the main output is a repository-owned skill under `.github/skills/`. It is the canonical local entrypoint for that work and should handle the repo-local decision gate itself. After that gate is clear, delegate only the remaining bundle anatomy, helper-script, `agents/openai.yaml`, or structural-validation work to `openai-skill-creator` instead of duplicating it. Use `internal-agent-sync-control-center` when deciding keep, refresh, replace, or retire outcomes across the sync-managed catalog rather than improving one agent.
 
 Prefer explicit engine-skill architecture for routers and broader command centers:
 

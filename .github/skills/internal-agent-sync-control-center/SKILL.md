@@ -13,7 +13,7 @@ Use the current repository state as evidence and starting context, but anchor de
 
 Use `internal-skill-creator` first when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill. It is the canonical local entrypoint for repository-owned skill work in this repository.
 
-Use `openai-skill-creator` as the embedded core engine for bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation while that concrete skill work is in scope under `internal-skill-creator`.
+Use `openai-skill-creator` only for the remaining bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation work after `internal-skill-creator` has established the repository-owned skill boundary and decided the local ownership outcome.
 
 Use `internal-agent-development` when the sync changes the control-center agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
 
@@ -39,7 +39,7 @@ For `internal-sync-control-center`, keep the split strict:
 - This skill owns audit order, keep/update/extract/retire decisions, anti-overlap heuristics, and sync execution discipline.
 - `internal-agent-development` owns structural changes to the agent itself, including mandatory engine-skill architecture and boundary rewrites.
 - `internal-skill-creator` owns repository-owned skill authoring and should be the first local route when one concrete skill needs creation, replacement, or major redesign.
-- `openai-skill-creator` is the embedded core workflow for bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, and structural validation details during that work.
+- `openai-skill-creator` covers only the remaining bundle mechanics during that work; it should not replace the local decision gate or duplicate repository-owned routing logic.
 
 Do not collapse these roles back into one file just because the current task touches all of them.
 
