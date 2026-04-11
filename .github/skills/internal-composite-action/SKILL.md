@@ -32,27 +32,8 @@ description: Use when creating or modifying a reusable GitHub composite action u
 - Keep secrets out of defaults and logs.
 
 ## Minimal template
-```yaml
-name: Validate Input
-description: Validate required inputs before action logic
-inputs:
-  target:
-    description: Target environment
-    required: true
-runs:
-  using: composite
-  steps:
-    - shell: bash
-      env:
-        TARGET: ${{ inputs.target }}
-      run: |
-        set -euo pipefail
-        if [[ -z "$TARGET" ]]; then
-          echo "❌ target is required" >&2
-          exit 1
-        fi
-        echo "✅ input validated"
-```
+
+Load `references/minimal-template.md` when you need the starter `action.yml` shape. Keep only one focused validation step in the initial template and move longer shell logic into a script early.
 
 ## Common mistakes
 

@@ -11,7 +11,7 @@ Keep the ownership model explicit:
 
 - `internal-skill-creator` is the canonical local owner for repository-owned `.github/skills/` work.
 - `openai-skill-creator` is the core operating engine inside that wrapper for bundle anatomy, reusable resources, `agents/openai.yaml`, initialization workflow, and structural validation.
-- this skill adds the repository-specific gate: prove the need, choose reuse versus creation, keep triggers retrieval-safe, harden the result against rationalization and boundary drift, and delegate only the remaining bundle work to OpenAI
+- This skill adds the repository-specific gate: prove the need, choose reuse versus creation, keep triggers retrieval-safe, harden the result against rationalization and boundary drift, and delegate only the remaining bundle work to OpenAI.
 
 This means `internal-skill-creator` should trigger first for repository-owned skill work, establish the local boundary, and then deliberately hand only the remaining bundle mechanics to `openai-skill-creator` instead of competing with it or duplicating it.
 
@@ -129,28 +129,7 @@ After the local decision gate is complete, hand off to `openai-skill-creator` on
 8. Re-check routing fallout.
    Update nearby references only when the visible local entrypoint or ownership meaning actually changed.
 
-## What this wrapper adds beyond `openai-skill-creator`
-
-- A hard proof gate before creation or major revision.
-- A local reuse-versus-create decision instead of automatic bundle expansion.
-- Trigger-only description discipline for repository-owned skills.
-- Boundary enforcement against sync governance and agent authoring drift.
-- Skill-type testing and anti-rationalization checks distilled from `writing-skills`.
-- A delegation boundary that keeps this skill from duplicating the OpenAI workflow.
-
-## What to absorb from `writing-skills`
-
-- Fail first, then write: if there is no baseline miss, stop and reassess.
-- Reuse or reject before inventing: reuse an existing skill, tighten routing, or do nothing when the evidence is weak.
-- Treat skills as reusable guides rather than narratives.
-- Close loopholes explicitly instead of relying on intent.
-- Treat "it's obvious", "it's only wording", or "we can fix it later" as red flags, not reasons to proceed.
-- Keep the token budget disciplined. Prefer selective cross-references over copying generic scaffolding or long examples.
-- Test the skill type you are writing:
-  - Discipline skills need negative cases, loophole checks, and reruns.
-  - Technique skills need a failing case, a success case, and one misuse case.
-  - Pattern skills need boundary checks and counterexamples.
-  - Reference skills need example fidelity, retrieval checks, and application checks.
+Use `references/writing-skills-checklist.md` for the anti-rationalization rules, token-discipline reminders, and skill-type testing expectations that this wrapper should enforce.
 
 ## Validation
 

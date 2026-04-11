@@ -23,14 +23,9 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 - Keep entrypoints thin: parse arguments, resolve paths, orchestrate helpers, and return an exit code through `main() -> int` plus `raise SystemExit(main())`.
 - Prefer `argparse`, `pathlib.Path`, and small helper functions for operator-facing tools.
 - When a tool can be called from subdirectories, resolve the repository root explicitly instead of assuming the current working directory.
-- Add a local `requirements.txt` and a `run.sh` launcher only when external packages are used.
-- When several entrypoints share the same dependencies and helper code, centralize them in one toolkit folder with a shared `lib/`, one hash-locked `requirements.txt`, and one `run.sh` bootstrapper. Thin `<tool>.sh` wrappers may delegate to that shared runner.
-- Existing standalone Python entry points should keep a sibling Bash launcher only when that launcher is needed to bootstrap external packages or an isolated local environment.
-- Stdlib-only standalone Python entry points should be documented and invoked directly with `python3 <script>.py` or an executable shebang path.
 - Use type hints on non-trivial public helpers and CLI-facing boundaries.
 - Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
 - Reach for `pathlib`, context managers, and small helper functions before adding framework-like structure to a script.
-- Use a small shared helper module for repeated concerns such as emoji logging, JSON rendering, path discovery, or typed result objects instead of duplicating those helpers across entrypoints.
 - Add machine-readable output such as `--format json` only when the tool has a real automation consumer. Keep text output as the default operator path.
 
 ## Dependency decision note
@@ -57,8 +52,7 @@ Keep these rules visible while drafting:
 - Use a dedicated tool folder or toolkit root rather than a loose top-level `.py` file.
 - Add `requirements.txt` and `run.sh` only when external packages are actually needed.
 - Generate `requirements.txt` with `pip-compile --generate-hashes` or an equivalent locked workflow.
-- Stdlib-only tools should run directly with `python3 <script>.py` or an executable shebang path.
-- When a repository already has a shared runner such as `.github/scripts/run.sh`, reuse it instead of cloning bootstrap logic into every entrypoint.
+- Reuse an existing shared runner such as `.github/scripts/run.sh` instead of cloning bootstrap logic into every entrypoint.
 - Mirror script or toolkit coverage under the repository-root `tests/` tree; do not create ad-hoc test folders beside the tool.
 
 ## Testing
@@ -69,9 +63,8 @@ Keep these rules visible while drafting:
 
 ## Runtime guidance
 - Prefer direct, readable orchestration over framework-like structure.
-- Reach for script-local helpers before introducing reusable application layering into a standalone tool.
-- For small maintenance toolkits, keep reusable logic in a local shared module such as `lib/` and keep each entrypoint focused on one command surface.
-- If multiple entrypoints expose the same environment bootstrap, centralize that in a shared runner rather than copying `.venv` and `pip install` logic into every wrapper.
+- Keep shared helpers local to the toolkit, not promoted into application-style layering without a real need.
+- Centralize repeated environment bootstrap in one shared runner instead of copying `.venv` and `pip install` logic into every wrapper.
 
 ## Common mistakes
 
@@ -102,5 +95,4 @@ Keep these rules visible while drafting:
 - `python -m py_compile <script_name>.py` (syntax check)
 - `bash -n run.sh` (launcher syntax check, only when `run.sh` exists)
 - `pytest tests/` (run tests)
-- `python -m compileall <changed_paths>` (batch syntax check)
-- `./run.sh <tool> --help` or `make test` / `make lint` when the repository already exposes the canonical script-toolkit runner
+- `python -m compileall <changed_paths>` or the repository's canonical shared runner when the tool already lives inside a maintained toolkit

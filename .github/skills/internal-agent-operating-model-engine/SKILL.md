@@ -71,19 +71,11 @@ Use this policy across all canonical agents:
 - Do not create 1:1 decorative engine skills for symmetry alone.
 - A shared engine is preferable when the same reusable rules would otherwise drift across multiple agents.
 
-## Skill Ownership Model
+Load `references/ownership-maps.md` when you need:
 
-| Skill | Primary owner | When it wins |
-| --- | --- | --- |
-| `internal-agent-routing-engine` | `internal-router` | Front-door classification, fail-safe selection, and dispatch to one canonical owner |
-| `internal-agent-operating-model-engine` | Shared by the four canonical agents | Shared boundary, recommendation, and anti-overlap logic |
-| `internal-code-review` | `internal-review-guard` | Tactical review engine for findings and defect-first analysis |
-| `internal-agent-development` | `internal-planning-leader` | Non-trivial repository-owned agent authoring |
-| `internal-copilot-audit` | `internal-planning-leader` | Catalog audit, drift analysis, and stale-reference review |
-| `internal-copilot-docs-research` | `internal-planning-leader` | Contract questions that depend on current GitHub Copilot or MCP behavior |
-| `internal-change-impact-analysis` | `internal-planning-leader` | Change-impact and architecture-risk analysis |
-| `internal-terraform`, `internal-cicd-workflow`, and runtime-specific internal skills | `internal-fast-executor` for local execution, `internal-planning-leader` when design or rollout dominates | Tactical delivery versus strategy split |
-| `obra-*` workflows | Cross-agent support | Mandatory when relevant, absent when irrelevant |
+- the current canonical skill-to-owner lookup
+- the retired-to-canonical owner mapping
+- the shorthand rules for cloud and runtime skills inside the operational model
 
 ## Relationship Model
 
@@ -95,19 +87,6 @@ Use this policy across all canonical agents:
 - `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.
 - `internal-critical-challenger` should stay narrow: challenge the reasoning, reframe hidden constraints when useful, synthesize the pressure test, and tell the user when planning should resume.
 - `internal-sync-*` and `awesome-*` assets stay outside this canonical operational model.
-
-## Retired To Canonical Ownership Mapping
-
-| Retired owner | Canonical owner |
-| --- | --- |
-| `internal-ai-resource-creator` | `internal-planning-leader` |
-| `internal-architect` | `internal-planning-leader` |
-| `internal-developer` | `internal-fast-executor` |
-| `internal-infrastructure` | `internal-fast-executor` or `internal-planning-leader` when design or rollout dominates |
-| `internal-cicd` | `internal-fast-executor` or `internal-planning-leader` when orchestration or tradeoffs dominate |
-| `internal-code-review` | `internal-review-guard` |
-| `internal-quality-engineering` | `internal-review-guard` for validation and risk, `internal-fast-executor` for a clear fix |
-| `internal-aws-*`, `internal-azure-*`, `internal-gcp-*` | `internal-planning-leader` for strategy or design, `internal-fast-executor` for clear local execution |
 
 ## Anti-Overlap Checklist
 

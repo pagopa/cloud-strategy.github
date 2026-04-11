@@ -65,6 +65,8 @@ Do not collapse these roles back into one file just because the current task tou
 | Agent body becoming procedural or duplicative | Extract procedure into this skill or the right internal skill |
 | Agent routing or engine-skill split changing materially | Use `internal-agent-development` |
 
+Load `references/catalog-decision-checklist.md` when you need the detailed keep/update/extract/retire heuristics or overlap tests.
+
 ## Workflow
 
 ### 1. Inventory Before Editing
@@ -119,20 +121,7 @@ When a sync workflow needs evidence that a managed resource truly changed:
 - Record source, target path, normalization version, and content hash when a retained manifest materially improves safety.
 - Keep any retained sync evidence under repository-root `tmp/` and treat it as auxiliary workflow output, not catalog policy.
 - Do not introduce hashing manifests or helper scripts as decorative machinery; add them only when they clearly reduce false positives, repeated work, or unsafe refresh decisions.
-
-Current fingerprinting contract:
-
-- Use `sha256` for both raw and normalized content.
-- Keep `source_hash` for raw bytes and `content_hash` for normalized content.
-- Normalize line endings, trailing whitespace, and final newline before hashing text resources.
-- Treat section order as meaningful in `v1`; do not silently reorder markdown or frontmatter content.
-- Include `resource_id`, `kind`, `target_path`, `source_ref`, `normalization_version`, and `metadata` in each manifest entry.
-
-Output paths:
-
-- Skill-level temporary manifests should default to `tmp/superpowers/internal-agent-sync-control-center.manifest.json`.
-- Additional ad hoc comparison outputs for this skill should stay under repository-root `tmp/superpowers/`.
-- The canonical repository sync manifest remains `.github/copilot-sync.manifest.json` and is owned by `.github/scripts/lib/syncing.py`, not by this skill.
+- Use the normalization rules, manifest schema, and output defaults from `references/fingerprinting-contract.md` instead of forking them inline.
 
 ### 5. Re-check Governance Immediately
 
@@ -142,38 +131,6 @@ After catalog changes:
 - Re-check `.github/copilot-instructions.md` for repo-wide projection drift.
 - Re-check `.github/INVENTORY.md` for exact path accuracy.
 - Re-check nearby agents and skills for stale references, decorative declarations, or broken ownership assumptions.
-
-## Overlap Review Checklist
-
-Delete or replace an asset when most of these are true:
-
-- The description triggers on the same requests as another installed asset.
-- The competing asset is more structured or more complete.
-- The weaker asset adds no distinctive workflow.
-- The weaker asset routes to missing resources or stale instructions.
-- The repository already has an internal asset that should own the domain.
-
-Keep specialized subskills only when they narrow trigger space instead of broadening collision.
-
-## Refresh Rules
-
-When refreshing an installed external-prefixed asset:
-
-1. Keep the existing local identifier and prefix.
-2. Preserve only the capability that still maps to the current repository.
-3. Remove stale runtime assumptions, deprecated frontmatter, and broken bundled references.
-4. Do not add new sibling assets from the same family unless the user explicitly expands scope.
-5. Update governance files only when routing or inventory meaningfully changes.
-
-## Extraction Rules
-
-When `internal-sync-control-center` or a nearby sync asset is turning into a knowledge dump:
-
-1. Keep the agent cohesive around routing, managed scope, approval posture, and orchestration.
-2. Move long reusable procedures into this skill or the right existing internal skill.
-3. Use `internal-agent-development` if the extraction changes the agent's structural contract.
-4. Point the agent at the canonical skill explicitly.
-5. Keep the extracted workflow reusable outside the single current task.
 
 ## Validation
 

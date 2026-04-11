@@ -59,21 +59,12 @@ Use these heuristics:
 
 ## Medium-Task Thresholds
 
-Route away from execution and into planning when any of these are true:
+Use `internal-agent-operating-model-engine` for the shared medium-task logic.
 
-- The change is likely to touch `>= 3` files with lateral impact.
-- The change crosses more than one directory family or logical boundary.
-- The change affects routing, ownership, naming contracts, or catalog boundaries.
-- There are `>= 2` credible solution paths with non-trivial tradeoffs.
-- The task needs rollout, regression, governance, or rollback decisions.
-- The task creates a new repository-owned resource instead of making a banal update to an existing one.
+For router purposes, the consequence is simple:
 
-Stay with `route-to-execute` only when all of these remain true:
-
-- The likely change touches `<= 2` files.
-- The work stays within one directory family or one logical boundary.
-- Routing, ownership, naming contracts, and catalog boundaries stay unchanged.
-- The task does not require a real strategic comparison.
+- if any shared medium-task threshold is hit, fail safe to `route-to-plan`
+- stay with `route-to-execute` only when the task remains clearly local, low-risk, and concretely verifiable
 
 ## High-Value Clarification Question Rule
 
@@ -111,16 +102,7 @@ Keep the handoff compact, preserve the user's wording, and include only the evid
 
 ## Retired To Canonical Mapping
 
-| Retired route | Canonical route |
-| --- | --- |
-| `internal-ai-resource-creator` | `internal-planning-leader` |
-| `internal-architect` | `internal-planning-leader` |
-| `internal-developer` | `internal-fast-executor` |
-| `internal-infrastructure` | `internal-fast-executor` or `internal-planning-leader` when design or rollout dominates |
-| `internal-cicd` | `internal-fast-executor` or `internal-planning-leader` when orchestration or tradeoffs dominate |
-| `internal-code-review` | `internal-review-guard` |
-| `internal-quality-engineering` | `internal-review-guard` for validation and risk, `internal-fast-executor` for a clear fix |
-| `internal-aws-*`, `internal-azure-*`, `internal-gcp-*` | `internal-planning-leader` for strategy or design, `internal-fast-executor` for clear local execution |
+Load `../internal-agent-operating-model-engine/references/ownership-maps.md` when the request mentions retired owners or cloud-family aliases and you need the canonical owner before dispatch.
 
 Do not use `internal-sync-*` or `awesome-*` assets as canonical operational owners in this routing model.
 

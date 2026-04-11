@@ -45,13 +45,7 @@ Load these inputs before finalizing an internal agent:
 - `references/subagent-patterns.md` when the agent needs to invoke or be invoked as a subagent, or when designing coordinator/worker workflows
 - `internal-copilot-docs-research` and `.github/skills/internal-copilot-docs-research/references/official-source-map.md` when the change depends on current GitHub Copilot or VS Code platform behavior
 
-If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints shaped by the repository resource model, not as a platform-enforced requirement to use every listed skill.
-
-Prefer role-based matching over identifier memorization:
-
-- When the selected agent includes a skill-guidance section and is being used to create, revise, split, or normalize agents, load the listed skill that best governs agent authoring for the task before drafting or editing the target agent.
-- When the selected agent includes a research or documentation-verification skill and the task depends on current vendor guidance, load that skill before finalizing routing or domain claims.
-- When multiple listed skills are present, select according to the declared resource model: `obra-*` for cross-cutting workflow guidance, `internal-*` for canonical repository-owned ownership, imported skills for support depth, and `local-*` for consumer-local extensions. Choose the skill whose dominant role fits the task instead of inferring role from prefix alone. If no internal owner exists for a capability, imported specialists may be used directly.
+When the source agent already has a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load only the directly relevant skill files before editing the target agent. Treat those lists as curated routing hints shaped by the repository resource model, not as a platform-enforced requirement to use every listed skill.
 
 ## Decision Gate
 
@@ -131,34 +125,22 @@ That asymmetry is a feature, not a defect, when it reduces drift.
 
 1. Define the operating role in one sentence.
    Use behavioral scope, not prestige language.
-2. If the work is routed through an existing agent and that agent has a skill-guidance section, read it and load the skills that directly govern the task.
-   Treat those skills as the best candidate inputs for the task, not as an instruction to use every listed skill.
-3. Scan neighboring agents and trigger overlap.
-   Compare `description:` lines first. If two descriptions trigger on the same request, resolve the overlap before drafting.
-4. Decide whether the behavior belongs in an agent, a skill, or both.
+2. Scan neighboring agents and trigger overlap.
+   Compare `description:` lines first and resolve collisions before drafting.
+3. Decide whether the behavior belongs in an agent, a skill, or both.
    Extract reusable procedure into a skill if the draft starts becoming a playbook.
-5. If the behavior belongs in both, define the split explicitly.
-   Decide what stays in the agent body and what becomes the engine skill before drafting sections.
-6. Decide whether the agent needs `## Mandatory Engine Skills`, `## Optional Support Skills`, or both.
-   Mandatory engines own required decision logic; optional support skills add conditional help without redefining the route.
-7. Draft the `description:` before the body.
+4. If the behavior belongs in both, define the split explicitly.
+   Keep route, stance, tool contract, and output shape in the agent; keep reusable procedure in the skill.
+5. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
-8. Choose the frontmatter strategy intentionally.
-   Define the explicit `tools:` contract first using canonical aliases and the smallest role-shaped set. Add `target:`, `mcp-servers:`, or model-selection properties only when they change real behavior.
-9. Translate capabilities into repo-local building blocks.
-   Map expertise claims, workflow logic, and any remaining tool dependencies into declared skills, role language, routing rules, output expectations, and a deliberate frontmatter contract.
-10. If the agent needs engine skills, keep them explicit and small.
-   Prefer one dedicated engine for routers and one shared engine for cross-agent operating logic before inventing parallel skill mirrors.
-11. If a support-skill section will help the agent, build a cohesive one.
-   Keep skills that reinforce the same operating role. Delete kitchen-sink additions and avoid ordering that implies origin-based priority.
-12. Write routing rules with a real boundary.
-    State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases. If the agent is not a router, recommend that neighboring owner to the user instead of actively handing off.
-13. Add output expectations that match the role.
-   Ask what a successful response from this command center should reliably contain. For routers or coordinators, make completed delegation versus blocked delegation explicit instead of allowing classification-only endings.
-14. Normalize imported patterns and remove stale baggage.
-   Preserve the decision model; remove retired frontmatter, obsolete tool ids, irrelevant command syntax, and UI-only metadata.
-15. Validate and de-duplicate.
-    Run repository validation and re-check whether the new agent makes another one redundant.
+6. Choose the frontmatter and engine-skill strategy intentionally.
+   Keep `tools:` explicit, engine skills small, and support skills cohesive.
+7. Normalize imported patterns and remove stale baggage.
+   Preserve the decision model while deleting obsolete runtime-specific scaffolding.
+8. Add real boundaries and measurable output expectations.
+   Non-router agents recommend the better owner when the boundary breaks instead of routing automatically.
+9. Validate and de-duplicate.
+   Run repository validation and re-check whether the new agent makes another one redundant.
 
 ## Capability Translation Rules
 
@@ -169,12 +151,10 @@ When learning from richer upstream agents, keep the signal and drop the scaffold
 - Keep `tools:` explicit and least-privilege for every repository-owned internal agent.
 - Translate governance or trust patterns into concrete approval rules, audit expectations, and routing boundaries instead of framework-specific policy code.
 - Translate expertise lists into routing rules, role focus, or output expectations.
-- Translate framework pillars or evaluation matrices into a compact but explicit decision lens. Keep the named dimensions when they help users reason, compare options, or understand tradeoffs quickly.
-- Translate long clarification question banks into a compact list of critical requirements that must be confirmed before strong recommendations.
-- Preserve ordered execution flow when the upstream agent is genuinely easier to use because it sequences the work well. A clear `## Execution Workflow` is often worth keeping for architecture, governance, investigation, or rollout agents.
-- Translate exhaustive question banks into a few high-value discovery priorities unless the branching logic is unique and reusable.
-- Translate platform-specific setup or deployment details into repo-local references only if this repository actually needs them.
-- Preserve strong response organization when it improves operator usability. If an upstream agent is effective because it has a clear requirement gate, decision lens, and response structure, keep those advantages in repo-local form instead of compressing them away.
+- Translate decision frameworks into a compact decision lens only when the named dimensions still improve tradeoff quality.
+- Translate long question banks into a few high-value discovery priorities unless the branching logic is genuinely reusable.
+- Preserve ordered execution flow or strong response structure only when they materially improve the role.
+- Move platform-specific setup or deployment detail into repo-local references only when this repository actually needs it.
 - Keep only examples that clarify routing or output shape; move broader examples into references.
 
 ## Governance And Trust Boundaries
@@ -199,32 +179,6 @@ Good reasons to split:
 
 Do not split only because the file is long. First ask whether the reusable procedure belongs in a skill.
 
-## Command-Center Heuristics
-
-A strong internal agent usually has:
-
-- a precise routing sentence
-- a short role statement that defines its operating stance
-- a declared skill list that matches the role
-- routing boundaries against nearby agents
-- output expectations that make success observable
-
-Many strong specialist agents also benefit from:
-
-- an explicit decision lens that names the evaluation dimensions
-- a compact requirement gate that prevents weak assumptions
-- an execution workflow when ordered reasoning materially improves answer quality
-- a response shape that makes evidence, tradeoffs, and next steps easy to scan
-
-Many strong command-center agents also benefit from:
-
-- one explicit mandatory engine skill
-- one non-kitchen-sink optional support section when conditional support really improves routing
-- a clear split between core routing prose and reusable operating logic
-- a validation rule that confirms the engine exists and is not decorative
-
-Load `references/design-patterns.md` when deciding how much workflow, discovery, or governance logic belongs in the agent body.
-
 ## Imported Pattern Normalization
 
 When adapting external agents:
@@ -234,11 +188,10 @@ When adapting external agents:
 3. Rewrite naming into the canonical `internal-*` contract.
 4. Replace platform assumptions with repo-local files, prompts, skills, and validations.
 5. Convert broad expertise claims into concrete routing or output rules.
-6. Remove historical or marketing language that does not change selection behavior.
 
 Do not over-compress a well-structured upstream agent. If its strength comes from a clear requirement gate, decision lens, execution order, or response structure, preserve those patterns in repo-local form instead of reducing everything to flat bullets.
 
-Load `references/example-transformations.md` if you need side-by-side conversion examples.
+Load `references/design-patterns.md` for command-center structure questions and `references/example-transformations.md` for side-by-side conversion examples.
 
 ## Anti-Patterns
 
@@ -264,7 +217,6 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 
 ## Validation
 
-- Confirm the agent filename stem, frontmatter `name:`, and command identifier are identical.
 - Confirm internal agents keep filename stem, frontmatter `name:`, and command identifier identical.
 - Confirm any intentionally non-internal agent has an explicit reason to keep a different external-facing `name:`.
 - Confirm the `description:` says when to use the agent instead of restating its workflow.
