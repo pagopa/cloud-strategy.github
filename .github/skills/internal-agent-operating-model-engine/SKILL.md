@@ -26,7 +26,7 @@ Implications:
 | `internal-fast-executor` | Clear, local execution with concrete verification and limited risk | Strategic tradeoffs, ambiguous scope, broad authoring, review-first asks, or critical challenge |
 | `internal-planning-leader` | Ambiguity resolution, decision records, plans, repository-owned authoring, rollout and governance decisions | Default local execution once the design is settled, defect-first review, or pure challenge |
 | `internal-review-guard` | Review, validation, merge readiness, regression risk, evidence gaps, and defect-first findings | Implementation, initial design ownership, or open-ended strategic challenge |
-| `internal-critical-challenger` | Pre-mortems, assumption stress tests, failure modes, and strong objections | Implementation, routine technical review, or final operational planning |
+| `internal-critical-challenger` | Pre-mortems, assumption stress tests, alternative framings, failure modes, and strong objections | Implementation, routine technical review, or final operational planning |
 
 ## Medium-Task Thresholds
 
@@ -56,7 +56,7 @@ Only `internal-router` actively routes between owners and may dispatch to the se
 | `internal-planning-leader` | Ambiguity, cross-boundary tradeoffs, repository-owned authoring, or rollout decisions still need active ownership. | The design is settled and the next step is routine local execution. | `internal-fast-executor` |
 | `internal-review-guard` | The task is defect-first review, merge readiness, regression analysis, or evidence gathering. | Findings reveal missing design or weak boundaries. | `internal-planning-leader` |
 | `internal-review-guard` | The task is still review-owned but weak reasoning becomes the dominant gap. | Pressure-testing the reasoning matters more than technical review. | `internal-critical-challenger` |
-| `internal-critical-challenger` | The task is assumption testing, a pre-mortem, or failure-mode analysis. | The framing or plan must be reformulated. | `internal-planning-leader` |
+| `internal-critical-challenger` | The task is assumption testing, a pre-mortem, lateral reframing, or failure-mode analysis. | The framing or plan must be reformulated. | `internal-planning-leader` |
 | `internal-critical-challenger` | The task remains challenge-owned until the reasoning survives scrutiny. | Evidence-based validation becomes the next need. | `internal-review-guard` |
 
 Recommendation should name the reason, not only the suggested owner, and the user decides whether to switch.
@@ -92,7 +92,7 @@ Use this policy across all canonical agents:
 - `internal-planning-leader` absorbs the role previously covered by `internal-ai-resource-creator` when the work is non-trivial repository-owned authoring.
 - `internal-review-guard` must reuse `internal-code-review` instead of restating the review playbook in the agent body.
 - `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.
-- `internal-critical-challenger` should stay narrow: challenge the reasoning, synthesize the pressure test, and tell the user when planning should resume.
+- `internal-critical-challenger` should stay narrow: challenge the reasoning, reframe hidden constraints when useful, synthesize the pressure test, and tell the user when planning should resume.
 - `internal-sync-*` and `awesome-*` assets stay outside this canonical operational model.
 
 ## Retired To Canonical Ownership Mapping

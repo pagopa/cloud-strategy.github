@@ -32,7 +32,7 @@ This folder contains deliberate custom agents for repository-owned operational r
 2. Use `internal-fast-executor` for clear, local execution work with concrete verification and no non-trivial strategic tradeoffs.
 3. Use `internal-planning-leader` for ambiguity resolution, non-trivial repository-owned authoring, design decisions, and rollout or governance planning.
 4. Use `internal-review-guard` for defect-first review, merge readiness, regression analysis, and evidence-based validation.
-5. Use `internal-critical-challenger` for pre-mortems, objection-first pressure tests, and failure-mode analysis.
+5. Use `internal-critical-challenger` for pre-mortems, objection-first pressure tests, lateral reframing, and failure-mode analysis.
 6. Use `internal-sync-control-center` when governing the live `.github/` catalog in this repository: refresh approved external assets, align naming, consolidate overlap, retire obsolete entries, and clean up downstream governance references. Unless the user explicitly asks for an audit or plan first, treat `sync` as a full apply request.
 7. Use `internal-sync-global-copilot-configs-into-repo` when aligning a consumer repository with the managed Copilot baseline from this standards repository.
 8. Use prompts and skills from `.github/prompts/` and `.github/skills/` for work that does not need a dedicated agent file.

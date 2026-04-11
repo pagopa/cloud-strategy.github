@@ -6,6 +6,9 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-11
+- Strengthened `internal-critical-challenger` so the challenge lane now distinguishes hard constraints from assumed ones, applies a compact lateral-thinking challenge lens, and reports non-obvious reframes alongside failure modes; aligned the router, routing engine, operating-model engine, and agent selection guide so the expanded challenge contract is discoverable and routable.
+
 ## 2026-04-10
 - Added the provider skill rollout beyond AWS by creating repository-owned Azure, GCP, and GitHub skill families under `.github/skills/internal-{azure,gcp,github}-*`, keeping the AWS boundary model as the baseline with short adaptive strategic skills, separate organization/governance/operations lanes where justified, minimal `references/`, and `agents/openai.yaml` metadata for every new skill.
 - Refreshed `.github/README.md` and `.github/INVENTORY.md` so the maintainer-facing catalog now matches the live provider-skill inventory and the current prompt, skill, and script counts on disk.

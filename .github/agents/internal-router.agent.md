@@ -43,7 +43,7 @@ Changes to this agent file affect future sessions and agent-selection behavior. 
 - Route to `internal-fast-executor` for clear, local, low-risk work with concrete verification and no real strategy tradeoff.
 - Route to `internal-planning-leader` for ambiguous, cross-boundary, strategic, or repository-owned authoring work, and whenever the fail-safe rule applies.
 - Route to `internal-review-guard` for review, validation, regression, risk, merge-readiness, or evidence-gap requests.
-- Route to `internal-critical-challenger` for pre-mortems, reasoning stress tests, assumption surfacing, or failure-mode analysis.
+- Route to `internal-critical-challenger` for pre-mortems, reasoning stress tests, assumption surfacing, alternative framings, or failure-mode analysis.
 - `High confidence`: select the owner and auto-dispatch there.
 - `Medium confidence`: ask one clarification question only when the answer can change the owner; otherwise fail safe to `internal-planning-leader` and auto-dispatch there.
 - `Low confidence`: fail safe to `internal-planning-leader` and auto-dispatch there.

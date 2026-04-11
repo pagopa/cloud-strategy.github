@@ -26,7 +26,7 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 | `route-to-execute` | `internal-fast-executor` | The task is clear, local, low-risk, and has concrete verification. |
 | `route-to-plan` | `internal-planning-leader` | The task is ambiguous, cross-boundary, strategic, or changes repository-owned contracts. |
 | `route-to-review` | `internal-review-guard` | The user asks for review, validation, merge readiness, regression analysis, or evidence checks. |
-| `route-to-challenge` | `internal-critical-challenger` | The user wants assumptions challenged, a pre-mortem, or failure modes surfaced. |
+| `route-to-challenge` | `internal-critical-challenger` | The user wants assumptions challenged, a pre-mortem, alternative framings pressure-tested, or failure modes surfaced. |
 
 ## Confidence Model
 
@@ -39,7 +39,7 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 Use these heuristics:
 
 - Treat explicit review language such as `review`, `audit`, `validate`, `risk`, `merge readiness`, or `regression` as `route-to-review` unless the user clearly asks for implementation.
-- Treat explicit challenge language such as `challenge this`, `pre-mortem`, `stress-test`, `what am I missing`, or `failure modes` as `route-to-challenge`.
+- Treat explicit challenge language such as `challenge this`, `pre-mortem`, `stress-test`, `what am I missing`, `failure modes`, `reframe this`, or `think laterally` as `route-to-challenge`.
 - Treat repository-owned authoring of agents, skills, prompts, instructions, routing, or governance as planning unless the change is trivially local and already designed.
 - Treat vague implementation requests as planning when scale, ownership, or rollout is not yet clear.
 
@@ -51,7 +51,7 @@ Use these heuristics:
 | Medium execution | Mostly concrete, but some uncertainty remains about scale or boundaries | Ask one question or route to `internal-planning-leader` |
 | Ambiguous or strategic | Cross-file, cross-boundary, naming or ownership changes, or multiple credible options | `route-to-plan` |
 | Review-oriented | The output should be findings, evidence, risk, or merge readiness | `route-to-review` |
-| Challenge-oriented | The output should be objections, pressure tests, assumptions, or failure modes | `route-to-challenge` |
+| Challenge-oriented | The output should be objections, pressure tests, assumption gaps, alternative framings, or failure modes | `route-to-challenge` |
 
 ## Medium-Task Thresholds
 
