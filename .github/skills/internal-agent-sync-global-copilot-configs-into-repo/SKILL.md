@@ -1,5 +1,6 @@
+---
 name: internal-agent-sync-global-copilot-configs-into-repo
-description: Mirror the managed GitHub Copilot baseline into consumer repositories with source-authoritative mirroring, `local-*` preservation, root-guidance alignment, retained plan tracking, and script-backed plan or apply automation.
+description: Use when aligning a consumer repository to this repository's managed GitHub Copilot baseline, including mirror planning, apply runs, drift checks, and preservation of target `local-*` assets.
 ---
 
 # Internal Agent Sync Global Copilot Configs Into Repo

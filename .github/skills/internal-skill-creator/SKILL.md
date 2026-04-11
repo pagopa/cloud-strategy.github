@@ -1,6 +1,6 @@
 ---
 name: internal-skill-creator
-description: Use first when creating, modifying, replacing, splitting, or materially revising any repository-owned skill under `.github/skills/`. This is the canonical local entrypoint for skill work in this repository and should load before `openai-skill-creator` so repo-local ownership, routing, retrieval, and validation rules are established before the OpenAI core workflow expands the bundle.
+description: Use first when creating, splitting, replacing, or materially revising a repository-owned skill under `.github/skills/`, especially when trigger, boundary, or validation decisions must be made locally before `openai-skill-creator`.
 ---
 
 # Internal Skill Creator

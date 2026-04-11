@@ -1,6 +1,6 @@
 ---
 name: internal-pr-editor
-description: Generate review-ready PR descriptions from diffs, specifications, or template-driven requirements using structured templates with section order and diff-to-description mapping. Use when the user needs to write, update, or format a pull request body, summarize code changes, or turn a specification into PR-ready text that still matches the actual diff.
+description: Use when writing or updating a pull request title or body from a real diff, specification, or repository template, and the output must stay aligned with the actual change.
 ---
 
 # TechAI PR Editor — Skill

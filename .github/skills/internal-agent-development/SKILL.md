@@ -1,6 +1,6 @@
 ---
 name: internal-agent-development
-description: Create, refine, split, or realign repository-owned Copilot agents with clear routing, deliberate tool contracts, mandatory engine skills where justified, optional support skills, reusable command-center patterns, subagent orchestration, and repo-local normalization of imported agent ideas. Use when adding or updating a `.github/agents/*.agent.md`, strengthening an agent's operating model, designing coordinator/worker delegation, or deciding whether broad behavior belongs in an agent, skill, prompt, or instruction.
+description: Use when creating or materially revising a repository-owned Copilot agent under `.github/agents/`, or when deciding whether behavior belongs in an agent, skill, prompt, or instruction.
 metadata:
   short-description: Create, refine, or realign repository-owned Copilot agents
 ---

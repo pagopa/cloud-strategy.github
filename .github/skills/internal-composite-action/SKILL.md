@@ -1,6 +1,6 @@
 ---
 name: internal-composite-action
-description: Create or modify reusable GitHub composite actions with secure Bash and deterministic behavior. Use when the user wants to build a composite action, write an action.yml with composite runs, create shared reusable steps, or mentions action authoring.
+description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially for shared step logic that should not become a full reusable workflow.
 ---
 
 # Composite Action Skill

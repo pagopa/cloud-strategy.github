@@ -1,6 +1,6 @@
 ---
 name: internal-copilot-instructions-creator
-description: Create and revise `.github/instructions/*.instructions.md` files for this repository with tight `applyTo` scope, minimal frontmatter, and path-specific Copilot guidance that does not duplicate repo-wide policy or skill workflows. Use when authoring, reviewing, splitting, replacing, or retiring GitHub Copilot instruction files.
+description: Use when creating, revising, splitting, replacing, or retiring repository-owned instruction files under `.github/instructions/`, especially when `applyTo` scope or precedence needs tightening.
 ---
 
 # Internal Copilot Instructions Creator

@@ -1,6 +1,6 @@
 ---
 name: internal-project-java
-description: Create or modify Java project components with purpose JavaDoc, modern Java judgment, Spring Boot service patterns, and JUnit 5 testing discipline. Use when building Java services, Spring Boot apps, Java libraries, class scaffolding, service layers, or repository patterns.
+description: Use when creating or modifying Java project code and the main concern is Java application structure, tests, or library/service design rather than Spring Boot framework choices.
 ---
 
 # Java Project Skill

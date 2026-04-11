@@ -1,6 +1,6 @@
 ---
 name: internal-project-nodejs
-description: Create or modify Node.js/TypeScript project modules with purpose comments, async/runtime judgment, and repository-aligned test strategy. Use when building Express services, TypeScript libraries, Node.js APIs, middleware patterns, async handlers, or module scaffolding.
+description: Use when creating or modifying Node.js or TypeScript project code such as services, APIs, middleware, or modules, and the main concern is application code rather than Docker, workflows, or infrastructure.
 ---
 
 # Node.js Project Skill

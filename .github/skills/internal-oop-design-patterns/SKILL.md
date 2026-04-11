@@ -1,6 +1,6 @@
 ---
 name: internal-oop-design-patterns
-description: Choose and apply object-oriented design patterns and SOLID-guided refactorings without turning every problem into a class hierarchy. Use when refactoring object collaborations, replacing branching with polymorphism, decomposing god classes, isolating construction logic, or deciding whether a GoF pattern is justified in Java, TypeScript, JavaScript, Python, or C# code.
+description: Use when refactoring object collaborations, replacing branching with polymorphism, decomposing god classes, isolating construction logic, or deciding whether an object-oriented design pattern is justified.
 ---
 
 # Internal OOP Design Patterns

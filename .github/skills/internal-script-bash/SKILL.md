@@ -1,6 +1,6 @@
 ---
 name: internal-script-bash
-description: Create or modify Bash scripts with repository-aligned structure plus script-specific hardening for idempotency, dependency checks, and reusable helpers. Use when the user needs shell scripts, automation scripts, helper bash utilities, or any standalone .sh file with reliable operator-facing behavior.
+description: Use when creating or modifying standalone Bash scripts or shell utilities with operator-facing behavior, rather than Bash embedded inside composite actions or CI workflows.
 ---
 
 # Bash Script Skill

@@ -1,6 +1,6 @@
 ---
 name: internal-devops-core-principles
-description: DevOps culture, CALMS, DORA metrics, infinity-loop delivery discipline, release safety, observability, blameless operations, and value-stream thinking. Use when the task concerns CI/CD strategy, release or deployment quality, platform delivery, operational readiness, incident learning, or software-delivery health across Plan -> Monitor. Do not use for one-off YAML syntax or provider-specific command lookup.
+description: Use when the task is about delivery-system strategy, release safety, operational readiness, or incident learning across the software-delivery lifecycle, not one-off workflow syntax or provider commands.
 ---
 
 # Internal DevOps Core Principles

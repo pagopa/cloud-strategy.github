@@ -1,6 +1,6 @@
 ---
 name: internal-script-python
-description: Create or modify standalone Python tools and script toolkits with purpose docstring, emoji logs, pinned dependencies, and pragmatic runtime choices. Use for automation scripts, CLI tools, data processing scripts, or multi-entrypoint maintenance tooling that is not application package code.
+description: Use when creating or modifying standalone Python scripts, CLIs, or small operator-facing toolkits whose primary contract is direct execution rather than reusable package or application code.
 ---
 
 # Python Script Skill

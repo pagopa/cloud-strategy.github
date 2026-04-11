@@ -1,6 +1,6 @@
 ---
 name: internal-docker
-description: Create or modify Docker assets with digest-pinned images, secure runtime defaults, and reproducible builds. Use when the user mentions Dockerfiles, container images, Docker Compose, multi-stage builds, .dockerignore, or container security hardening.
+description: Use when creating or modifying Dockerfiles, Compose assets, image build settings, or container hardening rules.
 ---
 
 # Docker Skill

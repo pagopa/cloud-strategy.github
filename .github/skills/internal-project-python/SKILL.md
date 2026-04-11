@@ -1,6 +1,6 @@
 ---
 name: internal-project-python
-description: Create or modify structured Python package and application components with clear separation of concerns, async/framework judgment, and deterministic pytest coverage. Use when building Python services, FastAPI/Flask apps, Python libraries, module scaffolding, or service layers.
+description: Use when creating or modifying Python package or application code whose primary contract is imported behavior, service boundaries, or framework-owned flows rather than operator-facing scripts.
 ---
 
 # Python Project Skill

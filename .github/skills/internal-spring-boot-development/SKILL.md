@@ -1,6 +1,6 @@
 ---
 name: internal-spring-boot-development
-description: Design and modify Spring Boot applications with lean controllers, explicit service boundaries, typed configuration, validation, error handling, and slice-first testing. Use when working on Spring Boot controllers, services, repositories, configuration properties, REST APIs, scheduled jobs, or Spring-specific Java/Kotlin tests.
+description: Use when Spring Boot framework choices drive the work, such as controllers, configuration properties, repositories, scheduled jobs, or Spring-specific tests.
 ---
 
 # Internal Spring Boot Development

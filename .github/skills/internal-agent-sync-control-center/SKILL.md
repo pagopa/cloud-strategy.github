@@ -1,6 +1,6 @@
 ---
 name: internal-agent-sync-control-center
-description: "Operate the catalog-governance engine for `internal-sync-control-center`: audit the managed `.github/` catalog, decide keep/update/extract/retire outcomes, refresh approved in-scope external assets without widening scope, remove fallback drift, and keep governance files aligned after sync changes. Use when working inside or directly supporting `.github/agents/internal-sync-control-center.agent.md`."
+description: Use when maintaining the sync-managed `.github/` catalog behind `internal-sync-control-center`, especially for keep/update/extract/retire decisions, approved external refreshes, and governance-drift checks.
 ---
 
 # Internal Agent Sync Control Center

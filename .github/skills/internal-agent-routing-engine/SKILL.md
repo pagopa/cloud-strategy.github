@@ -1,6 +1,6 @@
 ---
 name: internal-agent-routing-engine
-description: Route repository-owned operational requests between the four canonical owners using intent classification, confidence thresholds, medium-task rules, old-to-new mapping, allowed dispatch targets, and handoff protocol. Use when a generic or ambiguous request must be routed to execute, plan, review, or challenge.
+description: Use when `internal-router` must classify an ambiguous operational request and dispatch it to execution, planning, review, or challenge without doing the domain work itself.
 ---
 
 # Internal Agent Routing Engine

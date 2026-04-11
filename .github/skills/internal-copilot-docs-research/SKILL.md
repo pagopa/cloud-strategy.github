@@ -1,6 +1,6 @@
 ---
 name: internal-copilot-docs-research
-description: Research current GitHub Copilot behavior and customization guidance using official GitHub documentation first, then session-specific MCP capability when needed. Use when validating repository-owned Copilot agents, skills, prompts, instructions, custom agents, agent skills, tool contracts, or MCP integration behavior before changing `.github/` assets.
+description: Use when a `.github/` customization change depends on current GitHub Copilot or MCP platform behavior and repo-local policy alone is not enough.
 ---
 
 # Internal Copilot Docs Research

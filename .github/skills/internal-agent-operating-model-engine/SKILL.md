@@ -1,6 +1,6 @@
 ---
 name: internal-agent-operating-model-engine
-description: Share the canonical boundary model, recommendation protocol, medium-task thresholds, OBRA workflow policy, skill ownership rules, and anti-overlap checks for the repository-owned operational agents. Use when `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, or `internal-critical-challenger` need the same operating model.
+description: Use when one of the four canonical operational agents needs the shared boundary, recommendation, medium-task, and anti-overlap policy.
 ---
 
 # Internal Agent Operating Model Engine

@@ -1,6 +1,6 @@
 ---
 name: internal-copilot-audit
-description: Audit Copilot customization health for overlap, hollow references, retired frontmatter, stale tool contracts, weak bridge design, naming violations, stale governance references, and redundant command-center assets. Use when reviewing the quality of `.github/` customization assets in this repository.
+description: Use when auditing repository-owned GitHub Copilot assets for overlap, hollow references, stale contracts, naming drift, or governance drift across `.github/`.
 ---
 
 # Internal Copilot Audit
