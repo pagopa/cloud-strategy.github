@@ -25,6 +25,7 @@ When deterministic change detection matters, read `references/fingerprinting-con
 - Move reusable sync procedure into this skill instead of bloating the agent body.
 - Keep naming, frontmatter, links, descriptions, and governance references deterministic.
 - Remove fallback, alias, deprecated, or compatibility-only drift in the same pass that introduces the canonical replacement.
+- Keep low-frequency imported or internal capabilities documented as on-demand depth when they still add distinct value and do not justify a repository-owned wrapper.
 - Keep governance review of root `AGENTS.md` and `.github/copilot-instructions.md` explicit, never implied.
 - Provide a deterministic fingerprinting workflow that distinguishes real content change from formatting noise.
 
@@ -57,6 +58,7 @@ Do not collapse these roles back into one file just because the current task tou
 | Installed external-prefixed asset still useful and declared in scope | Refresh in place |
 | Thin alias, fallback copy, or deprecated variant | Delete the weaker asset |
 | Broken or stale asset with no unique value | Retire it |
+| Installed capability is still distinct but low-frequency or on-demand | Keep it as dormant support depth and document why; do not wrap it unless the root wrapper threshold is met |
 | Agent body becoming procedural or duplicative | Extract procedure into this skill or the right internal skill |
 | Agent routing or engine-skill split changing materially | Use `internal-agent-development` |
 
@@ -78,6 +80,7 @@ Use these heuristics:
 - Keep both only when they serve clearly different intents.
 - Merge only when the surviving asset becomes easier to trigger and easier to maintain.
 - Delete when one asset is just a noisier, thinner, or less structured version of another.
+- Keep dormant imported or internal capabilities when they still provide distinct on-demand value and the root wrapper threshold is not met.
 - Create or update an internal asset when the capability is strategic for this repository and should not depend on external wording or lifecycle.
 - Refresh an in-scope external-prefixed asset only when it still adds distinct value to the declared managed catalog.
 
