@@ -30,7 +30,6 @@ No prompt files currently ship in the live catalog.
 
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
-- `.github/skills/antigravity-aws-serverless/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
 - `.github/skills/antigravity-golang-pro/SKILL.md`
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`

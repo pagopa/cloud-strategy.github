@@ -161,7 +161,6 @@ Managed skills:
 
 - `api-design-principles` -> `antigravity-api-design-principles`
 - `aws-cost-optimizer` -> `antigravity-aws-cost-optimizer`
-- `aws-serverless` -> `antigravity-aws-serverless`
 - `cloudformation-best-practices` -> `antigravity-cloudformation-best-practices`
 - `golang-pro` -> `antigravity-golang-pro`
 - `grafana-dashboards` -> `antigravity-grafana-dashboards`

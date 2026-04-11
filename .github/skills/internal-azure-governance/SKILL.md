@@ -73,6 +73,8 @@ For broader asks, return:
   Use when the governance question is actually about where a capability should live.
 - `internal-azure-operations`
   Use when the next need is preflight, reporting, validation, or operational evidence after the governance design is chosen.
+- `awesome-copilot-azure-role-selector`
+  Use as depth support when the governance boundary is already clear and the next need is least-privilege role selection, custom-role fallback, or assignment artifacts such as CLI commands and Bicep snippets.
 
 ## Anti-patterns
 
