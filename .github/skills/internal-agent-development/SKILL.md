@@ -45,13 +45,13 @@ Load these inputs before finalizing an internal agent:
 - `references/subagent-patterns.md` when the agent needs to invoke or be invoked as a subagent, or when designing coordinator/worker workflows
 - `internal-copilot-docs-research` and `.github/skills/internal-copilot-docs-research/references/official-source-map.md` when the change depends on current GitHub Copilot or VS Code platform behavior
 
-If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints shaped by the repository layered contract, not as a platform-enforced requirement to use every listed skill.
+If the work is being routed through an existing agent and that agent includes a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load the skill files that are directly relevant to the task before editing any target agent. Treat those lists as curated routing hints shaped by the repository resource model, not as a platform-enforced requirement to use every listed skill.
 
 Prefer role-based matching over identifier memorization:
 
 - When the selected agent includes a skill-guidance section and is being used to create, revise, split, or normalize agents, load the listed skill that best governs agent authoring for the task before drafting or editing the target agent.
 - When the selected agent includes a research or documentation-verification skill and the task depends on current vendor guidance, load that skill before finalizing routing or domain claims.
-- When multiple listed skills are present, select according to the declared layered contract: `obra-*` for strategic framing, `internal-*` for repository-owned tactical ownership, and imported skills for support-only depth. If no internal owner exists for a capability, imported specialists may be used directly.
+- When multiple listed skills are present, select according to the declared resource model: `obra-*` for cross-cutting workflow guidance, `internal-*` for canonical repository-owned ownership, imported skills for support depth, and `local-*` for consumer-local extensions. Choose the skill whose dominant role fits the task instead of inferring role from prefix alone. If no internal owner exists for a capability, imported specialists may be used directly.
 
 ## Decision Gate
 
