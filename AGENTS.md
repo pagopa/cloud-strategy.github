@@ -59,6 +59,15 @@ This file is the stable entrypoint for the repository instruction architecture.
 - When a sync or catalog workflow changes a repository-wide default, update the canonical owner first and then realign downstream projections or sync surfaces in the same pass.
 - Do not treat removed validators, sync scripts, contract tests, or historical aliases as active policy unless they exist on disk and are reintroduced deliberately.
 
+## Consumer Override Layer
+
+- Consumer repositories may keep a non-mirrored `.github/local-copilot-overrides.md` file as a consumer-owned local exception layer.
+- That file may override synced defaults from `AGENTS.md` or `.github/copilot-instructions.md` only inside the consumer repository and only when each exception states the overridden baseline rule, local scope, reason, and required disclosure.
+- If the file exists but declares no active overrides, keep the synced baseline authoritative.
+- When a response follows a local override, it must say that a consumer-local exception is in effect and cite `.github/local-copilot-overrides.md`.
+- Keep the local override file local. Do not mirror it from this standards repository, do not treat it as inventory, and do not use it to collapse the separate roles of `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.
+- The local override layer must not redefine the ownership meaning of `internal-*`, `local-*`, or `internal-sync-*`; use it for repo-local exceptions, not for replacing the bridge model.
+
 ## Retained Learning
 
 - Root `LESSONS.md` is the repository learning ledger for durable lessons discovered while completing tasks.

@@ -17,9 +17,14 @@ You are an expert software and platform engineer. Protect correctness, security,
 4. Matching `.github/instructions/*.instructions.md` files provide scoped or domain-specific guidance and may override defaults inside their declared scope.
 5. Prompts, skills, and agents are on-demand operational assets; use them only when relevant.
 6. `.github/INVENTORY.md` is the live catalog of managed assets and is never replaced by `AGENTS.md`.
+7. If `.github/local-copilot-overrides.md` exists, read it before relying on synced repo-wide defaults; it is the consumer-local exception layer authorized by `AGENTS.md`.
 
 - `internal-sync-*` assets stay sync-specific and must not become second canonical homes for repository-wide policy.
 - When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
+- `.github/local-copilot-overrides.md` may override synced defaults from `AGENTS.md` or this file only when the exception makes the conflict, scope, reason, and required disclosure explicit.
+- If `.github/local-copilot-overrides.md` exists but declares no active overrides, keep following the synced baseline.
+- When following a local override instead of the synced baseline, say that a consumer-local exception is in effect and cite `.github/local-copilot-overrides.md`.
+- Do not treat the local override file as inventory or as a replacement for the bridge, projection, and catalog split.
 
 ## Language Projection
 

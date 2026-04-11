@@ -44,6 +44,10 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
         "---\nname: local-special\ntools: [read]\n---\n",
     )
     write_file(
+        target_root / ".github/local-copilot-overrides.md",
+        "# Local Copilot Overrides\n\n- Override: Keep repo-local behavior explicit.\n",
+    )
+    write_file(
         target_root / ".github/agents/custom.agent.md",
         "---\nname: custom\ntools: [read]\n---\n",
     )
@@ -52,9 +56,31 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert ("preserve", ".github/agents/local-special.agent.md") in actions
+    assert ("preserve", ".github/local-copilot-overrides.md") in actions
     assert ("delete", ".github/agents/custom.agent.md") in actions
     assert ("update", ".github/agents/internal-fast.agent.md") in actions
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
+
+
+def test_build_sync_plan_does_not_mirror_source_local_override_file(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/local-copilot-overrides.md",
+        "# Local Copilot Overrides\n\n- No active overrides in this repository.\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert all(
+        operation.path != ".github/local-copilot-overrides.md"
+        for operation in plan.operations
+    )
 
 
 def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) -> None:
@@ -79,6 +105,10 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     write_file(
         target_root / ".github/internal-sync-copilot-configs.manifest.json", "{}\n"
     )
+    write_file(
+        target_root / ".github/local-copilot-overrides.md",
+        "# Local Copilot Overrides\n\n- Override: Keep target-local exceptions.\n",
+    )
 
     plan = build_sync_plan(source_root, target_root)
     plan_path = write_sync_plan(plan)
@@ -93,6 +123,7 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert not (
         target_root / ".github/internal-sync-copilot-configs.manifest.json"
     ).exists()
+    assert (target_root / ".github/local-copilot-overrides.md").exists()
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
     assert (target_root / "AGENTS.md").read_text(
@@ -100,7 +131,7 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     ) == "# AGENTS\nsource\n"
     assert (target_root / ".gitignore").read_text(
         encoding="utf-8"
-    ) == "/docs/superpowers/\n"
+    ) == "/tmp/superpowers/\n"
 
 
 def test_build_sync_plan_ensures_target_gitignore_entry_without_mirroring_source_gitignore(
@@ -120,10 +151,10 @@ def test_build_sync_plan_ensures_target_gitignore_entry_without_mirroring_source
     operations = {(operation.action, operation.path) for operation in plan.operations}
 
     assert ("ensure", ".gitignore") in operations
-    assert plan.generated_gitignore == "node_modules/\n/docs/superpowers/\n"
+    assert plan.generated_gitignore == "node_modules/\n/tmp/superpowers/\n"
 
 
-def test_build_sync_plan_accepts_existing_docs_superpowers_gitignore_entry(
+def test_build_sync_plan_accepts_existing_tmp_superpowers_gitignore_entry(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -133,13 +164,13 @@ def test_build_sync_plan_accepts_existing_docs_superpowers_gitignore_entry(
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
-    write_file(target_root / ".gitignore", "node_modules/\ndocs/superpowers/\n")
+    write_file(target_root / ".gitignore", "node_modules/\ntmp/superpowers/\n")
 
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert ("unchanged", ".gitignore") in actions
-    assert plan.generated_gitignore == "node_modules/\ndocs/superpowers/\n"
+    assert plan.generated_gitignore == "node_modules/\ntmp/superpowers/\n"
 
 
 def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
