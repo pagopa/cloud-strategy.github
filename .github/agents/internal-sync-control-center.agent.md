@@ -79,11 +79,7 @@ Source repositories:
 
 Managed agents:
 
-- `azure-principal-architect` -> `awesome-copilot-azure-principal-architect`
-- `critical-thinking` -> `awesome-copilot-critical-thinking`
-- `devils-advocate` -> `awesome-copilot-devils-advocate`
-- `devops-expert` -> `awesome-copilot-devops-expert`
-- `plan` -> `awesome-copilot-plan`
+- No managed agents currently remain from this upstream source in the live repository catalog.
 
 Managed skills:
 

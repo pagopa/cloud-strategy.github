@@ -117,11 +117,6 @@ No prompt files currently ship in the live catalog.
 
 ## Agents
 
-- `.github/agents/awesome-copilot-azure-principal-architect.agent.md`
-- `.github/agents/awesome-copilot-critical-thinking.agent.md`
-- `.github/agents/awesome-copilot-devils-advocate.agent.md`
-- `.github/agents/awesome-copilot-devops-expert.agent.md`
-- `.github/agents/awesome-copilot-plan.agent.md`
 - `.github/agents/internal-critical-challenger.agent.md`
 - `.github/agents/internal-fast-executor.agent.md`
 - `.github/agents/internal-planning-leader.agent.md`
