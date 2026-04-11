@@ -210,8 +210,9 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Expected behavior:
   - repository-root `LESSONS.md` exists as a non-canonical learning ledger
   - completed tasks add only durable, reusable lessons that were not already codified when discovered
+  - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
   - no ledger update is required when no stable new lesson emerged
-  - retained entries stay concise, safe to keep, and point to canonical owners when the lesson is codified elsewhere
+  - once a lesson is codified elsewhere, it is removed from `LESSONS.md` instead of being retained as a codified duplicate
 
 ### Future Automation Constraints
 

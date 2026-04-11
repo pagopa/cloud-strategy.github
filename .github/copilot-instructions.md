@@ -70,9 +70,10 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Retained Learning
 
 - After a completed task, check whether the work produced any new durable lessons that were not already codified in repository resources when discovered.
+- Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
 - When it did, update repository-root `LESSONS.md` in English with concise, reusable, deduplicated entries.
 - Treat `LESSONS.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
-- If the same task also codified the lesson into `AGENTS.md`, this file, a scoped instruction, a prompt, a skill, or an agent, keep the `LESSONS.md` entry short and point to that canonical owner.
+- If the same task also codified the lesson into `AGENTS.md`, this file, a scoped instruction, a prompt, a skill, or an agent, remove the lesson from `LESSONS.md` instead of keeping a codified copy there.
 - If no durable lesson emerged, do not force a `LESSONS.md` change.
 
 ## Completion Report
