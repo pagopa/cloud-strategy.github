@@ -35,6 +35,16 @@ This file is the stable entrypoint for the repository instruction architecture.
 - Repository-owned resources created in other repositories use the `local-*` prefix.
 - Imported upstream resources keep the `<short-repo>-<original-resource-name>` form.
 
+## Resource Model
+
+- Treat prefixes as origin and ownership markers first. Do not use them as a rigid proxy for strategic, tactical, or operational level.
+- Evaluate resources on two axes: origin/ownership and dominant role.
+- `obra-*` resources are cross-cutting workflow assets. They often help with strategic framing, but may govern tactical or operational work when relevant.
+- `internal-*` resources are the canonical repository-owned layer. They are tactical by default, but may also be strategic or operational when their contract says so.
+- Imported upstream resources remain support depth by default. Overlap alone is not enough to fork or wrap them; prefer a repository-owned wrapper or replacement only when routing, governance, terminology, output shape, or safety expectations require repo-local ownership.
+- `local-*` resources remain consumer-local extensions. They are usually tactical or operational, but may be strategic when a consumer repository needs explicit local governance.
+- When overlap exists, prefer the repository-owned internal owner as canonical and use imported depth as support unless no credible internal owner exists.
+
 ## Operational Owner Model
 
 - `internal-router` remains the only active front-door router for the canonical operational catalog.
