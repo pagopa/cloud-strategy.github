@@ -18,6 +18,9 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 - Dispatch only to the four canonical owners: `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`.
 - If the router is entered as an explicit second parallel lane from another canonical owner, preserve that current lane as context and classify only the parallel operational request.
 - Preserve the user's exact request plus any already-collected evidence instead of forcing the selected owner to re-triage from scratch.
+- Treat the routing turn as incomplete until the delegated owner's result is attached in the same turn, or one blocking clarification question is asked because the selected owner cannot safely proceed without it.
+- Do not present route selection or the handoff package alone as a completed response.
+- If auto-dispatch is interrupted, yields no usable owner result, or the delegated result is missing from the response, retry once when safe. If it still does not complete, state that delegation did not complete, surface the preserved handoff package, and ask one blocking question only when user input is required.
 - Do not implement through the router.
 
 ## Primary Route Labels
@@ -137,7 +140,8 @@ Routing conservatively is cheaper than dispatching the user to the wrong owner a
 - One-sentence routing rationale
 - Handoff package summary with preserved request, constraints, and already-collected evidence
 - Delegated owner's result, prefixed by a short routing note
-- Single clarification question only when the decision was medium confidence
+- Explicit blocking explanation plus preserved handoff package when delegation did not complete
+- Single clarification question only when medium-confidence routing or degraded dispatch truly needs user input
 - Explicit confirmation that the router delegated instead of performing the domain work
 
 ## Common Mistakes

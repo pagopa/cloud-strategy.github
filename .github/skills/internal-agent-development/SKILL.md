@@ -23,7 +23,7 @@ Prefer explicit engine-skill architecture for routers and broader command center
 - Keep one cohesive operating role per agent.
 - Translate imported agent value into repo-local GitHub Copilot form.
 - Move reusable procedures into skills instead of bloating agent bodies.
-- Prefer explicit mandatory engine skills when an agent depends on reusable routing or decision logic.
+- Prefer explicit mandatory engine skills when an agent depends on reusable routing or decision logic, and make delegation-completion, degraded-mode, and anti-stall behavior explicit for routers and coordinator-style agents.
 - Keep any skill guidance explicit and reviewable when it adds value, without implying platform-enforced execution order.
 - Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without cargo-culting obsolete tool wiring.
 - Use current GitHub Copilot custom-agent frontmatter deliberately instead of stripping supported properties by default.
@@ -103,6 +103,7 @@ Use this split when authoring command-center agents:
   - decision matrix
   - threshold rules for medium or ambiguous tasks
   - old-to-new ownership mapping
+   - completion semantics and degraded-mode rules when delegation-based turns stall or return no usable worker result
   - anti-overlap checklist
   - shared workflow steps that would otherwise be duplicated
 
@@ -153,7 +154,7 @@ That asymmetry is a feature, not a defect, when it reduces drift.
 12. Write routing rules with a real boundary.
     State when to use the agent, when not to use it, and which neighboring agent should win ambiguous cases. If the agent is not a router, recommend that neighboring owner to the user instead of actively handing off.
 13. Add output expectations that match the role.
-   Ask what a successful response from this command center should reliably contain.
+   Ask what a successful response from this command center should reliably contain. For routers or coordinators, make completed delegation versus blocked delegation explicit instead of allowing classification-only endings.
 14. Normalize imported patterns and remove stale baggage.
    Preserve the decision model; remove retired frontmatter, obsolete tool ids, irrelevant command syntax, and UI-only metadata.
 15. Validate and de-duplicate.
@@ -243,6 +244,7 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 
 - Prestige-first descriptions that never say when the agent wins routing.
 - Imported agents copied almost verbatim with stale platform-specific frontmatter or obsolete tool ids.
+- Routers or coordinators that stop after naming the selected owner or saying a handoff will happen, without the delegated result or an explicit blocking explanation.
 - A skill-list section as a dumping ground for unrelated capabilities.
 - A `## Mandatory Engine Skills` section that merely mirrors the agent body without owning real reusable logic.
 - Creating one dedicated skill per agent for visual symmetry even when shared or existing engines already solve the problem.
@@ -279,6 +281,7 @@ Load `references/example-transformations.md` if you need side-by-side conversion
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
 - Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
 - Confirm routers keep classification matrices, fallback rules, and old-to-new ownership mapping in an engine skill instead of long body prose when that logic is substantial.
+- For routers or coordinator-style agents that delegate within the turn, confirm the contract forbids classification-only completion and defines degraded-mode behavior when delegation does not return usable content.
 - Confirm routers are treated as the strongest case for a dedicated engine and that shared operational logic for the four canonical owners stays in a shared engine instead of branching into decorative mirrors.
 - Confirm the final internal agent preserved the strongest usable structure from the source pattern when that structure improved requirement discovery, tradeoff analysis, or response quality.
 - Confirm reusable procedures live in skills, not in the agent body.
