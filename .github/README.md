@@ -11,7 +11,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 
 - Instructions: 17 total (`13 internal-*`, `4 awesome-copilot-*`)
 - Prompts: 0 total
-- Skills: 85 total (`44 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `7 openai-*`, `2 terraform-*`)
+- Skills: 85 total (`45 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `8 antigravity-*`, `7 openai-*`, `2 terraform-*`)
 - Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
 - Scripts: 17 total
 - Workflows: 1 total
@@ -65,9 +65,9 @@ Skills are grouped into three functional lanes plus imported support families.
 Some skill directories include support material beyond `SKILL.md`. Current live examples include:
 
 - provider families with bundled references and UI metadata: `internal-aws-*`, `internal-azure-*`, `internal-gcp-*`, `internal-github-*`
-- repository-owned support bundles such as `internal-agent-*`, `internal-change-impact-analysis`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-copilot-*`, `internal-data-registry`, `internal-docker`, `internal-oop-design-patterns`, `internal-performance-optimization`, `internal-pr-editor`, `internal-project-*`, `internal-script-*`, `internal-spring-boot-development`, `internal-sync-global-copilot-configs-into-repo`, and `internal-terraform`
+- repository-owned support bundles such as `internal-agent-*`, `internal-change-impact-analysis`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-copilot-*`, `internal-ddd`, `internal-docker`, `internal-oop-design-patterns`, `internal-performance-optimization`, `internal-pr-editor`, `internal-project-*`, `internal-script-*`, `internal-spring-boot-development`, `internal-sync-global-copilot-configs-into-repo`, and `internal-terraform`
 - workflow packs with bundled references or helpers such as `obra-brainstorming`, `obra-requesting-code-review`, `obra-subagent-driven-development`, `obra-systematic-debugging`, `obra-test-driven-development`, `obra-using-superpowers`, `obra-writing-plans`, and `obra-writing-skills`
-- imported or upstream-derived bundles such as `antigravity-domain-driven-design`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-azure-role-selector`, `awesome-copilot-cloud-design-patterns`, `openai-docx`, `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-pdf`, `openai-skill-creator`, `openai-slides`, `openai-spreadsheet`, and `terraform-terraform-search-import`
+- imported or upstream-derived bundles such as `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-azure-role-selector`, `awesome-copilot-cloud-design-patterns`, `openai-docx`, `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-pdf`, `openai-skill-creator`, `openai-slides`, `openai-spreadsheet`, and `terraform-terraform-search-import`
 
 Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery. Use this README for family-level orientation only.
 
