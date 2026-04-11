@@ -7,6 +7,7 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-11
+- Updated `.github/scripts/lib/internal_skills.py` so documented workflow outputs under `tmp/` are treated as virtual paths during internal-skill validation, then refreshed `.github/README.md` to match the live tracked agent catalog and current source-side script entrypoints.
 - Consolidated the imported `.github/skills/antigravity-domain-driven-design/` guidance into the repository-owned `.github/skills/internal-ddd/` skill, then removed the imported DDD skill and the obsolete `.github/skills/internal-data-registry/` bundle from the live catalog while realigning source-catalog docs and audit notes.
 - Replaced the imported `awesome-copilot-instructions.instructions.md` authoring guide with the repository-owned skill `.github/skills/internal-copilot-instructions-creator/`, then removed the imported instruction from the live catalog and realigned inventory, source-catalog summaries, and sync-managed imported-instruction references.
 - Replaced the imported `awesome-copilot-oop-design-patterns` and `awesome-copilot-springboot` instructions with the repository-owned skills `.github/skills/internal-oop-design-patterns/` and `.github/skills/internal-spring-boot-development/`, slimmed `internal-project-java` to point Spring-specific work at the new skill, and realigned inventory and source-catalog docs so the removed `awesome-*` instruction files are no longer part of the live catalog.

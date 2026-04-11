@@ -23,6 +23,9 @@ INLINE_TEMPLATE_THRESHOLD = 4
 ALLOWED_VIRTUAL_PATHS = {
     ".github/copilot-sync.manifest.json",
 }
+ALLOWED_VIRTUAL_PREFIXES = (
+    "tmp/",
+)
 
 
 def detect_internal_skill_findings(root: Path, selected_skills: set[str] | None = None) -> list[Finding]:
@@ -281,9 +284,11 @@ def resolve_reference(root: Path, skill_dir: Path, source_file: Path, target: st
         return None
     if target in ALLOWED_VIRTUAL_PATHS:
         return None
+    if target.startswith(ALLOWED_VIRTUAL_PREFIXES):
+        return None
 
     target_path = Path(target)
-    if target.startswith(".github/") or target.startswith("tmp/"):
+    if target.startswith(".github/"):
         return root / target_path
     if target == "AGENTS.md":
         return root / target_path
