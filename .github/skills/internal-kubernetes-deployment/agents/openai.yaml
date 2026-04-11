@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Kubernetes Deployment"
-  short_description: "Help with Internal Kubernetes Deployment tasks"
-  default_prompt: "Use $internal-kubernetes-deployment for this task and follow the repository-owned workflow in the skill."
+  short_description: "Operational Kubernetes rollout guidance"
+  default_prompt: "Use $internal-kubernetes-deployment for Kubernetes manifest authoring, rollout safety, and production readiness checks."
