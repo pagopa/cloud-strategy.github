@@ -79,7 +79,7 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
-- `.github/skills/internal-pair-architect/SKILL.md`
+- `.github/skills/internal-change-impact-analysis/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
 - `.github/skills/internal-pr-editor/SKILL.md`
 - `.github/skills/internal-project-java/SKILL.md`

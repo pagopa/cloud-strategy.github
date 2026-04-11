@@ -1,9 +1,9 @@
 ---
-name: internal-pair-architect
+name: internal-change-impact-analysis
 description: Use when the user wants to understand the ripple effects of a change, identify architectural risks in a changeset, review cross-cutting concerns before merge, or needs a holistic pre-merge impact assessment beyond line-level review.
 ---
 
-# Pair Architect — Change Impact Analysis Skill
+# Change Impact Analysis Skill
 
 ## When to use
 - Analyze a set of repository changes (branch diff, PR, or file list) for correctness, design, and blind spots.

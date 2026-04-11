@@ -45,7 +45,7 @@ description: Safely update structured JSON/YAML registry files such as users, gr
 
 ## Cross-references
 - **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing registry change PRs.
-- **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for impact analysis when modifying authorization registries.
+- **internal-change-impact-analysis** (`.github/skills/internal-change-impact-analysis/SKILL.md`): for impact analysis when modifying authorization registries.
 
 ## Validation
 - Run repository checks for JSON/YAML syntax.
