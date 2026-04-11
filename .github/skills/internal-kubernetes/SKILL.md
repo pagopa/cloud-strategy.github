@@ -39,4 +39,3 @@ Load `references/routing-matrix.md` when the request mixes platform, manifest, a
 - winning skill or instruction and why
 - key assumptions or missing inputs
 - next artifact or validation step
-
