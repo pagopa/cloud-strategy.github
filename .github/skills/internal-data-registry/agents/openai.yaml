@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Data Registry"
+  short_description: "Help with Internal Data Registry tasks"
+  default_prompt: "Use $internal-data-registry for this task and follow the repository-owned workflow in the skill."

@@ -119,55 +119,7 @@ Keep the handoff compact, preserve the user's wording, and include only the evid
 
 Do not use `internal-sync-*` or `awesome-*` assets as canonical operational owners in this routing model.
 
-## Owner Examples
-
-### `internal-fast-executor`
-
-Positive examples:
-
-- `Update the validator to reject missing frontmatter in one script and one test file.`
-- `Fix this broken prompt reference and run the relevant tests.`
-
-Negative examples:
-
-- `Decide how to redesign the operational catalog.`
-- `Figure out whether we should split or merge these command centers.`
-
-### `internal-planning-leader`
-
-Positive examples:
-
-- `Rationalize the internal agent catalog and define the new routing model.`
-- `Create a new repository-owned skill and decide where the shared logic should live.`
-
-Negative examples:
-
-- `Change this one test assertion in place.`
-- `Review my diff for regressions.`
-
-### `internal-review-guard`
-
-Positive examples:
-
-- `Review this change for merge readiness and regression risk.`
-- `Validate whether the new catalog leaves stale references or weak evidence.`
-
-Negative examples:
-
-- `Implement the missing routing engine.`
-- `Challenge whether the strategy itself is sound before we review code.`
-
-### `internal-critical-challenger`
-
-Positive examples:
-
-- `Stress-test this operating model before we adopt it.`
-- `Give me the strongest objections and failure modes for this plan.`
-
-Negative examples:
-
-- `Write the implementation plan and apply the changes.`
-- `Perform a normal code review of the diff.`
+Load `references/owner-examples.md` only when the matrix and confidence model still leave two plausible owners and you need concrete examples to break the tie.
 
 ## Fail-Safe Rule
 

@@ -16,31 +16,12 @@ Follow `.github/instructions/internal-nodejs.instructions.md` for the baseline N
 - Validate inputs at API or function boundaries and keep async error handling explicit.
 - Keep framework wiring thin and move request-shaping logic out of transport handlers when reuse or testing would improve.
 
-## Minimal module example
-```javascript
-/** Purpose: Build a user profile response. */
-function buildUserProfile(input) {
-  if (!input?.id) {
-    throw new Error("❌ id is required");
-  }
-  return { id: input.id, name: input.name ?? "unknown" };
-}
-```
+Load `references/examples.md` when you need a minimal module or test example.
 
 ## Test stack
 - Follow the repository test-stack defaults from the instruction owner.
 - If the repository already uses Jest, stay with local Jest conventions instead of introducing mixed test stacks.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
-
-## Minimal test example
-```javascript
-const test = require("node:test");
-const assert = require("node:assert/strict");
-
-test("given missing id when building profile then throws", () => {
-  assert.throws(() => buildUserProfile({}), /id is required/);
-});
-```
 
 ## Runtime and async guidance
 - Prefer `async`/`await` over promise chains unless streaming or concurrency composition clearly benefits from lower-level primitives.

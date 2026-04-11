@@ -18,35 +18,9 @@ description: Create or modify Docker assets with digest-pinned images, secure ru
 - Minimize layer count — combine related `RUN` commands.
 - Always include a `.dockerignore` to exclude `.git`, `node_modules`, `__pycache__`, etc.
 
-## Multi-stage pattern
-```dockerfile
-# -- build stage --
-FROM node:22.14.0-alpine3.21@sha256:<digest> AS build
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+## Dockerfile patterns
 
-# -- runtime stage --
-FROM node:22.14.0-alpine3.21@sha256:<digest> AS runtime
-WORKDIR /app
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/node_modules ./node_modules
-USER node
-CMD ["node", "dist/server.js"]
-```
-
-## Single-stage minimal example
-```dockerfile
-FROM python:3.12-slim@sha256:<digest>
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-USER nobody
-CMD ["python", "main.py"]
-```
+Load `references/dockerfile-patterns.md` when you need the canonical multi-stage or single-stage example.
 
 ## Common mistakes
 

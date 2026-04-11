@@ -14,14 +14,17 @@ Use the current repository state as audit input and execution target, not as a s
 
 When a sync or catalog change creates drift in root guidance, update the canonical owner first and then realign this agent and other downstream governance assets in the same pass.
 
-Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflow for catalog decisions inside this agent's sync-specific scope.
+Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandatory operating engine for catalog decisions inside this agent's sync-specific scope.
+
+## Mandatory Engine Skills
+
+- `internal-agent-sync-control-center`
 
 ## Optional Support Skills
 
 - `obra-writing-plans`
 - `obra-executing-plans`
 - `obra-verification-before-completion`
-- `internal-skill-management`
 - `internal-copilot-audit`
 - `internal-agent-development`
 - `openai-skill-creator`
@@ -53,9 +56,9 @@ Treat `.github/skills/internal-skill-management/SKILL.md` as the default workflo
 
 ## Skill Usage Contract
 
-- `internal-skill-management`: Default operating workflow for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
+- `internal-agent-sync-control-center`: Mandatory operating engine for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
-- `internal-agent-development`: Use only when the sync changes an agent file, modifies agent routing boundaries, or rewrites skill-guidance sections or contracts.
+- `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
@@ -151,6 +154,10 @@ Managed skills:
 - `gh-address-comments` -> `openai-gh-address-comments`
 - `gh-fix-ci` -> `openai-gh-fix-ci`
 - `skill-creator` -> `openai-skill-creator`
+- `spreadsheet` -> `openai-spreadsheet`
+- `slides` -> `openai-slides`
+- `pdf` -> `openai-pdf`
+- `doc` -> `openai-docx`
 
 ### `sickn33/antigravity-awesome-skills`
 
@@ -199,7 +206,7 @@ When repository state drifts from the declared governance contract, treat the dr
 2. Run `internal-copilot-audit` as a mandatory preflight against the live catalog, declared skills, and governance files.
 3. For `apply`, resolve or retire every remaining `blocking` finding before continuing.
 4. Inventory the relevant local assets and nearby overlaps against the declared managed scope plus the canonical root governance files.
-5. Decide `keep`, `update`, `extract`, or `retire` using `internal-skill-management` as the default decision workflow.
+5. Decide `keep`, `update`, `extract`, or `retire` using `internal-agent-sync-control-center` as the mandatory operating engine.
 6. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
 7. When the change affects repo-wide guidance, update the canonical owner first and then refresh downstream sync-facing governance artifacts that describe the change.
 8. Run repository validation and report any remaining gaps.

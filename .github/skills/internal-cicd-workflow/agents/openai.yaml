@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Cicd Workflow"
+  short_description: "Help with Internal Cicd Workflow tasks"
+  default_prompt: "Use $internal-cicd-workflow for this task and follow the repository-owned workflow in the skill."

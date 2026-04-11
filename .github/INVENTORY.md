@@ -53,8 +53,16 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-agent-development/SKILL.md`
 - `.github/skills/internal-agent-operating-model-engine/SKILL.md`
 - `.github/skills/internal-agent-routing-engine/SKILL.md`
-- `.github/skills/internal-aws-control-plane-governance/SKILL.md`
+- `.github/skills/internal-agent-sync-control-center/SKILL.md`
+- `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
+- `.github/skills/internal-aws-operations/SKILL.md`
+- `.github/skills/internal-aws-organization-structure/SKILL.md`
+- `.github/skills/internal-aws-strategic/SKILL.md`
+- `.github/skills/internal-azure-governance/SKILL.md`
+- `.github/skills/internal-azure-operations/SKILL.md`
+- `.github/skills/internal-azure-organization-structure/SKILL.md`
+- `.github/skills/internal-azure-strategic/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cicd-workflow/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
@@ -65,6 +73,13 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-data-registry/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
+- `.github/skills/internal-gcp-governance/SKILL.md`
+- `.github/skills/internal-gcp-operations/SKILL.md`
+- `.github/skills/internal-gcp-organization-structure/SKILL.md`
+- `.github/skills/internal-gcp-strategic/SKILL.md`
+- `.github/skills/internal-github-governance/SKILL.md`
+- `.github/skills/internal-github-operations/SKILL.md`
+- `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-pair-architect/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
@@ -74,7 +89,6 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
-- `.github/skills/internal-skill-management/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`
@@ -91,9 +105,13 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/obra-verification-before-completion/SKILL.md`
 - `.github/skills/obra-writing-plans/SKILL.md`
 - `.github/skills/obra-writing-skills/SKILL.md`
+- `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
+- `.github/skills/openai-pdf/SKILL.md`
 - `.github/skills/openai-skill-creator/SKILL.md`
+- `.github/skills/openai-slides/SKILL.md`
+- `.github/skills/openai-spreadsheet/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
 

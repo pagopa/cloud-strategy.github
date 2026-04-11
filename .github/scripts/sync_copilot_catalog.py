@@ -4,6 +4,10 @@
 Usage examples:
   python3 ./.github/scripts/sync_copilot_catalog.py plan --target-repo ../consumer-repo
   python3 ./.github/scripts/sync_copilot_catalog.py apply --target-repo ../consumer-repo --allow-dirty-target
+
+Generated files:
+  - Plan output: tmp/copilot-sync.plan.md
+  - Canonical sync manifest on apply: .github/copilot-sync.manifest.json
 """
 
 from __future__ import annotations
@@ -12,6 +16,7 @@ import argparse
 from pathlib import Path
 
 from lib.catalog_checks import run_consistency_checks
+from lib.fingerprinting import HASH_ALGO, NORMALIZATION_VERSION
 from lib.shared import Finding, find_repo_root, log_error, log_info, log_success, render_json
 from lib.syncing import apply_sync_plan, build_sync_plan, write_sync_plan
 
@@ -55,6 +60,8 @@ def main() -> int:
                         "plan": plan.to_dict(),
                         "plan_path": plan_path.as_posix(),
                         "manifest_path": manifest_path.as_posix(),
+                        "normalization_version": NORMALIZATION_VERSION,
+                        "hash_algo": HASH_ALGO,
                     }
                 )
             )
@@ -64,7 +71,18 @@ def main() -> int:
         return 0
 
     if args.format == "json":
-        print(render_json({"mode": "plan", "plan": plan.to_dict(), "plan_path": plan_path.as_posix(), "source_findings": [finding.to_dict() for finding in source_findings]}))
+        print(
+            render_json(
+                {
+                    "mode": "plan",
+                    "plan": plan.to_dict(),
+                    "plan_path": plan_path.as_posix(),
+                    "source_findings": [finding.to_dict() for finding in source_findings],
+                    "normalization_version": NORMALIZATION_VERSION,
+                    "hash_algo": HASH_ALGO,
+                }
+            )
+        )
     else:
         render_text("plan", plan, plan_path)
         render_source_findings(source_findings)
@@ -82,6 +100,7 @@ def render_text(mode: str, plan, plan_path: Path, manifest_path: Path | None = N
         log_info(f"Plan file cleared: {plan_path.as_posix()}")
     if manifest_path is not None:
         log_info(f"Manifest file: {manifest_path.as_posix()}")
+        log_info(f"Fingerprinting: {HASH_ALGO} normalized-content ({NORMALIZATION_VERSION})")
     for operation in plan.operations:
         print(f"- {operation.action:9s} {operation.path} :: {operation.reason}")
 

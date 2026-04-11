@@ -16,18 +16,7 @@ Follow `.github/instructions/internal-java.instructions.md` for the baseline Jav
 - Keep controllers thin, services stateless, and API DTOs separate from persistence entities.
 - Use Java 21 features only when the project already targets them or the runtime requirement is explicit.
 
-## Minimal class example
-```java
-/** Purpose: Resolve user by id with input validation. */
-public final class UserService {
-    public String resolveUserId(String userId) {
-        if (userId == null || userId.isBlank()) {
-            throw new IllegalArgumentException("❌ userId is required");
-        }
-        return userId.trim();
-    }
-}
-```
+Load `references/examples.md` when you need a minimal class or test example.
 
 ## Test stack
 - Follow the JUnit 5 defaults from the instruction owner.
@@ -35,22 +24,6 @@ public final class UserService {
 - Use Spring test slices such as `@WebMvcTest` or `@DataJpaTest` before defaulting to full-context tests.
 - Use Testcontainers when integration tests need real databases or external dependencies.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
-
-## Minimal test example
-```java
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-class UserServiceTest {
-    @Test
-    @DisplayName("given blank userId when resolving then throws")
-    void givenBlankUserId_whenResolving_thenThrows() {
-        var service = new UserService();
-        assertThrows(IllegalArgumentException.class, () -> service.resolveUserId(" "));
-    }
-}
-```
 
 ## Spring Boot patterns
 - Use Spring Boot starters instead of hand-assembling common dependency sets.

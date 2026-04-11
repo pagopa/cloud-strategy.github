@@ -28,51 +28,10 @@ description: Use when the user mentions CI/CD, continuous integration, deploymen
 | Shared steps across multiple repositories | Composite action (see `internal-composite-action`) |
 | Conditional deployment per environment | Environment protection rules + manual approval |
 
-## Cloud auth snippets
+## Auth and workflow examples
 
-Load from `references/auth-snippets.md` for full examples. Quick reference:
-
-### AWS (OIDC)
-```yaml
-- uses: aws-actions/configure-aws-credentials@<FULL_SHA>
-  with:
-    role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-    aws-region: eu-south-1
-```
-
-### Azure (OIDC)
-```yaml
-- uses: azure/login@<FULL_SHA>
-  with:
-    client-id: ${{ secrets.AZURE_CLIENT_ID }}
-    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-```
-
-### GCP (OIDC)
-```yaml
-- uses: google-github-actions/auth@<FULL_SHA>
-  with:
-    workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-    service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-```
-
-## Minimal workflow example
-```yaml
-name: CI
-on: [pull_request]
-
-permissions:
-  contents: read
-  id-token: write
-
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@<FULL_SHA>
-      - run: terraform fmt -check -recursive
-```
+- Load `references/auth-snippets.md` for AWS, Azure, and GCP OIDC snippets.
+- Load `references/workflow-example.md` for the minimal workflow skeleton.
 
 ## Common mistakes
 

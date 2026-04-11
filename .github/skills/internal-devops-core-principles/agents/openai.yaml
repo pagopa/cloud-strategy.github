@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Devops Core Principles"
+  short_description: "Help with Internal Devops Core Principles tasks"
+  default_prompt: "Use $internal-devops-core-principles for this task and follow the repository-owned workflow in the skill."

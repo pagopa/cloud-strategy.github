@@ -21,27 +21,7 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 - Choose async only when the workload is I/O-bound and the surrounding stack supports it cleanly.
 - Keep request or transport models, domain logic, and persistence concerns in separate modules.
 
-## Minimal module example
-```python
-"""Purpose: Resolve account status based on domain rules."""
-
-from dataclasses import dataclass
-
-
-@dataclass(frozen=True)
-class AccountId:
-    value: str
-
-    def __post_init__(self) -> None:
-        if not self.value.strip():
-            raise ValueError("account id is required")
-
-
-def resolve_account_state(account_id: AccountId, is_locked: bool) -> str:
-    if is_locked:
-        return "locked"
-    return f"active:{account_id.value}"
-```
+Load `references/examples.md` when you need a minimal module or test example.
 
 ## Testing
 - Follow the repository pytest defaults from the instruction owner.
@@ -49,15 +29,6 @@ def resolve_account_state(account_id: AccountId, is_locked: bool) -> str:
 - Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
 - Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
-
-## Minimal test example
-```python
-import pytest
-
-def test_given_blank_account_id_when_creating_then_raises_value_error() -> None:
-    with pytest.raises(ValueError):
-        AccountId(" ")
-```
 
 ## Architecture and framework guidance
 - Follow the repository's existing framework before introducing FastAPI, Flask, Django, or a new dependency stack.

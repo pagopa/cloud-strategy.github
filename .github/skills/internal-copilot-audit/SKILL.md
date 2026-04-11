@@ -102,7 +102,7 @@ Flag a sync workflow when:
 
 ## Flagging examples
 
-- `blocking` / `Patch`: a skill references `references/example.md`, but that file is missing on disk.
+- `blocking` / `Patch`: a skill references a missing file under `references/`, so the documented workflow cannot actually be loaded.
 - `non-blocking` / `Patch`: `AGENTS.md` still inventories a path that was deleted from `.github/`.
 - `non-blocking` / `Keep`: two assets are adjacent in topic area, but their descriptions and trigger boundaries remain distinct.
 - `blocking` / `Replace`: a repository-owned internal asset fully supersedes a weaker local fallback that still broadens trigger space.
