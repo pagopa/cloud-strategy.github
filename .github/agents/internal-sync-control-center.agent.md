@@ -60,12 +60,12 @@ Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandat
 - `internal-agent-sync-control-center`: Mandatory operating engine for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
 - `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
-- `internal-skill-creator`: Canonical repository-owned answer when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
+- `internal-skill-creator`: Canonical first entrypoint when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
 - `obra-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
-- `openai-skill-creator`: Support-only; use only for bundle anatomy, helper scripts, progressive disclosure, or structural validation details while `internal-skill-creator` owns the repository-owned skill change.
+- `openai-skill-creator`: Use as the embedded core workflow for bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation only after `internal-skill-creator` has established the repository-owned skill boundary.
 
 ## Managed External Resource Map
 
