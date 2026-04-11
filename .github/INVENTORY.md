@@ -88,6 +88,7 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
+- `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-spring-boot-development/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`
@@ -103,7 +104,6 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/obra-using-superpowers/SKILL.md`
 - `.github/skills/obra-verification-before-completion/SKILL.md`
 - `.github/skills/obra-writing-plans/SKILL.md`
-- `.github/skills/obra-writing-skills/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`

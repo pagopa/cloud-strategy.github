@@ -11,7 +11,9 @@ This skill owns the reusable catalog-governance procedure behind that agent. Kee
 
 Use the current repository state as evidence and starting context, but anchor decisions to the declared contract in the relevant agent, root `AGENTS.md`, and `.github/copilot-instructions.md`.
 
-Use `openai-skill-creator` when improving this skill itself or when a sync decision requires creating or materially rewriting one specific skill.
+Use `internal-skill-creator` when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
+
+Use `openai-skill-creator` only as support depth for bundle anatomy, helper scripts, progressive disclosure, or structural validation while that concrete skill work is in scope.
 
 Use `internal-agent-development` when the sync changes the control-center agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
 
@@ -36,7 +38,8 @@ For `internal-sync-control-center`, keep the split strict:
 - Agent owns routing, scope boundaries, managed resource map, approval posture, and output expectations.
 - This skill owns audit order, keep/update/extract/retire decisions, anti-overlap heuristics, and sync execution discipline.
 - `internal-agent-development` owns structural changes to the agent itself, including mandatory engine-skill architecture and boundary rewrites.
-- `openai-skill-creator` supports authoring when one concrete skill needs creation or major redesign.
+- `internal-skill-creator` owns repository-owned skill authoring when one concrete skill needs creation, replacement, or major redesign.
+- `openai-skill-creator` stays support-only depth for bundle anatomy, helper scripts, progressive disclosure, and structural validation details during that work.
 
 Do not collapse these roles back into one file just because the current task touches all of them.
 
@@ -91,7 +94,7 @@ Required frontmatter for skills:
 ```yaml
 ---
 name: internal-example
-description: Clear trigger language that says what the skill does and when to use it.
+description: Clear trigger language that says when the skill should be used.
 ---
 ```
 
@@ -99,6 +102,7 @@ Rules:
 
 - `name:` must match the directory name exactly.
 - Put trigger language in `description:`, not buried in the body.
+- Keep `description:` focused on triggering conditions; do not summarize the workflow there.
 - Keep repository-facing text in English.
 - Keep the local canonical identifier when refreshing an installed external-prefixed asset.
 - Do not keep runtime-specific clutter, compatibility prose, or history-preserving aliases unless policy explicitly requires them.
