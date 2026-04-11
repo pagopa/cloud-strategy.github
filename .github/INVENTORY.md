@@ -5,7 +5,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 ## Instructions
 
 - `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
-- `.github/instructions/awesome-copilot-copilot-sdk-python.instructions.md`
 - `.github/instructions/awesome-copilot-go.instructions.md`
 - `.github/instructions/awesome-copilot-instructions.instructions.md`
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`

@@ -96,7 +96,6 @@ Managed skills:
 Managed instructions:
 
 - `awesome-copilot-azure-devops-pipelines.instructions.md`
-- `awesome-copilot-copilot-sdk-python.instructions.md`
 - `awesome-copilot-go.instructions.md`
 - `awesome-copilot-instructions.instructions.md`
 - `awesome-copilot-kubernetes-manifests.instructions.md`
