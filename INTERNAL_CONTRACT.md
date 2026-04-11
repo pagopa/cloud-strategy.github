@@ -146,6 +146,33 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - every declared `name:` matches the canonical resource identifier
   - imported non-`internal-*` resources may remain verbatim
 
+#### `resource-governance-separates-origin-from-dominant-role`
+
+- Goal: keep prefix-based ownership distinct from dominant role so the catalog can evolve without false hierarchy drift.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - governance skills and agents that describe the catalog model
+- Expected behavior:
+  - prefixes describe origin and ownership first, not a rigid strategic, tactical, or operational level
+  - resources are evaluated on two axes: origin/ownership and dominant role
+  - `obra-*` resources act as workflow assets and may govern strategic, tactical, or operational work
+  - `internal-*` resources remain the canonical repository-owned layer and may be strategic, tactical, or operational as declared by contract
+  - imported non-`internal-*` resources remain support depth by default
+  - `local-*` resources remain consumer-local extensions and become strategic only when explicit local governance requires it
+
+#### `resource-governance-wrapper-threshold-stays-explicit`
+
+- Goal: avoid unnecessary repository-owned wrappers around imported assets.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - governance skills and agents that describe the catalog model
+- Expected behavior:
+  - overlap alone does not justify wrapping or replacing an imported asset
+  - repository-owned wrappers or replacements are justified when they add repository-specific routing, governance, terminology, output shape, safety expectations, or a missing internal owner
+  - imported assets may remain verbatim when those gaps do not exist
+
 #### `resource-governance-canonical-operational-model-stays-explicit`
 
 - Goal: keep the canonical repository-owned operating model clear across projections.

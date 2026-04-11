@@ -120,8 +120,8 @@ Only elevate simplification suggestions when they materially improve maintainabi
 | Generic "this could be improved" without concrete fix | Not actionable | Every finding must include a fix suggestion |
 
 ## Cross-references
-- **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for change-set-level impact analysis, architectural evaluation, and blind-spot detection beyond line-level review.
-- Use both together: this skill for nit-level anti-patterns first, then `internal-pair-architect` for the bigger picture.
+- **internal-change-impact-analysis** (`.github/skills/internal-change-impact-analysis/SKILL.md`): for change-set-level impact analysis, architectural evaluation, and blind-spot detection beyond line-level review.
+- Use both together: this skill for nit-level anti-patterns first, then `internal-change-impact-analysis` for the bigger picture.
 
 ## Validation
 - Verify every finding references a real file path and line from the diff.

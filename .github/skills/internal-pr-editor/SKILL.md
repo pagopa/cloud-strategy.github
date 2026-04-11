@@ -1,6 +1,6 @@
 ---
 name: internal-pr-editor
-description: Generate review-ready PR descriptions from diffs, specifications, or template-driven requirements using structured templates with section order and diff-to-description mapping. Use when the user needs to write, update, or format a pull request body, summarize code changes, or turn a specification into PR-ready text that still matches the actual diff.
+description: Use when writing or updating a pull request title or body from a real diff, specification, or repository template, and the output must stay aligned with the actual change.
 ---
 
 # TechAI PR Editor — Skill
@@ -67,7 +67,7 @@ If the user provides a specification, issue, or acceptance outline:
 | Not including validation commands and output | Reviewer has no confidence that code was tested | Always include the exact commands and their results |
 
 ## Cross-references
-- **internal-pair-architect** (`.github/skills/internal-pair-architect/SKILL.md`): for change-impact analysis that feeds the risk section.
+- **internal-change-impact-analysis** (`.github/skills/internal-change-impact-analysis/SKILL.md`): for change-impact analysis that feeds the risk section.
 - **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for the review that follows the PR.
 
 ## Validation

@@ -1,6 +1,6 @@
 ---
 name: internal-composite-action
-description: Create or modify reusable GitHub composite actions with secure Bash and deterministic behavior. Use when the user wants to build a composite action, write an action.yml with composite runs, create shared reusable steps, or mentions action authoring.
+description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially for shared step logic that should not become a full reusable workflow.
 ---
 
 # Composite Action Skill
@@ -32,27 +32,8 @@ description: Create or modify reusable GitHub composite actions with secure Bash
 - Keep secrets out of defaults and logs.
 
 ## Minimal template
-```yaml
-name: Validate Input
-description: Validate required inputs before action logic
-inputs:
-  target:
-    description: Target environment
-    required: true
-runs:
-  using: composite
-  steps:
-    - shell: bash
-      env:
-        TARGET: ${{ inputs.target }}
-      run: |
-        set -euo pipefail
-        if [[ -z "$TARGET" ]]; then
-          echo "❌ target is required" >&2
-          exit 1
-        fi
-        echo "✅ input validated"
-```
+
+Load `references/minimal-template.md` when you need the starter `action.yml` shape. Keep only one focused validation step in the initial template and move longer shell logic into a script early.
 
 ## Common mistakes
 

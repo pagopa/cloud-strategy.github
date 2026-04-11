@@ -44,6 +44,7 @@ Positive examples:
 
 - `Stress-test this operating model before we adopt it.`
 - `Give me the strongest objections and failure modes for this plan.`
+- `Reframe this proposal from a lateral-thinking angle and surface the hidden assumptions.`
 
 Negative examples:
 

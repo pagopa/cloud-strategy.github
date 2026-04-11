@@ -1,6 +1,6 @@
 ---
 name: internal-script-bash
-description: Create or modify Bash scripts with purpose header, emoji logs, readable guard-clause flow, and defensive hardening for cleanup traps, temp resources, and safe reruns. Use when the user needs shell scripts, automation scripts, helper bash utilities, or any standalone .sh file with reliable failure handling and structured output.
+description: Use when creating or modifying standalone Bash scripts or shell utilities with operator-facing behavior, rather than Bash embedded inside composite actions or CI workflows.
 ---
 
 # Bash Script Skill
@@ -12,18 +12,15 @@ Follow `.github/instructions/internal-bash.instructions.md` for the baseline Bas
 - Existing Bash scripts that need updates.
 
 ## Script-specific hardening guidance
-- Quote all variables: `"$var"`, never bare `$var`.
 - Prefer `printf` for formatted output and arrays for dynamic commands.
-- Use `mktemp` plus a cleanup trap for temporary files or directories when the script owns temporary state.
 - Destructive or repeatable scripts should be idempotent and expose `--dry-run` when operator risk is non-trivial.
 - Validate required external commands with `command -v` before first use.
 - Do not add unit tests unless explicitly requested.
 
 ## Templates and hardening helpers
 
-Load `references/templates.md` when you need the starter script, the standard argument parser skeleton, or the cleanup helpers.
+Load `references/templates.md` when you need the starter script, the standard argument parser skeleton, or optional cleanup helpers for scripts that own temporary state.
 
-- Use `mktemp` and `trap cleanup EXIT` only when the script owns temporary state.
 - Prefer safe reruns with guards like `mkdir -p`, existence checks, or replace-in-place flows.
 - Use `--` before user-supplied paths in destructive commands such as `rm -rf -- "$target"`.
 
@@ -31,15 +28,10 @@ Load `references/templates.md` when you need the starter script, the standard ar
 
 | Mistake | Why it matters | Instead |
 |---|---|---|
-| Missing `set -euo pipefail` | Errors silently ignored, script continues in broken state | Always first executable line |
-| Unquoted variables: `$var` | Word splitting and glob expansion cause bugs with spaces/special chars | Always `"$var"` |
-| Using `eval` | Command injection risk | Use arrays for dynamic commands: `cmd=("${parts[@]}"); "${cmd[@]}"` |
-| Piping to `while read` without process substitution | Loop runs in subshell — variable changes lost | Use `while read ... done < <(command)` |
-| No `main()` function wrapper | Global scope pollution, no clean entry point | Wrap logic in `main()` and call `main "$@"` |
-| Temporary files without cleanup | Leaks state and leaves partial artifacts behind | Use `mktemp` plus `trap cleanup EXIT` |
+| Skipping dependency checks for required commands | Failures surface late and with weaker operator context | Check `command -v` before the first call |
+| Building dynamic commands as strings | Quoting and argument boundaries become fragile | Use arrays plus `printf` for operator-facing formatting |
 | Destructive commands without rerun safety | Repeated execution can corrupt state or surprise operators | Add `--dry-run` and make the mutation idempotent |
-| Hardcoded paths | Non-portable across environments | Use variables or `dirname "$0"` for relative paths |
-| Wrapper requires positional arguments for the default path | Makes the common invocation brittle and hard to automate | Keep sane defaults in the script and expose optional overrides |
+| Rewriting parser or cleanup scaffolding from scratch | Operator UX and failure handling drift between scripts | Reuse the starter and helper patterns from `references/templates.md` |
 
 ## Cross-references
 - **internal-composite-action** (`.github/skills/internal-composite-action/SKILL.md`): for Bash inside composite actions.

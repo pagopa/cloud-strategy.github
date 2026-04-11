@@ -1,6 +1,6 @@
 ---
 name: internal-changelog-automation
-description: Changelog generation, release notes, Keep a Changelog structure, conventional commit interpretation, semver-aware release summaries, and automation around versioned delivery. Use when creating or improving release-note workflows, changelog scripts, or repeatable release documentation.
+description: Use when creating or improving changelog generation, release-note workflows, or repeatable release-documentation automation.
 ---
 
 # Internal Changelog Automation

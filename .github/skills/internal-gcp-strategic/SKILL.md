@@ -1,6 +1,6 @@
 ---
 name: internal-gcp-strategic
-description: Use when the user needs high-level Google Cloud decision support, option framing, or tradeoff analysis before implementation. This skill helps evaluate GCP platform choices, clarify assumptions, and recommend a direction using only the lenses that matter for the current request while using current Google Cloud guidance only when freshness materially affects the answer.
+description: Use when the user needs high-level Google Cloud platform decision support or tradeoff framing before implementation, and the next step is not yet structure, governance, operations, or code delivery.
 ---
 
 # Internal GCP Strategic

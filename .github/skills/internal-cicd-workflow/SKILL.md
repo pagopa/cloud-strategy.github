@@ -1,6 +1,6 @@
 ---
 name: internal-cicd-workflow
-description: Use when the user mentions CI/CD, continuous integration, deployment pipelines, GitHub Actions workflow files, automated testing workflows, or wants to add steps like linting, testing, or deploying in a .github/workflows/ YAML file.
+description: Use when authoring or revising GitHub Actions workflow files, CI jobs, deployment workflows, or pipeline automation in `.github/workflows/`.
 ---
 
 # CI/CD Workflow Skill
@@ -9,6 +9,8 @@ description: Use when the user mentions CI/CD, continuous integration, deploymen
 - Create or modify GitHub Actions workflows.
 - Add CI/CD jobs (build, test, deploy, lint).
 - Add cloud authentication steps for Terraform or deployment.
+
+Use `internal-devops-core-principles` when the question is delivery strategy, release model, or operating-model health rather than workflow authoring.
 
 ## Mandatory rules
 - Prefer OIDC for cloud authentication (no long-lived secrets).

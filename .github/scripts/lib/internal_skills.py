@@ -23,6 +23,9 @@ INLINE_TEMPLATE_THRESHOLD = 4
 ALLOWED_VIRTUAL_PATHS = {
     ".github/copilot-sync.manifest.json",
 }
+ALLOWED_VIRTUAL_PREFIXES = (
+    "tmp/",
+)
 
 
 def detect_internal_skill_findings(root: Path, selected_skills: set[str] | None = None) -> list[Finding]:
@@ -61,31 +64,58 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
             )
         ]
 
-    frontmatter, body = split_frontmatter(read_text(skill_md))
-    declared_name = frontmatter.get("name")
-    description = frontmatter.get("description")
+    raw_text = read_text(skill_md)
+    frontmatter, body = split_frontmatter(raw_text)
+    has_valid_frontmatter = True
 
-    if declared_name != skill_name:
+    if not raw_text.startswith("---"):
         findings.append(
             Finding(
                 severity="blocking",
-                code="skill-name-mismatch",
+                code="missing-frontmatter-block",
                 path=skill_md.as_posix(),
-                message=f"Frontmatter name '{declared_name}' does not match folder '{skill_name}'.",
-                suggestion="Keep the internal skill folder name and frontmatter name identical.",
+                message="SKILL.md must start with a YAML frontmatter block.",
+                suggestion="Add a leading --- frontmatter block with at least name and description.",
             )
         )
-
-    if not isinstance(description, str) or not description.strip():
+        has_valid_frontmatter = False
+    elif not frontmatter:
         findings.append(
             Finding(
                 severity="blocking",
-                code="missing-description",
+                code="invalid-frontmatter-block",
                 path=skill_md.as_posix(),
-                message="SKILL.md frontmatter is missing a usable description.",
-                suggestion="Add a clear description that states what the skill does and when to use it.",
+                message="SKILL.md frontmatter is missing, malformed, or not parseable as a mapping.",
+                suggestion="Fix the YAML frontmatter so structural validation can run before content review.",
             )
         )
+        has_valid_frontmatter = False
+
+    if has_valid_frontmatter:
+        declared_name = frontmatter.get("name")
+        description = frontmatter.get("description")
+
+        if declared_name != skill_name:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="skill-name-mismatch",
+                    path=skill_md.as_posix(),
+                    message=f"Frontmatter name '{declared_name}' does not match folder '{skill_name}'.",
+                    suggestion="Keep the internal skill folder name and frontmatter name identical.",
+                )
+            )
+
+        if not isinstance(description, str) or not description.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="missing-description",
+                    path=skill_md.as_posix(),
+                    message="SKILL.md frontmatter is missing a usable description.",
+                    suggestion="Add a clear description that states what the skill does and when to use it.",
+                )
+            )
 
     findings.extend(validate_openai_yaml(skill_dir, skill_name))
     findings.extend(validate_local_references(root, skill_dir))
@@ -281,9 +311,11 @@ def resolve_reference(root: Path, skill_dir: Path, source_file: Path, target: st
         return None
     if target in ALLOWED_VIRTUAL_PATHS:
         return None
+    if target.startswith(ALLOWED_VIRTUAL_PREFIXES):
+        return None
 
     target_path = Path(target)
-    if target.startswith(".github/") or target.startswith("tmp/"):
+    if target.startswith(".github/"):
         return root / target_path
     if target == "AGENTS.md":
         return root / target_path

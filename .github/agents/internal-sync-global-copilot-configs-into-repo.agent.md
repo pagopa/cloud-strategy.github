@@ -10,11 +10,11 @@ tools: ["read", "edit", "search", "execute", "web", "agent"]
 
 You are the cross-repository baseline propagation owner for GitHub Copilot assets.
 
-Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md` as one workflow contract. The skill owns the reusable analyze/plan/apply procedure, mirrored scope, plan-file lifecycle, automation entrypoints, and reporting details. Keep this agent focused on mode selection, approval posture, and boundary decisions.
+Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/SKILL.md` as one workflow contract. The skill owns the reusable analyze/plan/apply procedure, mirrored scope, plan-file lifecycle, automation entrypoints, and reporting details. Keep this agent focused on mode selection, approval posture, and boundary decisions.
 
 ## Mandatory Engine Skills
 
-- `internal-sync-global-copilot-configs-into-repo`
+- `internal-agent-sync-global-copilot-configs-into-repo`
 
 ## Optional Support Skills
 
@@ -27,7 +27,7 @@ Treat this agent plus `.github/skills/internal-sync-global-copilot-configs-into-
 
 ## Skill Usage Contract
 
-- Always load `internal-sync-global-copilot-configs-into-repo` before planning or applying a consumer-repository sync. If this agent and that skill drift apart, fix the drift instead of inventing a parallel contract.
+- Always load `internal-agent-sync-global-copilot-configs-into-repo` before planning or applying a consumer-repository sync. If this agent and that skill drift apart, fix the drift instead of inventing a parallel contract.
 - Use `obra-writing-plans` when the target sync needs retained staging, checkpoints, or cleanup order beyond the default tracking plan.
 - Use `obra-executing-plans` when the user already approved a concrete sync plan and execution should happen in deliberate batches.
 - Use `obra-verification-before-completion` before reporting success so target state, preserved local assets, and validation results are backed by fresh evidence.

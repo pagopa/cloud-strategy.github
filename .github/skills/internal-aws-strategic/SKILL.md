@@ -1,6 +1,6 @@
 ---
 name: internal-aws-strategic
-description: Use when the user needs high-level AWS decision support, option framing, or tradeoff analysis before implementation. This skill helps evaluate platform choices, clarify assumptions, and recommend a direction using only the lenses that matter for the current request. It may use internal-aws-mcp-research when current AWS documentation or service behavior must be verified.
+description: Use when the user needs high-level AWS platform decision support or tradeoff framing before implementation, and the next step is not yet structure, governance, operations, or code delivery.
 ---
 
 # Internal AWS Strategic

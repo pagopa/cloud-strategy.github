@@ -1,6 +1,6 @@
 ---
 name: internal-project-java
-description: Create or modify Java project components with purpose JavaDoc, modern Java judgment, Spring Boot service patterns, and JUnit 5 testing discipline. Use when building Java services, Spring Boot apps, Java libraries, class scaffolding, service layers, or repository patterns.
+description: Use when creating or modifying Java project code and the main concern is Java application structure, tests, or library/service design rather than Spring Boot framework choices.
 ---
 
 # Java Project Skill
@@ -25,13 +25,9 @@ Load `references/examples.md` when you need a minimal class or test example.
 - Use Testcontainers when integration tests need real databases or external dependencies.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
-## Spring Boot patterns
-- Use Spring Boot starters instead of hand-assembling common dependency sets.
-- Prefer constructor injection with `private final` dependencies.
-- Validate incoming DTOs with Bean Validation and `@Valid`.
-- Use `@ControllerAdvice` for consistent API error handling when the application exposes HTTP endpoints.
-- Bind structured configuration with `@ConfigurationProperties` instead of scattering `@Value` keys.
-- Keep transaction boundaries in the service layer and scope them as narrowly as the behavior allows.
+## Spring coordination
+- Keep Spring-specific design decisions lightweight here and use `internal-spring-boot-development` when controller, configuration, repository, or test-slice choices dominate the task.
+- Prefer constructor injection with `private final` dependencies and keep transaction boundaries narrow.
 
 ## Modern Java guidance
 - Prefer records for small immutable data carriers when the codebase already uses them.
@@ -56,6 +52,8 @@ Load `references/examples.md` when you need a minimal class or test example.
 ## Cross-references
 - **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Java code (see `.github/skills/internal-code-review/references/anti-patterns-java.md`).
 - **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Java apps.
+- **internal-oop-design-patterns** (`.github/skills/internal-oop-design-patterns/SKILL.md`): for object collaboration refactors and pattern selection that go beyond baseline Java guidance.
+- **internal-spring-boot-development** (`.github/skills/internal-spring-boot-development/SKILL.md`): for Spring Boot-specific application, configuration, persistence, and test decisions.
 
 ## Validation
 - Compile with `mvn compile` or `gradle build`.

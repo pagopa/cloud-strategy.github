@@ -1,6 +1,6 @@
 ---
 name: internal-terraform
-description: Use when the user needs to add, modify, refactor, or review Terraform resources, variables, outputs, data sources, or modules. Covers both feature-level changes within existing configurations and creation of reusable modules, plus style-consistent HCL authoring, remote state hygiene, drift review, module versioning, and policy-aware plan/apply workflows.
+description: Use when adding, refactoring, or reviewing Terraform or OpenTofu configuration, including root-level resources, reusable modules, drift-safe changes, and HCL interface design.
 ---
 
 # Terraform Skill

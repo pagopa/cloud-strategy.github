@@ -9,11 +9,11 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 
 ## Live Catalog Summary
 
-- Instructions: 21 total (`13 internal-*`, `8 awesome-copilot-*`)
+- Instructions: 17 total (`13 internal-*`, `4 awesome-copilot-*`)
 - Prompts: 0 total
-- Skills: 82 total (`41 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `7 openai-*`, `2 terraform-*`)
-- Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
-- Scripts: 17 total
+- Skills: 85 total (`45 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `8 antigravity-*`, `7 openai-*`, `2 terraform-*`)
+- Agents: 7 total (`7 internal-*`)
+- Scripts: 21 tracked files
 - Workflows: 1 total
 
 ## Structure
@@ -40,7 +40,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 Instructions are path-driven and auto-apply via `applyTo`.
 
 - Repository-owned `internal-*` instructions: `internal-bash`, `internal-docker`, `internal-github-action-composite`, `internal-github-actions`, `internal-java`, `internal-json`, `internal-lambda`, `internal-makefile`, `internal-markdown`, `internal-nodejs`, `internal-python`, `internal-terraform`, `internal-yaml`
-- Imported `awesome-copilot-*` instructions: `awesome-copilot-azure-devops-pipelines`, `awesome-copilot-copilot-sdk-python`, `awesome-copilot-go`, `awesome-copilot-instructions`, `awesome-copilot-kubernetes-manifests`, `awesome-copilot-oop-design-patterns`, `awesome-copilot-shell`, `awesome-copilot-springboot`
+- Imported `awesome-copilot-*` instructions: `awesome-copilot-azure-devops-pipelines`, `awesome-copilot-go`, `awesome-copilot-kubernetes-manifests`, `awesome-copilot-shell`
 
 Use instructions as automatic file-path guidance. Do not hardcode instruction references into prompts when `applyTo` already resolves the behavior.
 
@@ -54,7 +54,7 @@ If prompt assets are reintroduced, they must stay aligned with real files under 
 
 Skills are grouped into three functional lanes plus imported support families.
 
-- `internal-*`: repository-owned tactical execution, governance, routing, review, project lanes, CI/CD, data registry, cloud policy, Docker, Terraform, PR authoring support, and provider skill families for AWS, Azure, GCP, and GitHub
+- `internal-*`: repository-owned governance, routing, review, execution, project, sync, platform, and provider skill families for AWS, Azure, GCP, and GitHub
 - `obra-*`: strategic workflow support for brainstorming, planning, debugging, verification, worktree usage, and skill authoring
 - Imported support families:
   - `awesome-copilot-*`
@@ -65,9 +65,9 @@ Skills are grouped into three functional lanes plus imported support families.
 Some skill directories include support material beyond `SKILL.md`. Current live examples include:
 
 - provider families with bundled references and UI metadata: `internal-aws-*`, `internal-azure-*`, `internal-gcp-*`, `internal-github-*`
-- repository-owned support bundles such as `internal-agent-*`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-copilot-*`, `internal-data-registry`, `internal-docker`, `internal-pair-architect`, `internal-performance-optimization`, `internal-pr-editor`, `internal-project-*`, `internal-script-*`, `internal-sync-global-copilot-configs-into-repo`, and `internal-terraform`
+- repository-owned support bundles such as `internal-agent-*`, `internal-change-impact-analysis`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-composite-action`, `internal-copilot-*`, `internal-ddd`, `internal-docker`, `internal-kubernetes`, `internal-kubernetes-deployment`, `internal-oop-design-patterns`, `internal-performance-optimization`, `internal-pr-editor`, `internal-project-*`, `internal-script-*`, `internal-spring-boot-development`, `internal-sync-*`, and `internal-terraform`
 - workflow packs with bundled references or helpers such as `obra-brainstorming`, `obra-requesting-code-review`, `obra-subagent-driven-development`, `obra-systematic-debugging`, `obra-test-driven-development`, `obra-using-superpowers`, `obra-writing-plans`, and `obra-writing-skills`
-- imported or upstream-derived bundles such as `antigravity-domain-driven-design`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-azure-role-selector`, `awesome-copilot-cloud-design-patterns`, `openai-docx`, `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-pdf`, `openai-skill-creator`, `openai-slides`, `openai-spreadsheet`, and `terraform-terraform-search-import`
+- imported or upstream-derived bundles such as `awesome-copilot-agentic-eval`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-azure-role-selector`, `awesome-copilot-cloud-design-patterns`, `openai-docx`, `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-pdf`, `openai-skill-creator`, `openai-slides`, `openai-spreadsheet`, `terraform-terraform-search-import`, and `terraform-terraform-test`
 
 Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery. Use this README for family-level orientation only.
 
@@ -77,24 +77,28 @@ See [`agents/README.md`](agents/README.md) for the selection guide.
 
 - Canonical repository-owned operational agents: `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-challenger`
 - Repository-owned source-side sync and governance agents: `internal-sync-control-center`, `internal-sync-global-copilot-configs-into-repo`
-- Imported support agents: `awesome-copilot-azure-principal-architect`, `awesome-copilot-critical-thinking`, `awesome-copilot-devils-advocate`, `awesome-copilot-devops-expert`, `awesome-copilot-plan`
+- No imported support agents currently ship in the live catalog.
 
 The current repository-owned operating model is the internal router plus the four canonical internal owners. Do not document retired operational routes here.
 Only `internal-router` actively routes between canonical owners; the four canonical owners stay boundary-driven and user-directed.
 
 ### Scripts and workflow
 
-This table highlights the most commonly maintained source-side entrypoints rather than every helper under `.github/scripts/`.
+This table highlights the most commonly maintained source-side entrypoints rather than every tracked helper under `.github/scripts/`.
 
 | Path | Purpose |
 | --- | --- |
-| `scripts/internal-python-runner.sh` | Shared Bash bootstrap for local `.venv` setup and `requirements.txt` installation before running repository Python entrypoints. |
-| `scripts/internal_yaml.py` | Shared repository-owned YAML and frontmatter helper used by internal Python automation. |
+| `scripts/run.sh` | Shared wrapper that resolves the canonical repository Python entrypoints and runs them with the local script environment. |
+| `scripts/audit_copilot_catalog.sh` | Wrapper entrypoint for source-side catalog audit runs. |
+| `scripts/build_inventory.sh` | Wrapper entrypoint for rebuilding or checking `.github/INVENTORY.md` from filesystem state. |
+| `scripts/check_catalog_consistency.sh` | Wrapper entrypoint for aggregated catalog consistency checks, including optional token-risk analysis. |
+| `scripts/detect_token_risks.sh` | Wrapper entrypoint for focused token-budget and overlap risk analysis. |
+| `scripts/sync_copilot_catalog.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |
+| `scripts/validate_internal_skills.py` | Validates repository-owned internal skill metadata, local references, and token hygiene. |
 | `scripts/requirements.txt` | Local pinned dependency set for repository-owned Python scripts under `.github/scripts/`. |
-| `scripts/internal-sync-copilot-configs.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |
-| `scripts/internal-sync-copilot-configs.py` | Sync planner implementation used by the wrapper and source-side automation. |
-| `scripts/report-copilot-usage.py` | Reporting entrypoint for Copilot catalog telemetry aggregation. |
 | `workflows/terraform-pre-commit.yml` | Source repository workflow for Terraform-focused pre-commit checks. |
+
+The matching `.py` entrypoints and `scripts/lib/*.py` modules are part of the same tracked script catalog and stay aligned with these wrappers.
 
 ## Source-of-Truth Rules
 

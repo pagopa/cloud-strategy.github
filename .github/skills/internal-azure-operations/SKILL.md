@@ -73,6 +73,8 @@ For broader asks, return:
   Use when the operations question is actually about management-group, subscription, or topology placement.
 - `internal-azure-governance`
   Use when the operations question is actually about RBAC, managed identity, Policy, or guardrail design rather than validation.
+- `awesome-copilot-azure-resource-health-diagnose`
+  Use as depth support when the Azure resource is already identified and the next need is deep health diagnosis, log and telemetry analysis, or a remediation plan for that specific resource.
 
 ## Anti-patterns
 

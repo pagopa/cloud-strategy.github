@@ -85,6 +85,19 @@ agents: []
 
 This makes the "recommendation-only" boundary a platform-enforced fact, not just prose.
 
+### Canonical owner with a router-only second lane
+
+```yaml
+agents: ['internal-router']
+```
+
+Use this only when all of these are true:
+
+- `internal-router` remains the only router and still chooses any downstream owner
+- the current agent stays in its own lane instead of turning into a router
+- the second lane is explicit, narrow, and parallel rather than a hidden handoff
+- the agent's body makes the exception and trigger conditions explicit
+
 ### Subagent-only agents
 
 ```yaml

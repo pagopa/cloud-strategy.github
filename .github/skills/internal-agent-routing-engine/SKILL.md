@@ -1,6 +1,6 @@
 ---
 name: internal-agent-routing-engine
-description: Route repository-owned operational requests between the four canonical owners using intent classification, confidence thresholds, medium-task rules, old-to-new mapping, allowed dispatch targets, and handoff protocol. Use when a generic or ambiguous request must be routed to execute, plan, review, or challenge.
+description: Use when `internal-router` must classify an ambiguous operational request and dispatch it to execution, planning, review, or challenge without doing the domain work itself.
 ---
 
 # Internal Agent Routing Engine
@@ -16,7 +16,11 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 - Ask at most one targeted clarification question with two clear options, and only when it materially improves routing confidence.
 - If confidence does not reach a safe routing decision after that question, fail safe to `internal-planning-leader` and hand off there.
 - Dispatch only to the four canonical owners: `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`.
+- If the router is entered as an explicit second parallel lane from another canonical owner, preserve that current lane as context and classify only the parallel operational request.
 - Preserve the user's exact request plus any already-collected evidence instead of forcing the selected owner to re-triage from scratch.
+- Treat the routing turn as incomplete until the delegated owner's result is attached in the same turn, or one blocking clarification question is asked because the selected owner cannot safely proceed without it.
+- Do not present route selection or the handoff package alone as a completed response.
+- If auto-dispatch is interrupted, yields no usable owner result, or the delegated result is missing from the response, retry once when safe. If it still does not complete, state that delegation did not complete, surface the preserved handoff package, and ask one blocking question only when user input is required.
 - Do not implement through the router.
 
 ## Primary Route Labels
@@ -26,7 +30,7 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 | `route-to-execute` | `internal-fast-executor` | The task is clear, local, low-risk, and has concrete verification. |
 | `route-to-plan` | `internal-planning-leader` | The task is ambiguous, cross-boundary, strategic, or changes repository-owned contracts. |
 | `route-to-review` | `internal-review-guard` | The user asks for review, validation, merge readiness, regression analysis, or evidence checks. |
-| `route-to-challenge` | `internal-critical-challenger` | The user wants assumptions challenged, a pre-mortem, or failure modes surfaced. |
+| `route-to-challenge` | `internal-critical-challenger` | The user wants assumptions challenged, a pre-mortem, alternative framings pressure-tested, or failure modes surfaced. |
 
 ## Confidence Model
 
@@ -39,7 +43,7 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 Use these heuristics:
 
 - Treat explicit review language such as `review`, `audit`, `validate`, `risk`, `merge readiness`, or `regression` as `route-to-review` unless the user clearly asks for implementation.
-- Treat explicit challenge language such as `challenge this`, `pre-mortem`, `stress-test`, `what am I missing`, or `failure modes` as `route-to-challenge`.
+- Treat explicit challenge language such as `challenge this`, `pre-mortem`, `stress-test`, `what am I missing`, `failure modes`, `reframe this`, or `think laterally` as `route-to-challenge`.
 - Treat repository-owned authoring of agents, skills, prompts, instructions, routing, or governance as planning unless the change is trivially local and already designed.
 - Treat vague implementation requests as planning when scale, ownership, or rollout is not yet clear.
 
@@ -51,25 +55,16 @@ Use these heuristics:
 | Medium execution | Mostly concrete, but some uncertainty remains about scale or boundaries | Ask one question or route to `internal-planning-leader` |
 | Ambiguous or strategic | Cross-file, cross-boundary, naming or ownership changes, or multiple credible options | `route-to-plan` |
 | Review-oriented | The output should be findings, evidence, risk, or merge readiness | `route-to-review` |
-| Challenge-oriented | The output should be objections, pressure tests, assumptions, or failure modes | `route-to-challenge` |
+| Challenge-oriented | The output should be objections, pressure tests, assumption gaps, alternative framings, or failure modes | `route-to-challenge` |
 
 ## Medium-Task Thresholds
 
-Route away from execution and into planning when any of these are true:
+Use `internal-agent-operating-model-engine` for the shared medium-task logic.
 
-- The change is likely to touch `>= 3` files with lateral impact.
-- The change crosses more than one directory family or logical boundary.
-- The change affects routing, ownership, naming contracts, or catalog boundaries.
-- There are `>= 2` credible solution paths with non-trivial tradeoffs.
-- The task needs rollout, regression, governance, or rollback decisions.
-- The task creates a new repository-owned resource instead of making a banal update to an existing one.
+For router purposes, the consequence is simple:
 
-Stay with `route-to-execute` only when all of these remain true:
-
-- The likely change touches `<= 2` files.
-- The work stays within one directory family or one logical boundary.
-- Routing, ownership, naming contracts, and catalog boundaries stay unchanged.
-- The task does not require a real strategic comparison.
+- if any shared medium-task threshold is hit, fail safe to `route-to-plan`
+- stay with `route-to-execute` only when the task remains clearly local, low-risk, and concretely verifiable
 
 ## High-Value Clarification Question Rule
 
@@ -97,6 +92,7 @@ After selecting the canonical owner, hand off a compact package that includes:
 - `route_label`
 - `confidence`
 - `routing_rationale`
+- `current_lane` when the router was entered as a second parallel lane
 - `user_request`
 - `relevant_constraints`
 - `already_collected_evidence`
@@ -106,16 +102,7 @@ Keep the handoff compact, preserve the user's wording, and include only the evid
 
 ## Retired To Canonical Mapping
 
-| Retired route | Canonical route |
-| --- | --- |
-| `internal-ai-resource-creator` | `internal-planning-leader` |
-| `internal-architect` | `internal-planning-leader` |
-| `internal-developer` | `internal-fast-executor` |
-| `internal-infrastructure` | `internal-fast-executor` or `internal-planning-leader` when design or rollout dominates |
-| `internal-cicd` | `internal-fast-executor` or `internal-planning-leader` when orchestration or tradeoffs dominate |
-| `internal-code-review` | `internal-review-guard` |
-| `internal-quality-engineering` | `internal-review-guard` for validation and risk, `internal-fast-executor` for a clear fix |
-| `internal-aws-*`, `internal-azure-*`, `internal-gcp-*` | `internal-planning-leader` for strategy or design, `internal-fast-executor` for clear local execution |
+Load `../internal-agent-operating-model-engine/references/ownership-maps.md` when the request mentions retired owners or cloud-family aliases and you need the canonical owner before dispatch.
 
 Do not use `internal-sync-*` or `awesome-*` assets as canonical operational owners in this routing model.
 
@@ -135,7 +122,8 @@ Routing conservatively is cheaper than dispatching the user to the wrong owner a
 - One-sentence routing rationale
 - Handoff package summary with preserved request, constraints, and already-collected evidence
 - Delegated owner's result, prefixed by a short routing note
-- Single clarification question only when the decision was medium confidence
+- Explicit blocking explanation plus preserved handoff package when delegation did not complete
+- Single clarification question only when medium-confidence routing or degraded dispatch truly needs user input
 - Explicit confirmation that the router delegated instead of performing the domain work
 
 ## Common Mistakes

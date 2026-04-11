@@ -1,6 +1,6 @@
 ---
 name: internal-github-strategic
-description: Use when the user needs high-level GitHub platform decision support, option framing, or tradeoff analysis before implementation. This skill helps evaluate GitHub operating-model choices, clarify assumptions, and recommend a direction using only the lenses that matter for the current request while using current GitHub documentation only when freshness materially affects the answer.
+description: Use when the user needs high-level GitHub platform or operating-model decision support before implementation, and the next step is not yet governance, operations, or delivery work.
 ---
 
 # Internal GitHub Strategic

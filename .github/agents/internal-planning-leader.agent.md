@@ -24,7 +24,7 @@ You are the planning, authoring, and decision owner for non-trivial operational 
 - `internal-agent-development`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
-- `internal-pair-architect`
+- `internal-change-impact-analysis`
 
 ## Core Rules
 

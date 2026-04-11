@@ -1,6 +1,6 @@
 ---
 name: internal-performance-optimization
-description: Performance profiling, latency reduction, throughput tuning, rendering efficiency, memory control, SQL and PostgreSQL query tuning, caching strategy, and regression prevention. Use when the task is to diagnose slowness, optimize runtime behavior, improve responsiveness, or design performance-focused changes across frontend, backend, or database layers.
+description: Use when performance is the primary problem, such as profiling slowness, reducing latency, improving throughput, or preventing regressions across frontend, backend, or database layers.
 ---
 
 # Internal Performance Optimization

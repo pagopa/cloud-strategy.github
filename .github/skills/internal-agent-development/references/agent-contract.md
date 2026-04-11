@@ -32,13 +32,13 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 - Use `## Optional Support Skills` only for conditional support skills, not for the required engine.
 - When present, a skill-list section is a curated routing and discovery list. List exact canonical skill identifiers, one per bullet, in backticks.
 - Do not present a skill-list section as a native GitHub Copilot property or as a guarantee that every listed skill will be invoked automatically.
-- When expressing the layered model, keep `obra-*` as the strategic lane, `internal-*` as the tactical owner, and imported skills as support-only depth unless no internal owner exists.
+- When expressing the resource model, treat `obra-*` as the cross-cutting workflow lane, `internal-*` as the canonical repository-owned layer, imported skills as support depth by default, and `local-*` as consumer-local extensions. Do not infer strategic, tactical, or operational role from prefix alone.
 - Do not create a 1:1 dedicated skill per agent just for symmetry. Create an engine skill only when it owns real reusable logic that would otherwise bloat the agent or drift.
 - Router agents are the strongest default candidate for a dedicated engine skill because their classification matrix, fallback rules, and ownership mapping are highly procedural.
 
 ## Delegation And Invocation Controls
 
-- Only router agents should own active delegation logic. Canonical non-router agents should recommend a better owner to the user instead of routing on the user's behalf.
+- Only router agents should own active downstream routing logic. Canonical non-router agents should recommend a better owner to the user instead of routing on the user's behalf, unless a narrower scoped contract explicitly allows them to invoke `internal-router` as a second parallel lane while leaving downstream owner selection to the router.
 - When an agent should dispatch to specific subagents, declare `agents:` with the explicit list of allowed targets.
 - When an agent must not dispatch subagents, declare `agents: []` to enforce the recommendation-only boundary.
 - When an agent should only be accessible as a subagent and not appear in the user dropdown, set `user-invocable: false`.

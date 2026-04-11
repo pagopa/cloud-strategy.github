@@ -27,6 +27,7 @@ Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandat
 - `obra-verification-before-completion`
 - `internal-copilot-audit`
 - `internal-agent-development`
+- `internal-skill-creator`
 - `openai-skill-creator`
 - `internal-copilot-docs-research`
 
@@ -59,11 +60,12 @@ Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandat
 - `internal-agent-sync-control-center`: Mandatory operating engine for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
 - `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
+- `internal-skill-creator`: Canonical first entrypoint when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
 - `obra-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
-- `openai-skill-creator`: Support-only; use only when a `replace` or `extract` decision requires creating or materially rewriting a skill as part of catalog governance.
+- `openai-skill-creator`: Use as the embedded core workflow for bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation only after `internal-skill-creator` has established the repository-owned skill boundary.
 
 ## Managed External Resource Map
 
@@ -79,11 +81,7 @@ Source repositories:
 
 Managed agents:
 
-- `azure-principal-architect` -> `awesome-copilot-azure-principal-architect`
-- `critical-thinking` -> `awesome-copilot-critical-thinking`
-- `devils-advocate` -> `awesome-copilot-devils-advocate`
-- `devops-expert` -> `awesome-copilot-devops-expert`
-- `plan` -> `awesome-copilot-plan`
+- No managed agents currently remain from this upstream source in the live repository catalog.
 
 Managed skills:
 
@@ -100,13 +98,9 @@ Managed skills:
 Managed instructions:
 
 - `awesome-copilot-azure-devops-pipelines.instructions.md`
-- `awesome-copilot-copilot-sdk-python.instructions.md`
 - `awesome-copilot-go.instructions.md`
-- `awesome-copilot-instructions.instructions.md`
 - `awesome-copilot-kubernetes-manifests.instructions.md`
-- `awesome-copilot-oop-design-patterns.instructions.md`
 - `awesome-copilot-shell.instructions.md`
-- `awesome-copilot-springboot.instructions.md`
 
 ### `obra/superpowers`
 
@@ -129,7 +123,6 @@ Managed skills:
 - `using-superpowers` -> `obra-using-superpowers`
 - `verification-before-completion` -> `obra-verification-before-completion`
 - `writing-plans` -> `obra-writing-plans`
-- `writing-skills` -> `obra-writing-skills`
 
 ### `hashicorp/agent-skills`
 
@@ -169,9 +162,7 @@ Managed skills:
 
 - `api-design-principles` -> `antigravity-api-design-principles`
 - `aws-cost-optimizer` -> `antigravity-aws-cost-optimizer`
-- `aws-serverless` -> `antigravity-aws-serverless`
 - `cloudformation-best-practices` -> `antigravity-cloudformation-best-practices`
-- `domain-driven-design` -> `antigravity-domain-driven-design`
 - `golang-pro` -> `antigravity-golang-pro`
 - `grafana-dashboards` -> `antigravity-grafana-dashboards`
 - `kubernetes-architect` -> `antigravity-kubernetes-architect`
@@ -192,7 +183,7 @@ When repository state drifts from the declared governance contract, treat the dr
 - Use this agent when creating, refreshing, renaming, consolidating, or retiring `.github/` Copilot assets in this repository.
 - Use this agent when the task is about catalog coherence, naming normalization, overlap removal, governance drift, or repo-owned replacements.
 - Use this agent when declared approved external-prefixed assets need to be refreshed, reduced, or normalized without expanding scope.
-- Start with the strategic lane when the catalog problem needs option framing, a staged governance plan, specific skill-refresh work, or a user-supplied multi-step remediation plan.
+- Start with `internal-planning-leader` when the catalog problem still needs option framing, a staged governance plan, specific skill-refresh work, or a user-supplied multi-step remediation plan.
 - Treat `sync` as `apply` by default unless the user explicitly asks for an audit, plan, or dry run.
 - Treat `apply` as invalid until `internal-copilot-audit` has completed its preflight and any remaining `blocking` findings are resolved.
 - Do not use this agent for one-resource authoring or non-trivial repository-owned planning work when `internal-planning-leader` is sufficient.

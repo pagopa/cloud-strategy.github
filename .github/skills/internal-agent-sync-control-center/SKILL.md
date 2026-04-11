@@ -1,6 +1,6 @@
 ---
 name: internal-agent-sync-control-center
-description: "Operate the catalog-governance engine for `internal-sync-control-center`: audit the managed `.github/` catalog, decide keep/update/extract/retire outcomes, refresh approved in-scope external assets without widening scope, remove fallback drift, and keep governance files aligned after sync changes. Use when working inside or directly supporting `.github/agents/internal-sync-control-center.agent.md`."
+description: Use when maintaining the sync-managed `.github/` catalog behind `internal-sync-control-center`, especially for keep/update/extract/retire decisions, approved external refreshes, and governance-drift checks.
 ---
 
 # Internal Agent Sync Control Center
@@ -11,7 +11,9 @@ This skill owns the reusable catalog-governance procedure behind that agent. Kee
 
 Use the current repository state as evidence and starting context, but anchor decisions to the declared contract in the relevant agent, root `AGENTS.md`, and `.github/copilot-instructions.md`.
 
-Use `openai-skill-creator` when improving this skill itself or when a sync decision requires creating or materially rewriting one specific skill.
+Use `internal-skill-creator` first when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill. It is the canonical local entrypoint for repository-owned skill work in this repository.
+
+Use `openai-skill-creator` only for the remaining bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation work after `internal-skill-creator` has established the repository-owned skill boundary and decided the local ownership outcome.
 
 Use `internal-agent-development` when the sync changes the control-center agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
 
@@ -25,6 +27,7 @@ When deterministic change detection matters, read `references/fingerprinting-con
 - Move reusable sync procedure into this skill instead of bloating the agent body.
 - Keep naming, frontmatter, links, descriptions, and governance references deterministic.
 - Remove fallback, alias, deprecated, or compatibility-only drift in the same pass that introduces the canonical replacement.
+- Keep low-frequency imported or internal capabilities documented as on-demand depth when they still add distinct value and do not justify a repository-owned wrapper.
 - Keep governance review of root `AGENTS.md` and `.github/copilot-instructions.md` explicit, never implied.
 - Provide a deterministic fingerprinting workflow that distinguishes real content change from formatting noise.
 
@@ -35,7 +38,8 @@ For `internal-sync-control-center`, keep the split strict:
 - Agent owns routing, scope boundaries, managed resource map, approval posture, and output expectations.
 - This skill owns audit order, keep/update/extract/retire decisions, anti-overlap heuristics, and sync execution discipline.
 - `internal-agent-development` owns structural changes to the agent itself, including mandatory engine-skill architecture and boundary rewrites.
-- `openai-skill-creator` supports authoring when one concrete skill needs creation or major redesign.
+- `internal-skill-creator` owns repository-owned skill authoring and should be the first local route when one concrete skill needs creation, replacement, or major redesign.
+- `openai-skill-creator` covers only the remaining bundle mechanics during that work; it should not replace the local decision gate or duplicate repository-owned routing logic.
 
 Do not collapse these roles back into one file just because the current task touches all of them.
 
@@ -57,8 +61,11 @@ Do not collapse these roles back into one file just because the current task tou
 | Installed external-prefixed asset still useful and declared in scope | Refresh in place |
 | Thin alias, fallback copy, or deprecated variant | Delete the weaker asset |
 | Broken or stale asset with no unique value | Retire it |
+| Installed capability is still distinct but low-frequency or on-demand | Keep it as dormant support depth and document why; do not wrap it unless the root wrapper threshold is met |
 | Agent body becoming procedural or duplicative | Extract procedure into this skill or the right internal skill |
 | Agent routing or engine-skill split changing materially | Use `internal-agent-development` |
+
+Load `references/catalog-decision-checklist.md` when you need the detailed keep/update/extract/retire heuristics or overlap tests.
 
 ## Workflow
 
@@ -78,6 +85,7 @@ Use these heuristics:
 - Keep both only when they serve clearly different intents.
 - Merge only when the surviving asset becomes easier to trigger and easier to maintain.
 - Delete when one asset is just a noisier, thinner, or less structured version of another.
+- Keep dormant imported or internal capabilities when they still provide distinct on-demand value and the root wrapper threshold is not met.
 - Create or update an internal asset when the capability is strategic for this repository and should not depend on external wording or lifecycle.
 - Refresh an in-scope external-prefixed asset only when it still adds distinct value to the declared managed catalog.
 
@@ -88,7 +96,7 @@ Required frontmatter for skills:
 ```yaml
 ---
 name: internal-example
-description: Clear trigger language that says what the skill does and when to use it.
+description: Clear trigger language that says when the skill should be used.
 ---
 ```
 
@@ -96,6 +104,7 @@ Rules:
 
 - `name:` must match the directory name exactly.
 - Put trigger language in `description:`, not buried in the body.
+- Keep `description:` focused on triggering conditions; do not summarize the workflow there.
 - Keep repository-facing text in English.
 - Keep the local canonical identifier when refreshing an installed external-prefixed asset.
 - Do not keep runtime-specific clutter, compatibility prose, or history-preserving aliases unless policy explicitly requires them.
@@ -112,20 +121,7 @@ When a sync workflow needs evidence that a managed resource truly changed:
 - Record source, target path, normalization version, and content hash when a retained manifest materially improves safety.
 - Keep any retained sync evidence under repository-root `tmp/` and treat it as auxiliary workflow output, not catalog policy.
 - Do not introduce hashing manifests or helper scripts as decorative machinery; add them only when they clearly reduce false positives, repeated work, or unsafe refresh decisions.
-
-Current fingerprinting contract:
-
-- Use `sha256` for both raw and normalized content.
-- Keep `source_hash` for raw bytes and `content_hash` for normalized content.
-- Normalize line endings, trailing whitespace, and final newline before hashing text resources.
-- Treat section order as meaningful in `v1`; do not silently reorder markdown or frontmatter content.
-- Include `resource_id`, `kind`, `target_path`, `source_ref`, `normalization_version`, and `metadata` in each manifest entry.
-
-Output paths:
-
-- Skill-level temporary manifests should default to `tmp/superpowers/internal-agent-sync-control-center.manifest.json`.
-- Additional ad hoc comparison outputs for this skill should stay under repository-root `tmp/superpowers/`.
-- The canonical repository sync manifest remains `.github/copilot-sync.manifest.json` and is owned by `.github/scripts/lib/syncing.py`, not by this skill.
+- Use the normalization rules, manifest schema, and output defaults from `references/fingerprinting-contract.md` instead of forking them inline.
 
 ### 5. Re-check Governance Immediately
 
@@ -135,38 +131,6 @@ After catalog changes:
 - Re-check `.github/copilot-instructions.md` for repo-wide projection drift.
 - Re-check `.github/INVENTORY.md` for exact path accuracy.
 - Re-check nearby agents and skills for stale references, decorative declarations, or broken ownership assumptions.
-
-## Overlap Review Checklist
-
-Delete or replace an asset when most of these are true:
-
-- The description triggers on the same requests as another installed asset.
-- The competing asset is more structured or more complete.
-- The weaker asset adds no distinctive workflow.
-- The weaker asset routes to missing resources or stale instructions.
-- The repository already has an internal asset that should own the domain.
-
-Keep specialized subskills only when they narrow trigger space instead of broadening collision.
-
-## Refresh Rules
-
-When refreshing an installed external-prefixed asset:
-
-1. Keep the existing local identifier and prefix.
-2. Preserve only the capability that still maps to the current repository.
-3. Remove stale runtime assumptions, deprecated frontmatter, and broken bundled references.
-4. Do not add new sibling assets from the same family unless the user explicitly expands scope.
-5. Update governance files only when routing or inventory meaningfully changes.
-
-## Extraction Rules
-
-When `internal-sync-control-center` or a nearby sync asset is turning into a knowledge dump:
-
-1. Keep the agent cohesive around routing, managed scope, approval posture, and orchestration.
-2. Move long reusable procedures into this skill or the right existing internal skill.
-3. Use `internal-agent-development` if the extraction changes the agent's structural contract.
-4. Point the agent at the canonical skill explicitly.
-5. Keep the extracted workflow reusable outside the single current task.
 
 ## Validation
 

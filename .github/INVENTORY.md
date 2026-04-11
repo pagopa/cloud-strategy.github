@@ -5,13 +5,9 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 ## Instructions
 
 - `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
-- `.github/instructions/awesome-copilot-copilot-sdk-python.instructions.md`
 - `.github/instructions/awesome-copilot-go.instructions.md`
-- `.github/instructions/awesome-copilot-instructions.instructions.md`
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
-- `.github/instructions/awesome-copilot-oop-design-patterns.instructions.md`
 - `.github/instructions/awesome-copilot-shell.instructions.md`
-- `.github/instructions/awesome-copilot-springboot.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
 - `.github/instructions/internal-github-action-composite.instructions.md`
@@ -34,9 +30,7 @@ No prompt files currently ship in the live catalog.
 
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
-- `.github/skills/antigravity-aws-serverless/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
-- `.github/skills/antigravity-domain-driven-design/SKILL.md`
 - `.github/skills/antigravity-golang-pro/SKILL.md`
 - `.github/skills/antigravity-grafana-dashboards/SKILL.md`
 - `.github/skills/antigravity-kubernetes-architect/SKILL.md`
@@ -54,15 +48,18 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-agent-operating-model-engine/SKILL.md`
 - `.github/skills/internal-agent-routing-engine/SKILL.md`
 - `.github/skills/internal-agent-sync-control-center/SKILL.md`
+- `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
 - `.github/skills/internal-aws-organization-structure/SKILL.md`
+- `.github/skills/internal-aws-serverless/SKILL.md`
 - `.github/skills/internal-aws-strategic/SKILL.md`
 - `.github/skills/internal-azure-governance/SKILL.md`
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
 - `.github/skills/internal-azure-strategic/SKILL.md`
+- `.github/skills/internal-change-impact-analysis/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cicd-workflow/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
@@ -70,7 +67,8 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-composite-action/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-copilot-docs-research/SKILL.md`
-- `.github/skills/internal-data-registry/SKILL.md`
+- `.github/skills/internal-copilot-instructions-creator/SKILL.md`
+- `.github/skills/internal-ddd/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-gcp-governance/SKILL.md`
@@ -81,7 +79,8 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-github-operations/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
-- `.github/skills/internal-pair-architect/SKILL.md`
+- `.github/skills/internal-kubernetes/SKILL.md`
+- `.github/skills/internal-oop-design-patterns/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
 - `.github/skills/internal-pr-editor/SKILL.md`
 - `.github/skills/internal-project-java/SKILL.md`
@@ -89,7 +88,8 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
-- `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
+- `.github/skills/internal-skill-creator/SKILL.md`
+- `.github/skills/internal-spring-boot-development/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`
 - `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
@@ -104,7 +104,6 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/obra-using-superpowers/SKILL.md`
 - `.github/skills/obra-verification-before-completion/SKILL.md`
 - `.github/skills/obra-writing-plans/SKILL.md`
-- `.github/skills/obra-writing-skills/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
@@ -117,11 +116,6 @@ No prompt files currently ship in the live catalog.
 
 ## Agents
 
-- `.github/agents/awesome-copilot-azure-principal-architect.agent.md`
-- `.github/agents/awesome-copilot-critical-thinking.agent.md`
-- `.github/agents/awesome-copilot-devils-advocate.agent.md`
-- `.github/agents/awesome-copilot-devops-expert.agent.md`
-- `.github/agents/awesome-copilot-plan.agent.md`
 - `.github/agents/internal-critical-challenger.agent.md`
 - `.github/agents/internal-fast-executor.agent.md`
 - `.github/agents/internal-planning-leader.agent.md`

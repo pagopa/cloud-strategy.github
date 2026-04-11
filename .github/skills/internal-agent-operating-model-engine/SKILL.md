@@ -1,6 +1,6 @@
 ---
 name: internal-agent-operating-model-engine
-description: Share the canonical boundary model, recommendation protocol, medium-task thresholds, OBRA workflow policy, skill ownership rules, and anti-overlap checks for the repository-owned operational agents. Use when `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, or `internal-critical-challenger` need the same operating model.
+description: Use when one of the four canonical operational agents needs the shared boundary, recommendation, medium-task, and anti-overlap policy.
 ---
 
 # Internal Agent Operating Model Engine
@@ -26,7 +26,7 @@ Implications:
 | `internal-fast-executor` | Clear, local execution with concrete verification and limited risk | Strategic tradeoffs, ambiguous scope, broad authoring, review-first asks, or critical challenge |
 | `internal-planning-leader` | Ambiguity resolution, decision records, plans, repository-owned authoring, rollout and governance decisions | Default local execution once the design is settled, defect-first review, or pure challenge |
 | `internal-review-guard` | Review, validation, merge readiness, regression risk, evidence gaps, and defect-first findings | Implementation, initial design ownership, or open-ended strategic challenge |
-| `internal-critical-challenger` | Pre-mortems, assumption stress tests, failure modes, and strong objections | Implementation, routine technical review, or final operational planning |
+| `internal-critical-challenger` | Pre-mortems, assumption stress tests, alternative framings, failure modes, and strong objections | Implementation, routine technical review, or final operational planning |
 
 ## Medium-Task Thresholds
 
@@ -48,7 +48,7 @@ Implications:
 
 ## Boundary Recommendation Protocol
 
-Only `internal-router` actively routes between owners and may dispatch to the selected canonical owner. The four canonical owners may be entered either directly by the user or by router handoff, but once active they stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating.
+Only `internal-router` actively routes between owners and may dispatch to the selected canonical owner. The four canonical owners may be entered either directly by the user or by router handoff, but once active they stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating unless a narrower scoped contract explicitly allows invoking `internal-router` as a second parallel lane while leaving downstream owner selection to the router.
 
 | Agent | Stay owner when | Boundary breaks when | Recommend |
 | --- | --- | --- | --- |
@@ -56,7 +56,7 @@ Only `internal-router` actively routes between owners and may dispatch to the se
 | `internal-planning-leader` | Ambiguity, cross-boundary tradeoffs, repository-owned authoring, or rollout decisions still need active ownership. | The design is settled and the next step is routine local execution. | `internal-fast-executor` |
 | `internal-review-guard` | The task is defect-first review, merge readiness, regression analysis, or evidence gathering. | Findings reveal missing design or weak boundaries. | `internal-planning-leader` |
 | `internal-review-guard` | The task is still review-owned but weak reasoning becomes the dominant gap. | Pressure-testing the reasoning matters more than technical review. | `internal-critical-challenger` |
-| `internal-critical-challenger` | The task is assumption testing, a pre-mortem, or failure-mode analysis. | The framing or plan must be reformulated. | `internal-planning-leader` |
+| `internal-critical-challenger` | The task is assumption testing, a pre-mortem, lateral reframing, or failure-mode analysis. | The framing or plan must be reformulated. | `internal-planning-leader` |
 | `internal-critical-challenger` | The task remains challenge-owned until the reasoning survives scrutiny. | Evidence-based validation becomes the next need. | `internal-review-guard` |
 
 Recommendation should name the reason, not only the suggested owner, and the user decides whether to switch.
@@ -71,42 +71,22 @@ Use this policy across all canonical agents:
 - Do not create 1:1 decorative engine skills for symmetry alone.
 - A shared engine is preferable when the same reusable rules would otherwise drift across multiple agents.
 
-## Skill Ownership Model
+Load `references/ownership-maps.md` when you need:
 
-| Skill | Primary owner | When it wins |
-| --- | --- | --- |
-| `internal-agent-routing-engine` | `internal-router` | Front-door classification, fail-safe selection, and dispatch to one canonical owner |
-| `internal-agent-operating-model-engine` | Shared by the four canonical agents | Shared boundary, recommendation, and anti-overlap logic |
-| `internal-code-review` | `internal-review-guard` | Tactical review engine for findings and defect-first analysis |
-| `internal-agent-development` | `internal-planning-leader` | Non-trivial repository-owned agent authoring |
-| `internal-copilot-audit` | `internal-planning-leader` | Catalog audit, drift analysis, and stale-reference review |
-| `internal-copilot-docs-research` | `internal-planning-leader` | Contract questions that depend on current GitHub Copilot or MCP behavior |
-| `internal-pair-architect` | `internal-planning-leader` | Change-impact and architecture-risk analysis |
-| `internal-terraform`, `internal-cicd-workflow`, and runtime-specific internal skills | `internal-fast-executor` for local execution, `internal-planning-leader` when design or rollout dominates | Tactical delivery versus strategy split |
-| `obra-*` workflows | Cross-agent support | Mandatory when relevant, absent when irrelevant |
+- the current canonical skill-to-owner lookup
+- the retired-to-canonical owner mapping
+- the shorthand rules for cloud and runtime skills inside the operational model
 
 ## Relationship Model
 
 - `internal-router` owns the front door only. It may hand the task to one canonical owner, but it does not implement, plan, review, or challenge by itself.
 - The four canonical owners may be entered directly by the user or by router handoff; the entry path does not widen their boundary.
+- A canonical non-router may invoke `internal-router` only when a narrower scoped contract explicitly allows a second parallel lane and the non-router does not choose the downstream owner itself.
 - `internal-planning-leader` absorbs the role previously covered by `internal-ai-resource-creator` when the work is non-trivial repository-owned authoring.
 - `internal-review-guard` must reuse `internal-code-review` instead of restating the review playbook in the agent body.
 - `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.
-- `internal-critical-challenger` should stay narrow: challenge the reasoning, synthesize the pressure test, and tell the user when planning should resume.
+- `internal-critical-challenger` should stay narrow: challenge the reasoning, reframe hidden constraints when useful, synthesize the pressure test, and tell the user when planning should resume.
 - `internal-sync-*` and `awesome-*` assets stay outside this canonical operational model.
-
-## Retired To Canonical Ownership Mapping
-
-| Retired owner | Canonical owner |
-| --- | --- |
-| `internal-ai-resource-creator` | `internal-planning-leader` |
-| `internal-architect` | `internal-planning-leader` |
-| `internal-developer` | `internal-fast-executor` |
-| `internal-infrastructure` | `internal-fast-executor` or `internal-planning-leader` when design or rollout dominates |
-| `internal-cicd` | `internal-fast-executor` or `internal-planning-leader` when orchestration or tradeoffs dominate |
-| `internal-code-review` | `internal-review-guard` |
-| `internal-quality-engineering` | `internal-review-guard` for validation and risk, `internal-fast-executor` for a clear fix |
-| `internal-aws-*`, `internal-azure-*`, `internal-gcp-*` | `internal-planning-leader` for strategy or design, `internal-fast-executor` for clear local execution |
 
 ## Anti-Overlap Checklist
 

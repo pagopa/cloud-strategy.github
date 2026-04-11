@@ -1,13 +1,19 @@
 ---
 name: internal-kubernetes-deployment
-description: Kubernetes deployment design, production manifests, rollout safety, probes, autoscaling, ingress, Helm packaging, config and secret handling, network policy, observability hooks, and operational hardening. Use when authoring or reviewing Kubernetes deployment assets, workload topology, or production rollout guidance.
+description: Use when authoring or reviewing Kubernetes workload manifests, service exposure, probes, autoscaling, rollout strategy, or production-readiness settings for an already-chosen platform or cluster model.
 ---
 
 # Internal Kubernetes Deployment
 
-Use this skill for production-grade Kubernetes deployment decisions.
+Use this skill for operational Kubernetes delivery work after the platform direction is already known.
 
-## Baseline Workflow
+## Boundary
+
+- Use `internal-kubernetes` when the right Kubernetes lane is still unclear or the request mixes platform architecture with delivery work.
+- Use `antigravity-kubernetes-architect` for cluster architecture, GitOps operating model, service mesh, or multi-cluster strategy.
+- Keep this skill focused on workload manifests, rollout safety, and production hardening.
+
+## Operational Workflow
 
 1. Identify workload type: stateless, stateful, batch, or platform component.
 2. Choose the right controller: Deployment, StatefulSet, Job, or CronJob.
@@ -31,6 +37,7 @@ Use this skill for production-grade Kubernetes deployment decisions.
 - Prefer raw manifests by default; add Helm only when repeated installs, versioned packaging, or environment overlays justify chart maintenance.
 - Treat service mesh integration as conditional: configure traffic policy, mTLS, and mesh telemetry only when the cluster already runs a mesh or the platform standard requires it.
 - Prefer controller-driven delivery such as GitOps only when the team already operates that model and the rollout ownership is explicit.
+- Let `awesome-copilot-kubernetes-manifests.instructions.md` own YAML-level manifest conventions when the target files are manifests.
 
 ## Operational Rules
 

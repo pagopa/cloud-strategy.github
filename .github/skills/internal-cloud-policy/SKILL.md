@@ -1,6 +1,6 @@
 ---
 name: internal-cloud-policy
-description: Use when the user mentions cloud policies, organization policies, guardrails, service control policies, policy-as-code, deny rules, or compliance rules for AWS, Azure, or GCP.
+description: Use when authoring, comparing, or reviewing concrete cloud policy definitions such as AWS SCPs, Azure Policy, or GCP Org Policy, especially for cross-cloud policy shape or rollout safety.
 ---
 
 # Cloud Policy Skill
@@ -9,6 +9,10 @@ description: Use when the user mentions cloud policies, organization policies, g
 - Create or modify governance policy definitions (AWS SCP, Azure Policy, GCP Org Policy).
 - Update policy scope, conditions, or effects.
 - Normalize policy structure for reviewability and rollout safety.
+
+## Boundary
+- Use this skill for concrete policy artifacts or cross-cloud policy comparisons.
+- Use `internal-aws-governance`, `internal-azure-governance`, or `internal-gcp-governance` when the main question is IAM, RBAC, operating-model, or guardrail strategy rather than the policy definition itself.
 
 ## Mandatory rules
 - Keep scope explicit (organization / folder / subscription / project / management group).
