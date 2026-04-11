@@ -1,9 +1,9 @@
 ---
-name: internal-composite-action
+name: internal-github-composite-action
 description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially for shared step logic that should not become a full reusable workflow.
 ---
 
-# Composite Action Skill
+# GitHub Composite Action Skill
 
 ## When to use
 - Create a new reusable composite action under `.github/actions/`.

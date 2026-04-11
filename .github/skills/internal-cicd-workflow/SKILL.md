@@ -27,7 +27,7 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 |---|---|
 | Simple job sequence (build → test → deploy) | Single workflow with dependent jobs |
 | Shared steps across 3+ workflows in the same repo | Reusable workflow (`workflow_call`) |
-| Shared steps across multiple repositories | Composite action (see `internal-composite-action`) |
+| Shared steps across multiple repositories | Composite action (see `internal-github-composite-action`) |
 | Conditional deployment per environment | Environment protection rules + manual approval |
 
 ## Auth and workflow examples
@@ -48,7 +48,7 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 | Duplicating steps across workflows instead of reusable workflow or composite | Maintenance burden grows with every copy | Extract to reusable workflow (same repo) or composite action (cross-repo) |
 
 ## Cross-references
-- **internal-composite-action** (`.github/skills/internal-composite-action/SKILL.md`): for reusable composite actions shared across repos.
+- **internal-github-composite-action** (`.github/skills/internal-github-composite-action/SKILL.md`): for reusable composite actions shared across repos.
 - **internal-terraform** (`.github/skills/internal-terraform/SKILL.md`): for the Terraform resources deployed by CI/CD.
 
 ## Checklist
