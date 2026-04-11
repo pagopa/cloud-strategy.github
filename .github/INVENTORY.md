@@ -6,7 +6,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 - `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
 - `.github/instructions/awesome-copilot-go.instructions.md`
-- `.github/instructions/awesome-copilot-instructions.instructions.md`
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
 - `.github/instructions/awesome-copilot-shell.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
@@ -64,6 +63,7 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-cicd-workflow/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
+- `.github/skills/internal-copilot-instructions-creator/SKILL.md`
 - `.github/skills/internal-composite-action/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-copilot-docs-research/SKILL.md`

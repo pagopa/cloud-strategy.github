@@ -9,9 +9,9 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 
 ## Live Catalog Summary
 
-- Instructions: 18 total (`13 internal-*`, `5 awesome-copilot-*`)
+- Instructions: 17 total (`13 internal-*`, `4 awesome-copilot-*`)
 - Prompts: 0 total
-- Skills: 84 total (`43 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `7 openai-*`, `2 terraform-*`)
+- Skills: 85 total (`44 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `9 antigravity-*`, `7 openai-*`, `2 terraform-*`)
 - Agents: 12 total (`7 internal-*`, `5 awesome-copilot-*`)
 - Scripts: 17 total
 - Workflows: 1 total
@@ -40,7 +40,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 Instructions are path-driven and auto-apply via `applyTo`.
 
 - Repository-owned `internal-*` instructions: `internal-bash`, `internal-docker`, `internal-github-action-composite`, `internal-github-actions`, `internal-java`, `internal-json`, `internal-lambda`, `internal-makefile`, `internal-markdown`, `internal-nodejs`, `internal-python`, `internal-terraform`, `internal-yaml`
-- Imported `awesome-copilot-*` instructions: `awesome-copilot-azure-devops-pipelines`, `awesome-copilot-go`, `awesome-copilot-instructions`, `awesome-copilot-kubernetes-manifests`, `awesome-copilot-shell`
+- Imported `awesome-copilot-*` instructions: `awesome-copilot-azure-devops-pipelines`, `awesome-copilot-go`, `awesome-copilot-kubernetes-manifests`, `awesome-copilot-shell`
 
 Use instructions as automatic file-path guidance. Do not hardcode instruction references into prompts when `applyTo` already resolves the behavior.
 

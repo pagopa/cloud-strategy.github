@@ -97,7 +97,6 @@ Managed instructions:
 
 - `awesome-copilot-azure-devops-pipelines.instructions.md`
 - `awesome-copilot-go.instructions.md`
-- `awesome-copilot-instructions.instructions.md`
 - `awesome-copilot-kubernetes-manifests.instructions.md`
 - `awesome-copilot-shell.instructions.md`
 
