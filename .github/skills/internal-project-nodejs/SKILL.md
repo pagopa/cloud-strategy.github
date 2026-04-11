@@ -49,10 +49,6 @@ Load `references/examples.md` when you need a minimal module or test example.
 | Changing module system casually | Breaks tooling, imports, and runtime behavior | Stay with the existing ESM/CJS choice unless the migration is explicit |
 | Using `Promise.all` on dependent work | Masks ordering assumptions and makes failures harder to interpret | Keep dependent async steps sequential |
 
-## Cross-references
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Node.js code (see `.github/skills/internal-code-review/references/anti-patterns-nodejs.md`).
-- **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Node.js apps.
-
 ## Validation
 - Run tests: `node --test` or `npm test`.
 - Lint: `npx eslint .` when configured.

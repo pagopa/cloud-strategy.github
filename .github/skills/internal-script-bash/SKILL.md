@@ -33,10 +33,6 @@ Load `references/templates.md` when you need the starter script, the standard ar
 | Destructive commands without rerun safety | Repeated execution can corrupt state or surprise operators | Add `--dry-run` and make the mutation idempotent |
 | Rewriting parser or cleanup scaffolding from scratch | Operator UX and failure handling drift between scripts | Reuse the starter and helper patterns from `references/templates.md` |
 
-## Cross-references
-- **internal-github-composite-action** (`.github/skills/internal-github-composite-action/SKILL.md`): for Bash inside composite actions.
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Bash code (see `.github/skills/internal-code-review/references/anti-patterns-bash.md`).
-
 ## Validation
 - `bash -n script.sh` (syntax check)
 - `shellcheck -s bash script.sh` (lint)

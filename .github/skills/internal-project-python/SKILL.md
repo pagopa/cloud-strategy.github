@@ -12,10 +12,10 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 - Refactoring or extending existing Python application components.
 - Reusable Python code whose primary contract is imported behavior rather than operator-facing execution.
 
-## Boundary with internal-script-python
-- **This skill**: structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
-- **internal-script-python**: standalone operational tools, CLI entrypoints, and small script toolkits whose primary contract is direct execution.
-- A `lib/` folder, root-level tests, or multiple entrypoints alone do not make a tool `internal-project-python`.
+## Boundary
+- This skill covers structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
+- Small operator-facing tools remain out of scope even when they have multiple files or tests.
+- A `lib/` folder, root-level tests, or multiple entrypoints alone do not make a tool application code.
 
 ## Application-specific guidance
 - Use type hints on public APIs and keep data contracts explicit.
@@ -55,11 +55,6 @@ Load `references/examples.md` when you need a minimal module or test example.
 | Mocking internal implementation details | Makes tests brittle and hides real regressions | Mock only true external boundaries |
 | Treating line coverage as the goal | Inflates test volume without improving defect detection | Target coverage around changed behavior and risky paths |
 | God classes with 10+ methods | Hard to test, hard to reason about | Split by responsibility into focused classes |
-
-## Cross-references
-- **internal-script-python** (`.github/skills/internal-script-python/SKILL.md`): for standalone scripts.
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `.github/skills/internal-code-review/references/anti-patterns-python.md`).
-- **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Python apps.
 
 ## Validation
 - `python -m compileall <paths>` (syntax check)

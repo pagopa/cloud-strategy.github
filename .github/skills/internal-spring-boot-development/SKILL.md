@@ -5,7 +5,7 @@ description: Use when Spring Boot framework choices drive the work, such as cont
 
 # Internal Spring Boot Development
 
-Follow `.github/instructions/internal-java.instructions.md` and `.github/skills/internal-project-java/SKILL.md` for the baseline Java rules. Use this skill only when the Spring Boot framework choices materially affect the design, wiring, testing, or configuration.
+Follow `.github/instructions/internal-java.instructions.md` for the baseline Java rules. Use this skill only when the Spring Boot framework choices materially affect the design, wiring, testing, or configuration.
 
 ## Workflow
 

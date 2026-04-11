@@ -26,7 +26,7 @@ Load `references/examples.md` when you need a minimal class or test example.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
 ## Spring coordination
-- Keep Spring-specific design decisions lightweight here and use `internal-spring-boot-development` when controller, configuration, repository, or test-slice choices dominate the task.
+- Keep Spring-specific design decisions lightweight here and treat controller, configuration, repository, or test-slice-heavy work as a separate framework-focused lane.
 - Prefer constructor injection with `private final` dependencies and keep transaction boundaries narrow.
 
 ## Modern Java guidance
@@ -48,12 +48,6 @@ Load `references/examples.md` when you need a minimal class or test example.
 | Exposing JPA entities directly from controllers | Leaks persistence shape into the API and couples layers | Map entities to request/response DTOs |
 | Adding virtual threads without checking execution model | Can mask blocking or context propagation issues | Adopt them only when runtime support and workload fit are clear |
 | Over-using inheritance for code reuse | Rigid hierarchies, fragile base class problem | Prefer composition and delegation |
-
-## Cross-references
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Java code (see `.github/skills/internal-code-review/references/anti-patterns-java.md`).
-- **internal-docker** (`.github/skills/internal-docker/SKILL.md`): for containerizing Java apps.
-- **internal-oop-design-patterns** (`.github/skills/internal-oop-design-patterns/SKILL.md`): for object collaboration refactors and pattern selection that go beyond baseline Java guidance.
-- **internal-spring-boot-development** (`.github/skills/internal-spring-boot-development/SKILL.md`): for Spring Boot-specific application, configuration, persistence, and test decisions.
 
 ## Validation
 - Compile with `mvn compile` or `gradle build`.
