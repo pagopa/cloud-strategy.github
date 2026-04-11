@@ -200,6 +200,19 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - the contract stays projected where Copilot or governance flows rely on it
   - root `AGENTS.md` may point to the repo-wide projection but does not need to carry the full formatting contract
 
+#### `reporting-retained-learning-ledger-stays-governed`
+
+- Goal: preserve retained learning without turning it into shadow policy.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `LESSONS.md`
+- Expected behavior:
+  - repository-root `LESSONS.md` exists as a non-canonical learning ledger
+  - completed tasks add only durable, reusable lessons that were not already codified when discovered
+  - no ledger update is required when no stable new lesson emerged
+  - retained entries stay concise, safe to keep, and point to canonical owners when the lesson is codified elsewhere
+
 ### Future Automation Constraints
 
 #### `future-automation-reads-canonical-ownership`

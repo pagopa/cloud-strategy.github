@@ -6,6 +6,9 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-12
+- Added a retained-learning governance contract: root `AGENTS.md` now defines repository-root `LESSONS.md` as a non-canonical ledger for durable lessons learned during completed tasks, `.github/copilot-instructions.md` projects the same behavior into native Copilot flows, `INTERNAL_CONTRACT.md` source-governs the invariant, and the new `LESSONS.md` file records retained lessons with canonical-owner pointers.
+
 ## 2026-04-11
 - Tightened the Python skill split instead of collapsing it: clarified the shared baseline in `.github/instructions/internal-python.instructions.md`, sharpened `internal-project-python` around structured package and application boundaries, and expanded `internal-script-python` plus its layout reference to cover the repository-aligned toolkit pattern used under `.github/scripts/` with shared `lib/`, hash-locked `requirements.txt`, shared `run.sh`, root-level tests, and thin wrapper entrypoints.
 - Renamed the sync engine skill from `.github/skills/internal-sync-global-copilot-configs-into-repo/` to `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/`, then realigned the paired agent contract and skill invocation metadata to the new canonical skill name.

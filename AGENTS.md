@@ -59,6 +59,14 @@ This file is the stable entrypoint for the repository instruction architecture.
 - When a sync or catalog workflow changes a repository-wide default, update the canonical owner first and then realign downstream projections or sync surfaces in the same pass.
 - Do not treat removed validators, sync scripts, contract tests, or historical aliases as active policy unless they exist on disk and are reintroduced deliberately.
 
+## Retained Learning
+
+- Root `LESSONS.md` is the repository learning ledger for durable lessons discovered while completing tasks.
+- Record only lessons that were not already codified in repository resources when discovered and that are likely to help future work beyond the current task.
+- Keep `LESSONS.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, prompts, skills, or agents.
+- Do not store secrets, transient debugging notes, or task-local chatter. If no durable lesson emerged, leave the ledger unchanged.
+- When a lesson becomes codified elsewhere, keep the ledger entry short and point to the canonical owner, or remove it if the ledger no longer adds value.
+
 ## Volatile Artifacts
 
 - Transient planning, brainstorming, and other Superpowers-generated working files must not be written under `docs/`.

@@ -67,9 +67,18 @@ You are an expert software and platform engineer. Protect correctness, security,
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with a release or tag reference.
 - `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
 
+## Retained Learning
+
+- After a completed task, check whether the work produced any new durable lessons that were not already codified in repository resources when discovered.
+- When it did, update repository-root `LESSONS.md` in English with concise, reusable, deduplicated entries.
+- Treat `LESSONS.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
+- If the same task also codified the lesson into `AGENTS.md`, this file, a scoped instruction, a prompt, a skill, or an agent, keep the `LESSONS.md` entry short and point to that canonical owner.
+- If no durable lesson emerged, do not force a `LESSONS.md` change.
+
 ## Completion Report
 
 - End completed operations with `✅ Outcome`.
 - When used, also include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources`.
 - In each included section, state which resources were used and why they were relevant.
+- When `LESSONS.md` was updated, mention it under `📦 Other Resources` with a short reason.
 - Omit unused categories instead of adding empty or negative sections.
