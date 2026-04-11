@@ -53,6 +53,7 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
 - `.github/skills/internal-aws-organization-structure/SKILL.md`
+- `.github/skills/internal-aws-serverless/SKILL.md`
 - `.github/skills/internal-aws-strategic/SKILL.md`
 - `.github/skills/internal-azure-governance/SKILL.md`
 - `.github/skills/internal-azure-operations/SKILL.md`

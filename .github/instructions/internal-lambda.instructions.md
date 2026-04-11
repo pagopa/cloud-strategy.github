@@ -32,6 +32,7 @@ applyTo: "**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts"
 - When the event source supports partial batch failure reporting, enable it and return only failed record identifiers for retry.
 
 ## Runtime cross-references
+- For AWS-specific Lambda implementation patterns, load `.github/skills/internal-aws-serverless/SKILL.md` when the task needs API Gateway, SQS, packaging, or cold-start guidance.
 - For Python Lambdas, also follow `.github/instructions/internal-python.instructions.md`.
 - For JavaScript or TypeScript Lambdas, also follow `.github/instructions/internal-nodejs.instructions.md`.
 
