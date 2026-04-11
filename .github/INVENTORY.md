@@ -8,9 +8,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/instructions/awesome-copilot-go.instructions.md`
 - `.github/instructions/awesome-copilot-instructions.instructions.md`
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
-- `.github/instructions/awesome-copilot-oop-design-patterns.instructions.md`
 - `.github/instructions/awesome-copilot-shell.instructions.md`
-- `.github/instructions/awesome-copilot-springboot.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
 - `.github/instructions/internal-github-action-composite.instructions.md`
@@ -80,6 +78,7 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-github-operations/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
+- `.github/skills/internal-oop-design-patterns/SKILL.md`
 - `.github/skills/internal-pair-architect/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
 - `.github/skills/internal-pr-editor/SKILL.md`
@@ -88,6 +87,7 @@ No prompt files currently ship in the live catalog.
 - `.github/skills/internal-project-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
+- `.github/skills/internal-spring-boot-development/SKILL.md`
 - `.github/skills/internal-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`

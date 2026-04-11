@@ -99,9 +99,7 @@ Managed instructions:
 - `awesome-copilot-go.instructions.md`
 - `awesome-copilot-instructions.instructions.md`
 - `awesome-copilot-kubernetes-manifests.instructions.md`
-- `awesome-copilot-oop-design-patterns.instructions.md`
 - `awesome-copilot-shell.instructions.md`
-- `awesome-copilot-springboot.instructions.md`
 
 ### `obra/superpowers`
 
