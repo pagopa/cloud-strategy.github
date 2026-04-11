@@ -27,6 +27,6 @@ Immediate removal is allowed only for security or compliance issues. The removal
 ## Current deprecations
 - `.github/skills/antigravity-domain-driven-design/SKILL.md`: **Removed**. Consolidated into `.github/skills/internal-ddd/SKILL.md`.
 - `.github/skills/internal-data-registry/SKILL.md`: **Removed**. Retired from the live catalog after confirming no remaining live references.
-- `scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the `internal-sync-global-copilot-configs-into-repo` agent and skill workflow.
+- `scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the `internal-sync-global-copilot-configs-into-repo` agent and the `internal-agent-sync-global-copilot-configs-into-repo` skill workflow.
 - `skills/internal-terraform-feature/SKILL.md`: **Removed**. Merged into `skills/internal-terraform/SKILL.md`.
 - `skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into `skills/internal-terraform/SKILL.md`.
