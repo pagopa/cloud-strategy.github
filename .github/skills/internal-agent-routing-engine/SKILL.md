@@ -16,6 +16,7 @@ This skill owns the reusable routing logic. The router stays short: classify, as
 - Ask at most one targeted clarification question with two clear options, and only when it materially improves routing confidence.
 - If confidence does not reach a safe routing decision after that question, fail safe to `internal-planning-leader` and hand off there.
 - Dispatch only to the four canonical owners: `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`.
+- If the router is entered as an explicit second parallel lane from another canonical owner, preserve that current lane as context and classify only the parallel operational request.
 - Preserve the user's exact request plus any already-collected evidence instead of forcing the selected owner to re-triage from scratch.
 - Do not implement through the router.
 
@@ -97,6 +98,7 @@ After selecting the canonical owner, hand off a compact package that includes:
 - `route_label`
 - `confidence`
 - `routing_rationale`
+- `current_lane` when the router was entered as a second parallel lane
 - `user_request`
 - `relevant_constraints`
 - `already_collected_evidence`

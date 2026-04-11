@@ -23,7 +23,7 @@ This folder contains deliberate custom agents for repository-owned operational r
 - This repository keeps a deliberate set of source-side command-center agents under `.github/agents/`.
 - Prefer one cohesive agent per recurring operational or governance workflow.
 - Keep the operational front door explicit, keep the four canonical owners non-overlapping, and keep reusable logic in skills instead of bloating agent bodies.
-- Keep active delegation in `internal-router` only; the four canonical owners define boundaries and recommend a better owner instead of handing off automatically.
+- Keep downstream owner selection in `internal-router` only; canonical owners define boundaries and recommend a better owner instead of handing off automatically unless a scoped contract explicitly allows invoking `internal-router` as a second parallel lane.
 - Technology is resolved from file paths and prompt inputs (for example, `**/*.py` -> Python instructions).
 - Prefer prompts and skills for detailed task procedures unless a dedicated agent file is present.
 

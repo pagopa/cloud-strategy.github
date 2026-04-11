@@ -38,7 +38,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 ## Operational Owner Model
 
 - `internal-router` remains the only active front-door router for the canonical operational catalog.
-- `internal-router` may hand work to one selected canonical owner without becoming the domain owner itself; non-router canonical agents may be entered directly or by router handoff, but remain recommendation-only when their boundary breaks.
+- `internal-router` may hand work to one selected canonical owner without becoming the domain owner itself; non-router canonical agents may be entered directly or by router handoff, but remain recommendation-only when their boundary breaks unless a narrower scoped contract explicitly allows invoking `internal-router` as a second parallel lane while keeping `internal-router` as the only router.
 
 ## Projection Rules
 

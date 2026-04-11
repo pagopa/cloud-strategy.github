@@ -48,7 +48,7 @@ Implications:
 
 ## Boundary Recommendation Protocol
 
-Only `internal-router` actively routes between owners and may dispatch to the selected canonical owner. The four canonical owners may be entered either directly by the user or by router handoff, but once active they stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating.
+Only `internal-router` actively routes between owners and may dispatch to the selected canonical owner. The four canonical owners may be entered either directly by the user or by router handoff, but once active they stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating unless a narrower scoped contract explicitly allows invoking `internal-router` as a second parallel lane while leaving downstream owner selection to the router.
 
 | Agent | Stay owner when | Boundary breaks when | Recommend |
 | --- | --- | --- | --- |
@@ -89,6 +89,7 @@ Use this policy across all canonical agents:
 
 - `internal-router` owns the front door only. It may hand the task to one canonical owner, but it does not implement, plan, review, or challenge by itself.
 - The four canonical owners may be entered directly by the user or by router handoff; the entry path does not widen their boundary.
+- A canonical non-router may invoke `internal-router` only when a narrower scoped contract explicitly allows a second parallel lane and the non-router does not choose the downstream owner itself.
 - `internal-planning-leader` absorbs the role previously covered by `internal-ai-resource-creator` when the work is non-trivial repository-owned authoring.
 - `internal-review-guard` must reuse `internal-code-review` instead of restating the review playbook in the agent body.
 - `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.
