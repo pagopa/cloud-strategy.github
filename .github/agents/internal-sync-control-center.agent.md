@@ -163,7 +163,6 @@ Managed skills:
 - `aws-cost-optimizer` -> `antigravity-aws-cost-optimizer`
 - `aws-serverless` -> `antigravity-aws-serverless`
 - `cloudformation-best-practices` -> `antigravity-cloudformation-best-practices`
-- `domain-driven-design` -> `antigravity-domain-driven-design`
 - `golang-pro` -> `antigravity-golang-pro`
 - `grafana-dashboards` -> `antigravity-grafana-dashboards`
 - `kubernetes-architect` -> `antigravity-kubernetes-architect`
