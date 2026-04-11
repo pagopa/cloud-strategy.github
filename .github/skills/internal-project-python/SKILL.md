@@ -1,6 +1,6 @@
 ---
 name: internal-project-python
-description: Create or modify Python application components with clear separation of concerns, async/framework judgment, and deterministic pytest coverage. Use when building Python services, FastAPI/Flask apps, Python libraries, module scaffolding, or service layers.
+description: Create or modify structured Python package and application components with clear separation of concerns, async/framework judgment, and deterministic pytest coverage. Use when building Python services, FastAPI/Flask apps, Python libraries, module scaffolding, or service layers.
 ---
 
 # Python Project Skill
@@ -8,13 +8,14 @@ description: Create or modify Python application components with clear separatio
 Follow `.github/instructions/internal-python.instructions.md` for the baseline Python rules. This skill adds application-specific guidance only.
 
 ## When to use
-- Services, use cases, adapters, and modules in Python applications.
+- Services, use cases, adapters, packages, and modules in Python applications.
 - Refactoring or extending existing Python application components.
-- Non-script Python code that contains business behavior.
+- Reusable Python code whose primary contract is imported behavior rather than operator-facing execution.
 
 ## Boundary with internal-script-python
-- **This skill**: application components inside a structured project with package layout (services, use cases, adapters).
-- **internal-script-python**: standalone scripts (`scripts/`, CLI tools, one-off automation).
+- **This skill**: structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
+- **internal-script-python**: standalone operational tools, CLI entrypoints, and small script toolkits whose primary contract is direct execution.
+- A `lib/` folder, root-level tests, or multiple entrypoints alone do not make a tool `internal-project-python`.
 
 ## Application-specific guidance
 - Use type hints on public APIs and keep data contracts explicit.

@@ -7,6 +7,7 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-11
+- Tightened the Python skill split instead of collapsing it: clarified the shared baseline in `.github/instructions/internal-python.instructions.md`, sharpened `internal-project-python` around structured package and application boundaries, and expanded `internal-script-python` plus its layout reference to cover the repository-aligned toolkit pattern used under `.github/scripts/` with shared `lib/`, hash-locked `requirements.txt`, shared `run.sh`, root-level tests, and thin wrapper entrypoints.
 - Renamed the sync engine skill from `.github/skills/internal-sync-global-copilot-configs-into-repo/` to `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/`, then realigned the paired agent contract and skill invocation metadata to the new canonical skill name.
 - Updated `.github/scripts/lib/internal_skills.py` so documented workflow outputs under `tmp/` are treated as virtual paths during internal-skill validation, then refreshed `.github/README.md` to match the live tracked agent catalog and current source-side script entrypoints.
 - Consolidated the imported `.github/skills/antigravity-domain-driven-design/` guidance into the repository-owned `.github/skills/internal-ddd/` skill, then removed the imported DDD skill and the obsolete `.github/skills/internal-data-registry/` bundle from the live catalog while realigning source-catalog docs and audit notes.

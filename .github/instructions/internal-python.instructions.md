@@ -24,9 +24,9 @@ applyTo: "**/*.py"
 - Do not add local vendored libraries, wheelhouses, copied site-packages, fallback dependency mirrors, or deprecated alternate dependency paths unless explicitly requested.
 
 ## Use the right Python skill
-- Load `.github/skills/internal-project-python/SKILL.md` for structured application code, service boundaries, async judgment, and application test shape.
-- Load `.github/skills/internal-script-python/SKILL.md` for standalone tool layout, launcher rules, dependency choices, and script runtime orchestration.
-- Keep this instruction as the shared auto-loaded baseline; keep app-vs-script workflow detail in the paired skills.
+- Load `.github/skills/internal-project-python/SKILL.md` for structured package or application code, reusable library boundaries, async judgment, and application test shape.
+- Load `.github/skills/internal-script-python/SKILL.md` for standalone operational tools, toolkit layout, launcher rules, dependency choices, and script runtime orchestration.
+- Keep this instruction as the shared auto-loaded baseline; keep the standalone-tool versus structured-package workflow detail in the paired skills.
 
 ## Dependency lock example
 
