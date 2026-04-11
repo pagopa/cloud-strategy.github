@@ -53,6 +53,9 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Prefer the simplest correct change.
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
+- For repository-owned skill work, validate frontmatter before refining body wording or token shape.
+- Keep repository-owned skill `description:` lines trigger-first, and do not rewrite a working route during token optimization unless improving retrieval is the explicit goal.
+- Prefer `references/` over new `scripts/` for static checklists, lookup tables, and starter templates; add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - Keep Python tests under the repository-root `tests/` tree with mirrored source paths, and make Bash wrappers runnable with internal defaults plus optional overrides.
 - Run the applicable validation that actually exists for the files you changed.
 - If a dedicated validator, sync script, or contract test suite does not exist, report the gap and use the closest existing verification instead.

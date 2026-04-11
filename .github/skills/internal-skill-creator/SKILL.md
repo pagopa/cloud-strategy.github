@@ -39,7 +39,7 @@ Use `internal-agent-development` when the primary output is an agent change or a
 - The task is catalog governance, inventory maintenance, or sync routing. Use `internal-agent-sync-control-center` instead.
 - The task is primarily agent authoring or agent/skill architecture. Use `internal-agent-development` instead.
 - The task is outside `.github/skills/` or does not change a repository-owned skill.
-- The existing skill already covers the need and only a small wording or routing tweak is required.
+- The existing skill already covers the need and the change is a pure copyedit that does not affect retrieval, boundary, validation, or bundle structure.
 
 ## Division of labor
 
@@ -83,12 +83,17 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - Start by checking whether an existing repository-owned skill can be reused, narrowed, or updated in place.
 - Do not create a new skill until you can state the concrete failure, ambiguity, or repeated authoring miss it must prevent.
 - Require a baseline failure before a new or materially revised skill is accepted. If the undesired behavior has not been observed, the case is not ready.
+- Check frontmatter integrity before debating trigger wording. Broken frontmatter is a structural failure, not a content-polish issue.
 - Treat skills as reusable reference guides, not narratives about how one task was solved once.
+- Review the nearest competing skills before editing. Retrieval quality is judged against neighboring owners, not in isolation.
 - Prefer the smallest change that fixes the local problem.
 - Keep `description:` trigger-only. It should say when the skill applies, not summarize the workflow.
+- Prefer tightening a description or adding one boundary note over a broad rewrite when that fixes the observed miss.
 - Use active, searchable naming when creating a new skill. Prefer direct verbs or action-shaped names over abstract labels when that improves retrieval.
 - Make descriptions searchable with concrete terms people would actually type: skill, trigger, `.github/skills/`, `SKILL.md`, create, replace, revise, update, reuse, validation.
+- Preserve a working `description:` during token optimization unless the baseline shows the route itself is the problem.
 - Keep the body lean. Put only the local contract in `SKILL.md` and move optional depth into references or reusable tools when repeated need justifies it.
+- Prefer `references/` over new `scripts/` for static tables, starter templates, and audit taxonomies. Add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - Keep cross-references explicit instead of duplicating large chunks of generic bundle guidance.
 - Do not mirror the full OpenAI bundle workflow in this skill. Point to it when the remaining task is already covered there.
 - A good outcome may be reuse, narrowing, deletion, or replacement. Do not let the workflow bias toward creating another skill.

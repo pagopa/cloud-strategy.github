@@ -4,6 +4,14 @@ Use this reference when the audit needs detailed flagging criteria instead of on
 
 ## What To Flag
 
+### Frontmatter integrity
+
+Flag an asset when:
+
+- a repository-owned skill or agent does not start with a valid YAML frontmatter block
+- YAML parsing fails, so route and metadata checks are no longer trustworthy
+- review discussion is focusing on wording even though structural metadata is already broken
+
 ### Hollow assets
 
 Flag an asset when:
@@ -52,6 +60,24 @@ Flag a pair or group when:
 - one asset is a workflow bundle built from missing dependencies
 - one asset broadens trigger space without adding real capability
 - a new internal asset fully supersedes an upstream one
+
+### Skill route quality
+
+Flag a repository-owned skill when:
+
+- `description:` reads like a capability summary or mini workflow instead of a trigger
+- `description:` mixes too many adjacent domains or quietly widens the lane with "helpful" wording
+- the body widens the boundary beyond what the description should own
+- a wrapper skill replays a full upstream workflow instead of enforcing the local gate and pointing to the right references
+
+### Token-shape drift
+
+Flag a repository-owned skill when:
+
+- static lookup tables, starter templates, or taxonomies stay inline even though `references/` would carry them cleanly
+- new scripts were added mainly to hold static guidance rather than deterministic repeated execution
+- shared owner maps or canonical checklists are copied into multiple wrappers instead of one canonical owner
+- a long body is being treated as a problem even though there is no retrieval drift, maintenance drift, or duplicated guidance
 
 ### Bridge problems
 
