@@ -15,4 +15,6 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
-| - | No pending lessons currently. | - | - |
+| 2026-04-12 | For repo-owned standards work that deepens parallel skill sets, split planning into staged working documents under `tmp/superpowers/`, make anti-scope explicit, and sequence in-place parity work (`Common mistakes`, `Validation`, existing reference depth) before optional new skills, validators, or shared assets. | Pending | .github/copilot-instructions.md |
+| 2026-04-12 | For provider-specific cloud skills, keep guidance provider-native and omit cross-cloud comparison or cloud-selection content when provider choice is already upstream of skill activation. | Pending | .github/copilot-instructions.md |
+| 2026-04-12 | In source-of-truth guidance repositories, judge new GitHub Actions depth against downstream reuse needs, but keep auto-loaded instructions lean and move advanced patterns into skill references. | Pending | .github/copilot-instructions.md |

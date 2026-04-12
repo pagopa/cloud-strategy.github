@@ -70,7 +70,8 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Retained Learning
 
-- Root `LESSONS.md` is the repository learning ledger for durable lessons discovered while completing tasks.
+- Root `LESSONS.md` is the repository learning ledger for durable lessons discovered during repository work, regardless of phase.
+- Record or codify a durable lesson as soon as it becomes clear enough to be reusable; do not wait for task completion only because the work is still in planning, review, debugging, or implementation.
 - Keep `LESSONS.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
 - Durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons.
 - Keep detailed retained-learning behavior in `.github/copilot-instructions.md`; keep only the strategic boundary here.
