@@ -21,6 +21,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 - `AGENTS.md` owns repository-wide defaults, rule placement, and bridge behavior.
 - `.github/copilot-instructions.md` projects the repo-wide behavior that must remain visible in native Copilot flows and must stay aligned with this file.
 - Narrower scoped instructions may override defaults only inside their declared scope.
+- Before adding a new policy, decide whether it truly belongs at repository scope; prefer the smallest specific instruction, skill, agent, or configuration that fully owns the behavior, and promote it to `AGENTS.md` only when it changes cross-surface governance or applies across the AI configuration baseline.
 - When rules conflict, prefer the smallest valid scope; if scope is equal, follow the canonical rule stated here and remove the conflicting duplicate.
 
 ## Language Default
@@ -70,12 +71,12 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Retained Learning
 
-- Root `LESSONS.md` is the repository learning ledger for durable lessons discovered during repository work, regardless of phase.
+- Root `LESSONS_LEARNED.md` is the repository learning ledger for durable lessons discovered during repository work, regardless of phase.
 - Record or codify a durable lesson as soon as it becomes clear enough to be reusable; do not wait for task completion only because the work is still in planning, review, debugging, or implementation.
 - When a validator, IDE, schema check, or runtime error overturns an earlier implementation assumption, re-evaluate retained learning immediately instead of treating the correction as task-local by default.
 - When correctness depends on vendor-owned workflow semantics, schema constraints, or context availability, read the primary documentation before editing or asserting that a change is valid.
-- Keep `LESSONS.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
-- Keep `LESSONS.md` append-preserving by default: preserve unrelated rows already on disk, including local uncommitted lessons, and change a specific row only when that same lesson is being codified, disproven, narrowed, or deduplicated.
+- Keep `LESSONS_LEARNED.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
+- Keep `LESSONS_LEARNED.md` append-preserving by default: preserve unrelated rows already on disk, including local uncommitted lessons, and change a specific row only when that same lesson is being codified, disproven, narrowed, or deduplicated.
 - Durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons.
 - Keep detailed retained-learning behavior in `.github/copilot-instructions.md`; keep only the strategic boundary here.
 

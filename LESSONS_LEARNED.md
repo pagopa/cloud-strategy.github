@@ -9,7 +9,9 @@ This file retains durable lessons discovered while completing tasks in this repo
 - Also record durable corrections to repeated or consequential misapplication of already-codified repository rules when that correction is likely to prevent future mistakes.
 - When a validator, IDE, schema check, or runtime error overturns an earlier assumption, re-check immediately whether the correction is durable enough to retain until it is codified or deliberately dropped.
 - Before deciding whether to retain, codify, or drop such a correction, read the relevant primary documentation instead of relying on memory alone.
+- Prefer the smallest canonical home: if the correction belongs in a scoped instruction, skill, agent, or repository config and is being codified there, do not retain a duplicate lesson row.
 - Keep only stable, reusable, repository-relevant lessons.
+- Do not retain incident-specific or implementation-specific fixes that are too narrow to reuse beyond the triggering task or log.
 - Exclude secrets, transient debugging notes, raw conversation logs, and task-local noise.
 - Keep new or still-uncodified lessons in the pending table until they are codified or deliberately dropped.
 - Add a new lesson by appending one new row to the pending table; do not regenerate, reorder, or rewrite unrelated rows.

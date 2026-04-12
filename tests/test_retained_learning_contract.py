@@ -12,7 +12,7 @@ def read_text(relative_path: str) -> str:
 def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
     expected_contracts: dict[str, list[str]] = {
         "AGENTS.md": [
-            "Keep `LESSONS.md` append-preserving by default",
+            "Keep `LESSONS_LEARNED.md` append-preserving by default",
             "preserve unrelated rows already on disk, including local uncommitted lessons",
             (
                 "change a specific row only when that same lesson is being codified, "
@@ -20,17 +20,17 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
             ),
         ],
         ".github/copilot-instructions.md": [
-            "Before editing repository-root `LESSONS.md`, read its current on-disk contents",
+            "Before editing repository-root `LESSONS_LEARNED.md`, read its current on-disk contents",
             "including uncommitted rows already present on disk",
-            "append one concise, reusable row to the pending table in `LESSONS.md`",
+            "append one concise, reusable row to the pending table in `LESSONS_LEARNED.md`",
             "do not regenerate, reorder, or rewrite unrelated rows",
             (
-                "Preserve unrelated existing lessons in `LESSONS.md`, including local "
+                "Preserve unrelated existing lessons in `LESSONS_LEARNED.md`, including local "
                 "uncommitted ones already on disk"
             ),
             "update or remove only that lesson's row before completion",
         ],
-        "LESSONS.md": [
+        "LESSONS_LEARNED.md": [
             "Before editing this file, read its current on-disk contents",
             "including local uncommitted rows already present on disk",
             (

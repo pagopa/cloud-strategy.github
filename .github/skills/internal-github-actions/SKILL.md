@@ -54,6 +54,7 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 | Missing `environment` protection on production deploys | Anyone who can push to the branch can deploy to production | Add an environment with required reviewers |
 | Letting `workflow_dispatch` inputs flow directly into shell or deploy steps | Free-form input becomes a control path without validation | Validate and normalize inputs in an early step or job |
 | Using `runner.temp` or other runner-scoped contexts in workflow-root `env` or `jobs.<job_id>.env` | The workflow fails validation before it even queues | Use `runner` only in keys that allow it, or derive the path from runner environment variables inside `run` |
+| Treating a cache miss or restore notice as the failing condition | You stop at an informational setup line and fix the wrong thing | Find the first failed step and confirm whether the action can actually fail on that message |
 | Using timestamp-driven or branch-only cache keys | Cache hits become noisy, stale, or misleading across runs | Key caches from lockfiles, tool versions, and other stable inputs |
 | Uploading artifacts without explicit name or retention | Review and deploy handoffs become ambiguous and harder to clean up | Name artifacts deliberately and set `retention-days` |
 | Duplicating steps across workflows instead of reusable workflow or composite action | Maintenance burden grows with every copy | Extract to a reusable workflow in one repo or a composite action across repos |
@@ -79,6 +80,7 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 
 - `actionlint` on workflow files, if available.
 - When expressions use non-global contexts, compare each workflow key against GitHub's official context-availability table.
+- For CI-log debugging, verify the first failed step before treating earlier cache or setup lines as causal.
 - Verify there is no `permissions: write-all` and no missing permissions block where least privilege matters.
 - Verify all third-party `uses:` lines reference full SHAs instead of tags.
 - Re-check that every referenced local guide resolves before treating the skill update as complete.

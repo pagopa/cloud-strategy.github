@@ -24,8 +24,10 @@ LEGACY_AGENT_TOOL_IDS = {
 IGNORED_SYNC_FILENAMES = {"README.md", "CHANGELOG.md"}
 IGNORED_SYNC_PARTS = {"__pycache__", ".venv"}
 CONSUMER_SYNC_EXCLUDED_PREFIX = "internal-sync-"
+LESSONS_PATH = "LESSONS_LEARNED.md"
 MANAGED_ROOT_FILES = (
     "AGENTS.md",
+    LESSONS_PATH,
     ".editorconfig",
     ".pre-commit-config.yaml",
     ".github/copilot-instructions.md",
@@ -86,6 +88,7 @@ class SyncPlan:
     operations: tuple[SyncOperation, ...]
     local_assets: tuple[str, ...]
     generated_inventory: str
+    generated_lessons: str | None = None
     generated_gitignore: str | None = None
 
     def to_dict(self) -> dict[str, object]:

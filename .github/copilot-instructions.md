@@ -82,19 +82,19 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
 - When a validator, IDE, schema check, or runtime error overturns an earlier assumption, immediately re-check whether that correction is durable enough to retain or codify.
 - Before finalizing such a correction, read the primary documentation for the relevant platform or schema instead of relying on memory or partial recall.
-- Before editing repository-root `LESSONS.md`, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including uncommitted rows already present on disk.
-- When a durable lesson is clear and still uncodified, append one concise, reusable row to the pending table in `LESSONS.md` instead of waiting for task completion; do not regenerate, reorder, or rewrite unrelated rows.
+- Before editing repository-root `LESSONS_LEARNED.md`, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including uncommitted rows already present on disk.
+- When a durable lesson is clear and still uncodified, append one concise, reusable row to the pending table in `LESSONS_LEARNED.md` instead of waiting for task completion; do not regenerate, reorder, or rewrite unrelated rows.
 - If you decide not to record a lesson after such a correction, make that decision explicit in the completion report with a short reason.
-- Treat `LESSONS.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
-- Preserve unrelated existing lessons in `LESSONS.md`, including local uncommitted ones already on disk.
+- Treat `LESSONS_LEARNED.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
+- Preserve unrelated existing lessons in `LESSONS_LEARNED.md`, including local uncommitted ones already on disk.
 - If a lesson is later disproven, narrowed, deduplicated, or codified elsewhere in the same task, update or remove only that lesson's row before completion.
-- If the same task also codifies the lesson into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent, remove that corresponding row from `LESSONS.md` instead of keeping a codified duplicate there.
-- If no durable lesson emerged, do not force a `LESSONS.md` change.
+- If the same task also codifies the lesson into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent, remove that corresponding row from `LESSONS_LEARNED.md` instead of keeping a codified duplicate there.
+- If no durable lesson emerged, do not force a `LESSONS_LEARNED.md` change.
 
 ## Completion Report
 
 - End completed operations with `✅ Outcome`.
 - When used, also include `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`.
 - In each included section, state which resources were used and why they were relevant.
-- When `LESSONS.md` was updated, mention it under `📦 Other Resources` with a short reason.
+- When `LESSONS_LEARNED.md` was updated, mention it under `📦 Other Resources` with a short reason.
 - Omit unused categories instead of adding empty or negative sections.

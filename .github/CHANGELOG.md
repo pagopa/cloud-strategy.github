@@ -7,14 +7,15 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-12
+- Renamed the repository-root retained-learning ledger to `LESSONS_LEARNED.md`, then realigned the retained-learning contract, sync automation, and tests to use the new canonical path.
 - Aligned `.pre-commit-config.yaml` and expanded `.editorconfig` with file-type defaults for Python, shell, Terraform/HCL, YAML, JSON/TOML, Markdown, Make, and local config files so the repo and synced consumers get a practical editor baseline without the formatter ping-pong that left `pre-commit` failing with no visible git diff.
 - Expanded the cross-repository sync baseline to include `.editorconfig`, `.pre-commit-config.yaml`, and `.github/workflows/terraform-pre-commit.yml`, then updated the sync agent/skill contract and sync planner tests to keep that scope explicit and narrow.
 - Renamed the workflow skill from `internal-cicd-workflow` to `internal-github-actions`, renamed `internal-github-composite-action` to `internal-github-action-composite`, and realigned the GitHub Actions instructions so the umbrella instruction is the family baseline while the composite instruction now carries only composite-specific delta guidance.
-- Added a retained-learning governance contract: root `AGENTS.md` now defines repository-root `LESSONS.md` as a non-canonical ledger for durable lessons learned during completed tasks, `.github/copilot-instructions.md` projects the same behavior into native Copilot flows, `INTERNAL_CONTRACT.md` source-governs the invariant, and the new `LESSONS.md` file records retained lessons with canonical-owner pointers.
+- Added a retained-learning governance contract: root `AGENTS.md` now defines repository-root `LESSONS_LEARNED.md` as a non-canonical ledger for durable lessons learned during completed tasks, `.github/copilot-instructions.md` projects the same behavior into native Copilot flows, `INTERNAL_CONTRACT.md` source-governs the invariant, and the new `LESSONS_LEARNED.md` file records retained lessons with canonical-owner pointers.
 - Slimmed the retained-learning section in root `AGENTS.md` so the bridge keeps only strategic ownership and boundary language while `.github/copilot-instructions.md` remains the detailed operational projection.
-- Expanded the retained-learning contract so `LESSONS.md` may also keep durable corrections to repeated or consequential misapplication of already-codified repository rules, then recorded the bridge-vs-projection lesson for `AGENTS.md` and `.github/copilot-instructions.md`.
-- Restructured `LESSONS.md` into two tables so new or still-pending lessons stay separate from codified rules.
-- Simplified `LESSONS.md` again so it now keeps only pending lessons; once a lesson is codified into a canonical owner, it is removed from the ledger instead of being duplicated there.
+- Expanded the retained-learning contract so `LESSONS_LEARNED.md` may also keep durable corrections to repeated or consequential misapplication of already-codified repository rules, then recorded the bridge-vs-projection lesson for `AGENTS.md` and `.github/copilot-instructions.md`.
+- Restructured `LESSONS_LEARNED.md` into two tables so new or still-pending lessons stay separate from codified rules.
+- Simplified `LESSONS_LEARNED.md` again so it now keeps only pending lessons; once a lesson is codified into a canonical owner, it is removed from the ledger instead of being duplicated there.
 
 ## 2026-04-11
 - Tightened the Python skill split instead of collapsing it: clarified the shared baseline in `.github/instructions/internal-python.instructions.md`, sharpened `internal-project-python` around structured package and application boundaries, and expanded `internal-script-python` plus its layout reference to cover the repository-aligned toolkit pattern used under `.github/scripts/` with shared `lib/`, hash-locked `requirements.txt`, shared `run.sh`, root-level tests, and thin wrapper entrypoints.
