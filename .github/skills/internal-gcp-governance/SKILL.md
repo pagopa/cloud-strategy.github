@@ -73,10 +73,21 @@ For broader asks, return:
 - `internal-gcp-operations`
   Use when the next need is preflight, reporting, validation, inventory, or operational evidence after the governance design is chosen.
 
-## Anti-patterns
+## Common mistakes
 
-- treating Org Policy as if it grants access
-- answering a governance question without naming scope
-- mixing org-wide guardrails and project-level authorization into one vague recommendation
-- proposing service account or emergency access without boundaries or audit expectations
-- recommending rollout without staged validation when the blast radius is high
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Treating Org Policy as if it grants access | Preventive governance gets confused with authorization | Pair Org Policy guidance with the IAM path that actually grants access |
+| Answering a governance question without naming scope | Org, folder, and project controls behave differently | State the exact governance scope before recommending a mechanism |
+| Mixing org-wide guardrails and project-level authorization into one vague recommendation | Reviewers cannot see what prevents versus what grants | Separate Org Policy or inheritance posture from IAM bindings and workload identity design |
+| Proposing service account or emergency access without boundaries or audit expectations | Privilege becomes durable and hard to review | Define who can use it, how it is bounded, and what evidence must exist |
+| Recommending rollout without staged validation when the blast radius is high | A wide deny or identity failure can interrupt platform operations | Use targeted rollout, explicit rollback, and verification before widening scope |
+| Treating workload identity federation as a reason to skip service-account boundary design | Keys may disappear but privilege can still stay too broad | Keep identity mechanism and authorization scope as separate decisions |
+
+## Validation
+
+- Confirm the governance scope is explicit: org, folder set, or project set.
+- Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains workload identity.
+- Confirm service-account and human-access boundaries are explicit when access crosses project or folder boundaries.
+- Confirm staged rollout validation is named before high-blast-radius Org Policy or IAM changes.
+- Confirm the answer says when operational proof should move to `internal-gcp-operations`.

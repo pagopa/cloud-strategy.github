@@ -76,10 +76,21 @@ For broader asks, return:
 - `awesome-copilot-azure-resource-health-diagnose`
   Use as depth support when the Azure resource is already identified and the next need is deep health diagnosis, log and telemetry analysis, or a remediation plan for that specific resource.
 
-## Anti-patterns
+## Common mistakes
 
-- treating monitoring as proof that restore or recovery works
-- skipping preflight for high-blast-radius rollout
-- reporting only control intent without operational evidence
-- mixing validation advice with new governance design instead of keeping the boundary clear
-- giving a DR answer without making the business criticality assumption visible
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Treating monitoring as proof that restore or recovery works | Healthy dashboards do not prove recovery viability | Keep monitoring evidence, backup proof, and restore proof as separate lines |
+| Skipping preflight for high-blast-radius rollout | Policy, identity, or connectivity failures surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
+| Reporting only control intent without operational evidence | The platform appears compliant without proof that it works | Record what Azure Monitor, Log Analytics, backup, or compliance signals actually showed |
+| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Policy or RBAC design in `internal-azure-governance` and validate it here |
+| Giving a DR answer without making the business criticality assumption visible | Recovery guidance can be overbuilt or incomplete | State the assumed criticality, RTO, or RPO before recommending the validation path |
+| Treating one successful rollout wave as proof for all subscriptions or regions | Wider inheritance, network, or residency paths can still fail differently | Validate the first safe unit and widen only after recording real evidence |
+
+## Validation
+
+- Confirm the answer distinguishes confirmed evidence from inferred evidence.
+- Confirm preflight checks, rollback trigger, and rollout unit are explicit for risky changes.
+- Confirm Azure Monitor or Log Analytics signals are named for the affected surface, not as a generic checklist.
+- Confirm backup proof and restore proof are treated as separate validation paths when state exists.
+- Confirm DR or continuity notes are included only when business criticality or recovery posture is actually in scope.

@@ -70,10 +70,21 @@ For broader asks, return:
 - `internal-github-governance`
   Use when the operations question is actually about rulesets, permissions, OIDC, secret posture, or guardrail design rather than validation.
 
-## Anti-patterns
+## Common mistakes
 
-- treating workflow success as proof that permissions or guardrails are correct
-- skipping preflight for high-blast-radius rollout
-- reporting only intended policy without operational evidence
-- mixing validation advice with new governance design instead of keeping the boundary clear
-- giving a continuity answer without making the build or release criticality assumption visible
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Treating workflow success as proof that permissions or guardrails are correct | A single green run can hide excessive privilege or missing failure paths | Check expected permission boundaries, audit trails, and negative cases as separate signals |
+| Skipping preflight for high-blast-radius rollout | Ruleset, token, runner, or environment regressions surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
+| Reporting only intended policy without operational evidence | Governance looks correct on paper without proof that delivery still works | Record what workflows, runners, and audit surfaces actually showed |
+| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new guardrail design in `internal-github-governance` and validate it here |
+| Giving a continuity answer without making the build or release criticality assumption visible | Continuity guidance can be overbuilt or incomplete | State the assumed pipeline or release criticality before recommending the evidence path |
+| Treating one successful rollout wave as proof for all repositories or environments | Wider repo sets or runner groups can still fail differently | Validate the first safe unit and widen only after recording real evidence |
+
+## Validation
+
+- Confirm the answer distinguishes confirmed evidence from inferred evidence.
+- Confirm preflight checks, rollback trigger, and rollout unit are explicit for risky changes.
+- Confirm workflow, runner, and audit signals are named for the affected surface, not as a generic checklist.
+- Confirm permission proof and operational proof are treated as separate validation paths.
+- Confirm continuity notes are included only when build, release, or repository criticality is actually in scope.

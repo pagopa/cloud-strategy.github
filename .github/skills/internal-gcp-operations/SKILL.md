@@ -74,10 +74,21 @@ For broader asks, return:
 - `internal-gcp-governance`
   Use when the operations question is actually about IAM, workload identity, Org Policy, or guardrail design rather than validation.
 
-## Anti-patterns
+## Common mistakes
 
-- treating monitoring as proof that restore or recovery works
-- skipping preflight for high-blast-radius rollout
-- reporting only control intent without operational evidence
-- mixing validation advice with new governance design instead of keeping the boundary clear
-- giving a DR answer without making the business criticality assumption visible
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Treating monitoring as proof that restore or recovery works | Healthy metrics do not prove recovery viability | Keep monitoring evidence, backup proof, and restore proof as separate lines |
+| Skipping preflight for high-blast-radius rollout | IAM, Org Policy, or Shared VPC regressions surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
+| Reporting only control intent without operational evidence | The platform appears compliant without proof that it works | Record what Monitoring, Logging, asset inventory, or recovery exercises actually showed |
+| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Org Policy or IAM design in `internal-gcp-governance` and validate it here |
+| Giving a DR answer without making the business criticality assumption visible | Recovery guidance can be overbuilt or incomplete | State the assumed criticality, RTO, or RPO before recommending the evidence path |
+| Treating one successful rollout wave as proof for all folders or projects | Wider inheritance or network paths can still fail differently | Validate the first safe unit and widen only after recording real evidence |
+
+## Validation
+
+- Confirm the answer distinguishes confirmed evidence from inferred evidence.
+- Confirm preflight checks, rollback trigger, and rollout unit are explicit for risky changes.
+- Confirm Monitoring, Logging, and inventory signals are named for the affected surface, not as a generic checklist.
+- Confirm backup proof and restore proof are treated as separate validation paths when state exists.
+- Confirm DR or continuity notes are included only when business criticality or recovery posture is actually in scope.
