@@ -7,17 +7,20 @@ Use this reference when the paired agent or this skill needs the exact sync rule
 Mirror these source-managed paths into the consumer repository:
 
 - `AGENTS.md`
+- `.editorconfig`
+- `.pre-commit-config.yaml`
 - `.github/copilot-instructions.md`
 - `.github/copilot-code-review-instructions.md`
 - `.github/copilot-commit-message-instructions.md`
 - `.github/security-baseline.md`
 - `.github/DEPRECATION.md`
 - `.github/repo-profiles.yml`
+- `.github/workflows/terraform-pre-commit.yml`
 - `.github/agents/**`
 - `.github/instructions/**`
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
 
-Do not sync `README.md`, changelogs, workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
+Do not sync `README.md`, changelogs, other workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
 Do not sync consumer-facing resources whose file or directory name starts with `internal-sync-`; those remain source-only operational controls for the standards repository.
 
 ## Target Rules

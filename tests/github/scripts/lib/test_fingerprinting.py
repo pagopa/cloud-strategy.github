@@ -3,9 +3,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from lib.fingerprinting import (build_fingerprint, build_manifest,
-                                collect_files, diff_manifests, load_manifest,
-                                normalize_content, render_diff_text)
+from lib.fingerprinting import (
+    build_fingerprint,
+    build_manifest,
+    collect_files,
+    diff_manifests,
+    load_manifest,
+    normalize_content,
+    render_diff_text,
+)
 
 
 def write_file(path: Path, content: str) -> None:

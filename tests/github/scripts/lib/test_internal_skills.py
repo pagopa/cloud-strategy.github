@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.internal_skills import (detect_internal_skill_findings,
-                                 markdown_targets, resolve_reference,
-                                 validate_internal_skill)
+from lib.internal_skills import (
+    detect_internal_skill_findings,
+    markdown_targets,
+    resolve_reference,
+    validate_internal_skill,
+)
 
 
 def write_file(path: Path, content: str) -> None:

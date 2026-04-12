@@ -26,6 +26,8 @@ IGNORED_SYNC_PARTS = {"__pycache__", ".venv"}
 CONSUMER_SYNC_EXCLUDED_PREFIX = "internal-sync-"
 MANAGED_ROOT_FILES = (
     "AGENTS.md",
+    ".editorconfig",
+    ".pre-commit-config.yaml",
     ".github/copilot-instructions.md",
     ".github/copilot-code-review-instructions.md",
     ".github/copilot-commit-message-instructions.md",
@@ -33,6 +35,7 @@ MANAGED_ROOT_FILES = (
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",
 )
+MANAGED_WORKFLOW_FILES = (".github/workflows/terraform-pre-commit.yml",)
 LOCAL_COPILOT_OVERRIDES_PATH = ".github/local-copilot-overrides.md"
 INVENTORY_PATH = ".github/INVENTORY.md"
 
