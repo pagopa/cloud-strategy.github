@@ -14,6 +14,8 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 - Start with `contents: read` and add write scopes only when the job requires them.
 - Avoid `pull_request_target` for untrusted code.
 - Pass secrets only through `secrets.*` or protected environments; never hardcode them in `env`.
+- For production deployments, use protected `environment:` gates with required reviewers instead of relying on branch conditions alone.
+- Treat self-hosted runners as trusted infrastructure and scope them to the repositories, runner groups, and network access they actually need.
 
 ## Family baseline
 - Use clear English step names and deterministic outputs.
@@ -22,9 +24,10 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 - Prefer reusable workflows (`workflow_call`) for repeated job orchestration inside one repository.
 - Prefer smaller jobs with explicit `needs` over monolithic workflows when phases are logically separate.
 - Use `if` conditions deliberately for branch, event, and environment-specific execution.
-- Keep cache and artifact usage explicit, deterministic, and scoped to real reuse.
-- Use self-hosted runners only for justified hardware, network, or cost reasons, and note the security and maintenance tradeoff.
+- Keep cache keys deterministic from lockfiles, tool versions, or other stable inputs instead of timestamps or branch-only entropy.
+- Set explicit artifact `retention-days` when artifacts bridge review, release, or deploy stages.
+- Validate `workflow_dispatch` free-form inputs before shell, deploy, or infrastructure steps consume them.
 
 ## Use the skill for deeper guidance
-- Load `.github/skills/internal-github-actions/SKILL.md` for workflow-vs-reusable-vs-composite decisions, reusable workflow patterns, and examples.
+- Load `.github/skills/internal-github-actions/SKILL.md` for workflow-vs-reusable-vs-composite decisions, reusable workflow templates, cache and artifact patterns, and workflow hardening checklists.
 - Keep this instruction as the auto-loaded baseline; keep authoring depth and examples in the skill.

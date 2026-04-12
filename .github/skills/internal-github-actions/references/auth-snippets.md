@@ -7,7 +7,10 @@ permissions:
   contents: read
 
 steps:
-  - uses: aws-actions/configure-aws-credentials@<FULL_SHA>
+  - name: Configure AWS credentials
+    # aws-actions/configure-aws-credentials@v6.1.0
+    # https://github.com/aws-actions/configure-aws-credentials/releases/tag/v6.1.0
+    uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37
     with:
       role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
       aws-region: eu-south-1
@@ -25,7 +28,10 @@ permissions:
   contents: read
 
 steps:
-  - uses: azure/login@<FULL_SHA>
+  - name: Sign in to Azure
+    # Azure/login@v3.0.0
+    # https://github.com/Azure/login/releases/tag/v3.0.0
+    uses: Azure/login@93381592711f247e165c389ebb30b596c84cdc48
     with:
       client-id: ${{ secrets.AZURE_CLIENT_ID }}
       tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -44,7 +50,10 @@ permissions:
   contents: read
 
 steps:
-  - uses: google-github-actions/auth@<FULL_SHA>
+  - name: Authenticate to Google Cloud
+    # google-github-actions/auth@v3.0.0
+    # https://github.com/google-github-actions/auth/releases/tag/v3.0.0
+    uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
     with:
       workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
       service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
