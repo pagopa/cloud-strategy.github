@@ -80,10 +80,21 @@ For broader asks, return:
 - `internal-aws-operations`
   Use when the structure is accepted and the next need is validation, monitoring, backup, or operational evidence.
 
-## Anti-patterns
+## Common mistakes
 
-- treating the management account as the default operating account
-- mixing payer responsibility with day-to-day operational ownership without making the reason explicit
-- proposing OU or account layouts without a rollout scope
-- hiding global-resource or cross-region blast radius in StackSets discussions
-- using structure answers to sneak in IAM or SCP design without separating the concerns
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Treating the management account as the default operating account | It increases blast radius and weakens separation of duties | Keep the management account minimal and prefer delegated administrator accounts when AWS supports them |
+| Mixing payer responsibility with day-to-day operational ownership without making the reason explicit | Finance and platform controls drift together and are harder to change safely | State the financial owner and the operational owner separately |
+| Proposing OU or account layouts without a rollout scope | Structural changes become hard to stage or roll back | Name the smallest safe rollout unit: account, OU, or region set |
+| Hiding global-resource or cross-region blast radius in StackSets discussions | Failures spread further than the rollout plan suggests | Make regional scope, global resources, and rollback boundaries explicit |
+| Using structure answers to sneak in IAM or SCP design without separating the concerns | The lane boundary blurs and review gets weaker | Keep placement decisions in this skill and hand guardrail logic to `internal-aws-governance` |
+| Recommending shared services placement without naming service ownership | Central accounts become generic dumping grounds | State which platform capability lives centrally and which workload teams still own their execution accounts |
+
+## Validation
+
+- Confirm the placement model is explicit: management account, delegated administrator, shared-services account, or member account.
+- Confirm the smallest safe rollout unit is named and matches the proposed structural change.
+- Confirm blast radius is explicit for OU moves, delegated admin changes, StackSets rollout, or regional topology shifts.
+- Confirm financial ownership and operational ownership are separated when both appear in the answer.
+- Confirm the next handoff is clear when the user now needs guardrails or operational validation.

@@ -71,10 +71,21 @@ For broader asks, return:
 - `internal-github-operations`
   Use when the next need is preflight, audit evidence, drift checks, or validation after the governance design is chosen.
 
-## Anti-patterns
+## Common mistakes
 
-- treating permissions as if they automatically imply the right branch or environment guardrails
-- answering a governance question without naming scope
-- mixing org-wide guardrails and repository-level exceptions into one vague recommendation
-- proposing OIDC, Apps, or secret posture without naming trust boundaries
-- recommending rollout without staged validation when the blast radius is high
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Treating permissions as if they automatically imply the right branch or environment guardrails | Authorization and workflow controls get conflated | Pair permissions with the rulesets, environments, or approvals that actually constrain risky actions |
+| Answering a governance question without naming scope | Enterprise, organization, repository, and environment scopes behave differently | State the exact scope before recommending a mechanism |
+| Mixing org-wide guardrails and repository-level exceptions into one vague recommendation | Reviewers cannot see what is standard versus exceptional | Separate the baseline control from the exception path and its owner |
+| Proposing OIDC, Apps, or secret posture without naming trust boundaries | Automation trust becomes broad and hard to audit | Name what actor gets access, what boundary limits it, and what evidence must exist |
+| Recommending rollout without staged validation when the blast radius is high | Ruleset, permission, or environment errors can block delivery quickly | Use scoped rollout, validation, and explicit rollback triggers before widening |
+| Treating Copilot governance as identical to general repository permissions | Policy, licensing, and visibility needs may differ | Keep Copilot entitlement and governance posture explicit when they diverge from repo permissions |
+
+## Validation
+
+- Confirm the governance scope is explicit: enterprise, organization, repository set, or environment.
+- Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains automation.
+- Confirm trust boundaries are explicit for Apps, Actions, OIDC, secrets, or Copilot policy choices.
+- Confirm staged rollout validation is named before high-blast-radius ruleset, permission, or environment changes.
+- Confirm the answer says when operational proof should move to `internal-github-operations`.

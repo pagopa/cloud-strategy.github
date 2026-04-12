@@ -140,11 +140,21 @@ Include:
 - `internal-terraform`, `internal-script-python`, `internal-script-bash`
   Use when the decision is settled and implementation begins.
 
-## Anti-patterns
+## Common mistakes
 
-- forcing a full multi-lens analysis for a small question
-- treating BC/DR as mandatory for every answer
-- recommending a direction without current-source verification when freshness matters
-- confusing decision support with implementation guidance
-- expanding into tool selection when the user did not ask for it
-- giving generic best-practice advice without context, tradeoff, or cost implication
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Forcing a full multi-lens analysis for a small question | The answer becomes heavier than the decision requires | Start with the smallest useful lens set and widen only if risk or ambiguity justifies it |
+| Treating BC/DR as mandatory for every answer | Continuity language crowds out the actual GCP tradeoff | Activate BC/DR only when regional continuity or recovery posture changes the recommendation |
+| Recommending a direction without current-source verification when freshness matters | Product limits, Org Policy behavior, or regional support may have changed | Call out the freshness dependency and say which Google Cloud facts still need current verification |
+| Confusing decision support with implementation guidance | The user loses the strategic framing they asked for | Keep the answer at decision level and hand off only after the direction is chosen |
+| Expanding into tool or automation selection when the user did not ask for it | The response drifts from platform tradeoffs into delivery detail | Keep the recommendation centered on the GCP choice, not the tooling |
+| Giving generic best-practice advice without context, tradeoff, or cost implication | Generic advice is hard to act on and easy to misapply | Tie the recommendation to assumptions, viable options, and cost-value consequences |
+
+## Validation
+
+- Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
+- Confirm assumptions, active lenses, and the main tradeoff are named instead of implied.
+- Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.
+- Confirm cost-value or operational impact is called out when it materially changes the recommendation.
+- Confirm the answer states when freshness matters and which current Google Cloud fact still needs validation.

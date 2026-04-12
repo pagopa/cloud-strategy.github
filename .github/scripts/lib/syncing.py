@@ -11,6 +11,7 @@ from .shared import (
     INVENTORY_PATH,
     LOCAL_COPILOT_OVERRIDES_PATH,
     MANAGED_ROOT_FILES,
+    MANAGED_WORKFLOW_FILES,
     SyncOperation,
     SyncPlan,
     action_sort_key,
@@ -197,6 +198,7 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
 
 def discover_source_sync_files(root: Path) -> set[str]:
     files = {relative_path for relative_path in MANAGED_ROOT_FILES if (root / relative_path).exists()}
+    files.update(relative_path for relative_path in MANAGED_WORKFLOW_FILES if (root / relative_path).exists())
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
@@ -209,6 +211,7 @@ def discover_source_sync_files(root: Path) -> set[str]:
 
 def discover_target_managed_files(root: Path) -> set[str]:
     files = {relative_path for relative_path in MANAGED_ROOT_FILES if (root / relative_path).exists()}
+    files.update(relative_path for relative_path in MANAGED_WORKFLOW_FILES if (root / relative_path).exists())
     if (root / INVENTORY_PATH).exists():
         files.add(INVENTORY_PATH)
     files.update(all_files_under(root, ".github/agents"))

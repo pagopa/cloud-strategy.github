@@ -74,10 +74,21 @@ For broader asks, return:
 - `internal-aws-operations`
   Use when the next need is preflight, reporting, validation, or operational evidence after the governance design is chosen.
 
-## Anti-patterns
+## Common mistakes
 
-- using SCPs as if they grant access
-- answering a governance question without naming scope
-- mixing org-wide guardrails and in-account authorization into one vague recommendation
-- proposing break-glass access without boundaries or audit expectations
-- recommending rollout without simulation or staged validation when the blast radius is high
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Using SCPs as if they grant access | Preventive controls get mistaken for execution permissions | Pair SCP guidance with the required IAM grant path and keep their roles distinct |
+| Answering a governance question without naming scope | Root, OU, and account-level controls behave very differently | State the exact governance scope before recommending a mechanism |
+| Mixing org-wide guardrails and in-account authorization into one vague recommendation | Reviewers cannot see which control prevents versus grants | Separate the org-level mechanism from the account-level authorization design |
+| Proposing break-glass access without boundaries or audit expectations | Emergency access becomes a standing privilege with weak accountability | Define who can invoke it, how it is bounded, and what audit evidence must exist |
+| Recommending rollout without simulation or staged validation when the blast radius is high | A wide deny or trust failure can interrupt platform operations | Use simulation, targeted rollout, and explicit rollback triggers before widening scope |
+| Treating permission boundaries as a replacement for trust design | Delegation is still too broad even if identity policies are constrained | Use permission boundaries to limit delegated builders and trust policies to control who can assume the role |
+
+## Validation
+
+- Confirm the governance scope is explicit: root, OU, account set, or single account.
+- Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains permissions.
+- Confirm trust boundaries and exception paths are explicit when human or workload access crosses account boundaries.
+- Confirm staged validation or simulation is named before high-blast-radius rollout.
+- Confirm the answer says when operational proof should move to `internal-aws-operations`.

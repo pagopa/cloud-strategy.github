@@ -3,11 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from lib.shared import (Finding, all_files_under, dedupe_preserve_order,
-                        find_repo_root, finding_sort_key,
-                        is_consumer_sync_excluded_path, is_local_asset,
-                        path_list, resolve_markdown_target, split_frontmatter,
-                        strip_frontmatter)
+from lib.shared import (
+    Finding,
+    all_files_under,
+    dedupe_preserve_order,
+    find_repo_root,
+    finding_sort_key,
+    is_consumer_sync_excluded_path,
+    is_local_asset,
+    path_list,
+    resolve_markdown_target,
+    split_frontmatter,
+    strip_frontmatter,
+)
 
 
 def write_file(path: Path, content: str) -> None:

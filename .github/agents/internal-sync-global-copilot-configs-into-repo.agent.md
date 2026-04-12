@@ -1,6 +1,6 @@
 ---
 name: internal-sync-global-copilot-configs-into-repo
-description: Use this agent when aligning a consumer repository to the managed GitHub Copilot baseline from this standards repository. Keep the paired sync skill as the reusable sync-procedure owner, preserve target `local-*` extensions plus any `.github/local-copilot-overrides.md` layer, and keep root-guidance files aligned to their separate ownership layers.
+description: Use this agent when aligning a consumer repository to the managed GitHub Copilot baseline from this standards repository, plus the explicitly shared repository-hygiene files declared by the paired sync skill. Keep the paired sync skill as the reusable sync-procedure owner, preserve target `local-*` extensions plus any `.github/local-copilot-overrides.md` layer, and keep root-guidance files aligned to their separate ownership layers.
 tools: ["read", "edit", "search", "execute", "web", "agent"]
 agents: []
 ---
@@ -42,7 +42,7 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 - Start in `plan` by default. Move to `apply` only on explicit request and only when the plan is conflict-safe.
 - Keep target assumptions narrow and let the paired skill own the mirrored-scope and plan-file details.
 - Preserve target `local-*` assets plus any consumer-owned `.github/local-copilot-overrides.md` file, exclude repository-owned `internal-sync-*` resources from mirroring, and keep root-guidance files layered according to the paired skill contract.
-- Sync GitHub Copilot assets only unless the user explicitly expands scope.
+- Sync only the managed cross-repository baseline declared by the paired skill contract; do not expand beyond that scope unless the user explicitly asks for more.
 - Do not restate reusable sync procedure in this agent; when the contract drifts, update the paired skill first and then realign this agent.
 
 ## Routing

@@ -33,3 +33,30 @@ Use this reference when turning a structural Azure question into the right contr
 - Management groups shape policy and RBAC inheritance scope, but they do not replace subscription-level ownership.
 - Landing-zone design should keep platform topology separate from workload-by-workload implementation detail.
 - Regional placement is a structural concern when it changes connectivity, sovereignty, or continuity assumptions.
+
+## Starter management-group and subscription patterns
+
+| Pattern | When it fits | Watch for |
+| --- | --- | --- |
+| Platform MG plus workload MG split | A central platform team needs clear separation from application ownership | Do not hide production versus non-production risk boundaries inside one flat workload group |
+| Environment-first subscription families | Teams share controls and rollout cadence by environment | Keep environment naming aligned to operating reality, not only to billing labels |
+| Regulated or sovereign segment | A subset of workloads needs distinct residency, approval, or connectivity posture | Keep the segment requirement explicit so it does not become a vague exception bucket |
+| Shared connectivity and management subscriptions | Platform services need stable ownership outside workload subscriptions | Keep service purpose and landing-zone expectations explicit |
+
+## Landing-zone placement heuristics
+
+| Question | Prefer | Reason |
+| --- | --- | --- |
+| Does the capability provide shared connectivity or central policy plumbing? | Platform landing zone or dedicated platform subscription | Keeps shared controls separate from workload delivery |
+| Does the capability exist only for one workload or product boundary? | Workload landing zone or workload subscription | Avoids centralizing application-specific ownership |
+| Does residency or regulated access change the operating model? | Dedicated hierarchy or landing-zone segment | Prevents mixing incompatible policy and connectivity assumptions |
+| Does the change affect many subscriptions at once? | Management-group level placement with staged rollout | Keeps inheritance and blast radius visible |
+
+## Safe rollout-unit examples
+
+| Structural change | Start with | Widen after |
+| --- | --- | --- |
+| New management-group branch | One low-risk subscription family | Inheritance, policy scope, and operational ownership are confirmed |
+| Landing-zone baseline update | One landing zone or one environment slice | Connectivity, automation, and rollback behavior are observed |
+| Platform subscription introduction | One shared capability with named consumers | Ownership, routing, and dependency impact are validated |
+| Region or residency split | One workload set with explicit fallback | Connectivity, sovereignty controls, and continuity assumptions are proven |

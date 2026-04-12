@@ -141,11 +141,21 @@ Include:
 - `internal-github-actions`, `internal-script-python`, `internal-script-bash`
   Use when the decision is settled and implementation begins.
 
-## Anti-patterns
+## Common mistakes
 
-- forcing a full multi-lens analysis for a small question
-- treating BC/DR as mandatory for every answer
-- recommending a direction without current-source verification when freshness matters
-- confusing decision support with implementation guidance
-- expanding into tool selection when the user did not ask for it
-- forcing GitHub into a cloud-provider structure pattern when the boundary is weaker
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Forcing a full multi-lens analysis for a small question | The answer gets heavy without improving the decision | Start with the smallest useful lens set and widen only if risk or ambiguity justifies it |
+| Treating BC/DR as mandatory for every answer | Continuity concerns can crowd out the actual GitHub operating-model choice | Activate BC/DR only when build, release, or repository continuity materially changes the recommendation |
+| Recommending a direction without current-source verification when freshness matters | Product boundaries, permission models, or licensing limits may have changed | Call out the freshness dependency and say which GitHub fact still needs current verification |
+| Confusing decision support with implementation guidance | The user loses the strategic framing they asked for | Keep the answer at decision level and hand off only after the direction is chosen |
+| Expanding into tool selection when the user did not ask for it | The response drifts from GitHub tradeoffs into execution detail | Keep the recommendation centered on the platform choice, not the delivery tooling |
+| Forcing GitHub into a cloud-provider structure pattern when the boundary is weaker | The strategic lane gets distorted and a fake structure owner pressure appears | Keep light enterprise, org, and repo-shape decisions inside strategic unless a real boundary emerges |
+
+## Validation
+
+- Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
+- Confirm assumptions, active lenses, and the main tradeoff are named instead of implied.
+- Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.
+- Confirm viable options are compared in GitHub-local terms such as repo model, Apps trust, runners, or Copilot posture.
+- Confirm the answer states when freshness matters and which current GitHub fact still needs validation.

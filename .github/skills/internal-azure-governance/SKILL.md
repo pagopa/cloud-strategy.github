@@ -76,10 +76,21 @@ For broader asks, return:
 - `awesome-copilot-azure-role-selector`
   Use as depth support when the governance boundary is already clear and the next need is least-privilege role selection, custom-role fallback, or assignment artifacts such as CLI commands and Bicep snippets.
 
-## Anti-patterns
+## Common mistakes
 
-- treating Azure Policy as if it grants access
-- answering a governance question without naming scope
-- mixing tenant-wide guardrails and subscription-level authorization into one vague recommendation
-- proposing emergency access without boundaries, audit expectations, or privileged-access posture
-- recommending rollout without staged validation when the blast radius is high
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Treating Azure Policy as if it grants access | Preventive controls get confused with authorization paths | Pair Policy guidance with the RBAC or identity model that actually grants access |
+| Answering a governance question without naming scope | Management-group, subscription, and resource scopes behave differently | State the exact scope before recommending a mechanism |
+| Mixing tenant-wide guardrails and subscription-level authorization into one vague recommendation | Reviewers cannot see what prevents versus what grants | Separate Policy or PIM posture from RBAC assignments and workload identity design |
+| Proposing emergency access without boundaries, audit expectations, or privileged-access posture | Break-glass becomes a standing exception instead of controlled elevation | Define who can elevate, how long it lasts, and what evidence must exist |
+| Recommending rollout without staged validation when the blast radius is high | Wide RBAC or Policy errors can block operations quickly | Use scoped rollout, compliance checks, and explicit rollback triggers |
+| Treating managed identities as a reason to skip scope design | Identity becomes secretless but still over-privileged | Keep identity type and authorization scope as separate decisions |
+
+## Validation
+
+- Confirm the governance scope is explicit: management group, subscription set, or single subscription.
+- Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains privileged access.
+- Confirm identity boundaries and exception paths are explicit for human and workload access.
+- Confirm staged rollout validation is named before high-blast-radius Policy, RBAC, or PIM changes.
+- Confirm the answer says when operational proof should move to `internal-azure-operations` and when least-privilege role depth should move to `awesome-copilot-azure-role-selector`.

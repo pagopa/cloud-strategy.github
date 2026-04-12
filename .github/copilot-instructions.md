@@ -21,6 +21,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 - `internal-sync-*` assets stay sync-specific and must not become second canonical homes for repository-wide policy.
 - When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
+- When source-managed guidance from this repository is mirrored into consumer repositories, phrase source-side rules conditionally so they remain true in targets and do not imply that the target repository is the source of truth.
 - `.github/local-copilot-overrides.md` may override synced defaults from `AGENTS.md` or this file only when the exception makes the conflict, scope, reason, and required disclosure explicit.
 - If `.github/local-copilot-overrides.md` exists but declares no active overrides, keep following the synced baseline.
 - When following a local override instead of the synced baseline, say that a consumer-local exception is in effect and cite `.github/local-copilot-overrides.md`.
@@ -58,8 +59,11 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Prefer the simplest correct change.
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
+- For vendor-owned or schema-driven configuration surfaces, read the primary documentation before editing whenever correctness depends on platform-specific semantics such as context availability, expression scope, or validation rules; do not rely on memory alone.
 - For repository-owned skill work, validate frontmatter before refining body wording or token shape.
+- For source-side repository-owned standards work that deepens parallel skill families, stage planning in `tmp/superpowers/`, make anti-scope explicit, and close parity gaps in existing `Common mistakes`, `Validation`, and current reference depth before adding optional new skills, validators, or shared assets.
 - Keep repository-owned skill `description:` lines trigger-first, and do not rewrite a working route during token optimization unless improving retrieval is the explicit goal.
+- For provider-specific cloud skills, keep guidance provider-native and omit cross-cloud comparison or provider-selection content when provider choice is already upstream of skill activation.
 - Prefer `references/` over new `scripts/` for static checklists, lookup tables, and starter templates; add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - Keep Python tests under the repository-root `tests/` tree with mirrored source paths, and make Bash wrappers runnable with internal defaults plus optional overrides.
 - Run the applicable validation that actually exists for the files you changed.
@@ -76,8 +80,11 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 - Whenever work reveals a new durable lesson, regardless of whether the task is in planning, review, debugging, or implementation, check whether it was already codified in repository resources when discovered.
 - Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
+- When a validator, IDE, schema check, or runtime error overturns an earlier assumption, immediately re-check whether that correction is durable enough to retain or codify.
+- Before finalizing such a correction, read the primary documentation for the relevant platform or schema instead of relying on memory or partial recall.
 - Before editing repository-root `LESSONS.md`, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including uncommitted rows already present on disk.
 - When a durable lesson is clear and still uncodified, append one concise, reusable row to the pending table in `LESSONS.md` instead of waiting for task completion; do not regenerate, reorder, or rewrite unrelated rows.
+- If you decide not to record a lesson after such a correction, make that decision explicit in the completion report with a short reason.
 - Treat `LESSONS.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
 - Preserve unrelated existing lessons in `LESSONS.md`, including local uncommitted ones already on disk.
 - If a lesson is later disproven, narrowed, deduplicated, or codified elsewhere in the same task, update or remove only that lesson's row before completion.

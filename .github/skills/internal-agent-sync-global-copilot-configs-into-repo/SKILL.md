@@ -1,6 +1,6 @@
 ---
 name: internal-agent-sync-global-copilot-configs-into-repo
-description: Use when aligning a consumer repository to this repository's managed GitHub Copilot baseline, including mirror planning, apply runs, drift checks, and preservation of target `local-*` assets plus any `.github/local-copilot-overrides.md` layer.
+description: Use when aligning a consumer repository to this repository's managed GitHub Copilot baseline plus the explicitly shared repository-hygiene files, including mirror planning, apply runs, drift checks, and preservation of target `local-*` assets plus any `.github/local-copilot-overrides.md` layer.
 ---
 
 # Internal Agent Sync Global Copilot Configs Into Repo
@@ -15,6 +15,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 
 - Align a consumer repository with the managed GitHub Copilot baseline from this repository.
 - Refresh target `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` to the current bridge model after mirroring.
+- Refresh shared repository-hygiene files that are part of the managed sync baseline, currently `.editorconfig`, `.pre-commit-config.yaml`, and `.github/workflows/terraform-pre-commit.yml`.
 - Preserve or review a target `.github/local-copilot-overrides.md` file that locally overrides the synced baseline.
 - Run or interpret `.github/scripts/sync_copilot_catalog.sh` or `.github/scripts/sync_copilot_catalog.py`.
 - Audit source-target drift before or after a sync.
@@ -27,6 +28,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Exclude source resources named `internal-sync-*` from consumer mirroring and remove any target copies of those resources during `apply`.
 - Do not mirror a source `.github/local-copilot-overrides.md`; it stays consumer-owned even when the source repository has one.
 - Keep root guidance layered: `AGENTS.md` is the bridge, `.github/copilot-instructions.md` is the repo-wide projection, `.github/local-copilot-overrides.md` is the consumer-local exception layer, and `.github/INVENTORY.md` is the live catalog.
+- Mirror only the explicitly shared repository-hygiene files declared in `references/sync-contract.md`; do not widen workflow or root-file mirroring implicitly.
 - Ensure the target repository `.gitignore` contains an ignore rule for `tmp/superpowers/`.
 - Prefer the bundled sync automation when it matches the requested mode instead of re-deriving the workflow manually.
 - Keep detailed operating rules in `references/sync-contract.md` instead of re-expanding them in the agent body.

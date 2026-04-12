@@ -78,10 +78,21 @@ For broader asks, return:
 - `internal-azure-operations`
   Use when the structure is accepted and the next need is validation, monitoring, backup, or operational evidence.
 
-## Anti-patterns
+## Common mistakes
 
-- proposing hierarchy or subscription layouts without a rollout scope
-- mixing landing-zone placement and RBAC design into one vague answer
-- treating network topology as an operations concern instead of a structure concern
-- using structure answers to sneak in Policy or RBAC design without separating the concerns
-- ignoring region or residency implications when they materially shape layout
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Proposing hierarchy or subscription layouts without a rollout scope | Tenant and hierarchy changes are hard to unwind if staged poorly | Name the smallest safe rollout unit: management group, subscription set, or region set |
+| Mixing landing-zone placement and RBAC design into one vague answer | Structure and governance review get blurred together | Keep placement here and move authorization or guardrails to `internal-azure-governance` |
+| Treating network topology as an operations concern instead of a structure concern | Connectivity design decisions get delayed until after layout is fixed | Keep hub-spoke, Virtual WAN, and regional topology in the structure lane |
+| Using structure answers to sneak in Policy or RBAC design without separating the concerns | The ownership boundary becomes unreliable | State where the capability lives and hand off what controls or permissions apply |
+| Ignoring region or residency implications when they materially shape layout | Subscription or landing-zone placement can violate real requirements | Make sovereignty, region pairing, and continuity assumptions explicit |
+| Recommending platform subscriptions without naming their operating purpose | Platform estates become catch-all containers with unclear ownership | State whether the subscription is for connectivity, identity, management, or shared services |
+
+## Validation
+
+- Confirm the placement model is explicit: management group, subscription family, landing zone, or platform topology.
+- Confirm the smallest safe rollout unit is named and matches the proposed structural change.
+- Confirm region or residency implications are explicit when they shape hierarchy, subscription, or topology choices.
+- Confirm platform ownership and workload ownership are separated when both appear in the recommendation.
+- Confirm the next handoff is clear when the user now needs governance controls or operational proof.

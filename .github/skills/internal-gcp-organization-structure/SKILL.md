@@ -79,10 +79,21 @@ For broader asks, return:
 - `internal-gcp-operations`
   Use when the structure is accepted and the next need is validation, monitoring, backup, inventory, or operational evidence.
 
-## Anti-patterns
+## Common mistakes
 
-- proposing org or project layouts without a rollout scope
-- mixing Shared VPC placement and IAM design into one vague answer
-- treating billing layout as an afterthought when it changes ownership or blast radius
-- using structure answers to sneak in Org Policy or IAM design without separating the concerns
-- ignoring region or residency implications when they materially shape layout
+| Mistake | Why it matters | Instead |
+| --- | --- | --- |
+| Proposing org or project layouts without a rollout scope | Structural changes are hard to unwind if staged poorly | Name the smallest safe rollout unit: folder, project set, or region set |
+| Mixing Shared VPC placement and IAM design into one vague answer | Structure and governance review get blurred together | Keep host and service project placement here and move access design to `internal-gcp-governance` |
+| Treating billing layout as an afterthought when it changes ownership or blast radius | Finance and platform decisions drift together and become hard to review | Make billing ownership explicit when it differs from project or folder ownership |
+| Using structure answers to sneak in Org Policy or IAM design without separating the concerns | The lane boundary becomes unreliable | State where the capability lives and hand off what controls or permissions apply |
+| Ignoring region or residency implications when they materially shape layout | Project or Shared VPC placement can violate real requirements | Make sovereignty, region choice, and continuity assumptions explicit |
+| Recommending central host projects without naming who operates them | Shared infrastructure becomes a vague platform bucket | State the host-project owner and which service projects depend on it |
+
+## Validation
+
+- Confirm the placement model is explicit: org branch, folder set, project family, Shared VPC host, or billing boundary.
+- Confirm the smallest safe rollout unit is named and matches the proposed structural change.
+- Confirm region or residency implications are explicit when they shape folder, project, or network placement.
+- Confirm billing ownership and platform ownership are separated when both appear in the recommendation.
+- Confirm the next handoff is clear when the user now needs governance controls or operational proof.

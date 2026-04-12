@@ -175,6 +175,77 @@ def test_build_sync_plan_accepts_existing_tmp_superpowers_gitignore_entry(
     assert plan.generated_gitignore == "node_modules/\ntmp/superpowers/\n"
 
 
+def test_build_sync_plan_includes_shared_repo_hygiene_files_only(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / ".editorconfig", "root = true\n")
+    write_file(source_root / ".pre-commit-config.yaml", "repos: []\n")
+    write_file(
+        source_root / ".github/workflows/terraform-pre-commit.yml",
+        "name: terraform-pre-commit\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / ".editorconfig", "root = false\n")
+    write_file(target_root / ".pre-commit-config.yaml", "repos:\n  - repo: old\n")
+    write_file(
+        target_root / ".github/workflows/terraform-pre-commit.yml",
+        "name: old-terraform-pre-commit\n",
+    )
+    write_file(target_root / ".github/workflows/local-only.yml", "name: local-only\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+    planned_paths = {operation.path for operation in plan.operations}
+
+    assert ("update", ".editorconfig") in actions
+    assert ("update", ".pre-commit-config.yaml") in actions
+    assert ("update", ".github/workflows/terraform-pre-commit.yml") in actions
+    assert ".github/workflows/local-only.yml" not in planned_paths
+
+
+def test_apply_sync_plan_mirrors_shared_repo_hygiene_files(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / ".editorconfig", "root = true\n")
+    write_file(source_root / ".pre-commit-config.yaml", "repos: []\n")
+    write_file(
+        source_root / ".github/workflows/terraform-pre-commit.yml",
+        "name: terraform-pre-commit\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / ".editorconfig", "root = false\n")
+    write_file(target_root / ".pre-commit-config.yaml", "repos:\n  - repo: old\n")
+    write_file(
+        target_root / ".github/workflows/terraform-pre-commit.yml",
+        "name: old-terraform-pre-commit\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+    apply_sync_plan(plan)
+
+    assert (target_root / ".editorconfig").read_text(
+        encoding="utf-8"
+    ) == "root = true\n"
+    assert (target_root / ".pre-commit-config.yaml").read_text(
+        encoding="utf-8"
+    ) == "repos: []\n"
+    assert (target_root / ".github/workflows/terraform-pre-commit.yml").read_text(
+        encoding="utf-8"
+    ) == "name: terraform-pre-commit\n"
+
+
 def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     repeated_lines = "\n".join(
         [
