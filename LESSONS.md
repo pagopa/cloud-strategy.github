@@ -4,12 +4,15 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 ## Entry Rules
 
+- Before editing this file, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including local uncommitted rows already present on disk.
 - Record only lessons that were not already codified in repository resources at the time they were learned.
 - Also record durable corrections to repeated or consequential misapplication of already-codified repository rules when that correction is likely to prevent future mistakes.
 - Keep only stable, reusable, repository-relevant lessons.
 - Exclude secrets, transient debugging notes, raw conversation logs, and task-local noise.
 - Keep new or still-uncodified lessons in the pending table until they are codified or deliberately dropped.
-- When a lesson becomes codified elsewhere, remove it from this file.
+- Add a new lesson by appending one new row to the pending table; do not regenerate, reorder, or rewrite unrelated rows.
+- Preserve unrelated existing lessons, including local uncommitted ones already on disk.
+- Only update or remove a specific lesson row when that same lesson is being codified, disproven, narrowed, or deduplicated.
 
 ## Pending Rules
 

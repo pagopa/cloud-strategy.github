@@ -76,10 +76,12 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 - Whenever work reveals a new durable lesson, regardless of whether the task is in planning, review, debugging, or implementation, check whether it was already codified in repository resources when discovered.
 - Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
-- When a durable lesson is clear and still uncodified, update repository-root `LESSONS.md` in English with concise, reusable, deduplicated entries instead of waiting for task completion.
+- Before editing repository-root `LESSONS.md`, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including uncommitted rows already present on disk.
+- When a durable lesson is clear and still uncodified, append one concise, reusable row to the pending table in `LESSONS.md` instead of waiting for task completion; do not regenerate, reorder, or rewrite unrelated rows.
 - Treat `LESSONS.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
-- If a lesson is later disproven, narrowed, or codified elsewhere in the same task, update or remove the `LESSONS.md` entry before completion.
-- If the same task also codifies the lesson into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent, remove the lesson from `LESSONS.md` instead of keeping a codified copy there.
+- Preserve unrelated existing lessons in `LESSONS.md`, including local uncommitted ones already on disk.
+- If a lesson is later disproven, narrowed, deduplicated, or codified elsewhere in the same task, update or remove only that lesson's row before completion.
+- If the same task also codifies the lesson into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent, remove that corresponding row from `LESSONS.md` instead of keeping a codified duplicate there.
 - If no durable lesson emerged, do not force a `LESSONS.md` change.
 
 ## Completion Report
