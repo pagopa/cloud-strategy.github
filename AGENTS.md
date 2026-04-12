@@ -11,9 +11,9 @@ This file is the stable entrypoint for the repository instruction architecture.
 ## Cross-Surface Contract
 
 1. Use `.github/copilot-instructions.md` as the repo-wide Copilot projection.
-2. Use `.github/INVENTORY.md` for the exact live catalog of instructions, prompts, skills, and agents.
+2. Use `.github/INVENTORY.md` for the exact live catalog of instructions, skills, and agents.
 3. Use `.github/instructions/` for path-specific or domain-specific projections.
-4. Use `.github/prompts/`, `.github/skills/`, and `.github/agents/` only when they are relevant to the current task.
+4. Use `.github/skills/` and `.github/agents/` only when they are relevant to the current task.
 5. Keep policy, projections, and inventory separate instead of mixing them into one file.
 
 ## Precedence Model
@@ -71,7 +71,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 ## Retained Learning
 
 - Root `LESSONS.md` is the repository learning ledger for durable lessons discovered while completing tasks.
-- Keep `LESSONS.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, prompts, skills, or agents.
+- Keep `LESSONS.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
 - Durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons.
 - Keep detailed retained-learning behavior in `.github/copilot-instructions.md`; keep only the strategic boundary here.
 

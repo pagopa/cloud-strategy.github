@@ -186,7 +186,7 @@ When adapting external agents:
 1. Keep the useful mental model or decision sequence.
 2. Delete stale runtime-specific frontmatter and copied tool catalog details that do not belong in the internal contract.
 3. Rewrite naming into the canonical `internal-*` contract.
-4. Replace platform assumptions with repo-local files, prompts, skills, and validations.
+4. Replace platform assumptions with repo-local files, skills, and validations.
 5. Convert broad expertise claims into concrete routing or output rules.
 
 Do not over-compress a well-structured upstream agent. If its strength comes from a clear requirement gate, decision lens, execution order, or response structure, preserve those patterns in repo-local form instead of reducing everything to flat bullets.

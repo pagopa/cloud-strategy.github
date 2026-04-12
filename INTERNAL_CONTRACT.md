@@ -65,7 +65,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Scope:
   - root `AGENTS.md`
   - `.github/copilot-instructions.md`
-  - scoped instructions, prompts, skills, and agents
+  - scoped instructions, skills, and agents
 - Expected behavior:
   - root `AGENTS.md` states that the default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it
   - `.github/copilot-instructions.md` may project that rule in compact form for Copilot flows
@@ -124,7 +124,6 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: ensure repository resources follow the naming convention defined by origin.
 - Scope:
-  - prompts
   - skills
   - agents
   - instructions
@@ -137,12 +136,11 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: ensure repository-owned resources that support explicit naming metadata declare it correctly.
 - Scope:
-  - internal prompts
   - internal skills
   - internal agents
 - Expected behavior:
   - every repository-owned internal resource has a non-empty canonical identifier
-  - every internal prompt, skill, and agent declares a non-empty `name:`
+  - every internal skill and agent declares a non-empty `name:`
   - every declared `name:` matches the canonical resource identifier
   - imported non-`internal-*` resources may remain verbatim
 

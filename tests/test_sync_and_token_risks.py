@@ -198,6 +198,26 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     assert "bridge-overlap" in finding_codes
 
 
+def test_detect_token_risks_ignores_structural_bridge_references(tmp_path: Path) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n"
+        "- Use `.github/copilot-instructions.md` as the repo-wide projection.\n"
+        "- Use `.github/INVENTORY.md` as the live catalog.\n"
+        "- Use `.github/instructions/` for scoped guidance.\n"
+        "- Use `.github/skills/` when a reusable workflow is relevant.\n"
+        "- Use `.github/agents/` when a stable owner is relevant.\n"
+        "- Keep `.github/local-copilot-overrides.md` local to consumer repositories.\n",
+    )
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "inventory-dump-in-bridge" not in finding_codes
+
+
 def test_detect_token_risks_reports_internal_root_policy_overlap(
     tmp_path: Path,
 ) -> None:

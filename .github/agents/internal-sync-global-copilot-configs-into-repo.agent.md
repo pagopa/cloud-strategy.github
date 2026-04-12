@@ -66,4 +66,4 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 - Preserved `local-*` assets, `.github/local-copilot-overrides.md` status, and target-only cleanup decisions
 - Boundary or approval decisions that affected the selected mode
 - Validation results, remaining blockers, and the completion-report sections
-- When present, the completion report should name the used agents, instructions, prompts, skills, and other resources and explain why they were relevant
+- When present, the completion report should name the used agents, instructions, skills, and other resources and explain why they were relevant

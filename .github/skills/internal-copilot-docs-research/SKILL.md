@@ -15,7 +15,6 @@ It is especially useful when the question touches:
 
 - repository custom instructions
 - path-specific instructions
-- prompt files
 - agent skills
 - custom agents
 - custom-agent frontmatter fields and environment support
@@ -29,7 +28,7 @@ Read the local contract before deciding that the platform should change the repo
 
 - `AGENTS.md`
 - `.github/copilot-instructions.md`
-- the relevant local agent, prompt, skill, or instruction file being changed
+- the relevant local agent, skill, or instruction file being changed
 - `references/official-source-map.md`
 
 ## Source Priority

@@ -30,8 +30,6 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
 
     assert "## Instructions" in inventory
     assert "- `.github/instructions/internal-python.instructions.md`" in inventory
-    assert "## Prompts" in inventory
-    assert "No prompt files currently ship in the live catalog." in inventory
     assert "- `.github/skills/internal-catalog/SKILL.md`" in inventory
     assert "- `.github/agents/internal-fast-executor.agent.md`" in inventory
 
@@ -49,7 +47,7 @@ def test_run_consistency_checks_flags_inventory_drift_and_missing_tools(
     )
     write_file(
         tmp_path / ".github/INVENTORY.md",
-        "# Copilot Inventory\n\n## Instructions\n\nNo instruction files currently ship in the live catalog.\n\n## Prompts\n\nNo prompt files currently ship in the live catalog.\n\n## Skills\n\nNo skill files currently ship in the live catalog.\n\n## Agents\n\nNo agent files currently ship in the live catalog.\n",
+        "# Copilot Inventory\n\n## Instructions\n\nNo instruction files currently ship in the live catalog.\n\n## Skills\n\nNo skill files currently ship in the live catalog.\n\n## Agents\n\nNo agent files currently ship in the live catalog.\n",
     )
     write_file(
         tmp_path / ".github/agents/internal-sync.agent.md",

@@ -15,7 +15,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 2. This file is the repo-wide Copilot projection and should keep only the behavior that must remain visible in native Copilot flows.
 3. `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` apply when the task is review or commit authoring.
 4. Matching `.github/instructions/*.instructions.md` files provide scoped or domain-specific guidance and may override defaults inside their declared scope.
-5. Prompts, skills, and agents are on-demand operational assets; use them only when relevant.
+5. Skills and agents are on-demand operational assets; use them only when relevant.
 6. `.github/INVENTORY.md` is the live catalog of managed assets and is never replaced by `AGENTS.md`.
 7. If `.github/local-copilot-overrides.md` exists, read it before relying on synced repo-wide defaults; it is the consumer-local exception layer authorized by `AGENTS.md`.
 
@@ -78,13 +78,13 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
 - When it did, update repository-root `LESSONS.md` in English with concise, reusable, deduplicated entries.
 - Treat `LESSONS.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
-- If the same task also codified the lesson into `AGENTS.md`, this file, a scoped instruction, a prompt, a skill, or an agent, remove the lesson from `LESSONS.md` instead of keeping a codified copy there.
+- If the same task also codified the lesson into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent, remove the lesson from `LESSONS.md` instead of keeping a codified copy there.
 - If no durable lesson emerged, do not force a `LESSONS.md` change.
 
 ## Completion Report
 
 - End completed operations with `✅ Outcome`.
-- When used, also include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources`.
+- When used, also include `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`.
 - In each included section, state which resources were used and why they were relevant.
 - When `LESSONS.md` was updated, mention it under `📦 Other Resources` with a short reason.
 - Omit unused categories instead of adding empty or negative sections.

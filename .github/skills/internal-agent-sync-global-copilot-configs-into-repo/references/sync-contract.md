@@ -15,7 +15,6 @@ Mirror these source-managed paths into the consumer repository:
 - `.github/repo-profiles.yml`
 - `.github/agents/**`
 - `.github/instructions/**`
-- `.github/prompts/**`
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
 
 Do not sync `README.md`, changelogs, workflows, templates, or bootstrap helpers unless the user explicitly expands scope.

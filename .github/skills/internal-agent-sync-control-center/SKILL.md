@@ -75,7 +75,7 @@ Load `references/catalog-decision-checklist.md` when you need the detailed keep/
 - Compare `description:` lines first. Trigger overlap starts there.
 - Check whether the repository already has a stronger internal equivalent.
 - Check whether the asset references files that do not exist.
-- Check whether nearby agents, prompts, skills, instructions, `AGENTS.md`, or `.github/copilot-instructions.md` still route to the asset.
+- Check whether nearby agents, skills, instructions, `AGENTS.md`, or `.github/copilot-instructions.md` still route to the asset.
 - Check whether the asset still belongs to the declared managed scope or only survives due to repository drift.
 
 ### 2. Pick the Right Outcome

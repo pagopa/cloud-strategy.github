@@ -3,7 +3,7 @@ name: internal-pr-editor
 description: Use when writing or updating a pull request title or body from a real diff, specification, or repository template, and the output must stay aligned with the actual change.
 ---
 
-# TechAI PR Editor — Skill
+# Internal PR Editor
 
 ## When to use
 - Create a new pull request description.

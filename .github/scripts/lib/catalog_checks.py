@@ -191,7 +191,6 @@ def check_duplicate_frontmatter_names(root: Path) -> list[Finding]:
     groups = {
         "agent": sorted((root / ".github/agents").glob("*.agent.md")),
         "skill": sorted((root / ".github/skills").glob("**/SKILL.md")),
-        "prompt": sorted((root / ".github/prompts").glob("**/*.prompt.md")),
     }
     for family, paths in groups.items():
         names: dict[str, list[str]] = defaultdict(list)
@@ -306,7 +305,6 @@ def collect_catalog_candidate_paths(root: Path) -> list[str]:
             (
                 ".github/agents/",
                 ".github/instructions/",
-                ".github/prompts/",
                 ".github/skills/",
             )
         )

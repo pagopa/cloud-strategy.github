@@ -32,16 +32,16 @@ from built-in roles (`default`, `explorer`, `worker`).
 
 When a skill says to dispatch a named agent type:
 
-1. Find the agent's prompt file (e.g., `agents/code-reviewer.md` or the skill's
-   local prompt template like `code-quality-reviewer-prompt.md`)
-2. Read the prompt content
+1. Find the agent's task file (e.g., `agents/code-reviewer.md` or the skill's
+   local task template like `code-quality-reviewer-task.md`)
+2. Read the task content
 3. Fill any template placeholders (`{BASE_SHA}`, `{WHAT_WAS_IMPLEMENTED}`, etc.)
 4. Spawn a `worker` agent with the filled content as the `message`
 
 | Skill instruction | Codex equivalent |
 |-------------------|------------------|
 | `Task tool (internal-review-guard)` | `spawn_agent(agent_type="worker", message=...)` with `code-reviewer.md` content |
-| `Task tool (general-purpose)` with inline prompt | `spawn_agent(message=...)` with the same prompt |
+| `Task tool (general-purpose)` with inline task text | `spawn_agent(message=...)` with the same task text |
 
 ### Message framing
 

@@ -2,6 +2,7 @@
 name: internal-sync-control-center
 description: Use this agent when governing or synchronizing the Copilot customization catalog in this repository. Keep root governance canonical in `AGENTS.md` and `.github/copilot-instructions.md`, keep sync-specific scope and managed external resources here, remove obsolete overlap instead of keeping fallbacks, and align downstream governance after catalog changes.
 tools: ["read", "edit", "search", "execute", "web", "agent"]
+agents: []
 ---
 
 # Internal Sync Control Center
@@ -43,7 +44,7 @@ Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandat
 - Do not preserve fallback assets, compatibility aliases, or deprecated variants unless `AGENTS.md` explicitly requires them.
 - Do not introduce new prefixes, naming schemes, or external asset families unless the user explicitly expands scope.
 - When a managed `openai/skills` asset is declared below, install or refresh only the mapped skills into `.github/skills/` using the required `openai-` prefix. Do not keep unprefixed copies or add sibling OpenAI skills unless the user explicitly expands scope.
-- Do not leave stale references in `AGENTS.md`, prompts, skills, agents, instructions, or scripts after catalog changes. Update README-based catalogs only when README edits are explicitly in scope.
+- Do not leave stale references in `AGENTS.md`, skills, agents, instructions, or scripts after catalog changes. Update README-based catalogs only when README edits are explicitly in scope.
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.

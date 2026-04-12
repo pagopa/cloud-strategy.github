@@ -11,9 +11,9 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 
 ## Audit Goals
 
-- Detect overlapping skills, prompts, and agents.
+- Detect overlapping skills and agents.
 - Detect hollow assets that point to missing local files or missing companion skills.
-- Detect declared skills that have no concrete workflow role in the agent or prompt that declares them.
+- Detect declared skills that have no concrete workflow role in the agent or skill surface that declares them.
 - Detect retired frontmatter and stale runtime-specific wording.
 - Detect stale or misleading tool contracts in repository-owned internal agents.
 - Detect weak `AGENTS.md` bridge design.
@@ -29,7 +29,7 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 4. Check declared skill contracts and decorative skill usage.
 5. Check trigger overlap.
 6. Check bridge coherence between `AGENTS.md` and `.github/copilot-instructions.md`.
-7. Check whether prompts, skills, or agents became redundant after internal replacements were added.
+7. Check whether skills or agents became redundant after internal replacements were added.
 8. Check whether governance files still describe superseded or removed assets.
 
 Load `references/audit-checklist.md` when you need the detailed issue taxonomy, flagging criteria, or example findings.
