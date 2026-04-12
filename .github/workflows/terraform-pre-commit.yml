@@ -37,6 +37,7 @@ jobs:
     timeout-minutes: 30
     env:
       # Local-only validation: Terraform must not reach remote backends.
+      PRE_COMMIT_CACHE_DIR: ${{ runner.temp }}/pre-commit-cache
       TF_INPUT: "0"
       TF_IN_AUTOMATION: "1"
     defaults:
@@ -48,6 +49,18 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 https://github.com/actions/checkout/releases/tag/v6.0.2
         with:
           persist-credentials: false
+
+      - name: Restore pre-commit cache
+        # actions/cache@v5.0.4
+        # https://github.com/actions/cache/releases/tag/v5.0.4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
+        with:
+          path: ${{ env.PRE_COMMIT_CACHE_DIR }}
+          key: pre-commit-${{ runner.os }}-v1-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Ensure pre-commit cache directory
+        run: |
+          mkdir -p "${PRE_COMMIT_CACHE_DIR}"
 
       - name: Pull pre-commit container image
         run: |
@@ -61,8 +74,10 @@ jobs:
         run: |
           docker run --rm \
             -e USERID="$(id -u):$(id -g)" \
+            -e PRE_COMMIT_HOME=/pre-commit-cache \
             -e TF_INPUT \
             -e TF_IN_AUTOMATION \
+            -v "${PRE_COMMIT_CACHE_DIR}:/pre-commit-cache" \
             -v "${PWD}:/lint" \
             -w /lint \
             "${PRE_COMMIT_IMAGE}" run \
