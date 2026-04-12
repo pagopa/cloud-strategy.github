@@ -2,12 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.internal_skills import (
-    detect_internal_skill_findings,
-    markdown_targets,
-    resolve_reference,
-    validate_internal_skill,
-)
+from lib.internal_skills import (detect_internal_skill_findings,
+                                 markdown_targets, resolve_reference,
+                                 validate_internal_skill)
 
 
 def write_file(path: Path, content: str) -> None:
@@ -115,11 +112,16 @@ def test_markdown_targets_and_resolve_reference_support_repo_and_skill_paths(
     assert ".github/copilot-instructions.md" in targets
     assert "references/example.md" in targets
     assert "scripts/run.py" in targets
-    assert resolve_reference(
-        root, skill_dir, source_file, ".github/copilot-instructions.md"
-    ) == root / ".github/copilot-instructions.md"
+    assert (
+        resolve_reference(
+            root, skill_dir, source_file, ".github/copilot-instructions.md"
+        )
+        == root / ".github/copilot-instructions.md"
+    )
     assert resolve_reference(root, skill_dir, source_file, "references/example.md") == (
         skill_dir / "references/example.md"
     )
     assert resolve_reference(root, skill_dir, source_file, "tmp/generated.md") is None
-    assert resolve_reference(root, skill_dir, source_file, "https://example.com") is None
+    assert (
+        resolve_reference(root, skill_dir, source_file, "https://example.com") is None
+    )

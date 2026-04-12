@@ -62,7 +62,9 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
 
 
-def test_build_sync_plan_does_not_mirror_source_local_override_file(tmp_path: Path) -> None:
+def test_build_sync_plan_does_not_mirror_source_local_override_file(
+    tmp_path: Path,
+) -> None:
     source_root = tmp_path / "source"
     target_root = tmp_path / "target"
 
@@ -198,7 +200,9 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     assert "bridge-overlap" in finding_codes
 
 
-def test_detect_token_risks_ignores_structural_bridge_references(tmp_path: Path) -> None:
+def test_detect_token_risks_ignores_structural_bridge_references(
+    tmp_path: Path,
+) -> None:
     write_file(
         tmp_path / "AGENTS.md",
         "# AGENTS\n\n"

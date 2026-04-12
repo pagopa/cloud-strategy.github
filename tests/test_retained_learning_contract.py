@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -49,6 +48,6 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
     for relative_path, expected_snippets in expected_contracts.items():
         text = read_text(relative_path)
         for snippet in expected_snippets:
-            assert snippet in text, (
-                f"{relative_path} is missing retained-learning guardrail text: {snippet}"
-            )
+            assert (
+                snippet in text
+            ), f"{relative_path} is missing retained-learning guardrail text: {snippet}"

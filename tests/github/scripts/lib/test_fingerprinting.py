@@ -3,15 +3,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from lib.fingerprinting import (
-    build_fingerprint,
-    build_manifest,
-    collect_files,
-    diff_manifests,
-    load_manifest,
-    normalize_content,
-    render_diff_text,
-)
+from lib.fingerprinting import (build_fingerprint, build_manifest,
+                                collect_files, diff_manifests, load_manifest,
+                                normalize_content, render_diff_text)
 
 
 def write_file(path: Path, content: str) -> None:
@@ -25,8 +19,12 @@ def test_collect_files_expands_directories_and_builds_manifest(tmp_path: Path) -
     write_file(root / "README.md", "# readme\n")
 
     files = collect_files(root, [Path(".github/agents"), Path("README.md")])
-    manifest = build_manifest(root, files, source_ref_base="https://example.test/source")
-    resources = {resource["resource_id"]: resource for resource in manifest["resources"]}
+    manifest = build_manifest(
+        root, files, source_ref_base="https://example.test/source"
+    )
+    resources = {
+        resource["resource_id"]: resource for resource in manifest["resources"]
+    }
 
     assert [path.relative_to(root).as_posix() for path in files] == [
         ".github/agents/internal-fast.agent.md",
@@ -49,13 +47,18 @@ def test_build_fingerprint_normalizes_text_and_leaves_binary_content_unchanged(
     fingerprint = build_fingerprint(root, text_path, source_ref_base="source-root")
 
     assert fingerprint.kind == "instruction"
-    assert fingerprint.source_ref == "source-root/.github/instructions/internal-python.instructions.md"
+    assert (
+        fingerprint.source_ref
+        == "source-root/.github/instructions/internal-python.instructions.md"
+    )
     assert fingerprint.metadata["bytes"] == len(b"line one\r\nline two\r\n\r\n")
     assert fingerprint.metadata["normalized_bytes"] == len(b"line one\nline two\n")
     assert normalize_content("binary.bin", b"\xff\x00") == b"\xff\x00"
 
 
-def test_diff_manifests_tracks_changed_noise_only_created_and_removed(tmp_path: Path) -> None:
+def test_diff_manifests_tracks_changed_noise_only_created_and_removed(
+    tmp_path: Path,
+) -> None:
     old_manifest = {
         "normalization_version": "v1",
         "hash_algo": "sha256",
@@ -63,7 +66,11 @@ def test_diff_manifests_tracks_changed_noise_only_created_and_removed(tmp_path: 
             {"resource_id": "same.md", "source_hash": "a", "content_hash": "same"},
             {"resource_id": "noise.md", "source_hash": "old", "content_hash": "same"},
             {"resource_id": "changed.md", "source_hash": "old", "content_hash": "old"},
-            {"resource_id": "removed.md", "source_hash": "gone", "content_hash": "gone"},
+            {
+                "resource_id": "removed.md",
+                "source_hash": "gone",
+                "content_hash": "gone",
+            },
         ],
     }
     new_manifest = {

@@ -26,15 +26,16 @@ def initialize_governance_repo(root: Path, *, with_inventory: bool = True) -> No
     )
     write_file(
         root / ".github/copilot-instructions.md",
-        "# Copilot Instructions\n\n"
-        "See `AGENTS.md` and `.github/INVENTORY.md`.\n",
+        "# Copilot Instructions\n\n" "See `AGENTS.md` and `.github/INVENTORY.md`.\n",
     )
     if with_inventory:
         sync_inventory(root)
 
 
 def sync_inventory(root: Path) -> None:
-    write_file(root / ".github/INVENTORY.md", build_inventory.build_inventory_markdown(root))
+    write_file(
+        root / ".github/INVENTORY.md", build_inventory.build_inventory_markdown(root)
+    )
 
 
 def write_valid_internal_skill(skill_dir: Path, skill_name: str) -> None:
@@ -176,7 +177,9 @@ def test_validate_internal_skills_main_honors_skill_selection(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
     initialize_governance_repo(tmp_path, with_inventory=False)
-    write_valid_internal_skill(tmp_path / ".github/skills/internal-good", "internal-good")
+    write_valid_internal_skill(
+        tmp_path / ".github/skills/internal-good", "internal-good"
+    )
     (tmp_path / ".github/skills/internal-bad").mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr(
         validate_internal_skills,
@@ -251,4 +254,6 @@ def test_sync_copilot_catalog_apply_aborts_when_source_has_blocking_findings(
 
     assert exit_code == 1
     assert not (target_root / ".github/copilot-sync.manifest.json").exists()
-    assert "Source repository has blocking governance findings" in capsys.readouterr().out
+    assert (
+        "Source repository has blocking governance findings" in capsys.readouterr().out
+    )

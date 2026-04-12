@@ -3,20 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
-from lib.shared import (
-    Finding,
-    all_files_under,
-    dedupe_preserve_order,
-    finding_sort_key,
-    find_repo_root,
-    is_consumer_sync_excluded_path,
-    is_local_asset,
-    path_list,
-    resolve_markdown_target,
-    split_frontmatter,
-    strip_frontmatter,
-)
+from lib.shared import (Finding, all_files_under, dedupe_preserve_order,
+                        find_repo_root, finding_sort_key,
+                        is_consumer_sync_excluded_path, is_local_asset,
+                        path_list, resolve_markdown_target, split_frontmatter,
+                        strip_frontmatter)
 
 
 def write_file(path: Path, content: str) -> None:
@@ -68,9 +59,17 @@ def test_find_repo_root_and_resolve_markdown_target(tmp_path: Path) -> None:
     current_file.write_text("# router\n", encoding="utf-8")
 
     assert find_repo_root(root / "nested" / "deeper") == root
-    assert resolve_markdown_target(root, current_file, "AGENTS.md") == root / "AGENTS.md"
-    assert resolve_markdown_target(root, current_file, ".github/copilot-instructions.md") == root / ".github/copilot-instructions.md"
-    assert resolve_markdown_target(root, current_file, "../README.md#usage") == (root / ".github/README.md").resolve()
+    assert (
+        resolve_markdown_target(root, current_file, "AGENTS.md") == root / "AGENTS.md"
+    )
+    assert (
+        resolve_markdown_target(root, current_file, ".github/copilot-instructions.md")
+        == root / ".github/copilot-instructions.md"
+    )
+    assert (
+        resolve_markdown_target(root, current_file, "../README.md#usage")
+        == (root / ".github/README.md").resolve()
+    )
     assert resolve_markdown_target(root, current_file, "https://example.com") is None
     assert resolve_markdown_target(root, current_file, "/absolute/path.md") is None
 

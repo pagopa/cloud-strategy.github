@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 TEST_OWNERS = {
     "tests/github/scripts/test_cli_entrypoints.py": {
         ".github/scripts/audit_copilot_catalog.py",
