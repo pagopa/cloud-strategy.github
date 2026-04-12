@@ -1,6 +1,6 @@
 ---
-name: internal-github-composite-action
-description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially for shared step logic that should not become a full reusable workflow.
+name: internal-github-action-composite
+description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially when input validation, shell safety, or contract compatibility matters.
 ---
 
 # GitHub Composite Action Skill
@@ -8,50 +8,52 @@ description: Use when creating or modifying a reusable GitHub composite action u
 ## When to use
 - Create a new reusable composite action under `.github/actions/`.
 - Modify an existing composite action and preserve compatibility.
-- Standardize input validation and shell execution patterns.
+- Deepen a GitHub Actions task that has already been classified as composite-action authoring.
+
+## Relationship to the umbrella skill
+- `internal-github-actions` is the default entry point for GitHub Actions authoring.
+- Load this skill when the work is specifically a composite action or when the umbrella skill decides the reusable unit should move here.
 
 ## Composite action vs reusable workflow
 
 | Factor | Composite action | Reusable workflow |
 |---|---|---|
-| Granularity | Step-level (runs inside a job) | Job-level (runs as separate job) |
-| Secrets access | Inherited from caller job | Must be passed explicitly |
+| Granularity | Step-level reuse inside a job | Job-level orchestration |
+| Secrets access | Inherited from the caller job | Passed explicitly to the called workflow |
 | Outputs | Step outputs only | Workflow outputs |
-| Best for | Shared validation, setup, formatting | Full CI/CD pipelines, multi-job orchestration |
-
-**Rule of thumb**: if the reusable unit is a few steps → composite action. If it is an entire job with its own runner → reusable workflow.
+| Best for | Shared validation, setup, or step logic | Pipelines with their own jobs, runners, or environments |
 
 ## Mandatory rules
-- Keep the action focused on one responsibility.
-- Define explicit `name`, `description`, and typed `inputs`.
-- Validate required inputs early and fail fast.
-- Use English logs and deterministic output.
-- Prefer shell scripts for complex logic instead of large inline blocks.
-- Pass expression inputs via `env` — never interpolate `${{ }}` directly in `run:`.
-- Quote shell variables. Avoid `eval` and untrusted command execution.
-- Keep secrets out of defaults and logs.
+- Follow `.github/instructions/internal-github-action-composite.instructions.md`.
+- Pass expression inputs via `env:` instead of interpolating `${{ }}` directly in `run:`.
+- Keep `shell: bash` explicit on composite steps.
+- Start shell blocks with `set -euo pipefail`.
+- Extract long shell logic into a dedicated script early.
+- Preserve backward compatibility when modifying existing inputs or outputs.
 
 ## Minimal template
 
-Load `references/minimal-template.md` when you need the starter `action.yml` shape. Keep only one focused validation step in the initial template and move longer shell logic into a script early.
+Load `references/minimal-template.md` when you need the starter `action.yml` shape. Keep the initial template small, validate required inputs early, and move longer logic into a script instead of growing a large inline `run:` block.
 
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
 |---|---|---|
-| Interpolating `${{ inputs.x }}` directly in `run:` | Script injection via crafted input values | Pass through `env:` and use `"$VAR"` in shell |
-| Missing `set -euo pipefail` in `run:` blocks | Silent failures, partial execution | Always set strict mode as first line |
-| Large inline `run:` blocks (>30 lines) | Hard to read, test, and lint | Extract to a shell script under the action directory |
-| No input validation before logic | Cryptic downstream errors | Validate and fail fast at the top of the first step |
-| Forgetting `shell: bash` on composite steps | Defaults to `sh` on some runners — different behavior | Always explicit `shell: bash` |
-| Breaking existing input contract | Callers silently break without warning | Add new inputs with defaults; deprecate old ones gradually |
+| Interpolating `${{ inputs.x }}` directly in `run:` | Crafted input values can turn into shell injection | Pass the value through `env:` and use quoted shell variables |
+| Missing `set -euo pipefail` in `run:` blocks | Silent failures and partial execution become hard to spot | Make strict mode the first line of every shell block |
+| Large inline `run:` blocks | They are hard to read, lint, and review | Extract the logic into a dedicated script early |
+| No input validation before the main logic | Failures surface later with weaker error messages | Validate required inputs in the first step and fail fast |
+| Forgetting `shell: bash` on composite steps | Runner defaults can differ and change behavior | Keep `shell: bash` explicit |
+| Breaking an existing input or output contract | Callers can fail without a clear migration path | Add new fields compatibly and preserve the old contract where possible |
 
 ## Cross-references
-- **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for workflows that call composite actions.
+
+- **internal-github-actions** (`.github/skills/internal-github-actions/SKILL.md`): for the umbrella GitHub Actions lane and reuse-pattern selection.
 - **internal-script-bash** (`.github/skills/internal-script-bash/SKILL.md`): for extracted shell scripts inside the action.
 
 ## Validation
-- Inputs documented and validated.
-- Shell code is safe (`set -euo pipefail`, quoted vars).
-- No secret leakage in logs/defaults.
-- Backward compatibility preserved when modifying existing action.
+
+- Inputs are explicit and validated early.
+- Shell code uses `set -euo pipefail`, quoted variables, and explicit `shell: bash`.
+- Longer logic moves into a dedicated script instead of staying inline.
+- Existing input and output contracts remain backward compatible.
