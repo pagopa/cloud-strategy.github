@@ -202,7 +202,9 @@ def test_apply_sync_plan_creates_target_lessons_from_source_template(
 
     apply_sync_plan(plan)
 
-    assert (target_root / "LESSONS_LEARNED.md").read_text(encoding="utf-8") == source_lessons
+    assert (target_root / "LESSONS_LEARNED.md").read_text(
+        encoding="utf-8"
+    ) == source_lessons
 
 
 def test_apply_sync_plan_realigns_lessons_structure_without_losing_target_rows(
