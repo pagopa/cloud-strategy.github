@@ -24,6 +24,27 @@ Use cache for reproducible dependency reuse across runs. Use artifacts for expli
 
 Use stable inputs like lockfiles, tool versions, or build configuration. Do not use timestamps or raw `github.run_id` in cache keys.
 
+When a cache path needs a runner-scoped location such as `runner.temp`, resolve it in a step key that allows the `runner` context. Do not put `runner.temp` in workflow-root `env` or `jobs.<job_id>.env`.
+
+## Runner temp cache example
+
+```yaml
+- name: Restore pre-commit cache
+  # actions/cache@v5.0.4
+  # https://github.com/actions/cache/releases/tag/v5.0.4
+  uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
+  with:
+    path: ${{ runner.temp }}/pre-commit-cache
+    key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+- name: Use cached path in a shell step
+  env:
+    PRE_COMMIT_CACHE_DIR: ${{ runner.temp }}/pre-commit-cache
+  run: |
+    mkdir -p "${PRE_COMMIT_CACHE_DIR}"
+    echo "Using cache at ${PRE_COMMIT_CACHE_DIR}"
+```
+
 ## Artifact handoff example
 
 ```yaml
