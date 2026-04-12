@@ -50,12 +50,15 @@ jobs:
           persist-credentials: false
 
       - name: Restore pre-commit cache
-        # actions/cache@v5.0.4
+        id: pre-commit-cache
+        # actions/cache/restore@v5.0.4
         # https://github.com/actions/cache/releases/tag/v5.0.4
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ runner.temp }}/pre-commit-cache
-          key: pre-commit-${{ runner.os }}-v1-${{ hashFiles('.pre-commit-config.yaml') }}
+          key: pre-commit-${{ runner.os }}-config-hash-${{ hashFiles(inputs.pre-commit-config || '.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-config-hash-
 
       - name: Ensure pre-commit cache directory
         env:
@@ -72,6 +75,7 @@ jobs:
           docker run --rm --entrypoint cat "${PRE_COMMIT_IMAGE}" /usr/bin/tools_versions_info
 
       - name: Run pre-commit in container
+        id: pre-commit-run
         env:
           PRE_COMMIT_CACHE_DIR: ${{ runner.temp }}/pre-commit-cache
         run: |
@@ -89,3 +93,12 @@ jobs:
             --verbose \
             --show-diff-on-failure \
             --color always
+
+      - name: Save pre-commit cache
+        if: ${{ always() && steps.pre-commit-run.outcome != 'skipped' && steps.pre-commit-cache.outputs.cache-hit != 'true' }}
+        # actions/cache/save@v5.0.4
+        # https://github.com/actions/cache/releases/tag/v5.0.4
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7
+        with:
+          path: ${{ runner.temp }}/pre-commit-cache
+          key: pre-commit-${{ runner.os }}-config-hash-${{ hashFiles(inputs.pre-commit-config || '.pre-commit-config.yaml') }}
