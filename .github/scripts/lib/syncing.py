@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 from datetime import datetime, timezone
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import copy2
 
@@ -9,6 +12,7 @@ from .inventory import render_inventory_markdown, sections_from_catalog_paths
 from .fingerprinting import HASH_ALGO, NORMALIZATION_VERSION, build_fingerprint
 from .shared import (
     INVENTORY_PATH,
+    LESSONS_PATH,
     LOCAL_COPILOT_OVERRIDES_PATH,
     MANAGED_ROOT_FILES,
     MANAGED_WORKFLOW_FILES,
@@ -35,6 +39,15 @@ LEGACY_SYNC_ARTIFACT_PATHS = (
 )
 TARGET_GITIGNORE_PATH = ".gitignore"
 TARGET_SUPERPOWERS_IGNORE_ENTRY = "/tmp/superpowers/"
+NO_PENDING_LESSONS_MARKERS = {"No pending lessons currently."}
+
+
+@dataclass(frozen=True)
+class PendingLessonsTable:
+    column_count: int
+    data_start: int
+    data_end: int
+    section_end: int
 
 
 def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
@@ -45,10 +58,47 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     target_files = discover_target_managed_files(target_root)
     target_excluded_files = discover_target_excluded_sync_files(target_root)
     operations: list[SyncOperation] = []
+    generated_lessons: str | None = None
 
     for relative_path in sorted(source_files):
         source_path = source_root / relative_path
         target_path = target_root / relative_path
+        if relative_path == LESSONS_PATH:
+            generated_lessons = render_synced_lessons(
+                read_text(source_path),
+                read_text(target_path) if target_path.exists() else None,
+            )
+            desired_hash = sha256_text(generated_lessons)
+            if not target_path.exists():
+                operations.append(
+                    SyncOperation(
+                        action="create",
+                        path=relative_path,
+                        reason="Target learning ledger missing; create it from the source structure.",
+                        source_hash=desired_hash,
+                        target_hash=None,
+                    )
+                )
+                continue
+
+            target_hash = sha256_file(target_path)
+            action = "unchanged" if target_hash == desired_hash else "update"
+            reason = (
+                "Target learning ledger already matches the source structure and preserved lessons."
+                if action == "unchanged"
+                else "Target learning ledger must align with the source structure while preserving target-authored lessons."
+            )
+            operations.append(
+                SyncOperation(
+                    action=action,
+                    path=relative_path,
+                    reason=reason,
+                    source_hash=desired_hash,
+                    target_hash=target_hash,
+                )
+            )
+            continue
+
         source_hash = sha256_file(source_path)
         if not target_path.exists():
             operations.append(
@@ -192,8 +242,122 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         operations=ordered_operations,
         local_assets=tuple(sorted(local_assets)),
         generated_inventory=generated_inventory,
+        generated_lessons=generated_lessons,
         generated_gitignore=generated_gitignore,
     )
+
+
+def render_synced_lessons(source_content: str, target_content: str | None) -> str:
+    source_lines = source_content.splitlines()
+    pending_table = find_pending_lessons_table(source_lines)
+    if pending_table is None:
+        return ensure_trailing_newline(source_content)
+
+    target_rows = extract_pending_lessons_rows(target_content)
+    normalized_rows = [
+        normalize_pending_lessons_row(row, pending_table.column_count)
+        for row in target_rows
+    ]
+    section_suffix = source_lines[pending_table.data_end : pending_table.section_end]
+    if normalized_rows:
+        section_suffix = [
+            line
+            for line in section_suffix
+            if line.strip() not in NO_PENDING_LESSONS_MARKERS
+        ]
+
+    merged_lines = (
+        source_lines[: pending_table.data_start]
+        + [format_markdown_table_row(row) for row in normalized_rows]
+        + section_suffix
+        + source_lines[pending_table.section_end :]
+    )
+    return ensure_trailing_newline("\n".join(merged_lines))
+
+
+def extract_pending_lessons_rows(content: str | None) -> list[list[str]]:
+    if not content:
+        return []
+    lines = content.splitlines()
+    pending_table = find_pending_lessons_table(lines)
+    if pending_table is None:
+        return []
+
+    rows: list[list[str]] = []
+    for line in lines[pending_table.data_start : pending_table.data_end]:
+        cells = parse_markdown_table_row(line)
+        if any(cell for cell in cells):
+            rows.append(cells)
+    return rows
+
+
+def find_pending_lessons_table(lines: list[str]) -> PendingLessonsTable | None:
+    section_start: int | None = None
+    for index, line in enumerate(lines):
+        if line.strip() == "## Pending Rules":
+            section_start = index + 1
+            break
+    if section_start is None:
+        return None
+
+    section_end = len(lines)
+    for index in range(section_start, len(lines)):
+        if lines[index].startswith("## "):
+            section_end = index
+            break
+
+    header_index: int | None = None
+    for index in range(section_start, section_end):
+        if lines[index].lstrip().startswith("|"):
+            header_index = index
+            break
+    if header_index is None or header_index + 1 >= section_end:
+        return None
+    if not is_markdown_table_separator(lines[header_index + 1]):
+        return None
+
+    data_start = header_index + 2
+    data_end = data_start
+    while data_end < section_end and lines[data_end].lstrip().startswith("|"):
+        data_end += 1
+
+    return PendingLessonsTable(
+        column_count=len(parse_markdown_table_row(lines[header_index])),
+        data_start=data_start,
+        data_end=data_end,
+        section_end=section_end,
+    )
+
+
+def is_markdown_table_separator(line: str) -> bool:
+    cells = parse_markdown_table_row(line)
+    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells)
+
+
+def parse_markdown_table_row(line: str) -> list[str]:
+    stripped = line.strip()
+    if not stripped.startswith("|"):
+        return []
+    core = stripped.strip("|")
+    return [cell.strip() for cell in core.split("|")]
+
+
+def normalize_pending_lessons_row(row: list[str], column_count: int) -> list[str]:
+    if len(row) >= column_count:
+        return row[:column_count]
+    return row + [""] * (column_count - len(row))
+
+
+def format_markdown_table_row(cells: list[str]) -> str:
+    return f"| {' | '.join(cells)} |"
+
+
+def ensure_trailing_newline(content: str) -> str:
+    return content if content.endswith("\n") else f"{content}\n"
+
+
+def sha256_text(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
 def discover_source_sync_files(root: Path) -> set[str]:
@@ -359,9 +523,14 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
     for operation in plan.operations:
         target_path = plan.target_root / operation.path
         if operation.action in {"create", "update"}:
-            source_path = plan.source_root / operation.path
             target_path.parent.mkdir(parents=True, exist_ok=True)
-            copy2(source_path, target_path)
+            if operation.path == LESSONS_PATH:
+                if plan.generated_lessons is None:
+                    raise RuntimeError("Generated LESSONS.md content missing from sync plan.")
+                write_text(target_path, plan.generated_lessons)
+            else:
+                source_path = plan.source_root / operation.path
+                copy2(source_path, target_path)
         elif operation.action == "delete":
             if target_path.exists():
                 target_path.unlink()

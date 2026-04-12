@@ -175,6 +175,86 @@ def test_build_sync_plan_accepts_existing_tmp_superpowers_gitignore_entry(
     assert plan.generated_gitignore == "node_modules/\ntmp/superpowers/\n"
 
 
+def test_apply_sync_plan_creates_target_lessons_from_source_template(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+    source_lessons = (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n\n"
+        "No pending lessons currently.\n"
+    )
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / "LESSONS.md", source_lessons)
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("create", "LESSONS.md") in actions
+
+    apply_sync_plan(plan)
+
+    assert (target_root / "LESSONS.md").read_text(encoding="utf-8") == source_lessons
+
+
+def test_apply_sync_plan_realigns_lessons_structure_without_losing_target_rows(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+    source_lessons = (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Entry Rules\n\n"
+        "- Use the source structure.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target | Notes |\n"
+        "| --- | --- | --- | --- | --- |\n\n"
+        "No pending lessons currently.\n"
+    )
+    target_lessons = (
+        "# Lessons\n\n"
+        "Target-only intro that should be replaced.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n"
+        "| 2026-04-12 | Preserve local lesson | pending | AGENTS.md |\n"
+    )
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / "LESSONS.md", source_lessons)
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "LESSONS.md", target_lessons)
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("update", "LESSONS.md") in actions
+
+    apply_sync_plan(plan)
+
+    assert (target_root / "LESSONS.md").read_text(encoding="utf-8") == (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Entry Rules\n\n"
+        "- Use the source structure.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target | Notes |\n"
+        "| --- | --- | --- | --- | --- |\n"
+        "| 2026-04-12 | Preserve local lesson | pending | AGENTS.md |  |\n"
+    )
+
+
 def test_build_sync_plan_includes_shared_repo_hygiene_files_only(
     tmp_path: Path,
 ) -> None:

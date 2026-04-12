@@ -21,6 +21,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 - `AGENTS.md` owns repository-wide defaults, rule placement, and bridge behavior.
 - `.github/copilot-instructions.md` projects the repo-wide behavior that must remain visible in native Copilot flows and must stay aligned with this file.
 - Narrower scoped instructions may override defaults only inside their declared scope.
+- Before adding a new policy, decide whether it truly belongs at repository scope; prefer the smallest specific instruction, skill, agent, or configuration that fully owns the behavior, and promote it to `AGENTS.md` only when it changes cross-surface governance or applies across the AI configuration baseline.
 - When rules conflict, prefer the smallest valid scope; if scope is equal, follow the canonical rule stated here and remove the conflicting duplicate.
 
 ## Language Default
