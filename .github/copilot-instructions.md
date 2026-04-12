@@ -21,6 +21,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 - `internal-sync-*` assets stay sync-specific and must not become second canonical homes for repository-wide policy.
 - When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
+- When source-managed guidance from this repository is mirrored into consumer repositories, phrase source-side rules conditionally so they remain true in targets and do not imply that the target repository is the source of truth.
 - `.github/local-copilot-overrides.md` may override synced defaults from `AGENTS.md` or this file only when the exception makes the conflict, scope, reason, and required disclosure explicit.
 - If `.github/local-copilot-overrides.md` exists but declares no active overrides, keep following the synced baseline.
 - When following a local override instead of the synced baseline, say that a consumer-local exception is in effect and cite `.github/local-copilot-overrides.md`.
@@ -59,7 +60,9 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
 - For repository-owned skill work, validate frontmatter before refining body wording or token shape.
+- For source-side repository-owned standards work that deepens parallel skill families, stage planning in `tmp/superpowers/`, make anti-scope explicit, and close parity gaps in existing `Common mistakes`, `Validation`, and current reference depth before adding optional new skills, validators, or shared assets.
 - Keep repository-owned skill `description:` lines trigger-first, and do not rewrite a working route during token optimization unless improving retrieval is the explicit goal.
+- For provider-specific cloud skills, keep guidance provider-native and omit cross-cloud comparison or provider-selection content when provider choice is already upstream of skill activation.
 - Prefer `references/` over new `scripts/` for static checklists, lookup tables, and starter templates; add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - Keep Python tests under the repository-root `tests/` tree with mirrored source paths, and make Bash wrappers runnable with internal defaults plus optional overrides.
 - Run the applicable validation that actually exists for the files you changed.

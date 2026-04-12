@@ -30,4 +30,5 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 
 ## Use the skill for deeper guidance
 - Load `.github/skills/internal-github-actions/SKILL.md` for workflow-vs-reusable-vs-composite decisions, reusable workflow templates, cache and artifact patterns, and workflow hardening checklists.
+- Keep this instruction lean because it is part of the source-managed baseline mirrored into consumer repositories; add new always-on GitHub Actions depth only when downstream reuse justifies that sync cost, and keep advanced patterns, examples, and decision support in the skill references.
 - Keep this instruction as the auto-loaded baseline; keep authoring depth and examples in the skill.
