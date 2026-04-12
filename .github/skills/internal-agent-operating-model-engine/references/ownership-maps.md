@@ -13,7 +13,7 @@ Use this reference when the operational model needs a lookup table instead of a 
 | `internal-copilot-audit` | `internal-planning-leader` | Catalog audit, drift analysis, and stale-reference review |
 | `internal-copilot-docs-research` | `internal-planning-leader` | Contract questions that depend on current GitHub Copilot or MCP behavior |
 | `internal-change-impact-analysis` | `internal-planning-leader` | Change-impact and architecture-risk analysis |
-| `internal-terraform`, `internal-cicd-workflow`, and runtime-specific internal skills | `internal-fast-executor` for local execution, `internal-planning-leader` when design or rollout dominates | Tactical delivery versus strategy split |
+| `internal-terraform`, `internal-github-actions`, and runtime-specific internal skills | `internal-fast-executor` for local execution, `internal-planning-leader` when design or rollout dominates | Tactical delivery versus strategy split |
 | `obra-*` workflows | Cross-agent support | Mandatory when relevant, absent when irrelevant |
 
 ## Retired To Canonical Ownership Mapping

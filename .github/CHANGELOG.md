@@ -7,6 +7,7 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-12
+- Renamed the workflow skill from `internal-cicd-workflow` to `internal-github-actions`, renamed `internal-github-composite-action` to `internal-github-action-composite`, and realigned the GitHub Actions instructions so the umbrella instruction is the family baseline while the composite instruction now carries only composite-specific delta guidance.
 - Added a retained-learning governance contract: root `AGENTS.md` now defines repository-root `LESSONS.md` as a non-canonical ledger for durable lessons learned during completed tasks, `.github/copilot-instructions.md` projects the same behavior into native Copilot flows, `INTERNAL_CONTRACT.md` source-governs the invariant, and the new `LESSONS.md` file records retained lessons with canonical-owner pointers.
 - Slimmed the retained-learning section in root `AGENTS.md` so the bridge keeps only strategic ownership and boundary language while `.github/copilot-instructions.md` remains the detailed operational projection.
 - Expanded the retained-learning contract so `LESSONS.md` may also keep durable corrections to repeated or consequential misapplication of already-codified repository rules, then recorded the bridge-vs-projection lesson for `AGENTS.md` and `.github/copilot-instructions.md`.

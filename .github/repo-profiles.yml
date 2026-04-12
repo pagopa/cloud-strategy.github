@@ -31,7 +31,7 @@ profiles:
       - instructions/internal-yaml.instructions.md
       - instructions/internal-json.instructions.md
     recommended_skills:
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   backend-java:
     description: Java service repositories.
@@ -41,7 +41,7 @@ profiles:
       - instructions/internal-markdown.instructions.md
     recommended_skills:
       - skills/internal-project-java/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   backend-nodejs:
     description: Node.js service repositories.
@@ -51,7 +51,7 @@ profiles:
       - instructions/internal-markdown.instructions.md
     recommended_skills:
       - skills/internal-project-nodejs/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   backend-python:
     description: Python service repositories.
@@ -61,7 +61,7 @@ profiles:
       - instructions/internal-markdown.instructions.md
     recommended_skills:
       - skills/internal-project-python/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   infrastructure-heavy:
     description: Infrastructure repositories with Terraform as primary language.
@@ -83,5 +83,5 @@ profiles:
     recommended_skills:
       - skills/internal-project-java/SKILL.md
       - skills/internal-project-nodejs/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
       - skills/internal-terraform/SKILL.md
