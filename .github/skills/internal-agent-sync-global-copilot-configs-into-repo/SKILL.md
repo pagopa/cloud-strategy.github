@@ -16,7 +16,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Align a consumer repository with the managed GitHub Copilot baseline from this repository.
 - Refresh target `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` to the current bridge model after mirroring.
 - Refresh shared repository-hygiene files that are part of the managed sync baseline, currently `.editorconfig`, `.pre-commit-config.yaml`, and `.github/workflows/terraform-pre-commit.yml`.
-- Refresh repository-root `LESSONS.md` from the source structure while preserving and, when needed, migrating target-authored pending lesson rows.
+- Refresh repository-root `LESSONS_LEARNED.md` from the source structure while preserving and, when needed, migrating target-authored pending lesson rows.
 - Preserve or review a target `.github/local-copilot-overrides.md` file that locally overrides the synced baseline.
 - Run or interpret `.github/scripts/sync_copilot_catalog.sh` or `.github/scripts/sync_copilot_catalog.py`.
 - Audit source-target drift before or after a sync.
@@ -29,7 +29,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Exclude source resources named `internal-sync-*` from consumer mirroring and remove any target copies of those resources during `apply`.
 - Do not mirror a source `.github/local-copilot-overrides.md`; it stays consumer-owned even when the source repository has one.
 - Keep root guidance layered: `AGENTS.md` is the bridge, `.github/copilot-instructions.md` is the repo-wide projection, `.github/local-copilot-overrides.md` is the consumer-local exception layer, and `.github/INVENTORY.md` is the live catalog.
-- Treat `LESSONS.md` as a source-managed retained-learning template: create it when missing, keep its structure aligned with the source contract, and preserve target-authored pending lessons instead of overwriting them with source rows.
+- Treat `LESSONS_LEARNED.md` as a source-managed retained-learning template: create it when missing, keep its structure aligned with the source contract, and preserve target-authored pending lessons instead of overwriting them with source rows.
 - Mirror only the explicitly shared repository-hygiene files declared in `references/sync-contract.md`; do not widen workflow or root-file mirroring implicitly.
 - Ensure the target repository `.gitignore` contains an ignore rule for `tmp/superpowers/`.
 - Prefer the bundled sync automation when it matches the requested mode instead of re-deriving the workflow manually.
@@ -39,7 +39,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 
 1. Analyze the source baseline, target catalog, target git state, and preserved local assets.
 2. Write `tmp/copilot-sync.plan.md` in the target repository with the pending operations and any manual follow-up that remains outside automation.
-3. In `apply`, mirror source-managed assets, merge target `LESSONS.md` rows into the current source structure, rebuild the target inventory, write the target manifest, and clear the tracking plan when nothing remains pending.
+3. In `apply`, mirror source-managed assets, merge target `LESSONS_LEARNED.md` rows into the current source structure, rebuild the target inventory, write the target manifest, and clear the tracking plan when nothing remains pending.
 4. Re-run the closest existing validation and report any blockers or gaps.
 
 ## Mode Selection

@@ -7,7 +7,7 @@ Use this reference when the paired agent or this skill needs the exact sync rule
 Mirror or structurally align these source-managed paths into the consumer repository:
 
 - `AGENTS.md`
-- `LESSONS.md`
+- `LESSONS_LEARNED.md`
 - `.editorconfig`
 - `.pre-commit-config.yaml`
 - `.github/copilot-instructions.md`
@@ -23,7 +23,7 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 
 Do not sync `README.md`, changelogs, other workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
 Do not sync consumer-facing resources whose file or directory name starts with `internal-sync-`; those remain source-only operational controls for the standards repository.
-Treat `LESSONS.md` as a structure-managed exception: sync the source template and contract, but preserve target-authored pending lesson rows instead of copying source rows into consumer repositories.
+Treat `LESSONS_LEARNED.md` as a structure-managed exception: sync the source template and contract, but preserve target-authored pending lesson rows instead of copying source rows into consumer repositories.
 
 ## Target Rules
 
@@ -32,7 +32,7 @@ Treat `LESSONS.md` as a structure-managed exception: sync the source template an
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - Do not mirror a source `.github/local-copilot-overrides.md` into consumer repositories.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
-- Ensure target root `LESSONS.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
+- Ensure target root `LESSONS_LEARNED.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
 - Ensure the target root `.gitignore` contains an ignore entry for `tmp/superpowers/`.
 - Treat the `.gitignore` update as target-local hygiene: ensure the required ignore entry exists without mirroring the source repository `.gitignore`.
 
@@ -41,7 +41,7 @@ Treat `LESSONS.md` as a structure-managed exception: sync the source template an
 When root guidance is in scope, keep the target files in these roles:
 
 - `AGENTS.md`: strategic bridge, precedence anchor, naming contract, and cross-surface routing guidance
-- `LESSONS.md`: retained-learning ledger template aligned from source structure while preserving target-authored pending lessons; it remains non-canonical and repo-local in content
+- `LESSONS_LEARNED.md`: retained-learning ledger template aligned from source structure while preserving target-authored pending lessons; it remains non-canonical and repo-local in content
 - `.github/copilot-instructions.md`: repo-wide GitHub Copilot projection
 - `.github/local-copilot-overrides.md`: consumer-local exception layer authorized by `AGENTS.md`; it may override synced defaults only when conflict, scope, reason, and disclosure are explicit
 - `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
@@ -84,7 +84,7 @@ If a dedicated contract test is missing, call out the gap explicitly.
 Completed runs should make these facts visible:
 
 - target analysis and selected mode
-- root-guidance alignment strategy and `LESSONS.md` status
+- root-guidance alignment strategy and `LESSONS_LEARNED.md` status
 - preserved `local-*` assets and `.github/local-copilot-overrides.md` status
 - target-only cleanup decisions
 - plan-file status and lifecycle

@@ -191,18 +191,18 @@ def test_apply_sync_plan_creates_target_lessons_from_source_template(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(source_root / "LESSONS.md", source_lessons)
+    write_file(source_root / "LESSONS_LEARNED.md", source_lessons)
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
 
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("create", "LESSONS.md") in actions
+    assert ("create", "LESSONS_LEARNED.md") in actions
 
     apply_sync_plan(plan)
 
-    assert (target_root / "LESSONS.md").read_text(encoding="utf-8") == source_lessons
+    assert (target_root / "LESSONS_LEARNED.md").read_text(encoding="utf-8") == source_lessons
 
 
 def test_apply_sync_plan_realigns_lessons_structure_without_losing_target_rows(
@@ -231,19 +231,19 @@ def test_apply_sync_plan_realigns_lessons_structure_without_losing_target_rows(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(source_root / "LESSONS.md", source_lessons)
+    write_file(source_root / "LESSONS_LEARNED.md", source_lessons)
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
-    write_file(target_root / "LESSONS.md", target_lessons)
+    write_file(target_root / "LESSONS_LEARNED.md", target_lessons)
 
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("update", "LESSONS.md") in actions
+    assert ("update", "LESSONS_LEARNED.md") in actions
 
     apply_sync_plan(plan)
 
-    assert (target_root / "LESSONS.md").read_text(encoding="utf-8") == (
+    assert (target_root / "LESSONS_LEARNED.md").read_text(encoding="utf-8") == (
         "# Lessons\n\n"
         "Source-managed retained learning ledger.\n\n"
         "## Entry Rules\n\n"

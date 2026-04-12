@@ -526,7 +526,7 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
             target_path.parent.mkdir(parents=True, exist_ok=True)
             if operation.path == LESSONS_PATH:
                 if plan.generated_lessons is None:
-                    raise RuntimeError("Generated LESSONS.md content missing from sync plan.")
+                    raise RuntimeError("Generated LESSONS_LEARNED.md content missing from sync plan.")
                 write_text(target_path, plan.generated_lessons)
             else:
                 source_path = plan.source_root / operation.path
