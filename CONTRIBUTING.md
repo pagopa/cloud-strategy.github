@@ -22,9 +22,8 @@ This repository is the source baseline for reusable GitHub Copilot customization
 ## Adding or updating assets
 
 - Instructions: keep frontmatter `description` and `applyTo`, use repository-agnostic wording, and avoid stack duplication already covered by a skill.
-- Prompts: require `name`, `description`, `agent`, and `argument-hint`, plus `## Instructions`, `## Validation`, and `## Minimal example`.
 - Skills: keep `name`, `description`, `## When to use`, and one validation/testing section.
-- Agents: keep `name`, `description`, `tools`, `## Objective`, and `## Restrictions`.
+- Agents: keep `name`, `description`, `tools`, and the current section structure used in this repository: `## Role`, `## Mandatory Engine Skills`, `## Optional Support Skills`, `## Core Rules`, `## Routing Rules`, `## Boundary Definition`, and `## Output Expectations`.
 
 ## Validation before PR
 

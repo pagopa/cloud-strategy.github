@@ -15,7 +15,6 @@ Mirror these source-managed paths into the consumer repository:
 - `.github/repo-profiles.yml`
 - `.github/agents/**`
 - `.github/instructions/**`
-- `.github/prompts/**`
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
 
 Do not sync `README.md`, changelogs, workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
@@ -24,9 +23,11 @@ Do not sync consumer-facing resources whose file or directory name starts with `
 ## Target Rules
 
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
+- Preserve target `.github/local-copilot-overrides.md` as a consumer-owned local exception layer and surface it in the plan or final report when present.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
+- Do not mirror a source `.github/local-copilot-overrides.md` into consumer repositories.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
-- Ensure the target root `.gitignore` contains an ignore entry for `docs/superpowers/`.
+- Ensure the target root `.gitignore` contains an ignore entry for `tmp/superpowers/`.
 - Treat the `.gitignore` update as target-local hygiene: ensure the required ignore entry exists without mirroring the source repository `.gitignore`.
 
 ## Root Guidance Ownership
@@ -35,9 +36,10 @@ When root guidance is in scope, keep the target files in these roles:
 
 - `AGENTS.md`: strategic bridge, precedence anchor, naming contract, and cross-surface routing guidance
 - `.github/copilot-instructions.md`: repo-wide GitHub Copilot projection
+- `.github/local-copilot-overrides.md`: consumer-local exception layer authorized by `AGENTS.md`; it may override synced defaults only when conflict, scope, reason, and disclosure are explicit
 - `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
 
-Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`.
+Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`. Do not let `.github/local-copilot-overrides.md` replace the bridge or catalog roles.
 
 ## Tracking Plan Lifecycle
 
@@ -50,7 +52,9 @@ Do not flatten these roles into one file. Do not let target `AGENTS.md` become a
 ## Automation Entry Points
 
 - Preferred wrapper: `.github/scripts/sync_copilot_catalog.sh`
+- Audit wrapper: `.github/scripts/audit_copilot_catalog.sh`
 - Python entry point: `.github/scripts/sync_copilot_catalog.py`
+- Audit entry point: `.github/scripts/audit_copilot_catalog.py`
 - Core implementation: `.github/scripts/lib/syncing.py`
 - Target manifest: `.github/copilot-sync.manifest.json`
 
@@ -63,7 +67,8 @@ Use the closest existing checks for the touched behavior:
 1. `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks`
 2. `./.github/scripts/build_inventory.sh --root .`
 3. `./.github/scripts/sync_copilot_catalog.sh plan --target-repo <repo>`
-4. `pytest tests/test_sync_and_token_risks.py` when sync automation changes
+4. `./.github/scripts/audit_copilot_catalog.sh --root .` when the decision depends on governance drift or local override behavior
+5. `pytest tests/test_sync_and_token_risks.py` when sync automation changes
 
 If a dedicated contract test is missing, call out the gap explicitly.
 
@@ -73,7 +78,7 @@ Completed runs should make these facts visible:
 
 - target analysis and selected mode
 - root-guidance alignment strategy
-- preserved `local-*` assets
+- preserved `local-*` assets and `.github/local-copilot-overrides.md` status
 - target-only cleanup decisions
 - plan-file status and lifecycle
 - validation results and remaining blockers

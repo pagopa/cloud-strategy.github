@@ -13,10 +13,10 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 - CLI tools, one-off automation, data processing.
 - Small multi-entrypoint toolkits whose primary contract is operator-facing execution rather than reusable package APIs.
 
-## Boundary with internal-project-python
-- **This skill**: standalone operational tools, CLI entrypoints, and small script toolkits whose primary contract is direct execution.
-- **internal-project-python**: structured package, library, and application components whose primary contract is imported behavior, service boundaries, or framework-owned flows.
-- A tool does not become `internal-project-python` just because it has multiple files, a `lib/` folder, or root-level tests.
+## Boundary
+- This skill covers standalone operational tools, CLI entrypoints, and small script toolkits whose primary contract is direct execution.
+- A tool does not become application code just because it has multiple files, a `lib/` folder, or root-level tests.
+- Move out of this lane only when the primary contract becomes imported behavior, service boundaries, or framework-owned flows.
 
 ## Script-specific guidance
 - Standalone tools should default to a dedicated folder or toolkit root, not a loose top-level `.py` file.
@@ -86,10 +86,6 @@ Keep these rules visible while drafting:
 | Defaulting to stdlib without comparing mature libraries | Leaves avoidable boilerplate, edge cases, and custom parsing logic in the script | Write the dependency decision note first and choose the option that makes the final code simpler |
 | Rejecting a useful dependency just to keep dependency count low | Optimizes the wrong thing and increases custom code | Optimize for simpler final code and justified value, not dependency minimization |
 | Forcing async or framework abstractions into a simple tool | Raises complexity without improving the script | Keep the script synchronous and direct unless concurrency is essential |
-
-## Cross-references
-- **internal-project-python** (`.github/skills/internal-project-python/SKILL.md`): for structured application code.
-- **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for reviewing Python code (see `.github/skills/internal-code-review/references/anti-patterns-python.md`).
 
 ## Validation
 - `python -m py_compile <script_name>.py` (syntax check)

@@ -9,6 +9,7 @@ from .inventory import render_inventory_markdown, sections_from_catalog_paths
 from .fingerprinting import HASH_ALGO, NORMALIZATION_VERSION, build_fingerprint
 from .shared import (
     INVENTORY_PATH,
+    LOCAL_COPILOT_OVERRIDES_PATH,
     MANAGED_ROOT_FILES,
     SyncOperation,
     SyncPlan,
@@ -32,7 +33,7 @@ LEGACY_SYNC_ARTIFACT_PATHS = (
     ".github/internal-sync-copilot-configs.manifest.json",
 )
 TARGET_GITIGNORE_PATH = ".gitignore"
-TARGET_SUPERPOWERS_IGNORE_ENTRY = "/docs/superpowers/"
+TARGET_SUPERPOWERS_IGNORE_ENTRY = "/tmp/superpowers/"
 
 
 def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
@@ -108,6 +109,19 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
             )
         )
 
+    local_override_path = target_root / LOCAL_COPILOT_OVERRIDES_PATH
+    if local_override_path.exists():
+        local_assets.append(LOCAL_COPILOT_OVERRIDES_PATH)
+        operations.append(
+            SyncOperation(
+                action="preserve",
+                path=LOCAL_COPILOT_OVERRIDES_PATH,
+                reason="Preserved consumer-owned local override layer.",
+                source_hash=None,
+                target_hash=sha256_file(local_override_path),
+            )
+        )
+
     for relative_path in LEGACY_SYNC_ARTIFACT_PATHS:
         legacy_path = target_root / relative_path
         if not legacy_path.exists():
@@ -125,12 +139,12 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     future_inventory_paths = sorted(
         catalog_path
         for catalog_path in source_files
-        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/"))
+        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/skills/"))
     )
     future_inventory_paths.extend(
         catalog_path
         for catalog_path in local_assets
-        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/"))
+        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/skills/"))
     )
     generated_inventory = render_inventory_markdown(sections_from_catalog_paths(future_inventory_paths))
 
@@ -153,9 +167,9 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     generated_gitignore = ensure_superpowers_gitignore_entry(current_gitignore)
     gitignore_action = "unchanged" if current_gitignore == generated_gitignore else "ensure"
     gitignore_reason = (
-        "Target .gitignore already ignores docs/superpowers."
+        "Target .gitignore already ignores tmp/superpowers."
         if gitignore_action == "unchanged"
-        else "Target .gitignore must ignore docs/superpowers for Superpowers-generated docs artifacts."
+        else "Target .gitignore must ignore tmp/superpowers for Superpowers-generated working artifacts."
     )
     operations.append(
         SyncOperation(
@@ -185,7 +199,6 @@ def discover_source_sync_files(root: Path) -> set[str]:
     files = {relative_path for relative_path in MANAGED_ROOT_FILES if (root / relative_path).exists()}
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
-    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     return {
         relative_path
@@ -200,7 +213,6 @@ def discover_target_managed_files(root: Path) -> set[str]:
         files.add(INVENTORY_PATH)
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
-    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     return {
         relative_path
@@ -213,7 +225,6 @@ def discover_target_excluded_sync_files(root: Path) -> set[str]:
     files: set[str] = set()
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
-    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     return {
         relative_path
@@ -288,10 +299,10 @@ def ensure_superpowers_gitignore_entry(current_content: str | None) -> str:
     lines = current_content.splitlines()
     normalized_entries = {line.strip() for line in lines}
     accepted_entries = {
-        "docs/superpowers",
-        "docs/superpowers/",
-        "/docs/superpowers",
-        "/docs/superpowers/",
+        "tmp/superpowers",
+        "tmp/superpowers/",
+        "/tmp/superpowers",
+        "/tmp/superpowers/",
     }
     if normalized_entries & accepted_entries:
         return current_content if current_content.endswith("\n") else f"{current_content}\n"

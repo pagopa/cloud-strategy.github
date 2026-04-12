@@ -105,8 +105,6 @@ def detect_kind(relative_path: str) -> str:
         return "agent"
     if relative_path.startswith(".github/instructions/") and relative_path.endswith(".instructions.md"):
         return "instruction"
-    if relative_path.startswith(".github/prompts/"):
-        return "prompt"
     return "file"
 
 

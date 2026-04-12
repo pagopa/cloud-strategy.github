@@ -5,10 +5,9 @@ from pathlib import Path
 
 from .shared import INVENTORY_PATH, path_list, write_text
 
-SECTION_ORDER = ("Instructions", "Prompts", "Skills", "Agents")
+SECTION_ORDER = ("Instructions", "Skills", "Agents")
 EMPTY_MESSAGES = {
     "Instructions": "No instruction files currently ship in the live catalog.",
-    "Prompts": "No prompt files currently ship in the live catalog.",
     "Skills": "No skill files currently ship in the live catalog.",
     "Agents": "No agent files currently ship in the live catalog.",
 }
@@ -17,7 +16,6 @@ EMPTY_MESSAGES = {
 def collect_inventory_sections(root: Path) -> dict[str, list[str]]:
     return {
         "Instructions": path_list(root, ".github/instructions/**/*.instructions.md"),
-        "Prompts": path_list(root, ".github/prompts/**/*.prompt.md"),
         "Skills": path_list(root, ".github/skills/**/SKILL.md"),
         "Agents": path_list(root, ".github/agents/*.agent.md"),
     }
@@ -28,8 +26,6 @@ def sections_from_catalog_paths(paths: list[str]) -> dict[str, list[str]]:
     for relative_path in sorted(paths):
         if relative_path.startswith(".github/instructions/") and relative_path.endswith(".instructions.md"):
             sections["Instructions"].append(relative_path)
-        elif relative_path.startswith(".github/prompts/") and relative_path.endswith(".prompt.md"):
-            sections["Prompts"].append(relative_path)
         elif relative_path.startswith(".github/skills/") and relative_path.endswith("/SKILL.md"):
             sections["Skills"].append(relative_path)
         elif relative_path.startswith(".github/agents/") and relative_path.endswith(".agent.md"):

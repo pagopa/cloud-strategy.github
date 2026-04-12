@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal Composite Action"
-  short_description: "Help with Internal Composite Action tasks"
-  default_prompt: "Use $internal-composite-action for this task and follow the repository-owned workflow in the skill."

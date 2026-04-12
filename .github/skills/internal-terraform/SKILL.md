@@ -78,11 +78,6 @@ Load `references/template-examples.md` when you need a minimal inline feature ex
 | Missing `prevent_destroy` on critical production resources | Accidental deletion during `terraform apply` | Add lifecycle for databases, DNS zones, encryption keys |
 | `default = ""` instead of `default = null` for optional strings | Empty string passes validation but means "no value" ambiguously | Use `null` for truly optional inputs |
 
-## Cross-references
-- **internal-cloud-policy** (`.github/skills/internal-cloud-policy/SKILL.md`): for governance policies (SCP, Azure Policy, GCP Org Policy) applied alongside Terraform infra.
-- **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for CI/CD pipelines that run `terraform plan/apply`.
-- **terraform-terraform-test** (`.github/skills/terraform-terraform-test/SKILL.md`): for `.tftest.hcl` authoring and Terraform native test workflows.
-
 ## Validation
 - `terraform fmt -check -recursive`
 - `terraform validate`

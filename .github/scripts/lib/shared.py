@@ -33,6 +33,7 @@ MANAGED_ROOT_FILES = (
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",
 )
+LOCAL_COPILOT_OVERRIDES_PATH = ".github/local-copilot-overrides.md"
 INVENTORY_PATH = ".github/INVENTORY.md"
 
 

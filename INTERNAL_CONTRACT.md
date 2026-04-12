@@ -65,7 +65,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Scope:
   - root `AGENTS.md`
   - `.github/copilot-instructions.md`
-  - scoped instructions, prompts, skills, and agents
+  - scoped instructions, skills, and agents
 - Expected behavior:
   - root `AGENTS.md` states that the default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it
   - `.github/copilot-instructions.md` may project that rule in compact form for Copilot flows
@@ -124,7 +124,6 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: ensure repository resources follow the naming convention defined by origin.
 - Scope:
-  - prompts
   - skills
   - agents
   - instructions
@@ -137,12 +136,11 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: ensure repository-owned resources that support explicit naming metadata declare it correctly.
 - Scope:
-  - internal prompts
   - internal skills
   - internal agents
 - Expected behavior:
   - every repository-owned internal resource has a non-empty canonical identifier
-  - every internal prompt, skill, and agent declares a non-empty `name:`
+  - every internal skill and agent declares a non-empty `name:`
   - every declared `name:` matches the canonical resource identifier
   - imported non-`internal-*` resources may remain verbatim
 
@@ -199,6 +197,20 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - completed runs end with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
   - the contract stays projected where Copilot or governance flows rely on it
   - root `AGENTS.md` may point to the repo-wide projection but does not need to carry the full formatting contract
+
+#### `reporting-retained-learning-ledger-stays-governed`
+
+- Goal: preserve retained learning without turning it into shadow policy.
+- Scope:
+  - root `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `LESSONS.md`
+- Expected behavior:
+  - repository-root `LESSONS.md` exists as a non-canonical learning ledger
+  - completed tasks add only durable, reusable lessons that were not already codified when discovered
+  - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
+  - no ledger update is required when no stable new lesson emerged
+  - once a lesson is codified elsewhere, it is removed from `LESSONS.md` instead of being retained as a codified duplicate
 
 ### Future Automation Constraints
 

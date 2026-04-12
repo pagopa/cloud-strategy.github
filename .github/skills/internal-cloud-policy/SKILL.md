@@ -12,7 +12,7 @@ description: Use when authoring, comparing, or reviewing concrete cloud policy d
 
 ## Boundary
 - Use this skill for concrete policy artifacts or cross-cloud policy comparisons.
-- Use `internal-aws-governance`, `internal-azure-governance`, or `internal-gcp-governance` when the main question is IAM, RBAC, operating-model, or guardrail strategy rather than the policy definition itself.
+- When the main question is IAM, RBAC, operating-model, or guardrail strategy rather than the policy definition itself, treat it as a governance-design problem instead of a policy-definition task.
 
 ## Mandatory rules
 - Keep scope explicit (organization / folder / subscription / project / management group).
@@ -45,10 +45,6 @@ Load `references/policy-templates.md` for AWS SCP, Azure Policy, GCP Org Policy,
 | Overly broad Azure Policy `deployIfNotExists` | Auto-remediation creates resources you don't expect | Use `audit` first, promote to `deployIfNotExists` after validation |
 | No rollback path documented | When policy causes incident, recovery takes hours | Document disable/removal steps before every rollout |
 | Hardcoded account/subscription/project IDs in policy | Non-portable across environments | Use variables or parameters |
-
-## Cross-references
-- **internal-terraform** (`.github/skills/internal-terraform/SKILL.md`): for Terraform resources that deploy policies.
-- **internal-cicd-workflow** (`.github/skills/internal-cicd-workflow/SKILL.md`): for CI/CD pipelines that validate and apply policies.
 
 ## Validation
 - Validate syntax in the target format (JSON / HCL).

@@ -9,12 +9,12 @@ Use this file as a starting map, not as a substitute for opening the live docs.
 - `https://docs.github.com/en/copilot/how-tos/configure-custom-instructions`
   - Use for the high-level entry point to personal, repository, and organization custom instructions.
 - `https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions?tool=vscode`
-  - Use for repository custom instructions, prompt files, and environment-specific behavior.
+  - Use for repository custom instructions and environment-specific behavior.
 
 ## Custom agents and skills
 
 - `https://docs.github.com/en/copilot/concepts/agents/coding-agent/about-custom-agents`
-  - Use for what custom agents are, where they are supported, and the high-level model that custom agents can specify prompts, tools, and MCP servers.
+  - Use for what custom agents are, where they are supported, and the high-level model that custom agents can specify tools and MCP servers.
 - `https://docs.github.com/en/copilot/reference/custom-agents-configuration`
   - Use as the primary source for supported frontmatter fields, current tool aliases, MCP tool namespacing, retired `infer`, and environment-specific behavior.
 - `https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents`
@@ -38,7 +38,7 @@ Use this file as a starting map, not as a substitute for opening the live docs.
 - `https://code.visualstudio.com/docs/copilot/agents/subagents`
   - Use for subagent invocation, coordinator/worker orchestration patterns, nested subagents, and `agents:` restriction.
 - `https://code.visualstudio.com/docs/copilot/copilot-customization`
-  - Use for the VS Code customization overview: instructions, prompt files, agents, and skills.
+  - Use for the VS Code customization overview: instructions, agents, and skills.
 - `https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode`
   - Use for agent mode behavior, tool usage, and session-level agent configuration in VS Code.
 - `https://code.visualstudio.com/docs/copilot/customization/agent-skills`

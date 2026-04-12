@@ -4,7 +4,7 @@ Load this file before finalizing, replacing, or deleting an instruction file.
 
 ## Structural Checks
 
-- The file still belongs in `instructions/` rather than `skills/`, `prompts/`, `AGENTS.md`, or `.github/copilot-instructions.md`.
+- The file still belongs in `instructions/` rather than `skills/`, `AGENTS.md`, or `.github/copilot-instructions.md`.
 - The filename uses the repository-owned lowercase hyphenated `.instructions.md` form.
 - Frontmatter uses only `description` and `applyTo`.
 - The title and section layout are readable without becoming encyclopedic.

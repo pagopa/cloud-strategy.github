@@ -15,11 +15,16 @@ You are an expert software and platform engineer. Protect correctness, security,
 2. This file is the repo-wide Copilot projection and should keep only the behavior that must remain visible in native Copilot flows.
 3. `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` apply when the task is review or commit authoring.
 4. Matching `.github/instructions/*.instructions.md` files provide scoped or domain-specific guidance and may override defaults inside their declared scope.
-5. Prompts, skills, and agents are on-demand operational assets; use them only when relevant.
+5. Skills and agents are on-demand operational assets; use them only when relevant.
 6. `.github/INVENTORY.md` is the live catalog of managed assets and is never replaced by `AGENTS.md`.
+7. If `.github/local-copilot-overrides.md` exists, read it before relying on synced repo-wide defaults; it is the consumer-local exception layer authorized by `AGENTS.md`.
 
 - `internal-sync-*` assets stay sync-specific and must not become second canonical homes for repository-wide policy.
 - When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
+- `.github/local-copilot-overrides.md` may override synced defaults from `AGENTS.md` or this file only when the exception makes the conflict, scope, reason, and required disclosure explicit.
+- If `.github/local-copilot-overrides.md` exists but declares no active overrides, keep following the synced baseline.
+- When following a local override instead of the synced baseline, say that a consumer-local exception is in effect and cite `.github/local-copilot-overrides.md`.
+- Do not treat the local override file as inventory or as a replacement for the bridge, projection, and catalog split.
 
 ## Language Projection
 
@@ -67,9 +72,22 @@ You are an expert software and platform engineer. Protect correctness, security,
 - For GitHub Actions pinning, each full SHA must include an adjacent comment with a release or tag reference.
 - `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
 
+## Retained Learning
+
+- Whenever work reveals a new durable lesson, regardless of whether the task is in planning, review, debugging, or implementation, check whether it was already codified in repository resources when discovered.
+- Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
+- Before editing repository-root `LESSONS.md`, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including uncommitted rows already present on disk.
+- When a durable lesson is clear and still uncodified, append one concise, reusable row to the pending table in `LESSONS.md` instead of waiting for task completion; do not regenerate, reorder, or rewrite unrelated rows.
+- Treat `LESSONS.md` as a learning ledger, not as canonical policy. Do not dump transient notes, full debugging timelines, sensitive content, or conversational noise into it.
+- Preserve unrelated existing lessons in `LESSONS.md`, including local uncommitted ones already on disk.
+- If a lesson is later disproven, narrowed, deduplicated, or codified elsewhere in the same task, update or remove only that lesson's row before completion.
+- If the same task also codifies the lesson into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent, remove that corresponding row from `LESSONS.md` instead of keeping a codified duplicate there.
+- If no durable lesson emerged, do not force a `LESSONS.md` change.
+
 ## Completion Report
 
 - End completed operations with `✅ Outcome`.
-- When used, also include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources`.
+- When used, also include `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`.
 - In each included section, state which resources were used and why they were relevant.
+- When `LESSONS.md` was updated, mention it under `📦 Other Resources` with a short reason.
 - Omit unused categories instead of adding empty or negative sections.

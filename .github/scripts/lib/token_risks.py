@@ -2,10 +2,20 @@ from __future__ import annotations
 
 from collections import defaultdict
 from pathlib import Path
+import re
 
-from .shared import Finding, finding_sort_key, iter_markdown_assets, load_frontmatter, normalize_markdown_text, read_text, significant_text_lines
+from .shared import (
+    Finding,
+    finding_sort_key,
+    iter_markdown_assets,
+    load_frontmatter,
+    normalize_markdown_text,
+    read_text,
+    significant_text_lines,
+)
 
 ROOT_POLICY_MARKERS = ("AGENTS.md", ".github/copilot-instructions.md", ".github/INVENTORY.md")
+INVENTORY_LINE_PATTERN = re.compile(r"^- `?\.github/[^`]+`?(?::|\s*$)")
 
 
 def detect_token_risks(root: Path) -> list[Finding]:
@@ -37,7 +47,7 @@ def check_bridge_overlap(root: Path) -> list[Finding]:
             path="AGENTS.md",
             message=(
                 "AGENTS.md and .github/copilot-instructions.md share too many significant lines, "
-                f"which increases prompt duplication ({len(shared_lines)} overlapping lines)."
+                f"which increases duplicated context ({len(shared_lines)} overlapping lines)."
             ),
             suggestion="Keep strategic bridge rules in AGENTS.md and move repo-wide Copilot behavior to .github/copilot-instructions.md.",
         )
@@ -53,7 +63,7 @@ def check_inventory_dumps(root: Path) -> list[Finding]:
         inventory_lines = [
             line
             for line in read_text(path).splitlines()
-            if line.strip().startswith("- ") and ".github/" in line
+            if INVENTORY_LINE_PATTERN.match(line.strip())
         ]
         if len(inventory_lines) < 5:
             continue
@@ -88,7 +98,7 @@ def check_duplicate_markdown_bodies(root: Path) -> list[Finding]:
                 code="duplicate-markdown-body",
                 path=sorted(paths)[0],
                 message=f"Multiple Markdown assets resolve to the same normalized body: {duplicate_paths}.",
-                suggestion="Remove weaker aliases or move shared logic into one canonical file to reduce duplicated prompt context.",
+                suggestion="Remove weaker aliases or move shared logic into one canonical file to reduce duplicated context.",
             )
         )
     return findings
@@ -106,7 +116,7 @@ def check_internal_agent_skill_list_size(root: Path) -> list[Finding]:
                     severity="non-blocking",
                     code="large-skill-list",
                     path=path.relative_to(root).as_posix(),
-                    message=f"The internal agent declares {len(bullets)} optional support skills, which broadens prompt context.",
+                    message=f"The internal agent declares {len(bullets)} optional support skills, which broadens live context.",
                     suggestion="Keep optional skill lists tight and move generic guidance into shared skills when possible.",
                 )
             )

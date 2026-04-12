@@ -30,10 +30,8 @@ profiles:
       - instructions/internal-markdown.instructions.md
       - instructions/internal-yaml.instructions.md
       - instructions/internal-json.instructions.md
-    recommended_prompts:
-      - prompts/internal-github-action.prompt.md
     recommended_skills:
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   backend-java:
     description: Java service repositories.
@@ -41,11 +39,9 @@ profiles:
       - instructions/internal-java.instructions.md
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-markdown.instructions.md
-    recommended_prompts:
-      - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
       - skills/internal-project-java/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   backend-nodejs:
     description: Node.js service repositories.
@@ -53,11 +49,9 @@ profiles:
       - instructions/internal-nodejs.instructions.md
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-markdown.instructions.md
-    recommended_prompts:
-      - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
       - skills/internal-project-nodejs/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   backend-python:
     description: Python service repositories.
@@ -65,11 +59,9 @@ profiles:
       - instructions/internal-python.instructions.md
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-markdown.instructions.md
-    recommended_prompts:
-      - prompts/internal-add-unit-tests.prompt.md
     recommended_skills:
       - skills/internal-project-python/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
 
   infrastructure-heavy:
     description: Infrastructure repositories with Terraform as primary language.
@@ -77,8 +69,6 @@ profiles:
       - instructions/internal-terraform.instructions.md
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-yaml.instructions.md
-    recommended_prompts:
-      - prompts/internal-terraform-module.prompt.md
     recommended_skills:
       - skills/internal-terraform/SKILL.md
       - skills/internal-cloud-policy/SKILL.md
@@ -90,13 +80,8 @@ profiles:
       - instructions/internal-nodejs.instructions.md
       - instructions/internal-github-actions.instructions.md
       - instructions/internal-terraform.instructions.md
-    recommended_prompts:
-      - prompts/internal-add-platform.prompt.md
-      - prompts/internal-add-unit-tests.prompt.md
-      - prompts/internal-github-action.prompt.md
-      - prompts/internal-terraform-module.prompt.md
     recommended_skills:
       - skills/internal-project-java/SKILL.md
       - skills/internal-project-nodejs/SKILL.md
-      - skills/internal-cicd-workflow/SKILL.md
+      - skills/internal-github-actions/SKILL.md
       - skills/internal-terraform/SKILL.md

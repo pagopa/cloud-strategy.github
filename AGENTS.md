@@ -11,9 +11,9 @@ This file is the stable entrypoint for the repository instruction architecture.
 ## Cross-Surface Contract
 
 1. Use `.github/copilot-instructions.md` as the repo-wide Copilot projection.
-2. Use `.github/INVENTORY.md` for the exact live catalog of instructions, prompts, skills, and agents.
+2. Use `.github/INVENTORY.md` for the exact live catalog of instructions, skills, and agents.
 3. Use `.github/instructions/` for path-specific or domain-specific projections.
-4. Use `.github/prompts/`, `.github/skills/`, and `.github/agents/` only when they are relevant to the current task.
+4. Use `.github/skills/` and `.github/agents/` only when they are relevant to the current task.
 5. Keep policy, projections, and inventory separate instead of mixing them into one file.
 
 ## Precedence Model
@@ -58,6 +58,24 @@ This file is the stable entrypoint for the repository instruction architecture.
 - Keep `internal-sync-*` assets sync-specific. They may reference root governance, but they do not replace canonical ownership in this file or `.github/copilot-instructions.md`.
 - When a sync or catalog workflow changes a repository-wide default, update the canonical owner first and then realign downstream projections or sync surfaces in the same pass.
 - Do not treat removed validators, sync scripts, contract tests, or historical aliases as active policy unless they exist on disk and are reintroduced deliberately.
+
+## Consumer Override Layer
+
+- Consumer repositories may keep a non-mirrored `.github/local-copilot-overrides.md` file as a consumer-owned local exception layer.
+- That file may override synced defaults from `AGENTS.md` or `.github/copilot-instructions.md` only inside the consumer repository and only when each exception states the overridden baseline rule, local scope, reason, and required disclosure.
+- If the file exists but declares no active overrides, keep the synced baseline authoritative.
+- When a response follows a local override, it must say that a consumer-local exception is in effect and cite `.github/local-copilot-overrides.md`.
+- Keep the local override file local. Do not mirror it from this standards repository, do not treat it as inventory, and do not use it to collapse the separate roles of `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.
+- The local override layer must not redefine the ownership meaning of `internal-*`, `local-*`, or `internal-sync-*`; use it for repo-local exceptions, not for replacing the bridge model.
+
+## Retained Learning
+
+- Root `LESSONS.md` is the repository learning ledger for durable lessons discovered during repository work, regardless of phase.
+- Record or codify a durable lesson as soon as it becomes clear enough to be reusable; do not wait for task completion only because the work is still in planning, review, debugging, or implementation.
+- Keep `LESSONS.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
+- Keep `LESSONS.md` append-preserving by default: preserve unrelated rows already on disk, including local uncommitted lessons, and change a specific row only when that same lesson is being codified, disproven, narrowed, or deduplicated.
+- Durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons.
+- Keep detailed retained-learning behavior in `.github/copilot-instructions.md`; keep only the strategic boundary here.
 
 ## Volatile Artifacts
 

@@ -3,14 +3,13 @@
 This directory is the source-side catalog for reusable GitHub Copilot customization assets maintained in `cloud-strategy.github`.
 
 - `.github/copilot-instructions.md` is the primary detailed policy layer.
-- Root [`AGENTS.md`](../AGENTS.md) is the thin bridge for routing, naming, discovery, and the pointer to exact path inventory.
+- Root [`AGENTS.md`](../AGENTS.md) is the strategic entrypoint, precedence anchor, and bridge for routing, naming, discovery, and the pointer to exact path inventory.
 - [`INVENTORY.md`](INVENTORY.md) is the exact path inventory for the live catalog.
 - This README is an orientation guide for maintainers of the source catalog. It should describe the live on-disk catalog only.
 
 ## Live Catalog Summary
 
 - Instructions: 17 total (`13 internal-*`, `4 awesome-copilot-*`)
-- Prompts: 0 total
 - Skills: 85 total (`45 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `8 antigravity-*`, `7 openai-*`, `2 terraform-*`)
 - Agents: 7 total (`7 internal-*`)
 - Scripts: 21 tracked files
@@ -23,7 +22,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 | Path | Purpose |
 | --- | --- |
 | `copilot-instructions.md` | Primary detailed policy, validation baseline, routing model, and completion-report contract. |
-| `INVENTORY.md` | Exact path inventory for live instructions, prompts, skills, and agents. |
+| `INVENTORY.md` | Exact path inventory for live instructions, skills, and agents. |
 | `copilot-code-review-instructions.md` | Review-specific severity and defect-first guidance. |
 | `copilot-commit-message-instructions.md` | Commit message conventions. |
 | `security-baseline.md` | Cross-cutting security bar for workflows and infrastructure changes. |
@@ -32,8 +31,6 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 | `CHANGELOG.md` | Source-side history of meaningful catalog changes. |
 | `PULL_REQUEST_TEMPLATE.md` | PR section order for this repository. |
 | `dependabot.yml` | Dependency update configuration for this source repository. |
-| `obra-superpowers-source-of-truth.json` | Pinned upstream mapping contract for imported `obra-*` skills. |
-| `.bootstrap-ignore` | Legacy compatibility artifact retained outside the primary sync workflow. |
 
 ### Instructions (`instructions/`)
 
@@ -42,13 +39,7 @@ Instructions are path-driven and auto-apply via `applyTo`.
 - Repository-owned `internal-*` instructions: `internal-bash`, `internal-docker`, `internal-github-action-composite`, `internal-github-actions`, `internal-java`, `internal-json`, `internal-lambda`, `internal-makefile`, `internal-markdown`, `internal-nodejs`, `internal-python`, `internal-terraform`, `internal-yaml`
 - Imported `awesome-copilot-*` instructions: `awesome-copilot-azure-devops-pipelines`, `awesome-copilot-go`, `awesome-copilot-kubernetes-manifests`, `awesome-copilot-shell`
 
-Use instructions as automatic file-path guidance. Do not hardcode instruction references into prompts when `applyTo` already resolves the behavior.
-
-### Prompts (`prompts/`)
-
-No prompt files currently ship in the live catalog.
-
-If prompt assets are reintroduced, they must stay aligned with real files under `instructions/`, `skills/`, and `scripts/`.
+Use instructions as automatic file-path guidance. Do not restate path-driven behavior in skills when `applyTo` already resolves it.
 
 ### Skills (`skills/`)
 
@@ -65,8 +56,8 @@ Skills are grouped into three functional lanes plus imported support families.
 Some skill directories include support material beyond `SKILL.md`. Current live examples include:
 
 - provider families with bundled references and UI metadata: `internal-aws-*`, `internal-azure-*`, `internal-gcp-*`, `internal-github-*`
-- repository-owned support bundles such as `internal-agent-*`, `internal-change-impact-analysis`, `internal-cicd-workflow`, `internal-cloud-policy`, `internal-code-review`, `internal-composite-action`, `internal-copilot-*`, `internal-ddd`, `internal-docker`, `internal-kubernetes`, `internal-kubernetes-deployment`, `internal-oop-design-patterns`, `internal-performance-optimization`, `internal-pr-editor`, `internal-project-*`, `internal-script-*`, `internal-spring-boot-development`, `internal-sync-*`, and `internal-terraform`
-- workflow packs with bundled references or helpers such as `obra-brainstorming`, `obra-requesting-code-review`, `obra-subagent-driven-development`, `obra-systematic-debugging`, `obra-test-driven-development`, `obra-using-superpowers`, `obra-writing-plans`, and `obra-writing-skills`
+- repository-owned support bundles such as `internal-agent-*`, `internal-change-impact-analysis`, `internal-github-actions`, `internal-cloud-policy`, `internal-code-review`, `internal-github-action-composite`, `internal-copilot-*`, `internal-ddd`, `internal-docker`, `internal-kubernetes`, `internal-kubernetes-deployment`, `internal-oop-design-patterns`, `internal-performance-optimization`, `internal-pr-editor`, `internal-project-*`, `internal-script-*`, `internal-spring-boot-development`, `internal-sync-*`, and `internal-terraform`
+- workflow packs with bundled references or helpers such as `obra-brainstorming`, `obra-requesting-code-review`, `obra-subagent-driven-development`, `obra-systematic-debugging`, `obra-test-driven-development`, `obra-using-superpowers`, and `obra-writing-plans`
 - imported or upstream-derived bundles such as `awesome-copilot-agentic-eval`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-azure-role-selector`, `awesome-copilot-cloud-design-patterns`, `openai-docx`, `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-pdf`, `openai-skill-creator`, `openai-slides`, `openai-spreadsheet`, `terraform-terraform-search-import`, and `terraform-terraform-test`
 
 Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery. Use this README for family-level orientation only.
@@ -105,7 +96,7 @@ The matching `.py` entrypoints and `scripts/lib/*.py` modules are part of the sa
 - Trust real on-disk paths and [`INVENTORY.md`](INVENTORY.md) over remembered historical names. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery.
 - Keep `.github/copilot-instructions.md` as the normative policy layer and update it before root `AGENTS.md` when both must change.
 - Treat this README as maintainer-facing orientation, not as the normative contract.
-- Historical documents such as `../COPILOT_REVIEW.md` and older changelog entries may intentionally mention removed legacy assets. Do not use them as live catalog references.
+- Historical documents and older changelog entries may intentionally mention removed legacy assets. Do not use them as live catalog references.
 
 ## Maintenance Workflow
 
@@ -132,11 +123,6 @@ Completed operations must end with a concise recap.
 
 - Include this section only when instructions were used.
 - State which instructions were used and why they mattered.
-
-### 📝 Prompts
-
-- Include this section only when prompts were used.
-- State which prompts were used and why they were relevant.
 
 ### 🧩 Skills
 

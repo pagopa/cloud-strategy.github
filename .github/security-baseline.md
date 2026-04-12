@@ -28,11 +28,11 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 - Protect production environments with required reviewers and deployment rules.
 - Set explicit `timeout-minutes` and `concurrency` on jobs.
 
-## Prompt and instruction safety
+## Instruction and artifact safety
 - Avoid instructions that request hidden or sensitive data.
 - Prohibit plaintext tokens, keys, and passwords in examples.
 - Use explicit guardrails for destructive operations.
-- Require deterministic, reviewable output in prompts.
+- Require deterministic, reviewable output in generated artifacts.
 
 ## Agent safety
 - Prefer read-only agents for planning/review.
@@ -40,8 +40,8 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 - Require explicit references to policy files for security-sensitive changes.
 
 ## Change governance
-- Document breaking prompt or instruction changes in `.github/CHANGELOG.md`.
-- Use a deprecation window before removing prompts/skills in active use.
+- Document breaking instruction, skill, or agent changes in `.github/CHANGELOG.md`.
+- Use a deprecation window before removing instructions, skills, or agents in active use.
 - Keep a rollback path for workflow and policy changes.
 
 ## Enforcement status
@@ -52,10 +52,10 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 | Docker image digest pinning | Manual review | `internal-docker.instructions.md` + PR review |
 | Validate `.github/**` in CI | Not currently automated | n/a |
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
-| Secret placeholder avoidance in prompts/examples | Partial | pre-commit hooks + review |
+| Secret placeholder avoidance in examples/generated artifacts | Partial | pre-commit hooks + review |
 | OIDC over long-lived secrets | Manual review | `internal-github-actions.instructions.md` |
 | IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-code-review` + `internal-terraform` |
-| Supply chain hardening | Manual review | `awesome-copilot-github-actions-ci-cd-best-practices.instructions.md` + `internal-code-review` |
+| Supply chain hardening | Manual review | `internal-github-actions.instructions.md` + `internal-code-review` |
 | Branch protection for `.github/**` | Manual review | repository settings |
 | Read-only reviewer agents | Manual review | agent review |
 | CHANGELOG-based change governance | Manual review | PR review |

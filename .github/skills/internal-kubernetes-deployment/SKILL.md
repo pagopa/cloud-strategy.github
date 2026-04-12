@@ -9,8 +9,8 @@ Use this skill for operational Kubernetes delivery work after the platform direc
 
 ## Boundary
 
-- Use `internal-kubernetes` when the right Kubernetes lane is still unclear or the request mixes platform architecture with delivery work.
-- Use `antigravity-kubernetes-architect` for cluster architecture, GitOps operating model, service mesh, or multi-cluster strategy.
+- Use this skill only after the platform or cluster direction is already chosen.
+- If the real question is cluster architecture, GitOps operating model, service mesh, or multi-cluster strategy, treat it as a platform-design problem rather than a manifest-delivery task.
 - Keep this skill focused on workload manifests, rollout safety, and production hardening.
 
 ## Operational Workflow

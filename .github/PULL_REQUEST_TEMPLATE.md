@@ -1,6 +1,6 @@
 <!-- markdownlint-disable-file MD041 -->
 <!-- PR title format: <type>(<scope>): <summary> -->
-<!-- Examples: feat(prompts): add reusable prompt template -->
+<!-- Examples: feat(skills): add reusable review workflow -->
 <!--           fix(workflows): tighten customization validation -->
 
 ## Description
@@ -11,7 +11,6 @@
 
 - [ ] Agent update
 - [ ] Instruction update
-- [ ] Prompt update
 - [ ] Skill update
 - [ ] Workflow/automation update
 - [ ] Verification/automation update
