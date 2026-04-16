@@ -11,6 +11,8 @@ applyTo: "**/*.sh"
 
 Assume `.github/instructions/awesome-copilot-shell.instructions.md` covers the baseline shell rules for quoting, failure handling, temp resources, cleanup traps, parser choice, and general structure. This internal instruction keeps only the repository-specific Bash delta.
 
+The two instruction files intentionally co-load for `**/*.sh`: the imported file remains the generic shell baseline, while this file owns the repository-specific Bash defaults, operator-facing emoji logs, wrapper conventions, and Python-launcher rules.
+
 ## Repository-specific rules
 - Use Bash only: `#!/usr/bin/env bash`.
 - Add a short header comment with purpose and usage examples.
