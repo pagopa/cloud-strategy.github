@@ -22,5 +22,4 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
-
-No pending lessons currently.
+| 2026-04-16 | The sync workflow writes `tmp/copilot-sync.plan.md` during `plan`, so a follow-up `sync_copilot_catalog apply` against the same target needs `--allow-dirty-target` when that generated plan file is the only target diff. | pending | `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/SKILL.md` |
