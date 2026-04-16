@@ -11,6 +11,7 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 - Services, use cases, adapters, packages, and modules in Python applications.
 - Refactoring or extending existing Python application components.
 - Reusable Python code whose primary contract is imported behavior rather than operator-facing execution.
+- Python application code that should keep logging neutral or framework-native; operator-facing emoji output belongs to CLI, script, or delivery boundaries instead.
 
 ## Boundary
 - This skill covers structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
@@ -21,6 +22,7 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 - Use type hints on public APIs and keep data contracts explicit.
 - Choose async only when the workload is I/O-bound and the surrounding stack supports it cleanly.
 - Keep request or transport models, domain logic, and persistence concerns in separate modules.
+- Keep reusable module and service logs neutral or structured; reserve emoji log formatting for outer operator-facing entrypoints.
 
 Load `references/examples.md` when you need a minimal module or test example.
 

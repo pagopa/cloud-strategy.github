@@ -22,6 +22,7 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 - Standalone tools should default to a dedicated folder or toolkit root, not a loose top-level `.py` file.
 - Keep entrypoints thin: parse arguments, resolve paths, orchestrate helpers, and return an exit code through `main() -> int` plus `raise SystemExit(main())`.
 - Prefer `argparse`, `pathlib.Path`, and small helper functions for operator-facing tools.
+- Keep emoji logs at operator-facing boundaries such as start, success, warning, and failure states; keep reusable helpers free of decorative log formatting.
 - When a tool can be called from subdirectories, resolve the repository root explicitly instead of assuming the current working directory.
 - Use type hints on non-trivial public helpers and CLI-facing boundaries.
 - Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
