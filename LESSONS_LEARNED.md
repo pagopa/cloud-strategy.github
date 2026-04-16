@@ -22,5 +22,4 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
-
-No pending lessons currently.
+| 2026-04-16 | Post-sync validation for consumer repositories must run from the source repository wrappers with `--root <target>` because `.github/scripts` is intentionally outside the mirrored baseline and target repos do not receive those maintenance entrypoints. | pending | `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md` |
