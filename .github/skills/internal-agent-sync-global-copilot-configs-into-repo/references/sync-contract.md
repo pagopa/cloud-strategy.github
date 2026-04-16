@@ -52,6 +52,7 @@ Do not flatten these roles into one file. Do not let target `AGENTS.md` become a
 
 - Write `tmp/copilot-sync.plan.md` before any mirrored change.
 - Keep the plan in the target repository so the user can inspect pending sync work between runs.
+- A follow-up `apply` against the same target therefore needs `--allow-dirty-target` when `tmp/copilot-sync.plan.md` is the only target diff left by `plan`; do not use that flag to bypass unrelated dirty target changes.
 - When `apply` finishes and nothing remains pending, remove the plan file.
 - If `apply` stops early or manual follow-up remains, keep the plan file for the next run.
 - Remove legacy tracking artifacts named `internal-sync-*` from the target during `apply`.

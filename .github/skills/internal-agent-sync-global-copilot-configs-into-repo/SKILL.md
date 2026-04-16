@@ -32,6 +32,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Treat `LESSONS_LEARNED.md` as a source-managed retained-learning template: create it when missing, keep its structure aligned with the source contract, and preserve target-authored pending lessons instead of overwriting them with source rows.
 - Mirror only the explicitly shared repository-hygiene files declared in `references/sync-contract.md`; do not widen workflow or root-file mirroring implicitly.
 - Ensure the target repository `.gitignore` contains an ignore rule for `tmp/superpowers/`.
+- When moving from `plan` to `apply` against the same target, pass `--allow-dirty-target` only when the generated `tmp/copilot-sync.plan.md` is the sole target diff left by the planning run.
 - Prefer the bundled sync automation when it matches the requested mode instead of re-deriving the workflow manually.
 - Keep detailed operating rules in `references/sync-contract.md` instead of re-expanding them in the agent body.
 
