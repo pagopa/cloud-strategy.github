@@ -1,0 +1,13 @@
+{
+  "config": {
+    "MD013": false
+  },
+  "ignores": [
+    "tmp/**",
+    ".github/skills/antigravity-*/**",
+    ".github/skills/awesome-copilot-*/**",
+    ".github/skills/obra-*/**",
+    ".github/skills/openai-*/**",
+    ".github/skills/terraform-*/**"
+  ]
+}
