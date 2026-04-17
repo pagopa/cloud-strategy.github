@@ -24,6 +24,8 @@ Define a predictable process for deprecating Copilot customization assets (`inst
 Immediate removal is allowed only for security or compliance issues. The removal reason must be documented in `.github/CHANGELOG.md`.
 
 ## Current deprecations
+- `.github/workflows/_pre-commit.yml`: **Removed**. Replaced by `.github/workflows/catalog-validation.yml` after retiring the disabled legacy pre-commit workflow shape.
+- `.github/workflows/_terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/terraform-pre-commit.yml` with active naming and workflow-safe context usage.
 - `.github/skills/antigravity-domain-driven-design/SKILL.md`: **Removed**. Consolidated into `.github/skills/internal-ddd/SKILL.md`.
 - `.github/skills/internal-data-registry/SKILL.md`: **Removed**. Retired from the live catalog after confirming no remaining live references.
 - `scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the `internal-sync-global-copilot-configs-into-repo` agent and the `internal-agent-sync-global-copilot-configs-into-repo` skill workflow.

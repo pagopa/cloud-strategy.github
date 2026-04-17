@@ -4,10 +4,10 @@ PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests .github/skills
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
 
-.PHONY: help lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks all
+.PHONY: help lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks all'
+	@printf '%s\n' 'Targets: lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
 
 scripts-bootstrap:
 	@$(SCRIPTS_RUNNER) build_inventory --help >/dev/null
@@ -31,5 +31,11 @@ inventory-build: scripts-bootstrap
 
 token-risks: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) detect_token_risks --root .
+
+skill-lint: scripts-bootstrap
+	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
+
+docs-lint:
+	@if command -v npx >/dev/null 2>&1; then npx --yes markdownlint-cli2@0.18.1 "**/*.md" "#tmp/**"; else printf '%s\n' 'npx not installed; skipping markdown lint.'; fi
 
 all: lint test catalog-check

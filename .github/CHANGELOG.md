@@ -6,6 +6,11 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-17
+- Added reusable prompt files under `.github/prompts/` for planning kickoff, pre-mortem challenge, review kickoff, and sync planning so the repository now ships concrete prompt-file surfaces instead of an empty placeholder directory.
+- Refreshed plan tracking under `tmp/done/superpowers/plans/` so completed plan work is mirrored outside the active plan files and the remaining plan sources can stay current-state only.
+- Rebuilt `.github/INVENTORY.md` after the catalog refresh so support-only imported office skills are labeled explicitly in the generated inventory output.
+
 ## 2026-04-12
 - Renamed the repository-root retained-learning ledger to `LESSONS_LEARNED.md`, then realigned the retained-learning contract, sync automation, and tests to use the new canonical path.
 - Aligned `.pre-commit-config.yaml` and expanded `.editorconfig` with file-type defaults for Python, shell, Terraform/HCL, YAML, JSON/TOML, Markdown, Make, and local config files so the repo and synced consumers get a practical editor baseline without the formatter ping-pong that left `pre-commit` failing with no visible git diff.
