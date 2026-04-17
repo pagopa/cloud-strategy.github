@@ -123,6 +123,17 @@ Only elevate simplification suggestions when they materially improve maintainabi
 - **internal-change-impact-analysis** (`.github/skills/internal-change-impact-analysis/SKILL.md`): for change-set-level impact analysis, architectural evaluation, and blind-spot detection beyond line-level review.
 - Use both together: this skill for nit-level anti-patterns first, then `internal-change-impact-analysis` for the bigger picture.
 
+## Delegation
+
+Use this skill as the default review owner, then add a narrower specialist only when the evidence demands it.
+
+- Stay with `internal-code-review` when the main need is defect-first review across mixed Python, Bash, Terraform, Java, or Node.js changes.
+- Add `internal-terraform` when the review is primarily about Terraform resource modeling, module interfaces, or drift-safe HCL changes.
+- Add `antigravity-golang-pro` when the review is primarily about Go concurrency, service design, or Go performance behavior.
+- Add `awesome-copilot-codeql` when the review is primarily about CodeQL workflow setup, SARIF handling, or query-suite coverage rather than the diff itself.
+- Add `awesome-copilot-secret-scanning` when the review is primarily about GitHub-native secret scanning, push protection, alert handling, or blocked-push remediation.
+- Add language or domain specialists only when they materially improve the finding quality; do not fan out by default.
+
 ## Validation
 - Verify every finding references a real file path and line from the diff.
 - Verify severity assignments match the anti-pattern catalog rules.

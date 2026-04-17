@@ -39,6 +39,7 @@ Follow `.github/instructions/internal-java.instructions.md` for the baseline Jav
 - Do not choose YAML vs properties by doctrine; follow the existing project format unless the user asked for a migration.
 - Do not default to `@SpringBootTest` for controller or repository work that a slice test can cover faster.
 - Do not hide framework misconfiguration with defensive fallbacks that make failures harder to detect.
+- Read current Spring Boot documentation when the recommendation depends on framework behavior, annotation semantics, or test-slice support that may have changed across releases.
 
 ## Validation
 

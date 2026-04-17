@@ -131,6 +131,7 @@ After catalog changes:
 - Re-check `.github/copilot-instructions.md` for repo-wide projection drift.
 - Re-check `.github/INVENTORY.md` for exact path accuracy.
 - Re-check nearby agents and skills for stale references, decorative declarations, or broken ownership assumptions.
+- Re-check `LESSONS_LEARNED.md` and ask whether any pending lesson was just codified or disproven so the ledger does not retain a duplicate.
 
 ## Validation
 

@@ -9,6 +9,11 @@ Use this skill as the mandatory engine for `internal-router`.
 
 This skill owns the reusable routing logic. The router stays short: classify, ask at most one high-value question when needed, hand off to one canonical owner, and stay out of the domain work. The router never implements.
 
+Keep the engine boundary explicit:
+
+- `internal-agent-routing-engine` owns classification, confidence, clarification, and handoff packaging.
+- `internal-agent-operating-model-engine` owns the shared medium-task thresholds, owner boundaries, and anti-overlap rules that inform routing but are not rewritten here.
+
 ## Core Rules
 
 - Classify first by intent: execution, planning, review, or challenge.
@@ -44,6 +49,7 @@ Use these heuristics:
 
 - Treat explicit review language such as `review`, `audit`, `validate`, `risk`, `merge readiness`, or `regression` as `route-to-review` unless the user clearly asks for implementation.
 - Treat explicit challenge language such as `challenge this`, `pre-mortem`, `stress-test`, `what am I missing`, `failure modes`, `reframe this`, or `think laterally` as `route-to-challenge`.
+- Bias toward `route-to-challenge` when the user asks for a check before merge, before a major refactor, before a cross-boundary plan, or when the framing looks rigid enough that an objection-first pass would materially change the plan.
 - Treat repository-owned authoring of agents, skills, instructions, routing, or governance as planning unless the change is trivially local and already designed.
 - Treat vague implementation requests as planning when scale, ownership, or rollout is not yet clear.
 
