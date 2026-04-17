@@ -37,6 +37,7 @@ Tools:
   audit_copilot_catalog
   detect_token_risks
   sync_copilot_catalog
+    validate_internal_skills
 EOF
 }
 
@@ -71,6 +72,9 @@ resolve_script() {
             ;;
         sync_copilot_catalog|sync_copilot_catalog.py)
             printf '%s\n' "$SCRIPT_DIR/sync_copilot_catalog.py"
+            ;;
+        validate_internal_skills|validate_internal_skills.py)
+            printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"
             ;;
         *)
             return 1

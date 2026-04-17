@@ -20,9 +20,11 @@ def write_valid_skill(skill_dir: Path, skill_name: str) -> None:
         skill_dir / "SKILL.md",
         "---\n"
         f"name: {skill_name}\n"
-        "description: Keep repository-owned Python skills well shaped.\n"
+        "description: Use when repository-owned Python skills need structural validation.\n"
         "---\n\n"
         f"# {skill_name}\n\n"
+        "## When to use\n\n"
+        "Use this skill when repository-owned Python skills need structural validation.\n\n"
         "Use `.github/copilot-sync.manifest.json` only as a generated artifact.\n"
         "Reference `references/guide.md` for examples.\n"
         "```md\n"
@@ -90,6 +92,8 @@ def test_validate_internal_skill_reports_metadata_and_reference_issues(
     ]
 
     assert "skill-name-mismatch" in finding_codes
+    assert "description-not-trigger-first" in finding_codes
+    assert "missing-when-to-use-heading" in finding_codes
     assert "short-description-length" in finding_codes
     assert "default-prompt-skill-mention" in finding_codes
     assert len(missing_reference_findings) == 1

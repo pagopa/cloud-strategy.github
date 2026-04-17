@@ -11,6 +11,12 @@ EMPTY_MESSAGES = {
     "Skills": "No skill files currently ship in the live catalog.",
     "Agents": "No agent files currently ship in the live catalog.",
 }
+OFFICE_SUPPORT_ONLY_SKILLS = (
+    ".github/skills/openai-docx/SKILL.md",
+    ".github/skills/openai-pdf/SKILL.md",
+    ".github/skills/openai-slides/SKILL.md",
+    ".github/skills/openai-spreadsheet/SKILL.md",
+)
 
 
 def collect_inventory_sections(root: Path) -> dict[str, list[str]]:
@@ -46,6 +52,15 @@ def render_inventory_markdown(sections: dict[str, list[str]]) -> str:
         entries = sections.get(section, [])
         if entries:
             lines.extend(f"- `{entry}`" for entry in entries)
+            if section == "Skills":
+                office_entries = [entry for entry in entries if entry in OFFICE_SUPPORT_ONLY_SKILLS]
+                if office_entries:
+                    lines.append("")
+                    lines.append("### Support-only imported office skills")
+                    lines.append("")
+                    lines.append(
+                        "These imported `openai-*` office skills remain support-only depth for repositories that explicitly need document workflows."
+                    )
         else:
             lines.append(EMPTY_MESSAGES[section])
         lines.append("")
