@@ -17,6 +17,12 @@ Prefer explicit engine-skill architecture for routers and broader command center
 - move long decision matrices, threshold rules, ownership maps, and reusable operating logic into repo-owned engine skills
 - when that engine is required for the agent's core behavior, declare it explicitly instead of burying it in optional skill guidance
 
+## When to use
+
+- Create or materially revise a repository-owned agent under `.github/agents/`.
+- Decide whether a repository-owned behavior belongs in an agent, skill, prompt, or instruction.
+- Normalize an imported or legacy agent into the repository-owned internal contract.
+
 ## Goals
 
 - Build agents that are easy to route to.

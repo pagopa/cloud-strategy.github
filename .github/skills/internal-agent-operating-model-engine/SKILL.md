@@ -9,6 +9,12 @@ Use this skill as the shared engine for the four canonical operational agents.
 
 This skill is intentionally shared. It owns the reusable rules that would otherwise drift across `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`. It is not a copy of the agents.
 
+## When to use
+
+- One of the four canonical operational agents needs the shared boundary and anti-overlap logic.
+- A planning, execution, review, or challenge decision depends on the shared medium-task thresholds.
+- Canonical-agent ownership drift needs to be resolved without rewriting the same rules into multiple agents.
+
 ## Shared Core Rule
 
 Check relevant OBRA skills before starting any task. If a workflow is relevant, it is mandatory, not optional. Do not preload irrelevant workflows.

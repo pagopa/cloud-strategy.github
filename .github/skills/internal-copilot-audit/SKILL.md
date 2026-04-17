@@ -11,6 +11,12 @@ This skill is often invoked by planning or sync lanes, but it can also be used d
 
 Treat the declared governance contract in the relevant agent, root `AGENTS.md`, and `.github/copilot-instructions.md` as the policy source of truth. Treat the current `.github/` catalog on disk as evidence to compare against that policy.
 
+## When to use
+
+- Audit repository-owned GitHub Copilot assets for overlap, hollow references, stale contracts, naming drift, or governance drift.
+- Run a focused `.github/` catalog audit from planning or sync work.
+- Verify whether governance files still match the live repository catalog on disk.
+
 ## Audit Goals
 
 - Detect overlapping skills and agents.

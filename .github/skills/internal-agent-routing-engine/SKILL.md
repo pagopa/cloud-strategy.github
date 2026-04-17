@@ -14,6 +14,12 @@ Keep the engine boundary explicit:
 - `internal-agent-routing-engine` owns classification, confidence, clarification, and handoff packaging.
 - `internal-agent-operating-model-engine` owns the shared medium-task thresholds, owner boundaries, and anti-overlap rules that inform routing but are not rewritten here.
 
+## When to use
+
+- `internal-router` must classify an ambiguous request across execution, planning, review, or challenge.
+- Router confidence, clarification rules, or handoff packaging need to change without widening the router into domain work.
+- Routing behavior must be updated while preserving the separate operating-model engine boundary.
+
 ## Core Rules
 
 - Classify first by intent: execution, planning, review, or challenge.

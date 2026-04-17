@@ -7,6 +7,12 @@ description: Use when Spring Boot framework choices drive the work, such as cont
 
 Follow `.github/instructions/internal-java.instructions.md` for the baseline Java rules. Use this skill only when the Spring Boot framework choices materially affect the design, wiring, testing, or configuration.
 
+## When to use
+
+- Spring Boot framework choices drive the work, such as controllers, configuration properties, repositories, scheduled jobs, or Spring-specific tests.
+- The task depends on Spring wiring, stereotypes, test slices, or Boot configuration behavior rather than plain Java structure alone.
+- You need Spring-specific guidance after the general Java ownership boundary is already clear.
+
 ## Workflow
 
 1. Identify the Spring surface first.
