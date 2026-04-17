@@ -1,6 +1,6 @@
 ---
 description: Java project standards with DDD boundaries, readability-first design, and deterministic unit testing.
-applyTo: "**/*.java"
+applyTo: "**/*.java,**/pom.xml,**/build.gradle,**/build.gradle.kts"
 ---
 
 # Java Instructions
@@ -23,3 +23,7 @@ applyTo: "**/*.java"
 
 ## Reference implementation
 - For code and test examples, use `.github/skills/internal-project-java/SKILL.md`.
+
+## Build-file boundary
+- For `pom.xml`, `build.gradle`, and `build.gradle.kts`, keep guidance limited to dependency intent, plugin clarity, and test/runtime alignment.
+- Do not use this instruction to restate full Maven or Gradle style guidance that belongs in a narrower build-tool owner.

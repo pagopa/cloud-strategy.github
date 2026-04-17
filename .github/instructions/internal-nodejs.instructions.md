@@ -1,6 +1,6 @@
 ---
 description: Node.js project standards with DDD-oriented layering, early returns, and deterministic test practices.
-applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
+applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx,**/package.json,**/tsconfig.json"
 ---
 
 # Node.js Instructions
@@ -23,3 +23,8 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx"
 
 ## Reference implementation
 - For module and test examples, use `.github/skills/internal-project-nodejs/SKILL.md`.
+
+## Project config files
+- For `package.json`, keep scripts, engines, and dependency intent explicit; avoid redundant tooling drift or placeholder metadata.
+- For `tsconfig.json`, prefer strict compiler options unless the repository has a documented compatibility reason not to.
+- Keep project config guidance scoped to Node.js or TypeScript project ownership; do not restate generic JSON formatting rules here.
