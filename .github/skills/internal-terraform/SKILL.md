@@ -63,6 +63,11 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 
 Load `references/template-examples.md` when you need a minimal inline feature example or a starter reusable module.
 
+## Imported complements
+
+- Load `.github/skills/terraform-terraform-search-import/SKILL.md` when existing unmanaged resources must be discovered or bulk-imported into Terraform state.
+- Load `.github/skills/terraform-terraform-test/SKILL.md` when authoring `.tftest.hcl` coverage, choosing plan-vs-apply test modes, or troubleshooting Terraform test execution.
+
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
