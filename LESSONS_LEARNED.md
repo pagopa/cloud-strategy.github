@@ -22,5 +22,3 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
-| 2026-04-17 | GitHub Actions `inputs` context is only available in reusable or `workflow_dispatch` workflows, so workflows that also run on `push` or `pull_request` must not rely on shared `inputs.*` expressions for default env or cache keys. | pending | `.github/instructions/internal-github-actions.instructions.md` |
-| 2026-04-17 | Plan-closure audits must verify referenced plan files and governance paths against the live repository tree because volatile planning artifacts can retain stale references to removed plans or relocated assets. | pending | `.github/skills/internal-copilot-audit/references/audit-checklist.md` |
