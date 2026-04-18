@@ -1,7 +1,8 @@
 ---
 name: internal-sync-control-center
-description: Use this agent when governing or synchronizing the Copilot customization catalog in this repository. Keep root governance canonical in `AGENTS.md` and `.github/copilot-instructions.md`, keep sync-specific scope and managed external resources here, remove obsolete overlap instead of keeping fallbacks, and align downstream governance after catalog changes.
-tools: ["read", "edit", "search", "execute", "web", "agent"]
+description: Use this agent when applying, auditing, or planning changes to the declared sync-managed GitHub Copilot catalog in this repository, including keep/update/extract/retire decisions and governance-drift cleanup within the approved managed scope.
+tools: ["read", "edit", "search", "execute", "web"]
+disable-model-invocation: true
 agents: []
 ---
 
@@ -20,6 +21,7 @@ Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandat
 ## Mandatory Engine Skills
 
 - `internal-agent-sync-control-center`
+- `internal-agent-boundary-recommendation-engine`
 
 ## Optional Support Skills
 
@@ -195,6 +197,12 @@ When repository state drifts from the declared governance contract, treat the dr
 - Do not use this agent while the catalog direction is still ambiguous enough to need open option framing or cross-boundary planning; recommend `internal-planning-leader` first, then return here once the governance path is chosen.
 - Do not use this agent for target-repository baseline propagation.
 - When current platform behavior decides policy, validate it through `internal-copilot-docs-research` before changing the sync contract.
+
+## Boundary Definition
+
+- Stay in this lane while the task is source-side `.github/` catalog governance inside the declared managed scope.
+- If the request is really source-side planning, consumer-repository sync, or a local edit outside catalog-governance scope, stop, explain the mismatch, and use `internal-agent-boundary-recommendation-engine` to recommend the better owner.
+- Do not route, dispatch, or delegate from this lane.
 
 ## Execution Workflow
 

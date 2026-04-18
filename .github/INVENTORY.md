@@ -40,6 +40,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
+- `.github/skills/internal-agent-boundary-recommendation-engine/SKILL.md`
 - `.github/skills/internal-agent-development/SKILL.md`
 - `.github/skills/internal-agent-operating-model-engine/SKILL.md`
 - `.github/skills/internal-agent-sync-control-center/SKILL.md`
