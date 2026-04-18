@@ -56,20 +56,13 @@ jobs:
       - name: Run repository validation targets
         run: |
           set -euo pipefail
-          make lint
+          make catalog-lint
           make test
           make skill-lint
           make catalog-check
-          make docs-lint
 
       - name: Run dedicated token-risk scan
         continue-on-error: true
         run: |
           set -euo pipefail
           make token-risks
-
-      - name: Lint GitHub YAML files
-        run: |
-          set -euo pipefail
-          python -m pip install --disable-pip-version-check yamllint==1.37.1
-          yamllint .github

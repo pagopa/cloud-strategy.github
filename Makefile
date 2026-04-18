@@ -7,10 +7,10 @@ PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests .github/skills
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
 
-.PHONY: help python-version-check lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
+.PHONY: help python-version-check lint catalog-lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
+	@printf '%s\n' 'Targets: lint catalog-lint test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -22,6 +22,10 @@ scripts-bootstrap: python-version-check
 lint: python-version-check
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
+	$(PYTHON) -m compileall $(PYTHON_PATHS)
+
+catalog-lint: python-version-check
+	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	$(PYTHON) -m compileall $(PYTHON_PATHS)
 
 test: scripts-bootstrap

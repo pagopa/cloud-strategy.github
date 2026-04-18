@@ -7,6 +7,8 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-18
+- Narrowed `.github/workflows/catalog-validation.yml` so it no longer repeats `_pre-commit` coverage: the workflow now runs the new `make catalog-lint` target for Bash syntax plus Python bytecode compilation, skips the duplicate YAML lint step, and leaves Markdown lint available as a manual target instead of failing the catalog-specific gate on long-standing repo-wide style debt.
+- Expanded `.github/scripts/requirements.txt` so the locked `PyYAML==6.0.2` hashes cover the published CPython 3.13 source and wheel artifacts used by GitHub Actions Linux and local macOS installs, preventing `.github/scripts/run.sh` from failing on valid platform-specific downloads.
 - Consolidated the repository pre-commit baseline onto `.github/workflows/_pre-commit.yml`, removed the duplicate `_terraform-pre-commit.yml` and `terraform-pre-commit.yml` workflows, and realigned the sync baseline, deprecation log, README, and sync tests to the single canonical workflow.
 - Simplified `.github/workflows/_pre-commit.yml` so it no longer depends on the `inputs` context during `push` or `pull_request` runs, keeping the surviving workflow aligned with GitHub Actions context-availability rules.
 
