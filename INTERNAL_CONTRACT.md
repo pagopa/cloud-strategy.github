@@ -179,10 +179,12 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - canonical operational agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` remain the canonical repository-owned operational agents
-  - only `internal-router` actively routes and it may invoke one selected canonical owner
-  - non-router canonical agents may be entered directly by the user or by router handoff
-  - non-router canonical agents define boundaries and recommendations instead of active delegation
+  - `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` remain the canonical repository-owned operational agents
+  - the default operational model uses direct owner selection instead of a repository-owned front-door router
+  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader`
+  - canonical owners define boundaries and recommendations instead of active delegation
+  - canonical owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
+  - any future peer-automation exception between canonical owners must be narrow, one-directional, auditably bounded, and non-mesh
   - mandatory and optional skill contracts remain explicit where the operating model depends on them
 
 ### Reporting

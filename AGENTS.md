@@ -50,8 +50,11 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Operational Owner Model
 
-- `internal-router` remains the only active front-door router for the canonical operational catalog.
-- `internal-router` may hand work to one selected canonical owner without becoming the domain owner itself; non-router canonical agents may be entered directly or by router handoff, but remain recommendation-only when their boundary breaks unless a narrower scoped contract explicitly allows invoking `internal-router` as a second parallel lane while keeping `internal-router` as the only router.
+- `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` remain the canonical repository-owned operational agents.
+- The canonical operational model uses direct entry instead of a repository-owned front-door router.
+- When the right lane is unclear, prefer `internal-planning-leader` as the safe fallback.
+- Canonical owners remain recommendation-only when their boundary breaks and are not subagent-invoked by default.
+- Any future automation between canonical owners must be explicit, narrow, one-directional, and must not create all-to-all dispatch or nested ping-pong.
 
 ## Projection Rules
 

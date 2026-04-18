@@ -7,6 +7,7 @@ Use this format for new updates:
 - Include file/path scope when useful.
 
 ## 2026-04-18
+- Removed `internal-router` and the paired `internal-agent-routing-engine` from the live canonical operational model, left the four direct owners as the only canonical lanes, defaulted ambiguous entry to `internal-planning-leader`, platform-enforced no hidden peer dispatch by setting the canonical owners to `disable-model-invocation: true`, and realigned the active contracts, references, and tests away from router-centric dispatch.
 - Narrowed `.github/workflows/catalog-validation.yml` so it no longer repeats `_pre-commit` coverage: the workflow now runs the new `make catalog-lint` target for Bash syntax plus Python bytecode compilation, skips the duplicate YAML lint step, and leaves Markdown lint available as a manual target instead of failing the catalog-specific gate on long-standing repo-wide style debt.
 - Expanded `.github/scripts/requirements.txt` so the locked `PyYAML==6.0.2` hashes cover the published CPython 3.13 source and wheel artifacts used by GitHub Actions Linux and local macOS installs, preventing `.github/scripts/run.sh` from failing on valid platform-specific downloads.
 - Consolidated the repository pre-commit baseline onto `.github/workflows/_pre-commit.yml`, removed the duplicate `_terraform-pre-commit.yml` and `terraform-pre-commit.yml` workflows, and realigned the sync baseline, deprecation log, README, and sync tests to the single canonical workflow.

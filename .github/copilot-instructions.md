@@ -43,8 +43,11 @@ You are an expert software and platform engineer. Protect correctness, security,
 - `internal-*` skills are the canonical repository-owned layer. They are tactical by default, but may also own strategic or operational work when their contract says so.
 - Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
 - `local-*` assets are consumer-local extensions. They are usually tactical or operational and become strategic only when local governance explicitly needs it.
-- `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` are the canonical repository-owned operational agents.
-- Only `internal-router` actively routes. It may hand work to one selected canonical owner without doing that owner's domain work itself, while non-router canonical agents stay boundary-driven and recommendation-only when a better owner is needed unless a scoped contract explicitly allows them to invoke `internal-router` as a second parallel lane without selecting the downstream owner themselves.
+- `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` are the canonical repository-owned operational agents.
+- The canonical operational model uses direct entry instead of a repository-owned front-door router.
+- `internal-planning-leader` is the safe fallback when the right operational lane is still ambiguous.
+- Canonical owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
+- Any future automation between canonical owners must be explicit, narrow, one-directional, and must not create all-to-all dispatch or nested ping-pong.
 - `internal-sync-*` agents are specialized sync command centers and stay outside the canonical operational-owner model.
 
 ## Non-Negotiables

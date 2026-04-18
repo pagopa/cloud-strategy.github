@@ -8,17 +8,12 @@ def read_text(relative_path: str) -> str:
 
 
 def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execution() -> None:
-    router_text = read_text(".github/agents/internal-router.agent.md")
     fast_executor_text = read_text(".github/agents/internal-fast-executor.agent.md")
     planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
-    routing_engine_text = read_text(
-        ".github/skills/internal-agent-routing-engine/SKILL.md"
-    )
     operating_model_text = read_text(
         ".github/skills/internal-agent-operating-model-engine/SKILL.md"
     )
 
-    assert "deterministic repository-owned maintenance or realignment" in router_text
     assert (
         "deterministic realignment across adjacent repository-owned assets"
         in fast_executor_text
@@ -28,11 +23,11 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
         in planning_leader_text
     )
     assert (
-        "Do not fail safe to `route-to-plan` only because the change touches more than two adjacent repository-owned files"
-        in routing_engine_text
+        "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
+        in operating_model_text
     )
     assert (
-        "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
+        "ambiguous entry fails safe to `internal-planning-leader`"
         in operating_model_text
     )
 

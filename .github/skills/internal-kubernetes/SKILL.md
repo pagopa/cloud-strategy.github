@@ -38,7 +38,7 @@ Load `references/routing-matrix.md` when the request mixes platform, manifest, a
 - Do not describe this skill as a router for the whole catalog; it only chooses the right Kubernetes lane.
 - Do not escalate to GitOps, service mesh, or multi-cluster design unless the user is actually changing platform behavior.
 - Do not treat a manifest edit as platform architecture work just because the workload runs on Kubernetes.
-- When `internal-router` already selected `internal-kubernetes-deployment` or `antigravity-kubernetes-architect` directly, this skill adds no value and should stay out of the turn.
+- When the user or an upstream operational choice already selected `internal-kubernetes-deployment` or `antigravity-kubernetes-architect` directly, this skill adds no value and should stay out of the turn.
 
 ## Output requirements
 
