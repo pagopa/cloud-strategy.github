@@ -7,7 +7,7 @@ description: Use when repository-owned work needs a plan under tmp/superpowers/<
 
 Use this skill as the repository-owned wrapper for plan authoring in this repository.
 
-Keep `obra-writing-plans` unchanged. This skill adds the local contract for where plans live, how they are split, what language they use, and what must stay outside the execution loop.
+Treat `obra-writing-plans` as imported depth and keep any repo-local drift fixes narrow. This skill adds the local contract for where plans live, how they are split, what language they use, and what must stay outside the execution loop.
 
 ## When to use
 
@@ -17,7 +17,7 @@ Keep `obra-writing-plans` unchanged. This skill adds the local contract for wher
 
 ## When not to use
 
-- General design or spec work under `docs/superpowers/specs/`; use `obra-brainstorming` when that workflow is relevant.
+- General design or spec work under `tmp/superpowers/specs/`; use `obra-brainstorming` when that workflow is relevant.
 - Local execution with no retained plan artifact.
 - Imported or sync-managed planning assets; do not edit `obra-*` skills to impose this policy.
 
@@ -50,7 +50,7 @@ Keep `obra-writing-plans` unchanged. This skill adds the local contract for wher
 - There are `01-...`, `02-...`, `03-...` style plan files when more than one macro-category exists.
 - Plan files are in Italian unless the user asked otherwise.
 - `dubbi-e-domande.md` exists when needed and remains separate from executable plan files.
-- The plan does not rely on editing imported `obra-*` skills to enforce local policy.
+- The plan does not rely on imported `obra-*` skills as the policy owner; any repo-local drift fix stays narrow and subordinate to this wrapper.
 
 ## Common mistakes
 

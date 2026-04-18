@@ -38,7 +38,7 @@ Keep the engine boundary explicit:
 
 | Label | Canonical owner | Route when |
 | --- | --- | --- |
-| `route-to-execute` | `internal-fast-executor` | The task is clear, local, low-risk, and has concrete verification. |
+| `route-to-execute` | `internal-fast-executor` | The task is clear, low-risk, has concrete verification, or is a deterministic repository-owned maintenance or realignment pass with a known target state. |
 | `route-to-plan` | `internal-planning-leader` | The task is ambiguous, cross-boundary, strategic, or changes repository-owned contracts. |
 | `route-to-review` | `internal-review-guard` | The user asks for review, validation, merge readiness, regression analysis, or evidence checks. |
 | `route-to-challenge` | `internal-critical-challenger` | The user wants assumptions challenged, a pre-mortem, alternative framings pressure-tested, or failure modes surfaced. |
@@ -56,7 +56,8 @@ Use these heuristics:
 - Treat explicit review language such as `review`, `audit`, `validate`, `risk`, `merge readiness`, or `regression` as `route-to-review` unless the user clearly asks for implementation.
 - Treat explicit challenge language such as `challenge this`, `pre-mortem`, `stress-test`, `what am I missing`, `failure modes`, `reframe this`, or `think laterally` as `route-to-challenge`.
 - Bias toward `route-to-challenge` when the user asks for a check before merge, before a major refactor, before a cross-boundary plan, or when the framing looks rigid enough that an objection-first pass would materially change the plan.
-- Treat repository-owned authoring of agents, skills, instructions, routing, or governance as planning unless the change is trivially local and already designed.
+- Treat repository-owned authoring of agents, skills, instructions, routing, or governance as planning when the change is non-trivial, introduces real tradeoffs, or changes ownership or catalog behavior in substance.
+- Deterministic repository-owned maintenance or realignment with a known target state and concrete validation can stay with execution even when several adjacent files move together.
 - Treat vague implementation requests as planning when scale, ownership, or rollout is not yet clear.
 
 ## Decision Matrix
@@ -64,8 +65,9 @@ Use these heuristics:
 | Task shape | Signals | Route |
 | --- | --- | --- |
 | Clear execution | One concrete outcome, local scope, obvious validation path, no strategy tradeoff | `route-to-execute` |
-| Medium execution | Mostly concrete, but some uncertainty remains about scale or boundaries | Ask one question or route to `internal-planning-leader` |
-| Ambiguous or strategic | Cross-file, cross-boundary, naming or ownership changes, or multiple credible options | `route-to-plan` |
+| Deterministic repository-owned realignment | Adjacent repository-owned assets move together, the target state is already known, and validation is concrete | `route-to-execute` |
+| Medium execution | Mostly concrete, but some uncertainty remains about actual ownership, tradeoffs, or rollout | Ask one question or route to `internal-planning-leader` |
+| Ambiguous or strategic | Real ambiguity, substantive ownership or naming changes, or multiple credible options | `route-to-plan` |
 | Review-oriented | The output should be findings, evidence, risk, or merge readiness | `route-to-review` |
 | Challenge-oriented | The output should be objections, pressure tests, assumption gaps, alternative framings, or failure modes | `route-to-challenge` |
 
@@ -75,8 +77,9 @@ Use `internal-agent-operating-model-engine` for the shared medium-task logic.
 
 For router purposes, the consequence is simple:
 
-- if any shared medium-task threshold is hit, fail safe to `route-to-plan`
-- stay with `route-to-execute` only when the task remains clearly local, low-risk, and concretely verifiable
+- fail safe to `route-to-plan` when the shared thresholds reveal real ambiguity, non-trivial tradeoffs, or substantive ownership or catalog changes
+- stay with `route-to-execute` when the task remains clearly scoped, concretely verifiable, and the target state is already known
+- Do not fail safe to `route-to-plan` only because the change touches more than two adjacent repository-owned files or crosses adjacent boundaries inside one coherent family such as related `.github/` assets.
 
 ## High-Value Clarification Question Rule
 
@@ -143,6 +146,7 @@ Routing conservatively is cheaper than dispatching the user to the wrong owner a
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
 | Routing generic requests straight to execution | Medium tasks silently expand and cause ownership drift | Fail safe to `internal-planning-leader` when boundaries are not stable |
+| Treating file count or adjacent boundary crossing as an automatic reason to fail safe | Deterministic maintenance gets routed to planning for the shape of the diff instead of the actual decision load | Check for real ambiguity, tradeoffs, or ownership change before leaving execution |
 | Asking multiple clarification questions | The router becomes a hidden planner | Ask at most one question that changes the owner |
 | Treating review and challenge as the same lane | Findings and pressure tests have different outputs and escalation paths | Keep `review` and `challenge` distinct |
 | Letting retired agents stay mentally canonical | Users keep landing on the old overlap model | Translate old names through the old-to-new table and route to a canonical owner |

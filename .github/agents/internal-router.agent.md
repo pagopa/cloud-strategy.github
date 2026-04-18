@@ -42,11 +42,12 @@ You may be entered either as the user's primary front door or as an explicit sec
 - Use this agent when the user has not chosen the right owner, the request is generic, or more than one canonical lane is plausible.
 - Do not use this agent when the task is already clearly execution, planning, review, or challenge and the right canonical agent is obvious.
 - Keep the router narrow: classify intent, scale, risk, and ambiguity, then hand off the substantive work to the selected owner.
+- Do not route to planning only because a clear, concretely verifiable change touches multiple adjacent repository-owned files.
 
 ## Routing / Dispatch
 
-- Route to `internal-fast-executor` for clear, local, low-risk work with concrete verification and no real strategy tradeoff.
-- Route to `internal-planning-leader` for ambiguous, cross-boundary, strategic, or repository-owned authoring work, and whenever the fail-safe rule applies.
+- Route to `internal-fast-executor` for clear, low-risk work with concrete verification and no real strategy tradeoff, including deterministic repository-owned maintenance or realignment across adjacent assets when the target state is already known.
+- Route to `internal-planning-leader` for ambiguous, strategic, or non-trivial repository-owned authoring work, and whenever the fail-safe rule applies.
 - Route to `internal-review-guard` for review, validation, regression, risk, merge-readiness, or evidence-gap requests.
 - Route to `internal-critical-challenger` for pre-mortems, reasoning stress tests, assumption surfacing, alternative framings, failure-mode analysis, or an objection-first pass before merge, a major refactor, or a cross-boundary plan.
 - `High confidence`: select the owner and auto-dispatch there in the same turn.

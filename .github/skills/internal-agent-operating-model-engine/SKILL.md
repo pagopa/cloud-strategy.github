@@ -29,8 +29,8 @@ Implications:
 
 | Canonical owner | Owns | Does not own |
 | --- | --- | --- |
-| `internal-fast-executor` | Clear, local execution with concrete verification and limited risk | Strategic tradeoffs, ambiguous scope, broad authoring, review-first asks, or critical challenge |
-| `internal-planning-leader` | Ambiguity resolution, decision records, plans, repository-owned authoring, rollout and governance decisions | Default local execution once the design is settled, defect-first review, or pure challenge |
+| `internal-fast-executor` | Clear, local execution and deterministic repository-owned maintenance or realignment with concrete verification and limited risk | Strategic tradeoffs, ambiguous scope, non-trivial repository-owned authoring, review-first asks, or critical challenge |
+| `internal-planning-leader` | Ambiguity resolution, decision records, plans, non-trivial repository-owned authoring, and rollout or governance decisions that remain open | Default local execution once the design is settled, deterministic maintenance whose target state is already known, defect-first review, or pure challenge |
 | `internal-review-guard` | Review, validation, merge readiness, regression risk, evidence gaps, and defect-first findings | Implementation, initial design ownership, or open-ended strategic challenge |
 | `internal-critical-challenger` | Pre-mortems, assumption stress tests, alternative framings, failure modes, and strong objections | Implementation, routine technical review, or final operational planning |
 
@@ -38,17 +38,20 @@ Implications:
 
 `internal-fast-executor` stays owner only when all of these are true:
 
-- The likely change touches `<= 2` files.
-- The work stays within one directory family or one logical boundary.
-- Routing, ownership, naming contracts, and catalog boundaries stay unchanged.
-- The task does not require a real strategic comparison.
+- The outcome is already clear and concrete verification exists.
+- The work is deterministic implementation or repository-owned maintenance or realignment with no non-trivial strategy tradeoff.
+- File count and adjacent boundary crossing stay within one coherent area, or do not create a new ownership or catalog decision.
+- Routing, ownership, naming contracts, and catalog boundaries are being applied rather than redesigned.
+
+File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
+
+A clear realignment across more than two adjacent `.github/` assets can stay with `internal-fast-executor` when the target state is already known and validation is concrete.
 
 `internal-planning-leader` becomes owner when at least one of these is true:
 
-- The change touches `>= 3` files with lateral impact.
-- The change crosses more than one directory family or logical boundary.
-- The change affects routing, ownership, naming contracts, or catalog boundaries.
+- Real ambiguity remains about the right shape, contract, or rollout.
 - There are `>= 2` credible solution paths with non-trivial tradeoffs.
+- The change affects routing, ownership, naming contracts, or catalog boundaries in substance, not just by touching adjacent files.
 - The task needs rollout, regression, governance, or rollback decisions.
 - The task creates a new repository-owned resource instead of a banal update to an existing one.
 
@@ -58,7 +61,7 @@ Only `internal-router` actively routes between owners and may dispatch to the se
 
 | Agent | Stay owner when | Boundary breaks when | Recommend |
 | --- | --- | --- | --- |
-| `internal-fast-executor` | The task is clear, local, low-risk, and concretely verifiable. | Medium-task thresholds, non-obvious tradeoffs, or routing and ownership changes appear. | `internal-planning-leader` |
+| `internal-fast-executor` | The task is clear, local, low-risk, concretely verifiable, or a deterministic repository-owned realignment with a known target state. | Real medium-task ambiguity, non-obvious tradeoffs, or routing and ownership changes appear. | `internal-planning-leader` |
 | `internal-planning-leader` | Ambiguity, cross-boundary tradeoffs, repository-owned authoring, or rollout decisions still need active ownership. | The design is settled and the next step is routine local execution. | `internal-fast-executor` |
 | `internal-review-guard` | The task is defect-first review, merge readiness, regression analysis, or evidence gathering. | Findings reveal missing design or weak boundaries. | `internal-planning-leader` |
 | `internal-review-guard` | The task is still review-owned but weak reasoning becomes the dominant gap. | Pressure-testing the reasoning matters more than technical review. | `internal-critical-challenger` |
@@ -113,6 +116,7 @@ If any answer points to overlap, narrow the agent or move the shared logic into 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
 | Letting `internal-fast-executor` keep medium tasks by momentum | Execution becomes accidental planning | Tell the user the boundary broke and recommend `internal-planning-leader` on the first medium-task threshold hit |
+| Treating file count or adjacent boundary crossing as automatic planning triggers | Deterministic realignments get over-routed into planning | Check for real ambiguity, tradeoffs, or ownership change before leaving execution |
 | Letting `internal-planning-leader` execute by default | The planner becomes a catch-all generalist | Tell the user when the design is settled and recommend `internal-fast-executor` |
 | Rewriting the review playbook inside `internal-review-guard` | Review logic drifts from the tactical skill | Reuse `internal-code-review` as the mandatory tactical engine |
 | Treating challenge as generic negativity | The agent stops producing useful decision pressure | Keep one challenge thread, then synthesize clear failure modes |
