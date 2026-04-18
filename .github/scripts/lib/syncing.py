@@ -13,7 +13,8 @@ from .fingerprinting import HASH_ALGO, NORMALIZATION_VERSION, build_fingerprint
 from .shared import (
     INVENTORY_PATH,
     LESSONS_PATH,
-    LOCAL_COPILOT_OVERRIDES_PATH,
+    LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH,
+    LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_TEMPLATE_PATH,
     MANAGED_ROOT_FILES,
     MANAGED_WORKFLOW_FILES,
     SyncOperation,
@@ -61,7 +62,33 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     target_files = discover_target_managed_files(target_root)
     target_excluded_files = discover_target_excluded_sync_files(target_root)
     operations: list[SyncOperation] = []
+    local_assets: list[str] = []
     generated_lessons: str | None = None
+
+    local_override_template_path = source_root / LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_TEMPLATE_PATH
+    local_override_target_path = target_root / LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH
+    if local_override_template_path.exists():
+        if not local_override_target_path.exists():
+            operations.append(
+                SyncOperation(
+                    action="create",
+                    path=LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH,
+                    reason="Source-managed local override template missing from target; create the consumer-local override scaffold.",
+                    source_hash=sha256_file(local_override_template_path),
+                    target_hash=None,
+                )
+            )
+        else:
+            local_assets.append(LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH)
+            operations.append(
+                SyncOperation(
+                    action="preserve",
+                    path=LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH,
+                    reason="Preserved consumer-owned local override layer after template materialization.",
+                    source_hash=sha256_file(local_override_template_path),
+                    target_hash=sha256_file(local_override_target_path),
+                )
+            )
 
     for relative_path in sorted(source_files):
         source_path = source_root / relative_path
@@ -128,7 +155,6 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
             )
         )
 
-    local_assets: list[str] = []
     for relative_path in sorted(target_files - source_files - {INVENTORY_PATH}):
         if is_local_asset(relative_path):
             local_assets.append(relative_path)
@@ -160,19 +186,6 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
                 reason="Target internal-sync resource must be removed from consumer repositories.",
                 source_hash=None,
                 target_hash=sha256_file(target_root / relative_path),
-            )
-        )
-
-    local_override_path = target_root / LOCAL_COPILOT_OVERRIDES_PATH
-    if local_override_path.exists():
-        local_assets.append(LOCAL_COPILOT_OVERRIDES_PATH)
-        operations.append(
-            SyncOperation(
-                action="preserve",
-                path=LOCAL_COPILOT_OVERRIDES_PATH,
-                reason="Preserved consumer-owned local override layer.",
-                source_hash=None,
-                target_hash=sha256_file(local_override_path),
             )
         )
 
@@ -371,6 +384,7 @@ def discover_source_sync_files(root: Path) -> set[str]:
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
+    files.discard(LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_TEMPLATE_PATH)
     return {
         relative_path
         for relative_path in files
@@ -560,6 +574,9 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
                 if plan.generated_lessons is None:
                     raise RuntimeError("Generated LESSONS_LEARNED.md content missing from sync plan.")
                 write_text(target_path, plan.generated_lessons)
+            elif operation.path == LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH:
+                source_path = plan.source_root / LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_TEMPLATE_PATH
+                copy2(source_path, target_path)
             else:
                 source_path = plan.source_root / operation.path
                 copy2(source_path, target_path)

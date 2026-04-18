@@ -28,9 +28,8 @@ Treat `LESSONS_LEARNED.md` as a structure-managed exception: sync the source tem
 ## Target Rules
 
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
-- Preserve target `.github/local-copilot-overrides.md` as a consumer-owned local exception layer and surface it in the plan or final report when present.
+- Materialize `.github/local-github-instructions-overrides.md.template` from the standards repository into the consumer-local GitHub instructions overrides file when that target file is missing, then preserve the target file as a consumer-owned local exception layer and surface it in the plan or final report when present.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
-- Do not mirror a source `.github/local-copilot-overrides.md` into consumer repositories.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
 - Ensure target root `LESSONS_LEARNED.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
 - Ensure the target root `.gitignore` contains an ignore entry for `tmp/superpowers/`.
@@ -43,10 +42,10 @@ When root guidance is in scope, keep the target files in these roles:
 - `AGENTS.md`: strategic bridge, precedence anchor, naming contract, and cross-surface routing guidance
 - `LESSONS_LEARNED.md`: retained-learning ledger template aligned from source structure while preserving target-authored pending lessons; it remains non-canonical and repo-local in content
 - `.github/copilot-instructions.md`: repo-wide GitHub Copilot projection
-- `.github/local-copilot-overrides.md`: consumer-local exception layer authorized by `AGENTS.md`; it may override synced defaults only when conflict, scope, reason, and disclosure are explicit
+- the consumer-local GitHub instructions overrides file: consumer-local exception layer authorized by `AGENTS.md`; it may override synced defaults only when conflict, scope, reason, and disclosure are explicit
 - `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
 
-Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`. Do not let `.github/local-copilot-overrides.md` replace the bridge or catalog roles.
+Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`. Do not let the consumer-local GitHub instructions overrides file replace the bridge or catalog roles.
 
 ## Tracking Plan Lifecycle
 
@@ -86,7 +85,7 @@ Completed runs should make these facts visible:
 
 - target analysis and selected mode
 - root-guidance alignment strategy and `LESSONS_LEARNED.md` status
-- preserved `local-*` assets and `.github/local-copilot-overrides.md` status
+- preserved `local-*` assets and consumer-local GitHub instructions overrides status
 - target-only cleanup decisions
 - plan-file status and lifecycle
 - validation results and remaining blockers
