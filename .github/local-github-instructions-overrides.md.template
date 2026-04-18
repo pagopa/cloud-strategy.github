@@ -1,8 +1,10 @@
-# Local Copilot Overrides
+# Local GitHub Instructions Overrides
 
 This file is the consumer-local exception layer authorized by `AGENTS.md` and referenced by `.github/copilot-instructions.md`.
 
-It is intentionally local, non-canonical, and outside the mirrored sync baseline.
+In the standards repository it lives as `.github/local-github-instructions-overrides.md.template`.
+Sync materializes that template into consumer repositories as `.github/local-github-instructions-overrides.md`.
+After materialization, the target repository owns the local exceptions declared there.
 
 ## Status
 
@@ -30,5 +32,5 @@ Copy this block for each active exception and replace the placeholders.
 - `Baseline rule`: `<quote or summarize the synced rule being overridden>`
 - `Local scope`: `<paths, file families, workflows, or request types>`
 - `Reason`: `<why this repository needs the exception>`
-- `Required disclosure`: `Consumer-local exception in effect from .github/local-copilot-overrides.md: <short disclosure>`
+- `Required disclosure`: `Consumer-local exception in effect from .github/local-github-instructions-overrides.md: <short disclosure>`
 - `Local instruction`: `<the replacement behavior that applies in the declared scope>`

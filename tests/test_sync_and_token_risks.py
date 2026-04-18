@@ -21,6 +21,10 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     write_file(source_root / "AGENTS.md", "# AGENTS\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
+        source_root / ".github/local-github-instructions-overrides.md.template",
+        "# Local GitHub Instructions Overrides\n\n- No active overrides in this repository.\n",
+    )
+    write_file(
         source_root / ".github/agents/internal-fast.agent.md",
         "---\nname: internal-fast\ntools: [read]\n---\n",
     )
@@ -44,8 +48,8 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
         "---\nname: local-special\ntools: [read]\n---\n",
     )
     write_file(
-        target_root / ".github/local-copilot-overrides.md",
-        "# Local Copilot Overrides\n\n- Override: Keep repo-local behavior explicit.\n",
+        target_root / ".github/local-github-instructions-overrides.md",
+        "# Local GitHub Instructions Overrides\n\n- Override: Keep repo-local behavior explicit.\n",
     )
     write_file(
         target_root / ".github/agents/custom.agent.md",
@@ -56,13 +60,13 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert ("preserve", ".github/agents/local-special.agent.md") in actions
-    assert ("preserve", ".github/local-copilot-overrides.md") in actions
+    assert ("preserve", ".github/local-github-instructions-overrides.md") in actions
     assert ("delete", ".github/agents/custom.agent.md") in actions
     assert ("update", ".github/agents/internal-fast.agent.md") in actions
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
 
 
-def test_build_sync_plan_does_not_mirror_source_local_override_file(
+def test_build_sync_plan_creates_target_local_override_from_template_when_missing(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -71,16 +75,19 @@ def test_build_sync_plan_does_not_mirror_source_local_override_file(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/local-copilot-overrides.md",
-        "# Local Copilot Overrides\n\n- No active overrides in this repository.\n",
+        source_root / ".github/local-github-instructions-overrides.md.template",
+        "# Local GitHub Instructions Overrides\n\n- No active overrides in this repository.\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
 
     plan = build_sync_plan(source_root, target_root)
 
+    assert ("create", ".github/local-github-instructions-overrides.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
     assert all(
-        operation.path != ".github/local-copilot-overrides.md"
+        operation.path != ".github/local-github-instructions-overrides.md.template"
         for operation in plan.operations
     )
 
@@ -92,6 +99,10 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / "VERSION", "1.2.3\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/local-github-instructions-overrides.md.template",
+        "# Local GitHub Instructions Overrides\n\n- No active overrides in this repository.\n",
+    )
     write_file(
         source_root / ".github/agents/internal-fast.agent.md",
         "---\nname: internal-fast\ntools: [read]\n---\n\n# Source\n",
@@ -108,11 +119,6 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     write_file(
         target_root / ".github/internal-sync-copilot-configs.manifest.json", "{}\n"
     )
-    write_file(
-        target_root / ".github/local-copilot-overrides.md",
-        "# Local Copilot Overrides\n\n- Override: Keep target-local exceptions.\n",
-    )
-
     plan = build_sync_plan(source_root, target_root)
     plan_path = write_sync_plan(plan)
 
@@ -126,7 +132,13 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert not (
         target_root / ".github/internal-sync-copilot-configs.manifest.json"
     ).exists()
-    assert (target_root / ".github/local-copilot-overrides.md").exists()
+    assert (target_root / ".github/local-github-instructions-overrides.md").exists()
+    assert (
+        target_root / ".github/local-github-instructions-overrides.md"
+    ).read_text(encoding="utf-8") == (
+        "# Local GitHub Instructions Overrides\n\n"
+        "- No active overrides in this repository.\n"
+    )
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
     assert manifest["source_version"] == "1.2.3"
@@ -388,7 +400,7 @@ def test_detect_token_risks_ignores_structural_bridge_references(
         "- Use `.github/instructions/` for scoped guidance.\n"
         "- Use `.github/skills/` when a reusable workflow is relevant.\n"
         "- Use `.github/agents/` when a stable owner is relevant.\n"
-        "- Keep `.github/local-copilot-overrides.md` local to consumer repositories.\n",
+        "- Keep `.github/local-github-instructions-overrides.md` local to consumer repositories.\n",
     )
     write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
