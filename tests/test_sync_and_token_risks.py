@@ -133,9 +133,9 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
         target_root / ".github/internal-sync-copilot-configs.manifest.json"
     ).exists()
     assert (target_root / ".github/local-github-instructions-overrides.md").exists()
-    assert (
-        target_root / ".github/local-github-instructions-overrides.md"
-    ).read_text(encoding="utf-8") == (
+    assert (target_root / ".github/local-github-instructions-overrides.md").read_text(
+        encoding="utf-8"
+    ) == (
         "# Local GitHub Instructions Overrides\n\n"
         "- No active overrides in this repository.\n"
     )
