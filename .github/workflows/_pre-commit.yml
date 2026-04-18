@@ -5,26 +5,10 @@ on:
   push:
     branches:
       - main
-  workflow_call:
-    inputs:
-      pre-commit-image:
-        description: "Docker image for pre-commit-terraform"
-        required: false
-        type: string
-        default: "ghcr.io/antonbabenko/pre-commit-terraform:v1.105.0@sha256:4ef4b8323b27fc263535ad88c9d2f20488fcb3b520258e5e7f0553ed5f6692b5" # pre-commit-terraform v1.105.0
-      pre-commit-config:
-        description: "Path to the pre-commit config file"
-        required: false
-        type: string
-        default: ".pre-commit-config.yaml"
   workflow_dispatch:
 
 permissions:
   contents: read
-
-env:
-  PRE_COMMIT_IMAGE: ${{ inputs.pre-commit-image || 'ghcr.io/antonbabenko/pre-commit-terraform:v1.105.0@sha256:4ef4b8323b27fc263535ad88c9d2f20488fcb3b520258e5e7f0553ed5f6692b5' }} # pre-commit-terraform v1.105.0
-  PRE_COMMIT_CONFIG: ${{ inputs.pre-commit-config || '.pre-commit-config.yaml' }}
 
 concurrency:
   group: pre-commit-${{ github.ref }}
@@ -36,6 +20,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
+      PRE_COMMIT_IMAGE: ghcr.io/antonbabenko/pre-commit-terraform:v1.105.0@sha256:4ef4b8323b27fc263535ad88c9d2f20488fcb3b520258e5e7f0553ed5f6692b5 # pre-commit-terraform v1.105.0
+      PRE_COMMIT_CONFIG: .pre-commit-config.yaml
       # Local-only validation: Terraform must not reach remote backends.
       TF_INPUT: "0"
       TF_IN_AUTOMATION: "1"
@@ -56,7 +42,7 @@ jobs:
         uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ runner.temp }}/pre-commit-cache
-          key: pre-commit-${{ runner.os }}-config-hash-${{ hashFiles(inputs.pre-commit-config || '.pre-commit-config.yaml') }}
+          key: pre-commit-${{ runner.os }}-config-hash-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: |
             pre-commit-${{ runner.os }}-config-hash-
 
@@ -101,4 +87,4 @@ jobs:
         uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ${{ runner.temp }}/pre-commit-cache
-          key: pre-commit-${{ runner.os }}-config-hash-${{ hashFiles(inputs.pre-commit-config || '.pre-commit-config.yaml') }}
+          key: pre-commit-${{ runner.os }}-config-hash-${{ hashFiles('.pre-commit-config.yaml') }}

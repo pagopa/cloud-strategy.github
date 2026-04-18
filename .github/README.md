@@ -87,7 +87,7 @@ This table highlights the most commonly maintained source-side entrypoints rathe
 | `scripts/sync_copilot_catalog.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |
 | `scripts/validate_internal_skills.py` | Validates repository-owned internal skill metadata, local references, and token hygiene. |
 | `scripts/requirements.txt` | Local pinned dependency set for repository-owned Python scripts under `.github/scripts/`. |
-| `workflows/terraform-pre-commit.yml` | Source repository workflow for Terraform-focused pre-commit checks. |
+| `workflows/_pre-commit.yml` | Source repository workflow for repository-wide pre-commit checks. |
 
 The matching `.py` entrypoints and `scripts/lib/*.py` modules are part of the same tracked script catalog and stay aligned with these wrappers.
 

@@ -6,6 +6,10 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-18
+- Consolidated the repository pre-commit baseline onto `.github/workflows/_pre-commit.yml`, removed the duplicate `_terraform-pre-commit.yml` and `terraform-pre-commit.yml` workflows, and realigned the sync baseline, deprecation log, README, and sync tests to the single canonical workflow.
+- Simplified `.github/workflows/_pre-commit.yml` so it no longer depends on the `inputs` context during `push` or `pull_request` runs, keeping the surviving workflow aligned with GitHub Actions context-availability rules.
+
 ## 2026-04-17
 - Added reusable prompt files under `.github/prompts/` for planning kickoff, pre-mortem challenge, review kickoff, and sync planning so the repository now ships concrete prompt-file surfaces instead of an empty placeholder directory.
 - Refreshed plan tracking under `tmp/done/superpowers/plans/` so completed plan work is mirrored outside the active plan files and the remaining plan sources can stay current-state only.

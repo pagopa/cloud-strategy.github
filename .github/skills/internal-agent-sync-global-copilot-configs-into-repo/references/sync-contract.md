@@ -16,7 +16,7 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 - `.github/security-baseline.md`
 - `.github/DEPRECATION.md`
 - `.github/repo-profiles.yml`
-- `.github/workflows/terraform-pre-commit.yml`
+- `.github/workflows/_pre-commit.yml`
 - `.github/agents/**`
 - `.github/instructions/**`
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
