@@ -117,6 +117,7 @@ def test_run_consistency_checks_flags_invalid_imported_asset_override_registry(
         "  - id: bad-entry\n"
         "    target_path: .github/skills/obra-demo/SKILL.md\n"
         "    lifecycle_mode: support-only\n"
+        "    apply_strategy: ad-hoc\n"
         "    approval: pending\n"
         "    patch_path: patches/missing.patch\n"
         "    expected_content_hash: short\n",
@@ -128,5 +129,6 @@ def test_run_consistency_checks_flags_invalid_imported_asset_override_registry(
 
     assert "imported-asset-override-approval-missing" in finding_codes
     assert "imported-asset-override-invalid-lifecycle" in finding_codes
+    assert "imported-asset-override-invalid-apply-strategy" in finding_codes
     assert "imported-asset-override-patch-missing" in finding_codes
     assert "imported-asset-override-invalid-hash" in finding_codes

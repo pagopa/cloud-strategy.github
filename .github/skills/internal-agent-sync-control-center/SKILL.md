@@ -51,7 +51,7 @@ For `internal-sync-control-center`, keep the split strict:
 - `internal-skill-creator` owns repository-owned skill authoring and should be the first local route when one concrete skill needs creation, replacement, or major redesign.
 - `openai-skill-creator` covers only the remaining bundle mechanics during that work; it should not replace the local decision gate or duplicate repository-owned routing logic.
 - `references/imported-asset-overrides.yaml` owns the approved imported in-place override registry for this repository.
-- `scripts/apply_imported_asset_overrides.py` owns patch replay after an upstream refresh; if a patch no longer applies cleanly, stop and review instead of forcing a hidden fork.
+- `scripts/apply_imported_asset_overrides.py` owns patch replay after an upstream refresh; prefer a clean replay first, allow a registered `git apply --3way` fallback when upstream text drift is compatible, and stop for review instead of forcing a hidden fork.
 
 Do not collapse these roles back into one file just because the current task touches all of them.
 
@@ -145,7 +145,7 @@ When an imported upstream asset has an approved repo-local exception:
 1. Refresh the imported asset verbatim from the declared upstream source.
 2. Check that the target path is listed in `references/imported-asset-overrides.yaml`.
 3. Run `scripts/apply_imported_asset_overrides.py --id <override-id>` or the full bundle when replaying every approved override after the refresh.
-4. If `git apply --check` fails or the post-apply content hash does not match the registry, stop and review the exception instead of forcing the patch through.
+4. If clean replay fails, allow only the registered `git apply --3way` fallback. If that also fails, or if the post-apply content hash does not match the registry, stop and review the exception instead of forcing the patch through.
 5. Reassess whether an `internal-*` wrapper or replacement now serves the repository better than continuing the imported override.
 
 ### 6. Re-check Governance Immediately

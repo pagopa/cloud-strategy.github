@@ -318,6 +318,7 @@ def check_imported_asset_overrides(root: Path) -> list[Finding]:
         expected_hash = entry.get("expected_content_hash")
         approval = entry.get("approval")
         lifecycle_mode = entry.get("lifecycle_mode")
+        apply_strategy = entry.get("apply_strategy")
 
         if not isinstance(override_id, str) or not override_id.strip():
             findings.append(
@@ -411,6 +412,23 @@ def check_imported_asset_overrides(root: Path) -> list[Finding]:
                     path=target_path,
                     message="Imported-asset overrides must use `lifecycle_mode: post-refresh-patch`.",
                     suggestion="Keep the override replay model explicit instead of inventing ad hoc lifecycle states.",
+                )
+            )
+
+        if apply_strategy not in {"git-apply", "git-apply-3way"}:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-invalid-apply-strategy",
+                    path=target_path,
+                    message=(
+                        "Imported-asset overrides must declare `apply_strategy` as "
+                        "`git-apply` or `git-apply-3way`."
+                    ),
+                    suggestion=(
+                        "Keep the replay mechanism explicit so upstream-refresh "
+                        "behavior stays auditable and repeatable."
+                    ),
                 )
             )
 

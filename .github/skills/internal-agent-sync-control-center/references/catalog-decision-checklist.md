@@ -34,7 +34,7 @@ Use a direct imported in-place override only when all of these are true:
 - the replay patch lives under `patches/`
 - the override can be replayed after a verbatim upstream refresh without manual guesswork
 
-Refresh upstream content first, then replay the registered patch. If `git apply --check` fails, stop and review the exception instead of forcing it.
+Refresh upstream content first, then replay the registered patch. Prefer a clean replay first; if the registry allows `git apply --3way`, use that fallback only when upstream text drift is still compatible. If neither path applies cleanly, stop and review the exception instead of forcing it.
 
 ## Extraction Rules
 

@@ -74,7 +74,8 @@ def main() -> int:
             print(f"[error] missing target file for {override_id}: {target_path}", file=sys.stderr)
             return 1
 
-        patch_status = detect_patch_status(repo_root, patch_path)
+        apply_strategy = override.get("apply_strategy", "git-apply")
+        patch_status = detect_patch_status(repo_root, patch_path, apply_strategy=apply_strategy)
         if patch_status == "conflict":
             print(
                 f"[error] patch does not apply cleanly for {override_id}; stop and review the override.",
@@ -85,6 +86,11 @@ def main() -> int:
         if args.dry_run:
             if patch_status == "already-applied":
                 print(f"[dry-run] {override_id}: patch already applied")
+            elif patch_status == "applicable-with-3way":
+                print(
+                    f"[dry-run] {override_id}: patch needs 3-way replay "
+                    f"({apply_strategy}) because upstream text changed"
+                )
             else:
                 print(f"[dry-run] {override_id}: patch applies cleanly")
             continue
@@ -93,7 +99,7 @@ def main() -> int:
             print(f"[skipped] {override_id}: patch already applied")
             continue
 
-        apply_cmd = ["git", "apply", patch_path.as_posix()]
+        apply_cmd = build_apply_command(patch_path, patch_status)
         if run_git(apply_cmd, repo_root) != 0:
             print(f"[error] failed to apply patch for {override_id}", file=sys.stderr)
             return 1
@@ -108,7 +114,10 @@ def main() -> int:
             )
             return 1
 
-        print(f"[applied] {override_id}: {override['target_path']}")
+        if patch_status == "applicable-with-3way":
+            print(f"[applied] {override_id}: {override['target_path']} via 3-way replay")
+        else:
+            print(f"[applied] {override_id}: {override['target_path']}")
 
     return 0
 
@@ -158,7 +167,19 @@ def run_git(command: list[str], repo_root: Path, quiet: bool = False) -> int:
     return completed.returncode
 
 
-def detect_patch_status(repo_root: Path, patch_path: Path) -> str:
+def build_apply_command(patch_path: Path, patch_status: str) -> list[str]:
+    command = ["git", "apply"]
+    if patch_status == "applicable-with-3way":
+        command.append("--3way")
+    command.append(patch_path.as_posix())
+    return command
+
+
+def detect_patch_status(
+    repo_root: Path,
+    patch_path: Path,
+    apply_strategy: str = "git-apply",
+) -> str:
     if run_git(["git", "apply", "--check", patch_path.as_posix()], repo_root, quiet=True) == 0:
         return "applicable"
     if (
@@ -170,6 +191,15 @@ def detect_patch_status(repo_root: Path, patch_path: Path) -> str:
         == 0
     ):
         return "already-applied"
+    if apply_strategy == "git-apply-3way" and (
+        run_git(
+            ["git", "apply", "--3way", "--check", patch_path.as_posix()],
+            repo_root,
+            quiet=True,
+        )
+        == 0
+    ):
+        return "applicable-with-3way"
     return "conflict"
 
 

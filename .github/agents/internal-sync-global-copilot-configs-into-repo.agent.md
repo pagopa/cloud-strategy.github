@@ -42,6 +42,7 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 - Start in `plan` by default. Move to `apply` only on explicit request and only when the plan is conflict-safe.
 - Keep target assumptions narrow and let the paired skill own the mirrored-scope and plan-file details.
 - Preserve target `local-*` assets plus any consumer-owned `.github/local-github-instructions-overrides.md` file, exclude repository-owned `internal-sync-*` resources from mirroring, and keep root-guidance files layered according to the paired skill contract.
+- When the source baseline contains approved imported-asset override registries or replay patches, mirror them as source-managed governance assets; do not recreate target-only hidden forks or ad hoc local edits to imported upstream resources.
 - When repository-root `LESSONS_LEARNED.md` is in scope, ensure the target has it and keep it structurally aligned with the source contract while preserving or migrating target-authored lesson rows through the paired skill workflow.
 - Sync only the managed cross-repository baseline declared by the paired skill contract; do not expand beyond that scope unless the user explicitly asks for more.
 - Do not restate reusable sync procedure in this agent; when the contract drifts, update the paired skill first and then realign this agent.

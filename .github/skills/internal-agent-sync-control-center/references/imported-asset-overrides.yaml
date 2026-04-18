@@ -5,11 +5,16 @@ policy:
     Allow a direct imported-asset override only for a strong repo-specific need
     that the user explicitly counter-validates, then register the replay patch
     in this bundle before treating the override as active.
+  replay_rule: >-
+    Prefer a clean patch replay first, then allow a registered `git apply
+    --3way` fallback when upstream text drift is compatible. Stop for review if
+    neither path applies cleanly.
 overrides:
   - id: obra-brainstorming-workflow-review
     target_path: .github/skills/obra-brainstorming/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
+    apply_strategy: git-apply-3way
     approval: explicit-user-counter-validated
     reason: >-
       Narrow brainstorming to creative or design-ambiguous work and align
@@ -23,6 +28,7 @@ overrides:
     target_path: .github/skills/obra-writing-plans/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
+    apply_strategy: git-apply-3way
     approval: explicit-user-counter-validated
     reason: >-
       Remove planning as the default gate for deterministic maintenance and
@@ -36,6 +42,7 @@ overrides:
     target_path: .github/skills/obra-test-driven-development/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
+    apply_strategy: git-apply-3way
     approval: explicit-user-counter-validated
     reason: >-
       Keep TDD strong for executable behavior without making it a rigid default
@@ -49,6 +56,7 @@ overrides:
     target_path: .github/skills/obra-subagent-driven-development/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
+    apply_strategy: git-apply-3way
     approval: explicit-user-counter-validated
     reason: >-
       Keep the example plan path aligned with tmp/superpowers so imported
@@ -62,6 +70,7 @@ overrides:
     target_path: .github/skills/obra-requesting-code-review/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
+    apply_strategy: git-apply-3way
     approval: explicit-user-counter-validated
     reason: >-
       Keep the reviewer handoff aligned with the canonical internal reviewer and
