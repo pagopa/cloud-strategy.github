@@ -8,6 +8,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Inspect nearby files before editing and follow the existing naming, frontmatter, and directory patterns.
 - Use only repository evidence that exists on disk. Do not invent runtimes, validators, sync flows, or test suites.
 - Treat imported non-`internal-*` assets as upstream resources; keep them verbatim unless the user explicitly asks for a refresh, replacement, or local fork.
+- Do not edit imported upstream assets in place unless the need is strong, the user explicitly counter-validates the exception, and the replay patch is registered in the `internal-agent-sync-control-center` bundle in the same change.
 
 ## Precedence And Projections
 
@@ -78,6 +79,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Keep doubts, open questions, and user decisions in `dubbi-e-domande.md`. This file stays outside the plan-and-apply loop and must not be treated as an executable plan file.
 - During execution, maintain matching `done-*` files. Move completed items into the corresponding `done-*` file, remove them from the active source file, delete an emptied source plan file, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.
 - Preserve imported `obra-*`, `awesome-*`, `openai-*`, and other upstream assets; express this repository's planning policy through repository-owned internal wrappers instead of editing upstream planning skills.
+- If an imported asset still requires a direct repo-local exception, register the replay patch in `.github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml` instead of leaving an undocumented fork.
 
 ## Repository Workflow Reminders
 

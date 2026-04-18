@@ -19,10 +19,13 @@ Use `internal-agent-development` when the sync changes the control-center agent,
 
 When deterministic change detection matters, read `references/fingerprinting-contract.md`, use the canonical repository implementation in `.github/scripts/lib/fingerprinting.py`, and use `scripts/sync_resource_fingerprint.py` from this skill only as a thin workflow wrapper.
 
+When an imported upstream asset has an exceptionally approved repo-local override, read `references/imported-asset-overrides.yaml` and use `scripts/apply_imported_asset_overrides.py` to replay the registered patch bundle after refreshing the upstream content.
+
 ## When to use
 
 - Maintain the sync-managed `.github/` catalog behind `internal-sync-control-center`.
 - Make keep, update, extract, retire, or approved external-refresh decisions across the managed catalog.
+- Keep approved imported-asset override exceptions explicit, replayable, and auditable instead of leaving hidden forks.
 - Resolve governance drift, overlap, or managed-scope ambiguity in the source repository.
 
 ## Goals
@@ -30,6 +33,7 @@ When deterministic change detection matters, read `references/fingerprinting-con
 - Keep one clear canonical asset per intent across the managed `.github/` catalog.
 - Make `internal-sync-control-center` visibly depend on one named operating engine instead of an implicit catalog skill.
 - Refresh only approved in-scope external-prefixed assets without expanding scope accidentally.
+- Keep approved imported in-place exceptions narrow, mapped, and re-applicable after future refreshes.
 - Move reusable sync procedure into this skill instead of bloating the agent body.
 - Keep naming, frontmatter, links, descriptions, and governance references deterministic.
 - Remove fallback, alias, deprecated, or compatibility-only drift in the same pass that introduces the canonical replacement.
@@ -46,6 +50,8 @@ For `internal-sync-control-center`, keep the split strict:
 - `internal-agent-development` owns structural changes to the agent itself, including mandatory engine-skill architecture and boundary rewrites.
 - `internal-skill-creator` owns repository-owned skill authoring and should be the first local route when one concrete skill needs creation, replacement, or major redesign.
 - `openai-skill-creator` covers only the remaining bundle mechanics during that work; it should not replace the local decision gate or duplicate repository-owned routing logic.
+- `references/imported-asset-overrides.yaml` owns the approved imported in-place override registry for this repository.
+- `scripts/apply_imported_asset_overrides.py` owns patch replay after an upstream refresh; if a patch no longer applies cleanly, stop and review instead of forcing a hidden fork.
 
 Do not collapse these roles back into one file just because the current task touches all of them.
 
@@ -53,6 +59,7 @@ Do not collapse these roles back into one file just because the current task tou
 
 1. Check the declared managed scope in `internal-sync-control-center` plus the live local inventory and nearby trigger space.
 2. Decide whether the capability should remain an `internal-*` asset, remain an approved in-scope external-prefixed asset, or be retired.
+3. For imported assets, prefer verbatim refresh first. Allow a direct in-place override only when the reason is strong, the user explicitly counter-validates it, and the replay patch is registered in this skill bundle.
 3. Prefer consolidation over coexistence when two assets compete for the same trigger space.
 4. Repair broken references only when the asset still adds distinct value to the declared catalog.
 5. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
@@ -65,6 +72,7 @@ Do not collapse these roles back into one file just because the current task tou
 | Repo-specific sync workflow or governance logic | Create or update an `internal-*` asset |
 | Control-center reusable operating logic | Keep it in this skill |
 | Installed external-prefixed asset still useful and declared in scope | Refresh in place |
+| Imported asset needs a rare repo-local exception after refresh | Require explicit user counter-validation, register the patch in `references/imported-asset-overrides.yaml`, and replay it with `scripts/apply_imported_asset_overrides.py` |
 | Thin alias, fallback copy, or deprecated variant | Delete the weaker asset |
 | Broken or stale asset with no unique value | Retire it |
 | Installed capability is still distinct but low-frequency or on-demand | Keep it as dormant support depth and document why; do not wrap it unless the root wrapper threshold is met |
@@ -94,6 +102,7 @@ Use these heuristics:
 - Keep dormant imported or internal capabilities when they still provide distinct on-demand value and the root wrapper threshold is not met.
 - Create or update an internal asset when the capability is strategic for this repository and should not depend on external wording or lifecycle.
 - Refresh an in-scope external-prefixed asset only when it still adds distinct value to the declared managed catalog.
+- For imported assets with approved repo-local exceptions, refresh the upstream content first and replay only the registered patch bundle afterward.
 
 ### 3. Author or Refresh Carefully
 
@@ -129,7 +138,17 @@ When a sync workflow needs evidence that a managed resource truly changed:
 - Do not introduce hashing manifests or helper scripts as decorative machinery; add them only when they clearly reduce false positives, repeated work, or unsafe refresh decisions.
 - Use the normalization rules, manifest schema, and output defaults from `references/fingerprinting-contract.md` instead of forking them inline.
 
-### 5. Re-check Governance Immediately
+### 5. Replay Approved Imported Overrides
+
+When an imported upstream asset has an approved repo-local exception:
+
+1. Refresh the imported asset verbatim from the declared upstream source.
+2. Check that the target path is listed in `references/imported-asset-overrides.yaml`.
+3. Run `scripts/apply_imported_asset_overrides.py --id <override-id>` or the full bundle when replaying every approved override after the refresh.
+4. If `git apply --check` fails or the post-apply content hash does not match the registry, stop and review the exception instead of forcing the patch through.
+5. Reassess whether an `internal-*` wrapper or replacement now serves the repository better than continuing the imported override.
+
+### 6. Re-check Governance Immediately
 
 After catalog changes:
 
@@ -152,11 +171,14 @@ Before finishing:
 - Confirm the agent still names this skill explicitly as its engine or default operating workflow.
 - Confirm the change did not leave decorative skill declarations behind.
 - Confirm no fallback alias or compatibility-only duplicate remains beside the canonical asset.
+- Confirm every approved imported in-place override is registered in `references/imported-asset-overrides.yaml`, has a live patch file, and still matches the expected normalized content hash.
 
 ## Anti-Patterns
 
 - Keeping duplicate assets "just in case."
 - Refreshing an external asset just because upstream changed when the local catalog does not need it.
+- Leaving a repo-local imported override undocumented, unapproved, or without a replay patch.
+- Forcing a replay patch after `git apply --check` failed.
 - Creating machinery-heavy sync helpers that never become part of a real workflow.
 - Creating a control-center engine skill that merely says "see another skill."
 - Leaving retired or deprecated assets in the live catalog.

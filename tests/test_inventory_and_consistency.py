@@ -93,3 +93,40 @@ def test_run_consistency_checks_flags_empty_and_invalid_tools_contracts(
         ".github/agents/internal-invalid.agent.md",
         "internal-agent-invalid-tools",
     ) in findings_by_path
+
+
+def test_run_consistency_checks_flags_invalid_imported_asset_override_registry(
+    tmp_path: Path,
+) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot Instructions\n\nSee `AGENTS.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/obra-demo/SKILL.md",
+        "---\nname: obra-demo\ndescription: Imported workflow.\n---\n",
+    )
+    write_file(
+        tmp_path
+        / ".github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml",
+        "overrides:\n"
+        "  - id: bad-entry\n"
+        "    target_path: .github/skills/obra-demo/SKILL.md\n"
+        "    lifecycle_mode: support-only\n"
+        "    approval: pending\n"
+        "    patch_path: patches/missing.patch\n"
+        "    expected_content_hash: short\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
+
+    findings = run_consistency_checks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "imported-asset-override-approval-missing" in finding_codes
+    assert "imported-asset-override-invalid-lifecycle" in finding_codes
+    assert "imported-asset-override-patch-missing" in finding_codes
+    assert "imported-asset-override-invalid-hash" in finding_codes

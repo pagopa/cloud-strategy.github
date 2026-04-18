@@ -3,12 +3,16 @@ from __future__ import annotations
 from collections import defaultdict
 from pathlib import Path
 
+import yaml
+
 from .inventory import collect_inventory_sections, parse_inventory_markdown
 from .shared import (
     INVENTORY_PATH,
+    IMPORTED_ASSET_OVERRIDES_PATH,
     LEGACY_AGENT_TOOL_IDS,
     Finding,
     finding_sort_key,
+    is_imported_asset,
     is_local_asset,
     iter_markdown_assets,
     load_frontmatter,
@@ -26,6 +30,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_internal_agent_contracts(root))
     findings.extend(check_duplicate_frontmatter_names(root))
     findings.extend(check_source_local_assets(root))
+    findings.extend(check_imported_asset_overrides(root))
     findings.extend(check_broken_local_links(root))
     if include_token_risks:
         from .token_risks import detect_token_risks
@@ -257,6 +262,208 @@ def check_source_local_assets(root: Path) -> list[Finding]:
                 suggestion="Rename or move the asset if it is intended to be source-managed.",
             )
         )
+    return findings
+
+
+def check_imported_asset_overrides(root: Path) -> list[Finding]:
+    registry_path = root / IMPORTED_ASSET_OVERRIDES_PATH
+    if not registry_path.exists():
+        return []
+
+    try:
+        payload = yaml.safe_load(read_text(registry_path)) or {}
+    except yaml.YAMLError as error:
+        return [
+            Finding(
+                severity="blocking",
+                code="imported-asset-overrides-invalid-yaml",
+                path=IMPORTED_ASSET_OVERRIDES_PATH,
+                message=f"The imported-asset override registry is not valid YAML: {error}.",
+                suggestion="Fix the YAML syntax so approved imported overrides remain auditable.",
+            )
+        ]
+
+    overrides = payload.get("overrides")
+    if not isinstance(overrides, list):
+        return [
+            Finding(
+                severity="blocking",
+                code="imported-asset-overrides-missing-list",
+                path=IMPORTED_ASSET_OVERRIDES_PATH,
+                message="The imported-asset override registry must define an `overrides` list.",
+                suggestion="Add an `overrides` list or remove the registry until an approved override exists.",
+            )
+        ]
+
+    findings: list[Finding] = []
+    ids_seen: set[str] = set()
+    targets_seen: set[str] = set()
+    skill_root = registry_path.parent.parent
+    for entry in overrides:
+        if not isinstance(entry, dict):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-invalid-entry",
+                    path=IMPORTED_ASSET_OVERRIDES_PATH,
+                    message="Each imported-asset override entry must be a mapping.",
+                    suggestion="Normalize the registry entries to YAML mappings.",
+                )
+            )
+            continue
+
+        override_id = entry.get("id")
+        target_path = entry.get("target_path")
+        patch_path = entry.get("patch_path")
+        expected_hash = entry.get("expected_content_hash")
+        approval = entry.get("approval")
+        lifecycle_mode = entry.get("lifecycle_mode")
+
+        if not isinstance(override_id, str) or not override_id.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-missing-id",
+                    path=IMPORTED_ASSET_OVERRIDES_PATH,
+                    message="An imported-asset override entry is missing a non-empty `id`.",
+                    suggestion="Give every override a stable id so sync replay can target it explicitly.",
+                )
+            )
+        elif override_id in ids_seen:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-duplicate-id",
+                    path=IMPORTED_ASSET_OVERRIDES_PATH,
+                    message=f"The imported-asset override id `{override_id}` is declared more than once.",
+                    suggestion="Keep one unique registry entry per approved imported override.",
+                )
+            )
+        else:
+            ids_seen.add(override_id)
+
+        if not isinstance(target_path, str) or not target_path.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-missing-target",
+                    path=IMPORTED_ASSET_OVERRIDES_PATH,
+                    message="An imported-asset override entry is missing `target_path`.",
+                    suggestion="Point each override at the imported asset it patches.",
+                )
+            )
+            continue
+
+        if target_path in targets_seen:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-duplicate-target",
+                    path=target_path,
+                    message="The imported-asset override registry maps the same target more than once.",
+                    suggestion="Keep one canonical override entry per imported target path.",
+                )
+            )
+        else:
+            targets_seen.add(target_path)
+
+        if not is_imported_asset(target_path):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-target-not-imported",
+                    path=target_path,
+                    message="Imported-asset override targets must point to non-internal, non-local catalog assets.",
+                    suggestion="Move repository-owned behavior into an internal asset instead of registering it as an imported override.",
+                )
+            )
+            continue
+
+        target_file = root / target_path
+        if not target_file.exists():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-target-missing",
+                    path=target_path,
+                    message="The imported-asset override target does not exist on disk.",
+                    suggestion="Restore the target asset or remove the stale override entry.",
+                )
+            )
+            continue
+
+        if approval != "explicit-user-counter-validated":
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-approval-missing",
+                    path=target_path,
+                    message="Imported-asset overrides require `approval: explicit-user-counter-validated`.",
+                    suggestion="Record the explicit user counter-validation before keeping the override active.",
+                )
+            )
+
+        if lifecycle_mode != "post-refresh-patch":
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-invalid-lifecycle",
+                    path=target_path,
+                    message="Imported-asset overrides must use `lifecycle_mode: post-refresh-patch`.",
+                    suggestion="Keep the override replay model explicit instead of inventing ad hoc lifecycle states.",
+                )
+            )
+
+        if not isinstance(patch_path, str) or not patch_path.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-missing-patch",
+                    path=target_path,
+                    message="Imported-asset overrides must declare a replay patch path.",
+                    suggestion="Add a patch file under the internal-agent-sync-control-center skill bundle.",
+                )
+            )
+        else:
+            patch_file = skill_root / patch_path
+            if not patch_file.exists():
+                findings.append(
+                    Finding(
+                        severity="blocking",
+                        code="imported-asset-override-patch-missing",
+                        path=patch_file.relative_to(root).as_posix()
+                        if patch_file.is_relative_to(root)
+                        else patch_path,
+                        message="The replay patch declared for an imported override is missing on disk.",
+                        suggestion="Restore the patch file or remove the stale override entry.",
+                    )
+                )
+
+        if not isinstance(expected_hash, str) or len(expected_hash) != 64:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="imported-asset-override-invalid-hash",
+                    path=target_path,
+                    message="Imported-asset overrides must declare a 64-character expected content hash.",
+                    suggestion="Store the normalized content hash so validator and replay can detect drift.",
+                )
+            )
+        else:
+            from .fingerprinting import build_fingerprint
+
+            actual_hash = build_fingerprint(root, target_file).content_hash
+            if actual_hash != expected_hash:
+                findings.append(
+                    Finding(
+                        severity="blocking",
+                        code="imported-asset-override-hash-mismatch",
+                        path=target_path,
+                        message="The imported-asset override target no longer matches the registry hash.",
+                        suggestion="Refresh the registry and replay patch together, or revert the untracked drift.",
+                    )
+                )
+
     return findings
 
 

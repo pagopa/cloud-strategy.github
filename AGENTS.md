@@ -44,6 +44,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 - `obra-*` resources are cross-cutting workflow assets. They often help with strategic framing, but may govern tactical or operational work when relevant.
 - `internal-*` resources are the canonical repository-owned layer. They are tactical by default, but may also be strategic or operational when their contract says so.
 - Imported upstream resources remain support depth by default. Overlap alone is not enough to fork or wrap them; prefer a repository-owned wrapper or replacement only when routing, governance, terminology, output shape, or safety expectations require repo-local ownership.
+- Keep imported upstream assets verbatim by default. Allow a direct in-place override only for a strong repo-specific need that the user explicitly counter-validates, and register that override in the `internal-agent-sync-control-center` skill bundle so future refreshes can replay it safely.
 - `local-*` resources remain consumer-local extensions. They are usually tactical or operational, but may be strategic when a consumer repository needs explicit local governance.
 - When overlap exists, prefer the repository-owned internal owner as canonical and use imported depth as support unless no credible internal owner exists.
 

@@ -46,6 +46,9 @@ Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandat
 - When a managed `openai/skills` asset is declared below, install or refresh only the mapped skills into `.github/skills/` using the required `openai-` prefix. Do not keep unprefixed copies or add sibling OpenAI skills unless the user explicitly expands scope.
 - Do not leave stale references in `AGENTS.md`, skills, agents, instructions, or scripts after catalog changes. Update README-based catalogs only when README edits are explicitly in scope.
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
+- Keep imported assets verbatim by default. Allow a direct in-place override only for a strong repo-specific need that the user explicitly counter-validates.
+- Every approved imported in-place override must be mapped in `.github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml` and replayed through the bundled override script after each refresh.
+- Treat any unregistered imported in-place override or stale replay patch as blocking sync drift.
 - Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
 - Treat any stale `obra-*` mapping or reference as blocking drift.
@@ -63,6 +66,7 @@ Treat `.github/skills/internal-agent-sync-control-center/SKILL.md` as the mandat
 - `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
 - `internal-skill-creator`: Canonical first entrypoint when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
+- `internal-agent-sync-control-center` bundled references and scripts: Use `references/imported-asset-overrides.yaml` plus `scripts/apply_imported_asset_overrides.py` whenever an approved imported override must survive a future upstream refresh.
 - `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
 - `obra-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
