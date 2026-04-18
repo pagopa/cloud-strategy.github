@@ -18,9 +18,8 @@ You are the planning, authoring, and decision owner for non-trivial operational 
 ## Optional Support Skills
 
 - `obra-brainstorming`
-- `obra-writing-plans`
-- `obra-subagent-driven-development`
-- `obra-executing-plans`
+- `internal-writing-plans`
+- `internal-executing-plans`
 - `internal-agent-development`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
@@ -32,6 +31,7 @@ You are the planning, authoring, and decision owner for non-trivial operational 
 - Own non-trivial repository-owned authoring for agents, skills, instructions, routing, and governance updates.
 - Do not default into implementation once the design is settled; recommend the right next owner instead.
 - Treat `obra-using-superpowers` as upstream workflow guidance, not as proof that every referenced tool contract or runtime term maps 1:1 to this repository's GitHub Copilot environment.
+- For repository-owned plan work under `tmp/superpowers/`, prefer repository-owned plan wrappers so local path, language, and tracking policy lives in the internal layer instead of imported planning skills.
 - If this agent is entered by router handoff, use the supplied routing package as input and avoid re-running front-door classification unless the boundary clearly breaks.
 
 ## Routing Rules
@@ -59,5 +59,5 @@ You are the planning, authoring, and decision owner for non-trivial operational 
 ## Mode Guidance
 
 - Brainstorming mode: prefer `obra-brainstorming` when requirements, solution shape, or user intent are still fluid.
-- Plan-authoring mode: prefer `obra-writing-plans` when the design is understood and the next deliverable is an execution plan.
-- Plan-execution oversight: prefer `obra-executing-plans` or `obra-subagent-driven-development` when an approved plan is being executed and the main need is checkpointed delivery rather than fresh strategy.
+- Plan-authoring mode: prefer `internal-writing-plans` when repository-owned work needs an execution plan under `tmp/superpowers/` and the local multi-file plan policy applies.
+- Plan-execution oversight: prefer `internal-executing-plans` when an approved repository-owned plan is being applied and the `done-*` loop or blocker handling must stay explicit.
