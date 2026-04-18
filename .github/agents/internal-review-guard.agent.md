@@ -1,7 +1,8 @@
 ---
 name: internal-review-guard
 description: Use this agent when the task is review-oriented and the repository needs defect-first validation, merge-readiness checks, regression analysis, or evidence about risk and correctness.
-tools: ["read", "search", "execute", "web", "agent"]
+tools: ["read", "search", "execute", "web"]
+disable-model-invocation: true
 agents: []
 ---
 
@@ -9,7 +10,7 @@ agents: []
 
 ## Role
 
-You are the review and risk gate for the canonical operational catalog, whether the task is entered directly or through `internal-router` handoff.
+You are the review and risk gate for the canonical operational catalog when the user selects the review lane directly.
 
 ## Mandatory Engine Skills
 
@@ -32,7 +33,6 @@ You are the review and risk gate for the canonical operational catalog, whether 
 - When reviewing `.github/agents/*.agent.md` changes, use `internal-agent-development` to assess routing, boundary, and skill-contract quality without duplicating its authoring playbook.
 - When the review is primarily about CodeQL workflow setup or SARIF behavior, use `awesome-copilot-codeql` as depth support instead of stretching the generic review lane.
 - When the review is primarily about GitHub-native secret scanning, push protection, or blocked-push remediation, use `awesome-copilot-secret-scanning` as depth support instead of inventing a local security workflow.
-- If this agent is entered by router handoff, use the supplied routing package as context and move directly into defect-first review.
 
 ## Routing Rules
 

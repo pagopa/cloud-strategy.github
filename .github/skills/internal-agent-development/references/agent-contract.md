@@ -38,7 +38,9 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 
 ## Delegation And Invocation Controls
 
-- Only router agents should own active downstream routing logic. Canonical non-router agents should recommend a better owner to the user instead of routing on the user's behalf, unless a narrower scoped contract explicitly allows them to invoke `internal-router` as a second parallel lane while leaving downstream owner selection to the router.
+- Only dedicated coordinator or router agents should own active downstream routing logic. Canonical direct owners should recommend a better owner to the user instead of routing on the user's behalf.
+- Prefer user-visible lane changes or direct user choice over hidden peer dispatch between canonical owners.
+- If a narrower scoped contract allows one canonical owner to invoke another, the exception must be explicit, one-directional, auditably bounded, and must not create an all-to-all mesh or nested ping-pong.
 - When an agent should dispatch to specific subagents, declare `agents:` with the explicit list of allowed targets.
 - When an agent must not dispatch subagents, declare `agents: []` to enforce the recommendation-only boundary.
 - When an agent should only be accessible as a subagent and not appear in the user dropdown, set `user-invocable: false`.

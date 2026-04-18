@@ -5,7 +5,7 @@ description: Use when one of the four canonical operational agents needs the sha
 
 # Internal Agent Operating Model Engine
 
-Use this skill as the shared engine for the four canonical operational agents.
+Use this skill as the shared engine for the four canonical operational agents in the direct-entry operational model.
 
 This skill is intentionally shared. It owns the reusable rules that would otherwise drift across `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`. It is not a copy of the agents.
 
@@ -57,7 +57,9 @@ A clear realignment across more than two adjacent `.github/` assets can stay wit
 
 ## Boundary Recommendation Protocol
 
-Only `internal-router` actively routes between owners and may dispatch to the selected canonical owner. The four canonical owners may be entered either directly by the user or by router handoff, but once active they stay inside their boundary, tell the user when that boundary no longer holds, and recommend the better owner instead of delegating unless a narrower scoped contract explicitly allows invoking `internal-router` as a second parallel lane while leaving downstream owner selection to the router.
+The canonical operational model uses direct entry: users select one of the four canonical owners directly, and ambiguous entry fails safe to `internal-planning-leader`. Once active, each owner stays inside its boundary, tells the user when that boundary no longer holds, and recommends the better owner instead of delegating.
+
+The four canonical owners are not subagent-invoked by default. Any future exception must be explicit, narrow, one-directional, and must not create an all-to-all mesh or nested ping-pong.
 
 | Agent | Stay owner when | Boundary breaks when | Recommend |
 | --- | --- | --- | --- |
@@ -88,9 +90,10 @@ Load `references/ownership-maps.md` when you need:
 
 ## Relationship Model
 
-- `internal-router` owns the front door only. It may hand the task to one canonical owner, but it does not implement, plan, review, or challenge by itself.
-- The four canonical owners may be entered directly by the user or by router handoff; the entry path does not widen their boundary.
-- A canonical non-router may invoke `internal-router` only when a narrower scoped contract explicitly allows a second parallel lane and the non-router does not choose the downstream owner itself.
+- The direct-entry model has no repository-owned front-door router above the four canonical owners.
+- `internal-planning-leader` is the safe fallback when the right lane is not clear yet.
+- The four canonical owners should stay user-selectable and `disable-model-invocation: true` by default so hidden peer dispatch stays opt-in instead of ambient.
+- If a narrower scoped contract ever allows one canonical owner to invoke another, the exception must be explicit, one-directional, auditably bounded, and must not create ping-pong or hidden route selection.
 - `internal-planning-leader` absorbs the role previously covered by `internal-ai-resource-creator` when the work is non-trivial repository-owned authoring.
 - `internal-review-guard` must reuse `internal-code-review` instead of restating the review playbook in the agent body.
 - `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.

@@ -2,11 +2,12 @@
 
 Use this reference when the operational model needs a lookup table instead of a narrative boundary explanation.
 
+The canonical operational model uses direct owner selection. When the winning owner is unclear, fail safe to `internal-planning-leader` instead of a dedicated routing skill.
+
 ## Skill Ownership Model
 
 | Skill | Primary owner | When it wins |
 | --- | --- | --- |
-| `internal-agent-routing-engine` | `internal-router` | Front-door classification, fail-safe selection, and dispatch to one canonical owner |
 | `internal-agent-operating-model-engine` | Shared by the four canonical agents | Shared boundary, recommendation, and anti-overlap logic |
 | `internal-code-review` | `internal-review-guard` | Tactical review engine for findings and defect-first analysis |
 | `internal-agent-development` | `internal-planning-leader` | Non-trivial repository-owned agent authoring |
