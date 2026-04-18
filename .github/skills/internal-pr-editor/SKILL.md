@@ -24,7 +24,7 @@ description: Use when writing or updating a pull request title or body from a re
 ## Template resolution
 Resolve and use one existing repository template:
 1. `.github/PULL_REQUEST_TEMPLATE.md`
-2. `.github/pull_request_template.md`
+2. the lowercase filename under `.github/` if the repository exposes one
 3. `PULL_REQUEST_TEMPLATE.md`
 4. `pull_request_template.md`
 
