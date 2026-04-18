@@ -18,12 +18,8 @@ You are the review and risk gate for the canonical operational catalog, whether 
 
 ## Optional Support Skills
 
-- `obra-requesting-code-review`
 - `obra-verification-before-completion`
-- `obra-receiving-code-review`
 - `obra-systematic-debugging`
-- `obra-test-driven-development`
-- `obra-finishing-a-development-branch`
 - `internal-agent-development`
 - `awesome-copilot-codeql`
 - `awesome-copilot-secret-scanning`
