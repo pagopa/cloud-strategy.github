@@ -103,7 +103,10 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Completion Report
 
 - End completed operations with `✅ Outcome`.
-- When used, also include `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`.
-- In each included section, state which resources were used and why they were relevant.
-- When `LESSONS_LEARNED.md` was updated, mention it under `📦 Other Resources` with a short reason.
+- Default to a concise `✅ Outcome` instead of dumping every supporting section automatically.
+- If detailed provenance or supporting context would help, offer it as an optional follow-up instead of expanding it by default.
+- The optional follow-up offer should stay compact and allow a number-only reply, for example `1 = resources used`, `2 = files changed`, `3 = validations`, `4 = full detail`.
+- Include `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources` only when the user asks for that detail or when a narrower scoped contract requires the disclosure inline.
+- In each included detail section, state which resources were used and why they were relevant.
+- When `LESSONS_LEARNED.md` was updated and `📦 Other Resources` is shown, mention it there with a short reason.
 - Omit unused categories instead of adding empty or negative sections.
