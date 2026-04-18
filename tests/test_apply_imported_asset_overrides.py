@@ -8,7 +8,9 @@ def load_module():
     script_path = Path(
         ".github/skills/internal-agent-sync-control-center/scripts/apply_imported_asset_overrides.py"
     )
-    spec = importlib.util.spec_from_file_location("apply_imported_asset_overrides", script_path)
+    spec = importlib.util.spec_from_file_location(
+        "apply_imported_asset_overrides", script_path
+    )
     module = importlib.util.module_from_spec(spec)
     assert spec is not None
     assert spec.loader is not None

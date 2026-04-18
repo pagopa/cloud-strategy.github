@@ -7,7 +7,9 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execution() -> None:
+def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execution() -> (
+    None
+):
     fast_executor_text = read_text(".github/agents/internal-fast-executor.agent.md")
     planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
     operating_model_text = read_text(
@@ -44,13 +46,13 @@ def test_obra_assets_use_tmp_superpowers_for_transient_paths() -> None:
     for relative_path in obra_paths:
         assert "docs/superpowers" not in read_text(relative_path)
 
-    assert "tmp/superpowers/" in read_text(
-        ".github/skills/obra-brainstorming/SKILL.md"
-    )
+    assert "tmp/superpowers/" in read_text(".github/skills/obra-brainstorming/SKILL.md")
     assert "tmp/superpowers/" in read_text(".github/skills/obra-writing-plans/SKILL.md")
 
 
-def test_obra_workflows_do_not_claim_deterministic_textual_governance_maintenance() -> None:
+def test_obra_workflows_do_not_claim_deterministic_textual_governance_maintenance() -> (
+    None
+):
     brainstorming_text = read_text(".github/skills/obra-brainstorming/SKILL.md")
     writing_plans_text = read_text(".github/skills/obra-writing-plans/SKILL.md")
     tdd_text = read_text(".github/skills/obra-test-driven-development/SKILL.md")
