@@ -13,8 +13,8 @@ Use `internal-skill-creator` first when the main output is a repository-owned sk
 
 Prefer explicit engine-skill architecture for routers and broader command centers:
 
-- keep routing contract, tool contract, boundaries, boundary recommendations, and output shape in the agent
-- move long decision matrices, threshold rules, ownership maps, and reusable operating logic into repo-owned engine skills
+- keep routing contract, tool contract, positive boundaries, and output shape in the agent
+- move reusable boundary-recommendation protocols, long decision matrices, threshold rules, ownership maps, and shared operating logic into repo-owned engine skills when multiple agents need the same behavior
 - when that engine is required for the agent's core behavior, declare it explicitly instead of burying it in optional skill guidance
 
 ## When to use
@@ -97,9 +97,10 @@ Use this split when authoring command-center agents:
   - role and stance
   - boundary with neighboring agents
   - tool contract
-  - boundary definition and user-facing recommendation pattern
+   - boundary definition and any agent-specific lane-break handling that is not shared elsewhere
   - output expectations
 - Engine skill:
+   - shared stop-and-recommend protocol when several neighboring agents need the same lane-mismatch handling
   - decision matrix
   - threshold rules for medium or ambiguous tasks
   - old-to-new ownership mapping
@@ -207,6 +208,7 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - A skill-list section as a dumping ground for unrelated capabilities.
 - A `## Mandatory Engine Skills` section that merely mirrors the agent body without owning real reusable logic.
 - Creating one dedicated skill per agent for visual symmetry even when shared or existing engines already solve the problem.
+- Repeating the same lane-mismatch recommendation matrix across multiple neighboring agents when one shared boundary engine would be clearer.
 - Starting from the selected agent file alone and skipping the directly relevant optional support or preferred skills that define how that agent should be applied.
 - Treating preferred or optional skills as a fake platform-enforced toolchain or as an origin-based priority ladder.
 - Treating optional support skills as if they were the required engine.
@@ -238,6 +240,7 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - If the agent includes a skill-list section, confirm the wording does not imply that `internal-*` skills automatically outrank imported skills.
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
 - Confirm the agent has a meaningful routing boundary and is not just "expert at everything in X."
+- If a shared boundary-recommendation engine is used, confirm the agent still keeps a real route and at least one meaningful negative boundary instead of turning into a thin pointer.
 - Confirm routers keep classification matrices, fallback rules, and old-to-new ownership mapping in an engine skill instead of long body prose when that logic is substantial.
 - For routers or coordinator-style agents that delegate within the turn, confirm the contract forbids classification-only completion and defines degraded-mode behavior when delegation does not return usable content.
 - Confirm routers are treated as the strongest case for a dedicated engine and that shared operational logic for the four canonical owners stays in a shared engine instead of branching into decorative mirrors.

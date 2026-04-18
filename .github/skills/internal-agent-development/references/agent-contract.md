@@ -34,6 +34,7 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 - Do not present a skill-list section as a native GitHub Copilot property or as a guarantee that every listed skill will be invoked automatically.
 - When expressing the resource model, treat `obra-*` as the cross-cutting workflow lane, `internal-*` as the canonical repository-owned layer, imported skills as support depth by default, and `local-*` as consumer-local extensions. Do not infer strategic, tactical, or operational role from prefix alone.
 - Do not create a 1:1 dedicated skill per agent just for symmetry. Create an engine skill only when it owns real reusable logic that would otherwise bloat the agent or drift.
+- When several neighboring repository-owned agents share the same stop-and-recommend behavior, prefer one shared boundary-recommendation engine over repeating the same next-owner matrix in every agent body. Keep the route and at least one real boundary in each agent.
 - Router agents are the strongest default candidate for a dedicated engine skill because their classification matrix, fallback rules, and ownership mapping are highly procedural.
 
 ## Delegation And Invocation Controls
