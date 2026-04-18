@@ -24,8 +24,10 @@ Define a predictable process for deprecating Copilot customization assets (`inst
 Immediate removal is allowed only for security or compliance issues. The removal reason must be documented in `.github/CHANGELOG.md`.
 
 ## Current deprecations
+- `.github/workflows/_terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` after consolidating duplicate pre-commit workflows into one canonical entrypoint.
+- `.github/workflows/terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` so the source baseline ships a single pre-commit workflow.
 - `.github/skills/antigravity-domain-driven-design/SKILL.md`: **Removed**. Consolidated into `.github/skills/internal-ddd/SKILL.md`.
 - `.github/skills/internal-data-registry/SKILL.md`: **Removed**. Retired from the live catalog after confirming no remaining live references.
-- `scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the `internal-sync-global-copilot-configs-into-repo` agent and the `internal-agent-sync-global-copilot-configs-into-repo` skill workflow.
-- `skills/internal-terraform-feature/SKILL.md`: **Removed**. Merged into `skills/internal-terraform/SKILL.md`.
-- `skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into `skills/internal-terraform/SKILL.md`.
+- `.github/scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the `internal-sync-global-copilot-configs-into-repo` agent and the `internal-agent-sync-global-copilot-configs-into-repo` skill workflow.
+- `.github/skills/internal-terraform-feature/SKILL.md`: **Removed**. Merged into `.github/skills/internal-terraform/SKILL.md`.
+- `.github/skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into `.github/skills/internal-terraform/SKILL.md`.

@@ -37,7 +37,7 @@ MANAGED_ROOT_FILES = (
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",
 )
-MANAGED_WORKFLOW_FILES = (".github/workflows/terraform-pre-commit.yml",)
+MANAGED_WORKFLOW_FILES = (".github/workflows/_pre-commit.yml",)
 LOCAL_COPILOT_OVERRIDES_PATH = ".github/local-copilot-overrides.md"
 INVENTORY_PATH = ".github/INVENTORY.md"
 
@@ -83,6 +83,8 @@ class SyncPlan:
     source_root: Path
     target_root: Path
     source_revision: str | None
+    source_version: str | None
+    target_manifest_source_version: str | None
     target_dirty: bool
     stacks: tuple[str, ...]
     operations: tuple[SyncOperation, ...]
@@ -96,6 +98,8 @@ class SyncPlan:
             "source_root": self.source_root.as_posix(),
             "target_root": self.target_root.as_posix(),
             "source_revision": self.source_revision,
+            "source_version": self.source_version,
+            "target_manifest_source_version": self.target_manifest_source_version,
             "target_dirty": self.target_dirty,
             "stacks": list(self.stacks),
             "local_assets": list(self.local_assets),

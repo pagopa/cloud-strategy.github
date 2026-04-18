@@ -12,9 +12,11 @@
 - [ ] Agent update
 - [ ] Instruction update
 - [ ] Skill update
+- [ ] AI policy update (AGENTS.md, copilot-instructions.md)
 - [ ] Workflow/automation update
 - [ ] Verification/automation update
 - [ ] Documentation/configuration only
+- [ ] Scripts/Utils update
 - [ ] Other
 
 ## List of changes

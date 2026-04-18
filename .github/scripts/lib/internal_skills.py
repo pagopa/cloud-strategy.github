@@ -20,6 +20,13 @@ SHORT_DESCRIPTION_MIN = 25
 SHORT_DESCRIPTION_MAX = 64
 MAX_SKILL_BODY_LINES = 220
 INLINE_TEMPLATE_THRESHOLD = 4
+TRIGGER_FIRST_PREFIXES = (
+    "Use when",
+    "Use first when",
+    "Use this",
+    "Use before",
+    "When ",
+)
 ALLOWED_VIRTUAL_PATHS = {
     ".github/copilot-sync.manifest.json",
 }
@@ -116,6 +123,27 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
                     suggestion="Add a clear description that states what the skill does and when to use it.",
                 )
             )
+        elif not description.strip().startswith(TRIGGER_FIRST_PREFIXES):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="description-not-trigger-first",
+                    path=skill_md.as_posix(),
+                    message="SKILL.md description must stay trigger-first so routing intent appears immediately.",
+                    suggestion="Start the description with an explicit trigger such as 'Use when ...'.",
+                )
+            )
+
+    if "## When to use" not in body:
+        findings.append(
+            Finding(
+                severity="blocking",
+                code="missing-when-to-use-heading",
+                path=skill_md.as_posix(),
+                message="SKILL.md must include a '## When to use' section for consistent routing guidance.",
+                suggestion="Add a short '## When to use' section before deeper workflow details.",
+            )
+        )
 
     findings.extend(validate_openai_yaml(skill_dir, skill_name))
     findings.extend(validate_local_references(root, skill_dir))

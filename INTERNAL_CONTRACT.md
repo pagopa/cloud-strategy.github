@@ -194,7 +194,9 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - `.github/copilot-instructions.md`
   - relevant governance or sync agents
 - Expected behavior:
-  - completed runs end with `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, and `🧩 Skills`
+  - completed runs end with `✅ Outcome`
+  - supporting sections such as `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources` are optional detail by default
+  - when detail is available but omitted for token discipline, the response offers a compact follow-up and accepts number-only replies
   - the contract stays projected where Copilot or governance flows rely on it
   - root `AGENTS.md` may point to the repo-wide projection but does not need to carry the full formatting contract
 

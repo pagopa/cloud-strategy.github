@@ -19,6 +19,12 @@ Use `internal-agent-development` when the sync changes the control-center agent,
 
 When deterministic change detection matters, read `references/fingerprinting-contract.md`, use the canonical repository implementation in `.github/scripts/lib/fingerprinting.py`, and use `scripts/sync_resource_fingerprint.py` from this skill only as a thin workflow wrapper.
 
+## When to use
+
+- Maintain the sync-managed `.github/` catalog behind `internal-sync-control-center`.
+- Make keep, update, extract, retire, or approved external-refresh decisions across the managed catalog.
+- Resolve governance drift, overlap, or managed-scope ambiguity in the source repository.
+
 ## Goals
 
 - Keep one clear canonical asset per intent across the managed `.github/` catalog.
@@ -131,6 +137,7 @@ After catalog changes:
 - Re-check `.github/copilot-instructions.md` for repo-wide projection drift.
 - Re-check `.github/INVENTORY.md` for exact path accuracy.
 - Re-check nearby agents and skills for stale references, decorative declarations, or broken ownership assumptions.
+- Re-check `LESSONS_LEARNED.md` and ask whether any pending lesson was just codified or disproven so the ledger does not retain a duplicate.
 
 ## Validation
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Writing Plans"
+  short_description: "Repo wrapper for numbered plan authoring"
+  default_prompt: "Use $internal-writing-plans to author repository-owned multi-file plans under tmp/superpowers with numbered phases and a separate dubbi-e-domande file."

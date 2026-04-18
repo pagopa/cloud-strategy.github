@@ -87,7 +87,7 @@ This table highlights the most commonly maintained source-side entrypoints rathe
 | `scripts/sync_copilot_catalog.sh` | Supported sync planner and apply entrypoint for source-to-consumer Copilot alignment. |
 | `scripts/validate_internal_skills.py` | Validates repository-owned internal skill metadata, local references, and token hygiene. |
 | `scripts/requirements.txt` | Local pinned dependency set for repository-owned Python scripts under `.github/scripts/`. |
-| `workflows/terraform-pre-commit.yml` | Source repository workflow for Terraform-focused pre-commit checks. |
+| `workflows/_pre-commit.yml` | Source repository workflow for repository-wide pre-commit checks. |
 
 The matching `.py` entrypoints and `scripts/lib/*.py` modules are part of the same tracked script catalog and stay aligned with these wrappers.
 
@@ -113,23 +113,26 @@ Completed operations must end with a concise recap.
 ### ✅ Outcome
 
 - Summarize the completed operation and any relevant validation status or blockers.
+- Keep this section concise by default.
+- If more detail is available, offer it as an optional follow-up instead of appending every detail block automatically.
+- The offer should support number-only replies, for example `1 = resources used`, `2 = files changed`, `3 = validations`, `4 = full detail`.
 
 ### 🤖 Agents
 
-- Include this section only when agents were used.
+- Include this section only when agents were used and the user asked for the detail, or when a narrower scoped contract requires inline disclosure.
 - State which agents were used and why they were relevant.
 
 ### 📘 Instructions
 
-- Include this section only when instructions were used.
+- Include this section only when instructions were used and the user asked for the detail, or when a narrower scoped contract requires inline disclosure.
 - State which instructions were used and why they mattered.
 
 ### 🧩 Skills
 
-- Include this section only when skills were used.
+- Include this section only when skills were used and the user asked for the detail, or when a narrower scoped contract requires inline disclosure.
 - State which skills were used and why they were relevant.
 
 ### 📦 Other Resources
 
-- Include this section only when other resources were used.
+- Include this section only when other resources were used and the user asked for the detail, or when a narrower scoped contract requires inline disclosure.
 - State which other resources were used and why they were relevant.

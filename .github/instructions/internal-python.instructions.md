@@ -6,7 +6,7 @@ applyTo: "**/*.py"
 # Python Instructions
 
 ## Mandatory rules
-- Use emoji logs for key execution states.
+- Use emoji logs for key operator-facing execution states.
 - Prefer early return and clear guard clauses.
 - Keep code explicit and readable.
 - Prefer simple, readable, and easily modifiable code over clever abstractions.
@@ -27,6 +27,7 @@ applyTo: "**/*.py"
 - Load `.github/skills/internal-project-python/SKILL.md` for structured package or application code, reusable library boundaries, async judgment, and application test shape.
 - Load `.github/skills/internal-script-python/SKILL.md` for standalone operational tools, toolkit layout, launcher rules, dependency choices, and script runtime orchestration.
 - Keep this instruction as the shared auto-loaded baseline; keep the standalone-tool versus structured-package workflow detail in the paired skills.
+- Treat `excludeAgent` frontmatter differentiation as a follow-up optimization for this instruction family, not a default requirement. GitHub Docs still document `excludeAgent` for path-specific instructions; re-check the supported agent values before rolling it out here.
 
 ## Dependency lock example
 

@@ -90,6 +90,7 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     target_root = tmp_path / "target"
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / "VERSION", "1.2.3\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
         source_root / ".github/agents/internal-fast.agent.md",
@@ -128,6 +129,7 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert (target_root / ".github/local-copilot-overrides.md").exists()
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
+    assert manifest["source_version"] == "1.2.3"
     assert (target_root / "AGENTS.md").read_text(
         encoding="utf-8"
     ) == "# AGENTS\nsource\n"
@@ -173,6 +175,28 @@ def test_build_sync_plan_accepts_existing_tmp_superpowers_gitignore_entry(
 
     assert ("unchanged", ".gitignore") in actions
     assert plan.generated_gitignore == "node_modules/\ntmp/superpowers/\n"
+
+
+def test_build_sync_plan_reads_source_and_target_manifest_versions(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / "VERSION", "2.4.0\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".github/copilot-sync.manifest.json",
+        json.dumps({"source_version": "2.3.1"}) + "\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert plan.source_version == "2.4.0"
+    assert plan.target_manifest_source_version == "2.3.1"
 
 
 def test_apply_sync_plan_creates_target_lessons_from_source_template(
@@ -268,16 +292,16 @@ def test_build_sync_plan_includes_shared_repo_hygiene_files_only(
     write_file(source_root / ".editorconfig", "root = true\n")
     write_file(source_root / ".pre-commit-config.yaml", "repos: []\n")
     write_file(
-        source_root / ".github/workflows/terraform-pre-commit.yml",
-        "name: terraform-pre-commit\n",
+        source_root / ".github/workflows/_pre-commit.yml",
+        "name: pre-commit\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
     write_file(target_root / ".editorconfig", "root = false\n")
     write_file(target_root / ".pre-commit-config.yaml", "repos:\n  - repo: old\n")
     write_file(
-        target_root / ".github/workflows/terraform-pre-commit.yml",
-        "name: old-terraform-pre-commit\n",
+        target_root / ".github/workflows/_pre-commit.yml",
+        "name: old-pre-commit\n",
     )
     write_file(target_root / ".github/workflows/local-only.yml", "name: local-only\n")
 
@@ -287,7 +311,7 @@ def test_build_sync_plan_includes_shared_repo_hygiene_files_only(
 
     assert ("update", ".editorconfig") in actions
     assert ("update", ".pre-commit-config.yaml") in actions
-    assert ("update", ".github/workflows/terraform-pre-commit.yml") in actions
+    assert ("update", ".github/workflows/_pre-commit.yml") in actions
     assert ".github/workflows/local-only.yml" not in planned_paths
 
 
@@ -302,16 +326,16 @@ def test_apply_sync_plan_mirrors_shared_repo_hygiene_files(
     write_file(source_root / ".editorconfig", "root = true\n")
     write_file(source_root / ".pre-commit-config.yaml", "repos: []\n")
     write_file(
-        source_root / ".github/workflows/terraform-pre-commit.yml",
-        "name: terraform-pre-commit\n",
+        source_root / ".github/workflows/_pre-commit.yml",
+        "name: pre-commit\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
     write_file(target_root / ".editorconfig", "root = false\n")
     write_file(target_root / ".pre-commit-config.yaml", "repos:\n  - repo: old\n")
     write_file(
-        target_root / ".github/workflows/terraform-pre-commit.yml",
-        "name: old-terraform-pre-commit\n",
+        target_root / ".github/workflows/_pre-commit.yml",
+        "name: old-pre-commit\n",
     )
 
     plan = build_sync_plan(source_root, target_root)
@@ -323,9 +347,9 @@ def test_apply_sync_plan_mirrors_shared_repo_hygiene_files(
     assert (target_root / ".pre-commit-config.yaml").read_text(
         encoding="utf-8"
     ) == "repos: []\n"
-    assert (target_root / ".github/workflows/terraform-pre-commit.yml").read_text(
+    assert (target_root / ".github/workflows/_pre-commit.yml").read_text(
         encoding="utf-8"
-    ) == "name: terraform-pre-commit\n"
+    ) == "name: pre-commit\n"
 
 
 def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:

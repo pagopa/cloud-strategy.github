@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -51,3 +52,28 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
             assert (
                 snippet in text
             ), f"{relative_path} is missing retained-learning guardrail text: {snippet}"
+
+
+def test_pending_lesson_rows_have_expected_shape_when_present() -> None:
+    lines = read_text("LESSONS_LEARNED.md").splitlines()
+
+    section_start = lines.index("## Pending Rules") + 1
+    header_index = next(
+        index
+        for index in range(section_start, len(lines))
+        if lines[index].startswith("|")
+    )
+    data_start = header_index + 2
+
+    data_rows: list[list[str]] = []
+    for line in lines[data_start:]:
+        if not line.startswith("|"):
+            break
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if any(cells):
+            data_rows.append(cells)
+
+    for row in data_rows:
+        assert len(row) == 4
+        assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", row[0])
+        assert all(cell for cell in row[1:])

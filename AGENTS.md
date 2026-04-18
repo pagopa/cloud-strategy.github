@@ -29,6 +29,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 - The default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it.
 - User chat may be Italian.
 - Keep language exceptions explicit and local instead of restating broader prohibitions across the catalog.
+- Repository-owned execution-plan artifacts under `tmp/superpowers/<clear-action-or-task-name>/` may default to Italian when the local planning policy applies; this exception stays local to those plan files and does not change the repository-wide English default.
 
 ## Naming Contract
 
@@ -84,3 +85,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 - Transient planning, brainstorming, and other Superpowers-generated working files must not be written under `docs/`.
 - When such artifacts are needed inside this repository, write them under `tmp/superpowers/`.
+- Repository-owned plan work under `tmp/superpowers/` should live in a task-specific folder named `tmp/superpowers/<clear-action-or-task-name>/`.
+- Keep active execution plans there as multiple numbered macro-category Markdown files, for example `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md`, instead of one monolithic plan document.
+- Keep unresolved questions, doubts, or user decisions in `dubbi-e-domande.md`; this file stays separate from executable plan files and remains outside the plan-and-apply loop.
+- During execution, create matching `done-*` files, move completed items into them, remove completed items from the active source plan file, delete emptied numbered plan files, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.

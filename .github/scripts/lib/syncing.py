@@ -33,6 +33,7 @@ from .shared import (
 MANAGED_SKILL_DIR = ".github/skills"
 SYNC_PLAN_PATH = "tmp/copilot-sync.plan.md"
 SYNC_MANIFEST_PATH = ".github/copilot-sync.manifest.json"
+VERSION_PATH = "VERSION"
 LEGACY_SYNC_ARTIFACT_PATHS = (
     "tmp/internal-sync-copilot-configs.plan.md",
     ".github/internal-sync-copilot-configs.manifest.json",
@@ -53,6 +54,8 @@ class PendingLessonsTable:
 def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     source_root = source_root.resolve()
     target_root = target_root.resolve()
+    source_version = read_source_version(source_root)
+    target_manifest_source_version = read_target_manifest_source_version(target_root)
 
     source_files = discover_source_sync_files(source_root)
     target_files = discover_target_managed_files(target_root)
@@ -237,6 +240,8 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         source_root=source_root,
         target_root=target_root,
         source_revision=git_revision(source_root),
+        source_version=source_version,
+        target_manifest_source_version=target_manifest_source_version,
         target_dirty=is_git_dirty(target_root),
         stacks=tuple(detect_target_stacks(target_root)),
         operations=ordered_operations,
@@ -422,6 +427,8 @@ def render_sync_plan_markdown(plan: SyncPlan) -> str:
         f"- Source root: `{plan.source_root.as_posix()}`",
         f"- Target root: `{plan.target_root.as_posix()}`",
         f"- Source revision: `{plan.source_revision or 'unknown'}`",
+        f"- Source version: `{plan.source_version or 'unknown'}`",
+        f"- Target manifest source version: `{plan.target_manifest_source_version or 'unknown'}`",
         f"- Target dirty: `{'yes' if plan.target_dirty else 'no'}`",
         f"- Detected stacks: `{', '.join(plan.stacks)}`",
         "",
@@ -481,6 +488,30 @@ def ensure_superpowers_gitignore_entry(current_content: str | None) -> str:
     return updated
 
 
+def read_source_version(source_root: Path) -> str | None:
+    version_path = source_root / VERSION_PATH
+    if not version_path.exists():
+        return None
+    version = read_text(version_path).strip()
+    return version or None
+
+
+def read_target_manifest_source_version(target_root: Path) -> str | None:
+    manifest_path = target_root / SYNC_MANIFEST_PATH
+    if not manifest_path.exists():
+        return None
+    try:
+        payload = json.loads(read_text(manifest_path))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    source_version = payload.get("source_version")
+    if not isinstance(source_version, str):
+        return None
+    normalized = source_version.strip()
+    return normalized or None
+
+
 def write_sync_manifest(plan: SyncPlan) -> Path:
     manifest_path = plan.target_root / SYNC_MANIFEST_PATH
     managed_hashes: dict[str, str] = {}
@@ -504,6 +535,7 @@ def write_sync_manifest(plan: SyncPlan) -> Path:
         "source_root": plan.source_root.as_posix(),
         "target_root": plan.target_root.as_posix(),
         "source_revision": plan.source_revision,
+        "source_version": plan.source_version,
         "normalization_version": NORMALIZATION_VERSION,
         "hash_algo": HASH_ALGO,
         "local_assets": list(plan.local_assets),

@@ -6,6 +6,17 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-18
+- Narrowed `.github/workflows/catalog-validation.yml` so it no longer repeats `_pre-commit` coverage: the workflow now runs the new `make catalog-lint` target for Bash syntax plus Python bytecode compilation, skips the duplicate YAML lint step, and leaves Markdown lint available as a manual target instead of failing the catalog-specific gate on long-standing repo-wide style debt.
+- Expanded `.github/scripts/requirements.txt` so the locked `PyYAML==6.0.2` hashes cover the published CPython 3.13 source and wheel artifacts used by GitHub Actions Linux and local macOS installs, preventing `.github/scripts/run.sh` from failing on valid platform-specific downloads.
+- Consolidated the repository pre-commit baseline onto `.github/workflows/_pre-commit.yml`, removed the duplicate `_terraform-pre-commit.yml` and `terraform-pre-commit.yml` workflows, and realigned the sync baseline, deprecation log, README, and sync tests to the single canonical workflow.
+- Simplified `.github/workflows/_pre-commit.yml` so it no longer depends on the `inputs` context during `push` or `pull_request` runs, keeping the surviving workflow aligned with GitHub Actions context-availability rules.
+
+## 2026-04-17
+- Added reusable prompt files under `.github/prompts/` for planning kickoff, pre-mortem challenge, review kickoff, and sync planning so the repository now ships concrete prompt-file surfaces instead of an empty placeholder directory.
+- Refreshed plan tracking under `tmp/done/superpowers/plans/` so completed plan work is mirrored outside the active plan files and the remaining plan sources can stay current-state only.
+- Rebuilt `.github/INVENTORY.md` after the catalog refresh so support-only imported office skills are labeled explicitly in the generated inventory output.
+
 ## 2026-04-12
 - Renamed the repository-root retained-learning ledger to `LESSONS_LEARNED.md`, then realigned the retained-learning contract, sync automation, and tests to use the new canonical path.
 - Aligned `.pre-commit-config.yaml` and expanded `.editorconfig` with file-type defaults for Python, shell, Terraform/HCL, YAML, JSON/TOML, Markdown, Make, and local config files so the repo and synced consumers get a practical editor baseline without the formatter ping-pong that left `pre-commit` failing with no visible git diff.

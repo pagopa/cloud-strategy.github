@@ -37,6 +37,7 @@ Tools:
   audit_copilot_catalog
   detect_token_risks
   sync_copilot_catalog
+    validate_internal_skills
 EOF
 }
 
@@ -51,6 +52,59 @@ hash_file() {
         return
     fi
     log_error "Missing SHA-256 helper: install sha256sum or shasum."
+    exit 1
+}
+
+load_required_python_version() {
+    if [[ ! -f "$PYTHON_VERSION_FILE" ]]; then
+        log_error "Missing required Python version file: $PYTHON_VERSION_FILE"
+        exit 1
+    fi
+
+    REQUIRED_PYTHON_VERSION="$(tr -d '[:space:]' <"$PYTHON_VERSION_FILE")"
+    REQUIRED_PYTHON_MAJOR_MINOR="$(printf '%s' "$REQUIRED_PYTHON_VERSION" | awk -F. 'NF >= 2 { print $1 "." $2 }')"
+
+    if [[ -z "$REQUIRED_PYTHON_MAJOR_MINOR" ]]; then
+        log_error "Invalid Python version in $PYTHON_VERSION_FILE: $REQUIRED_PYTHON_VERSION"
+        exit 1
+    fi
+}
+
+select_python_bin() {
+    if [[ -n "$PYTHON_BIN" ]]; then
+        return
+    fi
+
+    PYTHON_BIN="python$REQUIRED_PYTHON_MAJOR_MINOR"
+}
+
+verify_python_bin_version() {
+    local actual_version
+    actual_version="$("$PYTHON_BIN" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+
+    if [[ "$actual_version" == "$REQUIRED_PYTHON_MAJOR_MINOR" ]]; then
+        return
+    fi
+
+    log_error "$PYTHON_BIN resolved to Python $actual_version, but .python-version requires $REQUIRED_PYTHON_VERSION."
+    exit 1
+}
+
+verify_venv_version() {
+    local venv_python="$VENV_DIR/bin/python"
+    local venv_version
+
+    if [[ ! -x "$venv_python" ]]; then
+        log_error "Virtual environment is missing its Python interpreter: $venv_python"
+        exit 1
+    fi
+
+    venv_version="$("$venv_python" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+    if [[ "$venv_version" == "$REQUIRED_PYTHON_MAJOR_MINOR" ]]; then
+        return
+    fi
+
+    log_error "Existing virtual environment uses Python $venv_version, but .python-version requires $REQUIRED_PYTHON_VERSION. Remove $VENV_DIR and rerun."
     exit 1
 }
 
@@ -72,6 +126,9 @@ resolve_script() {
         sync_copilot_catalog|sync_copilot_catalog.py)
             printf '%s\n' "$SCRIPT_DIR/sync_copilot_catalog.py"
             ;;
+        validate_internal_skills|validate_internal_skills.py)
+            printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"
+            ;;
         *)
             return 1
             ;;
@@ -80,10 +137,12 @@ resolve_script() {
 
 ensure_venv() {
     if [[ -d "$VENV_DIR" ]]; then
+        verify_venv_version
         return
     fi
     log_info "Creating local virtual environment."
     "$PYTHON_BIN" -m venv "$VENV_DIR"
+    verify_venv_version
 }
 
 install_dependencies() {
@@ -122,15 +181,20 @@ main() {
     }
     shift
 
+    load_required_python_version
+    select_python_bin
     require_command "$PYTHON_BIN"
+    verify_python_bin_version
     ensure_venv
     install_dependencies
     exec "$VENV_DIR/bin/python" "$script_path" "$@"
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 VENV_DIR="$SCRIPT_DIR/.venv"
-PYTHON_BIN="${PYTHON_BIN:-python3}"
+PYTHON_BIN="${PYTHON_BIN:-}"
+PYTHON_VERSION_FILE="$REPO_ROOT/.python-version"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 REQUIREMENTS_HASH_FILE="$VENV_DIR/.requirements.sha256"
 

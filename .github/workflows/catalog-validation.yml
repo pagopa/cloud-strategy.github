@@ -1,0 +1,65 @@
+name: 20 🕵️‍♀️ catalog-validation
+
+on:
+  pull_request:
+    paths:
+      - .github/**
+      - tests/**
+      - Makefile
+      - .python-version
+      - AGENTS.md
+      - CONTRIBUTING.md
+      - INTERNAL_CONTRACT.md
+      - LESSONS_LEARNED.md
+      - VERSION
+  push:
+    branches:
+      - main
+    paths:
+      - .github/**
+      - tests/**
+      - Makefile
+      - .python-version
+      - AGENTS.md
+      - CONTRIBUTING.md
+      - INTERNAL_CONTRACT.md
+      - LESSONS_LEARNED.md
+      - VERSION
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        # actions/checkout@v6.0.2
+        # https://github.com/actions/checkout/releases/tag/v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        # actions/setup-python@v6.0.0
+        # https://github.com/actions/setup-python/releases/tag/v6.0.0
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c
+        with:
+          python-version-file: ".python-version"
+
+      - name: Run repository validation targets
+        run: |
+          set -euo pipefail
+          ./.github/scripts/catalog_validation.sh --skip-token-risks
+
+      - name: Run dedicated token-risk scan
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          ./.github/scripts/catalog_validation.sh --token-risks-only

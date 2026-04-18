@@ -16,7 +16,7 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 - `.github/security-baseline.md`
 - `.github/DEPRECATION.md`
 - `.github/repo-profiles.yml`
-- `.github/workflows/terraform-pre-commit.yml`
+- `.github/workflows/_pre-commit.yml`
 - `.github/agents/**`
 - `.github/instructions/**`
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
@@ -92,4 +92,7 @@ Completed runs should make these facts visible:
 - validation results and remaining blockers
 
 End completed runs with `✅ Outcome`.
-Include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources` only when those categories were actually used, and state why each listed resource mattered.
+Keep `✅ Outcome` concise by default.
+When additional provenance or execution detail would help, offer it as optional follow-up detail with a compact prompt that accepts number-only replies.
+Include `🤖 Agents`, `📘 Instructions`, `📝 Prompts`, `🧩 Skills`, and `📦 Other Resources` only when those categories were actually used and the user asked for the detail, or when a narrower scoped contract requires inline disclosure.
+State why each listed resource mattered in any included detail section.

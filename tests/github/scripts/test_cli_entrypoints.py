@@ -43,9 +43,11 @@ def write_valid_internal_skill(skill_dir: Path, skill_name: str) -> None:
         skill_dir / "SKILL.md",
         "---\n"
         f"name: {skill_name}\n"
-        "description: Validate repository-owned skill metadata safely.\n"
+        "description: Use when validating repository-owned skill metadata safely.\n"
         "---\n\n"
         f"# {skill_name}\n\n"
+        "## When to use\n"
+        "- Use when validating repository-owned skill metadata safely.\n\n"
         "Use `AGENTS.md` for bridge context.\n",
     )
     write_file(

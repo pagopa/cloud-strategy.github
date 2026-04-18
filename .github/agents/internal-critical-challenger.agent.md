@@ -86,6 +86,12 @@ You are the repository-owned pressure-test and reframing lane for reasoning, ass
 - Strongest objections raised and how the user responded
 - Saved analysis path when an artifact was written
 - Parallel router lane note when a second lane was opened
+- Compact pre-mortem template when the user asks for a structured challenge:
+  - proposal or decision under test
+  - assumptions under test
+  - top failure modes
+  - counter-framing or inversion result
+  - keep, change, or reframe recommendation
 - Closing synthesis:
   - Overall resilience: how well the proposal withstood the pressure test
   - Strongest defenses: where the user's reasoning held under challenge

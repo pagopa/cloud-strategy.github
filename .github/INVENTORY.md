@@ -57,7 +57,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-azure-strategic/SKILL.md`
 - `.github/skills/internal-change-impact-analysis/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
-- `.github/skills/internal-github-actions/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
@@ -66,11 +65,13 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-ddd/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
+- `.github/skills/internal-executing-plans/SKILL.md`
 - `.github/skills/internal-gcp-governance/SKILL.md`
 - `.github/skills/internal-gcp-operations/SKILL.md`
 - `.github/skills/internal-gcp-organization-structure/SKILL.md`
 - `.github/skills/internal-gcp-strategic/SKILL.md`
 - `.github/skills/internal-github-action-composite/SKILL.md`
+- `.github/skills/internal-github-actions/SKILL.md`
 - `.github/skills/internal-github-governance/SKILL.md`
 - `.github/skills/internal-github-operations/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
@@ -87,6 +88,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-spring-boot-development/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
+- `.github/skills/internal-writing-plans/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`
 - `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
 - `.github/skills/obra-executing-plans/SKILL.md`
@@ -109,6 +111,10 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/openai-spreadsheet/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
+
+### Support-only imported office skills
+
+These imported `openai-*` office skills remain support-only depth for repositories that explicitly need document workflows.
 
 ## Agents
 

@@ -24,7 +24,7 @@ description: Use when writing or updating a pull request title or body from a re
 ## Template resolution
 Resolve and use one existing repository template:
 1. `.github/PULL_REQUEST_TEMPLATE.md`
-2. `.github/pull_request_template.md`
+2. the lowercase filename under `.github/` if the repository exposes one
 3. `PULL_REQUEST_TEMPLATE.md`
 4. `pull_request_template.md`
 
@@ -69,6 +69,7 @@ If the user provides a specification, issue, or acceptance outline:
 ## Cross-references
 - **internal-change-impact-analysis** (`.github/skills/internal-change-impact-analysis/SKILL.md`): for change-impact analysis that feeds the risk section.
 - **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for the review that follows the PR.
+- **openai-gh-address-comments** (`.github/skills/openai-gh-address-comments/SKILL.md`): for addressing review threads and PR comments after the PR body exists; keep this skill focused on PR title/body authoring.
 
 ## Validation
 - Every template-defined section heading is present.

@@ -32,6 +32,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - User chat may be Italian.
 - The default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it.
 - Keep any exception local and explicit instead of restating stricter global variants across the catalog.
+- For repository-owned plan artifacts kept under `tmp/superpowers/<clear-action-or-task-name>/`, Italian is the default authoring language unless the user explicitly asks for another language; do not generalize this exception beyond those plan files.
 
 ## Catalog Model
 
@@ -70,6 +71,14 @@ You are an expert software and platform engineer. Protect correctness, security,
 - If a dedicated validator, sync script, or contract test suite does not exist, report the gap and use the closest existing verification instead.
 - Do not add unrequested abstractions, logging, or refactors.
 
+## Superpowers Plan Policy
+
+- For repository-owned planning work, create or reuse a task folder at `tmp/superpowers/<clear-action-or-task-name>/`.
+- Keep execution plans as multiple numbered Markdown files by macro-category, such as `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md`; do not collapse them into one monolithic plan file.
+- Keep doubts, open questions, and user decisions in `dubbi-e-domande.md`. This file stays outside the plan-and-apply loop and must not be treated as an executable plan file.
+- During execution, maintain matching `done-*` files. Move completed items into the corresponding `done-*` file, remove them from the active source file, delete an emptied source plan file, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.
+- Preserve imported `obra-*`, `awesome-*`, `openai-*`, and other upstream assets; express this repository's planning policy through repository-owned internal wrappers instead of editing upstream planning skills.
+
 ## Repository Workflow Reminders
 
 - PR content must follow `.github/PULL_REQUEST_TEMPLATE.md` in exact section order.
@@ -94,7 +103,10 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Completion Report
 
 - End completed operations with `✅ Outcome`.
-- When used, also include `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`.
-- In each included section, state which resources were used and why they were relevant.
-- When `LESSONS_LEARNED.md` was updated, mention it under `📦 Other Resources` with a short reason.
+- Default to a concise `✅ Outcome` instead of dumping every supporting section automatically.
+- If detailed provenance or supporting context would help, offer it as an optional follow-up instead of expanding it by default.
+- The optional follow-up offer should stay compact and allow a number-only reply, for example `1 = resources used`, `2 = files changed`, `3 = validations`, `4 = full detail`.
+- Include `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources` only when the user asks for that detail or when a narrower scoped contract requires the disclosure inline.
+- In each included detail section, state which resources were used and why they were relevant.
+- When `LESSONS_LEARNED.md` was updated and `📦 Other Resources` is shown, mention it there with a short reason.
 - Omit unused categories instead of adding empty or negative sections.
