@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 PLAN_SKILL_PATHS = {
     "internal-writing-plans": ".github/skills/internal-writing-plans/SKILL.md",
     "internal-executing-plans": ".github/skills/internal-executing-plans/SKILL.md",
@@ -19,7 +18,10 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
 
-    assert "The default authoring language for repository artifacts is English" in agents_text
+    assert (
+        "The default authoring language for repository artifacts is English"
+        in agents_text
+    )
     assert PLAN_TASK_PATH in agents_text
     assert "01-contesto-e-vincoli.md" in agents_text
     assert "Italian" in agents_text
@@ -27,7 +29,10 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     assert "done-*" in agents_text
     assert "continue through the remaining numbered plan files" in agents_text
 
-    assert "The default authoring language for repository artifacts is English" in copilot_text
+    assert (
+        "The default authoring language for repository artifacts is English"
+        in copilot_text
+    )
     assert PLAN_TASK_PATH in copilot_text
     assert "01-contesto-e-vincoli.md" in copilot_text
     assert "Italian" in copilot_text
@@ -37,9 +42,7 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
 
 
 def test_internal_planning_leader_prefers_repository_plan_wrappers() -> None:
-    planning_leader_text = read_text(
-        ".github/agents/internal-planning-leader.agent.md"
-    )
+    planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
 
     assert "- `internal-writing-plans`" in planning_leader_text
     assert "- `internal-executing-plans`" in planning_leader_text
@@ -53,8 +56,14 @@ def test_plan_wrapper_skills_are_listed_in_ownership_map_and_inventory() -> None
     )
     inventory_text = read_text(".github/INVENTORY.md")
 
-    assert "| `internal-writing-plans` | `internal-planning-leader` |" in ownership_map_text
-    assert "| `internal-executing-plans` | `internal-planning-leader` |" in ownership_map_text
+    assert (
+        "| `internal-writing-plans` | `internal-planning-leader` |"
+        in ownership_map_text
+    )
+    assert (
+        "| `internal-executing-plans` | `internal-planning-leader` |"
+        in ownership_map_text
+    )
     assert PLAN_TASK_PATH in ownership_map_text
 
     for skill_path in PLAN_SKILL_PATHS.values():
@@ -86,9 +95,7 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
 
 def test_plan_wrapper_skills_ship_openai_metadata() -> None:
     for skill_name in PLAN_SKILL_PATHS:
-        metadata_text = read_text(
-            f".github/skills/{skill_name}/agents/openai.yaml"
-        )
+        metadata_text = read_text(f".github/skills/{skill_name}/agents/openai.yaml")
 
         assert "interface:" in metadata_text
         assert "display_name:" in metadata_text

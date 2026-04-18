@@ -58,7 +58,11 @@ def test_pending_lesson_rows_have_expected_shape_when_present() -> None:
     lines = read_text("LESSONS_LEARNED.md").splitlines()
 
     section_start = lines.index("## Pending Rules") + 1
-    header_index = next(index for index in range(section_start, len(lines)) if lines[index].startswith("|"))
+    header_index = next(
+        index
+        for index in range(section_start, len(lines))
+        if lines[index].startswith("|")
+    )
     data_start = header_index + 2
 
     data_rows: list[list[str]] = []

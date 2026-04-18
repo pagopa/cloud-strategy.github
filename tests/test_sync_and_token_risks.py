@@ -177,7 +177,9 @@ def test_build_sync_plan_accepts_existing_tmp_superpowers_gitignore_entry(
     assert plan.generated_gitignore == "node_modules/\ntmp/superpowers/\n"
 
 
-def test_build_sync_plan_reads_source_and_target_manifest_versions(tmp_path: Path) -> None:
+def test_build_sync_plan_reads_source_and_target_manifest_versions(
+    tmp_path: Path,
+) -> None:
     source_root = tmp_path / "source"
     target_root = tmp_path / "target"
 

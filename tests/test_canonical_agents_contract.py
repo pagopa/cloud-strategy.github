@@ -4,7 +4,6 @@ from pathlib import Path
 
 import yaml
 
-
 CANONICAL_AGENTS = {
     "internal-router": ".github/agents/internal-router.agent.md",
     "internal-fast-executor": ".github/agents/internal-fast-executor.agent.md",
@@ -44,7 +43,9 @@ def test_canonical_agents_keep_required_frontmatter_and_engine_contracts() -> No
         assert "## Output Expectations" in body
 
     router_frontmatter = load_frontmatter(CANONICAL_AGENTS["internal-router"])
-    challenger_frontmatter = load_frontmatter(CANONICAL_AGENTS["internal-critical-challenger"])
+    challenger_frontmatter = load_frontmatter(
+        CANONICAL_AGENTS["internal-critical-challenger"]
+    )
 
     assert set(router_frontmatter.get("agents", [])) == expected_router_agents
     assert challenger_frontmatter.get("agents") == ["internal-router"]
