@@ -30,24 +30,24 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 ## Language Projection
 
-- User chat may be Italian.
-- The default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it.
+- Match the user's chat language when practical; Italian is allowed in conversation.
+- Write repository artifacts in English by default unless a narrower scoped instruction says otherwise.
 - Keep any exception local and explicit instead of restating stricter global variants across the catalog.
 - For repository-owned plan artifacts kept under `tmp/superpowers/<clear-action-or-task-name>/`, Italian is the default authoring language unless the user explicitly asks for another language; do not generalize this exception beyond those plan files.
 
 ## Catalog Model
 
 - Prefixes encode origin and ownership first, not a rigid abstraction level.
-- Evaluate resources on two axes: origin/ownership and dominant role.
+- Judge resources by both origin/ownership and dominant role rather than collapsing them into one label.
 - `obra-*` skills are the cross-cutting workflow lane. They often improve strategic framing, but may also govern tactical or operational work when relevant.
 - `internal-*` skills are the canonical repository-owned layer. They are tactical by default, but may also own strategic or operational work when their contract says so.
 - Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
 - `local-*` assets are consumer-local extensions. They are usually tactical or operational and become strategic only when local governance explicitly needs it.
 - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the canonical repository-owned operational agents.
-- The canonical operational model uses direct entry instead of a repository-owned front-door router.
+- Use direct entry for canonical operational lanes and do not invent a repository-owned front-door router.
 - `internal-planning-leader` is the safe fallback when the right operational lane is still ambiguous.
 - Canonical owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
-- Any future automation between canonical owners must be explicit, narrow, one-directional, and must not create all-to-all dispatch or nested ping-pong.
+- Any automation added between canonical owners must stay explicit, narrow, and one-directional, with no all-to-all dispatch or nested ping-pong.
 - `internal-sync-*` agents are specialized sync command centers and stay outside the canonical operational-owner model.
 
 ## Non-Negotiables
