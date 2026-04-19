@@ -529,5 +529,11 @@ def test_sync_contract_requires_target_local_validation_after_apply() -> None:
         ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
-    assert "run the closest target-local catalog or contract validation" in sync_contract_text
-    assert "Treat any resulting fixes as consumer-local follow-up work" in sync_contract_text
+    assert (
+        "run the closest target-local catalog or contract validation"
+        in sync_contract_text
+    )
+    assert (
+        "Treat any resulting fixes as consumer-local follow-up work"
+        in sync_contract_text
+    )

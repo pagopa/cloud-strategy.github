@@ -76,10 +76,18 @@ def test_obra_workflows_do_not_claim_deterministic_textual_governance_maintenanc
 
 
 def test_agent_authoring_docs_preserve_subagent_inherited_defaults_note() -> None:
-    agent_development_text = read_text(".github/skills/internal-agent-development/SKILL.md")
+    agent_development_text = read_text(
+        ".github/skills/internal-agent-development/SKILL.md"
+    )
     subagent_patterns_text = read_text(
         ".github/skills/internal-agent-development/references/subagent-patterns.md"
     )
 
-    assert "subagents inherit the main session agent, model, and tools" in agent_development_text
-    assert "a subagent inherits the main session agent, model, and tools" in subagent_patterns_text
+    assert (
+        "subagents inherit the main session agent, model, and tools"
+        in agent_development_text
+    )
+    assert (
+        "a subagent inherits the main session agent, model, and tools"
+        in subagent_patterns_text
+    )

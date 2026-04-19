@@ -2,8 +2,8 @@
 #
 # Purpose: Run the GitHub catalog validation workflow simulation.
 # Usage examples:
-#   ./.github/scripts/github_catalog_validation.sh
-#   ./.github/scripts/github_catalog_validation.sh --skip-token-risks
+#   bash ./.github/scripts/github_catalog_validation.sh
+#   bash ./.github/scripts/github_catalog_validation.sh --skip-token-risks
 
 set -Eeuo pipefail
 

@@ -46,9 +46,7 @@ def test_repo_only_sync_agents_keep_their_named_operating_engines() -> None:
     )
 
     assert "- `internal-agent-sync-control-center`" in sync_control_center
-    assert (
-        "- `internal-agent-sync-global-copilot-configs-into-repo`" in sync_global
-    )
+    assert "- `internal-agent-sync-global-copilot-configs-into-repo`" in sync_global
 
 
 def test_direct_entry_model_keeps_removed_router_assets_out_of_live_catalog() -> None:

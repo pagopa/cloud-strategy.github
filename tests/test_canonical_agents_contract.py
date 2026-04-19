@@ -48,4 +48,3 @@ def test_canonical_agents_keep_expected_engine_skill_assignments() -> None:
         body = read_body(CANONICAL_AGENTS[agent_name])
         assert "- `internal-agent-cross-lane-engine`" in body
         assert "- `internal-agent-boundary-recommendation-engine`" in body
-

@@ -3,7 +3,7 @@
 This directory is the source-side catalog for reusable GitHub Copilot customization assets maintained in `cloud-strategy.github`.
 
 - `.github/copilot-instructions.md` is the primary detailed policy layer.
-- Root [`AGENTS.md`](../AGENTS.md) is the strategic entrypoint, precedence anchor, and bridge for routing, naming, discovery, and the pointer to exact path inventory.
+- Root [`AGENTS.md`](../AGENTS.md) is the strategic entrypoint, precedence anchor, and bridge for operational ownership, naming, discovery, and the pointer to exact path inventory.
 - [`INVENTORY.md`](INVENTORY.md) is the exact path inventory for the live catalog.
 - This README is an orientation guide for maintainers of the source catalog. It should describe the live on-disk catalog only.
 
@@ -21,7 +21,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 
 | Path | Purpose |
 | --- | --- |
-| `copilot-instructions.md` | Primary detailed policy, validation baseline, routing model, and completion-report contract. |
+| `copilot-instructions.md` | Primary detailed policy, validation baseline, direct-entry operating model, and completion-report contract. |
 | `INVENTORY.md` | Exact path inventory for live instructions, skills, and agents. |
 | `copilot-code-review-instructions.md` | Review-specific severity and defect-first guidance. |
 | `copilot-commit-message-instructions.md` | Commit message conventions. |
@@ -45,7 +45,7 @@ Use instructions as automatic file-path guidance. Do not restate path-driven beh
 
 Skills are grouped into three functional lanes plus imported support families.
 
-- `internal-*`: repository-owned governance, routing, review, execution, project, sync, platform, and provider skill families for AWS, Azure, GCP, and GitHub
+- `internal-*`: repository-owned governance, ownership, review, execution, project, sync, platform, and provider skill families for AWS, Azure, GCP, and GitHub
 - `obra-*`: strategic workflow support for brainstorming, planning, debugging, verification, worktree usage, and skill authoring
 - Imported support families:
   - `awesome-copilot-*`
@@ -66,12 +66,11 @@ Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGEN
 
 See [`agents/README.md`](agents/README.md) for the selection guide.
 
-- Canonical repository-owned operational agents: `internal-router`, `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-master`
+- Canonical repository-owned operational agents: `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-master`
 - Repository-owned source-side sync and governance agents: `internal-sync-control-center`, `internal-sync-global-copilot-configs-into-repo`
 - No imported support agents currently ship in the live catalog.
 
-The current repository-owned operating model is the internal router plus the four canonical internal owners. Do not document retired operational routes here.
-Only `internal-router` actively routes between canonical owners; the four canonical owners stay boundary-driven and user-directed.
+The current repository-owned operating model uses direct entry to the four canonical internal owners. When the right owner is unclear, default to `internal-planning-leader`. Do not document retired operational routes here.
 
 ### Scripts and workflow
 

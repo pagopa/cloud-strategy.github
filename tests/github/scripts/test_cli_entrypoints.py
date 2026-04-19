@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 import audit_copilot_catalog
 import build_inventory
@@ -117,7 +117,9 @@ def test_github_catalog_validation_main_runs_required_targets_then_token_risks(
         "catalog-check",
         "token-risks",
     ]
-    assert "continuing to match .github/workflows/_github-catalog-validation.yml" in output
+    assert (
+        "continuing to match .github/workflows/_github-catalog-validation.yml" in output
+    )
 
 
 def test_github_catalog_validation_main_honors_token_risks_only(
