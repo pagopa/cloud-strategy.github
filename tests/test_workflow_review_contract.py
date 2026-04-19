@@ -93,9 +93,12 @@ def test_agent_authoring_docs_preserve_subagent_inherited_defaults_note() -> Non
     )
 
 
-def test_repo_owned_agent_and_skill_authoring_guardrails_stay_explicit() -> None:
-    instruction_text = read_text(
-        ".github/instructions/internal-copilot-agent-skill-authoring.instructions.md"
+def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> None:
+    agent_instruction_text = read_text(
+        ".github/instructions/internal-copilot-agent-authoring.instructions.md"
+    )
+    reference_instruction_text = read_text(
+        ".github/instructions/internal-copilot-skill-reference-authoring.instructions.md"
     )
     agent_development_text = read_text(
         ".github/skills/internal-agent-development/SKILL.md"
@@ -110,13 +113,24 @@ def test_repo_owned_agent_and_skill_authoring_guardrails_stay_explicit() -> None
         ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
     )
 
-    assert ".github/agents/*.agent.md,.github/skills/**/SKILL.md" in instruction_text
+    assert not Path(
+        ".github/instructions/internal-copilot-agent-skill-authoring.instructions.md"
+    ).exists()
     assert (
-        "Do not duplicate the same operational subtopic inventory across an agent, "
-        "its paired skill, and supporting references."
-        in instruction_text
+        'applyTo: ".github/agents/internal-*.agent.md,.github/agents/local-*.agent.md"'
+        in agent_instruction_text
     )
-    assert "Treat `## Preferred/Optional Skills` as legacy" in instruction_text
+    assert (
+        'applyTo: ".github/skills/internal-*/references/**/*.md,.github/skills/local-*/references/**/*.md"'
+        in reference_instruction_text
+    )
+    assert ".github/skills/**/SKILL.md" not in agent_instruction_text
+    assert ".github/skills/**/SKILL.md" not in reference_instruction_text
+    assert "Treat `## Preferred/Optional Skills` as legacy" in agent_instruction_text
+    assert (
+        "Use references as the deep owner for reusable tables, templates, and detailed checklists."
+        in reference_instruction_text
+    )
     assert (
         "When a paired skill or reference is the detailed contract owner"
         in agent_development_text

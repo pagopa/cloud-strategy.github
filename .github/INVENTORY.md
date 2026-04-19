@@ -9,7 +9,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
 - `.github/instructions/awesome-copilot-shell.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
-- `.github/instructions/internal-copilot-agent-skill-authoring.instructions.md`
+- `.github/instructions/internal-copilot-agent-authoring.instructions.md`
+- `.github/instructions/internal-copilot-skill-reference-authoring.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
 - `.github/instructions/internal-github-action-composite.instructions.md`
 - `.github/instructions/internal-github-actions.instructions.md`
