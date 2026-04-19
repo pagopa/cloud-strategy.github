@@ -28,7 +28,7 @@ Treat `LESSONS_LEARNED.md` as a structure-managed exception: sync the source tem
 ## Target Rules
 
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
-- Materialize `.github/local-github-instructions-overrides.md.template` from the standards repository into the consumer-local GitHub instructions overrides file when that target file is missing, then preserve the target file as a consumer-owned local exception layer and surface it in the plan or final report when present.
+- Materialize `.github/copilot-instructions.override.md.template` from the standards repository into the consumer-local copilot instructions override file when that target file is missing, then preserve the target file as a consumer-owned local exception layer and surface it in the plan or final report when present.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
 - Ensure target root `LESSONS_LEARNED.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
