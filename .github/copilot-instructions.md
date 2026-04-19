@@ -31,7 +31,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Language Projection
 
 - Match the user's chat language when practical; Italian is allowed in conversation.
-- Write repository artifacts in English by default unless a narrower scoped instruction says otherwise.
+- The default authoring language for repository artifacts is English; a narrower scoped instruction may override it for its local scope.
 - Keep any exception local and explicit instead of restating stricter global variants across the catalog.
 - For repository-owned plan artifacts kept under `tmp/superpowers/<clear-action-or-task-name>/`, Italian is the default authoring language unless the user explicitly asks for another language; do not generalize this exception beyond those plan files.
 
