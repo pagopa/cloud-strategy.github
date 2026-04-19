@@ -106,9 +106,7 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
     agent_contract_text = read_text(
         ".github/skills/internal-agent-development/references/agent-contract.md"
     )
-    skill_creator_text = read_text(
-        ".github/skills/internal-skill-creator/SKILL.md"
-    )
+    skill_creator_text = read_text(".github/skills/internal-skill-creator/SKILL.md")
     writing_skills_text = read_text(
         ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
     )
