@@ -7,7 +7,7 @@ description: Use when one of the four canonical operational agents needs the sha
 
 Use this skill as the shared engine for the four canonical operational agents in the direct-entry operational model.
 
-This skill is intentionally shared. It owns the reusable rules that would otherwise drift across `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger`. It is not a copy of the agents.
+This skill is intentionally shared. It owns the reusable rules that would otherwise drift across `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master`. It is not a copy of the agents.
 
 ## When to use
 
@@ -29,14 +29,14 @@ Implications:
 
 | Canonical owner | Owns | Does not own |
 | --- | --- | --- |
-| `internal-fast-executor` | Clear, local execution and deterministic repository-owned maintenance or realignment with concrete verification and limited risk | Strategic tradeoffs, ambiguous scope, non-trivial repository-owned authoring, review-first asks, or critical challenge |
+| `internal-delivery-operator` | Clear, local execution and deterministic repository-owned maintenance or realignment with concrete verification and limited risk | Strategic tradeoffs, ambiguous scope, non-trivial repository-owned authoring, review-first asks, or critical challenge |
 | `internal-planning-leader` | Ambiguity resolution, decision records, plans, non-trivial repository-owned authoring, and rollout or governance decisions that remain open | Default local execution once the design is settled, deterministic maintenance whose target state is already known, defect-first review, or pure challenge |
 | `internal-review-guard` | Review, validation, merge readiness, regression risk, evidence gaps, and defect-first findings | Implementation, initial design ownership, or open-ended strategic challenge |
-| `internal-critical-challenger` | Pre-mortems, assumption stress tests, alternative framings, failure modes, and strong objections | Implementation, routine technical review, or final operational planning |
+| `internal-critical-master` | Pre-mortems, assumption stress tests, alternative framings, failure modes, and strong objections | Implementation, routine technical review, or final operational planning |
 
 ## Medium-Task Thresholds
 
-`internal-fast-executor` stays owner only when all of these are true:
+`internal-delivery-operator` stays owner only when all of these are true:
 
 - The outcome is already clear and concrete verification exists.
 - The work is deterministic implementation or repository-owned maintenance or realignment with no non-trivial strategy tradeoff.
@@ -45,7 +45,7 @@ Implications:
 
 File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
 
-A clear realignment across more than two adjacent `.github/` assets can stay with `internal-fast-executor` when the target state is already known and validation is concrete.
+A clear realignment across more than two adjacent `.github/` assets can stay with `internal-delivery-operator` when the target state is already known and validation is concrete.
 
 `internal-planning-leader` becomes owner when at least one of these is true:
 
@@ -87,8 +87,8 @@ Load `references/ownership-maps.md` when you need:
 - If a narrower scoped contract ever allows one canonical owner to invoke another, the exception must be explicit, one-directional, auditably bounded, and must not create ping-pong or hidden route selection.
 - `internal-planning-leader` absorbs the role previously covered by `internal-ai-resource-creator` when the work is non-trivial repository-owned authoring.
 - `internal-review-guard` must reuse `internal-code-review` instead of restating the review playbook in the agent body.
-- `internal-fast-executor` should stay light and load runtime or domain skills only when the task already belongs to execution.
-- `internal-critical-challenger` should stay narrow: challenge the reasoning, reframe hidden constraints when useful, synthesize the pressure test, and tell the user when planning should resume.
+- `internal-delivery-operator` should stay light and load runtime or domain skills only when the task already belongs to execution.
+- `internal-critical-master` should stay narrow: challenge the reasoning, reframe hidden constraints when useful, synthesize the pressure test, and tell the user when planning should resume.
 - `internal-sync-*` and `awesome-*` assets stay outside this canonical operational model.
 
 ## Anti-Overlap Checklist
@@ -109,9 +109,9 @@ If any answer points to overlap, narrow the agent or move the shared logic into 
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Letting `internal-fast-executor` keep medium tasks by momentum | Execution becomes accidental planning | Tell the user the boundary broke and recommend `internal-planning-leader` on the first medium-task threshold hit |
+| Letting `internal-delivery-operator` keep medium tasks by momentum | Execution becomes accidental planning | Tell the user the boundary broke and recommend `internal-planning-leader` on the first medium-task threshold hit |
 | Treating file count or adjacent boundary crossing as automatic planning triggers | Deterministic realignments get over-routed into planning | Check for real ambiguity, tradeoffs, or ownership change before leaving execution |
-| Letting `internal-planning-leader` execute by default | The planner becomes a catch-all generalist | Tell the user when the design is settled and recommend `internal-fast-executor` |
+| Letting `internal-planning-leader` execute by default | The planner becomes a catch-all generalist | Tell the user when the design is settled and recommend `internal-delivery-operator` |
 | Rewriting the review playbook inside `internal-review-guard` | Review logic drifts from the tactical skill | Reuse `internal-code-review` as the mandatory tactical engine |
 | Treating challenge as generic negativity | The agent stops producing useful decision pressure | Keep one challenge thread, then synthesize clear failure modes |
 | Creating one dedicated engine skill per agent for symmetry | The catalog grows without adding real structure | Use shared engines or existing skills unless a real gap exists |

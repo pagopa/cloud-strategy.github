@@ -52,7 +52,7 @@ def test_internal_planning_leader_prefers_repository_plan_wrappers() -> None:
 
 def test_plan_wrapper_skills_are_listed_in_ownership_map_and_inventory() -> None:
     ownership_map_text = read_text(
-        ".github/skills/internal-agent-operating-model-engine/references/ownership-maps.md"
+        ".github/skills/internal-agent-cross-lane-engine/references/ownership-maps.md"
     )
     inventory_text = read_text(".github/INVENTORY.md")
 

@@ -29,7 +29,7 @@ catalog-lint: python-version-check
 	$(PYTHON) -m compileall $(PYTHON_PATHS)
 
 catalog-validation: python-version-check
-	@./.github/scripts/catalog_validation.sh
+	@./.github/scripts/github_catalog_validation.sh
 
 test: scripts-bootstrap
 	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q

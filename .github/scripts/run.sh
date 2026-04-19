@@ -32,6 +32,7 @@ Usage:
   ./.github/scripts/run.sh <tool> [tool-args...]
 
 Tools:
+    github_catalog_validation
   build_inventory
   check_catalog_consistency
   audit_copilot_catalog
@@ -111,6 +112,9 @@ verify_venv_version() {
 resolve_script() {
     local tool_name="$1"
     case "$tool_name" in
+        github_catalog_validation|github_catalog_validation.py)
+            printf '%s\n' "$SCRIPT_DIR/github_catalog_validation.py"
+            ;;
         build_inventory|build_inventory.py)
             printf '%s\n' "$SCRIPT_DIR/build_inventory.py"
             ;;

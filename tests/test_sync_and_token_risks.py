@@ -522,3 +522,12 @@ def test_detect_token_risks_reports_paired_agent_skill_overlap(tmp_path: Path) -
     finding_codes = {finding.code for finding in findings}
 
     assert "paired-agent-skill-overlap" in finding_codes
+
+
+def test_sync_contract_requires_target_local_validation_after_apply() -> None:
+    sync_contract_text = Path(
+        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+    ).read_text(encoding="utf-8")
+
+    assert "run the closest target-local catalog or contract validation" in sync_contract_text
+    assert "Treat any resulting fixes as consumer-local follow-up work" in sync_contract_text

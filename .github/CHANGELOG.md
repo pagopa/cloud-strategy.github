@@ -6,6 +6,11 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-19
+- Renamed the canonical execution and challenge agents from `.github/agents/internal-fast-executor.agent.md` and `.github/agents/internal-critical-challenger.agent.md` to `.github/agents/internal-delivery-operator.agent.md` and `.github/agents/internal-critical-master.agent.md`, then realigned the live operational contracts, prompt references, shared boundary skills, and tests to the new canonical names.
+- Renamed `.github/workflows/catalog-validation.yml` to `.github/workflows/_github-catalog-validation.yml`, replaced the old Bash-only `catalog_validation` entrypoint with the new `.github/scripts/github_catalog_validation.py` plus matching Bash wrappers, and realigned `Makefile`, script coverage tests, and security-baseline references to the new workflow and script names.
+- Codified the pending retained-learning lessons into `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md`, `.github/skills/internal-agent-development/SKILL.md`, and `.github/skills/internal-agent-development/references/subagent-patterns.md`, added contract tests for the new guidance, and cleared the now-codified rows from `LESSONS_LEARNED.md`.
+
 ## 2026-04-18
 - Centralized lane-mismatch handling into the new repository-owned skill `.github/skills/internal-agent-boundary-recommendation-engine/`, realigned the four canonical operational agents plus the two sync command centers to stop and recommend the right owner through one shared protocol, removed the unused `agent` tool from the sync agents, and retired the orphaned `internal-agent-routing-engine` bundle from the live catalog.
 - Removed `internal-router` and the paired `internal-agent-routing-engine` from the live canonical operational model, left the four direct owners as the only canonical lanes, defaulted ambiguous entry to `internal-planning-leader`, platform-enforced no hidden peer dispatch by setting the canonical owners to `disable-model-invocation: true`, and realigned the active contracts, references, and tests away from router-centric dispatch.

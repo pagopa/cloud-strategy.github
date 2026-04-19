@@ -10,15 +10,17 @@ def read_text(relative_path: str) -> str:
 def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execution() -> (
     None
 ):
-    fast_executor_text = read_text(".github/agents/internal-fast-executor.agent.md")
+    delivery_operator_text = read_text(
+        ".github/agents/internal-delivery-operator.agent.md"
+    )
     planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
     operating_model_text = read_text(
-        ".github/skills/internal-agent-operating-model-engine/SKILL.md"
+        ".github/skills/internal-agent-cross-lane-engine/SKILL.md"
     )
 
     assert (
         "deterministic realignment across adjacent repository-owned assets"
-        in fast_executor_text
+        in delivery_operator_text
     )
     assert (
         "Boundary crossing alone does not make the task planning-owned."
@@ -71,3 +73,13 @@ def test_obra_workflows_do_not_claim_deterministic_textual_governance_maintenanc
         "Do not treat this workflow as the default for prompt, skill, agent, instruction, or Markdown authoring"
         in tdd_text
     )
+
+
+def test_agent_authoring_docs_preserve_subagent_inherited_defaults_note() -> None:
+    agent_development_text = read_text(".github/skills/internal-agent-development/SKILL.md")
+    subagent_patterns_text = read_text(
+        ".github/skills/internal-agent-development/references/subagent-patterns.md"
+    )
+
+    assert "subagents inherit the main session agent, model, and tools" in agent_development_text
+    assert "a subagent inherits the main session agent, model, and tools" in subagent_patterns_text

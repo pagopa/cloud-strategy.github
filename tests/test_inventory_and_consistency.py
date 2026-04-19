@@ -14,8 +14,8 @@ def write_file(path: Path, content: str) -> None:
 def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None:
     write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
     write_file(
-        tmp_path / ".github/agents/internal-fast-executor.agent.md",
-        "---\nname: internal-fast-executor\ntools: [read]\n---\n",
+        tmp_path / ".github/agents/internal-delivery-operator.agent.md",
+        "---\nname: internal-delivery-operator\ntools: [read]\n---\n",
     )
     write_file(
         tmp_path / ".github/instructions/internal-python.instructions.md",
@@ -31,7 +31,7 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
     assert "## Instructions" in inventory
     assert "- `.github/instructions/internal-python.instructions.md`" in inventory
     assert "- `.github/skills/internal-catalog/SKILL.md`" in inventory
-    assert "- `.github/agents/internal-fast-executor.agent.md`" in inventory
+    assert "- `.github/agents/internal-delivery-operator.agent.md`" in inventory
 
 
 def test_run_consistency_checks_flags_inventory_drift_and_missing_tools(

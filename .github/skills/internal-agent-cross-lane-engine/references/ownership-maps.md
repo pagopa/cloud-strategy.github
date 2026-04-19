@@ -17,7 +17,7 @@ The canonical operational model uses direct owner selection. When the winning ow
 | `internal-change-impact-analysis` | `internal-planning-leader` | Change-impact and architecture-risk analysis |
 | `internal-writing-plans` | `internal-planning-leader` | Repository-owned execution-plan authoring under `tmp/superpowers/<clear-action-or-task-name>/` with local structure, path, and language rules |
 | `internal-executing-plans` | `internal-planning-leader` | Repository-owned plan application with `done-*` tracking, sequential continuation, and blocker stops |
-| `internal-terraform`, `internal-github-actions`, and runtime-specific internal skills | `internal-fast-executor` for local execution, `internal-planning-leader` when design or rollout dominates | Tactical delivery versus strategy split |
+| `internal-terraform`, `internal-github-actions`, and runtime-specific internal skills | `internal-delivery-operator` for local execution, `internal-planning-leader` when design or rollout dominates | Tactical delivery versus strategy split |
 | `obra-*` workflows | Cross-agent support | Mandatory when relevant, absent when irrelevant |
 
 ## Retired To Canonical Ownership Mapping
@@ -26,9 +26,9 @@ The canonical operational model uses direct owner selection. When the winning ow
 | --- | --- |
 | `internal-ai-resource-creator` | `internal-planning-leader` |
 | `internal-architect` | `internal-planning-leader` |
-| `internal-developer` | `internal-fast-executor` |
-| `internal-infrastructure` | `internal-fast-executor` or `internal-planning-leader` when design or rollout dominates |
-| `internal-cicd` | `internal-fast-executor` or `internal-planning-leader` when orchestration or tradeoffs dominate |
+| `internal-developer` | `internal-delivery-operator` |
+| `internal-infrastructure` | `internal-delivery-operator` or `internal-planning-leader` when design or rollout dominates |
+| `internal-cicd` | `internal-delivery-operator` or `internal-planning-leader` when orchestration or tradeoffs dominate |
 | `internal-code-review` | `internal-review-guard` |
-| `internal-quality-engineering` | `internal-review-guard` for validation and risk, `internal-fast-executor` for a clear fix |
-| `internal-aws-*`, `internal-azure-*`, `internal-gcp-*` | `internal-planning-leader` for strategy or design, `internal-fast-executor` for clear local execution |
+| `internal-quality-engineering` | `internal-review-guard` for validation and risk, `internal-delivery-operator` for a clear fix |
+| `internal-aws-*`, `internal-azure-*`, `internal-gcp-*` | `internal-planning-leader` for strategy or design, `internal-delivery-operator` for clear local execution |

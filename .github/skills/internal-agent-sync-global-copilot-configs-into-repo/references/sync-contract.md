@@ -79,6 +79,8 @@ Use the closest existing checks for the touched behavior:
 
 If a dedicated contract test is missing, call out the gap explicitly.
 
+After `apply`, run the closest target-local catalog or contract validation when preserved `local-*` assets, preserved consumer-local GitHub instructions overrides, or other target-owned assets can still expose latent drift. Treat any resulting fixes as consumer-local follow-up work, not as source-baseline drift, unless the same finding reproduces against the source-managed assets themselves.
+
 ## Reporting Contract
 
 Completed runs should make these facts visible:

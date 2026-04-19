@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from types import SimpleNamespace
 from pathlib import Path
 
 import audit_copilot_catalog
 import build_inventory
 import check_catalog_consistency
 import detect_token_risks
+import github_catalog_validation
 import sync_copilot_catalog
 import validate_internal_skills
 
@@ -76,6 +78,75 @@ def test_build_inventory_main_rebuilds_inventory_file(
         encoding="utf-8"
     ) == build_inventory.build_inventory_markdown(tmp_path)
     assert "Inventory rebuilt successfully." in capsys.readouterr().out
+
+
+def test_github_catalog_validation_main_runs_required_targets_then_token_risks(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    called_targets: list[str] = []
+
+    def fake_run(command: list[str], cwd: Path, check: bool) -> SimpleNamespace:
+        assert check is False
+        assert Path(cwd) == tmp_path
+        assert command[0] == "make"
+        called_targets.append(command[1])
+        if command[1] == "token-risks":
+            return SimpleNamespace(returncode=1)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(
+        github_catalog_validation,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            skip_token_risks=False,
+            token_risks_only=False,
+        ),
+    )
+    monkeypatch.setattr(github_catalog_validation.subprocess, "run", fake_run)
+
+    exit_code = github_catalog_validation.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert called_targets == [
+        "catalog-lint",
+        "test",
+        "skill-lint",
+        "catalog-check",
+        "token-risks",
+    ]
+    assert "continuing to match .github/workflows/_github-catalog-validation.yml" in output
+
+
+def test_github_catalog_validation_main_honors_token_risks_only(
+    monkeypatch, tmp_path: Path
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    called_targets: list[str] = []
+
+    def fake_run(command: list[str], cwd: Path, check: bool) -> SimpleNamespace:
+        assert check is False
+        assert Path(cwd) == tmp_path
+        called_targets.append(command[1])
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(
+        github_catalog_validation,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            skip_token_risks=False,
+            token_risks_only=True,
+        ),
+    )
+    monkeypatch.setattr(github_catalog_validation.subprocess, "run", fake_run)
+
+    exit_code = github_catalog_validation.main()
+
+    assert exit_code == 0
+    assert called_targets == ["token-risks"]
 
 
 def test_build_inventory_main_check_detects_inventory_drift(

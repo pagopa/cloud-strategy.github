@@ -43,7 +43,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - `internal-*` skills are the canonical repository-owned layer. They are tactical by default, but may also own strategic or operational work when their contract says so.
 - Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
 - `local-*` assets are consumer-local extensions. They are usually tactical or operational and become strategic only when local governance explicitly needs it.
-- `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` are the canonical repository-owned operational agents.
+- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the canonical repository-owned operational agents.
 - The canonical operational model uses direct entry instead of a repository-owned front-door router.
 - `internal-planning-leader` is the safe fallback when the right operational lane is still ambiguous.
 - Canonical owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.

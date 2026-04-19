@@ -179,7 +179,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - canonical operational agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` remain the canonical repository-owned operational agents
+  - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the canonical repository-owned operational agents
   - the default operational model uses direct owner selection instead of a repository-owned front-door router
   - ambiguous or mixed-shape entry fails safe to `internal-planning-leader`
   - canonical owners define boundaries and recommendations instead of active delegation

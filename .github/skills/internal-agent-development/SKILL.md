@@ -212,7 +212,8 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - Starting from the selected agent file alone and skipping the directly relevant optional support or preferred skills that define how that agent should be applied.
 - Treating preferred or optional skills as a fake platform-enforced toolchain or as an origin-based priority ladder.
 - Treating optional support skills as if they were the required engine.
-- Creating a dedicated mirror skill for `internal-fast-executor` or `internal-critical-challenger` when the shared operating-model engine already carries the reusable logic.
+- Creating a dedicated mirror skill for `internal-delivery-operator` or `internal-critical-master` when the shared operating-model engine already carries the reusable logic.
+- Assuming VS Code subagent context isolation means the child loses all inherited defaults; by default, subagents inherit the main session agent, model, and tools, and a custom agent used as a subagent overrides those defaults with its own configuration.
 - Preserving the route but throwing away the upstream agent's best structure, leaving a compliant internal agent that is harder to use and less decisive.
 - Treating `tools:` or `model:` as deprecated in current GitHub Copilot custom agents.
 - Copying multi-screen tool lists from older examples instead of normalizing them to canonical aliases and an explicit minimal contract.

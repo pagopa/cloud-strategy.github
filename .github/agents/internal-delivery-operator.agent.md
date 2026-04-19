@@ -1,12 +1,12 @@
 ---
-name: internal-fast-executor
+name: internal-delivery-operator
 description: Use this agent when the request is clear, local, and execution-oriented, the verification path is concrete, and the work does not require non-trivial strategic tradeoffs or routing decisions.
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
 agents: []
 ---
 
-# Internal Fast Executor
+# Internal Delivery Operator
 
 ## Role
 

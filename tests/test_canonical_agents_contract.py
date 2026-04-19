@@ -5,10 +5,10 @@ from pathlib import Path
 import yaml
 
 CANONICAL_AGENTS = {
-    "internal-fast-executor": ".github/agents/internal-fast-executor.agent.md",
+    "internal-delivery-operator": ".github/agents/internal-delivery-operator.agent.md",
     "internal-planning-leader": ".github/agents/internal-planning-leader.agent.md",
     "internal-review-guard": ".github/agents/internal-review-guard.agent.md",
-    "internal-critical-challenger": ".github/agents/internal-critical-challenger.agent.md",
+    "internal-critical-master": ".github/agents/internal-critical-master.agent.md",
 }
 
 
@@ -40,12 +40,12 @@ def test_canonical_agents_keep_required_frontmatter_and_engine_contracts() -> No
 
 def test_canonical_agents_keep_expected_engine_skill_assignments() -> None:
     for agent_name in (
-        "internal-fast-executor",
+        "internal-delivery-operator",
         "internal-planning-leader",
         "internal-review-guard",
-        "internal-critical-challenger",
+        "internal-critical-master",
     ):
         body = read_body(CANONICAL_AGENTS[agent_name])
-        assert "- `internal-agent-operating-model-engine`" in body
+        assert "- `internal-agent-cross-lane-engine`" in body
         assert "- `internal-agent-boundary-recommendation-engine`" in body
 

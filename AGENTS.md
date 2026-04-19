@@ -50,7 +50,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Operational Owner Model
 
-- `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` remain the canonical repository-owned operational agents.
+- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the canonical repository-owned operational agents.
 - The canonical operational model uses direct entry instead of a repository-owned front-door router.
 - When the right lane is unclear, prefer `internal-planning-leader` as the safe fallback.
 - Canonical owners remain recommendation-only when their boundary breaks and are not subagent-invoked by default.

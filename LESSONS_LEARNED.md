@@ -22,5 +22,5 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
-| 2026-04-18 | Consumer baseline sync can expose latent drift in preserved `local-*` assets without modifying them; after `apply`, run target-local catalog or contract validation and treat any follow-up fixes as consumer-local work, not source-baseline drift. | pending | `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md` |
-| 2026-04-18 | When evaluating VS Code custom-agent orchestration, distinguish subagent context isolation from total loss of inherited defaults: the docs allow custom-agent subagents to override defaults inherited from the main session, so platform critiques should not claim that subagents categorically inherit nothing from the parent. | pending | `.github/skills/internal-agent-development/SKILL.md` |
+
+No pending lessons currently.

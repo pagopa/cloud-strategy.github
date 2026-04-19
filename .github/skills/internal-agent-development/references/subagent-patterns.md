@@ -17,6 +17,7 @@ Key rules:
 - If `agents:` is present, `agent` must be in the `tools:` list.
 - `handoffs` and `argument-hint` are VS Code only; GitHub.com ignores them.
 - `infer:` is retired. Use `user-invocable` and `disable-model-invocation` instead.
+- Context isolation does not mean a subagent starts from zero configuration. By default, a subagent inherits the main session agent, model, and tools; when the subagent is a custom agent, its own configuration overrides those inherited defaults.
 
 ## Coordinator and Worker Pattern
 
@@ -72,7 +73,7 @@ Focused instructions for domain A work.
 ### Router with explicit dispatch targets
 
 ```yaml
-agents: ['internal-fast-executor', 'internal-planning-leader', 'internal-review-guard', 'internal-critical-challenger']
+agents: ['internal-delivery-operator', 'internal-planning-leader', 'internal-review-guard', 'internal-critical-master']
 ```
 
 Only these four agents can be invoked as subagents. The platform enforces this.
@@ -116,7 +117,7 @@ Handoffs create guided sequential workflows with user-visible buttons between ag
 ```yaml
 handoffs:
   - label: Start Implementation
-    agent: internal-fast-executor
+    agent: internal-delivery-operator
     prompt: Implement the plan outlined above.
     send: false
 ```

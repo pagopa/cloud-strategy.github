@@ -33,28 +33,28 @@ Use this skill as the shared lane-mismatch engine for repository-owned internal 
 
 | Current agent | When the boundary breaks | Recommend |
 | --- | --- | --- |
-| `internal-fast-executor` | Ambiguity, governance, or non-trivial authoring dominates | `internal-planning-leader` |
-| `internal-fast-executor` | Review, regression, or validation becomes the main need | `internal-review-guard` |
-| `internal-fast-executor` | Assumption stress-testing becomes the main need | `internal-critical-challenger` |
-| `internal-planning-leader` | The next step is clear local execution with concrete verification | `internal-fast-executor` |
+| `internal-delivery-operator` | Ambiguity, governance, or non-trivial authoring dominates | `internal-planning-leader` |
+| `internal-delivery-operator` | Review, regression, or validation becomes the main need | `internal-review-guard` |
+| `internal-delivery-operator` | Assumption stress-testing becomes the main need | `internal-critical-master` |
+| `internal-planning-leader` | The next step is clear local execution with concrete verification | `internal-delivery-operator` |
 | `internal-planning-leader` | Defect-first validation or merge readiness is now the main need | `internal-review-guard` |
-| `internal-planning-leader` | The plan must be pressure-tested before action | `internal-critical-challenger` |
+| `internal-planning-leader` | The plan must be pressure-tested before action | `internal-critical-master` |
 | `internal-review-guard` | Findings show missing design, routing, or plan ownership | `internal-planning-leader` |
-| `internal-review-guard` | Weak reasoning needs a pressure test more than a technical review | `internal-critical-challenger` |
-| `internal-review-guard` | The review lane is done and the next step is a clear local fix | `internal-fast-executor` |
-| `internal-critical-challenger` | The next step is a clear implementation or apply action | `internal-fast-executor` |
-| `internal-critical-challenger` | The framing or plan must be reformulated first | `internal-planning-leader` |
-| `internal-critical-challenger` | The next step is evidence-based validation of a concrete change | `internal-review-guard` |
+| `internal-review-guard` | Weak reasoning needs a pressure test more than a technical review | `internal-critical-master` |
+| `internal-review-guard` | The review lane is done and the next step is a clear local fix | `internal-delivery-operator` |
+| `internal-critical-master` | The next step is a clear implementation or apply action | `internal-delivery-operator` |
+| `internal-critical-master` | The framing or plan must be reformulated first | `internal-planning-leader` |
+| `internal-critical-master` | The next step is evidence-based validation of a concrete change | `internal-review-guard` |
 | `internal-sync-control-center` | The source-side catalog direction is still ambiguous or needs repo-owned authoring decisions first | `internal-planning-leader` |
 | `internal-sync-control-center` | The real job is consumer-repository baseline propagation | `internal-sync-global-copilot-configs-into-repo` |
-| `internal-sync-control-center` | The work reduced to a clear local edit outside catalog-governance scope | `internal-fast-executor` |
+| `internal-sync-control-center` | The work reduced to a clear local edit outside catalog-governance scope | `internal-delivery-operator` |
 | `internal-sync-global-copilot-configs-into-repo` | The real job is source-side catalog governance in this repository | `internal-sync-control-center` |
 | `internal-sync-global-copilot-configs-into-repo` | The request is source-side redesign, agent authoring, or governance restructuring | `internal-planning-leader` |
-| `internal-sync-global-copilot-configs-into-repo` | Only a clear target-local execution step remains after the sync contract is settled | `internal-fast-executor` |
+| `internal-sync-global-copilot-configs-into-repo` | Only a clear target-local execution step remains after the sync contract is settled | `internal-delivery-operator` |
 
 ## Agent-Specific Notes
 
-- `internal-critical-challenger` may need to ask whether the current analysis should be saved before recommending another owner.
+- `internal-critical-master` may need to ask whether the current analysis should be saved before recommending another owner.
 - Repo-only sync agents may name the mode or scope mismatch before giving the shared recommendation.
 - Do not recommend returning to the same agent.
 - Do not recommend multiple alternatives unless the user explicitly asks for options.
