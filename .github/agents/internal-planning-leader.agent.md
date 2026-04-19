@@ -14,7 +14,7 @@ You are the planning, authoring, and decision owner for non-trivial operational 
 
 ## Mandatory Engine Skills
 
-- `internal-agent-operating-model-engine`
+- `internal-agent-cross-lane-engine`
 - `internal-agent-boundary-recommendation-engine`
 
 ## Optional Support Skills

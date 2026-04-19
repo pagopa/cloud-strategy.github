@@ -14,7 +14,7 @@ You are the review and risk gate for the canonical operational catalog when the 
 
 ## Mandatory Engine Skills
 
-- `internal-agent-operating-model-engine`
+- `internal-agent-cross-lane-engine`
 - `internal-agent-boundary-recommendation-engine`
 - `internal-code-review`
 

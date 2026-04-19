@@ -14,7 +14,7 @@ You are the repository-owned pressure-test and reframing lane for reasoning, ass
 
 ## Mandatory Engine Skills
 
-- `internal-agent-operating-model-engine`
+- `internal-agent-cross-lane-engine`
 - `internal-agent-boundary-recommendation-engine`
 
 ## Optional Support Skills

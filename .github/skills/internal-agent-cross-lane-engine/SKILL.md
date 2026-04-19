@@ -1,9 +1,9 @@
 ---
-name: internal-agent-operating-model-engine
-description: Use when one of the four canonical operational agents needs the shared boundary, recommendation, medium-task, and anti-overlap policy.
+name: internal-agent-cross-lane-engine
+description: Use when one of the four canonical operational agents needs the shared cross-lane boundary, medium-task, and anti-overlap policy.
 ---
 
-# Internal Agent Operating Model Engine
+# Internal Agent Cross-Lane Engine
 
 Use this skill as the shared engine for the four canonical operational agents in the direct-entry operational model.
 
@@ -11,7 +11,7 @@ This skill is intentionally shared. It owns the reusable rules that would otherw
 
 ## When to use
 
-- One of the four canonical operational agents needs the shared boundary and anti-overlap logic.
+- One of the four canonical operational agents needs the shared cross-lane boundary and anti-overlap logic.
 - A planning, execution, review, or challenge decision depends on the shared medium-task thresholds.
 - Canonical-agent ownership drift needs to be resolved without rewriting the same rules into multiple agents.
 
@@ -55,24 +55,13 @@ A clear realignment across more than two adjacent `.github/` assets can stay wit
 - The task needs rollout, regression, governance, or rollback decisions.
 - The task creates a new repository-owned resource instead of a banal update to an existing one.
 
-## Boundary Recommendation Protocol
+## Lane-Change Protocol
 
-The canonical operational model uses direct entry: users select one of the four canonical owners directly, and ambiguous entry fails safe to `internal-planning-leader`. Once active, each owner stays inside its boundary, tells the user when that boundary no longer holds, and recommends the better owner instead of delegating.
+The canonical operational model uses direct entry: users select one of the four canonical owners directly, and ambiguous entry fails safe to `internal-planning-leader`.
 
-When the same user-visible stop-and-recommend behavior must also stay aligned with repo-only sync command centers, reuse `internal-agent-boundary-recommendation-engine` instead of cloning the recommendation matrix into each agent body.
+Once active, each owner stays inside its boundary. When the boundary no longer holds, use `internal-agent-boundary-recommendation-engine` for the user-visible stop-and-recommend behavior instead of cloning that protocol or matrix here.
 
 The four canonical owners are not subagent-invoked by default. Any future exception must be explicit, narrow, one-directional, and must not create an all-to-all mesh or nested ping-pong.
-
-| Agent | Stay owner when | Boundary breaks when | Recommend |
-| --- | --- | --- | --- |
-| `internal-fast-executor` | The task is clear, local, low-risk, concretely verifiable, or a deterministic repository-owned realignment with a known target state. | Real medium-task ambiguity, non-obvious tradeoffs, or routing and ownership changes appear. | `internal-planning-leader` |
-| `internal-planning-leader` | Ambiguity, cross-boundary tradeoffs, repository-owned authoring, or rollout decisions still need active ownership. | The design is settled and the next step is routine local execution. | `internal-fast-executor` |
-| `internal-review-guard` | The task is defect-first review, merge readiness, regression analysis, or evidence gathering. | Findings reveal missing design or weak boundaries. | `internal-planning-leader` |
-| `internal-review-guard` | The task is still review-owned but weak reasoning becomes the dominant gap. | Pressure-testing the reasoning matters more than technical review. | `internal-critical-challenger` |
-| `internal-critical-challenger` | The task is assumption testing, a pre-mortem, lateral reframing, or failure-mode analysis. | The framing or plan must be reformulated. | `internal-planning-leader` |
-| `internal-critical-challenger` | The task remains challenge-owned until the reasoning survives scrutiny. | Evidence-based validation becomes the next need. | `internal-review-guard` |
-
-Recommendation should name the reason, not only the suggested owner, and the user decides whether to switch.
 
 ## Mandatory Engine vs Optional Support
 
