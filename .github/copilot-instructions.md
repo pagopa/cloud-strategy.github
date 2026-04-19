@@ -8,6 +8,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Inspect nearby files before editing and follow the existing naming, frontmatter, and directory patterns.
 - Use only repository evidence that exists on disk. Do not invent runtimes, validators, sync flows, or test suites.
 - Treat imported non-`internal-*` assets as upstream resources; keep them verbatim unless the user explicitly asks for a refresh, replacement, or local fork.
+- Do not edit imported upstream assets in place unless the need is strong, the user explicitly counter-validates the exception, and the replay patch is registered in the `internal-agent-sync-control-center` bundle in the same change.
 
 ## Precedence And Projections
 
@@ -29,21 +30,24 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 ## Language Projection
 
-- User chat may be Italian.
-- The default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it.
+- Match the user's chat language when practical; Italian is allowed in conversation.
+- The default authoring language for repository artifacts is English; a narrower scoped instruction may override it for its local scope.
 - Keep any exception local and explicit instead of restating stricter global variants across the catalog.
 - For repository-owned plan artifacts kept under `tmp/superpowers/<clear-action-or-task-name>/`, Italian is the default authoring language unless the user explicitly asks for another language; do not generalize this exception beyond those plan files.
 
 ## Catalog Model
 
 - Prefixes encode origin and ownership first, not a rigid abstraction level.
-- Evaluate resources on two axes: origin/ownership and dominant role.
+- Judge resources by both origin/ownership and dominant role rather than collapsing them into one label.
 - `obra-*` skills are the cross-cutting workflow lane. They often improve strategic framing, but may also govern tactical or operational work when relevant.
 - `internal-*` skills are the canonical repository-owned layer. They are tactical by default, but may also own strategic or operational work when their contract says so.
 - Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
 - `local-*` assets are consumer-local extensions. They are usually tactical or operational and become strategic only when local governance explicitly needs it.
-- `internal-router`, `internal-fast-executor`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-challenger` are the canonical repository-owned operational agents.
-- Only `internal-router` actively routes. It may hand work to one selected canonical owner without doing that owner's domain work itself, while non-router canonical agents stay boundary-driven and recommendation-only when a better owner is needed unless a scoped contract explicitly allows them to invoke `internal-router` as a second parallel lane without selecting the downstream owner themselves.
+- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the canonical repository-owned operational agents.
+- Use direct entry for canonical operational lanes and do not invent a repository-owned front-door router.
+- `internal-planning-leader` is the safe fallback when the right operational lane is still ambiguous.
+- Canonical owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
+- Any automation added between canonical owners must stay explicit, narrow, and one-directional, with no all-to-all dispatch or nested ping-pong.
 - `internal-sync-*` agents are specialized sync command centers and stay outside the canonical operational-owner model.
 
 ## Non-Negotiables
@@ -78,6 +82,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Keep doubts, open questions, and user decisions in `dubbi-e-domande.md`. This file stays outside the plan-and-apply loop and must not be treated as an executable plan file.
 - During execution, maintain matching `done-*` files. Move completed items into the corresponding `done-*` file, remove them from the active source file, delete an emptied source plan file, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.
 - Preserve imported `obra-*`, `awesome-*`, `openai-*`, and other upstream assets; express this repository's planning policy through repository-owned internal wrappers instead of editing upstream planning skills.
+- If an imported asset still requires a direct repo-local exception, register the replay patch in `.github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml` instead of leaving an undocumented fork.
 
 ## Repository Workflow Reminders
 

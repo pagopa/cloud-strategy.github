@@ -7,7 +7,7 @@ description: Use when executing a repository-owned plan from tmp/superpowers/<cl
 
 Use this skill as the repository-owned wrapper for applying multi-file plans in this repository.
 
-Keep `obra-executing-plans` and `obra-subagent-driven-development` unchanged. This skill adds the local execution loop for numbered plan files and `done-*` tracking.
+Treat `obra-executing-plans` and `obra-subagent-driven-development` as imported execution depth and keep any repo-local drift fixes narrow. This skill adds the local execution loop for numbered plan files and `done-*` tracking.
 
 ## When to use
 

@@ -1,7 +1,8 @@
 ---
 name: internal-sync-global-copilot-configs-into-repo
-description: Use this agent when aligning a consumer repository to the managed GitHub Copilot baseline from this standards repository, plus the explicitly shared repository-hygiene files and retained-learning ledger contract declared by the paired sync skill. Keep the paired sync skill as the reusable sync-procedure owner, preserve target `local-*` extensions plus any `.github/local-github-instructions-overrides.md` layer, and keep root-guidance files aligned to their separate ownership layers.
-tools: ["read", "edit", "search", "execute", "web", "agent"]
+description: Use this agent when planning, auditing, or applying consumer-repository alignment to this repository's managed GitHub Copilot baseline and explicitly shared hygiene files while preserving target `local-*` assets and the consumer-local overrides layer.
+tools: ["read", "edit", "search", "execute", "web"]
+disable-model-invocation: true
 agents: []
 ---
 
@@ -16,6 +17,7 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 ## Mandatory Engine Skills
 
 - `internal-agent-sync-global-copilot-configs-into-repo`
+- `internal-agent-boundary-recommendation-engine`
 
 ## Optional Support Skills
 
@@ -42,6 +44,7 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 - Start in `plan` by default. Move to `apply` only on explicit request and only when the plan is conflict-safe.
 - Keep target assumptions narrow and let the paired skill own the mirrored-scope and plan-file details.
 - Preserve target `local-*` assets plus any consumer-owned `.github/local-github-instructions-overrides.md` file, exclude repository-owned `internal-sync-*` resources from mirroring, and keep root-guidance files layered according to the paired skill contract.
+- When the source baseline contains approved imported-asset override registries or replay patches, mirror them as source-managed governance assets; do not recreate target-only hidden forks or ad hoc local edits to imported upstream resources.
 - When repository-root `LESSONS_LEARNED.md` is in scope, ensure the target has it and keep it structurally aligned with the source contract while preserving or migrating target-authored lesson rows through the paired skill workflow.
 - Sync only the managed cross-repository baseline declared by the paired skill contract; do not expand beyond that scope unless the user explicitly asks for more.
 - Do not restate reusable sync procedure in this agent; when the contract drifts, update the paired skill first and then realign this agent.
@@ -53,6 +56,12 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 - Do not use this agent for source-side catalog redesign, agent or skill authoring, or governance restructuring in this repository; recommend `internal-planning-leader` instead.
 - Do not use this agent for routine local execution once the sync contract is already settled and only a small target-local edit remains; recommend the appropriate executor for that repository instead.
 - When current platform behavior is the deciding factor, validate it through `internal-copilot-docs-research` before changing the sync policy.
+
+## Boundary Definition
+
+- Stay in this lane while the task is consumer-repository baseline propagation, drift assessment, or `plan`/`apply`/`audit` work for that sync workflow.
+- If the request is really source-side catalog governance, source-side redesign, or a local edit outside the sync lane, stop, explain the mismatch, and use `internal-agent-boundary-recommendation-engine` to recommend the better owner.
+- Do not route, dispatch, or delegate from this lane.
 
 ## Execution Workflow
 

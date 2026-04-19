@@ -18,8 +18,8 @@ ${input:constraints:List technical, policy, or rollout constraints}
 Use these repository sources first:
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
-- [.github/agents/internal-critical-challenger.agent.md](../agents/internal-critical-challenger.agent.md)
-- [.github/skills/internal-agent-operating-model-engine/SKILL.md](../skills/internal-agent-operating-model-engine/SKILL.md)
+- [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
+- [.github/skills/internal-agent-cross-lane-engine/SKILL.md](../skills/internal-agent-cross-lane-engine/SKILL.md)
 
 Return a compact pre-mortem with:
 

@@ -40,10 +40,10 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
+- `.github/skills/internal-agent-boundary-recommendation-engine/SKILL.md`
+- `.github/skills/internal-agent-cross-lane-engine/SKILL.md`
 - `.github/skills/internal-agent-development/SKILL.md`
-- `.github/skills/internal-agent-operating-model-engine/SKILL.md`
-- `.github/skills/internal-agent-routing-engine/SKILL.md`
-- `.github/skills/internal-agent-sync-control-center/SKILL.md`
+- `.github/skills/internal-agent-sync-external-resources/SKILL.md`
 - `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
@@ -118,10 +118,9 @@ These imported `openai-*` office skills remain support-only depth for repositori
 
 ## Agents
 
-- `.github/agents/internal-critical-challenger.agent.md`
-- `.github/agents/internal-fast-executor.agent.md`
+- `.github/agents/internal-critical-master.agent.md`
+- `.github/agents/internal-delivery-operator.agent.md`
 - `.github/agents/internal-planning-leader.agent.md`
 - `.github/agents/internal-review-guard.agent.md`
-- `.github/agents/internal-router.agent.md`
-- `.github/agents/internal-sync-control-center.agent.md`
+- `.github/agents/internal-sync-external-resources.agent.md`
 - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`

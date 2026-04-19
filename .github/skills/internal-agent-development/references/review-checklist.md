@@ -7,7 +7,7 @@ Use this checklist before finalizing a new or revised internal agent.
 - Does `description:` start with `Use this agent when ...`?
 - Could a reader tell when this agent wins over neighboring agents?
 - Does the agent include at least one real negative boundary?
-- If the agent is not `internal-router`, does it avoid active delegation and recommend the next owner instead?
+- If the agent is a direct owner rather than a coordinator, does it avoid active delegation and recommend the next owner instead?
 - Is the route behavioral rather than prestige-based?
 - If the agent works in a fast-moving vendor domain, does the route make current-documentation verification visible?
 

@@ -44,13 +44,17 @@ This file is the stable entrypoint for the repository instruction architecture.
 - `obra-*` resources are cross-cutting workflow assets. They often help with strategic framing, but may govern tactical or operational work when relevant.
 - `internal-*` resources are the canonical repository-owned layer. They are tactical by default, but may also be strategic or operational when their contract says so.
 - Imported upstream resources remain support depth by default. Overlap alone is not enough to fork or wrap them; prefer a repository-owned wrapper or replacement only when routing, governance, terminology, output shape, or safety expectations require repo-local ownership.
+- Keep imported upstream assets verbatim by default. Allow a direct in-place override only for a strong repo-specific need that the user explicitly counter-validates, and register that override in the `internal-agent-sync-external-resources` skill bundle so future refreshes can replay it safely.
 - `local-*` resources remain consumer-local extensions. They are usually tactical or operational, but may be strategic when a consumer repository needs explicit local governance.
 - When overlap exists, prefer the repository-owned internal owner as canonical and use imported depth as support unless no credible internal owner exists.
 
 ## Operational Owner Model
 
-- `internal-router` remains the only active front-door router for the canonical operational catalog.
-- `internal-router` may hand work to one selected canonical owner without becoming the domain owner itself; non-router canonical agents may be entered directly or by router handoff, but remain recommendation-only when their boundary breaks unless a narrower scoped contract explicitly allows invoking `internal-router` as a second parallel lane while keeping `internal-router` as the only router.
+- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the canonical repository-owned operational agents.
+- The canonical operational model uses direct entry instead of a repository-owned front-door router.
+- When the right lane is unclear, prefer `internal-planning-leader` as the safe fallback.
+- Canonical owners remain recommendation-only when their boundary breaks and are not subagent-invoked by default.
+- Any future automation between canonical owners must be explicit, narrow, one-directional, and must not create all-to-all dispatch or nested ping-pong.
 
 ## Projection Rules
 

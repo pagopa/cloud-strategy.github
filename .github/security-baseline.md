@@ -50,13 +50,13 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 | Third-party action SHA pinning | Manual review | `internal-github-actions.instructions.md` + PR review |
 | Minimal workflow permissions | Manual review | `internal-github-actions.instructions.md` + PR review |
 | Docker image digest pinning | Manual review | `internal-docker.instructions.md` + PR review |
-| Validate `.github/**` in CI | Automated | `.github/workflows/catalog-validation.yml` |
+| Validate `.github/**` in CI | Automated | `.github/workflows/_github-catalog-validation.yml` |
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
 | Secret placeholder avoidance in examples/generated artifacts | Partial | pre-commit hooks + review |
 | OIDC over long-lived secrets | Manual review | `internal-github-actions.instructions.md` |
 | IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-code-review` + `internal-terraform` |
 | Supply chain hardening | Manual review | `internal-github-actions.instructions.md` + `internal-code-review` |
-| Branch protection for `.github/**` | Manual review | repository settings requiring `catalog-validation` |
+| Branch protection for `.github/**` | Manual review | repository settings requiring `_github-catalog-validation` |
 | Read-only reviewer agents | Manual review | agent review |
 | CHANGELOG-based change governance | Manual review | PR review |
 

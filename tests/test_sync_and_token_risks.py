@@ -434,9 +434,9 @@ def test_detect_token_risks_reports_internal_root_policy_overlap(
     )
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
     write_file(
-        tmp_path / ".github/agents/internal-sync-control-center.agent.md",
-        "---\nname: internal-sync-control-center\ntools: [read]\n---\n\n"
-        "# Internal Sync Control Center\n\n"
+        tmp_path / ".github/agents/internal-sync-external-resources.agent.md",
+        "---\nname: internal-sync-external-resources\ntools: [read]\n---\n\n"
+        "# Internal Sync External Resources\n\n"
         "Use `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.\n\n"
         f"{root_policy_lines}\n",
     )
@@ -522,3 +522,18 @@ def test_detect_token_risks_reports_paired_agent_skill_overlap(tmp_path: Path) -
     finding_codes = {finding.code for finding in findings}
 
     assert "paired-agent-skill-overlap" in finding_codes
+
+
+def test_sync_contract_requires_target_local_validation_after_apply() -> None:
+    sync_contract_text = Path(
+        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+    ).read_text(encoding="utf-8")
+
+    assert (
+        "run the closest target-local catalog or contract validation"
+        in sync_contract_text
+    )
+    assert (
+        "Treat any resulting fixes as consumer-local follow-up work"
+        in sync_contract_text
+    )
