@@ -439,7 +439,7 @@ def check_imported_asset_overrides(root: Path) -> list[Finding]:
                     code="imported-asset-override-missing-patch",
                     path=target_path,
                     message="Imported-asset overrides must declare a replay patch path.",
-                    suggestion="Add a patch file under the internal-agent-sync-control-center skill bundle.",
+                    suggestion="Add a patch file under the internal-agent-sync-external-resources skill bundle.",
                 )
             )
         else:

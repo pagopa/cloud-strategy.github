@@ -41,7 +41,7 @@ MANAGED_WORKFLOW_FILES = (".github/workflows/_pre-commit.yml",)
 LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_TEMPLATE_PATH = ".github/local-github-instructions-overrides.md.template"
 LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH = ".github/local-github-instructions-overrides.md"
 INVENTORY_PATH = ".github/INVENTORY.md"
-IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml"
+IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/internal-agent-sync-external-resources/references/imported-asset-overrides.yaml"
 
 
 @dataclass(frozen=True)

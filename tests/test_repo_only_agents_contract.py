@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 SYNC_AGENTS = {
-    "internal-sync-control-center": ".github/agents/internal-sync-control-center.agent.md",
+    "internal-sync-external-resources": ".github/agents/internal-sync-external-resources.agent.md",
     "internal-sync-global-copilot-configs-into-repo": ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md",
 }
 
@@ -39,13 +39,13 @@ def test_repo_only_sync_agents_keep_boundary_and_tool_contracts() -> None:
 
 def test_repo_only_sync_agents_keep_their_named_operating_engines() -> None:
     sync_control_center = read_body(
-        ".github/agents/internal-sync-control-center.agent.md"
+        ".github/agents/internal-sync-external-resources.agent.md"
     )
     sync_global = read_body(
         ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"
     )
 
-    assert "- `internal-agent-sync-control-center`" in sync_control_center
+    assert "- `internal-agent-sync-external-resources`" in sync_control_center
     assert "- `internal-agent-sync-global-copilot-configs-into-repo`" in sync_global
 
 

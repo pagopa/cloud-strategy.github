@@ -112,7 +112,7 @@ def test_run_consistency_checks_flags_invalid_imported_asset_override_registry(
     )
     write_file(
         tmp_path
-        / ".github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml",
+        / ".github/skills/internal-agent-sync-external-resources/references/imported-asset-overrides.yaml",
         "overrides:\n"
         "  - id: bad-entry\n"
         "    target_path: .github/skills/obra-demo/SKILL.md\n"

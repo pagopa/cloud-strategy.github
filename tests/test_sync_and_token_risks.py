@@ -434,9 +434,9 @@ def test_detect_token_risks_reports_internal_root_policy_overlap(
     )
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
     write_file(
-        tmp_path / ".github/agents/internal-sync-control-center.agent.md",
-        "---\nname: internal-sync-control-center\ntools: [read]\n---\n\n"
-        "# Internal Sync Control Center\n\n"
+        tmp_path / ".github/agents/internal-sync-external-resources.agent.md",
+        "---\nname: internal-sync-external-resources\ntools: [read]\n---\n\n"
+        "# Internal Sync External Resources\n\n"
         "Use `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.\n\n"
         f"{root_policy_lines}\n",
     )

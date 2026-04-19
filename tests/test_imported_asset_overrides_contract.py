@@ -10,7 +10,7 @@ sys.path.insert(0, str((Path(".") / ".github/scripts").resolve()))
 from lib.fingerprinting import build_fingerprint  # noqa: E402
 
 REGISTRY_PATH = Path(
-    ".github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml"
+    ".github/skills/internal-agent-sync-external-resources/references/imported-asset-overrides.yaml"
 )
 SKILL_ROOT = REGISTRY_PATH.parent.parent
 
@@ -58,10 +58,10 @@ def test_imported_asset_override_policy_is_visible_in_canonical_and_sync_assets(
     agents_text = Path("AGENTS.md").read_text(encoding="utf-8")
     copilot_text = Path(".github/copilot-instructions.md").read_text(encoding="utf-8")
     sync_agent_text = Path(
-        ".github/agents/internal-sync-control-center.agent.md"
+        ".github/agents/internal-sync-external-resources.agent.md"
     ).read_text(encoding="utf-8")
     sync_skill_text = Path(
-        ".github/skills/internal-agent-sync-control-center/SKILL.md"
+        ".github/skills/internal-agent-sync-external-resources/SKILL.md"
     ).read_text(encoding="utf-8")
     target_sync_agent_text = Path(
         ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"
