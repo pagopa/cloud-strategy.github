@@ -524,6 +524,50 @@ def test_detect_token_risks_reports_paired_agent_skill_overlap(tmp_path: Path) -
     assert "paired-agent-skill-overlap" in finding_codes
 
 
+def test_detect_token_risks_reports_paired_local_agent_skill_overlap(
+    tmp_path: Path,
+) -> None:
+    shared_lines = "\n".join(
+        [
+            "- Keep the paired agent short.",
+            "- The skill owns the reusable support workflow.",
+            "- Keep references as the home for starter templates.",
+            "- Re-check the paired bundle before finalizing.",
+            "- Avoid cloning the same subtopic inventory in three places.",
+            "- Leave routing and boundary language in the agent only.",
+        ]
+    )
+
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/agents/local-sync-example.agent.md",
+        "---\n"
+        "name: local-sync-example\n"
+        "tools: [read]\n"
+        "---\n\n"
+        "# Local Sync Example\n\n"
+        "## Mandatory Engine Skills\n\n"
+        "- `local-sync-example`\n\n"
+        f"{shared_lines}\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/local-sync-example/SKILL.md",
+        "---\n"
+        "name: local-sync-example\n"
+        "description: Local sync example\n"
+        "---\n\n"
+        "# Local Sync Example\n\n"
+        f"{shared_lines}\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "paired-agent-skill-overlap" in finding_codes
+
+
 def test_sync_contract_requires_target_local_validation_after_apply() -> None:
     sync_contract_text = Path(
         ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"

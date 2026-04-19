@@ -29,6 +29,7 @@ Prefer explicit engine-skill architecture for routers and broader command center
 - Keep one cohesive operating role per agent.
 - Translate imported agent value into repo-local GitHub Copilot form.
 - Move reusable procedures into skills instead of bloating agent bodies.
+- Keep paired agent, skill, and reference bundles coherent by assigning one owner per detail layer instead of letting the same subtopic drift across files.
 - Prefer explicit mandatory engine skills when an agent depends on reusable routing or decision logic, and make delegation-completion, degraded-mode, and anti-stall behavior explicit for routers and coordinator-style agents.
 - Keep any skill guidance explicit and reviewable when it adds value, without implying platform-enforced execution order.
 - Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without cargo-culting obsolete tool wiring.
@@ -52,6 +53,8 @@ Load these inputs before finalizing an internal agent:
 - `internal-copilot-docs-research` and `.github/skills/internal-copilot-docs-research/references/official-source-map.md` when the change depends on current GitHub Copilot or VS Code platform behavior
 
 When the source agent already has a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load only the directly relevant skill files before editing the target agent. Treat those lists as curated routing hints shaped by the repository resource model, not as a platform-enforced requirement to use every listed skill.
+
+When the target agent depends on a paired skill or local references for detailed workflow, load those assets before editing so route, reusable procedure, and deep reference detail stay aligned instead of drifting in parallel.
 
 ## Decision Gate
 
@@ -77,6 +80,7 @@ Keep these rules visible while drafting:
 - `description:` is the route and should start with `Use this agent when ...`.
 - Internal agents declare `tools:` explicitly with a short, role-shaped contract.
 - Use `## Mandatory Engine Skills` only for truly required reusable logic and `## Optional Support Skills` only for conditional support.
+- When a paired skill or reference is the detailed contract owner, keep the agent boundary-focused and do not re-list the same operational subtopics.
 - Keep delegation controls explicit with `agents:`, `user-invocable`, and `disable-model-invocation` only when they materially enforce the boundary.
 - Keep long procedures in skills, not in the agent body.
 
@@ -137,7 +141,7 @@ That asymmetry is a feature, not a defect, when it reduces drift.
 3. Decide whether the behavior belongs in an agent, a skill, or both.
    Extract reusable procedure into a skill if the draft starts becoming a playbook.
 4. If the behavior belongs in both, define the split explicitly.
-   Keep route, stance, tool contract, and output shape in the agent; keep reusable procedure in the skill.
+   Keep route, stance, tool contract, and output shape in the agent; keep reusable procedure in the skill; keep deep tables, templates, and long checklists in references.
 5. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
 6. Choose the frontmatter and engine-skill strategy intentionally.
@@ -146,8 +150,8 @@ That asymmetry is a feature, not a defect, when it reduces drift.
    Preserve the decision model while deleting obsolete runtime-specific scaffolding.
 8. Add real boundaries and measurable output expectations.
    Non-router agents recommend the better owner when the boundary breaks instead of routing automatically.
-9. Validate and de-duplicate.
-   Run repository validation and re-check whether the new agent makes another one redundant.
+9. Validate, de-duplicate, and re-check paired assets.
+   Run repository validation and re-check whether the new agent makes another one redundant or leaves the paired bundle out of sync.
 
 ## Capability Translation Rules
 
@@ -207,6 +211,7 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - Routers or coordinators that stop after naming the selected owner or saying a handoff will happen, without the delegated result or an explicit blocking explanation.
 - A skill-list section as a dumping ground for unrelated capabilities.
 - A `## Mandatory Engine Skills` section that merely mirrors the agent body without owning real reusable logic.
+- An agent that points to a paired skill or reference as the detailed contract owner and then repeats the same subtopic inventory in the body.
 - Creating one dedicated skill per agent for visual symmetry even when shared or existing engines already solve the problem.
 - Repeating the same lane-mismatch recommendation matrix across multiple neighboring agents when one shared boundary engine would be clearer.
 - Starting from the selected agent file alone and skipping the directly relevant optional support or preferred skills that define how that agent should be applied.
@@ -236,7 +241,9 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - If the agent includes `## Mandatory Engine Skills`, confirm every listed skill exists on disk and is truly required for the agent's core behavior.
 - If the agent includes `## Mandatory Engine Skills`, confirm the engine owns reusable logic that would otherwise bloat the agent or drift across multiple agents.
 - Confirm `## Optional Support Skills` does not duplicate `## Mandatory Engine Skills`.
+- If a paired skill or reference is cited as the detailed contract owner, confirm the agent does not restate the same operational subtopics.
 - For canonical operational agents, confirm `## Optional Support Skills` is used instead of `## Preferred/Optional Skills`.
+- If the agent includes `## Skill Usage Contract`, confirm `## Optional Support Skills` is present and the contract is actually conditional.
 - If the agent includes a skill-list section, confirm the list matches the intended reusable procedures.
 - If the agent includes a skill-list section, confirm the wording does not imply that `internal-*` skills automatically outrank imported skills.
 - Confirm any existing command-center agent used as a source or workflow anchor had its directly relevant declared skills loaded before final decisions were made.
@@ -247,6 +254,7 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - Confirm routers are treated as the strongest case for a dedicated engine and that shared operational logic for the four canonical owners stays in a shared engine instead of branching into decorative mirrors.
 - Confirm the final internal agent preserved the strongest usable structure from the source pattern when that structure improved requirement discovery, tradeoff analysis, or response quality.
 - Confirm reusable procedures live in skills, not in the agent body.
+- When changing a paired agent, confirm the adjacent skill and directly referenced local docs still match the route and boundaries.
 - Confirm the new or changed agent does not make an existing agent redundant.
 - Use `references/review-checklist.md` for a final pass when the change broadens scope or imports external patterns.
 - Run the repository validation entrypoints that currently exist after changes that affect agent naming or inventory, and report the gap explicitly when no dedicated validator is present.

@@ -28,6 +28,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_inventory_matches_filesystem(root))
     findings.extend(check_bridge_references(root))
     findings.extend(check_internal_agent_contracts(root))
+    findings.extend(check_repo_owned_agent_sections(root))
     findings.extend(check_duplicate_frontmatter_names(root))
     findings.extend(check_source_local_assets(root))
     findings.extend(check_imported_asset_overrides(root))
@@ -188,6 +189,56 @@ def check_internal_agent_contracts(root: Path) -> list[Finding]:
                         suggestion="Prefer the canonical GitHub Copilot tool aliases unless a narrower legacy id is still required.",
                     )
                 )
+    return findings
+
+
+def check_repo_owned_agent_sections(root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    agents_root = root / ".github/agents"
+    if not agents_root.exists():
+        return findings
+
+    for path in sorted(agents_root.glob("*.agent.md")):
+        if not path.is_file() or not path.name.startswith(("internal-", "local-")):
+            continue
+
+        relative_path = path.relative_to(root).as_posix()
+        text = read_text(path)
+
+        if "## Preferred/Optional Skills" in text:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="repo-owned-agent-legacy-skill-heading",
+                    path=relative_path,
+                    message=(
+                        "Repository-owned agents must use `## Optional Support Skills` instead of the legacy "
+                        "`## Preferred/Optional Skills` heading."
+                    ),
+                    suggestion=(
+                        "Replace the legacy heading and keep `## Skill Usage Contract` only when support "
+                        "skills are genuinely conditional."
+                    ),
+                )
+            )
+
+        if "## Skill Usage Contract" in text and "## Optional Support Skills" not in text:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="repo-owned-agent-skill-usage-without-optional-support",
+                    path=relative_path,
+                    message=(
+                        "Repository-owned agents should not keep `## Skill Usage Contract` without an "
+                        "`## Optional Support Skills` section."
+                    ),
+                    suggestion=(
+                        "Remove `## Skill Usage Contract` or add `## Optional Support Skills` only when the "
+                        "declared skills are genuinely conditional."
+                    ),
+                )
+            )
+
     return findings
 
 

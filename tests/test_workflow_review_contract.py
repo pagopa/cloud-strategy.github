@@ -91,3 +91,42 @@ def test_agent_authoring_docs_preserve_subagent_inherited_defaults_note() -> Non
         "a subagent inherits the main session agent, model, and tools"
         in subagent_patterns_text
     )
+
+
+def test_repo_owned_agent_and_skill_authoring_guardrails_stay_explicit() -> None:
+    instruction_text = read_text(
+        ".github/instructions/internal-copilot-agent-skill-authoring.instructions.md"
+    )
+    agent_development_text = read_text(
+        ".github/skills/internal-agent-development/SKILL.md"
+    )
+    agent_contract_text = read_text(
+        ".github/skills/internal-agent-development/references/agent-contract.md"
+    )
+    skill_creator_text = read_text(
+        ".github/skills/internal-skill-creator/SKILL.md"
+    )
+    writing_skills_text = read_text(
+        ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
+    )
+
+    assert ".github/agents/*.agent.md,.github/skills/**/SKILL.md" in instruction_text
+    assert (
+        "Do not duplicate the same operational subtopic inventory across an agent, "
+        "its paired skill, and supporting references."
+        in instruction_text
+    )
+    assert "Treat `## Preferred/Optional Skills` as legacy" in instruction_text
+    assert (
+        "When a paired skill or reference is the detailed contract owner"
+        in agent_development_text
+    )
+    assert (
+        "If an agent points to a paired skill or reference as the detailed contract owner"
+        in agent_contract_text
+    )
+    assert (
+        "When a skill sits behind a paired agent or local references"
+        in skill_creator_text
+    )
+    assert "If the skill sits behind a paired agent" in writing_skills_text
