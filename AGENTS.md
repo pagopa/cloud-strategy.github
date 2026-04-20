@@ -67,11 +67,11 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Consumer Override Layer
 
-- This standards repository owns the sync seed template at `.github/local-github-instructions-overrides.md.template`.
-- Consumer repositories may keep `.github/local-github-instructions-overrides.md` as the consumer-local exception layer materialized from that template by sync.
+- This standards repository owns the sync seed template at `.github/copilot-instructions.override.md.template`.
+- Consumer repositories may keep `.github/copilot-instructions.override.md` as the consumer-local exception layer materialized from that template by sync.
 - That file may override synced defaults from `AGENTS.md` or `.github/copilot-instructions.md` only inside the consumer repository and only when each exception states the overridden baseline rule, local scope, reason, and required disclosure.
 - If the target file exists but declares no active overrides, keep the synced baseline authoritative.
-- When a response follows a local override, it must say that a consumer-local exception is in effect and cite `.github/local-github-instructions-overrides.md`.
+- When a response follows a local override, it must say that a consumer-local exception is in effect and cite `.github/copilot-instructions.override.md`.
 - Keep the target override file local in effect even when seeded by sync. Do not treat it as inventory, and do not use it to collapse the separate roles of `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.
 - The local override layer must not redefine the ownership meaning of `internal-*`, `local-*`, or `internal-sync-*`; use it for repo-local exceptions, not for replacing the bridge model.
 

@@ -30,6 +30,18 @@ def detect_token_risks(root: Path) -> list[Finding]:
     return sorted(findings, key=finding_sort_key)
 
 
+def iter_repo_owned_agent_paths(root: Path) -> list[Path]:
+    agents_root = root / ".github/agents"
+    if not agents_root.exists():
+        return []
+
+    return [
+        path
+        for path in sorted(agents_root.glob("*.agent.md"))
+        if path.is_file() and path.name.startswith(("internal-", "local-"))
+    ]
+
+
 def check_bridge_overlap(root: Path) -> list[Finding]:
     agents_path = root / "AGENTS.md"
     copilot_path = root / ".github/copilot-instructions.md"
@@ -106,9 +118,7 @@ def check_duplicate_markdown_bodies(root: Path) -> list[Finding]:
 
 def check_internal_agent_skill_list_size(root: Path) -> list[Finding]:
     findings: list[Finding] = []
-    for path in sorted((root / ".github/agents").glob("internal-*.agent.md")):
-        if not path.is_file():
-            continue
+    for path in iter_repo_owned_agent_paths(root):
         bullets = extract_section_bullets(read_text(path), "## Optional Support Skills")
         if len(bullets) > 8:
             findings.append(
@@ -116,7 +126,7 @@ def check_internal_agent_skill_list_size(root: Path) -> list[Finding]:
                     severity="non-blocking",
                     code="large-skill-list",
                     path=path.relative_to(root).as_posix(),
-                    message=f"The internal agent declares {len(bullets)} optional support skills, which broadens live context.",
+                    message=f"The repo-owned agent declares {len(bullets)} optional support skills, which broadens live context.",
                     suggestion="Keep optional skill lists tight and move generic guidance into shared skills when possible.",
                 )
             )
@@ -227,9 +237,7 @@ def check_paired_agent_skill_overlap(root: Path) -> list[Finding]:
         return []
 
     findings: list[Finding] = []
-    for agent_path in sorted(agents_root.glob("internal-*.agent.md")):
-        if not agent_path.is_file():
-            continue
+    for agent_path in iter_repo_owned_agent_paths(root):
 
         agent_text = read_text(agent_path)
         mandatory_skills = [bullet.strip("`") for bullet in extract_section_bullets(agent_text, "## Mandatory Engine Skills")]

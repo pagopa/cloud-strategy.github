@@ -30,6 +30,7 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 - `## Optional Support Skills` is optional. Use it only when it materially improves routing clarity, discovery, or command-center usability.
 - Prefer `## Optional Support Skills` over `## Preferred/Optional Skills` for current internal contracts.
 - Use `## Optional Support Skills` only for conditional support skills, not for the required engine.
+- When an agent depends on a paired skill or reference for detailed workflow, keep the agent summary-level and avoid re-listing the same operational subtopics.
 - When present, a skill-list section is a curated routing and discovery list. List exact canonical skill identifiers, one per bullet, in backticks.
 - Do not present a skill-list section as a native GitHub Copilot property or as a guarantee that every listed skill will be invoked automatically.
 - When expressing the resource model, treat `obra-*` as the cross-cutting workflow lane, `internal-*` as the canonical repository-owned layer, imported skills as support depth by default, and `local-*` as consumer-local extensions. Do not infer strategic, tactical, or operational role from prefix alone.
@@ -53,8 +54,10 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 
 - Every agent must explain both positive routing and at least one meaningful boundary.
 - Every agent must define `## Output Expectations`.
-- Add `## Skill Usage Contract` only when the agent is a broader command center whose listed skills are used conditionally.
+- Add `## Skill Usage Contract` only when the agent is a broader command center whose listed support skills are used conditionally.
+- Do not keep `## Skill Usage Contract` on a single-paired-skill agent with no conditional support list.
 - When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order.
+- If an agent points to a paired skill or reference as the detailed contract owner, keep deep procedure, matrices, and templates out of the agent body.
 - When an agent can influence external actions, call out where human approval or review gates apply.
 - Keep long reusable workflows in skills, not in the agent body.
 

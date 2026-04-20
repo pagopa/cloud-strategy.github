@@ -38,8 +38,8 @@ MANAGED_ROOT_FILES = (
     ".github/repo-profiles.yml",
 )
 MANAGED_WORKFLOW_FILES = (".github/workflows/_pre-commit.yml",)
-LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_TEMPLATE_PATH = ".github/local-github-instructions-overrides.md.template"
-LOCAL_GITHUB_INSTRUCTIONS_OVERRIDES_PATH = ".github/local-github-instructions-overrides.md"
+COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH = ".github/copilot-instructions.override.md.template"
+COPILOT_INSTRUCTIONS_OVERRIDE_PATH = ".github/copilot-instructions.override.md"
 INVENTORY_PATH = ".github/INVENTORY.md"
 IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/internal-agent-sync-external-resources/references/imported-asset-overrides.yaml"
 

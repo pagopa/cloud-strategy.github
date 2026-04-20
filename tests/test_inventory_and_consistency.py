@@ -132,3 +132,63 @@ def test_run_consistency_checks_flags_invalid_imported_asset_override_registry(
     assert "imported-asset-override-invalid-apply-strategy" in finding_codes
     assert "imported-asset-override-patch-missing" in finding_codes
     assert "imported-asset-override-invalid-hash" in finding_codes
+
+
+def test_run_consistency_checks_flags_legacy_repo_owned_agent_skill_headings(
+    tmp_path: Path,
+) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot Instructions\n\nSee `AGENTS.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/agents/local-demo.agent.md",
+        "---\nname: local-demo\ntools: [read]\n---\n\n"
+        "# Local Demo\n\n"
+        "## Preferred/Optional Skills\n\n"
+        "- `local-demo`\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
+
+    findings = run_consistency_checks(tmp_path)
+    findings_by_path = {(finding.path, finding.code) for finding in findings}
+
+    assert (
+        ".github/agents/local-demo.agent.md",
+        "repo-owned-agent-legacy-skill-heading",
+    ) in findings_by_path
+
+
+def test_run_consistency_checks_flags_skill_usage_contract_without_optional_support(
+    tmp_path: Path,
+) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot Instructions\n\nSee `AGENTS.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/agents/internal-demo.agent.md",
+        "---\nname: internal-demo\ntools: [read]\n---\n\n"
+        "# Internal Demo\n\n"
+        "## Mandatory Engine Skills\n\n"
+        "- `internal-demo`\n\n"
+        "## Skill Usage Contract\n\n"
+        "- `internal-demo`: Use when the skill is mandatory.\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
+
+    findings = run_consistency_checks(tmp_path)
+    findings_by_path = {(finding.path, finding.code) for finding in findings}
+
+    assert (
+        ".github/agents/internal-demo.agent.md",
+        "repo-owned-agent-skill-usage-without-optional-support",
+    ) in findings_by_path
