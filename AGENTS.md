@@ -90,7 +90,8 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 - Transient planning, brainstorming, and other Superpowers-generated working files must not be written under `docs/`.
 - When such artifacts are needed inside this repository, write them under `tmp/superpowers/`.
-- Repository-owned plan work under `tmp/superpowers/` should live in a task-specific folder named `tmp/superpowers/<clear-action-or-task-name>/`.
-- Keep active execution plans there as multiple numbered macro-category Markdown files, for example `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md`, instead of one monolithic plan document.
+- Keep planning ephemeral in chat for clear, local, quick, or banal tasks.
+- Create or reuse `tmp/superpowers/<clear-action-or-task-name>/` only for retained repository-owned planning that must survive the current turn because the work is non-banal, crosses turns, spans macro-categories, needs handoff, tracking, or provenance, or preserves tradeoffs worth review.
+- Keep retained execution plans as numbered Markdown files: a single `01-...md` file when one macro-category is enough, or multiple numbered files such as `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md` when the work spans multiple macro-categories.
 - Keep unresolved questions, doubts, or user decisions in `dubbi-e-domande.md`; this file stays separate from executable plan files and remains outside the plan-and-apply loop.
-- During execution, create matching `done-*` files, move completed items into them, remove completed items from the active source plan file, delete emptied numbered plan files, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.
+- During execution, create matching `done-*` files, move completed items into them, remove them from the active numbered source file, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.
