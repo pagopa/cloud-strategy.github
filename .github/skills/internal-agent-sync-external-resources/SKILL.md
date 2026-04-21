@@ -60,10 +60,10 @@ Do not collapse these roles back into one file just because the current task tou
 1. Check the declared managed scope in `internal-sync-external-resources` plus the live local inventory and nearby trigger space.
 2. Decide whether the capability should remain an `internal-*` asset, remain an approved in-scope external-prefixed asset, or be retired.
 3. For imported assets, prefer verbatim refresh first. Allow a direct in-place override only when the reason is strong, the user explicitly counter-validates it, and the replay patch is registered in this skill bundle.
-3. Prefer consolidation over coexistence when two assets compete for the same trigger space.
-4. Repair broken references only when the asset still adds distinct value to the declared catalog.
-5. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
-6. Re-check root `AGENTS.md` and `.github/copilot-instructions.md` whenever catalog meaning, routing, or governance language changed.
+4. Prefer consolidation over coexistence when two assets compete for the same trigger space.
+5. Repair broken references only when the asset still adds distinct value to the declared catalog.
+6. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
+7. Re-check root `AGENTS.md` and `.github/copilot-instructions.md` whenever catalog meaning, routing, or governance language changed.
 
 ## Classification Matrix
 

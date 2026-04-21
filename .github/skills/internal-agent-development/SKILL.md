@@ -101,14 +101,14 @@ Use this split when authoring command-center agents:
   - role and stance
   - boundary with neighboring agents
   - tool contract
-   - boundary definition and any agent-specific lane-break handling that is not shared elsewhere
+  - boundary definition and any agent-specific lane-break handling that is not shared elsewhere
   - output expectations
 - Engine skill:
-   - shared stop-and-recommend protocol when several neighboring agents need the same lane-mismatch handling
+  - shared stop-and-recommend protocol when several neighboring agents need the same lane-mismatch handling
   - decision matrix
   - threshold rules for medium or ambiguous tasks
   - old-to-new ownership mapping
-   - completion semantics and degraded-mode rules when delegation-based turns stall or return no usable worker result
+  - completion semantics and degraded-mode rules when delegation-based turns stall or return no usable worker result
   - anti-overlap checklist
   - shared workflow steps that would otherwise be duplicated
 

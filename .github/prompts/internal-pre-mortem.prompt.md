@@ -3,6 +3,8 @@ agent: "agent"
 description: "Pressure-test a proposal before merge, refactor, or cross-boundary implementation"
 ---
 
+<!-- markdownlint-disable-file MD041 -->
+
 Proposal or decision under test:
 ${input:proposal:Describe the proposal, plan, or change you want challenged}
 
@@ -16,6 +18,7 @@ Constraints or non-negotiables:
 ${input:constraints:List technical, policy, or rollout constraints}
 
 Use these repository sources first:
+
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)

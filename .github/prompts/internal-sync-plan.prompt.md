@@ -3,6 +3,8 @@ agent: "agent"
 description: "Prepare a source-authoritative sync or catalog-governance plan before applying changes to a consumer repository"
 ---
 
+<!-- markdownlint-disable-file MD041 -->
+
 Source repository or branch:
 ${input:source:Describe the source standards repo or branch under consideration}
 
@@ -16,6 +18,7 @@ Target-local exceptions to preserve:
 ${input:local:List local assets, overrides, or no-touch areas if known}
 
 Use these repository sources first:
+
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)

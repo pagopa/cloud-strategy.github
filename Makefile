@@ -19,7 +19,7 @@ python-version-check:
 scripts-bootstrap: python-version-check
 	@$(SCRIPTS_RUNNER) build_inventory --help >/dev/null
 
-lint: python-version-check
+lint: python-version-check docs-lint
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
 	$(PYTHON) -m compileall $(PYTHON_PATHS)

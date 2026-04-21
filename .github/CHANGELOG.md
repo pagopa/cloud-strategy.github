@@ -1,18 +1,30 @@
 # Changelog
 
 ## Entry template
+
 Use this format for new updates:
+
 - `## YYYY-MM-DD`
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-21
+
+- Realigned `.github/skills/internal-copilot-audit/SKILL.md` to the current catalog-consistency and sync entrypoints, removing stale references to retired source-side script names that were blocking `make skill-lint`.
+- Tightened `.markdownlint-cli2.jsonc` to exclude the local `.github/scripts/.venv/` tree and preserved imported `awesome-copilot-*` instruction files from repo-owned Markdown lint enforcement, keeping the lint target aligned with the repository rule that upstream assets stay verbatim unless explicitly refreshed.
+- Normalized repo-owned Markdown and prompt surfaces across `.github/agents/`, `.github/prompts/`, and multiple `.github/skills/internal-*/` files so `make docs-lint` now passes alongside the existing catalog validators.
+- Promoted `docs-lint` into the standard validation path through `Makefile` and `.github/scripts/github_catalog_validation.py`, and added regression coverage for the markdownlint config plus the aggregate `all` target.
+- Hardened `Makefile` again so the aggregate `lint` target now absorbs `docs-lint` without double-running it through `all`, and added a workflow-level contract test that keeps `_github-catalog-validation` pinned to the canonical Bash wrapper entrypoints.
+
 ## 2026-04-19
+
 - Renamed the root `Makefile` target from `catalog-validation` to `github-catalog-validation` for nomenclature consistency with the `_github-catalog-validation` workflow and refreshed `.github/README.md` plus `.github/agents/README.md` to remove remaining live `internal-router` wording in favor of the direct-entry operational model.
 - Renamed the canonical execution and challenge agents from `.github/agents/internal-fast-executor.agent.md` and `.github/agents/internal-critical-challenger.agent.md` to `.github/agents/internal-delivery-operator.agent.md` and `.github/agents/internal-critical-master.agent.md`, then realigned the live operational contracts, prompt references, shared boundary skills, and tests to the new canonical names.
 - Renamed `.github/workflows/catalog-validation.yml` to `.github/workflows/_github-catalog-validation.yml`, replaced the old Bash-only `catalog_validation` entrypoint with the new `.github/scripts/github_catalog_validation.py` plus matching Bash wrappers, and realigned `Makefile`, script coverage tests, and security-baseline references to the new workflow and script names.
 - Codified the pending retained-learning lessons into `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md`, `.github/skills/internal-agent-development/SKILL.md`, and `.github/skills/internal-agent-development/references/subagent-patterns.md`, added contract tests for the new guidance, and cleared the now-codified rows from `LESSONS_LEARNED.md`.
 
 ## 2026-04-18
+
 - Centralized lane-mismatch handling into the new repository-owned skill `.github/skills/internal-agent-boundary-recommendation-engine/`, realigned the four canonical operational agents plus the two sync command centers to stop and recommend the right owner through one shared protocol, removed the unused `agent` tool from the sync agents, and retired the orphaned `internal-agent-routing-engine` bundle from the live catalog.
 - Removed `internal-router` and the paired `internal-agent-routing-engine` from the live canonical operational model, left the four direct owners as the only canonical lanes, defaulted ambiguous entry to `internal-planning-leader`, platform-enforced no hidden peer dispatch by setting the canonical owners to `disable-model-invocation: true`, and realigned the active contracts, references, and tests away from router-centric dispatch.
 - Narrowed `.github/workflows/catalog-validation.yml` so it no longer repeats `_pre-commit` coverage: the workflow now runs the new `make catalog-lint` target for Bash syntax plus Python bytecode compilation, skips the duplicate YAML lint step, and leaves Markdown lint available as a manual target instead of failing the catalog-specific gate on long-standing repo-wide style debt.
@@ -21,11 +33,13 @@ Use this format for new updates:
 - Simplified `.github/workflows/_pre-commit.yml` so it no longer depends on the `inputs` context during `push` or `pull_request` runs, keeping the surviving workflow aligned with GitHub Actions context-availability rules.
 
 ## 2026-04-17
+
 - Added reusable prompt files under `.github/prompts/` for planning kickoff, pre-mortem challenge, review kickoff, and sync planning so the repository now ships concrete prompt-file surfaces instead of an empty placeholder directory.
 - Refreshed plan tracking under `tmp/done/superpowers/plans/` so completed plan work is mirrored outside the active plan files and the remaining plan sources can stay current-state only.
 - Rebuilt `.github/INVENTORY.md` after the catalog refresh so support-only imported office skills are labeled explicitly in the generated inventory output.
 
 ## 2026-04-12
+
 - Renamed the repository-root retained-learning ledger to `LESSONS_LEARNED.md`, then realigned the retained-learning contract, sync automation, and tests to use the new canonical path.
 - Aligned `.pre-commit-config.yaml` and expanded `.editorconfig` with file-type defaults for Python, shell, Terraform/HCL, YAML, JSON/TOML, Markdown, Make, and local config files so the repo and synced consumers get a practical editor baseline without the formatter ping-pong that left `pre-commit` failing with no visible git diff.
 - Expanded the cross-repository sync baseline to include `.editorconfig`, `.pre-commit-config.yaml`, and `.github/workflows/terraform-pre-commit.yml`, then updated the sync agent/skill contract and sync planner tests to keep that scope explicit and narrow.
@@ -37,6 +51,7 @@ Use this format for new updates:
 - Simplified `LESSONS_LEARNED.md` again so it now keeps only pending lessons; once a lesson is codified into a canonical owner, it is removed from the ledger instead of being duplicated there.
 
 ## 2026-04-11
+
 - Tightened the Python skill split instead of collapsing it: clarified the shared baseline in `.github/instructions/internal-python.instructions.md`, sharpened `internal-project-python` around structured package and application boundaries, and expanded `internal-script-python` plus its layout reference to cover the repository-aligned toolkit pattern used under `.github/scripts/` with shared `lib/`, hash-locked `requirements.txt`, shared `run.sh`, root-level tests, and thin wrapper entrypoints.
 - Renamed the sync engine skill from `.github/skills/internal-sync-global-copilot-configs-into-repo/` to `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/`, then realigned the paired agent contract and skill invocation metadata to the new canonical skill name.
 - Updated `.github/scripts/lib/internal_skills.py` so documented workflow outputs under `tmp/` are treated as virtual paths during internal-skill validation, then refreshed `.github/README.md` to match the live tracked agent catalog and current source-side script entrypoints.
@@ -50,13 +65,16 @@ Use this format for new updates:
 - Removed `.github/instructions/awesome-copilot-copilot-sdk-python.instructions.md` from the live catalog and realigned `.github/INVENTORY.md`, `.github/README.md`, `.github/agents/internal-sync-external-resources.agent.md`, and `tmp/superpowers/2026-04-10-audit-catalogo-copilot.md` so the imported Python SDK instruction is no longer treated as active.
 
 ## 2026-04-10
+
 - Added the provider skill rollout beyond AWS by creating repository-owned Azure, GCP, and GitHub skill families under `.github/skills/internal-{azure,gcp,github}-*`, keeping the AWS boundary model as the baseline with short adaptive strategic skills, separate organization/governance/operations lanes where justified, minimal `references/`, and `agents/openai.yaml` metadata for every new skill.
 - Refreshed `.github/README.md` and `.github/INVENTORY.md` so the maintainer-facing catalog now matches the live provider-skill inventory and the current prompt, skill, and script counts on disk.
 
 ## 2026-04-07
+
 - Updated the completion-report policy in `.github/copilot-instructions.md`, `.github/README.md`, and the sync agent and skill contract so synced target repositories now inherit a summary format that lists only the actually used agents, instructions, prompts, skills, and other resources, each with a short reason.
 
 ## 2026-04-06
+
 - Externalized the exact path inventory into `.github/INVENTORY.md`, reduced root `AGENTS.md` to a bridge pointer, removed the current repository validator/test layer, and updated maintainer docs, templates, and governance text to stop depending on deleted validation assets and the removed `internal-agents-md-bridge` skill.
 - Refactored the instruction architecture around rule ownership: root `AGENTS.md` is now the strategic entrypoint and precedence anchor, `.github/copilot-instructions.md` is the compact repo-wide Copilot projection, `INTERNAL_CONTRACT.md` now captures rebuild-safe invariants instead of deleted automation behavior, scoped Markdown guidance now projects the central English-by-default rule, and sync governance assets were updated to stop treating root `AGENTS.md` as a subordinate thin bridge.
 - Slimmed `.github/copilot-instructions.md` by removing stack-owned Python template, script, Java, and Node guidance, and reduced `.github/instructions/internal-bash.instructions.md` to repo-local Bash additions so runtime-specific rules now stay with their matching instruction owners instead of the primary policy layer.
@@ -66,6 +84,7 @@ Use this format for new updates:
 - Tightened the active non-README governance layer after the refactor: reduced root `AGENTS.md` to a thinner bridge, refreshed `.github/INVENTORY.md` to match the live prompt catalog, removed stale prompt/script/source-of-truth references from active governance assets, and aligned the cross-repository sync agent/skill with the files that actually exist on disk.
 
 ## 2026-04-05
+
 - Added `scripts/internal_yaml.py` and reused it from both `internal-sync-copilot-configs.py` and `validate-copilot-customizations.py` so repository-owned Python automation now shares one YAML/frontmatter parser instead of duplicating parsing logic.
 - Restored hash-locked Python dependency policy for repository-owned scripts: `scripts/requirements.txt` now carries the pinned `PyYAML` wheel hash and `internal-python-runner.sh` installs with `--require-hashes` without any fallback path.
 - Removed the hash-detection fallback from `scripts/internal-python-runner.sh`, switched repository-owned Python launcher guidance to install directly from `requirements.txt`, and deleted the internal Python-policy clause that allowed a non-locked fallback path.
@@ -79,6 +98,7 @@ Use this format for new updates:
 - Refreshed `.github/README.md` so the maintainer-facing catalog now matches the live `internal-*`, `obra-*`, and imported support families, the canonical internal agent model, and the actual scripts and workflow present on disk after recent repository restructuring.
 
 ## 2026-04-04
+
 - Added a mandatory end-of-operation completion report contract to `.github/copilot-instructions.md`, documented the same emoji-based `Outcome` / `Agents` / `Instructions` / `Skills` structure in `.github/README.md`, and kept root `AGENTS.md` on a thin bridge pointer to the detailed policy.
 - Extended `INTERNAL_CONTRACT.md`, `tests/test_contract_runner.py`, `tests/test_validate_copilot_customizations.py`, and `.github/scripts/validate-copilot-customizations.py` so the completion-report contract is now source-governed and strict-validator enforced.
 - Updated `internal-sync-external-resources`, `internal-sync-global-copilot-configs-into-repo`, and the sync skill workflow so completed sync runs must also end with the same completion-report categories and explicit unused-category explanations.
@@ -86,10 +106,12 @@ Use this format for new updates:
 - Updated `.github/copilot-instructions.md`, `.github/instructions/internal-python.instructions.md`, and `.github/skills/internal-script-python/SKILL.md` so new Python scripts must make an explicit stdlib-vs-library decision, prefer mature third-party packages when they clearly simplify the final code, and record that choice in a short dependency decision note before implementation.
 
 ## 2026-03-19
+
 - Updated `.github/copilot-instructions.md`, `.github/instructions/python.instructions.md`, and `.github/prompts/tech-ai-python.prompt.md` so Python tasks now standardize on human-readable hash-locked `requirements.txt` files for external dependencies, clarify that the lock file should capture the full dependency closure, and treat third-party libraries as a recommendation only when they materially simplify the code.
 - Updated `.github/prompts/tech-ai-python-script.prompt.md`, `.github/skills/tech-ai-script-python/SKILL.md`, and `.github/instructions/bash.instructions.md` so new standalone Python tools default to a self-contained folder with a `run.sh` launcher, add a local `requirements.txt` only when external packages are used, and bootstrap `.venv` plus locked dependency installation only when that file exists.
 
 ## 2026-03-13
+
 - Updated `.pre-commit-config.yaml` to pin `pre-commit-hooks` `v6.0.0`, keep `pre-commit-terraform` explicitly annotated at `v1.105.0`, and move `shellcheck-py` to `v0.11.0.1`, adding inline release comments for each pinned revision.
 - Updated `.github/workflows/github-validate-copilot-customizations.yml` to pin the runner to `ubuntu-24.04`, add `actions/setup-python` pinned by SHA for Python `3.14.3`, pin `pip` to `26.0.1`, and replace the unpinned `apt` shellcheck install with the pinned Python dependency set from `.github/tech-ai-requirements-dev.txt`.
 - Annotated `.github/workflows/terraform-pre-commit.yml` image digest references with the corresponding `pre-commit-terraform` release version to make the SHA-based pin self-describing.
@@ -98,14 +120,17 @@ Use this format for new updates:
 - Updated `.github/scripts/internal-sync-copilot-configs.py` so the default VS Code PR description mode expected during consumer alignment is now `template` instead of `Copilot`.
 
 ## 2026-03-12
+
 - Renamed the canonical PR prompt from `tech-ai-pr-description.prompt.md` / `TechAIPRDescription` to `tech-ai-pr-editor.prompt.md` / `TechAIPREditor`, and updated `AGENTS.md`, the validator, and review notes to use the new canonical name consistently.
 - Updated `scripts/internal-sync-copilot-configs.py` and its tests so sync plans now delete manifest-managed files that were removed from the desired baseline, allowing canonical renames to cleanly remove deprecated managed assets in consumer repositories.
 
 ## 2026-03-11
+
 - Updated `scripts/internal-sync-copilot-configs.py` so consumer sync now discovers new instructions from `applyTo`, automatically includes all portable consumer-facing agents, and merges consumer-facing prompt/skill capabilities declared in the source `AGENTS.md` preferred sections. This prevents newly added shared assets such as the PAIR analysis flow from being silently skipped in downstream repos.
 - Updated `scripts/internal-sync-copilot-configs.py` and `tests/test_tech_ai_sync_copilot_configs.py` so consumer alignment now reports a target-side gap when `.vscode/settings.json` is missing or does not set `githubPullRequests.pullRequestDescription` to `Copilot`, making the VS Code PR-form Copilot dependency visible in sync reports.
 
 ## 2026-03-09
+
 - Added the repo-only `TechAIRepoCopilotExtender` agent, prompt, and skill for creating consumer-repository `internal-*` Copilot assets without duplicating the shared baseline, and excluded the trio from consumer sync.
 - Tightened `TechAIRepoCopilotExtender` so it must ground repo-local prompts, examples, schema snippets, and naming rules on concrete target files instead of generic remembered patterns.
 - Deprecated `.github/scripts/bootstrap-copilot-config.sh` in favor of `.github/scripts/internal-sync-copilot-configs.py`, updated lifecycle docs, and made quickstart plus `.github/README.md` prefer sync-first alignment.
@@ -115,6 +140,7 @@ Use this format for new updates:
 - Expanded validator and sync tests to cover new recommendation, rendering, provenance, and validation paths.
 
 ## 2026-03-08
+
 - Updated the PR-writing prompt, skill, and agent guidance to derive required sections from the resolved repository PR template instead of hardcoding older headings such as `Security and Compliance` or `Related Links`.
 - Updated `scripts/internal-sync-copilot-configs.py` and `scripts/validate-copilot-customizations.sh` so repository-owned prompt, skill, and agent assets outside the synced global baseline must use `internal-*` in both filenames and `name:` values, making internal customizations visibly distinct from synced `tech-ai-*` assets.
 - Updated `scripts/internal-sync-copilot-configs.py` so target-only skill detection compares full relative paths instead of the shared `SKILL.md` filename, fixing missed unmanaged skill assets in consumer repositories.
@@ -130,6 +156,7 @@ Use this format for new updates:
 - Updated `tests/test_tech_ai_sync_copilot_configs.py` to cover duplicate-alias detection and conflict behavior during sync planning.
 
 ## 2026-03-07
+
 - Added repo-only global customization agents `TechAIStandardsRepoConfigBuilder` and `TechAIStandardsRepoConfigAuditor` for standards-authoring and final quality gates in this repository.
 - Marked `TechAICustomizationAuditor` as a deprecated compatibility alias that now points to `TechAIStandardsRepoConfigAuditor`.
 - Updated root `AGENTS.md`, agent catalog docs, sync exclusions, validator semantics, and tests to treat the `TechAIGlobal*` pair as repo-only standards agents.
@@ -143,6 +170,7 @@ Use this format for new updates:
 - Removed the redundant `script-bash.prompt.md` and `script-python.prompt.md` alias prompts to keep one canonical script prompt per stack.
 
 ## 2026-03-06
+
 - Added `agents/tech-ai-sync-global-copilot-configs-into-repo.agent.md`: `TechAISyncGlobalCopilotConfigsIntoRepo` for local repository analysis and conservative Copilot-core alignment.
 - Added `prompts/tech-ai-sync-global-copilot-configs-into-repo.prompt.md` and `skills/tech-ai-sync-global-copilot-configs-into-repo/SKILL.md` for repeatable alignment workflows.
 - Added `scripts/internal-sync-copilot-configs.py` plus `tests/test_tech_ai_sync_copilot_configs.py` for deterministic analysis, manifest-based sync planning, and reporting.
@@ -152,6 +180,7 @@ Use this format for new updates:
 - Added `.github/tech-ai-requirements-dev.txt`, CI pytest execution, `shellcheck` pre-commit coverage, and validator integration tests for stronger local and CI validation.
 
 ## 2026-03-04
+
 - Added `skills/tech-ai-code-review/SKILL.md`: per-language anti-pattern catalogs with severity mappings and good-vs-bad examples.
 - Added `prompts/cs-code-review.prompt.md`: on-demand strict code review prompt with configurable strictness.
 - Added `agents/tech-ai-script-reviewer.agent.md`: exhaustive, nit-level code reviewer (`TechAIScriptReviewer`) for Python, Bash, and Terraform with review persona inspired by Martin Fowler, Raymond Hettinger, and Kelsey Hightower.
@@ -159,9 +188,11 @@ Use this format for new updates:
 - Updated `AGENTS.md` with `TechAIScriptReviewer` routing, `code-review` skill, and `cs-code-review` prompt.
 
 ## 2026-02-28
+
 - Renamed GitHub-related files to `github-*` prefix for consistency across agents, prompts, instructions, and workflows.
 
 ## 2026-02-07
+
 - Added missing global Copilot instruction files for commit messages and code review.
 - Added new instruction files: YAML, Markdown, Makefile, Scripts, Lambda.
 - Added new skills: `terraform-module`, `cloud-policy`.

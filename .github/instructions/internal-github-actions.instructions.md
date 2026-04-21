@@ -6,6 +6,7 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 # GitHub Actions Instructions
 
 ## Security baseline
+
 - Prefer OIDC over long-lived secrets.
 - Pin actions to full-length commit SHAs with adjacent release comments and upstream release URLs.
 - Pin `docker://` references and workflow container images by digest.
@@ -18,6 +19,7 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 - Treat self-hosted runners as trusted infrastructure and scope them to the repositories, runner groups, and network access they actually need.
 
 ## Family baseline
+
 - Use clear English step names and deterministic outputs.
 - Set explicit `timeout-minutes` for workflows that could otherwise hang.
 - Set `concurrency` when jobs can conflict on a shared target.
@@ -35,6 +37,7 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 - Path-specific instructions can use `excludeAgent: "code-review"` or `excludeAgent: "cloud-agent"` when workflow guidance must be scoped to one GitHub Copilot surface, but treat that as a deliberate optimization rather than a default requirement.
 
 ## Use the skill for deeper guidance
+
 - Load `.github/skills/internal-github-actions/SKILL.md` for workflow-vs-reusable-vs-composite decisions, reusable workflow templates, cache and artifact patterns, and workflow hardening checklists.
 - Keep this instruction lean because it is part of the source-managed baseline mirrored into consumer repositories; add new always-on GitHub Actions depth only when downstream reuse justifies that sync cost, and keep advanced patterns, examples, and decision support in the skill references.
 - Keep this instruction as the auto-loaded baseline; keep authoring depth and examples in the skill.

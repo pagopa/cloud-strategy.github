@@ -4,6 +4,11 @@
   },
   "ignores": [
     "tmp/**",
+    // Ignore the local script venv because it is generated tooling state, not repo-owned content.
+    ".github/scripts/.venv/**",
+    // Preserve imported awesome-copilot instructions verbatim unless an explicit refresh or fork is requested.
+    ".github/instructions/awesome-copilot-*.instructions.md",
+    // Preserve imported support skill families verbatim by default; lint only repo-owned Markdown.
     ".github/skills/antigravity-*/**",
     ".github/skills/awesome-copilot-*/**",
     ".github/skills/obra-*/**",

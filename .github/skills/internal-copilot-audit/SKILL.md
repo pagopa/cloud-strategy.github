@@ -28,7 +28,7 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 - Detect sync workflows that skip or fail to report governance review for `.github/copilot-instructions.md` and root `AGENTS.md`.
 - Detect naming violations and stale inventory references.
 - Detect governance files that still describe removed, renamed, or retired assets.
-- Detect catalog retirements or remaps that were not propagated in the same change to the local sync command center, `.github/scripts/validate-copilot-customizations.py`, and `.github/scripts/internal-sync-copilot-configs.py`.
+- Detect catalog retirements or remaps that were not propagated in the same change to the supported consistency and sync entrypoints, `.github/scripts/check_catalog_consistency.sh` and `.github/scripts/sync_copilot_catalog.sh`.
 
 ## Audit Order
 
