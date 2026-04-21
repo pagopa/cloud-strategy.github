@@ -26,6 +26,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Treat this repository as the source of truth.
 - Keep target assumptions narrow: GitHub Copilot assets live under `.github/` and `AGENTS.md` stays at repository root.
 - Preserve target `local-*` assets under mirrored categories, preserve the target consumer-local GitHub instructions overrides file after materialization, and delete target-only non-local assets there during `apply`.
+- When consumer-local creator bundles depend on shared runtime-critical rules, mirror those rules inside each creator bundle as source-managed files and keep the mirror paths registered in the source inventory and target manifest; do not rely on cross-bundle references or unsynced local-only resources for creator runtime behavior.
 - When the source baseline includes an approved imported-asset override registry plus replay patches, mirror that governance bundle as source-managed state instead of recreating target-local hidden forks on imported assets.
 - Exclude source resources named `internal-sync-*` from consumer mirroring and remove any target copies of those resources during `apply`.
 - Materialize the source template `.github/copilot-instructions.override.md.template` into the consumer target as the consumer-local copilot instructions override file when that target file is missing, then preserve target-authored changes there on later sync runs.
