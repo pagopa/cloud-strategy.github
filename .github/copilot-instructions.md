@@ -8,7 +8,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Inspect nearby files before editing and follow the existing naming, frontmatter, and directory patterns.
 - Use only repository evidence that exists on disk. Do not invent runtimes, validators, sync flows, or test suites.
 - Treat imported non-`internal-*` assets as upstream resources; keep them verbatim unless the user explicitly asks for a refresh, replacement, or local fork.
-- Do not edit imported upstream assets in place unless the need is strong, the user explicitly counter-validates the exception, and the replay patch is registered in the `internal-agent-sync-control-center` bundle in the same change.
+- Do not edit imported upstream assets in place unless the need is strong, the user explicitly counter-validates the exception, and the replay patch is registered in the `internal-agent-sync-external-resources` bundle in the same change.
 
 ## Precedence And Projections
 
@@ -77,12 +77,14 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 ## Superpowers Plan Policy
 
-- For repository-owned planning work, create or reuse a task folder at `tmp/superpowers/<clear-action-or-task-name>/`.
-- Keep execution plans as multiple numbered Markdown files by macro-category, such as `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md`; do not collapse them into one monolithic plan file.
+- Keep planning ephemeral in chat for clear, local, quick, or banal tasks.
+- Create or reuse `tmp/superpowers/<clear-action-or-task-name>/` only when retained planning is justified by non-banal work such as multi-turn coordination, multiple macro-categories, explicit handoff, tracking, or provenance, or tradeoffs and uncertainties that merit a saved plan.
+- Keep retained execution plans as numbered Markdown files: use a single `01-...md` file when one macro-category is enough, or multiple numbered files such as `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md` when the work genuinely spans multiple macro-categories.
+- Keep detailed plan-shape and authoring heuristics in `internal-writing-plans` instead of restating them in this repo-wide projection.
 - Keep doubts, open questions, and user decisions in `dubbi-e-domande.md`. This file stays outside the plan-and-apply loop and must not be treated as an executable plan file.
 - During execution, maintain matching `done-*` files. Move completed items into the corresponding `done-*` file, remove them from the active source file, delete an emptied source plan file, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.
 - Preserve imported `obra-*`, `awesome-*`, `openai-*`, and other upstream assets; express this repository's planning policy through repository-owned internal wrappers instead of editing upstream planning skills.
-- If an imported asset still requires a direct repo-local exception, register the replay patch in `.github/skills/internal-agent-sync-control-center/references/imported-asset-overrides.yaml` instead of leaving an undocumented fork.
+- If an imported asset still requires a direct repo-local exception, register the replay patch in `.github/skills/internal-agent-sync-external-resources/references/imported-asset-overrides.yaml` instead of leaving an undocumented fork.
 
 ## Repository Workflow Reminders
 

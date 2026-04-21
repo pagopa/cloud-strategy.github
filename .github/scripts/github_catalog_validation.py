@@ -60,7 +60,13 @@ def main() -> int:
     run_token_risks = args.token_risks_only or not args.skip_token_risks
 
     if run_required_targets:
-        for target in ("catalog-lint", "test", "skill-lint", "catalog-check"):
+        for target in (
+            "catalog-lint",
+            "test",
+            "skill-lint",
+            "catalog-check",
+            "docs-lint",
+        ):
             exit_code = run_make_target(root, target, optional=False)
             if exit_code != 0:
                 return exit_code

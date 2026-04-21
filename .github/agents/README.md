@@ -3,12 +3,14 @@
 This folder contains deliberate custom agents for repository-owned direct-owner operations plus repo-only sync workflows.
 
 ## Resolution order
+
 1. Apply repository non-negotiables from `copilot-instructions.md`.
 2. Apply explicit user request and selected agent behavior (agent-first).
 3. Apply matching `instructions/*.instructions.md` (`applyTo` by path).
 4. Apply referenced skill details.
 
 ## Recommended owner selection
+
 - Safe fallback when the right operational lane is still ambiguous: `internal-planning-leader`.
 - Direct canonical owners: `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-master`.
 - Source-side catalog sync, rationalization, overlap cleanup, and governance drift correction in this repository: `internal-sync-external-resources`.
@@ -16,10 +18,12 @@ This folder contains deliberate custom agents for repository-owned direct-owner 
 - PR-focused work should use the `internal-pr-editor` skill because this repository does not currently ship a dedicated PR editor agent.
 
 ## Repo-only agents (not synced to consumers)
+
 - `internal-sync-external-resources`
 - `internal-sync-global-copilot-configs-into-repo`
 
 ## Why this catalog stays deliberate
+
 - This repository keeps a deliberate set of source-side command-center agents under `.github/agents/`.
 - Prefer one cohesive agent per recurring operational or governance workflow.
 - Keep the four canonical owners explicit and non-overlapping, and keep reusable logic in skills instead of bloating agent bodies.
@@ -28,6 +32,7 @@ This folder contains deliberate custom agents for repository-owned direct-owner 
 - Prefer skills for detailed task procedures unless a dedicated agent file is present.
 
 ## Selection guide
+
 1. Use `internal-planning-leader` when the user has not yet chosen the right owner or the request could plausibly be execution, planning, review, or challenge.
 2. Use `internal-delivery-operator` for clear, local execution work with concrete verification and no non-trivial strategic tradeoffs.
 3. Use `internal-review-guard` for defect-first review, merge readiness, regression analysis, and evidence-based validation.

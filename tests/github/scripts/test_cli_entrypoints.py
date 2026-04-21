@@ -115,6 +115,7 @@ def test_github_catalog_validation_main_runs_required_targets_then_token_risks(
         "test",
         "skill-lint",
         "catalog-check",
+        "docs-lint",
         "token-risks",
     ]
     assert (

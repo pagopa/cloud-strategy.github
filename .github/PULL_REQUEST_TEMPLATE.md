@@ -1,9 +1,4 @@
-<!-- markdownlint-disable-file MD041 -->
-<!-- PR title format: <type>(<scope>): <summary> -->
-<!-- Examples: feat(skills): add reusable review workflow -->
-<!--           fix(workflows): tighten customization validation -->
-
-## Description
+# Description
 
 <!-- Describe what changed and why. -->
 

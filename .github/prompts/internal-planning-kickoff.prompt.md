@@ -3,6 +3,8 @@ agent: "agent"
 description: "Create a planning brief for repository-owned Copilot governance or cross-boundary execution work"
 ---
 
+<!-- markdownlint-disable-file MD041 -->
+
 Task or handoff:
 ${input:request:Paste the user request, handoff package, or desired change}
 
@@ -13,6 +15,7 @@ Constraints or rollout risks:
 ${input:constraints:List non-negotiables, rollout concerns, or known blockers}
 
 Use these repository sources first:
+
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)

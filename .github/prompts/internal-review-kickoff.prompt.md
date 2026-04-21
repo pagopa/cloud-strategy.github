@@ -3,6 +3,8 @@ agent: "agent"
 description: "Kick off a defect-first review for governance, workflow, or repository-owned catalog changes"
 ---
 
+<!-- markdownlint-disable-file MD041 -->
+
 Change, diff, or asset to review:
 ${input:subject:Describe the PR, diff, file set, or asset under review}
 
@@ -13,6 +15,7 @@ Known assumptions or concerns:
 ${input:concerns:List any risks, assumptions, or reviewer comments already in play}
 
 Use these repository sources first:
+
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-code-review-instructions.md](../copilot-code-review-instructions.md)
 - [.github/skills/internal-code-review/SKILL.md](../skills/internal-code-review/SKILL.md)
