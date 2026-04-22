@@ -581,3 +581,19 @@ def test_sync_contract_requires_target_local_validation_after_apply() -> None:
         "Treat any resulting fixes as consumer-local follow-up work"
         in sync_contract_text
     )
+
+
+def test_sync_contract_requires_source_side_convergence_check_without_local_validator() -> None:
+    sync_contract_text = Path(
+        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+    ).read_text(encoding="utf-8")
+
+    assert "When the target has no local catalog or contract validation script" in sync_contract_text
+    assert (
+        "python3 ./.github/scripts/sync_copilot_catalog.py plan --target-repo <repo> --format json"
+        in sync_contract_text
+    )
+    assert (
+        "zero managed `create`, `update`, `ensure`, `rebuild`, or `delete` operations"
+        in sync_contract_text
+    )

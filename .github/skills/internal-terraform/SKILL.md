@@ -44,6 +44,7 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - Treat `terraform import`, `terraform state mv`, and `terraform state rm` as explicit migration steps that must be documented alongside address or module refactors.
 - Review drift before structural changes, especially when renaming resources, changing `for_each` keys, or splitting code into modules.
 - Pin external modules and provider versions intentionally; when changing constraints, state the upgrade or compatibility reason.
+- When the repository validates Terraform with `terraform init -lockfile=readonly`, treat the commented `terraform_providers_lock` block in the repo `.pre-commit-config.yaml` as the canonical lock platform matrix and regenerate `.terraform.lock.hcl` with checksums for every listed platform when providers change or CI reports checksum mismatches.
 - Run policy or compliance gates when the repository or delivery pipeline already depends on them.
 - Stay Terraform/OpenTofu compatible unless the target repository explicitly standardizes on OpenTofu-only features.
 
@@ -90,5 +91,6 @@ Load `references/template-examples.md` when you need a minimal inline feature ex
 
 - `terraform fmt -check -recursive`
 - `terraform validate`
+- If `.terraform.lock.hcl` changes or checksum mismatches appear, confirm the lockfile still covers every platform declared in the repository lock matrix.
 - Review `terraform plan` output for unexpected changes
 - For modules: run example/consumer plan review

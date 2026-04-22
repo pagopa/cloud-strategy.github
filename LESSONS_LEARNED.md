@@ -23,7 +23,4 @@ This file retains durable lessons discovered while completing tasks in this repo
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
 
-| 2026-04-21 | After Copilot baseline apply, if the target has no local catalog validation script, confirm convergence with a source-side sync plan and require zero managed create/update/delete operations. | pending | .github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md |
-| 2026-04-22 | When Terraform `pre-commit` fails in GitHub Actions with provider checksum mismatches, do not stop at cache busting: test an affected root with `terraform providers lock -platform=linux_amd64` because the real defect can be lockfiles that pass locally on macOS but still lack Linux checksums for CI. | pending | .github/skills/internal-terraform/SKILL.md |
-| 2026-04-22 | For self-authored PRs under required-review policy, green checks are not enough: GitHub rejects self-approval, and some repositories also reject merge commits, so the operational merge path must prefer `--squash` and may require explicit admin merge when policy allows. | pending | .github/copilot-instructions.md |
-| 2026-04-22 | Organization-wide `gh search prs` results can lag briefly after a merge; confirm the terminal state of a just-merged PR with repository-scoped `gh pr view --json state,mergedAt` before treating it as still open. | pending | .github/copilot-instructions.md |
+No pending lessons currently.

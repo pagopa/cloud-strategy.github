@@ -80,6 +80,8 @@ Use the closest existing checks for the touched behavior:
 
 If a dedicated contract test is missing, call out the gap explicitly.
 
+When the target has no local catalog or contract validation script, confirm convergence from the source side with `python3 ./.github/scripts/sync_copilot_catalog.py plan --target-repo <repo> --format json` and require zero managed `create`, `update`, `ensure`, `rebuild`, or `delete` operations before treating the sync as converged. If that fallback check leaves `tmp/copilot-sync.plan.md` in an otherwise clean target and the file is not ignored, remove it after inspection.
+
 After `apply`, run the closest target-local catalog or contract validation when preserved `local-*` assets, preserved consumer-local GitHub instructions overrides, or other target-owned assets can still expose latent drift. Treat any resulting fixes as consumer-local follow-up work, not as source-baseline drift, unless the same finding reproduces against the source-managed assets themselves.
 
 ## Reporting Contract

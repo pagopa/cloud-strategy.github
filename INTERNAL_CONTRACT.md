@@ -187,6 +187,20 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - any future peer-automation exception between canonical owners must be narrow, one-directional, auditably bounded, and non-mesh
   - mandatory and optional skill contracts remain explicit where the operating model depends on them
 
+### Repository Workflow
+
+#### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-visible`
+
+- Goal: keep repo-wide GitHub PR operating reminders visible where native Copilot flows need them.
+- Scope:
+  - `.github/copilot-instructions.md`
+- Expected behavior:
+  - self-authored PRs under required reviews are not treated as mergeable from green checks alone
+  - the repo-wide projection tells operators to verify a qualifying non-author approval before merge
+  - the repo-wide projection prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
+  - organization-wide `gh search prs` results are treated as potentially stale immediately after merge
+  - repository-scoped `gh pr view --json state,mergedAt` is used to confirm terminal PR state before treating a just-merged PR as still open
+
 ### Reporting
 
 #### `reporting-completion-report-projection-stays-visible`

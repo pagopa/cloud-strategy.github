@@ -54,6 +54,8 @@ repos:
           - --args=-json
           - --args=-no-color
       - id: terraform_tflint
+      # Keep this hook commented to avoid slowing normal pre-commit runs.
+      # Treat the platform list below as the canonical `.terraform.lock.hcl` matrix.
       # - id: terraform_providers_lock
       #   args:
       #     - --hook-config=--mode=always-regenerate-lockfile
