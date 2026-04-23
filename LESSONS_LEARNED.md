@@ -22,3 +22,4 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
+| 2026-04-23 | When a Python test must modify `sys.path` to import a standalone script, keep the import after that setup and mark that import with `# noqa: E402`; do not use suppressions for real dead code such as unused imports or unused variables, which should be removed instead. | pending | Repository Python linting and test import conventions |
