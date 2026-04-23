@@ -35,6 +35,9 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - Avoid hardcoded values (IDs, ARNs, subscription IDs, secrets).
 - Apply tags on all taggable resources.
 - Preserve naming and folder conventions of the target repository.
+- For new root configurations without an established competing layout, use the numbered root structure from `references/structure-standard.md`.
+- Treat numbered root files as a logical hierarchy for humans only; actual Terraform ordering must still be expressed in the dependency graph.
+- Do not proactively migrate an existing root only to match the default structure; use the default as the migration target only when migration is explicitly requested.
 - Preserve stable module input/output contracts when modifying existing modules.
 - Keep Terraform formatting and file splits consistent with the target directory; when the repo already separates `providers.tf`, `terraform.tf`, `variables.tf`, or `outputs.tf`, preserve that structure.
 
@@ -54,6 +57,13 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 - Place meta-arguments before normal arguments, keep arguments before nested blocks, and keep lifecycle-style control blocks last.
 - Use descriptive singular `snake_case` identifiers; use `main` only when there is one obvious instance and a more specific name adds no clarity.
 - When `variables.tf` or `outputs.tf` exist as dedicated files, keep entries deterministic and easy to scan, typically alphabetical by identifier.
+
+## Root configuration standard layout
+
+- Load `references/structure-standard.md` when creating or reorganizing a root configuration.
+- Use the numbered root layout as the default for new root configurations unless the target repository or folder already has another established structure, keeping `00-*` for init or fundamental data and allocating `10-97` dynamically from upstream prerequisites to downstream branches.
+- Keep environment selection under `env/<account|subscription|project>/` when the root uses the repository default `terraform.sh` runner pattern.
+- Do not apply the numbered root layout to reusable modules.
 
 ## Module standard layout
 
