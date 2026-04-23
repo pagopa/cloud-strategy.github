@@ -14,7 +14,10 @@ def test_repo_projection_keeps_github_pr_merge_and_terminal_state_guardrails() -
     assert "For self-authored PRs under required-review policy" in copilot_text
     assert "qualifying non-author approval" in copilot_text
     assert "prefer `gh pr merge --squash`" in copilot_text
-    assert "Treat organization-wide `gh search prs` results as eventually consistent" in copilot_text
+    assert (
+        "Treat organization-wide `gh search prs` results as eventually consistent"
+        in copilot_text
+    )
     assert "`gh pr view --json state,mergedAt`" in copilot_text
 
     assert (
@@ -31,8 +34,20 @@ def test_terraform_lock_matrix_policy_stays_visible() -> None:
     precommit_text = read_text(".pre-commit-config.yaml")
 
     assert "canonical lock platform matrix" in terraform_skill_text
-    assert "`terraform_providers_lock` block in the repo `.pre-commit-config.yaml`" in terraform_skill_text
-    assert "If `.terraform.lock.hcl` changes or checksum mismatches appear" in terraform_skill_text
+    assert (
+        "`terraform_providers_lock` block in the repo `.pre-commit-config.yaml`"
+        in terraform_skill_text
+    )
+    assert (
+        "If `.terraform.lock.hcl` changes or checksum mismatches appear"
+        in terraform_skill_text
+    )
 
-    assert "Keep this hook commented to avoid slowing normal pre-commit runs." in precommit_text
-    assert "Treat the platform list below as the canonical `.terraform.lock.hcl` matrix." in precommit_text
+    assert (
+        "Keep this hook commented to avoid slowing normal pre-commit runs."
+        in precommit_text
+    )
+    assert (
+        "Treat the platform list below as the canonical `.terraform.lock.hcl` matrix."
+        in precommit_text
+    )

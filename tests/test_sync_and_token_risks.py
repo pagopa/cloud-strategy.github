@@ -136,8 +136,7 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert (target_root / ".github/copilot-instructions.override.md").read_text(
         encoding="utf-8"
     ) == (
-        "# Copilot Instructions Override\n\n"
-        "- No active overrides in this repository.\n"
+        "# Copilot Instructions Override\n\n- No active overrides in this repository.\n"
     )
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
@@ -583,12 +582,17 @@ def test_sync_contract_requires_target_local_validation_after_apply() -> None:
     )
 
 
-def test_sync_contract_requires_source_side_convergence_check_without_local_validator() -> None:
+def test_sync_contract_requires_source_side_convergence_check_without_local_validator() -> (
+    None
+):
     sync_contract_text = Path(
         ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
-    assert "When the target has no local catalog or contract validation script" in sync_contract_text
+    assert (
+        "When the target has no local catalog or contract validation script"
+        in sync_contract_text
+    )
     assert (
         "python3 ./.github/scripts/sync_copilot_catalog.py plan --target-repo <repo> --format json"
         in sync_contract_text

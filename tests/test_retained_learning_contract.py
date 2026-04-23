@@ -49,9 +49,9 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
     for relative_path, expected_snippets in expected_contracts.items():
         text = read_text(relative_path)
         for snippet in expected_snippets:
-            assert (
-                snippet in text
-            ), f"{relative_path} is missing retained-learning guardrail text: {snippet}"
+            assert snippet in text, (
+                f"{relative_path} is missing retained-learning guardrail text: {snippet}"
+            )
 
 
 def test_pending_lesson_rows_have_expected_shape_when_present() -> None:

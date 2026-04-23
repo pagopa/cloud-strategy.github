@@ -28,7 +28,7 @@ def initialize_governance_repo(root: Path, *, with_inventory: bool = True) -> No
     )
     write_file(
         root / ".github/copilot-instructions.md",
-        "# Copilot Instructions\n\n" "See `AGENTS.md` and `.github/INVENTORY.md`.\n",
+        "# Copilot Instructions\n\nSee `AGENTS.md` and `.github/INVENTORY.md`.\n",
     )
     if with_inventory:
         sync_inventory(root)
