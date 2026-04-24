@@ -302,7 +302,12 @@ def extract_pending_lessons_rows(content: str | None) -> list[list[str]]:
         return []
 
     rows: list[list[str]] = []
-    for line in lines[pending_table.data_start : pending_table.data_end]:
+    for line in lines[pending_table.data_start : pending_table.section_end]:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if not line.lstrip().startswith("|"):
+            break
         cells = parse_markdown_table_row(line)
         if any(cell for cell in cells):
             rows.append(cells)

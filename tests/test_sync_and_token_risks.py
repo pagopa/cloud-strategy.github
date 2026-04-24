@@ -292,6 +292,55 @@ def test_apply_sync_plan_realigns_lessons_structure_without_losing_target_rows(
     )
 
 
+def test_apply_sync_plan_preserves_multiple_lessons_rows_separated_by_blank_lines(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+    source_lessons = (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n\n"
+        "No pending lessons currently.\n"
+    )
+    target_lessons = (
+        "# Lessons\n\n"
+        "Target-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n"
+        "| 2026-04-23 | Keep first lesson | pending | first.md |\n\n"
+        "| 2026-04-21 | Keep second lesson | pending | second.md |\n"
+    )
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / "LESSONS_LEARNED.md", source_lessons)
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "LESSONS_LEARNED.md", target_lessons)
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("update", "LESSONS_LEARNED.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+    apply_sync_plan(plan)
+
+    assert (target_root / "LESSONS_LEARNED.md").read_text(encoding="utf-8") == (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n"
+        "| 2026-04-23 | Keep first lesson | pending | first.md |\n"
+        "| 2026-04-21 | Keep second lesson | pending | second.md |\n"
+    )
+
+
 def test_build_sync_plan_includes_shared_repo_hygiene_files_only(
     tmp_path: Path,
 ) -> None:
