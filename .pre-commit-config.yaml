@@ -99,6 +99,8 @@ repos:
           # only when it needs structured retry/error matching.
           - --args=-no-color
       - id: terraform_tflint # Lint Terraform code against provider and best-practice rules.
+      # Keep this hook commented to avoid slowing normal pre-commit runs.
+      # Treat the platform list below as the canonical `.terraform.lock.hcl` matrix.
       # - id: terraform_providers_lock # Regenerate provider lock files for supported platforms.
       #   args:
       #     - --hook-config=--mode=always-regenerate-lockfile
