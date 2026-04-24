@@ -21,6 +21,7 @@ from .shared import (
     SyncPlan,
     action_sort_key,
     all_files_under,
+    git_dirty_paths,
     git_revision,
     is_consumer_sync_excluded_path,
     is_git_dirty,
@@ -249,6 +250,18 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     )
 
     ordered_operations = tuple(sorted(operations, key=lambda operation: (action_sort_key(operation.action), operation.path)))
+    planned_paths = {operation.path for operation in ordered_operations}
+    dirty_paths = tuple(path for path in git_dirty_paths(target_root) if path in planned_paths)
+    managed_mutation_paths = tuple(
+        sorted(
+            {
+                operation.path
+                for operation in ordered_operations
+                if operation.action in {"create", "update", "ensure", "rebuild", "delete"}
+            }
+        )
+    )
+    dirty_managed_overlap = tuple(path for path in dirty_paths if path in managed_mutation_paths)
     return SyncPlan(
         source_root=source_root,
         target_root=target_root,
@@ -262,6 +275,9 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         generated_inventory=generated_inventory,
         generated_lessons=generated_lessons,
         generated_gitignore=generated_gitignore,
+        dirty_paths=dirty_paths,
+        managed_mutation_paths=managed_mutation_paths,
+        dirty_managed_overlap=dirty_managed_overlap,
     )
 
 

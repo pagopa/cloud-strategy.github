@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 from lib.syncing import apply_sync_plan, build_sync_plan, write_sync_plan
@@ -10,6 +11,27 @@ from lib.token_risks import detect_token_risks
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def run_git(root: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", *args],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def init_git_repo(root: Path) -> None:
+    run_git(root, "init")
+    run_git(root, "config", "user.name", "Test User")
+    run_git(root, "config", "user.email", "test@example.com")
+
+
+def commit_all(root: Path, message: str) -> None:
+    run_git(root, "add", "-A")
+    run_git(root, "commit", "-m", message)
 
 
 def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
@@ -208,6 +230,34 @@ def test_build_sync_plan_reads_source_and_target_manifest_versions(
 
     assert plan.source_version == "2.4.0"
     assert plan.target_manifest_source_version == "2.3.1"
+
+
+def test_sync_plan_json_reports_dirty_overlap_for_managed_mutations(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\nstale\n")
+    write_file(target_root / ".gitignore", "/tmp/superpowers/\n")
+
+    init_git_repo(target_root)
+    commit_all(target_root, "Initial target state")
+
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ndirty\n")
+    write_file(target_root / "notes.txt", "target-only notes\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    payload = plan.to_dict()
+
+    assert payload["dirty_paths"] == [".github/copilot-instructions.md"]
+    assert ".github/copilot-instructions.md" in payload["managed_mutation_paths"]
+    assert payload["dirty_managed_overlap"] == [".github/copilot-instructions.md"]
+    assert "notes.txt" not in payload["dirty_paths"]
+    assert "notes.txt" not in payload["dirty_managed_overlap"]
 
 
 def test_apply_sync_plan_creates_target_lessons_from_source_template(

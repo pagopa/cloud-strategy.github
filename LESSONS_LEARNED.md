@@ -22,5 +22,4 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
-
-No pending lessons currently.
+| 2026-04-24 | In source-side skill Markdown, do not cite target-only materialized paths such as `.github/copilot-instructions.override.md`; skill-lint resolves local references against files that exist on disk, so prefer `.github/copilot-instructions.override.md.template` or descriptive prose. | pending | `.github/skills/internal-skill-creator/SKILL.md` |
