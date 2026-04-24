@@ -650,3 +650,20 @@ def test_sync_contract_requires_source_side_convergence_check_without_local_vali
         "zero managed `create`, `update`, `ensure`, `rebuild`, or `delete` operations"
         in sync_contract_text
     )
+
+
+def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() -> (
+    None
+):
+    sync_contract_text = Path(
+        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+    ).read_text(encoding="utf-8")
+
+    assert (
+        "compare dirty paths against the planned managed mutations"
+        in sync_contract_text
+    )
+    assert (
+        "do not use `--allow-dirty-target` as a blanket bypass"
+        in sync_contract_text
+    )

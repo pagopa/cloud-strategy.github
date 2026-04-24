@@ -22,4 +22,5 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Intended canonical target |
 | --- | --- | --- | --- |
-| 2026-04-24 | When a consumer target is dirty outside the mirrored sync scope, do not use `--allow-dirty-target` as a blanket bypass; compare the dirty paths against the planned managed mutations first and treat zero-overlap cases as plan-scoped manual reconciliation work. | pending | `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md` |
+
+No pending lessons currently.
