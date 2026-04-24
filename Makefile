@@ -6,6 +6,8 @@ SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
 PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests .github/skills
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
+MARKDOWNLINT_VERSION := 0.18.1
+MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**"
 
 .PHONY: help python-version-check lint catalog-lint github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
@@ -50,6 +52,18 @@ skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
 
 docs-lint:
-	@if command -v npx >/dev/null 2>&1; then npx --yes markdownlint-cli2@0.18.1 "**/*.md" "#tmp/**"; else printf '%s\n' 'npx not installed; skipping markdown lint.'; fi
+	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
+		markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
+	elif command -v npx >/dev/null 2>&1; then \
+		if [ -n "$${CI:-}" ]; then \
+			npx --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) $(MARKDOWNLINT_PATTERNS); \
+		elif npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- --version >/dev/null 2>&1; then \
+			npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- $(MARKDOWNLINT_PATTERNS); \
+		else \
+			printf '%s\n' 'markdownlint-cli2 is not installed or cached; skipping markdown lint outside CI.'; \
+		fi; \
+	else \
+		printf '%s\n' 'npx not installed; skipping markdown lint.'; \
+	fi
 
 all: lint test catalog-check

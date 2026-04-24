@@ -110,19 +110,19 @@ class SyncPlan:
 
 
 def log_info(message: str) -> None:
-    print(f"ℹ️  {message}")
+    print(f"ℹ️  {message}", flush=True)
 
 
 def log_warn(message: str) -> None:
-    print(f"⚠️  {message}")
+    print(f"⚠️  {message}", flush=True)
 
 
 def log_success(message: str) -> None:
-    print(f"✅ {message}")
+    print(f"✅ {message}", flush=True)
 
 
 def log_error(message: str) -> None:
-    print(f"❌ {message}")
+    print(f"❌ {message}", flush=True)
 
 
 def find_repo_root(start: Path) -> Path:
