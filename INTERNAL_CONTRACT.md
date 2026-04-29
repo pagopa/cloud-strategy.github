@@ -95,6 +95,19 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - policy files do not repeat volatile inventory
   - historical recommendations do not remain framed as active requirements
 
+  #### `duplication-thin-wrapper-entrypoints-need-content-verification`
+
+  - Goal: prevent same-named helper files or entry points from being treated as duplicate assets without checking whether one is an intentional thin wrapper to a canonical implementation.
+  - Scope:
+    - repo-root helper entry points
+    - `.github/scripts/**`
+    - catalog review and consistency guidance
+  - Expected behavior:
+    - same-named files in different locations are not classified as duplicate from naming or path alone
+    - review, audit, and rationalization work compares both content and operating role before recommending `DELETE` or `MERGE`
+    - thin wrappers and convenience entry points to canonical implementations remain allowed when they improve operator ergonomics and do not fork the underlying logic
+    - destructive deduplication requires evidence of duplicated behavior, not just matching names
+
 #### `duplication-useful-projections-are-allowed`
 
 - Goal: preserve local self-containment when it materially helps the consumer.
@@ -186,6 +199,20 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - canonical owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
   - any future peer-automation exception between canonical owners must be narrow, one-directional, auditably bounded, and non-mesh
   - mandatory and optional skill contracts remain explicit where the operating model depends on them
+
+### Repository Workflow
+
+#### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-visible`
+
+- Goal: keep repo-wide GitHub PR operating reminders visible where native Copilot flows need them.
+- Scope:
+  - `.github/copilot-instructions.md`
+- Expected behavior:
+  - self-authored PRs under required reviews are not treated as mergeable from green checks alone
+  - the repo-wide projection tells operators to verify a qualifying non-author approval before merge
+  - the repo-wide projection prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
+  - organization-wide `gh search prs` results are treated as potentially stale immediately after merge
+  - repository-scoped `gh pr view --json state,mergedAt` is used to confirm terminal PR state before treating a just-merged PR as still open
 
 ### Reporting
 

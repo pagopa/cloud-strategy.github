@@ -94,6 +94,9 @@ class SyncPlan:
     generated_inventory: str
     generated_lessons: str | None = None
     generated_gitignore: str | None = None
+    dirty_paths: tuple[str, ...] = ()
+    managed_mutation_paths: tuple[str, ...] = ()
+    dirty_managed_overlap: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -105,24 +108,27 @@ class SyncPlan:
             "target_dirty": self.target_dirty,
             "stacks": list(self.stacks),
             "local_assets": list(self.local_assets),
+            "dirty_paths": list(self.dirty_paths),
+            "managed_mutation_paths": list(self.managed_mutation_paths),
+            "dirty_managed_overlap": list(self.dirty_managed_overlap),
             "operations": [operation.to_dict() for operation in self.operations],
         }
 
 
 def log_info(message: str) -> None:
-    print(f"ℹ️  {message}")
+    print(f"ℹ️  {message}", flush=True)
 
 
 def log_warn(message: str) -> None:
-    print(f"⚠️  {message}")
+    print(f"⚠️  {message}", flush=True)
 
 
 def log_success(message: str) -> None:
-    print(f"✅ {message}")
+    print(f"✅ {message}", flush=True)
 
 
 def log_error(message: str) -> None:
-    print(f"❌ {message}")
+    print(f"❌ {message}", flush=True)
 
 
 def find_repo_root(start: Path) -> Path:
@@ -174,6 +180,40 @@ def is_git_dirty(root: Path) -> bool:
     if result.returncode != 0:
         return False
     return bool(result.stdout.strip())
+
+
+def git_dirty_paths(root: Path) -> list[str]:
+    result = subprocess.run(
+        ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
+        cwd=root,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout:
+        return []
+
+    entries = result.stdout.decode("utf-8", errors="replace").split("\0")
+    dirty_paths: list[str] = []
+    index = 0
+    while index < len(entries):
+        entry = entries[index]
+        index += 1
+        if not entry:
+            continue
+
+        status = entry[:2]
+        path = entry[3:]
+        if path:
+            dirty_paths.append(path)
+
+        if "R" in status or "C" in status:
+            if index < len(entries):
+                renamed_path = entries[index]
+                index += 1
+                if renamed_path:
+                    dirty_paths.append(renamed_path)
+
+    return sorted(dedupe_preserve_order(dirty_paths))
 
 
 def split_frontmatter(text: str) -> tuple[dict[str, object], str]:

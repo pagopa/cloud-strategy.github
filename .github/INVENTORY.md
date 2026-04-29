@@ -126,3 +126,12 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/agents/internal-review-guard.agent.md`
 - `.github/agents/internal-sync-external-resources.agent.md`
 - `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
+
+## Prompts
+
+- `.github/prompts/internal-copilot-resources-mega-review.prompt.md`
+- `.github/prompts/internal-mega-review.prompt.md`
+- `.github/prompts/internal-planning-kickoff.prompt.md`
+- `.github/prompts/internal-pre-mortem.prompt.md`
+- `.github/prompts/internal-review-kickoff.prompt.md`
+- `.github/prompts/internal-sync-plan.prompt.md`

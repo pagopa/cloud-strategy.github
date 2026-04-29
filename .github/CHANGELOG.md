@@ -8,6 +8,14 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-04-23
+
+- Cleared the stale pending row from `LESSONS_LEARNED.md` after confirming the sync-convergence fallback rule is already codified in `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md`.
+
+## 2026-04-22
+
+- Codified the pending retained-learning rows into `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md`, `.github/skills/internal-terraform/SKILL.md`, `.pre-commit-config.yaml`, `.github/copilot-instructions.md`, and `INTERNAL_CONTRACT.md`, added regression coverage for the new sync, Terraform, and GitHub PR operating rules, and cleared the now-codified rows from `LESSONS_LEARNED.md`.
+
 ## 2026-04-21
 
 - Realigned `.github/skills/internal-copilot-audit/SKILL.md` to the current catalog-consistency and sync entrypoints, removing stale references to retired source-side script names that were blocking `make skill-lint`.

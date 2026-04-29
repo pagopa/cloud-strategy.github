@@ -21,6 +21,7 @@ from .shared import (
     SyncPlan,
     action_sort_key,
     all_files_under,
+    git_dirty_paths,
     git_revision,
     is_consumer_sync_excluded_path,
     is_git_dirty,
@@ -206,12 +207,16 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     future_inventory_paths = sorted(
         catalog_path
         for catalog_path in source_files
-        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/skills/"))
+        if catalog_path.startswith(
+            (".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/")
+        )
     )
     future_inventory_paths.extend(
         catalog_path
         for catalog_path in local_assets
-        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/skills/"))
+        if catalog_path.startswith(
+            (".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/")
+        )
     )
     generated_inventory = render_inventory_markdown(sections_from_catalog_paths(future_inventory_paths))
 
@@ -249,6 +254,18 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     )
 
     ordered_operations = tuple(sorted(operations, key=lambda operation: (action_sort_key(operation.action), operation.path)))
+    planned_paths = {operation.path for operation in ordered_operations}
+    dirty_paths = tuple(path for path in git_dirty_paths(target_root) if path in planned_paths)
+    managed_mutation_paths = tuple(
+        sorted(
+            {
+                operation.path
+                for operation in ordered_operations
+                if operation.action in {"create", "update", "ensure", "rebuild", "delete"}
+            }
+        )
+    )
+    dirty_managed_overlap = tuple(path for path in dirty_paths if path in managed_mutation_paths)
     return SyncPlan(
         source_root=source_root,
         target_root=target_root,
@@ -262,6 +279,9 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         generated_inventory=generated_inventory,
         generated_lessons=generated_lessons,
         generated_gitignore=generated_gitignore,
+        dirty_paths=dirty_paths,
+        managed_mutation_paths=managed_mutation_paths,
+        dirty_managed_overlap=dirty_managed_overlap,
     )
 
 
@@ -302,7 +322,12 @@ def extract_pending_lessons_rows(content: str | None) -> list[list[str]]:
         return []
 
     rows: list[list[str]] = []
-    for line in lines[pending_table.data_start : pending_table.data_end]:
+    for line in lines[pending_table.data_start : pending_table.section_end]:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if not line.lstrip().startswith("|"):
+            break
         cells = parse_markdown_table_row(line)
         if any(cell for cell in cells):
             rows.append(cells)
@@ -383,6 +408,7 @@ def discover_source_sync_files(root: Path) -> set[str]:
     files.update(relative_path for relative_path in MANAGED_WORKFLOW_FILES if (root / relative_path).exists())
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
+    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     files.discard(COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH)
     return {
@@ -399,6 +425,7 @@ def discover_target_managed_files(root: Path) -> set[str]:
         files.add(INVENTORY_PATH)
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
+    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     return {
         relative_path
@@ -411,6 +438,7 @@ def discover_target_excluded_sync_files(root: Path) -> set[str]:
     files: set[str] = set()
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
+    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     return {
         relative_path

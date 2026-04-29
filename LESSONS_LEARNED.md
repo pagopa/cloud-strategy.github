@@ -20,7 +20,7 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 ## Pending Rules
 
-| Date | Lesson | Status | Intended canonical target |
+| Date | Lesson | Status | Codification target |
 | --- | --- | --- | --- |
 
-| 2026-04-21 | After Copilot baseline apply, if the target has no local catalog validation script, confirm convergence with a source-side sync plan and require zero managed create/update/delete operations. | pending | .github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md |
+No pending lessons currently require codification.

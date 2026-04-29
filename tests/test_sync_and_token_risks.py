@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 from lib.syncing import apply_sync_plan, build_sync_plan, write_sync_plan
@@ -10,6 +11,27 @@ from lib.token_risks import detect_token_risks
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def run_git(root: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", *args],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def init_git_repo(root: Path) -> None:
+    run_git(root, "init")
+    run_git(root, "config", "user.name", "Test User")
+    run_git(root, "config", "user.email", "test@example.com")
+
+
+def commit_all(root: Path, message: str) -> None:
+    run_git(root, "add", "-A")
+    run_git(root, "commit", "-m", message)
 
 
 def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
@@ -92,6 +114,32 @@ def test_build_sync_plan_creates_target_local_override_from_template_when_missin
     )
 
 
+def test_build_sync_plan_includes_prompt_assets_in_managed_inventory(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/prompts/internal-review-kickoff.prompt.md",
+        "---\ndescription: Review kickoff\n---\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("create", ".github/prompts/internal-review-kickoff.prompt.md") in actions
+    assert "## Prompts" in plan.generated_inventory
+    assert (
+        "- `.github/prompts/internal-review-kickoff.prompt.md`"
+        in plan.generated_inventory
+    )
+
+
 def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) -> None:
     source_root = tmp_path / "source"
     target_root = tmp_path / "target"
@@ -136,8 +184,7 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert (target_root / ".github/copilot-instructions.override.md").read_text(
         encoding="utf-8"
     ) == (
-        "# Copilot Instructions Override\n\n"
-        "- No active overrides in this repository.\n"
+        "# Copilot Instructions Override\n\n- No active overrides in this repository.\n"
     )
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
@@ -209,6 +256,34 @@ def test_build_sync_plan_reads_source_and_target_manifest_versions(
 
     assert plan.source_version == "2.4.0"
     assert plan.target_manifest_source_version == "2.3.1"
+
+
+def test_sync_plan_json_reports_dirty_overlap_for_managed_mutations(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\nstale\n")
+    write_file(target_root / ".gitignore", "/tmp/superpowers/\n")
+
+    init_git_repo(target_root)
+    commit_all(target_root, "Initial target state")
+
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ndirty\n")
+    write_file(target_root / "notes.txt", "target-only notes\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    payload = plan.to_dict()
+
+    assert payload["dirty_paths"] == [".github/copilot-instructions.md"]
+    assert ".github/copilot-instructions.md" in payload["managed_mutation_paths"]
+    assert payload["dirty_managed_overlap"] == [".github/copilot-instructions.md"]
+    assert "notes.txt" not in payload["dirty_paths"]
+    assert "notes.txt" not in payload["dirty_managed_overlap"]
 
 
 def test_apply_sync_plan_creates_target_lessons_from_source_template(
@@ -290,6 +365,55 @@ def test_apply_sync_plan_realigns_lessons_structure_without_losing_target_rows(
         "| Date | Lesson | Status | Intended canonical target | Notes |\n"
         "| --- | --- | --- | --- | --- |\n"
         "| 2026-04-12 | Preserve local lesson | pending | AGENTS.md |  |\n"
+    )
+
+
+def test_apply_sync_plan_preserves_multiple_lessons_rows_separated_by_blank_lines(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+    source_lessons = (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n\n"
+        "No pending lessons currently.\n"
+    )
+    target_lessons = (
+        "# Lessons\n\n"
+        "Target-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n"
+        "| 2026-04-23 | Keep first lesson | pending | first.md |\n\n"
+        "| 2026-04-21 | Keep second lesson | pending | second.md |\n"
+    )
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / "LESSONS_LEARNED.md", source_lessons)
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "LESSONS_LEARNED.md", target_lessons)
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("update", "LESSONS_LEARNED.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+    apply_sync_plan(plan)
+
+    assert (target_root / "LESSONS_LEARNED.md").read_text(encoding="utf-8") == (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n"
+        "| 2026-04-23 | Keep first lesson | pending | first.md |\n"
+        "| 2026-04-21 | Keep second lesson | pending | second.md |\n"
     )
 
 
@@ -568,6 +692,58 @@ def test_detect_token_risks_reports_paired_local_agent_skill_overlap(
     assert "paired-agent-skill-overlap" in finding_codes
 
 
+def test_detect_token_risks_reports_unprofiled_imported_skill_description_budget(
+    tmp_path: Path,
+) -> None:
+    long_description = (
+        "Use when " + "optimizing cloud catalog trigger routing safely. " * 12
+    )
+
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/repo-profiles.yml",
+        "version: 1\nprofiles:\n  minimal:\n    recommended_skills: []\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/awesome-long/SKILL.md",
+        "---\n"
+        "name: awesome-long\n"
+        f"description: {long_description}\n"
+        "---\n\n"
+        "# Awesome Long\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "imported-skill-description-budget" in finding_codes
+
+
+def test_detect_token_risks_reports_skill_description_trigger_collision(
+    tmp_path: Path,
+) -> None:
+    description = "Use when reviewing repository-owned GitHub governance boundaries and validation evidence."
+
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/skills/internal-one/SKILL.md",
+        f"---\nname: internal-one\ndescription: {description}\n---\n\n# Internal One\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/internal-two/SKILL.md",
+        f"---\nname: internal-two\ndescription: {description}\n---\n\n# Internal Two\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "skill-description-trigger-collision" in finding_codes
+
+
 def test_sync_contract_requires_target_local_validation_after_apply() -> None:
     sync_contract_text = Path(
         ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
@@ -581,3 +757,36 @@ def test_sync_contract_requires_target_local_validation_after_apply() -> None:
         "Treat any resulting fixes as consumer-local follow-up work"
         in sync_contract_text
     )
+
+
+def test_sync_contract_requires_source_side_convergence_check_without_local_validator() -> (
+    None
+):
+    sync_contract_text = Path(
+        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+    ).read_text(encoding="utf-8")
+
+    assert (
+        "When the target has no local catalog or contract validation script"
+        in sync_contract_text
+    )
+    assert (
+        "python3 ./.github/scripts/sync_copilot_catalog.py plan --target-repo <repo> --format json"
+        in sync_contract_text
+    )
+    assert (
+        "zero managed `create`, `update`, `ensure`, `rebuild`, or `delete` operations"
+        in sync_contract_text
+    )
+
+
+def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() -> None:
+    sync_contract_text = Path(
+        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+    ).read_text(encoding="utf-8")
+
+    assert (
+        "compare dirty paths against the planned managed mutations"
+        in sync_contract_text
+    )
+    assert "do not use `--allow-dirty-target` as a blanket bypass" in sync_contract_text

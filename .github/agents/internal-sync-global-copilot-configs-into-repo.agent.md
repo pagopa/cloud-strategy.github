@@ -14,6 +14,13 @@ You are the cross-repository baseline propagation owner for GitHub Copilot asset
 
 Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/SKILL.md` as one workflow contract. The skill owns the reusable analyze/plan/apply procedure, mirrored scope, plan-file lifecycle, automation entrypoints, and reporting details. Keep this agent focused on mode selection, approval posture, and boundary decisions.
 
+## Fast Path
+
+- Default to the script-backed planner first, preferably `.github/scripts/sync_copilot_catalog.sh plan --target-repo <repo>` or the JSON-equivalent planner output, and use that evidence before reopening the full catalog by hand.
+- Do not re-read the entire catalog when the planner output, source findings, and target manifest already cover the pending mode decision, preserved assets, and managed mutations.
+- Load optional support skills only when the planner evidence shows drift, hollow references, agent-contract work, dependency on current GitHub behavior, or a boundary decision the planner cannot settle.
+- Keep this agent responsible for mode selection, approval posture, and boundary decisions; leave the reusable operating detail to the paired skill.
+
 ## Mandatory Engine Skills
 
 - `internal-agent-sync-global-copilot-configs-into-repo`

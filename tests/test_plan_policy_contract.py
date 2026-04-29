@@ -32,7 +32,7 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     )
     assert_plan_policy_anchors(agents_text)
     assert "Italian" in agents_text
-    assert "clear, local, quick, or banal tasks" in agents_text
+    assert "clear, local, quick, or banal tasks" not in agents_text
     assert "non-banal" in agents_text
     assert "macro-categories" in agents_text
     assert "continue through the remaining numbered plan files" in agents_text
@@ -45,6 +45,7 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     )
     assert_plan_policy_anchors(copilot_text)
     assert "Italian" in copilot_text
+    assert "clear, local, quick, or banal tasks" in copilot_text
     assert "retained planning is justified" in copilot_text
     assert "`internal-writing-plans`" in copilot_text
     assert "continue through the remaining numbered plan files" in copilot_text
