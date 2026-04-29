@@ -21,6 +21,31 @@ from .shared import (
     resolve_markdown_target,
 )
 
+APPLY_TO_OVERLAP_ALLOWLIST = (
+    {
+        "apply_to": "**/*.sh",
+        "paths": frozenset(
+            {
+                ".github/instructions/awesome-copilot-shell.instructions.md",
+                ".github/instructions/internal-bash.instructions.md",
+            }
+        ),
+        "reason": "Intentional co-load: imported generic shell guidance plus repository-specific Bash launcher rules.",
+        "owner": ".github/instructions/internal-bash.instructions.md",
+    },
+    {
+        "apply_to": "**/actions/**/action.y*ml",
+        "paths": frozenset(
+            {
+                ".github/instructions/internal-github-action-composite.instructions.md",
+                ".github/instructions/internal-github-actions.instructions.md",
+            }
+        ),
+        "reason": "Intentional co-load: composite-action rules extend the GitHub Actions baseline.",
+        "owner": ".github/instructions/internal-github-action-composite.instructions.md",
+    },
+)
+
 
 def run_consistency_checks(root: Path, include_token_risks: bool = False) -> list[Finding]:
     findings: list[Finding] = []
@@ -30,6 +55,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_internal_agent_contracts(root))
     findings.extend(check_repo_owned_agent_sections(root))
     findings.extend(check_duplicate_frontmatter_names(root))
+    findings.extend(check_instruction_apply_to_overlaps(root))
     findings.extend(check_source_local_assets(root))
     findings.extend(check_imported_asset_overrides(root))
     findings.extend(check_broken_local_links(root))
@@ -270,6 +296,63 @@ def check_duplicate_frontmatter_names(root: Path) -> list[Finding]:
                 )
             )
     return findings
+
+
+def check_instruction_apply_to_overlaps(root: Path) -> list[Finding]:
+    instructions_root = root / ".github/instructions"
+    if not instructions_root.exists():
+        return []
+
+    paths_by_apply_to: dict[str, list[str]] = defaultdict(list)
+    for path in sorted(instructions_root.glob("*.instructions.md")):
+        if not path.is_file():
+            continue
+        relative_path = path.relative_to(root).as_posix()
+        for apply_to in normalize_apply_to_patterns(load_frontmatter(path).get("applyTo")):
+            paths_by_apply_to[apply_to].append(relative_path)
+
+    findings: list[Finding] = []
+    for apply_to, paths in sorted(paths_by_apply_to.items()):
+        if len(paths) < 2 or is_apply_to_overlap_allowlisted(apply_to, paths):
+            continue
+        findings.append(
+            Finding(
+                severity="blocking",
+                code="instruction-applyto-overlap",
+                path=paths[0],
+                message=(
+                    f"Multiple instruction files declare the same applyTo pattern `{apply_to}`: "
+                    f"{', '.join(paths)}."
+                ),
+                suggestion=(
+                    "Keep only one owner for the exact glob or register an intentional co-load in "
+                    "APPLY_TO_OVERLAP_ALLOWLIST with reason and owner."
+                ),
+            )
+        )
+    return findings
+
+
+def normalize_apply_to_patterns(value: object) -> list[str]:
+    if isinstance(value, str):
+        raw_values = [value]
+    elif isinstance(value, list):
+        raw_values = [item for item in value if isinstance(item, str)]
+    else:
+        return []
+
+    patterns: list[str] = []
+    for raw_value in raw_values:
+        patterns.extend(pattern.strip() for pattern in raw_value.split(",") if pattern.strip())
+    return patterns
+
+
+def is_apply_to_overlap_allowlisted(apply_to: str, paths: list[str]) -> bool:
+    path_set = frozenset(paths)
+    for entry in APPLY_TO_OVERLAP_ALLOWLIST:
+        if entry["apply_to"] == apply_to and entry["paths"] == path_set:
+            return True
+    return False
 
 
 def normalize_agent_tools(tools: object) -> tuple[list[str], str | None]:
@@ -581,6 +664,7 @@ def collect_catalog_candidate_paths(root: Path) -> list[str]:
             (
                 ".github/agents/",
                 ".github/instructions/",
+                ".github/prompts/",
                 ".github/skills/",
             )
         )

@@ -114,6 +114,32 @@ def test_build_sync_plan_creates_target_local_override_from_template_when_missin
     )
 
 
+def test_build_sync_plan_includes_prompt_assets_in_managed_inventory(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/prompts/internal-review-kickoff.prompt.md",
+        "---\ndescription: Review kickoff\n---\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("create", ".github/prompts/internal-review-kickoff.prompt.md") in actions
+    assert "## Prompts" in plan.generated_inventory
+    assert (
+        "- `.github/prompts/internal-review-kickoff.prompt.md`"
+        in plan.generated_inventory
+    )
+
+
 def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) -> None:
     source_root = tmp_path / "source"
     target_root = tmp_path / "target"
@@ -666,6 +692,58 @@ def test_detect_token_risks_reports_paired_local_agent_skill_overlap(
     assert "paired-agent-skill-overlap" in finding_codes
 
 
+def test_detect_token_risks_reports_unprofiled_imported_skill_description_budget(
+    tmp_path: Path,
+) -> None:
+    long_description = (
+        "Use when " + "optimizing cloud catalog trigger routing safely. " * 12
+    )
+
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/repo-profiles.yml",
+        "version: 1\nprofiles:\n  minimal:\n    recommended_skills: []\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/awesome-long/SKILL.md",
+        "---\n"
+        "name: awesome-long\n"
+        f"description: {long_description}\n"
+        "---\n\n"
+        "# Awesome Long\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "imported-skill-description-budget" in finding_codes
+
+
+def test_detect_token_risks_reports_skill_description_trigger_collision(
+    tmp_path: Path,
+) -> None:
+    description = "Use when reviewing repository-owned GitHub governance boundaries and validation evidence."
+
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/skills/internal-one/SKILL.md",
+        f"---\nname: internal-one\ndescription: {description}\n---\n\n# Internal One\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/internal-two/SKILL.md",
+        f"---\nname: internal-two\ndescription: {description}\n---\n\n# Internal Two\n",
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "skill-description-trigger-collision" in finding_codes
+
+
 def test_sync_contract_requires_target_local_validation_after_apply() -> None:
     sync_contract_text = Path(
         ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
@@ -702,9 +780,7 @@ def test_sync_contract_requires_source_side_convergence_check_without_local_vali
     )
 
 
-def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() -> (
-    None
-):
+def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() -> None:
     sync_contract_text = Path(
         ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
@@ -713,7 +789,4 @@ def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() ->
         "compare dirty paths against the planned managed mutations"
         in sync_contract_text
     )
-    assert (
-        "do not use `--allow-dirty-target` as a blanket bypass"
-        in sync_contract_text
-    )
+    assert "do not use `--allow-dirty-target` as a blanket bypass" in sync_contract_text

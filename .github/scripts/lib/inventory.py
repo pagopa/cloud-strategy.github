@@ -5,11 +5,12 @@ from pathlib import Path
 
 from .shared import INVENTORY_PATH, path_list, write_text
 
-SECTION_ORDER = ("Instructions", "Skills", "Agents")
+SECTION_ORDER = ("Instructions", "Skills", "Agents", "Prompts")
 EMPTY_MESSAGES = {
     "Instructions": "No instruction files currently ship in the live catalog.",
     "Skills": "No skill files currently ship in the live catalog.",
     "Agents": "No agent files currently ship in the live catalog.",
+    "Prompts": "No prompt files currently ship in the live catalog.",
 }
 OFFICE_SUPPORT_ONLY_SKILLS = (
     ".github/skills/openai-docx/SKILL.md",
@@ -24,6 +25,7 @@ def collect_inventory_sections(root: Path) -> dict[str, list[str]]:
         "Instructions": path_list(root, ".github/instructions/**/*.instructions.md"),
         "Skills": path_list(root, ".github/skills/**/SKILL.md"),
         "Agents": path_list(root, ".github/agents/*.agent.md"),
+        "Prompts": path_list(root, ".github/prompts/*.prompt.md"),
     }
 
 
@@ -36,6 +38,8 @@ def sections_from_catalog_paths(paths: list[str]) -> dict[str, list[str]]:
             sections["Skills"].append(relative_path)
         elif relative_path.startswith(".github/agents/") and relative_path.endswith(".agent.md"):
             sections["Agents"].append(relative_path)
+        elif relative_path.startswith(".github/prompts/") and relative_path.endswith(".prompt.md"):
+            sections["Prompts"].append(relative_path)
     return {section: sorted(entries) for section, entries in sections.items()}
 
 

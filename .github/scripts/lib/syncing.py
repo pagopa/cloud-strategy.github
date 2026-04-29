@@ -207,12 +207,16 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     future_inventory_paths = sorted(
         catalog_path
         for catalog_path in source_files
-        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/skills/"))
+        if catalog_path.startswith(
+            (".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/")
+        )
     )
     future_inventory_paths.extend(
         catalog_path
         for catalog_path in local_assets
-        if catalog_path.startswith((".github/agents/", ".github/instructions/", ".github/skills/"))
+        if catalog_path.startswith(
+            (".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/")
+        )
     )
     generated_inventory = render_inventory_markdown(sections_from_catalog_paths(future_inventory_paths))
 
@@ -404,6 +408,7 @@ def discover_source_sync_files(root: Path) -> set[str]:
     files.update(relative_path for relative_path in MANAGED_WORKFLOW_FILES if (root / relative_path).exists())
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
+    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     files.discard(COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH)
     return {
@@ -420,6 +425,7 @@ def discover_target_managed_files(root: Path) -> set[str]:
         files.add(INVENTORY_PATH)
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
+    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     return {
         relative_path
@@ -432,6 +438,7 @@ def discover_target_excluded_sync_files(root: Path) -> set[str]:
     files: set[str] = set()
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
+    files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     return {
         relative_path

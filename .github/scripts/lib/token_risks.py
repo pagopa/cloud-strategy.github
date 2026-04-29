@@ -4,9 +4,12 @@ from collections import defaultdict
 from pathlib import Path
 import re
 
+import yaml
+
 from .shared import (
     Finding,
     finding_sort_key,
+    is_imported_asset,
     iter_markdown_assets,
     load_frontmatter,
     normalize_markdown_text,
@@ -16,6 +19,7 @@ from .shared import (
 
 ROOT_POLICY_MARKERS = ("AGENTS.md", ".github/copilot-instructions.md", ".github/INVENTORY.md")
 INVENTORY_LINE_PATTERN = re.compile(r"^- `?\.github/[^`]+`?(?::|\s*$)")
+IMPORTED_SKILL_DESCRIPTION_LIMIT = 500
 
 
 def detect_token_risks(root: Path) -> list[Finding]:
@@ -23,6 +27,8 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_bridge_overlap(root))
     findings.extend(check_inventory_dumps(root))
     findings.extend(check_duplicate_markdown_bodies(root))
+    findings.extend(check_imported_skill_description_budget(root))
+    findings.extend(check_skill_description_trigger_collisions(root))
     findings.extend(check_internal_agent_skill_list_size(root))
     findings.extend(check_internal_root_policy_overlap(root))
     findings.extend(check_instruction_skill_policy_overlap(root))
@@ -40,6 +46,14 @@ def iter_repo_owned_agent_paths(root: Path) -> list[Path]:
         for path in sorted(agents_root.glob("*.agent.md"))
         if path.is_file() and path.name.startswith(("internal-", "local-"))
     ]
+
+
+def iter_skill_paths(root: Path) -> list[Path]:
+    skills_root = root / ".github/skills"
+    if not skills_root.exists():
+        return []
+
+    return sorted(path for path in skills_root.glob("**/SKILL.md") if path.is_file())
 
 
 def check_bridge_overlap(root: Path) -> list[Finding]:
@@ -114,6 +128,118 @@ def check_duplicate_markdown_bodies(root: Path) -> list[Finding]:
             )
         )
     return findings
+
+
+def check_imported_skill_description_budget(root: Path) -> list[Finding]:
+    profiled_skill_paths = collect_profiled_skill_paths(root)
+    findings: list[Finding] = []
+    for path in iter_skill_paths(root):
+        relative_path = path.relative_to(root).as_posix()
+        if not is_imported_asset(relative_path) or relative_path in profiled_skill_paths:
+            continue
+
+        description = load_frontmatter(path).get("description")
+        if not isinstance(description, str):
+            continue
+
+        normalized_description = " ".join(description.split())
+        if len(normalized_description) < IMPORTED_SKILL_DESCRIPTION_LIMIT:
+            continue
+
+        family = path.parent.name.split("-", maxsplit=1)[0]
+        findings.append(
+            Finding(
+                severity="non-blocking",
+                code="imported-skill-description-budget",
+                path=relative_path,
+                message=(
+                    "Imported skill description is long and not referenced by .github/repo-profiles.yml "
+                    f"({len(normalized_description)} characters, family `{family}`)."
+                ),
+                suggestion=(
+                    "Keep it support-only, profile-scope it, wrap it only for local routing needs, "
+                    "or tighten the description trigger if it creates retrieval ambiguity."
+                ),
+            )
+        )
+    return findings
+
+
+def check_skill_description_trigger_collisions(root: Path) -> list[Finding]:
+    paths_by_description: dict[str, list[str]] = defaultdict(list)
+    for path in iter_skill_paths(root):
+        description = load_frontmatter(path).get("description")
+        if not isinstance(description, str):
+            continue
+        normalized_description = normalize_skill_description_trigger(description)
+        if len(normalized_description) < 40:
+            continue
+        paths_by_description[normalized_description].append(path.relative_to(root).as_posix())
+
+    findings: list[Finding] = []
+    for paths in paths_by_description.values():
+        if len(paths) < 2:
+            continue
+        findings.append(
+            Finding(
+                severity="non-blocking",
+                code="skill-description-trigger-collision",
+                path=sorted(paths)[0],
+                message=(
+                    "Multiple skills share the same normalized description trigger: "
+                    f"{', '.join(sorted(paths))}."
+                ),
+                suggestion=(
+                    "Make the trigger descriptions distinguish the routing boundary, or consolidate the skills "
+                    "if they intentionally describe the same workflow."
+                ),
+            )
+        )
+    return findings
+
+
+def collect_profiled_skill_paths(root: Path) -> set[str]:
+    profiles_path = root / ".github/repo-profiles.yml"
+    if not profiles_path.exists():
+        return set()
+
+    try:
+        payload = yaml.safe_load(read_text(profiles_path)) or {}
+    except yaml.YAMLError:
+        return set()
+    if not isinstance(payload, dict):
+        return set()
+
+    profiles = payload.get("profiles")
+    if not isinstance(profiles, dict):
+        return set()
+
+    profiled_paths: set[str] = set()
+    for profile in profiles.values():
+        if not isinstance(profile, dict):
+            continue
+        recommended_skills = profile.get("recommended_skills")
+        if not isinstance(recommended_skills, list):
+            continue
+        for skill_path in recommended_skills:
+            if isinstance(skill_path, str):
+                profiled_paths.add(normalize_profile_asset_path(skill_path))
+    return profiled_paths
+
+
+def normalize_profile_asset_path(path: str) -> str:
+    normalized_path = path.strip().lstrip("/")
+    if normalized_path.startswith(".github/"):
+        return normalized_path
+    if normalized_path.startswith(("agents/", "instructions/", "prompts/", "skills/")):
+        return f".github/{normalized_path}"
+    return normalized_path
+
+
+def normalize_skill_description_trigger(description: str) -> str:
+    lowered = description.lower()
+    normalized = re.sub(r"[^a-z0-9]+", " ", lowered)
+    return re.sub(r"\s+", " ", normalized).strip()
 
 
 def check_internal_agent_skill_list_size(root: Path) -> list[Finding]:
