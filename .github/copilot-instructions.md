@@ -42,6 +42,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - `obra-*` skills are the cross-cutting workflow lane. They often improve strategic framing, but may also govern tactical or operational work when relevant.
 - `internal-*` skills are the canonical repository-owned layer. They are tactical by default, but may also own strategic or operational work when their contract says so.
 - Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
+- During catalog review or rationalization, imported assets in domains already covered by a credible internal owner should be evaluated as `keep as depth`, `wrap under the internal owner`, or `retire`; do not collapse the decision to a binary keep/delete choice.
 - `local-*` assets are consumer-local extensions. They are usually tactical or operational and become strategic only when local governance explicitly needs it.
 - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the canonical repository-owned operational agents.
 - Use direct entry for canonical operational lanes and do not invent a repository-owned front-door router.

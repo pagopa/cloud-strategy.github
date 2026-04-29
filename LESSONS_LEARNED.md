@@ -21,6 +21,6 @@ This file retains durable lessons discovered while completing tasks in this repo
 ## Pending Rules
 
 | Date | Lesson | Status | Codification target |
-|---|---|---|---|
+| --- | --- | --- | --- |
 
 No pending lessons currently require codification.

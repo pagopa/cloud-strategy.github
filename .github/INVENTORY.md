@@ -129,6 +129,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 
 ## Prompts
 
+- `.github/prompts/internal-copilot-resource-mega-review.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
 - `.github/prompts/internal-planning-kickoff.prompt.md`
 - `.github/prompts/internal-pre-mortem.prompt.md`

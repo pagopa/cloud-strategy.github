@@ -95,6 +95,19 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - policy files do not repeat volatile inventory
   - historical recommendations do not remain framed as active requirements
 
+  #### `duplication-thin-wrapper-entrypoints-need-content-verification`
+
+  - Goal: prevent same-named helper files or entry points from being treated as duplicate assets without checking whether one is an intentional thin wrapper to a canonical implementation.
+  - Scope:
+    - repo-root helper entry points
+    - `.github/scripts/**`
+    - catalog review and consistency guidance
+  - Expected behavior:
+    - same-named files in different locations are not classified as duplicate from naming or path alone
+    - review, audit, and rationalization work compares both content and operating role before recommending `DELETE` or `MERGE`
+    - thin wrappers and convenience entry points to canonical implementations remain allowed when they improve operator ergonomics and do not fork the underlying logic
+    - destructive deduplication requires evidence of duplicated behavior, not just matching names
+
 #### `duplication-useful-projections-are-allowed`
 
 - Goal: preserve local self-containment when it materially helps the consumer.
