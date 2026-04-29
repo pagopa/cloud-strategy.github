@@ -61,6 +61,8 @@ This file is the stable entrypoint for the repository instruction architecture.
 - Keep repo-wide Copilot behavior in `.github/copilot-instructions.md`.
 - Keep local self-containment in scoped instruction files only when it improves the consumer experience and does not create drift.
 - Keep volatile inventory in `.github/INVENTORY.md`, never here.
+- When introducing a new source-managed catalog family or a new human-readable catalog summary surface, update inventory generation, sync discovery, and validator coverage in the same change so `.github/INVENTORY.md` is not the only surface aware of it.
+- Do not add hand-maintained catalog matrices or counts beside `.github/INVENTORY.md` unless they are generated from the filesystem or covered by validation.
 - Keep `internal-sync-*` assets sync-specific. They may reference root governance, but they do not replace canonical ownership in this file or `.github/copilot-instructions.md`.
 - When a sync or catalog workflow changes a repository-wide default, update the canonical owner first and then realign downstream projections or sync surfaces in the same pass.
 - Do not treat removed validators, sync scripts, contract tests, or historical aliases as active policy unless they exist on disk and are reintroduced deliberately.

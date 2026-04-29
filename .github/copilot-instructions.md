@@ -64,6 +64,8 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Prefer the simplest correct change.
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
+- When introducing a new source-managed catalog family or a new human-readable catalog summary surface, update inventory generation, sync discovery, and validation in the same change so `.github/INVENTORY.md` does not become the only surface aware of it.
+- Do not add hand-maintained catalog matrices or counts beside `.github/INVENTORY.md` unless they are generated from the filesystem or covered by validation.
 - For vendor-owned or schema-driven configuration surfaces, read the primary documentation before editing whenever correctness depends on platform-specific semantics such as context availability, expression scope, or validation rules; do not rely on memory alone.
 - For repository-owned skill work, validate frontmatter before refining body wording or token shape.
 - For source-side repository-owned standards work that deepens parallel skill families, stage planning in `tmp/superpowers/`, make anti-scope explicit, and close parity gaps in existing `Common mistakes`, `Validation`, and current reference depth before adding optional new skills, validators, or shared assets.

@@ -130,6 +130,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 ## Prompts
 
 - `.github/prompts/internal-planning-kickoff.prompt.md`
+- `.github/prompts/internal-multi-repo-review.prompt.md`
 - `.github/prompts/internal-pre-mortem.prompt.md`
 - `.github/prompts/internal-review-kickoff.prompt.md`
 - `.github/prompts/internal-sync-plan.prompt.md`
