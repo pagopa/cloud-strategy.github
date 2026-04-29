@@ -1,8 +1,8 @@
 ---
-name: "Internal Multi-Repo Review"
+name: "Internal Mega Review"
 agent: "agent"
-description: "Run a complete advisor-only review for one or more repositories and write split analysis under each repo tmp/"
-argument-hint: "Repository paths or names; optional focus, constraints, and output language"
+description: "Run a complete advisor-only mega review for one or more repositories and write split English analysis under each repo tmp/"
+argument-hint: "Repository paths or names; optional focus and constraints; retained output is English"
 ---
 
 <!-- markdownlint-disable-file MD041 -->
@@ -19,7 +19,9 @@ ${input:constraints:Optional non-negotiables, exclusions, prior findings to pres
 Output language:
 ${input:language:Match chat language unless explicitly overridden. If you want to force one, write Italian or English.}
 
-Use these standards-repository sources first:
+Retained analysis content, headings, tables, and artifact filenames must stay in English.
+
+Use these standards-repository sources first for governance, evidence, and split-output discipline:
 
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
@@ -28,7 +30,9 @@ Use these standards-repository sources first:
 - [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
 - [.github/skills/internal-writing-plans/SKILL.md](../skills/internal-writing-plans/SKILL.md)
 
-Then run a complete, analysis-only repository review with these rules.
+For this mega-review prompt, the English retained artifact contract below overrides any legacy non-English filename examples in those sources.
+
+Then run a complete, analysis-only mega review with these rules.
 
 ## 1. Mission
 
@@ -38,7 +42,7 @@ Review one or more repositories as a pragmatic technical advisor.
 - Do not edit production files.
 - Do not rename, move, or delete real repository assets.
 - Write analysis artifacts only under `tmp/`.
-- Keep the output concise, operational, evidence-based, and ready to guide later implementation work.
+- Keep the output concise, operational, evidence-based, written in English, and ready to guide later implementation work.
 
 ## 2. Repository Resolution
 
@@ -62,8 +66,9 @@ If the target `tmp/superpowers/mega-review/` folder already exists:
 
 - Preserve the previous analysis.
 - Do not rewrite it wholesale.
-- Add only missing coverage, corrections, or newly discovered findings in a separate numbered file such as `04-completamento-review.md`.
-- Update `01-riassunto-esecutivo.md` only when the executive summary is materially outdated.
+- Add only missing coverage, corrections, or newly discovered findings in a separate numbered file such as `04-review-addendum.md`.
+- Update `01-executive-summary.md` only when the executive summary is materially outdated.
+- Do not create new non-English filenames. If a prior package uses legacy non-English filenames, preserve those files and continue with English-named delta files unless the user explicitly asks for migration.
 
 If no prior review exists, create a fresh split review package.
 
@@ -127,7 +132,8 @@ If a claim cannot be tied to concrete evidence, move it to open questions or blo
 
 For each material finding, use this structure:
 
-### <finding title>
+### Finding Title
+
 - Severity: Critical | Medium | Low
 - Category: Security | Architecture | Automation | Testing | Documentation | Governance | AI-readiness | Cleanup
 - Classification: Must | Should | Could | Won't for now
@@ -145,16 +151,16 @@ Use split numbered files, not one monolithic document.
 
 Minimum retained output per repository:
 
-- `01-riassunto-esecutivo.md`
-- `02-inventory-e-stato-attuale.md`
-- `03-finding-e-backlog.md`
-- `dubbi-e-domande.md`
+- `01-executive-summary.md`
+- `02-inventory-and-current-state.md`
+- `03-findings-and-backlog.md`
+- `open-questions-and-blockers.md`
 
 If the repository already has a retained review package, prefer a complement file such as:
 
-- `04-completamento-review.md`
+- `04-review-addendum.md`
 
-`01-riassunto-esecutivo.md` must always exist as the entrypoint for a fresh review package.
+`01-executive-summary.md` must always exist as the entrypoint for a fresh review package.
 
 Minimum coverage inside the split files:
 
@@ -219,18 +225,18 @@ If more than one repository is in scope, also produce a global split review unde
 
 Minimum global output:
 
-- `01-riassunto-esecutivo.md`
+- `01-executive-summary.md`
 - `02-consistency-cross-repo.md`
-- `03-security-automation-gaps.md`
-- `04-roadmap-globale.md`
-- `05-ai-readiness-globale.md`
-- `06-standard-globale-raccomandato.md`
-- `dubbi-e-domande.md`
+- `03-security-and-automation-gaps.md`
+- `04-global-roadmap.md`
+- `05-global-ai-readiness.md`
+- `06-recommended-global-standard.md`
+- `open-questions-and-blockers.md`
 
 Optional when complementing an existing global package:
 
-- `07-completamento-review.md`
-- `08-consistency-gate-critical-master.md`
+- `07-review-addendum.md`
+- `08-critical-master-consistency-gate.md`
 
 Global review coverage must include:
 
@@ -272,6 +278,7 @@ If the repository already contains prior analysis under `tmp/`:
 - Preserve what is still valid.
 - Only add missing sections, corrected evidence, or newly observed findings.
 - Avoid duplicating the same backlog item unless the evidence has materially changed.
+- Keep newly created retained artifacts in English even when prior retained analysis used another language or legacy filenames.
 
 ## 14. Final Consistency Gate
 
@@ -297,6 +304,7 @@ Before stopping, verify that the retained output is:
 - Non-destructive
 - Adapted to the observed repositories and stacks
 - Split into multiple files
+- Written with English retained content and filenames
 - Useful for follow-up implementation work
 - Explicit about impact, priority, effort, and uncertainty
 
