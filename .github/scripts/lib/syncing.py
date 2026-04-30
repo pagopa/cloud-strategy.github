@@ -311,9 +311,9 @@ def render_synced_lessons(source_content: str, target_content: str | None) -> st
             or find_no_pending_lessons_marker(source_content)
             or DEFAULT_NO_PENDING_LESSONS_MARKER
         )
-        if not section_suffix or section_suffix[0].strip():
-            pending_section_lines.append("")
-        pending_section_lines.append(marker)
+        if not section_suffix or section_suffix[-1].strip():
+            section_suffix.append("")
+        section_suffix.append(marker)
 
     merged_lines = (
         source_lines[: pending_table.data_start]
