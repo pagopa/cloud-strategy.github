@@ -22,3 +22,4 @@ This file retains durable lessons discovered while completing tasks in this repo
 
 | Date | Lesson | Status | Codification target |
 | --- | --- | --- | --- |
+| 2026-04-30 | After `apply`, consumer repos can still show synced files as dirty in the working tree; treat the sync as converged only when planner `managed_mutation_paths` is empty and no managed `create`, `update`, `ensure`, `rebuild`, or `delete` actions remain. | Pending | `.github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md` |
