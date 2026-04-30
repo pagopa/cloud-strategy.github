@@ -287,7 +287,9 @@ def check_internal_root_policy_overlap(root: Path) -> list[Finding]:
         relative_path = path.relative_to(root).as_posix()
         if not (
             relative_path.startswith(".github/agents/internal-")
+            or relative_path.startswith(".github/agents/local-")
             or relative_path.startswith(".github/skills/internal-")
+            or relative_path.startswith(".github/skills/local-")
         ):
             continue
 

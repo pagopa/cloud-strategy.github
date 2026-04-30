@@ -5,8 +5,8 @@ from pathlib import Path
 import yaml
 
 SYNC_AGENTS = {
-    "internal-sync-external-resources": ".github/agents/internal-sync-external-resources.agent.md",
-    "internal-sync-global-copilot-configs-into-repo": ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md",
+    "local-sync-external-resources": ".github/agents/local-sync-external-resources.agent.md",
+    "local-sync-global-copilot-configs-into-repo": ".github/agents/local-sync-global-copilot-configs-into-repo.agent.md",
 }
 
 
@@ -39,14 +39,14 @@ def test_repo_only_sync_agents_keep_boundary_and_tool_contracts() -> None:
 
 def test_repo_only_sync_agents_keep_their_named_operating_engines() -> None:
     sync_control_center = read_body(
-        ".github/agents/internal-sync-external-resources.agent.md"
+        ".github/agents/local-sync-external-resources.agent.md"
     )
     sync_global = read_body(
-        ".github/agents/internal-sync-global-copilot-configs-into-repo.agent.md"
+        ".github/agents/local-sync-global-copilot-configs-into-repo.agent.md"
     )
 
-    assert "- `internal-agent-sync-external-resources`" in sync_control_center
-    assert "- `internal-agent-sync-global-copilot-configs-into-repo`" in sync_global
+    assert "- `local-agent-sync-external-resources`" in sync_control_center
+    assert "- `local-agent-sync-global-copilot-configs-into-repo`" in sync_global
 
 
 def test_direct_entry_model_keeps_removed_router_assets_out_of_live_catalog() -> None:

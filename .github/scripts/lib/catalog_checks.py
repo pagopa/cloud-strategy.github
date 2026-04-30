@@ -13,7 +13,6 @@ from .shared import (
     Finding,
     finding_sort_key,
     is_imported_asset,
-    is_local_asset,
     iter_markdown_assets,
     load_frontmatter,
     markdown_link_targets,
@@ -56,7 +55,6 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_repo_owned_agent_sections(root))
     findings.extend(check_duplicate_frontmatter_names(root))
     findings.extend(check_instruction_apply_to_overlaps(root))
-    findings.extend(check_source_local_assets(root))
     findings.extend(check_imported_asset_overrides(root))
     findings.extend(check_broken_local_links(root))
     if include_token_risks:
@@ -382,23 +380,6 @@ def normalize_agent_tools(tools: object) -> tuple[list[str], str | None]:
     return normalized_tools, None
 
 
-def check_source_local_assets(root: Path) -> list[Finding]:
-    findings: list[Finding] = []
-    for relative_path in collect_catalog_candidate_paths(root):
-        if not is_local_asset(relative_path):
-            continue
-        findings.append(
-            Finding(
-                severity="non-blocking",
-                code="source-local-asset",
-                path=relative_path,
-                message="`local-*` assets are reserved for consumer repositories and usually should not live in the standards repository.",
-                suggestion="Rename or move the asset if it is intended to be source-managed.",
-            )
-        )
-    return findings
-
-
 def check_imported_asset_overrides(root: Path) -> list[Finding]:
     registry_path = root / IMPORTED_ASSET_OVERRIDES_PATH
     if not registry_path.exists():
@@ -573,7 +554,7 @@ def check_imported_asset_overrides(root: Path) -> list[Finding]:
                     code="imported-asset-override-missing-patch",
                     path=target_path,
                     message="Imported-asset overrides must declare a replay patch path.",
-                    suggestion="Add a patch file under the internal-agent-sync-external-resources skill bundle.",
+                    suggestion="Add a patch file under the local-agent-sync-external-resources skill bundle.",
                 )
             )
         else:
@@ -647,8 +628,10 @@ def collect_repository_owned_markdown_paths(root: Path) -> list[Path]:
         "AGENTS.md",
         ".github/copilot-instructions.md",
         ".github/agents/internal-*.agent.md",
+        ".github/agents/local-*.agent.md",
         ".github/instructions/internal-*.instructions.md",
         ".github/skills/internal-*/**/*.md",
+        ".github/skills/local-*/**/*.md",
     ]
     for pattern in candidate_patterns:
         owned_paths.extend(path for path in root.glob(pattern) if path.is_file())

@@ -31,7 +31,6 @@ from .shared import (
     sha256_file,
     write_text,
 )
-
 MANAGED_SKILL_DIR = ".github/skills"
 SYNC_PLAN_PATH = "tmp/copilot-sync.plan.md"
 SYNC_MANIFEST_PATH = ".github/copilot-sync.manifest.json"
@@ -436,7 +435,9 @@ def discover_source_sync_files(root: Path) -> set[str]:
     return {
         relative_path
         for relative_path in files
-        if not is_ignored_sync_path(relative_path) and not is_consumer_sync_excluded_path(relative_path)
+        if not is_ignored_sync_path(relative_path)
+        and not is_consumer_sync_excluded_path(relative_path)
+        and not is_local_asset(relative_path)
     }
 
 

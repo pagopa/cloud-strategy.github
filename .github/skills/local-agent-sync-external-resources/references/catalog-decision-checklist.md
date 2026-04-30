@@ -38,7 +38,7 @@ Refresh upstream content first, then replay the registered patch. Prefer a clean
 
 ## Extraction Rules
 
-When `internal-sync-external-resources` or a nearby sync asset is turning into a knowledge dump:
+When `local-sync-external-resources` or a nearby sync asset is turning into a knowledge dump:
 
 1. Keep the agent cohesive around routing, managed scope, approval posture, and orchestration.
 2. Move long reusable procedures into this skill or the right existing internal skill.

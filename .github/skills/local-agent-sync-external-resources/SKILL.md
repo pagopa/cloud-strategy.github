@@ -1,11 +1,11 @@
 ---
-name: internal-agent-sync-external-resources
-description: Use when maintaining the sync-managed `.github/` catalog behind `internal-sync-external-resources`, especially for keep/update/extract/retire decisions, approved external refreshes, and governance-drift checks.
+name: local-agent-sync-external-resources
+description: Use when maintaining the sync-managed `.github/` catalog behind `local-sync-external-resources`, especially for keep/update/extract/retire decisions, approved external refreshes, and governance-drift checks.
 ---
 
 # Internal Agent Sync External Resources
 
-Use this skill as the default operating engine for `.github/agents/internal-sync-external-resources.agent.md`.
+Use this skill as the default operating engine for `.github/agents/local-sync-external-resources.agent.md`.
 
 This skill owns the reusable catalog-governance procedure behind that agent. Keep the agent focused on routing, managed scope, approval posture, and output contract. Keep the reusable sync workflow, decision rules, and anti-drift checks here.
 
@@ -23,7 +23,7 @@ When an imported upstream asset has an exceptionally approved repo-local overrid
 
 ## When to use
 
-- Maintain the sync-managed `.github/` catalog behind `internal-sync-external-resources`.
+- Maintain the sync-managed `.github/` catalog behind `local-sync-external-resources`.
 - Make keep, update, extract, retire, or approved external-refresh decisions across the managed catalog.
 - Keep approved imported-asset override exceptions explicit, replayable, and auditable instead of leaving hidden forks.
 - Resolve governance drift, overlap, or managed-scope ambiguity in the source repository.
@@ -31,7 +31,7 @@ When an imported upstream asset has an exceptionally approved repo-local overrid
 ## Goals
 
 - Keep one clear canonical asset per intent across the managed `.github/` catalog.
-- Make `internal-sync-external-resources` visibly depend on one named operating engine instead of an implicit catalog skill.
+- Make `local-sync-external-resources` visibly depend on one named operating engine instead of an implicit catalog skill.
 - Refresh only approved in-scope external-prefixed assets without expanding scope accidentally.
 - Keep approved imported in-place exceptions narrow, mapped, and re-applicable after future refreshes.
 - Move reusable sync procedure into this skill instead of bloating the agent body.
@@ -43,7 +43,7 @@ When an imported upstream asset has an exceptionally approved repo-local overrid
 
 ## Agent Coupling Contract
 
-For `internal-sync-external-resources`, keep the split strict:
+For `local-sync-external-resources`, keep the split strict:
 
 - Agent owns routing, scope boundaries, managed resource map, approval posture, and output expectations.
 - This skill owns audit order, keep/update/extract/retire decisions, anti-overlap heuristics, and sync execution discipline.
@@ -57,7 +57,7 @@ Do not collapse these roles back into one file just because the current task tou
 
 ## Decision Order
 
-1. Check the declared managed scope in `internal-sync-external-resources` plus the live local inventory and nearby trigger space.
+1. Check the declared managed scope in `local-sync-external-resources` plus the live local inventory and nearby trigger space.
 2. Decide whether the capability should remain an `internal-*` asset, remain an approved in-scope external-prefixed asset, or be retired.
 3. For imported assets, prefer verbatim refresh first. Allow a direct in-place override only when the reason is strong, the user explicitly counter-validates it, and the replay patch is registered in this skill bundle.
 4. Prefer consolidation over coexistence when two assets compete for the same trigger space.
@@ -186,7 +186,7 @@ Before finishing:
 
 ## Handoff
 
-When this skill is used from `internal-sync-external-resources`:
+When this skill is used from `local-sync-external-resources`:
 
 1. Audit the catalog.
 2. Decide keep, refresh, replace, extract, or retire.

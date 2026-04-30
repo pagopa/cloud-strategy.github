@@ -605,8 +605,8 @@ def test_detect_token_risks_reports_internal_root_policy_overlap(
     )
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
     write_file(
-        tmp_path / ".github/agents/internal-sync-external-resources.agent.md",
-        "---\nname: internal-sync-external-resources\ntools: [read]\n---\n\n"
+        tmp_path / ".github/agents/local-sync-external-resources.agent.md",
+        "---\nname: local-sync-external-resources\ntools: [read]\n---\n\n"
         "# Internal Sync External Resources\n\n"
         "Use `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.\n\n"
         f"{root_policy_lines}\n",
@@ -793,7 +793,7 @@ def test_detect_token_risks_reports_skill_description_trigger_collision(
 
 def test_sync_contract_requires_target_local_validation_after_apply() -> None:
     sync_contract_text = Path(
-        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+        ".github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
     assert (
@@ -810,7 +810,7 @@ def test_sync_contract_requires_source_side_convergence_check_without_local_vali
     None
 ):
     sync_contract_text = Path(
-        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+        ".github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
     assert (
@@ -829,7 +829,7 @@ def test_sync_contract_requires_source_side_convergence_check_without_local_vali
 
 def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() -> None:
     sync_contract_text = Path(
-        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+        ".github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
     assert (

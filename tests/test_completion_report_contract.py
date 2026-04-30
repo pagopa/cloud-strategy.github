@@ -24,7 +24,7 @@ def test_completion_report_docs_match_optional_detail_contract() -> None:
     readme_text = read_text(".github/README.md")
     internal_contract_text = read_text("INTERNAL_CONTRACT.md")
     sync_contract_text = read_text(
-        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+        ".github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     )
 
     assert "offer it as an optional follow-up" in readme_text

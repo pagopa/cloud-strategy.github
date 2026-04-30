@@ -41,7 +41,7 @@ MANAGED_WORKFLOW_FILES = (".github/workflows/_pre-commit.yml",)
 COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH = ".github/copilot-instructions.override.md.template"
 COPILOT_INSTRUCTIONS_OVERRIDE_PATH = ".github/copilot-instructions.override.md"
 INVENTORY_PATH = ".github/INVENTORY.md"
-IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/internal-agent-sync-external-resources/references/imported-asset-overrides.yaml"
+IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
 
 
 @dataclass(frozen=True)
