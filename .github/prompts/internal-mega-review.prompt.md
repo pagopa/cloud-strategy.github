@@ -1,5 +1,5 @@
 ---
-name: "Internal Mega Review"
+name: "internal-mega-review"
 agent: "agent"
 description: "Run a complete advisor-only mega review for one or more repositories and write split English analysis under each repo tmp/"
 argument-hint: "Repository paths or names; optional focus and constraints; retained output is English"

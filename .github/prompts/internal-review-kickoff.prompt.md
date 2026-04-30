@@ -1,4 +1,5 @@
 ---
+name: "internal-review-kickoff"
 agent: "agent"
 description: "Kick off a defect-first review for governance, workflow, or repository-owned catalog changes"
 ---

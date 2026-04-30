@@ -1,4 +1,5 @@
 ---
+name: "internal-planning-kickoff"
 agent: "agent"
 description: "Create a planning brief for repository-owned Copilot governance or cross-boundary execution work"
 ---

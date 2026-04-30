@@ -1,4 +1,5 @@
 ---
+name: "internal-copilot-resources-mega-review"
 agent: "agent"
 description: "Run a decision-focused mega review of Copilot and AI repository resources with a mandatory pre-analysis control pass, evidence discipline, wrapper-aware overlap checks, and a final completeness pass so nothing important is missed"
 ---

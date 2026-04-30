@@ -1,4 +1,5 @@
 ---
+name: "internal-sync-plan"
 agent: "agent"
 description: "Prepare a source-authoritative sync or catalog-governance plan before applying changes to a consumer repository"
 ---

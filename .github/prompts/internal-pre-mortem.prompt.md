@@ -1,4 +1,5 @@
 ---
+name: "internal-pre-mortem"
 agent: "agent"
 description: "Pressure-test a proposal before merge, refactor, or cross-boundary implementation"
 ---
