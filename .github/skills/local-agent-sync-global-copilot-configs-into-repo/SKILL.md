@@ -1,11 +1,11 @@
 ---
-name: internal-agent-sync-global-copilot-configs-into-repo
+name: local-agent-sync-global-copilot-configs-into-repo
 description: Use when aligning a consumer repository to this repository's managed GitHub Copilot baseline plus the explicitly shared repository-hygiene files and retained-learning ledger template, including mirror planning, apply runs, drift checks, and preservation of target `local-*` assets plus any consumer-local GitHub instructions overrides layer.
 ---
 
 # Internal Agent Sync Global Copilot Configs Into Repo
 
-Use this skill as the mandatory operating engine for `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`.
+Use this skill as the mandatory operating engine for `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`.
 
 This skill owns the reusable sync procedure. Keep the paired agent short; do not duplicate the analyze, plan, apply, reporting, or automation rules there.
 

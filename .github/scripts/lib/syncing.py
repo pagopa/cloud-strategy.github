@@ -31,7 +31,6 @@ from .shared import (
     sha256_file,
     write_text,
 )
-
 MANAGED_SKILL_DIR = ".github/skills"
 SYNC_PLAN_PATH = "tmp/copilot-sync.plan.md"
 SYNC_MANIFEST_PATH = ".github/copilot-sync.manifest.json"
@@ -42,7 +41,11 @@ LEGACY_SYNC_ARTIFACT_PATHS = (
 )
 TARGET_GITIGNORE_PATH = ".gitignore"
 TARGET_SUPERPOWERS_IGNORE_ENTRY = "/tmp/superpowers/"
-NO_PENDING_LESSONS_MARKERS = {"No pending lessons currently."}
+DEFAULT_NO_PENDING_LESSONS_MARKER = "No pending lessons currently require codification."
+NO_PENDING_LESSONS_MARKERS = {
+    "No pending lessons currently.",
+    DEFAULT_NO_PENDING_LESSONS_MARKER,
+}
 
 
 @dataclass(frozen=True)
@@ -296,21 +299,39 @@ def render_synced_lessons(source_content: str, target_content: str | None) -> st
         normalize_pending_lessons_row(row, pending_table.column_count)
         for row in target_rows
     ]
-    section_suffix = source_lines[pending_table.data_end : pending_table.section_end]
-    if normalized_rows:
-        section_suffix = [
-            line
-            for line in section_suffix
-            if line.strip() not in NO_PENDING_LESSONS_MARKERS
-        ]
+    section_suffix = [
+        line
+        for line in source_lines[pending_table.data_end : pending_table.section_end]
+        if line.strip() not in NO_PENDING_LESSONS_MARKERS
+    ]
+    pending_section_lines = [format_markdown_table_row(row) for row in normalized_rows]
+    if not normalized_rows:
+        marker = (
+            find_no_pending_lessons_marker(target_content)
+            or find_no_pending_lessons_marker(source_content)
+            or DEFAULT_NO_PENDING_LESSONS_MARKER
+        )
+        if not section_suffix or section_suffix[-1].strip():
+            section_suffix.append("")
+        section_suffix.append(marker)
 
     merged_lines = (
         source_lines[: pending_table.data_start]
-        + [format_markdown_table_row(row) for row in normalized_rows]
+        + pending_section_lines
         + section_suffix
         + source_lines[pending_table.section_end :]
     )
     return ensure_trailing_newline("\n".join(merged_lines))
+
+
+def find_no_pending_lessons_marker(content: str | None) -> str | None:
+    if not content:
+        return None
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped in NO_PENDING_LESSONS_MARKERS:
+            return stripped
+    return None
 
 
 def extract_pending_lessons_rows(content: str | None) -> list[list[str]]:
@@ -414,7 +435,9 @@ def discover_source_sync_files(root: Path) -> set[str]:
     return {
         relative_path
         for relative_path in files
-        if not is_ignored_sync_path(relative_path) and not is_consumer_sync_excluded_path(relative_path)
+        if not is_ignored_sync_path(relative_path)
+        and not is_consumer_sync_excluded_path(relative_path)
+        and not is_local_asset(relative_path)
     }
 
 

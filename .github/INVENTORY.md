@@ -45,8 +45,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-agent-boundary-recommendation-engine/SKILL.md`
 - `.github/skills/internal-agent-cross-lane-engine/SKILL.md`
 - `.github/skills/internal-agent-development/SKILL.md`
-- `.github/skills/internal-agent-sync-external-resources/SKILL.md`
-- `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
@@ -91,6 +89,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-spring-boot-development/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/internal-writing-plans/SKILL.md`
+- `.github/skills/local-agent-sync-external-resources/SKILL.md`
+- `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`
 - `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
 - `.github/skills/obra-executing-plans/SKILL.md`
@@ -124,11 +124,12 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/agents/internal-delivery-operator.agent.md`
 - `.github/agents/internal-planning-leader.agent.md`
 - `.github/agents/internal-review-guard.agent.md`
-- `.github/agents/internal-sync-external-resources.agent.md`
-- `.github/agents/internal-sync-global-copilot-configs-into-repo.agent.md`
+- `.github/agents/local-sync-external-resources.agent.md`
+- `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`
 
 ## Prompts
 
+- `.github/prompts/internal-architecture-md-creator.prompt.md`
 - `.github/prompts/internal-copilot-resources-mega-review.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
 - `.github/prompts/internal-planning-kickoff.prompt.md`

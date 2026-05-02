@@ -1,5 +1,5 @@
 ---
-name: internal-sync-external-resources
+name: local-sync-external-resources
 description: Use this agent when applying, auditing, or planning changes to the declared sync-managed GitHub Copilot catalog in this repository, including keep/update/extract/retire decisions and governance-drift cleanup within the approved managed scope.
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
@@ -16,11 +16,11 @@ Use the current repository state as audit input and execution target, not as a s
 
 When a sync or catalog change creates drift in root guidance, update the canonical owner first and then realign this agent and other downstream governance assets in the same pass.
 
-Treat `.github/skills/internal-agent-sync-external-resources/SKILL.md` as the mandatory operating engine for catalog decisions inside this agent's sync-specific scope.
+Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the mandatory operating engine for catalog decisions inside this agent's sync-specific scope.
 
 ## Mandatory Engine Skills
 
-- `internal-agent-sync-external-resources`
+- `local-agent-sync-external-resources`
 - `internal-agent-boundary-recommendation-engine`
 
 ## Optional Support Skills
@@ -49,9 +49,9 @@ Treat `.github/skills/internal-agent-sync-external-resources/SKILL.md` as the ma
 - Do not leave stale references in `AGENTS.md`, skills, agents, instructions, or scripts after catalog changes. Update README-based catalogs only when README edits are explicitly in scope.
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Keep imported assets verbatim by default. Allow a direct in-place override only for a strong repo-specific need that the user explicitly counter-validates.
-- Every approved imported in-place override must be mapped in `.github/skills/internal-agent-sync-external-resources/references/imported-asset-overrides.yaml` and replayed through the bundled override script after each refresh.
+- Every approved imported in-place override must be mapped in `.github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml` and replayed through the bundled override script after each refresh.
 - Treat any unregistered imported in-place override or stale replay patch as blocking sync drift.
-- Do not route cross-repository baseline propagation through this agent. Use `internal-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
+- Do not route cross-repository baseline propagation through this agent. Use `local-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
 - Treat any stale `obra-*` mapping or reference as blocking drift.
 - Before changing repo-wide guidance, decide whether the rule is canonical in `AGENTS.md` or projected in `.github/copilot-instructions.md`; update the canonical owner first and then realign the projection in the same governance pass.
@@ -63,12 +63,12 @@ Treat `.github/skills/internal-agent-sync-external-resources/SKILL.md` as the ma
 
 ## Skill Usage Contract
 
-- `internal-agent-sync-external-resources`: Mandatory operating engine for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
+- `local-agent-sync-external-resources`: Mandatory operating engine for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
 - `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
 - `internal-skill-creator`: Canonical first entrypoint when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
-- `internal-agent-sync-external-resources` bundled references and scripts: Use `references/imported-asset-overrides.yaml` plus `scripts/apply_imported_asset_overrides.py` whenever an approved imported override must survive a future upstream refresh.
+- `local-agent-sync-external-resources` bundled references and scripts: Use `references/imported-asset-overrides.yaml` plus `scripts/apply_imported_asset_overrides.py` whenever an approved imported override must survive a future upstream refresh.
 - `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
 - `obra-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
@@ -210,7 +210,7 @@ When repository state drifts from the declared governance contract, treat the dr
 2. Run `internal-copilot-audit` as a mandatory preflight against the live catalog, declared skills, and governance files.
 3. For `apply`, resolve or retire every remaining `blocking` finding before continuing.
 4. Inventory the relevant local assets and nearby overlaps against the declared managed scope plus the canonical root governance files.
-5. Decide `keep`, `update`, `extract`, or `retire` using `internal-agent-sync-external-resources` as the mandatory operating engine.
+5. Decide `keep`, `update`, `extract`, or `retire` using `local-agent-sync-external-resources` as the mandatory operating engine.
 6. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
 7. When the change affects repo-wide guidance, update the canonical owner first and then refresh downstream sync-facing governance artifacts that describe the change.
 8. Run repository validation and report any remaining gaps.

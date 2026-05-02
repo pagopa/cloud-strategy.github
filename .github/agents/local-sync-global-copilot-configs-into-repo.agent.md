@@ -1,5 +1,5 @@
 ---
-name: internal-sync-global-copilot-configs-into-repo
+name: local-sync-global-copilot-configs-into-repo
 description: Use this agent when planning, auditing, or applying consumer-repository alignment to this repository's managed GitHub Copilot baseline and explicitly shared hygiene files while preserving target `local-*` assets and the consumer-local overrides layer.
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
@@ -12,7 +12,7 @@ agents: []
 
 You are the cross-repository baseline propagation owner for GitHub Copilot assets.
 
-Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/SKILL.md` as one workflow contract. The skill owns the reusable analyze/plan/apply procedure, mirrored scope, plan-file lifecycle, automation entrypoints, and reporting details. Keep this agent focused on mode selection, approval posture, and boundary decisions.
+Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md` as one workflow contract. The skill owns the reusable analyze/plan/apply procedure, mirrored scope, plan-file lifecycle, automation entrypoints, and reporting details. Keep this agent focused on mode selection, approval posture, and boundary decisions.
 
 ## Fast Path
 
@@ -23,7 +23,7 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 
 ## Mandatory Engine Skills
 
-- `internal-agent-sync-global-copilot-configs-into-repo`
+- `local-agent-sync-global-copilot-configs-into-repo`
 - `internal-agent-boundary-recommendation-engine`
 
 ## Optional Support Skills
@@ -37,7 +37,7 @@ Treat this agent plus `.github/skills/internal-agent-sync-global-copilot-configs
 
 ## Skill Usage Contract
 
-- Always load `internal-agent-sync-global-copilot-configs-into-repo` before planning or applying a consumer-repository sync. If this agent and that skill drift apart, fix the drift instead of inventing a parallel contract.
+- Always load `local-agent-sync-global-copilot-configs-into-repo` before planning or applying a consumer-repository sync. If this agent and that skill drift apart, fix the drift instead of inventing a parallel contract.
 - Use `obra-writing-plans` when the target sync needs retained staging, checkpoints, or cleanup order beyond the default tracking plan.
 - Use `obra-executing-plans` when the user already approved a concrete sync plan and execution should happen in deliberate batches.
 - Use `obra-verification-before-completion` before reporting success so target state, preserved local assets, and validation results are backed by fresh evidence.

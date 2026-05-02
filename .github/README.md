@@ -67,7 +67,7 @@ Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGEN
 See [`agents/README.md`](agents/README.md) for the selection guide.
 
 - Canonical repository-owned operational agents: `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-master`
-- Repository-owned source-side sync and governance agents: `internal-sync-external-resources`, `internal-sync-global-copilot-configs-into-repo`
+- Repository-owned source-side sync and governance agents: `local-sync-external-resources`, `local-sync-global-copilot-configs-into-repo`
 - No imported support agents currently ship in the live catalog.
 
 The current repository-owned operating model uses direct entry to the four canonical internal owners. When the right owner is unclear, default to `internal-planning-leader`. Do not document retired operational routes here.

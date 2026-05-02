@@ -16,7 +16,7 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # pre-commit-hooks v6.0.0; source https://github.com/pre-commit/pre-commit-hooks/releases/tag/v6.0.0
     hooks:
-      # Common text hygiene
+      # # Common text hygiene
       # - id: end-of-file-fixer # Ensure files end with a trailing newline.
       #   exclude_types: [sql, csv]
       #   exclude: '\.csv$'

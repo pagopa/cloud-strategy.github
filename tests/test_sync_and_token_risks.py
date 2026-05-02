@@ -417,6 +417,53 @@ def test_apply_sync_plan_preserves_multiple_lessons_rows_separated_by_blank_line
     )
 
 
+def test_apply_sync_plan_keeps_no_pending_marker_when_source_has_rows(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+    source_lessons = (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n"
+        "| 2026-04-16 | Centralize shared Terraform lesson | pending | .github/instructions/internal-terraform.instructions.md |\n"
+    )
+    target_lessons = (
+        "# Lessons\n\n"
+        "Target-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n\n"
+        "No pending lessons currently require codification.\n"
+    )
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / "LESSONS_LEARNED.md", source_lessons)
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "LESSONS_LEARNED.md", target_lessons)
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("update", "LESSONS_LEARNED.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+    apply_sync_plan(plan)
+
+    assert (target_root / "LESSONS_LEARNED.md").read_text(encoding="utf-8") == (
+        "# Lessons\n\n"
+        "Source-managed retained learning ledger.\n\n"
+        "## Pending Rules\n\n"
+        "| Date | Lesson | Status | Intended canonical target |\n"
+        "| --- | --- | --- | --- |\n\n"
+        "No pending lessons currently require codification.\n"
+    )
+
+
 def test_build_sync_plan_includes_shared_repo_hygiene_files_only(
     tmp_path: Path,
 ) -> None:
@@ -558,8 +605,8 @@ def test_detect_token_risks_reports_internal_root_policy_overlap(
     )
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
     write_file(
-        tmp_path / ".github/agents/internal-sync-external-resources.agent.md",
-        "---\nname: internal-sync-external-resources\ntools: [read]\n---\n\n"
+        tmp_path / ".github/agents/local-sync-external-resources.agent.md",
+        "---\nname: local-sync-external-resources\ntools: [read]\n---\n\n"
         "# Internal Sync External Resources\n\n"
         "Use `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`.\n\n"
         f"{root_policy_lines}\n",
@@ -746,7 +793,7 @@ def test_detect_token_risks_reports_skill_description_trigger_collision(
 
 def test_sync_contract_requires_target_local_validation_after_apply() -> None:
     sync_contract_text = Path(
-        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+        ".github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
     assert (
@@ -763,7 +810,7 @@ def test_sync_contract_requires_source_side_convergence_check_without_local_vali
     None
 ):
     sync_contract_text = Path(
-        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+        ".github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
     assert (
@@ -782,7 +829,7 @@ def test_sync_contract_requires_source_side_convergence_check_without_local_vali
 
 def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() -> None:
     sync_contract_text = Path(
-        ".github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
+        ".github/skills/local-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md"
     ).read_text(encoding="utf-8")
 
     assert (
