@@ -66,7 +66,7 @@ If the target `tmp/superpowers/mega-review/` folder already exists:
 
 - Preserve the previous analysis.
 - Do not rewrite it wholesale.
-- Add only missing coverage, corrections, or newly discovered findings in a separate numbered file such as `04-review-addendum.md`.
+- Add only missing coverage, corrections, or newly discovered findings in a separate numbered file such as `05-review-addendum.md`, or in a numbered addendum inside the relevant domain folder.
 - Update `01-executive-summary.md` only when the executive summary is materially outdated.
 - Do not create new non-English filenames. If a prior package uses legacy non-English filenames, preserve those files and continue with English-named delta files unless the user explicitly asks for migration.
 
@@ -147,52 +147,80 @@ For each material finding, use this structure:
 
 ## 9. Required Output Shape Per Repository
 
-Use split numbered files, not one monolithic document.
+Use split numbered files, not one monolithic document. The package MUST be organized by reader context: a small top-level entrypoint plus two domain folders, one for cloud infrastructure and one for application engineering. Avoid duplicating the same finding across files; assign it to the domain where the owner will act.
 
-Minimum retained output per repository:
+Every retained file MUST begin with a short `Purpose:` blockquote explaining what the file is for.
+
+Required top-level retained output per repository:
 
 - `01-executive-summary.md`
 - `02-inventory-and-current-state.md`
-- `03-findings-and-backlog.md`
+- `03-remediation-plan.md`
+- `04-consistency-gate.md`
 - `open-questions-and-blockers.md`
 
-If the repository already has a retained review package, prefer a complement file such as:
+Required `cloud-infra/` output:
 
-- `04-review-addendum.md`
+- `cloud-infra/01-overview.md`
+- `cloud-infra/02-architecture.md`
+- `cloud-infra/03-iac-code-and-scripts.md`
+- `cloud-infra/04-automation-and-cicd.md`
+- `cloud-infra/05-governance-and-auditability.md`
+- `cloud-infra/06-security-and-compliance.md`
+- `cloud-infra/07-remediation-plan.md`
 
-`01-executive-summary.md` must always exist as the entrypoint for a fresh review package.
+Required `application-engineering/` output:
 
-Minimum coverage inside the split files:
+- `application-engineering/01-overview.md`
+- `application-engineering/02-architecture.md`
+- `application-engineering/03-code-and-script-quality.md`
+- `application-engineering/04-testing-and-validation.md`
+- `application-engineering/05-automation-and-cicd.md`
+- `application-engineering/06-security-and-dependency-hygiene.md`
+- `application-engineering/07-remediation-plan.md`
 
-1. Executive summary
-2. Repository inventory
-3. Repository purpose and current state
-4. Critical findings
-5. Medium findings
-6. Low findings
-7. Security review
-8. Architecture and design review
-9. Automation and CI/CD review
-10. Testing and validation review
-11. Documentation and operational readiness
-12. Enterprise governance and auditability
-13. AI-readiness review
-14. Files and structure actions table
-15. Prioritized remediation backlog
-16. Quick wins
-17. Strategic improvements when justified
-18. Open questions and blockers
+If the repository already has a retained review package, preserve the prior files and add complement files such as:
 
-If a section has no meaningful issue, say: `No relevant finding observed.`
+- `05-review-addendum.md` at top level, or a numbered addendum inside the relevant domain folder.
+
+`01-executive-summary.md` must always exist as the entrypoint for a fresh review package and must link to the domain folder overview files, the top-level remediation index, consistency gate, and open questions file.
+
+Each domain detail file must contain:
+
+1. What this file is for
+2. Scope for this repository
+3. Critical findings in that category (using the Finding Format from section 8)
+4. Medium findings in that category
+5. Low findings in that category
+6. Quick wins specific to that category, if any
+7. Open questions specific to that category, if any
+
+If a domain detail file has no meaningful issue, the file must still exist and explicitly say: `No relevant finding observed.` so reviewers know the dimension was assessed.
+
+`03-remediation-plan.md` is a short routing index only. It must link to `cloud-infra/07-remediation-plan.md` and `application-engineering/07-remediation-plan.md`.
+
+The two domain remediation plan files hold their own priorities, quick wins, strategic moves, and file actions. Do not create separate backlog, quick-win, and file-action files unless the user explicitly asks for them.
 
 ## 10. Required Tables
 
-Use these tables where relevant.
+Use compact tables where relevant. Tables should normally have 3 or 4 columns and MUST NOT exceed 5 columns unless the user explicitly asks for a wider table. Prefer bullets for details that would make a table hard to read.
 
-Files and structure actions:
+Priority plan:
 
-| Action | File or directory | Reason | Risk | Effort | Notes |
-|---|---|---|---|---|---|
+| Priority | Area | Work item | First action |
+|---|---|---|---|
+
+Allowed priorities:
+
+- P0 = critical risk or major blocker
+- P1 = high value or high risk
+- P2 = important but not urgent
+- P3 = cleanup or optional optimization
+
+File actions:
+
+| Action | Target | Reason | Effort |
+|---|---|---|---|
 
 Allowed actions:
 
@@ -207,17 +235,10 @@ Allowed actions:
 - automate
 - standardize
 
-Prioritized remediation backlog:
+Quick wins:
 
-| Priority | Classification | Finding | Category | Impact | Effort | Invasiveness | Risk if ignored | Expected benefit | Files or directories | Proposed action |
-|---|---|---|---|---|---|---|---|---|---|---|
-
-Allowed priorities:
-
-- P0 = critical risk or major blocker
-- P1 = high value or high risk
-- P2 = important but not urgent
-- P3 = cleanup or optional optimization
+| Action | Owner area | Target |
+|---|---|---|
 
 ## 11. Cross-Repo Output When Reviewing More Than One Repository
 
@@ -251,15 +272,15 @@ Global review coverage must include:
 9. Recommended repository standard
 10. Global prioritized roadmap
 
-Use this maturity matrix:
+Use this compact maturity matrix:
 
-| Repo | Security maturity | Automation maturity | Testing maturity | Documentation maturity | Governance maturity | AI-readiness | Main gap | Top quick win | Top strategic move |
-|---|---|---|---|---|---|---|---|---|---|
+| Repo | Strengths | Main gaps | Top next step |
+|---|---|---|---|
 
-Use this roadmap table:
+Use this compact roadmap table:
 
-| Priority | Classification | Initiative | Repositories involved | Problem solved | Benefit | Effort | Invasiveness | First step |
-|---|---|---|---|---|---|---|---|---|
+| Priority | Initiative | Repositories | First step |
+|---|---|---|---|
 
 ## 12. Review Discipline
 
