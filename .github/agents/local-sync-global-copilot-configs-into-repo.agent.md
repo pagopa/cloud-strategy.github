@@ -60,7 +60,14 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 
 Use this section only for consumer-propagation awareness. The canonical source-side external scope remains in `local-sync-external-resources`.
 
-- `mattpocock/skills`: `grill-me` -> `mattpocock-grill-me`
+- `mattpocock/skills`:
+  - `diagnose` -> `mattpocock-diagnose`
+  - `grill-me` -> `mattpocock-grill-me`
+  - `grill-with-docs` -> `mattpocock-grill-with-docs`
+  - `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
+  - `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
+  - `tdd` -> `mattpocock-tdd`
+  - `zoom-out` -> `mattpocock-zoom-out`
 
 ## Routing
 

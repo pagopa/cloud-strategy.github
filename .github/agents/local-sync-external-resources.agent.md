@@ -144,13 +144,20 @@ Managed skills:
 
 ### `mattpocock/skills`
 
-Source repository:
+Source repositories:
 
-- Skills: `https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me`
+- Engineering skills: `https://github.com/mattpocock/skills/tree/main/skills/engineering`
+- Productivity skills: `https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me`
 
 Managed skills:
 
+- `diagnose` -> `mattpocock-diagnose`
 - `grill-me` -> `mattpocock-grill-me`
+- `grill-with-docs` -> `mattpocock-grill-with-docs`
+- `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
+- `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
+- `tdd` -> `mattpocock-tdd`
+- `zoom-out` -> `mattpocock-zoom-out`
 
 ### `openai/skills`
 
