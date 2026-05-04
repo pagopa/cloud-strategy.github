@@ -17,6 +17,8 @@ Use `openai-skill-creator` only for the remaining bundle anatomy, helper scripts
 
 Use `internal-agent-development` when the sync changes this external-resources agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
 
+Use `mattpocock-caveman` only as optional compression support for long sync summaries after blockers, warnings, approvals, validation evidence, and destructive-operation gates are already clear.
+
 When deterministic change detection matters, read `references/fingerprinting-contract.md`, use the canonical repository implementation in `.github/scripts/lib/fingerprinting.py`, and use `scripts/sync_resource_fingerprint.py` from this skill only as a thin workflow wrapper.
 
 When an imported upstream asset has an exceptionally approved repo-local override, read `references/imported-asset-overrides.yaml` and use `scripts/apply_imported_asset_overrides.py` to replay the registered patch bundle after refreshing the upstream content.
@@ -157,6 +159,7 @@ After catalog changes:
 - Re-check `.github/INVENTORY.md` for exact path accuracy.
 - Re-check nearby agents and skills for stale references, decorative declarations, or broken ownership assumptions.
 - Re-check `LESSONS_LEARNED.md` and ask whether any pending lesson was just codified or disproven so the ledger does not retain a duplicate.
+- Use compression support only after safety-critical sync details remain explicit.
 
 ## Validation
 

@@ -21,7 +21,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 ## Mandatory Engine Skills
 
 - `local-agent-sync-external-resources`
-- `internal-agent-boundary-recommendation-engine`
+- `internal-agent-lane-change-engine`
 
 ## Optional Support Skills
 
@@ -33,6 +33,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - `internal-skill-creator`
 - `openai-skill-creator`
 - `internal-copilot-docs-research`
+- `mattpocock-caveman`
 
 ## Core Rules
 
@@ -68,6 +69,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
 - `internal-skill-creator`: Canonical first entrypoint when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
+- `mattpocock-caveman`: Optional compression support for long sync summaries or catalog-diff narratives, never for hiding blockers, warnings, validation evidence, approvals, or destructive-operation gates.
 - `local-agent-sync-external-resources` bundled references and scripts: Use `references/imported-asset-overrides.yaml` plus `scripts/apply_imported_asset_overrides.py` whenever an approved imported override must survive a future upstream refresh.
 - `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
@@ -147,10 +149,11 @@ Managed skills:
 Source repositories:
 
 - Engineering skills: `https://github.com/mattpocock/skills/tree/main/skills/engineering`
-- Productivity skills: `https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me`
+- Productivity skills: `https://github.com/mattpocock/skills/tree/main/skills/productivity`
 
 Managed skills:
 
+- `caveman` -> `mattpocock-caveman`
 - `diagnose` -> `mattpocock-diagnose`
 - `grill-me` -> `mattpocock-grill-me`
 - `grill-with-docs` -> `mattpocock-grill-with-docs`
@@ -218,7 +221,7 @@ When repository state drifts from the declared governance contract, treat the dr
 ## Boundary Definition
 
 - Stay in this lane while the task is source-side `.github/` catalog governance inside the declared managed scope.
-- If the request is really source-side planning, consumer-repository sync, or a local edit outside catalog-governance scope, stop, explain the mismatch, and use `internal-agent-boundary-recommendation-engine` to recommend the better owner.
+- If the request is really source-side planning, consumer-repository sync, or a local edit outside catalog-governance scope, stop, explain the mismatch, and use `internal-agent-lane-change-engine` to recommend the better owner.
 - Do not route, dispatch, or delegate from this lane.
 
 ## Execution Workflow

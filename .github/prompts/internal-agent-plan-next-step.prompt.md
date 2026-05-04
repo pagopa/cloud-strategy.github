@@ -1,7 +1,7 @@
 ---
-name: "internal-planning-kickoff"
-agent: "agent"
-description: "Create a planning brief for repository-owned Copilot governance or cross-boundary execution work"
+name: "internal-agent-plan-next-step"
+agent: "internal-planning-leader"
+description: "Create a planning brief and next-step package for repository-owned Copilot governance or cross-boundary work"
 ---
 
 <!-- markdownlint-disable-file MD041 -->
@@ -22,6 +22,7 @@ Use these repository sources first:
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
 - [.github/agents/internal-planning-leader.agent.md](../agents/internal-planning-leader.agent.md)
+- [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
 
 Produce a planning brief with:
 
@@ -29,4 +30,4 @@ Produce a planning brief with:
 2. Main assumptions and tradeoffs
 3. Selected direction and why it wins
 4. Validation or rollout notes
-5. Recommended next owner when planning should hand off
+5. Recommended next owner and next-step package when planning should transition

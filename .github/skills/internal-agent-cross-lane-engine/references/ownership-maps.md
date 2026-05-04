@@ -8,7 +8,8 @@ The canonical operational model uses direct owner selection. When the winning ow
 
 | Skill | Primary owner | When it wins |
 | --- | --- | --- |
-| `internal-agent-boundary-recommendation-engine` | Shared by the canonical operational agents and repo-only sync command centers | Shared stop-and-recommend protocol when the selected lane no longer fits |
+| `internal-agent-lane-change-engine` | Shared by the canonical operational agents and repo-only sync command centers | Shared stop-and-recommend protocol when the selected lane no longer fits |
+| `internal-agent-next-step` | `internal-planning-leader` and `internal-review-guard`, with optional support for delivery and critical challenge | Shared package for an already-selected next owner, scope, action, validation path, and residual risk |
 | `internal-agent-cross-lane-engine` | Shared by the four canonical agents | Shared cross-lane boundary, medium-task, and anti-overlap logic |
 | `internal-code-review` | `internal-review-guard` | Tactical review engine for findings and defect-first analysis |
 | `internal-agent-development` | `internal-planning-leader` | Non-trivial repository-owned agent authoring |

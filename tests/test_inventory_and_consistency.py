@@ -26,8 +26,8 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
         "---\nname: internal-catalog\ndescription: Catalog helper\n---\n",
     )
     write_file(
-        tmp_path / ".github/prompts/internal-planning-kickoff.prompt.md",
-        "---\ndescription: Planning kickoff\n---\n",
+        tmp_path / ".github/prompts/internal-agent-plan-next-step.prompt.md",
+        "---\ndescription: Planning next step\n---\n",
     )
 
     inventory = build_inventory_markdown(tmp_path)
@@ -37,7 +37,7 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
     assert "- `.github/instructions/internal-python.instructions.md`" in inventory
     assert "- `.github/skills/internal-catalog/SKILL.md`" in inventory
     assert "- `.github/agents/internal-delivery-operator.agent.md`" in inventory
-    assert "- `.github/prompts/internal-planning-kickoff.prompt.md`" in inventory
+    assert "- `.github/prompts/internal-agent-plan-next-step.prompt.md`" in inventory
 
 
 def test_run_consistency_checks_flags_prompt_inventory_drift(tmp_path: Path) -> None:
@@ -50,8 +50,8 @@ def test_run_consistency_checks_flags_prompt_inventory_drift(tmp_path: Path) -> 
         "# Copilot Instructions\n\nSee `AGENTS.md` and `.github/INVENTORY.md`.\n",
     )
     write_file(
-        tmp_path / ".github/prompts/internal-review-kickoff.prompt.md",
-        "---\ndescription: Review kickoff\n---\n",
+        tmp_path / ".github/prompts/internal-agent-review-next-actions.prompt.md",
+        "---\ndescription: Review next actions\n---\n",
     )
     write_file(
         tmp_path / ".github/INVENTORY.md",
@@ -60,12 +60,11 @@ def test_run_consistency_checks_flags_prompt_inventory_drift(tmp_path: Path) -> 
         "## Skills\n\nNo skill files currently ship in the live catalog.\n\n"
         "## Agents\n\nNo agent files currently ship in the live catalog.\n",
     )
-
     findings = run_consistency_checks(tmp_path)
     findings_by_path = {(finding.path, finding.code) for finding in findings}
 
     assert (
-        ".github/prompts/internal-review-kickoff.prompt.md",
+        ".github/prompts/internal-agent-review-next-actions.prompt.md",
         "inventory-missing-entry",
     ) in findings_by_path
 

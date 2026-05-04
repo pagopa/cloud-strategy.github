@@ -11,6 +11,20 @@ CANONICAL_AGENTS = {
     "internal-critical-master": ".github/agents/internal-critical-master.agent.md",
 }
 
+EXPECTED_HANDOFF_LABELS = {
+    "internal-delivery-operator": ["Next step: Review result"],
+    "internal-planning-leader": [
+        "Next step: Implement plan",
+        "Next step: Pressure-test plan",
+    ],
+    "internal-review-guard": [
+        "Next action: Apply local fixes",
+        "Next action: Re-plan larger changes",
+        "Next action: Pressure-test unresolved decision",
+    ],
+    "internal-critical-master": ["Next step: Reformulate plan"],
+}
+
 
 def load_frontmatter(relative_path: str) -> dict[str, object]:
     text = Path(relative_path).read_text(encoding="utf-8")
@@ -47,4 +61,34 @@ def test_canonical_agents_keep_expected_engine_skill_assignments() -> None:
     ):
         body = read_body(CANONICAL_AGENTS[agent_name])
         assert "- `internal-agent-cross-lane-engine`" in body
-        assert "- `internal-agent-boundary-recommendation-engine`" in body
+        assert "- `internal-agent-lane-change-engine`" in body
+
+
+def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
+    for agent_name, relative_path in CANONICAL_AGENTS.items():
+        frontmatter = load_frontmatter(relative_path)
+        handoffs = frontmatter.get("handoffs")
+
+        assert isinstance(handoffs, list)
+        assert [handoff["label"] for handoff in handoffs] == EXPECTED_HANDOFF_LABELS[
+            agent_name
+        ]
+        assert all(handoff.get("send") is False for handoff in handoffs)
+        assert all(isinstance(handoff.get("agent"), str) for handoff in handoffs)
+        assert all(isinstance(handoff.get("prompt"), str) for handoff in handoffs)
+
+
+def test_next_step_package_skill_is_mandatory_only_for_planning_and_review() -> None:
+    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
+    review_body = read_body(CANONICAL_AGENTS["internal-review-guard"])
+    delivery_body = read_body(CANONICAL_AGENTS["internal-delivery-operator"])
+    critical_body = read_body(CANONICAL_AGENTS["internal-critical-master"])
+
+    assert "## Mandatory Engine Skills" in planning_body
+    assert "- `internal-agent-next-step`" in planning_body
+    assert "## Mandatory Engine Skills" in review_body
+    assert "- `internal-agent-next-step`" in review_body
+    assert "## Optional Support Skills" in delivery_body
+    assert "- `internal-agent-next-step`" in delivery_body
+    assert "## Optional Support Skills" in critical_body
+    assert "- `internal-agent-next-step`" in critical_body

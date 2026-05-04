@@ -1,7 +1,7 @@
 ---
-name: "internal-pre-mortem"
-agent: "agent"
-description: "Pressure-test a proposal before merge, refactor, or cross-boundary implementation"
+name: "internal-agent-pressure-test-plan"
+agent: "internal-critical-master"
+description: "Pressure-test a plan or proposal before merge, refactor, or cross-boundary implementation"
 ---
 
 <!-- markdownlint-disable-file MD041 -->
@@ -24,12 +24,15 @@ Use these repository sources first:
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
 - [.github/skills/internal-agent-cross-lane-engine/SKILL.md](../skills/internal-agent-cross-lane-engine/SKILL.md)
+- [.github/skills/internal-agent-lane-change-engine/SKILL.md](../skills/internal-agent-lane-change-engine/SKILL.md)
+- [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
 
-Return a compact pre-mortem with:
+Return a compact pressure test with:
 
 1. Proposal or decision under test
 2. Assumptions under test
 3. Top failure modes
 4. Counter-framing or inversion result
 5. Keep, change, or reframe recommendation
-6. Residual risk if the proposal still goes ahead
+6. Return-to-planning next-step package when the challenged artifact is a plan
+7. Residual risk if the proposal still goes ahead

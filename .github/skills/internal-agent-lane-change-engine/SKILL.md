@@ -1,9 +1,9 @@
 ---
-name: internal-agent-boundary-recommendation-engine
-description: Use when a repository-owned internal agent needs a consistent stop-and-recommend response after the user selected the wrong lane or the current lane stops being the best fit.
+name: internal-agent-lane-change-engine
+description: Use when a repository-owned internal agent needs a consistent user-visible lane-change response after the selected lane no longer fits.
 ---
 
-# Internal Agent Boundary Recommendation Engine
+# Internal Agent Lane Change Engine
 
 Use this skill as the shared lane-mismatch engine for repository-owned internal agents that must stop, explain the mismatch, and recommend the better next option without hidden delegation.
 

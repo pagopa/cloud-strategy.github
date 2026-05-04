@@ -59,7 +59,7 @@ A clear realignment across more than two adjacent `.github/` assets can stay wit
 
 The canonical operational model uses direct entry: users select one of the four canonical owners directly, and ambiguous entry fails safe to `internal-planning-leader`.
 
-Once active, each owner stays inside its boundary. When the boundary no longer holds, use `internal-agent-boundary-recommendation-engine` for the user-visible stop-and-recommend behavior instead of cloning that protocol or matrix here.
+Once active, each owner stays inside its boundary. When the boundary no longer holds, use `internal-agent-lane-change-engine` for the user-visible stop-and-recommend behavior instead of cloning that protocol or matrix here.
 
 The four canonical owners are not subagent-invoked by default. Any future exception must be explicit, narrow, one-directional, and must not create an all-to-all mesh or nested ping-pong.
 
