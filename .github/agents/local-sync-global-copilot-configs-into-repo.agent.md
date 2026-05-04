@@ -56,6 +56,12 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 - Sync only the managed cross-repository baseline declared by the paired skill contract; do not expand beyond that scope unless the user explicitly asks for more.
 - Do not restate reusable sync procedure in this agent; when the contract drifts, update the paired skill first and then realign this agent.
 
+## Source-Managed Imported Skill Map
+
+Use this section only for consumer-propagation awareness. The canonical source-side external scope remains in `local-sync-external-resources`.
+
+- `mattpocock/skills`: `grill-me` -> `mattpocock-grill-me`
+
 ## Routing
 
 - Use this agent for consumer-repository baseline propagation, drift assessment, `plan`, and `apply` runs.

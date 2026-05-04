@@ -142,6 +142,16 @@ Managed skills:
 - `terraform-search-import` -> `terraform-terraform-search-import`
 - `terraform-test` -> `terraform-terraform-test`
 
+### `mattpocock/skills`
+
+Source repository:
+
+- Skills: `https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me`
+
+Managed skills:
+
+- `grill-me` -> `mattpocock-grill-me`
+
 ### `openai/skills`
 
 Source repositories:

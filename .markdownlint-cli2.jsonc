@@ -11,6 +11,7 @@
     // Preserve imported support skill families verbatim by default; lint only repo-owned Markdown.
     ".github/skills/antigravity-*/**",
     ".github/skills/awesome-copilot-*/**",
+    ".github/skills/mattpocock-*/**",
     ".github/skills/obra-*/**",
     ".github/skills/openai-*/**",
     ".github/skills/terraform-*/**"
