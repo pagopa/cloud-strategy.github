@@ -25,6 +25,20 @@ EXPECTED_HANDOFF_LABELS = {
     "internal-critical-master": ["Next step: Reformulate plan"],
 }
 
+EXPECTED_HANDOFF_TARGETS = {
+    "internal-delivery-operator": ["internal-review-guard"],
+    "internal-planning-leader": [
+        "internal-delivery-operator",
+        "internal-critical-master",
+    ],
+    "internal-review-guard": [
+        "internal-delivery-operator",
+        "internal-planning-leader",
+        "internal-critical-master",
+    ],
+    "internal-critical-master": ["internal-planning-leader"],
+}
+
 
 def load_frontmatter(relative_path: str) -> dict[str, object]:
     text = Path(relative_path).read_text(encoding="utf-8")
@@ -73,8 +87,11 @@ def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
         assert [handoff["label"] for handoff in handoffs] == EXPECTED_HANDOFF_LABELS[
             agent_name
         ]
+        assert [handoff["agent"] for handoff in handoffs] == EXPECTED_HANDOFF_TARGETS[
+            agent_name
+        ]
         assert all(handoff.get("send") is False for handoff in handoffs)
-        assert all(isinstance(handoff.get("agent"), str) for handoff in handoffs)
+        assert all(handoff["agent"] in CANONICAL_AGENTS for handoff in handoffs)
         assert all(isinstance(handoff.get("prompt"), str) for handoff in handoffs)
 
 
@@ -92,3 +109,28 @@ def test_next_step_package_skill_is_mandatory_only_for_planning_and_review() -> 
     assert "- `internal-agent-next-step`" in delivery_body
     assert "## Optional Support Skills" in critical_body
     assert "- `internal-agent-next-step`" in critical_body
+
+
+def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
+    readme = Path(".github/agents/README.md").read_text(encoding="utf-8")
+
+    assert "## ASCII Workflow Map" in readme
+    assert "These maps describe the expected human-visible flow" in readme
+    assert "+----------------------------+" in readme
+    assert "| internal-delivery-operator |" in readme
+    assert "internal-planning-leader" in readme
+    assert "internal-review-guard" in readme
+    assert "internal-critical-master" in readme
+    assert "### 5. Source and consumer sync workflows" in readme
+    assert "local-sync-external-resources" in readme
+    assert "local-sync-global-copilot-configs-into-repo" in readme
+    assert "## Use Examples" in readme
+    assert "#### Delivery use cases" in readme
+    assert "Good delivery requests usually name one of these surfaces" in readme
+    assert "| Documentation |" in readme
+    assert "| Agent contract |" in readme
+    assert "Delivery can still cross multiple adjacent files" in readme
+    assert "Clear local edit with known validation" in readme
+    assert "Catalog redesign, routing change, or retained plan" in readme
+    assert "Source-side external catalog sync" in readme
+    assert "If a request starts in the wrong lane" in readme
