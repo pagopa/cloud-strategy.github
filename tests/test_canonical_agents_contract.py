@@ -130,6 +130,18 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
     assert "| Documentation |" in readme
     assert "| Agent contract |" in readme
     assert "Delivery can still cross multiple adjacent files" in readme
+    assert "#### Planning use cases" in readme
+    assert "Good planning requests usually involve one of these questions" in readme
+    assert "| Ownership |" in readme
+    assert "#### Review use cases" in readme
+    assert "Good review requests usually name one of these review surfaces" in readme
+    assert "| Merge readiness |" in readme
+    assert "#### Critical challenge use cases" in readme
+    assert "Good challenge requests usually involve one of these pressure points" in readme
+    assert "| Hidden assumption |" in readme
+    assert "#### Sync use cases" in readme
+    assert "Source-side sync examples" in readme
+    assert "Consumer propagation examples" in readme
     assert "Clear local edit with known validation" in readme
     assert "Catalog redesign, routing change, or retained plan" in readme
     assert "Source-side external catalog sync" in readme

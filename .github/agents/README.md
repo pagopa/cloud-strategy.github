@@ -222,6 +222,82 @@ Example:
 - Next owner: `internal-delivery-operator`, because the chosen changes are now
   concrete and testable.
 
+#### Planning use cases
+
+Use `internal-planning-leader` when the next correct action is not yet obvious.
+Planning is not a slower version of delivery; it exists to settle ownership,
+scope, tradeoffs, rollout shape, and validation before files change.
+
+```text
++--------------------------------+
+| Does the request need a choice  |
+| before implementation starts?   |
++--------------------------------+
+              | yes                         | no
+              v                             v
++--------------------------+        +----------------------------+
+| internal-planning-leader |        | internal-delivery-operator |
+| owns the decision frame  |        | can execute directly       |
++--------------------------+        +----------------------------+
+              |
+              v
++-------------------------------+
+| Produce a selected direction  |
+| plus next-step package        |
++-------------------------------+
+              |
+              v
++-------------------------------+
+| Stop before implementation    |
+| unless user explicitly asks   |
+| planning to continue locally  |
++-------------------------------+
+```
+
+Good planning requests usually involve one of these questions:
+
+| Question type | Planning can own this | Expected output |
+| --- | --- | --- |
+| Ownership | Should this be an agent, skill, instruction, prompt, script, or README change? | Chosen owner, rejected alternatives, next-step package. |
+| Scope | Which files and catalog surfaces should move together? | Explicit in-scope and out-of-scope list. |
+| Governance | Does the change affect `AGENTS.md`, Copilot projection, inventory, or sync behavior? | Canonical owner decision and projection impact. |
+| Sequencing | Should the work happen as one delivery pass or staged phases? | Ordered plan, validation gates, rollback notes. |
+| Ambiguity | The user goal is clear but the implementation path is not. | Assumptions, tradeoffs, selected direction. |
+| Retained plan | Work spans macro-categories, turns, handoff, or durable decisions. | Numbered files under `tmp/superpowers/<task>/`. |
+
+Concrete planning examples:
+
+- "Decide whether next-step behavior belongs in each agent body or in a shared
+  skill." Planning owns the placement decision before delivery edits files.
+- "We need a workflow for plan -> delivery -> review -> fixes; design the first
+  tranche without creating hidden routers." Planning owns the operating model.
+- "This catalog cleanup touches agents, skills, prompts, inventory, and tests;
+  decide the safe order." Planning owns sequencing and validation gates.
+- "I want to sync this baseline into consumer repos, but I am unsure what should
+  remain local." Planning can frame the decision, then route to the sync owner.
+- "Create a retained execution plan because this crosses documentation, tests,
+  and governance policy." Planning owns the plan artifact.
+
+Examples that should leave planning:
+
+- The target state is now fixed and only local edits remain. Move to delivery.
+- The main need is defect-first confidence in an existing change. Move to review.
+- The plan is plausible but rests on weak assumptions. Move to critical.
+- The work is source-side external resource refresh after scope is approved. Move
+  to `local-sync-external-resources`.
+
+Planning should finish with a next-step package:
+
+```text
++-------------------------------+
+| Owner: exact next owner       |
+| Scope: files or decision area |
+| Action: one concrete action   |
+| Validation: expected evidence |
+| Risk: why approval is manual  |
++-------------------------------+
+```
+
 ### 3. Audited work
 
 Audited work is for defect-first review after a change exists or when correctness
@@ -289,6 +365,98 @@ Example:
 - Next action: delivery applies small fixes if the finding is local; planning
   owns larger workflow redesign.
 
+#### Review use cases
+
+Use `internal-review-guard` when the main question is "what is wrong, risky, or
+insufficiently validated?" Review is evidence-first and defect-first. It does
+not implement the fix, even when the fix is obvious.
+
+```text
++-------------------------------+
+| Does a concrete artifact or    |
+| change already exist?          |
++-------------------------------+
+              | yes                         | no
+              v                             v
++-----------------------------+     +--------------------------+
+| Is correctness evidence      |     | internal-planning-leader |
+| the main need?               |     | owns design first        |
++-----------------------------+     +--------------------------+
+              | yes
+              v
++-----------------------+
+| internal-review-guard |
+| owns findings, risk,  |
+| and fix routing       |
++-----------------------+
+              |
+              v
++------------------------------+
+| Route each actionable finding |
+| to delivery, planning,        |
+| critical, or defer            |
++------------------------------+
+```
+
+Good review requests usually name one of these review surfaces:
+
+| Surface | Review can own this | Evidence to inspect |
+| --- | --- | --- |
+| Changed files | Find defects, regressions, stale references, or missing updates. | Diff, adjacent contracts, tests. |
+| Agent behavior | Validate routing boundaries, handoff targets, tool contracts, and output expectations. | Agent frontmatter, body sections, contract tests. |
+| Skill behavior | Check if a skill is hollow, overloaded, stale, or mis-scoped. | `SKILL.md`, references, `agents/openai.yaml`, skill lint. |
+| Documentation claims | Verify whether README examples match live files and tests. | Target docs, catalog files, executable checks. |
+| Validation evidence | Decide whether the run commands actually prove the claim. | Test output, skipped checks, residual risk. |
+| Merge readiness | Identify blockers before handoff or PR. | Full validation wrapper, changed-file review, open gaps. |
+
+Review findings should use this structure:
+
+```text
++------------------------------+
+| Finding                       |
+| - severity                    |
+| - confidence                  |
+| - evidence                    |
++------------------------------+
+              |
+              v
++------------------------------+
+| Causal layer                  |
+| - why this happened           |
+| - what assumption failed      |
++------------------------------+
+              |
+              v
++------------------------------+
+| Fix routing plan              |
+| - delivery                    |
+| - planning                    |
+| - critical                    |
+| - defer with residual risk    |
++------------------------------+
+```
+
+Concrete review examples:
+
+- "Review whether the delivery examples in the README are enough to guide future
+  users." Review owns evidence and missing-case findings.
+- "Check that every `handoffs:` target in the four canonical agents points to a
+  real canonical agent and keeps `send: false`." Review owns contract validation.
+- "Look at this catalog change and tell me whether inventory, tests, and docs are
+  aligned." Review owns cross-surface defect detection.
+- "The validation passed, but tell me what it did not prove." Review owns
+  evidence gaps and residual risk.
+- "Find any stale references after this rename." Review owns stale-name detection
+  and routes fixes back to delivery.
+
+Examples that should leave review:
+
+- The user asks to apply the fix. Move to delivery.
+- The finding requires deciding a new operating model. Move to planning.
+- The concern is a weak assumption in a proposed design, not a concrete defect.
+  Move to critical.
+- The user wants a broad source catalog refresh. Move to sync or planning first.
+
 ### 4. Challenged decisions
 
 Challenge is for pressure-testing reasoning before action. It is deliberately
@@ -343,6 +511,74 @@ Example:
   governance risk.
 - Next owner: `internal-planning-leader`, because the plan must be reformulated
   before delivery touches files.
+
+#### Critical challenge use cases
+
+Use `internal-critical-master` when the risky part is reasoning quality, not an
+already-observed defect. Critical challenge should expose hidden assumptions,
+failure modes, overfitting, and missed alternatives before implementation starts.
+
+```text
++------------------------------+
+| Is there a proposal, plan,    |
+| or decision to attack?        |
++------------------------------+
+            | yes                         | no
+            v                             v
++-----------------------------+   +--------------------------+
+| Is the main risk weak        |   | internal-planning-leader |
+| reasoning or hidden premise? |   | frames the plan first    |
++-----------------------------+   +--------------------------+
+            | yes
+            v
++--------------------------+
+| internal-critical-master |
+| owns pressure testing    |
++--------------------------+
+            |
+            v
++-----------------------------+
+| Closing synthesis, then      |
+| recommend reformulation,     |
+| review, or delivery          |
++-----------------------------+
+```
+
+Good challenge requests usually involve one of these pressure points:
+
+| Pressure point | Critical can own this | Expected output |
+| --- | --- | --- |
+| Hidden assumption | What must be true for this plan to work? | Strongest assumption gap and why it matters. |
+| Failure mode | How could this plan fail after appearing correct? | Pre-mortem with likely failure path. |
+| Overengineering | Is this solving a smaller problem with too much machinery? | Simpler alternative or scope compression. |
+| Underengineering | Is the plan skipping necessary governance, tests, or safety? | Missing constraint and downstream consequence. |
+| False tradeoff | Are we choosing between two options when a third framing exists? | Reframed decision surface. |
+| Timing risk | What breaks if this is done now versus later? | Sequence challenge and recommended next owner. |
+
+Concrete critical examples:
+
+- "Pressure-test the idea of adding a coordinator agent." Critical challenges
+  hidden routing complexity, maintenance cost, and ping-pong risk.
+- "Attack this retained plan before delivery implements it." Critical looks for
+  assumptions that planning normalized too quickly.
+- "Is direct entry actually enough for the workflow, or are we avoiding needed
+  orchestration?" Critical tests both downside and upside.
+- "What is the strongest reason not to import this upstream skill?" Critical
+  focuses on strategic fit, not line-level defects.
+- "Find the weakest part of this migration plan." Critical identifies the single
+  most important premise to resolve before action.
+
+Examples that should leave critical:
+
+- The user asks for implementation. Move to delivery.
+- The user asks for final plan reformulation. Move to planning.
+- The user asks whether a concrete diff is correct. Move to review.
+- The user asks for open-ended idea generation. Use planning or brainstorming
+  support instead.
+
+Critical should end with synthesis, not endless skepticism. The useful output is
+the strongest surviving objection, what uncertainty remains, and which owner
+should act next.
 
 ### 5. Source and consumer sync workflows
 
@@ -404,6 +640,59 @@ Consumer baseline propagation:
 Use `local-sync-external-resources` when changing this repository's source
 catalog. Use `local-sync-global-copilot-configs-into-repo` when pushing the
 managed baseline into another repository.
+
+#### Sync use cases
+
+Use sync agents only when the task is about catalog synchronization or baseline
+propagation. They are command centers for a specific operational surface, not
+general-purpose delivery agents.
+
+```text
++------------------------------+
+| Is the source catalog in this |
+| repository being changed?     |
++------------------------------+
+        | yes                           | no
+        v                               v
++-------------------------------+   +--------------------------------+
+| local-sync-external-resources |   | Is a consumer repo receiving   |
+| owns source-side sync         |   | this baseline?                 |
++-------------------------------+   +--------------------------------+
+                                        | yes                    | no
+                                        v                        v
+                         +--------------------------------+   +--------------------------+
+                         | local-sync-global-copilot      |   | Pick planning, delivery, |
+                         | configs-into-repo owns target  |   | review, or critical      |
+                         | baseline propagation           |   +--------------------------+
+                         +--------------------------------+
+```
+
+Source-side sync examples:
+
+- "Refresh the managed `mattpocock-*` skills declared in the source-side map."
+- "Audit imported `obra-*` assets for overlap with internal owners."
+- "Apply approved imported-asset override patches after upstream refresh."
+- "Retire a managed external skill after the user explicitly narrows scope."
+- "Check that `AGENTS.md`, `.github/copilot-instructions.md`, and inventory stay
+  aligned after source catalog changes."
+
+Consumer propagation examples:
+
+- "Plan syncing this repository's Copilot baseline into another repo."
+- "Apply the approved baseline sync while preserving target `local-*` assets."
+- "Check whether the consumer override layer changes the effective guidance."
+- "Bring `LESSONS_LEARNED.md` structure into a target repo without losing local
+  lesson rows."
+- "Report which managed files would change before applying sync."
+
+Examples that should leave sync:
+
+- A single local README or test edit remains after sync planning. Move to
+  delivery.
+- The user is still deciding whether a new catalog family should exist. Move to
+  planning.
+- The user asks for correctness review of the sync result. Move to review.
+- The user asks whether the sync strategy itself is flawed. Move to critical.
 
 ## Use Examples
 
