@@ -5,14 +5,14 @@ description: Use when a repository-owned agent or prompt needs to package an alr
 
 # Internal Agent Next Step
 
-Use this skill to format the next step after the next owner has already been chosen or confirmed. It keeps sequential workflows compact, explicit, and user-visible without turning canonical agents into hidden routers.
+Use this skill to format the next step after the next owner has already been chosen or confirmed. It keeps sequential workflows compact, explicit, and user-visible without turning Copilot wrappers or portable skill workflows into hidden routers.
 
 ## When to use
 
-- `internal-planning-leader` recommends moving from planning to delivery, review, or critical challenge.
-- `internal-review-guard` finishes defect-first analysis and needs to route actionable findings to delivery, planning, critical challenge, or deferred follow-up.
+- `internal-agent-operational-flow` ends `plan`, `execute`, or `review` mode with a visible transition.
+- A Copilot wrapper recommends moving from planning, delivery, review, or critical challenge to a different owner.
+- `internal-review-guard` or `review` mode finishes defect-first analysis and needs to route actionable findings to delivery, planning, critical challenge, or deferred follow-up.
 - A prompt needs a consistent handoff package that survives surfaces where VS Code `handoffs:` buttons are not available.
-- `internal-delivery-operator` or `internal-critical-master` wants optional support for a compact next-step recommendation after its own lane is complete.
 
 ## When not to use
 
@@ -34,7 +34,7 @@ Keep the package short. Prefer one line per field unless the validation path or 
 
 ## VS Code Handoffs
 
-- Treat `handoffs:` buttons as the primary VS Code UX for sequential workflows.
+- Treat `handoffs:` buttons as the primary VS Code wrapper UX for sequential workflows.
 - Keep `send: false` so the user reviews and approves the transition.
 - Keep the text package in the response even when a button exists, because GitHub.com and other surfaces may ignore `handoffs:`.
 - Use user-facing labels with `Next step:` or `Next action:`; keep `handoffs:` only as the technical frontmatter property.

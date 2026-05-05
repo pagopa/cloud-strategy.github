@@ -1,20 +1,28 @@
 # Agents Catalog
 
-This folder contains custom agents for repository-owned direct-owner operations plus repo-only sync workflows.
+This folder contains Copilot wrapper agents for repository-owned operations plus repo-only sync workflows. The portable operational semantics live in skills; these agents provide VS Code route selection, tool scope, and manual handoff UX.
+
+## Skill-First Core
+
+- `internal-agent-operational-flow` owns the reusable `plan`, `execute`, and `review` modes.
+- `internal-agent-critical-master` owns the reusable critical challenge workflow.
+- The four internal operational agents are current Copilot wrapper entrypoints, not a separate semantic source.
+- Runtime surfaces without Copilot agent UI should read the relevant `SKILL.md` files and use text next-step packages.
 
 ## Resolution order
 
 1. Apply repository non-negotiables from `copilot-instructions.md`.
-2. Apply the explicit user request and selected agent behavior.
+2. Apply the explicit user request and selected skill mode or wrapper behavior.
 3. Apply matching `instructions/*.instructions.md` by path.
 4. Apply referenced skill details.
 
 ## ASCII Workflow Map
 
-These maps describe the expected human-visible flow between direct-entry agents.
-They are not hidden dispatch rules. A box is an owner, an arrow is a transition
-that should remain visible to the user, and `handoffs: send=false` means VS Code
-may offer a button but the user still reviews and approves the next message.
+These maps describe the expected human-visible flow between direct-entry modes
+and Copilot wrappers. They are not hidden dispatch rules. A box is an owner, an
+arrow is a transition that should remain visible to the user, and
+`handoffs: send=false` means VS Code may offer a button but the user still
+reviews and approves the next message.
 
 ### 1. Quick execution
 
@@ -55,6 +63,8 @@ Use this path when the target state is already known. The delivery agent should
 not reopen strategy, invent new ownership, or create retained plan files unless
 the task unexpectedly becomes non-trivial.
 
+Portable core: `execute` mode in `internal-agent-operational-flow`.
+
 Good examples:
 
 - "Fix the typo in the internal Python instruction."
@@ -72,6 +82,8 @@ Bad fit examples:
 Use `internal-delivery-operator` when the request already contains enough
 direction to edit or run commands without first resolving ownership. Delivery is
 the right lane for concrete work, not for deciding what the work should mean.
+Use `execute` mode directly when the runtime does not expose Copilot wrapper
+agents.
 
 ```text
 +------------------------------+
@@ -213,6 +225,8 @@ Use this path when the work needs a decision record, plan, or route selection
 before editing. The planning output should be compact enough for delivery to act
 without rediscovering the whole problem.
 
+Portable core: `plan` mode in `internal-agent-operational-flow`.
+
 Example:
 
 - Request: "The workflow between planning, delivery, review, and critical feels
@@ -227,6 +241,7 @@ Example:
 Use `internal-planning-leader` when the next correct action is not yet obvious.
 Planning is not a slower version of delivery; it exists to settle ownership,
 scope, tradeoffs, rollout shape, and validation before files change.
+Use `plan` mode directly when the runtime does not expose Copilot wrapper agents.
 
 ```text
 +--------------------------------+
@@ -356,6 +371,9 @@ Use this path when the user asks "is this right?", "what is risky?", or "review
 this before I trust it." A good review answer should make missing validation a
 finding, not a footnote.
 
+Portable core: `review` mode in `internal-agent-operational-flow`, with
+`internal-code-review` as the tactical review engine.
+
 Example:
 
 - Request: "Check whether the new agent handoffs really work as expected."
@@ -370,6 +388,8 @@ Example:
 Use `internal-review-guard` when the main question is "what is wrong, risky, or
 insufficiently validated?" Review is evidence-first and defect-first. It does
 not implement the fix, even when the fix is obvious.
+Use `review` mode directly when the runtime does not expose Copilot wrapper
+agents.
 
 ```text
 +-------------------------------+
@@ -502,6 +522,8 @@ not a routine review lane and should not implement the solution it critiques.
 Use this path for non-banal decisions where the cost of acting on weak reasoning
 is higher than the cost of one pressure-test pass.
 
+Portable core: `internal-agent-critical-master`.
+
 Example:
 
 - Request: "Before we create a coordinator agent, pressure-test whether that
@@ -517,6 +539,8 @@ Example:
 Use `internal-critical-master` when the risky part is reasoning quality, not an
 already-observed defect. Critical challenge should expose hidden assumptions,
 failure modes, overfitting, and missed alternatives before implementation starts.
+Use `internal-agent-critical-master` directly when the runtime does not expose
+Copilot wrapper agents.
 
 ```text
 +------------------------------+
@@ -696,10 +720,10 @@ Examples that should leave sync:
 
 ## Use Examples
 
-- Clear local edit with known validation: start with `internal-delivery-operator`.
-- Catalog redesign, routing change, or retained plan: start with `internal-planning-leader`.
-- "Check whether this is correct before merge": start with `internal-review-guard`.
-- "Find the weakest assumption in this plan": start with `internal-critical-master`.
+- Clear local edit with known validation: start with `execute` mode or `internal-delivery-operator`.
+- Catalog redesign, routing change, or retained plan: start with `plan` mode or `internal-planning-leader`.
+- "Check whether this is correct before merge": start with `review` mode or `internal-review-guard`.
+- "Find the weakest assumption in this plan": start with `internal-agent-critical-master` or `internal-critical-master`.
 - Source-side external catalog sync: start with `local-sync-external-resources`.
 - Consumer repository baseline propagation: start with `local-sync-global-copilot-configs-into-repo`.
 
@@ -707,10 +731,10 @@ More concrete examples:
 
 | User request shape | Start with | Why |
 | --- | --- | --- |
-| "Update one README section and run the related test." | `internal-delivery-operator` | Scope and validation are already concrete. |
-| "Decide whether this should be an agent, a skill, or an instruction." | `internal-planning-leader` | The core work is ownership and placement. |
-| "Review these agent changes for routing regressions." | `internal-review-guard` | The job is defect-first validation, not implementation. |
-| "Attack this plan before I apply it." | `internal-critical-master` | The job is assumption pressure-testing. |
+| "Update one README section and run the related test." | `execute` or `internal-delivery-operator` | Scope and validation are already concrete. |
+| "Decide whether this should be an agent, a skill, or an instruction." | `plan` or `internal-planning-leader` | The core work is ownership and placement. |
+| "Review these agent changes for routing regressions." | `review` or `internal-review-guard` | The job is defect-first validation, not implementation. |
+| "Attack this plan before I apply it." | `internal-agent-critical-master` or `internal-critical-master` | The job is assumption pressure-testing. |
 | "Refresh the managed `obra-*` skills from upstream." | `local-sync-external-resources` | The job is source-side external catalog sync. |
 | "Plan the propagation of this baseline into another repo." | `local-sync-global-copilot-configs-into-repo` | The job is consumer baseline alignment. |
 
@@ -718,16 +742,16 @@ If a request starts in the wrong lane, the selected agent should stop, explain
 the mismatch, and recommend one better owner through `internal-agent-lane-change-engine`.
 It should not continue by acting as a hidden router.
 
-## Owner selection
+## Owner Selection
 
-- `internal-delivery-operator`: clear local execution, deterministic realignment, concrete validation.
-- `internal-planning-leader`: ambiguity, cross-boundary tradeoffs, non-trivial repository-owned authoring, rollout decisions.
-- `internal-review-guard`: defect-first review, merge readiness, regression analysis, validation evidence.
-- `internal-critical-master`: pre-mortem, assumption pressure test, failure modes, alternative framing.
+- `execute` mode or `internal-delivery-operator`: clear local execution, deterministic realignment, concrete validation.
+- `plan` mode or `internal-planning-leader`: ambiguity, cross-boundary tradeoffs, non-trivial repository-owned authoring, rollout decisions.
+- `review` mode or `internal-review-guard`: defect-first review, merge readiness, regression analysis, validation evidence.
+- `internal-agent-critical-master` or `internal-critical-master`: pre-mortem, assumption pressure test, failure modes, alternative framing.
 - `local-sync-external-resources`: source-side `.github/` catalog sync, rationalization, overlap cleanup, managed external resources.
 - `local-sync-global-copilot-configs-into-repo`: consumer-repository baseline propagation.
 
-Safe fallback: use `internal-planning-leader` when two or more owners still plausibly fit.
+Safe fallback: use `plan` mode or `internal-planning-leader` when two or more owners still plausibly fit.
 
 ## When not to use
 
@@ -739,7 +763,7 @@ Safe fallback: use `internal-planning-leader` when two or more owners still plau
 
 ## Next steps
 
-The four canonical agents can expose VS Code `handoffs:` buttons for user-visible transitions. The buttons keep `send: false`; the user still approves the move. Agent responses should also include a compact next-step package because some surfaces may ignore handoff buttons.
+The four Copilot wrapper agents can expose VS Code `handoffs:` buttons for user-visible transitions. The buttons keep `send: false`; the user still approves the move. Responses should also include a compact next-step package because some surfaces may ignore handoff buttons.
 
 Use `Next step:` labels for planned transitions and `Next action:` labels for review remediation.
 

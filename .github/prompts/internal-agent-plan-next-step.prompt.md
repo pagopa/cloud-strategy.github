@@ -22,6 +22,7 @@ Use these repository sources first:
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
 - [.github/agents/internal-planning-leader.agent.md](../agents/internal-planning-leader.agent.md)
+- [.github/skills/internal-agent-operational-flow/SKILL.md](../skills/internal-agent-operational-flow/SKILL.md)
 - [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
 
 Produce a planning brief with:

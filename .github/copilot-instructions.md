@@ -45,11 +45,13 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
 - During catalog review or rationalization, imported assets in domains already covered by a credible internal owner should be evaluated as `keep as depth`, `wrap under the internal owner`, or `retire`; do not collapse the decision to a binary keep/delete choice.
 - `local-*` assets are consumer-local extensions in target repositories. In this standards repository, the `local-*` prefix is also used for repo-owned tooling that must not be synced to consumers (for example, sync command centers and their paired engine skills); these assets remain source-of-truth here and are excluded from the synced baseline.
-- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the canonical repository-owned operational agents.
-- Use direct entry for canonical operational lanes and do not invent a repository-owned front-door router.
-- `internal-planning-leader` is the safe fallback when the right operational lane is still ambiguous.
-- Canonical owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
-- Any automation added between canonical owners must stay explicit, narrow, and one-directional, with no all-to-all dispatch or nested ping-pong.
+- `internal-agent-operational-flow` is the portable skill-first core for repository-owned `plan`, `execute`, and `review` work across Copilot, ChatGPT, Codex, and other runtimes.
+- `internal-agent-critical-master` is the portable skill-first core for critical challenge, pre-mortem, hidden-assumption, and failure-mode work.
+- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the current Copilot wrapper entrypoints for VS Code route selection, tool scope, and manual handoff UX.
+- Use direct entry for operational modes and Copilot wrapper lanes, and do not invent a repository-owned front-door router.
+- `plan` mode through `internal-agent-operational-flow`, or the `internal-planning-leader` wrapper in VS Code, is the safe fallback when the right operational lane is still ambiguous.
+- Operational owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
+- Any automation added between operational owners must stay explicit, narrow, and one-directional, with no all-to-all dispatch or nested ping-pong.
 - `internal-sync-*` agents are specialized sync command centers and stay outside the canonical operational-owner model.
 
 ## Non-Negotiables

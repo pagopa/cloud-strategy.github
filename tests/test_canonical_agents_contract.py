@@ -11,6 +11,8 @@ CANONICAL_AGENTS = {
     "internal-critical-master": ".github/agents/internal-critical-master.agent.md",
 }
 
+OLD_CROSS_LANE_ENGINE = "internal-agent-" + "cross-lane-engine"
+
 EXPECTED_HANDOFF_LABELS = {
     "internal-delivery-operator": ["Next step: Review result"],
     "internal-planning-leader": [
@@ -39,6 +41,30 @@ EXPECTED_HANDOFF_TARGETS = {
     "internal-critical-master": ["internal-planning-leader"],
 }
 
+EXPECTED_MANDATORY_SKILLS = {
+    "internal-delivery-operator": [
+        "internal-agent-operational-flow",
+        "internal-agent-lane-change-engine",
+        "internal-agent-next-step",
+    ],
+    "internal-planning-leader": [
+        "internal-agent-operational-flow",
+        "internal-agent-lane-change-engine",
+        "internal-agent-next-step",
+    ],
+    "internal-review-guard": [
+        "internal-agent-operational-flow",
+        "internal-agent-lane-change-engine",
+        "internal-agent-next-step",
+        "internal-code-review",
+    ],
+    "internal-critical-master": [
+        "internal-agent-critical-master",
+        "internal-agent-lane-change-engine",
+        "internal-agent-next-step",
+    ],
+}
+
 
 def load_frontmatter(relative_path: str) -> dict[str, object]:
     text = Path(relative_path).read_text(encoding="utf-8")
@@ -49,6 +75,11 @@ def load_frontmatter(relative_path: str) -> dict[str, object]:
 def read_body(relative_path: str) -> str:
     text = Path(relative_path).read_text(encoding="utf-8")
     return text.split("---\n", 2)[2]
+
+
+def mandatory_section(body: str) -> str:
+    section = body.split("## Mandatory Engine Skills", 1)[1]
+    return section.split("## ", 1)[0]
 
 
 def test_canonical_agents_keep_required_frontmatter_and_engine_contracts() -> None:
@@ -67,15 +98,14 @@ def test_canonical_agents_keep_required_frontmatter_and_engine_contracts() -> No
 
 
 def test_canonical_agents_keep_expected_engine_skill_assignments() -> None:
-    for agent_name in (
-        "internal-delivery-operator",
-        "internal-planning-leader",
-        "internal-review-guard",
-        "internal-critical-master",
-    ):
+    for agent_name, expected_skills in EXPECTED_MANDATORY_SKILLS.items():
         body = read_body(CANONICAL_AGENTS[agent_name])
-        assert "- `internal-agent-cross-lane-engine`" in body
-        assert "- `internal-agent-lane-change-engine`" in body
+        mandatory_skills = mandatory_section(body)
+
+        for expected_skill in expected_skills:
+            assert f"- `{expected_skill}`" in mandatory_skills
+
+        assert f"- `{OLD_CROSS_LANE_ENGINE}`" not in mandatory_skills
 
 
 def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
@@ -95,20 +125,12 @@ def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
         assert all(isinstance(handoff.get("prompt"), str) for handoff in handoffs)
 
 
-def test_next_step_package_skill_is_mandatory_only_for_planning_and_review() -> None:
-    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
-    review_body = read_body(CANONICAL_AGENTS["internal-review-guard"])
-    delivery_body = read_body(CANONICAL_AGENTS["internal-delivery-operator"])
-    critical_body = read_body(CANONICAL_AGENTS["internal-critical-master"])
+def test_next_step_package_skill_is_mandatory_for_all_operational_wrappers() -> None:
+    for relative_path in CANONICAL_AGENTS.values():
+        body = read_body(relative_path)
 
-    assert "## Mandatory Engine Skills" in planning_body
-    assert "- `internal-agent-next-step`" in planning_body
-    assert "## Mandatory Engine Skills" in review_body
-    assert "- `internal-agent-next-step`" in review_body
-    assert "## Optional Support Skills" in delivery_body
-    assert "- `internal-agent-next-step`" in delivery_body
-    assert "## Optional Support Skills" in critical_body
-    assert "- `internal-agent-next-step`" in critical_body
+        assert "## Mandatory Engine Skills" in body
+        assert "- `internal-agent-next-step`" in mandatory_section(body)
 
 
 def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
@@ -146,3 +168,70 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
     assert "Catalog redesign, routing change, or retained plan" in readme
     assert "Source-side external catalog sync" in readme
     assert "If a request starts in the wrong lane" in readme
+
+
+def test_skill_first_operational_core_exists_with_required_modes() -> None:
+    skill_text = Path(
+        ".github/skills/internal-agent-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    mode_contracts_text = Path(
+        ".github/skills/internal-agent-operational-flow/references/mode-contracts.md"
+    ).read_text(encoding="utf-8")
+    workflow_maps_text = Path(
+        ".github/skills/internal-agent-operational-flow/references/workflow-maps.md"
+    ).read_text(encoding="utf-8")
+    wrapper_alignment_text = Path(
+        ".github/skills/internal-agent-operational-flow/references/wrapper-alignment.md"
+    ).read_text(encoding="utf-8")
+    metadata_text = Path(
+        ".github/skills/internal-agent-operational-flow/agents/openai.yaml"
+    ).read_text(encoding="utf-8")
+
+    assert "name: internal-agent-operational-flow" in skill_text
+    assert "`plan`, `execute`, and `review`" in skill_text
+    assert "`plan`" in mode_contracts_text
+    assert "`execute`" in mode_contracts_text
+    assert "`review`" in mode_contracts_text
+    assert "Codex plugin or Codex CLI" in workflow_maps_text
+    assert "internal-planning-leader" in wrapper_alignment_text
+    assert "$internal-agent-operational-flow" in metadata_text
+
+
+def test_critical_master_skill_exists_with_challenge_boundary() -> None:
+    skill_text = Path(
+        ".github/skills/internal-agent-critical-master/SKILL.md"
+    ).read_text(encoding="utf-8")
+    lenses_text = Path(
+        ".github/skills/internal-agent-critical-master/references/challenge-lenses.md"
+    ).read_text(encoding="utf-8")
+    metadata_text = Path(
+        ".github/skills/internal-agent-critical-master/agents/openai.yaml"
+    ).read_text(encoding="utf-8")
+
+    assert "name: internal-agent-critical-master" in skill_text
+    assert "Do not implement, routine-review, or finalize the plan" in skill_text
+    assert "Final Consistency Gate" in lenses_text
+    assert "Scope compression" in lenses_text
+    assert "$internal-agent-critical-master" in metadata_text
+
+
+def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
+    operational_text = Path(
+        ".github/skills/internal-agent-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
+
+    assert Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
+    assert not Path(".github/skills/grill-me/SKILL.md").exists()
+    assert "mattpocock-grill-me" in operational_text
+    assert "conditional support" in operational_text
+    assert "provide numbered questions with a recommended answer" in operational_text
+    assert "continue one question at a time" in operational_text
+    assert "- `mattpocock-grill-me`" in planning_body
+
+
+def test_old_cross_lane_engine_is_not_live_catalog_contract() -> None:
+    assert not Path(f".github/skills/{OLD_CROSS_LANE_ENGINE}/SKILL.md").exists()
+
+    for relative_path in CANONICAL_AGENTS.values():
+        assert OLD_CROSS_LANE_ENGINE not in read_body(relative_path)

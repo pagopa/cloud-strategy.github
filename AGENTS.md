@@ -53,11 +53,13 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Operational Owner Model
 
-- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the canonical repository-owned operational agents.
-- The canonical operational model uses direct entry instead of a repository-owned front-door router.
-- When the right lane is unclear, prefer `internal-planning-leader` as the safe fallback.
-- Canonical owners remain recommendation-only when their boundary breaks and are not subagent-invoked by default.
-- Any future automation between canonical owners must be explicit, narrow, one-directional, and must not create all-to-all dispatch or nested ping-pong.
+- `internal-agent-operational-flow` is the portable skill-first core for repository-owned `plan`, `execute`, and `review` work across Copilot, ChatGPT, Codex, and other runtimes.
+- `internal-agent-critical-master` is the portable skill-first core for critical challenge, pre-mortem, hidden-assumption, and failure-mode work.
+- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the current Copilot wrapper entrypoints for VS Code route selection, tool scope, and manual handoff UX.
+- The operational model uses direct entry instead of a repository-owned front-door router.
+- When the right mode or wrapper is unclear, prefer `plan` mode through `internal-agent-operational-flow` or the `internal-planning-leader` wrapper as the safe fallback.
+- Operational owners remain recommendation-only when their boundary breaks and are not subagent-invoked by default.
+- Any future automation between operational owners must be explicit, narrow, one-directional, and must not create all-to-all dispatch or nested ping-pong.
 
 ## Projection Rules
 

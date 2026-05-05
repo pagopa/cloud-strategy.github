@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Agent Critical Master"
+  short_description: "Portable critical challenge core"
+  default_prompt: "Use $internal-agent-critical-master to pressure-test this plan or decision and surface the strongest supported objection."

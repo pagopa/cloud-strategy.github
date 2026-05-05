@@ -23,7 +23,7 @@ Use these repository sources first:
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
-- [.github/skills/internal-agent-cross-lane-engine/SKILL.md](../skills/internal-agent-cross-lane-engine/SKILL.md)
+- [.github/skills/internal-agent-critical-master/SKILL.md](../skills/internal-agent-critical-master/SKILL.md)
 - [.github/skills/internal-agent-lane-change-engine/SKILL.md](../skills/internal-agent-lane-change-engine/SKILL.md)
 - [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
 

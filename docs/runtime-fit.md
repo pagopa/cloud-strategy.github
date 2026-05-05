@@ -8,8 +8,9 @@ This repository is authored as a GitHub Copilot customization and governance bas
 | --- | --- |
 | ChatGPT 5.5 | Read `AGENTS.md`, `.github/copilot-instructions.md`, matching `.github/instructions/*.instructions.md`, and relevant `SKILL.md` files as manual references when no automatic apply or skill tool exists. Replace prompt inputs such as `${input:request}` manually. |
 | Opus 4.6 | Use the same manual-reference model as ChatGPT 5.5 unless the host environment provides native skill or instruction loading. |
-| GitHub Copilot | Use repository instructions, path-scoped `.github/instructions/*.instructions.md`, prompts, agents, and skills through the native VS Code or GitHub Copilot surfaces. |
-| Codex | Treat skills and instructions as operational references unless the host environment provides native skill invocation. Follow repository-local validation commands before completion. |
+| GitHub Copilot | Use repository instructions, path-scoped `.github/instructions/*.instructions.md`, prompts, wrapper agents, and skills through the native VS Code or GitHub Copilot surfaces. |
+| Codex plugin for VS Code | Load the relevant `SKILL.md` files as the operational source of truth; Copilot wrapper agents are UX projections and may not be available. |
+| Codex CLI | Treat skills and instructions as operational references unless the host environment provides native skill invocation. Follow repository-local validation commands before completion and do not rely on Copilot agent buttons. |
 
 ## Portability Rules
 
@@ -17,6 +18,7 @@ This repository is authored as a GitHub Copilot customization and governance bas
 - Keep prompt files model-agnostic; `${input:...}` placeholders are a UI convenience, not a requirement of the policy.
 - Treat `applyTo` as GitHub Copilot activation metadata. Other runtimes can still read the same instruction content as reference material.
 - Treat `SKILL.md` files as workflows. If a runtime has no skill invocation tool, read the relevant skill file and follow its workflow manually.
+- Treat `.github/agents/*.agent.md` files as Copilot wrapper projections around skill-owned semantics, not as the only operational source.
 - Do not optimize asset wording for only ChatGPT 5.5, Opus 4.6, GitHub Copilot, or Codex unless a narrower local instruction explicitly requires that runtime.
 
 ## Validation

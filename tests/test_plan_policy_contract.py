@@ -66,22 +66,25 @@ def test_internal_planning_leader_prefers_repository_plan_wrappers() -> None:
 
 def test_plan_wrapper_skills_are_listed_in_ownership_map_and_inventory() -> None:
     ownership_map_text = read_text(
-        ".github/skills/internal-agent-cross-lane-engine/references/ownership-maps.md"
+        ".github/skills/internal-agent-operational-flow/references/mode-contracts.md"
     )
     inventory_text = read_text(".github/INVENTORY.md")
 
     assert (
-        "| `internal-writing-plans` | `internal-planning-leader` |"
+        "| `internal-writing-plans` | `plan` mode |"
         in ownership_map_text
     )
     assert (
-        "| `internal-executing-plans` | `internal-planning-leader` |"
+        "| `internal-executing-plans` | `plan` mode oversight |"
         in ownership_map_text
     )
     assert PLAN_TASK_PATH in ownership_map_text
 
     for skill_path in PLAN_SKILL_PATHS.values():
         assert f"- `{skill_path}`" in inventory_text
+
+    assert "- `.github/skills/internal-agent-operational-flow/SKILL.md`" in inventory_text
+    assert "- `.github/skills/internal-agent-critical-master/SKILL.md`" in inventory_text
 
 
 def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
