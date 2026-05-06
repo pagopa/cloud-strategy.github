@@ -57,6 +57,20 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - useful self-containment is allowed when it helps the target surface
   - global rules are repeated locally only when the projection is deliberate and low-drift
 
+#### `instruction-architecture-scoped-instructions-stay-matchable`
+
+- Goal: keep scoped instructions discoverable by target path without promising universal auto-loading.
+- Scope:
+  - `.github/instructions/**/*.instructions.md`
+  - `docs/runtime-fit.md`
+  - catalog consistency helpers and tests
+- Expected behavior:
+  - each active scoped instruction exposes usable `applyTo` metadata
+  - non-Copilot runtimes can identify all matching instructions for a known target path and read them as manual references
+  - repository-owned `internal-*` instructions and imported non-`internal-*` instructions remain eligible when their `applyTo` metadata matches
+  - overlap between different glob patterns is treated as relevant co-load unless a clear conflict requires a narrower scope or explicit uncertainty
+  - docs and validators describe discoverability and matching, not universal runtime enforcement
+
 ### Language Policy
 
 #### `language-default-is-centrally-governed`

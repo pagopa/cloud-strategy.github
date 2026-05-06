@@ -21,6 +21,16 @@ This repository is authored as a GitHub Copilot customization and governance bas
 - Treat `.github/agents/*.agent.md` files as Copilot wrapper projections around skill-owned semantics, not as the only operational source.
 - Do not optimize asset wording for only ChatGPT 5.5, Opus 4.6, GitHub Copilot, or Codex unless a narrower local instruction explicitly requires that runtime.
 
+## Matching Scoped Instructions
+
+For runtime hosts without native Copilot instruction loading, scoped instructions remain relevant by matching the target path against each instruction file's `applyTo` metadata.
+
+- Before editing, reviewing, or asserting policy for a known target path, identify every `.github/instructions/*.instructions.md` file whose `applyTo` glob matches that path.
+- Read all matching instructions as manual references, including both repository-owned `internal-*` instructions and imported non-`internal-*` instructions.
+- Treat multiple matches as intentional co-load unless the instructions directly conflict; prefer the narrower target scope when the conflict is clear.
+- If the target path is not explicit, infer the artifact family only when it is obvious, such as Python, GitHub Actions, Kubernetes, Docker, or Markdown; otherwise ask for the target path before making path-scoped policy claims.
+- Keep this as a discoverability and reference contract. Do not describe it as universal runtime enforcement or automatic loading outside hosts that document that behavior.
+
 ## Validation
 
 - Run the repository validator or the closest available local checks after changing shared governance assets.

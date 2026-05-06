@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import re
 from pathlib import Path
 
 import yaml
@@ -420,6 +421,63 @@ def normalize_apply_to_patterns(value: object) -> list[str]:
     for raw_value in raw_values:
         patterns.extend(pattern.strip() for pattern in raw_value.split(",") if pattern.strip())
     return patterns
+
+
+def collect_matching_instruction_paths(root: Path, target_path: str) -> list[str]:
+    instructions_root = root / ".github/instructions"
+    if not instructions_root.exists():
+        return []
+
+    normalized_target = normalize_instruction_target_path(target_path)
+    if not normalized_target:
+        return []
+
+    matching_paths: list[str] = []
+    for path in sorted(instructions_root.glob("*.instructions.md")):
+        if not path.is_file():
+            continue
+        patterns = normalize_apply_to_patterns(load_frontmatter(path).get("applyTo"))
+        if any(apply_to_pattern_matches_target(pattern, normalized_target) for pattern in patterns):
+            matching_paths.append(path.relative_to(root).as_posix())
+    return matching_paths
+
+
+def apply_to_pattern_matches_target(pattern: str, target_path: str) -> bool:
+    normalized_pattern = normalize_instruction_target_path(pattern)
+    normalized_target = normalize_instruction_target_path(target_path)
+    if not normalized_pattern or not normalized_target:
+        return False
+    return re.fullmatch(apply_to_pattern_to_regex(normalized_pattern), normalized_target) is not None
+
+
+def normalize_instruction_target_path(value: str) -> str:
+    normalized = value.strip().replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized.lstrip("/")
+
+
+def apply_to_pattern_to_regex(pattern: str) -> str:
+    regex_parts: list[str] = []
+    index = 0
+    while index < len(pattern):
+        char = pattern[index]
+        if char == "*" and index + 1 < len(pattern) and pattern[index + 1] == "*":
+            if index + 2 < len(pattern) and pattern[index + 2] == "/":
+                regex_parts.append(r"(?:[^/]+/)*")
+                index += 3
+                continue
+            regex_parts.append(r".*")
+            index += 2
+            continue
+        if char == "*":
+            regex_parts.append(r"[^/]*")
+        elif char == "?":
+            regex_parts.append(r"[^/]")
+        else:
+            regex_parts.append(re.escape(char))
+        index += 1
+    return "".join(regex_parts)
 
 
 def is_apply_to_overlap_allowlisted(apply_to: str, paths: list[str]) -> bool:

@@ -13,9 +13,10 @@ This file is the stable entrypoint for the repository instruction architecture.
 1. Use `.github/copilot-instructions.md` as the repo-wide Copilot projection.
 2. Use `.github/INVENTORY.md` for the exact live catalog of instructions, skills, and agents.
 3. Use `.github/instructions/` for path-specific or domain-specific projections.
-4. Use `.github/skills/` and `.github/agents/` only when they are relevant to the current task.
-5. Keep policy, projections, and inventory separate instead of mixing them into one file.
-6. If `docs/architecture.md` exists in the current repository, treat it as the per-repo architecture contract: read it before reasoning about repository purpose, components, system boundaries, or runtime fit, and update it in the same change when behavior, components, or boundaries move. This file is intentionally not part of the synced baseline; each repository owns its own `docs/architecture.md`. If the file is absent, fall back to inspecting the repository structure on disk and do not invent architecture facts.
+4. When a runtime lacks native scoped-instruction loading and the target path is known, treat every `.github/instructions/*.instructions.md` file with matching `applyTo` metadata as relevant manual reference material.
+5. Use `.github/skills/` and `.github/agents/` only when they are relevant to the current task.
+6. Keep policy, projections, and inventory separate instead of mixing them into one file.
+7. If `docs/architecture.md` exists in the current repository, treat it as the per-repo architecture contract: read it before reasoning about repository purpose, components, system boundaries, or runtime fit, and update it in the same change when behavior, components, or boundaries move. This file is intentionally not part of the synced baseline; each repository owns its own `docs/architecture.md`. If the file is absent, fall back to inspecting the repository structure on disk and do not invent architecture facts.
 
 ## Precedence Model
 
