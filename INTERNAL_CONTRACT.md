@@ -189,16 +189,17 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Goal: keep the canonical repository-owned operating model clear across projections.
 - Scope:
   - `.github/copilot-instructions.md`
-  - canonical operational agents
+  - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the canonical repository-owned operational agents
+  - `internal-agent-operational-flow` and `internal-agent-critical-master` remain the canonical repository-owned skill-first operational core
+  - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection instead of a repository-owned front-door router
-  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader`
-  - canonical owners define boundaries and recommendations instead of active delegation
-  - canonical owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
-  - any future peer-automation exception between canonical owners must be narrow, one-directional, auditably bounded, and non-mesh
-  - mandatory and optional skill contracts remain explicit where the operating model depends on them
+  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader` or `plan` mode through `internal-agent-operational-flow`
+  - wrapper owners define boundaries and recommendations instead of active delegation
+  - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
+  - any future peer-automation exception between wrapper owners must be narrow, one-directional, auditably bounded, and non-mesh
+  - mandatory and optional skill contracts remain explicit where the wrapper behavior depends on them
 
 ### Repository Workflow
 
