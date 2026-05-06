@@ -31,7 +31,6 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - `internal-copilot-audit`
 - `internal-agent-development`
 - `internal-skill-creator`
-- `openai-skill-creator`
 - `internal-copilot-docs-research`
 - `mattpocock-caveman`
 
@@ -74,7 +73,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
 - `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
 - `obra-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
-- `openai-skill-creator`: Use as the embedded core workflow for bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation only after `internal-skill-creator` has established the repository-owned skill boundary.
+- `openai-skill-creator`: Keep this as downstream bundle mechanics after `internal-skill-creator` has established the repository-owned skill boundary; do not load it as a first-pass optional support skill from this agent.
 
 ## Managed External Resource Map
 

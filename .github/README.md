@@ -112,7 +112,7 @@ The matching `.py` entrypoints and `scripts/lib/*.py` modules are part of the sa
 2. Update the relevant asset under `.github/`.
 3. If routing, naming, or repository-wide defaults changed, update root `AGENTS.md` first and then refresh `.github/copilot-instructions.md`.
 4. Refresh `.github/INVENTORY.md` when the live catalog changed, and update this README only when orientation text still needs adjustment.
-4. Run the repository checks that currently exist for the touched assets.
+5. Run the repository checks that currently exist for the touched assets.
 5. Update `CHANGELOG.md` for meaningful `.github/` changes.
 
 ## Completion Report Contract

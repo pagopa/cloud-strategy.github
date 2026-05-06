@@ -54,6 +54,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_internal_agent_contracts(root))
     findings.extend(check_repo_owned_agent_sections(root))
     findings.extend(check_duplicate_frontmatter_names(root))
+    findings.extend(check_prompt_contracts(root))
     findings.extend(check_instruction_apply_to_overlaps(root))
     findings.extend(check_imported_asset_overrides(root))
     findings.extend(check_broken_local_links(root))
@@ -293,6 +294,82 @@ def check_duplicate_frontmatter_names(root: Path) -> list[Finding]:
                     suggestion="Keep one canonical asset name per family to avoid ambiguous matching and routing.",
                 )
             )
+    return findings
+
+
+def check_prompt_contracts(root: Path) -> list[Finding]:
+    prompts_root = root / ".github/prompts"
+    if not prompts_root.exists():
+        return []
+
+    findings: list[Finding] = []
+    for path in sorted(prompts_root.glob("*.prompt.md")):
+        if not path.is_file():
+            continue
+
+        relative_path = path.relative_to(root).as_posix()
+        frontmatter = load_frontmatter(path)
+        expected_name = path.name.removesuffix(".prompt.md")
+
+        name = frontmatter.get("name")
+        if not isinstance(name, str) or not name.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-name",
+                    path=relative_path,
+                    message="Prompt files must declare a non-empty `name:` frontmatter value.",
+                    suggestion="Set `name:` to the canonical prompt identifier so catalog routing stays explicit.",
+                )
+            )
+        elif name.strip() != expected_name:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-name-mismatch",
+                    path=relative_path,
+                    message=(
+                        f"Prompt frontmatter name `{name.strip()}` does not match the filename stem `{expected_name}`."
+                    ),
+                    suggestion="Keep prompt filename and `name:` aligned so prompt routing stays deterministic.",
+                )
+            )
+
+        agent = frontmatter.get("agent")
+        if not isinstance(agent, str) or not agent.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-agent",
+                    path=relative_path,
+                    message="Prompt files must declare a non-empty `agent:` frontmatter value.",
+                    suggestion="Declare the intended agent owner so prompt entrypoint behavior stays reviewable.",
+                )
+            )
+
+        description = frontmatter.get("description")
+        if not isinstance(description, str) or not description.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-description",
+                    path=relative_path,
+                    message="Prompt files must declare a non-empty `description:` frontmatter value.",
+                    suggestion="Add a short description that explains when the prompt should be used.",
+                )
+            )
+
+        if "${input:" not in read_text(path):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-input-placeholder",
+                    path=relative_path,
+                    message="Prompt files must expose at least one `${input:...}` placeholder for reusable invocation.",
+                    suggestion="Add one or more `${input:...}` placeholders so the prompt can collect structured operator input.",
+                )
+            )
+
     return findings
 
 
@@ -630,6 +707,7 @@ def collect_repository_owned_markdown_paths(root: Path) -> list[Path]:
         ".github/agents/internal-*.agent.md",
         ".github/agents/local-*.agent.md",
         ".github/instructions/internal-*.instructions.md",
+        ".github/prompts/*.prompt.md",
         ".github/skills/internal-*/**/*.md",
         ".github/skills/local-*/**/*.md",
     ]
