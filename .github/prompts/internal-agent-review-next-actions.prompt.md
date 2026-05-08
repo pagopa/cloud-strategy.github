@@ -1,7 +1,7 @@
 ---
-name: "internal-review-kickoff"
-agent: "agent"
-description: "Kick off a defect-first review for governance, workflow, or repository-owned catalog changes"
+name: "internal-agent-review-next-actions"
+agent: "internal-review-guard"
+description: "Kick off defect-first review findings with causal layers and routed next actions"
 ---
 
 <!-- markdownlint-disable-file MD041 -->
@@ -19,13 +19,16 @@ Use these repository sources first:
 
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-code-review-instructions.md](../copilot-code-review-instructions.md)
+- [.github/skills/internal-agent-operational-flow/SKILL.md](../skills/internal-agent-operational-flow/SKILL.md)
 - [.github/skills/internal-code-review/SKILL.md](../skills/internal-code-review/SKILL.md)
+- [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
 - [.github/agents/internal-review-guard.agent.md](../agents/internal-review-guard.agent.md)
 
 Produce review findings with:
 
 1. Severity and confidence on every finding
-2. Evidence gaps
-3. Self-questioning notes for the most severe finding
-4. Residual risks if no further changes are made
-5. Recommended owner if the task is no longer review-owned
+2. Causal layer and fix routing plan for every actionable finding
+3. Evidence gaps
+4. Self-questioning notes for the most severe finding
+5. Residual risks if no further changes are made
+6. Recommended owner and next-step package if the task is no longer review-owned

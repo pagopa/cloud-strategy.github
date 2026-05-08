@@ -84,6 +84,19 @@ profiles:
       - skills/internal-terraform/SKILL.md
       - skills/internal-cloud-policy/SKILL.md
 
+  azure-platform:
+    description: Azure platform, landing-zone, or governance repositories that need cost-aware guidance.
+    recommended_instructions:
+      - instructions/internal-terraform.instructions.md
+      - instructions/internal-yaml.instructions.md
+      - instructions/internal-markdown.instructions.md
+    recommended_skills:
+      - skills/internal-azure-strategic/SKILL.md
+      - skills/internal-azure-organization-structure/SKILL.md
+      - skills/internal-azure-governance/SKILL.md
+      - skills/internal-azure-operations/SKILL.md
+      - skills/awesome-copilot-azure-pricing/SKILL.md
+
   mixed-platform:
     description: Repositories mixing app code, CI/CD, and some infrastructure.
     recommended_instructions:

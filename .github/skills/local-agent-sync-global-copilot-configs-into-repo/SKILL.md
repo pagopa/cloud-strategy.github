@@ -9,6 +9,8 @@ Use this skill as the mandatory operating engine for `.github/agents/local-sync-
 
 This skill owns the reusable sync procedure. Keep the paired agent short; do not duplicate the analyze, plan, apply, reporting, or automation rules there.
 
+Use `mattpocock-caveman` only as optional compression support for long target-drift or sync reports after blockers, warnings, approval posture, validation evidence, and destructive-operation gates remain explicit.
+
 The paired agent should not restate default mode handling, preserved `local-*` behavior, `internal-sync-*` exclusions, plan-file lifecycle, or automation entrypoints from this skill.
 
 ## When to use

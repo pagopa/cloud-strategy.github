@@ -38,9 +38,9 @@ repos:
 
       # Python safety rails
       - id: check-ast # Ensure Python files are syntactically valid.
-        files: ^(scripts|src|tests)/.*\.py$
+        files: ^(scripts|src|tests|tools)/.*\.py$
       - id: debug-statements # Block accidental breakpoint() and debugger imports.
-        files: ^(scripts|src|tests)/.*\.py$
+        files: ^(scripts|src|tests|tools)/.*\.py$
 
       # Security
       - id: detect-aws-credentials # Prevent committing AWS credentials by mistake.
@@ -73,11 +73,11 @@ repos:
           - --fix
           - --select
           - I
-        files: ^(scripts|src|tests)/.*\.py$
+        files: ^(scripts|src|tests|tools)/.*\.py$
       - id: ruff-format # Format Python code with Ruff instead of Black.
-        files: ^(scripts|src|tests)/.*\.py$
+        files: ^(scripts|src|tests|tools)/.*\.py$
       - id: ruff-check # Lint Python code for correctness, style, and simplifications.
-        files: ^(scripts|src|tests)/.*\.py$
+        files: ^(scripts|src|tests|tools)/.*\.py$
 
   # Terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform

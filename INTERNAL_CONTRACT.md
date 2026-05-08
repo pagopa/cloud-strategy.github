@@ -57,6 +57,20 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - useful self-containment is allowed when it helps the target surface
   - global rules are repeated locally only when the projection is deliberate and low-drift
 
+#### `instruction-architecture-scoped-instructions-stay-matchable`
+
+- Goal: keep scoped instructions discoverable by target path without promising universal auto-loading.
+- Scope:
+  - `.github/instructions/**/*.instructions.md`
+  - `docs/runtime-fit.md`
+  - catalog consistency helpers and tests
+- Expected behavior:
+  - each active scoped instruction exposes usable `applyTo` metadata
+  - non-Copilot runtimes can identify all matching instructions for a known target path and read them as manual references
+  - repository-owned `internal-*` instructions and imported non-`internal-*` instructions remain eligible when their `applyTo` metadata matches
+  - overlap between different glob patterns is treated as relevant co-load unless a clear conflict requires a narrower scope or explicit uncertainty
+  - docs and validators describe discoverability and matching, not universal runtime enforcement
+
 ### Language Policy
 
 #### `language-default-is-centrally-governed`
@@ -189,16 +203,17 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Goal: keep the canonical repository-owned operating model clear across projections.
 - Scope:
   - `.github/copilot-instructions.md`
-  - canonical operational agents
+  - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the canonical repository-owned operational agents
+  - `internal-agent-operational-flow` and `internal-agent-critical-master` remain the canonical repository-owned skill-first operational core
+  - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection instead of a repository-owned front-door router
-  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader`
-  - canonical owners define boundaries and recommendations instead of active delegation
-  - canonical owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
-  - any future peer-automation exception between canonical owners must be narrow, one-directional, auditably bounded, and non-mesh
-  - mandatory and optional skill contracts remain explicit where the operating model depends on them
+  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader` or `plan` mode through `internal-agent-operational-flow`
+  - wrapper owners define boundaries and recommendations instead of active delegation
+  - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
+  - any future peer-automation exception between wrapper owners must be narrow, one-directional, auditably bounded, and non-mesh
+  - mandatory and optional skill contracts remain explicit where the wrapper behavior depends on them
 
 ### Repository Workflow
 

@@ -42,9 +42,11 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
-- `.github/skills/internal-agent-boundary-recommendation-engine/SKILL.md`
-- `.github/skills/internal-agent-cross-lane-engine/SKILL.md`
+- `.github/skills/internal-agent-critical-master/SKILL.md`
 - `.github/skills/internal-agent-development/SKILL.md`
+- `.github/skills/internal-agent-lane-change-engine/SKILL.md`
+- `.github/skills/internal-agent-next-step/SKILL.md`
+- `.github/skills/internal-agent-operational-flow/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
@@ -91,6 +93,14 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-writing-plans/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
+- `.github/skills/mattpocock-caveman/SKILL.md`
+- `.github/skills/mattpocock-diagnose/SKILL.md`
+- `.github/skills/mattpocock-grill-me/SKILL.md`
+- `.github/skills/mattpocock-grill-with-docs/SKILL.md`
+- `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
+- `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
+- `.github/skills/mattpocock-tdd/SKILL.md`
+- `.github/skills/mattpocock-zoom-out/SKILL.md`
 - `.github/skills/obra-brainstorming/SKILL.md`
 - `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
 - `.github/skills/obra-executing-plans/SKILL.md`
@@ -129,10 +139,10 @@ These imported `openai-*` office skills remain support-only depth for repositori
 
 ## Prompts
 
+- `.github/prompts/internal-agent-plan-next-step.prompt.md`
+- `.github/prompts/internal-agent-pressure-test-plan.prompt.md`
+- `.github/prompts/internal-agent-review-next-actions.prompt.md`
 - `.github/prompts/internal-architecture-md-creator.prompt.md`
 - `.github/prompts/internal-copilot-resources-mega-review.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
-- `.github/prompts/internal-planning-kickoff.prompt.md`
-- `.github/prompts/internal-pre-mortem.prompt.md`
-- `.github/prompts/internal-review-kickoff.prompt.md`
 - `.github/prompts/internal-sync-plan.prompt.md`

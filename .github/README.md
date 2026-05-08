@@ -2,18 +2,16 @@
 
 This directory is the source-side catalog for reusable GitHub Copilot customization assets maintained in `cloud-strategy.github`.
 
-- `.github/copilot-instructions.md` is the primary detailed policy layer.
 - Root [`AGENTS.md`](../AGENTS.md) is the strategic entrypoint, precedence anchor, and bridge for operational ownership, naming, discovery, and the pointer to exact path inventory.
+- `.github/copilot-instructions.md` is the repo-wide Copilot projection for native Copilot flows.
 - [`INVENTORY.md`](INVENTORY.md) is the exact path inventory for the live catalog.
 - This README is an orientation guide for maintainers of the source catalog. It should describe the live on-disk catalog only.
 
 ## Live Catalog Summary
 
-- Instructions: 17 total (`13 internal-*`, `4 awesome-copilot-*`)
-- Skills: 85 total (`45 internal-*`, `14 obra-*`, `9 awesome-copilot-*`, `8 antigravity-*`, `7 openai-*`, `2 terraform-*`)
-- Agents: 7 total (`7 internal-*`)
-- Scripts: 21 tracked files
-- Workflows: 1 total
+- Use [`INVENTORY.md`](INVENTORY.md) for the exact live counts and paths.
+- Use `scripts/build_inventory.sh` when you need to rebuild or verify the generated inventory from filesystem state.
+- This README intentionally avoids hand-maintained totals so orientation does not drift from the generated catalog.
 
 ## Structure
 
@@ -62,6 +60,17 @@ Some skill directories include support material beyond `SKILL.md`. Current live 
 
 Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery. Use this README for family-level orientation only.
 
+### Prompts (`prompts/`)
+
+Prompt files are parameterized entrypoints for repeatable advisory or orchestration starts. Use them when an operator needs a structured kickoff package rather than always-on policy or a reusable skill body.
+
+- `internal-mega-review`: general advisor-only mega review for one or more repositories; writes retained English review artifacts under `tmp/`.
+- `internal-copilot-resources-mega-review`: focused review for the AI resource control plane itself, including agents, skills, instructions, prompts, scripts, docs, memory, inventory, and governance drift.
+- `internal-agent-plan-next-step`, `internal-agent-review-next-actions`, and `internal-agent-pressure-test-plan`: compact planning, review, and pressure-test entrypoints aligned with the wrapper lanes.
+- `internal-sync-plan` and `internal-architecture-md-creator`: targeted prompts for sync planning and architecture contract refresh work.
+
+Prefer `internal-copilot-resources-mega-review` when the subject is the repository's Copilot or AI catalog. Prefer `internal-mega-review` when the target is a broader repository review outside the catalog-governance surface.
+
 ### Agents (`agents/`)
 
 See [`agents/README.md`](agents/README.md) for the selection guide.
@@ -93,7 +102,7 @@ The matching `.py` entrypoints and `scripts/lib/*.py` modules are part of the sa
 ## Source-of-Truth Rules
 
 - Trust real on-disk paths and [`INVENTORY.md`](INVENTORY.md) over remembered historical names. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery.
-- Keep `.github/copilot-instructions.md` as the normative policy layer and update it before root `AGENTS.md` when both must change.
+- Keep root [`AGENTS.md`](../AGENTS.md) as the strategic bridge. When a repository-wide default changes, update `AGENTS.md` first, then `.github/copilot-instructions.md`, then downstream orientation surfaces.
 - Treat this README as maintainer-facing orientation, not as the normative contract.
 - Historical documents and older changelog entries may intentionally mention removed legacy assets. Do not use them as live catalog references.
 
@@ -101,9 +110,10 @@ The matching `.py` entrypoints and `scripts/lib/*.py` modules are part of the sa
 
 1. Inspect the real target files first.
 2. Update the relevant asset under `.github/`.
-3. If routing, naming, discovery, or inventory changed, refresh root `AGENTS.md` and `.github/INVENTORY.md`.
-4. Run the repository checks that currently exist for the touched assets.
-5. Update `CHANGELOG.md` for meaningful `.github/` changes.
+3. If routing, naming, or repository-wide defaults changed, update root `AGENTS.md` first and then refresh `.github/copilot-instructions.md`.
+4. Refresh `.github/INVENTORY.md` when the live catalog changed, and update this README only when orientation text still needs adjustment.
+5. Run the repository checks that currently exist for the touched assets.
+6. Update `CHANGELOG.md` for meaningful `.github/` changes.
 
 ## Completion Report Contract
 

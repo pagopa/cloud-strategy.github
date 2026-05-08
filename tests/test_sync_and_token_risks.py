@@ -123,8 +123,8 @@ def test_build_sync_plan_includes_prompt_assets_in_managed_inventory(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/prompts/internal-review-kickoff.prompt.md",
-        "---\ndescription: Review kickoff\n---\n",
+        source_root / ".github/prompts/internal-agent-review-next-actions.prompt.md",
+        "---\ndescription: Review next actions\n---\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
@@ -132,10 +132,13 @@ def test_build_sync_plan_includes_prompt_assets_in_managed_inventory(
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("create", ".github/prompts/internal-review-kickoff.prompt.md") in actions
+    assert (
+        "create",
+        ".github/prompts/internal-agent-review-next-actions.prompt.md",
+    ) in actions
     assert "## Prompts" in plan.generated_inventory
     assert (
-        "- `.github/prompts/internal-review-kickoff.prompt.md`"
+        "- `.github/prompts/internal-agent-review-next-actions.prompt.md`"
         in plan.generated_inventory
     )
 

@@ -24,7 +24,7 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 ## Mandatory Engine Skills
 
 - `local-agent-sync-global-copilot-configs-into-repo`
-- `internal-agent-boundary-recommendation-engine`
+- `internal-agent-lane-change-engine`
 
 ## Optional Support Skills
 
@@ -34,6 +34,7 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
 - `internal-agent-development`
+- `mattpocock-caveman`
 
 ## Skill Usage Contract
 
@@ -44,6 +45,7 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 - Use `internal-copilot-audit` when source or target drift, hollow references, or bridge-policy overlap changes the recommended sync outcome.
 - Use `internal-copilot-docs-research` only when a sync decision depends on current GitHub Copilot or MCP behavior rather than repository-local contract.
 - Use `internal-agent-development` only when a consumer-repository sync must compare, preserve, or normalize repository-owned agent contracts instead of mirroring agent files mechanically.
+- Use `mattpocock-caveman` only as optional compression support for long sync reports or target-drift summaries, never for hiding blockers, warnings, validation evidence, approval posture, or destructive-operation gates.
 
 ## Core Rules
 
@@ -56,6 +58,20 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 - Sync only the managed cross-repository baseline declared by the paired skill contract; do not expand beyond that scope unless the user explicitly asks for more.
 - Do not restate reusable sync procedure in this agent; when the contract drifts, update the paired skill first and then realign this agent.
 
+## Source-Managed Imported Skill Map
+
+Use this section only for consumer-propagation awareness. The canonical source-side external scope remains in `local-sync-external-resources`.
+
+- `mattpocock/skills`:
+  - `caveman` -> `mattpocock-caveman`
+  - `diagnose` -> `mattpocock-diagnose`
+  - `grill-me` -> `mattpocock-grill-me`
+  - `grill-with-docs` -> `mattpocock-grill-with-docs`
+  - `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
+  - `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
+  - `tdd` -> `mattpocock-tdd`
+  - `zoom-out` -> `mattpocock-zoom-out`
+
 ## Routing
 
 - Use this agent for consumer-repository baseline propagation, drift assessment, `plan`, and `apply` runs.
@@ -67,7 +83,7 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 ## Boundary Definition
 
 - Stay in this lane while the task is consumer-repository baseline propagation, drift assessment, or `plan`/`apply`/`audit` work for that sync workflow.
-- If the request is really source-side catalog governance, source-side redesign, or a local edit outside the sync lane, stop, explain the mismatch, and use `internal-agent-boundary-recommendation-engine` to recommend the better owner.
+- If the request is really source-side catalog governance, source-side redesign, or a local edit outside the sync lane, stop, explain the mismatch, and use `internal-agent-lane-change-engine` to recommend the better owner.
 - Do not route, dispatch, or delegate from this lane.
 
 ## Execution Workflow

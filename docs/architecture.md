@@ -6,7 +6,7 @@
 
 ## Purpose
 
-The repository does not host a product runtime. Its primary system is an AI governance supply chain: repository-owned agents, skills, instructions, prompts, inventory, validation scripts, and sync contracts are authored here and then validated or projected into consumer repositories.
+The repository does not host a product runtime. Its primary system is an AI governance supply chain: repository-owned skills, Copilot wrapper agents, instructions, prompts, inventory, validation scripts, and sync contracts are authored here and then validated or projected into consumer repositories.
 
 ## System Boundaries
 
@@ -32,8 +32,8 @@ Out of scope:
 | Strategic bridge | `AGENTS.md` | Precedence model, ownership prefixes, volatile artifact policy, and retained-learning boundary. |
 | Copilot projection | `.github/copilot-instructions.md` | Repo-wide behavior visible to native Copilot flows. |
 | Catalog inventory | `.github/INVENTORY.md` | Generated catalog surface for agents, skills, instructions, prompts, and related assets. |
-| Operational agents | `.github/agents/` | Direct-entry planning, review, delivery, sync, and critical challenge lanes. |
-| Reusable skills | `.github/skills/` | On-demand workflows, references, validation guidance, and sync support depth. |
+| Copilot wrapper agents | `.github/agents/` | VS Code route selection, tool scope, and manual handoff UX for the operational skills plus repo-only sync command centers. |
+| Reusable skills | `.github/skills/` | Skill-first operational core, on-demand workflows, references, validation guidance, and sync support depth. |
 | Scoped instructions | `.github/instructions/` | Path or domain-specific authoring rules. |
 | Automation scripts | `.github/scripts/` | Inventory build, catalog consistency, token-risk detection, skill validation, and sync planning. |
 | Regression tests | `tests/` | Contract checks for agents, inventory, imported assets, plan policy, scripts, and completion reports. |
@@ -42,6 +42,7 @@ Out of scope:
 
 ```text
 Repository-owned AI assets
+  -> skill-first operational core and Copilot wrapper projections
   -> inventory and consistency builders
   -> validation tests and Makefile targets
   -> sync planning and consumer projection
@@ -70,7 +71,7 @@ Observed validation entrypoints include:
 | Risk | Current evidence | Recommended handling |
 | --- | --- | --- |
 | Catalog drift | Sync and inventory scripts exist, plus tests, but catalog families evolve over time. | Keep inventory generation, sync discovery, and validators updated in the same change. |
-| Overloaded always-on guidance | Multiple projections and scoped resources exist. | Keep high-volume detail in skills or references, not repo-wide instructions. |
+| Overloaded always-on guidance | Multiple projections and scoped resources exist. | Keep high-volume detail in skills or references, not repo-wide instructions or wrapper agents. |
 | Consumer override ambiguity | Local override layer exists by contract. | Require explicit override scope, reason, and disclosure when followed. |
 
 ## Contract Status

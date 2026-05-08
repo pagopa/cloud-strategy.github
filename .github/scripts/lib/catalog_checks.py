@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import re
 from pathlib import Path
 
 import yaml
@@ -54,6 +55,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_internal_agent_contracts(root))
     findings.extend(check_repo_owned_agent_sections(root))
     findings.extend(check_duplicate_frontmatter_names(root))
+    findings.extend(check_prompt_contracts(root))
     findings.extend(check_instruction_apply_to_overlaps(root))
     findings.extend(check_imported_asset_overrides(root))
     findings.extend(check_broken_local_links(root))
@@ -296,6 +298,82 @@ def check_duplicate_frontmatter_names(root: Path) -> list[Finding]:
     return findings
 
 
+def check_prompt_contracts(root: Path) -> list[Finding]:
+    prompts_root = root / ".github/prompts"
+    if not prompts_root.exists():
+        return []
+
+    findings: list[Finding] = []
+    for path in sorted(prompts_root.glob("*.prompt.md")):
+        if not path.is_file():
+            continue
+
+        relative_path = path.relative_to(root).as_posix()
+        frontmatter = load_frontmatter(path)
+        expected_name = path.name.removesuffix(".prompt.md")
+
+        name = frontmatter.get("name")
+        if not isinstance(name, str) or not name.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-name",
+                    path=relative_path,
+                    message="Prompt files must declare a non-empty `name:` frontmatter value.",
+                    suggestion="Set `name:` to the canonical prompt identifier so catalog routing stays explicit.",
+                )
+            )
+        elif name.strip() != expected_name:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-name-mismatch",
+                    path=relative_path,
+                    message=(
+                        f"Prompt frontmatter name `{name.strip()}` does not match the filename stem `{expected_name}`."
+                    ),
+                    suggestion="Keep prompt filename and `name:` aligned so prompt routing stays deterministic.",
+                )
+            )
+
+        agent = frontmatter.get("agent")
+        if not isinstance(agent, str) or not agent.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-agent",
+                    path=relative_path,
+                    message="Prompt files must declare a non-empty `agent:` frontmatter value.",
+                    suggestion="Declare the intended agent owner so prompt entrypoint behavior stays reviewable.",
+                )
+            )
+
+        description = frontmatter.get("description")
+        if not isinstance(description, str) or not description.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-description",
+                    path=relative_path,
+                    message="Prompt files must declare a non-empty `description:` frontmatter value.",
+                    suggestion="Add a short description that explains when the prompt should be used.",
+                )
+            )
+
+        if "${input:" not in read_text(path):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-missing-input-placeholder",
+                    path=relative_path,
+                    message="Prompt files must expose at least one `${input:...}` placeholder for reusable invocation.",
+                    suggestion="Add one or more `${input:...}` placeholders so the prompt can collect structured operator input.",
+                )
+            )
+
+    return findings
+
+
 def check_instruction_apply_to_overlaps(root: Path) -> list[Finding]:
     instructions_root = root / ".github/instructions"
     if not instructions_root.exists():
@@ -343,6 +421,63 @@ def normalize_apply_to_patterns(value: object) -> list[str]:
     for raw_value in raw_values:
         patterns.extend(pattern.strip() for pattern in raw_value.split(",") if pattern.strip())
     return patterns
+
+
+def collect_matching_instruction_paths(root: Path, target_path: str) -> list[str]:
+    instructions_root = root / ".github/instructions"
+    if not instructions_root.exists():
+        return []
+
+    normalized_target = normalize_instruction_target_path(target_path)
+    if not normalized_target:
+        return []
+
+    matching_paths: list[str] = []
+    for path in sorted(instructions_root.glob("*.instructions.md")):
+        if not path.is_file():
+            continue
+        patterns = normalize_apply_to_patterns(load_frontmatter(path).get("applyTo"))
+        if any(apply_to_pattern_matches_target(pattern, normalized_target) for pattern in patterns):
+            matching_paths.append(path.relative_to(root).as_posix())
+    return matching_paths
+
+
+def apply_to_pattern_matches_target(pattern: str, target_path: str) -> bool:
+    normalized_pattern = normalize_instruction_target_path(pattern)
+    normalized_target = normalize_instruction_target_path(target_path)
+    if not normalized_pattern or not normalized_target:
+        return False
+    return re.fullmatch(apply_to_pattern_to_regex(normalized_pattern), normalized_target) is not None
+
+
+def normalize_instruction_target_path(value: str) -> str:
+    normalized = value.strip().replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized.lstrip("/")
+
+
+def apply_to_pattern_to_regex(pattern: str) -> str:
+    regex_parts: list[str] = []
+    index = 0
+    while index < len(pattern):
+        char = pattern[index]
+        if char == "*" and index + 1 < len(pattern) and pattern[index + 1] == "*":
+            if index + 2 < len(pattern) and pattern[index + 2] == "/":
+                regex_parts.append(r"(?:[^/]+/)*")
+                index += 3
+                continue
+            regex_parts.append(r".*")
+            index += 2
+            continue
+        if char == "*":
+            regex_parts.append(r"[^/]*")
+        elif char == "?":
+            regex_parts.append(r"[^/]")
+        else:
+            regex_parts.append(re.escape(char))
+        index += 1
+    return "".join(regex_parts)
 
 
 def is_apply_to_overlap_allowlisted(apply_to: str, paths: list[str]) -> bool:
@@ -630,6 +765,7 @@ def collect_repository_owned_markdown_paths(root: Path) -> list[Path]:
         ".github/agents/internal-*.agent.md",
         ".github/agents/local-*.agent.md",
         ".github/instructions/internal-*.instructions.md",
+        ".github/prompts/*.prompt.md",
         ".github/skills/internal-*/**/*.md",
         ".github/skills/local-*/**/*.md",
     ]

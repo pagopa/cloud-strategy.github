@@ -20,6 +20,7 @@ def test_markdownlint_ignores_local_venv_and_preserved_upstream_assets() -> None
     assert ".github/instructions/awesome-copilot-*.instructions.md" in ignores
     assert ".github/skills/antigravity-*/**" in ignores
     assert ".github/skills/awesome-copilot-*/**" in ignores
+    assert ".github/skills/mattpocock-*/**" in ignores
     assert ".github/skills/openai-*/**" in ignores
     assert ".github/skills/obra-*/**" in ignores
 
