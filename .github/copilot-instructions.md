@@ -66,12 +66,17 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Implementation Discipline
 
 - Prefer the simplest correct change.
+- Prefer the smallest credible blast radius. Avoid temporary fixes, unrequested abstractions, and broad rewrites unless the selected plan explicitly justifies them.
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
 - When introducing a new source-managed catalog family or a new human-readable catalog summary surface, update inventory generation, sync discovery, and validation in the same change so `.github/INVENTORY.md` does not become the only surface aware of it.
 - Do not add hand-maintained catalog matrices or counts beside `.github/INVENTORY.md` unless they are generated from the filesystem or covered by validation.
 - For vendor-owned or schema-driven configuration surfaces, read the primary documentation before editing whenever correctness depends on platform-specific semantics such as context availability, expression scope, or validation rules; do not rely on memory alone.
 - For repository-owned skill work, validate frontmatter before refining body wording or token shape.
+- For non-trivial repository-owned work, keep the target state, anti-scope, main assumptions, tradeoffs, and validation path visible before delivery starts or before recommending the next owner.
+- If validation output, logs, user correction, or repository evidence invalidates the selected direction, stop and re-select the operational lane before continuing.
+- Handle bug reports and failing checks evidence-first: inspect the failing signal, identify the root cause, and resolve it when the target state is clear; ask the user only for missing decisions, unsafe permissions, or unavailable context.
+- Parallel or subagent-supported work is allowed only when the runtime and task shape support bounded independent scopes, visible integration, and independent verification before any completion claim.
 - For source-side repository-owned standards work that deepens parallel skill families, stage planning in `tmp/superpowers/`, make anti-scope explicit, and close parity gaps in existing `Common mistakes`, `Validation`, and current reference depth before adding optional new skills, validators, or shared assets.
 - Keep repository-owned skill `description:` lines trigger-first, and do not rewrite a working route during token optimization unless improving retrieval is the explicit goal.
 - For provider-specific cloud skills, keep guidance provider-native and omit cross-cloud comparison or provider-selection content when provider choice is already upstream of skill activation.
@@ -106,6 +111,8 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
 - When a validator, IDE, schema check, or runtime error overturns an earlier assumption, immediately re-check whether that correction is durable enough to retain or codify.
 - Before finalizing such a correction, read the primary documentation for the relevant platform or schema instead of relying on memory or partial recall.
+- Treat `LESSONS_LEARNED.md` as a temporary incubation ledger, not the final home for policy. Stable lessons should move into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent when they become canonical.
+- Before repeating a workflow or domain where durable corrections already exist, consult the relevant retained lessons without treating the ledger as canonical policy.
 - Before editing repository-root `LESSONS_LEARNED.md`, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including uncommitted rows already present on disk.
 - When a durable lesson is clear and still uncodified, append one concise, reusable row to the pending table in `LESSONS_LEARNED.md` instead of waiting for task completion; do not regenerate, reorder, or rewrite unrelated rows.
 - If you decide not to record a lesson after such a correction, make that decision explicit in the completion report with a short reason.
