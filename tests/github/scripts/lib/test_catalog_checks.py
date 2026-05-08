@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.catalog_checks import apply_to_pattern_matches_target, collect_matching_instruction_paths
-
+from lib.catalog_checks import (
+    apply_to_pattern_matches_target,
+    collect_matching_instruction_paths,
+)
 
 INSTRUCTION_APPLY_TO = {
     ".github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md": (
@@ -45,7 +47,10 @@ INSTRUCTION_APPLY_TO = {
 def write_instruction(root: Path, relative_path: str, apply_to: str) -> None:
     path = root / relative_path
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(f"---\ndescription: Test instruction\napplyTo: '{apply_to}'\n---\n", encoding="utf-8")
+    path.write_text(
+        f"---\ndescription: Test instruction\napplyTo: '{apply_to}'\n---\n",
+        encoding="utf-8",
+    )
 
 
 def write_instruction_catalog(root: Path) -> None:
@@ -53,14 +58,18 @@ def write_instruction_catalog(root: Path) -> None:
         write_instruction(root, relative_path, apply_to)
 
 
-def test_apply_to_pattern_matches_target_treats_globstar_as_zero_or_more_directories() -> None:
+def test_apply_to_pattern_matches_target_treats_globstar_as_zero_or_more_directories() -> (
+    None
+):
     assert apply_to_pattern_matches_target("**/*.py", "lambda.py")
     assert apply_to_pattern_matches_target("**/*.py", "src/functions/lambda.py")
     assert apply_to_pattern_matches_target("k8s/**/*.yaml", "k8s/pod.yaml")
     assert apply_to_pattern_matches_target("k8s/**/*.yaml", "k8s/apps/payment/pod.yaml")
 
 
-def test_collect_matching_instruction_paths_covers_realistic_sample_paths(tmp_path: Path) -> None:
+def test_collect_matching_instruction_paths_covers_realistic_sample_paths(
+    tmp_path: Path,
+) -> None:
     write_instruction_catalog(tmp_path)
 
     expected_by_target = {
@@ -110,8 +119,13 @@ def test_collect_matching_instruction_paths_covers_realistic_sample_paths(tmp_pa
         },
         "package.json": {".github/instructions/internal-nodejs.instructions.md"},
         "tsconfig.json": {".github/instructions/internal-nodejs.instructions.md"},
-        "services/api/main.go": {".github/instructions/awesome-copilot-go.instructions.md"},
+        "services/api/main.go": {
+            ".github/instructions/awesome-copilot-go.instructions.md"
+        },
     }
 
     for target_path, expected_paths in expected_by_target.items():
-        assert set(collect_matching_instruction_paths(tmp_path, target_path)) == expected_paths
+        assert (
+            set(collect_matching_instruction_paths(tmp_path, target_path))
+            == expected_paths
+        )

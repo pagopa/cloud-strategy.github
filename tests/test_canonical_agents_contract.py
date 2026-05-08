@@ -159,7 +159,9 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
     assert "Good review requests usually name one of these review surfaces" in readme
     assert "| Merge readiness |" in readme
     assert "#### Critical challenge use cases" in readme
-    assert "Good challenge requests usually involve one of these pressure points" in readme
+    assert (
+        "Good challenge requests usually involve one of these pressure points" in readme
+    )
     assert "| Hidden assumption |" in readme
     assert "#### Sync use cases" in readme
     assert "Source-side sync examples" in readme
