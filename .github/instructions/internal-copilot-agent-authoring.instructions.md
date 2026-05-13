@@ -1,5 +1,5 @@
 ---
-description: Repository-owned Copilot agent authoring guardrails for boundary clarity, paired-asset coherence, and minimal duplication.
+description: Use when authoring or revising repository-owned Copilot agents; owns boundary clarity, paired-asset coherence, and minimal duplication.
 applyTo: ".github/agents/internal-*.agent.md,.github/agents/local-*.agent.md"
 ---
 

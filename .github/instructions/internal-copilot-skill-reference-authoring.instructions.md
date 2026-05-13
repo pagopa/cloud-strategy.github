@@ -1,5 +1,5 @@
 ---
-description: Repository-owned skill reference guardrails for deep reusable detail without duplicating paired agent or SKILL.md contracts.
+description: Use when editing internal/local skill references; owns deep reusable detail without duplicating paired agent or SKILL.md contracts.
 applyTo: ".github/skills/internal-*/references/**/*.md,.github/skills/local-*/references/**/*.md"
 ---
 
