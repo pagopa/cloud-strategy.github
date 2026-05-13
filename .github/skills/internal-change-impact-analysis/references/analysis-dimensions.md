@@ -12,7 +12,7 @@
 ## 2. Separation of concerns
 
 | Principle | What to check |
-|---|---|
+| --- | --- |
 | Business vs I/O | Is business logic cleanly separated from I/O, SDKs, and persistence? |
 | Module boundaries | Are module boundaries clear and cohesive? |
 | Naming clarity | Do names reflect what the code does in business terms? |
@@ -22,7 +22,7 @@
 ## 3. Architecture
 
 | Quality | What to check |
-|---|---|
+| --- | --- |
 | Separation of concerns | Are business logic, I/O, and presentation layers distinct? |
 | Dependency direction | Do dependencies point inward (infrastructure → application → core logic)? |
 | Coupling | Is coupling between modules explicit and minimal? |

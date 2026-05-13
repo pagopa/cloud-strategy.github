@@ -5,7 +5,7 @@ Reference: `instructions/internal-java.instructions.md`
 ## Critical
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | JV-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
 | JV-C02 | Deserialization of untrusted data (`ObjectInputStream`) | Remote code execution risk |
 | JV-C03 | SQL string concatenation instead of parameterized queries | SQL injection |
@@ -13,7 +13,7 @@ Reference: `instructions/internal-java.instructions.md`
 ## Major
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | JV-M01 | Bare `catch (Exception e)` that swallows without re-throw or logging | Silent failures |
 | JV-M02 | Missing `try-with-resources` for `AutoCloseable` | Resource leak |
 | JV-M03 | Mutable shared state without synchronization | Race conditions |
@@ -26,7 +26,7 @@ Reference: `instructions/internal-java.instructions.md`
 ## Minor
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | JV-m01 | Unused imports | Dead code noise |
 | JV-m02 | Missing purpose JavaDoc on public classes | Discoverability gap |
 | JV-m03 | Field injection (`@Autowired` on fields) instead of constructor injection | Testability and immutability |
@@ -37,7 +37,7 @@ Reference: `instructions/internal-java.instructions.md`
 ## Nit
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | JV-N01 | Non-standard naming (camelCase for methods, PascalCase for classes) | Convention consistency |
 | JV-N02 | Missing trailing newline at end of file | POSIX convention |
 | JV-N03 | Inconsistent brace style within a file | Style consistency |

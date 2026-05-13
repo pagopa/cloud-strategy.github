@@ -5,7 +5,7 @@ Reference: `instructions/internal-python.instructions.md`
 ## Critical
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | PY-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
 | PY-C02 | `eval()` or `exec()` on untrusted input | Arbitrary code execution |
 | PY-C03 | `pickle.load()` / `pickle.loads()` on untrusted data | Deserialization attack |
@@ -13,7 +13,7 @@ Reference: `instructions/internal-python.instructions.md`
 ## Major
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | PY-M01 | Bare `except:` or `except Exception:` without re-raise or logging | Swallows errors silently |
 | PY-M02 | Mutable default arguments (`def f(items=[])`) | Shared state across calls |
 | PY-M03 | `os.system()` or `subprocess` with `shell=True` | Shell injection risk |
@@ -27,7 +27,7 @@ Reference: `instructions/internal-python.instructions.md`
 ## Minor
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | PY-m01 | Unused imports | Dead code noise |
 | PY-m02 | Hardcoded file paths or URLs | Portability and configuration concern |
 | PY-m03 | Missing docstring on public functions/classes | Reduces discoverability |
@@ -40,7 +40,7 @@ Reference: `instructions/internal-python.instructions.md`
 ## Nit
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | PY-N01 | Line length > 120 characters | PEP8 / repo convention |
 | PY-N02 | Missing trailing newline at end of file | POSIX convention |
 | PY-N03 | Inconsistent quote style (single vs double) within a module | Style preference |

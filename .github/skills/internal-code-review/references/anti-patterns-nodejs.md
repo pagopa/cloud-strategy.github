@@ -5,7 +5,7 @@ Reference: `instructions/internal-nodejs.instructions.md`
 ## Critical
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | ND-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
 | ND-C02 | `eval()` or `new Function()` on untrusted input | Arbitrary code execution |
 | ND-C03 | User input in `child_process.exec()` without sanitization | Command injection |
@@ -13,7 +13,7 @@ Reference: `instructions/internal-nodejs.instructions.md`
 ## Major
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | ND-M01 | Unhandled promise rejection (missing `.catch()` or `try/catch` on `await`) | Silent crash or process exit |
 | ND-M02 | Synchronous file I/O (`readFileSync`) in request path | Event loop blocking |
 | ND-M03 | Missing `AbortController` or timeout on outbound HTTP/fetch | Unbounded resource consumption |
@@ -26,7 +26,7 @@ Reference: `instructions/internal-nodejs.instructions.md`
 ## Minor
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | ND-m01 | Unused imports or variables | Dead code noise |
 | ND-m02 | Missing purpose comment on exported modules | Discoverability gap |
 | ND-m03 | `require()` in ESM context or mixed module systems | Import consistency |
@@ -37,7 +37,7 @@ Reference: `instructions/internal-nodejs.instructions.md`
 ## Nit
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | ND-N01 | Non-standard naming (camelCase for functions, PascalCase for classes/types) | Convention consistency |
 | ND-N02 | Missing trailing newline at end of file | POSIX convention |
 | ND-N03 | Inconsistent use of semicolons within a project | Style consistency |

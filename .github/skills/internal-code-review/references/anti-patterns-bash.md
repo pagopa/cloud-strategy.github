@@ -5,7 +5,7 @@ Reference: `instructions/internal-bash.instructions.md`
 ## Critical
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | SH-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
 | SH-C02 | `eval` on user-controlled input | Arbitrary command execution |
 | SH-C03 | World-writable temp files without `mktemp` | Race condition / symlink attack |
@@ -13,7 +13,7 @@ Reference: `instructions/internal-bash.instructions.md`
 ## Major
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | SH-M01 | Missing `set -euo pipefail` | Silent failures and undefined variables |
 | SH-M02 | Unquoted variable expansion outside `[[ ]]` | Word splitting and globbing bugs |
 | SH-M03 | `cd` without error handling (`cd dir \|\| exit 1`) | Silent directory change failure |
@@ -25,7 +25,7 @@ Reference: `instructions/internal-bash.instructions.md`
 ## Minor
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | SH-m01 | `echo` for status messages instead of emoji logs (`ℹ️ ✅ ⚠️ ❌`) | Repo convention violation |
 | SH-m02 | Hardcoded paths (e.g., `/usr/local/bin/tool`) | Portability concern |
 | SH-m03 | Missing purpose header comment | Repo convention |
@@ -36,7 +36,7 @@ Reference: `instructions/internal-bash.instructions.md`
 ## Nit
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | SH-N01 | `[ ... ]` instead of `[[ ... ]]` | Bash convention |
 | SH-N02 | Backticks `` `cmd` `` instead of `$(cmd)` | Readability and nesting |
 | SH-N03 | Missing blank line between function definitions | Visual structure |

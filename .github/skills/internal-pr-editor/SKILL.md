@@ -64,7 +64,7 @@ If the user provides a specification, issue, or acceptance outline:
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Generic summary ("Various improvements") | Reviewers cannot assess impact or scope | Write specific outcome: "Adds region validation to SCP deploy pipeline" |
 | Missing risk level or rollback plan | Reviewers approve without understanding blast radius | Always fill Risk and Rollback sections explicitly |
 | Adding sections not in the repo template | Breaks template consistency across PRs | Use only the sections from the resolved template |

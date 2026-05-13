@@ -20,7 +20,7 @@ description: Use when creating or modifying a reusable GitHub composite action u
 ## Composite action vs reusable workflow
 
 | Factor | Composite action | Reusable workflow |
-|---|---|---|
+| --- | --- | --- |
 | Granularity | Step-level reuse inside a job | Job-level orchestration |
 | Secrets access | Inherited from the caller job | Passed explicitly to the called workflow |
 | Outputs | Step outputs only | Workflow outputs |
@@ -49,7 +49,7 @@ description: Use when creating or modifying a reusable GitHub composite action u
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Interpolating `${{ inputs.x }}` directly in `run:` | Crafted input values can turn into shell injection | Pass the value through `env:` and use quoted shell variables |
 | Missing `set -euo pipefail` in `run:` blocks | Silent failures and partial execution become hard to spot | Make strict mode the first line of every shell block |
 | Large inline `run:` blocks | They are hard to read, lint, and review | Extract the logic into a dedicated script early |

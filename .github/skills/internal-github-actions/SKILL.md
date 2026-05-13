@@ -39,7 +39,7 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 ## Choose the right reuse pattern
 
 | Situation | Pattern |
-|---|---|
+| --- | --- |
 | Simple pipeline in one repository | Standard workflow |
 | Repeated job orchestration inside one repository | Reusable workflow (`workflow_call`) |
 | Shared step logic across repositories or many workflows | Composite action |
@@ -49,7 +49,7 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Using `permissions: write-all` or omitting permissions entirely | Grants the token maximum access and widens the blast radius of a compromised step | Declare only the permissions the job needs |
 | Pinning actions by tag (`@v4`) instead of SHA | Tags are mutable and can be retargeted upstream | Pin to a full-length commit SHA with a release comment |
 | Long-lived cloud credentials in secrets instead of OIDC | Static credentials can leak and do not expire automatically | Configure OIDC federation for AWS, Azure, or GCP |
