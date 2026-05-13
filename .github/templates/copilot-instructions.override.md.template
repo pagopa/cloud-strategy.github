@@ -2,7 +2,7 @@
 
 This file is the consumer-local exception layer authorized by `AGENTS.md` and referenced by `.github/copilot-instructions.md`.
 
-In the standards repository it lives as `.github/copilot-instructions.override.md.template`.
+In the standards repository it lives as `.github/templates/copilot-instructions.override.md.template`.
 Sync materializes that template into consumer repositories as `.github/copilot-instructions.override.md`.
 After materialization, the target repository owns the local exceptions declared there.
 

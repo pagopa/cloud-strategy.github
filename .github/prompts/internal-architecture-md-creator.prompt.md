@@ -1,7 +1,7 @@
 ---
 name: "internal-architecture-md-creator"
 agent: "agent"
-description: "Generate or refresh docs/architecture.md (canonical AI architecture contract) for any repository, evidence-based, repo-shape agnostic"
+description: "Generate or refresh docs/01-architecture.md (canonical AI architecture contract) for any repository, evidence-based, repo-shape agnostic"
 argument-hint: "Optional target repository path; optional focus, constraints, language. Retained artifacts are English."
 ---
 
@@ -34,7 +34,7 @@ Then produce an evidence-based architecture contract for the target repository w
 
 Create or refresh, for the target repository, one artifact:
 
-- `<repo>/docs/architecture.md` — canonical, concise, evidence-based architecture contract for AI agents and human maintainers.
+- `<repo>/docs/01-architecture.md` — canonical, concise, evidence-based architecture contract for AI agents and human maintainers.
 
 The canonical contract must describe the architecture that is actually present in the repository, not a marketing pitch and not a theoretical proposal.
 
@@ -50,11 +50,11 @@ The canonical contract must describe the architecture that is actually present i
 Before writing the canonical artifact, confirm on disk:
 
 - Repository root and top-level layout.
-- Presence or absence of: `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/`, `docs/`, `docs/architecture.md`, `README.md`, `Makefile`, language manifests (`pyproject.toml`, `package.json`, `go.mod`, `Cargo.toml`, …), IaC roots (`*.tf`, `bicep/`, `cloudformation/`, `pulumi/`, `terragrunt.hcl`), CI workflows (`.github/workflows/`, `.gitlab-ci.yml`, `azure-pipelines.yml`), test roots (`tests/`, `test/`, `__tests__/`, `spec/`).
+- Presence or absence of: `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/`, `docs/`, `docs/01-architecture.md`, `README.md`, `Makefile`, language manifests (`pyproject.toml`, `package.json`, `go.mod`, `Cargo.toml`, …), IaC roots (`*.tf`, `bicep/`, `cloudformation/`, `pulumi/`, `terragrunt.hcl`), CI workflows (`.github/workflows/`, `.gitlab-ci.yml`, `azure-pipelines.yml`), test roots (`tests/`, `test/`, `__tests__/`, `spec/`).
 - Whether the repo is a **monorepo** (multiple independent roots, numbered prefixes such as `00-`, `10-`, per-service folders, multiple IaC roots, multiple language manifests at top level).
 - Existing ADRs, architecture notes, design docs, or standards files to align with and reference.
 
-If `docs/architecture.md` already exists, treat it as the prior canonical version: refresh it in place, preserve still-true claims, and downgrade unsupported claims to `Unknown / To verify` or remove them when evidence contradicts them.
+If `docs/01-architecture.md` already exists, treat it as the prior canonical version: refresh it in place, preserve still-true claims, and downgrade unsupported claims to `Unknown / To verify` or remove them when evidence contradicts them.
 
 ## 4. Operating Rules
 
@@ -62,7 +62,7 @@ If `docs/architecture.md` already exists, treat it as the prior canonical versio
 2. Prefer evidence from source code, configs, tests, workflows, package manifests, IaC files, scripts, and existing docs.
 3. Do not invent missing architecture. If unclear, mark `Unknown / To verify`.
 4. Do not modify application code, IaC, tests, workflows, or scripts.
-5. Create or update only `docs/architecture.md`.
+5. Create or update only `docs/01-architecture.md`.
 6. Do not modify `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/*`, or `.github/prompts/*` unless the user explicitly asks. Suggest exact snippets instead.
 7. Do not store the canonical contract under `.github/`. Keep `.github/` as the activation/instruction layer.
 8. Keep the canonical document concise; avoid full file trees and implementation trivia.
@@ -100,7 +100,7 @@ For `Documented`, `Evidenced`, and `Inferred`, include source paths.
 
 ## 7. Internal Analysis Discipline
 
-Perform the analysis steps before writing `docs/architecture.md`, but do not create a separate retained analysis file.
+Perform the analysis steps before writing `docs/01-architecture.md`, but do not create a separate retained analysis file.
 
 Keep the working analysis internal and use it only to:
 
@@ -113,7 +113,7 @@ Do not include private chain-of-thought in the chat. Surface only concise eviden
 
 ## 8. Required Canonical Output
 
-Create or refresh `<repo>/docs/architecture.md` with the following 14 sections. Keep section numbering and titles stable so AI agents can rely on them.
+Create or refresh `<repo>/docs/01-architecture.md` with the following 14 sections. Keep section numbering and titles stable so AI agents can rely on them.
 
 ```md
 # Architecture
@@ -204,10 +204,10 @@ Section content rules:
 
 If the pre-analysis control pass identified a monorepo:
 
-- Keep `docs/architecture.md` at the repository root, scoped to the monorepo-level architecture.
+- Keep `docs/01-architecture.md` at the repository root, scoped to the monorepo-level architecture.
 - Section 5 must list each top-level service/component root and its responsibility.
 - Section 6 must describe inter-component boundaries, not internal per-service detail.
-- Section 14 must explicitly state whether per-service `docs/architecture.md` files are recommended.
+- Section 14 must explicitly state whether per-service `docs/01-architecture.md` files are recommended.
 - Do not create per-service files automatically.
 
 ## 10. Activation Snippets to Suggest
@@ -217,15 +217,15 @@ After creating the files, suggest these snippets only if the target file already
 ### Suggested `AGENTS.md` snippet
 
 ```md
-Before structural, cross-file, or refactoring changes, read `docs/architecture.md` and treat it as the source of truth for repository boundaries, dependency direction, key flows, validation commands, and AI-agent working rules.
+Before structural, cross-file, or refactoring changes, read `docs/01-architecture.md` and treat it as the source of truth for repository boundaries, dependency direction, key flows, validation commands, and AI-agent working rules.
 
-If the requested change conflicts with `docs/architecture.md`, explain the conflict before editing. If the change intentionally updates the architecture, propose the required architecture document update explicitly.
+If the requested change conflicts with `docs/01-architecture.md`, explain the conflict before editing. If the change intentionally updates the architecture, propose the required architecture document update explicitly.
 ```
 
 ### Suggested `.github/copilot-instructions.md` snippet
 
 ```md
-For architectural, cross-file, or refactoring tasks, consult `docs/architecture.md` before editing. If the request conflicts with documented boundaries, dependency rules, key flows, or validation commands, explain the conflict first.
+For architectural, cross-file, or refactoring tasks, consult `docs/01-architecture.md` before editing. If the request conflicts with documented boundaries, dependency rules, key flows, or validation commands, explain the conflict first.
 ```
 
 ### Optional `.github/instructions/architecture.instructions.md` snippet
@@ -235,14 +235,14 @@ For architectural, cross-file, or refactoring tasks, consult `docs/architecture.
 applyTo: "**/*"
 ---
 
-For structural, cross-file, or refactoring changes, use `docs/architecture.md` as the repository architecture contract. Keep changes scoped, preserve documented boundaries, and update the architecture file when intentional architectural changes are made.
+For structural, cross-file, or refactoring changes, use `docs/01-architecture.md` as the repository architecture contract. Keep changes scoped, preserve documented boundaries, and update the architecture file when intentional architectural changes are made.
 ```
 
 Suggest the optional file only if `.github/instructions/` already exists in the repo or path-specific Copilot instructions would clearly help.
 
 ## 11. Quality Bar
 
-`docs/architecture.md` must be:
+`docs/01-architecture.md` must be:
 
 - accurate, concise, evidence-based;
 - useful to both humans and AI agents;
@@ -277,7 +277,7 @@ Reconcile the answers before writing the final document:
 
 - Preserve the strongest supported claims with evidence.
 - Trim unsupported claims or move them to section 14 (`Unknown / To verify`).
-- Reflect any downgrade decisions directly in `docs/architecture.md`, especially in sections 3, 7, 8, 11, 13, and 14 as appropriate.
+- Reflect any downgrade decisions directly in `docs/01-architecture.md`, especially in sections 3, 7, 8, 11, 13, and 14 as appropriate.
 - Do not route to another lane; this is an internal validation step inside this prompt.
 
 ## 13. Final Response Shape
@@ -292,4 +292,4 @@ After creating or updating the files, respond with:
 6. Commands considered or run for validation.
 7. The Critical-Master gate outcome in one or two lines: what was kept, what was downgraded.
 
-Do not paste the full `docs/architecture.md` in the chat unless explicitly requested.
+Do not paste the full `docs/01-architecture.md` in the chat unless explicitly requested.

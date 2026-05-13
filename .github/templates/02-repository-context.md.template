@@ -1,0 +1,34 @@
+# Repository Context
+
+> Purpose: stable target-owned operating context. Use this file for local facts, glossary entries, ownership notes, and durable interpretation aids that help humans and agents understand the repository without overriding policy.
+
+## Where Adjacent Content Belongs
+
+- Use `docs/01-architecture.md` for architecture, boundaries, flows, and validation surfaces.
+- Use `docs/03-ai-runtime-operating-model.md` for the source-managed runtime consumption model shared from the standards baseline.
+- Use `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents for binding rules.
+- Use `LESSONS_LEARNED.md` for lessons that are still pending codification.
+
+## Scope
+
+This file is repo-specific and descriptive. It may inform interpretation, but it must not override canonical instruction surfaces or consumer-local override files.
+
+## Local Operating Context
+
+- No local context has been recorded yet.
+
+## Stable Decisions
+
+| Decision | Status | Policy owner |
+| --- | --- | --- |
+| `<decision>` | `<status>` | `<canonical owner>` |
+
+## Glossary
+
+| Term | Meaning |
+| --- | --- |
+| `<term>` | `<meaning>` |
+
+## Non-Policy Notes
+
+- Move binding behavior to `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/skills/`, or the appropriate local override surface.

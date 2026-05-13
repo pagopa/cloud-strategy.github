@@ -16,7 +16,9 @@ This file is the stable entrypoint for the repository instruction architecture.
 4. When a runtime lacks native scoped-instruction loading and the target path is known, treat every `.github/instructions/*.instructions.md` file with matching `applyTo` metadata as relevant manual reference material.
 5. Use `.github/skills/` and `.github/agents/` only when they are relevant to the current task.
 6. Keep policy, projections, and inventory separate instead of mixing them into one file.
-7. If `docs/architecture.md` exists in the current repository, treat it as the per-repo architecture contract: read it before reasoning about repository purpose, components, system boundaries, or runtime fit, and update it in the same change when behavior, components, or boundaries move. This file is intentionally not part of the synced baseline; each repository owns its own `docs/architecture.md`. If the file is absent, fall back to inspecting the repository structure on disk and do not invent architecture facts.
+7. If `docs/01-architecture.md` exists in the current repository, treat it as the per-repo architecture contract: read it before reasoning about repository purpose, components, system boundaries, or runtime fit, and update it in the same change when behavior, components, or boundaries move. This file is consumer-local after scaffold creation; each repository owns its own `docs/01-architecture.md`.
+8. If `docs/02-repository-context.md` exists, read it after the architecture contract as descriptive local context. It may inform interpretation but must not override instruction policy.
+9. If `docs/03-ai-runtime-operating-model.md` exists, treat it as the source-managed runtime consumption model for how assistant hosts should use this baseline.
 
 ## Precedence Model
 
@@ -83,7 +85,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Consumer Override Layer
 
-- This standards repository owns the sync seed template at `.github/copilot-instructions.override.md.template`.
+- This standards repository owns the sync seed template at `.github/templates/copilot-instructions.override.md.template`.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the consumer-local exception layer materialized from that template by sync.
 - That file may override synced defaults from `AGENTS.md` or `.github/copilot-instructions.md` only inside the consumer repository and only when each exception states the overridden baseline rule, local scope, reason, and required disclosure.
 - If the target file exists but declares no active overrides, keep the synced baseline authoritative.

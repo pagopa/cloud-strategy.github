@@ -1,6 +1,19 @@
-# Runtime Fit
+# AI Runtime Operating Model
+
+> Purpose: source-managed runtime consumption model for Codex, Copilot, ChatGPT, and other assistants that use this repository's AI customization assets. Keep cross-runtime loading, matching, and portability guidance here.
+
+## Where Adjacent Content Belongs
+
+- Use `docs/01-architecture.md` for the repository-specific architecture contract.
+- Use `docs/02-repository-context.md` for stable local operating context that does not override policy.
+- Use `AGENTS.md`, `.github/copilot-instructions.md`, and scoped `.github/instructions/*.instructions.md` for binding instruction policy.
+- Use relevant `SKILL.md` files for task-specific workflow depth.
+
+## Runtime Role
 
 This repository is authored as a GitHub Copilot customization and governance baseline, but its assets should remain usable by multiple assistant runtimes.
+
+Unlike `docs/01-architecture.md` and `docs/02-repository-context.md`, this file is source-managed by the standards repository and synchronized into consumer repositories.
 
 ## Supported Runtimes
 
