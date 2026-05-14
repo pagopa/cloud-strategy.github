@@ -5,7 +5,7 @@ Reference: `instructions/internal-terraform.instructions.md`
 ## Critical
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | TF-C01 | Hardcoded secrets, access keys, or passwords in `.tf` files | Credential exposure |
 | TF-C02 | Overly broad IAM policy with `"Action": "*"` or `"Resource": "*"` | Excessive privilege |
 | TF-C03 | Backend configuration with no state locking | Concurrent state corruption |
@@ -13,7 +13,7 @@ Reference: `instructions/internal-terraform.instructions.md`
 ## Major
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | TF-M01 | `count` used where `for_each` with logical keys is appropriate | Index-based drift risk |
 | TF-M02 | Missing `description` on variables | Undocumented interface |
 | TF-M03 | Missing `type` constraint on variables | Unvalidated input |
@@ -26,7 +26,7 @@ Reference: `instructions/internal-terraform.instructions.md`
 ## Minor
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | TF-m01 | Unused variables or outputs | Dead code |
 | TF-m02 | Missing `description` on outputs | Undocumented contract |
 | TF-m03 | Missing `terraform fmt` (inconsistent formatting) | Style consistency |
@@ -37,7 +37,7 @@ Reference: `instructions/internal-terraform.instructions.md`
 ## Nit
 
 | ID | Anti-pattern | Why |
-|---|---|---|
+| --- | --- | --- |
 | TF-N01 | Resource name not in `snake_case` | Naming convention |
 | TF-N02 | Inconsistent ordering of block arguments | Readability |
 | TF-N03 | Empty `default = ""` instead of `default = null` for optional strings | Semantic clarity |

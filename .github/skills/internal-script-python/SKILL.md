@@ -76,7 +76,7 @@ Keep these rules visible while drafting:
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Missing `if __name__ == "__main__":` guard | Script runs on import, breaks testing and reuse | Always guard the entry point |
 | Using `print()` for errors | Errors go to stdout, mixed with normal output | Use `print(..., file=sys.stderr)` or `logging` |
 | Bare `except:` or `except Exception:` at top level | Swallows all errors including KeyboardInterrupt | Catch specific exceptions; let unexpected ones propagate |

@@ -44,7 +44,7 @@ Operational notes:
 ## Recommended split of responsibilities
 
 | Question type | Preferred server |
-|---|---|
+| --- | --- |
 | "What does AWS currently recommend?" | AWS Knowledge MCP |
 | "Which regions support this?" | AWS Knowledge MCP |
 | "What does this role or user currently have?" | AWS IAM MCP |

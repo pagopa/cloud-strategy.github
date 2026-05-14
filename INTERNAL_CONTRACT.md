@@ -62,7 +62,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Goal: keep scoped instructions discoverable by target path without promising universal auto-loading.
 - Scope:
   - `.github/instructions/**/*.instructions.md`
-  - `docs/runtime-fit.md`
+  - `docs/03-ai-runtime-operating-model.md`
   - catalog consistency helpers and tests
 - Expected behavior:
   - each active scoped instruction exposes usable `applyTo` metadata
@@ -70,6 +70,25 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - repository-owned `internal-*` instructions and imported non-`internal-*` instructions remain eligible when their `applyTo` metadata matches
   - overlap between different glob patterns is treated as relevant co-load unless a clear conflict requires a narrower scope or explicit uncertainty
   - docs and validators describe discoverability and matching, not universal runtime enforcement
+
+#### `instruction-architecture-knowledge-docs-keep-ownership-split`
+
+- Goal: keep repository knowledge documents ordered and owned by the right source.
+- Scope:
+  - `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `docs/01-architecture.md`
+  - `docs/02-repository-context.md`
+  - `docs/03-ai-runtime-operating-model.md`
+  - `.github/templates/01-architecture.md.template`
+  - `.github/templates/02-repository-context.md.template`
+  - sync automation and sync-contract tests
+- Expected behavior:
+  - `docs/01-architecture.md` is the repository-specific architecture contract and is scaffolded into consumers only when missing
+  - `docs/02-repository-context.md` is descriptive local context and cannot override binding instruction policy
+  - `docs/03-ai-runtime-operating-model.md` is source-managed runtime guidance synchronized from the standards repository
+  - sync automation preserves existing consumer-local architecture and context documents after initial scaffold creation
+  - `.github/templates/` remains source-side scaffold material and is not mirrored as a target catalog family
 
 ### Language Policy
 

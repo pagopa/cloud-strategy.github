@@ -27,7 +27,7 @@ Load `references/dockerfile-patterns.md` when you need the canonical multi-stage
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Using `latest` or floating tags | Non-reproducible builds, supply-chain risk | Pin by digest: `image@sha256:abc...` |
 | Running as root in production | Container escape gives host-level privileges | Add `USER node` / `USER nobody` in final stage |
 | Copying entire context without `.dockerignore` | Bloated image with `.git`, secrets, dev deps | Create `.dockerignore` excluding non-essential files |

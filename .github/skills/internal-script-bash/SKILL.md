@@ -29,7 +29,7 @@ Load `references/templates.md` when you need the starter script, the standard ar
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Skipping dependency checks for required commands | Failures surface late and with weaker operator context | Check `command -v` before the first call |
 | Building dynamic commands as strings | Quoting and argument boundaries become fragile | Use arrays plus `printf` for operator-facing formatting |
 | Destructive commands without rerun safety | Repeated execution can corrupt state or surprise operators | Add `--dry-run` and make the mutation idempotent |

@@ -29,7 +29,7 @@ Dimensions are loaded from `references/analysis-dimensions.md` when deeper check
 ## Severity mappings
 
 | Category | Severity | Criteria |
-|---|---|---|
+| --- | --- | --- |
 | Error | Critical | Security flaw, data loss risk, correctness bug affecting business logic |
 | Error | Major | Missing error handling, broken contract, regression risk |
 | Improvement | Readability | Code clarity, naming, structure |
@@ -39,7 +39,7 @@ Dimensions are loaded from `references/analysis-dimensions.md` when deeper check
 | Improvement | Security | Hardening, least privilege, input validation |
 
 | Effort | Meaning |
-|---|---|
+| --- | --- |
 | Low | Less than 1 hour, isolated change |
 | Medium | 1-4 hours, may touch multiple files |
 | High | More than 4 hours, may require design discussion |
@@ -60,7 +60,7 @@ For empty sections, state "No findings in this category."
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Flagging code style as an architectural issue | Inflates findings, dilutes trust | Use `internal-code-review` for nit-level checks |
 | Making ungrounded findings ("this might break X") | Speculation ≠ evidence | Every finding must cite a concrete file and line from the diff |
 | Scope creep — analyzing the entire codebase | The user asked about a specific change | Analyze only changed files and their immediate dependencies |

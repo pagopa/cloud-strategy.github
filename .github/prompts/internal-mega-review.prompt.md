@@ -208,7 +208,7 @@ Use compact tables where relevant. Tables should normally have 3 or 4 columns an
 Priority plan:
 
 | Priority | Area | Work item | First action |
-|---|---|---|---|
+| --- | --- | --- | --- |
 
 Allowed priorities:
 
@@ -220,7 +220,7 @@ Allowed priorities:
 File actions:
 
 | Action | Target | Reason | Effort |
-|---|---|---|---|
+| --- | --- | --- | --- |
 
 Allowed actions:
 
@@ -238,7 +238,7 @@ Allowed actions:
 Quick wins:
 
 | Action | Owner area | Target |
-|---|---|---|
+| --- | --- | --- |
 
 ## 11. Cross-Repo Output When Reviewing More Than One Repository
 
@@ -275,12 +275,12 @@ Global review coverage must include:
 Use this compact maturity matrix:
 
 | Repo | Strengths | Main gaps | Top next step |
-|---|---|---|---|
+| --- | --- | --- | --- |
 
 Use this compact roadmap table:
 
 | Priority | Initiative | Repositories | First step |
-|---|---|---|---|
+| --- | --- | --- | --- |
 
 ## 12. Review Discipline
 

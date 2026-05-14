@@ -16,7 +16,9 @@ This file is the stable entrypoint for the repository instruction architecture.
 4. When a runtime lacks native scoped-instruction loading and the target path is known, treat every `.github/instructions/*.instructions.md` file with matching `applyTo` metadata as relevant manual reference material.
 5. Use `.github/skills/` and `.github/agents/` only when they are relevant to the current task.
 6. Keep policy, projections, and inventory separate instead of mixing them into one file.
-7. If `docs/architecture.md` exists in the current repository, treat it as the per-repo architecture contract: read it before reasoning about repository purpose, components, system boundaries, or runtime fit, and update it in the same change when behavior, components, or boundaries move. This file is intentionally not part of the synced baseline; each repository owns its own `docs/architecture.md`. If the file is absent, fall back to inspecting the repository structure on disk and do not invent architecture facts.
+7. If `docs/01-architecture.md` exists in the current repository, treat it as the per-repo architecture contract: read it before reasoning about repository purpose, components, system boundaries, or runtime fit, and update it in the same change when behavior, components, or boundaries move. This file is consumer-local after scaffold creation; each repository owns its own `docs/01-architecture.md`.
+8. If `docs/02-repository-context.md` exists, read it after the architecture contract as descriptive local context. It may inform interpretation but must not override instruction policy.
+9. If `docs/03-ai-runtime-operating-model.md` exists, treat it as the source-managed runtime consumption model for how assistant hosts should use this baseline.
 
 ## Precedence Model
 
@@ -62,6 +64,14 @@ This file is the stable entrypoint for the repository instruction architecture.
 - Operational owners remain recommendation-only when their boundary breaks and are not subagent-invoked by default.
 - Any future automation between operational owners must be explicit, narrow, one-directional, and must not create all-to-all dispatch or nested ping-pong.
 
+## Operational Evidence And Delivery Invariants
+
+- For non-trivial repository-owned work, make the target state, anti-scope, main assumptions, tradeoffs, and validation path visible before delivery starts or before recommending the next owner.
+- If validation output, logs, user correction, or repository evidence invalidates the selected direction, stop and re-select the operational lane before continuing.
+- Bug reports and failing checks should be handled evidence-first: inspect the failing signal, identify the root cause, and resolve it when the target state is clear; ask the user only for missing decisions, unsafe permissions, or unavailable context.
+- Prefer the simplest correct change with the smallest credible blast radius; avoid temporary fixes, unrequested abstractions, and broad rewrites unless the selected plan explicitly justifies them.
+- Parallel or subagent-supported work, when allowed by the runtime and task shape, must use bounded independent scopes, visible integration, and independent verification before any completion claim.
+
 ## Projection Rules
 
 - Keep repo-wide Copilot behavior in `.github/copilot-instructions.md`.
@@ -75,7 +85,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Consumer Override Layer
 
-- This standards repository owns the sync seed template at `.github/copilot-instructions.override.md.template`.
+- This standards repository owns the sync seed template at `.github/templates/copilot-instructions.override.md.template`.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the consumer-local exception layer materialized from that template by sync.
 - That file may override synced defaults from `AGENTS.md` or `.github/copilot-instructions.md` only inside the consumer repository and only when each exception states the overridden baseline rule, local scope, reason, and required disclosure.
 - If the target file exists but declares no active overrides, keep the synced baseline authoritative.
@@ -90,7 +100,9 @@ This file is the stable entrypoint for the repository instruction architecture.
 - When a validator, IDE, schema check, or runtime error overturns an earlier implementation assumption, re-evaluate retained learning immediately instead of treating the correction as task-local by default.
 - When correctness depends on vendor-owned workflow semantics, schema constraints, or context availability, read the primary documentation before editing or asserting that a change is valid.
 - Keep `LESSONS_LEARNED.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
+- Treat `LESSONS_LEARNED.md` as a temporary incubation ledger: codify stable lessons into their canonical owner when ready, then remove any duplicate ledger row in the same change.
 - Keep `LESSONS_LEARNED.md` append-preserving by default: preserve unrelated rows already on disk, including local uncommitted lessons, and change a specific row only when that same lesson is being codified, disproven, narrowed, or deduplicated.
+- Before repeating a workflow or domain where durable corrections already exist, consult the relevant retained lessons without treating the ledger as canonical policy.
 - Durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons.
 - Keep detailed retained-learning behavior in `.github/copilot-instructions.md`; keep only the strategic boundary here.
 
@@ -98,7 +110,7 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 - Transient planning, brainstorming, and other Superpowers-generated working files must not be written under `docs/`.
 - When such artifacts are needed inside this repository, write them under `tmp/superpowers/`.
-- Create or reuse `tmp/superpowers/<clear-action-or-task-name>/` only for retained repository-owned planning that must survive the current turn because the work is non-banal, crosses turns, spans macro-categories, needs handoff, tracking, or provenance, or preserves tradeoffs worth review.
+- When retained repository-owned planning must survive the current turn, create or reuse `tmp/superpowers/<clear-action-or-task-name>/` only for non-banal, cross-turn, multi-category, handoff, tracking, provenance, or reviewable-tradeoff work.
 - Keep retained execution plans as numbered Markdown files: a single `01-...md` file when one macro-category is enough, or multiple numbered files such as `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md` when the work spans multiple macro-categories.
 - Keep unresolved questions, doubts, or user decisions in `dubbi-e-domande.md`; this file stays separate from executable plan files and remains outside the plan-and-apply loop.
 - During execution, create matching `done-*` files, move completed items into them, remove them from the active numbered source file, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.

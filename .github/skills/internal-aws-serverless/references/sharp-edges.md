@@ -1,7 +1,7 @@
 # AWS Serverless Sharp Edges
 
 | Sharp edge | Why it happens | Check first | Typical mitigation |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Cold starts feel randomly slow | Large bundles, heavy imports, or VPC setup dominate init time | Init duration, package size, import graph, VPC attachment | Reduce dependencies, split functions, profile init work, remove unnecessary VPC use |
 | Lambda in a VPC times out on external calls | DNS, route, NAT, or security configuration is incomplete | Whether the function really needs a VPC, subnet routes, DNS, egress path | Keep Lambda out of a VPC unless required; otherwise validate DNS and egress explicitly |
 | SQS retry storms | One record failure causes whole-batch replay | Batch size, handler error path, partial batch failure support | Catch per-record exceptions and return failed IDs only |

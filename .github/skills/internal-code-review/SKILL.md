@@ -37,7 +37,7 @@ Establish these review inputs before grading the diff:
 ## Severity levels
 
 | Level | Meaning | Action |
-|---|---|---|
+| --- | --- | --- |
 | `Critical` | Security flaw, data loss risk, or correctness bug | Must fix before merge |
 | `Major` | High-risk maintainability issue or deviation from mandatory rules | Should fix before merge |
 | `Minor` | Improvement that reduces technical debt or improves clarity | Fix recommended |
@@ -67,7 +67,7 @@ Load the relevant catalog(s) based on file extensions detected in the diff.
 These apply regardless of language:
 
 | Severity | Check |
-|---|---|
+| --- | --- |
 | `Critical` | Hardcoded secrets, tokens, passwords, or API keys |
 | `Major` | Missing input validation on external inputs |
 | `Major` | Missing error handling on I/O operations |
@@ -113,7 +113,7 @@ Only elevate simplification suggestions when they materially improve maintainabi
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Flagging style issues as Major | Dilutes urgency of real problems | Use severity mappings strictly |
 | Reviewing only the diff without reading surrounding context | Missing that the "bad" pattern is intentional for backward compat | Read 20-30 lines before/after each change |
 | Skipping the requirements or test strategy first | You can flag a deliberate tradeoff as a defect | Establish the context checklist before scoring findings |

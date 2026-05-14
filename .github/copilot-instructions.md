@@ -19,7 +19,9 @@ You are an expert software and platform engineer. Protect correctness, security,
 5. Skills and agents are on-demand operational assets; use them only when relevant.
 6. `.github/INVENTORY.md` is the live catalog of managed assets and is never replaced by `AGENTS.md`.
 7. If `.github/copilot-instructions.override.md` exists, read it before relying on synced repo-wide defaults; it is the consumer-local exception layer authorized by `AGENTS.md`.
-8. If `docs/architecture.md` exists in the current repository, read it as the per-repo architecture contract before reasoning about repository purpose, components, or boundaries; this file is intentionally per-repo and not synced from the standards repository.
+8. If `docs/01-architecture.md` exists in the current repository, read it as the per-repo architecture contract before reasoning about repository purpose, components, or boundaries; this file is consumer-local after scaffold creation.
+9. If `docs/02-repository-context.md` exists, read it after the architecture contract as descriptive local context, not as policy.
+10. If `docs/03-ai-runtime-operating-model.md` exists, use it as the source-managed runtime consumption model for how assistant hosts should use this baseline.
 
 - `internal-sync-*` assets stay sync-specific and must not become second canonical homes for repository-wide policy.
 - When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
@@ -45,9 +47,9 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
 - During catalog review or rationalization, imported assets in domains already covered by a credible internal owner should be evaluated as `keep as depth`, `wrap under the internal owner`, or `retire`; do not collapse the decision to a binary keep/delete choice.
 - `local-*` assets are consumer-local extensions in target repositories. In this standards repository, the `local-*` prefix is also used for repo-owned tooling that must not be synced to consumers (for example, sync command centers and their paired engine skills); these assets remain source-of-truth here and are excluded from the synced baseline.
-- `internal-agent-operational-flow` is the portable skill-first core for repository-owned `plan`, `execute`, and `review` work across Copilot, ChatGPT, Codex, and other runtimes.
-- `internal-agent-critical-master` is the portable skill-first core for critical challenge, pre-mortem, hidden-assumption, and failure-mode work.
-- `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` are the current Copilot wrapper entrypoints for VS Code route selection, tool scope, and manual handoff UX.
+- Use `internal-agent-operational-flow` as the portable skill-first owner for repository-owned `plan`, `execute`, and `review` workflows across assistant runtimes.
+- Use `internal-agent-critical-master` for critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
+- In VS Code, route through the Copilot wrapper lanes `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` for route selection, tool scope, and manual handoff UX.
 - Use direct entry for operational modes and Copilot wrapper lanes, and do not invent a repository-owned front-door router.
 - `plan` mode through `internal-agent-operational-flow`, or the `internal-planning-leader` wrapper in VS Code, is the safe fallback when the right operational lane is still ambiguous.
 - Operational owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
@@ -66,13 +68,18 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Implementation Discipline
 
 - Prefer the simplest correct change.
+- Prefer the smallest credible blast radius. Avoid temporary fixes, unrequested abstractions, and broad rewrites unless the selected plan explicitly justifies them.
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
 - When introducing a new source-managed catalog family or a new human-readable catalog summary surface, update inventory generation, sync discovery, and validation in the same change so `.github/INVENTORY.md` does not become the only surface aware of it.
-- Do not add hand-maintained catalog matrices or counts beside `.github/INVENTORY.md` unless they are generated from the filesystem or covered by validation.
+- Keep catalog matrices and counts generated from the filesystem or covered by validation; do not maintain manual copies beside `.github/INVENTORY.md`.
 - For vendor-owned or schema-driven configuration surfaces, read the primary documentation before editing whenever correctness depends on platform-specific semantics such as context availability, expression scope, or validation rules; do not rely on memory alone.
 - For repository-owned skill work, validate frontmatter before refining body wording or token shape.
-- For source-side repository-owned standards work that deepens parallel skill families, stage planning in `tmp/superpowers/`, make anti-scope explicit, and close parity gaps in existing `Common mistakes`, `Validation`, and current reference depth before adding optional new skills, validators, or shared assets.
+- For non-trivial repository-owned work, keep the target state, anti-scope, main assumptions, tradeoffs, and validation path visible before delivery starts or before recommending the next owner.
+- When validation output, logs, user correction, or repository evidence disproves the selected direction, stop and choose the right operational lane before continuing.
+- Handle bug reports and failing checks evidence-first: inspect the failing signal, identify the root cause, and resolve it when the target state is clear; ask the user only for missing decisions, unsafe permissions, or unavailable context.
+- Parallel or subagent-supported work is allowed only when the runtime and task shape support bounded independent scopes, visible integration, and independent verification before any completion claim.
+- When source-side standards work deepens parallel skill families, stage planning in `tmp/superpowers/`; make anti-scope explicit; close parity gaps in existing `Common mistakes`, `Validation`, and reference depth before adding optional assets.
 - Keep repository-owned skill `description:` lines trigger-first, and do not rewrite a working route during token optimization unless improving retrieval is the explicit goal.
 - For provider-specific cloud skills, keep guidance provider-native and omit cross-cloud comparison or provider-selection content when provider choice is already upstream of skill activation.
 - Prefer `references/` over new `scripts/` for static checklists, lookup tables, and starter templates; add scripts only when the workflow is deterministic, repeated, and execution-heavy.
@@ -106,6 +113,8 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Also treat a repeated or consequential misapplication of an already-codified repository rule as a lesson when the correction is likely to prevent the same mistake in future work.
 - When a validator, IDE, schema check, or runtime error overturns an earlier assumption, immediately re-check whether that correction is durable enough to retain or codify.
 - Before finalizing such a correction, read the primary documentation for the relevant platform or schema instead of relying on memory or partial recall.
+- Treat `LESSONS_LEARNED.md` as a temporary incubation ledger, not the final home for policy. Stable lessons should move into `AGENTS.md`, this file, a scoped instruction, a skill, or an agent when they become canonical.
+- Consult relevant retained lessons before repeating a workflow or domain with durable corrections, while keeping the ledger non-canonical.
 - Before editing repository-root `LESSONS_LEARNED.md`, read its current on-disk contents and treat them as the source of truth for in-progress local lessons, including uncommitted rows already present on disk.
 - When a durable lesson is clear and still uncodified, append one concise, reusable row to the pending table in `LESSONS_LEARNED.md` instead of waiting for task completion; do not regenerate, reorder, or rewrite unrelated rows.
 - If you decide not to record a lesson after such a correction, make that decision explicit in the completion report with a short reason.

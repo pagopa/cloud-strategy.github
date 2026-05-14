@@ -25,9 +25,25 @@ IGNORED_SYNC_FILENAMES = {"README.md", "CHANGELOG.md"}
 IGNORED_SYNC_PARTS = {"__pycache__", ".venv"}
 CONSUMER_SYNC_EXCLUDED_PREFIX = "internal-sync-"
 LESSONS_PATH = "LESSONS_LEARNED.md"
+ARCHITECTURE_PATH = "docs/01-architecture.md"
+REPOSITORY_CONTEXT_PATH = "docs/02-repository-context.md"
+RUNTIME_OPERATING_MODEL_PATH = "docs/03-ai-runtime-operating-model.md"
+LEGACY_ARCHITECTURE_PATH = "docs/architecture.md"
+LEGACY_RUNTIME_FIT_PATH = "docs/runtime-fit.md"
+ARCHITECTURE_TEMPLATE_PATH = ".github/templates/01-architecture.md.template"
+REPOSITORY_CONTEXT_TEMPLATE_PATH = ".github/templates/02-repository-context.md.template"
+COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH = (
+    ".github/templates/copilot-instructions.override.md.template"
+)
+COPILOT_INSTRUCTIONS_OVERRIDE_PATH = ".github/copilot-instructions.override.md"
+CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES = {
+    ARCHITECTURE_PATH: ARCHITECTURE_TEMPLATE_PATH,
+    REPOSITORY_CONTEXT_PATH: REPOSITORY_CONTEXT_TEMPLATE_PATH,
+}
 MANAGED_ROOT_FILES = (
     "AGENTS.md",
     LESSONS_PATH,
+    RUNTIME_OPERATING_MODEL_PATH,
     ".editorconfig",
     ".pre-commit-config.yaml",
     ".github/copilot-instructions.md",
@@ -38,8 +54,6 @@ MANAGED_ROOT_FILES = (
     ".github/repo-profiles.yml",
 )
 MANAGED_WORKFLOW_FILES = (".github/workflows/_pre-commit.yml",)
-COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH = ".github/copilot-instructions.override.md.template"
-COPILOT_INSTRUCTIONS_OVERRIDE_PATH = ".github/copilot-instructions.override.md"
 INVENTORY_PATH = ".github/INVENTORY.md"
 IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
 
@@ -282,7 +296,8 @@ def iter_markdown_assets(root: Path) -> Iterator[Path]:
         candidates.extend(
             path
             for path in github_root.rglob("*.md")
-            if path.is_file() and not any(part in IGNORED_SYNC_PARTS for part in path.parts)
+            if path.is_file()
+            and not any(part in IGNORED_SYNC_PARTS for part in path.parts)
         )
     for path in candidates:
         if path.exists():
@@ -343,11 +358,13 @@ def action_sort_key(action: str) -> int:
     ordering = {
         "create": 0,
         "update": 1,
-        "ensure": 2,
-        "rebuild": 3,
-        "delete": 4,
-        "preserve": 5,
-        "unchanged": 6,
+        "rename": 2,
+        "ensure": 3,
+        "rebuild": 4,
+        "delete": 5,
+        "manual": 6,
+        "preserve": 7,
+        "unchanged": 8,
     }
     return ordering.get(action, 99)
 
@@ -358,7 +375,11 @@ def finding_sort_key(finding: Finding) -> tuple[int, str, str]:
 
 
 def path_list(root: Path, pattern: str) -> list[str]:
-    return sorted(path.relative_to(root).as_posix() for path in root.glob(pattern) if path.is_file())
+    return sorted(
+        path.relative_to(root).as_posix()
+        for path in root.glob(pattern)
+        if path.is_file()
+    )
 
 
 def all_files_under(root: Path, relative_dir: str) -> list[str]:

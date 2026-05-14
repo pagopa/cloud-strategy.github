@@ -8,6 +8,7 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 
 - `AGENTS.md`
 - `LESSONS_LEARNED.md`
+- `docs/03-ai-runtime-operating-model.md`
 - `.editorconfig`
 - `.pre-commit-config.yaml`
 - `.github/copilot-instructions.md`
@@ -22,6 +23,7 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
 
 Do not sync `README.md`, changelogs, other workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
+Use `.github/templates/` only as standards-repository scaffold source material; do not mirror it into consumer repositories as an operational catalog family.
 Do not sync consumer-facing resources whose file or directory name starts with `internal-sync-`; those remain source-only operational controls for the standards repository.
 Treat `LESSONS_LEARNED.md` as a structure-managed exception: sync the source template and contract, but preserve target-authored pending lesson rows instead of copying source rows into consumer repositories.
 When a consumer-local creator depends on shared runtime-critical rules, keep a self-contained mirror of those rules inside the creator bundle and track the mirror path in the source inventory plus the target `.github/copilot-sync.manifest.json`; do not assume cross-bundle references or target-local extras will be present at runtime.
@@ -29,7 +31,11 @@ When a consumer-local creator depends on shared runtime-critical rules, keep a s
 ## Target Rules
 
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
-- Materialize `.github/copilot-instructions.override.md.template` from the standards repository into the consumer-local copilot instructions override file when that target file is missing, then preserve the target file as a consumer-owned local exception layer and surface it in the plan or final report when present.
+- Materialize `.github/templates/copilot-instructions.override.md.template` from the standards repository into the consumer-local copilot instructions override file when that target file is missing, then preserve the target file as a consumer-owned local exception layer and surface it in the plan or final report when present.
+- Create `docs/01-architecture.md` from `.github/templates/01-architecture.md.template` only when the target has neither `docs/01-architecture.md` nor legacy `docs/architecture.md`, then preserve it as consumer-local content.
+- Create `docs/02-repository-context.md` from `.github/templates/02-repository-context.md.template` only when missing, then preserve it as consumer-local content.
+- If a target has legacy `docs/architecture.md` and lacks `docs/01-architecture.md`, rename the legacy file to the new path. If both paths exist, block apply and require manual reconciliation.
+- Delete legacy `docs/runtime-fit.md`; the source-managed replacement is `docs/03-ai-runtime-operating-model.md`.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
 - Ensure target root `LESSONS_LEARNED.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
@@ -42,6 +48,9 @@ When root guidance is in scope, keep the target files in these roles:
 
 - `AGENTS.md`: strategic bridge, precedence anchor, naming contract, and cross-surface routing guidance
 - `LESSONS_LEARNED.md`: retained-learning ledger template aligned from source structure while preserving target-authored pending lessons; it remains non-canonical and repo-local in content
+- `docs/01-architecture.md`: consumer-local architecture contract scaffolded only when missing and then preserved
+- `docs/02-repository-context.md`: consumer-local descriptive context scaffolded only when missing and then preserved; it does not override policy
+- `docs/03-ai-runtime-operating-model.md`: source-managed runtime consumption model synchronized from the standards baseline
 - `.github/copilot-instructions.md`: repo-wide GitHub Copilot projection
 - the consumer-local GitHub instructions overrides file: consumer-local exception layer authorized by `AGENTS.md`; it may override synced defaults only when conflict, scope, reason, and disclosure are explicit
 - `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
@@ -92,6 +101,7 @@ Completed runs should make these facts visible:
 
 - target analysis and selected mode
 - root-guidance alignment strategy and `LESSONS_LEARNED.md` status
+- architecture, repository context, and runtime operating model status
 - preserved `local-*` assets and consumer-local GitHub instructions overrides status
 - target-only cleanup decisions
 - plan-file status and lifecycle

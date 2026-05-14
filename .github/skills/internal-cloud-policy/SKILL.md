@@ -28,7 +28,7 @@ description: Use when authoring, comparing, or reviewing concrete cloud policy d
 ## Policy type decision
 
 | Situation | AWS | Azure | GCP |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Prevent actions org-wide | SCP (JSON) | Azure Policy (deny effect) | Org Policy constraint |
 | Enforce tagging standards | SCP condition on `aws:RequestTag` | Azure Policy (audit/deny) | Custom Org Policy |
 | Restrict regions | SCP condition `aws:RequestedRegion` | Azure Policy `allowedLocations` | `constraints/gcp.resourceLocations` |
@@ -41,7 +41,7 @@ Load `references/policy-templates.md` for AWS SCP, Azure Policy, GCP Org Policy,
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Using wildcard `"Action": "*"` in an SCP without a `Condition` | Denies everything — locks out the entire org | Always scope with conditions (region, service, tag) |
 | Deploying policy directly to prod scope | A bad policy locks out legitimate workloads with no rollback | Test in non-prod scope first, then promote |
 | Missing `NotAction` exemptions for essential services | Breaks IAM, billing, support access | Always exempt `iam:*`, `organizations:*`, `support:*` from blanket denies |

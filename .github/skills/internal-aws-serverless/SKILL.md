@@ -62,7 +62,7 @@ Load `references/sharp-edges.md` when diagnosing cold starts, VPC latency, retry
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Treating the handler as the business layer | Hard to test, high coupling to AWS events | Keep the handler thin and call testable helpers |
 | Parsing every event inline differently | Inconsistent behavior and brittle error handling | Normalize one event contract per trigger type |
 | Returning whole-batch failure for one bad SQS record | Causes replay storms and blocks healthy messages | Catch per-record failures and return failed IDs only when supported |

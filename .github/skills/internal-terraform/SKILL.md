@@ -17,7 +17,7 @@ description: Use when adding, refactoring, or reviewing Terraform or OpenTofu co
 See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 
 | Situation | Use |
-|---|---|
+| --- | --- |
 | Adding resources to an existing root/environment config | Feature (inline) |
 | Logic reused across 2+ root configs or repositories | Module |
 | Complex resource group with its own lifecycle | Module |
@@ -85,7 +85,7 @@ Load `references/template-examples.md` when you need a minimal inline feature ex
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Using `count` where `for_each` with logical keys fits | Index-based addressing causes drift when items are added/removed in the middle | Use `for_each` with a map or `toset()` of logical keys |
 | Missing `description` on variables and outputs | Undocumented interfaces block collaboration and code review | Always add `description` — it costs nothing |
 | Hardcoded ARNs, subscription IDs, or account IDs | Breaks portability between environments and accounts | Use variables or data sources |

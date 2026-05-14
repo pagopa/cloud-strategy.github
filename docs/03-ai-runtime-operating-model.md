@@ -1,6 +1,19 @@
-# Runtime Fit
+# AI Runtime Operating Model
+
+> Purpose: source-managed runtime consumption model for Codex, Copilot, ChatGPT, and other assistants that use this repository's AI customization assets. Keep cross-runtime loading, matching, and portability guidance here.
+
+## Where Adjacent Content Belongs
+
+- Use `docs/01-architecture.md` for the repository-specific architecture contract.
+- Use `docs/02-repository-context.md` for stable local operating context that does not override policy.
+- Use `AGENTS.md`, `.github/copilot-instructions.md`, and scoped `.github/instructions/*.instructions.md` for binding instruction policy.
+- Use relevant `SKILL.md` files for task-specific workflow depth.
+
+## Runtime Role
 
 This repository is authored as a GitHub Copilot customization and governance baseline, but its assets should remain usable by multiple assistant runtimes.
+
+Unlike `docs/01-architecture.md` and `docs/02-repository-context.md`, this file is source-managed by the standards repository and synchronized into consumer repositories.
 
 ## Supported Runtimes
 
@@ -25,7 +38,7 @@ This repository is authored as a GitHub Copilot customization and governance bas
 
 For runtime hosts without native Copilot instruction loading, scoped instructions remain relevant by matching the target path against each instruction file's `applyTo` metadata.
 
-- Before editing, reviewing, or asserting policy for a known target path, identify every `.github/instructions/*.instructions.md` file whose `applyTo` glob matches that path.
+- When a target path is known, identify every matching `.github/instructions/*.instructions.md` `applyTo` glob before editing, reviewing, or asserting policy.
 - Read all matching instructions as manual references, including both repository-owned `internal-*` instructions and imported non-`internal-*` instructions.
 - Treat multiple matches as intentional co-load unless the instructions directly conflict; prefer the narrower target scope when the conflict is clear.
 - If the target path is not explicit, infer the artifact family only when it is obvious, such as Python, GitHub Actions, Kubernetes, Docker, or Markdown; otherwise ask for the target path before making path-scoped policy claims.

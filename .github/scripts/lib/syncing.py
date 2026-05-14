@@ -11,12 +11,17 @@ from shutil import copy2
 from .inventory import render_inventory_markdown, sections_from_catalog_paths
 from .fingerprinting import HASH_ALGO, NORMALIZATION_VERSION, build_fingerprint
 from .shared import (
+    ARCHITECTURE_PATH,
+    CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES,
     COPILOT_INSTRUCTIONS_OVERRIDE_PATH,
     COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH,
     INVENTORY_PATH,
+    LEGACY_ARCHITECTURE_PATH,
+    LEGACY_RUNTIME_FIT_PATH,
     LESSONS_PATH,
     MANAGED_ROOT_FILES,
     MANAGED_WORKFLOW_FILES,
+    REPOSITORY_CONTEXT_PATH,
     SyncOperation,
     SyncPlan,
     action_sort_key,
@@ -31,6 +36,7 @@ from .shared import (
     sha256_file,
     write_text,
 )
+
 MANAGED_SKILL_DIR = ".github/skills"
 SYNC_PLAN_PATH = "tmp/copilot-sync.plan.md"
 SYNC_MANIFEST_PATH = ".github/copilot-sync.manifest.json"
@@ -69,7 +75,9 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     local_assets: list[str] = []
     generated_lessons: str | None = None
 
-    local_override_template_path = source_root / COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH
+    local_override_template_path = (
+        source_root / COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH
+    )
     local_override_target_path = target_root / COPILOT_INSTRUCTIONS_OVERRIDE_PATH
     if local_override_template_path.exists():
         if not local_override_target_path.exists():
@@ -93,6 +101,13 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
                     target_hash=sha256_file(local_override_target_path),
                 )
             )
+
+    append_consumer_local_knowledge_operations(
+        source_root=source_root,
+        target_root=target_root,
+        operations=operations,
+        local_assets=local_assets,
+    )
 
     for relative_path in sorted(source_files):
         source_path = source_root / relative_path
@@ -148,7 +163,11 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
 
         target_hash = sha256_file(target_path)
         action = "unchanged" if source_hash == target_hash else "update"
-        reason = "Already aligned with source." if action == "unchanged" else "Target file differs from source."
+        reason = (
+            "Already aligned with source."
+            if action == "unchanged"
+            else "Target file differs from source."
+        )
         operations.append(
             SyncOperation(
                 action=action,
@@ -207,40 +226,74 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
             )
         )
 
+    legacy_runtime_fit_path = target_root / LEGACY_RUNTIME_FIT_PATH
+    if legacy_runtime_fit_path.exists():
+        operations.append(
+            SyncOperation(
+                action="delete",
+                path=LEGACY_RUNTIME_FIT_PATH,
+                reason="Legacy runtime-fit document is replaced by docs/03-ai-runtime-operating-model.md.",
+                source_hash=None,
+                target_hash=sha256_file(legacy_runtime_fit_path),
+            )
+        )
+
     future_inventory_paths = sorted(
         catalog_path
         for catalog_path in source_files
         if catalog_path.startswith(
-            (".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/")
+            (
+                ".github/agents/",
+                ".github/instructions/",
+                ".github/prompts/",
+                ".github/skills/",
+            )
         )
     )
     future_inventory_paths.extend(
         catalog_path
         for catalog_path in local_assets
         if catalog_path.startswith(
-            (".github/agents/", ".github/instructions/", ".github/prompts/", ".github/skills/")
+            (
+                ".github/agents/",
+                ".github/instructions/",
+                ".github/prompts/",
+                ".github/skills/",
+            )
         )
     )
-    generated_inventory = render_inventory_markdown(sections_from_catalog_paths(future_inventory_paths))
+    generated_inventory = render_inventory_markdown(
+        sections_from_catalog_paths(future_inventory_paths)
+    )
 
     inventory_path = target_root / INVENTORY_PATH
     current_inventory = read_text(inventory_path) if inventory_path.exists() else None
-    inventory_action = "unchanged" if current_inventory == generated_inventory else "rebuild"
-    inventory_reason = "Inventory already reflects target state." if inventory_action == "unchanged" else "Inventory must be rebuilt from target filesystem state."
+    inventory_action = (
+        "unchanged" if current_inventory == generated_inventory else "rebuild"
+    )
+    inventory_reason = (
+        "Inventory already reflects target state."
+        if inventory_action == "unchanged"
+        else "Inventory must be rebuilt from target filesystem state."
+    )
     operations.append(
         SyncOperation(
             action=inventory_action,
             path=INVENTORY_PATH,
             reason=inventory_reason,
             source_hash=None,
-            target_hash=sha256_file(inventory_path) if inventory_path.exists() else None,
+            target_hash=(
+                sha256_file(inventory_path) if inventory_path.exists() else None
+            ),
         )
     )
 
     gitignore_path = target_root / TARGET_GITIGNORE_PATH
     current_gitignore = read_text(gitignore_path) if gitignore_path.exists() else None
     generated_gitignore = ensure_superpowers_gitignore_entry(current_gitignore)
-    gitignore_action = "unchanged" if current_gitignore == generated_gitignore else "ensure"
+    gitignore_action = (
+        "unchanged" if current_gitignore == generated_gitignore else "ensure"
+    )
     gitignore_reason = (
         "Target .gitignore already ignores tmp/superpowers."
         if gitignore_action == "unchanged"
@@ -252,23 +305,43 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
             path=TARGET_GITIGNORE_PATH,
             reason=gitignore_reason,
             source_hash=None,
-            target_hash=sha256_file(gitignore_path) if gitignore_path.exists() else None,
+            target_hash=(
+                sha256_file(gitignore_path) if gitignore_path.exists() else None
+            ),
         )
     )
 
-    ordered_operations = tuple(sorted(operations, key=lambda operation: (action_sort_key(operation.action), operation.path)))
+    ordered_operations = tuple(
+        sorted(
+            operations,
+            key=lambda operation: (action_sort_key(operation.action), operation.path),
+        )
+    )
     planned_paths = {operation.path for operation in ordered_operations}
-    dirty_paths = tuple(path for path in git_dirty_paths(target_root) if path in planned_paths)
+    dirty_paths = tuple(
+        path for path in git_dirty_paths(target_root) if path in planned_paths
+    )
     managed_mutation_paths = tuple(
         sorted(
             {
                 operation.path
                 for operation in ordered_operations
-                if operation.action in {"create", "update", "ensure", "rebuild", "delete"}
+                if operation.action
+                in {
+                    "create",
+                    "update",
+                    "rename",
+                    "ensure",
+                    "rebuild",
+                    "delete",
+                    "manual",
+                }
             }
         )
     )
-    dirty_managed_overlap = tuple(path for path in dirty_paths if path in managed_mutation_paths)
+    dirty_managed_overlap = tuple(
+        path for path in dirty_paths if path in managed_mutation_paths
+    )
     return SyncPlan(
         source_root=source_root,
         target_root=target_root,
@@ -286,6 +359,120 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         managed_mutation_paths=managed_mutation_paths,
         dirty_managed_overlap=dirty_managed_overlap,
     )
+
+
+def append_consumer_local_knowledge_operations(
+    source_root: Path,
+    target_root: Path,
+    operations: list[SyncOperation],
+    local_assets: list[str],
+) -> None:
+    append_architecture_operations(source_root, target_root, operations, local_assets)
+    append_repository_context_operations(
+        source_root, target_root, operations, local_assets
+    )
+
+
+def append_architecture_operations(
+    source_root: Path,
+    target_root: Path,
+    operations: list[SyncOperation],
+    local_assets: list[str],
+) -> None:
+    template_path = source_root / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[ARCHITECTURE_PATH]
+    target_path = target_root / ARCHITECTURE_PATH
+    legacy_path = target_root / LEGACY_ARCHITECTURE_PATH
+
+    if target_path.exists() and legacy_path.exists():
+        local_assets.append(ARCHITECTURE_PATH)
+        operations.append(
+            SyncOperation(
+                action="manual",
+                path=ARCHITECTURE_PATH,
+                reason="Both legacy docs/architecture.md and docs/01-architecture.md exist; reconcile manually before apply.",
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_path),
+            )
+        )
+        return
+
+    if target_path.exists():
+        local_assets.append(ARCHITECTURE_PATH)
+        operations.append(
+            SyncOperation(
+                action="preserve",
+                path=ARCHITECTURE_PATH,
+                reason="Preserved consumer-local architecture contract after scaffold materialization.",
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_path),
+            )
+        )
+        return
+
+    if legacy_path.exists():
+        operations.append(
+            SyncOperation(
+                action="rename",
+                path=ARCHITECTURE_PATH,
+                reason="Legacy docs/architecture.md should move to consumer-local docs/01-architecture.md.",
+                source_hash=None,
+                target_hash=sha256_file(legacy_path),
+            )
+        )
+        return
+
+    if template_path.exists():
+        operations.append(
+            SyncOperation(
+                action="create",
+                path=ARCHITECTURE_PATH,
+                reason="Consumer-local architecture contract missing; create scaffold from the source template.",
+                source_hash=sha256_file(template_path),
+                target_hash=None,
+            )
+        )
+
+
+def append_repository_context_operations(
+    source_root: Path,
+    target_root: Path,
+    operations: list[SyncOperation],
+    local_assets: list[str],
+) -> None:
+    template_path = (
+        source_root / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[REPOSITORY_CONTEXT_PATH]
+    )
+    target_path = target_root / REPOSITORY_CONTEXT_PATH
+
+    if target_path.exists():
+        local_assets.append(REPOSITORY_CONTEXT_PATH)
+        operations.append(
+            SyncOperation(
+                action="preserve",
+                path=REPOSITORY_CONTEXT_PATH,
+                reason="Preserved consumer-local repository context after scaffold materialization.",
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_path),
+            )
+        )
+        return
+
+    if template_path.exists():
+        operations.append(
+            SyncOperation(
+                action="create",
+                path=REPOSITORY_CONTEXT_PATH,
+                reason="Consumer-local repository context missing; create scaffold from the source template.",
+                source_hash=sha256_file(template_path),
+                target_hash=None,
+            )
+        )
 
 
 def render_synced_lessons(source_content: str, target_content: str | None) -> str:
@@ -425,13 +612,23 @@ def sha256_text(content: str) -> str:
 
 
 def discover_source_sync_files(root: Path) -> set[str]:
-    files = {relative_path for relative_path in MANAGED_ROOT_FILES if (root / relative_path).exists()}
-    files.update(relative_path for relative_path in MANAGED_WORKFLOW_FILES if (root / relative_path).exists())
+    files = {
+        relative_path
+        for relative_path in MANAGED_ROOT_FILES
+        if (root / relative_path).exists()
+    }
+    files.update(
+        relative_path
+        for relative_path in MANAGED_WORKFLOW_FILES
+        if (root / relative_path).exists()
+    )
     files.update(all_files_under(root, ".github/agents"))
     files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     files.discard(COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH)
+    for template_path in CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES.values():
+        files.discard(template_path)
     return {
         relative_path
         for relative_path in files
@@ -442,8 +639,16 @@ def discover_source_sync_files(root: Path) -> set[str]:
 
 
 def discover_target_managed_files(root: Path) -> set[str]:
-    files = {relative_path for relative_path in MANAGED_ROOT_FILES if (root / relative_path).exists()}
-    files.update(relative_path for relative_path in MANAGED_WORKFLOW_FILES if (root / relative_path).exists())
+    files = {
+        relative_path
+        for relative_path in MANAGED_ROOT_FILES
+        if (root / relative_path).exists()
+    }
+    files.update(
+        relative_path
+        for relative_path in MANAGED_WORKFLOW_FILES
+        if (root / relative_path).exists()
+    )
     if (root / INVENTORY_PATH).exists():
         files.add(INVENTORY_PATH)
     files.update(all_files_under(root, ".github/agents"))
@@ -453,7 +658,8 @@ def discover_target_managed_files(root: Path) -> set[str]:
     return {
         relative_path
         for relative_path in files
-        if not is_ignored_sync_path(relative_path) and not is_consumer_sync_excluded_path(relative_path)
+        if not is_ignored_sync_path(relative_path)
+        and not is_consumer_sync_excluded_path(relative_path)
     }
 
 
@@ -466,7 +672,8 @@ def discover_target_excluded_sync_files(root: Path) -> set[str]:
     return {
         relative_path
         for relative_path in files
-        if not is_ignored_sync_path(relative_path) and is_consumer_sync_excluded_path(relative_path)
+        if not is_ignored_sync_path(relative_path)
+        and is_consumer_sync_excluded_path(relative_path)
     }
 
 
@@ -474,7 +681,11 @@ def detect_target_stacks(root: Path) -> list[str]:
     stacks: list[str] = []
     if (root / "pyproject.toml").exists() or any(root.rglob("*.py")):
         stacks.append("python")
-    if (root / "package.json").exists() or any(root.rglob("*.ts")) or any(root.rglob("*.js")):
+    if (
+        (root / "package.json").exists()
+        or any(root.rglob("*.ts"))
+        or any(root.rglob("*.js"))
+    ):
         stacks.append("node")
     if (root / "go.mod").exists() or any(root.rglob("*.go")):
         stacks.append("go")
@@ -512,7 +723,17 @@ def render_sync_plan_markdown(plan: SyncPlan) -> str:
 
     lines.append("## Planned Operations")
     lines.append("")
-    for action in ["create", "update", "ensure", "rebuild", "delete", "preserve", "unchanged"]:
+    for action in [
+        "create",
+        "update",
+        "rename",
+        "ensure",
+        "rebuild",
+        "delete",
+        "manual",
+        "preserve",
+        "unchanged",
+    ]:
         group = action_groups.get(action, [])
         if not group:
             continue
@@ -544,7 +765,11 @@ def ensure_superpowers_gitignore_entry(current_content: str | None) -> str:
         "/tmp/superpowers/",
     }
     if normalized_entries & accepted_entries:
-        return current_content if current_content.endswith("\n") else f"{current_content}\n"
+        return (
+            current_content
+            if current_content.endswith("\n")
+            else f"{current_content}\n"
+        )
 
     updated = current_content
     if updated and not updated.endswith("\n"):
@@ -582,7 +807,7 @@ def write_sync_manifest(plan: SyncPlan) -> Path:
     managed_hashes: dict[str, str] = {}
     managed_fingerprints: list[dict[str, object]] = []
     for operation in plan.operations:
-        if operation.action in {"delete", "preserve"}:
+        if operation.action in {"delete", "manual", "preserve"}:
             continue
         target_path = plan.target_root / operation.path
         if target_path.exists():
@@ -612,10 +837,27 @@ def write_sync_manifest(plan: SyncPlan) -> Path:
 
 
 def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
-    if plan.target_dirty and not allow_dirty_target and any(
-        operation.action in {"create", "update", "ensure", "rebuild", "delete"} for operation in plan.operations
+    manual_operations = [
+        operation.path for operation in plan.operations if operation.action == "manual"
+    ]
+    if manual_operations:
+        paths = ", ".join(manual_operations)
+        raise RuntimeError(
+            f"Sync plan requires manual reconciliation before apply: {paths}."
+        )
+
+    if (
+        plan.target_dirty
+        and not allow_dirty_target
+        and any(
+            operation.action
+            in {"create", "update", "rename", "ensure", "rebuild", "delete"}
+            for operation in plan.operations
+        )
     ):
-        raise RuntimeError("Target repository is dirty. Re-run with --allow-dirty-target if this is intentional.")
+        raise RuntimeError(
+            "Target repository is dirty. Re-run with --allow-dirty-target if this is intentional."
+        )
 
     for operation in plan.operations:
         target_path = plan.target_root / operation.path
@@ -623,21 +865,39 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
             target_path.parent.mkdir(parents=True, exist_ok=True)
             if operation.path == LESSONS_PATH:
                 if plan.generated_lessons is None:
-                    raise RuntimeError("Generated LESSONS_LEARNED.md content missing from sync plan.")
+                    raise RuntimeError(
+                        "Generated LESSONS_LEARNED.md content missing from sync plan."
+                    )
                 write_text(target_path, plan.generated_lessons)
             elif operation.path == COPILOT_INSTRUCTIONS_OVERRIDE_PATH:
-                source_path = plan.source_root / COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH
+                source_path = (
+                    plan.source_root / COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH
+                )
+                copy2(source_path, target_path)
+            elif operation.path in CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES:
+                source_path = (
+                    plan.source_root
+                    / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[operation.path]
+                )
                 copy2(source_path, target_path)
             else:
                 source_path = plan.source_root / operation.path
                 copy2(source_path, target_path)
+        elif operation.action == "rename" and operation.path == ARCHITECTURE_PATH:
+            legacy_path = plan.target_root / LEGACY_ARCHITECTURE_PATH
+            if legacy_path.exists() and not target_path.exists():
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                legacy_path.rename(target_path)
+                cleanup_empty_parents(legacy_path, plan.target_root)
         elif operation.action == "delete":
             if target_path.exists():
                 target_path.unlink()
                 cleanup_empty_parents(target_path, plan.target_root)
         elif operation.action == "ensure" and operation.path == TARGET_GITIGNORE_PATH:
             if plan.generated_gitignore is None:
-                raise RuntimeError("Generated .gitignore content missing from sync plan.")
+                raise RuntimeError(
+                    "Generated .gitignore content missing from sync plan."
+                )
             write_text(target_path, plan.generated_gitignore)
         elif operation.action == "rebuild" and operation.path == INVENTORY_PATH:
             write_text(target_path, plan.generated_inventory)

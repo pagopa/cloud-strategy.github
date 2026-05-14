@@ -43,7 +43,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Mixing async/sync without `await` | Unhandled promise rejections, silent failures | Always `await` async calls; use `async` on the function |
 | Business logic inside route handlers | Untestable, coupled to Express/framework | Extract to service modules, inject dependencies |
 | Using `var` instead of `const`/`let` | Hoisting bugs, scope confusion | Use `const` by default, `let` only when reassignment is needed |

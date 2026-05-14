@@ -43,7 +43,7 @@ Load `references/examples.md` when you need a minimal class or test example.
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-|---|---|---|
+| --- | --- | --- |
 | Business logic inside controller/handler | Untestable, tightly coupled to framework | Extract to a service class, inject via constructor |
 | Catching `Exception` everywhere | Swallows unexpected errors, hides bugs | Catch specific exceptions; let runtime errors propagate |
 | Mutable shared state in service classes | Thread-safety bugs in concurrent environments | Use immutable objects or proper synchronization |

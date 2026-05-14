@@ -4,6 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
 from lib.syncing import apply_sync_plan, build_sync_plan, write_sync_plan
 from lib.token_risks import detect_token_risks
 
@@ -43,7 +44,7 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     write_file(source_root / "AGENTS.md", "# AGENTS\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
-        source_root / ".github/copilot-instructions.override.md.template",
+        source_root / ".github/templates/copilot-instructions.override.md.template",
         "# Copilot Instructions Override\n\n- No active overrides in this repository.\n",
     )
     write_file(
@@ -97,7 +98,7 @@ def test_build_sync_plan_creates_target_local_override_from_template_when_missin
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/copilot-instructions.override.md.template",
+        source_root / ".github/templates/copilot-instructions.override.md.template",
         "# Copilot Instructions Override\n\n- No active overrides in this repository.\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
@@ -109,9 +110,174 @@ def test_build_sync_plan_creates_target_local_override_from_template_when_missin
         (operation.action, operation.path) for operation in plan.operations
     }
     assert all(
-        operation.path != ".github/copilot-instructions.override.md.template"
+        operation.path != ".github/templates/copilot-instructions.override.md.template"
         for operation in plan.operations
     )
+
+
+def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / "docs/03-ai-runtime-operating-model.md", "# Runtime\n")
+    write_file(
+        source_root / ".github/templates/01-architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(
+        source_root / ".github/templates/02-repository-context.md.template",
+        "# Context scaffold\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+    planned_paths = {operation.path for operation in plan.operations}
+
+    assert ("create", "docs/01-architecture.md") in actions
+    assert ("create", "docs/02-repository-context.md") in actions
+    assert ("create", "docs/03-ai-runtime-operating-model.md") in actions
+    assert ".github/templates/01-architecture.md.template" not in planned_paths
+    assert ".github/templates/02-repository-context.md.template" not in planned_paths
+
+
+def test_apply_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/templates/01-architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(
+        source_root / ".github/templates/02-repository-context.md.template",
+        "# Context scaffold\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    apply_sync_plan(plan)
+
+    assert (target_root / "docs/01-architecture.md").read_text(
+        encoding="utf-8"
+    ) == "# Architecture scaffold\n"
+    assert (target_root / "docs/02-repository-context.md").read_text(
+        encoding="utf-8"
+    ) == "# Context scaffold\n"
+
+
+def test_build_sync_plan_preserves_existing_consumer_local_knowledge_docs(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/templates/01-architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(
+        source_root / ".github/templates/02-repository-context.md.template",
+        "# Context scaffold\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "docs/01-architecture.md", "# Target architecture\n")
+    write_file(target_root / "docs/02-repository-context.md", "# Target context\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("preserve", "docs/01-architecture.md") in actions
+    assert ("preserve", "docs/02-repository-context.md") in actions
+    assert "docs/01-architecture.md" in plan.local_assets
+    assert "docs/02-repository-context.md" in plan.local_assets
+
+
+def test_build_sync_plan_renames_legacy_architecture_when_new_path_is_missing(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/templates/01-architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "docs/architecture.md", "# Legacy architecture\n")
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("rename", "docs/01-architecture.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+    apply_sync_plan(plan)
+
+    assert not (target_root / "docs/architecture.md").exists()
+    assert (target_root / "docs/01-architecture.md").read_text(
+        encoding="utf-8"
+    ) == "# Legacy architecture\n"
+
+
+def test_apply_sync_plan_blocks_when_legacy_and_new_architecture_coexist(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/templates/01-architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "docs/architecture.md", "# Legacy architecture\n")
+    write_file(target_root / "docs/01-architecture.md", "# New architecture\n")
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("manual", "docs/01-architecture.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+    with pytest.raises(RuntimeError, match="manual reconciliation"):
+        apply_sync_plan(plan)
+
+
+def test_build_sync_plan_deletes_legacy_runtime_fit_document(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(source_root / "docs/03-ai-runtime-operating-model.md", "# Runtime\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "docs/runtime-fit.md", "# Runtime fit\n")
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("delete", "docs/runtime-fit.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
 
 
 def test_build_sync_plan_includes_prompt_assets_in_managed_inventory(
@@ -151,7 +317,7 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     write_file(source_root / "VERSION", "1.2.3\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/copilot-instructions.override.md.template",
+        source_root / ".github/templates/copilot-instructions.override.md.template",
         "# Copilot Instructions Override\n\n- No active overrides in this repository.\n",
     )
     write_file(
