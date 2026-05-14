@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 
 def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
@@ -51,6 +53,24 @@ def test_terraform_lock_matrix_policy_stays_visible() -> None:
         "Treat the platform list below as the canonical `.terraform.lock.hcl` matrix."
         in precommit_text
     )
+
+
+def test_dependabot_tracks_source_repository_dependency_manifests() -> None:
+    dependabot_config = yaml.safe_load(read_text(".github/dependabot.yml"))
+    updates = {
+        (entry["package-ecosystem"], entry["directory"]): entry
+        for entry in dependabot_config["updates"]
+    }
+
+    assert ("github-actions", "/") in updates
+    assert ("pip", "/.github/scripts") in updates
+    assert ("pre-commit", "/") in updates
+    assert Path(".github/scripts/requirements.txt").exists()
+    assert Path(".pre-commit-config.yaml").exists()
+    assert (
+        "python-tooling-minor-patch" in updates[("pip", "/.github/scripts")]["groups"]
+    )
+    assert "pre-commit-minor-patch" in updates[("pre-commit", "/")]["groups"]
 
 
 def test_recent_lessons_are_codified_in_scoped_owners() -> None:

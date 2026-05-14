@@ -2,8 +2,8 @@
 
 This directory is the source-side catalog for reusable GitHub Copilot customization assets maintained in `cloud-strategy.github`.
 
-- Root [`AGENTS.md`](../AGENTS.md) is the strategic entrypoint, precedence anchor, and bridge for operational ownership, naming, discovery, and the pointer to exact path inventory.
-- `.github/copilot-instructions.md` is the repo-wide Copilot projection for native Copilot flows.
+- Root [`AGENTS.md`](../AGENTS.md) is the strategic entrypoint, precedence anchor, bridge for operational ownership, and home for compact AI configuration editing and fixed-load token-budget guidance.
+- `.github/copilot-instructions.md` is the compact repo-wide Copilot projection for native Copilot flows.
 - [`INVENTORY.md`](INVENTORY.md) is the exact path inventory for the live catalog.
 - This README is an orientation guide for maintainers of the source catalog. It should describe the live on-disk catalog only.
 
@@ -19,7 +19,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 
 | Path | Purpose |
 | --- | --- |
-| `copilot-instructions.md` | Primary detailed policy, validation baseline, direct-entry operating model, and completion-report contract. |
+| `copilot-instructions.md` | Compact Copilot-native projection of repo-wide policy, validation expectations, direct-entry operating model, and completion-report contract. |
 | `INVENTORY.md` | Exact path inventory for live instructions, skills, and agents. |
 | `copilot-code-review-instructions.md` | Review-specific severity and defect-first guidance. |
 | `copilot-commit-message-instructions.md` | Commit message conventions. |
@@ -28,7 +28,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 | `DEPRECATION.md` | Lifecycle policy for retiring assets. |
 | `CHANGELOG.md` | Source-side history of meaningful catalog changes. |
 | `PULL_REQUEST_TEMPLATE.md` | PR section order for this repository. |
-| `dependabot.yml` | Dependency update configuration for this source repository. |
+| `dependabot.yml` | Dependency update configuration for GitHub Actions, script requirements, and pre-commit hooks in this source repository. |
 
 ### Instructions (`instructions/`)
 
@@ -59,6 +59,16 @@ Some skill directories include support material beyond `SKILL.md`. Current live 
 - imported or upstream-derived bundles such as `awesome-copilot-agentic-eval`, `awesome-copilot-azure-devops-cli`, `awesome-copilot-azure-pricing`, `awesome-copilot-azure-role-selector`, `awesome-copilot-cloud-design-patterns`, `openai-docx`, `openai-gh-address-comments`, `openai-gh-fix-ci`, `openai-pdf`, `openai-skill-creator`, `openai-slides`, `openai-spreadsheet`, `terraform-terraform-search-import`, and `terraform-terraform-test`
 
 Use [`INVENTORY.md`](INVENTORY.md) for the exact path inventory. Use root [`AGENTS.md`](../AGENTS.md) for bridge-level routing and discovery. Use this README for family-level orientation only.
+
+### Knowledge docs (`../docs/`)
+
+| Path | Purpose |
+| --- | --- |
+| `../docs/01-architecture.md` | Repository-specific architecture contract for boundaries, components, flows, and validation surfaces. |
+| `../docs/02-repository-context.md` | Descriptive local context equivalent to non-policy runtime context when manually assembled. |
+| `../docs/03-ai-runtime-operating-model.md` | Source-managed guidance for how Copilot, Codex, ChatGPT, and other assistants consume the AI customization assets. |
+
+Keep token-budget estimates in root [`AGENTS.md`](../AGENTS.md); this README intentionally does not duplicate those counts.
 
 ### Prompts (`prompts/`)
 
