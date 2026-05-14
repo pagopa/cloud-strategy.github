@@ -10,9 +10,9 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Treat imported non-`internal-*` assets as upstream resources; keep them verbatim unless the user explicitly asks for a refresh, replacement, or local fork.
 - Do not edit imported upstream assets in place unless the need is strong, the user explicitly counter-validates the exception, and the replay patch is registered in the `local-agent-sync-external-resources` bundle in the same change.
 
-## Precedence And Projections
+## Loading Order
 
-1. `AGENTS.md` is the strategic entrypoint, the precedence anchor, and the cross-surface bridge.
+1. `AGENTS.md` is the strategic entrypoint, precedence anchor, and cross-surface bridge.
 2. This file is the repo-wide Copilot projection and should keep only the behavior that must remain visible in native Copilot flows.
 3. `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` apply when the task is review or commit authoring.
 4. Matching `.github/instructions/*.instructions.md` files provide scoped or domain-specific guidance and may override defaults inside their declared scope.
@@ -23,40 +23,9 @@ You are an expert software and platform engineer. Protect correctness, security,
 9. If `docs/02-repository-context.md` exists, read it after the architecture contract as descriptive local context, not as policy.
 10. If `docs/03-ai-runtime-operating-model.md` exists, use it as the source-managed runtime consumption model for how assistant hosts should use this baseline.
 
-- `internal-sync-*` assets stay sync-specific and must not become second canonical homes for repository-wide policy.
-- When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
-- When source-managed guidance from this repository is mirrored into consumer repositories, phrase source-side rules conditionally so they remain true in targets and do not imply that the target repository is the source of truth.
-- `.github/copilot-instructions.override.md` may override synced defaults from `AGENTS.md` or this file only when the exception makes the conflict, scope, reason, and required disclosure explicit.
-- If `.github/copilot-instructions.override.md` exists but declares no active overrides, keep following the synced baseline.
-- When following a local override instead of the synced baseline, say that a consumer-local exception is in effect and cite `.github/copilot-instructions.override.md`.
-- Do not treat the local override file as inventory or as a replacement for the bridge, projection, and catalog split.
+When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
 
-## Language Projection
-
-- Match the user's chat language when practical; Italian is allowed in conversation.
-- The default authoring language for repository artifacts is English; a narrower scoped instruction may override it for its local scope.
-- Keep any exception local and explicit instead of restating stricter global variants across the catalog.
-- For repository-owned plan artifacts kept under `tmp/superpowers/<clear-action-or-task-name>/`, Italian is the default authoring language unless the user explicitly asks for another language; do not generalize this exception beyond those plan files.
-
-## Catalog Model
-
-- Prefixes encode origin and ownership first, not a rigid abstraction level.
-- Judge resources by both origin/ownership and dominant role rather than collapsing them into one label.
-- `obra-*` skills are the cross-cutting workflow lane. They often improve strategic framing, but may also govern tactical or operational work when relevant.
-- `internal-*` skills are the canonical repository-owned layer. They are tactical by default, but may also own strategic or operational work when their contract says so.
-- Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
-- During catalog review or rationalization, imported assets in domains already covered by a credible internal owner should be evaluated as `keep as depth`, `wrap under the internal owner`, or `retire`; do not collapse the decision to a binary keep/delete choice.
-- `local-*` assets are consumer-local extensions in target repositories. In this standards repository, the `local-*` prefix is also used for repo-owned tooling that must not be synced to consumers (for example, sync command centers and their paired engine skills); these assets remain source-of-truth here and are excluded from the synced baseline.
-- Use `internal-agent-operational-flow` as the portable skill-first owner for repository-owned `plan`, `execute`, and `review` workflows across assistant runtimes.
-- Use `internal-agent-critical-master` for critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
-- In VS Code, route through the Copilot wrapper lanes `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` for route selection, tool scope, and manual handoff UX.
-- Use direct entry for operational modes and Copilot wrapper lanes, and do not invent a repository-owned front-door router.
-- `plan` mode through `internal-agent-operational-flow`, or the `internal-planning-leader` wrapper in VS Code, is the safe fallback when the right operational lane is still ambiguous.
-- Operational owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
-- Any automation added between operational owners must stay explicit, narrow, and one-directional, with no all-to-all dispatch or nested ping-pong.
-- `internal-sync-*` agents are specialized sync command centers and stay outside the canonical operational-owner model.
-
-## Non-Negotiables
+## Always-On Guardrails
 
 - Least privilege.
 - No hardcoded secrets.
@@ -64,11 +33,27 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Do not modify `README.md` files unless explicitly requested.
 - Update non-README technical docs when behavior or governance changes.
 - Keep policy separate from inventory.
+- The default authoring language for repository artifacts is English; a narrower scoped instruction may override it for its local scope.
+- Match the user's chat language when practical; Italian is allowed in conversation.
+- For repository-owned plan artifacts kept under `tmp/superpowers/<clear-action-or-task-name>/`, Italian is the default authoring language unless the user explicitly asks for another language; do not generalize this exception beyond those plan files.
+- Keep repository-owned AI configuration files as Markdown. Use XML only as external prompt or context assembly delimiters, never as a replacement source format for these files.
+
+## Catalog And Operations
+
+- Prefixes encode origin and ownership first, not a rigid abstraction level.
+- Judge resources by both origin/ownership and dominant role rather than collapsing them into one label.
+- Imported non-`internal-*` assets are support-only depth by default. Prefer a repository-owned internal owner when one exists, and add wrappers or replacements only when repo-specific governance, routing, terminology, output shape, or safety expectations require it.
+- During catalog review or rationalization, imported assets in domains already covered by a credible internal owner should be evaluated as `keep as depth`, `wrap under the internal owner`, or `retire`; do not collapse the decision to a binary keep/delete choice.
+- `internal-agent-operational-flow` is the portable skill-first owner for repository-owned `plan`, `execute`, and `review` workflows across assistant runtimes.
+- `internal-agent-critical-master` is the portable skill-first owner for critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
+- In VS Code, route through the Copilot wrapper lanes `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` for route selection, tool scope, and manual handoff UX.
+- Use direct entry for operational modes and Copilot wrapper lanes, and do not invent a repository-owned front-door router.
+- `plan` mode through `internal-agent-operational-flow`, or the `internal-planning-leader` wrapper in VS Code, is the safe fallback when the right operational lane is still ambiguous.
+- Operational owners stay boundary-driven, recommendation-only when a better lane is needed, and are not subagent-invoked by default.
 
 ## Implementation Discipline
 
-- Prefer the simplest correct change.
-- Prefer the smallest credible blast radius. Avoid temporary fixes, unrequested abstractions, and broad rewrites unless the selected plan explicitly justifies them.
+- Prefer the simplest correct change with the smallest credible blast radius. Avoid temporary fixes, unrequested abstractions, and broad rewrites unless the selected plan explicitly justifies them.
 - Keep business logic separated from I/O and infrastructure concerns.
 - Apply only the instruction files relevant to the files being changed.
 - When introducing a new source-managed catalog family or a new human-readable catalog summary surface, update inventory generation, sync discovery, and validation in the same change so `.github/INVENTORY.md` does not become the only surface aware of it.
@@ -78,12 +63,6 @@ You are an expert software and platform engineer. Protect correctness, security,
 - For non-trivial repository-owned work, keep the target state, anti-scope, main assumptions, tradeoffs, and validation path visible before delivery starts or before recommending the next owner.
 - When validation output, logs, user correction, or repository evidence disproves the selected direction, stop and choose the right operational lane before continuing.
 - Handle bug reports and failing checks evidence-first: inspect the failing signal, identify the root cause, and resolve it when the target state is clear; ask the user only for missing decisions, unsafe permissions, or unavailable context.
-- Parallel or subagent-supported work is allowed only when the runtime and task shape support bounded independent scopes, visible integration, and independent verification before any completion claim.
-- When source-side standards work deepens parallel skill families, stage planning in `tmp/superpowers/`; make anti-scope explicit; close parity gaps in existing `Common mistakes`, `Validation`, and reference depth before adding optional assets.
-- Keep repository-owned skill `description:` lines trigger-first, and do not rewrite a working route during token optimization unless improving retrieval is the explicit goal.
-- For provider-specific cloud skills, keep guidance provider-native and omit cross-cloud comparison or provider-selection content when provider choice is already upstream of skill activation.
-- Prefer `references/` over new `scripts/` for static checklists, lookup tables, and starter templates; add scripts only when the workflow is deterministic, repeated, and execution-heavy.
-- Keep Python tests under the repository-root `tests/` tree with mirrored source paths, and make Bash wrappers runnable with internal defaults plus optional overrides.
 - Run the applicable validation that actually exists for the files you changed.
 - If a dedicated validator, sync script, or contract test suite does not exist, report the gap and use the closest existing verification instead.
 - Do not add unrequested abstractions, logging, or refactors.
@@ -97,7 +76,6 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Keep doubts, open questions, and user decisions in `dubbi-e-domande.md`. This file stays outside the plan-and-apply loop and must not be treated as an executable plan file.
 - During execution, maintain matching `done-*` files. Move completed items into the corresponding `done-*` file, remove them from the active source file, delete an emptied source plan file, and continue through the remaining numbered plan files until the work is finished or a real blocker requires user input.
 - Preserve imported `obra-*`, `awesome-*`, `openai-*`, and other upstream assets; express this repository's planning policy through repository-owned internal wrappers instead of editing upstream planning skills.
-- If an imported asset still requires a direct repo-local exception, register the replay patch in `.github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml` instead of leaving an undocumented fork.
 
 ## Repository Workflow Reminders
 

@@ -44,6 +44,24 @@ For runtime hosts without native Copilot instruction loading, scoped instruction
 - If the target path is not explicit, infer the artifact family only when it is obvious, such as Python, GitHub Actions, Kubernetes, Docker, or Markdown; otherwise ask for the target path before making path-scoped policy claims.
 - Keep this as a discoverability and reference contract. Do not describe it as universal runtime enforcement or automatic loading outside hosts that document that behavior.
 
+## Manual Prompt And Context Assembly
+
+Runtime hosts without native instruction or skill loading can assemble the relevant Markdown files into a prompt with explicit external delimiters. The repository files remain Markdown; XML tags are only prompt-assembly boundaries.
+
+```xml
+<instructions source="AGENTS.md">
+  ...
+</instructions>
+<projection source=".github/copilot-instructions.md">
+  ...
+</projection>
+<context source="docs/02-repository-context.md" policy="false">
+  ...
+</context>
+```
+
+Use this wrapping only at runtime when it helps separate binding instructions, surface-specific projections, and descriptive context. Do not convert source files to XML and do not wrap entire Markdown documents in XML on disk.
+
 ## Validation
 
 - Run the repository validator or the closest available local checks after changing shared governance assets.

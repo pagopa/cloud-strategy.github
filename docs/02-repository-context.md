@@ -11,7 +11,7 @@
 
 ## Scope
 
-This file is repo-specific and descriptive. It may inform interpretation, but it must not override `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, or consumer-local override files.
+This file is repo-specific and descriptive. It may inform interpretation, but it must not override `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, or consumer-local override files. When a runtime assembles manual context, this document is equivalent to a `<context policy="false">` block: it can explain local facts, but it is not an instruction source.
 
 Consumer repositories may receive a scaffold for their own `docs/02-repository-context.md`, but sync must preserve their target-owned content after creation.
 
@@ -45,5 +45,5 @@ Consumer repositories may receive a scaffold for their own `docs/02-repository-c
 
 ## Non-Policy Notes
 
-- This file can explain why a local convention exists, but binding behavior must live in the canonical owner listed in the architecture or policy files.
-- When context here contradicts a canonical instruction surface, follow the canonical instruction and update this file or the canonical owner in the same change.
+- This file describes why a local convention exists; binding behavior lives in the canonical owner listed in the architecture or policy files.
+- When context here contradicts a canonical instruction surface, the contradiction indicates documentation drift that should be corrected in this file or in the canonical owner.
