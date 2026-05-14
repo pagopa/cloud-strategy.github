@@ -28,7 +28,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 | `DEPRECATION.md` | Lifecycle policy for retiring assets. |
 | `CHANGELOG.md` | Source-side history of meaningful catalog changes. |
 | `PULL_REQUEST_TEMPLATE.md` | PR section order for this repository. |
-| `dependabot.yml` | Dependency update configuration for this source repository. |
+| `dependabot.yml` | Dependency update configuration for GitHub Actions, script requirements, and pre-commit hooks in this source repository. |
 
 ### Instructions (`instructions/`)
 

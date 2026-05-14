@@ -1006,3 +1006,32 @@ def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() ->
         in sync_contract_text
     )
     assert "do not use `--allow-dirty-target` as a blanket bypass" in sync_contract_text
+
+
+def test_agents_fixed_load_token_budget_table_matches_current_files() -> None:
+    agents_text = Path("AGENTS.md").read_text(encoding="utf-8")
+    section = agents_text.split("## Estimated Fixed-Load Token Budget\n", 1)[1].split(
+        "\n## ",
+        1,
+    )[0]
+    documented_estimates: dict[str, int] = {}
+    documented_total = None
+
+    for line in section.splitlines():
+        if not line.startswith("| `") and not line.startswith("| **Fixed-load"):
+            continue
+
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if cells[0].startswith("`"):
+            file_path = cells[0].strip("`")
+            documented_estimates[file_path] = int(cells[2].replace(",", ""))
+        elif cells[0] == "**Fixed-load set total**":
+            documented_total = int(cells[2].replace(",", ""))
+
+    calculated_estimates = {
+        file_path: (len(Path(file_path).read_bytes()) + 3) // 4
+        for file_path in documented_estimates
+    }
+
+    assert documented_estimates == calculated_estimates
+    assert documented_total == sum(calculated_estimates.values())

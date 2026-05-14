@@ -79,12 +79,12 @@ Estimated tokens are `ceil(UTF-8 character count / 4)`, measured on 2026-05-14. 
 | File | Target budget | Estimated tokens |
 | --- | ---: | ---: |
 | `AGENTS.md` | 4,500 | 3,461 |
-| `.github/copilot-instructions.md` | 4,500 | 3,272 |
+| `.github/copilot-instructions.md` | 4,500 | 3,286 |
 | `docs/01-architecture.md` | 2,500 | 1,705 |
-| `docs/02-repository-context.md` | 1,500 | 964 |
+| `docs/02-repository-context.md` | 1,500 | 965 |
 | `docs/03-ai-runtime-operating-model.md` | 2,000 | 1,264 |
-| `.github/README.md` | 3,500 | 2,836 |
-| **Fixed-load set total** | 18,500 | 13,501 |
+| `.github/README.md` | 3,500 | 2,855 |
+| **Fixed-load set total** | 18,500 | 13,536 |
 
 ## Delivery Invariants
 

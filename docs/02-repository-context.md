@@ -4,10 +4,10 @@
 
 ## Where Adjacent Content Belongs
 
-- Use `docs/01-architecture.md` for system boundaries, component responsibilities, architecture flow, and validation surfaces.
-- Use `docs/03-ai-runtime-operating-model.md` for shared guidance on how assistant runtimes consume instructions, skills, prompts, and agents.
-- Use `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents for binding rules.
-- Use `LESSONS_LEARNED.md` for lessons that are still pending codification.
+- System boundaries, component responsibilities, architecture flow, and validation surfaces live in `docs/01-architecture.md`.
+- Shared guidance on how assistant runtimes consume instructions, skills, prompts, and agents lives in `docs/03-ai-runtime-operating-model.md`.
+- Binding rules live in `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
+- Lessons that are still pending codification live in `LESSONS_LEARNED.md`.
 
 ## Scope
 

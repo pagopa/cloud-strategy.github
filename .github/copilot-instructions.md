@@ -18,7 +18,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 4. Matching `.github/instructions/*.instructions.md` files provide scoped or domain-specific guidance and may override defaults inside their declared scope.
 5. Skills and agents are on-demand operational assets; use them only when relevant.
 6. `.github/INVENTORY.md` is the live catalog of managed assets and is never replaced by `AGENTS.md`.
-7. If `.github/copilot-instructions.override.md` exists, read it before relying on synced repo-wide defaults; it is the consumer-local exception layer authorized by `AGENTS.md`.
+7. If `.github/copilot-instructions.override.md` exists, read it before relying on synced repo-wide defaults; follow active overrides with their required disclosure, otherwise keep the synced baseline authoritative.
 8. If `docs/01-architecture.md` exists in the current repository, read it as the per-repo architecture contract before reasoning about repository purpose, components, or boundaries; this file is consumer-local after scaffold creation.
 9. If `docs/02-repository-context.md` exists, read it after the architecture contract as descriptive local context, not as policy.
 10. If `docs/03-ai-runtime-operating-model.md` exists, use it as the source-managed runtime consumption model for how assistant hosts should use this baseline.
