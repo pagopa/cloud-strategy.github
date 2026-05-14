@@ -67,9 +67,9 @@ def test_dependabot_tracks_source_repository_dependency_manifests() -> None:
     assert ("pre-commit", "/") in updates
     assert Path(".github/scripts/requirements.txt").exists()
     assert Path(".pre-commit-config.yaml").exists()
-    assert "python-tooling-minor-patch" in updates[
-        ("pip", "/.github/scripts")
-    ]["groups"]
+    assert (
+        "python-tooling-minor-patch" in updates[("pip", "/.github/scripts")]["groups"]
+    )
     assert "pre-commit-minor-patch" in updates[("pre-commit", "/")]["groups"]
 
 
