@@ -10,15 +10,17 @@ This file is the stable entrypoint for the repository instruction architecture.
 
 ## Context Loading Order
 
-1. Use `.github/copilot-instructions.md` as the repo-wide Copilot projection.
-2. Use `.github/INVENTORY.md` for the exact live catalog of instructions, skills, agents, prompts, and related assets.
-3. Use `.github/instructions/` for path-specific or domain-specific projections.
+Use this order as a precedence and relevance model, not as a requirement to load every listed file for every task. Treat `AGENTS.md` and the active runtime projection as the critical always-on pair; treat inventory, docs, scoped instructions, skills, and agents as conditional depth unless the task target or runtime requires them.
+
+1. Use `.github/copilot-instructions.md` as the repo-wide Copilot projection when operating in Copilot-native flows.
+2. Use `.github/INVENTORY.md` when the exact live catalog of instructions, skills, agents, prompts, and related assets is needed.
+3. Use `.github/instructions/` for path-specific or domain-specific projections when the target path, file type, or task domain matches.
 4. When a runtime lacks native scoped-instruction loading and the target path is known, treat every `.github/instructions/*.instructions.md` file with matching `applyTo` metadata as relevant manual reference material.
 5. Use `.github/skills/` and `.github/agents/` only when they are relevant to the current task.
 6. Keep policy, projections, context, runtime guidance, and inventory separate instead of mixing them into one file.
-7. If `docs/01-architecture.md` exists in the current repository, treat it as the per-repo architecture contract: read it before reasoning about repository purpose, components, system boundaries, or runtime fit, and update it in the same change when behavior, components, or boundaries move. This file is consumer-local after scaffold creation; each repository owns its own `docs/01-architecture.md`.
-8. If `docs/02-repository-context.md` exists, read it after the architecture contract as descriptive local context. It may inform interpretation but must not override instruction policy.
-9. If `docs/03-ai-runtime-operating-model.md` exists, treat it as the source-managed runtime consumption model for how assistant hosts should use this baseline.
+7. If `docs/01-architecture.md` exists and the task requires reasoning about repository purpose, components, system boundaries, or runtime fit, treat it as the per-repo architecture contract and update it in the same change when behavior, components, or boundaries move. This file is consumer-local after scaffold creation; each repository owns its own `docs/01-architecture.md`.
+8. If `docs/02-repository-context.md` exists and local descriptive context is relevant, read it after the architecture contract. It may inform interpretation but must not override instruction policy.
+9. If `docs/03-ai-runtime-operating-model.md` exists and runtime consumption behavior is relevant, treat it as the source-managed model for how assistant hosts should use this baseline.
 
 ## Precedence Model
 
@@ -68,23 +70,27 @@ This file is the stable entrypoint for the repository instruction architecture.
 - Keep repository-owned AI configuration files as readable Markdown. Use XML tags only as external prompt or context assembly delimiters when a runtime needs explicit boundaries.
 - Modify the canonical owner first: `AGENTS.md` for bridge-level policy, `.github/copilot-instructions.md` for Copilot-native projection, `docs/02-repository-context.md` for descriptive local context, and `docs/03-ai-runtime-operating-model.md` for cross-runtime consumption guidance.
 - Avoid duplicating the same rule across bridge, projection, context, runtime guidance, skills, and agents unless self-containment is deliberate, compact, and covered by validation.
+- Apply the always-on gate before adding global instructions: keep a rule in `AGENTS.md` or `.github/copilot-instructions.md` only when it is cross-surface or Copilot-native, has no better scoped instruction, skill, agent, or context owner, prevents a costly or recurring error by default, and can be stated briefly with a validation path.
+- Prefer minimal always-on, conditional depth, and deliberate duplication. Token reduction alone is not enough reason to remove a rule, but unclear activation is enough reason to move it to a narrower owner.
 - Keep volatile catalog paths, counts, and generated listings in `.github/INVENTORY.md`; do not move inventory into policy files.
 - For vendor-owned or schema-driven surfaces, read the primary documentation before editing whenever correctness depends on platform semantics such as expression scope, context availability, validation rules, or file format behavior.
 - Update validators, tests, sync discovery, and non-README technical docs in the same change when a contract, catalog family, or shared runtime behavior changes.
 
 ## Estimated Fixed-Load Token Budget
 
-Estimated tokens are `ceil(UTF-8 character count / 4)`, measured on 2026-05-14. These counts are budget estimates, not tokenizer-exact numbers. Update this table whenever a listed always-on file changes.
+Estimated tokens are `ceil(UTF-8 character count / 4)`, measured on 2026-05-15. These counts are budget estimates, not tokenizer-exact numbers. Update this table whenever a listed file changes.
+
+The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md`; its soft target is 4,000 estimated tokens total. Other listed files are tracked because some workflows load them as fixed preparation, but they remain conditional depth unless the task calls for them.
 
 | File | Target budget | Estimated tokens |
 | --- | ---: | ---: |
-| `AGENTS.md` | 4,500 | 3,461 |
-| `.github/copilot-instructions.md` | 4,500 | 3,286 |
+| `AGENTS.md` | 2,000 | 3,781 |
+| `.github/copilot-instructions.md` | 2,000 | 3,576 |
 | `docs/01-architecture.md` | 2,500 | 1,705 |
 | `docs/02-repository-context.md` | 1,500 | 965 |
 | `docs/03-ai-runtime-operating-model.md` | 2,000 | 1,264 |
 | `.github/README.md` | 3,500 | 2,855 |
-| **Fixed-load set total** | 18,500 | 13,536 |
+| **Fixed-load set total** | 13,500 | 14,146 |
 
 ## Delivery Invariants
 

@@ -729,6 +729,36 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     assert "bridge-overlap" in finding_codes
 
 
+def test_detect_token_risks_reports_root_always_on_budget(tmp_path: Path) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n\n" + ("Root policy line.\n" * 5000))
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot\n\n" + ("Projection policy line.\n" * 5000),
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "root-always-on-budget" in finding_codes
+
+
+def test_detect_token_risks_reports_copilot_review_window_missing_core_rules(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot\n\n" + ("Repository background before critical rules.\n" * 150),
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "copilot-review-window-missing-core-rules" in finding_codes
+
+
 def test_detect_token_risks_ignores_structural_bridge_references(
     tmp_path: Path,
 ) -> None:

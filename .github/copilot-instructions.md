@@ -2,6 +2,14 @@
 
 You are an expert software and platform engineer. Protect correctness, security, simplicity, and maintainability in every change.
 
+## Critical Copilot Window
+
+- Treat `AGENTS.md` as the strategic bridge, and treat this file as the Copilot-native projection that must remain useful even when only the first 4,000 characters are read by a review surface.
+- Keep least privilege, no hardcoded secrets, evidence-first reasoning, and repository conventions visible before deeper catalog policy.
+- Apply only the instruction files relevant to the files being changed.
+- Run the applicable validation for changed files and report gaps when no dedicated validator exists.
+- Use minimal always-on, conditional depth, and deliberate duplication: duplicate only rules that Copilot must see natively without depending on another runtime's bridge loading.
+
 ## Repository Role
 
 - Treat this repository as a Copilot customization and governance repository unless the target files prove otherwise.
@@ -12,16 +20,18 @@ You are an expert software and platform engineer. Protect correctness, security,
 
 ## Loading Order
 
+Use this order as precedence for relevant surfaces, not as a demand to load every asset for every task.
+
 1. `AGENTS.md` is the strategic entrypoint, precedence anchor, and cross-surface bridge.
 2. This file is the repo-wide Copilot projection and should keep only the behavior that must remain visible in native Copilot flows.
 3. `.github/copilot-code-review-instructions.md` and `.github/copilot-commit-message-instructions.md` apply when the task is review or commit authoring.
-4. Matching `.github/instructions/*.instructions.md` files provide scoped or domain-specific guidance and may override defaults inside their declared scope.
+4. Matching `.github/instructions/*.instructions.md` files provide scoped or domain-specific guidance and may override defaults inside their declared scope when the target path or task domain matches.
 5. Skills and agents are on-demand operational assets; use them only when relevant.
-6. `.github/INVENTORY.md` is the live catalog of managed assets and is never replaced by `AGENTS.md`.
+6. `.github/INVENTORY.md` is the live catalog of managed assets; use it when exact catalog paths are needed, and never replace it with `AGENTS.md`.
 7. If `.github/copilot-instructions.override.md` exists, read it before relying on synced repo-wide defaults; follow active overrides with their required disclosure, otherwise keep the synced baseline authoritative.
-8. If `docs/01-architecture.md` exists in the current repository, read it as the per-repo architecture contract before reasoning about repository purpose, components, or boundaries; this file is consumer-local after scaffold creation.
-9. If `docs/02-repository-context.md` exists, read it after the architecture contract as descriptive local context, not as policy.
-10. If `docs/03-ai-runtime-operating-model.md` exists, use it as the source-managed runtime consumption model for how assistant hosts should use this baseline.
+8. If `docs/01-architecture.md` exists and the task requires repository purpose, component, boundary, or runtime-fit reasoning, read it as the per-repo architecture contract; this file is consumer-local after scaffold creation.
+9. If `docs/02-repository-context.md` exists and local descriptive context is relevant, read it after the architecture contract as context, not as policy.
+10. If `docs/03-ai-runtime-operating-model.md` exists and runtime consumption behavior is relevant, use it as the source-managed model for how assistant hosts should use this baseline.
 
 When repository-wide defaults change, update `AGENTS.md` first, then refresh this file, then realign narrower governance assets that reference the change.
 
@@ -60,6 +70,7 @@ When repository-wide defaults change, update `AGENTS.md` first, then refresh thi
 - Keep catalog matrices and counts generated from the filesystem or covered by validation; do not maintain manual copies beside `.github/INVENTORY.md`.
 - For vendor-owned or schema-driven configuration surfaces, read the primary documentation before editing whenever correctness depends on platform-specific semantics such as context availability, expression scope, or validation rules; do not rely on memory alone.
 - For repository-owned skill work, validate frontmatter before refining body wording or token shape.
+- Promote a rule into this repo-wide projection only when Copilot must see it natively, no narrower owner fits, omission creates a costly or recurring error, and the rule can stay brief with a validation path.
 - For non-trivial repository-owned work, keep the target state, anti-scope, main assumptions, tradeoffs, and validation path visible before delivery starts or before recommending the next owner.
 - When validation output, logs, user correction, or repository evidence disproves the selected direction, stop and choose the right operational lane before continuing.
 - Handle bug reports and failing checks evidence-first: inspect the failing signal, identify the root cause, and resolve it when the target state is clear; ask the user only for missing decisions, unsafe permissions, or unavailable context.
