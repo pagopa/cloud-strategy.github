@@ -26,8 +26,8 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 - Open with the strongest objection or assumption gap, not a broad list.
 - Pressure-test upside as well as downside: identify what the current framing may be preventing, overcomplicating, or falsely treating as mandatory.
 - Do not implement, routine-review, or finalize the plan through this skill.
-- Use `internal-agent-next-step` when the challenge ends with a recommended owner, scope, action, validation path, and risk note.
-- Use `internal-agent-lane-change-engine` when the main need has shifted to planning, delivery, or evidence-first review.
+- Use `internal-agent-support-next-step` when the challenge ends with a recommended owner, scope, action, validation path, and risk note.
+- Use `internal-agent-support-lane-change-engine` when the main need has shifted to planning, delivery, or evidence-first review.
 
 ## Challenge Workflow
 

@@ -25,8 +25,8 @@ Use this skill as the portable operational core for repository-owned `plan`, `ex
 - Choose exactly one mode for the current phase: `plan`, `execute`, or `review`.
 - If the mode is unclear, use `plan` as the safe fallback instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user.
-- Use `internal-agent-lane-change-engine` when the selected mode no longer fits.
-- Use `internal-agent-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
+- Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
+- Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Use `internal-code-review` inside `review` mode instead of duplicating the review playbook here.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 
@@ -65,7 +65,7 @@ Load `internal-code-review` for the tactical review engine whenever the task is 
 ## Validation
 
 - The selected mode is explicit or safely falls back to `plan`.
-- `internal-agent-next-step` is used for every user-visible transition.
+- `internal-agent-support-next-step` is used for every user-visible transition.
 - `review` mode reuses `internal-code-review` instead of cloning it.
 - `mattpocock-grill-me` remains an autonomous conditional support skill.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

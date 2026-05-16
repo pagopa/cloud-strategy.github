@@ -1,9 +1,9 @@
 ---
-name: internal-agent-next-step
+name: internal-agent-support-next-step
 description: Use when a repository-owned agent or prompt needs to package an already-chosen next owner, scope, action, validation path, and risk note for a user-visible transition.
 ---
 
-# Internal Agent Next Step
+# Internal Agent Support Next Step
 
 Use this skill to format the next step after the next owner has already been chosen or confirmed. It keeps sequential workflows compact, explicit, and user-visible without turning Copilot wrappers or portable skill workflows into hidden routers.
 
@@ -16,7 +16,7 @@ Use this skill to format the next step after the next owner has already been cho
 
 ## When not to use
 
-- Do not use this skill to choose the next owner from scratch; use `internal-agent-lane-change-engine` when the lane no longer fits.
+- Do not use this skill to choose the next owner from scratch; use `internal-agent-support-lane-change-engine` when the lane no longer fits.
 - Do not use it to dispatch another agent, auto-submit a handoff, or bypass user approval.
 - Do not duplicate the lane-change recommendation matrix here.
 
