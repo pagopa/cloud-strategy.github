@@ -13,6 +13,13 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 - Use the smallest valid owner for a rule. If scope is equal, follow the canonical rule here and remove the conflicting duplicate.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
 
+## Scoped Context Loading
+
+- For runtimes without native scoped-instruction loading, match known target paths against `.github/instructions/*.instructions.md` `applyTo` metadata before editing, reviewing, or asserting scoped policy.
+- Read every matching instruction as manual context, including co-loaded imported and `internal-*` instructions; prefer the narrower scope only when instructions directly conflict.
+- If no target path is known, infer obvious domains only, such as Python, GitHub Actions, Kubernetes, Docker, Markdown, or Terraform; otherwise ask for the target path before making path-scoped claims.
+- Load task-specific skills only when workflow depth is needed beyond the matching instruction files.
+
 ## Authoring Defaults
 
 - The default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it.
@@ -48,14 +55,6 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 - For non-trivial repository-owned work, make target state, anti-scope, assumptions, tradeoffs, and validation path visible before delivery or handoff.
 - Run the applicable validation that exists for changed files; when no dedicated validator exists, report the gap and use the closest check.
 - Do not treat removed validators, sync scripts, contract tests, or historical aliases as active policy unless they exist on disk and are deliberately reintroduced.
-
-## Repository Workflow Reminders
-
-- PR content must follow `.github/PULL_REQUEST_TEMPLATE.md` in exact section order.
-- For self-authored PRs under required-review policy, do not treat green checks as sufficient: confirm a qualifying non-author approval still exists, prefer `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and use `--admin` only when policy explicitly allows a bypass.
-- Treat organization-wide `gh search prs` results as eventually consistent immediately after merge; confirm terminal state with repository-scoped `gh pr view --json state,mergedAt` before treating a just-merged PR as still open.
-- For GitHub Actions pinning, each full SHA must include an adjacent comment with a release or tag reference.
-- `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
 
 ## Retained Plans
 

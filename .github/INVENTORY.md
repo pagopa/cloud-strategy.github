@@ -9,6 +9,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
 - `.github/instructions/awesome-copilot-shell.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
+- `.github/instructions/internal-codeowners.instructions.md`
 - `.github/instructions/internal-copilot-agent-authoring.instructions.md`
 - `.github/instructions/internal-copilot-skill-reference-authoring.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
@@ -76,12 +77,12 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-actions/SKILL.md`
 - `.github/skills/internal-github-governance/SKILL.md`
 - `.github/skills/internal-github-operations/SKILL.md`
+- `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-kubernetes/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
-- `.github/skills/internal-pr-editor/SKILL.md`
 - `.github/skills/internal-project-java/SKILL.md`
 - `.github/skills/internal-project-nodejs/SKILL.md`
 - `.github/skills/internal-project-python/SKILL.md`

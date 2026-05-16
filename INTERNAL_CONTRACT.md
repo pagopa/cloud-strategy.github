@@ -240,15 +240,17 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: keep repo-wide GitHub PR operating reminders visible without expanding the Copilot projection.
 - Scope:
-  - `AGENTS.md`
+  - `.github/skills/internal-github-pr/SKILL.md`
+  - `.github/instructions/internal-codeowners.instructions.md`
   - `.github/copilot-instructions.md`
 - Expected behavior:
   - self-authored PRs under required reviews are not treated as mergeable from green checks alone
-  - the strategic bridge tells operators to verify a qualifying non-author approval before merge
-  - the strategic bridge prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
+  - the GitHub PR skill tells operators to verify a qualifying non-author approval before merge
+  - the GitHub PR skill prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
   - organization-wide `gh search prs` results are treated as potentially stale immediately after merge
   - repository-scoped `gh pr view --json state,mergedAt` is used to confirm terminal PR state before treating a just-merged PR as still open
-  - the Copilot projection may carry a compact pointer to `AGENTS.md` instead of repeating the full workflow reminder text
+  - `CODEOWNERS` placeholder-owner rules stay path-scoped instead of always-on
+  - the Copilot projection does not repeat the full workflow reminder text
 
 ### Reporting
 

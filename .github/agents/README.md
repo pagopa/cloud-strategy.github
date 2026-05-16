@@ -776,4 +776,4 @@ Pick the narrowest owner that can complete the current phase. The right agent sh
 - `local-sync-external-resources`
 - `local-sync-global-copilot-configs-into-repo`
 
-PR-focused work should use the `internal-pr-editor` skill because this repository does not currently ship a dedicated PR editor agent.
+PR-focused work should use the `internal-github-pr` skill because this repository does not currently ship a dedicated PR agent.

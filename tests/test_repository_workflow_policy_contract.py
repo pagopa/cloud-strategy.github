@@ -9,28 +9,55 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def test_repo_bridge_owns_github_pr_merge_and_terminal_state_guardrails() -> None:
+def test_github_pr_skill_owns_pr_merge_and_terminal_state_guardrails() -> None:
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
+    github_pr_skill_text = read_text(".github/skills/internal-github-pr/SKILL.md")
+    codeowners_instruction_text = read_text(
+        ".github/instructions/internal-codeowners.instructions.md"
+    )
+    inventory_text = read_text(".github/INVENTORY.md")
     internal_contract_text = read_text("INTERNAL_CONTRACT.md")
 
-    assert "For self-authored PRs under required-review policy" in agents_text
-    assert "qualifying non-author approval" in agents_text
-    assert "prefer `gh pr merge --squash`" in agents_text
+    assert "## Repository Workflow Reminders" not in agents_text
+    assert "For self-authored PRs under required-review policy" in github_pr_skill_text
+    assert "qualifying non-author approval" in github_pr_skill_text
+    assert "Prefer `gh pr merge --squash`" in github_pr_skill_text
     assert (
         "Treat organization-wide `gh search prs` results as eventually consistent"
-        in agents_text
+        in github_pr_skill_text
     )
-    assert "`gh pr view --json state,mergedAt`" in agents_text
-    assert "Follow `AGENTS.md` for repository workflow reminders" in copilot_text
+    assert "`gh pr view --json state,mergedAt`" in github_pr_skill_text
+    assert "Follow `AGENTS.md` for repository workflow reminders" not in copilot_text
+    assert "@your-org/platform-governance-team" in codeowners_instruction_text
+    assert ".github/skills/internal-github-pr/SKILL.md" in inventory_text
+    assert ".github/skills/internal-pr-editor/SKILL.md" not in inventory_text
+    assert ".github/instructions/internal-codeowners.instructions.md" in inventory_text
 
     assert (
         "repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-owned"
         in internal_contract_text
     )
     assert "qualifying non-author approval" in internal_contract_text
-    assert "the strategic bridge prefers `gh pr merge --squash`" in internal_contract_text
+    assert "the GitHub PR skill prefers `gh pr merge --squash`" in internal_contract_text
     assert "`gh pr view --json state,mergedAt`" in internal_contract_text
+
+
+def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> None:
+    agents_text = read_text("AGENTS.md")
+    copilot_text = read_text(".github/copilot-instructions.md")
+
+    assert "## Scoped Context Loading" in agents_text
+    assert ".github/instructions/*.instructions.md" in agents_text
+    assert "`applyTo` metadata" in agents_text
+    assert "Read every matching instruction as manual context" in agents_text
+    assert "co-loaded imported and `internal-*` instructions" in agents_text
+    assert "Load task-specific skills only when workflow depth is needed" in agents_text
+
+    assert (
+        "Load every `.github/instructions/*.instructions.md` file whose `applyTo` or task domain matches"
+        in copilot_text
+    )
 
 
 def test_terraform_lock_matrix_policy_stays_visible() -> None:

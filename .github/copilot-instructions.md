@@ -26,7 +26,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Context Loading
 
 - Read `AGENTS.md` first when policy, precedence, or ownership matters.
-- Load `.github/instructions/*.instructions.md` only when `applyTo` or task domain matches.
+- Load every `.github/instructions/*.instructions.md` file whose `applyTo` or task domain matches.
 - Use skills, agents, prompts, and references on demand; prefer the smallest applicable owner.
 - Read `.github/copilot-instructions.override.md` before synced defaults when present.
 - Use `docs/01-architecture.md` for boundaries and `docs/03-ai-runtime-operating-model.md` for runtime behavior when relevant.
@@ -40,7 +40,6 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Read primary vendor docs before schema-driven edits.
 - Handle failures evidence-first: inspect the signal, fix the root cause when clear, and ask only for unsafe or missing decisions.
 - Do not add unrequested abstractions, logging, broad rewrites, or unrelated fixes.
-- Follow `AGENTS.md` for repository workflow reminders.
 
 ## Retained Plans And Learning
 
