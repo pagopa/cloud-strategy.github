@@ -25,6 +25,7 @@ Start with the smallest mode that can honestly finish the current phase:
 
 | Question | If yes | Result |
 | --- | --- | --- |
+| Is the task concrete and only needs skill-first quick routing or support-skill selection? | Use `internal-gateway-simple`. | Lightweight analysis, minimal support skills, focused execution, and validation are returned. |
 | Is the target state already clear and verifiable? | Use `execute`. | Files, commands, or guidance are delivered with validation evidence. |
 | Does a concrete artifact or diff already exist and need defect-first analysis? | Use `review`. | Findings, severity, evidence gaps, and fix routing are returned. |
 | Are ownership, shape, rollout, or tradeoffs still unresolved? | Use `plan`. | A decision frame and next-step package are returned. |
@@ -36,7 +37,7 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 
 | Use case | Example request | Mode and support | Expected result |
 | --- | --- | --- | --- |
-| Clear local implementation with analysis | "Create a Python script that lists public Azure Storage accounts." | `execute` plus `internal-script-python`; add Azure support skills or current Microsoft docs only when needed. | Script or implementation approach, focused validation, and residual risk. No retained plan by default. |
+| Clear local implementation with analysis | "Create a Python script that lists public Azure Storage accounts." | `internal-gateway-simple` plus `internal-script-python`; add Azure support skills or current Microsoft docs only when needed. | Script or implementation approach, focused validation, and residual risk. No retained plan by default. |
 | Simple advisory analysis before coding | "Tell me how you would build this script, then implement it." | `execute` if the target is concrete. Use a short tactical note, not full `plan` mode. | Brief approach, implementation, and checks. |
 | Deterministic multi-file alignment | "Rename this approved skill reference across adjacent files and run the focused tests." | `execute`. File count alone does not force planning. | Updated files, stale-name search, and validation evidence. |
 | New repository-owned workflow with unclear owner | "Should this be an agent, a skill, or an instruction?" | `plan` plus relevant authoring support skills. | Ownership decision, anti-scope, tradeoffs, next owner, and validation path. |
@@ -105,7 +106,7 @@ Expected result:
 Use these prompts when you want a specific amount of process.
 
 ```text
-Use internal-gateway-operational-flow in execute mode.
+Use internal-gateway-simple.
 Load the relevant Python and Azure support skills.
 Give only the short approach needed to implement and validate the script.
 ```

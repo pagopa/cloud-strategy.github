@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Gateway Simple"
+  short_description: "Fast path for concrete skill-first tasks"
+  default_prompt: "Use $internal-gateway-simple to route a concrete task through lightweight analysis, minimal support skills, focused execution, and validation without a retained plan."
