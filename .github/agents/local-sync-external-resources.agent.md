@@ -48,7 +48,6 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - When a managed `openai/skills` asset is declared below, install or refresh only the mapped skills into `.github/skills/` using the required `openai-` prefix. Do not keep unprefixed copies or add sibling OpenAI skills unless the user explicitly expands scope.
 - Do not leave stale references in `AGENTS.md`, skills, agents, instructions, or scripts after catalog changes. Update README-based catalogs only when README edits are explicitly in scope.
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
-- Keep imported assets verbatim by default. Allow a direct in-place override only for a strong repo-specific need that the user explicitly counter-validates.
 - Every approved imported in-place override must be mapped in `.github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml` and replayed through the bundled override script after each refresh.
 - Treat any unregistered imported in-place override or stale replay patch as blocking sync drift.
 - Do not route cross-repository baseline propagation through this agent. Use `local-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
@@ -60,6 +59,16 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - Do not report `apply` as complete unless the final output states whether `.github/copilot-instructions.md` and root `AGENTS.md` were reviewed, changed, or intentionally left unchanged.
 - When a sync workflow needs a retained plan or auxiliary support file, write it under repository-root `tmp/` and create the directory if it does not exist.
 - Follow the completion-report contract already defined in `.github/copilot-instructions.md` instead of re-owning that format here.
+
+## Resource Ownership
+
+- This agent owns source-side catalog prefix and imported-resource governance for sync-managed assets.
+- Repository-owned resources created in this standards repository use the `internal-*` prefix by default.
+- Source-only sync tooling in this standards repository uses `local-*`; target repositories may also keep consumer-owned `local-*` assets.
+- Imported upstream resources keep the `<short-repo>-<original-resource-name>` form unless an approved repository-owned replacement takes over.
+- Prefixes encode origin and ownership first, not a rigid strategic, tactical, or operational level.
+- Imported assets are support depth by default. Prefer an `internal-*` owner only when routing, governance, terminology, output shape, safety expectations, or a missing owner requires it.
+- Keep imported upstream assets verbatim by default. Allow a direct in-place override only for a strong repo-specific need that the user explicitly counter-validates and registers in the approved override bundle.
 
 ## Skill Usage Contract
 

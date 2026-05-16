@@ -195,8 +195,6 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: keep prefix-based ownership distinct from dominant role so the catalog can evolve without false hierarchy drift.
 - Scope:
-  - root `AGENTS.md`
-  - `.github/copilot-instructions.md`
   - governance skills and agents that describe the catalog model
 - Expected behavior:
   - prefixes describe origin and ownership first, not a rigid strategic, tactical, or operational level
@@ -210,9 +208,8 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: avoid unnecessary repository-owned wrappers around imported assets.
 - Scope:
-  - root `AGENTS.md`
-  - `.github/copilot-instructions.md`
-  - governance skills and agents that describe the catalog model
+  - `.github/agents/local-sync-external-resources.agent.md`
+  - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - Expected behavior:
   - overlap alone does not justify wrapping or replacing an imported asset
   - repository-owned wrappers or replacements are justified when they add repository-specific routing, governance, terminology, output shape, safety expectations, or a missing internal owner
@@ -282,9 +279,10 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - repository-root `LESSONS_LEARNED.md` exists as a non-canonical learning ledger
   - completed tasks add only durable, reusable lessons that were not already codified when discovered
   - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
+  - root `AGENTS.md` keeps only retained-artifact boundaries and points detailed procedures to scoped owners
   - detailed ledger row preservation rules live in `LESSONS_LEARNED.md` entry rules
   - the scoped lessons instruction reminds editors to read and follow the file's entry rules without duplicating the full ledger procedure
-  - the Copilot projection keeps only the retained-learning principle and read-before-editing reminder
+  - the Copilot projection keeps only the retained-artifact principle and owner-routing reminder
   - no ledger update is required when no stable new lesson emerged
   - once a lesson is codified elsewhere, it is removed from `LESSONS_LEARNED.md` instead of being retained as a codified duplicate
 

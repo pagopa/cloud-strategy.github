@@ -35,10 +35,10 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in agents_text
     )
-    assert PLAN_TASK_PATH in agents_text
-    assert "`internal-writing-plans`" in agents_text
-    assert "`internal-executing-plans`" in agents_text
-    assert "retained-plan shape and execution workflow" in agents_text
+    assert "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work" in agents_text
+    assert "Keep file shape, execution workflow, and ledger row rules" in agents_text
+    assert "`internal-writing-plans`" not in agents_text
+    assert "`internal-executing-plans`" not in agents_text
     assert "operational procedures, checklists, file-shape recipes" in agents_text
     assert_no_plan_procedure_markers(agents_text)
     assert "Italian" in agents_text
@@ -50,10 +50,11 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in copilot_text
     )
-    assert "tmp/superpowers/<clear-action-or-task-name>/" in copilot_text
-    assert "`internal-writing-plans`" in copilot_text
-    assert "`internal-executing-plans`" in copilot_text
-    assert "retained-plan shape and execution workflow" in copilot_text
+    assert "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical" in copilot_text
+    assert "dedicated retained-plan skills and scoped lessons instructions" in copilot_text
+    assert PLAN_TASK_PATH not in copilot_text
+    assert "`internal-writing-plans`" not in copilot_text
+    assert "`internal-executing-plans`" not in copilot_text
     assert_no_plan_procedure_markers(copilot_text)
     assert "clear, local, quick, or banal tasks" not in copilot_text
     assert "retained planning is justified" not in copilot_text

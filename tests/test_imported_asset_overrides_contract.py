@@ -70,15 +70,16 @@ def test_imported_asset_override_policy_is_visible_in_canonical_and_sync_assets(
         ".github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md"
     ).read_text(encoding="utf-8")
 
-    assert (
-        "Allow a direct in-place override only for a strong repo-specific need"
-        in agents_text
-    )
+    assert "Sync agents own catalog prefix rules" in agents_text
     assert (
         "Do not edit imported upstream assets in place unless the need is strong"
         in copilot_text
     )
     assert "Every approved imported in-place override must be mapped" in sync_agent_text
+    assert (
+        "Allow a direct in-place override only for a strong repo-specific need"
+        in sync_agent_text
+    )
     assert "scripts/apply_imported_asset_overrides.py" in sync_skill_text
     assert (
         "approved imported-asset override registries or replay patches"

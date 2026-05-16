@@ -21,6 +21,7 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 - `AGENTS.md` owns repository-wide defaults, precedence, rule placement, and cross-surface bridge behavior.
 - `.github/copilot-instructions.md` is the repo-wide Copilot projection; keep it aligned when repository-wide defaults change.
 - `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
+- Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
 - `.github/instructions/*.instructions.md` owns scoped path or domain rules; narrower matching scope overrides broad defaults only inside that scope.
 - Use `docs/01-architecture.md` for repository architecture, `docs/02-repository-context.md` for non-policy local context, and `docs/03-ai-runtime-operating-model.md` for runtime consumption guidance.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
@@ -42,15 +43,6 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 - For vendor-owned or schema-driven surfaces, read primary documentation when correctness depends on platform semantics.
 - Update validators, tests, sync discovery, or non-README technical docs when a contract, catalog family, or shared runtime behavior changes.
 
-## Resource Ownership
-
-- Repository-owned resources created in this standards repository use the `internal-*` prefix by default.
-- Repository-owned resources created in consumer repositories use `local-*`; in this standards repository, `local-*` also marks source-owned tooling that must not propagate during sync.
-- Imported upstream resources keep the `<short-repo>-<original-resource-name>` form.
-- Prefixes encode origin and ownership first, not a rigid strategic, tactical, or operational level.
-- Imported assets are support depth by default. Prefer a repository-owned internal owner only when routing, governance, terminology, output shape, safety expectations, or a missing owner requires it.
-- Keep imported upstream assets verbatim by default. Allow a direct in-place override only for a strong repo-specific need that the user explicitly counter-validates, and register it in the `local-agent-sync-external-resources` bundle.
-
 ## Operational Ownership
 
 - `internal-agent-operational-flow` owns the reusable `plan`, `execute`, and `review` mode semantics.
@@ -70,11 +62,9 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 ## Retained Artifacts
 
 - Keep transient planning, brainstorming, and Superpowers-generated working files out of `docs/`.
-- Use retained plans under `tmp/superpowers/<clear-action-or-task-name>/` only when the work needs durable tracking, handoff, provenance, or reviewable tradeoffs.
-- Use `internal-writing-plans` and `internal-executing-plans` for retained-plan shape and execution workflow.
-- Root `LESSONS_LEARNED.md` is a non-canonical learning ledger for durable lessons pending codification.
-- Follow `LESSONS_LEARNED.md` entry rules and `.github/instructions/internal-lessons-learned.instructions.md` before editing the ledger.
-- Codify stable lessons into the smallest canonical owner when ready, then remove duplicate ledger rows in the same change.
+- `tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work, but they do not replace canonical policy owners.
+- Treat retained plans and retained learning as non-canonical until codified in the smallest valid owner.
+- Keep file shape, execution workflow, and ledger row rules in their scoped owners, not here.
 
 ## Token And Drift Control
 

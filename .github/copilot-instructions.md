@@ -46,10 +46,8 @@ Protect correctness, security, simplicity, and maintainability.
 
 ## Retained Artifacts
 
-- Use `tmp/superpowers/<clear-action-or-task-name>/` only for retained plans needing tracking, handoff, provenance, or reviewable tradeoffs.
-- Use `internal-writing-plans` and `internal-executing-plans` for retained-plan shape and execution workflow.
-- Treat `LESSONS_LEARNED.md` as a non-canonical ledger for durable lessons pending codification.
-- Before editing `LESSONS_LEARNED.md`, read its entry rules and current on-disk contents, then preserve unrelated rows.
+- Treat retained plans and `LESSONS_LEARNED.md` as non-canonical until codified in the smallest valid owner.
+- Use dedicated retained-plan skills and scoped lessons instructions for file shape, execution workflow, and ledger row rules.
 
 ## Validation And Reporting
 
