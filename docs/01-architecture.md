@@ -1,21 +1,30 @@
 # AI Architecture Contract v1.1.0
 
-> Purpose: canonical repository-specific architecture contract for the AI governance supply chain in this repository. Keep component boundaries, system scope, validation surfaces, and runtime fit here when they describe this repository's actual architecture.
+> Purpose: defines the repository-specific architecture contract for this repository's AI governance supply chain.
+> Keep component boundaries, system scope, validation surfaces, and runtime fit here when they describe this
+> repository's actual architecture.
 
 ## Where Adjacent Content Belongs
 
-- Use `docs/02-repository-context.md` for stable local operating context, glossary, ownership notes, and repository-specific interpretation aids that do not override policy.
-- Use `docs/03-ai-runtime-operating-model.md` for the shared runtime model that explains how Codex, Copilot, ChatGPT, and other runtimes consume the AI customization surfaces.
-- Use `AGENTS.md`, `.github/copilot-instructions.md`, or scoped `.github/instructions/*.instructions.md` for binding instruction policy.
+- Use `docs/02-repository-context.md` for stable local operating context, glossary, ownership notes,
+  and repository-specific interpretation aids.
+  These aids must not override policy.
+- Use `docs/03-ai-runtime-operating-model.md` for the shared runtime model.
+  It explains how Codex, Copilot, ChatGPT, and other runtimes consume the AI customization surfaces.
+- Use `AGENTS.md`, `.github/copilot-instructions.md`, or scoped `.github/instructions/*.instructions.md`
+  for binding instruction policy.
 - Use `LESSONS_LEARNED.md` only for durable lessons that are pending codification elsewhere.
 
 ## Repository
 
-`cloud-strategy.github` is the source-of-truth repository for GitHub Copilot customization, repository instruction architecture, catalog governance, and sync tooling used by the cloud strategy workspace.
+`cloud-strategy.github` is the source-of-truth repository for GitHub Copilot customization, repository instruction
+architecture, catalog governance, and sync tooling used by the cloud strategy workspace.
 
 ## Purpose
 
-The repository does not host a product runtime. Its primary system is an AI governance supply chain: repository-owned skills, Copilot wrapper agents, instructions, prompts, inventory, validation scripts, and sync contracts are authored here and then validated or projected into consumer repositories.
+The repository does not host a product runtime. It hosts an AI governance supply chain: repository-owned skills,
+Copilot wrapper agents, instructions, prompts, inventory, validation scripts, and sync contracts. These assets are
+authored here, then validated or projected into consumer repositories.
 
 ## System Boundaries
 
@@ -64,23 +73,29 @@ Repository-owned AI assets
   -> consumer repositories with local architecture/context scaffolds and optional local override layer
 ```
 
-The key invariant is separation of policy, projection, inventory, local context, and runtime guidance. `AGENTS.md` owns stable strategy, `.github/copilot-instructions.md` owns the Copilot projection, `.github/INVENTORY.md` owns the volatile generated catalog, `docs/01-architecture.md` and `docs/02-repository-context.md` remain repo-specific, and `docs/03-ai-runtime-operating-model.md` is the source-managed runtime model.
+The key invariant is separation of policy, projection, inventory, local context, and runtime guidance.
+`AGENTS.md` owns stable strategy. `.github/copilot-instructions.md` owns the Copilot projection.
+`.github/INVENTORY.md` owns the volatile generated catalog. `docs/01-architecture.md` and
+`docs/02-repository-context.md` remain repo-specific. `docs/03-ai-runtime-operating-model.md` is the
+source-managed runtime model.
 
 ## Validation Surface
 
 Observed validation entrypoints include:
 
-- `Makefile` targets for `catalog-lint`, `github-catalog-validation`, `catalog-check`, `catalog-audit`, `inventory-build`, `token-risks`, `skill-lint`, `docs-lint`, and `test`.
+- `Makefile` targets for `catalog-lint`, `github-catalog-validation`, `catalog-check`, `catalog-audit`,
+  `inventory-build`, `token-risks`, `skill-lint`, `docs-lint`, and `test`.
 - Workflows `_code-analysis.yml`, `_github-catalog-validation.yml`, and `_pre-commit.yml`.
-- Python tests under `tests/`, including catalog, plan-policy, agent-contract, script-entrypoint, sync, and imported-asset override coverage.
+- Python tests under `tests/`, including catalog, plan-policy, agent-contract, script-entrypoint, sync,
+  and imported-asset override coverage.
 
 ## Operational Notes
 
 - Treat this repository as the canonical source for shared Copilot governance.
-- Do not use consumer repositories to redefine the meaning of `internal-*`, `local-*`, or `internal-sync-*`.
-- Do not hand-maintain catalog matrices beside `.github/INVENTORY.md` unless generated and validated.
-- Keep transient planning artifacts under `tmp/superpowers/`, not `docs/`.
-- Keep consumer-local knowledge documents scaffolded from templates but preserved after initial creation.
+- Do not use consumer repositories to redefine `internal-*`, `local-*`, or `internal-sync-*`.
+- Do not hand-maintain catalog matrices beside `.github/INVENTORY.md` unless they are generated and validated.
+- Keep transient planning artifacts under `tmp/superpowers/`, not under `docs/`.
+- Scaffold consumer-local knowledge documents from templates, then preserve them after initial creation.
 
 ## Risks And Open Questions
 
@@ -93,4 +108,6 @@ Observed validation entrypoints include:
 
 ## Contract Status
 
-This repository is ready to serve as the control-plane reference for AI Architecture Contract v1.1.0. Future changes should preserve the policy/projection/inventory/context/runtime split and keep validation tied to the actual filesystem.
+This repository is ready to serve as the control-plane reference for AI Architecture Contract v1.1.0. Future changes
+should preserve the policy/projection/inventory/context/runtime split. They should also keep validation tied to the
+actual filesystem.

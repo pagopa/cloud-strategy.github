@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Define a predictable process for deprecating Copilot customization assets (`instructions`, `skills`, `agents`, and templates).
+Define a predictable process for deprecating Copilot customization assets: `instructions`, `skills`, `agents`,
+and templates.
 
 ## Lifecycle states
 
@@ -26,14 +27,23 @@ Define a predictable process for deprecating Copilot customization assets (`inst
 
 ## Emergency exception
 
-Immediate removal is allowed only for security or compliance issues. The removal reason must be documented in `.github/CHANGELOG.md`.
+Immediate removal is allowed only for security or compliance issues. The removal reason must be documented in
+`.github/CHANGELOG.md`.
 
 ## Current deprecations
 
-- `.github/workflows/_terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` after consolidating duplicate pre-commit workflows into one canonical entrypoint.
-- `.github/workflows/terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` so the source baseline ships a single pre-commit workflow.
-- `.github/skills/antigravity-domain-driven-design/SKILL.md`: **Removed**. Consolidated into `.github/skills/internal-ddd/SKILL.md`.
-- `.github/skills/internal-data-registry/SKILL.md`: **Removed**. Retired from the live catalog after confirming no remaining live references.
-- `.github/scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the `local-sync-global-copilot-configs-into-repo` agent and the `local-agent-sync-global-copilot-configs-into-repo` skill workflow.
-- `.github/skills/internal-terraform-feature/SKILL.md`: **Removed**. Merged into `.github/skills/internal-terraform/SKILL.md`.
-- `.github/skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into `.github/skills/internal-terraform/SKILL.md`.
+- `.github/workflows/_terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` after
+  duplicate pre-commit workflows were consolidated into one canonical entrypoint.
+- `.github/workflows/terraform-pre-commit.yml`: **Removed**. Replaced by `.github/workflows/_pre-commit.yml` so the
+  source baseline ships one pre-commit workflow.
+- `.github/skills/antigravity-domain-driven-design/SKILL.md`: **Removed**. Consolidated into
+  `.github/skills/internal-ddd/SKILL.md`.
+- `.github/skills/internal-data-registry/SKILL.md`: **Removed**. Retired from the live catalog after confirmation that
+  no live references remained.
+- `.github/scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the
+  `local-sync-global-copilot-configs-into-repo` agent and the
+  `local-agent-sync-global-copilot-configs-into-repo` skill workflow.
+- `.github/skills/internal-terraform-feature/SKILL.md`: **Removed**. Merged into
+  `.github/skills/internal-terraform/SKILL.md`.
+- `.github/skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into
+  `.github/skills/internal-terraform/SKILL.md`.
