@@ -35,7 +35,10 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in agents_text
     )
-    assert "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work" in agents_text
+    assert (
+        "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work"
+        in agents_text
+    )
     assert "Keep file shape, execution workflow, and ledger row rules" in agents_text
     assert "strategic operating bridge" in agents_text
     assert "tactical operating defaults" in agents_text
@@ -67,12 +70,15 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in copilot_text
     )
-    assert "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical" in copilot_text
-    assert "dedicated retained-plan skills and scoped lessons instructions" in copilot_text
+    assert (
+        "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical" in copilot_text
+    )
+    assert (
+        "dedicated retained-plan skills and scoped lessons instructions" in copilot_text
+    )
     assert (
         "Use plan mode when ambiguity, ownership, rollout, validation, or "
-        "multiple credible paths remain"
-        in copilot_text
+        "multiple credible paths remain" in copilot_text
     )
     assert (
         "Use execute mode only when the target state and validation path are concrete"

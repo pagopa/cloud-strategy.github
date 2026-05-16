@@ -39,7 +39,9 @@ def test_github_pr_skill_owns_pr_merge_and_terminal_state_guardrails() -> None:
         in internal_contract_text
     )
     assert "qualifying non-author approval" in internal_contract_text
-    assert "the GitHub PR skill prefers `gh pr merge --squash`" in internal_contract_text
+    assert (
+        "the GitHub PR skill prefers `gh pr merge --squash`" in internal_contract_text
+    )
     assert "`gh pr view --json state,mergedAt`" in internal_contract_text
 
 
