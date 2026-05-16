@@ -84,13 +84,13 @@ The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md
 
 | File | Target budget | Estimated tokens |
 | --- | ---: | ---: |
-| `AGENTS.md` | 2,000 | 3,781 |
+| `AGENTS.md` | 2,000 | 3,571 |
 | `.github/copilot-instructions.md` | 2,000 | 3,576 |
 | `docs/01-architecture.md` | 2,500 | 1,705 |
 | `docs/02-repository-context.md` | 1,500 | 965 |
 | `docs/03-ai-runtime-operating-model.md` | 2,000 | 1,264 |
 | `.github/README.md` | 3,500 | 2,855 |
-| **Fixed-load set total** | 13,500 | 14,146 |
+| **Fixed-load set total** | 13,500 | 13,936 |
 
 ## Delivery Invariants
 
@@ -113,12 +113,8 @@ The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md
 ## Retained Learning
 
 - Root `LESSONS_LEARNED.md` is the repository learning ledger for durable lessons discovered during repository work, regardless of phase.
-- Record or codify a durable lesson as soon as it becomes clear enough to be reusable; do not wait for task completion only because the work is still in planning, review, debugging, or implementation.
-- When a validator, IDE, schema check, or runtime error overturns an earlier implementation assumption, re-evaluate retained learning immediately instead of treating the correction as task-local by default.
-- When correctness depends on vendor-owned workflow semantics, schema constraints, or context availability, read the primary documentation before editing or asserting that a change is valid.
 - Keep `LESSONS_LEARNED.md` non-canonical. It must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
-- Treat `LESSONS_LEARNED.md` as a temporary incubation ledger: codify stable lessons into their canonical owner when ready, then remove any duplicate ledger row in the same change.
-- Keep `LESSONS_LEARNED.md` append-preserving by default: preserve unrelated rows already on disk, including local uncommitted lessons, and change a specific row only when that same lesson is being codified, disproven, narrowed, or deduplicated.
+- Treat `LESSONS_LEARNED.md` as a temporary incubation ledger: codify stable lessons into the smallest canonical owner when ready, then remove any duplicate ledger row in the same change.
 - Before repeating a workflow or domain where durable corrections already exist, consult the relevant retained lessons without treating the ledger as canonical policy.
 - Durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons.
 - Keep detailed retained-learning behavior in `.github/copilot-instructions.md`; keep only the strategic boundary here.

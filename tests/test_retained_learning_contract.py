@@ -13,12 +13,10 @@ def read_text(relative_path: str) -> str:
 def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
     expected_contracts: dict[str, list[str]] = {
         "AGENTS.md": [
-            "Keep `LESSONS_LEARNED.md` append-preserving by default",
-            "preserve unrelated rows already on disk, including local uncommitted lessons",
-            (
-                "change a specific row only when that same lesson is being codified, "
-                "disproven, narrowed, or deduplicated"
-            ),
+            "Root `LESSONS_LEARNED.md` is the repository learning ledger",
+            "Keep `LESSONS_LEARNED.md` non-canonical",
+            "codify stable lessons into the smallest canonical owner when ready",
+            "Keep detailed retained-learning behavior in `.github/copilot-instructions.md`",
         ],
         ".github/copilot-instructions.md": [
             "Before editing repository-root `LESSONS_LEARNED.md`, read its current on-disk contents",
