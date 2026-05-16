@@ -8,9 +8,9 @@
 ## Where Adjacent Content Belongs
 
 - System boundaries, component responsibilities, architecture flow, and validation surfaces live in
-  `docs/01-architecture.md`.
+  `docs/01-local-architecture.md`.
 - Shared guidance on how assistant runtimes consume instructions, skills, prompts, and agents lives in
-  `docs/03-ai-runtime-operating-model.md`.
+  `docs/03-local-ai-runtime-operating-model.md`.
 - Binding rules live in `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
 - Lessons that are still pending codification live in `LESSONS_LEARNED.md`.
 
@@ -21,7 +21,7 @@ This file is repo-specific and descriptive. It may inform interpretation, but it
 runtime assembles manual context, this document is equivalent to a `<context policy="false">` block. It can explain
 local facts, but it is not an instruction source.
 
-Consumer repositories may receive a scaffold for their own `docs/02-repository-context.md`, but sync must preserve
+Consumer repositories may receive a scaffold for their own `docs/02-local-repository-context.md`, but sync must preserve
 their target-owned content after creation.
 
 ## Local Operating Context
@@ -39,9 +39,9 @@ their target-owned content after creation.
 
 | Decision | Status | Policy owner |
 | --- | --- | --- |
-| Keep policy, Copilot projection, inventory, architecture, local context, and runtime model separate. | Active | `AGENTS.md`, `.github/copilot-instructions.md`, `docs/01-architecture.md` |
-| Scaffold `docs/01-architecture.md` and `docs/02-repository-context.md` into consumers only when missing, then preserve them. | Active | Sync automation and `references/sync-contract.md` |
-| Keep `docs/03-ai-runtime-operating-model.md` source-managed and synchronized to consumers. | Active | Sync automation and `docs/03-ai-runtime-operating-model.md` |
+| Keep policy, Copilot projection, inventory, architecture, local context, and runtime model separate. | Active | `AGENTS.md`, `.github/copilot-instructions.md`, `docs/01-local-architecture.md` |
+| Scaffold `docs/01-local-architecture.md` and `docs/02-local-repository-context.md` into consumers only when missing, then preserve them. | Active | Sync automation and `references/sync-contract.md` |
+| Keep `docs/03-local-ai-runtime-operating-model.md` source-managed and synchronized to consumers. | Active | Sync automation and `docs/03-local-ai-runtime-operating-model.md` |
 | Keep `.github/templates/` as standards-repository sync source material, not a synced target catalog. | Active | Sync automation and `references/sync-contract.md` |
 
 ## Glossary

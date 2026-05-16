@@ -6,8 +6,8 @@
 
 ## Where Adjacent Content Belongs
 
-- Use `docs/01-architecture.md` for the repository-specific architecture contract.
-- Use `docs/02-repository-context.md` for stable local operating context that does not override policy.
+- Use `docs/01-local-architecture.md` for the repository-specific architecture contract.
+- Use `docs/02-local-repository-context.md` for stable local operating context that does not override policy.
 - Use `AGENTS.md`, `.github/copilot-instructions.md`, and scoped `.github/instructions/*.instructions.md` for binding
   instruction policy.
 - Use relevant `SKILL.md` files for task-specific workflow depth.
@@ -17,7 +17,7 @@
 This repository is authored as a GitHub Copilot customization and governance baseline. Its assets should remain usable
 by multiple assistant runtimes.
 
-Unlike `docs/01-architecture.md` and `docs/02-repository-context.md`, this file is source-managed by the standards
+Unlike `docs/01-local-architecture.md` and `docs/02-local-repository-context.md`, this file is source-managed by the standards
 repository and synchronized into consumer repositories.
 
 ## Supported Runtimes
@@ -72,7 +72,7 @@ explicit external delimiters. The repository files remain Markdown. XML tags are
 <projection source=".github/copilot-instructions.md">
   ...
 </projection>
-<context source="docs/02-repository-context.md" policy="false">
+<context source="docs/02-local-repository-context.md" policy="false">
   ...
 </context>
 ```

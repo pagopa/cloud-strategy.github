@@ -24,7 +24,7 @@ playbooks.
 - `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
 - Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
 - `.github/instructions/*.instructions.md` owns scoped path or domain rules; narrower matching scope overrides broad defaults only inside that scope.
-- Use `docs/01-architecture.md` for repository architecture, `docs/02-repository-context.md` for non-policy local context, and `docs/03-ai-runtime-operating-model.md` for runtime consumption guidance.
+- Use `docs/01-local-architecture.md` for repository architecture, `docs/02-local-repository-context.md` for non-policy local context, and `docs/03-local-ai-runtime-operating-model.md` for runtime consumption guidance.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
 
 ## Context And Scope

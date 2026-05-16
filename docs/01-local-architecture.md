@@ -6,10 +6,10 @@
 
 ## Where Adjacent Content Belongs
 
-- Use `docs/02-repository-context.md` for stable local operating context, glossary, ownership notes,
+- Use `docs/02-local-repository-context.md` for stable local operating context, glossary, ownership notes,
   and repository-specific interpretation aids.
   These aids must not override policy.
-- Use `docs/03-ai-runtime-operating-model.md` for the shared runtime model.
+- Use `docs/03-local-ai-runtime-operating-model.md` for the shared runtime model.
   It explains how Codex, Copilot, ChatGPT, and other runtimes consume the AI customization surfaces.
 - Use `AGENTS.md`, `.github/copilot-instructions.md`, or scoped `.github/instructions/*.instructions.md`
   for binding instruction policy.
@@ -31,8 +31,8 @@ authored here, then validated or projected into consumer repositories.
 In scope:
 
 - Repository-wide AI governance policy in `AGENTS.md` and `.github/copilot-instructions.md`.
-- Repo-specific architecture and context documents in `docs/01-architecture.md` and `docs/02-repository-context.md`.
-- Shared AI runtime operating model in `docs/03-ai-runtime-operating-model.md`.
+- Repo-specific architecture and context documents in `docs/01-local-architecture.md` and `docs/02-local-repository-context.md`.
+- Shared AI runtime operating model in `docs/03-local-ai-runtime-operating-model.md`.
 - Live resource inventory in `.github/INVENTORY.md`.
 - Agent, skill, instruction, prompt, template, and sync assets under `.github/`.
 - Catalog validation and synchronization scripts under `.github/scripts/`.
@@ -51,9 +51,9 @@ Out of scope:
 | --- | --- | --- |
 | Strategic bridge | `AGENTS.md` | Rule placement, precedence model, ownership prefixes, volatile artifact policy, and retained-artifact boundaries. |
 | Copilot projection | `.github/copilot-instructions.md` | Repo-wide behavior visible to native Copilot flows. |
-| Architecture contract | `docs/01-architecture.md` | Repo-specific architecture, boundaries, flows, and validation surface. |
-| Repository context | `docs/02-repository-context.md` | Stable local context, glossary, and non-policy interpretation aids. |
-| Runtime operating model | `docs/03-ai-runtime-operating-model.md` | Shared source-managed runtime consumption model for AI customization assets. |
+| Architecture contract | `docs/01-local-architecture.md` | Repo-specific architecture, boundaries, flows, and validation surface. |
+| Repository context | `docs/02-local-repository-context.md` | Stable local context, glossary, and non-policy interpretation aids. |
+| Runtime operating model | `docs/03-local-ai-runtime-operating-model.md` | Shared source-managed runtime consumption model for AI customization assets. |
 | Catalog inventory | `.github/INVENTORY.md` | Generated catalog surface for agents, skills, instructions, prompts, and related assets. |
 | Consumer-local scaffolds | `.github/templates/` | Source-side templates used by sync automation to create target-owned knowledge files and override layers. |
 | Copilot wrapper agents | `.github/agents/` | VS Code route selection, tool scope, and manual handoff UX for operational skills plus repo-only sync command centers. |
@@ -75,8 +75,8 @@ Repository-owned AI assets
 
 The key invariant is separation of policy, projection, inventory, local context, and runtime guidance.
 `AGENTS.md` owns stable strategy. `.github/copilot-instructions.md` owns the Copilot projection.
-`.github/INVENTORY.md` owns the volatile generated catalog. `docs/01-architecture.md` and
-`docs/02-repository-context.md` remain repo-specific. `docs/03-ai-runtime-operating-model.md` is the
+`.github/INVENTORY.md` owns the volatile generated catalog. `docs/01-local-architecture.md` and
+`docs/02-local-repository-context.md` remain repo-specific. `docs/03-local-ai-runtime-operating-model.md` is the
 source-managed runtime model.
 
 ## Validation Surface
@@ -104,7 +104,7 @@ Observed validation entrypoints include:
 | Catalog drift | Sync and inventory scripts exist, plus tests, but catalog families evolve over time. | Keep inventory generation, sync discovery, and validators updated in the same change. |
 | Overloaded always-on guidance | Multiple projections and scoped resources exist. | Keep high-volume detail in skills or references, not repo-wide instructions or wrapper agents. |
 | Consumer override ambiguity | Local override layer exists by contract. | Require explicit override scope, reason, and disclosure when followed. |
-| Knowledge document shadow policy | `docs/02-repository-context.md` can look instruction-like if unconstrained. | Keep it descriptive and move binding behavior to canonical instruction surfaces. |
+| Knowledge document shadow policy | `docs/02-local-repository-context.md` can look instruction-like if unconstrained. | Keep it descriptive and move binding behavior to canonical instruction surfaces. |
 
 ## Contract Status
 
