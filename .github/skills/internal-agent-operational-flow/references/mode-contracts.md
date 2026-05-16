@@ -37,8 +37,8 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | --- | --- | --- |
 | `internal-agent-operational-flow` | Shared by `plan`, `execute`, and `review` | Portable operational workflow core across Copilot, ChatGPT, Codex, and other runtimes. |
 | `internal-agent-critical-master` | Critical wrapper and pressure-test workflows | Challenge, pre-mortem, hidden assumptions, failure modes, and reframing. |
-| `internal-agent-lane-change-engine` | Shared by operational wrappers and sync command centers | Stop-and-recommend protocol when the selected mode or lane no longer fits. |
-| `internal-agent-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
+| `internal-agent-support-lane-change-engine` | Shared by operational wrappers and sync command centers | Stop-and-recommend protocol when the selected mode or lane no longer fits. |
+| `internal-agent-support-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
 | `internal-code-review` | `review` mode | Tactical review engine for defect-first findings and code or catalog review. |
 | `mattpocock-grill-me` | Conditional support for `plan` mode | User-requested or ambiguity-driven question pressure before plan finalization. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
@@ -50,7 +50,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 
 | Retired or old owner | Current owner |
 | --- | --- |
-| `internal-agent-cross-lane-engine` | `internal-agent-operational-flow` for plan/execute/review boundaries plus `internal-agent-lane-change-engine` for stop-and-recommend behavior. |
+| `internal-agent-cross-lane-engine` | `internal-agent-operational-flow` for plan/execute/review boundaries plus `internal-agent-support-lane-change-engine` for stop-and-recommend behavior. |
 | `internal-ai-resource-creator` | `plan` mode through `internal-planning-leader` or direct skill use. |
 | `internal-architect` | `plan` mode through `internal-planning-leader` or direct skill use. |
 | `internal-developer` | `execute` mode when target state is clear. |
@@ -63,4 +63,4 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 - `plan` exits to `execute`, `review`, or critical challenge only through a visible next-step package.
 - `execute` exits to `review` when correctness evidence or merge readiness is the main next need.
 - `review` exits to `execute`, `plan`, critical challenge, or deferred follow-up for each actionable finding.
-- Any mode may stop and recommend a better lane through `internal-agent-lane-change-engine` when the boundary breaks.
+- Any mode may stop and recommend a better lane through `internal-agent-support-lane-change-engine` when the boundary breaks.

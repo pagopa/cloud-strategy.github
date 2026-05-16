@@ -48,7 +48,7 @@ Use `mattpocock-grill-me` only as conditional support when the user asks for it,
 
 Execute mode owns clear local delivery. It may touch several adjacent files when the target state is already decided and validation is concrete. File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
 
-When ambiguity, ownership, governance, or rollout decisions become dominant, stop and use `internal-agent-lane-change-engine` instead of continuing as a hidden planner.
+When ambiguity, ownership, governance, or rollout decisions become dominant, stop and use `internal-agent-support-lane-change-engine` instead of continuing as a hidden planner.
 
 ## Review Mode
 

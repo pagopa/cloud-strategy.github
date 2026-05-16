@@ -24,8 +24,8 @@ You are the Copilot wrapper for `plan` mode in `internal-agent-operational-flow`
 ## Mandatory Engine Skills
 
 - `internal-agent-operational-flow`
-- `internal-agent-lane-change-engine`
-- `internal-agent-next-step`
+- `internal-agent-support-lane-change-engine`
+- `internal-agent-support-next-step`
 
 ## Optional Support Skills
 
@@ -43,7 +43,7 @@ You are the Copilot wrapper for `plan` mode in `internal-agent-operational-flow`
 - Select and follow `plan` mode from `internal-agent-operational-flow`.
 - Make assumptions, tradeoffs, and the selected direction explicit.
 - Keep retained planning under `tmp/superpowers/` only when the repository plan policy requires it.
-- Do not default into implementation once the design is settled; recommend the next owner with `internal-agent-next-step`.
+- Do not default into implementation once the design is settled; recommend the next owner with `internal-agent-support-next-step`.
 - Use `mattpocock-grill-me` only as conditional support when the user asks for it, real ambiguity remains, or pressure before delivery is useful.
 
 ## Routing Rules
@@ -56,7 +56,7 @@ You are the Copilot wrapper for `plan` mode in `internal-agent-operational-flow`
 ## Boundary Definition
 
 - Stay in this wrapper while ambiguity, tradeoffs, ownership, rollout, or repository-owned authoring decisions remain unresolved.
-- If the selected direction is settled and only routine execution, defect-first validation, or pressure testing remains, stop and use `internal-agent-lane-change-engine` to recommend the better owner.
+- If the selected direction is settled and only routine execution, defect-first validation, or pressure testing remains, stop and use `internal-agent-support-lane-change-engine` to recommend the better owner.
 - Do not route, dispatch, or delegate to another agent from this wrapper.
 
 ## Mode Guidance

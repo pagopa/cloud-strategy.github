@@ -24,7 +24,7 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 ## Mandatory Engine Skills
 
 - `local-agent-sync-global-copilot-configs-into-repo`
-- `internal-agent-lane-change-engine`
+- `internal-agent-support-lane-change-engine`
 
 ## Optional Support Skills
 
@@ -84,7 +84,7 @@ Use this section only for consumer-propagation awareness. The canonical source-s
 ## Boundary Definition
 
 - Stay in this lane while the task is consumer-repository baseline propagation, drift assessment, or `plan`/`apply`/`audit` work for that sync workflow.
-- If the request is really source-side catalog governance, source-side redesign, or a local edit outside the sync lane, stop, explain the mismatch, and use `internal-agent-lane-change-engine` to recommend the better owner.
+- If the request is really source-side catalog governance, source-side redesign, or a local edit outside the sync lane, stop, explain the mismatch, and use `internal-agent-support-lane-change-engine` to recommend the better owner.
 - Do not route, dispatch, or delegate from this lane.
 
 ## Execution Workflow

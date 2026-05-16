@@ -153,7 +153,7 @@ Concrete delivery examples:
   that sentence and run `tests/test_canonical_agents_contract.py`." This is a
   narrow regression fix with a known validation command.
 - "Rename `internal-agent-boundary-recommendation-engine` to
-  `internal-agent-lane-change-engine` everywhere active after planning approved
+  `internal-agent-support-lane-change-engine` everywhere active after planning approved
   the new name." This is delivery-owned only after the naming decision is
   settled.
 - "Apply the review finding that says the handoff target must be checked against
@@ -739,7 +739,7 @@ More concrete examples:
 | "Plan the propagation of this baseline into another repo." | `local-sync-global-copilot-configs-into-repo` | The job is consumer baseline alignment. |
 
 If a request starts in the wrong lane, the selected agent should stop, explain
-the mismatch, and recommend one better owner through `internal-agent-lane-change-engine`.
+the mismatch, and recommend one better owner through `internal-agent-support-lane-change-engine`.
 It should not continue by acting as a hidden router.
 
 ## Owner Selection

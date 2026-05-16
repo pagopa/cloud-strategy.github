@@ -21,7 +21,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 ## Mandatory Engine Skills
 
 - `local-agent-sync-external-resources`
-- `internal-agent-lane-change-engine`
+- `internal-agent-support-lane-change-engine`
 
 ## Optional Support Skills
 
@@ -229,7 +229,7 @@ When repository state drifts from the declared governance contract, treat the dr
 ## Boundary Definition
 
 - Stay in this lane while the task is source-side `.github/` catalog governance inside the declared managed scope.
-- If the request is really source-side planning, consumer-repository sync, or a local edit outside catalog-governance scope, stop, explain the mismatch, and use `internal-agent-lane-change-engine` to recommend the better owner.
+- If the request is really source-side planning, consumer-repository sync, or a local edit outside catalog-governance scope, stop, explain the mismatch, and use `internal-agent-support-lane-change-engine` to recommend the better owner.
 - Do not route, dispatch, or delegate from this lane.
 
 ## Execution Workflow

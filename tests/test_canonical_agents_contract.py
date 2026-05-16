@@ -44,24 +44,24 @@ EXPECTED_HANDOFF_TARGETS = {
 EXPECTED_MANDATORY_SKILLS = {
     "internal-delivery-operator": [
         "internal-agent-operational-flow",
-        "internal-agent-lane-change-engine",
-        "internal-agent-next-step",
+        "internal-agent-support-lane-change-engine",
+        "internal-agent-support-next-step",
     ],
     "internal-planning-leader": [
         "internal-agent-operational-flow",
-        "internal-agent-lane-change-engine",
-        "internal-agent-next-step",
+        "internal-agent-support-lane-change-engine",
+        "internal-agent-support-next-step",
     ],
     "internal-review-guard": [
         "internal-agent-operational-flow",
-        "internal-agent-lane-change-engine",
-        "internal-agent-next-step",
+        "internal-agent-support-lane-change-engine",
+        "internal-agent-support-next-step",
         "internal-code-review",
     ],
     "internal-critical-master": [
         "internal-agent-critical-master",
-        "internal-agent-lane-change-engine",
-        "internal-agent-next-step",
+        "internal-agent-support-lane-change-engine",
+        "internal-agent-support-next-step",
     ],
 }
 
@@ -130,7 +130,7 @@ def test_next_step_package_skill_is_mandatory_for_all_operational_wrappers() -> 
         body = read_body(relative_path)
 
         assert "## Mandatory Engine Skills" in body
-        assert "- `internal-agent-next-step`" in mandatory_section(body)
+        assert "- `internal-agent-support-next-step`" in mandatory_section(body)
 
 
 def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
