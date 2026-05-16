@@ -277,11 +277,13 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - `.github/copilot-instructions.md`
   - `LESSONS_LEARNED.md`
   - `.github/instructions/internal-lessons-learned.instructions.md`
+  - `.github/skills/internal-lesson-codification/SKILL.md`
 - Expected behavior:
   - repository-root `LESSONS_LEARNED.md` exists as a non-canonical learning ledger
   - completed tasks add only durable, reusable lessons that were not already codified when discovered
   - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
   - root `AGENTS.md` keeps only retained-artifact boundaries and points detailed procedures to scoped owners
+  - the lesson codification skill owns the workflow that routes candidate lessons to the smallest valid canonical owner before ledger fallback
   - detailed ledger row preservation rules live in `LESSONS_LEARNED.md` entry rules
   - the scoped lessons instruction reminds editors to read and follow the file's entry rules without duplicating the full ledger procedure
   - the Copilot projection keeps only the retained-artifact principle and owner-routing reminder

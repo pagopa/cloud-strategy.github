@@ -82,6 +82,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-kubernetes/SKILL.md`
+- `.github/skills/internal-lesson-codification/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
 - `.github/skills/internal-project-java/SKILL.md`
