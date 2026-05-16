@@ -1,6 +1,6 @@
 ---
 name: internal-agent-operational-flow
-description: Use when repository-owned operational work needs the portable skill-first core for plan, execute, or review modes across Copilot, ChatGPT, Codex, or other runtimes.
+description: Use when repository-owned work needs plan, execute, or review mode selection, especially for non-trivial work with ambiguity, ownership, rollout, validation, or multiple credible paths.
 ---
 
 # Internal Agent Operational Flow

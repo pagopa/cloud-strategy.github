@@ -14,12 +14,17 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def assert_plan_policy_anchors(text: str) -> None:
-    assert PLAN_TASK_PATH in text
-    assert "01-...md" in text
-    assert "01-contesto-e-vincoli.md" in text
-    assert "dubbi-e-domande.md" in text
-    assert "done-*" in text
+def assert_no_plan_procedure_markers(text: str) -> None:
+    disallowed_markers = [
+        "01-...md",
+        "01-contesto-e-vincoli.md",
+        "dubbi-e-domande.md",
+        "done-*",
+        "macro-categories",
+        "continue through the remaining numbered plan files",
+    ]
+    for marker in disallowed_markers:
+        assert marker not in text
 
 
 def test_root_policy_files_define_repository_plan_defaults() -> None:
@@ -30,12 +35,34 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in agents_text
     )
-    assert_plan_policy_anchors(agents_text)
+    assert (
+        "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work"
+        in agents_text
+    )
+    assert "Keep file shape, execution workflow, and ledger row rules" in agents_text
+    assert "strategic operating bridge" in agents_text
+    assert "tactical operating defaults" in agents_text
+    assert "## Tactical Defaults" in agents_text
+    assert (
+        "Use `plan` mode for non-trivial repository-owned work when ambiguity, "
+        "ownership, rollout, validation, or multiple credible paths remain"
+        in agents_text
+    )
+    assert (
+        "Use `execute` mode only when the target state and validation path are concrete"
+        in agents_text
+    )
+    assert (
+        "Do not report work as complete from intent alone; cite validation evidence or name the explicit validation gap"
+        in agents_text
+    )
+    assert "Prefer root-cause fixes over symptom workarounds" in agents_text
+    assert "`internal-writing-plans`" not in agents_text
+    assert "`internal-executing-plans`" not in agents_text
+    assert "operational procedures, checklists, file-shape recipes" in agents_text
+    assert_no_plan_procedure_markers(agents_text)
     assert "Italian" in agents_text
     assert "clear, local, quick, or banal tasks" not in agents_text
-    assert "non-banal" in agents_text
-    assert "macro-categories" in agents_text
-    assert "continue through the remaining numbered plan files" in agents_text
     assert "`Obiettivo`" not in agents_text
     assert "5-7 bullets when practical" not in agents_text
 
@@ -43,12 +70,27 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in copilot_text
     )
-    assert_plan_policy_anchors(copilot_text)
-    assert "Italian" in copilot_text
-    assert "clear, local, quick, or banal tasks" in copilot_text
-    assert "retained planning is justified" in copilot_text
-    assert "`internal-writing-plans`" in copilot_text
-    assert "continue through the remaining numbered plan files" in copilot_text
+    assert (
+        "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical" in copilot_text
+    )
+    assert (
+        "dedicated retained-plan skills and scoped lessons instructions" in copilot_text
+    )
+    assert (
+        "Use plan mode when ambiguity, ownership, rollout, validation, or "
+        "multiple credible paths remain" in copilot_text
+    )
+    assert (
+        "Use execute mode only when the target state and validation path are concrete"
+        in copilot_text
+    )
+    assert "Do not report completion from intent alone" in copilot_text
+    assert PLAN_TASK_PATH not in copilot_text
+    assert "`internal-writing-plans`" not in copilot_text
+    assert "`internal-executing-plans`" not in copilot_text
+    assert_no_plan_procedure_markers(copilot_text)
+    assert "clear, local, quick, or banal tasks" not in copilot_text
+    assert "retained planning is justified" not in copilot_text
     assert "`Obiettivo`" not in copilot_text
     assert "5-7 bullets when practical" not in copilot_text
 

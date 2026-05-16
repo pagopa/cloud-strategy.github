@@ -20,11 +20,34 @@ from .shared import (
 ROOT_POLICY_MARKERS = ("AGENTS.md", ".github/copilot-instructions.md", ".github/INVENTORY.md")
 INVENTORY_LINE_PATTERN = re.compile(r"^- `?\.github/[^`]+`?(?::|\s*$)")
 IMPORTED_SKILL_DESCRIPTION_LIMIT = 500
+ESTIMATED_TOKEN_BYTES = 4
+ROOT_ALWAYS_ON_PATHS = ("AGENTS.md", ".github/copilot-instructions.md")
+ROOT_ALWAYS_ON_TOKEN_TARGET = 4000
+COPILOT_CODE_REVIEW_CHAR_LIMIT = 4000
+COPILOT_REVIEW_WINDOW_REQUIRED_MARKERS = (
+    "first 4,000 characters",
+    "least privilege",
+    "no hardcoded secrets",
+    "Apply only the instruction files relevant",
+    "Run the applicable validation",
+)
+AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
+    "## Retained Plans",
+    "## Retained Learning",
+    "01-...md",
+    "01-contesto-e-vincoli.md",
+    "dubbi-e-domande.md",
+    "done-*",
+    "continue through the remaining numbered plan files",
+)
 
 
 def detect_token_risks(root: Path) -> list[Finding]:
     findings: list[Finding] = []
     findings.extend(check_bridge_overlap(root))
+    findings.extend(check_agents_operational_procedure_markers(root))
+    findings.extend(check_root_always_on_budget(root))
+    findings.extend(check_copilot_review_window(root))
     findings.extend(check_inventory_dumps(root))
     findings.extend(check_duplicate_markdown_bodies(root))
     findings.extend(check_imported_skill_description_budget(root))
@@ -34,6 +57,97 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_instruction_skill_policy_overlap(root))
     findings.extend(check_paired_agent_skill_overlap(root))
     return sorted(findings, key=finding_sort_key)
+
+
+def estimate_tokens(path: Path) -> int:
+    return (len(path.read_bytes()) + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES
+
+
+def check_root_always_on_budget(root: Path) -> list[Finding]:
+    paths = [root / relative_path for relative_path in ROOT_ALWAYS_ON_PATHS]
+    if not all(path.exists() for path in paths):
+        return []
+
+    estimated_tokens = sum(estimate_tokens(path) for path in paths)
+    if estimated_tokens <= ROOT_ALWAYS_ON_TOKEN_TARGET:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="root-always-on-budget",
+            path="AGENTS.md",
+            message=(
+                "AGENTS.md and .github/copilot-instructions.md exceed the critical always-on "
+                f"soft target ({estimated_tokens} estimated tokens, target {ROOT_ALWAYS_ON_TOKEN_TARGET})."
+            ),
+            suggestion=(
+                "Classify each global section as required always-on, Copilot-native projection, scoped instruction, "
+                "skill, context, inventory, or removal before trimming."
+            ),
+        )
+    ]
+
+
+def check_agents_operational_procedure_markers(root: Path) -> list[Finding]:
+    path = root / "AGENTS.md"
+    if not path.exists():
+        return []
+
+    text = read_text(path)
+    markers = [
+        marker for marker in AGENTS_OPERATIONAL_PROCEDURE_MARKERS if marker in text
+    ]
+    if not markers:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="agents-operational-procedure-marker",
+            path="AGENTS.md",
+            message=(
+                "AGENTS.md contains operational procedure markers that belong in scoped "
+                f"instructions, skills, or owned files: {', '.join(markers)}."
+            ),
+            suggestion=(
+                "Keep AGENTS.md to stable policy, precedence, ownership boundaries, and "
+                "routing anchors; move retained-plan and ledger mechanics to their owners."
+            ),
+        )
+    ]
+
+
+def check_copilot_review_window(root: Path) -> list[Finding]:
+    path = root / ".github/copilot-instructions.md"
+    if not path.exists():
+        return []
+
+    window = read_text(path)[:COPILOT_CODE_REVIEW_CHAR_LIMIT]
+    normalized_window = window.lower()
+    missing_markers = [
+        marker
+        for marker in COPILOT_REVIEW_WINDOW_REQUIRED_MARKERS
+        if marker.lower() not in normalized_window
+    ]
+    if not missing_markers:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="copilot-review-window-missing-core-rules",
+            path=".github/copilot-instructions.md",
+            message=(
+                "The first 4,000 characters of .github/copilot-instructions.md do not carry "
+                f"all review-critical anchors: {', '.join(missing_markers)}."
+            ),
+            suggestion=(
+                "Keep the bridge reference, security guardrails, relevant-instruction rule, and validation rule "
+                "inside the first 4,000 characters before deeper governance detail."
+            ),
+        )
+    ]
 
 
 def iter_repo_owned_agent_paths(root: Path) -> list[Path]:

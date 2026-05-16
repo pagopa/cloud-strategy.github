@@ -7,17 +7,14 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def test_repo_projection_makes_detail_sections_optional() -> None:
+def test_repo_projection_keeps_completion_report_compact() -> None:
     copilot_text = read_text(".github/copilot-instructions.md")
 
-    assert "- End completed operations with `✅ Outcome`." in copilot_text
-    assert "Default to a concise `✅ Outcome`" in copilot_text
-    assert "offer it as an optional follow-up" in copilot_text
-    assert "allow a number-only reply" in copilot_text
-    assert (
-        "`1 = resources used`, `2 = files changed`, `3 = validations`, `4 = full detail`"
-        in copilot_text
-    )
+    assert "Report completed work with outcome, changed files" in copilot_text
+    assert "validation results, and remaining gaps" in copilot_text
+    assert "Include detailed resource sections only when the user asks" in copilot_text
+    assert "`✅ Outcome`" not in copilot_text
+    assert "`1 = resources used`" not in copilot_text
 
 
 def test_completion_report_docs_match_optional_detail_contract() -> None:

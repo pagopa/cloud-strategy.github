@@ -19,6 +19,7 @@ INSTRUCTION_APPLY_TO = {
     ),
     ".github/instructions/awesome-copilot-shell.instructions.md": "**/*.sh",
     ".github/instructions/internal-bash.instructions.md": "**/*.sh",
+    ".github/instructions/internal-codeowners.instructions.md": "**/CODEOWNERS",
     ".github/instructions/internal-copilot-agent-authoring.instructions.md": (
         ".github/agents/internal-*.agent.md,.github/agents/local-*.agent.md"
     ),
@@ -113,6 +114,9 @@ def test_collect_matching_instruction_paths_covers_realistic_sample_paths(
             ".github/instructions/internal-markdown.instructions.md",
         },
         "Dockerfile": {".github/instructions/internal-docker.instructions.md"},
+        ".github/CODEOWNERS": {
+            ".github/instructions/internal-codeowners.instructions.md"
+        },
         "infra/payment_lambda.tf": {
             ".github/instructions/internal-lambda.instructions.md",
             ".github/instructions/internal-terraform.instructions.md",

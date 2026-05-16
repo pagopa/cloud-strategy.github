@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal GitHub PR"
+  short_description: "Create, update, validate, and merge repository pull requests."
+  default_prompt: "Use $internal-github-pr for this task and follow the repository-owned workflow in the skill."

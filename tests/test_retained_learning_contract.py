@@ -13,23 +13,21 @@ def read_text(relative_path: str) -> str:
 def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
     expected_contracts: dict[str, list[str]] = {
         "AGENTS.md": [
-            "Keep `LESSONS_LEARNED.md` append-preserving by default",
-            "preserve unrelated rows already on disk, including local uncommitted lessons",
-            (
-                "change a specific row only when that same lesson is being codified, "
-                "disproven, narrowed, or deduplicated"
-            ),
+            "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work",
+            "Treat retained plans and retained learning as non-canonical",
+            "Keep file shape, execution workflow, and ledger row rules in their scoped owners",
         ],
         ".github/copilot-instructions.md": [
-            "Before editing repository-root `LESSONS_LEARNED.md`, read its current on-disk contents",
-            "including uncommitted rows already present on disk",
-            "append one concise, reusable row to the pending table in `LESSONS_LEARNED.md`",
-            "do not regenerate, reorder, or rewrite unrelated rows",
-            (
-                "Preserve unrelated existing lessons in `LESSONS_LEARNED.md`, including local "
-                "uncommitted ones already on disk"
-            ),
-            "update or remove only that lesson's row before completion",
+            "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical",
+            "dedicated retained-plan skills and scoped lessons instructions",
+            "ledger row rules",
+        ],
+        ".github/instructions/internal-lessons-learned.instructions.md": [
+            'applyTo: "LESSONS_LEARNED.md"',
+            "Follow the file's `Entry Rules`.",
+            "current on-disk contents",
+            "preserve unrelated rows",
+            "smallest valid canonical owner",
         ],
         "LESSONS_LEARNED.md": [
             "Before editing this file, read its current on-disk contents",

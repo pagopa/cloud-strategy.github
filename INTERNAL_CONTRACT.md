@@ -17,15 +17,17 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 #### `instruction-architecture-root-agents-is-entrypoint`
 
-- Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface bridge.
+- Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface strategic operating bridge.
 - Scope:
   - root `AGENTS.md`
   - `.github/copilot-instructions.md`
   - `.github/INVENTORY.md`
 - Expected behavior:
-  - root `AGENTS.md` defines the strategic role of the instruction system, the precedence model, and the default language rule
+  - root `AGENTS.md` defines the strategic role of the instruction system, the precedence model, tactical operating defaults, and the default language rule
   - root `AGENTS.md` points to `.github/copilot-instructions.md` as the repo-wide Copilot projection and to `.github/INVENTORY.md` as the exact live catalog
-  - root `AGENTS.md` does not carry volatile inventory or long surface-specific playbooks
+  - root `AGENTS.md` defines rule placement early so operational procedures do not drift into the always-on bridge
+  - root `AGENTS.md` may carry compact tactical defaults for mode selection, owner visibility, validation evidence, and root-cause preference
+  - root `AGENTS.md` does not carry volatile inventory, file-shape recipes, command playbooks, or long surface-specific procedures
 
 #### `instruction-architecture-inventory-is-externalized`
 
@@ -194,8 +196,6 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: keep prefix-based ownership distinct from dominant role so the catalog can evolve without false hierarchy drift.
 - Scope:
-  - root `AGENTS.md`
-  - `.github/copilot-instructions.md`
   - governance skills and agents that describe the catalog model
 - Expected behavior:
   - prefixes describe origin and ownership first, not a rigid strategic, tactical, or operational level
@@ -209,9 +209,8 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 - Goal: avoid unnecessary repository-owned wrappers around imported assets.
 - Scope:
-  - root `AGENTS.md`
-  - `.github/copilot-instructions.md`
-  - governance skills and agents that describe the catalog model
+  - `.github/agents/local-sync-external-resources.agent.md`
+  - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - Expected behavior:
   - overlap alone does not justify wrapping or replacing an imported asset
   - repository-owned wrappers or replacements are justified when they add repository-specific routing, governance, terminology, output shape, safety expectations, or a missing internal owner
@@ -229,6 +228,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection instead of a repository-owned front-door router
   - ambiguous or mixed-shape entry fails safe to `internal-planning-leader` or `plan` mode through `internal-agent-operational-flow`
+  - unclear target state and multiple credible paths are explicit planning triggers
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
   - any future peer-automation exception between wrapper owners must be narrow, one-directional, auditably bounded, and non-mesh
@@ -236,31 +236,37 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 ### Repository Workflow
 
-#### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-visible`
+#### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-owned`
 
-- Goal: keep repo-wide GitHub PR operating reminders visible where native Copilot flows need them.
+- Goal: keep repo-wide GitHub PR operating reminders visible without expanding the Copilot projection.
 - Scope:
+  - `.github/skills/internal-github-pr/SKILL.md`
+  - `.github/instructions/internal-codeowners.instructions.md`
   - `.github/copilot-instructions.md`
 - Expected behavior:
   - self-authored PRs under required reviews are not treated as mergeable from green checks alone
-  - the repo-wide projection tells operators to verify a qualifying non-author approval before merge
-  - the repo-wide projection prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
+  - the GitHub PR skill tells operators to verify a qualifying non-author approval before merge
+  - the GitHub PR skill prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
   - organization-wide `gh search prs` results are treated as potentially stale immediately after merge
   - repository-scoped `gh pr view --json state,mergedAt` is used to confirm terminal PR state before treating a just-merged PR as still open
+  - `CODEOWNERS` placeholder-owner rules stay path-scoped instead of always-on
+  - the Copilot projection does not repeat the full workflow reminder text
 
 ### Reporting
 
 #### `reporting-completion-report-projection-stays-visible`
 
-- Goal: keep the completion report contract visible on the surfaces that need it.
+- Goal: keep the completion report contract visible on the surfaces that need it while keeping Copilot always-on guidance short.
 - Scope:
   - `.github/copilot-instructions.md`
+  - `.github/README.md`
   - relevant governance or sync agents
 - Expected behavior:
-  - completed runs end with `✅ Outcome`
+  - completed runs include outcome, changed files, validation results, and remaining gaps
+  - maintainer-facing docs and sync contracts may define detailed report labels such as `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`
   - supporting sections such as `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources` are optional detail by default
   - when detail is available but omitted for token discipline, the response offers a compact follow-up and accepts number-only replies
-  - the contract stays projected where Copilot or governance flows rely on it
+  - the Copilot projection keeps only a compact reporting reminder unless a narrower contract requires more detail
   - root `AGENTS.md` may point to the repo-wide projection but does not need to carry the full formatting contract
 
 #### `reporting-retained-learning-ledger-stays-governed`
@@ -270,10 +276,15 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - root `AGENTS.md`
   - `.github/copilot-instructions.md`
   - `LESSONS_LEARNED.md`
+  - `.github/instructions/internal-lessons-learned.instructions.md`
 - Expected behavior:
   - repository-root `LESSONS_LEARNED.md` exists as a non-canonical learning ledger
   - completed tasks add only durable, reusable lessons that were not already codified when discovered
   - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
+  - root `AGENTS.md` keeps only retained-artifact boundaries and points detailed procedures to scoped owners
+  - detailed ledger row preservation rules live in `LESSONS_LEARNED.md` entry rules
+  - the scoped lessons instruction reminds editors to read and follow the file's entry rules without duplicating the full ledger procedure
+  - the Copilot projection keeps only the retained-artifact principle and owner-routing reminder
   - no ledger update is required when no stable new lesson emerged
   - once a lesson is codified elsewhere, it is removed from `LESSONS_LEARNED.md` instead of being retained as a codified duplicate
 

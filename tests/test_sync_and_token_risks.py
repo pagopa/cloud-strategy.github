@@ -6,7 +6,12 @@ from pathlib import Path
 
 import pytest
 from lib.syncing import apply_sync_plan, build_sync_plan, write_sync_plan
-from lib.token_risks import detect_token_risks
+from lib.token_risks import (
+    ROOT_ALWAYS_ON_PATHS,
+    ROOT_ALWAYS_ON_TOKEN_TARGET,
+    detect_token_risks,
+    estimate_tokens,
+)
 
 
 def write_file(path: Path, content: str) -> None:
@@ -729,6 +734,55 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     assert "bridge-overlap" in finding_codes
 
 
+def test_detect_token_risks_reports_root_always_on_budget(tmp_path: Path) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n\n" + ("Root policy line.\n" * 5000))
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot\n\n" + ("Projection policy line.\n" * 5000),
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "root-always-on-budget" in finding_codes
+
+
+def test_detect_token_risks_reports_agents_operational_procedure_markers(
+    tmp_path: Path,
+) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n"
+        "## Retained Plans\n\n"
+        "- Keep unresolved questions in `dubbi-e-domande.md`.\n"
+        "- During execution, create matching `done-*` files.\n",
+    )
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "agents-operational-procedure-marker" in finding_codes
+
+
+def test_detect_token_risks_reports_copilot_review_window_missing_core_rules(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot\n\n" + ("Repository background before critical rules.\n" * 150),
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "copilot-review-window-missing-core-rules" in finding_codes
+
+
 def test_detect_token_risks_ignores_structural_bridge_references(
     tmp_path: Path,
 ) -> None:
@@ -1008,30 +1062,19 @@ def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() ->
     assert "do not use `--allow-dirty-target` as a blanket bypass" in sync_contract_text
 
 
-def test_agents_fixed_load_token_budget_table_matches_current_files() -> None:
+def test_root_always_on_token_budget_contract_uses_validator_constants() -> None:
     agents_text = Path("AGENTS.md").read_text(encoding="utf-8")
-    section = agents_text.split("## Estimated Fixed-Load Token Budget\n", 1)[1].split(
-        "\n## ",
-        1,
-    )[0]
-    documented_estimates: dict[str, int] = {}
-    documented_total = None
-
-    for line in section.splitlines():
-        if not line.startswith("| `") and not line.startswith("| **Fixed-load"):
-            continue
-
-        cells = [cell.strip() for cell in line.strip("|").split("|")]
-        if cells[0].startswith("`"):
-            file_path = cells[0].strip("`")
-            documented_estimates[file_path] = int(cells[2].replace(",", ""))
-        elif cells[0] == "**Fixed-load set total**":
-            documented_total = int(cells[2].replace(",", ""))
-
+    target_text = f"{ROOT_ALWAYS_ON_TOKEN_TARGET:,} estimated tokens"
     calculated_estimates = {
-        file_path: (len(Path(file_path).read_bytes()) + 3) // 4
-        for file_path in documented_estimates
+        file_path: estimate_tokens(Path(file_path))
+        for file_path in ROOT_ALWAYS_ON_PATHS
     }
 
-    assert documented_estimates == calculated_estimates
-    assert documented_total == sum(calculated_estimates.values())
+    assert "## Estimated Fixed-Load Token Budget" not in agents_text
+    assert (
+        "The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md`"
+        in agents_text
+    )
+    assert target_text in agents_text
+    assert "`make token-risks`" in agents_text
+    assert set(calculated_estimates) == set(ROOT_ALWAYS_ON_PATHS)

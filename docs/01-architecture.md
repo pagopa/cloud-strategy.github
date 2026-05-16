@@ -40,7 +40,7 @@ Out of scope:
 
 | Component | Path | Responsibility |
 | --- | --- | --- |
-| Strategic bridge | `AGENTS.md` | Precedence model, ownership prefixes, volatile artifact policy, and retained-learning boundary. |
+| Strategic bridge | `AGENTS.md` | Rule placement, precedence model, ownership prefixes, volatile artifact policy, and retained-artifact boundaries. |
 | Copilot projection | `.github/copilot-instructions.md` | Repo-wide behavior visible to native Copilot flows. |
 | Architecture contract | `docs/01-architecture.md` | Repo-specific architecture, boundaries, flows, and validation surface. |
 | Repository context | `docs/02-repository-context.md` | Stable local context, glossary, and non-policy interpretation aids. |
