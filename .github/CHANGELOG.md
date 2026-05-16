@@ -8,6 +8,10 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-05-16
+
+- Slimmed `.github/copilot-instructions.md` into a short Copilot-native projection, kept detailed retained-learning and repository-workflow behavior in narrower owners, and realigned the contract tests plus `INTERNAL_CONTRACT.md` to the new ownership boundary.
+
 ## 2026-04-23
 
 - Cleared the stale pending row from `LESSONS_LEARNED.md` after confirming the sync-convergence fallback rule is already codified in `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/references/sync-contract.md`.

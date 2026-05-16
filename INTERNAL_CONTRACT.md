@@ -236,31 +236,35 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 ### Repository Workflow
 
-#### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-visible`
+#### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-owned`
 
-- Goal: keep repo-wide GitHub PR operating reminders visible where native Copilot flows need them.
+- Goal: keep repo-wide GitHub PR operating reminders visible without expanding the Copilot projection.
 - Scope:
+  - `AGENTS.md`
   - `.github/copilot-instructions.md`
 - Expected behavior:
   - self-authored PRs under required reviews are not treated as mergeable from green checks alone
-  - the repo-wide projection tells operators to verify a qualifying non-author approval before merge
-  - the repo-wide projection prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
+  - the strategic bridge tells operators to verify a qualifying non-author approval before merge
+  - the strategic bridge prefers `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and keeps `--admin` as an explicit policy-gated bypass
   - organization-wide `gh search prs` results are treated as potentially stale immediately after merge
   - repository-scoped `gh pr view --json state,mergedAt` is used to confirm terminal PR state before treating a just-merged PR as still open
+  - the Copilot projection may carry a compact pointer to `AGENTS.md` instead of repeating the full workflow reminder text
 
 ### Reporting
 
 #### `reporting-completion-report-projection-stays-visible`
 
-- Goal: keep the completion report contract visible on the surfaces that need it.
+- Goal: keep the completion report contract visible on the surfaces that need it while keeping Copilot always-on guidance short.
 - Scope:
   - `.github/copilot-instructions.md`
+  - `.github/README.md`
   - relevant governance or sync agents
 - Expected behavior:
-  - completed runs end with `✅ Outcome`
+  - completed runs include outcome, changed files, validation results, and remaining gaps
+  - maintainer-facing docs and sync contracts may define detailed report labels such as `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`
   - supporting sections such as `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources` are optional detail by default
   - when detail is available but omitted for token discipline, the response offers a compact follow-up and accepts number-only replies
-  - the contract stays projected where Copilot or governance flows rely on it
+  - the Copilot projection keeps only a compact reporting reminder unless a narrower contract requires more detail
   - root `AGENTS.md` may point to the repo-wide projection but does not need to carry the full formatting contract
 
 #### `reporting-retained-learning-ledger-stays-governed`
@@ -274,6 +278,8 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - repository-root `LESSONS_LEARNED.md` exists as a non-canonical learning ledger
   - completed tasks add only durable, reusable lessons that were not already codified when discovered
   - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
+  - detailed ledger row preservation rules live in `LESSONS_LEARNED.md` entry rules
+  - the Copilot projection keeps only the retained-learning principle and read-before-editing reminder
   - no ledger update is required when no stable new lesson emerged
   - once a lesson is codified elsewhere, it is removed from `LESSONS_LEARNED.md` instead of being retained as a codified duplicate
 

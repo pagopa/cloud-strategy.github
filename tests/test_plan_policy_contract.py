@@ -43,12 +43,14 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in copilot_text
     )
-    assert_plan_policy_anchors(copilot_text)
-    assert "Italian" in copilot_text
-    assert "clear, local, quick, or banal tasks" in copilot_text
-    assert "retained planning is justified" in copilot_text
+    assert "tmp/superpowers/<clear-action-or-task-name>/" in copilot_text
     assert "`internal-writing-plans`" in copilot_text
-    assert "continue through the remaining numbered plan files" in copilot_text
+    assert "`internal-executing-plans`" in copilot_text
+    assert "`done-*`, `01-...md`, and `dubbi-e-domande.md`" in copilot_text
+    assert "clear, local, quick, or banal tasks" not in copilot_text
+    assert "retained planning is justified" not in copilot_text
+    assert "`internal-writing-plans`" in copilot_text
+    assert "continue through the remaining numbered plan files" not in copilot_text
     assert "`Obiettivo`" not in copilot_text
     assert "5-7 bullets when practical" not in copilot_text
 

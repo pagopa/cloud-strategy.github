@@ -49,6 +49,14 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 - Run the applicable validation that exists for changed files; when no dedicated validator exists, report the gap and use the closest check.
 - Do not treat removed validators, sync scripts, contract tests, or historical aliases as active policy unless they exist on disk and are deliberately reintroduced.
 
+## Repository Workflow Reminders
+
+- PR content must follow `.github/PULL_REQUEST_TEMPLATE.md` in exact section order.
+- For self-authored PRs under required-review policy, do not treat green checks as sufficient: confirm a qualifying non-author approval still exists, prefer `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method, and use `--admin` only when policy explicitly allows a bypass.
+- Treat organization-wide `gh search prs` results as eventually consistent immediately after merge; confirm terminal state with repository-scoped `gh pr view --json state,mergedAt` before treating a just-merged PR as still open.
+- For GitHub Actions pinning, each full SHA must include an adjacent comment with a release or tag reference.
+- `CODEOWNERS` may keep `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
+
 ## Retained Plans
 
 - Keep transient planning, brainstorming, and Superpowers-generated working files out of `docs/`; use `tmp/superpowers/` inside this repository.
@@ -63,7 +71,7 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 - Keep `LESSONS_LEARNED.md` non-canonical; it must not replace `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
 - Treat `LESSONS_LEARNED.md` as a temporary incubation ledger: codify stable lessons into the smallest canonical owner when ready, then remove any duplicate ledger row in the same change.
 - Retain durable corrections to repeated or consequential misapplication of existing repository rules when they are not already codified.
-- Keep detailed retained-learning behavior in `.github/copilot-instructions.md`; keep only the strategic boundary here.
+- Use `LESSONS_LEARNED.md` entry rules for detailed ledger-editing behavior; keep only the strategic boundary here and short Copilot-native reminders in `.github/copilot-instructions.md`.
 
 ## Token And Drift Control
 

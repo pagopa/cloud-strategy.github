@@ -16,18 +16,13 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
             "Root `LESSONS_LEARNED.md` is the repository learning ledger",
             "Keep `LESSONS_LEARNED.md` non-canonical",
             "codify stable lessons into the smallest canonical owner when ready",
-            "Keep detailed retained-learning behavior in `.github/copilot-instructions.md`",
+            "Use `LESSONS_LEARNED.md` entry rules for detailed ledger-editing behavior",
         ],
         ".github/copilot-instructions.md": [
-            "Before editing repository-root `LESSONS_LEARNED.md`, read its current on-disk contents",
-            "including uncommitted rows already present on disk",
-            "append one concise, reusable row to the pending table in `LESSONS_LEARNED.md`",
-            "do not regenerate, reorder, or rewrite unrelated rows",
-            (
-                "Preserve unrelated existing lessons in `LESSONS_LEARNED.md`, including local "
-                "uncommitted ones already on disk"
-            ),
-            "update or remove only that lesson's row before completion",
+            "Treat `LESSONS_LEARNED.md` as a non-canonical ledger",
+            "Before editing `LESSONS_LEARNED.md`, read its entry rules",
+            "current on-disk contents",
+            "preserve unrelated rows",
         ],
         "LESSONS_LEARNED.md": [
             "Before editing this file, read its current on-disk contents",
