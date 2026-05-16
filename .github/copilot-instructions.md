@@ -4,7 +4,7 @@ Protect correctness, security, simplicity, and maintainability.
 
 ## Critical Copilot Window
 
-- Treat `AGENTS.md` as the strategic bridge, precedence anchor, and rule-placement authority.
+- Treat `AGENTS.md` as the strategic operating bridge, precedence anchor, tactical-default owner, and rule-placement authority.
 - Keep operational procedures out of `AGENTS.md`; use scoped instructions for path rules and skills for workflows.
 - Treat this file as the Copilot-native projection; it must work when only the first 4,000 characters are read.
 - Use least privilege for permissions, tokens, roles, workflows, and automation.
@@ -36,6 +36,10 @@ Protect correctness, security, simplicity, and maintainability.
 
 ## Delivery Guardrails
 
+- Use plan mode when ambiguity, ownership, rollout, validation, or multiple credible paths remain.
+- Use execute mode only when the target state and validation path are concrete.
+- When the selected owner no longer fits, stop and make the better owner visible before continuing.
+- Do not report completion from intent alone; cite validation evidence or name the explicit gap.
 - Prefer the simplest correct change with the smallest credible blast radius.
 - Preserve existing conventions unless the task changes them.
 - Keep policy, projection, inventory, local context, runtime guidance, and operational workflows separate.

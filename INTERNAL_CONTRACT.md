@@ -17,15 +17,16 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 
 #### `instruction-architecture-root-agents-is-entrypoint`
 
-- Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface bridge.
+- Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface strategic operating bridge.
 - Scope:
   - root `AGENTS.md`
   - `.github/copilot-instructions.md`
   - `.github/INVENTORY.md`
 - Expected behavior:
-  - root `AGENTS.md` defines the strategic role of the instruction system, the precedence model, and the default language rule
+  - root `AGENTS.md` defines the strategic role of the instruction system, the precedence model, tactical operating defaults, and the default language rule
   - root `AGENTS.md` points to `.github/copilot-instructions.md` as the repo-wide Copilot projection and to `.github/INVENTORY.md` as the exact live catalog
   - root `AGENTS.md` defines rule placement early so operational procedures do not drift into the always-on bridge
+  - root `AGENTS.md` may carry compact tactical defaults for mode selection, owner visibility, validation evidence, and root-cause preference
   - root `AGENTS.md` does not carry volatile inventory, file-shape recipes, command playbooks, or long surface-specific procedures
 
 #### `instruction-architecture-inventory-is-externalized`
@@ -227,6 +228,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection instead of a repository-owned front-door router
   - ambiguous or mixed-shape entry fails safe to `internal-planning-leader` or `plan` mode through `internal-agent-operational-flow`
+  - unclear target state and multiple credible paths are explicit planning triggers
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
   - any future peer-automation exception between wrapper owners must be narrow, one-directional, auditably bounded, and non-mesh

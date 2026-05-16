@@ -1,11 +1,12 @@
 # AGENTS.md - Instruction Architecture Bridge
 
-This file is the repository constitution for AI configuration. Keep it short,
-stable, strategic, and free of volatile inventory or surface-specific playbooks.
+This file is the repository strategic operating bridge for AI configuration.
+Keep it compact, stable, and free of volatile inventory or surface-specific
+playbooks.
 
 ## Rule Placement
 
-- `AGENTS.md` must define stable repository-wide policy, precedence, ownership boundaries, and routing anchors only.
+- `AGENTS.md` must define stable repository-wide policy, precedence, tactical operating defaults, ownership boundaries, and routing anchors only.
 - Do not put operational procedures, checklists, file-shape recipes, command playbooks, or tool-specific workflows here.
 - Put each rule in the smallest valid owner: scoped instructions for path rules, skills for workflows, agents for route UX, docs for context, validators for enforceable checks, and owned files for their local editing rules.
 
@@ -49,6 +50,14 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 - `internal-agent-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
 - Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; reusable behavior stays in skills.
 - Use direct owner selection. Do not add a repository-owned front-door router or hidden peer dispatch.
+
+## Tactical Defaults
+
+- Use `plan` mode for non-trivial repository-owned work when ambiguity, ownership, rollout, validation, or multiple credible paths remain.
+- Use `execute` mode only when the target state and validation path are concrete.
+- When the selected owner no longer fits, stop and make the better owner visible before continuing.
+- Do not report work as complete from intent alone; cite validation evidence or name the explicit validation gap.
+- Prefer root-cause fixes over symptom workarounds unless a temporary mitigation is explicitly scoped.
 
 ## Delivery And Validation
 

@@ -37,6 +37,23 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     )
     assert "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work" in agents_text
     assert "Keep file shape, execution workflow, and ledger row rules" in agents_text
+    assert "strategic operating bridge" in agents_text
+    assert "tactical operating defaults" in agents_text
+    assert "## Tactical Defaults" in agents_text
+    assert (
+        "Use `plan` mode for non-trivial repository-owned work when ambiguity, "
+        "ownership, rollout, validation, or multiple credible paths remain"
+        in agents_text
+    )
+    assert (
+        "Use `execute` mode only when the target state and validation path are concrete"
+        in agents_text
+    )
+    assert (
+        "Do not report work as complete from intent alone; cite validation evidence or name the explicit validation gap"
+        in agents_text
+    )
+    assert "Prefer root-cause fixes over symptom workarounds" in agents_text
     assert "`internal-writing-plans`" not in agents_text
     assert "`internal-executing-plans`" not in agents_text
     assert "operational procedures, checklists, file-shape recipes" in agents_text
@@ -52,6 +69,16 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     )
     assert "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical" in copilot_text
     assert "dedicated retained-plan skills and scoped lessons instructions" in copilot_text
+    assert (
+        "Use plan mode when ambiguity, ownership, rollout, validation, or "
+        "multiple credible paths remain"
+        in copilot_text
+    )
+    assert (
+        "Use execute mode only when the target state and validation path are concrete"
+        in copilot_text
+    )
+    assert "Do not report completion from intent alone" in copilot_text
     assert PLAN_TASK_PATH not in copilot_text
     assert "`internal-writing-plans`" not in copilot_text
     assert "`internal-executing-plans`" not in copilot_text

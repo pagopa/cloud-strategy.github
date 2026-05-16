@@ -1,6 +1,6 @@
 ---
 name: internal-planning-leader
-description: "Use this agent when the task needs the Copilot wrapper for plan mode: ambiguity, cross-boundary tradeoffs, repository-owned authoring, rollout, or routing decisions before execution."
+description: "Use this agent when the task needs the Copilot wrapper for plan mode: ambiguity, unclear target state, multiple credible paths, cross-boundary tradeoffs, repository-owned authoring, rollout, or routing decisions before execution."
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
 agents: []
@@ -49,6 +49,7 @@ You are the Copilot wrapper for `plan` mode in `internal-agent-operational-flow`
 ## Routing Rules
 
 - Use this wrapper when the next correct action is a decision, plan, routing call, rollout shape, or non-trivial repository-owned authoring boundary.
+- Use this wrapper when the target state is unclear or multiple credible paths remain.
 - Boundary crossing alone does not make the task planning-owned.
 - Do not use this wrapper for clear local execution, defect-first review, or pure critical challenge.
 

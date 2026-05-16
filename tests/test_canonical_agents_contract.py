@@ -191,12 +191,21 @@ def test_skill_first_operational_core_exists_with_required_modes() -> None:
 
     assert "name: internal-agent-operational-flow" in skill_text
     assert "`plan`, `execute`, and `review`" in skill_text
+    assert "multiple credible paths" in skill_text
     assert "`plan`" in mode_contracts_text
     assert "`execute`" in mode_contracts_text
     assert "`review`" in mode_contracts_text
     assert "Codex plugin or Codex CLI" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
     assert "$internal-agent-operational-flow" in metadata_text
+
+    planning_frontmatter = load_frontmatter(
+        CANONICAL_AGENTS["internal-planning-leader"]
+    )
+    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
+    assert "unclear target state" in planning_frontmatter["description"]
+    assert "multiple credible paths" in planning_frontmatter["description"]
+    assert "multiple credible paths remain" in planning_body
 
 
 def test_critical_master_skill_exists_with_challenge_boundary() -> None:
