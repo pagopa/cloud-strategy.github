@@ -23,11 +23,11 @@ handoffs:
 
 ## Role
 
-You are the Copilot wrapper for `review` mode in `internal-agent-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and review next-action buttons; keep the reusable review boundary in the operational-flow skill and the tactical playbook in `internal-code-review`.
+You are the Copilot wrapper for `review` mode in `internal-gateway-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and review next-action buttons; keep the reusable review boundary in the operational-flow skill and the tactical playbook in `internal-code-review`.
 
 ## Mandatory Engine Skills
 
-- `internal-agent-operational-flow`
+- `internal-gateway-operational-flow`
 - `internal-agent-support-lane-change-engine`
 - `internal-agent-support-next-step`
 - `internal-code-review`
@@ -42,7 +42,7 @@ You are the Copilot wrapper for `review` mode in `internal-agent-operational-flo
 
 ## Core Rules
 
-- Select and follow `review` mode from `internal-agent-operational-flow`.
+- Select and follow `review` mode from `internal-gateway-operational-flow`.
 - Put findings before summaries.
 - Use `internal-code-review` for the tactical review engine instead of duplicating its playbook here.
 - For every actionable finding, include severity, confidence, causal layer, and a fix routing plan.

@@ -46,8 +46,8 @@ playbooks.
 
 ## Operational Ownership
 
-- `internal-agent-operational-flow` owns the reusable `plan`, `execute`, and `review` mode semantics.
-- `internal-agent-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
+- `internal-gateway-operational-flow` owns the reusable `plan`, `execute`, and `review` mode semantics.
+- `internal-gateway-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
 - Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; reusable behavior stays in skills.
 - Use direct owner selection. Do not add a repository-owned front-door router or hidden peer dispatch.
 

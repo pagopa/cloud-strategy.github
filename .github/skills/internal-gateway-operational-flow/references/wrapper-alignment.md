@@ -6,10 +6,10 @@ Use this reference when updating the Copilot agent wrappers, README projection, 
 
 | Wrapper | Mode | Mandatory engines |
 | --- | --- | --- |
-| `internal-planning-leader` | `plan` | `internal-agent-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
-| `internal-delivery-operator` | `execute` | `internal-agent-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
-| `internal-review-guard` | `review` | `internal-agent-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step`, `internal-code-review` |
-| `internal-critical-master` | critical challenge | `internal-agent-critical-master`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
+| `internal-planning-leader` | `plan` | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
+| `internal-delivery-operator` | `execute` | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
+| `internal-review-guard` | `review` | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step`, `internal-code-review` |
+| `internal-critical-master` | critical challenge | `internal-gateway-critical-master`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
 
 The wrappers keep route wording, tools, `disable-model-invocation: true`, `agents: []`, handoff buttons, boundary summary, and output shape. They should not repeat long mode tables or workflow maps from this skill bundle.
 
@@ -26,4 +26,4 @@ The repo-only sync agents remain outside the compressed operational model. They 
 
 ## README Projection
 
-`.github/agents/README.md` may document wrapper usage and ASCII flows, but the semantic owner for plan/execute/review behavior is `internal-agent-operational-flow`. Keep README examples aligned with this bundle instead of adding a second operational contract.
+`.github/agents/README.md` may document wrapper usage and ASCII flows, but the semantic owner for plan/execute/review behavior is `internal-gateway-operational-flow`. Keep README examples aligned with this bundle instead of adding a second operational contract.

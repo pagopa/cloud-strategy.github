@@ -44,11 +44,11 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
-- `.github/skills/internal-agent-critical-master/SKILL.md`
-- `.github/skills/internal-agent-development/SKILL.md`
-- `.github/skills/internal-agent-lane-change-engine/SKILL.md`
-- `.github/skills/internal-agent-next-step/SKILL.md`
-- `.github/skills/internal-agent-operational-flow/SKILL.md`
+- `.github/skills/internal-agent-creator/SKILL.md`
+- `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
+- `.github/skills/internal-agent-support-next-step/SKILL.md`
+- `.github/skills/internal-gateway-critical-master/SKILL.md`
+- `.github/skills/internal-gateway-operational-flow/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`

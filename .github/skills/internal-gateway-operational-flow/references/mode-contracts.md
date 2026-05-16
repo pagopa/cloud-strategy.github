@@ -35,8 +35,8 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 
 | Skill | Primary mode or wrapper | When it wins |
 | --- | --- | --- |
-| `internal-agent-operational-flow` | Shared by `plan`, `execute`, and `review` | Portable operational workflow core across Copilot, ChatGPT, Codex, and other runtimes. |
-| `internal-agent-critical-master` | Critical wrapper and pressure-test workflows | Challenge, pre-mortem, hidden assumptions, failure modes, and reframing. |
+| `internal-gateway-operational-flow` | Shared by `plan`, `execute`, and `review` | Portable operational workflow core across Copilot, ChatGPT, Codex, and other runtimes. |
+| `internal-gateway-critical-master` | Critical wrapper and pressure-test workflows | Challenge, pre-mortem, hidden assumptions, failure modes, and reframing. |
 | `internal-agent-support-lane-change-engine` | Shared by operational wrappers and sync command centers | Stop-and-recommend protocol when the selected mode or lane no longer fits. |
 | `internal-agent-support-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
 | `internal-code-review` | `review` mode | Tactical review engine for defect-first findings and code or catalog review. |
@@ -50,7 +50,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 
 | Retired or old owner | Current owner |
 | --- | --- |
-| `internal-agent-cross-lane-engine` | `internal-agent-operational-flow` for plan/execute/review boundaries plus `internal-agent-support-lane-change-engine` for stop-and-recommend behavior. |
+| `internal-agent-cross-lane-engine` | `internal-gateway-operational-flow` for plan/execute/review boundaries plus `internal-agent-support-lane-change-engine` for stop-and-recommend behavior. |
 | `internal-ai-resource-creator` | `plan` mode through `internal-planning-leader` or direct skill use. |
 | `internal-architect` | `plan` mode through `internal-planning-leader` or direct skill use. |
 | `internal-developer` | `execute` mode when target state is clear. |

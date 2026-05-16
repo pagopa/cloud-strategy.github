@@ -1,9 +1,9 @@
 ---
-name: internal-agent-critical-master
+name: internal-gateway-critical-master
 description: Use when a repository-owned plan, proposal, or decision needs a critical challenge, pre-mortem, hidden-assumption test, failure-mode analysis, or lateral reframe before action.
 ---
 
-# Internal Agent Critical Master
+# Internal Gateway Critical Master
 
 Use this skill as the portable core for critical challenge work. Copilot may expose `internal-critical-master` as a wrapper agent, but the reusable pressure-test method lives here so runtimes without agent UI can still use it directly.
 
@@ -16,7 +16,7 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 
 ## When not to use
 
-- The next step is final planning, implementation, or evidence-first review; use the relevant mode in `internal-agent-operational-flow`.
+- The next step is final planning, implementation, or evidence-first review; use the relevant mode in `internal-gateway-operational-flow`.
 - The user wants open-ended brainstorming without a proposal or decision to challenge.
 - The task is source-side sync governance or consumer baseline propagation.
 
@@ -40,9 +40,9 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 
 ## Boundaries
 
-- Use `internal-agent-operational-flow` `plan` mode when the main job is reformulating the plan.
-- Use `internal-agent-operational-flow` `execute` mode when the next step is a clear implementation.
-- Use `internal-agent-operational-flow` `review` mode when the next step is evidence-based validation of a concrete change.
+- Use `internal-gateway-operational-flow` `plan` mode when the main job is reformulating the plan.
+- Use `internal-gateway-operational-flow` `execute` mode when the next step is a clear implementation.
+- Use `internal-gateway-operational-flow` `review` mode when the next step is evidence-based validation of a concrete change.
 - Stay here only while the primary need is pressure-testing reasoning, assumptions, or failure modes.
 
 ## References

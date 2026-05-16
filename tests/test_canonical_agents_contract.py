@@ -43,23 +43,23 @@ EXPECTED_HANDOFF_TARGETS = {
 
 EXPECTED_MANDATORY_SKILLS = {
     "internal-delivery-operator": [
-        "internal-agent-operational-flow",
+        "internal-gateway-operational-flow",
         "internal-agent-support-lane-change-engine",
         "internal-agent-support-next-step",
     ],
     "internal-planning-leader": [
-        "internal-agent-operational-flow",
+        "internal-gateway-operational-flow",
         "internal-agent-support-lane-change-engine",
         "internal-agent-support-next-step",
     ],
     "internal-review-guard": [
-        "internal-agent-operational-flow",
+        "internal-gateway-operational-flow",
         "internal-agent-support-lane-change-engine",
         "internal-agent-support-next-step",
         "internal-code-review",
     ],
     "internal-critical-master": [
-        "internal-agent-critical-master",
+        "internal-gateway-critical-master",
         "internal-agent-support-lane-change-engine",
         "internal-agent-support-next-step",
     ],
@@ -174,22 +174,22 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
 
 def test_skill_first_operational_core_exists_with_required_modes() -> None:
     skill_text = Path(
-        ".github/skills/internal-agent-operational-flow/SKILL.md"
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
     mode_contracts_text = Path(
-        ".github/skills/internal-agent-operational-flow/references/mode-contracts.md"
+        ".github/skills/internal-gateway-operational-flow/references/mode-contracts.md"
     ).read_text(encoding="utf-8")
     workflow_maps_text = Path(
-        ".github/skills/internal-agent-operational-flow/references/workflow-maps.md"
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
     ).read_text(encoding="utf-8")
     wrapper_alignment_text = Path(
-        ".github/skills/internal-agent-operational-flow/references/wrapper-alignment.md"
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
     metadata_text = Path(
-        ".github/skills/internal-agent-operational-flow/agents/openai.yaml"
+        ".github/skills/internal-gateway-operational-flow/agents/openai.yaml"
     ).read_text(encoding="utf-8")
 
-    assert "name: internal-agent-operational-flow" in skill_text
+    assert "name: internal-gateway-operational-flow" in skill_text
     assert "`plan`, `execute`, and `review`" in skill_text
     assert "multiple credible paths" in skill_text
     assert "`plan`" in mode_contracts_text
@@ -197,7 +197,7 @@ def test_skill_first_operational_core_exists_with_required_modes() -> None:
     assert "`review`" in mode_contracts_text
     assert "Codex plugin or Codex CLI" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
-    assert "$internal-agent-operational-flow" in metadata_text
+    assert "$internal-gateway-operational-flow" in metadata_text
 
     planning_frontmatter = load_frontmatter(
         CANONICAL_AGENTS["internal-planning-leader"]
@@ -210,25 +210,25 @@ def test_skill_first_operational_core_exists_with_required_modes() -> None:
 
 def test_critical_master_skill_exists_with_challenge_boundary() -> None:
     skill_text = Path(
-        ".github/skills/internal-agent-critical-master/SKILL.md"
+        ".github/skills/internal-gateway-critical-master/SKILL.md"
     ).read_text(encoding="utf-8")
     lenses_text = Path(
-        ".github/skills/internal-agent-critical-master/references/challenge-lenses.md"
+        ".github/skills/internal-gateway-critical-master/references/challenge-lenses.md"
     ).read_text(encoding="utf-8")
     metadata_text = Path(
-        ".github/skills/internal-agent-critical-master/agents/openai.yaml"
+        ".github/skills/internal-gateway-critical-master/agents/openai.yaml"
     ).read_text(encoding="utf-8")
 
-    assert "name: internal-agent-critical-master" in skill_text
+    assert "name: internal-gateway-critical-master" in skill_text
     assert "Do not implement, routine-review, or finalize the plan" in skill_text
     assert "Final Consistency Gate" in lenses_text
     assert "Scope compression" in lenses_text
-    assert "$internal-agent-critical-master" in metadata_text
+    assert "$internal-gateway-critical-master" in metadata_text
 
 
 def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     operational_text = Path(
-        ".github/skills/internal-agent-operational-flow/SKILL.md"
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
     planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
 

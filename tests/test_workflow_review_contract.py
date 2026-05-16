@@ -15,7 +15,7 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
     )
     planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
     operating_model_text = read_text(
-        ".github/skills/internal-agent-operational-flow/SKILL.md"
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
 
     assert (

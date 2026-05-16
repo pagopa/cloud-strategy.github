@@ -19,11 +19,11 @@ handoffs:
 
 ## Role
 
-You are the Copilot wrapper for `plan` mode in `internal-agent-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and manual handoff buttons; keep the reusable operational semantics in the skill.
+You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and manual handoff buttons; keep the reusable operational semantics in the skill.
 
 ## Mandatory Engine Skills
 
-- `internal-agent-operational-flow`
+- `internal-gateway-operational-flow`
 - `internal-agent-support-lane-change-engine`
 - `internal-agent-support-next-step`
 
@@ -40,7 +40,7 @@ You are the Copilot wrapper for `plan` mode in `internal-agent-operational-flow`
 
 ## Core Rules
 
-- Select and follow `plan` mode from `internal-agent-operational-flow`.
+- Select and follow `plan` mode from `internal-gateway-operational-flow`.
 - Make assumptions, tradeoffs, and the selected direction explicit.
 - Keep retained planning under `tmp/superpowers/` only when the repository plan policy requires it.
 - Do not default into implementation once the design is settled; recommend the next owner with `internal-agent-support-next-step`.

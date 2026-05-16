@@ -15,11 +15,11 @@ handoffs:
 
 ## Role
 
-You are the Copilot wrapper for `execute` mode in `internal-agent-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and review handoff UX; keep reusable execution boundaries in the skill.
+You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and review handoff UX; keep reusable execution boundaries in the skill.
 
 ## Mandatory Engine Skills
 
-- `internal-agent-operational-flow`
+- `internal-gateway-operational-flow`
 - `internal-agent-support-lane-change-engine`
 - `internal-agent-support-next-step`
 
@@ -34,7 +34,7 @@ You are the Copilot wrapper for `execute` mode in `internal-agent-operational-fl
 
 ## Core Rules
 
-- Select and follow `execute` mode from `internal-agent-operational-flow`.
+- Select and follow `execute` mode from `internal-gateway-operational-flow`.
 - Start light, stay local, and implement only when scope, ownership, and validation are concrete.
 - Keep deterministic realignment across adjacent repository-owned assets in execution when the target state is already known.
 - Use `internal-agent-support-next-step` when recommending review or another visible transition.

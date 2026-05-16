@@ -1,9 +1,9 @@
 ---
-name: internal-agent-operational-flow
+name: internal-gateway-operational-flow
 description: Use when repository-owned work needs plan, execute, or review mode selection, especially for non-trivial work with ambiguity, ownership, rollout, validation, or multiple credible paths.
 ---
 
-# Internal Agent Operational Flow
+# Internal Gateway Operational Flow
 
 Use this skill as the portable operational core for repository-owned `plan`, `execute`, and `review` work. Copilot agents may wrap it with frontmatter, tools, and `handoffs:`, but the reusable workflow semantics live here so runtimes without agent UI can still follow the same model.
 
@@ -16,7 +16,7 @@ Use this skill as the portable operational core for repository-owned `plan`, `ex
 
 ## When not to use
 
-- The primary need is critical challenge or pre-mortem work; use `internal-agent-critical-master`.
+- The primary need is critical challenge or pre-mortem work; use `internal-gateway-critical-master`.
 - The work is source-side sync governance or consumer baseline propagation; use the repo-only sync owners.
 - The user only needs a narrow runtime or domain skill after the operational mode is already settled.
 
@@ -36,7 +36,7 @@ Use this skill as the portable operational core for repository-owned `plan`, `ex
 - `execute`: use when the target state is already clear, verification is concrete, and the work is deterministic local delivery or maintenance.
 - `review`: use when a concrete artifact, diff, or validation result exists and the main job is defect-first evidence, findings, and fix routing.
 
-Do not use this skill for critical pressure testing. Use `internal-agent-critical-master` when the primary need is a challenge, pre-mortem, hidden-assumption test, or lateral reframing.
+Do not use this skill for critical pressure testing. Use `internal-gateway-critical-master` when the primary need is a challenge, pre-mortem, hidden-assumption test, or lateral reframing.
 
 ## Plan Mode
 
