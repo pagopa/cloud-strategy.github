@@ -748,6 +748,25 @@ def test_detect_token_risks_reports_root_always_on_budget(tmp_path: Path) -> Non
     assert "root-always-on-budget" in finding_codes
 
 
+def test_detect_token_risks_reports_agents_operational_procedure_markers(
+    tmp_path: Path,
+) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n"
+        "## Retained Plans\n\n"
+        "- Keep unresolved questions in `dubbi-e-domande.md`.\n"
+        "- During execution, create matching `done-*` files.\n",
+    )
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "agents-operational-procedure-marker" in finding_codes
+
+
 def test_detect_token_risks_reports_copilot_review_window_missing_core_rules(
     tmp_path: Path,
 ) -> None:

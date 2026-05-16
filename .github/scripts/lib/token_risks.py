@@ -31,11 +31,21 @@ COPILOT_REVIEW_WINDOW_REQUIRED_MARKERS = (
     "Apply only the instruction files relevant",
     "Run the applicable validation",
 )
+AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
+    "## Retained Plans",
+    "## Retained Learning",
+    "01-...md",
+    "01-contesto-e-vincoli.md",
+    "dubbi-e-domande.md",
+    "done-*",
+    "continue through the remaining numbered plan files",
+)
 
 
 def detect_token_risks(root: Path) -> list[Finding]:
     findings: list[Finding] = []
     findings.extend(check_bridge_overlap(root))
+    findings.extend(check_agents_operational_procedure_markers(root))
     findings.extend(check_root_always_on_budget(root))
     findings.extend(check_copilot_review_window(root))
     findings.extend(check_inventory_dumps(root))
@@ -74,6 +84,35 @@ def check_root_always_on_budget(root: Path) -> list[Finding]:
             suggestion=(
                 "Classify each global section as required always-on, Copilot-native projection, scoped instruction, "
                 "skill, context, inventory, or removal before trimming."
+            ),
+        )
+    ]
+
+
+def check_agents_operational_procedure_markers(root: Path) -> list[Finding]:
+    path = root / "AGENTS.md"
+    if not path.exists():
+        return []
+
+    text = read_text(path)
+    markers = [
+        marker for marker in AGENTS_OPERATIONAL_PROCEDURE_MARKERS if marker in text
+    ]
+    if not markers:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="agents-operational-procedure-marker",
+            path="AGENTS.md",
+            message=(
+                "AGENTS.md contains operational procedure markers that belong in scoped "
+                f"instructions, skills, or owned files: {', '.join(markers)}."
+            ),
+            suggestion=(
+                "Keep AGENTS.md to stable policy, precedence, ownership boundaries, and "
+                "routing anchors; move retained-plan and ledger mechanics to their owners."
             ),
         )
     ]

@@ -4,7 +4,8 @@ Protect correctness, security, simplicity, and maintainability.
 
 ## Critical Copilot Window
 
-- Treat `AGENTS.md` as strategic bridge and precedence anchor.
+- Treat `AGENTS.md` as the strategic bridge, precedence anchor, and rule-placement authority.
+- Keep operational procedures out of `AGENTS.md`; use scoped instructions for path rules and skills for workflows.
 - Treat this file as the Copilot-native projection; it must work when only the first 4,000 characters are read.
 - Use least privilege for permissions, tokens, roles, workflows, and automation.
 - Keep no hardcoded secrets: never write credentials, keys, tokens, or sensitive tenant values.
@@ -26,34 +27,35 @@ Protect correctness, security, simplicity, and maintainability.
 
 ## Context Loading
 
-- Read `AGENTS.md` first when policy, precedence, or ownership matters.
-- Load matching `.github/instructions/*.instructions.md` files and relevant skills when the path or task makes them applicable.
-- Let scoped policy win over conflicting skill workflow; use skills for decision trees, domain depth, and reusable procedures.
+- Read `AGENTS.md` first when policy, precedence, ownership, or rule placement matters.
+- Load every `.github/instructions/*.instructions.md` file whose `applyTo` metadata or task domain matches the target.
+- Load task-specific skills only when workflow depth, decision trees, or domain procedure is needed.
+- Let scoped policy win over conflicting skill workflow.
 - Read `.github/copilot-instructions.override.md` before synced defaults when present.
-- Use `docs/01-architecture.md` for boundaries and `docs/03-ai-runtime-operating-model.md` when relevant.
+- Use `docs/01-architecture.md` for boundaries and `docs/03-ai-runtime-operating-model.md` when runtime consumption matters.
 
 ## Delivery Guardrails
 
-- Prefer the simplest correct change with the smallest credible blast radius. Avoid temporary fixes, unrequested abstractions, and broad rewrites unless the plan justifies them.
+- Prefer the simplest correct change with the smallest credible blast radius.
 - Preserve existing conventions unless the task changes them.
-- Keep policy, projection, inventory, local context, and runtime guidance separate.
+- Keep policy, projection, inventory, local context, runtime guidance, and operational workflows separate.
 - Update docs, validators, tests, or sync discovery when governance contracts change.
 - Read primary vendor docs before schema-driven edits.
 - Handle failures evidence-first: inspect the signal, fix the root cause when clear, and ask only for unsafe or missing decisions.
 - Do not add unrequested abstractions, logging, broad rewrites, or unrelated fixes.
 
-## Retained Plans And Learning
+## Retained Artifacts
 
 - Use `tmp/superpowers/<clear-action-or-task-name>/` only for retained plans needing tracking, handoff, provenance, or reviewable tradeoffs.
-- Use `internal-writing-plans` for plan shape and `internal-executing-plans` for `done-*`, `01-...md`, and `dubbi-e-domande.md` execution rules.
+- Use `internal-writing-plans` and `internal-executing-plans` for retained-plan shape and execution workflow.
 - Treat `LESSONS_LEARNED.md` as a non-canonical ledger for durable lessons pending codification.
-- Before editing `LESSONS_LEARNED.md`, read its entry rules and contents, then preserve unrelated rows.
+- Before editing `LESSONS_LEARNED.md`, read its entry rules and current on-disk contents, then preserve unrelated rows.
 
 ## Validation And Reporting
 
 - Run the validator that exists; use the closest check when no dedicated validator exists.
 - For always-on guidance changes, run `make token-risks` or the equivalent detector and address actionable findings.
 - For catalog or shared governance changes, run `make github-catalog-validation` or explain unavailable prerequisites.
-- Before completion, re-check the plan or request against the final diff and validation evidence.
+- Before completion, re-check the request against the final diff and validation evidence.
 - Report completed work with outcome, changed files, validation results, and remaining gaps.
 - Include detailed resource sections only when the user asks or a narrower contract requires them.

@@ -13,16 +13,27 @@ def read_text(relative_path: str) -> str:
 def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
     expected_contracts: dict[str, list[str]] = {
         "AGENTS.md": [
-            "Root `LESSONS_LEARNED.md` is the repository learning ledger",
-            "Keep `LESSONS_LEARNED.md` non-canonical",
-            "codify stable lessons into the smallest canonical owner when ready",
-            "Use `LESSONS_LEARNED.md` entry rules for detailed ledger-editing behavior",
+            "Root `LESSONS_LEARNED.md` is a non-canonical learning ledger",
+            (
+                "Follow `LESSONS_LEARNED.md` entry rules and "
+                "`.github/instructions/internal-lessons-learned.instructions.md`"
+            ),
+            "Codify stable lessons into the smallest canonical owner when ready",
         ],
         ".github/copilot-instructions.md": [
             "Treat `LESSONS_LEARNED.md` as a non-canonical ledger",
-            "Before editing `LESSONS_LEARNED.md`, read its entry rules",
+            (
+                "Before editing `LESSONS_LEARNED.md`, read its entry rules and "
+                "current on-disk contents"
+            ),
+            "preserve unrelated rows",
+        ],
+        ".github/instructions/internal-lessons-learned.instructions.md": [
+            'applyTo: "LESSONS_LEARNED.md"',
+            "Follow the file's `Entry Rules`.",
             "current on-disk contents",
             "preserve unrelated rows",
+            "smallest valid canonical owner",
         ],
         "LESSONS_LEARNED.md": [
             "Before editing this file, read its current on-disk contents",

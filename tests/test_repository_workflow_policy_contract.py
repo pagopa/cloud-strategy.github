@@ -47,17 +47,22 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
 
-    assert "## Scoped Context Loading" in agents_text
+    assert "## Rule Placement" in agents_text
+    assert "operational procedures, checklists, file-shape recipes" in agents_text
+    assert "smallest valid owner" in agents_text
+
+    assert "## Context And Scope" in agents_text
     assert ".github/instructions/*.instructions.md" in agents_text
     assert "`applyTo` metadata" in agents_text
     assert "Read every matching instruction as manual context" in agents_text
-    assert "co-loaded imported and `internal-*` instructions" in agents_text
-    assert "Load task-specific skills only when workflow depth is needed" in agents_text
+    assert "Co-load relevant skills" in agents_text
+    assert "skill procedure conflicts" in agents_text
 
     assert (
-        "Load every `.github/instructions/*.instructions.md` file whose `applyTo` or task domain matches"
+        "Load every `.github/instructions/*.instructions.md` file whose `applyTo` metadata or task domain matches"
         in copilot_text
     )
+    assert "Load task-specific skills only when workflow depth" in copilot_text
 
 
 def test_terraform_lock_matrix_policy_stays_visible() -> None:

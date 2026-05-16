@@ -18,6 +18,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/instructions/internal-java.instructions.md`
 - `.github/instructions/internal-json.instructions.md`
 - `.github/instructions/internal-lambda.instructions.md`
+- `.github/instructions/internal-lessons-learned.instructions.md`
 - `.github/instructions/internal-makefile.instructions.md`
 - `.github/instructions/internal-markdown.instructions.md`
 - `.github/instructions/internal-nodejs.instructions.md`

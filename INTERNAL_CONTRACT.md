@@ -25,7 +25,8 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Expected behavior:
   - root `AGENTS.md` defines the strategic role of the instruction system, the precedence model, and the default language rule
   - root `AGENTS.md` points to `.github/copilot-instructions.md` as the repo-wide Copilot projection and to `.github/INVENTORY.md` as the exact live catalog
-  - root `AGENTS.md` does not carry volatile inventory or long surface-specific playbooks
+  - root `AGENTS.md` defines rule placement early so operational procedures do not drift into the always-on bridge
+  - root `AGENTS.md` does not carry volatile inventory, file-shape recipes, command playbooks, or long surface-specific procedures
 
 #### `instruction-architecture-inventory-is-externalized`
 
@@ -276,11 +277,13 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - root `AGENTS.md`
   - `.github/copilot-instructions.md`
   - `LESSONS_LEARNED.md`
+  - `.github/instructions/internal-lessons-learned.instructions.md`
 - Expected behavior:
   - repository-root `LESSONS_LEARNED.md` exists as a non-canonical learning ledger
   - completed tasks add only durable, reusable lessons that were not already codified when discovered
   - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
   - detailed ledger row preservation rules live in `LESSONS_LEARNED.md` entry rules
+  - the scoped lessons instruction reminds editors to read and follow the file's entry rules without duplicating the full ledger procedure
   - the Copilot projection keeps only the retained-learning principle and read-before-editing reminder
   - no ledger update is required when no stable new lesson emerged
   - once a lesson is codified elsewhere, it is removed from `LESSONS_LEARNED.md` instead of being retained as a codified duplicate

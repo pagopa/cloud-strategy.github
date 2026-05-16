@@ -14,12 +14,17 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def assert_plan_policy_anchors(text: str) -> None:
-    assert PLAN_TASK_PATH in text
-    assert "01-...md" in text
-    assert "01-contesto-e-vincoli.md" in text
-    assert "dubbi-e-domande.md" in text
-    assert "done-*" in text
+def assert_no_plan_procedure_markers(text: str) -> None:
+    disallowed_markers = [
+        "01-...md",
+        "01-contesto-e-vincoli.md",
+        "dubbi-e-domande.md",
+        "done-*",
+        "macro-categories",
+        "continue through the remaining numbered plan files",
+    ]
+    for marker in disallowed_markers:
+        assert marker not in text
 
 
 def test_root_policy_files_define_repository_plan_defaults() -> None:
@@ -30,12 +35,14 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "The default authoring language for repository artifacts is English"
         in agents_text
     )
-    assert_plan_policy_anchors(agents_text)
+    assert PLAN_TASK_PATH in agents_text
+    assert "`internal-writing-plans`" in agents_text
+    assert "`internal-executing-plans`" in agents_text
+    assert "retained-plan shape and execution workflow" in agents_text
+    assert "operational procedures, checklists, file-shape recipes" in agents_text
+    assert_no_plan_procedure_markers(agents_text)
     assert "Italian" in agents_text
     assert "clear, local, quick, or banal tasks" not in agents_text
-    assert "non-banal" in agents_text
-    assert "macro-categories" in agents_text
-    assert "continue through the remaining numbered plan files" in agents_text
     assert "`Obiettivo`" not in agents_text
     assert "5-7 bullets when practical" not in agents_text
 
@@ -46,11 +53,10 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     assert "tmp/superpowers/<clear-action-or-task-name>/" in copilot_text
     assert "`internal-writing-plans`" in copilot_text
     assert "`internal-executing-plans`" in copilot_text
-    assert "`done-*`, `01-...md`, and `dubbi-e-domande.md`" in copilot_text
+    assert "retained-plan shape and execution workflow" in copilot_text
+    assert_no_plan_procedure_markers(copilot_text)
     assert "clear, local, quick, or banal tasks" not in copilot_text
     assert "retained planning is justified" not in copilot_text
-    assert "`internal-writing-plans`" in copilot_text
-    assert "continue through the remaining numbered plan files" not in copilot_text
     assert "`Obiettivo`" not in copilot_text
     assert "5-7 bullets when practical" not in copilot_text
 
