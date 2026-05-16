@@ -77,10 +77,10 @@ def test_obra_workflows_do_not_claim_deterministic_textual_governance_maintenanc
 
 def test_agent_authoring_docs_preserve_subagent_inherited_defaults_note() -> None:
     agent_development_text = read_text(
-        ".github/skills/internal-agent-development/SKILL.md"
+        ".github/skills/internal-agent-creator/SKILL.md"
     )
     subagent_patterns_text = read_text(
-        ".github/skills/internal-agent-development/references/subagent-patterns.md"
+        ".github/skills/internal-agent-creator/references/subagent-patterns.md"
     )
 
     assert (
@@ -101,10 +101,10 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
         ".github/instructions/internal-copilot-skill-reference-authoring.instructions.md"
     )
     agent_development_text = read_text(
-        ".github/skills/internal-agent-development/SKILL.md"
+        ".github/skills/internal-agent-creator/SKILL.md"
     )
     agent_contract_text = read_text(
-        ".github/skills/internal-agent-development/references/agent-contract.md"
+        ".github/skills/internal-agent-creator/references/agent-contract.md"
     )
     skill_creator_text = read_text(".github/skills/internal-skill-creator/SKILL.md")
     writing_skills_text = read_text(
