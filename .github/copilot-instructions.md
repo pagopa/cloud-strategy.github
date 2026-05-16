@@ -1,6 +1,6 @@
 # Global Copilot Instructions
 
-You are an expert software and platform engineer. Protect correctness, security, simplicity, and maintainability.
+Protect correctness, security, simplicity, and maintainability.
 
 ## Critical Copilot Window
 
@@ -11,11 +11,12 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Reason from repository evidence; do not invent runtimes, validators, sync flows, or tests.
 - Apply only the instruction files relevant to the files or task.
 - Run the applicable validation for changed files. Report gaps when no validator exists.
+- Write repository-owned prose in Plain Technical English; preserve required technical names.
 - Keep duplication deliberate; repeat only rules Copilot must see natively.
 
 ## Repository Contract
 
-- Treat this as a Copilot customization and governance repository unless target files prove otherwise.
+- Treat this as a Copilot customization and governance repo unless target files prove otherwise.
 - Inspect nearby files and follow local naming, frontmatter, and directory patterns.
 - Keep repository-owned AI configuration as Markdown; use XML only as runtime prompt delimiters.
 - The default authoring language for repository artifacts is English.
@@ -26,14 +27,14 @@ You are an expert software and platform engineer. Protect correctness, security,
 ## Context Loading
 
 - Read `AGENTS.md` first when policy, precedence, or ownership matters.
-- Load every `.github/instructions/*.instructions.md` file whose `applyTo` or task domain matches.
-- Use skills, agents, prompts, and references on demand; prefer the smallest applicable owner.
+- Load matching `.github/instructions/*.instructions.md` files and relevant skills when the path or task makes them applicable.
+- Let scoped policy win over conflicting skill workflow; use skills for decision trees, domain depth, and reusable procedures.
 - Read `.github/copilot-instructions.override.md` before synced defaults when present.
-- Use `docs/01-architecture.md` for boundaries and `docs/03-ai-runtime-operating-model.md` for runtime behavior when relevant.
+- Use `docs/01-architecture.md` for boundaries and `docs/03-ai-runtime-operating-model.md` when relevant.
 
 ## Delivery Guardrails
 
-- Prefer the simplest correct change with the smallest credible blast radius. Avoid temporary fixes, unrequested abstractions, and broad rewrites unless the selected plan explicitly justifies them.
+- Prefer the simplest correct change with the smallest credible blast radius. Avoid temporary fixes, unrequested abstractions, and broad rewrites unless the plan justifies them.
 - Preserve existing conventions unless the task changes them.
 - Keep policy, projection, inventory, local context, and runtime guidance separate.
 - Update docs, validators, tests, or sync discovery when governance contracts change.
@@ -46,7 +47,7 @@ You are an expert software and platform engineer. Protect correctness, security,
 - Use `tmp/superpowers/<clear-action-or-task-name>/` only for retained plans needing tracking, handoff, provenance, or reviewable tradeoffs.
 - Use `internal-writing-plans` for plan shape and `internal-executing-plans` for `done-*`, `01-...md`, and `dubbi-e-domande.md` execution rules.
 - Treat `LESSONS_LEARNED.md` as a non-canonical ledger for durable lessons pending codification.
-- Before editing `LESSONS_LEARNED.md`, read its entry rules and current on-disk contents, then preserve unrelated rows.
+- Before editing `LESSONS_LEARNED.md`, read its entry rules and contents, then preserve unrelated rows.
 
 ## Validation And Reporting
 

@@ -3,6 +3,13 @@
 This file is the repository constitution for AI configuration. Keep it short,
 stable, strategic, and free of volatile inventory or surface-specific playbooks.
 
+## Writing Style
+
+- Use Plain Technical English for repository-owned prose: plain language with light controlled-language principles.
+- Prefer short sentences, stable terms, active voice, one rule per bullet, and explicit `must`, `should`, and `may` wording.
+- Keep required technical names unchanged, including paths, commands, schema fields, product names, asset names, and established repository terms.
+- Do not rewrite imported upstream text that must remain verbatim.
+
 ## Role And Precedence
 
 - `AGENTS.md` owns repository-wide defaults, precedence, rule placement, and cross-surface bridge behavior.
@@ -16,9 +23,13 @@ stable, strategic, and free of volatile inventory or surface-specific playbooks.
 ## Scoped Context Loading
 
 - For runtimes without native scoped-instruction loading, match known target paths against `.github/instructions/*.instructions.md` `applyTo` metadata before editing, reviewing, or asserting scoped policy.
-- Read every matching instruction as manual context, including co-loaded imported and `internal-*` instructions; prefer the narrower scope only when instructions directly conflict.
+- Read every matching instruction as manual context, including co-loaded imported and `internal-*` instructions.
+- Treat scoped instructions as the baseline for matching paths, domains, or file families.
+- Prefer the narrower scoped instruction only for direct path-specific conflicts.
+- Co-load relevant skills when the task needs workflow, decision trees, domain depth, or reusable procedures.
+- When scoped instructions and skills both apply, use them together; applicable policy and scoped rules win if a skill procedure conflicts.
+- Use docs for descriptive context and runtime models, not as primary policy.
 - If no target path is known, infer obvious domains only, such as Python, GitHub Actions, Kubernetes, Docker, Markdown, or Terraform; otherwise ask for the target path before making path-scoped claims.
-- Load task-specific skills only when workflow depth is needed beyond the matching instruction files.
 
 ## Authoring Defaults
 
