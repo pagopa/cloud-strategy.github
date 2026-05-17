@@ -148,5 +148,6 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/prompts/internal-agent-review-next-actions.prompt.md`
 - `.github/prompts/internal-architecture-md-creator.prompt.md`
 - `.github/prompts/internal-copilot-resources-mega-review.prompt.md`
+- `.github/prompts/internal-execute-plan.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
 - `.github/prompts/internal-sync-plan.prompt.md`
