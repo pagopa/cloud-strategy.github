@@ -99,7 +99,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/mattpocock-caveman/SKILL.md`
 - `.github/skills/mattpocock-diagnose/SKILL.md`
-- `.github/skills/mattpocock-grill-me/SKILL.md`
+- `.github/skills/grill-me/SKILL.md`
 - `.github/skills/mattpocock-grill-with-docs/SKILL.md`
 - `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`

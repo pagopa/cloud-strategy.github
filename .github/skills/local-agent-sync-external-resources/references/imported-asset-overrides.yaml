@@ -80,8 +80,8 @@ overrides:
     baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
-  - id: mattpocock-grill-me-bulk-recommended-questions
-    target_path: .github/skills/mattpocock-grill-me/SKILL.md
+  - id: grill-me-bulk-recommended-questions
+    target_path: .github/skills/grill-me/SKILL.md
     source_family: mattpocock/skills
     lifecycle_mode: post-refresh-patch
     apply_strategy: git-apply-3way
@@ -91,7 +91,7 @@ overrides:
       question set with clear recommendations that the user can accept by
       default, while preserving follow-up pressure on contradictions, risks,
       and unresolved decisions.
-    patch_path: patches/mattpocock-grill-me.patch
+    patch_path: patches/grill-me.patch
     expected_content_hash: e2fa79d043891f6f27f9ac7eaf2202ead34f59ce63b76542d773056281ff831f
     baseline_repo_commit: "e74f006"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

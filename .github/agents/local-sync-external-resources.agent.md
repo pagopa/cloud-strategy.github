@@ -167,7 +167,7 @@ Managed skills:
 
 - `caveman` -> `mattpocock-caveman`
 - `diagnose` -> `mattpocock-diagnose`
-- `grill-me` -> `mattpocock-grill-me`
+- `grill-me` -> `grill-me`
 - `grill-with-docs` -> `mattpocock-grill-with-docs`
 - `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
 - `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
@@ -176,7 +176,7 @@ Managed skills:
 
 Approved in-place overrides:
 
-- `mattpocock-grill-me`: replay `mattpocock-grill-me-bulk-recommended-questions` after each refresh so the skill asks its initial question set as a dependency-ordered numbered list with recommendations accepted by default, while still surfacing contradictions, risks, and unresolved follow-up questions.
+- `grill-me`: replay `grill-me-bulk-recommended-questions` after each refresh so the skill asks its initial question set as a dependency-ordered numbered list with recommendations accepted by default, while still surfacing contradictions, risks, and unresolved follow-up questions.
 
 ### `openai/skills`
 

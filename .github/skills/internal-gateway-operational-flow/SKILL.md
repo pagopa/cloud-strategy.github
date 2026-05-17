@@ -66,7 +66,7 @@ Prompt-specific intent wins over the default. A direct review request starts in 
 
 Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, and next-step package. It does not silently become execution after the design is settled.
 
-Use `mattpocock-grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is being created, reformulated, or validated. Before asking questions, inspect the repository when the answer is recoverable from files. If the user wants to answer in bulk, provide numbered questions with a recommended answer for each; after the bulk answer, continue one question at a time only for unresolved ambiguity.
+Use `grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is being created, reformulated, or validated. Before asking questions, inspect the repository when the answer is recoverable from files. If the user wants to answer in bulk, provide numbered questions with a recommended answer for each; after the bulk answer, continue one question at a time only for unresolved ambiguity.
 
 After creating a retained plan or materially reformulating one, provide a compact Decision Brief in chat. The brief is a projection, not a second canonical plan:
 
@@ -150,6 +150,6 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - `apply-plan` uses `internal-executing-plans` and excludes `dubbi-e-domande.md`.
 - `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
-- `mattpocock-grill-me` is used for non-trivial retained plans or real clarification needs.
+- `grill-me` is used for non-trivial retained plans or real clarification needs.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.
