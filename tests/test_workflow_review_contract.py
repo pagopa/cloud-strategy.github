@@ -304,4 +304,7 @@ def test_lessons_learned_is_not_workflow_contract_owner() -> None:
     checklist_text = read_text("tmp/superpowers/workflow-first-followup/promotion-checklist.md")
 
     assert "Plan Completion Audit |" not in lessons_text
+    assert "large comparison corpus under `tmp/external-comparison/`" not in lessons_text
+    assert "always-on, cross-cutting, stack-specific lenses" not in lessons_text
+    assert "entry Decision Brief and an exit completion report" not in lessons_text
     assert "No new `LESSONS_LEARNED.md` row is added by default" in checklist_text
