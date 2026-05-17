@@ -35,7 +35,7 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 - `internal-agent-creator`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
-- `internal-change-impact-analysis`
+- `internal-systems-review`
 - `mattpocock-grill-me`
 
 ## Core Rules

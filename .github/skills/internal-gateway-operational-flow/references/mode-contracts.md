@@ -19,7 +19,7 @@ Use this reference when the staged `plan`, `execute`, `apply-plan`, `review`, or
 | `plan` | Ambiguity resolution, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, or pure pressure testing. |
 | `execute` | Clear local implementation, deterministic realignment, nearby documentation/test updates, and concrete validation. | Strategic tradeoffs, unresolved ownership, non-trivial rollout decisions, review-first asks, or assumption challenge. |
 | `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, blocker handling, cross-file continuation, and completion checks. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, or executing `dubbi-e-domande.md`. |
-| `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, and fix routing. | Applying fixes, designing the initial solution, or open-ended challenge. |
+| `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, systems risk, and fix routing. | Applying fixes, designing the initial solution, or open-ended challenge. |
 
 If two modes still plausibly fit, choose `plan` and make the uncertainty explicit.
 
@@ -51,12 +51,15 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-gateway-critical-master` | Critical wrapper and pressure-test workflows | Challenge, pre-mortem, hidden assumptions, failure modes, and reframing. |
 | `internal-agent-support-lane-change-engine` | Shared by operational wrappers and sync command centers | Stop-and-recommend protocol when the selected mode or lane no longer fits. |
 | `internal-agent-support-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
-| `internal-code-review` | `review` mode | Tactical review engine for defect-first findings and code or catalog review. |
+| `internal-code-review` | `review` mode code lens | Tactical review engine for code defects, regressions, tests, language anti-patterns, and file/line findings. |
+| `internal-systems-review` | `review` mode systems lens | Systems-level review engine for architecture, workflow, cross-cutting impact, operational fit, and blind spots. |
 | `mattpocock-grill-me` | Conditional support for `plan` mode | User-requested or ambiguity-driven question pressure before plan finalization. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |
 | `superpowers-*` workflows | Conditional support | Mandatory only when the task shape actually triggers the workflow. |
+
+`internal-security-review` is a future optional review lens only after its promotion gate creates the skill. Until then, security-specific review gaps should be stated explicitly and routed to the closest existing owner.
 
 ## Retired To Current Ownership Mapping
 

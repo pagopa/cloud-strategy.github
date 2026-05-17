@@ -57,7 +57,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
 - `.github/skills/internal-azure-strategic/SKILL.md`
-- `.github/skills/internal-change-impact-analysis/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
@@ -93,6 +92,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-script-python/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-spring-boot-development/SKILL.md`
+- `.github/skills/internal-systems-review/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/internal-writing-plans/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`

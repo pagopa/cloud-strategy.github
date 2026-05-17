@@ -124,8 +124,8 @@ Only elevate simplification suggestions when they materially improve maintainabi
 
 ## Cross-references
 
-- **internal-change-impact-analysis** (`.github/skills/internal-change-impact-analysis/SKILL.md`): for change-set-level impact analysis, architectural evaluation, and blind-spot detection beyond line-level review.
-- Use both together: this skill for nit-level anti-patterns first, then `internal-change-impact-analysis` for the bigger picture.
+- **internal-systems-review** (`.github/skills/internal-systems-review/SKILL.md`): for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
+- Use both together: this skill for nit-level anti-patterns first, then `internal-systems-review` for the bigger picture.
 
 ## Delegation
 

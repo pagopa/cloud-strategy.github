@@ -46,7 +46,7 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Require an explicit checkpoint before moving from `plan` or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
-- Use `internal-code-review` inside `review` mode instead of duplicating the review playbook here.
+- Use review lenses inside `review` mode instead of duplicating their playbooks here: `internal-code-review` for code defects, `internal-systems-review` for architecture, workflow, cross-cutting impact, and blind spots, and future `internal-security-review` only after that skill exists.
 - Use `internal-gateway-critical-master` as a visible critical phase when pressure testing is needed; do not duplicate its challenge logic here.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked.
@@ -105,9 +105,15 @@ For `execute` or `apply-plan`, return a compact execution report with active pha
 
 ## Review Mode
 
-Review mode owns findings, evidence gaps, regression risk, and fix routing. Findings come before summaries, and every actionable finding needs a causal layer plus a route to delivery, planning, critical challenge, or deferred follow-up.
+Review mode owns findings, evidence gaps, regression risk, systems risk, and fix routing. Findings come before summaries, and every actionable finding needs a causal layer plus a route to delivery, planning, critical challenge, or deferred follow-up.
 
-Load `internal-code-review` for the tactical review engine whenever the task is truly review-owned.
+Use the smallest review lens that fits the evidence:
+
+- `internal-code-review` for code defects, regressions, tests, and file/line findings.
+- `internal-systems-review` for architecture, workflow, cross-cutting impact, operational fit, and blind spots.
+- Future `internal-security-review` for security, AI safety, trust boundaries, data, and secrets only after promotion creates the skill; until then, state the security gap and route to the closest existing owner.
+
+Keep `internal-gateway-critical-master` as the separate owner for pressure testing, pre-mortems, and hidden assumptions.
 
 ## Staged Checkpoints
 
@@ -130,7 +136,7 @@ Load `internal-code-review` for the tactical review engine whenever the task is 
 - `internal-agent-support-next-step` is used for every user-visible transition.
 - `apply-plan` uses `internal-executing-plans` and excludes `dubbi-e-domande.md`.
 - `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
-- `review` mode reuses `internal-code-review` instead of cloning it.
+- `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
 - `mattpocock-grill-me` is used for non-trivial retained plans or real clarification needs.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

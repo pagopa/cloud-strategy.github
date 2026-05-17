@@ -13,6 +13,8 @@ Use this reference when updating the Copilot agent wrappers, README projection, 
 
 The wrappers keep route wording, tools, `disable-model-invocation: true`, `agents: []`, handoff buttons, boundary summary, and output shape. They should not repeat long mode tables or workflow maps from this skill bundle.
 
+`internal-review-guard` keeps `internal-code-review` mandatory for defect-first review. It lists `internal-systems-review` as optional support when the review surface is architecture, workflow, cross-cutting impact, operational fit, or blind spots. Do not list `internal-security-review` in the wrapper until the promotion gate creates that skill.
+
 ## Handoff Rules
 
 - Keep every Copilot wrapper handoff `send: false`.

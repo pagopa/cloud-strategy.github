@@ -16,7 +16,7 @@ phase at a time:
 - `apply-plan`: apply an approved retained plan through
   `internal-executing-plans`.
 - `review`: inspect an existing artifact, diff, or validation result with
-  findings first.
+  findings first and the smallest review lens that fits the evidence.
 - `mode-explicit`: honor a direct `plan`, `execute`, or `review` request.
 
 Use `internal-gateway-critical-master` instead when the primary job is pressure
@@ -30,7 +30,7 @@ Start with the smallest mode that can honestly finish the current phase:
 | --- | --- | --- |
 | Is the task concrete and only needs skill-first quick routing or support-skill selection? | Use `internal-gateway-simple`. | Lightweight analysis, minimal support skills, focused execution, and validation are returned. |
 | Is the target state already clear and verifiable? | Use `mode-explicit` `execute`. | Files, commands, or guidance are delivered with validation evidence. |
-| Does a concrete artifact or diff already exist and need defect-first analysis? | Use `review`. | Findings, severity, evidence gaps, and fix routing are returned. |
+| Does a concrete artifact or diff already exist and need defect-first or systems-level analysis? | Use `review`. | Findings, severity, evidence gaps, and fix routing are returned. |
 | Is there an approved retained plan under `tmp/superpowers/` to apply? | Use `apply-plan`. | `internal-executing-plans` runs the `done-*` loop and ignores `dubbi-e-domande.md`. |
 | Are ownership, shape, rollout, or tradeoffs still unresolved? | Use `plan-only` or `full-cycle`. | A decision frame, Decision Brief when retained, and next-step package are returned. |
 | Is the main request to attack the reasoning before action? | Use `internal-gateway-critical-master`. | Weak assumptions and failure modes are challenged before reformulation. |
@@ -48,7 +48,7 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 | Plan with user grilling before final plan | "Ask all grill-me questions first, then write the plan after my answers." | `plan` plus `mattpocock-grill-me` before final planning. | Numbered questions with recommended answers; after responses, a plan-ready decision frame. |
 | Plan, then critical challenge | "Make a plan, then pressure-test it before implementation." | `full-cycle`, then visible critical phase through `internal-gateway-critical-master`. | Plan, Decision Brief when retained, strongest objections, explicit outcome, and checkpoint before delivery. |
 | Apply retained plan | "Apply this plan under `tmp/superpowers/example`." | `apply-plan` plus `internal-executing-plans`. | Completed items move into `done-*`, active numbered files shrink or delete, and validation evidence is reported. |
-| Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
+| Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`; add `internal-systems-review` when architecture, workflow, cross-cutting impact, or blind spots are in scope. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
 | Pure challenge | "Attack this proposal before we trust it." | `internal-gateway-critical-master`, not this skill as the primary owner. | Failure modes, hidden assumptions, and a recommendation for reformulation. |
 | Runtime without Copilot agent UI | "Use the operational flow directly in Codex." | Load this skill and references manually. | Text next-step packages replace Copilot handoff buttons. |
 
@@ -143,6 +143,7 @@ Do not execute dubbi-e-domande.md.
 
 ```text
 Review this diff with review mode.
+Use code review for code defects and systems review for cross-cutting impact.
 Findings first, then evidence gaps, then route each fix to execute, plan,
 critical challenge, or defer.
 ```
