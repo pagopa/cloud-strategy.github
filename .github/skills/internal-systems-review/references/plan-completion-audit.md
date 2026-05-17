@@ -20,7 +20,20 @@ small, direct tasks. Run this full audit when any condition is true:
 - The change modifies always-on guidance, wrapper agents, validators, or tests.
 - A completion claim depends on manual evidence, external state, or a missing
   validator.
+- Numbered plan files were correctly removed by the `done-*` loop and completion
+  now depends on reconstructed evidence.
 - A reviewer asks whether the delivered diff really matches the approved plan.
+
+## Evidence Envelope Inputs
+
+When numbered plan files were removed by a correct `done-*` loop, use the
+evidence envelope as the plan-to-delivery source. The envelope should reconstruct
+each original or completed item and cite the file, diff, artifact, or validator
+evidence that supports its status.
+
+If no envelope exists, reconstruct from `done-*` files and reachable artifacts.
+If reconstruction cannot produce item-level evidence, mark the affected item
+`UNVERIFIABLE` and downgrade the completion state or route the gap.
 
 ## Status Vocabulary
 
@@ -48,13 +61,15 @@ available, mark it `UNVERIFIABLE` instead of guessing.
 ## Procedure
 
 1. Extract every executable item from the plan. Ignore `dubbi-e-domande.md`.
-2. Record the declared target state, anti-scope, owner, and validation path.
-3. Collect observed evidence from changed files, `git diff`, validators, and
+2. If numbered plan files are absent because the `done-*` loop removed them,
+  use the evidence envelope or reconstruct items from `done-*` files.
+3. Record the declared target state, anti-scope, owner, and validation path.
+4. Collect observed evidence from changed files, `git diff`, validators, and
    reachable target paths.
-4. Assign a verification class and status to each item.
-5. Route every `PARTIAL`, `NOT_DONE`, and `UNVERIFIABLE` item to delivery,
+5. Assign a verification class and status to each item.
+6. Route every `PARTIAL`, `NOT_DONE`, and `UNVERIFIABLE` item to delivery,
    planning, critical challenge, or defer.
-6. Re-check whether the observed delivery introduced scope drift with
+7. Re-check whether the observed delivery introduced scope drift with
    `scope-drift.md`.
 
 ## Output Table Template
@@ -69,5 +84,7 @@ available, mark it `UNVERIFIABLE` instead of guessing.
   claims are `UNVERIFIABLE` unless independent evidence exists.
 - A `done-*` file is a progress marker, not proof. Re-open the item when the
   target file or validator evidence is absent.
+- An evidence envelope may replace removed numbered plan files only when it
+  preserves item, status, evidence, and route.
 - Do not mark `SHIPPED` in a completion report while any required item remains
   `UNVERIFIABLE` without an explicit accepted risk.

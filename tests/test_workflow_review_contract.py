@@ -190,12 +190,21 @@ def test_systems_review_lens_referenced() -> None:
 
 def test_security_review_promotion_gated() -> None:
     review_guard_text = read_text(".github/agents/internal-review-guard.agent.md")
+    gateway_text = read_text(".github/skills/internal-gateway-operational-flow/SKILL.md")
+    systems_review_text = read_text(".github/skills/internal-systems-review/SKILL.md")
+    review_lenses_text = read_text(
+        ".github/skills/internal-systems-review/references/review-lenses.md"
+    )
     optional_support = review_guard_text.split("## Optional Support Skills", maxsplit=1)[1]
     optional_support = optional_support.split("## Core Rules", maxsplit=1)[0]
 
     assert not Path(".github/skills/internal-security-review").exists()
     assert "internal-security-review" not in optional_support
     assert "Treat `internal-security-review` as unavailable until promoted" in review_guard_text
+    assert "future `internal-security-review` only after that skill exists" in gateway_text
+    assert "Use a promoted `internal-security-review` only after that skill exists" in systems_review_text
+    assert "Owner skill | `internal-security-review`" not in review_lenses_text
+    assert "Route: `internal-security-review`" not in review_lenses_text
 
 
 def test_plan_completion_audit_reference_exists() -> None:
@@ -267,11 +276,72 @@ def test_completion_report_states_present() -> None:
     )
 
 
+def test_completion_report_requires_evidence_envelope() -> None:
+    assert_contains_all(
+        ".github/skills/internal-executing-plans/references/completion-report.md",
+        (
+            "Evidence envelope",
+            "Evidence gaps",
+            "Residual risks",
+            "`SHIPPED` requires passed validators and a completed report",
+            "item-level evidence",
+            "mark the item `UNVERIFIABLE` instead of",
+            "claiming `SHIPPED`",
+        ),
+    )
+
+
 def test_resume_protocol_reference_exists() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         ("Verify-first Sequence", "`done-*`", "`git diff`", "validators", "Status Report Template"),
     )
+
+
+def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
+    assert_contains_all(
+        ".github/skills/internal-executing-plans/references/resume-protocol.md",
+        (
+            "lacks an item/evidence table or evidence-envelope pointer",
+            "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
+        ),
+    )
+
+
+def test_plan_completion_audit_uses_evidence_envelope_for_removed_plan_files() -> None:
+    assert_contains_all(
+        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        (
+            "Evidence Envelope Inputs",
+            "Numbered plan files were correctly removed by the `done-*` loop",
+            "evidence envelope as the plan-to-delivery source",
+            "preserves item, status, evidence, and route",
+        ),
+    )
+
+
+def test_executing_plans_points_to_evidence_envelope_without_table_duplication() -> None:
+    executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
+
+    assert "evidence envelope with item, status,\n  evidence, and route" in executing_plans_text
+    assert "Source item or source `done-*` file" not in executing_plans_text
+    assert "| Source done file | Reconstructed item |" not in executing_plans_text
+
+
+def test_workflow_first_followup_evidence_envelope_covers_done_files() -> None:
+    envelope_path = Path("tmp/superpowers/workflow-first-followup/evidence-envelope.md")
+    done_files = sorted(Path("tmp/superpowers/workflow-first-followup").glob("done-*.md"))
+
+    assert envelope_path.exists()
+    assert done_files
+
+    envelope_text = envelope_path.read_text(encoding="utf-8")
+
+    assert "| Status |" in envelope_text
+    assert "| Evidence path or command |" in envelope_text
+
+    for done_file in done_files:
+        assert f"`{done_file.name}`" in envelope_text
 
 
 def test_audit_dispatch_reference_exists() -> None:
@@ -282,8 +352,8 @@ def test_audit_dispatch_reference_exists() -> None:
 
 
 def test_decision_brief_template_referenced() -> None:
-    assert "references/decision-brief.md" in read_text(
-        ".github/skills/internal-agent-support-next-step/SKILL.md"
+    assert "../internal-agent-support-next-step/references/decision-brief.md" in read_text(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
     assert_contains_all(
         ".github/skills/internal-agent-support-next-step/references/decision-brief.md",
@@ -297,6 +367,21 @@ def test_decision_brief_template_referenced() -> None:
             "Stop conditions",
         ),
     )
+
+
+def test_gateway_cross_skill_reference_paths_are_relative() -> None:
+    gateway_text = read_text(".github/skills/internal-gateway-operational-flow/SKILL.md")
+
+    assert "`../internal-agent-support-next-step/references/decision-brief.md`" in gateway_text
+    assert "`../internal-executing-plans/references/plan-handoff.md`" in gateway_text
+    assert "`../internal-executing-plans/references/resume-protocol.md`" in gateway_text
+    assert "`../internal-executing-plans/references/completion-report.md`" in gateway_text
+    assert "`../internal-systems-review/references/plan-completion-audit.md`" in gateway_text
+    assert "`../internal-systems-review/references/scope-drift.md`" in gateway_text
+
+    assert "`internal-agent-support-next-step/references/decision-brief.md`" not in gateway_text
+    assert "`internal-executing-plans/references/" not in gateway_text
+    assert "`internal-systems-review/references/" not in gateway_text
 
 
 def test_lessons_learned_is_not_workflow_contract_owner() -> None:
