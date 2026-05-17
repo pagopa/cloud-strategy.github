@@ -42,6 +42,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - Use the current repository state as the starting point for audit and drift detection.
 - Keep root governance canonical in `AGENTS.md` and `.github/copilot-instructions.md`; use this agent for sync-specific scope, managed external resources, and source-side orchestration.
 - Treat the declared managed resources listed below as the only default external sync scope.
+- Pin every documented upstream source to an immutable commit hash. Add an inline note beside each source reference with the release tag when one exists, or with the commit date when no tagged release exists.
 - Within an approved family, only the resources explicitly declared in this file are in scope by default. Do not add siblings just because an upstream repository has them or because they happen to exist on disk.
 - Do not preserve fallback assets, compatibility aliases, or deprecated variants unless `AGENTS.md` explicitly requires them.
 - Do not introduce new prefixes, naming schemes, or external asset families unless the user explicitly expands scope.
@@ -92,9 +93,9 @@ Use this section to understand exactly which external resources this agent manag
 
 Source repositories:
 
-- Agents: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/agents`
-- Skills: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/skills`
-- Instructions: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/instructions`
+- Agents: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/agents` (commit date: 2026-05-15)
+- Skills: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/skills` (commit date: 2026-05-15)
+- Instructions: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/instructions` (commit date: 2026-05-15)
 
 Managed agents:
 
@@ -123,7 +124,7 @@ Managed instructions:
 
 Source repository:
 
-- Skills: `https://github.com/obra/superpowers/tree/v5.1.0/skills`
+- Skills: `https://github.com/obra/superpowers/tree/f2cbfbefebbfef77321e4c9abc9e949826bea9d7/skills` (release tag: v5.1.0)
 
 Managed skills:
 
@@ -145,7 +146,7 @@ Managed skills:
 
 Source repository:
 
-- Skills: `https://github.com/hashicorp/agent-skills/tree/43ca9b0cde131e20a129c106bc9f6b6f9f1e5c9a/terraform/code-generation/skills`
+- Skills: `https://github.com/hashicorp/agent-skills/tree/43ca9b0cde131e20a129c106bc9f6b6f9f1e5c9a/terraform/code-generation/skills` (commit date: 2026-05-11)
 
 Managed skills:
 
@@ -156,8 +157,8 @@ Managed skills:
 
 Source repositories:
 
-- Engineering skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/engineering`
-- Productivity skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/productivity`
+- Engineering skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/engineering` (commit date: 2026-05-13)
+- Productivity skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/productivity` (commit date: 2026-05-13)
 
 Managed skills:
 
@@ -174,8 +175,8 @@ Managed skills:
 
 Source repositories:
 
-- Curated skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.curated`
-- System skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.system`
+- Curated skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.curated` (commit date: 2026-05-12)
+- System skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.system` (commit date: 2026-05-12)
 
 Managed skills:
 
@@ -191,7 +192,7 @@ Managed skills:
 
 Source repository:
 
-- Skills: `https://github.com/sickn33/antigravity-awesome-skills/tree/v11.3.0/skills`
+- Skills: `https://github.com/sickn33/antigravity-awesome-skills/tree/2e0c5a9cbf515a0611afcec73ef2a6644c4191e3/skills` (release tag: v11.3.0)
 
 Managed skills:
 
