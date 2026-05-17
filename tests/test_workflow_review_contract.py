@@ -1,6 +1,15 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
+
+
+CROSS_SKILL_FILE_PATTERN = re.compile(
+    r"(?P<target>"
+    r"(?:\.\./(?P<relative_skill>[A-Za-z0-9._-]+)"
+    r"|\.github/skills/(?P<absolute_skill>[A-Za-z0-9._-]+))"
+    r"/(?:SKILL\.md|references/|scripts/|assets/|agents/)[^`\\s)>]*)"
+)
 
 
 def read_text(relative_path: str) -> str:
@@ -144,6 +153,14 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
         "When a skill sits behind a paired agent or local references"
         in skill_creator_text
     )
+    assert (
+        "reference another skill by name and behavior only"
+        in skill_creator_text
+    )
+    assert (
+        "not by file paths inside their bundles"
+        in writing_skills_text
+    )
     assert "If the skill sits behind a paired agent" in writing_skills_text
 
 
@@ -162,7 +179,7 @@ def test_gateway_contains_completion_checks() -> None:
 def test_gateway_points_to_plan_completion_audit_reference() -> None:
     gateway_text = read_text(".github/skills/internal-gateway-operational-flow/SKILL.md")
 
-    assert "plan-completion-audit.md" in gateway_text
+    assert "plan-completion audit" in gateway_text
     assert "Status Vocabulary" not in gateway_text
     assert_contains_all(
         ".github/skills/internal-systems-review/references/plan-completion-audit.md",
@@ -184,7 +201,7 @@ def test_systems_review_lens_referenced() -> None:
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
-        ("internal-systems-review", "plan-completion-audit.md", "scope-drift.md"),
+        ("internal-systems-review", "plan-completion audit", "scope-drift analysis"),
     )
 
 
@@ -351,10 +368,11 @@ def test_audit_dispatch_reference_exists() -> None:
     )
 
 
-def test_decision_brief_template_referenced() -> None:
-    assert "../internal-agent-support-next-step/references/decision-brief.md" in read_text(
-        ".github/skills/internal-gateway-operational-flow/SKILL.md"
-    )
+def test_decision_brief_template_owner_referenced_without_cross_skill_path() -> None:
+    gateway_text = read_text(".github/skills/internal-gateway-operational-flow/SKILL.md")
+
+    assert "Use `internal-agent-support-next-step` for durable Decision Brief" in gateway_text
+    assert "../internal-agent-support-next-step/references/decision-brief.md" not in gateway_text
     assert_contains_all(
         ".github/skills/internal-agent-support-next-step/references/decision-brief.md",
         (
@@ -369,19 +387,23 @@ def test_decision_brief_template_referenced() -> None:
     )
 
 
-def test_gateway_cross_skill_reference_paths_are_relative() -> None:
-    gateway_text = read_text(".github/skills/internal-gateway-operational-flow/SKILL.md")
+def test_skill_bodies_reference_other_skills_by_name_not_bundle_file_path() -> None:
+    violations: list[str] = []
 
-    assert "`../internal-agent-support-next-step/references/decision-brief.md`" in gateway_text
-    assert "`../internal-executing-plans/references/plan-handoff.md`" in gateway_text
-    assert "`../internal-executing-plans/references/resume-protocol.md`" in gateway_text
-    assert "`../internal-executing-plans/references/completion-report.md`" in gateway_text
-    assert "`../internal-systems-review/references/plan-completion-audit.md`" in gateway_text
-    assert "`../internal-systems-review/references/scope-drift.md`" in gateway_text
+    for skill_path in sorted(Path(".github/skills").glob("*/SKILL.md")):
+        skill_name = skill_path.parent.name
+        for match in CROSS_SKILL_FILE_PATTERN.finditer(
+            skill_path.read_text(encoding="utf-8")
+        ):
+            referenced_skill = match.group("relative_skill") or match.group(
+                "absolute_skill"
+            )
+            if referenced_skill != skill_name:
+                violations.append(
+                    f"{skill_path.as_posix()} references {match.group('target')}"
+                )
 
-    assert "`internal-agent-support-next-step/references/decision-brief.md`" not in gateway_text
-    assert "`internal-executing-plans/references/" not in gateway_text
-    assert "`internal-systems-review/references/" not in gateway_text
+    assert violations == []
 
 
 def test_lessons_learned_is_not_workflow_contract_owner() -> None:

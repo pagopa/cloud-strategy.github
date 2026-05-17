@@ -34,7 +34,7 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 - Load [caching and artifacts](references/caching-and-artifacts.md) for deterministic cache keys and reviewed artifact handoffs.
 - Load [reuse decision tree](references/reuse-decision-tree.md) when inline steps, scripts, reusable workflows, and composite actions all look plausible.
 - Load [security hardening checklist](references/security-hardening-checklist.md) when the workflow touches deployment, secrets, self-hosted runners, or untrusted events.
-- Load `.github/skills/internal-github-action-composite/SKILL.md` when the reusable unit becomes step-level or contract-sensitive.
+- Load `internal-github-action-composite` when the reusable unit becomes step-level or contract-sensitive.
 
 ## Choose the right reuse pattern
 
@@ -64,8 +64,8 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 
 ## Cross-references
 
-- **internal-github-action-composite** (`.github/skills/internal-github-action-composite/SKILL.md`): for composite-action authoring and compatibility-sensitive contract changes.
-- **internal-terraform** (`.github/skills/internal-terraform/SKILL.md`): for the Terraform resources deployed by CI/CD.
+- **internal-github-action-composite**: for composite-action authoring and compatibility-sensitive contract changes.
+- **internal-terraform**: for the Terraform resources deployed by CI/CD.
 
 ## Checklist
 

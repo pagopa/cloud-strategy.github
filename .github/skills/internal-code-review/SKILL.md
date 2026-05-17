@@ -124,7 +124,7 @@ Only elevate simplification suggestions when they materially improve maintainabi
 
 ## Cross-references
 
-- **internal-systems-review** (`.github/skills/internal-systems-review/SKILL.md`): for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
+- **internal-systems-review**: for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
 - Use both together: this skill for nit-level anti-patterns first, then `internal-systems-review` for the bigger picture.
 
 ## Delegation

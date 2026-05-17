@@ -50,7 +50,7 @@ Load these inputs before finalizing an internal agent:
 - `references/example-transformations.md` when you need before-and-after conversion examples
 - `references/review-checklist.md` before final validation or when reviewing an existing agent
 - `references/subagent-patterns.md` when the agent needs to invoke or be invoked as a subagent, or when designing coordinator/worker workflows
-- `internal-copilot-docs-research` and `.github/skills/internal-copilot-docs-research/references/official-source-map.md` when the change depends on current GitHub Copilot or VS Code platform behavior
+- `internal-copilot-docs-research` when the change depends on current GitHub Copilot or VS Code platform behavior
 
 When the source agent already has a skill-guidance section such as `## Optional Support Skills` or `## Preferred/Optional Skills`, load only the directly relevant skill files before editing the target agent. Treat those lists as curated routing hints shaped by the repository resource model, not as a platform-enforced requirement to use every listed skill.
 
@@ -88,7 +88,7 @@ Keep these rules visible while drafting:
 
 Before changing claims about frontmatter support, tool aliases, MCP behavior, or subagent invocation:
 
-- load `internal-copilot-docs-research` and `.github/skills/internal-copilot-docs-research/references/official-source-map.md`
+- load `internal-copilot-docs-research` to identify the authoritative source map
 - verify the authoritative documentation for the exact surface involved
 - mark the claim as unverified if the docs are unreachable
 
