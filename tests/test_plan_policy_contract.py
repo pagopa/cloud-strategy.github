@@ -124,7 +124,8 @@ def test_plan_wrapper_skills_are_listed_in_ownership_map_and_inventory() -> None
         assert f"- `{skill_path}`" in inventory_text
 
     assert (
-        "- `.github/skills/internal-gateway-operational-flow/SKILL.md`" in inventory_text
+        "- `.github/skills/internal-gateway-operational-flow/SKILL.md`"
+        in inventory_text
     )
     assert (
         "- `.github/skills/internal-gateway-critical-master/SKILL.md`" in inventory_text

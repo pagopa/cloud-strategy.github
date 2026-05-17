@@ -128,7 +128,9 @@ def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(source_root / "docs/03-local-ai-runtime-operating-model.md", "# Runtime\n")
+    write_file(
+        source_root / "docs/03-local-ai-runtime-operating-model.md", "# Runtime\n"
+    )
     write_file(
         source_root / ".github/templates/01-architecture.md.template",
         "# Architecture scaffold\n",
@@ -200,7 +202,9 @@ def test_build_sync_plan_preserves_existing_consumer_local_knowledge_docs(
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
     write_file(target_root / "docs/01-local-architecture.md", "# Target architecture\n")
-    write_file(target_root / "docs/02-local-repository-context.md", "# Target context\n")
+    write_file(
+        target_root / "docs/02-local-repository-context.md", "# Target context\n"
+    )
 
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
@@ -273,7 +277,9 @@ def test_build_sync_plan_deletes_legacy_runtime_fit_document(tmp_path: Path) -> 
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(source_root / "docs/03-local-ai-runtime-operating-model.md", "# Runtime\n")
+    write_file(
+        source_root / "docs/03-local-ai-runtime-operating-model.md", "# Runtime\n"
+    )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
     write_file(target_root / "docs/runtime-fit.md", "# Runtime fit\n")
