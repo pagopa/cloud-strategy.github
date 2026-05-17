@@ -163,7 +163,7 @@ Managed skills:
 
 - `caveman` -> `mattpocock-caveman`
 - `diagnose` -> `mattpocock-diagnose`
-- `grill-me` -> `mattpocock-grill-me`
+- `grill-me` -> `grill-me`
 - `grill-with-docs` -> `mattpocock-grill-with-docs`
 - `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
 - `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
