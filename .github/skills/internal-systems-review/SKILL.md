@@ -39,6 +39,23 @@ Dimensions are loaded from `references/analysis-dimensions.md` when deeper check
 3. **Architecture** — Coupling, cohesion, extensibility, testability, operational readiness?
 4. **Blind spots** — Temporal analysis, team dynamics, cross-service impact, operational burden, data implications, security surface, performance cliffs, configuration drift, missing observability, alternative solutions?
 
+## Workflow Review Lenses
+
+Load the workflow references when review evidence needs more detail than the
+main skill should carry:
+
+- `references/plan-completion-audit.md`: plan-vs-diff mapping, completion
+  status, and `UNVERIFIABLE` evidence gaps.
+- `references/scope-drift.md`: declared intent, observed delivery, out-of-scope
+  changes, and missing requirements.
+- `references/review-lenses.md`: always-on, cross-cutting, and stack-specific
+  review lenses with severity and confidence calibration.
+- `references/audit-dispatch.md`: optional subagent dispatch for heavy plan or
+  diff audits, with main-assistant spot checks.
+
+Workflow findings should cover plan-vs-diff mapping, scope drift, evidence gaps,
+contract coverage, and governance drift when those dimensions are in scope.
+
 ## Severity mappings
 
 | Category | Severity | Criteria |

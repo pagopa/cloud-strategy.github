@@ -34,6 +34,10 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Write those plan files in Italian by default unless the user explicitly asks for another language.
 - Keep unresolved questions, doubts, and user decisions in `dubbi-e-domande.md`.
 - `dubbi-e-domande.md` is not an execution-plan file and must stay outside the plan-and-apply loop.
+- Use `references/scope-challenge.md` before approving non-trivial retained plans
+  for execution.
+- Use `references/plan-review-gate.md` when plan clarity, coherence,
+  validability, or evidence needs a lightweight review before handoff.
 
 ## Numbered-file shape
 
@@ -64,6 +68,8 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 5. Give each numbered file the shape above and keep every section compact.
 6. Put open questions and decision requests only in `dubbi-e-domande.md`.
 7. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
+8. Run the scope challenge and plan review gate when the retained plan is
+   non-trivial or will be handed to `internal-executing-plans`.
 
 ## Validation
 
@@ -73,6 +79,8 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Plan files are in Italian unless the user asked otherwise.
 - The numbered files follow the local shape contract with explicit headings and short bullets.
 - `dubbi-e-domande.md` exists when needed and remains separate from executable plan files.
+- Non-trivial retained plans can answer the scope challenge fields: target,
+  anti-scope, owner, validator, and stop conditions.
 - The plan does not rely on imported `superpowers-*` skills as the policy owner; any repo-local drift fix stays narrow and subordinate to this wrapper.
 
 ## Common mistakes

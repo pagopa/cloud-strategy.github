@@ -25,6 +25,14 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 
 - Read the numbered plan files in order.
 - Ignore `dubbi-e-domande.md` during plan application. It stays outside the plan-and-apply loop.
+- Read `dubbi-e-domande.md` only for accepted decisions that affect execution,
+  then keep it out of completion tracking.
+- Use `references/plan-handoff.md` before starting when handoff fields are
+  missing or ambiguous.
+- Use `references/resume-protocol.md` before continuing after interruption,
+  compaction, or a new session.
+- Use `references/completion-report.md` before reporting final retained-plan
+  state.
 - For each active plan file, create or update the matching `done-<source-file-name>.md` file.
 - When an item is completed, move it into the matching `done-*` file and remove it from the active plan file.
 - Delete an active plan file once all of its executable items have been moved out and the file is empty.
@@ -41,12 +49,14 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 ## Workflow
 
 1. Load the task folder and identify all remaining numbered plan files.
-2. Process the lowest-numbered remaining plan file first.
-3. Execute items, verify them, and move completed items to the matching `done-*` file.
-4. Remove completed items from the active source file.
-5. Delete an active plan file when no executable items remain.
-6. Repeat until all numbered plan files are cleared.
-7. Ask the user for input only when a real blocker prevents safe continuation.
+2. If resuming, verify existing `done-*` files, current diff, and validators
+   before editing.
+3. Process the lowest-numbered remaining plan file first.
+4. Execute items, verify them, and move completed items to the matching `done-*` file.
+5. Remove completed items from the active source file.
+6. Delete an active plan file when no executable items remain.
+7. Repeat until all numbered plan files are cleared.
+8. Ask the user for input only when a real blocker prevents safe continuation.
 
 ## Validation
 
@@ -54,6 +64,8 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - Matching `done-*` files exist for plan files that started execution.
 - Completed items no longer remain in the active numbered plan file.
 - Empty source plan files are deleted.
+- Resume and completion report references were applied when interruption,
+  compaction, or final retained-plan state needed durable evidence.
 - Execution continued across remaining numbered plan files until completion or a real blocker.
 - Imported execution skills were used only as engines, not rewritten as policy containers.
 

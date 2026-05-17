@@ -79,6 +79,9 @@ After creating a retained plan or materially reformulating one, provide a compac
 - ⭐ `Default consigliato`
 - ✋ `Decisione richiesta`
 
+Use `internal-agent-support-next-step/references/decision-brief.md` for the
+required Decision Brief fields when the brief must survive a handoff.
+
 ## Execute Mode
 
 Execute mode owns clear local delivery. It may touch several adjacent files when the target state is already decided and validation is concrete. File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
@@ -86,6 +89,11 @@ Execute mode owns clear local delivery. It may touch several adjacent files when
 For `execute`, keep edits scoped to the requested change, required adjacent contracts, and validation fixes. Do not silently add newly discovered improvements.
 
 For `apply-plan`, load `internal-executing-plans` and follow its repository-local `done-*` loop. The normal input is an approved retained plan folder under `tmp/superpowers/<clear-action-or-task-name>/`; an inline plan must be converted into a retained plan or receive an explicit checkpoint before execution. `dubbi-e-domande.md` is never an executable plan file.
+
+Use `internal-executing-plans/references/plan-handoff.md` for incoming handoff
+gaps, `internal-executing-plans/references/resume-protocol.md` when resuming
+interrupted work, and `internal-executing-plans/references/completion-report.md`
+when packaging final retained-plan state.
 
 When the user invokes this skill or the delivery wrapper with a retained plan folder, treat that folder as the execution target. Read numbered plan files in order, ignore `dubbi-e-domande.md`, continue across remaining executable items, and stop only for missing input, unsafe scope, out-of-scope work, or a blocker that prevents correct continuation.
 
@@ -98,6 +106,11 @@ Before reporting completion for `execute` or `apply-plan`, run three distinct ve
 - `Check 1`: Plan coverage. Map each requested item or retained-plan item to an implemented change, intentional non-action, or blocker.
 - `Check 2`: Contract coverage. Re-read changed files and relevant repository instructions to check ownership, frontmatter, links, inventory, schemas, and local conventions.
 - `Check 3`: Evidence coverage. Run the applicable validators, tests, lint commands, or closest available checks; read the output before claiming success.
+
+For large retained plans, multi-area diffs, always-on guidance changes, or
+validator changes, use `internal-systems-review/references/plan-completion-audit.md`
+and `internal-systems-review/references/scope-drift.md` instead of expanding this
+main skill with audit tables.
 
 If a check fails, fix the issue and rerun the relevant check. If a check cannot run, state the exact validation gap and the closest evidence gathered. Small changes may use concise checks, but the three perspectives must remain distinct.
 
@@ -128,6 +141,9 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Read `references/mode-contracts.md` for detailed mode boundaries, ownership maps, and medium-task thresholds.
 - Read `references/workflow-maps.md` when documenting or validating quick, planned, and audited workflows.
 - Read `references/wrapper-alignment.md` when updating Copilot agent wrappers, runtime portability claims, or tests.
+- Read `../internal-systems-review/references/plan-completion-audit.md` and
+  `../internal-systems-review/references/scope-drift.md` when completion checks
+  need a full workflow audit.
 
 ## Validation
 
