@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Gateway Operational Flow"
+  short_description: "Skill-first staged operational core"
+  default_prompt: "Use $internal-gateway-operational-flow to choose the visible full-cycle, plan-only, apply-plan, review, or explicit phase workflow."

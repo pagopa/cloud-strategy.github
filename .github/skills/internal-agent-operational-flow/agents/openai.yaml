@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal Agent Operational Flow"
-  short_description: "Portable plan, execute, and review core"
-  default_prompt: "Use $internal-agent-operational-flow to run the right plan, execute, or review mode with a visible next-step package."

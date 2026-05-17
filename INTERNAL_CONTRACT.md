@@ -64,7 +64,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Goal: keep scoped instructions discoverable by target path without promising universal auto-loading.
 - Scope:
   - `.github/instructions/**/*.instructions.md`
-  - `docs/03-ai-runtime-operating-model.md`
+  - `docs/03-local-ai-runtime-operating-model.md`
   - catalog consistency helpers and tests
 - Expected behavior:
   - each active scoped instruction exposes usable `applyTo` metadata
@@ -79,16 +79,16 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Scope:
   - `AGENTS.md`
   - `.github/copilot-instructions.md`
-  - `docs/01-architecture.md`
-  - `docs/02-repository-context.md`
-  - `docs/03-ai-runtime-operating-model.md`
+  - `docs/01-local-architecture.md`
+  - `docs/02-local-repository-context.md`
+  - `docs/03-local-ai-runtime-operating-model.md`
   - `.github/templates/01-architecture.md.template`
   - `.github/templates/02-repository-context.md.template`
   - sync automation and sync-contract tests
 - Expected behavior:
-  - `docs/01-architecture.md` is the repository-specific architecture contract and is scaffolded into consumers only when missing
-  - `docs/02-repository-context.md` is descriptive local context and cannot override binding instruction policy
-  - `docs/03-ai-runtime-operating-model.md` is source-managed runtime guidance synchronized from the standards repository
+  - `docs/01-local-architecture.md` is the repository-specific architecture contract and is scaffolded into consumers only when missing
+  - `docs/02-local-repository-context.md` is descriptive local context and cannot override binding instruction policy
+  - `docs/03-local-ai-runtime-operating-model.md` is source-managed runtime guidance synchronized from the standards repository
   - sync automation preserves existing consumer-local architecture and context documents after initial scaffold creation
   - `.github/templates/` remains source-side scaffold material and is not mirrored as a target catalog family
 
@@ -224,13 +224,15 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-agent-operational-flow` and `internal-agent-critical-master` remain the canonical repository-owned skill-first operational core
+  - `internal-gateway-operational-flow`, `internal-gateway-simple`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
   - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the current Copilot wrapper entrypoints for that core
-  - the default operational model uses direct owner selection instead of a repository-owned front-door router
-  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader` or `plan` mode through `internal-agent-operational-flow`
+  - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
+  - `internal-gateway-operational-flow` supports `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases without creating dedicated gateway skills for each phase
+  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader` or the `plan` phase through `internal-gateway-operational-flow`
   - unclear target state and multiple credible paths are explicit planning triggers
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
+  - critical challenge can return reformulation, simple, execute, review, continue-critical, or accept-with-risk outcomes
   - any future peer-automation exception between wrapper owners must be narrow, one-directional, auditably bounded, and non-mesh
   - mandatory and optional skill contracts remain explicit where the wrapper behavior depends on them
 

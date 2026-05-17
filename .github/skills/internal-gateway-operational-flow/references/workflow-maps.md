@@ -27,6 +27,50 @@ Use this reference when preserving or validating user-visible operational flows.
 
 Use this path when the target state is already known. Do not reopen strategy unless the task reveals real ambiguity.
 
+## Staged Full Cycle
+
+```text
++--------------------------------+
+| Non-trivial repository-owned    |
+| work or full-cycle request      |
++--------------------------------+
+               |
+               v
++-------------------------------+
+| plan phase                     |
+| - grill-me when needed         |
+| - retained plan when justified |
+| - Decision Brief projection    |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| visible critical phase when    |
+| reasoning risk needs pressure  |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| checkpoint before execute or   |
+| apply-plan unless preapproved  |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| execute or apply-plan          |
+| - local delivery or done-*     |
+|   retained-plan loop           |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| review evidence or final       |
+| outcome with residual risk     |
++-------------------------------+
+```
+
+The full cycle coordinates visible phases. It is not hidden dispatch between wrapper agents.
+
 ## Planned Work
 
 ```text
@@ -52,8 +96,9 @@ Use this path when the target state is already known. Do not reopen strategy unl
                |
                v
 +-------------------------------+
-| execute, review, or critical   |
-| only after manual approval     |
+| execute, apply-plan, review,   |
+| or critical only after         |
+| visible checkpoint             |
 +-------------------------------+
 ```
 
@@ -85,6 +130,37 @@ Planning output should be compact enough for the next owner or runtime to act wi
 ```
 
 Review treats missing validation as a finding, not a footnote.
+
+## Retained Plan Application
+
+```text
++-------------------------------+
+| User asks to apply an approved |
+| retained plan under tmp/       |
++-------------------------------+
+              |
+              v
++-------------------------------+
+| apply-plan entrypoint          |
+| - load internal-executing-plans|
+| - ignore dubbi-e-domande.md   |
++-------------------------------+
+              |
+              v
++-------------------------------+
+| done-* loop                    |
+| - move completed items         |
+| - delete empty active files    |
+| - stop only for blockers       |
++-------------------------------+
+              |
+              v
++-------------------------------+
+| validation and final evidence  |
++-------------------------------+
+```
+
+Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies.
 
 ## Runtime Projection
 

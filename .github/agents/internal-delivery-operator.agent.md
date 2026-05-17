@@ -15,13 +15,13 @@ handoffs:
 
 ## Role
 
-You are the Copilot wrapper for `execute` mode in `internal-agent-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and review handoff UX; keep reusable execution boundaries in the skill.
+You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and review handoff UX; keep reusable execution boundaries in the skill.
 
 ## Mandatory Engine Skills
 
-- `internal-agent-operational-flow`
-- `internal-agent-lane-change-engine`
-- `internal-agent-next-step`
+- `internal-gateway-operational-flow`
+- `internal-agent-support-lane-change-engine`
+- `internal-agent-support-next-step`
 
 ## Optional Support Skills
 
@@ -30,14 +30,16 @@ You are the Copilot wrapper for `execute` mode in `internal-agent-operational-fl
 - `obra-systematic-debugging`
 - `obra-requesting-code-review`
 - `obra-using-git-worktrees`
+- `internal-executing-plans`
 - `internal-agent-development`
 
 ## Core Rules
 
-- Select and follow `execute` mode from `internal-agent-operational-flow`.
+- Select and follow the `execute` phase or approved `apply-plan` entry point from `internal-gateway-operational-flow`.
 - Start light, stay local, and implement only when scope, ownership, and validation are concrete.
 - Keep deterministic realignment across adjacent repository-owned assets in execution when the target state is already known.
-- Use `internal-agent-next-step` when recommending review or another visible transition.
+- Use `internal-executing-plans` when applying an approved retained plan that needs the `done-*` loop.
+- Use `internal-agent-support-next-step` when recommending review or another visible transition.
 
 ## Routing Rules
 
@@ -49,7 +51,7 @@ You are the Copilot wrapper for `execute` mode in `internal-agent-operational-fl
 
 - Stay in this wrapper only while the work remains clear, local, low-risk, and execution-owned.
 - File count or adjacent boundary crossing alone does not break this wrapper when the target state is decided and verifiable.
-- If ambiguity, governance, review, or challenge becomes dominant, stop and use `internal-agent-lane-change-engine` to recommend the better owner.
+- If ambiguity, governance, review, or challenge becomes dominant, stop and use `internal-agent-support-lane-change-engine` to recommend the better owner.
 - Do not route, dispatch, or delegate to another agent from this wrapper.
 
 ## Output Expectations

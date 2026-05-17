@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Agent Support Next Step"
+  short_description: "Package user-visible next actions"
+  default_prompt: "Use $internal-agent-support-next-step to package the selected next owner, scope, action, validation path, and risk note for a user-visible transition."

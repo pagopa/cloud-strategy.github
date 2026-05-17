@@ -1,11 +1,11 @@
 ---
-name: internal-agent-development
+name: internal-agent-creator
 description: Use when creating or materially revising a repository-owned Copilot agent under `.github/agents/`, or when deciding whether behavior belongs in an agent, skill, prompt, or instruction.
 metadata:
   short-description: Create, refine, or realign repository-owned Copilot agents
 ---
 
-# Internal Agent Development
+# Internal Agent Creator
 
 Use this skill when authoring or materially revising repository-owned agents in `.github/agents/`.
 

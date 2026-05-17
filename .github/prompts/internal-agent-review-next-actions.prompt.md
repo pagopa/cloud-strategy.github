@@ -19,9 +19,9 @@ Use these repository sources first:
 
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-code-review-instructions.md](../copilot-code-review-instructions.md)
-- [.github/skills/internal-agent-operational-flow/SKILL.md](../skills/internal-agent-operational-flow/SKILL.md)
+- [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
 - [.github/skills/internal-code-review/SKILL.md](../skills/internal-code-review/SKILL.md)
-- [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
+- [.github/skills/internal-agent-support-next-step/SKILL.md](../skills/internal-agent-support-next-step/SKILL.md)
 - [.github/agents/internal-review-guard.agent.md](../agents/internal-review-guard.agent.md)
 
 Produce review findings with:

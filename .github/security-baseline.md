@@ -10,23 +10,26 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 - Keep `permissions` minimal in workflows (default to read-only unless write is required).
 - Prefer OIDC short-lived credentials over long-lived static secrets.
 - Require branch protection and pull request reviews for `.github/**` changes.
-- Validate `.github/**` content in CI using repository-defined automation when a dedicated validator exists.
+- Validate `.github/**` content in CI with repository-defined automation when a dedicated validator exists.
 - Run `shellcheck` on Bash scripts under `.github/scripts/`.
 
 ## IAM and least privilege
 
 - Apply least privilege across all clouds: scope roles, policies, and bindings to the narrowest effective target.
-- AWS: no `"Action": "*"` or `"Resource": "*"` without documented justification; use permission boundaries on human roles; align with SCPs.
-- Azure: no Owner at subscription level without justification; scope role assignments narrowly; prefer managed identities over service principal secrets.
-- GCP: no primitive roles (`roles/editor`, `roles/owner`); no `allUsers`/`allAuthenticatedUsers` bindings; prefer Workload Identity over SA keys.
+- AWS: no `"Action": "*"` or `"Resource": "*"` without documented justification. Use permission boundaries on human
+  roles. Align with SCPs.
+- Azure: no Owner at subscription level without justification. Scope role assignments narrowly. Prefer managed
+  identities over service principal secrets.
+- GCP: no primitive roles (`roles/editor`, `roles/owner`). No `allUsers`/`allAuthenticatedUsers` bindings. Prefer
+  Workload Identity over SA keys.
 - Flag privilege escalation chains (e.g., `iam:PassRole` + `lambda:CreateFunction` on AWS).
-- Review blast radius: what is the worst-case impact if this identity is compromised?
+- Review blast radius: identify the worst-case impact if this identity is compromised.
 
 ## Supply chain and CI/CD security
 
 - Pin every GitHub Action to a full-length commit SHA with adjacent release/tag comment.
 - Pin `docker://` references by digest instead of floating tags.
-- Require OIDC for cloud authentication in workflows — no long-lived secrets.
+- Require OIDC for cloud authentication in workflows. Do not use long-lived secrets.
 - Use minimal `permissions` on every workflow and job.
 - Never use `pull_request_target` with untrusted code execution.
 - Protect production environments with required reviewers and deployment rules.
@@ -47,7 +50,7 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 
 ## Change governance
 
-- Document breaking instruction, skill, or agent changes in `.github/CHANGELOG.md`.
+- Document breaking changes to instructions, skills, or agents in `.github/CHANGELOG.md`.
 - Use a deprecation window before removing instructions, skills, or agents in active use.
 - Keep a rollback path for workflow and policy changes.
 

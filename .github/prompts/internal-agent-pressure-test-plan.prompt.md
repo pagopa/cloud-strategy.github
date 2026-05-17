@@ -23,9 +23,9 @@ Use these repository sources first:
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
-- [.github/skills/internal-agent-critical-master/SKILL.md](../skills/internal-agent-critical-master/SKILL.md)
-- [.github/skills/internal-agent-lane-change-engine/SKILL.md](../skills/internal-agent-lane-change-engine/SKILL.md)
-- [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
+- [.github/skills/internal-gateway-critical-master/SKILL.md](../skills/internal-gateway-critical-master/SKILL.md)
+- [.github/skills/internal-agent-support-lane-change-engine/SKILL.md](../skills/internal-agent-support-lane-change-engine/SKILL.md)
+- [.github/skills/internal-agent-support-next-step/SKILL.md](../skills/internal-agent-support-next-step/SKILL.md)
 
 Return a compact pressure test with:
 
@@ -33,6 +33,6 @@ Return a compact pressure test with:
 2. Assumptions under test
 3. Top failure modes
 4. Counter-framing or inversion result
-5. Keep, change, or reframe recommendation
-6. Return-to-planning next-step package when the challenged artifact is a plan
+5. Explicit outcome: `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`
+6. Return-to-owner next-step package when another lane should act
 7. Residual risk if the proposal still goes ahead

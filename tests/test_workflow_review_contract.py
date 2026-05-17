@@ -15,7 +15,7 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
     )
     planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
     operating_model_text = read_text(
-        ".github/skills/internal-agent-operational-flow/SKILL.md"
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
 
     assert (
@@ -31,7 +31,7 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
         in operating_model_text
     )
     assert (
-        "If the mode is unclear, use `plan` as the safe fallback"
+        "If the entry point or phase is unclear, use `plan` as the safe fallback"
         in operating_model_text
     )
 
@@ -76,11 +76,9 @@ def test_obra_workflows_do_not_claim_deterministic_textual_governance_maintenanc
 
 
 def test_agent_authoring_docs_preserve_subagent_inherited_defaults_note() -> None:
-    agent_development_text = read_text(
-        ".github/skills/internal-agent-development/SKILL.md"
-    )
+    agent_development_text = read_text(".github/skills/internal-agent-creator/SKILL.md")
     subagent_patterns_text = read_text(
-        ".github/skills/internal-agent-development/references/subagent-patterns.md"
+        ".github/skills/internal-agent-creator/references/subagent-patterns.md"
     )
 
     assert (
@@ -100,11 +98,9 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
     reference_instruction_text = read_text(
         ".github/instructions/internal-copilot-skill-reference-authoring.instructions.md"
     )
-    agent_development_text = read_text(
-        ".github/skills/internal-agent-development/SKILL.md"
-    )
+    agent_development_text = read_text(".github/skills/internal-agent-creator/SKILL.md")
     agent_contract_text = read_text(
-        ".github/skills/internal-agent-development/references/agent-contract.md"
+        ".github/skills/internal-agent-creator/references/agent-contract.md"
     )
     skill_creator_text = read_text(".github/skills/internal-skill-creator/SKILL.md")
     writing_skills_text = read_text(

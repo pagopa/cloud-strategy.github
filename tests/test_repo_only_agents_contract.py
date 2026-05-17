@@ -34,7 +34,7 @@ def test_repo_only_sync_agents_keep_boundary_and_tool_contracts() -> None:
         assert frontmatter.get("agents") in (None, [])
         assert "## Mandatory Engine Skills" in body
         assert "## Boundary Definition" in body
-        assert "- `internal-agent-lane-change-engine`" in body
+        assert "- `internal-agent-support-lane-change-engine`" in body
         assert "- `mattpocock-caveman`" in body
 
 

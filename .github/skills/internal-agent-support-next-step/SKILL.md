@@ -1,22 +1,22 @@
 ---
-name: internal-agent-next-step
+name: internal-agent-support-next-step
 description: Use when a repository-owned agent or prompt needs to package an already-chosen next owner, scope, action, validation path, and risk note for a user-visible transition.
 ---
 
-# Internal Agent Next Step
+# Internal Agent Support Next Step
 
 Use this skill to format the next step after the next owner has already been chosen or confirmed. It keeps sequential workflows compact, explicit, and user-visible without turning Copilot wrappers or portable skill workflows into hidden routers.
 
 ## When to use
 
-- `internal-agent-operational-flow` ends `plan`, `execute`, or `review` mode with a visible transition.
+- `internal-gateway-operational-flow` ends a staged `plan`, `execute`, `apply-plan`, `review`, or critical phase with a visible transition.
 - A Copilot wrapper recommends moving from planning, delivery, review, or critical challenge to a different owner.
 - `internal-review-guard` or `review` mode finishes defect-first analysis and needs to route actionable findings to delivery, planning, critical challenge, or deferred follow-up.
 - A prompt needs a consistent handoff package that survives surfaces where VS Code `handoffs:` buttons are not available.
 
 ## When not to use
 
-- Do not use this skill to choose the next owner from scratch; use `internal-agent-lane-change-engine` when the lane no longer fits.
+- Do not use this skill to choose the next owner from scratch; use `internal-agent-support-lane-change-engine` when the lane no longer fits.
 - Do not use it to dispatch another agent, auto-submit a handoff, or bypass user approval.
 - Do not duplicate the lane-change recommendation matrix here.
 

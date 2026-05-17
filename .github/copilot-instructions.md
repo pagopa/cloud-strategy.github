@@ -43,6 +43,7 @@ Protect correctness, security, simplicity, and maintainability.
 - Prefer the simplest correct change with the smallest credible blast radius.
 - Preserve existing conventions unless the task changes them.
 - Keep policy, projection, inventory, local context, runtime guidance, and operational workflows separate.
+- Allow user-selected gateway skills with visible phases; keep hidden front-door routing and hidden peer dispatch disallowed.
 - Update docs, validators, tests, or sync discovery when governance contracts change.
 - Read primary vendor docs before schema-driven edits.
 - Handle failures evidence-first: inspect the signal, fix the root cause when clear, and ask only for unsafe or missing decisions.
@@ -61,3 +62,4 @@ Protect correctness, security, simplicity, and maintainability.
 - Before completion, re-check the request against the final diff and validation evidence.
 - Report completed work with outcome, changed files, validation results, and remaining gaps.
 - Include detailed resource sections only when the user asks or a narrower contract requires them.
+- Use light emoji markers only where the owning skill defines user-facing macro-category headings; keep technical paths, commands, identifiers, and schema fields plain.

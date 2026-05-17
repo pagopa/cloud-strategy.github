@@ -1,9 +1,9 @@
 ---
-name: internal-agent-lane-change-engine
+name: internal-agent-support-lane-change-engine
 description: Use when a repository-owned internal agent needs a consistent user-visible lane-change response after the selected lane no longer fits.
 ---
 
-# Internal Agent Lane Change Engine
+# Internal Agent Support Lane Change Engine
 
 Use this skill as the shared lane-mismatch engine for repository-owned internal agents that must stop, explain the mismatch, and recommend the better next option without hidden delegation.
 

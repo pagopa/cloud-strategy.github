@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Gateway Critical Master"
+  short_description: "Critical challenge with outcome routing"
+  default_prompt: "Use $internal-gateway-critical-master to pressure-test this plan or decision and close with an explicit routing outcome."

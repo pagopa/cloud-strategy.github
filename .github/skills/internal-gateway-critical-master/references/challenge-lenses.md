@@ -44,4 +44,5 @@ Then reconcile the answer:
 - Evidence or uncertainty.
 - One reframing move.
 - Closing synthesis after the final consistency gate.
+- Explicit outcome: `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
 - Recommended owner and next-step package when another lane should act.

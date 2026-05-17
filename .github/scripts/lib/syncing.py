@@ -232,7 +232,7 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
             SyncOperation(
                 action="delete",
                 path=LEGACY_RUNTIME_FIT_PATH,
-                reason="Legacy runtime-fit document is replaced by docs/03-ai-runtime-operating-model.md.",
+                reason="Legacy runtime-fit document is replaced by docs/03-local-ai-runtime-operating-model.md.",
                 source_hash=None,
                 target_hash=sha256_file(legacy_runtime_fit_path),
             )
