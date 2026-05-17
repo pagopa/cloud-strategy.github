@@ -10,8 +10,8 @@ policy:
     --3way` fallback when upstream text drift is compatible. Stop for review if
     neither path applies cleanly.
 overrides:
-  - id: obra-brainstorming-workflow-review
-    target_path: .github/skills/obra-brainstorming/SKILL.md
+  - id: superpowers-brainstorming-workflow-review
+    target_path: .github/skills/superpowers-brainstorming/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
     apply_strategy: git-apply-3way
@@ -19,13 +19,13 @@ overrides:
     reason: >-
       Narrow brainstorming to creative or design-ambiguous work and align
       transient spec artifacts to tmp/superpowers.
-    patch_path: patches/obra-brainstorming.patch
-    expected_content_hash: 9e0c6c59b1138312f6cff04f33f4e56e51b442a1df68f3cf04d1a5d276e4a101
-    baseline_repo_commit: "5930521"
+    patch_path: patches/superpowers-brainstorming.patch
+    expected_content_hash: 8027ef6296dfb28100e0513aa01d2a7e2021f7764cd271d3b16aa934f9bfd3fd
+    baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
-  - id: obra-writing-plans-workflow-review
-    target_path: .github/skills/obra-writing-plans/SKILL.md
+  - id: superpowers-writing-plans-workflow-review
+    target_path: .github/skills/superpowers-writing-plans/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
     apply_strategy: git-apply-3way
@@ -33,13 +33,13 @@ overrides:
     reason: >-
       Remove planning as the default gate for deterministic maintenance and
       align retained plan artifacts to tmp/superpowers.
-    patch_path: patches/obra-writing-plans.patch
-    expected_content_hash: 5d997b257b261082b03d48d4bb763140f1b4381450dec0b37639718a4fb9411f
-    baseline_repo_commit: "5930521"
+    patch_path: patches/superpowers-writing-plans.patch
+    expected_content_hash: e0d2b95ba36622ba014ea382988407543a423fc26e382e11bde08a053c90cd86
+    baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
-  - id: obra-test-driven-development-workflow-review
-    target_path: .github/skills/obra-test-driven-development/SKILL.md
+  - id: superpowers-test-driven-development-workflow-review
+    target_path: .github/skills/superpowers-test-driven-development/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
     apply_strategy: git-apply-3way
@@ -47,13 +47,13 @@ overrides:
     reason: >-
       Keep TDD strong for executable behavior without making it a rigid default
       for textual governance authoring.
-    patch_path: patches/obra-test-driven-development.patch
-    expected_content_hash: f52f1aa7de5190cb0d881553b2a0d4dcc370085868fa78234de6178973115ab9
-    baseline_repo_commit: "5930521"
+    patch_path: patches/superpowers-test-driven-development.patch
+    expected_content_hash: 24b6ca57b7a4596022d9d48217e019b1e8f92e407297aae835a2adb639225b48
+    baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
-  - id: obra-subagent-driven-development-workflow-review
-    target_path: .github/skills/obra-subagent-driven-development/SKILL.md
+  - id: superpowers-subagent-driven-development-workflow-review
+    target_path: .github/skills/superpowers-subagent-driven-development/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
     apply_strategy: git-apply-3way
@@ -61,13 +61,13 @@ overrides:
     reason: >-
       Keep the example plan path aligned with tmp/superpowers so imported
       execution guidance does not reintroduce deprecated transient paths.
-    patch_path: patches/obra-subagent-driven-development.patch
-    expected_content_hash: e2f01c2c8a79b6e6a05cb3e7315f01c50daabeefce72f251dd6b86a02035180f
-    baseline_repo_commit: "5930521"
+    patch_path: patches/superpowers-subagent-driven-development.patch
+    expected_content_hash: f85bd5cbe406718c6aca57408f8135e60a84ed4200c6233305b917a3ae41112d
+    baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
-  - id: obra-requesting-code-review-workflow-review
-    target_path: .github/skills/obra-requesting-code-review/SKILL.md
+  - id: superpowers-requesting-code-review-workflow-review
+    target_path: .github/skills/superpowers-requesting-code-review/SKILL.md
     source_family: obra/superpowers
     lifecycle_mode: post-refresh-patch
     apply_strategy: git-apply-3way
@@ -75,8 +75,8 @@ overrides:
     reason: >-
       Keep the reviewer handoff aligned with the canonical internal reviewer and
       with tmp/superpowers plan paths.
-    patch_path: patches/obra-requesting-code-review.patch
-    expected_content_hash: 404a24c62b9cf001a7b38463dab2a67fe70fb78b6c6c64ae0678697f6833675b
-    baseline_repo_commit: "5930521"
+    patch_path: patches/superpowers-requesting-code-review.patch
+    expected_content_hash: 1551f1af49cae7624862b50147af41c7a2275196d99b96380c16f53ca86c9abf
+    baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

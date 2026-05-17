@@ -29,13 +29,13 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 
 ## Optional Support Skills
 
-- `obra-brainstorming`
+- `superpowers-brainstorming`
 - `internal-writing-plans`
 - `internal-executing-plans`
-- `internal-agent-development`
+- `internal-agent-creator`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
-- `internal-change-impact-analysis`
+- `internal-systems-review`
 - `mattpocock-grill-me`
 
 ## Core Rules

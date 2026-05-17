@@ -7,7 +7,7 @@ description: Use when repository-owned work needs a retained numbered plan under
 
 Use this skill as the repository-owned wrapper for plan authoring in this repository.
 
-Treat `obra-writing-plans` as imported depth and keep any repo-local drift fixes narrow. This skill adds the local contract for when a plan is retained, where it lives, how numbered files are split, what language they use, and what must stay outside the execution loop.
+Treat `superpowers-writing-plans` as imported depth and keep any repo-local drift fixes narrow. This skill adds the local contract for when a plan is retained, where it lives, how numbered files are split, what language they use, and what must stay outside the execution loop.
 
 ## When to use
 
@@ -18,10 +18,10 @@ Treat `obra-writing-plans` as imported depth and keep any repo-local drift fixes
 
 ## When not to use
 
-- General design or spec work under `tmp/superpowers/specs/`; use `obra-brainstorming` when that workflow is relevant.
+- General design or spec work under `tmp/superpowers/specs/`; use `superpowers-brainstorming` when that workflow is relevant.
 - Clear, local, quick, or banal tasks whose next steps fit in chat.
 - Local execution with no retained plan artifact.
-- Imported or sync-managed planning assets; do not edit `obra-*` skills to impose this policy.
+- Imported or sync-managed planning assets; do not edit `superpowers-*` skills to impose this policy.
 
 ## Local retained-plan contract
 
@@ -34,6 +34,10 @@ Treat `obra-writing-plans` as imported depth and keep any repo-local drift fixes
 - Write those plan files in Italian by default unless the user explicitly asks for another language.
 - Keep unresolved questions, doubts, and user decisions in `dubbi-e-domande.md`.
 - `dubbi-e-domande.md` is not an execution-plan file and must stay outside the plan-and-apply loop.
+- Use `references/scope-challenge.md` before approving non-trivial retained plans
+  for execution.
+- Use `references/plan-review-gate.md` when plan clarity, coherence,
+  validability, or evidence needs a lightweight review before handoff.
 
 ## Numbered-file shape
 
@@ -52,8 +56,8 @@ Treat `obra-writing-plans` as imported depth and keep any repo-local drift fixes
 ## Relationship to OBRA
 
 - Use this skill first for repository-owned planning policy.
-- Reuse `obra-writing-plans` only for the remaining plan-authoring mechanics that do not conflict with the local contract.
-- If the plan will be executed in the same repository-owned workflow, hand off to `internal-executing-plans` instead of routing directly to `obra-executing-plans`.
+- Reuse `superpowers-writing-plans` only for the remaining plan-authoring mechanics that do not conflict with the local contract.
+- If the plan will be executed in the same repository-owned workflow, hand off to `internal-executing-plans` instead of routing directly to `superpowers-executing-plans`.
 
 ## Workflow
 
@@ -64,6 +68,8 @@ Treat `obra-writing-plans` as imported depth and keep any repo-local drift fixes
 5. Give each numbered file the shape above and keep every section compact.
 6. Put open questions and decision requests only in `dubbi-e-domande.md`.
 7. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
+8. Run the scope challenge and plan review gate when the retained plan is
+   non-trivial or will be handed to `internal-executing-plans`.
 
 ## Validation
 
@@ -73,7 +79,9 @@ Treat `obra-writing-plans` as imported depth and keep any repo-local drift fixes
 - Plan files are in Italian unless the user asked otherwise.
 - The numbered files follow the local shape contract with explicit headings and short bullets.
 - `dubbi-e-domande.md` exists when needed and remains separate from executable plan files.
-- The plan does not rely on imported `obra-*` skills as the policy owner; any repo-local drift fix stays narrow and subordinate to this wrapper.
+- Non-trivial retained plans can answer the scope challenge fields: target,
+  anti-scope, owner, validator, and stop conditions.
+- The plan does not rely on imported `superpowers-*` skills as the policy owner; any repo-local drift fix stays narrow and subordinate to this wrapper.
 
 ## Common mistakes
 

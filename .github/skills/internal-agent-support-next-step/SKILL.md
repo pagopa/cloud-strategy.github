@@ -32,6 +32,10 @@ When a next step is needed, include this compact package:
 
 Keep the package short. Prefer one line per field unless the validation path or risk note genuinely needs more detail.
 
+Use `references/decision-brief.md` when the next-step package must become a
+Decision Brief for retained planning, execution handoff, or cross-surface
+continuation.
+
 ## VS Code Handoffs
 
 - Treat `handoffs:` buttons as the primary VS Code wrapper UX for sequential workflows.
@@ -52,5 +56,7 @@ For each actionable review finding, name one routing outcome:
 
 - The next owner is already selected and exact.
 - The package includes owner, scope, action, validation, and risk.
+- Decision Brief handoffs include target state, anti-scope, suggested owner,
+  evidence source, validation path, known risks, and stop conditions.
 - The transition remains user-visible and manual unless the user explicitly asked otherwise.
 - The package does not restate the full lane-change matrix.

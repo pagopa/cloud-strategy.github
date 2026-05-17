@@ -28,23 +28,23 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 
 ## Optional Support Skills
 
-- `obra-writing-plans`
-- `obra-executing-plans`
-- `obra-verification-before-completion`
+- `superpowers-writing-plans`
+- `superpowers-executing-plans`
+- `superpowers-verification-before-completion`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
-- `internal-agent-development`
+- `internal-agent-creator`
 - `mattpocock-caveman`
 
 ## Skill Usage Contract
 
 - Always load `local-agent-sync-global-copilot-configs-into-repo` before planning or applying a consumer-repository sync. If this agent and that skill drift apart, fix the drift instead of inventing a parallel contract.
-- Use `obra-writing-plans` when the target sync needs retained staging, checkpoints, or cleanup order beyond the default tracking plan.
-- Use `obra-executing-plans` when the user already approved a concrete sync plan and execution should happen in deliberate batches.
-- Use `obra-verification-before-completion` before reporting success so target state, preserved local assets, and validation results are backed by fresh evidence.
+- Use `superpowers-writing-plans` when the target sync needs retained staging, checkpoints, or cleanup order beyond the default tracking plan.
+- Use `superpowers-executing-plans` when the user already approved a concrete sync plan and execution should happen in deliberate batches.
+- Use `superpowers-verification-before-completion` before reporting success so target state, preserved local assets, and validation results are backed by fresh evidence.
 - Use `internal-copilot-audit` when source or target drift, hollow references, or bridge-policy overlap changes the recommended sync outcome.
 - Use `internal-copilot-docs-research` only when a sync decision depends on current GitHub Copilot or MCP behavior rather than repository-local contract.
-- Use `internal-agent-development` only when a consumer-repository sync must compare, preserve, or normalize repository-owned agent contracts instead of mirroring agent files mechanically.
+- Use `internal-agent-creator` only when a consumer-repository sync must compare, preserve, or normalize repository-owned agent contracts instead of mirroring agent files mechanically.
 - Use `mattpocock-caveman` only as optional compression support for long sync reports or target-drift summaries, never for hiding blockers, warnings, validation evidence, approval posture, or destructive-operation gates.
 
 ## Core Rules

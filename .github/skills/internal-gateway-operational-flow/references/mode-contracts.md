@@ -8,7 +8,7 @@ Use this reference when the staged `plan`, `execute`, `apply-plan`, `review`, or
 | --- | --- | --- |
 | `full-cycle` | Non-trivial work that needs visible planning, optional critical challenge, checkpointed delivery, and final evidence. | Hidden wrapper-agent dispatch or unapproved execute/apply after planning. |
 | `plan-only` | Decisions, retained plans, Decision Briefs, and stop-before-apply workflows. | Silent implementation after the plan is written. |
-| `apply-plan` | Approved retained plans under `tmp/superpowers/<clear-action-or-task-name>/` using `internal-executing-plans`. | Inline plans without normalization or checkpoint, or `dubbi-e-domande.md` execution. |
+| `apply-plan` | Approved retained plan folders under `tmp/superpowers/<clear-action-or-task-name>/` using `internal-executing-plans`, folder-first execution, and explicit completion evidence. | Inline plans without normalization or checkpoint, newly discovered improvements, or `dubbi-e-domande.md` execution. |
 | `review` | Defect-first findings, evidence gaps, and fix routing. | Applying fixes or writing the initial design. |
 | `mode-explicit` | Direct user requests for `plan`, `execute`, or `review`. | Overriding the user's explicit phase unless the lane no longer fits. |
 
@@ -18,8 +18,8 @@ Use this reference when the staged `plan`, `execute`, `apply-plan`, `review`, or
 | --- | --- | --- |
 | `plan` | Ambiguity resolution, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, or pure pressure testing. |
 | `execute` | Clear local implementation, deterministic realignment, nearby documentation/test updates, and concrete validation. | Strategic tradeoffs, unresolved ownership, non-trivial rollout decisions, review-first asks, or assumption challenge. |
-| `apply-plan` | Repository-owned retained plan application with `done-*` tracking and blocker handling. | Creating or approving the plan, applying inline plans without checkpoint, or executing `dubbi-e-domande.md`. |
-| `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, and fix routing. | Applying fixes, designing the initial solution, or open-ended challenge. |
+| `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, blocker handling, cross-file continuation, and completion checks. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, or executing `dubbi-e-domande.md`. |
+| `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, systems risk, and fix routing. | Applying fixes, designing the initial solution, or open-ended challenge. |
 
 If two modes still plausibly fit, choose `plan` and make the uncertainty explicit.
 
@@ -31,6 +31,7 @@ If two modes still plausibly fit, choose `plan` and make the uncertainty explici
 - Verification is concrete enough to run locally or to name as an explicit gap.
 - The work applies an already-decided contract rather than redesigning ownership, routing, or catalog boundaries.
 - Adjacent file changes stay within one coherent maintenance area.
+- For retained plans, the input is an approved `tmp/superpowers/<clear-action-or-task-name>/` folder and the remaining work is execution, not plan approval.
 
 `plan` mode becomes the safer owner when at least one of these is true:
 
@@ -50,12 +51,15 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-gateway-critical-master` | Critical wrapper and pressure-test workflows | Challenge, pre-mortem, hidden assumptions, failure modes, and reframing. |
 | `internal-agent-support-lane-change-engine` | Shared by operational wrappers and sync command centers | Stop-and-recommend protocol when the selected mode or lane no longer fits. |
 | `internal-agent-support-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
-| `internal-code-review` | `review` mode | Tactical review engine for defect-first findings and code or catalog review. |
+| `internal-code-review` | `review` mode code lens | Tactical review engine for code defects, regressions, tests, language anti-patterns, and file/line findings. |
+| `internal-systems-review` | `review` mode systems lens | Systems-level review engine for architecture, workflow, cross-cutting impact, operational fit, and blind spots. |
 | `mattpocock-grill-me` | Conditional support for `plan` mode | User-requested or ambiguity-driven question pressure before plan finalization. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |
-| `obra-*` workflows | Conditional support | Mandatory only when the task shape actually triggers the workflow. |
+| `superpowers-*` workflows | Conditional support | Mandatory only when the task shape actually triggers the workflow. |
+
+`internal-security-review` is a future optional review lens only after its promotion gate creates the skill. Until then, security-specific review gaps should be stated explicitly and routed to the closest existing owner.
 
 ## Retired To Current Ownership Mapping
 
@@ -73,6 +77,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 
 - `plan` exits to `execute`, `apply-plan`, `review`, or critical challenge only through a visible next-step package and checkpoint unless the user authorized end-to-end work.
 - `execute` exits to `review` when correctness evidence or merge readiness is the main next need.
+- `apply-plan` exits only after all executable retained-plan items are completed, a real blocker is packaged, or validation exposes a gap that needs another visible owner.
 - `review` exits to `execute`, `plan`, critical challenge, or deferred follow-up for each actionable finding.
 - Critical challenge exits with `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
 - Any mode may stop and recommend a better lane through `internal-agent-support-lane-change-engine` when the boundary breaks.

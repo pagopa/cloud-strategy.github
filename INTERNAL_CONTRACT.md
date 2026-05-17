@@ -200,7 +200,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Expected behavior:
   - prefixes describe origin and ownership first, not a rigid strategic, tactical, or operational level
   - resources are evaluated on two axes: origin/ownership and dominant role
-  - `obra-*` resources act as workflow assets and may govern strategic, tactical, or operational work
+  - `superpowers-*` resources act as workflow assets and may govern strategic, tactical, or operational work
   - `internal-*` resources remain the canonical repository-owned layer and may be strategic, tactical, or operational as declared by contract
   - imported non-`internal-*` resources remain support depth by default
   - `local-*` resources remain consumer-local extensions and become strategic only when explicit local governance requires it

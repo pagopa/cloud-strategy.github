@@ -83,7 +83,7 @@ If the user provides a specification, issue, or acceptance outline:
 
 ## Cross-references
 
-- **internal-change-impact-analysis** (`.github/skills/internal-change-impact-analysis/SKILL.md`): for change-impact analysis that feeds the risk section.
+- **internal-systems-review** (`.github/skills/internal-systems-review/SKILL.md`): for systems-level impact analysis that feeds the risk section.
 - **internal-code-review** (`.github/skills/internal-code-review/SKILL.md`): for the review that follows the PR.
 - **internal-github-actions** (`.github/skills/internal-github-actions/SKILL.md`): for workflow/action pinning and Actions security rules touched by the PR.
 - **openai-gh-address-comments** (`.github/skills/openai-gh-address-comments/SKILL.md`): for addressing review threads and PR comments after the PR body exists; keep review-thread remediation separate from PR lifecycle/body work.

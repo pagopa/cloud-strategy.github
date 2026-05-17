@@ -17,7 +17,7 @@ This means `internal-skill-creator` should trigger first for repository-owned sk
 
 Use `internal-agent-sync-control-center` when the task is broader catalog governance, sync-managed external assets, or inventory-wide retirement and refresh work.
 
-Use `internal-agent-development` when the primary output is an agent change or an agent/skill boundary rewrite.
+Use `internal-agent-creator` when the primary output is an agent change or an agent/skill boundary rewrite.
 
 ## Read first
 
@@ -37,7 +37,7 @@ Use `internal-agent-development` when the primary output is an agent change or a
 ## When not to use
 
 - The task is catalog governance, inventory maintenance, or sync routing. Use `internal-agent-sync-control-center` instead.
-- The task is primarily agent authoring or agent/skill architecture. Use `internal-agent-development` instead.
+- The task is primarily agent authoring or agent/skill architecture. Use `internal-agent-creator` instead.
 - The task is outside `.github/skills/` or does not change a repository-owned skill.
 - The existing skill already covers the need and the change is a pure copyedit that does not affect retrieval, boundary, validation, or bundle structure.
 

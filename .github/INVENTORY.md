@@ -57,7 +57,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
 - `.github/skills/internal-azure-strategic/SKILL.md`
-- `.github/skills/internal-change-impact-analysis/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
@@ -93,6 +92,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-script-python/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-spring-boot-development/SKILL.md`
+- `.github/skills/internal-systems-review/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/internal-writing-plans/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
@@ -105,19 +105,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
 - `.github/skills/mattpocock-zoom-out/SKILL.md`
-- `.github/skills/obra-brainstorming/SKILL.md`
-- `.github/skills/obra-dispatching-parallel-agents/SKILL.md`
-- `.github/skills/obra-executing-plans/SKILL.md`
-- `.github/skills/obra-finishing-a-development-branch/SKILL.md`
-- `.github/skills/obra-receiving-code-review/SKILL.md`
-- `.github/skills/obra-requesting-code-review/SKILL.md`
-- `.github/skills/obra-subagent-driven-development/SKILL.md`
-- `.github/skills/obra-systematic-debugging/SKILL.md`
-- `.github/skills/obra-test-driven-development/SKILL.md`
-- `.github/skills/obra-using-git-worktrees/SKILL.md`
-- `.github/skills/obra-using-superpowers/SKILL.md`
-- `.github/skills/obra-verification-before-completion/SKILL.md`
-- `.github/skills/obra-writing-plans/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
@@ -125,6 +112,19 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/openai-skill-creator/SKILL.md`
 - `.github/skills/openai-slides/SKILL.md`
 - `.github/skills/openai-spreadsheet/SKILL.md`
+- `.github/skills/superpowers-brainstorming/SKILL.md`
+- `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
+- `.github/skills/superpowers-executing-plans/SKILL.md`
+- `.github/skills/superpowers-finishing-a-development-branch/SKILL.md`
+- `.github/skills/superpowers-receiving-code-review/SKILL.md`
+- `.github/skills/superpowers-requesting-code-review/SKILL.md`
+- `.github/skills/superpowers-subagent-driven-development/SKILL.md`
+- `.github/skills/superpowers-systematic-debugging/SKILL.md`
+- `.github/skills/superpowers-test-driven-development/SKILL.md`
+- `.github/skills/superpowers-using-git-worktrees/SKILL.md`
+- `.github/skills/superpowers-using-superpowers/SKILL.md`
+- `.github/skills/superpowers-verification-before-completion/SKILL.md`
+- `.github/skills/superpowers-writing-plans/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
 
@@ -148,5 +148,6 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/prompts/internal-agent-review-next-actions.prompt.md`
 - `.github/prompts/internal-architecture-md-creator.prompt.md`
 - `.github/prompts/internal-copilot-resources-mega-review.prompt.md`
+- `.github/prompts/internal-execute-plan.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
 - `.github/prompts/internal-sync-plan.prompt.md`

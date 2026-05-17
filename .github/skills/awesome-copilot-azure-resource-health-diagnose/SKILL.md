@@ -185,7 +185,7 @@ This workflow analyzes a specific Azure resource to assess its health status, di
 
    🚨 Issues Identified:
    • Critical: X issues requiring immediate attention
-   • High: Y issues affecting performance/reliability  
+   • High: Y issues affecting performance/reliability
    • Medium: Z issues for optimization
    • Low: N informational items
 
@@ -196,7 +196,7 @@ This workflow analyzes a specific Azure resource to assess its health status, di
 
    🛠️ Remediation Plan:
    • Immediate Actions: X items
-   • Short-term Fixes: Y items  
+   • Short-term Fixes: Y items
    • Long-term Improvements: Z items
    • Estimated Resolution Time: [Timeline]
 
@@ -207,8 +207,8 @@ This workflow analyzes a specific Azure resource to assess its health status, di
    ```markdown
    # Azure Resource Health Report: [Resource Name]
 
-   **Generated**: [Timestamp]  
-   **Resource**: [Full Resource ID]  
+   **Generated**: [Timestamp]
+   **Resource**: [Full Resource ID]
    **Overall Health**: [Status with color indicator]
 
    ## 🔍 Executive Summary
@@ -228,7 +228,7 @@ This workflow analyzes a specific Azure resource to assess its health status, di
      - **Impact**: [Business impact]
      - **Immediate Action**: [Required steps]
 
-   ### High Priority Issues  
+   ### High Priority Issues
    - **[Issue 2]**: [Description]
      - **Root Cause**: [Analysis]
      - **Impact**: [Performance/reliability impact]

@@ -135,8 +135,8 @@ Review treats missing validation as a finding, not a footnote.
 
 ```text
 +-------------------------------+
-| User asks to apply an approved |
-| retained plan under tmp/       |
+| User invokes skill or wrapper  |
+| with an approved tmp/ folder   |
 +-------------------------------+
               |
               v
@@ -151,12 +151,15 @@ Review treats missing validation as a finding, not a footnote.
 | done-* loop                    |
 | - move completed items         |
 | - delete empty active files    |
+| - continue across plan files   |
 | - stop only for blockers       |
 +-------------------------------+
               |
               v
 +-------------------------------+
-| validation and final evidence  |
+| Check 1 plan coverage          |
+| Check 2 contract coverage      |
+| Check 3 evidence coverage      |
 +-------------------------------+
 ```
 

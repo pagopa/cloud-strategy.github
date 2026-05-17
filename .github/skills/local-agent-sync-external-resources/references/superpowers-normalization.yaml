@@ -1,0 +1,72 @@
+version: 1
+source_family: obra/superpowers
+source_ref: f2cbfbefebbfef77321e4c9abc9e949826bea9d7
+local_prefix: superpowers-
+blocked_local_prefixes:
+  - obra-
+blocked_managed_reference_prefix: "superpowers:"
+managed_skills:
+  - upstream: brainstorming
+    legacy_local: obra-brainstorming
+    local: superpowers-brainstorming
+  - upstream: dispatching-parallel-agents
+    legacy_local: obra-dispatching-parallel-agents
+    local: superpowers-dispatching-parallel-agents
+  - upstream: executing-plans
+    legacy_local: obra-executing-plans
+    local: superpowers-executing-plans
+  - upstream: finishing-a-development-branch
+    legacy_local: obra-finishing-a-development-branch
+    local: superpowers-finishing-a-development-branch
+  - upstream: receiving-code-review
+    legacy_local: obra-receiving-code-review
+    local: superpowers-receiving-code-review
+  - upstream: requesting-code-review
+    legacy_local: obra-requesting-code-review
+    local: superpowers-requesting-code-review
+  - upstream: subagent-driven-development
+    legacy_local: obra-subagent-driven-development
+    local: superpowers-subagent-driven-development
+  - upstream: systematic-debugging
+    legacy_local: obra-systematic-debugging
+    local: superpowers-systematic-debugging
+  - upstream: test-driven-development
+    legacy_local: obra-test-driven-development
+    local: superpowers-test-driven-development
+  - upstream: using-git-worktrees
+    legacy_local: obra-using-git-worktrees
+    local: superpowers-using-git-worktrees
+  - upstream: using-superpowers
+    legacy_local: obra-using-superpowers
+    local: superpowers-using-superpowers
+  - upstream: verification-before-completion
+    legacy_local: obra-verification-before-completion
+    local: superpowers-verification-before-completion
+  - upstream: writing-plans
+    legacy_local: obra-writing-plans
+    local: superpowers-writing-plans
+managed_patches:
+  - legacy_path: patches/obra-brainstorming.patch
+    path: patches/superpowers-brainstorming.patch
+  - legacy_path: patches/obra-writing-plans.patch
+    path: patches/superpowers-writing-plans.patch
+  - legacy_path: patches/obra-test-driven-development.patch
+    path: patches/superpowers-test-driven-development.patch
+  - legacy_path: patches/obra-subagent-driven-development.patch
+    path: patches/superpowers-subagent-driven-development.patch
+  - legacy_path: patches/obra-requesting-code-review.patch
+    path: patches/superpowers-requesting-code-review.patch
+live_scan:
+  include:
+    - .github/agents
+    - .github/instructions
+    - .github/prompts
+    - .github/scripts
+    - .github/skills
+    - .github/INVENTORY.md
+    - .github/repo-profiles.yml
+    - .markdownlint-cli2.jsonc
+  ignored_files:
+    - README.md
+    - CHANGELOG.md
+    - superpowers-normalization.yaml

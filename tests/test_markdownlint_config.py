@@ -22,7 +22,7 @@ def test_markdownlint_ignores_local_venv_and_preserved_upstream_assets() -> None
     assert ".github/skills/awesome-copilot-*/**" in ignores
     assert ".github/skills/mattpocock-*/**" in ignores
     assert ".github/skills/openai-*/**" in ignores
-    assert ".github/skills/obra-*/**" in ignores
+    assert ".github/skills/superpowers-*/**" in ignores
 
 
 def test_markdownlint_config_documents_why_special_paths_are_ignored() -> None:

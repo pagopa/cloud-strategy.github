@@ -8,7 +8,7 @@ applyTo: ".github/skills/internal-*/references/**/*.md,.github/skills/local-*/re
 ## Workflow
 
 - Use references as the deep owner for reusable tables, templates, and detailed checklists.
-- When a reference change rewrites the paired bundle boundary, load `internal-skill-creator` and `internal-agent-development` as needed instead of inventing a parallel split.
+- When a reference change rewrites the paired bundle boundary, load `internal-skill-creator` and `internal-agent-creator` as needed instead of inventing a parallel split.
 - When editing a deep reference, inspect the paired `SKILL.md` and any paired agent before finalizing and fix only the necessary drift in the same change.
 
 ## Cohesion

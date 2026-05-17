@@ -23,7 +23,7 @@ Each resource entry should follow this shape:
 {
   "resource_id": "openai/skills/doc",
   "target_path": ".github/skills/openai-docx/SKILL.md",
-  "source_ref": "https://github.com/openai/skills/tree/main/skills/.system/doc/SKILL.md",
+  "source_ref": "https://github.com/openai/skills/tree/45d05d75363abf13f99d09e899d61e07b8010685/skills/.curated/doc/SKILL.md",
   "kind": "skill",
   "normalization_version": "v1",
   "hash_algo": "sha256",
@@ -34,6 +34,8 @@ Each resource entry should follow this shape:
   }
 }
 ```
+
+Use commit-hash `source_ref` values in manifests. When a Markdown catalog documents the same upstream source, add an inline note with the release tag when one exists, or with the commit date when no tagged release exists.
 
 Manifest-level fields should include:
 

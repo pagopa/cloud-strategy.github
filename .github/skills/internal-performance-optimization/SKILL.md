@@ -84,7 +84,7 @@ After a fix, add at least one of:
 
 ## Cross-references
 
-- Use `obra-systematic-debugging` when the first problem is still root-cause isolation rather than a confirmed performance bottleneck.
+- Use `superpowers-systematic-debugging` when the first problem is still root-cause isolation rather than a confirmed performance bottleneck.
 - Use `antigravity-network-engineer` when latency, packet flow, DNS, load-balancer behavior, or network topology is the primary bottleneck.
 
 ## Anti-Patterns

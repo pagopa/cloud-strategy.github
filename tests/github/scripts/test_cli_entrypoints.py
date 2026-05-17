@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -29,6 +30,26 @@ def initialize_governance_repo(root: Path, *, with_inventory: bool = True) -> No
     write_file(
         root / ".github/copilot-instructions.md",
         "# Copilot Instructions\n\nSee `AGENTS.md` and `.github/INVENTORY.md`.\n",
+    )
+    write_file(
+        root
+        / ".github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml",
+        textwrap.dedent(
+            """
+            version: 1
+            source_family: obra/superpowers
+            local_prefix: superpowers-
+            managed_skills:
+              - upstream: demo
+                legacy_local: obra-demo
+                local: superpowers-demo
+            live_scan:
+              include:
+                - .github/skills
+              ignored_files:
+                - superpowers-normalization.yaml
+            """
+        ).lstrip(),
     )
     if with_inventory:
         sync_inventory(root)

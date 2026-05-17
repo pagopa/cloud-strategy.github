@@ -7,7 +7,7 @@ applyTo: ".github/agents/internal-*.agent.md,.github/agents/local-*.agent.md"
 
 ## Workflow
 
-- Load `internal-agent-development` before planning or editing a repository-owned agent, or before redefining the boundary between an agent, skill, prompt, and instruction.
+- Load `internal-agent-creator` before planning or editing a repository-owned agent, or before redefining the boundary between an agent, skill, prompt, and instruction.
 - When the agent depends on a paired skill or local references, inspect those assets before finalizing and fix only the necessary drift in the same change.
 
 ## Cohesion

@@ -25,11 +25,11 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 
 ## Optional Support Skills
 
-- `obra-writing-plans`
-- `obra-executing-plans`
-- `obra-verification-before-completion`
+- `superpowers-writing-plans`
+- `superpowers-executing-plans`
+- `superpowers-verification-before-completion`
 - `internal-copilot-audit`
-- `internal-agent-development`
+- `internal-agent-creator`
 - `internal-skill-creator`
 - `internal-copilot-docs-research`
 - `mattpocock-caveman`
@@ -42,17 +42,20 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - Use the current repository state as the starting point for audit and drift detection.
 - Keep root governance canonical in `AGENTS.md` and `.github/copilot-instructions.md`; use this agent for sync-specific scope, managed external resources, and source-side orchestration.
 - Treat the declared managed resources listed below as the only default external sync scope.
+- Pin every documented upstream source to an immutable commit hash. Add an inline note beside each source reference with the release tag when one exists, or with the commit date when no tagged release exists.
 - Within an approved family, only the resources explicitly declared in this file are in scope by default. Do not add siblings just because an upstream repository has them or because they happen to exist on disk.
 - Do not preserve fallback assets, compatibility aliases, or deprecated variants unless `AGENTS.md` explicitly requires them.
 - Do not introduce new prefixes, naming schemes, or external asset families unless the user explicitly expands scope.
 - When a managed `openai/skills` asset is declared below, install or refresh only the mapped skills into `.github/skills/` using the required `openai-` prefix. Do not keep unprefixed copies or add sibling OpenAI skills unless the user explicitly expands scope.
+- When a retained `openai/skills` office asset is absent from the current pinned upstream snapshot, keep the documented historical commit source explicit and do not refresh it from unrelated current siblings.
 - Do not leave stale references in `AGENTS.md`, skills, agents, instructions, or scripts after catalog changes. Update README-based catalogs only when README edits are explicitly in scope.
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Every approved imported in-place override must be mapped in `.github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml` and replayed through the bundled override script after each refresh.
 - Treat any unregistered imported in-place override or stale replay patch as blocking sync drift.
 - Do not route cross-repository baseline propagation through this agent. Use `local-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
-- Treat any stale `obra-*` mapping or reference as blocking drift.
+- Treat any stale managed `obra-*` mapping or `superpowers:<managed-skill>` reference as blocking drift.
+- For the `obra/superpowers` family, use `.github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml` as the machine-readable map for upstream names, canonical local `superpowers-*` targets, retired `obra-*` ids, patch paths, and scan scope.
 - Before changing repo-wide guidance, decide whether the rule is canonical in `AGENTS.md` or projected in `.github/copilot-instructions.md`; update the canonical owner first and then realign the projection in the same governance pass.
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
@@ -74,14 +77,15 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 
 - `local-agent-sync-external-resources`: Mandatory operating engine for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
-- `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
+- `internal-agent-creator`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
 - `internal-skill-creator`: Canonical first entrypoint when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `mattpocock-caveman`: Optional compression support for long sync summaries or catalog-diff narratives, never for hiding blockers, warnings, validation evidence, approvals, or destructive-operation gates.
 - `local-agent-sync-external-resources` bundled references and scripts: Use `references/imported-asset-overrides.yaml` plus `scripts/apply_imported_asset_overrides.py` whenever an approved imported override must survive a future upstream refresh.
-- `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
-- `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
-- `obra-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
+- `local-agent-sync-external-resources` bundled normalization: Use `references/superpowers-normalization.yaml` plus `scripts/normalize_superpowers_imports.py` when refreshing or validating the managed `obra/superpowers` family.
+- `superpowers-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
+- `superpowers-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
+- `superpowers-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
 - `openai-skill-creator`: Keep this as downstream bundle mechanics after `internal-skill-creator` has established the repository-owned skill boundary; do not load it as a first-pass optional support skill from this agent.
 
 ## Managed External Resource Map
@@ -92,9 +96,9 @@ Use this section to understand exactly which external resources this agent manag
 
 Source repositories:
 
-- Agents: `https://github.com/github/awesome-copilot/tree/main/agents`
-- Skills: `https://github.com/github/awesome-copilot/tree/main/skills`
-- Instructions: `https://github.com/github/awesome-copilot/tree/main/instructions`
+- Agents: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/agents` (commit date: 2026-05-15)
+- Skills: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/skills` (commit date: 2026-05-15)
+- Instructions: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/instructions` (commit date: 2026-05-15)
 
 Managed agents:
 
@@ -123,29 +127,29 @@ Managed instructions:
 
 Source repository:
 
-- Skills: `https://github.com/obra/superpowers/tree/v5.0.7/skills`
+- Skills: `https://github.com/obra/superpowers/tree/f2cbfbefebbfef77321e4c9abc9e949826bea9d7/skills` (release tag: v5.1.0)
 
 Managed skills:
 
-- `brainstorming` -> `obra-brainstorming`
-- `dispatching-parallel-agents` -> `obra-dispatching-parallel-agents`
-- `executing-plans` -> `obra-executing-plans`
-- `finishing-a-development-branch` -> `obra-finishing-a-development-branch`
-- `receiving-code-review` -> `obra-receiving-code-review`
-- `requesting-code-review` -> `obra-requesting-code-review`
-- `subagent-driven-development` -> `obra-subagent-driven-development`
-- `systematic-debugging` -> `obra-systematic-debugging`
-- `test-driven-development` -> `obra-test-driven-development`
-- `using-git-worktrees` -> `obra-using-git-worktrees`
-- `using-superpowers` -> `obra-using-superpowers`
-- `verification-before-completion` -> `obra-verification-before-completion`
-- `writing-plans` -> `obra-writing-plans`
+- `brainstorming` -> `superpowers-brainstorming`
+- `dispatching-parallel-agents` -> `superpowers-dispatching-parallel-agents`
+- `executing-plans` -> `superpowers-executing-plans`
+- `finishing-a-development-branch` -> `superpowers-finishing-a-development-branch`
+- `receiving-code-review` -> `superpowers-receiving-code-review`
+- `requesting-code-review` -> `superpowers-requesting-code-review`
+- `subagent-driven-development` -> `superpowers-subagent-driven-development`
+- `systematic-debugging` -> `superpowers-systematic-debugging`
+- `test-driven-development` -> `superpowers-test-driven-development`
+- `using-git-worktrees` -> `superpowers-using-git-worktrees`
+- `using-superpowers` -> `superpowers-using-superpowers`
+- `verification-before-completion` -> `superpowers-verification-before-completion`
+- `writing-plans` -> `superpowers-writing-plans`
 
 ### `hashicorp/agent-skills`
 
 Source repository:
 
-- Skills: `https://github.com/hashicorp/agent-skills/tree/main/terraform/code-generation/skills`
+- Skills: `https://github.com/hashicorp/agent-skills/tree/43ca9b0cde131e20a129c106bc9f6b6f9f1e5c9a/terraform/code-generation/skills` (commit date: 2026-05-11)
 
 Managed skills:
 
@@ -156,8 +160,8 @@ Managed skills:
 
 Source repositories:
 
-- Engineering skills: `https://github.com/mattpocock/skills/tree/main/skills/engineering`
-- Productivity skills: `https://github.com/mattpocock/skills/tree/main/skills/productivity`
+- Engineering skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/engineering` (commit date: 2026-05-13)
+- Productivity skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/productivity` (commit date: 2026-05-13)
 
 Managed skills:
 
@@ -174,24 +178,30 @@ Managed skills:
 
 Source repositories:
 
-- Curated skills: `https://github.com/openai/skills/tree/main/skills/.curated`
-- System skills: `https://github.com/openai/skills/tree/main/skills/.system`
+- Curated skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.curated` (commit date: 2026-05-12)
+- System skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.system` (commit date: 2026-05-12)
+- Retained document skill: `https://github.com/openai/skills/tree/45d05d75363abf13f99d09e899d61e07b8010685/skills/.curated/doc` (commit date: 2026-05-01; absent from current pinned upstream)
+- Retained spreadsheet skill: `https://github.com/openai/skills/tree/e6afb0d74cc75d220df2faf3dd6c635c2dc6a108/skills/.curated/spreadsheet` (commit date: 2026-04-14; absent from current pinned upstream)
+- Retained slides skill: `https://github.com/openai/skills/tree/e6afb0d74cc75d220df2faf3dd6c635c2dc6a108/skills/.curated/slides` (commit date: 2026-04-14; absent from current pinned upstream)
 
 Managed skills:
 
 - `gh-address-comments` -> `openai-gh-address-comments`
 - `gh-fix-ci` -> `openai-gh-fix-ci`
 - `skill-creator` -> `openai-skill-creator`
+- `pdf` -> `openai-pdf`
+
+Retained support-only office skills:
+
+- `doc` -> `openai-docx`
 - `spreadsheet` -> `openai-spreadsheet`
 - `slides` -> `openai-slides`
-- `pdf` -> `openai-pdf`
-- `doc` -> `openai-docx`
 
 ### `sickn33/antigravity-awesome-skills`
 
 Source repository:
 
-- Skills: `https://github.com/sickn33/antigravity-awesome-skills/tree/main/skills`
+- Skills: `https://github.com/sickn33/antigravity-awesome-skills/tree/2e0c5a9cbf515a0611afcec73ef2a6644c4191e3/skills` (release tag: v11.3.0)
 
 Managed skills:
 
@@ -239,9 +249,10 @@ When repository state drifts from the declared governance contract, treat the dr
 3. For `apply`, resolve or retire every remaining `blocking` finding before continuing.
 4. Inventory the relevant local assets and nearby overlaps against the declared managed scope plus the canonical root governance files.
 5. Decide `keep`, `update`, `extract`, or `retire` using `local-agent-sync-external-resources` as the mandatory operating engine.
-6. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
-7. When the change affects repo-wide guidance, update the canonical owner first and then refresh downstream sync-facing governance artifacts that describe the change.
-8. Run repository validation and report any remaining gaps.
+6. For `obra/superpowers` refreshes, fetch upstream, compare the managed map, materialize `superpowers-*` targets, run the normalizer, dry-run registered overrides, apply overrides, rebuild inventory, and validate.
+7. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
+8. When the change affects repo-wide guidance, update the canonical owner first and then refresh downstream sync-facing governance artifacts that describe the change.
+9. Run repository validation and report any remaining gaps.
 
 ## Decision Standard
 
