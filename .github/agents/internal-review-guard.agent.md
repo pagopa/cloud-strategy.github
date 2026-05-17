@@ -34,8 +34,8 @@ You are the Copilot wrapper for `review` mode in `internal-gateway-operational-f
 
 ## Optional Support Skills
 
-- `obra-verification-before-completion`
-- `obra-systematic-debugging`
+- `superpowers-verification-before-completion`
+- `superpowers-systematic-debugging`
 - `internal-agent-development`
 - `awesome-copilot-codeql`
 - `awesome-copilot-secret-scanning`

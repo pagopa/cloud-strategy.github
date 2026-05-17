@@ -8,20 +8,20 @@
 version: 1
 
 _common_skills: &common_skills
-  - skills/obra-brainstorming/SKILL.md
+  - skills/superpowers-brainstorming/SKILL.md
   - skills/internal-code-review/SKILL.md
-  - skills/obra-dispatching-parallel-agents/SKILL.md
-  - skills/obra-executing-plans/SKILL.md
-  - skills/obra-finishing-a-development-branch/SKILL.md
-  - skills/obra-receiving-code-review/SKILL.md
-  - skills/obra-requesting-code-review/SKILL.md
-  - skills/obra-subagent-driven-development/SKILL.md
-  - skills/obra-systematic-debugging/SKILL.md
-  - skills/obra-test-driven-development/SKILL.md
-  - skills/obra-using-git-worktrees/SKILL.md
-  - skills/obra-using-superpowers/SKILL.md
-  - skills/obra-verification-before-completion/SKILL.md
-  - skills/obra-writing-plans/SKILL.md
+  - skills/superpowers-dispatching-parallel-agents/SKILL.md
+  - skills/superpowers-executing-plans/SKILL.md
+  - skills/superpowers-finishing-a-development-branch/SKILL.md
+  - skills/superpowers-receiving-code-review/SKILL.md
+  - skills/superpowers-requesting-code-review/SKILL.md
+  - skills/superpowers-subagent-driven-development/SKILL.md
+  - skills/superpowers-systematic-debugging/SKILL.md
+  - skills/superpowers-test-driven-development/SKILL.md
+  - skills/superpowers-using-git-worktrees/SKILL.md
+  - skills/superpowers-using-superpowers/SKILL.md
+  - skills/superpowers-verification-before-completion/SKILL.md
+  - skills/superpowers-writing-plans/SKILL.md
 
 profiles:
   minimal:

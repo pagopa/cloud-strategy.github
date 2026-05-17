@@ -1,5 +1,5 @@
 ---
-name: obra-using-git-worktrees
+name: superpowers-using-git-worktrees
 description: Use when starting feature work that needs an isolated workspace, or before executing implementation plans that should not share the current checkout; prefer native workspace isolation and fall back to git worktrees with safety checks.
 ---
 

@@ -1,9 +1,9 @@
-diff --git a/.github/skills/obra-brainstorming/SKILL.md b/.github/skills/obra-brainstorming/SKILL.md
---- a/.github/skills/obra-brainstorming/SKILL.md
-+++ b/.github/skills/obra-brainstorming/SKILL.md
+diff --git a/.github/skills/superpowers-brainstorming/SKILL.md b/.github/skills/superpowers-brainstorming/SKILL.md
+--- a/.github/skills/superpowers-brainstorming/SKILL.md
++++ b/.github/skills/superpowers-brainstorming/SKILL.md
 @@ -1,6 +1,6 @@
  ---
- name: obra-brainstorming
+ name: superpowers-brainstorming
 -description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
 +description: "Use before creative or design-ambiguous work that needs option exploration and design approval before implementation."
  ---
@@ -48,9 +48,9 @@ diff --git a/.github/skills/obra-brainstorming/SKILL.md b/.github/skills/obra-br
    - (User preferences for spec location override this default)
  - Use elements-of-style:writing-clearly-and-concisely skill if available
  - Commit the design document to git
-diff --git a/.github/skills/obra-brainstorming/spec-document-reviewer-prompt.md b/.github/skills/obra-brainstorming/spec-document-reviewer-prompt.md
---- a/.github/skills/obra-brainstorming/spec-document-reviewer-prompt.md
-+++ b/.github/skills/obra-brainstorming/spec-document-reviewer-prompt.md
+diff --git a/.github/skills/superpowers-brainstorming/spec-document-reviewer-prompt.md b/.github/skills/superpowers-brainstorming/spec-document-reviewer-prompt.md
+--- a/.github/skills/superpowers-brainstorming/spec-document-reviewer-prompt.md
++++ b/.github/skills/superpowers-brainstorming/spec-document-reviewer-prompt.md
 @@ -4,7 +4,7 @@
 
  **Purpose:** Verify the spec is complete, consistent, and ready for implementation planning.

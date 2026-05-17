@@ -1,6 +1,6 @@
-diff --git a/.github/skills/obra-requesting-code-review/SKILL.md b/.github/skills/obra-requesting-code-review/SKILL.md
---- a/.github/skills/obra-requesting-code-review/SKILL.md
-+++ b/.github/skills/obra-requesting-code-review/SKILL.md
+diff --git a/.github/skills/superpowers-requesting-code-review/SKILL.md b/.github/skills/superpowers-requesting-code-review/SKILL.md
+--- a/.github/skills/superpowers-requesting-code-review/SKILL.md
++++ b/.github/skills/superpowers-requesting-code-review/SKILL.md
 @@ -5,7 +5,7 @@
 
  # Requesting Code Review
@@ -19,7 +19,7 @@ diff --git a/.github/skills/obra-requesting-code-review/SKILL.md b/.github/skill
 
  **Placeholders:**
  - `{DESCRIPTION}` - Brief summary of what you built
-@@ -55,9 +55,9 @@
+@@ -55,8 +55,8 @@
  BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
  HEAD_SHA=$(git rev-parse HEAD)
 

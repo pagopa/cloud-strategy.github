@@ -25,11 +25,11 @@ You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-
 
 ## Optional Support Skills
 
-- `obra-verification-before-completion`
-- `obra-test-driven-development`
-- `obra-systematic-debugging`
-- `obra-requesting-code-review`
-- `obra-using-git-worktrees`
+- `superpowers-verification-before-completion`
+- `superpowers-test-driven-development`
+- `superpowers-systematic-debugging`
+- `superpowers-requesting-code-review`
+- `superpowers-using-git-worktrees`
 - `internal-executing-plans`
 - `internal-agent-development`
 

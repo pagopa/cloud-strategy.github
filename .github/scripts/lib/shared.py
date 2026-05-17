@@ -56,6 +56,7 @@ MANAGED_ROOT_FILES = (
 MANAGED_WORKFLOW_FILES = (".github/workflows/_pre-commit.yml",)
 INVENTORY_PATH = ".github/INVENTORY.md"
 IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
+SUPERPOWERS_NORMALIZATION_PATH = ".github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml"
 
 
 @dataclass(frozen=True)

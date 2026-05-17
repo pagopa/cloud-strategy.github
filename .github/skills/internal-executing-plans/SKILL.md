@@ -7,7 +7,7 @@ description: Use when executing a repository-owned plan from tmp/superpowers/<cl
 
 Use this skill as the repository-owned wrapper for applying retained numbered plans in this repository.
 
-Treat `obra-executing-plans` and `obra-subagent-driven-development` as imported execution depth and keep any repo-local drift fixes narrow. This skill adds the local execution loop for one or more numbered plan files and `done-*` tracking.
+Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development` as imported execution depth and keep any repo-local drift fixes narrow. This skill adds the local execution loop for one or more numbered plan files and `done-*` tracking.
 
 ## When to use
 
@@ -19,7 +19,7 @@ Treat `obra-executing-plans` and `obra-subagent-driven-development` as imported 
 
 - Reviewing or challenging a plan before execution; stay with `internal-planning-leader` or `internal-review-guard` as appropriate.
 - Treating `dubbi-e-domande.md` as an executable plan file.
-- Editing imported `obra-*` assets to change execution behavior.
+- Editing imported `superpowers-*` assets to change execution behavior.
 
 ## Execution contract
 
@@ -34,8 +34,8 @@ Treat `obra-executing-plans` and `obra-subagent-driven-development` as imported 
 ## Relationship to execution engines
 
 - Use this skill first for the repository-local execution policy.
-- Use `obra-subagent-driven-development` when same-session subagents are truly available and the plan benefits from worker isolation or staged parallelism.
-- Otherwise use `obra-executing-plans` for the underlying step-by-step execution engine.
+- Use `superpowers-subagent-driven-development` when same-session subagents are truly available and the plan benefits from worker isolation or staged parallelism.
+- Otherwise use `superpowers-executing-plans` for the underlying step-by-step execution engine.
 - Do not let imported execution skills override the local `done-*` loop, file ordering, or blocker rules.
 
 ## Workflow

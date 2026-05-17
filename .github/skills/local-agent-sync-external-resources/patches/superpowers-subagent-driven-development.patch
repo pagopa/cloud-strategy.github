@@ -1,7 +1,7 @@
-diff --git a/.github/skills/obra-subagent-driven-development/SKILL.md b/.github/skills/obra-subagent-driven-development/SKILL.md
---- a/.github/skills/obra-subagent-driven-development/SKILL.md
-+++ b/.github/skills/obra-subagent-driven-development/SKILL.md
-@@ -130,7 +130,7 @@
+diff --git a/.github/skills/superpowers-subagent-driven-development/SKILL.md b/.github/skills/superpowers-subagent-driven-development/SKILL.md
+--- a/.github/skills/superpowers-subagent-driven-development/SKILL.md
++++ b/.github/skills/superpowers-subagent-driven-development/SKILL.md
+@@ -130,6 +130,6 @@
  ```
  You: I'm using Subagent-Driven Development to execute this plan.
 

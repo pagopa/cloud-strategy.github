@@ -1,9 +1,9 @@
-diff --git a/.github/skills/obra-writing-plans/SKILL.md b/.github/skills/obra-writing-plans/SKILL.md
---- a/.github/skills/obra-writing-plans/SKILL.md
-+++ b/.github/skills/obra-writing-plans/SKILL.md
+diff --git a/.github/skills/superpowers-writing-plans/SKILL.md b/.github/skills/superpowers-writing-plans/SKILL.md
+--- a/.github/skills/superpowers-writing-plans/SKILL.md
++++ b/.github/skills/superpowers-writing-plans/SKILL.md
 @@ -1,6 +1,6 @@
  ---
- name: obra-writing-plans
+ name: superpowers-writing-plans
 -description: Use when you have a spec or requirements for a multi-step task, before touching code
 +description: Use when a multi-step implementation effort still needs an explicit plan before execution
  ---
@@ -21,14 +21,14 @@ diff --git a/.github/skills/obra-writing-plans/SKILL.md b/.github/skills/obra-wr
 
  **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
- **Context:** If working in an isolated worktree, it should have been created via the `superpowers:using-git-worktrees` skill at execution time.
+ **Context:** If working in an isolated worktree, it should have been created via the `superpowers-using-git-worktrees` skill at execution time.
 
 -**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 +**Save plans to:** `tmp/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
  - (User preferences for plan location override this default)
 
  ## Scope Check
-@@ -135,7 +139,7 @@
+@@ -135,6 +139,6 @@
 
  After saving the plan, offer execution choice:
 

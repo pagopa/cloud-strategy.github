@@ -55,7 +55,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |
-| `obra-*` workflows | Conditional support | Mandatory only when the task shape actually triggers the workflow. |
+| `superpowers-*` workflows | Conditional support | Mandatory only when the task shape actually triggers the workflow. |
 
 ## Retired To Current Ownership Mapping
 

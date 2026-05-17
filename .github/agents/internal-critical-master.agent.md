@@ -33,7 +33,7 @@ You are the Copilot wrapper for `internal-gateway-critical-master`. Use this wra
 
 ## Optional Support Skills
 
-- `obra-brainstorming`
+- `superpowers-brainstorming`
 - `internal-agent-development`
 
 ## Core Rules

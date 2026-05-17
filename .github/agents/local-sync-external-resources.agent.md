@@ -25,9 +25,9 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 
 ## Optional Support Skills
 
-- `obra-writing-plans`
-- `obra-executing-plans`
-- `obra-verification-before-completion`
+- `superpowers-writing-plans`
+- `superpowers-executing-plans`
+- `superpowers-verification-before-completion`
 - `internal-copilot-audit`
 - `internal-agent-development`
 - `internal-skill-creator`
@@ -54,7 +54,8 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - Treat any unregistered imported in-place override or stale replay patch as blocking sync drift.
 - Do not route cross-repository baseline propagation through this agent. Use `local-sync-global-copilot-configs-into-repo` for consumer-repository alignment.
 - When the intended managed scope changes, update this file so the policy remains self-consistent over time.
-- Treat any stale `obra-*` mapping or reference as blocking drift.
+- Treat any stale managed `obra-*` mapping or `superpowers:<managed-skill>` reference as blocking drift.
+- For the `obra/superpowers` family, use `.github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml` as the machine-readable map for upstream names, canonical local `superpowers-*` targets, retired `obra-*` ids, patch paths, and scan scope.
 - Before changing repo-wide guidance, decide whether the rule is canonical in `AGENTS.md` or projected in `.github/copilot-instructions.md`; update the canonical owner first and then realign the projection in the same governance pass.
 - When any managed resource changes, always re-check `.github/copilot-instructions.md` and root `AGENTS.md` for drift, stale references, and routing fallout in the same sync workflow.
 - Do not call a run `apply` unless `internal-copilot-audit` has completed its mandatory preflight and no unresolved `blocking` findings remain.
@@ -81,9 +82,10 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `mattpocock-caveman`: Optional compression support for long sync summaries or catalog-diff narratives, never for hiding blockers, warnings, validation evidence, approvals, or destructive-operation gates.
 - `local-agent-sync-external-resources` bundled references and scripts: Use `references/imported-asset-overrides.yaml` plus `scripts/apply_imported_asset_overrides.py` whenever an approved imported override must survive a future upstream refresh.
-- `obra-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
-- `obra-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
-- `obra-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
+- `local-agent-sync-external-resources` bundled normalization: Use `references/superpowers-normalization.yaml` plus `scripts/normalize_superpowers_imports.py` when refreshing or validating the managed `obra/superpowers` family.
+- `superpowers-writing-plans`: Use when the sync needs retained staging, checkpoints, or cleanup order.
+- `superpowers-executing-plans`: Use when the user already approved a concrete sync plan and execution should happen in deliberate batches.
+- `superpowers-verification-before-completion`: Use before reporting success so governance and validation outcomes are backed by fresh evidence.
 - `openai-skill-creator`: Keep this as downstream bundle mechanics after `internal-skill-creator` has established the repository-owned skill boundary; do not load it as a first-pass optional support skill from this agent.
 
 ## Managed External Resource Map
@@ -129,19 +131,19 @@ Source repository:
 
 Managed skills:
 
-- `brainstorming` -> `obra-brainstorming`
-- `dispatching-parallel-agents` -> `obra-dispatching-parallel-agents`
-- `executing-plans` -> `obra-executing-plans`
-- `finishing-a-development-branch` -> `obra-finishing-a-development-branch`
-- `receiving-code-review` -> `obra-receiving-code-review`
-- `requesting-code-review` -> `obra-requesting-code-review`
-- `subagent-driven-development` -> `obra-subagent-driven-development`
-- `systematic-debugging` -> `obra-systematic-debugging`
-- `test-driven-development` -> `obra-test-driven-development`
-- `using-git-worktrees` -> `obra-using-git-worktrees`
-- `using-superpowers` -> `obra-using-superpowers`
-- `verification-before-completion` -> `obra-verification-before-completion`
-- `writing-plans` -> `obra-writing-plans`
+- `brainstorming` -> `superpowers-brainstorming`
+- `dispatching-parallel-agents` -> `superpowers-dispatching-parallel-agents`
+- `executing-plans` -> `superpowers-executing-plans`
+- `finishing-a-development-branch` -> `superpowers-finishing-a-development-branch`
+- `receiving-code-review` -> `superpowers-receiving-code-review`
+- `requesting-code-review` -> `superpowers-requesting-code-review`
+- `subagent-driven-development` -> `superpowers-subagent-driven-development`
+- `systematic-debugging` -> `superpowers-systematic-debugging`
+- `test-driven-development` -> `superpowers-test-driven-development`
+- `using-git-worktrees` -> `superpowers-using-git-worktrees`
+- `using-superpowers` -> `superpowers-using-superpowers`
+- `verification-before-completion` -> `superpowers-verification-before-completion`
+- `writing-plans` -> `superpowers-writing-plans`
 
 ### `hashicorp/agent-skills`
 
@@ -247,9 +249,10 @@ When repository state drifts from the declared governance contract, treat the dr
 3. For `apply`, resolve or retire every remaining `blocking` finding before continuing.
 4. Inventory the relevant local assets and nearby overlaps against the declared managed scope plus the canonical root governance files.
 5. Decide `keep`, `update`, `extract`, or `retire` using `local-agent-sync-external-resources` as the mandatory operating engine.
-6. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
-7. When the change affects repo-wide guidance, update the canonical owner first and then refresh downstream sync-facing governance artifacts that describe the change.
-8. Run repository validation and report any remaining gaps.
+6. For `obra/superpowers` refreshes, fetch upstream, compare the managed map, materialize `superpowers-*` targets, run the normalizer, dry-run registered overrides, apply overrides, rebuild inventory, and validate.
+7. Apply the canonical change first, then remove deprecated duplicates, stale references, and hollow dependencies in the same pass.
+8. When the change affects repo-wide guidance, update the canonical owner first and then refresh downstream sync-facing governance artifacts that describe the change.
+9. Run repository validation and report any remaining gaps.
 
 ## Decision Standard
 

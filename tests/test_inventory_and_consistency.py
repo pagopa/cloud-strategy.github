@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.catalog_checks import run_consistency_checks
+from lib.catalog_checks import check_superpowers_import_naming, run_consistency_checks
 from lib.inventory import build_inventory_markdown
 
 
@@ -234,6 +234,72 @@ def test_run_consistency_checks_flags_invalid_imported_asset_override_registry(
     assert "imported-asset-override-invalid-apply-strategy" in finding_codes
     assert "imported-asset-override-patch-missing" in finding_codes
     assert "imported-asset-override-invalid-hash" in finding_codes
+
+
+def write_superpowers_normalization_reference(root: Path) -> None:
+    write_file(
+        root
+        / ".github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml",
+        "version: 1\n"
+        "source_family: obra/superpowers\n"
+        "local_prefix: superpowers-\n"
+        "blocked_local_prefixes:\n"
+        "  - obra-\n"
+        "blocked_managed_reference_prefix: 'superpowers:'\n"
+        "managed_skills:\n"
+        "  - upstream: demo\n"
+        "    legacy_local: obra-demo\n"
+        "    local: superpowers-demo\n"
+        "managed_patches:\n"
+        "  - legacy_path: patches/obra-demo.patch\n"
+        "    path: patches/superpowers-demo.patch\n"
+        "live_scan:\n"
+        "  include:\n"
+        "    - .github/agents\n"
+        "    - .github/skills\n"
+        "  ignored_files:\n"
+        "    - README.md\n"
+        "    - CHANGELOG.md\n"
+        "    - superpowers-normalization.yaml\n",
+    )
+
+
+def test_check_superpowers_import_naming_flags_legacy_drift(tmp_path: Path) -> None:
+    write_superpowers_normalization_reference(tmp_path)
+    write_file(
+        tmp_path / ".github/skills/obra-demo/SKILL.md",
+        "---\nname: obra-demo\ndescription: Demo.\n---\n\nUse superpowers:demo.\n",
+    )
+    write_file(
+        tmp_path / ".github/agents/local-demo.agent.md",
+        "---\nname: local-demo\ntools: [read]\n---\n\n- `obra-demo`\n- `superpowers:demo`\n",
+    )
+    write_file(
+        tmp_path / ".github/skills/local-agent-sync-external-resources/patches/obra-demo.patch",
+        "diff --git a/.github/skills/obra-demo/SKILL.md b/.github/skills/obra-demo/SKILL.md\n",
+    )
+
+    findings = check_superpowers_import_naming(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "superpowers-import-legacy-skill-directory" in finding_codes
+    assert "superpowers-import-skill-name-mismatch" in finding_codes
+    assert "superpowers-import-legacy-reference" in finding_codes
+    assert "superpowers-import-upstream-reference" in finding_codes
+
+
+def test_check_superpowers_import_naming_ignores_reference_legacy_map(
+    tmp_path: Path,
+) -> None:
+    write_superpowers_normalization_reference(tmp_path)
+    write_file(
+        tmp_path / ".github/skills/superpowers-demo/SKILL.md",
+        "---\nname: superpowers-demo\ndescription: Demo.\n---\n",
+    )
+
+    findings = check_superpowers_import_naming(tmp_path)
+
+    assert findings == []
 
 
 def test_run_consistency_checks_flags_legacy_repo_owned_agent_skill_headings(

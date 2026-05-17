@@ -23,6 +23,8 @@ When deterministic change detection matters, read `references/fingerprinting-con
 
 When an imported upstream asset has an exceptionally approved repo-local override, read `references/imported-asset-overrides.yaml` and use `scripts/apply_imported_asset_overrides.py` to replay the registered patch bundle after refreshing the upstream content.
 
+When refreshing the managed `obra/superpowers` family, read `references/superpowers-normalization.yaml` and use `scripts/normalize_superpowers_imports.py` so upstream skill names materialize as local `superpowers-*` ids before override replay, inventory rebuild, and validation.
+
 ## When to use
 
 - Maintain the sync-managed `.github/` catalog behind `local-sync-external-resources`.
@@ -38,6 +40,7 @@ When an imported upstream asset has an exceptionally approved repo-local overrid
 - Keep approved imported in-place exceptions narrow, mapped, and re-applicable after future refreshes.
 - Move reusable sync procedure into this skill instead of bloating the agent body.
 - Keep naming, frontmatter, links, descriptions, and governance references deterministic.
+- Keep the managed `obra/superpowers` family normalized to local `superpowers-*` ids; treat `obra-*` and `superpowers:<managed-skill>` in live catalog assets as blocking drift.
 - Remove fallback, alias, deprecated, or compatibility-only drift in the same pass that introduces the canonical replacement.
 - Keep low-frequency imported or internal capabilities documented as on-demand depth when they still add distinct value and do not justify a repository-owned wrapper.
 - Keep governance review of root `AGENTS.md` and `.github/copilot-instructions.md` explicit, never implied.
@@ -54,6 +57,8 @@ For `local-sync-external-resources`, keep the split strict:
 - `openai-skill-creator` covers only the remaining bundle mechanics during that work; it should not replace the local decision gate or duplicate repository-owned routing logic.
 - `references/imported-asset-overrides.yaml` owns the approved imported in-place override registry for this repository.
 - `scripts/apply_imported_asset_overrides.py` owns patch replay after an upstream refresh; prefer a clean replay first, allow a registered `git apply --3way` fallback when upstream text drift is compatible, and stop for review instead of forcing a hidden fork.
+- `references/superpowers-normalization.yaml` owns the upstream-to-local map, blocked legacy ids, managed patch renames, and live scan scope for the `obra/superpowers` family.
+- `scripts/normalize_superpowers_imports.py` owns local id normalization after upstream materialization and before imported override replay.
 
 Do not collapse these roles back into one file just because the current task touches all of them.
 
@@ -126,7 +131,21 @@ Rules:
 - Keep the local canonical identifier when refreshing an installed external-prefixed asset.
 - Do not keep runtime-specific clutter, compatibility prose, or history-preserving aliases unless policy explicitly requires them.
 
-### 4. Keep Sync Evidence Deterministic
+### 4. Normalize Managed Superpowers Imports
+
+For the `obra/superpowers` family:
+
+1. Read `references/superpowers-normalization.yaml` before materializing files.
+2. Install or refresh only the managed upstream skills listed in that reference.
+3. Materialize local directories and frontmatter as `superpowers-*`, not `obra-*`.
+4. Run `scripts/normalize_superpowers_imports.py --check` before the rename to expose drift.
+5. Run `scripts/normalize_superpowers_imports.py --apply` after materialization or rename.
+6. Run `scripts/apply_imported_asset_overrides.py --dry-run` after normalization and before applying overrides.
+7. Rebuild `.github/INVENTORY.md` and run catalog validation.
+
+Treat residual managed `obra-*` ids or `superpowers:<managed-skill>` references in live catalog assets as blocking drift. Do not add a newly discovered upstream Superpowers skill unless the user explicitly expands the managed map.
+
+### 5. Keep Sync Evidence Deterministic
 
 When a sync workflow needs evidence that a managed resource truly changed:
 
@@ -140,7 +159,7 @@ When a sync workflow needs evidence that a managed resource truly changed:
 - Do not introduce hashing manifests or helper scripts as decorative machinery; add them only when they clearly reduce false positives, repeated work, or unsafe refresh decisions.
 - Use the normalization rules, manifest schema, and output defaults from `references/fingerprinting-contract.md` instead of forking them inline.
 
-### 5. Replay Approved Imported Overrides
+### 6. Replay Approved Imported Overrides
 
 When an imported upstream asset has an approved repo-local exception:
 
@@ -150,7 +169,7 @@ When an imported upstream asset has an approved repo-local exception:
 4. If clean replay fails, allow only the registered `git apply --3way` fallback. If that also fails, or if the post-apply content hash does not match the registry, stop and review the exception instead of forcing the patch through.
 5. Reassess whether an `internal-*` wrapper or replacement now serves the repository better than continuing the imported override.
 
-### 6. Re-check Governance Immediately
+### 7. Re-check Governance Immediately
 
 After catalog changes:
 

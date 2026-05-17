@@ -36,28 +36,28 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
     )
 
 
-def test_obra_assets_use_tmp_superpowers_for_transient_paths() -> None:
-    obra_paths = (
-        ".github/skills/obra-brainstorming/SKILL.md",
-        ".github/skills/obra-brainstorming/spec-document-reviewer-prompt.md",
-        ".github/skills/obra-writing-plans/SKILL.md",
-        ".github/skills/obra-subagent-driven-development/SKILL.md",
-        ".github/skills/obra-requesting-code-review/SKILL.md",
+def test_superpowers_assets_use_tmp_superpowers_for_transient_paths() -> None:
+    superpowers_paths = (
+        ".github/skills/superpowers-brainstorming/SKILL.md",
+        ".github/skills/superpowers-brainstorming/spec-document-reviewer-prompt.md",
+        ".github/skills/superpowers-writing-plans/SKILL.md",
+        ".github/skills/superpowers-subagent-driven-development/SKILL.md",
+        ".github/skills/superpowers-requesting-code-review/SKILL.md",
     )
 
-    for relative_path in obra_paths:
+    for relative_path in superpowers_paths:
         assert "docs/superpowers" not in read_text(relative_path)
 
-    assert "tmp/superpowers/" in read_text(".github/skills/obra-brainstorming/SKILL.md")
-    assert "tmp/superpowers/" in read_text(".github/skills/obra-writing-plans/SKILL.md")
+    assert "tmp/superpowers/" in read_text(".github/skills/superpowers-brainstorming/SKILL.md")
+    assert "tmp/superpowers/" in read_text(".github/skills/superpowers-writing-plans/SKILL.md")
 
 
-def test_obra_workflows_do_not_claim_deterministic_textual_governance_maintenance() -> (
+def test_superpowers_workflows_do_not_claim_deterministic_textual_governance_maintenance() -> (
     None
 ):
-    brainstorming_text = read_text(".github/skills/obra-brainstorming/SKILL.md")
-    writing_plans_text = read_text(".github/skills/obra-writing-plans/SKILL.md")
-    tdd_text = read_text(".github/skills/obra-test-driven-development/SKILL.md")
+    brainstorming_text = read_text(".github/skills/superpowers-brainstorming/SKILL.md")
+    writing_plans_text = read_text(".github/skills/superpowers-writing-plans/SKILL.md")
+    tdd_text = read_text(".github/skills/superpowers-test-driven-development/SKILL.md")
 
     assert (
         "Do not use this workflow for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets"

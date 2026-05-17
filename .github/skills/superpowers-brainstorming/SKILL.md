@@ -1,5 +1,5 @@
 ---
-name: obra-brainstorming
+name: superpowers-brainstorming
 description: "Use before creative or design-ambiguous work that needs option exploration and design approval before implementation."
 ---
 
