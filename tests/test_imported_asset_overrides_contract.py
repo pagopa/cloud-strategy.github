@@ -19,7 +19,7 @@ def load_registry() -> dict[str, object]:
     return yaml.safe_load(REGISTRY_PATH.read_text(encoding="utf-8"))
 
 
-def test_imported_asset_override_registry_tracks_expected_superpowers_targets() -> None:
+def test_imported_asset_override_registry_tracks_expected_imported_targets() -> None:
     payload = load_registry()
     overrides = payload["overrides"]
     targets = {entry["target_path"] for entry in overrides}
@@ -31,6 +31,7 @@ def test_imported_asset_override_registry_tracks_expected_superpowers_targets() 
         ".github/skills/superpowers-test-driven-development/SKILL.md",
         ".github/skills/superpowers-subagent-driven-development/SKILL.md",
         ".github/skills/superpowers-requesting-code-review/SKILL.md",
+        ".github/skills/mattpocock-grill-me/SKILL.md",
     }
     assert all(
         entry["approval"] == "explicit-user-counter-validated" for entry in overrides

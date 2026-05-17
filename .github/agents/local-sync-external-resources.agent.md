@@ -174,6 +174,10 @@ Managed skills:
 - `tdd` -> `mattpocock-tdd`
 - `zoom-out` -> `mattpocock-zoom-out`
 
+Approved in-place overrides:
+
+- `mattpocock-grill-me`: replay `mattpocock-grill-me-bulk-recommended-questions` after each refresh so the skill asks its initial question set as a clear numbered list with recommendations that are accepted by default unless the user overrides them.
+
 ### `openai/skills`
 
 Source repositories:
