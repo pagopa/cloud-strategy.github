@@ -47,6 +47,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - Do not preserve fallback assets, compatibility aliases, or deprecated variants unless `AGENTS.md` explicitly requires them.
 - Do not introduce new prefixes, naming schemes, or external asset families unless the user explicitly expands scope.
 - When a managed `openai/skills` asset is declared below, install or refresh only the mapped skills into `.github/skills/` using the required `openai-` prefix. Do not keep unprefixed copies or add sibling OpenAI skills unless the user explicitly expands scope.
+- When a retained `openai/skills` office asset is absent from the current pinned upstream snapshot, keep the documented historical commit source explicit and do not refresh it from unrelated current siblings.
 - Do not leave stale references in `AGENTS.md`, skills, agents, instructions, or scripts after catalog changes. Update README-based catalogs only when README edits are explicitly in scope.
 - Keep agents cohesive around routing and orchestration. Move reusable procedures into skills.
 - Every approved imported in-place override must be mapped in `.github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml` and replayed through the bundled override script after each refresh.
@@ -177,16 +178,22 @@ Source repositories:
 
 - Curated skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.curated` (commit date: 2026-05-12)
 - System skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.system` (commit date: 2026-05-12)
+- Retained document skill: `https://github.com/openai/skills/tree/45d05d75363abf13f99d09e899d61e07b8010685/skills/.curated/doc` (commit date: 2026-05-01; absent from current pinned upstream)
+- Retained spreadsheet skill: `https://github.com/openai/skills/tree/e6afb0d74cc75d220df2faf3dd6c635c2dc6a108/skills/.curated/spreadsheet` (commit date: 2026-04-14; absent from current pinned upstream)
+- Retained slides skill: `https://github.com/openai/skills/tree/e6afb0d74cc75d220df2faf3dd6c635c2dc6a108/skills/.curated/slides` (commit date: 2026-04-14; absent from current pinned upstream)
 
 Managed skills:
 
 - `gh-address-comments` -> `openai-gh-address-comments`
 - `gh-fix-ci` -> `openai-gh-fix-ci`
 - `skill-creator` -> `openai-skill-creator`
+- `pdf` -> `openai-pdf`
+
+Retained support-only office skills:
+
+- `doc` -> `openai-docx`
 - `spreadsheet` -> `openai-spreadsheet`
 - `slides` -> `openai-slides`
-- `pdf` -> `openai-pdf`
-- `doc` -> `openai-docx`
 
 ### `sickn33/antigravity-awesome-skills`
 

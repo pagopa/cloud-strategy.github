@@ -1,8 +1,7 @@
 diff --git a/.github/skills/obra-test-driven-development/SKILL.md b/.github/skills/obra-test-driven-development/SKILL.md
-index a64beb0..1da6c6e 100644
 --- a/.github/skills/obra-test-driven-development/SKILL.md
 +++ b/.github/skills/obra-test-driven-development/SKILL.md
-@@ -9,13 +9,17 @@ description: Use when implementing any feature or bugfix, before writing impleme
+@@ -9,13 +9,17 @@
 
  Write the test first. Watch it fail. Write minimal code to pass.
 
@@ -21,7 +20,7 @@ index a64beb0..1da6c6e 100644
  - New features
  - Bug fixes
  - Refactoring
-@@ -25,6 +29,7 @@ Write the test first. Watch it fail. Write minimal code to pass.
+@@ -25,6 +29,7 @@
  - Throwaway prototypes
  - Generated code
  - Configuration files

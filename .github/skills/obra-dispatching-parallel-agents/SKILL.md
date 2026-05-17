@@ -83,7 +83,7 @@ When agents return:
 
 ## Agent Prompt Structure
 
-Good agent requests are:
+Good agent prompts are:
 1. **Focused** - One clear problem domain
 2. **Self-contained** - All context needed to understand the problem
 3. **Specific about output** - What should the agent return?

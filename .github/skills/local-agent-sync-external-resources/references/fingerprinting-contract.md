@@ -23,7 +23,7 @@ Each resource entry should follow this shape:
 {
   "resource_id": "openai/skills/doc",
   "target_path": ".github/skills/openai-docx/SKILL.md",
-  "source_ref": "https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.system/doc/SKILL.md",
+  "source_ref": "https://github.com/openai/skills/tree/45d05d75363abf13f99d09e899d61e07b8010685/skills/.curated/doc/SKILL.md",
   "kind": "skill",
   "normalization_version": "v1",
   "hash_algo": "sha256",
