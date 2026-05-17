@@ -34,7 +34,7 @@ You are the Copilot wrapper for `internal-gateway-critical-master`. Use this wra
 ## Optional Support Skills
 
 - `superpowers-brainstorming`
-- `internal-agent-development`
+- `internal-agent-creator`
 
 ## Core Rules
 
@@ -48,7 +48,7 @@ You are the Copilot wrapper for `internal-gateway-critical-master`. Use this wra
 
 - Use this wrapper when the user wants a pre-mortem, reasoning stress test, hidden-assumption challenge, alternative framing, or failure-mode analysis.
 - Do not use this wrapper for routine technical review, implementation, open-ended ideation, or final delivery planning.
-- When the challenged artifact is a repository-owned agent contract, use `internal-agent-development` as support for boundary and skill-contract quality.
+- When the challenged artifact is a repository-owned agent contract, use `internal-agent-creator` as support for boundary and skill-contract quality.
 
 ## Boundary Definition
 

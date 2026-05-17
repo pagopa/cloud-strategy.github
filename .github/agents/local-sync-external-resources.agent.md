@@ -29,7 +29,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 - `superpowers-executing-plans`
 - `superpowers-verification-before-completion`
 - `internal-copilot-audit`
-- `internal-agent-development`
+- `internal-agent-creator`
 - `internal-skill-creator`
 - `internal-copilot-docs-research`
 - `mattpocock-caveman`
@@ -77,7 +77,7 @@ Treat `.github/skills/local-agent-sync-external-resources/SKILL.md` as the manda
 
 - `local-agent-sync-external-resources`: Mandatory operating engine for `keep`, `update`, `extract`, and `retire` decisions across the managed catalog.
 - `internal-copilot-audit`: Mandatory preflight before any `apply`; classify findings as `blocking` or `non-blocking`; block `apply` when decorative skills, hollow references, or skipped governance review remain unresolved.
-- `internal-agent-development`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
+- `internal-agent-creator`: Use when the sync changes an agent file, modifies agent routing boundaries, or changes the agent/engine split or skill-guidance contract.
 - `internal-skill-creator`: Canonical first entrypoint when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill.
 - `internal-copilot-docs-research`: Use only when a policy decision depends on current GitHub Copilot or MCP behavior rather than repo-local contract.
 - `mattpocock-caveman`: Optional compression support for long sync summaries or catalog-diff narratives, never for hiding blockers, warnings, validation evidence, approvals, or destructive-operation gates.

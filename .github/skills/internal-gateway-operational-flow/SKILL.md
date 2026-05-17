@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-operational-flow
-description: Use when repository-owned work needs a skill-first staged operational workflow, including full-cycle, plan-only, apply-plan, review, or explicit plan, execute, and review phases.
+description: Use when repository-owned work needs a skill-first staged operational workflow, including full-cycle, plan-only, apply-plan, review, explicit phases, or folder-first retained-plan execution.
 ---
 
 # Internal Gateway Operational Flow
@@ -11,6 +11,7 @@ Use this skill as the portable skill-first operational core for repository-owned
 
 - Repository-owned operational work needs a portable staged workflow across `plan`, `execute`, `review`, critical challenge, or retained-plan application.
 - The user selects a gateway skill in a runtime such as Codex and needs visible phases instead of manual wrapper-agent switching.
+- The user provides a retained plan folder and expects every executable item to be implemented, verified, or blocked by a real blocker.
 - A runtime such as ChatGPT, Codex plugin, or Codex CLI needs the workflow without Copilot agent UI.
 - A Copilot wrapper needs the shared semantic owner for planning, delivery, or review behavior.
 - A next-step package must preserve the operational transition across surfaces.
@@ -48,6 +49,8 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Use `internal-code-review` inside `review` mode instead of duplicating the review playbook here.
 - Use `internal-gateway-critical-master` as a visible critical phase when pressure testing is needed; do not duplicate its challenge logic here.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
+- Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked.
+- Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
 
 ## Phase Selection
 
@@ -80,9 +83,25 @@ After creating a retained plan or materially reformulating one, provide a compac
 
 Execute mode owns clear local delivery. It may touch several adjacent files when the target state is already decided and validation is concrete. File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
 
-For `apply-plan`, load `internal-executing-plans` and follow its repository-local `done-*` loop. The normal input is an approved retained plan under `tmp/superpowers/`; an inline plan must be converted into a retained plan or receive an explicit checkpoint before execution. `dubbi-e-domande.md` is never an executable plan file.
+For `execute`, keep edits scoped to the requested change, required adjacent contracts, and validation fixes. Do not silently add newly discovered improvements.
+
+For `apply-plan`, load `internal-executing-plans` and follow its repository-local `done-*` loop. The normal input is an approved retained plan folder under `tmp/superpowers/<clear-action-or-task-name>/`; an inline plan must be converted into a retained plan or receive an explicit checkpoint before execution. `dubbi-e-domande.md` is never an executable plan file.
+
+When the user invokes this skill or the delivery wrapper with a retained plan folder, treat that folder as the execution target. Read numbered plan files in order, ignore `dubbi-e-domande.md`, continue across remaining executable items, and stop only for missing input, unsafe scope, out-of-scope work, or a blocker that prevents correct continuation.
 
 When ambiguity, ownership, governance, or rollout decisions become dominant, stop and use `internal-agent-support-lane-change-engine` instead of continuing as a hidden planner.
+
+## Completion Checks
+
+Before reporting completion for `execute` or `apply-plan`, run three distinct verification checks. Keep them separate in the response as `Check 1`, `Check 2`, and `Check 3`.
+
+- `Check 1`: Plan coverage. Map each requested item or retained-plan item to an implemented change, intentional non-action, or blocker.
+- `Check 2`: Contract coverage. Re-read changed files and relevant repository instructions to check ownership, frontmatter, links, inventory, schemas, and local conventions.
+- `Check 3`: Evidence coverage. Run the applicable validators, tests, lint commands, or closest available checks; read the output before claiming success.
+
+If a check fails, fix the issue and rerun the relevant check. If a check cannot run, state the exact validation gap and the closest evidence gathered. Small changes may use concise checks, but the three perspectives must remain distinct.
+
+For `execute` or `apply-plan`, return a compact execution report with active phase and owner, files changed, completed items and intentional non-actions, `Check 1` through `Check 3`, separate improvement ideas, durable lessons routed through the right owner, residual risk, and any next-step package.
 
 ## Review Mode
 
@@ -110,6 +129,7 @@ Load `internal-code-review` for the tactical review engine whenever the task is 
 - Every staged phase includes owner, scope, anti-scope, action, validation, risk, and next checkpoint or decision.
 - `internal-agent-support-next-step` is used for every user-visible transition.
 - `apply-plan` uses `internal-executing-plans` and excludes `dubbi-e-domande.md`.
+- `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
 - `review` mode reuses `internal-code-review` instead of cloning it.
 - `mattpocock-grill-me` is used for non-trivial retained plans or real clarification needs.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.

@@ -15,7 +15,7 @@ Use `internal-skill-creator` first when a sync decision requires creating, repla
 
 Use `openai-skill-creator` only for the remaining bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation work after `internal-skill-creator` has established the repository-owned skill boundary and decided the local ownership outcome.
 
-Use `internal-agent-development` when the sync changes this external-resources agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
+Use `internal-agent-creator` when the sync changes this external-resources agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
 
 Use `mattpocock-caveman` only as optional compression support for long sync summaries after blockers, warnings, approvals, validation evidence, and destructive-operation gates are already clear.
 
@@ -52,7 +52,7 @@ For `local-sync-external-resources`, keep the split strict:
 
 - Agent owns routing, scope boundaries, managed resource map, approval posture, and output expectations.
 - This skill owns audit order, keep/update/extract/retire decisions, anti-overlap heuristics, and sync execution discipline.
-- `internal-agent-development` owns structural changes to the agent itself, including mandatory engine-skill architecture and boundary rewrites.
+- `internal-agent-creator` owns structural changes to the agent itself, including mandatory engine-skill architecture and boundary rewrites.
 - `internal-skill-creator` owns repository-owned skill authoring and should be the first local route when one concrete skill needs creation, replacement, or major redesign.
 - `openai-skill-creator` covers only the remaining bundle mechanics during that work; it should not replace the local decision gate or duplicate repository-owned routing logic.
 - `references/imported-asset-overrides.yaml` owns the approved imported in-place override registry for this repository.
@@ -84,7 +84,7 @@ Do not collapse these roles back into one file just because the current task tou
 | Broken or stale asset with no unique value | Retire it |
 | Installed capability is still distinct but low-frequency or on-demand | Keep it as dormant support depth and document why; do not wrap it unless the root wrapper threshold is met |
 | Agent body becoming procedural or duplicative | Extract procedure into this skill or the right internal skill |
-| Agent routing or engine-skill split changing materially | Use `internal-agent-development` |
+| Agent routing or engine-skill split changing materially | Use `internal-agent-creator` |
 
 Load `references/catalog-decision-checklist.md` when you need the detailed keep/update/extract/retire heuristics or overlap tests.
 

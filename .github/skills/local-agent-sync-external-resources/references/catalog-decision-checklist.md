@@ -42,6 +42,6 @@ When `local-sync-external-resources` or a nearby sync asset is turning into a kn
 
 1. Keep the agent cohesive around routing, managed scope, approval posture, and orchestration.
 2. Move long reusable procedures into this skill or the right existing internal skill.
-3. Use `internal-agent-development` if the extraction changes the agent's structural contract.
+3. Use `internal-agent-creator` if the extraction changes the agent's structural contract.
 4. Point the agent at the canonical skill explicitly.
 5. Keep the extracted workflow reusable outside the single current task.

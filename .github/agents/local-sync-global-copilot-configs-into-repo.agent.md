@@ -33,7 +33,7 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 - `superpowers-verification-before-completion`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
-- `internal-agent-development`
+- `internal-agent-creator`
 - `mattpocock-caveman`
 
 ## Skill Usage Contract
@@ -44,7 +44,7 @@ Treat this agent plus `.github/skills/local-agent-sync-global-copilot-configs-in
 - Use `superpowers-verification-before-completion` before reporting success so target state, preserved local assets, and validation results are backed by fresh evidence.
 - Use `internal-copilot-audit` when source or target drift, hollow references, or bridge-policy overlap changes the recommended sync outcome.
 - Use `internal-copilot-docs-research` only when a sync decision depends on current GitHub Copilot or MCP behavior rather than repository-local contract.
-- Use `internal-agent-development` only when a consumer-repository sync must compare, preserve, or normalize repository-owned agent contracts instead of mirroring agent files mechanically.
+- Use `internal-agent-creator` only when a consumer-repository sync must compare, preserve, or normalize repository-owned agent contracts instead of mirroring agent files mechanically.
 - Use `mattpocock-caveman` only as optional compression support for long sync reports or target-drift summaries, never for hiding blockers, warnings, validation evidence, approval posture, or destructive-operation gates.
 
 ## Core Rules
