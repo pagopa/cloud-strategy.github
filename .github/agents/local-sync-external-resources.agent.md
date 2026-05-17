@@ -92,9 +92,9 @@ Use this section to understand exactly which external resources this agent manag
 
 Source repositories:
 
-- Agents: `https://github.com/github/awesome-copilot/tree/main/agents`
-- Skills: `https://github.com/github/awesome-copilot/tree/main/skills`
-- Instructions: `https://github.com/github/awesome-copilot/tree/main/instructions`
+- Agents: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/agents`
+- Skills: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/skills`
+- Instructions: `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/instructions`
 
 Managed agents:
 
@@ -123,7 +123,7 @@ Managed instructions:
 
 Source repository:
 
-- Skills: `https://github.com/obra/superpowers/tree/v5.0.7/skills`
+- Skills: `https://github.com/obra/superpowers/tree/v5.1.0/skills`
 
 Managed skills:
 
@@ -145,7 +145,7 @@ Managed skills:
 
 Source repository:
 
-- Skills: `https://github.com/hashicorp/agent-skills/tree/main/terraform/code-generation/skills`
+- Skills: `https://github.com/hashicorp/agent-skills/tree/43ca9b0cde131e20a129c106bc9f6b6f9f1e5c9a/terraform/code-generation/skills`
 
 Managed skills:
 
@@ -156,14 +156,14 @@ Managed skills:
 
 Source repositories:
 
-- Engineering skills: `https://github.com/mattpocock/skills/tree/main/skills/engineering`
-- Productivity skills: `https://github.com/mattpocock/skills/tree/main/skills/productivity`
+- Engineering skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/engineering`
+- Productivity skills: `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/productivity`
 
 Managed skills:
 
 - `caveman` -> `mattpocock-caveman`
 - `diagnose` -> `mattpocock-diagnose`
-- `grill-me` -> `grill-me`
+- `grill-me` -> `mattpocock-grill-me`
 - `grill-with-docs` -> `mattpocock-grill-with-docs`
 - `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
 - `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
@@ -174,8 +174,8 @@ Managed skills:
 
 Source repositories:
 
-- Curated skills: `https://github.com/openai/skills/tree/main/skills/.curated`
-- System skills: `https://github.com/openai/skills/tree/main/skills/.system`
+- Curated skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.curated`
+- System skills: `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.system`
 
 Managed skills:
 
@@ -191,7 +191,7 @@ Managed skills:
 
 Source repository:
 
-- Skills: `https://github.com/sickn33/antigravity-awesome-skills/tree/main/skills`
+- Skills: `https://github.com/sickn33/antigravity-awesome-skills/tree/v11.3.0/skills`
 
 Managed skills:
 
