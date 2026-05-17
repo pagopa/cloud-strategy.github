@@ -87,10 +87,11 @@ overrides:
     apply_strategy: git-apply-3way
     approval: explicit-user-counter-validated
     reason: >-
-      Default the initial grilling pass to a numbered bulk question set with
-      clear recommendations that the user can accept by default or override by
-      question number.
+      Default the initial grilling pass to a dependency-ordered numbered
+      question set with clear recommendations that the user can accept by
+      default, while preserving follow-up pressure on contradictions, risks,
+      and unresolved decisions.
     patch_path: patches/mattpocock-grill-me.patch
-    expected_content_hash: 39e6e8327d4c166df20cf54d3d84a0a7b54107f5461a9e3c10648cccea44d3f8
+    expected_content_hash: e2fa79d043891f6f27f9ac7eaf2202ead34f59ce63b76542d773056281ff831f
     baseline_repo_commit: "e74f006"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
