@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-simple
-description: Use when a concrete repository-owned task needs skill-first quick routing, lightweight analysis, support-skill selection, execution, or focused validation without a retained plan or critical challenge.
+description: Use when a concrete repository-owned task needs skill-first quick routing, support-skill discovery, execution, or focused validation without a retained plan, critical challenge, or staged workflow.
 ---
 
 # Internal Gateway Simple
@@ -16,36 +16,48 @@ critical challenge ownership.
 ## When to use
 
 - The requested outcome is already concrete enough to answer, edit, or validate.
-- The user wants tactical support skills, but not a full retained plan.
+- The user wants tactical support skills, but not a full retained plan or staged full-cycle workflow.
 - The task needs a short approach note before implementation.
 - The work is local, low to medium risk, and has a focused validation path.
 - The user asks for skill-first UX instead of selecting planning or delivery
   wrapper agents manually.
+- `internal-gateway-operational-flow` or `internal-gateway-critical-master`
+  de-escalates because the remaining work is concrete and low risk.
 
 ## When not to use
 
 - Real ambiguity remains about ownership, target shape, rollout, governance, or
-  validation. Use `internal-gateway-operational-flow` in `plan` mode.
+  validation. Use `internal-gateway-operational-flow` with the `plan-only` or
+  `full-cycle` entry point.
 - The primary request is pressure testing, pre-mortem analysis, hidden
   assumptions, or failure modes. Use `internal-gateway-critical-master`.
 - The primary request is defect-first review of an existing artifact, diff, or
-  validation result. Use `internal-gateway-operational-flow` in `review` mode.
+  validation result. Use the `review` entry point in
+  `internal-gateway-operational-flow`.
 - The work needs a retained numbered plan under `tmp/superpowers/`. Use
   `internal-writing-plans`.
 - The task is catalog sync governance or consumer propagation. Use the repo-only
   sync owners.
 
+## Protected Trigger
+
+Use this lane only when the task can be completed without settling a new
+operating model, ownership boundary, rollout path, or critical assumption. If a
+selected staged workflow reveals that the remaining work is just a clear edit,
+focused answer, or deterministic validation, de-escalate here visibly instead of
+continuing the heavier flow.
+
 ## Simple Flow
 
 1. Inspect local files first when repository evidence can answer the question.
 2. Decide whether the target state is concrete enough for lightweight execution.
-3. Select only the support skills needed for the domain or file type.
+3. Discover only the support skills needed for the domain or file type.
 4. Give a brief approach note when it helps the user understand the execution.
 5. Answer or implement without creating a retained plan.
 6. Run focused validation, or name the explicit validation gap.
 7. Escalate visibly if the work becomes planning, review, or critical challenge.
 
-## Support-Skill Selection
+## Support-Skill Discovery
 
 Load support skills after the simple lane is confirmed.
 
@@ -58,6 +70,11 @@ Examples:
 - GitHub Actions changes: use `internal-github-actions`.
 - Markdown-only edits: use matching scoped Markdown instructions and the closest
   repository-owned owner, without forcing a full plan.
+
+Search or inspect nearby files first when the right support skill is not obvious
+from the prompt. Prefer one targeted support skill over a broad bundle. Add a
+second support skill only when the file type, runtime, or validation path proves
+it is needed.
 
 Do not load every plausible support skill. Load the smallest set that can
 complete the task and validate the result.
@@ -73,6 +90,8 @@ Move out of this skill when the simple lane stops being true:
   reasoning or when a high-value pressure test is needed.
 - Move to `internal-writing-plans` when the work must survive the current turn as
   a retained plan.
+- Move back to `internal-gateway-operational-flow` when a task that looked
+  simple becomes staged, cross-boundary, or apply-plan owned.
 
 When escalating, state the boundary break and provide the next owner, scope,
 action, validation path, and main risk.
@@ -106,6 +125,19 @@ For escalation, return:
 | Continuing after ownership or rollout ambiguity appears | Stop and move visibly to `plan`. |
 | Running critical challenge by default | Use it only when the user asks or when reasoning risk is high. |
 | Reopening settled decisions during implementation | Execute the known target state and stop if it breaks. |
+| Using simple for an approved retained plan | Use `apply-plan` through `internal-gateway-operational-flow` and `internal-executing-plans`. |
+| Treating de-escalation as hidden dispatch | State the boundary break and next owner before acting. |
+
+## Misuse Tests
+
+- Concrete local edit with obvious validation should stay here and avoid a
+  retained plan.
+- Ambiguous agent, skill, or instruction ownership should move to
+  `internal-gateway-operational-flow`.
+- A completed diff that needs merge-readiness findings should move to `review`.
+- A retained plan under `tmp/superpowers/` should move to `apply-plan`.
+- A critical pass whose outcome is `de-escalate-to-simple` should name the
+  simple scope, validation, and residual risk before continuing.
 
 ## Validation
 
@@ -115,3 +147,5 @@ For escalation, return:
 - No retained plan was created unless the task moved to `internal-writing-plans`.
 - Focused validation was run or the validation gap was named.
 - Any lane change included owner, scope, action, validation path, and risk.
+- Misuse pressure cases still route to the heavier staged, review, retained-plan,
+  or critical owner when simple work is not the smallest correct lane.

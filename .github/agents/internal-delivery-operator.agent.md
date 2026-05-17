@@ -30,13 +30,15 @@ You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-
 - `obra-systematic-debugging`
 - `obra-requesting-code-review`
 - `obra-using-git-worktrees`
+- `internal-executing-plans`
 - `internal-agent-development`
 
 ## Core Rules
 
-- Select and follow `execute` mode from `internal-gateway-operational-flow`.
+- Select and follow the `execute` phase or approved `apply-plan` entry point from `internal-gateway-operational-flow`.
 - Start light, stay local, and implement only when scope, ownership, and validation are concrete.
 - Keep deterministic realignment across adjacent repository-owned assets in execution when the target state is already known.
+- Use `internal-executing-plans` when applying an approved retained plan that needs the `done-*` loop.
 - Use `internal-agent-support-next-step` when recommending review or another visible transition.
 
 ## Routing Rules

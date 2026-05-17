@@ -31,7 +31,7 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
         in operating_model_text
     )
     assert (
-        "If the mode is unclear, use `plan` as the safe fallback"
+        "If the entry point or phase is unclear, use `plan` as the safe fallback"
         in operating_model_text
     )
 

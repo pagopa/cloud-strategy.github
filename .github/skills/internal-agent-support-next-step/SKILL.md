@@ -9,7 +9,7 @@ Use this skill to format the next step after the next owner has already been cho
 
 ## When to use
 
-- `internal-agent-operational-flow` ends `plan`, `execute`, or `review` mode with a visible transition.
+- `internal-gateway-operational-flow` ends a staged `plan`, `execute`, `apply-plan`, `review`, or critical phase with a visible transition.
 - A Copilot wrapper recommends moving from planning, delivery, review, or critical challenge to a different owner.
 - `internal-review-guard` or `review` mode finishes defect-first analysis and needs to route actionable findings to delivery, planning, critical challenge, or deferred follow-up.
 - A prompt needs a consistent handoff package that survives surfaces where VS Code `handoffs:` buttons are not available.

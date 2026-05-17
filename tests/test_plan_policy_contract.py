@@ -48,6 +48,7 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "ownership, rollout, validation, or multiple credible paths remain"
         in agents_text
     )
+    assert "user-selected gateway skills with visible phases" in agents_text
     assert (
         "Use `execute` mode only when the target state and validation path are concrete"
         in agents_text
@@ -114,7 +115,8 @@ def test_plan_wrapper_skills_are_listed_in_ownership_map_and_inventory() -> None
 
     assert "| `internal-writing-plans` | `plan` mode |" in ownership_map_text
     assert (
-        "| `internal-executing-plans` | `plan` mode oversight |" in ownership_map_text
+        "| `internal-executing-plans` | `apply-plan` execution engine |"
+        in ownership_map_text
     )
     assert PLAN_TASK_PATH in ownership_map_text
 

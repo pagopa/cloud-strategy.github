@@ -22,8 +22,8 @@ Use these repository sources first:
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
 - [.github/agents/internal-planning-leader.agent.md](../agents/internal-planning-leader.agent.md)
-- [.github/skills/internal-agent-operational-flow/SKILL.md](../skills/internal-agent-operational-flow/SKILL.md)
-- [.github/skills/internal-agent-next-step/SKILL.md](../skills/internal-agent-next-step/SKILL.md)
+- [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
+- [.github/skills/internal-agent-support-next-step/SKILL.md](../skills/internal-agent-support-next-step/SKILL.md)
 
 Produce a planning brief with:
 
@@ -31,4 +31,5 @@ Produce a planning brief with:
 2. Main assumptions and tradeoffs
 3. Selected direction and why it wins
 4. Validation or rollout notes
-5. Recommended next owner and next-step package when planning should transition
+5. Decision Brief when a retained plan is created or materially reformulated
+6. Recommended next owner and next-step package when planning should transition

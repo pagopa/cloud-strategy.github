@@ -6,15 +6,18 @@ examples and expected results.
 
 ## Core Idea
 
-Use this skill to choose and run one visible operational mode for the current
-phase:
+Use this skill to choose one visible staged entry point, then run one active
+phase at a time:
 
-- `plan`: settle ambiguity, ownership, tradeoffs, rollout, or validation before
-  delivery.
-- `execute`: apply a clear local change or deterministic task with concrete
-  validation.
+- `full-cycle`: plan, optional critical challenge, checkpointed delivery, and
+  final evidence.
+- `plan-only`: plan, Decision Brief, optional critical pass, and stop before
+  apply.
+- `apply-plan`: apply an approved retained plan through
+  `internal-executing-plans`.
 - `review`: inspect an existing artifact, diff, or validation result with
   findings first.
+- `mode-explicit`: honor a direct `plan`, `execute`, or `review` request.
 
 Use `internal-gateway-critical-master` instead when the primary job is pressure
 testing, pre-mortem analysis, hidden-assumption challenge, or reframing.
@@ -26,9 +29,10 @@ Start with the smallest mode that can honestly finish the current phase:
 | Question | If yes | Result |
 | --- | --- | --- |
 | Is the task concrete and only needs skill-first quick routing or support-skill selection? | Use `internal-gateway-simple`. | Lightweight analysis, minimal support skills, focused execution, and validation are returned. |
-| Is the target state already clear and verifiable? | Use `execute`. | Files, commands, or guidance are delivered with validation evidence. |
+| Is the target state already clear and verifiable? | Use `mode-explicit` `execute`. | Files, commands, or guidance are delivered with validation evidence. |
 | Does a concrete artifact or diff already exist and need defect-first analysis? | Use `review`. | Findings, severity, evidence gaps, and fix routing are returned. |
-| Are ownership, shape, rollout, or tradeoffs still unresolved? | Use `plan`. | A decision frame and next-step package are returned. |
+| Is there an approved retained plan under `tmp/superpowers/` to apply? | Use `apply-plan`. | `internal-executing-plans` runs the `done-*` loop and ignores `dubbi-e-domande.md`. |
+| Are ownership, shape, rollout, or tradeoffs still unresolved? | Use `plan-only` or `full-cycle`. | A decision frame, Decision Brief when retained, and next-step package are returned. |
 | Is the main request to attack the reasoning before action? | Use `internal-gateway-critical-master`. | Weak assumptions and failure modes are challenged before reformulation. |
 
 If two modes still fit, choose `plan` and state why the boundary is uncertain.
@@ -42,7 +46,8 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 | Deterministic multi-file alignment | "Rename this approved skill reference across adjacent files and run the focused tests." | `execute`. File count alone does not force planning. | Updated files, stale-name search, and validation evidence. |
 | New repository-owned workflow with unclear owner | "Should this be an agent, a skill, or an instruction?" | `plan` plus relevant authoring support skills. | Ownership decision, anti-scope, tradeoffs, next owner, and validation path. |
 | Plan with user grilling before final plan | "Ask all grill-me questions first, then write the plan after my answers." | `plan` plus `mattpocock-grill-me` before final planning. | Numbered questions with recommended answers; after responses, a plan-ready decision frame. |
-| Plan, then critical challenge | "Make a plan, then pressure-test it before implementation." | `plan`, then visible next step to `internal-gateway-critical-master`, then back to `plan` if reformulation is needed. | Plan, strongest objections, reformulated plan or explicit residual risk. |
+| Plan, then critical challenge | "Make a plan, then pressure-test it before implementation." | `full-cycle`, then visible critical phase through `internal-gateway-critical-master`. | Plan, Decision Brief when retained, strongest objections, explicit outcome, and checkpoint before delivery. |
+| Apply retained plan | "Apply this plan under `tmp/superpowers/example`." | `apply-plan` plus `internal-executing-plans`. | Completed items move into `done-*`, active numbered files shrink or delete, and validation evidence is reported. |
 | Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
 | Pure challenge | "Attack this proposal before we trust it." | `internal-gateway-critical-master`, not this skill as the primary owner. | Failure modes, hidden assumptions, and a recommendation for reformulation. |
 | Runtime without Copilot agent UI | "Use the operational flow directly in Codex." | Load this skill and references manually. | Text next-step packages replace Copilot handoff buttons. |
@@ -80,7 +85,7 @@ Expected result:
 
 This is analysis-assisted execution, not `plan` mode.
 
-## Full Plan With Grill And Critical
+## Full Cycle With Grill And Critical
 
 Use this sequence when the user wants the rigorous path:
 
@@ -89,15 +94,21 @@ Use this sequence when the user wants the rigorous path:
 3. If the user asks for bulk questions, provide numbered questions with a
    recommended answer for each.
 4. Wait for the user answers when the answers affect the plan.
-5. Create the `plan` mode output.
-6. Move visibly to `internal-gateway-critical-master` for pressure testing.
-7. Reformulate the plan if the challenge changes the direction.
-8. Move to `execute` only after the target state and validation path are clear.
+5. Create the `plan` phase output.
+6. If a retained plan is created or materially reformulated, provide a Decision
+  Brief in chat.
+7. Move visibly to `internal-gateway-critical-master` for pressure testing when
+  reasoning risk remains.
+8. Reformulate, de-escalate, execute, review, continue critical, or accept risk
+  according to the critical outcome.
+9. Move to `execute` or `apply-plan` only after the target state and validation
+  path are clear and the checkpoint is satisfied.
 
 Expected result:
 
 - Pre-plan questions expose preferences and constraints.
 - The plan records assumptions, tradeoffs, selected direction, and anti-scope.
+- The Decision Brief is a compact chat projection, not a second canonical plan.
 - Critical challenge attacks the completed plan, not every small delivery step.
 - The final next-step package names owner, scope, action, validation, and risk.
 
@@ -121,7 +132,13 @@ Wait for my answers before finalizing the plan.
 ```text
 Create the plan first.
 Then use internal-gateway-critical-master to pressure-test the plan.
-After that, reformulate the plan before recommending execution.
+After that, use the explicit critical outcome before recommending execution.
+```
+
+```text
+Apply the approved retained plan under tmp/superpowers/example.
+Use internal-executing-plans for the done-* loop.
+Do not execute dubbi-e-domande.md.
 ```
 
 ```text

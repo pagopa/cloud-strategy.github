@@ -4,8 +4,8 @@ This folder contains Copilot wrapper agents for repository-owned operations plus
 
 ## Skill-First Core
 
-- `internal-agent-operational-flow` owns the reusable `plan`, `execute`, and `review` modes.
-- `internal-agent-critical-master` owns the reusable critical challenge workflow.
+- `internal-gateway-operational-flow` owns the reusable skill-first staged workflow for `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit phases.
+- `internal-gateway-critical-master` owns the reusable critical challenge workflow and outcome routing.
 - The four internal operational agents are current Copilot wrapper entrypoints, not a separate semantic source.
 - Runtime surfaces without Copilot agent UI should read the relevant `SKILL.md` files and use text next-step packages.
 
@@ -63,7 +63,7 @@ Use this path when the target state is already known. The delivery agent should
 not reopen strategy, invent new ownership, or create retained plan files unless
 the task unexpectedly becomes non-trivial.
 
-Portable core: `execute` mode in `internal-agent-operational-flow`.
+Portable core: `execute` phase in `internal-gateway-operational-flow`.
 
 Good examples:
 
@@ -225,7 +225,7 @@ Use this path when the work needs a decision record, plan, or route selection
 before editing. The planning output should be compact enough for delivery to act
 without rediscovering the whole problem.
 
-Portable core: `plan` mode in `internal-agent-operational-flow`.
+Portable core: `plan` phase or `plan-only` entry point in `internal-gateway-operational-flow`.
 
 Example:
 
@@ -371,7 +371,7 @@ Use this path when the user asks "is this right?", "what is risky?", or "review
 this before I trust it." A good review answer should make missing validation a
 finding, not a footnote.
 
-Portable core: `review` mode in `internal-agent-operational-flow`, with
+Portable core: `review` entry point in `internal-gateway-operational-flow`, with
 `internal-code-review` as the tactical review engine.
 
 Example:
@@ -508,21 +508,24 @@ not a routine review lane and should not implement the solution it critiques.
 | - closing synthesis           |
 +-------------------------------+
                |
-               | Next step: Reformulate plan
+               | Next step: Reformulate plan,
+               | implement clear next step,
+               | or review evidence
                | handoffs: send=false
                v
 +-------------------------------+
-| internal-planning-leader      |
-| - reformulates if needed      |
-| - recommends delivery only    |
-|   after assumptions settle    |
+| internal-planning-leader,     |
+| internal-delivery-operator,   |
+| or internal-review-guard      |
+| - acts only on the explicit   |
+|   critical outcome            |
 +-------------------------------+
 ```
 
 Use this path for non-banal decisions where the cost of acting on weak reasoning
 is higher than the cost of one pressure-test pass.
 
-Portable core: `internal-agent-critical-master`.
+Portable core: `internal-gateway-critical-master`.
 
 Example:
 
@@ -531,16 +534,18 @@ Example:
 - Critical result: strongest objection is hidden routing complexity; direct
   entry plus manual next-step packages may solve the current pain with less
   governance risk.
-- Next owner: `internal-planning-leader`, because the plan must be reformulated
-  before delivery touches files.
+- Outcome: `reformulate-plan`, because the plan must be reformulated before
+  delivery touches files.
+- Next owner: `internal-planning-leader`.
 
 #### Critical challenge use cases
 
 Use `internal-critical-master` when the risky part is reasoning quality, not an
 already-observed defect. Critical challenge should expose hidden assumptions,
 failure modes, overfitting, and missed alternatives before implementation starts.
-Use `internal-agent-critical-master` directly when the runtime does not expose
-Copilot wrapper agents.
+Use `internal-gateway-critical-master` directly when the runtime does not expose
+Copilot wrapper agents. Use `internal-critical-master` when VS Code wrapper UX
+is useful.
 
 ```text
 +------------------------------+
@@ -723,7 +728,7 @@ Examples that should leave sync:
 - Clear local edit with known validation: start with `execute` mode or `internal-delivery-operator`.
 - Catalog redesign, routing change, or retained plan: start with `plan` mode or `internal-planning-leader`.
 - "Check whether this is correct before merge": start with `review` mode or `internal-review-guard`.
-- "Find the weakest assumption in this plan": start with `internal-agent-critical-master` or `internal-critical-master`.
+- "Find the weakest assumption in this plan": start with `internal-gateway-critical-master` or `internal-critical-master`.
 - Source-side external catalog sync: start with `local-sync-external-resources`.
 - Consumer repository baseline propagation: start with `local-sync-global-copilot-configs-into-repo`.
 
@@ -734,7 +739,7 @@ More concrete examples:
 | "Update one README section and run the related test." | `execute` or `internal-delivery-operator` | Scope and validation are already concrete. |
 | "Decide whether this should be an agent, a skill, or an instruction." | `plan` or `internal-planning-leader` | The core work is ownership and placement. |
 | "Review these agent changes for routing regressions." | `review` or `internal-review-guard` | The job is defect-first validation, not implementation. |
-| "Attack this plan before I apply it." | `internal-agent-critical-master` or `internal-critical-master` | The job is assumption pressure-testing. |
+| "Attack this plan before I apply it." | `internal-gateway-critical-master` or `internal-critical-master` | The job is assumption pressure-testing. |
 | "Refresh the managed `obra-*` skills from upstream." | `local-sync-external-resources` | The job is source-side external catalog sync. |
 | "Plan the propagation of this baseline into another repo." | `local-sync-global-copilot-configs-into-repo` | The job is consumer baseline alignment. |
 
@@ -747,7 +752,7 @@ It should not continue by acting as a hidden router.
 - `execute` mode or `internal-delivery-operator`: clear local execution, deterministic realignment, concrete validation.
 - `plan` mode or `internal-planning-leader`: ambiguity, cross-boundary tradeoffs, non-trivial repository-owned authoring, rollout decisions.
 - `review` mode or `internal-review-guard`: defect-first review, merge readiness, regression analysis, validation evidence.
-- `internal-agent-critical-master` or `internal-critical-master`: pre-mortem, assumption pressure test, failure modes, alternative framing.
+- `internal-gateway-critical-master` or `internal-critical-master`: pre-mortem, assumption pressure test, failure modes, alternative framing.
 - `local-sync-external-resources`: source-side `.github/` catalog sync, rationalization, overlap cleanup, managed external resources.
 - `local-sync-global-copilot-configs-into-repo`: consumer-repository baseline propagation.
 

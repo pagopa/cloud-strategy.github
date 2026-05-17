@@ -40,11 +40,12 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 
 ## Core Rules
 
-- Select and follow `plan` mode from `internal-gateway-operational-flow`.
+- Select and follow the `plan` phase or `plan-only` entry point from `internal-gateway-operational-flow`.
 - Make assumptions, tradeoffs, and the selected direction explicit.
 - Keep retained planning under `tmp/superpowers/` only when the repository plan policy requires it.
+- Provide the Decision Brief projection after retained plans or material reformulations.
 - Do not default into implementation once the design is settled; recommend the next owner with `internal-agent-support-next-step`.
-- Use `mattpocock-grill-me` only as conditional support when the user asks for it, real ambiguity remains, or pressure before delivery is useful.
+- Use `mattpocock-grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is created, reformulated, or validated.
 
 ## Routing Rules
 
@@ -62,7 +63,7 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 ## Mode Guidance
 
 - Plan-authoring mode: prefer `internal-writing-plans` only when repository-owned work needs a retained execution plan under `tmp/superpowers/` because the work crosses turns, macro-categories, handoff, tracking, or provenance; keep planning in chat for clear, local, quick, or banal tasks.
-- Plan-execution oversight: prefer `internal-executing-plans` when an approved repository-owned plan is being applied and the `done-*` loop or blocker handling must stay explicit.
+- Plan-execution oversight: prefer `internal-executing-plans` when an approved repository-owned plan is being applied and the `done-*` loop or blocker handling must stay explicit; otherwise package `apply-plan` as a visible next step.
 
 ## Output Expectations
 

@@ -6,8 +6,8 @@ Use this reference when updating the Copilot agent wrappers, README projection, 
 
 | Wrapper | Mode | Mandatory engines |
 | --- | --- | --- |
-| `internal-planning-leader` | `plan` | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
-| `internal-delivery-operator` | `execute` | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
+| `internal-planning-leader` | `plan` phase and `plan-only` projection | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
+| `internal-delivery-operator` | `execute` phase and clear `apply-plan` work | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
 | `internal-review-guard` | `review` | `internal-gateway-operational-flow`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step`, `internal-code-review` |
 | `internal-critical-master` | critical challenge | `internal-gateway-critical-master`, `internal-agent-support-lane-change-engine`, `internal-agent-support-next-step` |
 
@@ -19,6 +19,8 @@ The wrappers keep route wording, tools, `disable-model-invocation: true`, `agent
 - Keep handoff labels user-facing with `Next step:` or `Next action:`.
 - Keep text next-step packages in responses because non-Copilot runtimes may ignore wrapper frontmatter.
 - Do not use wrapper handoffs as hidden dispatch.
+- Critical wrappers may expose more than reformulation as manual handoff options when the outcome is delivery or evidence review.
+- Skill-only outcomes such as `de-escalate-to-simple` should be named in the text next-step package because there is no simple wrapper agent.
 
 ## Sync Boundary
 

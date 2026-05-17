@@ -46,10 +46,11 @@ playbooks.
 
 ## Operational Ownership
 
-- `internal-gateway-operational-flow` owns the reusable `plan`, `execute`, and `review` mode semantics.
+- `internal-gateway-operational-flow` owns the reusable skill-first staged semantics for `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases.
 - `internal-gateway-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
 - Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; reusable behavior stays in skills.
-- Use direct owner selection. Do not add a repository-owned front-door router or hidden peer dispatch.
+- Use direct owner selection or user-selected gateway skills with visible phases. Do not add a repository-owned hidden front-door router or hidden peer dispatch.
+- Light emoji markers may appear in user-facing macro-category headings when the owning skill defines them; do not use them in paths, commands, identifiers, schema fields, or copied technical values.
 
 ## Tactical Defaults
 

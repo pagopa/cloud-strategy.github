@@ -24,7 +24,11 @@ EXPECTED_HANDOFF_LABELS = {
         "Next action: Re-plan larger changes",
         "Next action: Pressure-test unresolved decision",
     ],
-    "internal-critical-master": ["Next step: Reformulate plan"],
+    "internal-critical-master": [
+        "Next step: Reformulate plan",
+        "Next step: Implement clear next step",
+        "Next step: Review evidence",
+    ],
 }
 
 EXPECTED_HANDOFF_TARGETS = {
@@ -38,7 +42,11 @@ EXPECTED_HANDOFF_TARGETS = {
         "internal-planning-leader",
         "internal-critical-master",
     ],
-    "internal-critical-master": ["internal-planning-leader"],
+    "internal-critical-master": [
+        "internal-planning-leader",
+        "internal-delivery-operator",
+        "internal-review-guard",
+    ],
 }
 
 EXPECTED_MANDATORY_SKILLS = {
@@ -172,7 +180,7 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
     assert "If a request starts in the wrong lane" in readme
 
 
-def test_skill_first_operational_core_exists_with_required_modes() -> None:
+def test_skill_first_operational_core_exists_with_required_staged_entrypoints() -> None:
     skill_text = Path(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
@@ -190,12 +198,20 @@ def test_skill_first_operational_core_exists_with_required_modes() -> None:
     ).read_text(encoding="utf-8")
 
     assert "name: internal-gateway-operational-flow" in skill_text
-    assert "`plan`, `execute`, and `review`" in skill_text
+    assert "## Skill-First Staged Entry Points" in skill_text
+    assert "`full-cycle`" in skill_text
+    assert "`plan-only`" in skill_text
+    assert "`apply-plan`" in skill_text
+    assert "`mode-explicit`" in skill_text
+    assert "Decision Brief" in skill_text
+    assert "explicit checkpoint before moving from `plan`" in skill_text
     assert "multiple credible paths" in skill_text
     assert "`plan`" in mode_contracts_text
     assert "`execute`" in mode_contracts_text
     assert "`review`" in mode_contracts_text
+    assert "`apply-plan`" in mode_contracts_text
     assert "Codex plugin or Codex CLI" in workflow_maps_text
+    assert "Retained Plan Application" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
     assert "$internal-gateway-operational-flow" in metadata_text
 
@@ -221,9 +237,48 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
 
     assert "name: internal-gateway-critical-master" in skill_text
     assert "Do not implement, routine-review, or finalize the plan" in skill_text
+    assert "## Outcome Routing" in skill_text
+    assert "`de-escalate-to-simple`" in skill_text
+    assert "`execute-clear-next-step`" in skill_text
+    assert "`review-evidence`" in skill_text
+    assert "`accept-with-risk`" in skill_text
     assert "Final Consistency Gate" in lenses_text
     assert "Scope compression" in lenses_text
+    assert "Explicit outcome" in lenses_text
     assert "$internal-gateway-critical-master" in metadata_text
+
+
+def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
+    skill_text = Path(".github/skills/internal-gateway-simple/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    metadata_text = Path(
+        ".github/skills/internal-gateway-simple/agents/openai.yaml"
+    ).read_text(encoding="utf-8")
+
+    assert "## Protected Trigger" in skill_text
+    assert "## Support-Skill Discovery" in skill_text
+    assert "## Misuse Tests" in skill_text
+    assert "de-escalates because the remaining work is concrete" in skill_text
+    assert "`apply-plan` through `internal-gateway-operational-flow`" in skill_text
+    assert "$internal-gateway-simple" in metadata_text
+
+
+def test_prompt_examples_reference_live_gateway_skills() -> None:
+    prompt_paths = [
+        Path(".github/prompts/internal-agent-pressure-test-plan.prompt.md"),
+        Path(".github/prompts/internal-agent-review-next-actions.prompt.md"),
+        Path(".github/prompts/internal-agent-plan-next-step.prompt.md"),
+    ]
+    combined_text = "\n".join(path.read_text(encoding="utf-8") for path in prompt_paths)
+
+    assert "internal-gateway-operational-flow/SKILL.md" in combined_text
+    assert "internal-gateway-critical-master/SKILL.md" in combined_text
+    assert "internal-agent-support-next-step/SKILL.md" in combined_text
+    assert "internal-agent-operational-flow" not in combined_text
+    assert "internal-agent-critical-master" not in combined_text
+    assert "internal-agent-next-step" not in combined_text
+    assert "internal-agent-lane-change-engine" not in combined_text
 
 
 def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
@@ -235,7 +290,7 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
     assert not Path(".github/skills/grill-me/SKILL.md").exists()
     assert "mattpocock-grill-me" in operational_text
-    assert "conditional support" in operational_text
+    assert "non-trivial retained plan" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
     assert "continue one question at a time" in operational_text
     assert "- `mattpocock-grill-me`" in planning_body
