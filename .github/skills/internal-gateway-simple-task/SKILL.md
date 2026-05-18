@@ -5,6 +5,24 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 # Internal Gateway Simple Task
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `internal-gateway-operational-flow`: staged `plan`, `execute`, `review`, `full-cycle`, `plan-only`, and `apply-plan` owner when simple work no longer fits.
+- `internal-gateway-critical-master`: critical challenge, pre-mortem, hidden-assumption, and failure-mode owner.
+- `internal-systems-review`: systems-level review evidence for architecture, workflow, cross-cutting impact, and merge risk.
+- `internal-code-review`: defect-first code review evidence for line-level bugs, regressions, tests, and language anti-patterns.
+- `internal-writing-plans`: retained-plan owner when work must persist under `tmp/superpowers/`.
+- `internal-executing-plans`: retained-plan execution owner for approved `apply-plan` work.
+- `internal-script-python`: support skill for Python scripts.
+- `internal-tdd`: support skill for executable behavior when test-first delivery is requested or clearly valuable.
+- `internal-debugging`: support skill for bugs, failures, validator drift, sync failures, and unexpected behavior.
+- `internal-azure-operations`: support skill for Azure validation or evidence.
+- `internal-azure-governance`: support skill for Azure RBAC, Policy, identity, and guardrails.
+- `internal-terraform`: support skill for Terraform changes.
+- `internal-github-actions`: support skill for GitHub Actions changes.
+
 Use this skill as the skill-first fast path for concrete repository-owned work.
 It exists for runtimes where the user selects skills directly and does not want
 to manually switch between Copilot wrapper agents for small or medium tasks.
