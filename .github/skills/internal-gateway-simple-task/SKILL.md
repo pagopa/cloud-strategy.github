@@ -1,9 +1,9 @@
 ---
-name: internal-gateway-simple
+name: internal-gateway-simple-task
 description: Use when a concrete repository-owned task needs skill-first quick routing, support-skill discovery, execution, or focused validation without a retained plan, critical challenge, or staged workflow.
 ---
 
-# Internal Gateway Simple
+# Internal Gateway Simple Task
 
 Use this skill as the skill-first fast path for concrete repository-owned work.
 It exists for runtimes where the user selects skills directly and does not want

@@ -272,11 +272,11 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
 
 
 def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
-    skill_text = Path(".github/skills/internal-gateway-simple/SKILL.md").read_text(
+    skill_text = Path(".github/skills/internal-gateway-simple-task/SKILL.md").read_text(
         encoding="utf-8"
     )
     metadata_text = Path(
-        ".github/skills/internal-gateway-simple/agents/openai.yaml"
+        ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
     ).read_text(encoding="utf-8")
 
     assert "## Protected Trigger" in skill_text
@@ -284,7 +284,7 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     assert "## Misuse Tests" in skill_text
     assert "de-escalates because the remaining work is concrete" in skill_text
     assert "`apply-plan` through `internal-gateway-operational-flow`" in skill_text
-    assert "$internal-gateway-simple" in metadata_text
+    assert "$internal-gateway-simple-task" in metadata_text
 
 
 def test_prompt_examples_reference_live_gateway_skills() -> None:
