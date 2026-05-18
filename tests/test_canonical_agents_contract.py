@@ -285,7 +285,9 @@ def test_operational_flow_readme_references_live_gateway_skills() -> None:
     assert "## Output And Support Calibration" in readme_text
     assert "about 40 lines" in readme_text
     assert "about 30 lines" in readme_text
-    assert "Use imported support only after the gateway phase is selected" in readme_text
+    assert (
+        "Use imported support only after the gateway phase is selected" in readme_text
+    )
     assert "mattpocock-caveman" in readme_text
 
 
