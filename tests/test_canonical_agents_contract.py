@@ -248,6 +248,23 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "multiple credible paths remain" in planning_body
 
 
+def test_gateway_catalog_fast_path_stays_local_before_optional_support() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    workflow_maps_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
+    ).read_text(encoding="utf-8")
+
+    assert "internal-gateway-simple-task` vs `execute` vs `plan` triage" in skill_text
+    assert "before loading optional references, support skills, or review lenses" in skill_text
+    assert "one owner file plus one nearby validator or test" in skill_text
+    assert "### Catalog Fast Path" in workflow_maps_text
+    assert "`make catalog-fast-check`" in workflow_maps_text
+    assert "`make github-catalog-validation` once at the end" in workflow_maps_text
+    assert "`CATALOG_FAST_INCLUDE_TOKEN_RISKS=1`" in workflow_maps_text
+
+
 def test_critical_master_skill_exists_with_challenge_boundary() -> None:
     skill_text = Path(
         ".github/skills/internal-gateway-critical-master/SKILL.md"

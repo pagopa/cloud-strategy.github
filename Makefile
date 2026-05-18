@@ -6,13 +6,15 @@ SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
 PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests .github/skills
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
+CATALOG_FAST_TESTS := tests/test_inventory_and_consistency.py tests/test_validation_entrypoints_contract.py tests/github/scripts/test_cli_entrypoints.py
+CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**"
 
-.PHONY: help python-version-check lint catalog-lint github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint catalog-lint github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
+	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -24,11 +26,22 @@ scripts-bootstrap: python-version-check
 lint: python-version-check docs-lint
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
-	$(PYTHON) -m compileall $(PYTHON_PATHS)
+	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
 
 catalog-lint: python-version-check
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
-	$(PYTHON) -m compileall $(PYTHON_PATHS)
+	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
+
+catalog-fast-check: scripts-bootstrap
+	@$(SCRIPTS_RUNNER) build_inventory --root . --check
+	@$(SCRIPTS_RUNNER) check_catalog_consistency --root .
+	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
+	@$(SCRIPTS_VENV)/bin/python -m pytest -q $(CATALOG_FAST_TESTS)
+	@if [ "$(CATALOG_FAST_INCLUDE_TOKEN_RISKS)" = "1" ]; then \
+		$(SCRIPTS_RUNNER) detect_token_risks --root .; \
+	else \
+		printf '%s\n' 'Skipping token-risks; set CATALOG_FAST_INCLUDE_TOKEN_RISKS=1 for always-on or shared-contract changes.'; \
+	fi
 
 github-catalog-validation: python-version-check
 	@bash ./github_catalog_validation.sh

@@ -108,6 +108,10 @@ Execute mode owns clear local delivery. It may touch several adjacent files when
 
 For `execute`, keep edits scoped to the requested change, required adjacent contracts, and validation fixes. Do not silently add newly discovered improvements.
 
+For small catalog maintenance in this repository, do the `internal-gateway-simple-task` vs `execute` vs `plan` triage before loading optional references, support skills, or review lenses. Start from one owner file plus one nearby validator or test, and take only one extra reference when it changes the next safe action.
+
+Keep the local loop short: targeted `rg` or nearby read, patch, nearby test or validator, repository-local fast check, then full validation once at the end. Do not default to retained plans or review mode for one-file or one-owner fixes.
+
 For `apply-plan`, load `internal-executing-plans` and follow its repository-local `done-*` loop. The normal input is an approved retained plan folder under `tmp/superpowers/<clear-action-or-task-name>/`; an inline plan must be converted into a retained plan or receive an explicit checkpoint before execution. `dubbi-e-domande.md` is never an executable plan file.
 
 Use `internal-executing-plans` for incoming handoff gaps, resume protocol, and
