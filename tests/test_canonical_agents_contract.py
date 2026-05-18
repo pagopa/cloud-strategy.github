@@ -193,6 +193,9 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
+    imported_support_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
+    ).read_text(encoding="utf-8")
     metadata_text = Path(
         ".github/skills/internal-gateway-operational-flow/agents/openai.yaml"
     ).read_text(encoding="utf-8")
@@ -213,6 +216,11 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "Codex plugin or Codex CLI" in workflow_maps_text
     assert "Retained Plan Application" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
+    assert "mattpocock-zoom-out" in imported_support_text
+    assert "mattpocock-diagnose" in imported_support_text
+    assert "mattpocock-grill-with-docs" in imported_support_text
+    assert "mattpocock-setup-matt-pocock-skills" in imported_support_text
+    assert "No new internal skill is needed" in imported_support_text
     assert "$internal-gateway-operational-flow" in metadata_text
 
     planning_frontmatter = load_frontmatter(
@@ -287,13 +295,39 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     ).read_text(encoding="utf-8")
     planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
 
-    assert Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
-    assert not Path(".github/skills/grill-me/SKILL.md").exists()
-    assert "mattpocock-grill-me" in operational_text
+    assert Path(".github/skills/grill-me/SKILL.md").exists()
+    assert not Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
+    assert "grill-me" in operational_text
     assert "non-trivial retained plan" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
     assert "continue one question at a time" in operational_text
-    assert "- `mattpocock-grill-me`" in planning_body
+    assert "- `grill-me`" in planning_body
+
+
+def test_mattpocock_gateway_support_stays_active_or_dormant_by_fit() -> None:
+    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
+    delivery_body = read_body(CANONICAL_AGENTS["internal-delivery-operator"])
+    review_body = read_body(CANONICAL_AGENTS["internal-review-guard"])
+    imported_support_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
+    ).read_text(encoding="utf-8")
+
+    assert "- `mattpocock-zoom-out`" in planning_body
+    assert "- `mattpocock-diagnose`" in delivery_body
+    assert "- `mattpocock-zoom-out`" in review_body
+    assert "- `mattpocock-diagnose`" in review_body
+
+    for wrapper_body in (planning_body, delivery_body, review_body):
+        assert "- `mattpocock-grill-with-docs`" not in wrapper_body
+        assert "- `mattpocock-setup-matt-pocock-skills`" not in wrapper_body
+        assert "- `mattpocock-tdd`" not in wrapper_body
+        assert "- `mattpocock-improve-codebase-architecture`" not in wrapper_body
+
+    assert "| `mattpocock-tdd` | `execute` |" in imported_support_text
+    assert (
+        "| `mattpocock-improve-codebase-architecture` | `plan`, `review` |"
+        in imported_support_text
+    )
 
 
 def test_old_cross_lane_engine_is_not_live_catalog_contract() -> None:

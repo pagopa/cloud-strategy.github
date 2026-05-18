@@ -33,6 +33,7 @@ You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-
 - `internal-executing-plans`
 - `internal-lesson-codification`
 - `internal-agent-creator`
+- `mattpocock-diagnose`
 
 ## Core Rules
 
@@ -44,6 +45,7 @@ You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-
 - Keep improvement ideas separate unless they are required for the requested scope or validation fix.
 - Before completion, use the `internal-gateway-operational-flow` completion checks and report `Check 1`, `Check 2`, and `Check 3`.
 - Use `internal-agent-support-next-step` when recommending review or another visible transition.
+- Use imported Matt Pocock support only for real diagnosis or executable test-first seams; keep situational imports out of the wrapper list unless the task proves they are needed.
 
 ## Routing Rules
 

@@ -37,6 +37,7 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 - `internal-copilot-docs-research`
 - `internal-systems-review`
 - `grill-me`
+- `mattpocock-zoom-out`
 
 ## Core Rules
 
@@ -46,6 +47,7 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 - Provide the Decision Brief projection after retained plans or material reformulations.
 - Do not default into implementation once the design is settled; recommend the next owner with `internal-agent-support-next-step`.
 - Use `grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is created, reformulated, or validated.
+- Use imported Matt Pocock support only as conditional lenses through `internal-gateway-operational-flow`; keep situational or dormant imports out of the wrapper list unless the task proves they are needed.
 
 ## Routing Rules
 
