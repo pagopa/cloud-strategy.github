@@ -33,6 +33,7 @@ def test_makefile_exposes_explicit_catalog_fast_check_entrypoint() -> None:
     assert "validate_internal_skills --root . --strict" in makefile_text
     assert "tests/test_inventory_and_consistency.py" in makefile_text
     assert "tests/test_validation_entrypoints_contract.py" in makefile_text
+    assert "tests/test_retained_plan_artifact_contract.py" in makefile_text
     assert "tests/github/scripts/test_cli_entrypoints.py" in makefile_text
     assert "CATALOG_FAST_INCLUDE_TOKEN_RISKS=1" in makefile_text
 

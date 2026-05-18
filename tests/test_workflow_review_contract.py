@@ -367,22 +367,12 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
     assert "| Source done file | Reconstructed item |" not in executing_plans_text
 
 
-def test_workflow_first_followup_evidence_envelope_covers_done_files() -> None:
-    envelope_path = Path("tmp/superpowers/workflow-first-followup/evidence-envelope.md")
-    done_files = sorted(
-        Path("tmp/superpowers/workflow-first-followup").glob("done-*.md")
-    )
+def test_retained_plan_artifact_contract_is_general_not_folder_specific() -> None:
+    artifact_contract_text = read_text("tests/test_retained_plan_artifact_contract.py")
 
-    assert envelope_path.exists()
-    assert done_files
-
-    envelope_text = envelope_path.read_text(encoding="utf-8")
-
-    assert "| Status |" in envelope_text
-    assert "| Evidence path or command |" in envelope_text
-
-    for done_file in done_files:
-        assert f"`{done_file.name}`" in envelope_text
+    assert "completed_retained_plan_folders" in artifact_contract_text
+    assert "INVALID_PATCH_MARKERS" in artifact_contract_text
+    assert "workflow-first-followup" not in artifact_contract_text
 
 
 def test_audit_dispatch_reference_exists() -> None:
@@ -445,8 +435,8 @@ def test_skill_bodies_reference_other_skills_by_name_not_bundle_file_path() -> N
 
 def test_lessons_learned_is_not_workflow_contract_owner() -> None:
     lessons_text = read_text("LESSONS_LEARNED.md")
-    checklist_text = read_text(
-        "tmp/superpowers/workflow-first-followup/promotion-checklist.md"
+    completion_report_contract = read_text(
+        ".github/skills/internal-executing-plans/references/completion-report.md"
     )
 
     assert "Plan Completion Audit |" not in lessons_text
@@ -455,4 +445,4 @@ def test_lessons_learned_is_not_workflow_contract_owner() -> None:
     )
     assert "always-on, cross-cutting, stack-specific lenses" not in lessons_text
     assert "entry Decision Brief and an exit completion report" not in lessons_text
-    assert "No new `LESSONS_LEARNED.md` row is added by default" in checklist_text
+    assert "Follow-up suggestions separated from required work" in completion_report_contract

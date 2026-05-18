@@ -3,6 +3,7 @@
     "MD013": false
   },
   "ignores": [
+    // Keep transient retained work out of markdownlint; dedicated contract tests cover tmp/superpowers artifacts.
     "tmp/**",
     // Ignore the local script venv because it is generated tooling state, not repo-owned content.
     ".github/scripts/.venv/**",

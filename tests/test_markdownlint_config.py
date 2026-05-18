@@ -16,6 +16,7 @@ def test_markdownlint_ignores_local_venv_and_preserved_upstream_assets() -> None
     config = read_markdownlint_config()
     ignores = config["ignores"]
 
+    assert "tmp/**" in ignores
     assert ".github/scripts/.venv/**" in ignores
     assert ".github/instructions/awesome-copilot-*.instructions.md" in ignores
     assert ".github/skills/antigravity-*/**" in ignores
@@ -28,6 +29,7 @@ def test_markdownlint_ignores_local_venv_and_preserved_upstream_assets() -> None
 def test_markdownlint_config_documents_why_special_paths_are_ignored() -> None:
     config_text = Path(".markdownlint-cli2.jsonc").read_text(encoding="utf-8")
 
+    assert "dedicated contract tests cover tmp/superpowers artifacts" in config_text
     assert "generated tooling state" in config_text
     assert "Preserve imported awesome-copilot instructions verbatim" in config_text
     assert "Preserve imported support skill families verbatim" in config_text
