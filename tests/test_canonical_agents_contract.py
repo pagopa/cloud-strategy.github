@@ -229,8 +229,8 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "Codex plugin or Codex CLI" in workflow_maps_text
     assert "Retained Plan Application" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
-    assert "mattpocock-zoom-out" in imported_support_text
     assert "mattpocock-caveman" in imported_support_text
+    assert "mattpocock-zoom-out" not in imported_support_text
     assert "internal-debugging" in mode_contracts_text
     assert "internal-tdd" in mode_contracts_text
     assert "internal-performance-optimization" in mode_contracts_text
@@ -275,15 +275,28 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     skill_text = Path(".github/skills/internal-gateway-simple-task/SKILL.md").read_text(
         encoding="utf-8"
     )
+    simple_lanes_text = Path(
+        ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
+    ).read_text(encoding="utf-8")
+    support_routing_text = Path(
+        ".github/skills/internal-gateway-simple-task/references/support-routing.md"
+    ).read_text(encoding="utf-8")
     metadata_text = Path(
         ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
     ).read_text(encoding="utf-8")
 
-    assert "## Protected Trigger" in skill_text
-    assert "## Support-Skill Discovery" in skill_text
-    assert "## Misuse Tests" in skill_text
-    assert "de-escalates because the remaining work is concrete" in skill_text
-    assert "`apply-plan` through `internal-gateway-operational-flow`" in skill_text
+    assert "single-lane and single-phase by design" in skill_text
+    assert "already-decided contract" in skill_text
+    assert "same already-decided pattern and share one validation path" in skill_text
+    assert "## Escalation Triggers" in skill_text
+    assert "durable lesson candidate" in skill_text
+    assert "internal-lesson-codification" in skill_text
+    assert "validator passes" in skill_text
+    assert "auth, config, secrets, tenant data" in skill_text
+    assert "one focused block of clarification" in skill_text
+    assert "`support-loaded`" in simple_lanes_text
+    assert "`files-touched`" in simple_lanes_text
+    assert "internal-copilot-instructions-creator" in support_routing_text
     assert "$internal-gateway-simple-task" in metadata_text
 
 
@@ -327,11 +340,11 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
     ).read_text(encoding="utf-8")
 
-    assert "- `mattpocock-zoom-out`" in planning_body
+    assert "conditional lenses through `internal-gateway-operational-flow`" in planning_body
     assert "- `internal-debugging`" in delivery_body
     assert "- `internal-tdd`" in delivery_body
     assert "- `internal-performance-optimization`" in delivery_body
-    assert "- `mattpocock-zoom-out`" in review_body
+    assert "conditional map or compression lens" in review_body
     assert "- `internal-debugging`" in review_body
     assert "- `internal-systems-review`" in review_body
 
