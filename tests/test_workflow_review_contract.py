@@ -521,4 +521,7 @@ def test_lessons_learned_is_not_workflow_contract_owner() -> None:
     )
     assert "always-on, cross-cutting, stack-specific lenses" not in lessons_text
     assert "entry Decision Brief and an exit completion report" not in lessons_text
-    assert "Follow-up suggestions separated from required work" in completion_report_contract
+    assert (
+        "Follow-up suggestions separated from required work"
+        in completion_report_contract
+    )

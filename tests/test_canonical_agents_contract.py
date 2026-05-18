@@ -311,7 +311,10 @@ def test_gateway_catalog_fast_path_stays_local_before_optional_support() -> None
     ).read_text(encoding="utf-8")
 
     assert "internal-gateway-simple-task` vs `execute` vs `plan` triage" in skill_text
-    assert "before loading optional references, support skills, or review lenses" in skill_text
+    assert (
+        "before loading optional references, support skills, or review lenses"
+        in skill_text
+    )
     assert "one owner file plus one nearby validator or test" in skill_text
     assert "### Catalog Fast Path" in workflow_maps_text
     assert "`make catalog-fast-check`" in workflow_maps_text
@@ -415,7 +418,10 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         ".github/skills/internal-systems-review/SKILL.md"
     ).read_text(encoding="utf-8")
 
-    assert "conditional lenses through `internal-gateway-operational-flow`" in planning_body
+    assert (
+        "conditional lenses through `internal-gateway-operational-flow`"
+        in planning_body
+    )
     assert "- `internal-debugging`" in delivery_body
     assert "- `internal-tdd`" in delivery_body
     assert "- `internal-performance-optimization`" in delivery_body

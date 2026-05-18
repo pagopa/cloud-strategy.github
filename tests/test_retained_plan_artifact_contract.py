@@ -74,11 +74,15 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
         if "| Status |" not in envelope_text:
             violations.append(f"{envelope_path} is missing Status column")
         if "| Evidence path or command |" not in envelope_text:
-            violations.append(f"{envelope_path} is missing Evidence path or command column")
+            violations.append(
+                f"{envelope_path} is missing Evidence path or command column"
+            )
 
         for done_file in folder_done_files:
             if f"`{done_file.name}`" not in envelope_text:
-                violations.append(f"{envelope_path} does not reference {done_file.name}")
+                violations.append(
+                    f"{envelope_path} does not reference {done_file.name}"
+                )
 
         for field in COMPLETION_REPORT_FIELDS:
             if field not in report_text:
@@ -136,7 +140,9 @@ def test_completed_retained_plan_validation_rejects_active_numbered_files(
     ]
 
 
-def test_repository_completed_retained_plan_folders_preserve_completion_evidence() -> None:
+def test_repository_completed_retained_plan_folders_preserve_completion_evidence() -> (
+    None
+):
     if not RETAINED_PLAN_ROOT.exists():
         return
 

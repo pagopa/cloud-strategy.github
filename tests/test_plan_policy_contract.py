@@ -151,12 +151,18 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "monolithic" in writing_skill_text
     assert "dubbi-e-domande.md" in writing_skill_text
     assert "Italian" in writing_skill_text
-    assert "done-*`, `evidence-envelope.md`, and `completion-report.md`" in writing_skill_text
+    assert (
+        "done-*`, `evidence-envelope.md`, and `completion-report.md`"
+        in writing_skill_text
+    )
     assert "## Local retained-plan contract" in writing_skill_text
     assert "## File-role conventions" in writing_skill_text
     assert "## Token And Reading Discipline" in writing_skill_text
     assert "Classify the folder before broad reading" in writing_skill_text
-    assert "Limit the first pass to target existence, the riskiest claim" in writing_skill_text
+    assert (
+        "Limit the first pass to target existence, the riskiest claim"
+        in writing_skill_text
+    )
     assert "rg --no-ignore" in writing_skill_text
     assert "Use `grill-me` only after the evidence pass" in writing_skill_text
     assert "## Numbered-file shape" in writing_skill_text
@@ -183,12 +189,20 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "## When to use" in executing_skill_text
     assert "retained numbered plans" in executing_skill_text
     assert "Read `01-riassunto-direzione-e-decisione.md` first" in executing_skill_text
-    assert "Use the summary file to classify folder purpose and file roles" in executing_skill_text
+    assert (
+        "Use the summary file to classify folder purpose and file roles"
+        in executing_skill_text
+    )
     assert "Evidence pass iniziale" in executing_skill_text
     assert "Budget lettura" in executing_skill_text
-    assert "target existence, riskiest claim, and nearest validator" in executing_skill_text
+    assert (
+        "target existence, riskiest claim, and nearest validator"
+        in executing_skill_text
+    )
     assert "rg --no-ignore" in executing_skill_text
-    assert "classification, reading-budget, and evidence-pass role" in executing_skill_text
+    assert (
+        "classification, reading-budget, and evidence-pass role" in executing_skill_text
+    )
     assert 'generic request such as "analyze this plan"' in executing_skill_text
     assert "done-<source-file-name>.md" in executing_skill_text
     assert "dubbi-e-domande.md" in executing_skill_text
@@ -213,6 +227,12 @@ def test_plan_wrapper_skills_ship_openai_metadata() -> None:
         assert "short_description:" in metadata_text
 
     assert "$internal-writing-plans" in writing_metadata_text
-    assert "always starting with 01-riassunto-direzione-e-decisione.md" in writing_metadata_text
+    assert (
+        "always starting with 01-riassunto-direzione-e-decisione.md"
+        in writing_metadata_text
+    )
     assert "$internal-executing-plans" in executing_metadata_text
-    assert "classify retained plan folders from 01-riassunto-direzione-e-decisione.md" in executing_metadata_text
+    assert (
+        "classify retained plan folders from 01-riassunto-direzione-e-decisione.md"
+        in executing_metadata_text
+    )
