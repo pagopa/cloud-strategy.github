@@ -31,6 +31,24 @@
 | Testability | Can each component be tested in isolation? |
 | Operational readiness | Are logs, metrics, and health checks present for production visibility? |
 
+### Repository-local deepening lens
+
+Use these checks when the diff changes module shape, workflow ownership, or
+cross-boundary review surfaces:
+
+| Lens | What to check |
+| --- | --- |
+| Locality | Does a future maintainer find the relevant knowledge, bug, and fix in one place? |
+| Leverage | Does a small interface carry meaningful behavior, or do callers still need the implementation details? |
+| Shallow module | Is the module mostly a pass-through whose interface is nearly as complex as the implementation? |
+| Deep module | Does the module hide real complexity behind a stable, useful interface? |
+| Deletion test | If the module is deleted, does complexity vanish or reappear across multiple callers? |
+| Real seam | Is there more than one real adapter or caller proving the seam earns its abstraction cost? |
+
+Do not require `CONTEXT.md`, ADR folders, or glossary updates for this repository
+unless those structures already exist and the user explicitly makes them part of
+the task.
+
 ## 4. Blind-spot detection
 
 Apply lateral thinking on each dimension:

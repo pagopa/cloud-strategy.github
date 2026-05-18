@@ -29,7 +29,6 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 
 ## Optional Support Skills
 
-- `superpowers-brainstorming`
 - `internal-writing-plans`
 - `internal-executing-plans`
 - `internal-agent-creator`

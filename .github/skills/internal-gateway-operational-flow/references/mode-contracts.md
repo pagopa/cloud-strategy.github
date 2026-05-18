@@ -53,11 +53,12 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-agent-support-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
 | `internal-code-review` | `review` mode code lens | Tactical review engine for code defects, regressions, tests, language anti-patterns, and file/line findings. |
 | `internal-systems-review` | `review` mode systems lens | Systems-level review engine for architecture, workflow, cross-cutting impact, operational fit, and blind spots. |
+| `internal-debugging` | `execute` or `review` support | Root-cause diagnosis for bugs, test failures, build failures, validator drift, sync failures, and unexpected behavior. |
+| `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
+| `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |
 | `grill-me` | Conditional support for `plan` mode | User-requested or ambiguity-driven question pressure before plan finalization. |
 | `mattpocock-zoom-out` | Conditional support for `plan` or `review` | Broader repository map when work crosses wrappers, skills, projections, scripts, or sync boundaries. |
-| `mattpocock-diagnose` | Conditional support for `execute` or `review` | Feedback-loop diagnosis for real failing scripts, validators, tests, refreshes, or performance signals. |
-| Situational Matt Pocock support | Conditional support | Architecture, TDD, or compression lenses only when `references/imported-support-routing.md` says the phase and guardrail fit. |
-| Dormant Matt Pocock docs or setup skills | No default gateway owner | Use only after explicit adoption of glossary, ADR, docs, or setup conventions, or through a sync-governance decision. |
+| `mattpocock-caveman` | Support only | Compression after blockers, risks, and validation evidence are already explicit. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |

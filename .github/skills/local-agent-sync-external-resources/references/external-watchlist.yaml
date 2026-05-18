@@ -1,0 +1,27 @@
+version: 1
+items:
+  - source_family: mattpocock/skills
+    upstream_id: diagnose
+    local_owner: internal-debugging
+    reason: Root-cause diagnosis loop was extracted into a repository-owned owner.
+    action: alert-only
+  - source_family: mattpocock/skills
+    upstream_id: tdd
+    local_owner: internal-tdd
+    reason: Test-first delivery rules were extracted into a repository-owned owner.
+    action: alert-only
+  - source_family: mattpocock/skills
+    upstream_id: improve-codebase-architecture
+    local_owner: internal-systems-review
+    reason: Architecture deepening lenses were extracted into systems review.
+    action: alert-only
+  - source_family: mattpocock/skills
+    upstream_id: grill-with-docs
+    local_owner: internal-writing-plans
+    reason: Glossary and ADR side effects are not default repository conventions.
+    action: alert-only
+  - source_family: mattpocock/skills
+    upstream_id: setup-matt-pocock-skills
+    local_owner: local-agent-sync-external-resources
+    reason: Setup conventions are not part of the managed source catalog.
+    action: alert-only

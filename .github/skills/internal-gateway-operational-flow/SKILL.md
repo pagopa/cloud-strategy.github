@@ -49,8 +49,9 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Require an explicit checkpoint before moving from `plan` or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
 - Use review lenses inside `review` mode instead of duplicating their playbooks here: `internal-code-review` for code defects, `internal-systems-review` for architecture, workflow, cross-cutting impact, and blind spots, and future `internal-security-review` only after that skill exists.
 - Use `internal-gateway-critical-master` as a visible critical phase when pressure testing is needed; do not duplicate its challenge logic here.
-- Use imported Matt Pocock skills only as conditional support through the imported support routing reference; the active gateway set is `grill-me`, `mattpocock-zoom-out`, and `mattpocock-diagnose`.
-- Treat `mattpocock-grill-with-docs` and `mattpocock-setup-matt-pocock-skills` as dormant unless the user explicitly adopts their supporting `CONTEXT.md`, ADR, or setup conventions.
+- Use imported support only as conditional lenses through the imported support
+  routing reference. Prefer internal owners for debugging, TDD, performance, and
+  systems review.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
@@ -154,6 +155,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
 - `grill-me` is used for non-trivial retained plans or real clarification needs.
-- Imported Matt Pocock support follows the imported support routing reference, and dormant imported skills are not promoted without explicit supporting structures or a sync-governance decision.
+- Imported support follows the imported support routing reference and is never a
+  mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

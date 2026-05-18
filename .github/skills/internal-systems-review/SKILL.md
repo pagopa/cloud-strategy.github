@@ -22,6 +22,9 @@ surrounding architecture, workflow, ownership model, and operational context.
 - Use `internal-gateway-critical-master` for pre-mortems, hidden-assumption tests, and pressure testing.
 - Use a promoted `internal-security-review` only after that skill exists; until then, route security-specific gaps through the closest existing owner and state the gap.
 - Do not turn advisory architecture notes into mandatory changes without evidence.
+- Do not introduce `CONTEXT.md`, ADR folders, or glossary maintenance as a side
+  effect of review unless those structures already exist and the user asks to
+  adopt them.
 
 ## Relationship to other skills
 
@@ -55,6 +58,29 @@ main skill should carry:
 
 Workflow findings should cover plan-vs-diff mapping, scope drift, evidence gaps,
 contract coverage, and governance drift when those dimensions are in scope.
+
+## Architecture Fit Lenses
+
+Use these lenses when a review crosses module, workflow, or ownership boundaries:
+
+- **Locality**: Does the change concentrate related knowledge, bugs, and future
+  edits in one place, or does it force maintainers to chase behavior across
+  several files?
+- **Leverage**: Does the interface hide meaningful behavior behind a small
+  contract, or does every caller still need to understand the implementation?
+- **Module depth**: A deep module has a small interface and useful behavior
+  behind it. A shallow module mostly passes complexity through to its callers.
+- **Deletion test**: If the module vanished, would complexity disappear, or
+  would the same complexity reappear across multiple callers?
+- **Real seam test**: One adapter can be hypothetical. Two or more real users of
+  a seam make the abstraction easier to justify.
+- **Cross-boundary fit**: Check whether a change belongs in the touched owner,
+  an adjacent internal skill, a reference, a validator, or a generated catalog
+  artifact before recommending more files.
+
+Keep these as review lenses, not mandatory refactor demands. Recommend a
+deepening change only when the evidence shows current shallowness is creating
+real maintenance, testability, or workflow cost.
 
 ## Severity mappings
 

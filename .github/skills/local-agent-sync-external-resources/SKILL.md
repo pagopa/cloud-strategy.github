@@ -25,6 +25,11 @@ When an imported upstream asset has an exceptionally approved repo-local overrid
 
 When refreshing the managed `obra/superpowers` family, read `references/superpowers-normalization.yaml` and use `scripts/normalize_superpowers_imports.py` so upstream skill names materialize as local `superpowers-*` ids before override replay, inventory rebuild, and validation.
 
+When checking upstream items that were deliberately extracted or retired from
+the managed catalog, read `references/external-watchlist.yaml`. The watchlist is
+alert-only evidence; it does not reimport assets, decide keep/retire outcomes,
+or imply automation unless a script is explicitly added later.
+
 ## When to use
 
 - Maintain the sync-managed `.github/` catalog behind `local-sync-external-resources`.
@@ -179,6 +184,8 @@ After catalog changes:
 - Re-check nearby agents and skills for stale references, decorative declarations, or broken ownership assumptions.
 - Re-check `LESSONS_LEARNED.md` and ask whether any pending lesson was just codified or disproven so the ledger does not retain a duplicate.
 - Use compression support only after safety-critical sync details remain explicit.
+- Use the external watchlist only to notice upstream changes that might deserve
+	a future human review; do not treat watchlist entries as managed scope.
 
 ## Validation
 

@@ -15,7 +15,14 @@ The wrappers keep route wording, tools, `disable-model-invocation: true`, `agent
 
 `internal-review-guard` keeps `internal-code-review` mandatory for defect-first review. It lists `internal-systems-review` as optional support when the review surface is architecture, workflow, cross-cutting impact, operational fit, or blind spots. Do not list `internal-security-review` in the wrapper until the promotion gate creates that skill.
 
-Imported Matt Pocock skills stay optional support, never mandatory engines. Gateway wrappers should list only the active imported support that improves route UX: `grill-me` in planning, `mattpocock-zoom-out` in planning and review, and `mattpocock-diagnose` in delivery and review. Keep situational or dormant imports out of wrapper lists unless a task proves they are needed.
+Imported support stays optional and never becomes a mandatory engine. Gateway
+wrappers should list only the approved imported support that improves route UX:
+`grill-me` in planning and `mattpocock-zoom-out` in planning and review.
+Delivery and review wrappers use `internal-debugging`, `internal-tdd`,
+`internal-performance-optimization`, and `internal-systems-review` for local
+diagnosis, test-first, performance, and architecture evidence. Keep compression
+support in sync or reporting owners after blockers, risks, and validation
+evidence are already explicit.
 
 ## Handoff Rules
 

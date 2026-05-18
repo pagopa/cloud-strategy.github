@@ -5,7 +5,8 @@ description: Use when performance is the primary problem, such as profiling slow
 
 # Internal Performance Optimization
 
-Use this skill when performance is the primary constraint. Start from evidence, not intuition.
+Use this skill when performance is the primary constraint. Start from measured
+evidence, not intuition.
 
 ## When to use
 
@@ -19,19 +20,25 @@ Use this skill when performance is the primary constraint. Start from evidence, 
 
 ## Workflow
 
-1. Measure the problem.
-2. Locate the hottest path.
-3. Remove wasted work.
-4. Validate with before/after evidence.
-5. Protect the gain with tests, benchmarks, or budgets.
+1. Define the performance question, target, and acceptable regression budget.
+2. Establish a baseline with a profiler, benchmark, timing harness, trace,
+	query plan, or existing telemetry before changing behavior.
+3. Locate the hottest path and rank falsifiable performance hypotheses.
+4. Change one variable at a time and remove wasted work before adding caching or
+	concurrency.
+5. Validate the fix with before/after evidence from the same measurement path.
+6. Protect the gain with a benchmark, budget, query-plan check, regression test,
+	or monitoring threshold.
 
 ## Core Rules
 
-- Do not optimize blind.
+- Do not optimize blind or claim a gain without a baseline.
 - Fix the dominant bottleneck first.
 - Prefer simpler code paths before micro-optimizations.
 - Avoid broad caching until query shape, render flow, or algorithm choice is understood.
 - Treat database, network, and serialization costs as first-class suspects.
+- Keep measurement probes scoped and remove temporary timing or profiling code
+	before completion unless it becomes an intentional diagnostic surface.
 
 ## Frontend Checks
 
@@ -81,15 +88,21 @@ After a fix, add at least one of:
 - Performance budget
 - Query-plan validation
 - Monitoring or alert threshold
+- Before/after evidence attached to the change record when automated protection
+	is not practical
 
 ## Cross-references
 
-- Use `superpowers-systematic-debugging` when the first problem is still root-cause isolation rather than a confirmed performance bottleneck.
+- Use `internal-debugging` when the first problem is still root-cause isolation
+	rather than a confirmed performance bottleneck.
+- Use `superpowers-systematic-debugging` when the performance symptom is flaky
+	or the reproduction loop is the hard part.
 - Use `antigravity-network-engineer` when latency, packet flow, DNS, load-balancer behavior, or network topology is the primary bottleneck.
 
 ## Anti-Patterns
 
 - Premature optimization before profiling
+- Timing with a different harness before and after the fix
 - Using `SELECT *` in hot paths
 - Adding cache layers to hide broken query shapes
 - Using JSONB as a catch-all when relational modeling is clearer

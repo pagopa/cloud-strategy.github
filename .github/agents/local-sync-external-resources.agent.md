@@ -166,13 +166,11 @@ Source repositories:
 Managed skills:
 
 - `caveman` -> `mattpocock-caveman`
-- `diagnose` -> `mattpocock-diagnose`
 - `grill-me` -> `grill-me`
-- `grill-with-docs` -> `mattpocock-grill-with-docs`
-- `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
-- `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
-- `tdd` -> `mattpocock-tdd`
 - `zoom-out` -> `mattpocock-zoom-out`
+
+Retired upstream items that were extracted into internal owners are tracked in
+the alert-only watchlist owned by `local-agent-sync-external-resources`.
 
 Approved in-place overrides:
 

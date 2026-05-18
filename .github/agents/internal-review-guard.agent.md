@@ -35,13 +35,13 @@ You are the Copilot wrapper for `review` mode in `internal-gateway-operational-f
 ## Optional Support Skills
 
 - `superpowers-verification-before-completion`
-- `superpowers-systematic-debugging`
 - `internal-systems-review`
+- `internal-debugging`
+- `internal-performance-optimization`
 - `internal-agent-creator`
 - `awesome-copilot-codeql`
 - `awesome-copilot-secret-scanning`
 - `mattpocock-zoom-out`
-- `mattpocock-diagnose`
 
 ## Core Rules
 
@@ -52,10 +52,15 @@ You are the Copilot wrapper for `review` mode in `internal-gateway-operational-f
 - Use `internal-systems-review` references for review lenses, plan completion
   audit, scope drift, and heavy audit dispatch; keep those details out of this
   wrapper.
+- Use `internal-debugging` when review evidence shows a real failing loop that
+  needs root-cause diagnosis before fixes are safe.
+- Use `internal-performance-optimization` when the review surface is measured
+  latency, throughput, profiling, or performance-regression risk.
 - Treat `internal-security-review` as unavailable until promoted; report security-specific gaps without inventing a new owner.
 - For every actionable finding, include severity, confidence, causal layer, and a fix routing plan.
 - Do not implement fixes through this wrapper.
-- Use imported Matt Pocock support only as a conditional review lens or diagnosis signal; keep findings and fix routing owned by this wrapper and its internal review skills.
+- Use imported support only as a conditional map or compression lens; keep
+  findings and fix routing owned by this wrapper and its internal review skills.
 
 ## Routing Rules
 

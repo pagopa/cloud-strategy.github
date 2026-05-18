@@ -85,6 +85,19 @@ def read_body(relative_path: str) -> str:
     return text.split("---\n", 2)[2]
 
 
+def retired_mattpocock_ids() -> tuple[str, ...]:
+    return tuple(
+        f"mattpocock-{suffix}"
+        for suffix in (
+            "diagnose",
+            "tdd",
+            "improve-codebase-architecture",
+            "grill-with-docs",
+            "setup-matt-pocock-skills",
+        )
+    )
+
+
 def mandatory_section(body: str) -> str:
     section = body.split("## Mandatory Engine Skills", 1)[1]
     return section.split("## ", 1)[0]
@@ -217,10 +230,12 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "Retained Plan Application" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
     assert "mattpocock-zoom-out" in imported_support_text
-    assert "mattpocock-diagnose" in imported_support_text
-    assert "mattpocock-grill-with-docs" in imported_support_text
-    assert "mattpocock-setup-matt-pocock-skills" in imported_support_text
-    assert "No new internal skill is needed" in imported_support_text
+    assert "mattpocock-caveman" in imported_support_text
+    assert "internal-debugging" in mode_contracts_text
+    assert "internal-tdd" in mode_contracts_text
+    assert "internal-performance-optimization" in mode_contracts_text
+    for retired_id in retired_mattpocock_ids():
+        assert retired_id not in imported_support_text
     assert "$internal-gateway-operational-flow" in metadata_text
 
     planning_frontmatter = load_frontmatter(
@@ -304,7 +319,7 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "- `grill-me`" in planning_body
 
 
-def test_mattpocock_gateway_support_stays_active_or_dormant_by_fit() -> None:
+def test_gateway_support_uses_internal_owners_after_extraction() -> None:
     planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
     delivery_body = read_body(CANONICAL_AGENTS["internal-delivery-operator"])
     review_body = read_body(CANONICAL_AGENTS["internal-review-guard"])
@@ -313,21 +328,49 @@ def test_mattpocock_gateway_support_stays_active_or_dormant_by_fit() -> None:
     ).read_text(encoding="utf-8")
 
     assert "- `mattpocock-zoom-out`" in planning_body
-    assert "- `mattpocock-diagnose`" in delivery_body
+    assert "- `internal-debugging`" in delivery_body
+    assert "- `internal-tdd`" in delivery_body
+    assert "- `internal-performance-optimization`" in delivery_body
     assert "- `mattpocock-zoom-out`" in review_body
-    assert "- `mattpocock-diagnose`" in review_body
+    assert "- `internal-debugging`" in review_body
+    assert "- `internal-systems-review`" in review_body
 
     for wrapper_body in (planning_body, delivery_body, review_body):
-        assert "- `mattpocock-grill-with-docs`" not in wrapper_body
-        assert "- `mattpocock-setup-matt-pocock-skills`" not in wrapper_body
-        assert "- `mattpocock-tdd`" not in wrapper_body
-        assert "- `mattpocock-improve-codebase-architecture`" not in wrapper_body
+        for retired_id in retired_mattpocock_ids():
+            assert f"- `{retired_id}`" not in wrapper_body
 
-    assert "| `mattpocock-tdd` | `execute` |" in imported_support_text
-    assert (
-        "| `mattpocock-improve-codebase-architecture` | `plan`, `review` |"
-        in imported_support_text
+    assert "Failure diagnosis now belongs to `internal-debugging`" in imported_support_text
+    assert "Test-first delivery now belongs to `internal-tdd`" in imported_support_text
+    for retired_id in retired_mattpocock_ids():
+        assert retired_id not in imported_support_text
+
+
+def test_internal_debugging_and_tdd_skills_capture_extracted_workflows() -> None:
+    debugging_text = Path(".github/skills/internal-debugging/SKILL.md").read_text(
+        encoding="utf-8"
     )
+    debugging_metadata = Path(
+        ".github/skills/internal-debugging/agents/openai.yaml"
+    ).read_text(encoding="utf-8")
+    tdd_text = Path(".github/skills/internal-tdd/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    tdd_metadata = Path(".github/skills/internal-tdd/agents/openai.yaml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "name: internal-debugging" in debugging_text
+    assert "Build the fastest credible pass/fail loop" in debugging_text
+    assert "Rank three to five falsifiable hypotheses" in debugging_text
+    assert "tag it with a unique `DEBUG-` marker" in debugging_text
+    assert "regression test at the correct seam" in debugging_text
+    assert "$internal-debugging" in debugging_metadata
+
+    assert "name: internal-tdd" in tdd_text
+    assert "red-green-refactor" in tdd_text
+    assert "public interface" in tdd_text
+    assert "Do not force TDD onto Markdown-only" in tdd_text
+    assert "$internal-tdd" in tdd_metadata
 
 
 def test_old_cross_lane_engine_is_not_live_catalog_contract() -> None:
