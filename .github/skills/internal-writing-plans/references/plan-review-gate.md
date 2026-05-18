@@ -19,6 +19,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Validability | Is there a concrete validator, review path, or explicit validation gap? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
+| Executor context | Can a smaller or lower-context executor see the key files, validators, owner, assumptions, and stop conditions without rediscovering the plan? |
 
 ## Outcomes
 
@@ -32,3 +33,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 - Prefer editing the retained plan over explaining around a bad plan.
 - Do not add persona agents, runtime-specific frontmatter, or external workflow
   dependencies.
+- For plans intended for a smaller or lower-context executor, keep technical
+  identifiers, file names, commands, and validation steps explicit. Short
+  English glosses near critical decisions are allowed when they reduce handoff
+  ambiguity.

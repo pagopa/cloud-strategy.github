@@ -24,6 +24,17 @@ defect, and architecture evidence. Keep compression support in sync or
 reporting owners after blockers, risks, and validation evidence are already
 explicit.
 
+## Optional Support Map
+
+Keep this map aligned with each wrapper's `## Optional Support Skills` section.
+
+| Wrapper | Optional support skills |
+| --- | --- |
+| `internal-planning-leader` | `internal-writing-plans`, `internal-executing-plans`, `internal-agent-creator`, `internal-copilot-audit`, `internal-copilot-docs-research`, `internal-systems-review`, `grill-me` |
+| `internal-delivery-operator` | `superpowers-verification-before-completion`, `superpowers-using-git-worktrees`, `internal-executing-plans`, `internal-debugging`, `internal-tdd`, `internal-performance-optimization`, `internal-lesson-codification`, `internal-agent-creator` |
+| `internal-review-guard` | `superpowers-verification-before-completion`, `internal-systems-review`, `internal-debugging`, `internal-performance-optimization`, `internal-agent-creator`, `awesome-copilot-codeql`, `awesome-copilot-secret-scanning` |
+| `internal-critical-master` | `superpowers-brainstorming`, `internal-agent-creator` |
+
 ## Handoff Rules
 
 - Keep every Copilot wrapper handoff `send: false`.

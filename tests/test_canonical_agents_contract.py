@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import yaml
@@ -100,8 +101,20 @@ def retired_mattpocock_ids() -> tuple[str, ...]:
 
 
 def mandatory_section(body: str) -> str:
-    section = body.split("## Mandatory Engine Skills", 1)[1]
-    return section.split("## ", 1)[0]
+    return section_between(body, "## Mandatory Engine Skills")
+
+
+def section_between(body: str, heading: str) -> str:
+    section = body.split(heading, 1)[1]
+    return section.split("\n## ", 1)[0]
+
+
+def optional_section(body: str) -> str:
+    return section_between(body, "## Optional Support Skills")
+
+
+def markdown_listed_skills(section: str) -> list[str]:
+    return re.findall(r"^- `([^`]+)`", section, flags=re.MULTILINE)
 
 
 def test_canonical_agents_keep_required_frontmatter_and_engine_contracts() -> None:
@@ -218,8 +231,12 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "## Skill-First Staged Entry Points" in skill_text
     assert "`full-cycle`" in skill_text
     assert "`plan-only`" in skill_text
+    assert "`plan-only (clarify-first)`" in skill_text
     assert "`apply-plan`" in skill_text
     assert "`mode-explicit`" in skill_text
+    assert "## User Authorization Signals" in skill_text
+    assert "`full-cycle` alone" in skill_text
+    assert "existing approved retained plan folder" in skill_text
     assert "Decision Brief" in skill_text
     assert "explicit checkpoint before moving from `plan`" in skill_text
     assert "multiple credible paths" in skill_text
@@ -246,6 +263,43 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "unclear target state" in planning_frontmatter["description"]
     assert "multiple credible paths" in planning_frontmatter["description"]
     assert "multiple credible paths remain" in planning_body
+
+
+def test_operational_flow_readme_references_live_gateway_skills() -> None:
+    readme_text = Path(
+        ".github/skills/internal-gateway-operational-flow/README.md"
+    ).read_text(encoding="utf-8")
+    referenced_slugs = set(
+        re.findall(r"`(internal-gateway-[A-Za-z0-9-]+)`", readme_text)
+    )
+    live_skill_slugs = {
+        path.name
+        for path in Path(".github/skills").iterdir()
+        if (path / "SKILL.md").is_file()
+    }
+
+    assert referenced_slugs
+    assert referenced_slugs <= live_skill_slugs
+
+
+def test_gateway_wrapper_alignment_documents_optional_support_skills() -> None:
+    alignment_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
+    ).read_text(encoding="utf-8")
+    support_map_text = section_between(alignment_text, "## Optional Support Map")
+
+    for agent_name, relative_path in CANONICAL_AGENTS.items():
+        body = read_body(relative_path)
+        expected_skills = markdown_listed_skills(optional_section(body))
+        matching_rows = [
+            line
+            for line in support_map_text.splitlines()
+            if line.startswith(f"| `{agent_name}` |")
+        ]
+
+        assert len(matching_rows) == 1
+        for expected_skill in expected_skills:
+            assert f"`{expected_skill}`" in matching_rows[0]
 
 
 def test_gateway_catalog_fast_path_stays_local_before_optional_support() -> None:

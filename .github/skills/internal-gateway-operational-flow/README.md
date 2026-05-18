@@ -10,7 +10,7 @@ Use this skill to choose one visible staged entry point, then run one active
 phase at a time:
 
 - `full-cycle`: plan, optional critical challenge, checkpointed delivery, and
-  final evidence.
+  final evidence. The name alone does not skip the pre-execute checkpoint.
 - `plan-only`: plan, Decision Brief, optional critical pass, and stop before
   apply.
 - `apply-plan`: apply an approved retained plan through
@@ -28,7 +28,8 @@ Start with the smallest mode that can honestly finish the current phase:
 
 | Question | If yes | Result |
 | --- | --- | --- |
-| Is the task concrete and only needs skill-first quick routing or support-skill selection? | Use `internal-gateway-simple`. | Lightweight analysis, minimal support skills, focused execution, and validation are returned. |
+| Is the task concrete and only needs skill-first quick routing or support-skill selection? | Use `internal-gateway-simple-task`. | Lightweight analysis, minimal support skills, focused execution, and validation are returned. |
+| Does the user want questions before any plan output? | Use `plan-only (clarify-first)`. | `grill-me` asks bulk questions with recommended answers before the plan is written. |
 | Is the target state already clear and verifiable? | Use `mode-explicit` `execute`. | Files, commands, or guidance are delivered with validation evidence. |
 | Does a concrete artifact or diff already exist and need defect-first or systems-level analysis? | Use `review`. | Findings, severity, evidence gaps, and fix routing are returned. |
 | Is there an approved retained plan under `tmp/superpowers/` to apply? | Use `apply-plan`. | `internal-executing-plans` runs the `done-*` loop and ignores `dubbi-e-domande.md`. |
@@ -41,7 +42,7 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 
 | Use case | Example request | Mode and support | Expected result |
 | --- | --- | --- | --- |
-| Clear local implementation with analysis | "Create a Python script that lists public Azure Storage accounts." | `internal-gateway-simple` plus `internal-script-python`; add Azure support skills or current Microsoft docs only when needed. | Script or implementation approach, focused validation, and residual risk. No retained plan by default. |
+| Clear local implementation with analysis | "Create a Python script that lists public Azure Storage accounts." | `internal-gateway-simple-task` plus `internal-script-python`; add Azure support skills or current Microsoft docs only when needed. | Script or implementation approach, focused validation, and residual risk. No retained plan by default. |
 | Simple advisory analysis before coding | "Tell me how you would build this script, then implement it." | `execute` if the target is concrete. Use a short tactical note, not full `plan` mode. | Brief approach, implementation, and checks. |
 | Deterministic multi-file alignment | "Rename this approved skill reference across adjacent files and run the focused tests." | `execute`. File count alone does not force planning. | Updated files, stale-name search, and validation evidence. |
 | New repository-owned workflow with unclear owner | "Should this be an agent, a skill, or an instruction?" | `plan` plus relevant authoring support skills. | Ownership decision, anti-scope, tradeoffs, next owner, and validation path. |
@@ -102,7 +103,8 @@ Use this sequence when the user wants the rigorous path:
 8. Reformulate, de-escalate, execute, review, continue critical, or accept risk
   according to the critical outcome.
 9. Move to `execute` or `apply-plan` only after the target state and validation
-  path are clear and the checkpoint is satisfied.
+  path are clear and the checkpoint is satisfied or the user explicitly asked
+  to apply or run the work end to end.
 
 Expected result:
 
@@ -117,7 +119,7 @@ Expected result:
 Use these prompts when you want a specific amount of process.
 
 ```text
-Use internal-gateway-simple.
+Use internal-gateway-simple-task.
 Load the relevant Python and Azure support skills.
 Give only the short approach needed to implement and validate the script.
 ```
