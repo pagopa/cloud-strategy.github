@@ -5,6 +5,15 @@ description: Use when a review needs systems-level evidence about architecture, 
 
 # Internal Systems Review
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `internal-code-review`: line-level defect review owner.
+- `internal-gateway-critical-master`: pressure-test owner when the main need is challenge rather than review evidence.
+- `internal-security-review`: unavailable future security lens, used only after promotion creates the skill.
+- `superpowers-verification-before-completion`: evidence gate before claiming no systems findings or merge readiness.
+
 Use this skill as the systems-level review lens for repository changes. It
 complements defect-first code review by checking whether a change fits the
 surrounding architecture, workflow, ownership model, and operational context.
@@ -149,3 +158,5 @@ Before presenting findings, verify:
 - Every finding must include a minimal fix route or recommended owner.
 - Architecture recommendations must include impact and effort assessment.
 - Security-specific gaps must not imply `internal-security-review` exists before promotion.
+- Use `superpowers-verification-before-completion` before claiming there are no
+  systems findings, the review is complete, or the change is merge-ready.

@@ -5,6 +5,16 @@ description: Use when creating, updating, validating, or merging GitHub pull req
 
 # Internal GitHub PR
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `internal-code-review`: defect-first review after PR body or lifecycle work.
+- `internal-github-actions`: workflow/action pinning and Actions security rules for PRs that touch workflows.
+- `internal-systems-review`: systems-level impact analysis that feeds PR risk.
+- `openai-gh-address-comments`: review-thread remediation after PR body work exists.
+- `superpowers-verification-before-completion`: evidence gate before claiming PR readiness, validity, mergeability, or completion.
+
 ## When to use
 
 - Create a new pull request description.
@@ -29,6 +39,8 @@ description: Use when creating, updating, validating, or merging GitHub pull req
 - Use `--admin` only when policy explicitly allows a bypass.
 - Treat organization-wide `gh search prs` results as eventually consistent immediately after merge; confirm terminal state with repository-scoped `gh pr view --json state,mergedAt` before treating a just-merged PR as still open.
 - When the PR touches GitHub Actions workflow/action pinning, follow `internal-github-actions` for full-SHA and adjacent release-reference rules.
+- Use `superpowers-verification-before-completion` before claiming a PR is ready,
+  valid, mergeable, merged, or complete.
 
 ## Template resolution
 
@@ -87,6 +99,8 @@ If the user provides a specification, issue, or acceptance outline:
 - **internal-code-review**: for the review that follows the PR.
 - **internal-github-actions**: for workflow/action pinning and Actions security rules touched by the PR.
 - **openai-gh-address-comments**: for addressing review threads and PR comments after the PR body exists; keep review-thread remediation separate from PR lifecycle/body work.
+- **superpowers-verification-before-completion**: for evidence before readiness,
+  mergeability, merge, or completion claims.
 
 ## Validation
 
@@ -96,3 +110,5 @@ If the user provides a specification, issue, or acceptance outline:
 - Final PR body is persisted when tooling supports PR updates.
 - Merge readiness is based on PR-scoped checks and qualifying review evidence.
 - Recently merged PR state is confirmed with repository-scoped `gh pr view --json state,mergedAt`.
+- `superpowers-verification-before-completion` was applied before claiming PR
+  readiness, validity, mergeability, merge, or completion.

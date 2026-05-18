@@ -5,6 +5,15 @@ description: Use when performance is the primary problem, such as profiling slow
 
 # Internal Performance Optimization
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `antigravity-network-engineer`: network-specific owner when latency, DNS, load-balancer behavior, or topology is primary.
+- `internal-debugging`: root-cause owner when the problem is not yet a confirmed performance bottleneck.
+- `superpowers-systematic-debugging`: stricter loop discipline when reproduction is flaky or hard.
+- `superpowers-verification-before-completion`: evidence gate before claiming a performance gain.
+
 Use this skill when performance is the primary constraint. Start from measured
 evidence, not intuition.
 
@@ -22,13 +31,13 @@ evidence, not intuition.
 
 1. Define the performance question, target, and acceptable regression budget.
 2. Establish a baseline with a profiler, benchmark, timing harness, trace,
-	query plan, or existing telemetry before changing behavior.
+   query plan, or existing telemetry before changing behavior.
 3. Locate the hottest path and rank falsifiable performance hypotheses.
 4. Change one variable at a time and remove wasted work before adding caching or
-	concurrency.
+   concurrency.
 5. Validate the fix with before/after evidence from the same measurement path.
 6. Protect the gain with a benchmark, budget, query-plan check, regression test,
-	or monitoring threshold.
+   or monitoring threshold.
 
 ## Core Rules
 
@@ -38,7 +47,7 @@ evidence, not intuition.
 - Avoid broad caching until query shape, render flow, or algorithm choice is understood.
 - Treat database, network, and serialization costs as first-class suspects.
 - Keep measurement probes scoped and remove temporary timing or profiling code
-	before completion unless it becomes an intentional diagnostic surface.
+  before completion unless it becomes an intentional diagnostic surface.
 
 ## Frontend Checks
 
@@ -89,15 +98,26 @@ After a fix, add at least one of:
 - Query-plan validation
 - Monitoring or alert threshold
 - Before/after evidence attached to the change record when automated protection
-	is not practical
+  is not practical
 
 ## Cross-references
 
 - Use `internal-debugging` when the first problem is still root-cause isolation
-	rather than a confirmed performance bottleneck.
+  rather than a confirmed performance bottleneck.
 - Use `superpowers-systematic-debugging` when the performance symptom is flaky
-	or the reproduction loop is the hard part.
+  or the reproduction loop is the hard part.
+- Use `superpowers-verification-before-completion` before claiming latency,
+  throughput, allocation, or query-plan improvement.
 - Use `antigravity-network-engineer` when latency, packet flow, DNS, load-balancer behavior, or network topology is the primary bottleneck.
+
+## Validation
+
+- Baseline and after-change measurements use the same measurement path.
+- The claimed gain is backed by fresh output, traces, telemetry, or benchmark
+  evidence.
+- Regression protection exists, or the explicit protection gap is recorded.
+- Use `superpowers-verification-before-completion` before claiming a performance
+  improvement.
 
 ## Anti-Patterns
 

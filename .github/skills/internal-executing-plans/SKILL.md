@@ -5,6 +5,15 @@ description: Use when executing a repository-owned plan from tmp/superpowers/<cl
 
 # Internal Executing Plans
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `internal-writing-plans`: retained-plan authoring owner for plans that feed this execution loop.
+- `superpowers-executing-plans`: imported step-by-step execution engine when local policy is settled.
+- `superpowers-subagent-driven-development`: imported worker-isolation engine when same-session subagents are available and useful.
+- `superpowers-verification-before-completion`: evidence gate before item completion and final retained-plan completion claims.
+
 Use this skill as the repository-owned wrapper for applying retained numbered plans in this repository.
 
 Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development` as imported execution depth and keep any repo-local drift fixes narrow. This skill adds the local execution loop for one or more numbered plan files and `done-*` tracking.
@@ -36,6 +45,8 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - For non-trivial retained plans, `done-*` files must preserve the completed
   item and evidence, or point to an evidence envelope with item, status,
   evidence, and route.
+- Use `superpowers-verification-before-completion` before moving an item into
+  `done-*` or reporting final retained-plan completion.
 - For each active plan file, create or update the matching `done-<source-file-name>.md` file.
 - When an item is completed, move it into the matching `done-*` file and remove it from the active plan file.
 - Delete an active plan file once all of its executable items have been moved out and the file is empty.
@@ -71,6 +82,8 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
   compaction, or final retained-plan state needed durable evidence.
 - Non-trivial `done-*` markers preserve item-level evidence or point to an
   evidence envelope.
+- Item completion and final retained-plan completion claims have fresh
+  verification evidence from `superpowers-verification-before-completion`.
 - Execution continued across remaining numbered plan files until completion or a real blocker.
 - Imported execution skills were used only as engines, not rewritten as policy containers.
 

@@ -5,6 +5,21 @@ description: Use when repository-owned work needs a skill-first staged operation
 
 # Internal Gateway Operational Flow
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `grill-me`: clarification and pressure-questioning support when planning ambiguity remains.
+- `internal-agent-support-lane-change-engine`: user-visible lane-change response when the selected mode no longer fits.
+- `internal-agent-support-next-step`: durable next-owner, scope, validation, and risk handoff package.
+- `internal-code-review`: line-level defect review lens in review mode.
+- `internal-executing-plans`: retained-plan execution owner for approved `apply-plan` work.
+- `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
+- `internal-gateway-simple-task`: simple concrete fast path when staged workflow is too heavy.
+- `internal-security-review`: unavailable future security lens, used only after promotion creates the skill.
+- `internal-systems-review`: systems review, plan-completion audit, and scope-drift analysis.
+- `superpowers-verification-before-completion`: evidence gate before completion claims in `execute` or `apply-plan`.
+
 Use this skill as the portable skill-first operational core for repository-owned staged work. Copilot agents may wrap it with frontmatter, tools, and `handoffs:`, but the reusable workflow semantics live here so runtimes without agent UI can still follow the same model.
 
 ## When to use
@@ -55,6 +70,7 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
+- Use `superpowers-verification-before-completion` before claiming `execute` or `apply-plan` completion so success claims have fresh evidence.
 
 ## Phase Selection
 
@@ -109,6 +125,10 @@ Before reporting completion for `execute` or `apply-plan`, run three distinct ve
 - `Check 2`: Contract coverage. Re-read changed files and relevant repository instructions to check ownership, frontmatter, links, inventory, schemas, and local conventions.
 - `Check 3`: Evidence coverage. Run the applicable validators, tests, lint commands, or closest available checks; read the output before claiming success.
 
+Use `superpowers-verification-before-completion` as the final evidence gate for
+these checks. Do not claim completion from intent, stale output, or a delegated
+success report.
+
 For large retained plans, multi-area diffs, always-on guidance changes, or
 validator changes, use `internal-systems-review` for plan-completion audit and
 scope-drift analysis instead of expanding this main skill with audit tables.
@@ -153,6 +173,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - `internal-agent-support-next-step` is used for every user-visible transition.
 - `apply-plan` uses `internal-executing-plans` and excludes `dubbi-e-domande.md`.
 - `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
+- Completion claims in `execute` or `apply-plan` passed through `superpowers-verification-before-completion`.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
 - `grill-me` is used for non-trivial retained plans or real clarification needs.
 - Imported support follows the imported support routing reference and is never a

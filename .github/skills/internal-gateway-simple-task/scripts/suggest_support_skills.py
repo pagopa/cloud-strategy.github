@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Suggest minimal support skills for internal-gateway-simple-task.
+"""Suggest path and symptom-based support hints for internal-gateway-simple-task.
 
 The script is advisory. It maps known paths and symptoms to likely repository
-support owners, then leaves final selection to repository evidence.
+support owners, but absence from this helper is not evidence that a provider,
+runtime, or domain is unsupported. Final selection still belongs to repository
+evidence, matching scoped instructions, and explicit user-selected skills.
 """
 
 from __future__ import annotations
@@ -96,7 +98,10 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
 
 def render_text(suggestions: dict[str, set[str]]) -> None:
     if not suggestions:
-        print("No specific support skill suggested. Inspect files and scoped instructions first.")
+        print(
+            "No path or symptom-based support hint. Inspect files, scoped instructions, "
+            "and explicit user-selected domains first."
+        )
         return
 
     for skill in sorted(suggestions):
