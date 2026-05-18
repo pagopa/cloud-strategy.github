@@ -67,6 +67,9 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Optimize retained plan files for scanability and decision review rather than exhaustive prose.
 - Prefer explicit headings and short bullets; avoid long paragraphs.
 - Keep rationales brief and avoid duplicating context already captured in `AGENTS.md`, `.github/copilot-instructions.md`, or neighboring repository-owned assets.
+
+### Summary control file
+
 - `01-riassunto-direzione-e-decisione.md` must include these headings:
 - `Obiettivo`
 - `Direzione proposta`
@@ -77,11 +80,16 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - `Budget lettura`
 - `Validazione`
 - `Stop conditions`
+
+### Executable numbered files
+
+- Each executable numbered file after the summary control file must include these headings:
 - `Obiettivo`
 - `Logica scelta`
 - `Assunzioni chiave`
 - `Passi eseguibili`
 - `Validazione`
+- Treat `01-riassunto-direzione-e-decisione.md` as a numbered control file, not as an executable task list. During `apply-plan`, use it for classification and evidence, then close it through the same `done-*` evidence loop when the folder completes.
 - Keep each section to 5-7 bullets when practical.
 - Keep bullets to 1-2 lines when practical.
 - Make each executable step easy to challenge, verify, or remove without rewriting the whole file.

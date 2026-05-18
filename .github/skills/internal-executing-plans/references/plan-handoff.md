@@ -15,6 +15,7 @@ Decision Brief from planning. It defines the minimum input contract before the
 - `01-riassunto-direzione-e-decisione.md` with `Uso consigliato` and `Mappa file e ruolo`.
 - `Evidence pass iniziale` and `Budget lettura` in the summary control file.
 - Numbered executable plan files after the summary control file.
+- A plan for closing the summary control file through a matching `done-*` marker when the folder completes.
 - Confirmed target state and anti-scope.
 - Selected owner and known lane-change owner.
 - Validation path or explicit validation gap.

@@ -413,6 +413,7 @@ def test_plan_handoff_requires_summary_control_file() -> None:
             "`Evidence pass iniziale`",
             "`Budget lettura`",
             "summary control file",
+            "matching `done-*` marker",
         ),
     )
 
