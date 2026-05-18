@@ -339,7 +339,9 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         for retired_id in retired_mattpocock_ids():
             assert f"- `{retired_id}`" not in wrapper_body
 
-    assert "Failure diagnosis now belongs to `internal-debugging`" in imported_support_text
+    assert (
+        "Failure diagnosis now belongs to `internal-debugging`" in imported_support_text
+    )
     assert "Test-first delivery now belongs to `internal-tdd`" in imported_support_text
     for retired_id in retired_mattpocock_ids():
         assert retired_id not in imported_support_text
@@ -352,9 +354,7 @@ def test_internal_debugging_and_tdd_skills_capture_extracted_workflows() -> None
     debugging_metadata = Path(
         ".github/skills/internal-debugging/agents/openai.yaml"
     ).read_text(encoding="utf-8")
-    tdd_text = Path(".github/skills/internal-tdd/SKILL.md").read_text(
-        encoding="utf-8"
-    )
+    tdd_text = Path(".github/skills/internal-tdd/SKILL.md").read_text(encoding="utf-8")
     tdd_metadata = Path(".github/skills/internal-tdd/agents/openai.yaml").read_text(
         encoding="utf-8"
     )

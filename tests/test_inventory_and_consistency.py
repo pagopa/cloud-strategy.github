@@ -275,7 +275,8 @@ def test_check_superpowers_import_naming_flags_legacy_drift(tmp_path: Path) -> N
         "---\nname: local-demo\ntools: [read]\n---\n\n- `obra-demo`\n- `superpowers:demo`\n",
     )
     write_file(
-        tmp_path / ".github/skills/local-agent-sync-external-resources/patches/obra-demo.patch",
+        tmp_path
+        / ".github/skills/local-agent-sync-external-resources/patches/obra-demo.patch",
         "diff --git a/.github/skills/obra-demo/SKILL.md b/.github/skills/obra-demo/SKILL.md\n",
     )
 
