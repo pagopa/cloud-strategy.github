@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-simple-task
-description: Use when a concrete repository-owned task needs skill-first quick routing, support-skill discovery, execution, or focused validation without a retained plan, critical challenge, or staged workflow.
+description: Use when a concrete low-to-medium-risk repository-owned coding or non-coding task can be answered, edited, diagnosed, or validated quickly without a retained plan, review mode, critical challenge, or staged workflow.
 ---
 
 # Internal Gateway Simple Task
@@ -16,6 +16,8 @@ critical challenge ownership.
 ## When to use
 
 - The requested outcome is already concrete enough to answer, edit, or validate.
+- The task is coding or non-coding work with a known target file, artifact,
+  command, question, or validation path.
 - The user wants tactical support skills, but not a full retained plan or staged full-cycle workflow.
 - The task needs a short approach note before implementation.
 - The work is local, low to medium risk, and has a focused validation path.
@@ -34,6 +36,10 @@ critical challenge ownership.
 - The primary request is defect-first review of an existing artifact, diff, or
   validation result. Use the `review` entry point in
   `internal-gateway-operational-flow`.
+- The main need is architecture, workflow, cross-cutting impact, or merge-risk
+  evidence. Use `internal-systems-review` through review mode.
+- The main need is line-level code defects, regressions, tests, or language
+  anti-patterns. Use `internal-code-review` through review mode.
 - The work needs a retained numbered plan under `tmp/superpowers/`. Use
   `internal-writing-plans`.
 - The task is catalog sync governance or consumer propagation. Use the repo-only
@@ -51,11 +57,28 @@ continuing the heavier flow.
 
 1. Inspect local files first when repository evidence can answer the question.
 2. Decide whether the target state is concrete enough for lightweight execution.
-3. Discover only the support skills needed for the domain or file type.
+3. Pick one quick lane: answer, edit, diagnose, validate, or escalate.
 4. Give a brief approach note when it helps the user understand the execution.
-5. Answer or implement without creating a retained plan.
-6. Run focused validation, or name the explicit validation gap.
-7. Escalate visibly if the work becomes planning, review, or critical challenge.
+5. Discover only the support skills needed for the domain, file type, symptom,
+   or validation path.
+6. Answer, implement, diagnose, or validate without creating a retained plan.
+7. Run focused validation, or name the explicit validation gap.
+8. Escalate visibly if the work becomes planning, review, or critical challenge.
+
+## Quick Lanes
+
+Use the smallest lane that can honestly finish the request:
+
+- `answer`: explain or decide from repository evidence without editing files.
+- `edit`: make a clear local change and run the closest focused validation.
+- `diagnose`: reproduce a bug, failing test, build failure, validator drift, or
+  unexpected behavior before fixing it.
+- `validate`: run or design the focused check for an already concrete artifact.
+- `escalate`: stop when the request becomes planning, review, retained-plan
+  execution, or critical challenge.
+
+Read `references/simple-lanes.md` when the prompt is simple but the right quick
+lane or output shape is unclear.
 
 ## Support-Skill Discovery
 
@@ -64,10 +87,17 @@ Load support skills after the simple lane is confirmed.
 Examples:
 
 - Python scripts: use `internal-script-python`.
+- Executable behavior with a meaningful test seam: use `internal-tdd` only when
+  test-first delivery is requested or clearly valuable.
+- Bug, test failure, build failure, validator drift, sync failure, or unexpected
+  behavior: use `internal-debugging`.
 - Azure validation or evidence: use `internal-azure-operations`.
 - Azure RBAC, Policy, identity, or guardrails: use `internal-azure-governance`.
 - Terraform changes: use `internal-terraform`.
 - GitHub Actions changes: use `internal-github-actions`.
+- Systems-level review evidence: use `internal-systems-review` through review
+  mode, not imported zoom-out support.
+- Code defect review evidence: use `internal-code-review` through review mode.
 - Markdown-only edits: use matching scoped Markdown instructions and the closest
   repository-owned owner, without forcing a full plan.
 
@@ -78,6 +108,13 @@ it is needed.
 
 Do not load every plausible support skill. Load the smallest set that can
 complete the task and validate the result.
+
+Read `references/support-routing.md` when selecting among debugging, TDD,
+review, systems review, worktree isolation, performance, or domain support.
+
+Use `scripts/suggest_support_skills.py` only as an advisory helper when several
+target paths or symptoms make support-skill selection noisy. Inspect repository
+evidence and matching scoped instructions before acting on the suggestion.
 
 ## Escalation Rules
 
@@ -127,6 +164,7 @@ For escalation, return:
 | Reopening settled decisions during implementation | Execute the known target state and stop if it breaks. |
 | Using simple for an approved retained plan | Use `apply-plan` through `internal-gateway-operational-flow` and `internal-executing-plans`. |
 | Treating de-escalation as hidden dispatch | State the boundary break and next owner before acting. |
+| Using imported zoom-out support for broad review | Use `internal-systems-review` or `internal-code-review` through review mode. |
 
 ## Misuse Tests
 

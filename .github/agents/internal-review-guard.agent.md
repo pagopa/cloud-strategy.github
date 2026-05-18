@@ -41,7 +41,6 @@ You are the Copilot wrapper for `review` mode in `internal-gateway-operational-f
 - `internal-agent-creator`
 - `awesome-copilot-codeql`
 - `awesome-copilot-secret-scanning`
-- `mattpocock-zoom-out`
 
 ## Core Rules
 

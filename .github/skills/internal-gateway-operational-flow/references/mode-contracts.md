@@ -57,7 +57,6 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |
 | `grill-me` | Conditional support for `plan` mode | User-requested or ambiguity-driven question pressure before plan finalization. |
-| `mattpocock-zoom-out` | Conditional support for `plan` or `review` | Broader repository map when work crosses wrappers, skills, projections, scripts, or sync boundaries. |
 | `mattpocock-caveman` | Support only | Compression after blockers, risks, and validation evidence are already explicit. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |

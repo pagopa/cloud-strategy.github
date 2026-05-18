@@ -17,12 +17,12 @@ The wrappers keep route wording, tools, `disable-model-invocation: true`, `agent
 
 Imported support stays optional and never becomes a mandatory engine. Gateway
 wrappers should list only the approved imported support that improves route UX:
-`grill-me` in planning and `mattpocock-zoom-out` in planning and review.
-Delivery and review wrappers use `internal-debugging`, `internal-tdd`,
-`internal-performance-optimization`, and `internal-systems-review` for local
-diagnosis, test-first, performance, and architecture evidence. Keep compression
-support in sync or reporting owners after blockers, risks, and validation
-evidence are already explicit.
+`grill-me` in planning. Delivery and review wrappers use `internal-debugging`,
+`internal-tdd`, `internal-performance-optimization`, `internal-code-review`, and
+`internal-systems-review` for local diagnosis, test-first, performance, code
+defect, and architecture evidence. Keep compression support in sync or
+reporting owners after blockers, risks, and validation evidence are already
+explicit.
 
 ## Handoff Rules
 

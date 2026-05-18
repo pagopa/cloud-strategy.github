@@ -18,7 +18,6 @@ when they already cover the local contract.
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
 | `grill-me` | `plan`, `full-cycle` | The user asks for grilling, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first and use the local bulk-question override before one-at-a-time follow-up. |
-| `mattpocock-zoom-out` | `plan`, `review` | The work crosses wrappers, skills, projections, scripts, sync boundaries, or generated catalog artifacts and needs a higher-level map. | Use repository evidence and local docs; keep review findings owned by `internal-systems-review`. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
 ## Internal Replacements
@@ -28,6 +27,7 @@ when they already cover the local contract.
 - Performance work now belongs to `internal-performance-optimization`.
 - Architecture, locality, leverage, and cross-boundary review now belong to
   `internal-systems-review`.
+- Code defect review now belongs to `internal-code-review`.
 - Imported docs and setup conventions stay outside default gateway routing unless
   a future sync-governance decision deliberately changes the managed catalog.
 

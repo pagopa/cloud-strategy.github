@@ -19,7 +19,7 @@ Use this skill as the portable skill-first operational core for repository-owned
 ## When not to use
 
 - The primary need is critical challenge or pre-mortem work; use `internal-gateway-critical-master`.
-- The work is concrete, low to medium risk, and only needs skill-first quick routing, lightweight analysis, support-skill selection, execution, or focused validation; use `internal-gateway-simple`.
+- The work is concrete, low to medium risk, and only needs skill-first quick routing, lightweight analysis, support-skill selection, execution, or focused validation; use `internal-gateway-simple-task`.
 - The work is source-side sync governance or consumer baseline propagation; use the repo-only sync owners.
 - The user only needs a narrow runtime or domain skill after the operational mode is already settled.
 
