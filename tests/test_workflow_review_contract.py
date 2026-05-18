@@ -313,7 +313,15 @@ def test_scope_challenge_gate_reference_exists() -> None:
         ".github/skills/internal-writing-plans/references/scope-challenge.md"
     ).lower()
 
-    for expected in ("target", "anti-scope", "owner", "validator", "stop conditions"):
+    for expected in (
+        "target",
+        "anti-scope",
+        "owner",
+        "validator",
+        "stop conditions",
+        "uso consigliato",
+        "mappa file e ruolo",
+    ):
         assert expected in text
 
 
@@ -368,6 +376,7 @@ def test_resume_protocol_reference_exists() -> None:
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
             "Verify-first Sequence",
+            "`01-riassunto-direzione-e-decisione.md`",
             "`done-*`",
             "`git diff`",
             "validators",
@@ -380,8 +389,21 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
+            "file roles cannot be inferred safely",
             "lacks an item/evidence table or evidence-envelope pointer",
             "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
+        ),
+    )
+
+
+def test_plan_handoff_requires_summary_control_file() -> None:
+    assert_contains_all(
+        ".github/skills/internal-executing-plans/references/plan-handoff.md",
+        (
+            "`01-riassunto-direzione-e-decisione.md`",
+            "`Uso consigliato`",
+            "`Mappa file e ruolo`",
+            "summary control file",
         ),
     )
 

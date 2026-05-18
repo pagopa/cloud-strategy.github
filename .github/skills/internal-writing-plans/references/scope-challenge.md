@@ -23,6 +23,8 @@ Every retained plan must be able to answer these questions:
 5. `stop conditions`: What missing input, unsafe scope, ownership conflict, or
    validation failure must stop execution?
 
+For retained plans with numbered files, confirm that `01-riassunto-direzione-e-decisione.md` exposes the same target, anti-scope, owner, validator, and stop conditions, plus `Uso consigliato` and `Mappa file e ruolo`.
+
 ## Gate Result
 
 Use one of these outcomes:
@@ -40,6 +42,7 @@ Anti-scope: <explicit exclusions>
 Owner: <primary owner and lane-change owner>
 Validator: <command, review path, or explicit gap>
 Stop conditions: <what stops execution>
+Summary file: <present and decision-ready, or missing>
 ```
 
 Do not proceed to `apply-plan` when the result is `NEEDS_REVISION` or `BLOCKED`

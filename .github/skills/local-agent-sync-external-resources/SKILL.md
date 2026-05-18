@@ -185,7 +185,7 @@ After catalog changes:
 - Re-check `LESSONS_LEARNED.md` and ask whether any pending lesson was just codified or disproven so the ledger does not retain a duplicate.
 - Use compression support only after safety-critical sync details remain explicit.
 - Use the external watchlist only to notice upstream changes that might deserve
-	a future human review; do not treat watchlist entries as managed scope.
+  a future human review; do not treat watchlist entries as managed scope.
 
 ## Validation
 

@@ -28,22 +28,42 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Create or reuse a retained plan folder under `tmp/superpowers/<clear-action-or-task-name>/` only when the plan needs to survive the current turn.
 - Keep planning ephemeral in chat when the task is clear, local, quick, or banal.
 - Retain a plan only when at least one of these is true: the work crosses turns, spans multiple macro-categories, needs handoff, tracking, or provenance, or includes tradeoffs or uncertainties that should stay reviewable.
-- Use a single numbered file such as `01-implementazione.md` when the work has one macro-category.
-- Use multiple numbered Markdown files by macro-category, for example `01-contesto-e-vincoli.md`, `02-implementazione.md`, and `03-validazione.md`, when the work spans more than one macro-category.
+- Start every retained plan with `01-riassunto-direzione-e-decisione.md` so the user can understand the full direction and decide before execution.
+- `01-riassunto-direzione-e-decisione.md` must be exhaustive enough to explain the target state, tradeoffs, execution shape, validation path, and the decision the user is being asked to make.
+- After the summary file, use `02-esecuzione.md` when one executable macro-category is enough.
+- When the work spans more than one executable macro-category, continue with `02-...`, `03-...`, and later numbered files by category, for example `02-implementazione.md`, `03-validazione.md`, and `04-rollout.md`.
 - Do not keep one monolithic plan file when the work spans multiple macro-categories.
 - Write those plan files in Italian by default unless the user explicitly asks for another language.
 - Keep unresolved questions, doubts, and user decisions in `dubbi-e-domande.md`.
 - `dubbi-e-domande.md` is not an execution-plan file and must stay outside the plan-and-apply loop.
+- Use `done-*`, `evidence-envelope.md`, and `completion-report.md` only as execution-state artifacts after `apply-plan`; do not use them as authoring files.
 - Use `references/scope-challenge.md` before approving non-trivial retained plans
   for execution.
 - Use `references/plan-review-gate.md` when plan clarity, coherence,
   validability, or evidence needs a lightweight review before handoff.
+
+## File-role conventions
+
+- Treat `01-riassunto-direzione-e-decisione.md` as the control file for the folder. Read it first for generic requests such as "analyze this plan", "review this plan", "write this plan", or "apply this plan".
+- In that summary file, include `Uso consigliato` with the next expected treatment, such as `review`, `apply-plan`, `resume`, or `rewrite`.
+- In that summary file, include `Mappa file e ruolo` so the reader can classify each file as summary, execution, validation, rollout, questions, or status artifact without guessing.
+- Treat `dubbi-e-domande.md` as the only place for unresolved questions and user decisions.
+- Treat `done-*`, `evidence-envelope.md`, and `completion-report.md` as status artifacts that describe applied work, not pending plan intent.
+- If the summary file or file-role map is missing, the retained plan is not executor-friendly yet and should be revised before `apply-plan`.
 
 ## Numbered-file shape
 
 - Optimize retained plan files for scanability and decision review rather than exhaustive prose.
 - Prefer explicit headings and short bullets; avoid long paragraphs.
 - Keep rationales brief and avoid duplicating context already captured in `AGENTS.md`, `.github/copilot-instructions.md`, or neighboring repository-owned assets.
+- `01-riassunto-direzione-e-decisione.md` must include these headings:
+- `Obiettivo`
+- `Direzione proposta`
+- `Decisione richiesta`
+- `Uso consigliato`
+- `Mappa file e ruolo`
+- `Validazione`
+- `Stop conditions`
 - `Obiettivo`
 - `Logica scelta`
 - `Assunzioni chiave`
@@ -63,19 +83,23 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 
 1. Decide first whether retained planning is justified or whether in-chat planning is enough.
 2. Choose a clear task folder name under `tmp/superpowers/`.
-3. Define the macro-categories first and choose the smallest numbered-file shape that fits the work.
-4. Use a single `01-...md` file when one macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
-5. Give each numbered file the shape above and keep every section compact.
-6. Put open questions and decision requests only in `dubbi-e-domande.md`.
-7. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
-8. Run the scope challenge and plan review gate when the retained plan is
+3. Write `01-riassunto-direzione-e-decisione.md` first and use it to state direction, decision request, recommended treatment, and file-role map before detailed plan files exist.
+4. Define the executable macro-categories next and choose the smallest post-summary file shape that fits the work.
+5. Use `02-esecuzione.md` when one executable macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
+6. Give each numbered file the shape above and keep every section compact.
+7. Put open questions and decision requests only in `dubbi-e-domande.md`.
+8. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
+9. Run the scope challenge and plan review gate when the retained plan is
    non-trivial or will be handed to `internal-executing-plans`.
 
 ## Validation
 
 - The plan exists only when retained planning is justified beyond the current turn.
 - The plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
-- A single `01-...` file is used when one macro-category is enough; `01-...`, `02-...`, `03-...` style plan files exist when more than one macro-category exists.
+- `01-riassunto-direzione-e-decisione.md` exists and acts as the control file for the retained plan.
+- The summary file is exhaustive enough for the user to decide whether to approve, challenge, rewrite, or apply the plan.
+- The summary file declares `Uso consigliato` and `Mappa file e ruolo`.
+- `02-esecuzione.md` is used when one executable macro-category is enough; `02-...`, `03-...`, `04-...` style plan files exist when more than one executable macro-category exists.
 - Plan files are in Italian unless the user asked otherwise.
 - The numbered files follow the local shape contract with explicit headings and short bullets.
 - `dubbi-e-domande.md` exists when needed and remains separate from executable plan files.
@@ -86,6 +110,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 ## Common mistakes
 
 - Creating a retained plan artifact for a clear, local, quick task that should stay in chat.
+- Skipping `01-riassunto-direzione-e-decisione.md` or making it too thin to support a decision.
 - Writing the whole plan in one Markdown file.
 - Writing long narrative paragraphs or duplicating canonical context instead of keeping the plan scannable.
 - Mixing executable checklist items with open questions.

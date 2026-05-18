@@ -12,7 +12,8 @@ Decision Brief from planning. It defines the minimum input contract before the
 ## Required Inputs
 
 - Plan folder under `tmp/superpowers/<clear-action-or-task-name>/`.
-- Numbered executable plan files.
+- `01-riassunto-direzione-e-decisione.md` with `Uso consigliato` and `Mappa file e ruolo`.
+- Numbered executable plan files after the summary control file.
 - Confirmed target state and anti-scope.
 - Selected owner and known lane-change owner.
 - Validation path or explicit validation gap.
@@ -20,18 +21,20 @@ Decision Brief from planning. It defines the minimum input contract before the
 
 ## Before Starting
 
-1. Read `dubbi-e-domande.md` for accepted decisions, then exclude it from the
+1. Read `01-riassunto-direzione-e-decisione.md` first and use it to classify folder purpose, next expected treatment, and file roles.
+2. Read `dubbi-e-domande.md` for accepted decisions, then exclude it from the
    executable loop.
-2. Read numbered plan files in order.
-3. Check whether a Decision Brief exists in chat, a prompt, or a retained plan
+3. Read numbered plan files in order after the summary control file.
+4. Check whether a Decision Brief exists in chat, a prompt, or a retained plan
    artifact.
-4. If a required input is missing, inspect repository evidence before asking.
-5. If the missing input cannot be recovered, stop with a visible gap instead of
+5. If a required input is missing, inspect repository evidence before asking.
+6. If the missing input cannot be recovered, stop with a visible gap instead of
    guessing.
 
 ## Standard Stop Conditions
 
 - Scope moves outside the declared files, owners, or asset family.
+- The summary control file, `Uso consigliato`, or `Mappa file e ruolo` is missing from a non-trivial retained plan.
 - Owner is missing or the active owner no longer fits.
 - Validation path is absent and no closest check exists.
 - A promotion-gated contract would be violated.

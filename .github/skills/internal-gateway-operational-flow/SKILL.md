@@ -92,6 +92,8 @@ Treat end-to-end application as authorized only when one of these signals is pre
 
 Prompt-specific intent wins over the default. A direct review request starts in `review`; a direct retained-plan application starts in `apply-plan`; a `plan-only` request stops before apply. A `clarify-first` request stays inside `plan-only` and loads `grill-me` before producing plan output.
 
+When the user references a retained plan folder generically, for example "analyze this plan" or "write this plan", inspect the folder first. Read `01-riassunto-direzione-e-decisione.md` before selecting the phase, use its `Uso consigliato` and `Mappa file e ruolo` to classify the folder, and treat missing summary semantics as a planning defect rather than guessing the lane.
+
 ## Plan Mode
 
 Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, and next-step package. It does not silently become execution after the design is settled.

@@ -20,6 +20,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
 | Executor context | Can a smaller or lower-context executor see the key files, validators, owner, assumptions, and stop conditions without rediscovering the plan? |
+| Folder semantics | Does `01-riassunto-direzione-e-decisione.md` state `Uso consigliato` and `Mappa file e ruolo` so a generic reader can tell whether the folder is for review, apply, resume, rewrite, or status only? |
 
 ## Outcomes
 
@@ -37,3 +38,4 @@ or handoff. It checks clarity and validity without creating reviewer personas.
   identifiers, file names, commands, and validation steps explicit. Short
   English glosses near critical decisions are allowed when they reduce handoff
   ambiguity.
+- Treat a missing or weak summary control file as a plan-quality defect, not as a documentation nit.

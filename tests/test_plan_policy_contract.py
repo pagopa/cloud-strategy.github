@@ -140,15 +140,26 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert PLAN_TASK_PATH in writing_skill_text
     assert "crosses turns" in writing_skill_text
     assert "handoff, tracking, or provenance" in writing_skill_text
-    assert "01-contesto-e-vincoli.md" in writing_skill_text
+    assert "01-riassunto-direzione-e-decisione.md" in writing_skill_text
+    assert "`Uso consigliato`" in writing_skill_text
+    assert "`Mappa file e ruolo`" in writing_skill_text
+    assert "control file" in writing_skill_text
+    assert "02-esecuzione.md" in writing_skill_text
     assert "macro-category" in writing_skill_text
     assert "monolithic" in writing_skill_text
     assert "dubbi-e-domande.md" in writing_skill_text
     assert "Italian" in writing_skill_text
+    assert "done-*`, `evidence-envelope.md`, and `completion-report.md`" in writing_skill_text
     assert "## Local retained-plan contract" in writing_skill_text
+    assert "## File-role conventions" in writing_skill_text
     assert "## Numbered-file shape" in writing_skill_text
     assert "scanability and decision review" in writing_skill_text
     assert "`Obiettivo`" in writing_skill_text
+    assert "`Direzione proposta`" in writing_skill_text
+    assert "`Decisione richiesta`" in writing_skill_text
+    assert "`Uso consigliato`" in writing_skill_text
+    assert "`Mappa file e ruolo`" in writing_skill_text
+    assert "`Stop conditions`" in writing_skill_text
     assert "`Logica scelta`" in writing_skill_text
     assert "`Assunzioni chiave`" in writing_skill_text
     assert "`Passi eseguibili`" in writing_skill_text
@@ -159,6 +170,9 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
 
     assert "## When to use" in executing_skill_text
     assert "retained numbered plans" in executing_skill_text
+    assert "Read `01-riassunto-direzione-e-decisione.md` first" in executing_skill_text
+    assert "Use the summary file to classify folder purpose and file roles" in executing_skill_text
+    assert 'generic request such as "analyze this plan"' in executing_skill_text
     assert "done-<source-file-name>.md" in executing_skill_text
     assert "dubbi-e-domande.md" in executing_skill_text
     assert "move it into the matching `done-*` file" in executing_skill_text
@@ -182,5 +196,6 @@ def test_plan_wrapper_skills_ship_openai_metadata() -> None:
         assert "short_description:" in metadata_text
 
     assert "$internal-writing-plans" in writing_metadata_text
-    assert "single or multi-file shape as needed" in writing_metadata_text
+    assert "always starting with 01-riassunto-direzione-e-decisione.md" in writing_metadata_text
     assert "$internal-executing-plans" in executing_metadata_text
+    assert "classify retained plan folders from 01-riassunto-direzione-e-decisione.md" in executing_metadata_text
