@@ -9,8 +9,16 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
+- `grill-me`: optional clarification support when missing context blocks the start or continuation of simple work.
 - `internal-gateway-operational-flow`: staged workflow owner when simple work no longer fits.
 - `internal-gateway-critical-master`: critical challenge owner when reasoning, assumptions, or failure modes dominate.
+- `internal-debugging`: root-cause owner before claiming a bug, failure, or loop is fixed.
+- `internal-tdd`: test-first owner before claiming red-green-refactor or regression coverage.
+- `internal-performance-optimization`: measured performance owner before claiming a performance improvement.
+- `internal-github-pr`: PR lifecycle owner before claiming readiness, validity, mergeability, or completion.
+- `internal-code-review`: defect-first review owner before claiming no code findings or code merge readiness.
+- `internal-systems-review`: systems review owner before claiming no systems findings or systems merge readiness.
+- `superpowers-verification-before-completion`: final evidence gate before completion, readiness, or no-findings claims.
 
 Use this skill as the skill-first fast path for concrete repository-owned work.
 It keeps small and medium tasks light. It is not a hidden router, a retained-plan
@@ -45,12 +53,14 @@ engine, or a catalog of every operational skill in the repository.
 ## Simple Flow
 
 1. Inspect local files first when repository evidence can answer the question.
-2. Confirm the task still fits one quick lane.
-3. Load only the support skill proved by the prompt, target path, scoped
+2. If missing context blocks the start and local evidence cannot resolve it, use
+   `grill-me` for the minimum necessary clarification.
+3. Confirm the task still fits one quick lane.
+4. Load only the support skill proved by the prompt, target path, scoped
    instruction, symptom, domain evidence, or validation surface.
-4. Answer, edit, diagnose, or validate without creating a retained plan.
-5. Run focused validation, or name the explicit validation gap.
-6. If the task stops being simple, stop and issue an escalation alert.
+5. Answer, edit, diagnose, or validate without creating a retained plan.
+6. Run focused validation, or name the explicit validation gap.
+7. If the task stops being simple, stop and issue an escalation alert.
 
 ## Quick Lanes
 
@@ -80,6 +90,34 @@ If the prompt mentions a domain that is not represented by a known support
 skill, inspect repository evidence and use the closest valid owner. Do not infer
 that an unlisted provider, tool, or runtime is unsupported.
 
+Use `grill-me` only when missing user intent, target path, input data, local
+context, or a blocker prevents starting or continuing the simple lane. Keep the
+questions limited to the facts needed to proceed. If the missing information is
+really an ownership, rollout, governance, tradeoff, or validation decision,
+escalate instead of questioning inside simple mode.
+
+## Claim Gates
+
+These gates are exceptions to the anti-catalog posture. They are not a support
+bundle to preload. Use them only before making the matching claim:
+
+- Load `internal-debugging` before saying the original bug, failure, or loop is
+  fixed.
+- Load `internal-tdd` before saying red-green-refactor passed or a regression is
+  covered.
+- Load `internal-performance-optimization` before saying performance improved.
+- Load `internal-github-pr` before saying a PR is ready, valid, mergeable, or
+  complete.
+- Load `internal-code-review` before saying there are no code findings or code
+  merge-readiness blockers.
+- Load `internal-systems-review` before saying there are no systems findings or
+  systems merge-readiness blockers.
+- Load `superpowers-verification-before-completion` before any completion,
+  readiness, merge-ready, no-findings, fixed, covered, or improved claim.
+
+If a claim gate makes the work review-owned, staged, retained-plan-owned, or
+critical-owned, stop simple mode and escalate instead of making the claim.
+
 Read `references/support-routing.md` only when several plausible support owners
 compete. Use `scripts/suggest_support_skills.py` only as an advisory helper for
 known paths or symptoms.
@@ -108,6 +146,10 @@ For escalation, return only the escalation alert fields.
 - The target state was concrete enough for a quick lane, or escalation was
   explicit.
 - Support selection came from evidence, not a broad bundle or partial catalog.
+- `grill-me`, when used, asked only for the minimum context needed to start or
+  unblock simple work.
+- Claim gates were loaded before any fixed, covered, improved, ready,
+  merge-ready, complete, or no-findings claim.
 - No retained plan or staged workflow was created inside this skill.
 - Review-owned, critical-owned, and retained-plan-owned work stopped at the
   boundary and named the next owner.

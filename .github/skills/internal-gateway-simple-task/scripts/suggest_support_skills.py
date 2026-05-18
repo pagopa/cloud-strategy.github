@@ -15,15 +15,20 @@ from pathlib import Path
 
 
 SYMPTOM_SKILLS = {
+    "blocked": ("grill-me", "A blocker needs minimum clarification before continuing."),
     "bug": ("internal-debugging", "Bug or unexpected behavior needs reproduction."),
     "test-failure": ("internal-debugging", "A failing test needs root-cause diagnosis."),
     "build-failure": ("internal-debugging", "A failing build needs root-cause diagnosis."),
     "validator-drift": ("internal-debugging", "Validator drift needs a reproducible loop."),
     "unexpected": ("internal-debugging", "Unexpected output needs diagnosis before patching."),
+    "missing-context": ("grill-me", "Missing context prevents starting the simple lane."),
     "tdd": ("internal-tdd", "Executable behavior should be delivered test-first."),
     "performance": ("internal-performance-optimization", "Performance is the primary measured concern."),
+    "pr-readiness": ("internal-github-pr", "PR readiness, validity, mergeability, or completion needs PR lifecycle evidence."),
     "code-review": ("internal-code-review", "Line-level code review evidence is requested."),
     "systems-review": ("internal-systems-review", "Cross-boundary or architecture review evidence is requested."),
+    "completion-claim": ("superpowers-verification-before-completion", "Completion or readiness claim needs fresh validation evidence."),
+    "no-findings": ("internal-code-review", "No-findings claim needs defect-first review evidence."),
     "worktree": ("superpowers-using-git-worktrees", "The task needs isolated workspace setup."),
 }
 
