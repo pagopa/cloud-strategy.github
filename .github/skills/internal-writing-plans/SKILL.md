@@ -30,6 +30,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Retain a plan only when at least one of these is true: the work crosses turns, spans multiple macro-categories, needs handoff, tracking, or provenance, or includes tradeoffs or uncertainties that should stay reviewable.
 - Start every retained plan with `01-riassunto-direzione-e-decisione.md` so the user can understand the full direction and decide before execution.
 - `01-riassunto-direzione-e-decisione.md` must be exhaustive enough to explain the target state, tradeoffs, execution shape, validation path, and the decision the user is being asked to make.
+- The summary file must also include the smallest useful reading path: what to inspect first, which evidence pass proves the plan is still valid, and which files can be deferred.
 - After the summary file, use `02-esecuzione.md` when one executable macro-category is enough.
 - When the work spans more than one executable macro-category, continue with `02-...`, `03-...`, and later numbered files by category, for example `02-implementazione.md`, `03-validazione.md`, and `04-rollout.md`.
 - Do not keep one monolithic plan file when the work spans multiple macro-categories.
@@ -51,6 +52,16 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Treat `done-*`, `evidence-envelope.md`, and `completion-report.md` as status artifacts that describe applied work, not pending plan intent.
 - If the summary file or file-role map is missing, the retained plan is not executor-friendly yet and should be revised before `apply-plan`.
 
+## Token And Reading Discipline
+
+- Classify the folder before broad reading: `draft-to-review`, `write-or-rewrite`, `approved-to-apply`, `resume`, `completed-status`, or `unknown`.
+- Do a short evidence pass before reading many files. Limit the first pass to target existence, the riskiest claim in the summary, and the nearest validator or explicit validation gap.
+- For retained artifacts under `tmp/`, use `rg --no-ignore` or an equivalent ignored-file-aware search when checking claims.
+- Put the evidence pass and first-read budget in `01-riassunto-direzione-e-decisione.md` under `Evidence pass iniziale` and `Budget lettura`.
+- Prefer the smallest useful retained plan shape: summary, current execution or backlog, and validation. Add more numbered files only for independent macro-categories.
+- Use `grill-me` only after the evidence pass when real user decisions remain. Do not ask questions that repository evidence can answer.
+- Keep deferred improvements, retrospectives, and lessons separate from executable steps unless they are required for the requested outcome.
+
 ## Numbered-file shape
 
 - Optimize retained plan files for scanability and decision review rather than exhaustive prose.
@@ -62,6 +73,8 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - `Decisione richiesta`
 - `Uso consigliato`
 - `Mappa file e ruolo`
+- `Evidence pass iniziale`
+- `Budget lettura`
 - `Validazione`
 - `Stop conditions`
 - `Obiettivo`
@@ -83,7 +96,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 
 1. Decide first whether retained planning is justified or whether in-chat planning is enough.
 2. Choose a clear task folder name under `tmp/superpowers/`.
-3. Write `01-riassunto-direzione-e-decisione.md` first and use it to state direction, decision request, recommended treatment, and file-role map before detailed plan files exist.
+3. Write `01-riassunto-direzione-e-decisione.md` first and use it to state direction, decision request, recommended treatment, file-role map, evidence pass, and reading budget before detailed plan files exist.
 4. Define the executable macro-categories next and choose the smallest post-summary file shape that fits the work.
 5. Use `02-esecuzione.md` when one executable macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
 6. Give each numbered file the shape above and keep every section compact.
@@ -99,6 +112,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - `01-riassunto-direzione-e-decisione.md` exists and acts as the control file for the retained plan.
 - The summary file is exhaustive enough for the user to decide whether to approve, challenge, rewrite, or apply the plan.
 - The summary file declares `Uso consigliato` and `Mappa file e ruolo`.
+- The summary file declares `Evidence pass iniziale` and `Budget lettura`.
 - `02-esecuzione.md` is used when one executable macro-category is enough; `02-...`, `03-...`, `04-...` style plan files exist when more than one executable macro-category exists.
 - Plan files are in Italian unless the user asked otherwise.
 - The numbered files follow the local shape contract with explicit headings and short bullets.
@@ -111,6 +125,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 
 - Creating a retained plan artifact for a clear, local, quick task that should stay in chat.
 - Skipping `01-riassunto-direzione-e-decisione.md` or making it too thin to support a decision.
+- Omitting the initial evidence pass or reading budget, causing the next agent to read the whole folder before knowing the lane.
 - Writing the whole plan in one Markdown file.
 - Writing long narrative paragraphs or duplicating canonical context instead of keeping the plan scannable.
 - Mixing executable checklist items with open questions.

@@ -321,6 +321,9 @@ def test_scope_challenge_gate_reference_exists() -> None:
         "stop conditions",
         "uso consigliato",
         "mappa file e ruolo",
+        "evidence pass iniziale",
+        "budget lettura",
+        "reading budget",
     ):
         assert expected in text
 
@@ -377,6 +380,9 @@ def test_resume_protocol_reference_exists() -> None:
         (
             "Verify-first Sequence",
             "`01-riassunto-direzione-e-decisione.md`",
+            "Evidence pass iniziale",
+            "Budget lettura",
+            "rg --no-ignore",
             "`done-*`",
             "`git diff`",
             "validators",
@@ -390,6 +396,7 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
             "file roles cannot be inferred safely",
+            "before broad reading",
             "lacks an item/evidence table or evidence-envelope pointer",
             "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
         ),
@@ -403,6 +410,8 @@ def test_plan_handoff_requires_summary_control_file() -> None:
             "`01-riassunto-direzione-e-decisione.md`",
             "`Uso consigliato`",
             "`Mappa file e ruolo`",
+            "`Evidence pass iniziale`",
+            "`Budget lettura`",
             "summary control file",
         ),
     )
