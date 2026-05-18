@@ -12,6 +12,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Use the same proof standard for edits as for new skills.
 - Check frontmatter validity before reviewing route quality or body wording. Structural breakage outranks content cleanup.
 - Compare the target skill against the closest neighboring owners before deciding the fix. Route quality is a lane-level property.
+- Keep `## Referenced skills` immediately after the H1 for any created or materially revised `SKILL.md`.
 
 ## Discovery and retrieval
 
@@ -38,6 +39,8 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Prefer moving static lookup tables, starter templates, and detailed taxonomies into `references/`.
 - Prefer new `references/` over new `scripts/` unless the workflow is deterministic, repeated, and execution-heavy.
 - Reference other skills by skill name and owner behavior, not by file paths inside their bundles.
+- Keep `## Referenced skills` as an audit index: one backticked skill name plus one short owner-behavior phrase per item, or `- None.` when no other skill is referenced.
+- Update the referenced-skill index whenever the body adds, removes, renames, routes to, delegates to, or compares against another skill.
 - Prefer one strong example over several repetitive ones.
 
 ## Test posture
@@ -46,6 +49,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Re-run the same scenario with the skill after the change.
 - Re-run at least one neighboring-owner scenario when the edit changes routing or boundary wording.
 - Add a misuse, pressure, or counterexample test based on the skill type.
+- Verify that every listed referenced skill exists or is explicitly marked as external/on-demand, and that no later skill reference is missing from the index.
 
 ## Skill-type checks
 

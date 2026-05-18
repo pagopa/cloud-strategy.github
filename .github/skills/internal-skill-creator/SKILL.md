@@ -5,6 +5,14 @@ description: Use first when creating, splitting, replacing, or materially revisi
 
 # Internal Skill Creator
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to. Keep it current before changing downstream wording. Self-references to `internal-skill-creator` identify this current skill and are not a dependency.
+
+- `openai-skill-creator`: generic bundle anatomy, reusable-resource layout, `agents/openai.yaml`, initialization workflow, and structural validation after the local boundary is clear.
+- `local-agent-sync-external-resources`: catalog-governance operating engine behind `local-sync-external-resources` when work becomes sync-managed catalog maintenance, external refresh, or inventory-wide keep/update/extract/retire decisions.
+- `internal-agent-creator`: repository-owned agent authoring and agent/skill boundary rewrites.
+
 Use this skill as the canonical repository-owned first entrypoint for skill authoring in this repository.
 
 Keep the ownership model explicit:
@@ -15,7 +23,7 @@ Keep the ownership model explicit:
 
 This means `internal-skill-creator` should trigger first for repository-owned skill work, establish the local boundary, and then deliberately hand only the remaining bundle mechanics to `openai-skill-creator` instead of competing with it or duplicating it.
 
-Use `internal-agent-sync-control-center` when the task is broader catalog governance, sync-managed external assets, or inventory-wide retirement and refresh work.
+Use `local-agent-sync-external-resources` through `local-sync-external-resources` when the task is broader catalog governance, sync-managed external assets, or inventory-wide retirement and refresh work.
 
 Use `internal-agent-creator` when the primary output is an agent change or an agent/skill boundary rewrite.
 
@@ -26,6 +34,7 @@ Use `internal-agent-creator` when the primary output is an agent change or an ag
 - Read `.github/INVENTORY.md` when a skill may be added, retired, renamed, or replaced.
 - Load `references/writing-skills-checklist.md` when creating a new skill or materially revising an existing one.
 - Read `openai-skill-creator` only after the local boundary is clear and only for the remaining bundle work that this skill is not meant to repeat.
+- Confirm the target `SKILL.md` has an up-to-date `## Referenced skills` section immediately after the H1 before finalizing a new or materially revised skill.
 
 ## When to use
 
@@ -36,7 +45,7 @@ Use `internal-agent-creator` when the primary output is an agent change or an ag
 
 ## When not to use
 
-- The task is catalog governance, inventory maintenance, or sync routing. Use `internal-agent-sync-control-center` instead.
+- The task is catalog governance, inventory maintenance, or sync routing. Use `local-agent-sync-external-resources` through `local-sync-external-resources` instead.
 - The task is primarily agent authoring or agent/skill architecture. Use `internal-agent-creator` instead.
 - The task is outside `.github/skills/` or does not change a repository-owned skill.
 - The existing skill already covers the need and the change is a pure copyedit that does not affect retrieval, boundary, validation, or bundle structure.
@@ -75,7 +84,7 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 | Wording cleanup with no change to retrieval, owner, or validation | Update in place or do nothing |
 | Same owner, but weak trigger/body/validation is causing misses | Revise the existing skill |
 | One skill is handling two intents or colliding with another local owner | Split, replace, or retire the weaker skill |
-| The change affects multiple skills, inventory meaning, or sync-managed assets | Use `internal-agent-sync-control-center` |
+| The change affects multiple skills, inventory meaning, or sync-managed assets | Use `local-agent-sync-external-resources` through `local-sync-external-resources` |
 | The local decision is made and the remaining work is bundle anatomy, reusable resources, `agents/openai.yaml`, or validator usage | Delegate that remainder to `openai-skill-creator` |
 
 ## Core rules
@@ -93,6 +102,10 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - Make descriptions searchable with concrete terms people would actually type: skill, trigger, `.github/skills/`, `SKILL.md`, create, replace, revise, update, reuse, validation.
 - Preserve a working `description:` during token optimization unless the baseline shows the route itself is the problem.
 - Keep the body lean. Put only the local contract in `SKILL.md` and move optional depth into references or reusable tools when repeated need justifies it.
+- Every repository-owned `SKILL.md` this skill creates or materially revises must keep `## Referenced skills` immediately after the H1.
+- In `## Referenced skills`, list every other skill the file asks the agent to load, route to, compare against, or delegate to; use `- None.` only when no other skill is referenced.
+- Each referenced-skill item must name the skill in backticks and state the load, route, delegation, or comparison condition in one short phrase.
+- Update `## Referenced skills` whenever adding, removing, renaming, or repairing a skill reference. Treat stale or missing skill names as validation failures.
 - When a skill sits behind a paired agent or local references, keep one owner per detail layer: route and boundary in the agent, reusable workflow in `SKILL.md`, and deep detail in `references/`.
 - Prefer `references/` over new `scripts/` for static tables, starter templates, and audit taxonomies. Add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - Keep cross-references explicit instead of duplicating large chunks of generic bundle guidance.
@@ -146,6 +159,9 @@ Then confirm:
 - `name:` matches the folder name exactly.
 - `agents/openai.yaml` exists and still matches the skill's current purpose when bundle metadata was part of the task.
 - the skill is repository-owned and still the smallest credible answer to the problem.
+- the top-level `## Referenced skills` section exists immediately after the H1 for any created or materially revised `SKILL.md`.
+- every non-`None` referenced-skill entry maps to a real repository skill or an explicitly justified external/on-demand skill.
+- the referenced-skill index matches all skill names used later for loading, routing, comparison, or delegation.
 - the description matches the real trigger without describing the workflow.
 - the description is strong enough that repository-owned skill requests should retrieve this skill before the generic OpenAI one.
 - the result makes rejection, reuse, and in-place tightening as natural as creation or replacement.
@@ -163,7 +179,7 @@ Then confirm:
 
 - Update nearby routing or support-skill references when this skill changes the visible local entrypoint.
 - Re-check `.github/INVENTORY.md` whenever a repository-owned skill is added, retired, renamed, or replaced.
-- Escalate to `internal-agent-sync-control-center` when the change becomes catalog governance instead of one-skill authoring.
+- Escalate to `local-agent-sync-external-resources` through `local-sync-external-resources` when the change becomes catalog governance instead of one-skill authoring.
 
 ## Common mistakes
 
