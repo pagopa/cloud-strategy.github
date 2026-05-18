@@ -101,7 +101,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/mattpocock-caveman/SKILL.md`
-- `.github/skills/mattpocock-zoom-out/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`

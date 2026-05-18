@@ -92,6 +92,7 @@ def retired_mattpocock_ids() -> tuple[str, ...]:
             "diagnose",
             "tdd",
             "improve-codebase-architecture",
+            "zoom-out",
             "grill-with-docs",
             "setup-matt-pocock-skills",
         )
@@ -339,6 +340,9 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
     imported_support_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
     ).read_text(encoding="utf-8")
+    systems_review_text = Path(
+        ".github/skills/internal-systems-review/SKILL.md"
+    ).read_text(encoding="utf-8")
 
     assert "conditional lenses through `internal-gateway-operational-flow`" in planning_body
     assert "- `internal-debugging`" in delivery_body
@@ -356,6 +360,10 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         "Failure diagnosis now belongs to `internal-debugging`" in imported_support_text
     )
     assert "Test-first delivery now belongs to `internal-tdd`" in imported_support_text
+    assert "Higher-level code orientation" in imported_support_text
+    assert "## Orientation Map Lens" in systems_review_text
+    assert "## Orientation Output" in systems_review_text
+    assert "Module map" in systems_review_text
     for retired_id in retired_mattpocock_ids():
         assert retired_id not in imported_support_text
 

@@ -17,7 +17,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
 - `internal-gateway-simple-task`: simple concrete fast path when staged workflow is too heavy.
 - `internal-security-review`: unavailable future security lens, used only after promotion creates the skill.
-- `internal-systems-review`: systems review, plan-completion audit, and scope-drift analysis.
+- `internal-systems-review`: systems review, codebase orientation, plan-completion audit, and scope-drift analysis.
 - `superpowers-verification-before-completion`: evidence gate before completion claims in `execute` or `apply-plan`.
 
 Use this skill as the portable skill-first operational core for repository-owned staged work. Copilot agents may wrap it with frontmatter, tools, and `handoffs:`, but the reusable workflow semantics live here so runtimes without agent UI can still follow the same model.

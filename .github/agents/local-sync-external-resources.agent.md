@@ -167,7 +167,6 @@ Managed skills:
 
 - `caveman` -> `mattpocock-caveman`
 - `grill-me` -> `grill-me`
-- `zoom-out` -> `mattpocock-zoom-out`
 
 Retired upstream items that were extracted into internal owners are tracked in
 the alert-only watchlist owned by `local-agent-sync-external-resources`.

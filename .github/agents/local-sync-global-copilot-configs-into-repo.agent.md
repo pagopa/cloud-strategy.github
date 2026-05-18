@@ -66,7 +66,6 @@ Use this section only for consumer-propagation awareness. The canonical source-s
 - `mattpocock/skills`:
   - `caveman` -> `mattpocock-caveman`
   - `grill-me` -> `grill-me`
-  - `zoom-out` -> `mattpocock-zoom-out`
 
 ## Routing
 

@@ -27,6 +27,8 @@ when they already cover the local contract.
 - Performance work now belongs to `internal-performance-optimization`.
 - Architecture, locality, leverage, and cross-boundary review now belong to
   `internal-systems-review`.
+- Higher-level code orientation, module maps, caller maps, and domain-vocabulary
+  explanations now belong to `internal-systems-review`.
 - Code defect review now belongs to `internal-code-review`.
 - Imported docs and setup conventions stay outside default gateway routing unless
   a future sync-governance decision deliberately changes the managed catalog.

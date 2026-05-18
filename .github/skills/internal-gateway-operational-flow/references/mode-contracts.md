@@ -52,7 +52,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-agent-support-lane-change-engine` | Shared by operational wrappers and sync command centers | Stop-and-recommend protocol when the selected mode or lane no longer fits. |
 | `internal-agent-support-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
 | `internal-code-review` | `review` mode code lens | Tactical review engine for code defects, regressions, tests, language anti-patterns, and file/line findings. |
-| `internal-systems-review` | `review` mode systems lens | Systems-level review engine for architecture, workflow, cross-cutting impact, operational fit, and blind spots. |
+| `internal-systems-review` | `review` mode systems lens and codebase orientation support | Systems-level owner for architecture, workflow, cross-cutting impact, operational fit, blind spots, and unfamiliar-code maps. |
 | `internal-debugging` | `execute` or `review` support | Root-cause diagnosis for bugs, test failures, build failures, validator drift, sync failures, and unexpected behavior. |
 | `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |

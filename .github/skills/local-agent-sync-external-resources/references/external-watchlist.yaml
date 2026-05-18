@@ -16,6 +16,11 @@ items:
     reason: Architecture deepening lenses were extracted into systems review.
     action: alert-only
   - source_family: mattpocock/skills
+    upstream_id: zoom-out
+    local_owner: internal-systems-review
+    reason: Codebase orientation, module maps, caller maps, and domain vocabulary were extracted into systems review.
+    action: alert-only
+  - source_family: mattpocock/skills
     upstream_id: grill-with-docs
     local_owner: internal-writing-plans
     reason: Glossary and ADR side effects are not default repository conventions.
