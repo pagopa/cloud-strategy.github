@@ -220,9 +220,6 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
-    imported_support_text = Path(
-        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
-    ).read_text(encoding="utf-8")
     metadata_text = Path(
         ".github/skills/internal-gateway-operational-flow/agents/openai.yaml"
     ).read_text(encoding="utf-8")
@@ -247,13 +244,18 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "Codex plugin or Codex CLI" in workflow_maps_text
     assert "Retained Plan Application" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
-    assert "mattpocock-caveman" in imported_support_text
-    assert "mattpocock-zoom-out" not in imported_support_text
+    assert not Path(
+        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
+    ).exists()
+    assert "## Imported Support" in wrapper_alignment_text
+    assert "mattpocock-caveman" in wrapper_alignment_text
+    assert "mattpocock-zoom-out" not in wrapper_alignment_text
+    assert "## Future Security Lens" in wrapper_alignment_text
     assert "internal-debugging" in mode_contracts_text
     assert "internal-tdd" in mode_contracts_text
     assert "internal-performance-optimization" in mode_contracts_text
     for retired_id in retired_mattpocock_ids():
-        assert retired_id not in imported_support_text
+        assert retired_id not in wrapper_alignment_text
     assert "$internal-gateway-operational-flow" in metadata_text
 
     planning_frontmatter = load_frontmatter(
@@ -280,6 +282,11 @@ def test_operational_flow_readme_references_live_gateway_skills() -> None:
 
     assert referenced_slugs
     assert referenced_slugs <= live_skill_slugs
+    assert "## Output And Support Calibration" in readme_text
+    assert "about 40 lines" in readme_text
+    assert "about 30 lines" in readme_text
+    assert "Use imported support only after the gateway phase is selected" in readme_text
+    assert "mattpocock-caveman" in readme_text
 
 
 def test_gateway_wrapper_alignment_documents_optional_support_skills() -> None:
@@ -411,8 +418,8 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
     planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
     delivery_body = read_body(CANONICAL_AGENTS["internal-delivery-operator"])
     review_body = read_body(CANONICAL_AGENTS["internal-review-guard"])
-    imported_support_text = Path(
-        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
+    wrapper_alignment_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
     systems_review_text = Path(
         ".github/skills/internal-systems-review/SKILL.md"
@@ -433,16 +440,14 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         for retired_id in retired_mattpocock_ids():
             assert f"- `{retired_id}`" not in wrapper_body
 
-    assert (
-        "Failure diagnosis now belongs to `internal-debugging`" in imported_support_text
-    )
-    assert "Test-first delivery now belongs to `internal-tdd`" in imported_support_text
-    assert "Higher-level code orientation" in imported_support_text
+    assert "Failure diagnosis belongs to `internal-debugging`" in wrapper_alignment_text
+    assert "Test-first delivery belongs to `internal-tdd`" in wrapper_alignment_text
+    assert "higher-level code" in wrapper_alignment_text
     assert "## Orientation Map Lens" in systems_review_text
     assert "## Orientation Output" in systems_review_text
     assert "Module map" in systems_review_text
     for retired_id in retired_mattpocock_ids():
-        assert retired_id not in imported_support_text
+        assert retired_id not in wrapper_alignment_text
 
 
 def test_internal_debugging_and_tdd_skills_capture_extracted_workflows() -> None:

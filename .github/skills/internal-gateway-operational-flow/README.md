@@ -150,6 +150,17 @@ Findings first, then evidence gaps, then route each fix to execute, plan,
 critical challenge, or defer.
 ```
 
+## Output And Support Calibration
+
+Keep operational-flow responses compact unless evidence or user scope requires
+detail. Plan and review outputs should usually stay within about 40 lines, and
+execution reports should usually stay within about 30 lines.
+
+Use imported support only after the gateway phase is selected. `grill-me`
+supports planning questions. `mattpocock-caveman` is only a compression pass for
+long sync, review, or governance reports after blockers, risks, and validation
+evidence are explicit.
+
 ## Maintenance Notes
 
 - Keep this README aligned with [SKILL.md](SKILL.md) and the reference files.

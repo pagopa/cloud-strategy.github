@@ -55,7 +55,7 @@ You are the Copilot wrapper for `review` mode in `internal-gateway-operational-f
   needs root-cause diagnosis before fixes are safe.
 - Use `internal-performance-optimization` when the review surface is measured
   latency, throughput, profiling, or performance-regression risk.
-- Treat `internal-security-review` as unavailable until promoted; report security-specific gaps without inventing a new owner.
+- Follow the Future Security Lens rule in `internal-gateway-operational-flow` wrapper alignment; report security-specific gaps without inventing a new owner.
 - For every actionable finding, include severity, confidence, causal layer, and a fix routing plan.
 - Do not implement fixes through this wrapper.
 - Use imported support only as a conditional map or compression lens; keep

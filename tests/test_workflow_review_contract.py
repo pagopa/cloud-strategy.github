@@ -186,6 +186,10 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
             "Review Check 2",
             "Review Check 3",
             "## Failure And Recovery",
+            "## Output Calibration",
+            "about 40 lines",
+            "about 30 lines",
+            "about 100 lines",
             "make token-risks",
             "make github-catalog-validation",
             "`full-cycle` alone",
@@ -264,13 +268,11 @@ def test_security_review_promotion_gated() -> None:
 
     assert not Path(".github/skills/internal-security-review").exists()
     assert "internal-security-review" not in optional_support
-    assert (
-        "Treat `internal-security-review` as unavailable until promoted"
-        in review_guard_text
-    )
-    assert (
-        "future `internal-security-review` only after that skill exists" in gateway_text
-    )
+    assert "## Future Security Lens" in Path(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
+    ).read_text(encoding="utf-8")
+    assert "Future Security Lens" in review_guard_text
+    assert "Future Security Lens" in gateway_text
     assert (
         "Use a promoted `internal-security-review` only after that skill exists"
         in systems_review_text

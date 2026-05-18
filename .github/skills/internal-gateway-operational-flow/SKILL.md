@@ -17,7 +17,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `internal-executing-plans`: retained-plan execution owner for approved `apply-plan` work.
 - `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
 - `internal-gateway-simple-task`: simple concrete fast path when staged workflow is too heavy.
-- `internal-security-review`: unavailable future security lens, used only after promotion creates the skill.
+- `internal-security-review`: future security lens name governed by the promotion rule in `references/wrapper-alignment.md`.
 - `internal-systems-review`: systems review, codebase orientation, plan-completion audit, and scope-drift analysis.
 - `superpowers-verification-before-completion`: evidence gate before completion claims in `execute`, `apply-plan`, `plan complete`, `review complete`, or `no findings` states.
 
@@ -64,11 +64,9 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Treat cross-skill contracts as owner-level contracts. Reference another skill by name and the behavior it owns; do not link to another skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, or `agents/` files.
 - Require an explicit checkpoint before moving from `plan` or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
-- Use review lenses inside `review` mode instead of duplicating their playbooks here: `internal-code-review` for code defects, `internal-systems-review` for architecture, workflow, cross-cutting impact, and blind spots, and future `internal-security-review` only after that skill exists.
+- Use review lenses inside `review` mode instead of duplicating their playbooks here: `internal-code-review` for code defects, `internal-systems-review` for architecture, workflow, cross-cutting impact, and blind spots, and the future security lens only under the promotion rule in `references/wrapper-alignment.md`.
 - Use `internal-gateway-critical-master` as a visible critical phase when pressure testing is needed; do not duplicate its challenge logic here.
-- Use imported support only as conditional lenses through the imported support
-  routing reference. Prefer internal owners for debugging, TDD, performance, and
-  systems review.
+- Use imported support only as conditional lenses through `references/wrapper-alignment.md`. Prefer internal owners for debugging, TDD, performance, and systems review.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
@@ -168,6 +166,12 @@ If a check fails, fix the issue and rerun the relevant check. If a check cannot 
 
 For `execute` or `apply-plan`, return a compact execution report with active phase and owner, files changed, completed items and intentional non-actions, `Check 1` through `Check 3`, separate improvement ideas, durable lessons routed through the right owner, residual risk, and any next-step package.
 
+## Output Calibration
+
+Keep reports compact by default. Plan and review outputs should usually stay within about 40 lines, and execution reports should usually stay within about 30 lines. Use a longer report only when the user asks for detail or when findings, blockers, validation evidence, or residual risk require it.
+
+Use `mattpocock-caveman` only as a compression pass for sync, review, or governance reports likely to exceed about 100 lines, and only after blockers, risks, and validation evidence are explicit.
+
 ## Review Mode
 
 Review mode owns findings, evidence gaps, regression risk, systems risk, and fix routing. Findings come before summaries, and every actionable finding needs a causal layer plus a route to delivery, planning, critical challenge, or deferred follow-up.
@@ -178,7 +182,7 @@ Use the smallest review lens that fits the evidence:
 
 - `internal-code-review` for code defects, regressions, tests, and file/line findings.
 - `internal-systems-review` for architecture, workflow, cross-cutting impact, operational fit, and blind spots.
-- Future `internal-security-review` for security, AI safety, trust boundaries, data, and secrets only after promotion creates the skill; until then, state the security gap and route to the closest existing owner.
+- Security-specific gaps follow the Future Security Lens rule in `references/wrapper-alignment.md`; until promotion creates the lens, state the gap and route through the closest existing owner.
 
 Keep `internal-gateway-critical-master` as the separate owner for pressure testing, pre-mortems, and hidden assumptions.
 
@@ -195,8 +199,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 
 - Read `references/mode-contracts.md` for detailed mode boundaries, ownership maps, and medium-task thresholds.
 - Read `references/workflow-maps.md` when documenting or validating quick, planned, and audited workflows.
-- Read `references/wrapper-alignment.md` when updating Copilot agent wrappers, runtime portability claims, or tests.
-- Read `references/imported-support-routing.md` when selecting imported Matt Pocock support for a gateway phase.
+- Read `references/wrapper-alignment.md` when updating Copilot agent wrappers, runtime portability claims, imported support, future security lens posture, output projection, or tests.
 - Load `internal-systems-review` when completion checks need a full workflow
   audit.
 
@@ -211,7 +214,6 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Strong `plan complete`, `review complete`, `no findings`, or merge-readiness claims passed through `superpowers-verification-before-completion`.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
 - `grill-me` is used for non-trivial retained plans or real clarification needs.
-- Imported support follows the imported support routing reference and is never a
-  mandatory engine for gateway phases.
+- Imported support follows `references/wrapper-alignment.md` and is never a mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

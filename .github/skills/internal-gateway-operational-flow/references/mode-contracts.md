@@ -57,13 +57,12 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |
 | `grill-me` | Conditional support for `plan` mode | User-requested or ambiguity-driven question pressure before plan finalization. |
-| `mattpocock-caveman` | Support only | Compression after blockers, risks, and validation evidence are already explicit. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |
 | `superpowers-*` workflows | Conditional support | Mandatory only when the task shape actually triggers the workflow. |
 
-`internal-security-review` is a future optional review lens only after its promotion gate creates the skill. Until then, security-specific review gaps should be stated explicitly and routed to the closest existing owner.
+Imported support and the future security lens are not gateway owners. Their approved use, compression guardrails, and promotion posture live in `wrapper-alignment.md`.
 
 ## Retired To Current Ownership Mapping
 
