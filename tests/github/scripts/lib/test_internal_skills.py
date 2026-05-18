@@ -99,6 +99,38 @@ def test_validate_internal_skill_reports_metadata_and_reference_issues(
     assert len(missing_reference_findings) == 1
 
 
+def test_validate_internal_skill_rejects_cross_skill_file_references(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path
+    (root / ".github").mkdir(parents=True, exist_ok=True)
+    skill_dir = root / ".github/skills/internal-demo"
+    other_skill_dir = root / ".github/skills/internal-other"
+
+    write_valid_skill(skill_dir, "internal-demo")
+    write_valid_skill(other_skill_dir, "internal-other")
+    write_file(other_skill_dir / "references/guide.md", "# Guide\n")
+    write_file(
+        skill_dir / "SKILL.md",
+        "---\n"
+        "name: internal-demo\n"
+        "description: Use when repository-owned Python skills need structural validation.\n"
+        "---\n\n"
+        "# internal-demo\n\n"
+        "## When to use\n\n"
+        "Use this skill when repository-owned Python skills need structural validation.\n\n"
+        "Do not read `../internal-other/SKILL.md`.\n"
+        "Do not read `.github/skills/internal-other/references/guide.md`.\n",
+    )
+
+    findings = validate_internal_skill(root, skill_dir)
+    cross_skill_findings = [
+        finding for finding in findings if finding.code == "cross-skill-file-reference"
+    ]
+
+    assert len(cross_skill_findings) == 2
+
+
 def test_markdown_targets_and_resolve_reference_support_repo_and_skill_paths(
     tmp_path: Path,
 ) -> None:

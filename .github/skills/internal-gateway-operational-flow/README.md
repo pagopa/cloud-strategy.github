@@ -45,7 +45,7 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 | Simple advisory analysis before coding | "Tell me how you would build this script, then implement it." | `execute` if the target is concrete. Use a short tactical note, not full `plan` mode. | Brief approach, implementation, and checks. |
 | Deterministic multi-file alignment | "Rename this approved skill reference across adjacent files and run the focused tests." | `execute`. File count alone does not force planning. | Updated files, stale-name search, and validation evidence. |
 | New repository-owned workflow with unclear owner | "Should this be an agent, a skill, or an instruction?" | `plan` plus relevant authoring support skills. | Ownership decision, anti-scope, tradeoffs, next owner, and validation path. |
-| Plan with user grilling before final plan | "Ask all grill-me questions first, then write the plan after my answers." | `plan` plus `mattpocock-grill-me` before final planning. | Numbered questions with recommended answers; after responses, a plan-ready decision frame. |
+| Plan with user grilling before final plan | "Ask all grill-me questions first, then write the plan after my answers." | `plan` plus `grill-me` before final planning. | Numbered questions with recommended answers; after responses, a plan-ready decision frame. |
 | Plan, then critical challenge | "Make a plan, then pressure-test it before implementation." | `full-cycle`, then visible critical phase through `internal-gateway-critical-master`. | Plan, Decision Brief when retained, strongest objections, explicit outcome, and checkpoint before delivery. |
 | Apply retained plan | "Apply this plan under `tmp/superpowers/example`." | `apply-plan` plus `internal-executing-plans`. | Completed items move into `done-*`, active numbered files shrink or delete, and validation evidence is reported. |
 | Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`; add `internal-systems-review` when architecture, workflow, cross-cutting impact, or blind spots are in scope. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
@@ -90,7 +90,7 @@ This is analysis-assisted execution, not `plan` mode.
 Use this sequence when the user wants the rigorous path:
 
 1. Inspect repository evidence first.
-2. Run `mattpocock-grill-me` as conditional support.
+2. Run `grill-me` as conditional support.
 3. If the user asks for bulk questions, provide numbered questions with a
    recommended answer for each.
 4. Wait for the user answers when the answers affect the plan.

@@ -33,6 +33,9 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
   compaction, or a new session.
 - Use `references/completion-report.md` before reporting final retained-plan
   state.
+- For non-trivial retained plans, `done-*` files must preserve the completed
+  item and evidence, or point to an evidence envelope with item, status,
+  evidence, and route.
 - For each active plan file, create or update the matching `done-<source-file-name>.md` file.
 - When an item is completed, move it into the matching `done-*` file and remove it from the active plan file.
 - Delete an active plan file once all of its executable items have been moved out and the file is empty.
@@ -66,6 +69,8 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - Empty source plan files are deleted.
 - Resume and completion report references were applied when interruption,
   compaction, or final retained-plan state needed durable evidence.
+- Non-trivial `done-*` markers preserve item-level evidence or point to an
+  evidence envelope.
 - Execution continued across remaining numbered plan files until completion or a real blocker.
 - Imported execution skills were used only as engines, not rewritten as policy containers.
 

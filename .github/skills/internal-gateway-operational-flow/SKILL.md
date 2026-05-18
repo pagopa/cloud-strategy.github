@@ -45,9 +45,13 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Keep direct entry and manual transitions visible to the user.
 - Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
+- Treat cross-skill contracts as owner-level contracts. Reference another skill by name and the behavior it owns; do not link to another skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, or `agents/` files.
 - Require an explicit checkpoint before moving from `plan` or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
 - Use review lenses inside `review` mode instead of duplicating their playbooks here: `internal-code-review` for code defects, `internal-systems-review` for architecture, workflow, cross-cutting impact, and blind spots, and future `internal-security-review` only after that skill exists.
 - Use `internal-gateway-critical-master` as a visible critical phase when pressure testing is needed; do not duplicate its challenge logic here.
+- Use imported support only as conditional lenses through the imported support
+  routing reference. Prefer internal owners for debugging, TDD, performance, and
+  systems review.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
@@ -65,7 +69,7 @@ Prompt-specific intent wins over the default. A direct review request starts in 
 
 Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, and next-step package. It does not silently become execution after the design is settled.
 
-Use `mattpocock-grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is being created, reformulated, or validated. Before asking questions, inspect the repository when the answer is recoverable from files. If the user wants to answer in bulk, provide numbered questions with a recommended answer for each; after the bulk answer, continue one question at a time only for unresolved ambiguity.
+Use `grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is being created, reformulated, or validated. Before asking questions, inspect the repository when the answer is recoverable from files. If the user wants to answer in bulk, provide numbered questions with a recommended answer for each; after the bulk answer, continue one question at a time only for unresolved ambiguity.
 
 After creating a retained plan or materially reformulating one, provide a compact Decision Brief in chat. The brief is a projection, not a second canonical plan:
 
@@ -79,8 +83,8 @@ After creating a retained plan or materially reformulating one, provide a compac
 - ⭐ `Default consigliato`
 - ✋ `Decisione richiesta`
 
-Use `internal-agent-support-next-step/references/decision-brief.md` for the
-required Decision Brief fields when the brief must survive a handoff.
+Use `internal-agent-support-next-step` for durable Decision Brief handoff fields
+when the brief must survive a handoff.
 
 ## Execute Mode
 
@@ -90,10 +94,8 @@ For `execute`, keep edits scoped to the requested change, required adjacent cont
 
 For `apply-plan`, load `internal-executing-plans` and follow its repository-local `done-*` loop. The normal input is an approved retained plan folder under `tmp/superpowers/<clear-action-or-task-name>/`; an inline plan must be converted into a retained plan or receive an explicit checkpoint before execution. `dubbi-e-domande.md` is never an executable plan file.
 
-Use `internal-executing-plans/references/plan-handoff.md` for incoming handoff
-gaps, `internal-executing-plans/references/resume-protocol.md` when resuming
-interrupted work, and `internal-executing-plans/references/completion-report.md`
-when packaging final retained-plan state.
+Use `internal-executing-plans` for incoming handoff gaps, resume protocol, and
+final retained-plan completion reporting.
 
 When the user invokes this skill or the delivery wrapper with a retained plan folder, treat that folder as the execution target. Read numbered plan files in order, ignore `dubbi-e-domande.md`, continue across remaining executable items, and stop only for missing input, unsafe scope, out-of-scope work, or a blocker that prevents correct continuation.
 
@@ -108,9 +110,8 @@ Before reporting completion for `execute` or `apply-plan`, run three distinct ve
 - `Check 3`: Evidence coverage. Run the applicable validators, tests, lint commands, or closest available checks; read the output before claiming success.
 
 For large retained plans, multi-area diffs, always-on guidance changes, or
-validator changes, use `internal-systems-review/references/plan-completion-audit.md`
-and `internal-systems-review/references/scope-drift.md` instead of expanding this
-main skill with audit tables.
+validator changes, use `internal-systems-review` for plan-completion audit and
+scope-drift analysis instead of expanding this main skill with audit tables.
 
 If a check fails, fix the issue and rerun the relevant check. If a check cannot run, state the exact validation gap and the closest evidence gathered. Small changes may use concise checks, but the three perspectives must remain distinct.
 
@@ -141,9 +142,9 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Read `references/mode-contracts.md` for detailed mode boundaries, ownership maps, and medium-task thresholds.
 - Read `references/workflow-maps.md` when documenting or validating quick, planned, and audited workflows.
 - Read `references/wrapper-alignment.md` when updating Copilot agent wrappers, runtime portability claims, or tests.
-- Read `../internal-systems-review/references/plan-completion-audit.md` and
-  `../internal-systems-review/references/scope-drift.md` when completion checks
-  need a full workflow audit.
+- Read `references/imported-support-routing.md` when selecting imported Matt Pocock support for a gateway phase.
+- Load `internal-systems-review` when completion checks need a full workflow
+  audit.
 
 ## Validation
 
@@ -153,6 +154,8 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - `apply-plan` uses `internal-executing-plans` and excludes `dubbi-e-domande.md`.
 - `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
-- `mattpocock-grill-me` is used for non-trivial retained plans or real clarification needs.
+- `grill-me` is used for non-trivial retained plans or real clarification needs.
+- Imported support follows the imported support routing reference and is never a
+  mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

@@ -149,7 +149,7 @@ def log_error(message: str) -> None:
 def find_repo_root(start: Path) -> Path:
     candidate = start.resolve()
     for current in (candidate, *candidate.parents):
-        if (current / ".github").is_dir():
+        if (current / ".github").is_dir() or (current / ".git").exists():
             return current
     raise FileNotFoundError(f"Unable to find repository root from {start}")
 

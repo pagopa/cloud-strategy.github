@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal TDD"
+  short_description: "Test-first delivery through public interfaces"
+  default_prompt: "Use $internal-tdd to deliver this executable behavior with a red-green-refactor loop."

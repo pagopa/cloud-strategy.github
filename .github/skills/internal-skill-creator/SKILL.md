@@ -96,6 +96,7 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - When a skill sits behind a paired agent or local references, keep one owner per detail layer: route and boundary in the agent, reusable workflow in `SKILL.md`, and deep detail in `references/`.
 - Prefer `references/` over new `scripts/` for static tables, starter templates, and audit taxonomies. Add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - Keep cross-references explicit instead of duplicating large chunks of generic bundle guidance.
+- In `SKILL.md`, reference another skill by name and behavior only. Do not cite file paths inside another skill bundle; those files are private to the owning skill and may change.
 - In source-side skill Markdown, cite only paths that exist on disk in the source repository. When sync materializes a target-only file, prefer the source template path or descriptive prose over the consumer-only materialized path.
 - Do not mirror the full OpenAI bundle workflow in this skill. Point to it when the remaining task is already covered there.
 - A good outcome may be reuse, narrowing, deletion, or replacement. Do not let the workflow bias toward creating another skill.
@@ -152,6 +153,7 @@ Then confirm:
 - the skill reads like a reusable guide instead of a one-off narrative.
 - the edited skill does not repeat agent-owned routing or boundary language.
 - the edited skill points to reference-owned deep material instead of copying it back into `SKILL.md`.
+- the edited `SKILL.md` does not point at another skill's internal files.
 - any paired agent or local references still agree with the skill boundary when they exist.
 - OpenAI-side scaffolding or validation was invoked only when the remaining work actually required it.
 - the retrieval and pressure tests appropriate to the skill type have actually been run.

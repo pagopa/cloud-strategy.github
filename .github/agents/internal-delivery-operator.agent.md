@@ -26,11 +26,11 @@ You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-
 ## Optional Support Skills
 
 - `superpowers-verification-before-completion`
-- `superpowers-test-driven-development`
-- `superpowers-systematic-debugging`
-- `superpowers-requesting-code-review`
 - `superpowers-using-git-worktrees`
 - `internal-executing-plans`
+- `internal-debugging`
+- `internal-tdd`
+- `internal-performance-optimization`
 - `internal-lesson-codification`
 - `internal-agent-creator`
 
@@ -44,6 +44,9 @@ You are the Copilot wrapper for `execute` mode in `internal-gateway-operational-
 - Keep improvement ideas separate unless they are required for the requested scope or validation fix.
 - Before completion, use the `internal-gateway-operational-flow` completion checks and report `Check 1`, `Check 2`, and `Check 3`.
 - Use `internal-agent-support-next-step` when recommending review or another visible transition.
+- Use `internal-debugging` for failures or unexpected behavior, `internal-tdd`
+  for test-first executable seams, and `internal-performance-optimization` when
+  measured performance is the primary problem.
 
 ## Routing Rules
 

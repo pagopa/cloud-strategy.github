@@ -37,6 +37,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - If local references own the deep tables, templates, or examples, point to them instead of copying them back into `SKILL.md`.
 - Prefer moving static lookup tables, starter templates, and detailed taxonomies into `references/`.
 - Prefer new `references/` over new `scripts/` unless the workflow is deterministic, repeated, and execution-heavy.
+- Reference other skills by skill name and owner behavior, not by file paths inside their bundles.
 - Prefer one strong example over several repetitive ones.
 
 ## Test posture

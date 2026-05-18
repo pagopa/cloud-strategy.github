@@ -166,13 +166,15 @@ Source repositories:
 Managed skills:
 
 - `caveman` -> `mattpocock-caveman`
-- `diagnose` -> `mattpocock-diagnose`
-- `grill-me` -> `mattpocock-grill-me`
-- `grill-with-docs` -> `mattpocock-grill-with-docs`
-- `improve-codebase-architecture` -> `mattpocock-improve-codebase-architecture`
-- `setup-matt-pocock-skills` -> `mattpocock-setup-matt-pocock-skills`
-- `tdd` -> `mattpocock-tdd`
+- `grill-me` -> `grill-me`
 - `zoom-out` -> `mattpocock-zoom-out`
+
+Retired upstream items that were extracted into internal owners are tracked in
+the alert-only watchlist owned by `local-agent-sync-external-resources`.
+
+Approved in-place overrides:
+
+- `grill-me`: replay `grill-me-bulk-recommended-questions` after each refresh so the skill asks its initial question set as a dependency-ordered numbered list with recommendations accepted by default, while still surfacing contradictions, risks, and unresolved follow-up questions.
 
 ### `openai/skills`
 

@@ -1,6 +1,14 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
+
+CROSS_SKILL_FILE_PATTERN = re.compile(
+    r"(?P<target>"
+    r"(?:\.\./(?P<relative_skill>[A-Za-z0-9._-]+)"
+    r"|\.github/skills/(?P<absolute_skill>[A-Za-z0-9._-]+))"
+    r"/(?:SKILL\.md|references/|scripts/|assets/|agents/)[^`\\s)>]*)"
+)
 
 
 def read_text(relative_path: str) -> str:
@@ -55,8 +63,12 @@ def test_superpowers_assets_use_tmp_superpowers_for_transient_paths() -> None:
     for relative_path in superpowers_paths:
         assert "docs/superpowers" not in read_text(relative_path)
 
-    assert "tmp/superpowers/" in read_text(".github/skills/superpowers-brainstorming/SKILL.md")
-    assert "tmp/superpowers/" in read_text(".github/skills/superpowers-writing-plans/SKILL.md")
+    assert "tmp/superpowers/" in read_text(
+        ".github/skills/superpowers-brainstorming/SKILL.md"
+    )
+    assert "tmp/superpowers/" in read_text(
+        ".github/skills/superpowers-writing-plans/SKILL.md"
+    )
 
 
 def test_superpowers_workflows_do_not_claim_deterministic_textual_governance_maintenance() -> (
@@ -144,6 +156,8 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
         "When a skill sits behind a paired agent or local references"
         in skill_creator_text
     )
+    assert "reference another skill by name and behavior only" in skill_creator_text
+    assert "not by file paths inside their bundles" in writing_skills_text
     assert "If the skill sits behind a paired agent" in writing_skills_text
 
 
@@ -160,9 +174,11 @@ def test_gateway_contains_completion_checks() -> None:
 
 
 def test_gateway_points_to_plan_completion_audit_reference() -> None:
-    gateway_text = read_text(".github/skills/internal-gateway-operational-flow/SKILL.md")
+    gateway_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    )
 
-    assert "plan-completion-audit.md" in gateway_text
+    assert "plan-completion audit" in gateway_text
     assert "Status Vocabulary" not in gateway_text
     assert_contains_all(
         ".github/skills/internal-systems-review/references/plan-completion-audit.md",
@@ -184,18 +200,39 @@ def test_systems_review_lens_referenced() -> None:
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
-        ("internal-systems-review", "plan-completion-audit.md", "scope-drift.md"),
+        ("internal-systems-review", "plan-completion audit", "scope-drift analysis"),
     )
 
 
 def test_security_review_promotion_gated() -> None:
     review_guard_text = read_text(".github/agents/internal-review-guard.agent.md")
-    optional_support = review_guard_text.split("## Optional Support Skills", maxsplit=1)[1]
+    gateway_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    )
+    systems_review_text = read_text(".github/skills/internal-systems-review/SKILL.md")
+    review_lenses_text = read_text(
+        ".github/skills/internal-systems-review/references/review-lenses.md"
+    )
+    optional_support = review_guard_text.split(
+        "## Optional Support Skills", maxsplit=1
+    )[1]
     optional_support = optional_support.split("## Core Rules", maxsplit=1)[0]
 
     assert not Path(".github/skills/internal-security-review").exists()
     assert "internal-security-review" not in optional_support
-    assert "Treat `internal-security-review` as unavailable until promoted" in review_guard_text
+    assert (
+        "Treat `internal-security-review` as unavailable until promoted"
+        in review_guard_text
+    )
+    assert (
+        "future `internal-security-review` only after that skill exists" in gateway_text
+    )
+    assert (
+        "Use a promoted `internal-security-review` only after that skill exists"
+        in systems_review_text
+    )
+    assert "Owner skill | `internal-security-review`" not in review_lenses_text
+    assert "Route: `internal-security-review`" not in review_lenses_text
 
 
 def test_plan_completion_audit_reference_exists() -> None:
@@ -267,23 +304,111 @@ def test_completion_report_states_present() -> None:
     )
 
 
+def test_completion_report_requires_evidence_envelope() -> None:
+    assert_contains_all(
+        ".github/skills/internal-executing-plans/references/completion-report.md",
+        (
+            "Evidence envelope",
+            "Evidence gaps",
+            "Residual risks",
+            "`SHIPPED` requires passed validators and a completed report",
+            "item-level evidence",
+            "mark the item `UNVERIFIABLE` instead of",
+            "claiming `SHIPPED`",
+        ),
+    )
+
+
 def test_resume_protocol_reference_exists() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
-        ("Verify-first Sequence", "`done-*`", "`git diff`", "validators", "Status Report Template"),
+        (
+            "Verify-first Sequence",
+            "`done-*`",
+            "`git diff`",
+            "validators",
+            "Status Report Template",
+        ),
     )
+
+
+def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
+    assert_contains_all(
+        ".github/skills/internal-executing-plans/references/resume-protocol.md",
+        (
+            "lacks an item/evidence table or evidence-envelope pointer",
+            "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
+        ),
+    )
+
+
+def test_plan_completion_audit_uses_evidence_envelope_for_removed_plan_files() -> None:
+    assert_contains_all(
+        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        (
+            "Evidence Envelope Inputs",
+            "Numbered plan files were correctly removed by the `done-*` loop",
+            "evidence envelope as the plan-to-delivery source",
+            "preserves item, status, evidence, and route",
+        ),
+    )
+
+
+def test_executing_plans_points_to_evidence_envelope_without_table_duplication() -> (
+    None
+):
+    executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
+
+    assert (
+        "evidence envelope with item, status,\n  evidence, and route"
+        in executing_plans_text
+    )
+    assert "Source item or source `done-*` file" not in executing_plans_text
+    assert "| Source done file | Reconstructed item |" not in executing_plans_text
+
+
+def test_workflow_first_followup_evidence_envelope_covers_done_files() -> None:
+    envelope_path = Path("tmp/superpowers/workflow-first-followup/evidence-envelope.md")
+    done_files = sorted(
+        Path("tmp/superpowers/workflow-first-followup").glob("done-*.md")
+    )
+
+    assert envelope_path.exists()
+    assert done_files
+
+    envelope_text = envelope_path.read_text(encoding="utf-8")
+
+    assert "| Status |" in envelope_text
+    assert "| Evidence path or command |" in envelope_text
+
+    for done_file in done_files:
+        assert f"`{done_file.name}`" in envelope_text
 
 
 def test_audit_dispatch_reference_exists() -> None:
     assert_contains_all(
         ".github/skills/internal-systems-review/references/audit-dispatch.md",
-        ("More than 6 numbered plan files", "400 changed diff lines", "Typed findings", "spot-check"),
+        (
+            "More than 6 numbered plan files",
+            "400 changed diff lines",
+            "Typed findings",
+            "spot-check",
+        ),
     )
 
 
-def test_decision_brief_template_referenced() -> None:
-    assert "references/decision-brief.md" in read_text(
-        ".github/skills/internal-agent-support-next-step/SKILL.md"
+def test_decision_brief_template_owner_referenced_without_cross_skill_path() -> None:
+    gateway_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    )
+
+    assert (
+        "Use `internal-agent-support-next-step` for durable Decision Brief"
+        in gateway_text
+    )
+    assert (
+        "../internal-agent-support-next-step/references/decision-brief.md"
+        not in gateway_text
     )
     assert_contains_all(
         ".github/skills/internal-agent-support-next-step/references/decision-brief.md",
@@ -299,12 +424,35 @@ def test_decision_brief_template_referenced() -> None:
     )
 
 
+def test_skill_bodies_reference_other_skills_by_name_not_bundle_file_path() -> None:
+    violations: list[str] = []
+
+    for skill_path in sorted(Path(".github/skills").glob("*/SKILL.md")):
+        skill_name = skill_path.parent.name
+        for match in CROSS_SKILL_FILE_PATTERN.finditer(
+            skill_path.read_text(encoding="utf-8")
+        ):
+            referenced_skill = match.group("relative_skill") or match.group(
+                "absolute_skill"
+            )
+            if referenced_skill != skill_name:
+                violations.append(
+                    f"{skill_path.as_posix()} references {match.group('target')}"
+                )
+
+    assert violations == []
+
+
 def test_lessons_learned_is_not_workflow_contract_owner() -> None:
     lessons_text = read_text("LESSONS_LEARNED.md")
-    checklist_text = read_text("tmp/superpowers/workflow-first-followup/promotion-checklist.md")
+    checklist_text = read_text(
+        "tmp/superpowers/workflow-first-followup/promotion-checklist.md"
+    )
 
     assert "Plan Completion Audit |" not in lessons_text
-    assert "large comparison corpus under `tmp/external-comparison/`" not in lessons_text
+    assert (
+        "large comparison corpus under `tmp/external-comparison/`" not in lessons_text
+    )
     assert "always-on, cross-cutting, stack-specific lenses" not in lessons_text
     assert "entry Decision Brief and an exit completion report" not in lessons_text
     assert "No new `LESSONS_LEARNED.md` row is added by default" in checklist_text

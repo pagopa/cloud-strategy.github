@@ -118,7 +118,7 @@ Prefer these operations when available:
 
 - `references/official-source-map.md`
 - `references/mcp-capabilities.md`
-- `../internal-aws-strategic/SKILL.md`
-- `../internal-aws-organization-structure/SKILL.md`
-- `../internal-aws-governance/SKILL.md`
-- `../internal-aws-operations/SKILL.md`
+- `internal-aws-strategic`
+- `internal-aws-organization-structure`
+- `internal-aws-governance`
+- `internal-aws-operations`

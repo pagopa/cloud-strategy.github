@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Debugging"
+  short_description: "Root-cause debugging for repository failures"
+  default_prompt: "Use $internal-debugging to diagnose this failure from a reproducible feedback loop."

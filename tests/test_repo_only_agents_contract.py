@@ -9,6 +9,23 @@ SYNC_AGENTS = {
     "local-sync-global-copilot-configs-into-repo": ".github/agents/local-sync-global-copilot-configs-into-repo.agent.md",
 }
 
+WATCHLIST_PATH = Path(
+    ".github/skills/local-agent-sync-external-resources/references/external-watchlist.yaml"
+)
+
+
+def retired_mattpocock_ids() -> tuple[str, ...]:
+    return tuple(
+        f"mattpocock-{suffix}"
+        for suffix in (
+            "diagnose",
+            "tdd",
+            "improve-codebase-architecture",
+            "grill-with-docs",
+            "setup-matt-pocock-skills",
+        )
+    )
+
 
 def load_frontmatter(relative_path: str) -> dict[str, object]:
     text = Path(relative_path).read_text(encoding="utf-8")
@@ -48,6 +65,40 @@ def test_repo_only_sync_agents_keep_their_named_operating_engines() -> None:
 
     assert "- `local-agent-sync-external-resources`" in sync_control_center
     assert "- `local-agent-sync-global-copilot-configs-into-repo`" in sync_global
+
+
+def test_mattpocock_sync_scope_keeps_only_active_managed_imports() -> None:
+    sync_control_center = read_body(
+        ".github/agents/local-sync-external-resources.agent.md"
+    )
+    sync_global = read_body(
+        ".github/agents/local-sync-global-copilot-configs-into-repo.agent.md"
+    )
+    combined_text = f"{sync_control_center}\n{sync_global}"
+
+    assert "`caveman` -> `mattpocock-caveman`" in combined_text
+    assert "`grill-me` -> `grill-me`" in combined_text
+    assert "`zoom-out` -> `mattpocock-zoom-out`" in combined_text
+    for retired_id in retired_mattpocock_ids():
+        assert retired_id not in combined_text
+
+
+def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
+    payload = yaml.safe_load(WATCHLIST_PATH.read_text(encoding="utf-8"))
+    items = payload["items"]
+    owners = {item["local_owner"] for item in items}
+
+    assert payload["version"] == 1
+    assert len(items) == 5
+    assert all(item["source_family"] == "mattpocock/skills" for item in items)
+    assert all(item["action"] == "alert-only" for item in items)
+    assert {
+        "internal-debugging",
+        "internal-tdd",
+        "internal-systems-review",
+        "internal-writing-plans",
+        "local-agent-sync-external-resources",
+    } <= owners
 
 
 def test_direct_entry_model_keeps_removed_router_assets_out_of_live_catalog() -> None:

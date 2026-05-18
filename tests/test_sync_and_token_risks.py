@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from lib.shared import find_repo_root
 from lib.syncing import apply_sync_plan, build_sync_plan, write_sync_plan
 from lib.token_risks import (
     ROOT_ALWAYS_ON_PATHS,
@@ -38,6 +39,19 @@ def init_git_repo(root: Path) -> None:
 def commit_all(root: Path, message: str) -> None:
     run_git(root, "add", "-A")
     run_git(root, "commit", "-m", message)
+
+
+def test_find_repo_root_accepts_git_repo_without_github_directory(
+    tmp_path: Path,
+) -> None:
+    target_root = tmp_path / "target"
+    nested_path = target_root / "nested" / "path"
+
+    target_root.mkdir(parents=True)
+    init_git_repo(target_root)
+    nested_path.mkdir(parents=True)
+
+    assert find_repo_root(nested_path) == target_root
 
 
 def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(

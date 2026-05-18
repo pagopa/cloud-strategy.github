@@ -79,8 +79,8 @@ Load `references/template-examples.md` when you need a minimal inline feature ex
 
 ## Imported complements
 
-- Load `.github/skills/terraform-terraform-search-import/SKILL.md` when existing unmanaged resources must be discovered or bulk-imported into Terraform state.
-- Load `.github/skills/terraform-terraform-test/SKILL.md` when authoring `.tftest.hcl` coverage, choosing plan-vs-apply test modes, or troubleshooting Terraform test execution.
+- Load `terraform-terraform-search-import` when existing unmanaged resources must be discovered or bulk-imported into Terraform state.
+- Load `terraform-terraform-test` when authoring `.tftest.hcl` coverage, choosing plan-vs-apply test modes, or troubleshooting Terraform test execution.
 
 ## Common mistakes
 

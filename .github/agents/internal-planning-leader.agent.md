@@ -29,14 +29,14 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 
 ## Optional Support Skills
 
-- `superpowers-brainstorming`
 - `internal-writing-plans`
 - `internal-executing-plans`
 - `internal-agent-creator`
 - `internal-copilot-audit`
 - `internal-copilot-docs-research`
 - `internal-systems-review`
-- `mattpocock-grill-me`
+- `grill-me`
+- `mattpocock-zoom-out`
 
 ## Core Rules
 
@@ -45,7 +45,8 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 - Keep retained planning under `tmp/superpowers/` only when the repository plan policy requires it.
 - Provide the Decision Brief projection after retained plans or material reformulations.
 - Do not default into implementation once the design is settled; recommend the next owner with `internal-agent-support-next-step`.
-- Use `mattpocock-grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is created, reformulated, or validated.
+- Use `grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is created, reformulated, or validated.
+- Use imported Matt Pocock support only as conditional lenses through `internal-gateway-operational-flow`; keep situational or dormant imports out of the wrapper list unless the task proves they are needed.
 
 ## Routing Rules
 

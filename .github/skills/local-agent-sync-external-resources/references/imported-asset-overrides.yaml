@@ -80,3 +80,18 @@ overrides:
     baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
+  - id: grill-me-bulk-recommended-questions
+    target_path: .github/skills/grill-me/SKILL.md
+    source_family: mattpocock/skills
+    lifecycle_mode: post-refresh-patch
+    apply_strategy: git-apply-3way
+    approval: explicit-user-counter-validated
+    reason: >-
+      Default the initial grilling pass to a dependency-ordered numbered
+      question set with clear recommendations that the user can accept by
+      default, while preserving follow-up pressure on contradictions, risks,
+      and unresolved decisions.
+    patch_path: patches/grill-me.patch
+    expected_content_hash: de1b2c815d661827ecc6d53b394b7a163acbf0502ca562f4df4d390c12d6e3f5
+    baseline_repo_commit: "e74f006"
+    validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

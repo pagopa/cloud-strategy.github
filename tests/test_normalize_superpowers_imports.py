@@ -9,7 +9,9 @@ def load_module():
     script_path = Path(
         ".github/skills/local-agent-sync-external-resources/scripts/normalize_superpowers_imports.py"
     )
-    spec = importlib.util.spec_from_file_location("normalize_superpowers_imports", script_path)
+    spec = importlib.util.spec_from_file_location(
+        "normalize_superpowers_imports", script_path
+    )
     module = importlib.util.module_from_spec(spec)
     assert spec is not None
     assert spec.loader is not None
@@ -61,7 +63,8 @@ def test_normalizer_detects_and_applies_legacy_skill_drift(tmp_path: Path) -> No
         "---\nname: local-demo\ntools: [read]\n---\n\n- `obra-demo`\n",
     )
     write_file(
-        tmp_path / ".github/skills/local-agent-sync-external-resources/patches/obra-demo.patch",
+        tmp_path
+        / ".github/skills/local-agent-sync-external-resources/patches/obra-demo.patch",
         "diff --git a/.github/skills/obra-demo/SKILL.md b/.github/skills/obra-demo/SKILL.md\n",
     )
 
@@ -75,18 +78,18 @@ def test_normalizer_detects_and_applies_legacy_skill_drift(tmp_path: Path) -> No
     assert changes
     assert not (tmp_path / ".github/skills/obra-demo").exists()
     assert (tmp_path / ".github/skills/superpowers-demo/SKILL.md").is_file()
-    assert (
-        "name: superpowers-demo"
-        in (tmp_path / ".github/skills/superpowers-demo/SKILL.md").read_text(encoding="utf-8")
-    )
-    assert (
-        "superpowers-demo"
-        in (tmp_path / ".github/agents/local-demo.agent.md").read_text(encoding="utf-8")
-    )
+    assert "name: superpowers-demo" in (
+        tmp_path / ".github/skills/superpowers-demo/SKILL.md"
+    ).read_text(encoding="utf-8")
+    assert "superpowers-demo" in (
+        tmp_path / ".github/agents/local-demo.agent.md"
+    ).read_text(encoding="utf-8")
     assert not (
-        tmp_path / ".github/skills/local-agent-sync-external-resources/patches/obra-demo.patch"
+        tmp_path
+        / ".github/skills/local-agent-sync-external-resources/patches/obra-demo.patch"
     ).exists()
     assert (
-        tmp_path / ".github/skills/local-agent-sync-external-resources/patches/superpowers-demo.patch"
+        tmp_path
+        / ".github/skills/local-agent-sync-external-resources/patches/superpowers-demo.patch"
     ).is_file()
     assert module.detect_drift(tmp_path, config) == []

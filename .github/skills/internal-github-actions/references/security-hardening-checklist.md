@@ -23,4 +23,4 @@ Use this checklist when a workflow touches deployment, secrets, self-hosted runn
 - [ ] Forked or untrusted jobs do not gain access to deployment credentials.
 - [ ] Production deploys use protected environments with reviewers.
 
-Route organization-wide rulesets, runner governance, and GitHub App policy questions to `.github/skills/internal-github-governance/SKILL.md`.
+Route organization-wide rulesets, runner governance, and GitHub App policy questions to `internal-github-governance`.

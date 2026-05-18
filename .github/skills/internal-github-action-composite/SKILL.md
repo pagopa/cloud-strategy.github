@@ -61,8 +61,8 @@ description: Use when creating or modifying a reusable GitHub composite action u
 
 ## Cross-references
 
-- **internal-github-actions** (`.github/skills/internal-github-actions/SKILL.md`): for the umbrella GitHub Actions lane and reuse-pattern selection.
-- **internal-script-bash** (`.github/skills/internal-script-bash/SKILL.md`): for extracted shell scripts inside the action.
+- **internal-github-actions**: for the umbrella GitHub Actions lane and reuse-pattern selection.
+- **internal-script-bash**: for extracted shell scripts inside the action.
 
 ## Validation checklist
 

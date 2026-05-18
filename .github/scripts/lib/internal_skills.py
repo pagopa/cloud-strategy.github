@@ -11,6 +11,7 @@ INLINE_PATH_PATTERN = re.compile(
     r"`("
     r"AGENTS\.md"
     r"|\.github/[A-Za-z0-9._/\-]+"
+    r"|\.\./[A-Za-z0-9._/\-]+"
     r"|tmp/[A-Za-z0-9._/\-]+"
     r"|(?:references|scripts|assets|agents)/[A-Za-z0-9._/\-]+"
     r")`"
@@ -270,6 +271,17 @@ def validate_local_references(root: Path, skill_dir: Path) -> list[Finding]:
             if key in seen:
                 continue
             seen.add(key)
+            if is_cross_skill_file_reference(root, skill_dir, resolved):
+                findings.append(
+                    Finding(
+                        severity="blocking",
+                        code="cross-skill-file-reference",
+                        path=markdown_file.as_posix(),
+                        message=f"Skill Markdown points at another skill's internal file: {target}",
+                        suggestion="Reference the owning skill by name and behavior instead of linking to files inside another skill bundle.",
+                    )
+                )
+                continue
             if not resolved.exists():
                 findings.append(
                     Finding(
@@ -282,6 +294,21 @@ def validate_local_references(root: Path, skill_dir: Path) -> list[Finding]:
                 )
 
     return findings
+
+
+def is_cross_skill_file_reference(root: Path, skill_dir: Path, resolved: Path) -> bool:
+    skills_root = (root / ".github" / "skills").resolve()
+    skill_dir = skill_dir.resolve()
+    resolved = resolved.resolve()
+    try:
+        resolved.relative_to(skills_root)
+    except ValueError:
+        return False
+    try:
+        resolved.relative_to(skill_dir)
+    except ValueError:
+        return True
+    return False
 
 
 def validate_token_hygiene(skill_dir: Path, skill_md: Path, body: str) -> list[Finding]:

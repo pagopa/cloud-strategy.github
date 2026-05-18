@@ -13,14 +13,16 @@ completion report is evidence packaging, not a free-form summary.
 
 | State | Criteria |
 | --- | --- |
-| `SHIPPED` | All in-scope items are implemented or intentionally closed, validators passed, and the completion report is filled. |
+| `SHIPPED` | All in-scope items are implemented or intentionally closed, validators passed, required evidence envelope coverage exists, and the completion report is filled. |
 | `APPLIED_UNVERIFIED` | Edits were applied, but required validator, review, or evidence coverage is missing. |
 | `PARTIAL` | Some in-scope items remain incomplete or intentionally deferred. |
 | `BLOCKED` | A real blocker prevents correct continuation. |
 | `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. |
 
-`SHIPPED` requires passed validators and a completed report. If validators cannot
-run, use `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED` with the explicit gap.
+`SHIPPED` requires passed validators and a completed report. Non-trivial retained
+plans also require an evidence envelope or equivalent item-level evidence. If
+validators or evidence coverage cannot run, use `APPLIED_UNVERIFIED`, `PARTIAL`,
+or `BLOCKED` with the explicit gap.
 
 ## Required Fields
 
@@ -30,9 +32,28 @@ run, use `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED` with the explicit gap.
 - Items completed.
 - Intentional non-actions.
 - Validators or tests run.
+- Evidence envelope.
 - Evidence gaps.
 - Residual risks.
 - Follow-up suggestions separated from required work.
+
+## Evidence Envelope
+
+For non-trivial retained plans, include or link an evidence envelope. The
+envelope must map each retained-plan item or reconstructed `done-*` item to a
+status, evidence path or command, and route.
+
+Minimum fields:
+
+- Source item or source `done-*` file.
+- Reconstructed item when the original numbered plan file was already removed.
+- Status using `DONE`, `PARTIAL`, `NOT_DONE`, `CHANGED`, or `UNVERIFIABLE`.
+- Evidence path, artifact, or command.
+- Route for unresolved or intentionally deferred work.
+
+If a `done-*` marker lacks enough item-level evidence and no independent file,
+diff, or validator evidence exists, mark the item `UNVERIFIABLE` instead of
+claiming `SHIPPED`.
 
 ## Review Tiers
 
@@ -52,6 +73,7 @@ Files changed: <paths>
 Completed items: <items>
 Intentional non-actions: <items or none>
 Validators: <commands and outcomes>
+Evidence envelope: <path or item-level evidence summary>
 Evidence gaps: <gaps or none>
 Residual risks: <risks or none>
 Follow-up suggestions: <separate optional ideas>

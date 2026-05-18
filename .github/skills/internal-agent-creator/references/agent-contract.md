@@ -64,7 +64,7 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 ## Platform Verification Gate
 
 - Before claiming that a frontmatter property is supported, unsupported, deprecated, or behaves in a specific way, verify against the live official documentation.
-- Load `internal-copilot-docs-research` and `.github/skills/internal-copilot-docs-research/references/official-source-map.md` to identify the authoritative page.
+- Load `internal-copilot-docs-research` to identify the authoritative page.
 - Open the authoritative page for the surface involved: VS Code custom agents, GitHub.com custom agents, or subagents.
 - If the live docs contradict the current assumption, stop and tell the user what changed before proceeding.
 - If the docs are unreachable, state explicitly that the platform claim is unverified and proceed with caution.
