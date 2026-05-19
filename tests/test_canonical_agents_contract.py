@@ -225,9 +225,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         CANONICAL_AGENTS["internal-gateway-operational-flow"]
     )
     operational_body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
-    assert "plan, execute, apply-plan, review" in operational_frontmatter[
-        "description"
-    ]
+    assert "plan, execute, apply-plan, review" in operational_frontmatter["description"]
     assert "multiple credible paths" in skill_text
     assert "full-cycle" in operational_body
 
@@ -401,7 +399,9 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
 
     assert "Failure diagnosis belongs to `internal-debugging`" in wrapper_alignment_text
     assert "Test-first delivery belongs to `internal-tdd`" in wrapper_alignment_text
-    assert "Code defect review belongs to `internal-code-review`" in wrapper_alignment_text
+    assert (
+        "Code defect review belongs to `internal-code-review`" in wrapper_alignment_text
+    )
     assert "internal-systems-review" in wrapper_alignment_text
     assert "## Orientation Map Lens" in systems_review_text
     assert "## Orientation Output" in systems_review_text

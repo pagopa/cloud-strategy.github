@@ -35,12 +35,8 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
 
-    assert (
-        "plan, execute, apply-plan, review" in operational_flow_agent_text
-    )
-    assert (
-        "single-lane and single-phase" in simple_task_agent_text
-    )
+    assert "plan, execute, apply-plan, review" in operational_flow_agent_text
+    assert "single-lane and single-phase" in simple_task_agent_text
     assert (
         "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
         in operating_model_text
@@ -264,9 +260,10 @@ def test_security_review_promotion_gated() -> None:
         ".github/skills/internal-systems-review/references/review-lenses.md"
     )
     assert not Path(".github/skills/internal-security-review").exists()
-    assert "internal-security-review" not in wrapper_alignment_text.split(
-        "## Future Security Lens", maxsplit=1
-    )[0]
+    assert (
+        "internal-security-review"
+        not in wrapper_alignment_text.split("## Future Security Lens", maxsplit=1)[0]
+    )
     assert "## Future Security Lens" in Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
