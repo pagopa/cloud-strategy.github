@@ -89,6 +89,11 @@ block, escalate instead of continuing inside simple mode.
 6. Run focused validation, or name the explicit validation gap.
 7. If the task stops being simple, stop and issue an escalation alert.
 
+Keep the first read budget small: one target or owner file, one matching scoped
+instruction when applicable, and one nearby validator or test identified with
+`rg`. Open test files only when the exact assertion, fixture, or failure output
+is needed for the quick lane.
+
 ## Quick Lanes
 
 - `answer`: explain or decide from repository evidence without editing files.

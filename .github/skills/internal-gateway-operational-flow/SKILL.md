@@ -92,6 +92,24 @@ Prompt-specific intent wins over the default. A direct review request starts in 
 
 When the user references a retained plan folder generically, for example "analyze this plan" or "write this plan", inspect the folder first. Read `01-riassunto-direzione-e-decisione.md` before selecting the phase, use its `Uso consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, and `Budget lettura` to classify the folder, and treat missing summary semantics as a planning defect rather than guessing the lane. Keep this first pass narrow: target existence, riskiest claim, and nearest validator or explicit gap.
 
+## Token And Read Discipline
+
+Use the smallest evidence pass that can safely choose the owner and next action.
+
+- Classify the request, phase, target path, owner, anti-scope, and nearest
+  validation before broad reading.
+- For `plan-only`, identify validators, tests, and contract files with `rg`
+  before opening them. Do not read tests in full only to name future validation.
+- Open a test or validator only when its assertion, fixture shape, or failure
+  output can change the plan, target state, or stop condition.
+- Treat listed references and support skills as on-demand resources. Do not load
+  every referenced file because it appears in an index or optional map.
+- Stop exploration once the plan can state target, assumptions, anti-scope,
+  selected owner, validation path, residual risk, and user decisions.
+- When the user challenges token cost, runtime cost, or slow workflow, treat it
+  as workflow drift. Inspect only the matching skill sections, patch the
+  smallest owner, and validate with the closest available check.
+
 ## Plan Mode
 
 Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, and next-step package. It does not silently become execution after the design is settled.
@@ -100,7 +118,7 @@ Use `grill-me` when the user asks for it, real ambiguity remains, or a non-trivi
 
 After that evidence pass, stop for `grill-me` before writing the plan when unresolved user-only decisions could change scope, owner, target state, validation, rollout, or anti-scope. Do not replace those decisions with silent assumptions. If the user wants to answer in bulk, provide numbered questions with a recommended answer for each; after the bulk answer, continue one question at a time only for unresolved ambiguity.
 
-When the target path includes `AGENTS.md`, `.github/copilot-instructions.md`, `.github/INVENTORY.md`, validators, sync engines, or wrapper agents, treat the plan as governance-sensitive. Include the applicable validation path, such as `make token-risks`, `make github-catalog-validation`, and focused contract tests, or name the explicit validation gap.
+When the target path includes `AGENTS.md`, `.github/copilot-instructions.md`, `.github/INVENTORY.md`, validators, sync engines, or wrapper agents, treat the plan as governance-sensitive. Include the applicable validation path, such as `make token-risks`, `make github-catalog-validation`, and focused contract tests, or name the explicit validation gap. In `plan-only`, name focused tests by path or command without opening them unless their exact assertions affect the decision.
 
 Before claiming `plan complete`, check that `Plan Check 1` covers the decision frame, assumptions, anti-scope, and selected owner; `Plan Check 2` keeps the Decision Brief or retained handoff aligned with the plan; and `Plan Check 3` names concrete validation, evidence gaps, and stop conditions. Use `superpowers-verification-before-completion` for strong plan-completion claims.
 
@@ -199,6 +217,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 
 ## References
 
+- Read references on demand with targeted sections, not as a default bundle.
 - Read `references/mode-contracts.md` for detailed mode boundaries, ownership maps, and medium-task thresholds.
 - Read `references/workflow-maps.md` when documenting or validating quick, planned, and audited workflows.
 - Read `references/wrapper-alignment.md` when updating Copilot agent wrappers, runtime portability claims, imported support, future security lens posture, output projection, or tests.
@@ -219,3 +238,5 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Imported support follows `references/wrapper-alignment.md` and is never a mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.
+- `plan-only` identifies focused validators and tests without broad test-file
+  reading unless the exact assertion can change the plan.

@@ -33,6 +33,8 @@ Use this repository-local variant for small catalog maintenance before escalatin
 
 - Triage `internal-gateway-simple-task` vs `execute` vs `plan` before loading optional references, support skills, or review lenses.
 - Keep the first read budget to one owner file, one nearby validator or test, and one extra reference only when it changes the next safe action.
+- For `plan-only`, use `rg` to identify validators and focused tests; open the
+  test file only when the assertion or failure output can change the plan.
 - Use a short execution loop: targeted `rg` or nearby read, patch, nearby test, `make catalog-fast-check`, then `make github-catalog-validation` once at the end.
 - Add `CATALOG_FAST_INCLUDE_TOKEN_RISKS=1` only when the change touches always-on guidance or shared contracts.
 - Do not open a retained plan or full review mode for one-file or one-owner fixes that fit in the current turn.

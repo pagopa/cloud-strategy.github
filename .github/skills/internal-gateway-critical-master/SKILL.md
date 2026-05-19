@@ -24,6 +24,9 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 
 - Challenge one proposal, plan, decision, or assumption set at a time.
 - Open with the strongest objection or assumption gap, not a broad list.
+- Use the artifact and the smallest local evidence needed for the challenge.
+  Do not open validators, tests, or neighboring references unless a specific
+  claim depends on their exact content.
 - Pressure-test upside as well as downside: identify what the current framing may be preventing, overcomplicating, or falsely treating as mandatory.
 - Do not implement, routine-review, or finalize the plan through this skill.
 - Close with one explicit outcome: `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
