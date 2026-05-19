@@ -51,6 +51,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
   compaction, or a new session.
 - Use `references/completion-report.md` before reporting final retained-plan
   state.
+- Treat `completion-report.md` and `evidence-envelope.md` as late-stage evidence packaging. Refresh them after the current validator and evidence set is stable, not after every intermediate patch.
 - For non-trivial retained plans, `done-*` files must preserve the completed
   item and evidence, or point to an evidence envelope with item, status,
   evidence, and route.

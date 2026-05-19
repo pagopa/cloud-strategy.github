@@ -152,8 +152,14 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
         "When a skill sits behind a paired agent or local references"
         in skill_creator_text
     )
+    assert (
+        "When direct-copy portability or out-of-repo execution is part of the skill contract"
+        in skill_creator_text
+    )
     assert "reference another skill by name and behavior only" in skill_creator_text
     assert "not by file paths inside their bundles" in writing_skills_text
+    assert "If the skill must stay direct-copy portable or runnable outside the source repository" in writing_skills_text
+    assert "validate the bundled entrypoint directly and validate any repository wrapper separately" in writing_skills_text
     assert "If the skill sits behind a paired agent" in writing_skills_text
 
 
@@ -370,6 +376,8 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
             "`SHIPPED` requires passed validators and a completed report",
+            "late-stage packaging artifacts",
+            "not after every intermediate patch",
             "item-level evidence",
             "mark the item `UNVERIFIABLE` instead of",
             "claiming `SHIPPED`",
@@ -442,6 +450,8 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
         "evidence envelope with item, status,\n  evidence, and route"
         in executing_plans_text
     )
+    assert "late-stage evidence packaging" in executing_plans_text
+    assert "not after every intermediate patch" in executing_plans_text
     assert "Source item or source `done-*` file" not in executing_plans_text
     assert "| Source done file | Reconstructed item |" not in executing_plans_text
 
