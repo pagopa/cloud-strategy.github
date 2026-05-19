@@ -145,11 +145,11 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
         in reference_instruction_text
     )
     assert (
-        "When a paired skill or reference is the detailed contract owner"
+        "When an existing core skill or reference is the detailed contract owner"
         in agent_development_text
     )
     assert (
-        "If an agent points to a paired skill or reference as the detailed contract owner"
+        "If an agent points to an existing core skill or reference as the detailed contract owner"
         in agent_contract_text
     )
     assert (

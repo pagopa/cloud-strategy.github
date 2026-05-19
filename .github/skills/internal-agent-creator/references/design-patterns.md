@@ -9,7 +9,7 @@ It distills reusable patterns from richer external agents without carrying over 
 - Docs-first specialist
 - Discovery-first specialist
 - Requirement gate and decision lens
-- Capability-to-skill translation
+- Capability-to-agent-contract translation
 - Command-center workflow
 - Negative boundaries
 - Output contracts
@@ -22,7 +22,7 @@ Use this pattern when the domain changes quickly and the agent is expected to re
 Good docs-first characteristics:
 
 - the route says the agent should confirm current official guidance before finalizing recommendations
-- tool-specific vendor search is translated into a repo-local research skill or a routing rule about official documentation or configured MCP sources
+- tool-specific vendor search is translated into a routing rule about official documentation, configured MCP sources, or an existing research owner
 - the final answer separates documented facts from inferred recommendations
 
 Bad docs-first characteristics:
@@ -42,7 +42,7 @@ Keep only the discovery priorities that materially improve decisions:
 - identify constraints, neighboring systems, or risks
 - recommend the next action in the correct order
 
-Do not copy long question banks into the agent body. If the questioning logic is reusable and detailed, move it into a skill or prompt.
+Do not copy long question banks into the agent body. If the questioning logic is reusable and detailed, stop and route the non-agent work to the right owner.
 
 ## Requirement Gate and Decision Lens
 
@@ -62,7 +62,7 @@ Translate large framework matrices into a short decision lens:
 - state the main tradeoff explicitly
 - keep the lens in routing rules or output expectations instead of copying long handbooks
 
-## Capability-to-Core-Skill Translation
+## Capability-to-Agent-Contract Translation
 
 External agents often expose long tool lists, framework matrices, expertise catalogs, or helper-skill lists. Convert them into repository-local constructs.
 
@@ -70,10 +70,10 @@ External agents often expose long tool lists, framework matrices, expertise cata
 | --- | --- |
 | Expertise bullets | `## Role`, `## Routing Rules`, or `## Output Expectations` |
 | Tool catalogs | Short explicit `tools:` list with canonical aliases that matches the internal agent's role |
-| Platform setup steps | Reference file or skill |
+| Platform setup steps | Reference file, existing owner, or out-of-scope handoff |
 | Slash commands | `## Execution Workflow` when the sequence is core to the role |
-| Generic quality checklist | Skill or reference |
-| Many helper skills | Zero skill references, or one `## Core Skill` when a single reusable owner is required |
+| Generic quality checklist | Reference, existing owner, or out-of-scope handoff |
+| Many helper skills | Zero skill references, or one `## Core Skill` when a single existing reusable owner is required |
 
 Keep only the minimum content needed for routing and operating stance inside the agent.
 
@@ -92,7 +92,7 @@ Bad workflow characteristics:
 
 - platform command syntax copied from upstream
 - mixed implementation detail and governance policy in the same step
-- long nested procedures that belong in a skill
+- long nested procedures that belong outside the agent
 
 ## Negative Boundaries
 
@@ -103,7 +103,7 @@ Include at least one real boundary:
 - `Do not use this agent when ...`
 - `Prefer \`internal-other-agent\` when ...`
 - `If this lane no longer fits, tell the user why and recommend \`internal-other-agent\` instead of routing automatically`
-- `Use the matching skill instead when the work is procedural rather than routing-heavy`
+- `Recommend the better owner when the work is procedural rather than routing-heavy`
 
 If you cannot write a strong negative boundary, the route is probably still too broad.
 
@@ -134,11 +134,11 @@ Smells that point to splitting:
 - the body contains conflicting instructions for different audiences
 - different tasks would expect different output structures
 
-Extract to a skill when the body is mostly reusable procedure:
+Move content out of the agent when the body is mostly reusable procedure:
 
 - large checklists
 - detailed review criteria
 - repeated step-by-step methods
 - domain knowledge that another agent could also reuse
 
-If the role is still cohesive after extraction, keep one broader agent.
+If the role is still cohesive after removing the procedure, keep one broader agent. Treat any required external reusable owner as out of scope for this skill.

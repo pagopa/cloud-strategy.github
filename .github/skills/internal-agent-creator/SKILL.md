@@ -1,6 +1,6 @@
 ---
 name: internal-agent-creator
-description: Use when creating or materially revising a repository-owned Copilot agent under `.github/agents/`, or when deciding whether behavior belongs in an agent, skill, prompt, or instruction.
+description: Use when creating, reviewing, or materially revising a repository-owned Copilot agent under `.github/agents/`.
 metadata:
   short-description: Create, refine, or realign repository-owned Copilot agents
 ---
@@ -11,36 +11,43 @@ metadata:
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `internal-skill-creator`: repository-owned skill authoring route when the main output is a skill.
-- `openai-skill-creator`: bundle anatomy and structural validation after local skill boundaries are clear.
 - `local-agent-sync-external-resources`: sync-managed catalog governance when the decision is keep, refresh, replace, or retire across managed assets.
 - `internal-copilot-docs-research`: current GitHub Copilot or VS Code platform behavior verification.
 
 Use this skill when authoring or materially revising repository-owned agents in `.github/agents/`.
 
-Use `internal-skill-creator` first when the main output is a repository-owned skill under `.github/skills/`. It is the canonical local entrypoint for that work and should handle the repo-local decision gate itself. After that gate is clear, delegate only the remaining bundle anatomy, helper-script, `agents/openai.yaml`, or structural-validation work to `openai-skill-creator` instead of duplicating it. Use `local-agent-sync-external-resources` when deciding keep, refresh, replace, or retire outcomes across the sync-managed catalog rather than improving one agent.
+This workflow is agent-only. If the main requested output is not an agent file or an agent contract review, stop and name the better owner instead of continuing inside this skill.
+
+Use `local-agent-sync-external-resources` when deciding keep, refresh, replace, or retire outcomes across the sync-managed catalog rather than improving one agent.
 
 Prefer a singular core-skill architecture for routers and broader command centers:
 
 - keep routing contract, tool contract, positive boundaries, and output shape in the agent
-- move reusable boundary-recommendation protocols, long decision matrices, threshold rules, ownership maps, and shared operating logic into one repo-owned core skill when the agent depends on that behavior
-- when no one skill is core to the agent, do not add skill-list sections by default
+- cite one existing repo-owned core skill only when it owns required reusable logic for the agent
+- when no one skill is core to the agent, omit skill-list sections
 - mention extra support skills only when the user explicitly asks or a durable local contract justifies the exception
 
 ## When to use
 
 - Create or materially revise a repository-owned agent under `.github/agents/`.
-- Decide whether a repository-owned behavior belongs in an agent, skill, prompt, or instruction.
+- Review a repository-owned agent for route clarity, frontmatter shape, tool scope, output expectations, and subagent controls.
 - Normalize an imported or legacy agent into the repository-owned internal contract.
+
+## When not to use
+
+- The requested deliverable is a skill, prompt, scoped instruction, validator, doc, or sync workflow instead of an agent.
+- The work is catalog-wide sync governance rather than one or more concrete agent contracts.
+- The task needs current GitHub Copilot or VS Code platform facts before agent editing can continue; load `internal-copilot-docs-research` for that verification first.
 
 ## Goals
 
 - Build agents that are easy to route to.
 - Keep one cohesive operating role per agent.
 - Translate imported agent value into repo-local GitHub Copilot form.
-- Move reusable procedures into skills instead of bloating agent bodies.
-- Keep paired agent, skill, and reference bundles coherent by assigning one owner per detail layer instead of letting the same subtopic drift across files.
-- Prefer zero skill references or one explicit core skill, and make delegation-completion, degraded-mode, and anti-stall behavior explicit for routers and coordinator-style agents.
+- Keep long reusable procedures out of agent bodies.
+- Keep paired agent, existing core skill, and reference files coherent without duplicating the same subtopic across files.
+- Prefer zero skill references or one explicit core skill.
+- Make delegation-completion, degraded-mode, and anti-stall behavior explicit for routers and coordinator-style agents.
 - Keep any skill guidance explicit and reviewable when it adds value, without implying platform-enforced execution order or a hidden multi-skill toolchain.
 - Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without cargo-culting obsolete tool wiring.
 - Use current GitHub Copilot custom-agent frontmatter deliberately instead of stripping supported properties by default.
@@ -67,21 +74,21 @@ Use `scripts/audit_agent_contract.py` before material agent authoring or review 
 
 When the source agent already has legacy skill-guidance sections such as `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills`, treat them as benchmark evidence and migration input. Do not copy those sections into a new agent unless the user explicitly asks for a legacy-compatible edit.
 
-When the target agent depends on a paired skill or local references for detailed workflow, load those assets before editing so route, reusable procedure, and deep reference detail stay aligned instead of drifting in parallel.
+When the target agent depends on an existing core skill or local references for detailed workflow, load those assets before editing so route, reusable procedure, and deep reference detail stay aligned instead of drifting in parallel.
 
-## Decision Gate
+## Agent Scope Gate
 
-Pick the right artifact before drafting:
+Proceed only when the requested change is agent-shaped:
 
 | Need | Prefer |
 | --- | --- |
 | Named operating role with routing responsibility | Agent |
-| Front-door router or broad command center with reusable decision logic | Agent + one core skill |
-| Reusable procedure, checklist, or domain workflow | Skill |
-| Short repeatable drafting aid | Prompt |
-| File-type or stack-wide coding rule | Instruction |
+| Front-door router or broad command center with existing reusable decision logic | Agent + one existing core skill |
+| Coordinator or worker behavior with platform subagent controls | Agent |
+| Agent contract review, route cleanup, or imported-agent normalization | Agent edit or review |
+| Reusable procedure, drafting aid, file-type rule, validator, or doc-only content | Out of scope for this skill |
 
-Choose an agent only when the repository benefits from a stable command center or specialist persona. If the draft is mostly procedure, move the procedure into a skill and keep the agent short.
+Choose an agent only when the repository benefits from a stable command center, specialist persona, coordinator, or worker. If the draft is mostly procedure and no existing core skill owns that procedure, stop and report that the request is outside this skill's scope.
 
 ## Agent Contract
 
@@ -95,9 +102,10 @@ Keep these rules visible while drafting:
 - Use `## Core Skill` only when exactly one skill is required for the agent's core behavior.
 - If an agent has no core skill, omit skill-list sections.
 - Do not add `## Optional Support Skills` or `## Mandatory Engine Skills` to new agents by default.
-- When a paired skill or reference is the detailed contract owner, keep the agent boundary-focused and do not re-list the same operational subtopics.
-- Keep delegation controls explicit with `agents:`, `user-invocable`, and `disable-model-invocation` only when they materially enforce the boundary.
-- Keep long procedures in skills, not in the agent body.
+- When an existing core skill or reference is the detailed contract owner, keep the agent boundary-focused and do not re-list the same operational subtopics.
+- Use `agents:`, `user-invocable`, and `disable-model-invocation` only when they materially enforce the boundary.
+- Note that subagents inherit the main session agent, model, and tools unless custom-agent configuration overrides those defaults.
+- Keep long procedures out of the agent body.
 
 ## Platform Verification Gate
 
@@ -112,9 +120,12 @@ Before changing claims about frontmatter support, tool aliases, MCP behavior, or
 Use this split when authoring command-center agents: keep route, stance,
 tool contract, boundaries, and output expectations in the agent; keep shared
 decision matrices, threshold rules, owner maps, degraded-mode behavior, and
-long procedures in one core skill. Front-door routers and planning leaders are
-good candidates. Small executors and lightweight challengers often need no
-core skill.
+long procedures in one existing core skill when that skill already owns the
+logic. Front-door routers and planning leaders are good candidates. Small
+executors and lightweight challengers often need no core skill.
+
+Do not start reusable-owner design from this workflow. If the agent cannot be
+kept clear without a new reusable owner, stop and surface that boundary.
 
 ## Authoring Workflow
 
@@ -122,10 +133,10 @@ core skill.
    Use behavioral scope, not prestige language.
 2. Scan neighboring agents and trigger overlap.
    Compare `description:` lines first and resolve collisions before drafting.
-3. Decide whether the behavior belongs in an agent, a skill, or both.
-   Extract reusable procedure into a skill if the draft starts becoming a playbook.
-4. If the behavior belongs in both, define the split explicitly.
-   Keep route, stance, tool contract, and output shape in the agent; keep reusable procedure in the skill; keep deep tables, templates, and long checklists in references.
+3. Confirm the behavior belongs in an agent.
+   Stop if the main deliverable is a procedure, prompt, scoped instruction, validator, or doc.
+4. If the agent cites an existing core skill, define the split explicitly.
+   Keep route, stance, tool contract, and output shape in the agent; keep deep tables, templates, and long checklists in references.
 5. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
 6. Choose the frontmatter and core-skill strategy intentionally.
@@ -142,8 +153,9 @@ core skill.
 When learning from richer upstream agents, keep the signal and drop the
 scaffolding. Translate tool catalogs to short canonical `tools:` lists,
 expertise catalogs to route or output rules, governance patterns to approval
-boundaries, and helper-skill lists to zero skill references or one core skill.
-Use `references/design-patterns.md` for the detailed translation map.
+boundaries, and helper-skill lists to zero skill references or one existing
+core skill. Use `references/design-patterns.md` for the detailed translation
+map.
 
 ## Governance And Trust Boundaries
 
@@ -165,7 +177,7 @@ Good reasons to split:
 - The declared skills fall into separate clusters with different triggers.
 - Different outcomes are expected by different users.
 
-Do not split only because the file is long. First ask whether the reusable procedure belongs in a skill.
+Do not split only because the file is long. First ask whether the long content belongs outside the agent.
 
 ## Imported Pattern Normalization
 
@@ -174,7 +186,7 @@ When adapting external agents:
 1. Keep the useful mental model or decision sequence.
 2. Delete stale runtime-specific frontmatter and copied tool catalog details that do not belong in the internal contract.
 3. Rewrite naming into the canonical `internal-*` contract.
-4. Replace platform assumptions with repo-local files, skills, and validations.
+4. Replace platform assumptions with repo-local files, existing skills, and validations.
 5. Convert broad expertise claims into concrete routing or output rules.
 
 Do not over-compress a well-structured upstream agent. If its strength comes from a clear requirement gate, decision lens, execution order, or response structure, preserve those patterns in repo-local form instead of reducing everything to flat bullets.
@@ -189,7 +201,7 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - A `## Core Skill` section with more than one skill.
 - New `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills` sections without explicit legacy-compatibility scope.
 - Routers or coordinators that classify only and do not produce a delegated result or blocking explanation.
-- Agent bodies that hide constraints in long narrative prose or duplicate paired skill detail.
+- Agent bodies that hide constraints in long narrative prose or duplicate existing core-skill detail.
 
 ## Validation
 
@@ -198,4 +210,4 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - Confirm name, route, `tools:`, subagent controls, and output expectations with `references/review-checklist.md`.
 - Confirm `## Core Skill`, when present, has exactly one existing skill; otherwise confirm no skill-list section exists.
 - Confirm new agents do not introduce legacy skill headings unless the user explicitly requested legacy compatibility.
-- Confirm paired skills and references stay aligned, and run the closest repository validation after changes that affect agent naming or inventory.
+- Confirm referenced core skills and references stay aligned, and run the closest repository validation after changes that affect agent naming or inventory.

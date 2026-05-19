@@ -70,7 +70,7 @@ An imported agent is organized around commands such as bootstrap, validate, migr
 
 - keep one command-center role
 - use `## Core Rules` for policy guardrails
-- use `## Core Skill` only when one reusable procedure owns the command-center logic
+- use `## Core Skill` only when one existing reusable procedure owns the command-center logic
 - rewrite slash commands into repo-local execution steps
 
 ### Example 2 Internal Pattern
@@ -118,25 +118,25 @@ You are the command center for ...
 - Validation status
 ```
 
-## Example 3: Governance Reviewer to Agent-plus-Skill Split
+## Example 3: Checklist-Heavy Governance Reviewer to Lean Agent
 
-### Example 4 Situation
+### Example 3 Situation
 
 An imported agent is mostly made of checklists, policy rules, and enforcement steps.
 
 ### Decision
 
-Keep a short agent only if named routing matters. Move the detailed review procedure into a skill when another agent could reuse it.
+Keep a short agent only if named routing matters. If the detailed review procedure is the real deliverable and no existing owner already covers it, stop and route out of this agent-only workflow.
 
-### Split Pattern
+### Lean Agent Pattern
 
 Agent owns:
 
 - when the governance route wins
-- which reusable skills it depends on
+- which existing reusable owner it depends on, when that dependency already exists
 - how findings should be reported
 
-Skill owns:
+Existing reusable owner or reference owns:
 
 - detailed checks
 - policy matrices
@@ -145,7 +145,7 @@ Skill owns:
 
 ### Smell
 
-If the agent body reads like a long handbook, it is probably a skill pretending to be an agent.
+If the agent body reads like a long handbook, it is probably outside this skill's agent-only scope.
 
 ## Example 4: Provider Architect with Tool Catalog to Evidence-First Internal Cloud Agent
 
@@ -166,7 +166,7 @@ An imported cloud architect agent has:
 
 ### Example 4 Rewrite
 
-- move stale tool dependencies into repo-local research skills, routing rules about official documentation, or a short current `tools:` list that stays explicit and role-shaped
+- move stale tool dependencies into routing rules about official documentation, existing research owners, or a short current `tools:` list that stays explicit and role-shaped
 - turn the framework matrix into a short decision lens in routing rules or output expectations
 - compress the clarifying questions into a short list of critical constraints
 - keep the route focused on when the provider-specific agent wins

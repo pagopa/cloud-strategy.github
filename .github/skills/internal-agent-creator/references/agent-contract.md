@@ -22,17 +22,17 @@ Use this reference when editing frontmatter, tool scope, core-skill sections, or
 - Never use `color:`.
 - Do not depend on `argument-hint`, `handoffs`, or `hooks` for GitHub.com compatibility.
 
-## Skill Section Contract
+## Core Skill Section Contract
 
-- When an internal agent depends on one repo-owned skill for its required operating logic, add `## Core Skill`.
-- Treat `## Core Skill` as a repository-owned contract for the one skill that must be loaded before the agent's core routing or decision logic runs.
+- When an internal agent depends on one existing repo-owned skill for its required operating logic, add `## Core Skill`.
+- Treat `## Core Skill` as a repository-owned contract for the one existing skill that must be loaded before the agent's core routing or decision logic runs.
 - `## Core Skill` must list exactly one canonical skill identifier, one bullet, in backticks.
 - If the agent has no true core skill, omit skill-list sections entirely.
 - Do not introduce `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills` in new repository-owned agents unless the user explicitly requests a legacy-compatible edit.
-- When an agent depends on a paired skill or reference for detailed workflow, keep the agent summary-level and avoid re-listing the same operational subtopics.
+- When an agent depends on an existing core skill or reference for detailed workflow, keep the agent summary-level and avoid re-listing the same operational subtopics.
 - Do not present `## Core Skill` as a native GitHub Copilot property or as a guarantee that every referenced file will be invoked automatically.
 - When expressing the resource model, treat `superpowers-*` as the cross-cutting workflow lane, `internal-*` as the canonical repository-owned layer, imported skills as support depth by default, and `local-*` as consumer-local extensions. Do not infer strategic, tactical, or operational role from prefix alone.
-- Do not create a 1:1 dedicated skill per agent just for symmetry. Create or cite a core skill only when it owns real reusable logic that would otherwise bloat the agent or drift.
+- Do not add a 1:1 dedicated skill per agent just for symmetry. Cite a core skill only when it already owns real reusable logic that would otherwise bloat the agent or drift.
 - When several neighboring repository-owned agents share the same stop-and-recommend behavior, prefer one shared boundary-recommendation core skill over repeating the same next-owner matrix in every agent body. Keep the route and at least one real boundary in each agent.
 - Router agents are the strongest default candidate for a core skill because their classification matrix, fallback rules, and ownership mapping are highly procedural.
 
@@ -55,9 +55,9 @@ Use this reference when editing frontmatter, tool scope, core-skill sections, or
 - Add `## Skill Usage Contract` only as an explicit exception for a broader command center where the user requested durable multi-skill guidance.
 - Do not keep `## Skill Usage Contract` on a single-core-skill agent.
 - When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order or optional-support catalog.
-- If an agent points to a paired skill or reference as the detailed contract owner, keep deep procedure, matrices, and templates out of the agent body.
+- If an agent points to an existing core skill or reference as the detailed contract owner, keep deep procedure, matrices, and templates out of the agent body.
 - When an agent can influence external actions, call out where human approval or review gates apply.
-- Keep long reusable workflows in skills, not in the agent body.
+- Keep long reusable workflows out of the agent body.
 
 ## Platform Verification Gate
 

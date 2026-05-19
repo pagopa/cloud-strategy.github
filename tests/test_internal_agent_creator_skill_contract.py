@@ -35,7 +35,7 @@ def test_internal_agent_creator_uses_single_core_skill_contract() -> None:
     assert "## Referenced skills" in skill_text
     assert "## Core Skill" in skill_text
     assert "zero skill references or one explicit core skill" in skill_text
-    assert "one repo-owned skill for its required operating logic" in contract_text
+    assert "one existing repo-owned skill for its required operating logic" in contract_text
     assert "must list exactly one canonical skill identifier" in contract_text
     assert "## Core Skill" in template_text
     assert "## Optional Support Skills\n\n-" not in template_text
@@ -49,9 +49,13 @@ def test_internal_agent_creator_has_official_source_map_with_openai_guidance() -
 
     assert "https://docs.github.com/en/copilot/reference/custom-agents-configuration" in source_map
     assert "https://code.visualstudio.com/docs/copilot/agents/subagents" in source_map
-    assert "https://agentskills.io/specification" in source_map
+    assert "https://agentskills.io/specification" not in source_map
+    assert "skill-creation" not in source_map
     assert "https://developers.openai.com/api/docs/guides/prompt-engineering#coding" in source_map
-    assert "https://developers.openai.com/codex/learn/best-practices#improve-reliability-with-testing-and-review" in source_map
+    assert (
+        "https://developers.openai.com/codex/learn/best-practices#improve-reliability-with-testing-and-review"
+        in source_map
+    )
 
 
 def test_internal_agent_creator_scripts_report_agent_and_token_shape() -> None:

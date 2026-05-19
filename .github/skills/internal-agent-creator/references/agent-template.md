@@ -1,6 +1,6 @@
 # Internal Agent Templates
 
-Use the smallest template that matches the job. Keep the body concise and move reusable procedures into skills.
+Use the smallest template that matches the job. Keep the body concise and keep long reusable procedures out of the agent body.
 
 ## 1. Specialist Agent
 
@@ -31,7 +31,7 @@ tools: ['read', 'search']
 
 ## 2. Command-Center Agent
 
-Use this when the agent governs a broader recurring workflow and one core skill owns the reusable procedure.
+Use this when the agent governs a broader recurring workflow and one existing core skill owns the reusable procedure.
 
 ```markdown
 ---
@@ -130,7 +130,7 @@ Focused instructions for the worker's domain.
 
 ## Notes
 
-- `## Core Skill` is optional. Add it only when exactly one skill owns required reusable logic for the agent.
+- `## Core Skill` is optional. Add it only when exactly one existing skill owns required reusable logic for the agent.
 - Do not add `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills` to new repository-owned agents.
 - `## Skill Usage Contract` is an exception for user-approved command centers, not a default template section.
 - `## Core Rules` is optional. Add it when the agent governs policy, scope, or sync behavior.

@@ -14,10 +14,6 @@ contract in `SKILL.md` and `agent-contract.md`.
   `https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-custom-agents`
   - Use for the high-level model: agent profiles are Markdown files with
     frontmatter plus behavior instructions.
-- GitHub agent skills:
-  `https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills`
-  - Use for how skills load by description and when skills are better than
-    broad custom instructions.
 
 ## VS Code Custom Agents
 
@@ -29,17 +25,6 @@ contract in `SKILL.md` and `agent-contract.md`.
   `https://code.visualstudio.com/docs/copilot/agents/subagents`
   - Use for subagent inheritance, `user-invocable`,
     `disable-model-invocation`, `agents: []`, and nested-subagent limits.
-
-## Agent Skills
-
-- Agent Skills specification:
-  `https://agentskills.io/specification`
-  - Use for skill folder shape, frontmatter constraints, progressive
-    disclosure, reference files, scripts, and validation expectations.
-- Agent Skills best practices:
-  `https://agentskills.io/skill-creation/best-practices`
-  - Use for token discipline, moderate detail, validation loops, script
-    bundling, and avoiding generic guidance.
 
 ## OpenAI Guidance
 
@@ -57,7 +42,6 @@ contract in `SKILL.md` and `agent-contract.md`.
 - Product behavior facts come from GitHub or VS Code docs.
 - Agent execution quality guidance may use OpenAI docs when it is about
   prompts, testing, validation, tool-use transparency, or review loops.
-- Skill structure and token discipline come from the Agent Skills
-  specification and repository validators.
+- Bundle token discipline comes from repository validators.
 - Repository policy wins over broader product capability when this repository
   deliberately chooses a narrower contract.
