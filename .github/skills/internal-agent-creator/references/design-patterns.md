@@ -62,9 +62,9 @@ Translate large framework matrices into a short decision lens:
 - state the main tradeoff explicitly
 - keep the lens in routing rules or output expectations instead of copying long handbooks
 
-## Capability-to-Skill Translation
+## Capability-to-Core-Skill Translation
 
-External agents often expose long tool lists, framework matrices, or expertise catalogs. Convert them into repository-local constructs.
+External agents often expose long tool lists, framework matrices, expertise catalogs, or helper-skill lists. Convert them into repository-local constructs.
 
 | Upstream signal | Internal rewrite |
 | --- | --- |
@@ -73,6 +73,7 @@ External agents often expose long tool lists, framework matrices, or expertise c
 | Platform setup steps | Reference file or skill |
 | Slash commands | `## Execution Workflow` when the sequence is core to the role |
 | Generic quality checklist | Skill or reference |
+| Many helper skills | Zero skill references, or one `## Core Skill` when a single reusable owner is required |
 
 Keep only the minimum content needed for routing and operating stance inside the agent.
 
@@ -129,7 +130,7 @@ Split an agent when the routing surface itself is overloaded.
 Smells that point to splitting:
 
 - the route sentence needs multiple unrelated domains
-- declared skills fall into separate clusters with different triggers
+- a proposed core skill cannot be named because the behavior spans separate trigger clusters
 - the body contains conflicting instructions for different audiences
 - different tasks would expect different output structures
 

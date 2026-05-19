@@ -70,7 +70,7 @@ An imported agent is organized around commands such as bootstrap, validate, migr
 
 - keep one command-center role
 - use `## Core Rules` for policy guardrails
-- use `## Skill Usage Contract` only when declared skills are conditional
+- use `## Core Skill` only when one reusable procedure owns the command-center logic
 - rewrite slash commands into repo-local execution steps
 
 ### Example 2 Internal Pattern
@@ -79,6 +79,7 @@ An imported agent is organized around commands such as bootstrap, validate, migr
 ---
 name: internal-example-control-center
 description: Use this agent when the repository needs ...
+tools: ['read', 'search', 'execute']
 ---
 
 # Internal Example Control Center
@@ -93,10 +94,9 @@ You are the command center for ...
 - Treat ... as canonical.
 - Do not preserve fallback variants.
 
-## Skill Usage Contract
+## Core Skill
 
-- `internal-audit-skill`: Use when ...
-- `internal-authoring-skill`: Use when ...
+- `internal-example-core`
 
 ## Routing Rules
 

@@ -21,8 +21,11 @@ Use this checklist before finalizing a new or revised internal agent.
 ## Skill Contract
 
 - Are the skill identifiers exact and canonical?
-- Do all declared skills reinforce the same operating role?
-- Does the agent need `## Skill Usage Contract`, or would that add noise?
+- Does `## Core Skill`, when present, list exactly one skill?
+- Does the core skill own required reusable logic rather than decorative symmetry?
+- If there is no core skill, are skill-list sections absent?
+- Are legacy sections such as `## Mandatory Engine Skills`, `## Optional Support Skills`, and `## Preferred/Optional Skills` absent unless the user explicitly asked for legacy compatibility?
+- Does the agent avoid `## Skill Usage Contract` unless a user-approved exception requires durable multi-skill guidance?
 - If the agent cites a paired skill or reference, does the agent stay summary-level instead of repeating the same subtopic inventory?
 
 ## Output Contract

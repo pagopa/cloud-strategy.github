@@ -10,6 +10,7 @@ Use this when the agent owns one clear specialist role.
 ---
 name: internal-example
 description: Use this agent when the repository needs ...
+tools: ['read', 'search']
 ---
 
 # Internal Example
@@ -30,12 +31,13 @@ description: Use this agent when the repository needs ...
 
 ## 2. Command-Center Agent
 
-Use this when the agent governs a broader recurring workflow and its declared skills are conditional.
+Use this when the agent governs a broader recurring workflow and one core skill owns the reusable procedure.
 
 ```markdown
 ---
 name: internal-example-control-center
 description: Use this agent when the repository needs ...
+tools: ['read', 'search', 'execute']
 ---
 
 # Internal Example Control Center
@@ -48,10 +50,9 @@ description: Use this agent when the repository needs ...
 - Do not ...
 - Treat ... as canonical
 
-## Skill Usage Contract
+## Core Skill
 
-- `internal-skill-a`: Use when ...
-- `internal-skill-b`: Use when ...
+- `internal-example-core`
 
 ## Routing Rules
 
@@ -129,7 +130,9 @@ Focused instructions for the worker's domain.
 
 ## Notes
 
-- `## Skill Usage Contract` is optional. Add it only when the agent owns conditional use of multiple declared skills.
+- `## Core Skill` is optional. Add it only when exactly one skill owns required reusable logic for the agent.
+- Do not add `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills` to new repository-owned agents.
+- `## Skill Usage Contract` is an exception for user-approved command centers, not a default template section.
 - `## Core Rules` is optional. Add it when the agent governs policy, scope, or sync behavior.
 - Repository-owned internal agents should declare `tools:` explicitly. Prefer canonical aliases such as `read`, `edit`, `search`, `execute`, `agent`, and `web`.
 - Keep `tools:` short and role-shaped instead of copying long product-specific tool catalogs.

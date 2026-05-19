@@ -1,6 +1,6 @@
 # Internal Agent Contract Reference
 
-Use this reference when editing frontmatter, tool scope, engine-skill sections, or subagent controls for repository-owned agents.
+Use this reference when editing frontmatter, tool scope, core-skill sections, or subagent controls for repository-owned agents.
 
 ## Frontmatter Contract
 
@@ -24,19 +24,17 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 
 ## Skill Section Contract
 
-- When an internal agent depends on repo-owned skills as its required operating engine, add `## Mandatory Engine Skills`.
-- Treat `## Mandatory Engine Skills` as a repository-owned contract for the skill or skills that must be loaded before the agent's core routing or decision logic runs.
-- Keep mandatory engines short and role-defining. One shared engine or one shared plus one existing tactical engine is normal.
-- `## Optional Support Skills` is optional. Use it only when it materially improves routing clarity, discovery, or command-center usability.
-- Prefer `## Optional Support Skills` over `## Preferred/Optional Skills` for current internal contracts.
-- Use `## Optional Support Skills` only for conditional support skills, not for the required engine.
+- When an internal agent depends on one repo-owned skill for its required operating logic, add `## Core Skill`.
+- Treat `## Core Skill` as a repository-owned contract for the one skill that must be loaded before the agent's core routing or decision logic runs.
+- `## Core Skill` must list exactly one canonical skill identifier, one bullet, in backticks.
+- If the agent has no true core skill, omit skill-list sections entirely.
+- Do not introduce `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills` in new repository-owned agents unless the user explicitly requests a legacy-compatible edit.
 - When an agent depends on a paired skill or reference for detailed workflow, keep the agent summary-level and avoid re-listing the same operational subtopics.
-- When present, a skill-list section is a curated routing and discovery list. List exact canonical skill identifiers, one per bullet, in backticks.
-- Do not present a skill-list section as a native GitHub Copilot property or as a guarantee that every listed skill will be invoked automatically.
+- Do not present `## Core Skill` as a native GitHub Copilot property or as a guarantee that every referenced file will be invoked automatically.
 - When expressing the resource model, treat `superpowers-*` as the cross-cutting workflow lane, `internal-*` as the canonical repository-owned layer, imported skills as support depth by default, and `local-*` as consumer-local extensions. Do not infer strategic, tactical, or operational role from prefix alone.
-- Do not create a 1:1 dedicated skill per agent just for symmetry. Create an engine skill only when it owns real reusable logic that would otherwise bloat the agent or drift.
-- When several neighboring repository-owned agents share the same stop-and-recommend behavior, prefer one shared boundary-recommendation engine over repeating the same next-owner matrix in every agent body. Keep the route and at least one real boundary in each agent.
-- Router agents are the strongest default candidate for a dedicated engine skill because their classification matrix, fallback rules, and ownership mapping are highly procedural.
+- Do not create a 1:1 dedicated skill per agent just for symmetry. Create or cite a core skill only when it owns real reusable logic that would otherwise bloat the agent or drift.
+- When several neighboring repository-owned agents share the same stop-and-recommend behavior, prefer one shared boundary-recommendation core skill over repeating the same next-owner matrix in every agent body. Keep the route and at least one real boundary in each agent.
+- Router agents are the strongest default candidate for a core skill because their classification matrix, fallback rules, and ownership mapping are highly procedural.
 
 ## Delegation And Invocation Controls
 
@@ -54,9 +52,9 @@ Use this reference when editing frontmatter, tool scope, engine-skill sections, 
 
 - Every agent must explain both positive routing and at least one meaningful boundary.
 - Every agent must define `## Output Expectations`.
-- Add `## Skill Usage Contract` only when the agent is a broader command center whose listed support skills are used conditionally.
-- Do not keep `## Skill Usage Contract` on a single-paired-skill agent with no conditional support list.
-- When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order.
+- Add `## Skill Usage Contract` only as an explicit exception for a broader command center where the user requested durable multi-skill guidance.
+- Do not keep `## Skill Usage Contract` on a single-core-skill agent.
+- When `## Skill Usage Contract` is present, explain selection criteria and boundaries, not a blanket execution order or optional-support catalog.
 - If an agent points to a paired skill or reference as the detailed contract owner, keep deep procedure, matrices, and templates out of the agent body.
 - When an agent can influence external actions, call out where human approval or review gates apply.
 - Keep long reusable workflows in skills, not in the agent body.
