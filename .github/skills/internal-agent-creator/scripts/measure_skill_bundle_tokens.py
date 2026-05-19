@@ -36,6 +36,8 @@ def main() -> int:
     totals = {"loaded_docs": 0, "on_demand_docs": 0, "script_code": 0, "other": 0}
 
     for path in sorted(p for p in skill_dir.rglob("*") if p.is_file()):
+        if is_generated(path, skill_dir):
+            continue
         rel = path.relative_to(skill_dir).as_posix()
         tokens = estimate_tokens(path)
         bucket = classify(rel)
@@ -75,6 +77,11 @@ def classify(relative_path: str) -> str:
     if relative_path.startswith("scripts/"):
         return "script_code"
     return "other"
+
+
+def is_generated(path: Path, skill_dir: Path) -> bool:
+    relative_parts = path.relative_to(skill_dir).parts
+    return "__pycache__" in relative_parts or path.suffix in {".pyc", ".pyo"}
 
 
 def estimate_tokens(path: Path) -> int:

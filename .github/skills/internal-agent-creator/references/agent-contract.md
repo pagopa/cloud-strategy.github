@@ -36,6 +36,13 @@ Use this reference when editing frontmatter, tool scope, core-skill sections, or
 - When several neighboring repository-owned agents share the same stop-and-recommend behavior, prefer one shared boundary-recommendation core skill over repeating the same next-owner matrix in every agent body. Keep the route and at least one real boundary in each agent.
 - Router agents are the strongest default candidate for a core skill because their classification matrix, fallback rules, and ownership mapping are highly procedural.
 
+## Standard Changes And Migration
+
+- When changing an authoring standard while live agents still use the old shape, separate the new standard from migration work.
+- Use existing live assets as read-only benchmark evidence unless the user explicitly authorizes migration edits.
+- Start new validator checks as report-only unless the migration is in scope and current assets already satisfy the standard.
+- Do not change blocking validators or retrofit all existing agents to enforce a new standard without explicit migration approval.
+
 ## Delegation And Invocation Controls
 
 - Only dedicated coordinator or router agents should own active downstream routing logic. Canonical direct owners should recommend a better owner to the user instead of routing on the user's behalf.

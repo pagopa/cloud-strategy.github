@@ -26,6 +26,9 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 ## Local retained-plan contract
 
 - Create or reuse a retained plan folder under `tmp/superpowers/<clear-action-or-task-name>/` only when the plan needs to survive the current turn.
+- Treat the plan being created or rewritten as the only retained-plan corpus in scope.
+- Do not inspect sibling retained plan folders to infer scope, copy structure, or collect context unless the user explicitly names them for comparison or reuse.
+- When another retained plan is valid evidence, name its exact path in `Budget lettura` and explain why; otherwise leave other `tmp/` plans out of scope.
 - Keep planning ephemeral in chat when the task is clear, local, quick, or banal.
 - Retain a plan only when at least one of these is true: the work crosses turns, spans multiple macro-categories, needs handoff, tracking, or provenance, or includes tradeoffs or uncertainties that should stay reviewable.
 - Start every retained plan with `01-riassunto-direzione-e-decisione.md` so the user can understand the full direction and decide before execution.
@@ -58,6 +61,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Do a short evidence pass before reading many files. Limit the first pass to target existence, the riskiest claim in the summary, and the nearest validator or explicit validation gap.
 - For retained artifacts under `tmp/`, use `rg --no-ignore` or an equivalent ignored-file-aware search when checking claims.
 - Put the evidence pass and first-read budget in `01-riassunto-direzione-e-decisione.md` under `Evidence pass iniziale` and `Budget lettura`.
+- Make `Budget lettura` exclusive: list the current plan files and any exact external artifacts allowed, and state that sibling retained plans are out of scope when not listed.
 - Prefer the smallest useful retained plan shape: summary, current execution or backlog, and validation. Add more numbered files only for independent macro-categories.
 - Use `grill-me` only after the evidence pass when real user decisions remain. Do not ask questions that repository evidence can answer.
 - Keep deferred improvements, retrospectives, and lessons separate from executable steps unless they are required for the requested outcome.
@@ -121,6 +125,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - The summary file is exhaustive enough for the user to decide whether to approve, challenge, rewrite, or apply the plan.
 - The summary file declares `Uso consigliato` and `Mappa file e ruolo`.
 - The summary file declares `Evidence pass iniziale` and `Budget lettura`.
+- The summary file's `Budget lettura` confines future readers to this plan and exact named evidence; other retained plan folders are excluded unless specifically indicated.
 - `02-esecuzione.md` is used when one executable macro-category is enough; `02-...`, `03-...`, `04-...` style plan files exist when more than one executable macro-category exists.
 - Plan files are in Italian unless the user asked otherwise.
 - The numbered files follow the local shape contract with explicit headings and short bullets.
@@ -134,6 +139,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Creating a retained plan artifact for a clear, local, quick task that should stay in chat.
 - Skipping `01-riassunto-direzione-e-decisione.md` or making it too thin to support a decision.
 - Omitting the initial evidence pass or reading budget, causing the next agent to read the whole folder before knowing the lane.
+- Reading sibling retained plans to "understand context" when the user only passed one plan folder.
 - Writing the whole plan in one Markdown file.
 - Writing long narrative paragraphs or duplicating canonical context instead of keeping the plan scannable.
 - Mixing executable checklist items with open questions.

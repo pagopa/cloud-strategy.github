@@ -34,6 +34,8 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Keep `SKILL.md` lean and move deeper material into `references/` or reusable tools only when justified.
 - If the skill sits behind a paired agent, keep route and boundary language out of `SKILL.md`.
 - Preserve a working `description:` during token cuts unless the baseline shows routing is wrong.
+- For material skill-bundle revisions, measure the touched bundle or loaded files before and after the first material patch with the same token estimate; if no exact script exists, state the closest measurement.
+- Prefer focused references or reusable scripts over broad context dumps when a change needs supporting detail.
 - Cross-reference reusable material instead of restating it.
 - If local references own the deep tables, templates, or examples, point to them instead of copying them back into `SKILL.md`.
 - Prefer moving static lookup tables, starter templates, and detailed taxonomies into `references/`.
