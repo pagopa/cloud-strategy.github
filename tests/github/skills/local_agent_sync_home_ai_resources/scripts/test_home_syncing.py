@@ -78,7 +78,7 @@ def initialize_source_repo(root: Path) -> None:
         "  - target: codex\n"
         "    resource_family: skills\n"
         "    support_level: Documented\n"
-        "    home_path: $HOME/.agents/skills/<skill>/\n"
+        "    home_path: ~/.codex/skills/<skill>/\n"
         "    direct_copy_possible: true\n"
         "    translation_required: false\n"
         "    include_in_v1: true\n"
@@ -95,9 +95,9 @@ def initialize_source_repo(root: Path) -> None:
         "    notes: VS Code direct-copy skill support.\n"
         "  - target: antigravity\n"
         "    resource_family: skills\n"
-        "    support_level: Unknown / To verify\n"
+        "    support_level: User-provided / To verify\n"
         "    home_path: ~/.gemini/antigravity/skills/<skill>/\n"
-        "    direct_copy_possible: false\n"
+        "    direct_copy_possible: true\n"
         "    translation_required: false\n"
         "    include_in_v1: false\n"
         "    evidence: []\n"
@@ -139,7 +139,7 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
 
-    unmanaged_target = home_root / ".agents/skills/demo-skill"
+    unmanaged_target = home_root / ".codex/skills/demo-skill"
     write_file(unmanaged_target / "SKILL.md", "# unmanaged\n")
 
     plan = build_home_sync_plan(
@@ -175,13 +175,13 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
         apply_home_sync_plan(plan)
 
     manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
-    copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
+    copied_skill = home_root / ".codex/skills/demo-skill/SKILL.md"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
     assert copied_skill.is_file()
-    assert not (home_root / ".agents/skills/demo-skill/scripts/.venv").exists()
-    assert not (home_root / ".agents/skills/demo-skill/__pycache__").exists()
-    assert not (home_root / ".agents/skills/demo-skill/.pytest_cache").exists()
+    assert not (home_root / ".codex/skills/demo-skill/scripts/.venv").exists()
+    assert not (home_root / ".codex/skills/demo-skill/__pycache__").exists()
+    assert not (home_root / ".codex/skills/demo-skill/.pytest_cache").exists()
     assert manifest["targets"] == ["codex"]
     assert manifest["managed_resources"][0]["resource_id"] == "demo-skill"
 

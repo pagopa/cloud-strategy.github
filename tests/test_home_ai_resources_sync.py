@@ -39,7 +39,7 @@ def initialize_source_repo(root: Path) -> None:
         "  - target: codex\n"
         "    resource_family: skills\n"
         "    support_level: Documented\n"
-        "    home_path: $HOME/.agents/skills/<skill>/\n"
+        "    home_path: ~/.codex/skills/<skill>/\n"
         "    direct_copy_possible: true\n"
         "    translation_required: false\n"
         "    include_in_v1: true\n"
@@ -47,9 +47,9 @@ def initialize_source_repo(root: Path) -> None:
         "    notes: Codex direct-copy skill support.\n"
         "  - target: antigravity\n"
         "    resource_family: skills\n"
-        "    support_level: Unknown / To verify\n"
+        "    support_level: User-provided / To verify\n"
         "    home_path: ~/.gemini/antigravity/skills/<skill>/\n"
-        "    direct_copy_possible: false\n"
+        "    direct_copy_possible: true\n"
         "    translation_required: false\n"
         "    include_in_v1: false\n"
         "    evidence: []\n"
@@ -104,7 +104,7 @@ def test_main_plan_emits_json_for_selected_targets(
     assert exit_code == 0
     assert payload["mode"] == "plan"
     assert payload["selected_targets"] == ["codex"]
-    assert payload["missing_dirs"] == [str(home_root / ".agents/skills")]
+    assert payload["missing_dirs"] == [str(home_root / ".codex/skills")]
 
 
 def test_main_apply_blocks_docs_unverified_targets(

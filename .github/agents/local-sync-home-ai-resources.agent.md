@@ -1,6 +1,6 @@
 ---
 name: local-sync-home-ai-resources
-description: Use this agent when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources into local Codex or VS Code targets.
+description: Use this agent when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources into local Codex, VS Code, or experimental Antigravity targets.
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
 agents: []
@@ -21,7 +21,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 ## Routing Rules
 
 - Use this agent for local home-directory sync planning, audit, doctor checks, and explicit apply runs for supported AI runtime resources.
-- Use this agent when the target is a user home directory for Codex, VS Code, or an explicitly experimental runtime target governed by the paired skill.
+- Use this agent when the target is a user home directory for Codex, VS Code, or explicitly experimental Antigravity runtime resources governed by the paired skill.
 - Select `apply` only on explicit request, after the current evidence shows a conflict-safe plan and the target runtime family is documented or explicitly experimental.
 - Do not use this agent for source-side catalog governance or consumer-repository baseline sync; recommend `local-sync-external-resources` or `local-sync-global-copilot-configs-into-repo` as appropriate.
 - Do not use this agent for format translation, personal config merges, or general dotfiles management; recommend `internal-gateway-operational-flow` when the task becomes broader design or execution work.

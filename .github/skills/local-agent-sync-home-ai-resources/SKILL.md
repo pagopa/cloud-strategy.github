@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-home-ai-resources
-description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex or VS Code targets.
+description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, VS Code, or experimental Antigravity targets.
 ---
 
 # Local Agent Sync Home AI Resources
@@ -47,10 +47,13 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 
 ## Target Selection
 
-- Accept `codex`, `vscode`, comma-separated combinations, and `all`.
+- Accept `codex`, `vscode`, `antigravity`, comma-separated combinations, and `all`.
 - Normalize whitespace, deduplicate, and order targets deterministically.
-- Keep `antigravity` selectable for `plan`, `audit`, and `doctor` while its support remains undocumented.
-- Block `apply` for any runtime family whose matrix row is not `Documented` and `direct_copy_possible: true`.
+- Resolve skill roots as `~/.codex/skills`, `~/.copilot/skills`, and `~/.gemini/antigravity/skills`.
+- Do not use `.agents` as a home sync target.
+- Keep `antigravity` selectable for `plan`, `audit`, and `doctor` while its runtime semantics remain undocumented.
+- Block default `apply` unless the matrix row is `Documented` and `direct_copy_possible: true`.
+- Require an explicit experimental override for non-`Documented` rows.
 
 ## Source And Materialization Policy
 

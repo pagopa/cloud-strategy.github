@@ -12,7 +12,7 @@ HOME_SYNC_CATALOG_PATH = Path("references/home-sync-catalog.yaml")
 STATE_ROOT_RELATIVE = Path(".sync/cloud-strategy-governance/home-ai-resources")
 TARGET_ORDER = ("codex", "vscode", "antigravity")
 TARGET_SKILL_ROOTS = {
-    "codex": Path(".agents/skills"),
+    "codex": Path(".codex/skills"),
     "vscode": Path(".copilot/skills"),
     "antigravity": Path(".gemini/antigravity/skills"),
 }

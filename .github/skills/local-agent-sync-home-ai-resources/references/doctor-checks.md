@@ -14,18 +14,18 @@ Use this checklist when `doctor` needs to explain readiness before a local home 
 
 ## Codex Checks
 
-- Confirm `$HOME/.agents/skills` exists or can be created safely.
+- Confirm `~/.codex/skills` exists or can be created safely.
 - Confirm allowlisted skill bundles contain `SKILL.md`.
 - Confirm bundle-relative `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` paths stay self-contained.
 
 ## VS Code Checks
 
 - Confirm `~/.copilot/skills` exists or can be created safely.
-- Confirm the selected target is the canonical VS Code path, unless the user explicitly requested a compatibility alias.
+- Confirm `~/.copilot/agents` and `~/.copilot/instructions` are recognized only as non-v1 resource roots.
 - Confirm no unsupported `instructions`, `prompt files`, or `custom agents` are included in a v1 apply run.
 
 ## Antigravity Checks
 
-- Confirm `~/.gemini/antigravity` resolves inside the user home directory.
+- Confirm `~/.gemini/antigravity/skills` resolves inside the user home directory.
 - Confirm the run is `plan`, `audit`, or `doctor`, unless an explicit experimental override is present.
 - Confirm the matrix still marks the runtime as undocumented before blocking `apply`.
