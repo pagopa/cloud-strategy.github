@@ -10,7 +10,7 @@ Use this skill to choose one visible staged entry point, then run one active
 phase at a time:
 
 - `full-cycle`: plan, optional critical challenge, checkpointed delivery, and
-  final evidence.
+  final evidence. The name alone does not skip the pre-execute checkpoint.
 - `plan-only`: plan, Decision Brief, optional critical pass, and stop before
   apply.
 - `apply-plan`: apply an approved retained plan through
@@ -28,7 +28,8 @@ Start with the smallest mode that can honestly finish the current phase:
 
 | Question | If yes | Result |
 | --- | --- | --- |
-| Is the task concrete and only needs skill-first quick routing or support-skill selection? | Use `internal-gateway-simple`. | Lightweight analysis, minimal support skills, focused execution, and validation are returned. |
+| Is the task concrete and only needs skill-first quick routing or support-skill selection? | Use `internal-gateway-simple-task`. | Lightweight analysis, minimal support skills, focused execution, and validation are returned. |
+| Does the user want questions before any plan output? | Use `plan-only (clarify-first)`. | `grill-me` asks bulk questions with recommended answers before the plan is written. |
 | Is the target state already clear and verifiable? | Use `mode-explicit` `execute`. | Files, commands, or guidance are delivered with validation evidence. |
 | Does a concrete artifact or diff already exist and need defect-first or systems-level analysis? | Use `review`. | Findings, severity, evidence gaps, and fix routing are returned. |
 | Is there an approved retained plan under `tmp/superpowers/` to apply? | Use `apply-plan`. | `internal-executing-plans` runs the `done-*` loop and ignores `dubbi-e-domande.md`. |
@@ -41,7 +42,7 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 
 | Use case | Example request | Mode and support | Expected result |
 | --- | --- | --- | --- |
-| Clear local implementation with analysis | "Create a Python script that lists public Azure Storage accounts." | `internal-gateway-simple` plus `internal-script-python`; add Azure support skills or current Microsoft docs only when needed. | Script or implementation approach, focused validation, and residual risk. No retained plan by default. |
+| Clear local implementation with analysis | "Create a Python script that lists public Azure Storage accounts." | `internal-gateway-simple-task` plus `internal-script-python`; add Azure support skills or current Microsoft docs only when needed. | Script or implementation approach, focused validation, and residual risk. No retained plan by default. |
 | Simple advisory analysis before coding | "Tell me how you would build this script, then implement it." | `execute` if the target is concrete. Use a short tactical note, not full `plan` mode. | Brief approach, implementation, and checks. |
 | Deterministic multi-file alignment | "Rename this approved skill reference across adjacent files and run the focused tests." | `execute`. File count alone does not force planning. | Updated files, stale-name search, and validation evidence. |
 | New repository-owned workflow with unclear owner | "Should this be an agent, a skill, or an instruction?" | `plan` plus relevant authoring support skills. | Ownership decision, anti-scope, tradeoffs, next owner, and validation path. |
@@ -90,19 +91,22 @@ This is analysis-assisted execution, not `plan` mode.
 Use this sequence when the user wants the rigorous path:
 
 1. Inspect repository evidence first.
-2. Run `grill-me` as conditional support.
-3. If the user asks for bulk questions, provide numbered questions with a
+2. Separate facts recoverable from the repository from user-only decisions.
+3. Stop for `grill-me` when user-only decisions could change scope, owner,
+   target state, validation, rollout, or anti-scope.
+4. If the user asks for bulk questions, provide numbered questions with a
    recommended answer for each.
-4. Wait for the user answers when the answers affect the plan.
-5. Create the `plan` phase output.
-6. If a retained plan is created or materially reformulated, provide a Decision
+5. Wait for the user answers when the answers affect the plan.
+6. Create the `plan` phase output.
+7. If a retained plan is created or materially reformulated, provide a Decision
   Brief in chat.
-7. Move visibly to `internal-gateway-critical-master` for pressure testing when
+8. Move visibly to `internal-gateway-critical-master` for pressure testing when
   reasoning risk remains.
-8. Reformulate, de-escalate, execute, review, continue critical, or accept risk
+9. Reformulate, de-escalate, execute, review, continue critical, or accept risk
   according to the critical outcome.
-9. Move to `execute` or `apply-plan` only after the target state and validation
-  path are clear and the checkpoint is satisfied.
+10. Move to `execute` or `apply-plan` only after the target state and validation
+  path are clear and the checkpoint is satisfied or the user explicitly asked
+  to apply or run the work end to end.
 
 Expected result:
 
@@ -117,7 +121,7 @@ Expected result:
 Use these prompts when you want a specific amount of process.
 
 ```text
-Use internal-gateway-simple.
+Use internal-gateway-simple-task.
 Load the relevant Python and Azure support skills.
 Give only the short approach needed to implement and validate the script.
 ```
@@ -147,6 +151,17 @@ Use code review for code defects and systems review for cross-cutting impact.
 Findings first, then evidence gaps, then route each fix to execute, plan,
 critical challenge, or defer.
 ```
+
+## Output And Support Calibration
+
+Keep operational-flow responses compact unless evidence or user scope requires
+detail. Plan and review outputs should usually stay within about 40 lines, and
+execution reports should usually stay within about 30 lines.
+
+Use imported support only after the gateway phase is selected. `grill-me`
+supports planning questions. `mattpocock-caveman` is only a compression pass for
+long sync, review, or governance reports after blockers, risks, and validation
+evidence are explicit.
 
 ## Maintenance Notes
 

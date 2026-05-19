@@ -5,6 +5,18 @@ description: Use when executable behavior should be delivered test-first, includ
 
 # Internal TDD
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `internal-code-review`: defect-first review of test quality, coverage gaps, and false-confidence seams.
+- `internal-debugging`: root-cause diagnosis before regression tests when the failure is not understood.
+- `internal-project-java`: Java test layout, fixtures, and assertions.
+- `internal-project-nodejs`: Node.js or TypeScript test layout, fixtures, and assertions.
+- `internal-project-python`: Python test layout, fixtures, and assertions.
+- `superpowers-test-driven-development`: strict red-green-refactor execution for explicit TDD workflow requests.
+- `superpowers-verification-before-completion`: evidence gate before claiming red-green-refactor or regression coverage.
+
 Use this skill as the repository-owned meta-owner for test-first delivery. Keep
 the loop focused on observable behavior through public interfaces.
 
@@ -61,6 +73,8 @@ the loop focused on observable behavior through public interfaces.
 
 - `superpowers-test-driven-development`: strict red-green-refactor execution
   when the user explicitly asks for a TDD workflow.
+- `superpowers-verification-before-completion`: evidence gate before claiming
+  red-green-refactor completion or regression coverage.
 - `internal-debugging`: root-cause diagnosis before the regression test when the
   failure is not yet understood.
 - `internal-project-python`, `internal-project-nodejs`, `internal-project-java`,
@@ -75,3 +89,5 @@ the loop focused on observable behavior through public interfaces.
 - The implementation is the smallest behavior needed for the active slice.
 - Focused tests and the closest broader validation pass.
 - No speculative tests or features were added beyond the requested behavior.
+- Use `superpowers-verification-before-completion` before claiming
+  red-green-refactor completion or that a regression is covered.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Gateway Simple Task"
+  short_description: "Fast path for concrete repository tasks"
+  default_prompt: "Use $internal-gateway-simple-task for a concrete coding or non-coding task that needs quick support-skill selection, execution, diagnosis, or validation without a retained plan."

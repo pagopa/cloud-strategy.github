@@ -16,14 +16,17 @@ Use this checklist before finalizing a new or revised internal agent.
 - Does the agent own one operating role?
 - Would the same user expect one consistent style of output from every task routed here?
 - Are unrelated responsibilities forcing `and/or` language into the route?
-- Should any large procedure move into a skill instead?
+- Does any large procedure make the edit out of scope for an agent-only workflow?
 
-## Skill Contract
+## Core Skill Section Contract
 
 - Are the skill identifiers exact and canonical?
-- Do all declared skills reinforce the same operating role?
-- Does the agent need `## Skill Usage Contract`, or would that add noise?
-- If the agent cites a paired skill or reference, does the agent stay summary-level instead of repeating the same subtopic inventory?
+- Does `## Core Skill`, when present, list exactly one skill?
+- Does the core skill own required reusable logic rather than decorative symmetry?
+- If there is no core skill, are skill-list sections absent?
+- Are legacy sections such as `## Mandatory Engine Skills`, `## Optional Support Skills`, and `## Preferred/Optional Skills` absent unless the user explicitly asked for legacy compatibility?
+- Does the agent avoid `## Skill Usage Contract` unless a user-approved exception requires durable multi-skill guidance?
+- If the agent cites an existing core skill or reference, does the agent stay summary-level instead of repeating the same subtopic inventory?
 
 ## Output Contract
 
@@ -62,7 +65,7 @@ Use this checklist before finalizing a new or revised internal agent.
 
 - Does the filename stem match frontmatter `name:`?
 - Do all referenced local files exist?
-- Were adjacent paired skills and directly referenced local docs checked for drift?
+- Were directly referenced core skills and local docs checked for drift?
 - Does the agent avoid making a neighboring agent redundant?
 - Have the repository validation entrypoints that currently exist been run, or has the validation gap been called out explicitly?
 

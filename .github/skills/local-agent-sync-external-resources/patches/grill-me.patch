@@ -1,11 +1,13 @@
 diff --git a/.github/skills/grill-me/SKILL.md b/.github/skills/grill-me/SKILL.md
 --- a/.github/skills/grill-me/SKILL.md
 +++ b/.github/skills/grill-me/SKILL.md
-@@ -5,6 +5,18 @@
- 
+@@ -5,6 +5,20 @@
+
 -Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
++# Grill Me
++
 +Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one.
- 
+
 -Ask the questions one at a time.
 +Before asking, inspect the repository, codebase, documentation, or local files for answers that can be recovered from evidence.
 +
@@ -20,6 +22,6 @@ diff --git a/.github/skills/grill-me/SKILL.md b/.github/skills/grill-me/SKILL.md
 +Do not treat accepted recommendations as the end of the grilling process. If accepted defaults create contradictions, weak assumptions, unresolved risks, or dependent decisions, surface them explicitly.
 +
 +After the initial numbered list, ask one question at a time only for unresolved ambiguity, dependent follow-up decisions, or branches that cannot be settled from the user's bulk response.
- 
+
 -If a question can be answered by exploring the codebase, explore the codebase instead.
 +Do not ask questions that can be answered by exploring the codebase, documentation, or local files.

@@ -36,7 +36,6 @@ You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flo
 - `internal-copilot-docs-research`
 - `internal-systems-review`
 - `grill-me`
-- `mattpocock-zoom-out`
 
 ## Core Rules
 

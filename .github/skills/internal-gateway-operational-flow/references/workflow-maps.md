@@ -27,6 +27,16 @@ Use this reference when preserving or validating user-visible operational flows.
 
 Use this path when the target state is already known. Do not reopen strategy unless the task reveals real ambiguity.
 
+### Catalog Fast Path
+
+Use this repository-local variant for small catalog maintenance before escalating to retained planning or review.
+
+- Triage `internal-gateway-simple-task` vs `execute` vs `plan` before loading optional references, support skills, or review lenses.
+- Keep the first read budget to one owner file, one nearby validator or test, and one extra reference only when it changes the next safe action.
+- Use a short execution loop: targeted `rg` or nearby read, patch, nearby test, `make catalog-fast-check`, then `make github-catalog-validation` once at the end.
+- Add `CATALOG_FAST_INCLUDE_TOKEN_RISKS=1` only when the change touches always-on guidance or shared contracts.
+- Do not open a retained plan or full review mode for one-file or one-owner fixes that fit in the current turn.
+
 ## Staged Full Cycle
 
 ```text

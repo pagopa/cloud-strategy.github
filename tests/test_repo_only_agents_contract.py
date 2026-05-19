@@ -21,6 +21,7 @@ def retired_mattpocock_ids() -> tuple[str, ...]:
             "diagnose",
             "tdd",
             "improve-codebase-architecture",
+            "zoom-out",
             "grill-with-docs",
             "setup-matt-pocock-skills",
         )
@@ -78,7 +79,6 @@ def test_mattpocock_sync_scope_keeps_only_active_managed_imports() -> None:
 
     assert "`caveman` -> `mattpocock-caveman`" in combined_text
     assert "`grill-me` -> `grill-me`" in combined_text
-    assert "`zoom-out` -> `mattpocock-zoom-out`" in combined_text
     for retired_id in retired_mattpocock_ids():
         assert retired_id not in combined_text
 
@@ -87,11 +87,13 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
     payload = yaml.safe_load(WATCHLIST_PATH.read_text(encoding="utf-8"))
     items = payload["items"]
     owners = {item["local_owner"] for item in items}
+    upstream_ids = {item["upstream_id"] for item in items}
 
     assert payload["version"] == 1
-    assert len(items) == 5
+    assert len(items) == 6
     assert all(item["source_family"] == "mattpocock/skills" for item in items)
     assert all(item["action"] == "alert-only" for item in items)
+    assert "zoom-out" in upstream_ids
     assert {
         "internal-debugging",
         "internal-tdd",

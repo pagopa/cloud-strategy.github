@@ -14,7 +14,7 @@ Use this checklist when converting an upstream agent or agent-authoring pattern 
 1. Rename into the canonical internal contract: `internal-<name>.agent.md`.
 2. Rewrite the `description:` so it explains when the internal agent should be selected.
 3. Normalize copied tool catalogs to canonical aliases and declare an explicit `tools:` contract for the internal agent.
-4. Replace stale runtime-specific tool assumptions with repository-local files, skills, validators, or current GitHub Copilot frontmatter.
+4. Replace stale runtime-specific tool assumptions with repository-local files, existing skills, validators, or current GitHub Copilot frontmatter.
 5. Convert expertise lists into routing rules, role focus, or output expectations.
 6. Convert multi-step command flows into `## Execution Workflow` only when recurring orchestration is core to the role.
 
@@ -24,11 +24,11 @@ Use this checklist when converting an upstream agent or agent-authoring pattern 
 2. UI-only metadata, slash-command syntax, or platform-specific tool catalogs.
 3. Marketing language, prestige claims, or generic "world-class expert" phrasing.
 4. Historical context that no longer affects routing or governance.
-5. Technology encyclopedias that belong in a skill or reference instead of an agent body.
+5. Technology encyclopedias that belong outside an agent body.
 
 ## Decide
 
-1. If most of the value is reusable procedure, strengthen or create a skill instead.
+1. If most of the value is reusable procedure, stop and route out of this agent-only workflow.
 2. If the imported role overlaps a current internal agent, merge or narrow the route.
 3. If one imported agent spans unrelated roles, split or extract instead of keeping a kitchen-sink rewrite.
 4. If the output stays vague after cleanup, the routing contract is still wrong.

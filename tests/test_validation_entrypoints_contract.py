@@ -17,6 +17,27 @@ def test_makefile_lint_target_covers_docs_lint_without_double_running_from_all()
     assert "all: lint test catalog-check docs-lint" not in makefile_text
 
 
+def test_makefile_uses_quiet_compileall_for_local_catalog_linting() -> None:
+    makefile_text = read_text("Makefile")
+
+    assert "$(PYTHON) -m compileall -q $(PYTHON_PATHS)" in makefile_text
+    assert "$(PYTHON) -m compileall $(PYTHON_PATHS)" not in makefile_text
+
+
+def test_makefile_exposes_explicit_catalog_fast_check_entrypoint() -> None:
+    makefile_text = read_text("Makefile")
+
+    assert "catalog-fast-check" in makefile_text
+    assert "build_inventory --root . --check" in makefile_text
+    assert "check_catalog_consistency --root ." in makefile_text
+    assert "validate_internal_skills --root . --strict" in makefile_text
+    assert "tests/test_inventory_and_consistency.py" in makefile_text
+    assert "tests/test_validation_entrypoints_contract.py" in makefile_text
+    assert "tests/test_retained_plan_artifact_contract.py" in makefile_text
+    assert "tests/github/scripts/test_cli_entrypoints.py" in makefile_text
+    assert "CATALOG_FAST_INCLUDE_TOKEN_RISKS=1" in makefile_text
+
+
 def test_docs_lint_target_does_not_require_npm_network_outside_ci() -> None:
     makefile_text = read_text("Makefile")
 

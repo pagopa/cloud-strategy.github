@@ -5,6 +5,17 @@ description: Use when a code review is requested, a PR needs reviewing, or the u
 
 # Code Review Skill
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `antigravity-golang-pro`: Go concurrency, service design, or performance specialist when Go dominates the review.
+- `awesome-copilot-codeql`: CodeQL workflow and SARIF specialist when CodeQL setup dominates the review.
+- `awesome-copilot-secret-scanning`: GitHub secret scanning specialist when secret scanning workflow dominates the review.
+- `internal-systems-review`: systems-level review beyond line-level defects.
+- `internal-terraform`: Terraform specialist when HCL modeling or drift-safe Terraform dominates the review.
+- `superpowers-verification-before-completion`: evidence gate before claiming no findings or merge readiness.
+
 ## When to use
 
 - Perform an exhaustive, nit-level code review on Python, Bash, Terraform, Java, or Node.js/TypeScript files.
@@ -126,6 +137,8 @@ Only elevate simplification suggestions when they materially improve maintainabi
 
 - **internal-systems-review**: for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
 - Use both together: this skill for nit-level anti-patterns first, then `internal-systems-review` for the bigger picture.
+- **superpowers-verification-before-completion**: for evidence before claiming no
+  findings, review completion, or merge readiness.
 
 ## Delegation
 
@@ -144,3 +157,5 @@ Use this skill as the default review owner, then add a narrower specialist only 
 - Verify severity assignments match the anti-pattern catalog rules.
 - Verify escalation rules are applied for repeated violations (3+ of the same kind).
 - Verify cross-language checks are applied regardless of primary language.
+- Use `superpowers-verification-before-completion` before claiming there are no
+  findings, the review is complete, or the change is merge-ready.

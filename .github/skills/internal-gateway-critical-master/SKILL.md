@@ -42,7 +42,7 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 ## Boundaries
 
 - Use `internal-gateway-operational-flow` `plan-only` or `full-cycle` when the main job is reformulating the plan.
-- Use `internal-gateway-simple` when the critique shows the remaining work is concrete and does not need staged planning.
+- Use `internal-gateway-simple-task` when the critique shows the remaining work is concrete and does not need staged planning.
 - Use `internal-gateway-operational-flow` `execute` or `apply-plan` when the next step is a clear implementation with a visible checkpoint.
 - Use `internal-gateway-operational-flow` `review` when the next step is evidence-based validation of a concrete change.
 - Stay here only while the primary need is pressure-testing reasoning, assumptions, or failure modes.
@@ -52,7 +52,7 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 | Outcome | Use when | Recommended next owner |
 | --- | --- | --- |
 | `reformulate-plan` | The critique changes scope, assumptions, owner, or validation enough that planning must rewrite the plan. | `internal-gateway-operational-flow` `plan-only` or `full-cycle` |
-| `de-escalate-to-simple` | The strongest objection removes process weight and leaves a concrete local task. | `internal-gateway-simple` |
+| `de-escalate-to-simple` | The strongest objection removes process weight and leaves a concrete local task. | `internal-gateway-simple-task` |
 | `execute-clear-next-step` | The plan survives the challenge and the user has approved execute/apply or the prompt already allowed end-to-end work. | `internal-gateway-operational-flow` `execute` or `apply-plan` |
 | `review-evidence` | The next risk is correctness evidence for an existing artifact or validation result. | `internal-gateway-operational-flow` `review` |
 | `continue-critical` | The first challenge exposes another unresolved assumption that still belongs to pressure testing. | `internal-gateway-critical-master` |

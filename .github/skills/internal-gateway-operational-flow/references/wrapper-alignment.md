@@ -13,16 +13,58 @@ Use this reference when updating the Copilot agent wrappers, README projection, 
 
 The wrappers keep route wording, tools, `disable-model-invocation: true`, `agents: []`, handoff buttons, boundary summary, and output shape. They should not repeat long mode tables or workflow maps from this skill bundle.
 
-`internal-review-guard` keeps `internal-code-review` mandatory for defect-first review. It lists `internal-systems-review` as optional support when the review surface is architecture, workflow, cross-cutting impact, operational fit, or blind spots. Do not list `internal-security-review` in the wrapper until the promotion gate creates that skill.
+`internal-review-guard` keeps `internal-code-review` mandatory for defect-first review. It lists `internal-systems-review` as optional support when the review surface is architecture, workflow, cross-cutting impact, operational fit, or blind spots.
 
 Imported support stays optional and never becomes a mandatory engine. Gateway
 wrappers should list only the approved imported support that improves route UX:
-`grill-me` in planning and `mattpocock-zoom-out` in planning and review.
-Delivery and review wrappers use `internal-debugging`, `internal-tdd`,
-`internal-performance-optimization`, and `internal-systems-review` for local
-diagnosis, test-first, performance, and architecture evidence. Keep compression
-support in sync or reporting owners after blockers, risks, and validation
-evidence are already explicit.
+`grill-me` in planning. Delivery and review wrappers use `internal-debugging`,
+`internal-tdd`, `internal-performance-optimization`, `internal-code-review`, and
+`internal-systems-review` for local diagnosis, test-first, performance, code
+defect, and architecture evidence. Keep compression support in sync or
+reporting owners after blockers, risks, and validation evidence are already
+explicit.
+
+## Imported Support
+
+Keep imported support conditional, never a mandatory engine. Use imported
+support as a lens, compression aid, or conversation discipline, not as a new
+gateway lane. Internal owners win when they already cover the local contract.
+
+| Support | Gateway phase | Use when | Guardrail |
+| --- | --- | --- | --- |
+| `grill-me` | `plan`, `full-cycle` | The user asks for grilling, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first and use the local bulk-question override before one-at-a-time follow-up. |
+| `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
+
+Internal replacements:
+
+- Failure diagnosis belongs to `internal-debugging`.
+- Test-first delivery belongs to `internal-tdd`.
+- Performance work belongs to `internal-performance-optimization`.
+- Architecture, locality, leverage, cross-boundary review, higher-level code
+  orientation, module maps, caller maps, and domain-vocabulary explanations
+  belong to `internal-systems-review`.
+- Code defect review belongs to `internal-code-review`.
+- Imported docs and setup conventions stay outside default gateway routing
+  unless a future sync-governance decision deliberately changes the managed
+  catalog.
+
+## Future Security Lens
+
+`internal-security-review` is unavailable until a promoted skill with that name
+exists and the review wrapper optional-support map is updated in the same
+change. Until then, do not list it as an active owner or wrapper support skill.
+State security-specific gaps and route them through the closest existing owner.
+
+## Optional Support Map
+
+Keep this map aligned with each wrapper's `## Optional Support Skills` section.
+
+| Wrapper | Optional support skills |
+| --- | --- |
+| `internal-planning-leader` | `internal-writing-plans`, `internal-executing-plans`, `internal-agent-creator`, `internal-copilot-audit`, `internal-copilot-docs-research`, `internal-systems-review`, `grill-me` |
+| `internal-delivery-operator` | `superpowers-verification-before-completion`, `superpowers-using-git-worktrees`, `internal-executing-plans`, `internal-debugging`, `internal-tdd`, `internal-performance-optimization`, `internal-lesson-codification`, `internal-agent-creator` |
+| `internal-review-guard` | `superpowers-verification-before-completion`, `internal-systems-review`, `internal-debugging`, `internal-performance-optimization`, `internal-agent-creator`, `awesome-copilot-codeql`, `awesome-copilot-secret-scanning` |
+| `internal-critical-master` | `superpowers-brainstorming`, `internal-agent-creator` |
 
 ## Handoff Rules
 

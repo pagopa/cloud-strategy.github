@@ -1,13 +1,23 @@
 ---
 name: internal-systems-review
-description: Use when a review needs systems-level evidence about architecture, workflow, cross-cutting impact, blind spots, or merge risk beyond line-level code defects.
+description: Use when a task needs systems-level evidence about architecture, workflow, cross-cutting impact, blind spots, merge risk, or an orientation map of unfamiliar code.
 ---
 
 # Internal Systems Review
 
-Use this skill as the systems-level review lens for repository changes. It
-complements defect-first code review by checking whether a change fits the
-surrounding architecture, workflow, ownership model, and operational context.
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `internal-code-review`: line-level defect review owner.
+- `internal-gateway-critical-master`: pressure-test owner when the main need is challenge rather than review evidence.
+- `internal-security-review`: unavailable future security lens, used only after promotion creates the skill.
+- `superpowers-verification-before-completion`: evidence gate before claiming no systems findings or merge readiness.
+
+Use this skill as the systems-level owner for repository changes and unfamiliar
+code orientation. It complements defect-first code review by checking whether a
+change fits the surrounding architecture, workflow, ownership model, and
+operational context.
 
 ## When to use
 
@@ -15,6 +25,8 @@ surrounding architecture, workflow, ownership model, and operational context.
 - Evaluate architectural implications, workflow impact, and unconsidered effects.
 - Review cross-cutting concerns before merge when line-level findings are not enough.
 - Complement `internal-code-review` with broader evidence about coupling, ownership, and operational fit.
+- Build a higher-level orientation map for unfamiliar code, including relevant
+  modules, callers, boundaries, and repository domain vocabulary.
 
 ## When not to use
 
@@ -29,7 +41,8 @@ surrounding architecture, workflow, ownership model, and operational context.
 ## Relationship to other skills
 
 - `internal-code-review`: code defects, regressions, tests, language anti-patterns, and file/line findings.
-- This skill: architecture, workflow, cross-cutting impact, operational fit, and blind spots.
+- This skill: architecture, workflow, cross-cutting impact, operational fit,
+  blind spots, and higher-level codebase orientation.
 - `internal-gateway-critical-master`: challenge work when the main need is pressure testing rather than review evidence.
 - Future `internal-security-review`: security, AI safety, trust boundaries, data, and secret exposure after promotion gates pass.
 
@@ -82,6 +95,23 @@ Keep these as review lenses, not mandatory refactor demands. Recommend a
 deepening change only when the evidence shows current shallowness is creating
 real maintenance, testability, or workflow cost.
 
+## Orientation Map Lens
+
+Use this lens when the user asks to zoom out, understand an unfamiliar area, or
+see how code fits into the larger system before planning, reviewing, or editing.
+
+Keep the output evidence-based and compact:
+
+- Target area: the file, module, workflow, or behavior being explained.
+- Domain vocabulary: repository terms that name the concepts in play.
+- Module map: relevant modules, responsibilities, dependencies, and callers.
+- Flow map: the main data, control, or operational path through those modules.
+- Boundary notes: ownership, extension points, and cross-boundary risks.
+- Uncertainty: missing evidence, likely next files to inspect, or validation gaps.
+
+Do not turn orientation into review findings unless the user asks for a review
+or the inspected evidence exposes a concrete systems risk.
+
 ## Severity mappings
 
 | Category | Severity | Criteria |
@@ -100,7 +130,7 @@ real maintenance, testability, or workflow cost.
 | Medium | 1-4 hours, may touch multiple files |
 | High | More than 4 hours, may require design discussion |
 
-## Output structure
+## Review Output
 
 Present findings directly in conversation (never write files unless the user explicitly asks):
 
@@ -112,6 +142,20 @@ Present findings directly in conversation (never write files unless the user exp
 
 For empty sections, state "No findings in this category."
 
+## Orientation Output
+
+When the request is explanatory rather than review-owned, present a map instead
+of findings:
+
+1. **Target Area** — the file, module, workflow, or behavior being explained.
+2. **Domain Vocabulary** — repository terms that matter for the area.
+3. **Module Map** — modules, responsibilities, dependencies, and callers.
+4. **Flow Map** — main data, control, or operational path.
+5. **Boundary Notes** — ownership, extension points, and risks to respect.
+6. **Uncertainty** — missing evidence and next files or checks.
+
+Do not include empty review sections in an orientation-only answer.
+
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
@@ -122,6 +166,7 @@ For empty sections, state "No findings in this category."
 | Reporting without effort estimation | Leaves the author without prioritization signal | Always include Low/Medium/High effort per finding |
 | Treating advisory notes as blockers | Obscures urgency | Block only on evidenced systems risk |
 | Skipping blind-spot analysis | The most valuable part of this skill gets dropped | Run all 4 dimensions, even if some are empty |
+| Treating orientation as critique | The user may only need a codebase map | Separate maps from findings unless a concrete risk is evidenced |
 
 ## Self-questioning
 
@@ -136,11 +181,14 @@ Before presenting findings, verify:
 
 1. Identify changed files (diff against default branch or explicit file list).
 2. Load applicable instruction files based on detected languages.
-3. Read each changed file and its immediate dependencies.
-4. Analyze across all dimensions (load `references/analysis-dimensions.md` for detailed checklists).
-5. Self-question each finding before including it.
+3. Read each changed file or requested target area and its immediate dependencies.
+4. Analyze across all dimensions, or build an orientation map when the request
+   is explanatory rather than review-owned. Load
+   `references/analysis-dimensions.md` for detailed checklists.
+5. For review-owned work, self-question each finding before including it.
 6. Route code defects back to `internal-code-review` when they are not systems-level issues.
-7. Present findings in conversation using the output structure above.
+7. Present review findings or an orientation map using the matching output
+   structure above.
 
 ## Validation
 
@@ -148,4 +196,8 @@ Before presenting findings, verify:
 - Every finding must include a *why* explanation.
 - Every finding must include a minimal fix route or recommended owner.
 - Architecture recommendations must include impact and effort assessment.
+- Orientation maps must name the target area, domain vocabulary, module map,
+  caller or entrypoint evidence, boundary notes, and uncertainty.
 - Security-specific gaps must not imply `internal-security-review` exists before promotion.
+- Use `superpowers-verification-before-completion` before claiming there are no
+  systems findings, the review is complete, or the change is merge-ready.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import yaml
@@ -92,6 +93,7 @@ def retired_mattpocock_ids() -> tuple[str, ...]:
             "diagnose",
             "tdd",
             "improve-codebase-architecture",
+            "zoom-out",
             "grill-with-docs",
             "setup-matt-pocock-skills",
         )
@@ -99,8 +101,20 @@ def retired_mattpocock_ids() -> tuple[str, ...]:
 
 
 def mandatory_section(body: str) -> str:
-    section = body.split("## Mandatory Engine Skills", 1)[1]
-    return section.split("## ", 1)[0]
+    return section_between(body, "## Mandatory Engine Skills")
+
+
+def section_between(body: str, heading: str) -> str:
+    section = body.split(heading, 1)[1]
+    return section.split("\n## ", 1)[0]
+
+
+def optional_section(body: str) -> str:
+    return section_between(body, "## Optional Support Skills")
+
+
+def markdown_listed_skills(section: str) -> list[str]:
+    return re.findall(r"^- `([^`]+)`", section, flags=re.MULTILINE)
 
 
 def test_canonical_agents_keep_required_frontmatter_and_engine_contracts() -> None:
@@ -206,9 +220,6 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
-    imported_support_text = Path(
-        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
-    ).read_text(encoding="utf-8")
     metadata_text = Path(
         ".github/skills/internal-gateway-operational-flow/agents/openai.yaml"
     ).read_text(encoding="utf-8")
@@ -217,10 +228,15 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "## Skill-First Staged Entry Points" in skill_text
     assert "`full-cycle`" in skill_text
     assert "`plan-only`" in skill_text
+    assert "`plan-only (clarify-first)`" in skill_text
     assert "`apply-plan`" in skill_text
     assert "`mode-explicit`" in skill_text
+    assert "## User Authorization Signals" in skill_text
+    assert "`full-cycle` alone" in skill_text
+    assert "existing approved retained plan folder" in skill_text
     assert "Decision Brief" in skill_text
     assert "explicit checkpoint before moving from `plan`" in skill_text
+    assert "unresolved user-only decisions could change scope" in skill_text
     assert "multiple credible paths" in skill_text
     assert "`plan`" in mode_contracts_text
     assert "`execute`" in mode_contracts_text
@@ -229,13 +245,18 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "Codex plugin or Codex CLI" in workflow_maps_text
     assert "Retained Plan Application" in workflow_maps_text
     assert "internal-planning-leader" in wrapper_alignment_text
-    assert "mattpocock-zoom-out" in imported_support_text
-    assert "mattpocock-caveman" in imported_support_text
+    assert not Path(
+        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
+    ).exists()
+    assert "## Imported Support" in wrapper_alignment_text
+    assert "mattpocock-caveman" in wrapper_alignment_text
+    assert "mattpocock-zoom-out" not in wrapper_alignment_text
+    assert "## Future Security Lens" in wrapper_alignment_text
     assert "internal-debugging" in mode_contracts_text
     assert "internal-tdd" in mode_contracts_text
     assert "internal-performance-optimization" in mode_contracts_text
     for retired_id in retired_mattpocock_ids():
-        assert retired_id not in imported_support_text
+        assert retired_id not in wrapper_alignment_text
     assert "$internal-gateway-operational-flow" in metadata_text
 
     planning_frontmatter = load_frontmatter(
@@ -245,6 +266,70 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "unclear target state" in planning_frontmatter["description"]
     assert "multiple credible paths" in planning_frontmatter["description"]
     assert "multiple credible paths remain" in planning_body
+
+
+def test_operational_flow_readme_references_live_gateway_skills() -> None:
+    readme_text = Path(
+        ".github/skills/internal-gateway-operational-flow/README.md"
+    ).read_text(encoding="utf-8")
+    referenced_slugs = set(
+        re.findall(r"`(internal-gateway-[A-Za-z0-9-]+)`", readme_text)
+    )
+    live_skill_slugs = {
+        path.name
+        for path in Path(".github/skills").iterdir()
+        if (path / "SKILL.md").is_file()
+    }
+
+    assert referenced_slugs
+    assert referenced_slugs <= live_skill_slugs
+    assert "## Output And Support Calibration" in readme_text
+    assert "about 40 lines" in readme_text
+    assert "about 30 lines" in readme_text
+    assert (
+        "Use imported support only after the gateway phase is selected" in readme_text
+    )
+    assert "mattpocock-caveman" in readme_text
+
+
+def test_gateway_wrapper_alignment_documents_optional_support_skills() -> None:
+    alignment_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
+    ).read_text(encoding="utf-8")
+    support_map_text = section_between(alignment_text, "## Optional Support Map")
+
+    for agent_name, relative_path in CANONICAL_AGENTS.items():
+        body = read_body(relative_path)
+        expected_skills = markdown_listed_skills(optional_section(body))
+        matching_rows = [
+            line
+            for line in support_map_text.splitlines()
+            if line.startswith(f"| `{agent_name}` |")
+        ]
+
+        assert len(matching_rows) == 1
+        for expected_skill in expected_skills:
+            assert f"`{expected_skill}`" in matching_rows[0]
+
+
+def test_gateway_catalog_fast_path_stays_local_before_optional_support() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    workflow_maps_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
+    ).read_text(encoding="utf-8")
+
+    assert "internal-gateway-simple-task` vs `execute` vs `plan` triage" in skill_text
+    assert (
+        "before loading optional references, support skills, or review lenses"
+        in skill_text
+    )
+    assert "one owner file plus one nearby validator or test" in skill_text
+    assert "### Catalog Fast Path" in workflow_maps_text
+    assert "`make catalog-fast-check`" in workflow_maps_text
+    assert "`make github-catalog-validation` once at the end" in workflow_maps_text
+    assert "`CATALOG_FAST_INCLUDE_TOKEN_RISKS=1`" in workflow_maps_text
 
 
 def test_critical_master_skill_exists_with_challenge_boundary() -> None:
@@ -272,19 +357,32 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
 
 
 def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
-    skill_text = Path(".github/skills/internal-gateway-simple/SKILL.md").read_text(
+    skill_text = Path(".github/skills/internal-gateway-simple-task/SKILL.md").read_text(
         encoding="utf-8"
     )
+    simple_lanes_text = Path(
+        ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
+    ).read_text(encoding="utf-8")
+    support_routing_text = Path(
+        ".github/skills/internal-gateway-simple-task/references/support-routing.md"
+    ).read_text(encoding="utf-8")
     metadata_text = Path(
-        ".github/skills/internal-gateway-simple/agents/openai.yaml"
+        ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
     ).read_text(encoding="utf-8")
 
-    assert "## Protected Trigger" in skill_text
-    assert "## Support-Skill Discovery" in skill_text
-    assert "## Misuse Tests" in skill_text
-    assert "de-escalates because the remaining work is concrete" in skill_text
-    assert "`apply-plan` through `internal-gateway-operational-flow`" in skill_text
-    assert "$internal-gateway-simple" in metadata_text
+    assert "single-lane and single-phase by design" in skill_text
+    assert "already-decided contract" in skill_text
+    assert "same already-decided pattern and share one validation path" in skill_text
+    assert "## Escalation Triggers" in skill_text
+    assert "durable lesson candidate" in skill_text
+    assert "internal-lesson-codification" in skill_text
+    assert "validator passes" in skill_text
+    assert "auth, config, secrets, tenant data" in skill_text
+    assert "one focused block of clarification" in skill_text
+    assert "`support-loaded`" in simple_lanes_text
+    assert "`files-touched`" in simple_lanes_text
+    assert "internal-copilot-instructions-creator" in support_routing_text
+    assert "$internal-gateway-simple-task" in metadata_text
 
 
 def test_prompt_examples_reference_live_gateway_skills() -> None:
@@ -314,6 +412,7 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert not Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
     assert "grill-me" in operational_text
     assert "non-trivial retained plan" in operational_text
+    assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
     assert "continue one question at a time" in operational_text
     assert "- `grill-me`" in planning_body
@@ -323,15 +422,21 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
     planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
     delivery_body = read_body(CANONICAL_AGENTS["internal-delivery-operator"])
     review_body = read_body(CANONICAL_AGENTS["internal-review-guard"])
-    imported_support_text = Path(
-        ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
+    wrapper_alignment_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
+    ).read_text(encoding="utf-8")
+    systems_review_text = Path(
+        ".github/skills/internal-systems-review/SKILL.md"
     ).read_text(encoding="utf-8")
 
-    assert "- `mattpocock-zoom-out`" in planning_body
+    assert (
+        "conditional lenses through `internal-gateway-operational-flow`"
+        in planning_body
+    )
     assert "- `internal-debugging`" in delivery_body
     assert "- `internal-tdd`" in delivery_body
     assert "- `internal-performance-optimization`" in delivery_body
-    assert "- `mattpocock-zoom-out`" in review_body
+    assert "conditional map or compression lens" in review_body
     assert "- `internal-debugging`" in review_body
     assert "- `internal-systems-review`" in review_body
 
@@ -339,12 +444,14 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         for retired_id in retired_mattpocock_ids():
             assert f"- `{retired_id}`" not in wrapper_body
 
-    assert (
-        "Failure diagnosis now belongs to `internal-debugging`" in imported_support_text
-    )
-    assert "Test-first delivery now belongs to `internal-tdd`" in imported_support_text
+    assert "Failure diagnosis belongs to `internal-debugging`" in wrapper_alignment_text
+    assert "Test-first delivery belongs to `internal-tdd`" in wrapper_alignment_text
+    assert "higher-level code" in wrapper_alignment_text
+    assert "## Orientation Map Lens" in systems_review_text
+    assert "## Orientation Output" in systems_review_text
+    assert "Module map" in systems_review_text
     for retired_id in retired_mattpocock_ids():
-        assert retired_id not in imported_support_text
+        assert retired_id not in wrapper_alignment_text
 
 
 def test_internal_debugging_and_tdd_skills_capture_extracted_workflows() -> None:

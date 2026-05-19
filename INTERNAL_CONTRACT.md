@@ -224,7 +224,7 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-gateway-operational-flow`, `internal-gateway-simple`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
+  - `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
   - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
   - `internal-gateway-operational-flow` supports `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases without creating dedicated gateway skills for each phase

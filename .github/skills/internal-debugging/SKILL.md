@@ -5,6 +5,17 @@ description: Use when a bug, test failure, build failure, validator drift, sync 
 
 # Internal Debugging
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+
+- `internal-code-review`: defect-first review when diagnosis exposes unsafe code or missing tests.
+- `internal-performance-optimization`: performance owner when measured slowness or throughput is primary.
+- `internal-systems-review`: systems review when diagnosis exposes architecture, workflow, or ownership gaps.
+- `internal-tdd`: regression-test owner after the root cause is understood.
+- `superpowers-systematic-debugging`: stricter diagnosis discipline for hard, flaky, or guess-prone failures.
+- `superpowers-verification-before-completion`: evidence gate before claiming the original loop is fixed.
+
 Use this skill as the repository-owned owner for root-cause diagnosis. Build a
 feedback loop before changing behavior, then use evidence to narrow the cause.
 
@@ -53,6 +64,8 @@ feedback loop before changing behavior, then use evidence to narrow the cause.
 
 - `superpowers-systematic-debugging`: stricter diagnosis discipline when the
   failure is hard, flaky, or tempting to guess at.
+- `superpowers-verification-before-completion`: evidence gate before claiming
+  that the bug, failing loop, or drift signal is resolved.
 - `internal-tdd`: regression tests and public-interface test seams after the
   root cause is understood.
 - `internal-code-review`: defect-first review when the diagnosis exposes a code
@@ -70,6 +83,8 @@ feedback loop before changing behavior, then use evidence to narrow the cause.
 - Show the regression test, validator, or explicit seam gap.
 - Confirm temporary instrumentation, throwaway fixtures, and debug-only files
   were removed or intentionally retained with a clear route.
+- Use `superpowers-verification-before-completion` before claiming the bug,
+  original loop, or drift signal is fixed.
 
 ## Common mistakes
 

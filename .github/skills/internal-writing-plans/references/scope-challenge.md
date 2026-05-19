@@ -22,6 +22,9 @@ Every retained plan must be able to answer these questions:
    the result?
 5. `stop conditions`: What missing input, unsafe scope, ownership conflict, or
    validation failure must stop execution?
+6. `reading budget`: What is the smallest first read and evidence pass that can classify the folder without broad context loading?
+
+For retained plans with numbered files, confirm that `01-riassunto-direzione-e-decisione.md` exposes the same target, anti-scope, owner, validator, and stop conditions, plus `Uso consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, and `Budget lettura`.
 
 ## Gate Result
 
@@ -40,6 +43,8 @@ Anti-scope: <explicit exclusions>
 Owner: <primary owner and lane-change owner>
 Validator: <command, review path, or explicit gap>
 Stop conditions: <what stops execution>
+Summary file: <present and decision-ready, or missing>
+Reading budget: <first files or checks before broader reading>
 ```
 
 Do not proceed to `apply-plan` when the result is `NEEDS_REVISION` or `BLOCKED`

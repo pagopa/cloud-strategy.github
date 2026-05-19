@@ -49,6 +49,23 @@ Do not require `CONTEXT.md`, ADR folders, or glossary updates for this repositor
 unless those structures already exist and the user explicitly makes them part of
 the task.
 
+### Codebase orientation lens
+
+Use these checks when the user needs a higher-level map of unfamiliar code
+instead of a defect review:
+
+| Lens | What to check |
+| --- | --- |
+| Target area | Which file, module, workflow, or behavior anchors the question? |
+| Domain vocabulary | Which repository terms name the relevant concepts? |
+| Module map | Which modules own the behavior, and what does each one hide or expose? |
+| Caller map | Which direct callers, consumers, or workflow entrypoints depend on it? |
+| Flow map | What data, control, or operational path connects the modules? |
+| Boundary risk | Which ownership, abstraction, or validation boundary should a future edit respect? |
+
+Keep the map descriptive. Promote observations to findings only when concrete
+evidence shows a systems risk.
+
 ## 4. Blind-spot detection
 
 Apply lateral thinking on each dimension:
