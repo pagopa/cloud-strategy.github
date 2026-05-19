@@ -9,7 +9,7 @@ description: Use when repository-owned work needs a skill-first staged operation
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `grill-me`: clarification and pressure-questioning support when planning ambiguity remains.
+- `grill-me`: pre-plan clarification gate when user decisions can change scope, owner, target state, validation, rollout, or anti-scope.
 - `internal-debugging`: root-cause support when execution, validation, or recovery exposes a real failing loop.
 - `internal-agent-support-lane-change-engine`: user-visible lane-change response when the selected mode no longer fits.
 - `internal-agent-support-next-step`: durable next-owner, scope, validation, and risk handoff package.
@@ -60,6 +60,9 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Each active phase declares phase, logical owner, scope, anti-scope, action, validation, risk, and the next checkpoint or decision.
 - If the entry point or phase is unclear, use `plan` as the safe fallback instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user.
+- Treat `grill-me` as a blocking gate before plan output when user
+  decisions may change scope, owner, target state, validation, rollout, or
+  anti-scope.
 - Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Treat cross-skill contracts as owner-level contracts. Reference another skill by name and the behavior it owns; do not link to another skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, or `agents/` files.
@@ -104,6 +107,8 @@ Use the smallest evidence pass that can safely choose the owner and next action.
   output can change the plan, target state, or stop condition.
 - Treat listed references and support skills as on-demand resources. Do not load
   every referenced file because it appears in an index or optional map.
+- Token discipline limits the evidence pass. It does not skip a required
+  `grill-me` gate.
 - Stop exploration once the plan can state target, assumptions, anti-scope,
   selected owner, validation path, residual risk, and user decisions.
 - When the user challenges token cost, runtime cost, or slow workflow, treat it
@@ -114,9 +119,20 @@ Use the smallest evidence pass that can safely choose the owner and next action.
 
 Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, and next-step package. It does not silently become execution after the design is settled.
 
-Use `grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is being created, reformulated, or validated. Before asking questions, inspect the repository when the answer is recoverable from files.
+Before writing any `plan-only` output, non-trivial retained plan, or plan
+reformulation, check whether `grill-me` is mandatory. It is mandatory when the
+user asks to clarify before planning, when the request touches agents, skills,
+workflow, catalog, governance, or routing, or when missing context, target
+state, anti-scope, owner, validation, or user decisions could change scope,
+owner, target state, validation, rollout, or anti-scope. Before asking
+questions, inspect the repository when the answer is recoverable from files.
 
-After that evidence pass, stop for `grill-me` before writing the plan when unresolved user-only decisions could change scope, owner, target state, validation, rollout, or anti-scope. Do not replace those decisions with silent assumptions. If the user wants to answer in bulk, provide numbered questions with a recommended answer for each; after the bulk answer, continue one question at a time only for unresolved ambiguity.
+When `grill-me` is mandatory, stop before writing the plan.
+Then provide numbered questions with a recommended answer for each, using
+`Question`, `Recommendation`, `Why`, and `Default if accepted`, then wait until
+the user answers or explicitly accepts the defaults.
+Do not replace those decisions with silent assumptions. After the bulk answer,
+continue one question at a time only for unresolved ambiguity.
 
 When the target path includes `AGENTS.md`, `.github/copilot-instructions.md`, `.github/INVENTORY.md`, validators, sync engines, or wrapper agents, treat the plan as governance-sensitive. Include the applicable validation path, such as `make token-risks`, `make github-catalog-validation`, and focused contract tests, or name the explicit validation gap. In `plan-only`, name focused tests by path or command without opening them unless their exact assertions affect the decision.
 
@@ -234,7 +250,8 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Completion claims in `execute` or `apply-plan` passed through `superpowers-verification-before-completion`.
 - Strong `plan complete`, `review complete`, `no findings`, or merge-readiness claims passed through `superpowers-verification-before-completion`.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
-- `grill-me` is used for non-trivial retained plans or real clarification needs.
+- `grill-me` blocks plan output when user decisions can change scope, owner,
+  target state, validation, rollout, or anti-scope.
 - Imported support follows `references/wrapper-alignment.md` and is never a mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

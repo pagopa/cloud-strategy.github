@@ -61,7 +61,7 @@ def test_local_and_consumer_excluded_path_helpers(
 
 def test_find_repo_root_and_resolve_markdown_target(tmp_path: Path) -> None:
     root = tmp_path
-    current_file = root / ".github/agents/internal-delivery-operator.agent.md"
+    current_file = root / ".github/agents/internal-gateway-operational-flow.agent.md"
     (root / ".github/agents").mkdir(parents=True, exist_ok=True)
     (root / "docs").mkdir(parents=True, exist_ok=True)
     current_file.write_text("# delivery operator\n", encoding="utf-8")

@@ -5,7 +5,7 @@ description: Use when a repository-owned plan, proposal, or decision needs a cri
 
 # Internal Gateway Critical Master
 
-Use this skill as the portable core for critical challenge work. Copilot may expose `internal-critical-master` as a wrapper agent, but the reusable pressure-test method lives here so runtimes without agent UI can still use it directly.
+Use this skill as the portable core for critical challenge work. Copilot may expose `internal-gateway-critical-master` as a wrapper agent, but the reusable pressure-test method lives here so runtimes without agent UI can still use it directly.
 
 ## When to use
 

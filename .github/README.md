@@ -76,7 +76,7 @@ Prompt files are parameterized entrypoints for repeatable advisory or orchestrat
 
 - `internal-mega-review`: general advisor-only mega review for one or more repositories; writes retained English review artifacts under `tmp/`.
 - `internal-copilot-resources-mega-review`: focused review for the AI resource control plane itself, including agents, skills, instructions, prompts, scripts, docs, memory, inventory, and governance drift.
-- `internal-agent-plan-next-step`, `internal-agent-review-next-actions`, and `internal-agent-pressure-test-plan`: compact planning, review, and pressure-test entrypoints aligned with the wrapper lanes.
+- `internal-agent-plan-next-step`, `internal-agent-review-next-actions`, and `internal-agent-pressure-test-plan`: compact planning, review, and pressure-test entrypoints aligned with the gateway wrapper lanes.
 - `internal-sync-plan` and `internal-architecture-md-creator`: targeted prompts for sync planning and architecture contract refresh work.
 
 Prefer `internal-copilot-resources-mega-review` when the subject is the repository's Copilot or AI catalog. Prefer `internal-mega-review` when the target is a broader repository review outside the catalog-governance surface.
@@ -85,11 +85,12 @@ Prefer `internal-copilot-resources-mega-review` when the subject is the reposito
 
 See [`agents/README.md`](agents/README.md) for the selection guide.
 
-- Canonical repository-owned operational agents: `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-master`
+- Canonical repository-owned gateway agents: `internal-gateway-operational-flow`, `internal-gateway-critical-master`, `internal-gateway-simple-task`
+- Deprecated compatibility operational agents: `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-master`
 - Repository-owned source-side sync and governance agents: `local-sync-external-resources`, `local-sync-global-copilot-configs-into-repo`
 - No imported support agents currently ship in the live catalog.
 
-The current repository-owned operating model uses direct entry to the four canonical internal owners. When the right owner is unclear, default to `internal-planning-leader`. Do not document retired operational routes here.
+The current repository-owned operating model uses direct entry to the three gateway wrappers. When the right owner is unclear, default to `internal-gateway-operational-flow`. Deprecated compatibility wrappers must stay non-canonical during the deprecation window.
 
 ### Scripts and workflow
 

@@ -1,6 +1,6 @@
 ---
 name: "internal-agent-pressure-test-plan"
-agent: "internal-critical-master"
+agent: "internal-gateway-critical-master"
 description: "Pressure-test a plan or proposal before merge, refactor, or cross-boundary implementation"
 ---
 
@@ -22,7 +22,7 @@ Use these repository sources first:
 
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
-- [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
+- [.github/agents/internal-gateway-critical-master.agent.md](../agents/internal-gateway-critical-master.agent.md)
 - [.github/skills/internal-gateway-critical-master/SKILL.md](../skills/internal-gateway-critical-master/SKILL.md)
 - [.github/skills/internal-agent-support-lane-change-engine/SKILL.md](../skills/internal-agent-support-lane-change-engine/SKILL.md)
 - [.github/skills/internal-agent-support-next-step/SKILL.md](../skills/internal-agent-support-next-step/SKILL.md)

@@ -1,74 +1,37 @@
 ---
 name: internal-planning-leader
-description: "Use this agent when the task needs the Copilot wrapper for plan mode: ambiguity, unclear target state, multiple credible paths, cross-boundary tradeoffs, repository-owned authoring, rollout, or routing decisions before execution."
-tools: ["read", "edit", "search", "execute", "web"]
+description: "Use this agent when compatibility requires the deprecated planning wrapper; prefer internal-gateway-operational-flow for new plan and plan-only work."
+tools: ["read", "search"]
+user-invocable: false
 disable-model-invocation: true
 agents: []
-handoffs:
-  - label: "Next step: Implement plan"
-    agent: "internal-delivery-operator"
-    prompt: "Implement the plan above. Keep the next-step package scope, validation path, and residual risks visible."
-    send: false
-  - label: "Next step: Pressure-test plan"
-    agent: "internal-critical-master"
-    prompt: "Pressure-test the plan above. Focus on hidden assumptions, failure modes, and whether planning should reformulate before delivery."
-    send: false
 ---
 
 # Internal Planning Leader
 
-## Role
+## Deprecated Compatibility Wrapper
 
-You are the Copilot wrapper for `plan` mode in `internal-gateway-operational-flow`. Use this wrapper for VS Code tool access, direct selection, and manual handoff buttons; keep the reusable operational semantics in the skill.
+This wrapper is retained only for the soft-deprecation window. New planning,
+retained-plan authoring, and route-selection work should use
+`internal-gateway-operational-flow`.
 
-## Mandatory Engine Skills
+## Core Skill
 
 - `internal-gateway-operational-flow`
-- `internal-agent-support-lane-change-engine`
-- `internal-agent-support-next-step`
-
-## Optional Support Skills
-
-- `internal-writing-plans`
-- `internal-executing-plans`
-- `internal-agent-creator`
-- `internal-copilot-audit`
-- `internal-copilot-docs-research`
-- `internal-systems-review`
-- `grill-me`
-
-## Core Rules
-
-- Select and follow the `plan` phase or `plan-only` entry point from `internal-gateway-operational-flow`.
-- Make assumptions, tradeoffs, and the selected direction explicit.
-- Keep retained planning under `tmp/superpowers/` only when the repository plan policy requires it.
-- Provide the Decision Brief projection after retained plans or material reformulations.
-- Do not default into implementation once the design is settled; recommend the next owner with `internal-agent-support-next-step`.
-- Use `grill-me` when the user asks for it, real ambiguity remains, or a non-trivial retained plan is created, reformulated, or validated.
-- Use imported Matt Pocock support only as conditional lenses through `internal-gateway-operational-flow`; keep situational or dormant imports out of the wrapper list unless the task proves they are needed.
 
 ## Routing Rules
 
-- Use this wrapper when the next correct action is a decision, plan, routing call, rollout shape, or non-trivial repository-owned authoring boundary.
-- Use this wrapper when the target state is unclear or multiple credible paths remain.
-- Boundary crossing alone does not make the task planning-owned.
-- Do not use this wrapper for clear local execution, defect-first review, or pure critical challenge.
+- Do not select this wrapper for new work.
+- Use `internal-gateway-operational-flow` for `plan`, `plan-only`, and `full-cycle`.
+- Use `internal-gateway-critical-master` when the primary need is pressure testing.
 
 ## Boundary Definition
 
-- Stay in this wrapper while ambiguity, tradeoffs, ownership, rollout, or repository-owned authoring decisions remain unresolved.
-- If the selected direction is settled and only routine execution, defect-first validation, or pressure testing remains, stop and use `internal-agent-support-lane-change-engine` to recommend the better owner.
-- Do not route, dispatch, or delegate to another agent from this wrapper.
-
-## Mode Guidance
-
-- Plan-authoring mode: prefer `internal-writing-plans` only when repository-owned work needs a retained execution plan under `tmp/superpowers/` because the work crosses turns, macro-categories, handoff, tracking, or provenance; keep planning in chat for clear, local, quick, or banal tasks.
-- Plan-execution oversight: prefer `internal-executing-plans` when an approved repository-owned plan is being applied and the `done-*` loop or blocker handling must stay explicit; otherwise package `apply-plan` as a visible next step.
+- This file is non-invocable compatibility documentation.
+- Do not add new handoffs or planning procedure here.
 
 ## Output Expectations
 
-- Decision frame
-- Main assumptions and tradeoffs
-- Selected direction and why it won
-- Recommended owner and next-step package when the primary lane changes
-- Validation, rollout, or governance note when relevant
+- State that this wrapper is deprecated.
+- Recommend `internal-gateway-operational-flow` or `internal-gateway-critical-master`.
+- Preserve the user-provided decision surface, validation path, and risk note in the recommendation.

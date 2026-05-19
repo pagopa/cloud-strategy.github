@@ -96,15 +96,24 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
     assert "5-7 bullets when practical" not in copilot_text
 
 
-def test_internal_planning_leader_prefers_repository_plan_wrappers() -> None:
-    planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
+def test_gateway_operational_flow_prefers_repository_plan_wrappers() -> None:
+    operational_agent_text = read_text(
+        ".github/agents/internal-gateway-operational-flow.agent.md"
+    )
+    operational_skill_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    )
+    mode_contracts_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/references/mode-contracts.md"
+    )
+    writing_plans_text = read_text(".github/skills/internal-writing-plans/SKILL.md")
 
-    assert "- `internal-writing-plans`" in planning_leader_text
-    assert "- `internal-executing-plans`" in planning_leader_text
-    assert "prefer `internal-writing-plans`" in planning_leader_text
-    assert "prefer `internal-executing-plans`" in planning_leader_text
-    assert "clear, local, quick, or banal tasks" in planning_leader_text
-    assert "retained execution plan" in planning_leader_text
+    assert "## Core Skill" in operational_agent_text
+    assert "- `internal-gateway-operational-flow`" in operational_agent_text
+    assert "internal-writing-plans" in mode_contracts_text
+    assert "internal-executing-plans" in operational_skill_text
+    assert "clear, local, quick, or banal" in writing_plans_text
+    assert "Retained repository-owned plan authoring" in mode_contracts_text
 
 
 def test_plan_wrapper_skills_are_listed_in_ownership_map_and_inventory() -> None:

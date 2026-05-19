@@ -225,16 +225,17 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - shared operating-model skills
 - Expected behavior:
   - `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
-  - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain the current Copilot wrapper entrypoints for that core
+  - `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
+  - `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, and `internal-critical-master` remain deprecated compatibility wrappers only, not canonical routing owners
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
   - `internal-gateway-operational-flow` supports `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases without creating dedicated gateway skills for each phase
-  - ambiguous or mixed-shape entry fails safe to `internal-planning-leader` or the `plan` phase through `internal-gateway-operational-flow`
+  - ambiguous or mixed-shape entry fails safe to `internal-gateway-operational-flow`
   - unclear target state and multiple credible paths are explicit planning triggers
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
   - critical challenge can return reformulation, simple, execute, review, continue-critical, or accept-with-risk outcomes
   - any future peer-automation exception between wrapper owners must be narrow, one-directional, auditably bounded, and non-mesh
-  - mandatory and optional skill contracts remain explicit where the wrapper behavior depends on them
+  - core-skill and support-selection contracts remain explicit where the wrapper behavior depends on them
 
 ### Repository Workflow
 

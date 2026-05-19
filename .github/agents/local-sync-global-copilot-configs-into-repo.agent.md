@@ -71,7 +71,7 @@ Use this section only for consumer-propagation awareness. The canonical source-s
 
 - Use this agent for consumer-repository baseline propagation, drift assessment, `plan`, and `apply` runs.
 - Use this agent when the target must inherit the current bridge model around `AGENTS.md`, `.github/copilot-instructions.md`, `.github/copilot-instructions.override.md`, `.github/INVENTORY.md`, and repository-root `LESSONS_LEARNED.md`.
-- Do not use this agent for source-side catalog redesign, agent or skill authoring, or governance restructuring in this repository; recommend `internal-planning-leader` instead.
+- Do not use this agent for source-side catalog redesign, agent or skill authoring, or governance restructuring in this repository; recommend `internal-gateway-operational-flow` instead.
 - Do not use this agent for routine local execution once the sync contract is already settled and only a small target-local edit remains; recommend the appropriate executor for that repository instead.
 - When current platform behavior is the deciding factor, validate it through `internal-copilot-docs-research` before changing the sync policy.
 

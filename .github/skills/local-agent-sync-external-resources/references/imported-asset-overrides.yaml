@@ -73,10 +73,10 @@ overrides:
     apply_strategy: git-apply-3way
     approval: explicit-user-counter-validated
     reason: >-
-      Keep the reviewer handoff aligned with the canonical internal reviewer and
-      with tmp/superpowers plan paths.
+      Keep the reviewer handoff aligned with the canonical internal gateway
+      review owner and with tmp/superpowers plan paths.
     patch_path: patches/superpowers-requesting-code-review.patch
-    expected_content_hash: 1551f1af49cae7624862b50147af41c7a2275196d99b96380c16f53ca86c9abf
+    expected_content_hash: 8fae45ce34f6f94eae032d62792f04a54784a61d7715fea7f532375148842d7e
     baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

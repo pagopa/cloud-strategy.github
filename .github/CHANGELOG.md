@@ -8,6 +8,10 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-05-19
+
+- Added the three canonical gateway wrapper agents `.github/agents/internal-gateway-operational-flow.agent.md`, `.github/agents/internal-gateway-critical-master.agent.md`, and `.github/agents/internal-gateway-simple-task.agent.md`, soft-deprecated the four prior operational wrappers as non-invocable compatibility stubs, and realigned active prompt, README, lane-change, wrapper-alignment, internal-contract, test, and inventory contracts to the new model.
+
 ## 2026-05-16
 
 - Slimmed `.github/copilot-instructions.md` into a short Copilot-native projection, kept detailed retained-learning and repository-workflow behavior in narrower owners, and realigned the contract tests plus `INTERNAL_CONTRACT.md` to the new ownership boundary.

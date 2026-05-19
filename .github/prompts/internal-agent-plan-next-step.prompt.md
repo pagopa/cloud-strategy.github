@@ -1,6 +1,6 @@
 ---
 name: "internal-agent-plan-next-step"
-agent: "internal-planning-leader"
+agent: "internal-gateway-operational-flow"
 description: "Create a planning brief and next-step package for repository-owned Copilot governance or cross-boundary work"
 ---
 
@@ -21,7 +21,7 @@ Use these repository sources first:
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
-- [.github/agents/internal-planning-leader.agent.md](../agents/internal-planning-leader.agent.md)
+- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
 - [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
 - [.github/skills/internal-agent-support-next-step/SKILL.md](../skills/internal-agent-support-next-step/SKILL.md)
 

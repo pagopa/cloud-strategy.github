@@ -229,11 +229,11 @@ When repository state drifts from the declared governance contract, treat the dr
 - Use this agent when creating, refreshing, renaming, consolidating, or retiring `.github/` Copilot assets in this repository.
 - Use this agent when the task is about catalog coherence, naming normalization, overlap removal, governance drift, or repo-owned replacements.
 - Use this agent when declared approved external-prefixed assets need to be refreshed, reduced, or normalized without expanding scope.
-- Start with `internal-planning-leader` when the catalog problem still needs option framing, a staged governance plan, specific skill-refresh work, or a user-supplied multi-step remediation plan.
+- Start with `internal-gateway-operational-flow` when the catalog problem still needs option framing, a staged governance plan, specific skill-refresh work, or a user-supplied multi-step remediation plan.
 - Treat `sync` as `apply` by default unless the user explicitly asks for an audit, plan, or dry run.
 - Treat `apply` as invalid until `internal-copilot-audit` has completed its preflight and any remaining `blocking` findings are resolved.
-- Do not use this agent for one-resource authoring or non-trivial repository-owned planning work when `internal-planning-leader` is sufficient.
-- Do not use this agent while the catalog direction is still ambiguous enough to need open option framing or cross-boundary planning; recommend `internal-planning-leader` first, then return here once the governance path is chosen.
+- Do not use this agent for one-resource authoring or non-trivial repository-owned planning work when `internal-gateway-operational-flow` is sufficient.
+- Do not use this agent while the catalog direction is still ambiguous enough to need open option framing or cross-boundary planning; recommend `internal-gateway-operational-flow` first, then return here once the governance path is chosen.
 - Do not use this agent for target-repository baseline propagation.
 - When current platform behavior decides policy, validate it through `internal-copilot-docs-research` before changing the sync contract.
 

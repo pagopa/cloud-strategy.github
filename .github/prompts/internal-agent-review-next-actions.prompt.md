@@ -1,6 +1,6 @@
 ---
 name: "internal-agent-review-next-actions"
-agent: "internal-review-guard"
+agent: "internal-gateway-operational-flow"
 description: "Kick off defect-first review findings with causal layers and routed next actions"
 ---
 
@@ -22,7 +22,7 @@ Use these repository sources first:
 - [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
 - [.github/skills/internal-code-review/SKILL.md](../skills/internal-code-review/SKILL.md)
 - [.github/skills/internal-agent-support-next-step/SKILL.md](../skills/internal-agent-support-next-step/SKILL.md)
-- [.github/agents/internal-review-guard.agent.md](../agents/internal-review-guard.agent.md)
+- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
 
 Produce review findings with:
 

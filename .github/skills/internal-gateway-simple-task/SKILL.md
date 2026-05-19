@@ -9,7 +9,7 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `grill-me`: optional clarification support when missing context blocks the start or continuation of simple work.
+- `grill-me`: optional focused clarification support for simple blockers.
 - `internal-gateway-operational-flow`: staged workflow owner when simple work no longer fits.
 - `internal-gateway-critical-master`: critical challenge owner when reasoning, assumptions, or failure modes dominate.
 - `internal-lesson-codification`: lesson owner when a durable lesson candidate appears during simple work.
@@ -50,6 +50,9 @@ operational skill in the repository.
 - The request is `plan`, `execute`, `review`, `full-cycle`, `plan-only`,
   `apply-plan`, retained-plan execution, or merge-readiness review. Stop and
   recommend `internal-gateway-operational-flow`.
+- The user asks to create, rewrite, or clarify context before a plan. Stop and
+  recommend `internal-gateway-operational-flow` so its pre-plan `grill-me`
+  gate can run.
 - The primary request is pressure testing, pre-mortem analysis, hidden
   assumptions, or failure modes. Stop and recommend
   `internal-gateway-critical-master`.
@@ -69,6 +72,8 @@ Leave simple mode as soon as one of these becomes the real problem:
   a final check.
 - The edit expands into adjacent changes that need a design, rollback, rollout,
   or regression decision.
+- Missing information could change scope, owner, target state, validation,
+  rollout, or anti-scope before any plan output.
 - A durable lesson candidate appears. Report it in chat or hand it off to
   `internal-lesson-codification` instead of updating `LESSONS_LEARNED.md`
   inside simple mode.
@@ -80,14 +85,18 @@ governance, tradeoffs, or validation strategy are still ambiguous after that
 block, escalate instead of continuing inside simple mode.
 
 1. Inspect local files first when repository evidence can answer the question.
-2. If missing context blocks the start and local evidence cannot resolve it, use
+2. Run the exit check before using `grill-me`: if the prompt needs a plan,
+   retained plan, plan rewrite, or clarify-first planning gate, stop simple
+   mode and issue an escalation alert recommending
+   `internal-gateway-operational-flow`.
+3. If missing context blocks the start and local evidence cannot resolve it, use
    `grill-me` for the minimum necessary clarification.
-3. Confirm the task still fits one quick lane.
-4. Load only the support skill proved by the prompt, target path, scoped
+4. Confirm the task still fits one quick lane.
+5. Load only the support skill proved by the prompt, target path, scoped
    instruction, symptom, domain evidence, or validation surface.
-5. Answer, edit, diagnose, or validate without creating a retained plan.
-6. Run focused validation, or name the explicit validation gap.
-7. If the task stops being simple, stop and issue an escalation alert.
+6. Answer, edit, diagnose, or validate without creating a retained plan.
+7. Run focused validation, or name the explicit validation gap.
+8. If the task stops being simple, stop and issue an escalation alert.
 
 Keep the first read budget small: one target or owner file, one matching scoped
 instruction when applicable, and one nearby validator or test identified with
@@ -126,7 +135,8 @@ Use `grill-me` only when missing user intent, target path, input data, local
 context, or a blocker prevents starting or continuing the simple lane. Keep the
 questions limited to the facts needed to proceed. If the missing information is
 really an ownership, rollout, governance, tradeoff, or validation decision,
-escalate instead of questioning inside simple mode.
+escalate instead of questioning inside simple mode. Do not use simple-mode
+`grill-me` for pre-plan decisions.
 
 ## Claim Gates
 
