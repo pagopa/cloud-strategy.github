@@ -14,8 +14,8 @@ def write_file(path: Path, content: str) -> None:
 def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None:
     write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
     write_file(
-        tmp_path / ".github/agents/internal-delivery-operator.agent.md",
-        "---\nname: internal-delivery-operator\ntools: [read]\n---\n",
+        tmp_path / ".github/agents/internal-gateway-simple-task.agent.md",
+        "---\nname: internal-gateway-simple-task\ntools: [read]\n---\n",
     )
     write_file(
         tmp_path / ".github/instructions/internal-python.instructions.md",
@@ -36,7 +36,7 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
     assert "## Prompts" in inventory
     assert "- `.github/instructions/internal-python.instructions.md`" in inventory
     assert "- `.github/skills/internal-catalog/SKILL.md`" in inventory
-    assert "- `.github/agents/internal-delivery-operator.agent.md`" in inventory
+    assert "- `.github/agents/internal-gateway-simple-task.agent.md`" in inventory
     assert "- `.github/prompts/internal-agent-plan-next-step.prompt.md`" in inventory
 
 

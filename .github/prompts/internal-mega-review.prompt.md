@@ -26,8 +26,8 @@ Use these standards-repository sources first for governance, evidence, and split
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
-- [.github/agents/internal-planning-leader.agent.md](../agents/internal-planning-leader.agent.md)
-- [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
+- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
+- [.github/agents/internal-gateway-critical-master.agent.md](../agents/internal-gateway-critical-master.agent.md)
 - [.github/skills/internal-writing-plans/SKILL.md](../skills/internal-writing-plans/SKILL.md)
 
 For this mega-review prompt, the English retained artifact contract below overrides any legacy non-English filename examples in those sources.
@@ -305,7 +305,7 @@ If the repository already contains prior analysis under `tmp/`:
 
 Before finishing, validate the resulting analysis against the challenge posture defined in:
 
-- [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
+- [.github/agents/internal-gateway-critical-master.agent.md](../agents/internal-gateway-critical-master.agent.md)
 
 Run a brief consistency gate that answers:
 

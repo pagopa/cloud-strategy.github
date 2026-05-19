@@ -82,8 +82,8 @@ def test_internal_agent_creator_scripts_report_agent_and_token_shape() -> None:
         "json",
     )
 
-    assert audit["summary"]["agent_count"] >= 6
-    assert audit["summary"]["legacy_agent_count"] >= 1
+    assert audit["summary"]["agent_count"] >= 5
+    assert audit["summary"]["legacy_agent_count"] == 0
     assert token_audit["totals"]["loaded_docs"] < 4500
     assert token_audit["totals"]["script_code"] > 0
     assert token_audit["summary"]["finding_count"] == 0

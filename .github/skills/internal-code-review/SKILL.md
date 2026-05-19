@@ -24,7 +24,7 @@ This index lists every other skill that this file asks the agent to load, route 
 
 ## Standalone quick start
 
-When this skill is used directly instead of through `internal-review-guard`, establish these inputs first:
+When this skill is used directly instead of through `internal-gateway-operational-flow` review mode, establish these inputs first:
 
 - the review question or requested scope
 - the changed files or diff being reviewed

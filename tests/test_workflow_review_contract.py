@@ -25,22 +25,18 @@ def assert_contains_all(relative_path: str, snippets: tuple[str, ...]) -> None:
 def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execution() -> (
     None
 ):
-    delivery_operator_text = read_text(
-        ".github/agents/internal-delivery-operator.agent.md"
+    operational_flow_agent_text = read_text(
+        ".github/agents/internal-gateway-operational-flow.agent.md"
     )
-    planning_leader_text = read_text(".github/agents/internal-planning-leader.agent.md")
+    simple_task_agent_text = read_text(
+        ".github/agents/internal-gateway-simple-task.agent.md"
+    )
     operating_model_text = read_text(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
 
-    assert (
-        "deterministic realignment across adjacent repository-owned assets"
-        in delivery_operator_text
-    )
-    assert (
-        "Boundary crossing alone does not make the task planning-owned."
-        in planning_leader_text
-    )
+    assert "plan, execute, apply-plan, review" in operational_flow_agent_text
+    assert "single-lane and single-phase" in simple_task_agent_text
     assert (
         "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
         in operating_model_text
@@ -243,8 +239,8 @@ def test_gateway_points_to_plan_completion_audit_reference() -> None:
 
 def test_systems_review_lens_referenced() -> None:
     assert_contains_all(
-        ".github/agents/internal-review-guard.agent.md",
-        ("internal-systems-review", "review lenses", "scope drift", "audit dispatch"),
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
+        ("internal-systems-review", "cross-cutting impact", "blind spots"),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
@@ -253,7 +249,9 @@ def test_systems_review_lens_referenced() -> None:
 
 
 def test_security_review_promotion_gated() -> None:
-    review_guard_text = read_text(".github/agents/internal-review-guard.agent.md")
+    wrapper_alignment_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
+    )
     gateway_text = read_text(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
@@ -261,17 +259,15 @@ def test_security_review_promotion_gated() -> None:
     review_lenses_text = read_text(
         ".github/skills/internal-systems-review/references/review-lenses.md"
     )
-    optional_support = review_guard_text.split(
-        "## Optional Support Skills", maxsplit=1
-    )[1]
-    optional_support = optional_support.split("## Core Rules", maxsplit=1)[0]
-
     assert not Path(".github/skills/internal-security-review").exists()
-    assert "internal-security-review" not in optional_support
+    assert (
+        "internal-security-review"
+        not in wrapper_alignment_text.split("## Future Security Lens", maxsplit=1)[0]
+    )
     assert "## Future Security Lens" in Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
-    assert "Future Security Lens" in review_guard_text
+    assert "Future Security Lens" in wrapper_alignment_text
     assert "Future Security Lens" in gateway_text
     assert (
         "Use a promoted `internal-security-review` only after that skill exists"

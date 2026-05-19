@@ -24,8 +24,8 @@ Use these standards-repository sources first for evidence discipline, planning p
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
-- [.github/agents/internal-planning-leader.agent.md](../agents/internal-planning-leader.agent.md)
-- [.github/agents/internal-critical-master.agent.md](../agents/internal-critical-master.agent.md)
+- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
+- [.github/agents/internal-gateway-critical-master.agent.md](../agents/internal-gateway-critical-master.agent.md)
 - [.github/skills/internal-writing-plans/SKILL.md](../skills/internal-writing-plans/SKILL.md)
 
 Then produce an evidence-based architecture contract for the target repository with the rules below.
@@ -107,7 +107,7 @@ Keep the working analysis internal and use it only to:
 - decide what belongs in each canonical section;
 - decide which claims are `Documented`, `Evidenced`, `Inferred`, or `Unknown`;
 - identify the top risks and unknowns to surface in section 14 and in the final chat response;
-- apply the `internal-critical-master` consistency gate before finalizing the canonical document.
+- apply the `internal-gateway-critical-master` consistency gate before finalizing the canonical document.
 
 Do not include private chain-of-thought in the chat. Surface only concise evidence-backed outcomes.
 
@@ -263,9 +263,9 @@ Markdown hygiene (must pass markdownlint defaults):
 - One H1 per file.
 - No fabricated headings beyond the 14 canonical sections.
 
-## 12. Final Consistency Gate (internal-critical-master)
+## 12. Final Consistency Gate (internal-gateway-critical-master)
 
-Before finalizing the canonical document, run a brief internal pressure-test using the `internal-critical-master` lens:
+Before finalizing the canonical document, run a brief internal pressure-test using the `internal-gateway-critical-master` lens:
 
 - What in the candidate canonical document is most likely correct given on-disk evidence?
 - What may be overclaimed, contradictory, or hallucinated, and must be downgraded to `Unknown / To verify`?

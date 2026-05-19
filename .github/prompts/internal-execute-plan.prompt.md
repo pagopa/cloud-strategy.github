@@ -1,6 +1,6 @@
 ---
 name: "internal-execute-plan"
-agent: "internal-delivery-operator"
+agent: "internal-gateway-operational-flow"
 description: "Execute an approved repository-owned plan to completion with triple verification, improvement notes, and lesson routing"
 ---
 
@@ -23,7 +23,7 @@ Use these repository sources first:
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
-- [.github/agents/internal-delivery-operator.agent.md](../agents/internal-delivery-operator.agent.md)
+- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
 - [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
 - [.github/skills/internal-executing-plans/SKILL.md](../skills/internal-executing-plans/SKILL.md)
 - [.github/skills/superpowers-verification-before-completion/SKILL.md](../skills/superpowers-verification-before-completion/SKILL.md)

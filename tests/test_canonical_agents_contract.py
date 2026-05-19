@@ -6,71 +6,53 @@ from pathlib import Path
 import yaml
 
 CANONICAL_AGENTS = {
-    "internal-delivery-operator": ".github/agents/internal-delivery-operator.agent.md",
-    "internal-planning-leader": ".github/agents/internal-planning-leader.agent.md",
-    "internal-review-guard": ".github/agents/internal-review-guard.agent.md",
-    "internal-critical-master": ".github/agents/internal-critical-master.agent.md",
+    "internal-gateway-operational-flow": ".github/agents/internal-gateway-operational-flow.agent.md",
+    "internal-gateway-critical-master": ".github/agents/internal-gateway-critical-master.agent.md",
+    "internal-gateway-simple-task": ".github/agents/internal-gateway-simple-task.agent.md",
 }
 
 OLD_CROSS_LANE_ENGINE = "internal-agent-" + "cross-lane-engine"
 
+LEGACY_AGENT_HEADINGS = (
+    "## Mandatory Engine Skills",
+    "## Optional Support Skills",
+    "## Preferred/Optional Skills",
+    "## Skill Usage Contract",
+)
+
+EXPECTED_CORE_SKILLS = {
+    "internal-gateway-operational-flow": "internal-gateway-operational-flow",
+    "internal-gateway-critical-master": "internal-gateway-critical-master",
+    "internal-gateway-simple-task": "internal-gateway-simple-task",
+}
+
 EXPECTED_HANDOFF_LABELS = {
-    "internal-delivery-operator": ["Next step: Review result"],
-    "internal-planning-leader": [
-        "Next step: Implement plan",
-        "Next step: Pressure-test plan",
+    "internal-gateway-operational-flow": [
+        "Next step: Pressure-test decision",
+        "Next action: Use simple fast path",
     ],
-    "internal-review-guard": [
-        "Next action: Apply local fixes",
-        "Next action: Re-plan larger changes",
-        "Next action: Pressure-test unresolved decision",
+    "internal-gateway-critical-master": [
+        "Next step: Continue through staged flow",
+        "Next action: Use simple fast path",
     ],
-    "internal-critical-master": [
-        "Next step: Reformulate plan",
-        "Next step: Implement clear next step",
-        "Next step: Review evidence",
+    "internal-gateway-simple-task": [
+        "Next step: Use staged operational flow",
+        "Next step: Pressure-test task",
     ],
 }
 
 EXPECTED_HANDOFF_TARGETS = {
-    "internal-delivery-operator": ["internal-review-guard"],
-    "internal-planning-leader": [
-        "internal-delivery-operator",
-        "internal-critical-master",
-    ],
-    "internal-review-guard": [
-        "internal-delivery-operator",
-        "internal-planning-leader",
-        "internal-critical-master",
-    ],
-    "internal-critical-master": [
-        "internal-planning-leader",
-        "internal-delivery-operator",
-        "internal-review-guard",
-    ],
-}
-
-EXPECTED_MANDATORY_SKILLS = {
-    "internal-delivery-operator": [
-        "internal-gateway-operational-flow",
-        "internal-agent-support-lane-change-engine",
-        "internal-agent-support-next-step",
-    ],
-    "internal-planning-leader": [
-        "internal-gateway-operational-flow",
-        "internal-agent-support-lane-change-engine",
-        "internal-agent-support-next-step",
-    ],
-    "internal-review-guard": [
-        "internal-gateway-operational-flow",
-        "internal-agent-support-lane-change-engine",
-        "internal-agent-support-next-step",
-        "internal-code-review",
-    ],
-    "internal-critical-master": [
+    "internal-gateway-operational-flow": [
         "internal-gateway-critical-master",
-        "internal-agent-support-lane-change-engine",
-        "internal-agent-support-next-step",
+        "internal-gateway-simple-task",
+    ],
+    "internal-gateway-critical-master": [
+        "internal-gateway-operational-flow",
+        "internal-gateway-simple-task",
+    ],
+    "internal-gateway-simple-task": [
+        "internal-gateway-operational-flow",
+        "internal-gateway-critical-master",
     ],
 }
 
@@ -100,47 +82,47 @@ def retired_mattpocock_ids() -> tuple[str, ...]:
     )
 
 
-def mandatory_section(body: str) -> str:
-    return section_between(body, "## Mandatory Engine Skills")
-
-
 def section_between(body: str, heading: str) -> str:
     section = body.split(heading, 1)[1]
     return section.split("\n## ", 1)[0]
 
 
-def optional_section(body: str) -> str:
-    return section_between(body, "## Optional Support Skills")
+def core_skill(relative_path: str) -> str:
+    body = read_body(relative_path)
+    section = section_between(body, "## Core Skill")
+    matches = re.findall(r"^- `([^`]+)`", section, flags=re.MULTILINE)
+
+    assert len(matches) == 1
+    return matches[0]
 
 
-def markdown_listed_skills(section: str) -> list[str]:
-    return re.findall(r"^- `([^`]+)`", section, flags=re.MULTILINE)
+def assert_no_legacy_agent_headings(body: str) -> None:
+    for heading in LEGACY_AGENT_HEADINGS:
+        assert heading not in body
 
 
-def test_canonical_agents_keep_required_frontmatter_and_engine_contracts() -> None:
+def test_canonical_agents_keep_required_frontmatter_and_core_skill_contracts() -> None:
     for agent_name, relative_path in CANONICAL_AGENTS.items():
         frontmatter = load_frontmatter(relative_path)
         body = read_body(relative_path)
 
         assert frontmatter["name"] == agent_name
-        assert isinstance(frontmatter.get("description"), str)
+        assert frontmatter["description"].startswith("Use this agent when")
         assert frontmatter.get("tools")
         assert frontmatter.get("disable-model-invocation") is True
         assert "agent" not in frontmatter.get("tools", [])
         assert frontmatter.get("agents") in (None, [])
-        assert "## Mandatory Engine Skills" in body
+        assert "## Core Skill" in body
         assert "## Output Expectations" in body
+        assert_no_legacy_agent_headings(body)
 
 
-def test_canonical_agents_keep_expected_engine_skill_assignments() -> None:
-    for agent_name, expected_skills in EXPECTED_MANDATORY_SKILLS.items():
-        body = read_body(CANONICAL_AGENTS[agent_name])
-        mandatory_skills = mandatory_section(body)
+def test_canonical_agents_keep_expected_core_skill_assignments() -> None:
+    for agent_name, expected_skill in EXPECTED_CORE_SKILLS.items():
+        relative_path = CANONICAL_AGENTS[agent_name]
 
-        for expected_skill in expected_skills:
-            assert f"- `{expected_skill}`" in mandatory_skills
-
-        assert f"- `{OLD_CROSS_LANE_ENGINE}`" not in mandatory_skills
+        assert core_skill(relative_path) == expected_skill
+        assert Path(f".github/skills/{expected_skill}/SKILL.md").exists()
 
 
 def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
@@ -160,12 +142,12 @@ def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
         assert all(isinstance(handoff.get("prompt"), str) for handoff in handoffs)
 
 
-def test_next_step_package_skill_is_mandatory_for_all_operational_wrappers() -> None:
-    for relative_path in CANONICAL_AGENTS.values():
-        body = read_body(relative_path)
+# Deleted deprecated compatibility wrappers tests
+def test_operational_flow_wrapper_reports_completion_checks() -> None:
+    body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
 
-        assert "## Mandatory Engine Skills" in body
-        assert "- `internal-agent-support-next-step`" in mandatory_section(body)
+    assert "`Check 1`, `Check 2`, and `Check 3` evidence" in body
+    assert "Next-step package" in body or "next-step package" in body
 
 
 def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
@@ -173,37 +155,17 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
 
     assert "## ASCII Workflow Map" in readme
     assert "These maps describe the expected human-visible flow" in readme
-    assert "+----------------------------+" in readme
-    assert "| internal-delivery-operator |" in readme
-    assert "internal-planning-leader" in readme
-    assert "internal-review-guard" in readme
-    assert "internal-critical-master" in readme
-    assert "### 5. Source and consumer sync workflows" in readme
+    assert "+-----------------------------+" in readme
+    assert "internal-gateway-operational-flow" in readme
+    assert "internal-gateway-critical-master" in readme
+    assert "internal-gateway-simple-task" in readme
+    assert "### 4. Sync Workflows" in readme
     assert "local-sync-external-resources" in readme
     assert "local-sync-global-copilot-configs-into-repo" in readme
     assert "## Use Examples" in readme
-    assert "#### Delivery use cases" in readme
-    assert "Good delivery requests usually name one of these surfaces" in readme
-    assert "| Documentation |" in readme
-    assert "| Agent contract |" in readme
-    assert "Delivery can still cross multiple adjacent files" in readme
-    assert "#### Planning use cases" in readme
-    assert "Good planning requests usually involve one of these questions" in readme
-    assert "| Ownership |" in readme
-    assert "#### Review use cases" in readme
-    assert "Good review requests usually name one of these review surfaces" in readme
-    assert "| Merge readiness |" in readme
-    assert "#### Critical challenge use cases" in readme
-    assert (
-        "Good challenge requests usually involve one of these pressure points" in readme
-    )
-    assert "| Hidden assumption |" in readme
-    assert "#### Sync use cases" in readme
-    assert "Source-side sync examples" in readme
-    assert "Consumer propagation examples" in readme
-    assert "Clear local edit with known validation" in readme
-    assert "Catalog redesign, routing change, or retained plan" in readme
-    assert "Source-side external catalog sync" in readme
+    assert "Apply the approved retained plan" in readme
+    assert "Review these agent changes for routing regressions" in readme
+    assert "Attack this plan before I apply it" in readme
     assert "If a request starts in the wrong lane" in readme
 
 
@@ -236,7 +198,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "existing approved retained plan folder" in skill_text
     assert "Decision Brief" in skill_text
     assert "explicit checkpoint before moving from `plan`" in skill_text
-    assert "unresolved user-only decisions could change scope" in skill_text
+    assert "user decisions could change scope" in skill_text
     assert "multiple credible paths" in skill_text
     assert "`plan`" in mode_contracts_text
     assert "`execute`" in mode_contracts_text
@@ -244,7 +206,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "`apply-plan`" in mode_contracts_text
     assert "Codex plugin or Codex CLI" in workflow_maps_text
     assert "Retained Plan Application" in workflow_maps_text
-    assert "internal-planning-leader" in wrapper_alignment_text
+    assert "internal-gateway-operational-flow" in wrapper_alignment_text
     assert not Path(
         ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
     ).exists()
@@ -259,13 +221,13 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         assert retired_id not in wrapper_alignment_text
     assert "$internal-gateway-operational-flow" in metadata_text
 
-    planning_frontmatter = load_frontmatter(
-        CANONICAL_AGENTS["internal-planning-leader"]
+    operational_frontmatter = load_frontmatter(
+        CANONICAL_AGENTS["internal-gateway-operational-flow"]
     )
-    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
-    assert "unclear target state" in planning_frontmatter["description"]
-    assert "multiple credible paths" in planning_frontmatter["description"]
-    assert "multiple credible paths remain" in planning_body
+    operational_body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
+    assert "plan, execute, apply-plan, review" in operational_frontmatter["description"]
+    assert "multiple credible paths" in skill_text
+    assert "full-cycle" in operational_body
 
 
 def test_operational_flow_readme_references_live_gateway_skills() -> None:
@@ -292,24 +254,28 @@ def test_operational_flow_readme_references_live_gateway_skills() -> None:
     assert "mattpocock-caveman" in readme_text
 
 
-def test_gateway_wrapper_alignment_documents_optional_support_skills() -> None:
+def test_internal_contract_documents_gateway_wrapper_entrypoints() -> None:
+    contract_text = Path("INTERNAL_CONTRACT.md").read_text(encoding="utf-8")
+
+    assert (
+        "`internal-gateway-operational-flow`, `internal-gateway-simple-task`, and "
+        "`internal-gateway-critical-master` remain the current Copilot wrapper entrypoints"
+        in contract_text
+    )
+    assert "fails safe to `internal-gateway-operational-flow`" in contract_text
+    assert "internal-planning-leader` or the `plan` phase" not in contract_text
+
+
+def test_gateway_wrapper_alignment_documents_active_gateway_wrappers() -> None:
     alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
-    support_map_text = section_between(alignment_text, "## Optional Support Map")
 
-    for agent_name, relative_path in CANONICAL_AGENTS.items():
-        body = read_body(relative_path)
-        expected_skills = markdown_listed_skills(optional_section(body))
-        matching_rows = [
-            line
-            for line in support_map_text.splitlines()
-            if line.startswith(f"| `{agent_name}` |")
-        ]
-
-        assert len(matching_rows) == 1
-        for expected_skill in expected_skills:
-            assert f"`{expected_skill}`" in matching_rows[0]
+    assert "## Wrapper Roles" in alignment_text
+    assert "## Support Posture" in alignment_text
+    for agent_name, expected_skill in EXPECTED_CORE_SKILLS.items():
+        assert f"| `{agent_name}` | `{expected_skill}` |" in alignment_text
+        assert core_skill(CANONICAL_AGENTS[agent_name]) == expected_skill
 
 
 def test_gateway_catalog_fast_path_stays_local_before_optional_support() -> None:
@@ -385,14 +351,17 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     assert "$internal-gateway-simple-task" in metadata_text
 
 
-def test_prompt_examples_reference_live_gateway_skills() -> None:
+def test_prompt_examples_reference_live_gateway_skills_and_agents() -> None:
     prompt_paths = [
         Path(".github/prompts/internal-agent-pressure-test-plan.prompt.md"),
         Path(".github/prompts/internal-agent-review-next-actions.prompt.md"),
         Path(".github/prompts/internal-agent-plan-next-step.prompt.md"),
+        Path(".github/prompts/internal-execute-plan.prompt.md"),
     ]
     combined_text = "\n".join(path.read_text(encoding="utf-8") for path in prompt_paths)
 
+    assert "internal-gateway-operational-flow.agent.md" in combined_text
+    assert "internal-gateway-critical-master.agent.md" in combined_text
     assert "internal-gateway-operational-flow/SKILL.md" in combined_text
     assert "internal-gateway-critical-master/SKILL.md" in combined_text
     assert "internal-agent-support-next-step/SKILL.md" in combined_text
@@ -406,22 +375,21 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     operational_text = Path(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
-    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
+    wrapper_alignment_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
+    ).read_text(encoding="utf-8")
 
     assert Path(".github/skills/grill-me/SKILL.md").exists()
     assert not Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
     assert "grill-me" in operational_text
+    assert "grill-me" in wrapper_alignment_text
     assert "non-trivial retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
     assert "continue one question at a time" in operational_text
-    assert "- `grill-me`" in planning_body
 
 
 def test_gateway_support_uses_internal_owners_after_extraction() -> None:
-    planning_body = read_body(CANONICAL_AGENTS["internal-planning-leader"])
-    delivery_body = read_body(CANONICAL_AGENTS["internal-delivery-operator"])
-    review_body = read_body(CANONICAL_AGENTS["internal-review-guard"])
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
@@ -429,24 +397,12 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         ".github/skills/internal-systems-review/SKILL.md"
     ).read_text(encoding="utf-8")
 
-    assert (
-        "conditional lenses through `internal-gateway-operational-flow`"
-        in planning_body
-    )
-    assert "- `internal-debugging`" in delivery_body
-    assert "- `internal-tdd`" in delivery_body
-    assert "- `internal-performance-optimization`" in delivery_body
-    assert "conditional map or compression lens" in review_body
-    assert "- `internal-debugging`" in review_body
-    assert "- `internal-systems-review`" in review_body
-
-    for wrapper_body in (planning_body, delivery_body, review_body):
-        for retired_id in retired_mattpocock_ids():
-            assert f"- `{retired_id}`" not in wrapper_body
-
     assert "Failure diagnosis belongs to `internal-debugging`" in wrapper_alignment_text
     assert "Test-first delivery belongs to `internal-tdd`" in wrapper_alignment_text
-    assert "higher-level code" in wrapper_alignment_text
+    assert (
+        "Code defect review belongs to `internal-code-review`" in wrapper_alignment_text
+    )
+    assert "internal-systems-review" in wrapper_alignment_text
     assert "## Orientation Map Lens" in systems_review_text
     assert "## Orientation Output" in systems_review_text
     assert "Module map" in systems_review_text

@@ -13,6 +13,20 @@ WATCHLIST_PATH = Path(
     ".github/skills/local-agent-sync-external-resources/references/external-watchlist.yaml"
 )
 
+LEGACY_AGENT_HEADINGS = (
+    "## Mandatory Engine Skills",
+    "## Optional Support Skills",
+    "## Preferred/Optional Skills",
+    "## Skill Usage Contract",
+)
+
+EXPECTED_CORE_SKILLS = {
+    "local-sync-external-resources": "local-agent-sync-external-resources",
+    "local-sync-global-copilot-configs-into-repo": (
+        "local-agent-sync-global-copilot-configs-into-repo"
+    ),
+}
+
 
 def retired_mattpocock_ids() -> tuple[str, ...]:
     return tuple(
@@ -39,6 +53,17 @@ def read_body(relative_path: str) -> str:
     return text.split("---\n", 2)[2]
 
 
+def core_skill(body: str) -> str:
+    section = body.split("## Core Skill", 1)[1].split("\n## ", 1)[0]
+    matches = [
+        line.strip().strip("- ").strip("`")
+        for line in section.splitlines()
+        if line.strip().startswith("- ")
+    ]
+    assert len(matches) == 1
+    return matches[0]
+
+
 def test_repo_only_sync_agents_keep_boundary_and_tool_contracts() -> None:
     for agent_name, relative_path in SYNC_AGENTS.items():
         frontmatter = load_frontmatter(relative_path)
@@ -50,10 +75,12 @@ def test_repo_only_sync_agents_keep_boundary_and_tool_contracts() -> None:
         assert "agent" not in frontmatter.get("tools", [])
         assert frontmatter.get("disable-model-invocation") is True
         assert frontmatter.get("agents") in (None, [])
-        assert "## Mandatory Engine Skills" in body
+        assert "## Core Skill" in body
         assert "## Boundary Definition" in body
-        assert "- `internal-agent-support-lane-change-engine`" in body
-        assert "- `mattpocock-caveman`" in body
+        assert "## Output Expectations" in body
+        for heading in LEGACY_AGENT_HEADINGS:
+            assert heading not in body
+        assert core_skill(body) == EXPECTED_CORE_SKILLS[agent_name]
 
 
 def test_repo_only_sync_agents_keep_their_named_operating_engines() -> None:

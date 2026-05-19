@@ -26,7 +26,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 
 ## When not to use
 
-- Reviewing or challenging a plan before execution; stay with `internal-planning-leader` or `internal-review-guard` as appropriate.
+- Reviewing or challenging a plan before execution; stay with `internal-gateway-operational-flow` or `internal-gateway-critical-master` as appropriate.
 - Treating `dubbi-e-domande.md` as an executable plan file.
 - Editing imported `superpowers-*` assets to change execution behavior.
 

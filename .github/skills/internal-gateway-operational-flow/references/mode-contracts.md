@@ -69,8 +69,12 @@ Imported support and the future security lens are not gateway owners. Their appr
 | Retired or old owner | Current owner |
 | --- | --- |
 | `internal-agent-cross-lane-engine` | `internal-gateway-operational-flow` for plan/execute/review boundaries plus `internal-agent-support-lane-change-engine` for stop-and-recommend behavior. |
-| `internal-ai-resource-creator` | `plan` mode through `internal-planning-leader` or direct skill use. |
-| `internal-architect` | `plan` mode through `internal-planning-leader` or direct skill use. |
+| `internal-ai-resource-creator` | `plan` mode through `internal-gateway-operational-flow` or direct skill use. |
+| `internal-architect` | `plan` mode through `internal-gateway-operational-flow` or direct skill use. |
+| `internal-planning-leader` | Deprecated compatibility wrapper; current owner is `internal-gateway-operational-flow`. |
+| `internal-delivery-operator` | Deprecated compatibility wrapper; current owner is `internal-gateway-operational-flow` or `internal-gateway-simple-task` when the task is simple. |
+| `internal-review-guard` | Deprecated compatibility wrapper; current owner is `internal-gateway-operational-flow` review mode. |
+| `internal-critical-master` | Deprecated compatibility wrapper; current owner is `internal-gateway-critical-master`. |
 | `internal-developer` | `execute` mode when target state is clear. |
 | `internal-infrastructure` | `execute` for clear local changes, `plan` when design or rollout dominates. |
 | `internal-cicd` | `execute` for deterministic changes, `plan` when orchestration or tradeoffs dominate. |

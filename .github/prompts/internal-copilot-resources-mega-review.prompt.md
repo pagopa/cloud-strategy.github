@@ -28,7 +28,7 @@ Use these repository sources first:
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
 - [LESSONS_LEARNED.md](../../LESSONS_LEARNED.md)
-- [.github/agents/internal-planning-leader.agent.md](../agents/internal-planning-leader.agent.md)
+- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
 
 Language rules:
 
