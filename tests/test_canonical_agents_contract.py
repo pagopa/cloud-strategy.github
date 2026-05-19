@@ -236,6 +236,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "existing approved retained plan folder" in skill_text
     assert "Decision Brief" in skill_text
     assert "explicit checkpoint before moving from `plan`" in skill_text
+    assert "unresolved user-only decisions could change scope" in skill_text
     assert "multiple credible paths" in skill_text
     assert "`plan`" in mode_contracts_text
     assert "`execute`" in mode_contracts_text
@@ -411,6 +412,7 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert not Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
     assert "grill-me" in operational_text
     assert "non-trivial retained plan" in operational_text
+    assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
     assert "continue one question at a time" in operational_text
     assert "- `grill-me`" in planning_body

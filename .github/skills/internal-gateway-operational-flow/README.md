@@ -91,18 +91,20 @@ This is analysis-assisted execution, not `plan` mode.
 Use this sequence when the user wants the rigorous path:
 
 1. Inspect repository evidence first.
-2. Run `grill-me` as conditional support.
-3. If the user asks for bulk questions, provide numbered questions with a
+2. Separate facts recoverable from the repository from user-only decisions.
+3. Stop for `grill-me` when user-only decisions could change scope, owner,
+   target state, validation, rollout, or anti-scope.
+4. If the user asks for bulk questions, provide numbered questions with a
    recommended answer for each.
-4. Wait for the user answers when the answers affect the plan.
-5. Create the `plan` phase output.
-6. If a retained plan is created or materially reformulated, provide a Decision
+5. Wait for the user answers when the answers affect the plan.
+6. Create the `plan` phase output.
+7. If a retained plan is created or materially reformulated, provide a Decision
   Brief in chat.
-7. Move visibly to `internal-gateway-critical-master` for pressure testing when
+8. Move visibly to `internal-gateway-critical-master` for pressure testing when
   reasoning risk remains.
-8. Reformulate, de-escalate, execute, review, continue critical, or accept risk
+9. Reformulate, de-escalate, execute, review, continue critical, or accept risk
   according to the critical outcome.
-9. Move to `execute` or `apply-plan` only after the target state and validation
+10. Move to `execute` or `apply-plan` only after the target state and validation
   path are clear and the checkpoint is satisfied or the user explicitly asked
   to apply or run the work end to end.
 
