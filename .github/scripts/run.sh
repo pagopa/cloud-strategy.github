@@ -37,6 +37,7 @@ Tools:
   check_catalog_consistency
   audit_copilot_catalog
   detect_token_risks
+    sync_home_ai_resources
   sync_copilot_catalog
     validate_internal_skills
 EOF
@@ -126,6 +127,9 @@ resolve_script() {
             ;;
         detect_token_risks|detect_token_risks.py)
             printf '%s\n' "$SCRIPT_DIR/detect_token_risks.py"
+            ;;
+        sync_home_ai_resources|sync_home_ai_resources.py)
+            printf '%s\n' "$SCRIPT_DIR/sync_home_ai_resources.py"
             ;;
         sync_copilot_catalog|sync_copilot_catalog.py)
             printf '%s\n' "$SCRIPT_DIR/sync_copilot_catalog.py"

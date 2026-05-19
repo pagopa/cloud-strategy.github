@@ -1,0 +1,30 @@
+version: 1
+defaults:
+  include_internal_skills: false
+  include_local_skills: false
+  include_unlisted_skills: false
+resources:
+  - resource_id: antigravity-api-design-principles
+    source_family: skills
+    source_path: .github/skills/antigravity-api-design-principles
+    include_targets:
+      - codex
+      - vscode
+    target_support: Documented
+    notes: Portable reference skill with direct-copy bundle shape.
+  - resource_id: awesome-copilot-agentic-eval
+    source_family: skills
+    source_path: .github/skills/awesome-copilot-agentic-eval
+    include_targets:
+      - codex
+      - vscode
+    target_support: Documented
+    notes: Portable evaluation workflow skill with repository-contained references.
+  - resource_id: openai-skill-creator
+    source_family: skills
+    source_path: .github/skills/openai-skill-creator
+    include_targets:
+      - codex
+      - vscode
+    target_support: Documented
+    notes: Portable authoring skill that already ships deterministic helper scripts.

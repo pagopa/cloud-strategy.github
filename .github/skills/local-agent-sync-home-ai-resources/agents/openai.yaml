@@ -1,0 +1,4 @@
+interface:
+  display_name: "Home AI Resource Sync"
+  short_description: "Plan or apply local AI home sync"
+  default_prompt: "Use $local-agent-sync-home-ai-resources to plan or apply an allowlisted home-directory AI resource sync."

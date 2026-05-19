@@ -1,0 +1,225 @@
+version: 1
+rows:
+  - target: codex
+    resource_family: skills
+    support_level: Documented
+    home_path: $HOME/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://developers.openai.com/codex/skills
+    notes: Direct-copy bundles with SKILL.md, references, scripts, assets, and agents/openai.yaml.
+  - target: codex
+    resource_family: global_instructions
+    support_level: Documented
+    home_path: ~/.codex/AGENTS.md
+    direct_copy_possible: true
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://developers.openai.com/codex/guides/agents-md
+    notes: Repository AGENTS.md remains a workspace bridge, not a default personal sync target.
+  - target: codex
+    resource_family: global_override
+    support_level: Documented
+    home_path: ~/.codex/AGENTS.override.md
+    direct_copy_possible: true
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://developers.openai.com/codex/guides/agents-md
+    notes: Keep overrides out of v1 home sync.
+  - target: codex
+    resource_family: user_config
+    support_level: Documented
+    home_path: ~/.codex/config.toml
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://developers.openai.com/codex/config-reference
+    notes: Personal machine state is out of scope for v1.
+  - target: codex
+    resource_family: custom_agents
+    support_level: Documented
+    home_path: ~/.codex/agents/*.toml
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://developers.openai.com/codex/config-basic
+      - https://developers.openai.com/codex/config-reference
+    notes: .agent.md requires a TOML adapter and config wiring.
+  - target: codex
+    resource_family: vscode_agent_markdown
+    support_level: Not directly supported
+    home_path: null
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://developers.openai.com/codex/config-reference
+    notes: Do not copy .github/agents/*.agent.md to Codex.
+  - target: codex
+    resource_family: vscode_instructions
+    support_level: Not supported as such
+    home_path: null
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://developers.openai.com/codex/guides/agents-md
+    notes: No verified direct Codex home-level equivalent.
+  - target: codex
+    resource_family: prompt_files
+    support_level: Unknown / To verify
+    home_path: null
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://developers.openai.com/codex/config-reference
+    notes: Exclude until user-level prompt support is documented.
+  - target: vscode
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.copilot/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/agent-skills
+    notes: Prefer ~/.copilot/skills as the canonical VS Code target.
+  - target: vscode
+    resource_family: compatibility_alias_skills
+    support_level: Documented
+    home_path: ~/.claude/skills/<skill>/ or ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: false
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/agent-skills
+    notes: Support only when the user explicitly selects a compatibility alias.
+  - target: vscode
+    resource_family: custom_agents
+    support_level: Documented
+    home_path: ~/.copilot/agents/*.agent.md
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: false
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/custom-agents
+    notes: Direct copy is possible, but keep agents out of the v1 default.
+  - target: vscode
+    resource_family: instructions
+    support_level: Documented
+    home_path: ~/.copilot/instructions/**/*.instructions.md
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: false
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/custom-instructions
+    notes: Keep always-on instruction sync out of v1 unless separately approved.
+  - target: vscode
+    resource_family: prompt_files
+    support_level: Documented but path not stable
+    home_path: VS Code profile user data
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: false
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/prompt-files
+    notes: Defer because the stable filesystem target is not documented like ~/.copilot/*.
+  - target: vscode
+    resource_family: workspace_copilot_instructions
+    support_level: Workspace-only
+    home_path: workspace .github/copilot-instructions.md
+    direct_copy_possible: false
+    translation_required: false
+    include_in_v1: false
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/custom-instructions
+    notes: Do not treat workspace guidance as a home-level resource.
+  - target: vscode
+    resource_family: workspace_agents_bridge
+    support_level: Workspace convention
+    home_path: workspace root
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/custom-agents
+    notes: Do not promote repository AGENTS.md to home-level VS Code guidance.
+  - target: antigravity
+    resource_family: skills
+    support_level: Unknown / To verify
+    home_path: ~/.gemini/antigravity/skills/<skill>/
+    direct_copy_possible: false
+    translation_required: false
+    include_in_v1: false
+    evidence: []
+    notes: Keep available only for explicit experimental runs.
+  - target: antigravity
+    resource_family: global_rules
+    support_level: Unknown / To verify
+    home_path: ~/.gemini/GEMINI.md or ~/.gemini/antigravity/GEMINI.md
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence: []
+    notes: Do not sync without official precedence docs.
+  - target: antigravity
+    resource_family: mcp_config
+    support_level: Unknown / To verify
+    home_path: ~/.gemini/antigravity/mcp_config.json
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence: []
+    notes: Out of scope and likely sensitive.
+  - target: antigravity
+    resource_family: project_local_skills
+    support_level: Unknown / To verify
+    home_path: .agents/skills/ or equivalent
+    direct_copy_possible: false
+    translation_required: false
+    include_in_v1: false
+    evidence: []
+    notes: Workspace-local, not home sync.
+  - target: antigravity
+    resource_family: project_local_rules
+    support_level: Unknown / To verify
+    home_path: .agents/rules/ or equivalent
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence: []
+    notes: Workspace-local, not home sync.
+  - target: antigravity
+    resource_family: agents
+    support_level: Unknown
+    home_path: null
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence: []
+    notes: Do not assume compatibility.
+  - target: antigravity
+    resource_family: instructions
+    support_level: Unknown
+    home_path: null
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence: []
+    notes: Do not assume compatibility.
+  - target: antigravity
+    resource_family: prompt_files
+    support_level: Unknown
+    home_path: null
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: false
+    evidence: []
+    notes: Do not include without official support evidence.

@@ -15,6 +15,10 @@ TEST_OWNERS = {
     "tests/github/scripts/lib/test_fingerprinting.py": {
         ".github/scripts/lib/fingerprinting.py",
     },
+    "tests/github/scripts/lib/test_home_syncing.py": {
+        ".github/scripts/lib/home_sync_contract.py",
+        ".github/scripts/lib/home_syncing.py",
+    },
     "tests/github/scripts/lib/test_internal_skills.py": {
         ".github/scripts/lib/internal_skills.py",
     },
@@ -24,6 +28,9 @@ TEST_OWNERS = {
     "tests/test_inventory_and_consistency.py": {
         ".github/scripts/lib/catalog_checks.py",
         ".github/scripts/lib/inventory.py",
+    },
+    "tests/test_home_ai_resources_sync.py": {
+        ".github/scripts/sync_home_ai_resources.py",
     },
     "tests/test_sync_and_token_risks.py": {
         ".github/scripts/lib/syncing.py",
