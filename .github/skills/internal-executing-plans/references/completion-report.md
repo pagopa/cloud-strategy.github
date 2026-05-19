@@ -35,6 +35,7 @@ or `BLOCKED` with the explicit gap.
 - Evidence envelope.
 - Evidence gaps.
 - Residual risks.
+- Lessons status, including `added`, `codified`, or `none`.
 - Follow-up suggestions separated from required work.
 
 ## Evidence Envelope
@@ -76,5 +77,6 @@ Validators: <commands and outcomes>
 Evidence envelope: <path or item-level evidence summary>
 Evidence gaps: <gaps or none>
 Residual risks: <risks or none>
+Lessons: added | codified in <owner> | none - <short reason>
 Follow-up suggestions: <separate optional ideas>
 ```

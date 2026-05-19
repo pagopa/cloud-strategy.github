@@ -165,6 +165,9 @@ def test_gateway_contains_completion_checks() -> None:
             "`Check 1`: Plan coverage",
             "`Check 2`: Contract coverage",
             "`Check 3`: Evidence coverage",
+            "Every phase-ending response must include a compact `Lessons` line",
+            "internal-lesson-codification",
+            "Phase-ending reports state `Lessons` status",
         ),
     )
 
@@ -364,6 +367,8 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Evidence envelope",
             "Evidence gaps",
             "Residual risks",
+            "Lessons status",
+            "Lessons: added | codified in <owner> | none - <short reason>",
             "`SHIPPED` requires passed validators and a completed report",
             "item-level evidence",
             "mark the item `UNVERIFIABLE` instead of",

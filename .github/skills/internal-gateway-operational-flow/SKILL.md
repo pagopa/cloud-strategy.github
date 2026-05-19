@@ -17,6 +17,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `internal-executing-plans`: retained-plan execution owner for approved `apply-plan` work.
 - `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
 - `internal-gateway-simple-task`: simple concrete fast path when staged workflow is too heavy.
+- `internal-lesson-codification`: retained-learning routing when a durable lesson candidate appears before reporting or editing `LESSONS_LEARNED.md`.
 - `internal-security-review`: future security lens name governed by the promotion rule in `references/wrapper-alignment.md`.
 - `internal-systems-review`: systems review, codebase orientation, plan-completion audit, and scope-drift analysis.
 - `superpowers-verification-before-completion`: evidence gate before completion claims in `execute`, `apply-plan`, `plan complete`, `review complete`, or `no findings` states.
@@ -200,11 +201,13 @@ scope-drift analysis instead of expanding this main skill with audit tables.
 
 If a check fails, fix the issue and rerun the relevant check. If a check cannot run, state the exact validation gap and the closest evidence gathered. Small changes may use concise checks, but the three perspectives must remain distinct.
 
-For `execute` or `apply-plan`, return a compact execution report with active phase and owner, files changed, completed items and intentional non-actions, `Check 1` through `Check 3`, separate improvement ideas, durable lessons routed through the right owner, residual risk, and any next-step package.
+For `execute` or `apply-plan`, return a compact execution report with active phase and owner, files changed, completed items and intentional non-actions, `Check 1` through `Check 3`, separate improvement ideas, `Lessons` status, residual risk, and any next-step package.
 
 ## Output Calibration
 
 Keep reports compact by default. Plan and review outputs should usually stay within about 40 lines, and execution reports should usually stay within about 30 lines. Use a longer report only when the user asks for detail or when findings, blockers, validation evidence, or residual risk require it.
+
+Every phase-ending response must include a compact `Lessons` line. State whether a lesson was added, codified in another owner, or not retained; when no lesson was retained, give the short reason. When a durable lesson candidate exists, use `internal-lesson-codification` before editing `LESSONS_LEARNED.md`.
 
 Use `mattpocock-caveman` only as a compression pass for sync, review, or governance reports likely to exceed about 100 lines, and only after blockers, risks, and validation evidence are explicit.
 
@@ -249,6 +252,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
 - Completion claims in `execute` or `apply-plan` passed through `superpowers-verification-before-completion`.
 - Strong `plan complete`, `review complete`, `no findings`, or merge-readiness claims passed through `superpowers-verification-before-completion`.
+- Phase-ending reports state `Lessons` status even when no lesson was retained.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
 - `grill-me` blocks plan output when user decisions can change scope, owner,
   target state, validation, rollout, or anti-scope.
