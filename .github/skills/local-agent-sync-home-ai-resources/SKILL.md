@@ -11,7 +11,7 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 
 Use this skill as the operating engine for `.github/agents/local-sync-home-ai-resources.agent.md`.
 
-Keep the paired agent short. Keep route, boundary, approval posture, and output expectations in the agent. Keep reusable sync workflow, target policy, safety gates, and reporting posture here. Keep detailed tables and checklists in `references/`.
+Keep the paired agent short. Keep route, boundary, approval posture, and output expectations in the agent. Keep reusable sync workflow, target policy, safety gates, and reporting posture here. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
 
 ## When to use
 
@@ -60,6 +60,14 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Copy managed resources instead of creating symlinks.
 - Preserve target-local content that is outside the manifest.
 - Record source hashes and managed target paths in the local manifest.
+- Exclude runtime-generated bundle artifacts such as `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, and `.pyo` from hashes and copies.
+
+## Bundled Automation
+
+- Prefer `scripts/sync_home_ai_resources.py` for deterministic `plan`, `audit`, `doctor`, and `apply` behavior.
+- Use `scripts/run.sh` when a portable skill-local environment is needed; it installs the locked `PyYAML` dependency from `scripts/requirements.txt`.
+- In this source repository, `.github/scripts/sync_home_ai_resources.py` and `.github/scripts/sync_home_ai_resources.sh` are thin wrappers around the bundled skill script.
+- Keep library behavior inside `scripts/home_syncing.py` and reference loading inside `scripts/home_sync_contract.py`.
 
 ## Safety Gates
 
@@ -80,5 +88,6 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 
 - Rebuild `.github/INVENTORY.md` when the bundle or related scripts change by using `./.github/scripts/build_inventory.sh --root .`.
 - Run `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks` after bundle or automation changes.
+- Run `bash -n .github/skills/local-agent-sync-home-ai-resources/scripts/run.sh .github/scripts/sync_home_ai_resources.sh` after shell wrapper changes.
 - Run focused agent or skill contract tests for the touched bundle.
 - Run focused sync tests for target parsing, support-matrix policy, manifest handling, overwrite gates, and missing-directory behavior when automation changes.

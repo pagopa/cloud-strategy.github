@@ -15,10 +15,6 @@ TEST_OWNERS = {
     "tests/github/scripts/lib/test_fingerprinting.py": {
         ".github/scripts/lib/fingerprinting.py",
     },
-    "tests/github/scripts/lib/test_home_syncing.py": {
-        ".github/scripts/lib/home_sync_contract.py",
-        ".github/scripts/lib/home_syncing.py",
-    },
     "tests/github/scripts/lib/test_internal_skills.py": {
         ".github/scripts/lib/internal_skills.py",
     },

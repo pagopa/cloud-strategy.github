@@ -1,11 +1,49 @@
 from __future__ import annotations
 
+import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
-from lib.home_syncing import apply_home_sync_plan, build_home_sync_plan, parse_targets
+
+def find_repo_root(start: Path) -> Path:
+    for candidate in start.resolve().parents:
+        if (candidate / "AGENTS.md").is_file():
+            return candidate
+    raise FileNotFoundError(f"Unable to find repository root from {start}")
+
+
+REPO_ROOT = find_repo_root(Path(__file__))
+SKILL_SCRIPTS_ROOT = REPO_ROOT / ".github/skills/local-agent-sync-home-ai-resources/scripts"
+
+
+def load_skill_module():
+    inserted_path = False
+    if SKILL_SCRIPTS_ROOT.as_posix() not in sys.path:
+        sys.path.insert(0, SKILL_SCRIPTS_ROOT.as_posix())
+        inserted_path = True
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "_test_local_home_syncing",
+            SKILL_SCRIPTS_ROOT / "home_syncing.py",
+        )
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        if inserted_path:
+            sys.path.remove(SKILL_SCRIPTS_ROOT.as_posix())
+
+
+home_syncing = load_skill_module()
+apply_home_sync_plan = home_syncing.apply_home_sync_plan
+build_home_sync_plan = home_syncing.build_home_sync_plan
+parse_targets = home_syncing.parse_targets
 
 
 def write_file(path: Path, content: str) -> None:
@@ -122,6 +160,9 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
+    write_file(source_root / ".github/skills/demo-skill/scripts/.venv/marker.txt", "runtime\n")
+    write_file(source_root / ".github/skills/demo-skill/__pycache__/demo.pyc", "runtime\n")
+    write_file(source_root / ".github/skills/demo-skill/.pytest_cache/CACHEDIR.TAG", "runtime\n")
 
     plan = build_home_sync_plan(
         source_root=source_root,
@@ -138,5 +179,35 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
     assert copied_skill.is_file()
+    assert not (home_root / ".agents/skills/demo-skill/scripts/.venv").exists()
+    assert not (home_root / ".agents/skills/demo-skill/__pycache__").exists()
+    assert not (home_root / ".agents/skills/demo-skill/.pytest_cache").exists()
     assert manifest["targets"] == ["codex"]
     assert manifest["managed_resources"][0]["resource_id"] == "demo-skill"
+
+
+def test_skill_bundle_sync_scripts_can_load_bundled_references(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    write_file(source_root / "AGENTS.md", "# AGENTS\n")
+    write_file(
+        source_root / ".github/skills/demo-skill/SKILL.md",
+        "---\n"
+        "name: demo-skill\n"
+        "description: Use when a demo home-sync skill is needed.\n"
+        "---\n\n"
+        "# Demo Skill\n\n"
+        "## When to use\n\n"
+        "- Use when a demo home-sync skill is needed.\n",
+    )
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="plan",
+    )
+
+    assert plan.source_resources_considered >= 1

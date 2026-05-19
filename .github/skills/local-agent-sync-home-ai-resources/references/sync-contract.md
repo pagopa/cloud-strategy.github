@@ -29,6 +29,7 @@ Optional debug logs may live under `logs/` when the implementation needs durable
 - Record one manifest row per managed target resource.
 - Prune only resources that were previously manifest-managed and are now absent from the new plan.
 - Require explicit prune approval before deleting stale managed resources.
+- Exclude runtime-generated bundle artifacts from hashes and copies: `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, and `.pyo`.
 
 ## Manifest Fields
 
@@ -77,3 +78,15 @@ Text and JSON reporting should expose at least:
 - `validation`
 - `residual_drift`
 - `next_step`
+
+## Automation Entry Points
+
+- Bundled CLI: `scripts/sync_home_ai_resources.py`
+- Bundled dependency bootstrap: `scripts/run.sh`
+- Bundled implementation: `scripts/home_syncing.py`
+- Bundled reference loader: `scripts/home_sync_contract.py`
+- Bundled dependency lock: `scripts/requirements.txt`
+- Repository wrapper: `.github/scripts/sync_home_ai_resources.py`
+- Repository Bash wrapper: `.github/scripts/sync_home_ai_resources.sh`
+
+Prefer the bundled scripts when the skill is direct-copied into a home runtime. Prefer the repository wrappers when running from this source repository because they reuse the repository maintenance-tool environment.
