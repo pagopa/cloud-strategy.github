@@ -11,13 +11,6 @@ CANONICAL_AGENTS = {
     "internal-gateway-simple-task": ".github/agents/internal-gateway-simple-task.agent.md",
 }
 
-DEPRECATED_COMPATIBILITY_AGENTS = {
-    "internal-delivery-operator": ".github/agents/internal-delivery-operator.agent.md",
-    "internal-planning-leader": ".github/agents/internal-planning-leader.agent.md",
-    "internal-review-guard": ".github/agents/internal-review-guard.agent.md",
-    "internal-critical-master": ".github/agents/internal-critical-master.agent.md",
-}
-
 OLD_CROSS_LANE_ENGINE = "internal-agent-" + "cross-lane-engine"
 
 LEGACY_AGENT_HEADINGS = (
@@ -149,21 +142,7 @@ def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
         assert all(isinstance(handoff.get("prompt"), str) for handoff in handoffs)
 
 
-def test_deprecated_operational_wrappers_are_non_canonical_stubs() -> None:
-    for agent_name, relative_path in DEPRECATED_COMPATIBILITY_AGENTS.items():
-        frontmatter = load_frontmatter(relative_path)
-        body = read_body(relative_path)
-
-        assert frontmatter["name"] == agent_name
-        assert frontmatter["description"].startswith("Use this agent when")
-        assert frontmatter.get("user-invocable") is False
-        assert frontmatter.get("disable-model-invocation") is True
-        assert frontmatter.get("agents") in (None, [])
-        assert "## Deprecated Compatibility Wrapper" in body
-        assert "## Core Skill" in body
-        assert_no_legacy_agent_headings(body)
-
-
+# Deleted deprecated compatibility wrappers tests
 def test_operational_flow_wrapper_reports_completion_checks() -> None:
     body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
 
@@ -188,7 +167,6 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
     assert "Review these agent changes for routing regressions" in readme
     assert "Attack this plan before I apply it" in readme
     assert "If a request starts in the wrong lane" in readme
-    assert "Deprecated compatibility wrappers" in readme
 
 
 def test_skill_first_operational_core_exists_with_required_staged_entrypoints() -> None:
@@ -284,12 +262,6 @@ def test_internal_contract_documents_gateway_wrapper_entrypoints() -> None:
     assert (
         "`internal-gateway-operational-flow`, `internal-gateway-simple-task`, and "
         "`internal-gateway-critical-master` remain the current Copilot wrapper entrypoints"
-        in contract_text
-    )
-    assert (
-        "`internal-delivery-operator`, `internal-planning-leader`, "
-        "`internal-review-guard`, and `internal-critical-master` remain deprecated "
-        "compatibility wrappers only"
         in contract_text
     )
     assert "fails safe to `internal-gateway-operational-flow`" in contract_text
@@ -467,8 +439,5 @@ def test_internal_debugging_and_tdd_skills_capture_extracted_workflows() -> None
 def test_old_cross_lane_engine_is_not_live_catalog_contract() -> None:
     assert not Path(f".github/skills/{OLD_CROSS_LANE_ENGINE}/SKILL.md").exists()
 
-    for relative_path in (
-        *CANONICAL_AGENTS.values(),
-        *DEPRECATED_COMPATIBILITY_AGENTS.values(),
-    ):
+    for relative_path in CANONICAL_AGENTS.values():
         assert OLD_CROSS_LANE_ENGINE not in read_body(relative_path)

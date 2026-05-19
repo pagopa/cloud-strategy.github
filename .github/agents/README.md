@@ -31,11 +31,6 @@ these agents provide VS Code route selection, tool scope, and manual handoff UX.
 | `internal-gateway-critical-master` | `internal-gateway-critical-master` | A proposal, plan, decision, or assumption set needs pressure before action. |
 | `internal-gateway-simple-task` | `internal-gateway-simple-task` | A concrete low-to-medium-risk task can finish through one focused lane. |
 
-Deprecated compatibility wrappers remain on disk for a deprecation window:
-`internal-delivery-operator`, `internal-planning-leader`,
-`internal-review-guard`, and `internal-critical-master`. They are not canonical
-entrypoints for new work.
-
 ## ASCII Workflow Map
 
 These maps describe the expected human-visible flow. They are not hidden
