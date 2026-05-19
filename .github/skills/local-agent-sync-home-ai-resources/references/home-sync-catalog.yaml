@@ -11,7 +11,7 @@ resources:
       - codex
       - vscode
       - antigravity
-    target_support: Documented
+    target_support: See runtime support matrix
     notes: Self-contained home-sync owner bundle with scripts, references, and metadata.
   - resource_id: antigravity-api-design-principles
     source_family: skills
@@ -20,7 +20,7 @@ resources:
       - codex
       - vscode
       - antigravity
-    target_support: Documented
+    target_support: See runtime support matrix
     notes: Portable reference skill with direct-copy bundle shape.
   - resource_id: awesome-copilot-agentic-eval
     source_family: skills
@@ -29,7 +29,7 @@ resources:
       - codex
       - vscode
       - antigravity
-    target_support: Documented
+    target_support: See runtime support matrix
     notes: Portable evaluation workflow skill with repository-contained references.
   - resource_id: openai-skill-creator
     source_family: skills
@@ -38,5 +38,5 @@ resources:
       - codex
       - vscode
       - antigravity
-    target_support: Documented
+    target_support: See runtime support matrix
     notes: Portable authoring skill that already ships deterministic helper scripts.

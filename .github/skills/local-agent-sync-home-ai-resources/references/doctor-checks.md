@@ -6,7 +6,7 @@ Use this checklist when `doctor` needs to explain readiness before a local home 
 
 - Confirm the selected runtime targets are known.
 - Confirm the runtime support matrix is readable and current.
-- Confirm the allowlist catalog exists and only references repository paths.
+- Confirm the allowlist catalog exists and only references repository skill bundle paths.
 - Confirm the state root under `~/.sync/cloud-strategy-governance/home-ai-resources/` is readable and writable.
 - Confirm the manifest is either absent for a first run or parseable for later runs.
 - Confirm every resolved target path stays under the expected home root.
@@ -21,8 +21,8 @@ Use this checklist when `doctor` needs to explain readiness before a local home 
 ## VS Code Checks
 
 - Confirm `~/.copilot/skills` exists or can be created safely.
-- Confirm `~/.copilot/agents` and `~/.copilot/instructions` are recognized only as non-v1 resource roots.
-- Confirm no unsupported `instructions`, `prompt files`, or `custom agents` are included in a v1 apply run.
+- Confirm `~/.copilot/agents` and `~/.copilot/instructions` are recognized only as non-v1 resource roots for the current `skills`-only apply flow.
+- Confirm no non-v1 `agents` or `instructions` materialization is included in a `skills`-only apply run.
 
 ## Antigravity Checks
 

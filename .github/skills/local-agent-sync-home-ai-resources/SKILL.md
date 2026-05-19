@@ -51,6 +51,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Normalize whitespace, deduplicate, and order targets deterministically.
 - Resolve skill roots as `~/.codex/skills`, `~/.copilot/skills`, and `~/.gemini/antigravity/skills`.
 - Do not use `.agents` as a home sync target.
+- Keep adjacent runtime resource roots in the support matrix; keep the default materialization flow limited to the skill roots above.
 - Keep `antigravity` selectable for `plan`, `audit`, and `doctor` while its runtime semantics remain undocumented.
 - Block default `apply` unless the matrix row is `Documented` and `direct_copy_possible: true`.
 - Require an explicit experimental override for non-`Documented` rows.

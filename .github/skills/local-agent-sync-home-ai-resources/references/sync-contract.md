@@ -5,9 +5,9 @@ Use this reference when the paired agent or skill needs the exact sync rules rat
 ## Scope
 
 - Source root: this repository.
-- Target roots: runtime home directories for supported AI runtimes.
+- Target roots: runtime home resource directories for supported AI runtimes.
 - Managed families in v1: allowlisted `skills` only.
-- Excluded in v1: runtime config, global overrides, prompt files, undocumented families, and any translated output.
+- Excluded in v1: non-`skills` runtime resources, undocumented families, and any translated output.
 
 ## State Root
 
