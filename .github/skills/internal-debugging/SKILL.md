@@ -19,6 +19,8 @@ This index lists every other skill that this file asks the agent to load, route 
 Use this skill as the repository-owned owner for root-cause diagnosis. Build a
 feedback loop before changing behavior, then use evidence to narrow the cause.
 
+When an unexpected failure appears, stop adjacent feature work, preserve the current evidence, and diagnose that failure loop before resuming unrelated changes.
+
 ## When to use
 
 - A test, build, validator, script, sync run, or workflow is failing.

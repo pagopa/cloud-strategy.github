@@ -4,6 +4,8 @@ Use this reference when a systems review needs a heavy audit that can be isolate
 from the main assistant context. Dispatch is optional and traceable, not the
 default path.
 
+Keep audit dispatch user-visible. State why the independent audit is worth the extra cost, latency, or context isolation before using it.
+
 ## Source Patterns
 
 - Comparative source: `tmp/external-comparison/gstack/ship/SKILL.md`.
@@ -22,6 +24,8 @@ Consider a subagent audit when any condition is true:
   audit.
 
 An explicit user override may request inline review instead.
+
+If dispatch is used, tell the user which scope is being isolated and keep the result as a report, not a hidden decision engine.
 
 ## Payload To Subagent
 

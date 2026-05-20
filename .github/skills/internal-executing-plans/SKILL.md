@@ -60,6 +60,8 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
   `done-*` or reporting final retained-plan completion.
 - For each active plan file, create or update the matching `done-<source-file-name>.md` file.
 - For `01-riassunto-direzione-e-decisione.md`, create the matching `done-*` marker after its classification, reading-budget, and evidence-pass role has been used and the folder is ready to close.
+- Within an active plan file, prefer the smallest independently verifiable slice that can move to `done-*` without batching unrelated items.
+- Keep execution rollback-friendly: prefer narrowly scoped, reversible edits and verify each completed slice before continuing.
 - When an item is completed, move it into the matching `done-*` file and remove it from the active plan file.
 - Delete an active plan file once all of its executable items have been moved out and the file is empty.
 - Continue automatically to the next remaining numbered plan file until no numbered plan files remain.
