@@ -35,6 +35,8 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 
 ## Challenge Workflow
 
+Before applying a lens, name the claim, decision, or artifact under challenge in one sentence and separate it from prior reasoning.
+
 1. Identify the single strongest objection or assumption gap.
 2. Explain why it matters now.
 3. Apply one useful lens: inversion, counterfactual, role reversal, scope compression, time shift, or opportunity cost.

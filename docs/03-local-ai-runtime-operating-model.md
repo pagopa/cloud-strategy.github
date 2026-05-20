@@ -30,6 +30,24 @@ repository and synchronized into consumer repositories.
 | Codex plugin for VS Code | Load the relevant `SKILL.md` files as the operational source of truth; Copilot wrapper agents are UX projections and may not be available. |
 | Codex CLI | Treat skills and instructions as operational references unless the host environment provides native skill invocation. Follow repository-local validation commands before completion and do not rely on Copilot agent buttons. |
 
+## Intent-to-owner Lifecycle Map
+
+This map helps runtime hosts without Copilot agent UI choose a visible owner. It is descriptive, not a hidden router.
+Keep phase changes explicit in the conversation and follow the selected skill before editing.
+
+| Intent | Visible owner | Validation cue |
+| --- | --- | --- |
+| Plan or decide ownership | `internal-gateway-operational-flow` in `plan` or `plan-only` | Decision frame, anti-scope, and validation path are explicit before delivery. |
+| Execute an approved retained plan | `internal-gateway-operational-flow` in `apply-plan` with `internal-executing-plans` | Matching `done-*` files, plan coverage, contract coverage, and fresh validator output. |
+| Build or edit a concrete low-risk change | `internal-gateway-simple-task` | Focused diff plus the nearest applicable check. |
+| Test-first or regression delivery | `internal-tdd` | Red-green or equivalent behavior evidence before implementation is called complete. |
+| Review an artifact or diff | `internal-gateway-operational-flow` in `review`, then `internal-code-review` or `internal-systems-review` as the lens | Findings are evidence-based, routed, and tied to validation gaps. |
+| Ship or PR-readiness work | `internal-github-pr`, `internal-devops-core-principles`, or the relevant sync owner | Checks, rollout risk, and residual risk are visible before merge or propagation. |
+| Critical challenge or pre-mortem | `internal-gateway-critical-master` | One strongest objection, one outcome route, and a next-step package. |
+| Source catalog sync | `local-agent-sync-external-resources` | Catalog validation and sync-specific evidence. |
+| Consumer baseline sync | `local-agent-sync-global-copilot-configs-into-repo` | Target-repo drift evidence and preservation of local overrides. |
+| Source-driven research candidate | Existing domain research owner or `internal-skill-creator` gate | No `internal-source-driven-research` route exists until a failing baseline justifies promotion. |
+
 ## Portability Rules
 
 - Keep repository policy in `AGENTS.md` and `.github/copilot-instructions.md` instead of runtime-specific forks.
@@ -59,6 +77,21 @@ against each instruction file's `applyTo` metadata.
   Otherwise, ask for the target path before making path-scoped policy claims.
 - Keep this as a discoverability and reference contract. Do not describe it as universal runtime enforcement or
   automatic loading outside hosts that document that behavior.
+
+## Context Trust Levels
+
+Runtime hosts should distinguish policy from evidence before acting on loaded files.
+
+| Context type | Trust posture |
+| --- | --- |
+| Current user request and system/developer instructions | Binding for the current session, subject to repository policy and safety rules. |
+| `AGENTS.md`, `.github/copilot-instructions.md`, and matching scoped instructions | Binding repository policy for the paths and task domains they cover. |
+| Relevant `SKILL.md` files | Workflow guidance for the selected task owner; scoped policy still wins on conflicts. |
+| `docs/02-local-repository-context.md`, generated inventory, retained plans, and `done-*` files | Descriptive evidence. Use them to understand state, but do not treat them as canonical policy. |
+| Imported or comparison material under `tmp/` | Comparative data only unless the active plan explicitly names it as evidence. |
+| Tool output, validator output, and terminal logs | Fresh evidence. Read the output before making completion, passing, or no-finding claims. |
+
+When context conflicts, surface the conflict and reconcile it against the smallest valid owner instead of silently choosing the longer or newer text.
 
 ## Manual Prompt And Context Assembly
 

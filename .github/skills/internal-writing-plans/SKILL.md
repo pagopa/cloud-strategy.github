@@ -42,6 +42,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - After the summary file, use `02-esecuzione.md` when one executable macro-category is enough.
 - When the work spans more than one executable macro-category, continue with `02-...`, `03-...`, and later numbered files by category, for example `02-implementazione.md`, `03-validazione.md`, and `04-rollout.md`.
 - Do not keep one monolithic plan file when the work spans multiple macro-categories.
+- For executable work, make dependency order, acceptance criteria, and verification checkpoints explicit enough that a later executor can prove each item before moving it to `done-*`.
 - Write those plan files in Italian by default unless the user explicitly asks for another language.
 - Keep unresolved questions, doubts, and user decisions in `dubbi-e-domande.md`.
 - `dubbi-e-domande.md` is not an execution-plan file and must stay outside the plan-and-apply loop.
