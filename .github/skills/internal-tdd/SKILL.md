@@ -29,6 +29,7 @@ the loop focused on observable behavior through public interfaces.
 - A script, validator, reusable module, or application path changes behavior
   that can be checked through a stable interface.
 - A risky behavior change benefits from one small vertical slice at a time.
+- A vertical slice needs test-first delivery for one observable behavior inside that slice.
 
 ## When not to use
 
@@ -45,6 +46,8 @@ the loop focused on observable behavior through public interfaces.
 | Mandatory | The user explicitly asks for TDD, or a bugfix changes executable behavior with a credible regression seam. | Write the failing test before the fix. |
 | Recommended | The change touches domain logic, scripts, validators, APIs, or workflow behavior with meaningful edge cases. | Start with the most valuable public-interface behavior. |
 | Not suitable | The change is repository-owned prose, prompt, agent, skill, instruction, inventory, or governance text with no executable contract. | Use review, validator, or catalog checks instead. |
+
+For Markdown-only, agent, skill, instruction, inventory, or governance-text changes, do not manufacture tests to satisfy TDD. Use the relevant validator, catalog check, or review gate unless the user explicitly asks for a test-first workflow and a credible executable contract exists.
 
 ## Workflow
 

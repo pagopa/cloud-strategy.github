@@ -5,8 +5,8 @@
 ## Where Adjacent Content Belongs
 
 - Use `docs/02-repository-context.md` for stable local operating context, glossary, ownership notes, and non-policy interpretation aids.
-- Use `docs/03-ai-runtime-operating-model.md` for the source-managed runtime consumption model shared from the standards baseline.
 - Use `AGENTS.md`, `.github/copilot-instructions.md`, or scoped `.github/instructions/*.instructions.md` for binding instruction policy.
+- Use relevant `SKILL.md` files for workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Use `LESSONS_LEARNED.md` for durable lessons that still need codification.
 
 ## Repository

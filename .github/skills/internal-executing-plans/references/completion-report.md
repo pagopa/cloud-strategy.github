@@ -3,6 +3,8 @@
 Use this reference to close retained plan execution with an explicit state. A
 completion report is evidence packaging, not a free-form summary.
 
+Treat `completion-report.md` and `evidence-envelope.md` as late-stage packaging artifacts. Update them when the current validator, diff, and item-level evidence set is stable enough to report, not after every intermediate patch.
+
 ## Source Patterns
 
 - Comparative source: `tmp/external-comparison/compound-engineering-plugin/plugins/compound-engineering/skills/ce-work/references/shipping-workflow.md`.
@@ -35,6 +37,7 @@ or `BLOCKED` with the explicit gap.
 - Evidence envelope.
 - Evidence gaps.
 - Residual risks.
+- Lessons status, including `added`, `codified`, or `none`.
 - Follow-up suggestions separated from required work.
 
 ## Evidence Envelope
@@ -42,6 +45,8 @@ or `BLOCKED` with the explicit gap.
 For non-trivial retained plans, include or link an evidence envelope. The
 envelope must map each retained-plan item or reconstructed `done-*` item to a
 status, evidence path or command, and route.
+
+Do not churn the evidence envelope after every local slice when the validator output is still moving. Refresh it when the retained-plan state is coherent enough to support the reported completion state.
 
 Minimum fields:
 
@@ -76,5 +81,6 @@ Validators: <commands and outcomes>
 Evidence envelope: <path or item-level evidence summary>
 Evidence gaps: <gaps or none>
 Residual risks: <risks or none>
+Lessons: added | codified in <owner> | none - <short reason>
 Follow-up suggestions: <separate optional ideas>
 ```

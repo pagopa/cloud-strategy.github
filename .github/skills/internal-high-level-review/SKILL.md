@@ -1,9 +1,9 @@
 ---
-name: internal-systems-review
+name: internal-high-level-review
 description: Use when a task needs systems-level evidence about architecture, workflow, cross-cutting impact, blind spots, merge risk, or an orientation map of unfamiliar code.
 ---
 
-# Internal Systems Review
+# Internal High-Level Review
 
 ## Referenced skills
 

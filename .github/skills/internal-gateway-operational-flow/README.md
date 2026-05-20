@@ -49,7 +49,7 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 | Plan with user grilling before final plan | "Ask all grill-me questions first, then write the plan after my answers." | `plan` plus `grill-me` before final planning. | Numbered questions with recommended answers; after responses, a plan-ready decision frame. |
 | Plan, then critical challenge | "Make a plan, then pressure-test it before implementation." | `full-cycle`, then visible critical phase through `internal-gateway-critical-master`. | Plan, Decision Brief when retained, strongest objections, explicit outcome, and checkpoint before delivery. |
 | Apply retained plan | "Apply this plan under `tmp/superpowers/example`." | `apply-plan` plus `internal-executing-plans`. | Completed items move into `done-*`, active numbered files shrink or delete, and validation evidence is reported. |
-| Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`; add `internal-systems-review` when architecture, workflow, cross-cutting impact, or blind spots are in scope. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
+| Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`; add `internal-high-level-review` when architecture, workflow, cross-cutting impact, or blind spots are in scope. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
 | Pure challenge | "Attack this proposal before we trust it." | `internal-gateway-critical-master`, not this skill as the primary owner. | Failure modes, hidden assumptions, and a recommendation for reformulation. |
 | Runtime without Copilot agent UI | "Use the operational flow directly in Codex." | Load this skill and references manually. | Text next-step packages replace Copilot handoff buttons. |
 
@@ -94,17 +94,19 @@ Use this sequence when the user wants the rigorous path:
 2. Separate facts recoverable from the repository from user-only decisions.
 3. Stop for `grill-me` when user-only decisions could change scope, owner,
    target state, validation, rollout, or anti-scope.
-4. If the user asks for bulk questions, provide numbered questions with a
+4. Treat governance-sensitive planning as `plan-only (clarify-first)` even when
+   the user did not explicitly ask for grilling.
+5. If the user asks for bulk questions, provide numbered questions with a
    recommended answer for each.
-5. Wait for the user answers when the answers affect the plan.
-6. Create the `plan` phase output.
-7. If a retained plan is created or materially reformulated, provide a Decision
+6. Wait for the user answers when the answers affect the plan.
+7. Create the `plan` phase output.
+8. If a retained plan is created or materially reformulated, provide a Decision
   Brief in chat.
-8. Move visibly to `internal-gateway-critical-master` for pressure testing when
+9. Move visibly to `internal-gateway-critical-master` for pressure testing when
   reasoning risk remains.
-9. Reformulate, de-escalate, execute, review, continue critical, or accept risk
+10. Reformulate, de-escalate, execute, review, continue critical, or accept risk
   according to the critical outcome.
-10. Move to `execute` or `apply-plan` only after the target state and validation
+11. Move to `execute` or `apply-plan` only after the target state and validation
   path are clear and the checkpoint is satisfied or the user explicitly asked
   to apply or run the work end to end.
 
@@ -147,7 +149,7 @@ Do not execute dubbi-e-domande.md.
 
 ```text
 Review this diff with review mode.
-Use code review for code defects and systems review for cross-cutting impact.
+Use code review for code defects and high-level review for cross-cutting impact.
 Findings first, then evidence gaps, then route each fix to execute, plan,
 critical challenge, or defer.
 ```

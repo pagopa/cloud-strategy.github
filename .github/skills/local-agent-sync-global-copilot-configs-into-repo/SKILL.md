@@ -33,7 +33,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Exclude source resources named `internal-sync-*` from consumer mirroring and remove any target copies of those resources during `apply`.
 - Materialize the source template `.github/templates/copilot-instructions.override.md.template` into the consumer target as the consumer-local copilot instructions override file when that target file is missing, then preserve target-authored changes there on later sync runs.
 - Create consumer-local `docs/01-architecture.md` and `docs/02-repository-context.md` from `.github/templates/` only when missing, then preserve target-authored content on later sync runs.
-- Mirror `docs/03-ai-runtime-operating-model.md` as source-managed runtime guidance.
+- Delete retired standalone runtime operating model documents from consumers; runtime workflow guidance now travels through root guidance and skills.
 - Keep root guidance layered: `AGENTS.md` is the bridge, `.github/copilot-instructions.md` is the repo-wide projection, the consumer-local GitHub instructions overrides file is the consumer-local exception layer, and `.github/INVENTORY.md` is the live catalog.
 - Treat `LESSONS_LEARNED.md` as a source-managed retained-learning template: create it when missing, keep its structure aligned with the source contract, and preserve target-authored pending lessons instead of overwriting them with source rows.
 - Mirror only the explicitly shared repository-hygiene files declared in `references/sync-contract.md`; do not widen workflow or root-file mirroring implicitly.

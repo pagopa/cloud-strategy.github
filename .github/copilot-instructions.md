@@ -32,7 +32,8 @@ Protect correctness, security, simplicity, and maintainability.
 - Load task-specific skills only when workflow depth, decision trees, or domain procedure is needed.
 - Let scoped policy win over conflicting skill workflow.
 - Read `.github/copilot-instructions.override.md` before synced defaults when present.
-- Use `docs/01-architecture.md` for boundaries and `docs/03-ai-runtime-operating-model.md` when runtime consumption matters.
+- Use repository architecture and repository context docs for boundaries and non-policy context.
+- Use relevant skills when workflow depth or runtime consumption behavior matters.
 
 ## Delivery Guardrails
 
@@ -42,7 +43,7 @@ Protect correctness, security, simplicity, and maintainability.
 - Do not report completion from intent alone; cite validation evidence or name the explicit gap.
 - Prefer the simplest correct change with the smallest credible blast radius.
 - Preserve existing conventions unless the task changes them.
-- Keep policy, projection, inventory, local context, runtime guidance, and operational workflows separate.
+- Keep policy, projection, inventory, local context, and skill-owned workflows separate.
 - Allow user-selected gateway skills with visible phases; keep hidden front-door routing and hidden peer dispatch disallowed.
 - Update docs, validators, tests, or sync discovery when governance contracts change.
 - Read primary vendor docs before schema-driven edits.

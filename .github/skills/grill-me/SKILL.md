@@ -22,3 +22,10 @@ Do not treat accepted recommendations as the end of the grilling process. If acc
 After the initial numbered list, ask one question at a time only for unresolved ambiguity, dependent follow-up decisions, or branches that cannot be settled from the user's bulk response.
 
 Do not ask questions that can be answered by exploring the codebase, documentation, or local files.
+
+When this skill is used as a pre-plan gate, leave the caller with one explicit
+gate status:
+
+- `grill-me required`: unresolved user-only decisions still block safe planning.
+- `grill-me satisfied`: the user answered or accepted the required decisions.
+- `grill-me not applicable`: repository evidence fully resolves the decision surface.

@@ -24,7 +24,8 @@ playbooks.
 - `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
 - Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
 - `.github/instructions/*.instructions.md` owns scoped path or domain rules; narrower matching scope overrides broad defaults only inside that scope.
-- Use `docs/01-local-architecture.md` for repository architecture, `docs/02-local-repository-context.md` for non-policy local context, and `docs/03-local-ai-runtime-operating-model.md` for runtime consumption guidance.
+- Use `docs/01-local-architecture.md` for repository architecture and `docs/02-local-repository-context.md` for non-policy local context.
+- Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
 
 ## Context And Scope
@@ -33,6 +34,7 @@ playbooks.
 - Read every matching instruction as manual context.
 - Co-load relevant skills when the task needs workflow, decision trees, domain depth, or reusable procedures.
 - Use scoped instructions and skills together when both apply; applicable policy and scoped rules win if a skill procedure conflicts.
+- Treat `.github/agents/*.agent.md` as surface-specific wrapper projections; reusable behavior stays in skills when a runtime lacks wrapper UI.
 - If no target path is known, infer obvious domains only, such as Python, GitHub Actions, Kubernetes, Docker, Markdown, or Terraform; otherwise ask for the target path before making path-scoped claims.
 
 ## Authoring Defaults

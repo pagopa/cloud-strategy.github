@@ -152,8 +152,20 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
         "When a skill sits behind a paired agent or local references"
         in skill_creator_text
     )
+    assert (
+        "When direct-copy portability or out-of-repo execution is part of the skill contract"
+        in skill_creator_text
+    )
     assert "reference another skill by name and behavior only" in skill_creator_text
     assert "not by file paths inside their bundles" in writing_skills_text
+    assert (
+        "If the skill must stay direct-copy portable or runnable outside the source repository"
+        in writing_skills_text
+    )
+    assert (
+        "validate the bundled entrypoint directly and validate any repository wrapper separately"
+        in writing_skills_text
+    )
     assert "If the skill sits behind a paired agent" in writing_skills_text
 
 
@@ -165,6 +177,9 @@ def test_gateway_contains_completion_checks() -> None:
             "`Check 1`: Plan coverage",
             "`Check 2`: Contract coverage",
             "`Check 3`: Evidence coverage",
+            "Every phase-ending response must include a compact `Lessons` line",
+            "internal-lesson-codification",
+            "Phase-ending reports state `Lessons` status",
         ),
     )
 
@@ -190,6 +205,35 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
             "make github-catalog-validation",
             "`full-cycle` alone",
         ),
+    )
+
+
+def test_governance_sensitive_plans_default_to_clarify_first() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "Treat those cases as `plan-only (clarify-first)` even when the user did not",
+            "Comparison, integration, or architecture-judgment requests should",
+            "Governance-sensitive planning with unresolved user choices must stop for",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
+        (
+            "governance-sensitive planning still has unresolved user-only decisions",
+            "treat the lane as `plan-only (clarify-first)`",
+        ),
+    )
+    assert_contains_all(
+        ".github/agents/internal-gateway-operational-flow.agent.md",
+        (
+            "`plan-only (clarify-first)`",
+            "stop for `grill-me` before writing any",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/README.md",
+        ("Treat governance-sensitive planning as `plan-only (clarify-first)`",),
     )
 
 
@@ -225,7 +269,7 @@ def test_gateway_points_to_plan_completion_audit_reference() -> None:
     assert "plan-completion audit" in gateway_text
     assert "Status Vocabulary" not in gateway_text
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        ".github/skills/internal-high-level-review/references/plan-completion-audit.md",
         (
             "Status Vocabulary",
             "`DONE`",
@@ -240,11 +284,11 @@ def test_gateway_points_to_plan_completion_audit_reference() -> None:
 def test_systems_review_lens_referenced() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
-        ("internal-systems-review", "cross-cutting impact", "blind spots"),
+        ("internal-high-level-review", "cross-cutting impact", "blind spots"),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
-        ("internal-systems-review", "plan-completion audit", "scope-drift analysis"),
+        ("internal-high-level-review", "plan-completion audit", "scope-drift analysis"),
     )
 
 
@@ -255,9 +299,11 @@ def test_security_review_promotion_gated() -> None:
     gateway_text = read_text(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
-    systems_review_text = read_text(".github/skills/internal-systems-review/SKILL.md")
+    systems_review_text = read_text(
+        ".github/skills/internal-high-level-review/SKILL.md"
+    )
     review_lenses_text = read_text(
-        ".github/skills/internal-systems-review/references/review-lenses.md"
+        ".github/skills/internal-high-level-review/references/review-lenses.md"
     )
     assert not Path(".github/skills/internal-security-review").exists()
     assert (
@@ -279,7 +325,7 @@ def test_security_review_promotion_gated() -> None:
 
 def test_plan_completion_audit_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        ".github/skills/internal-high-level-review/references/plan-completion-audit.md",
         (
             "`DONE`",
             "`PARTIAL`",
@@ -294,7 +340,7 @@ def test_plan_completion_audit_reference_exists() -> None:
 
 def test_scope_drift_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/scope-drift.md",
+        ".github/skills/internal-high-level-review/references/scope-drift.md",
         (
             "`ON_SCOPE`",
             "`EXPANDED`",
@@ -328,7 +374,7 @@ def test_scope_challenge_gate_reference_exists() -> None:
 
 def test_review_lenses_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/review-lenses.md",
+        ".github/skills/internal-high-level-review/references/review-lenses.md",
         (
             "## Always-on Lenses",
             "## Cross-cutting Lenses",
@@ -364,7 +410,11 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Evidence envelope",
             "Evidence gaps",
             "Residual risks",
+            "Lessons status",
+            "Lessons: added | codified in <owner> | none - <short reason>",
             "`SHIPPED` requires passed validators and a completed report",
+            "late-stage packaging artifacts",
+            "not after every intermediate patch",
             "item-level evidence",
             "mark the item `UNVERIFIABLE` instead of",
             "claiming `SHIPPED`",
@@ -418,7 +468,7 @@ def test_plan_handoff_requires_summary_control_file() -> None:
 
 def test_plan_completion_audit_uses_evidence_envelope_for_removed_plan_files() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        ".github/skills/internal-high-level-review/references/plan-completion-audit.md",
         (
             "Evidence Envelope Inputs",
             "Numbered plan files were correctly removed by the `done-*` loop",
@@ -437,8 +487,22 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
         "evidence envelope with item, status,\n  evidence, and route"
         in executing_plans_text
     )
+    assert "late-stage evidence packaging" in executing_plans_text
+    assert "not after every intermediate patch" in executing_plans_text
     assert "Source item or source `done-*` file" not in executing_plans_text
     assert "| Source done file | Reconstructed item |" not in executing_plans_text
+
+
+def test_executing_plans_prefers_targeted_validation_before_broad_suite() -> None:
+    assert_contains_all(
+        ".github/skills/internal-executing-plans/SKILL.md",
+        (
+            "Prefer focused validation order for each slice",
+            "run the nearest targeted validator or test",
+            "broader repository validation only after the slice is stable",
+            "use the nearest targeted validator or test before broader suite validation",
+        ),
+    )
 
 
 def test_retained_plan_artifact_contract_is_general_not_folder_specific() -> None:
@@ -451,7 +515,7 @@ def test_retained_plan_artifact_contract_is_general_not_folder_specific() -> Non
 
 def test_audit_dispatch_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/audit-dispatch.md",
+        ".github/skills/internal-high-level-review/references/audit-dispatch.md",
         (
             "More than 6 numbered plan files",
             "400 changed diff lines",

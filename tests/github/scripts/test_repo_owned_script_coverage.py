@@ -25,6 +25,9 @@ TEST_OWNERS = {
         ".github/scripts/lib/catalog_checks.py",
         ".github/scripts/lib/inventory.py",
     },
+    "tests/test_home_ai_resources_sync.py": {
+        ".github/scripts/sync_home_ai_resources.py",
+    },
     "tests/test_sync_and_token_risks.py": {
         ".github/scripts/lib/syncing.py",
         ".github/scripts/lib/token_risks.py",

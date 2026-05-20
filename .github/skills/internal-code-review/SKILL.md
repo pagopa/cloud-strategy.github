@@ -12,7 +12,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `antigravity-golang-pro`: Go concurrency, service design, or performance specialist when Go dominates the review.
 - `awesome-copilot-codeql`: CodeQL workflow and SARIF specialist when CodeQL setup dominates the review.
 - `awesome-copilot-secret-scanning`: GitHub secret scanning specialist when secret scanning workflow dominates the review.
-- `internal-systems-review`: systems-level review beyond line-level defects.
+- `internal-high-level-review`: systems-level review beyond line-level defects.
 - `internal-terraform`: Terraform specialist when HCL modeling or drift-safe Terraform dominates the review.
 - `superpowers-verification-before-completion`: evidence gate before claiming no findings or merge readiness.
 
@@ -135,8 +135,8 @@ Only elevate simplification suggestions when they materially improve maintainabi
 
 ## Cross-references
 
-- **internal-systems-review**: for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
-- Use both together: this skill for nit-level anti-patterns first, then `internal-systems-review` for the bigger picture.
+- **internal-high-level-review**: for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
+- Use both together: this skill for nit-level anti-patterns first, then `internal-high-level-review` for the bigger picture.
 - **superpowers-verification-before-completion**: for evidence before claiming no
   findings, review completion, or merge readiness.
 

@@ -31,7 +31,7 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | `plan`, `full-cycle` | The user asks for grilling, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first and use the local bulk-question override before one-at-a-time follow-up. |
+| `grill-me` | `plan`, `full-cycle` | The user asks for grilling, governance-sensitive planning still has unresolved user-only decisions, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first, treat the lane as `plan-only (clarify-first)` when those decisions can still change scope, owner, or validation, and use the local bulk-question override before one-at-a-time follow-up. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
 Internal replacements:
@@ -41,7 +41,7 @@ Internal replacements:
 - Performance work belongs to `internal-performance-optimization`.
 - Architecture, locality, leverage, cross-boundary review, higher-level code
   orientation, module maps, caller maps, and domain-vocabulary explanations
-  belong to `internal-systems-review`.
+  belong to `internal-high-level-review`.
 - Code defect review belongs to `internal-code-review`.
 - Imported docs and setup conventions stay outside default gateway routing
   unless a future sync-governance decision deliberately changes the managed
@@ -61,6 +61,8 @@ sections.
 
 - Planning support includes `grill-me` only when the operational-flow skill
   selects it.
+- Governance-sensitive planning with unresolved user choices stays in
+  `plan-only (clarify-first)` until `grill-me` resolves those choices.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
 - Failure diagnosis belongs to `internal-debugging`.
@@ -68,7 +70,7 @@ sections.
 - Performance work belongs to `internal-performance-optimization`.
 - Code defect review belongs to `internal-code-review`.
 - Architecture, workflow, cross-cutting impact, operational fit, and blind spots
-  belong to `internal-systems-review`.
+  belong to `internal-high-level-review`.
 - Compression support such as `mattpocock-caveman` stays support-only after
   blockers, risks, and validation evidence are explicit.
 

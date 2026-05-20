@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal Systems Review"
-  short_description: "Help with internal systems review tasks"
-  default_prompt: "Use $internal-systems-review for this task and follow the repository-owned workflow in the skill."

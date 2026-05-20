@@ -31,6 +31,9 @@ portable workflow semantics in the core skill.
 
 - Use this agent for `full-cycle`, `plan-only`, `apply-plan`, `review`, or
   explicit `plan`, `execute`, and `review` phase requests.
+- Keep governance-sensitive planning in `plan-only (clarify-first)` when
+  unresolved user decisions remain, and stop for `grill-me` before writing any
+  plan artifact.
 - Use this agent when an approved retained plan under `tmp/superpowers/` should
   be applied through the repository `done-*` loop.
 - Do not use this agent for a concrete low-to-medium-risk task that can finish

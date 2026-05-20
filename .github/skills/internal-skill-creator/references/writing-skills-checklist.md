@@ -7,6 +7,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 ## Core posture
 
 - Treat a skill as a reusable guide for future agents, not as a narrative about one past task.
+- Prefer executable process over prose: steps, evidence, and exit criteria must change what a future agent does.
 - Iron law: do not create or materially revise a skill without first seeing the failure it must fix.
 - Do not create or materially revise a skill without first observing the failure, miss, or ambiguity it must fix.
 - Use the same proof standard for edits as for new skills.
@@ -40,6 +41,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - If local references own the deep tables, templates, or examples, point to them instead of copying them back into `SKILL.md`.
 - Prefer moving static lookup tables, starter templates, and detailed taxonomies into `references/`.
 - Prefer new `references/` over new `scripts/` unless the workflow is deterministic, repeated, and execution-heavy.
+- If the skill must stay direct-copy portable or runnable outside the source repository, keep the required deterministic automation, loaders, and dependency bootstrap inside the bundle; repository scripts may wrap that engine but should not be the only runnable owner.
 - Reference other skills by skill name and owner behavior, not by file paths inside their bundles.
 - Keep `## Referenced skills` as an audit index: one backticked skill name plus one short owner-behavior phrase per item, or `- None.` when no other skill is referenced.
 - Update the referenced-skill index whenever the body adds, removes, renames, routes to, delegates to, or compares against another skill.
@@ -51,6 +53,8 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Re-run the same scenario with the skill after the change.
 - Re-run at least one neighboring-owner scenario when the edit changes routing or boundary wording.
 - Add a misuse, pressure, or counterexample test based on the skill type.
+- Make every verification item evidence-shaped: command output, diff evidence, rendered artifact, or an explicit validation gap.
+- When the bundle owns runnable automation, validate the bundled entrypoint directly and validate any repository wrapper separately.
 - Verify that every listed referenced skill exists or is explicitly marked as external/on-demand, and that no later skill reference is missing from the index.
 
 ## Skill-type checks
@@ -67,5 +71,6 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - "We can test later."
 - "This should probably become a new skill."
 - "I already know what the skill should say."
+- The section explains a topic but does not alter trigger choice, workflow steps, evidence, or exit criteria.
 
 When one of these appears, stop and re-check the baseline and boundary.

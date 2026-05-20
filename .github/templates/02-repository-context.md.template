@@ -5,8 +5,8 @@
 ## Where Adjacent Content Belongs
 
 - Use `docs/01-architecture.md` for architecture, boundaries, flows, and validation surfaces.
-- Use `docs/03-ai-runtime-operating-model.md` for the source-managed runtime consumption model shared from the standards baseline.
 - Use `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents for binding rules.
+- Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Use `LESSONS_LEARNED.md` for lessons that are still pending codification.
 
 ## Scope

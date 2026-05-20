@@ -9,10 +9,9 @@
 - Use `docs/02-local-repository-context.md` for stable local operating context, glossary, ownership notes,
   and repository-specific interpretation aids.
   These aids must not override policy.
-- Use `docs/03-local-ai-runtime-operating-model.md` for the shared runtime model.
-  It explains how Codex, Copilot, ChatGPT, and other runtimes consume the AI customization surfaces.
 - Use `AGENTS.md`, `.github/copilot-instructions.md`, or scoped `.github/instructions/*.instructions.md`
   for binding instruction policy.
+- Use relevant `SKILL.md` files for workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Use `LESSONS_LEARNED.md` only for durable lessons that are pending codification elsewhere.
 
 ## Repository
@@ -32,7 +31,6 @@ In scope:
 
 - Repository-wide AI governance policy in `AGENTS.md` and `.github/copilot-instructions.md`.
 - Repo-specific architecture and context documents in `docs/01-local-architecture.md` and `docs/02-local-repository-context.md`.
-- Shared AI runtime operating model in `docs/03-local-ai-runtime-operating-model.md`.
 - Live resource inventory in `.github/INVENTORY.md`.
 - Agent, skill, instruction, prompt, template, and sync assets under `.github/`.
 - Catalog validation and synchronization scripts under `.github/scripts/`.
@@ -53,7 +51,6 @@ Out of scope:
 | Copilot projection | `.github/copilot-instructions.md` | Repo-wide behavior visible to native Copilot flows. |
 | Architecture contract | `docs/01-local-architecture.md` | Repo-specific architecture, boundaries, flows, and validation surface. |
 | Repository context | `docs/02-local-repository-context.md` | Stable local context, glossary, and non-policy interpretation aids. |
-| Runtime operating model | `docs/03-local-ai-runtime-operating-model.md` | Shared source-managed runtime consumption model for AI customization assets. |
 | Catalog inventory | `.github/INVENTORY.md` | Generated catalog surface for agents, skills, instructions, prompts, and related assets. |
 | Consumer-local scaffolds | `.github/templates/` | Source-side templates used by sync automation to create target-owned knowledge files and override layers. |
 | Copilot wrapper agents | `.github/agents/` | VS Code route selection, tool scope, and manual handoff UX for operational skills plus repo-only sync command centers. |
@@ -73,11 +70,11 @@ Repository-owned AI assets
   -> consumer repositories with local architecture/context scaffolds and optional local override layer
 ```
 
-The key invariant is separation of policy, projection, inventory, local context, and runtime guidance.
+The key invariant is separation of policy, projection, inventory, local context, and skill-owned workflow guidance.
 `AGENTS.md` owns stable strategy. `.github/copilot-instructions.md` owns the Copilot projection.
 `.github/INVENTORY.md` owns the volatile generated catalog. `docs/01-local-architecture.md` and
-`docs/02-local-repository-context.md` remain repo-specific. `docs/03-local-ai-runtime-operating-model.md` is the
-source-managed runtime model.
+`docs/02-local-repository-context.md` remain repo-specific. Runtime consumption behavior lives in relevant skills,
+especially `internal-gateway-operational-flow`.
 
 ## Validation Surface
 
@@ -109,5 +106,5 @@ Observed validation entrypoints include:
 ## Contract Status
 
 This repository is ready to serve as the control-plane reference for AI Architecture Contract v1.1.0. Future changes
-should preserve the policy/projection/inventory/context/runtime split. They should also keep validation tied to the
+should preserve the policy/projection/inventory/context/workflow split. They should also keep validation tied to the
 actual filesystem.

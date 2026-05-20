@@ -64,7 +64,8 @@ Treat the current instruction architecture as the source of truth. Do not infer 
 - Goal: keep scoped instructions discoverable by target path without promising universal auto-loading.
 - Scope:
   - `.github/instructions/**/*.instructions.md`
-  - `docs/03-local-ai-runtime-operating-model.md`
+  - `AGENTS.md`
+  - `.github/skills/internal-gateway-operational-flow/**`
   - catalog consistency helpers and tests
 - Expected behavior:
   - each active scoped instruction exposes usable `applyTo` metadata
@@ -81,14 +82,15 @@ Treat the current instruction architecture as the source of truth. Do not infer 
   - `.github/copilot-instructions.md`
   - `docs/01-local-architecture.md`
   - `docs/02-local-repository-context.md`
-  - `docs/03-local-ai-runtime-operating-model.md`
   - `.github/templates/01-architecture.md.template`
   - `.github/templates/02-repository-context.md.template`
+  - `.github/skills/internal-gateway-operational-flow/**`
   - sync automation and sync-contract tests
 - Expected behavior:
   - `docs/01-local-architecture.md` is the repository-specific architecture contract and is scaffolded into consumers only when missing
   - `docs/02-local-repository-context.md` is descriptive local context and cannot override binding instruction policy
-  - `docs/03-local-ai-runtime-operating-model.md` is source-managed runtime guidance synchronized from the standards repository
+  - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-operational-flow`
+  - the retired `docs/03-local-ai-runtime-operating-model.md` file is not recreated or synchronized into consumers
   - sync automation preserves existing consumer-local architecture and context documents after initial scaffold creation
   - `.github/templates/` remains source-side scaffold material and is not mirrored as a target catalog family
 
