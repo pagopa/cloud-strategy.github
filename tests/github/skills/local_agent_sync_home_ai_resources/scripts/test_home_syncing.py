@@ -16,7 +16,9 @@ def find_repo_root(start: Path) -> Path:
 
 
 REPO_ROOT = find_repo_root(Path(__file__))
-SKILL_SCRIPTS_ROOT = REPO_ROOT / ".github/skills/local-agent-sync-home-ai-resources/scripts"
+SKILL_SCRIPTS_ROOT = (
+    REPO_ROOT / ".github/skills/local-agent-sync-home-ai-resources/scripts"
+)
 
 
 def load_skill_module():
@@ -66,9 +68,9 @@ def initialize_source_repo(root: Path) -> None:
     write_file(
         root / ".github/skills/demo-skill/agents/openai.yaml",
         "interface:\n"
-        "  display_name: \"Demo Skill\"\n"
-        "  short_description: \"Portable demo skill bundle\"\n"
-        "  default_prompt: \"Use $demo-skill for demo work.\"\n",
+        '  display_name: "Demo Skill"\n'
+        '  short_description: "Portable demo skill bundle"\n'
+        '  default_prompt: "Use $demo-skill for demo work."\n',
     )
     write_file(
         root
@@ -148,7 +150,9 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
         targets=parse_targets("codex,antigravity"),
         mode="apply",
     )
-    operation_codes = {operation.code for operation in plan.operations if operation.code}
+    operation_codes = {
+        operation.code for operation in plan.operations if operation.code
+    }
 
     assert "target-exists-unmanaged" in operation_codes
     assert "docs-unverified" in operation_codes
@@ -160,9 +164,16 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
-    write_file(source_root / ".github/skills/demo-skill/scripts/.venv/marker.txt", "runtime\n")
-    write_file(source_root / ".github/skills/demo-skill/__pycache__/demo.pyc", "runtime\n")
-    write_file(source_root / ".github/skills/demo-skill/.pytest_cache/CACHEDIR.TAG", "runtime\n")
+    write_file(
+        source_root / ".github/skills/demo-skill/scripts/.venv/marker.txt", "runtime\n"
+    )
+    write_file(
+        source_root / ".github/skills/demo-skill/__pycache__/demo.pyc", "runtime\n"
+    )
+    write_file(
+        source_root / ".github/skills/demo-skill/.pytest_cache/CACHEDIR.TAG",
+        "runtime\n",
+    )
 
     plan = build_home_sync_plan(
         source_root=source_root,

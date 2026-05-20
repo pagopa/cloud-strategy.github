@@ -158,8 +158,14 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
     )
     assert "reference another skill by name and behavior only" in skill_creator_text
     assert "not by file paths inside their bundles" in writing_skills_text
-    assert "If the skill must stay direct-copy portable or runnable outside the source repository" in writing_skills_text
-    assert "validate the bundled entrypoint directly and validate any repository wrapper separately" in writing_skills_text
+    assert (
+        "If the skill must stay direct-copy portable or runnable outside the source repository"
+        in writing_skills_text
+    )
+    assert (
+        "validate the bundled entrypoint directly and validate any repository wrapper separately"
+        in writing_skills_text
+    )
     assert "If the skill sits behind a paired agent" in writing_skills_text
 
 
@@ -293,7 +299,9 @@ def test_security_review_promotion_gated() -> None:
     gateway_text = read_text(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
-    systems_review_text = read_text(".github/skills/internal-high-level-review/SKILL.md")
+    systems_review_text = read_text(
+        ".github/skills/internal-high-level-review/SKILL.md"
+    )
     review_lenses_text = read_text(
         ".github/skills/internal-high-level-review/references/review-lenses.md"
     )

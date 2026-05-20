@@ -27,9 +27,9 @@ def initialize_source_repo(root: Path) -> None:
     write_file(
         root / ".github/skills/demo-skill/agents/openai.yaml",
         "interface:\n"
-        "  display_name: \"Demo Skill\"\n"
-        "  short_description: \"Portable demo skill bundle\"\n"
-        "  default_prompt: \"Use $demo-skill for demo work.\"\n",
+        '  display_name: "Demo Skill"\n'
+        '  short_description: "Portable demo skill bundle"\n'
+        '  default_prompt: "Use $demo-skill for demo work."\n',
     )
     write_file(
         root
