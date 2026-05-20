@@ -120,6 +120,8 @@ Use the smallest evidence pass that can safely choose the owner and next action.
 
 Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, and next-step package. It does not silently become execution after the design is settled.
 
+Before a non-trivial or ambiguous request moves from evidence gathering into a retained plan, run a lightweight Spec Sufficiency Gate. The gate does not block simple, mechanical, or already concrete tasks. It must make visible the objective, assumptions that can change delivery, success criteria, boundaries, validation path, and open questions. If a vague request cannot be reframed into testable success criteria from repository evidence, stop for `grill-me` or an explicit `ASK` outcome instead of drafting around the gap.
+
 Before writing any `plan-only` output, non-trivial retained plan, or plan
 reformulation, check whether `grill-me` is mandatory. It is mandatory when the
 user asks to clarify before planning, when the request touches agents, skills,
@@ -168,6 +170,10 @@ when the brief must survive a handoff.
 Execute mode owns clear local delivery. It may touch several adjacent files when the target state is already decided and validation is concrete. File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
 
 For `execute`, keep edits scoped to the requested change, required adjacent contracts, and validation fixes. Do not silently add newly discovered improvements.
+
+For multi-step work, execute the smallest complete slice that can be verified and rolled back independently. Prefer a vertical slice when one end-to-end path can prove value, a contract-first slice when shared interfaces, validators, or owner contracts must align, and a risk-first slice when one uncertainty can invalidate later work. Each slice should have acceptance, fresh evidence, and a clear next slice before expanding scope.
+
+Do not rerun the same successful validator without intervening changes unless the rerun adds new evidence. Preserve the prior output and move to the next relevant check.
 
 For small catalog maintenance in this repository, do the `internal-gateway-simple-task` vs `execute` vs `plan` triage before loading optional references, support skills, or review lenses. Start from one owner file plus one nearby validator or test, and take only one extra reference when it changes the next safe action.
 

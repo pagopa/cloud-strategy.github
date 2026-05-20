@@ -16,6 +16,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | --- | --- |
 | Clarity | Can an executor identify the target files, owner, and next action without guessing? |
 | Coherence | Do the objective, rationale, executable steps, and validation path agree? |
+| Spec sufficiency | Are the target, success criteria, boundaries, validation path, and open questions concrete enough to decide whether execution is safe? |
 | Validability | Is there a concrete validator, review path, or explicit validation gap? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
@@ -34,6 +35,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 
 - Keep the gate plain text and short.
 - Prefer editing the retained plan over explaining around a bad plan.
+- Reframe vague requirements into observable success criteria when evidence supports it; otherwise return `ASK` instead of accepting an unverifiable plan.
 - Do not add persona agents, runtime-specific frontmatter, or external workflow
   dependencies.
 - For strategic-to-operational conversions, coverage review comes before shape-only validation.

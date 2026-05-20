@@ -34,6 +34,8 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Retain a plan only when at least one of these is true: the work crosses turns, spans multiple macro-categories, needs handoff, tracking, or provenance, or includes tradeoffs or uncertainties that should stay reviewable.
 - Start every retained plan with `01-riassunto-direzione-e-decisione.md` so the user can understand the full direction and decide before execution.
 - `01-riassunto-direzione-e-decisione.md` must be exhaustive enough to explain the target state, tradeoffs, execution shape, validation path, and the decision the user is being asked to make.
+- For non-trivial or ambiguous retained plans, the summary must include a lightweight spec baseline: objective, assumptions that affect delivery, success criteria, boundaries or anti-scope, validation path, and open questions or `none`.
+- Success criteria must be concrete enough to verify. Reframe vague goals into observable conditions when repository evidence supports it, or move the uncertainty to `dubbi-e-domande.md` before execution.
 - The summary file must also include the smallest useful reading path: what to inspect first, which evidence pass proves the plan is still valid, and which files can be deferred.
 - When converting an existing strategic, review-only, or monolithic plan into an executable retained plan, preserve the source decision inventory before compression, splitting, or deletion.
 - Prefer `02-matrice-operativa.md` as the first executable file when a source artifact must be converted point by point. Use an equivalently clear name only when it better matches the retained plan language.
@@ -43,6 +45,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - When the work spans more than one executable macro-category, continue with `02-...`, `03-...`, and later numbered files by category, for example `02-implementazione.md`, `03-validazione.md`, and `04-rollout.md`.
 - Do not keep one monolithic plan file when the work spans multiple macro-categories.
 - For executable work, make dependency order, acceptance criteria, and verification checkpoints explicit enough that a later executor can prove each item before moving it to `done-*`.
+- For each executable step, name the acceptance condition, verification path, and target files or owner when known. Keep steps small enough to verify without mixing unrelated owners or cleanup.
 - Write those plan files in Italian by default unless the user explicitly asks for another language.
 - Keep unresolved questions, doubts, and user decisions in `dubbi-e-domande.md`.
 - `dubbi-e-domande.md` is not an execution-plan file and must stay outside the plan-and-apply loop.
