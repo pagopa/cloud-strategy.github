@@ -202,6 +202,35 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
     )
 
 
+def test_governance_sensitive_plans_default_to_clarify_first() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "Treat those cases as `plan-only (clarify-first)` even when the user did not",
+            "Comparison, integration, or architecture-judgment requests should",
+            "Governance-sensitive planning with unresolved user choices must stop for",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
+        (
+            "governance-sensitive planning still has unresolved user-only decisions",
+            "treat the lane as `plan-only (clarify-first)`",
+        ),
+    )
+    assert_contains_all(
+        ".github/agents/internal-gateway-operational-flow.agent.md",
+        (
+            "`plan-only (clarify-first)`",
+            "stop for `grill-me` before writing any",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/README.md",
+        ("Treat governance-sensitive planning as `plan-only (clarify-first)`",),
+    )
+
+
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/SKILL.md",

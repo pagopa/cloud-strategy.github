@@ -127,6 +127,12 @@ workflow, catalog, governance, or routing, or when missing context, target
 state, anti-scope, owner, validation, or user decisions could change scope,
 owner, target state, validation, rollout, or anti-scope. Before asking
 questions, inspect the repository when the answer is recoverable from files.
+Treat those cases as `plan-only (clarify-first)` even when the user did not
+explicitly ask to be grilled. A detailed prompt, apparent solution, or large
+evidence pass does not waive the gate when unresolved user-only decisions still
+remain. Comparison, integration, or architecture-judgment requests should
+default to the clarify-first gate whenever the repository cannot recover the
+user's preferred owner, anti-scope, rollout posture, or validation bar.
 
 When `grill-me` is mandatory, stop before writing the plan.
 Then provide numbered questions with a recommended answer for each, using
@@ -136,6 +142,9 @@ Do not replace those decisions with silent assumptions. After the bulk answer,
 continue one question at a time only for unresolved ambiguity.
 
 When the target path includes `AGENTS.md`, `.github/copilot-instructions.md`, `.github/INVENTORY.md`, validators, sync engines, or wrapper agents, treat the plan as governance-sensitive. Include the applicable validation path, such as `make token-risks`, `make github-catalog-validation`, and focused contract tests, or name the explicit validation gap. In `plan-only`, name focused tests by path or command without opening them unless their exact assertions affect the decision.
+Governance-sensitive planning with unresolved user choices must stop for
+`grill-me` before any retained plan, Decision Brief, or recommendation is
+written.
 
 Before claiming `plan complete`, check that `Plan Check 1` covers the decision frame, assumptions, anti-scope, and selected owner; `Plan Check 2` keeps the Decision Brief or retained handoff aligned with the plan; and `Plan Check 3` names concrete validation, evidence gaps, and stop conditions. Use `superpowers-verification-before-completion` for strong plan-completion claims.
 
