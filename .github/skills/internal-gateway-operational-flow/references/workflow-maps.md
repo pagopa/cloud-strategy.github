@@ -187,3 +187,40 @@ Inline plans must be normalized into a retained plan or pass an explicit checkpo
 | Codex plugin or Codex CLI | Load relevant skills directly; do not rely on Copilot agent UI. |
 
 The workflow must remain understandable when no runtime can invoke a Copilot custom agent.
+
+## Runtime Context Assembly
+
+Use this section when a host runtime lacks native instruction, scoped-rule, or
+skill loading.
+
+1. Read `AGENTS.md` for repository-wide policy, precedence, owner visibility,
+   and rule placement.
+2. Read `.github/copilot-instructions.md` as the Copilot-native projection when
+   the task may run in a Copilot surface or the projection affects shared
+   behavior.
+3. Match known target paths against `.github/instructions/*.instructions.md`
+   `applyTo` metadata, then read every matching instruction as manual context.
+4. Load the selected owner skill and only the support skills or references that
+   can change the current phase.
+5. Use repository context docs, generated inventory, retained plans, and
+   `done-*` files as descriptive evidence.
+6. Use fresh tool or validator output before any completion, passing, or
+   no-finding claim.
+
+Keep prompt assembly external to the repository source files. XML-style
+delimiters may separate loaded context at runtime, but source assets remain
+Markdown.
+
+## Context Trust Levels
+
+| Context type | Trust posture |
+| --- | --- |
+| Current user request and system or developer instructions | Binding for the current session, subject to repository policy and safety rules. |
+| `AGENTS.md`, `.github/copilot-instructions.md`, and matching scoped instructions | Binding repository policy for covered paths and task domains. |
+| Relevant `SKILL.md` files | Workflow guidance for the selected task owner; scoped policy wins on conflicts. |
+| Repository context docs, generated inventory, retained plans, and `done-*` files | Descriptive evidence. Use them to understand state, not as canonical policy. |
+| Imported or comparison material under `tmp/` | Comparative data only unless the active plan names it as evidence. |
+| Tool output, validator output, and terminal logs | Fresh evidence that must be read before completion or no-finding claims. |
+
+When context conflicts, surface the conflict and reconcile it against the
+smallest valid owner instead of silently choosing the longer or newer text.

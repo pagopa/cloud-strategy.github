@@ -143,9 +143,6 @@ def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / "docs/03-local-ai-runtime-operating-model.md", "# Runtime\n"
-    )
-    write_file(
         source_root / ".github/templates/01-architecture.md.template",
         "# Architecture scaffold\n",
     )
@@ -162,7 +159,6 @@ def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
 
     assert ("create", "docs/01-local-architecture.md") in actions
     assert ("create", "docs/02-local-repository-context.md") in actions
-    assert ("create", "docs/03-local-ai-runtime-operating-model.md") in actions
     assert ".github/templates/01-architecture.md.template" not in planned_paths
     assert ".github/templates/02-repository-context.md.template" not in planned_paths
 
@@ -291,9 +287,6 @@ def test_build_sync_plan_deletes_legacy_runtime_fit_document(tmp_path: Path) -> 
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(
-        source_root / "docs/03-local-ai-runtime-operating-model.md", "# Runtime\n"
-    )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
     write_file(target_root / "docs/runtime-fit.md", "# Runtime fit\n")
@@ -301,6 +294,27 @@ def test_build_sync_plan_deletes_legacy_runtime_fit_document(tmp_path: Path) -> 
     plan = build_sync_plan(source_root, target_root)
 
     assert ("delete", "docs/runtime-fit.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_build_sync_plan_deletes_retired_runtime_operating_model(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / "docs/03-local-ai-runtime-operating-model.md", "# Runtime\n"
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("delete", "docs/03-local-ai-runtime-operating-model.md") in {
         (operation.action, operation.path) for operation in plan.operations
     }
 

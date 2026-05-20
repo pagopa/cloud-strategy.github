@@ -79,6 +79,18 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
 - Use `superpowers-verification-before-completion` before claiming `execute` or `apply-plan` completion so success claims have fresh evidence.
 
+## Runtime Context And Portability
+
+This skill owns portable runtime workflow semantics. Do not create or revive a
+separate runtime operating model document for this logic.
+
+- Use `references/workflow-maps.md` when a runtime host lacks native
+  instruction, scoped-rule, or skill loading.
+- Treat Copilot agents as wrapper projections and skills as workflow owners.
+  Repository policy and scoped instructions still win on conflicts.
+- Treat context docs, inventory, retained plans, and `done-*` files as evidence.
+  Completion claims still need fresh tool or validator output.
+
 ## User Authorization Signals
 
 Treat end-to-end application as authorized only when one of these signals is present:

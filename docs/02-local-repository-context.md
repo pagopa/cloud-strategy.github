@@ -9,9 +9,8 @@
 
 - System boundaries, component responsibilities, architecture flow, and validation surfaces live in
   `docs/01-local-architecture.md`.
-- Shared guidance on how assistant runtimes consume instructions, skills, prompts, and agents lives in
-  `docs/03-local-ai-runtime-operating-model.md`.
 - Binding rules live in `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
+- Runtime workflow behavior lives in relevant skills, especially `internal-gateway-operational-flow`.
 - Lessons that are still pending codification live in `LESSONS_LEARNED.md`.
 
 ## Scope
@@ -39,9 +38,8 @@ their target-owned content after creation.
 
 | Decision | Status | Policy owner |
 | --- | --- | --- |
-| Keep policy, Copilot projection, inventory, architecture, local context, and runtime model separate. | Active | `AGENTS.md`, `.github/copilot-instructions.md`, `docs/01-local-architecture.md` |
+| Keep policy, Copilot projection, inventory, architecture, local context, and skill-owned workflows separate. | Active | `AGENTS.md`, `.github/copilot-instructions.md`, `docs/01-local-architecture.md` |
 | Scaffold `docs/01-local-architecture.md` and `docs/02-local-repository-context.md` into consumers only when missing, then preserve them. | Active | Sync automation and `references/sync-contract.md` |
-| Keep `docs/03-local-ai-runtime-operating-model.md` source-managed and synchronized to consumers. | Active | Sync automation and `docs/03-local-ai-runtime-operating-model.md` |
 | Keep `.github/templates/` as standards-repository sync source material, not a synced target catalog. | Active | Sync automation and `references/sync-contract.md` |
 
 ## Glossary

@@ -27,7 +27,7 @@ CONSUMER_SYNC_EXCLUDED_PREFIX = "internal-sync-"
 LESSONS_PATH = "LESSONS_LEARNED.md"
 ARCHITECTURE_PATH = "docs/01-local-architecture.md"
 REPOSITORY_CONTEXT_PATH = "docs/02-local-repository-context.md"
-RUNTIME_OPERATING_MODEL_PATH = "docs/03-local-ai-runtime-operating-model.md"
+RETIRED_RUNTIME_OPERATING_MODEL_PATH = "docs/03-local-ai-runtime-operating-model.md"
 LEGACY_ARCHITECTURE_PATH = "docs/architecture.md"
 LEGACY_RUNTIME_FIT_PATH = "docs/runtime-fit.md"
 ARCHITECTURE_TEMPLATE_PATH = ".github/templates/01-architecture.md.template"
@@ -43,7 +43,6 @@ CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES = {
 MANAGED_ROOT_FILES = (
     "AGENTS.md",
     LESSONS_PATH,
-    RUNTIME_OPERATING_MODEL_PATH,
     ".editorconfig",
     ".pre-commit-config.yaml",
     ".github/copilot-instructions.md",

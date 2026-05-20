@@ -22,6 +22,7 @@ from .shared import (
     MANAGED_ROOT_FILES,
     MANAGED_WORKFLOW_FILES,
     REPOSITORY_CONTEXT_PATH,
+    RETIRED_RUNTIME_OPERATING_MODEL_PATH,
     SyncOperation,
     SyncPlan,
     action_sort_key,
@@ -226,15 +227,27 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
             )
         )
 
-    legacy_runtime_fit_path = target_root / LEGACY_RUNTIME_FIT_PATH
-    if legacy_runtime_fit_path.exists():
+    retired_runtime_documents = {
+        LEGACY_RUNTIME_FIT_PATH: (
+            "Legacy runtime-fit document is retired; runtime workflow guidance "
+            "now lives in root guidance and skills."
+        ),
+        RETIRED_RUNTIME_OPERATING_MODEL_PATH: (
+            "Retired source-managed runtime operating model document; runtime "
+            "workflow guidance now lives in root guidance and skills."
+        ),
+    }
+    for relative_path, reason in retired_runtime_documents.items():
+        retired_runtime_path = target_root / relative_path
+        if not retired_runtime_path.exists():
+            continue
         operations.append(
             SyncOperation(
                 action="delete",
-                path=LEGACY_RUNTIME_FIT_PATH,
-                reason="Legacy runtime-fit document is replaced by docs/03-local-ai-runtime-operating-model.md.",
+                path=relative_path,
+                reason=reason,
                 source_hash=None,
-                target_hash=sha256_file(legacy_runtime_fit_path),
+                target_hash=sha256_file(retired_runtime_path),
             )
         )
 
