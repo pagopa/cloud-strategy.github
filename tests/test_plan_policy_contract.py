@@ -149,6 +149,10 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert PLAN_TASK_PATH in writing_skill_text
     assert "crosses turns" in writing_skill_text
     assert "handoff, tracking, or provenance" in writing_skill_text
+    assert (
+        "strategic, review-only, or monolithic retained plan into an executable retained plan"
+        in writing_skill_text
+    )
     assert "01-riassunto-direzione-e-decisione.md" in writing_skill_text
     assert "`Uso consigliato`" in writing_skill_text
     assert "`Mappa file e ruolo`" in writing_skill_text
@@ -156,6 +160,7 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "`Budget lettura`" in writing_skill_text
     assert "control file" in writing_skill_text
     assert "02-esecuzione.md" in writing_skill_text
+    assert "02-matrice-operativa.md" in writing_skill_text
     assert "macro-category" in writing_skill_text
     assert "monolithic" in writing_skill_text
     assert "dubbi-e-domande.md" in writing_skill_text
@@ -165,8 +170,13 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
         in writing_skill_text
     )
     assert "## Local retained-plan contract" in writing_skill_text
+    assert "preserve the source decision inventory before compression" in writing_skill_text
+    assert "traceability file must map every source item" in writing_skill_text
+    assert "Do not retire, delete, or replace the source strategic artifact" in writing_skill_text
     assert "## File-role conventions" in writing_skill_text
+    assert "traceability owner for strategic-to-operational conversions" in writing_skill_text
     assert "## Token And Reading Discipline" in writing_skill_text
+    assert "Coverage before compression" in writing_skill_text
     assert "Classify the folder before broad reading" in writing_skill_text
     assert (
         "Limit the first pass to target existence, the riskiest claim"
@@ -194,6 +204,8 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "5-7 bullets when practical" in writing_skill_text
     assert "1-2 lines when practical" in writing_skill_text
     assert "outside the plan-and-apply loop" in writing_skill_text
+    assert "source-item coverage through `02-matrice-operativa.md`" in writing_skill_text
+    assert "Compressing or deleting a strategic source plan" in writing_skill_text
 
     assert "## When to use" in executing_skill_text
     assert "retained numbered plans" in executing_skill_text
@@ -202,6 +214,7 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
         "Use the summary file to classify folder purpose and file roles"
         in executing_skill_text
     )
+    assert "source-item coverage owner" in executing_skill_text
     assert "Evidence pass iniziale" in executing_skill_text
     assert "Budget lettura" in executing_skill_text
     assert (
@@ -220,6 +233,39 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "Delete an active plan file" in executing_skill_text
     assert "Continue automatically" in executing_skill_text
     assert "Stop only for real blockers" in executing_skill_text
+    assert "Strategic-to-operational conversions used `02-matrice-operativa.md`" in executing_skill_text
+    assert "traceability matrix has preserved source-item coverage" in executing_skill_text
+
+
+def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
+    scope_challenge_text = read_text(
+        ".github/skills/internal-writing-plans/references/scope-challenge.md"
+    )
+    review_gate_text = read_text(
+        ".github/skills/internal-writing-plans/references/plan-review-gate.md"
+    )
+
+    assert "## Required Questions" in scope_challenge_text
+    assert "`coverage`: Which traceability matrix or equivalent owner" in scope_challenge_text
+    assert (
+        "`02-matrice-operativa.md` or an equivalently clear traceability owner"
+        in scope_challenge_text
+    )
+    assert (
+        "Coverage: <traceability owner, explicit not-applicable, or blocker>"
+        in scope_challenge_text
+    )
+    assert (
+        "For strategic-to-operational conversions, `READY` also requires explicit source-item coverage"
+        in scope_challenge_text
+    )
+
+    assert "| Semantic coverage |" in review_gate_text
+    assert "coverage review comes before shape-only validation" in review_gate_text
+    assert (
+        "missing source-item coverage in a strategic-to-operational conversion"
+        in review_gate_text
+    )
 
 
 def test_plan_wrapper_skills_ship_openai_metadata() -> None:

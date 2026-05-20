@@ -19,6 +19,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Validability | Is there a concrete validator, review path, or explicit validation gap? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
+| Semantic coverage | When converting an existing strategic or monolithic plan, does the new plan preserve each source item in a traceability matrix or equivalent owner before retiring the source artifact? |
 | Executor context | Can a smaller or lower-context executor see the key files, validators, owner, assumptions, and stop conditions without rediscovering the plan? |
 | Folder semantics | Does `01-riassunto-direzione-e-decisione.md` state `Uso consigliato` and `Mappa file e ruolo` so a generic reader can tell whether the folder is for review, apply, resume, rewrite, or status only? |
 | Token discipline | Does the summary define `Evidence pass iniziale` and `Budget lettura` so the executor can classify the folder with the fewest safe reads? |
@@ -35,9 +36,11 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 - Prefer editing the retained plan over explaining around a bad plan.
 - Do not add persona agents, runtime-specific frontmatter, or external workflow
   dependencies.
+- For strategic-to-operational conversions, coverage review comes before shape-only validation.
 - For plans intended for a smaller or lower-context executor, keep technical
   identifiers, file names, commands, and validation steps explicit. Short
   English glosses near critical decisions are allowed when they reduce handoff
   ambiguity.
 - Treat a missing or weak summary control file as a plan-quality defect, not as a documentation nit.
 - Treat a missing evidence pass or reading budget as a token-waste defect for non-trivial retained plans.
+- Treat missing source-item coverage in a strategic-to-operational conversion as a plan-quality defect, not as an editorial preference.

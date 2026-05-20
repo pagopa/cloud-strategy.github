@@ -14,6 +14,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Writing or rewriting a retained repository-owned execution plan under `tmp/superpowers/` when the work is non-banal.
 - Retaining a plan because the work crosses turns, spans multiple macro-categories, needs handoff, tracking, or provenance, or carries tradeoffs or uncertainties that should stay reviewable.
 - Converting a monolithic or overgrown plan into the local numbered-plan structure.
+- Converting a strategic, review-only, or monolithic retained plan into an executable retained plan without losing source decisions.
 - Preparing a plan that will later be executed by `internal-executing-plans`.
 
 ## When not to use
@@ -34,6 +35,10 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Start every retained plan with `01-riassunto-direzione-e-decisione.md` so the user can understand the full direction and decide before execution.
 - `01-riassunto-direzione-e-decisione.md` must be exhaustive enough to explain the target state, tradeoffs, execution shape, validation path, and the decision the user is being asked to make.
 - The summary file must also include the smallest useful reading path: what to inspect first, which evidence pass proves the plan is still valid, and which files can be deferred.
+- When converting an existing strategic, review-only, or monolithic plan into an executable retained plan, preserve the source decision inventory before compression, splitting, or deletion.
+- Prefer `02-matrice-operativa.md` as the first executable file when a source artifact must be converted point by point. Use an equivalently clear name only when it better matches the retained plan language.
+- That traceability file must map every source item to one of: executable change, adaptation in another plan file, intentional non-action, deferred follow-up, rejection, or blocker.
+- Do not retire, delete, or replace the source strategic artifact until the traceability file proves semantic coverage for every source item.
 - After the summary file, use `02-esecuzione.md` when one executable macro-category is enough.
 - When the work spans more than one executable macro-category, continue with `02-...`, `03-...`, and later numbered files by category, for example `02-implementazione.md`, `03-validazione.md`, and `04-rollout.md`.
 - Do not keep one monolithic plan file when the work spans multiple macro-categories.
@@ -51,6 +56,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Treat `01-riassunto-direzione-e-decisione.md` as the control file for the folder. Read it first for generic requests such as "analyze this plan", "review this plan", "write this plan", or "apply this plan".
 - In that summary file, include `Uso consigliato` with the next expected treatment, such as `review`, `apply-plan`, `resume`, or `rewrite`.
 - In that summary file, include `Mappa file e ruolo` so the reader can classify each file as summary, execution, validation, rollout, questions, or status artifact without guessing.
+- When present, treat `02-matrice-operativa.md` as the traceability owner for strategic-to-operational conversions and read it before later phase files.
 - Treat `dubbi-e-domande.md` as the only place for unresolved questions and user decisions.
 - Treat `done-*`, `evidence-envelope.md`, and `completion-report.md` as status artifacts that describe applied work, not pending plan intent.
 - If the summary file or file-role map is missing, the retained plan is not executor-friendly yet and should be revised before `apply-plan`.
@@ -62,6 +68,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - For retained artifacts under `tmp/`, use `rg --no-ignore` or an equivalent ignored-file-aware search when checking claims.
 - Put the evidence pass and first-read budget in `01-riassunto-direzione-e-decisione.md` under `Evidence pass iniziale` and `Budget lettura`.
 - Make `Budget lettura` exclusive: list the current plan files and any exact external artifacts allowed, and state that sibling retained plans are out of scope when not listed.
+- Coverage before compression: when rewriting an existing strategic or monolithic plan, extract the source items first and preserve them in a traceability owner before shortening, splitting, or deleting the source artifact.
 - Prefer the smallest useful retained plan shape: summary, current execution or backlog, and validation. Add more numbered files only for independent macro-categories.
 - Use `grill-me` only after the evidence pass when real user decisions remain. Do not ask questions that repository evidence can answer.
 - Keep deferred improvements, retrospectives, and lessons separate from executable steps unless they are required for the requested outcome.
@@ -109,12 +116,13 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 1. Decide first whether retained planning is justified or whether in-chat planning is enough.
 2. Choose a clear task folder name under `tmp/superpowers/`.
 3. Write `01-riassunto-direzione-e-decisione.md` first and use it to state direction, decision request, recommended treatment, file-role map, evidence pass, and reading budget before detailed plan files exist.
-4. Define the executable macro-categories next and choose the smallest post-summary file shape that fits the work.
-5. Use `02-esecuzione.md` when one executable macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
-6. Give each numbered file the shape above and keep every section compact.
-7. Put open questions and decision requests only in `dubbi-e-domande.md`.
-8. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
-9. Run the scope challenge and plan review gate when the retained plan is
+4. If the input is an existing strategic, review-only, or monolithic plan, extract the source-item traceability owner next before defining later execution phases.
+5. Define the executable macro-categories next and choose the smallest post-summary file shape that fits the work.
+6. Use `02-esecuzione.md` when one executable macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
+7. Give each numbered file the shape above and keep every section compact.
+8. Put open questions and decision requests only in `dubbi-e-domande.md`.
+9. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
+10. Run the scope challenge and plan review gate when the retained plan is
    non-trivial or will be handed to `internal-executing-plans`.
 
 ## Validation
@@ -127,6 +135,8 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - The summary file declares `Evidence pass iniziale` and `Budget lettura`.
 - The summary file's `Budget lettura` confines future readers to this plan and exact named evidence; other retained plan folders are excluded unless specifically indicated.
 - `02-esecuzione.md` is used when one executable macro-category is enough; `02-...`, `03-...`, `04-...` style plan files exist when more than one executable macro-category exists.
+- Strategic-to-operational conversions preserve source-item coverage through `02-matrice-operativa.md` or an equivalently clear traceability owner before the source artifact is retired.
+- The source strategic artifact is not deleted, replaced, or compressed beyond recognition until the traceability owner maps each source item to a destination or explicit non-action.
 - Plan files are in Italian unless the user asked otherwise.
 - The numbered files follow the local shape contract with explicit headings and short bullets.
 - `dubbi-e-domande.md` exists when needed and remains separate from executable plan files.
@@ -139,6 +149,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Creating a retained plan artifact for a clear, local, quick task that should stay in chat.
 - Skipping `01-riassunto-direzione-e-decisione.md` or making it too thin to support a decision.
 - Omitting the initial evidence pass or reading budget, causing the next agent to read the whole folder before knowing the lane.
+- Compressing or deleting a strategic source plan before extracting a traceability matrix or equivalent coverage owner.
 - Reading sibling retained plans to "understand context" when the user only passed one plan folder.
 - Writing the whole plan in one Markdown file.
 - Writing long narrative paragraphs or duplicating canonical context instead of keeping the plan scannable.

@@ -38,6 +38,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - Treat the user-provided retained plan folder as the active plan scope.
 - Do not read sibling `tmp/superpowers/` folders, other `tmp/` plan corpora, or historical retained plans for context, precedent, or evidence unless the current user prompt names them or the active plan's `Budget lettura` lists the exact path.
 - Use the summary file to classify folder purpose and file roles before acting. Distinguish summary, executable plan files, validation files, questions, and status artifacts without guessing.
+- When `02-matrice-operativa.md` or an equivalently clear traceability file exists, treat it as the source-item coverage owner and use it before later phase files retire or compress the source artifact.
 - Use the summary file's `Evidence pass iniziale` and `Budget lettura` before broad reading. If they are missing from a non-trivial retained plan, stop and report the handoff gap.
 - Keep the initial evidence pass to three checks when possible: target existence, riskiest claim, and nearest validator or explicit gap.
 - Use `rg --no-ignore` or an equivalent ignored-file-aware search for retained artifacts under `tmp/`, scoped to the active plan folder by default. Widen only to exact additional paths that were specifically indicated.
@@ -84,7 +85,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 6. Identify whether the plan crosses multiple owners. Continue only while the
   active owner still fits; lane-change when governance, review, or design
   ownership becomes dominant.
-7. Process the lowest-numbered remaining executable plan file first after the summary control file is understood.
+7. Process the lowest-numbered remaining executable plan file first after the summary control file is understood. When `02-matrice-operativa.md` exists, use it to preserve source-item coverage before later phase files are cleared.
 8. Execute items, verify them, and move completed items to the matching `done-*` file.
 9. Remove completed items from the active source file.
 10. Delete an active plan file when no executable items remain.
@@ -96,6 +97,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - `dubbi-e-domande.md` was excluded from execution.
 - The summary control file was read first or its absence was reported as a handoff gap.
 - Folder purpose and file roles were classified before `apply-plan` continued.
+- Strategic-to-operational conversions used `02-matrice-operativa.md` or an equivalent traceability file before later phase files retired the source artifact.
 - The evidence pass and reading budget were followed or their absence was reported as a handoff gap.
 - Sibling retained plans under `tmp/` were not read or modified unless exact paths were specifically indicated by the user or active plan budget.
 - The summary control file was closed through a matching `done-*` marker when the folder completed.
@@ -118,6 +120,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - Checking items off in place but leaving them in the active plan file.
 - Treating a generic "analyze this plan" request as permission to execute it.
 - Skipping the summary control file and guessing what the numbered files are for.
+- Clearing later phase files in a strategic-to-operational conversion before the traceability matrix has preserved source-item coverage.
 - Reading the whole retained folder before classifying purpose, evidence pass, and active file.
 - Treating `dubbi-e-domande.md` as a task list.
 - Stopping after one numbered file even though others remain.
