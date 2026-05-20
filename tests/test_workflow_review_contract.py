@@ -485,6 +485,18 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
     assert "| Source done file | Reconstructed item |" not in executing_plans_text
 
 
+def test_executing_plans_prefers_targeted_validation_before_broad_suite() -> None:
+    assert_contains_all(
+        ".github/skills/internal-executing-plans/SKILL.md",
+        (
+            "Prefer focused validation order for each slice",
+            "run the nearest targeted validator or test",
+            "broader repository validation only after the slice is stable",
+            "use the nearest targeted validator or test before broader suite validation",
+        ),
+    )
+
+
 def test_retained_plan_artifact_contract_is_general_not_folder_specific() -> None:
     artifact_contract_text = read_text("tests/test_retained_plan_artifact_contract.py")
 

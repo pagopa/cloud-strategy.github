@@ -26,7 +26,7 @@ Every retained plan must be able to answer these questions:
 
 For strategic-to-operational or monolithic-to-executable conversions, also answer this:
 
-7. `coverage`: Which traceability matrix or equivalent owner preserves every source item before the source artifact is retired?
+1. `coverage`: Which traceability matrix or equivalent owner preserves every source item before the source artifact is retired?
 
 For retained plans with numbered files, confirm that `01-riassunto-direzione-e-decisione.md` exposes the same target, anti-scope, owner, validator, and stop conditions, plus `Uso consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, and `Budget lettura`.
 
