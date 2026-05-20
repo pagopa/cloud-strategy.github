@@ -19,7 +19,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `internal-gateway-simple-task`: simple concrete fast path when staged workflow is too heavy.
 - `internal-lesson-codification`: retained-learning routing when a durable lesson candidate appears before reporting or editing `LESSONS_LEARNED.md`.
 - `internal-security-review`: future security lens name governed by the promotion rule in `references/wrapper-alignment.md`.
-- `internal-systems-review`: systems review, codebase orientation, plan-completion audit, and scope-drift analysis.
+- `internal-high-level-review`: systems review, codebase orientation, plan-completion audit, and scope-drift analysis.
 - `superpowers-verification-before-completion`: evidence gate before completion claims in `execute`, `apply-plan`, `plan complete`, `review complete`, or `no findings` states.
 
 Use this skill as the portable skill-first operational core for repository-owned staged work. Copilot agents may wrap it with frontmatter, tools, and `handoffs:`, but the reusable workflow semantics live here so runtimes without agent UI can still follow the same model.
@@ -64,11 +64,14 @@ Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skil
 - Treat `grill-me` as a blocking gate before plan output when user
   decisions may change scope, owner, target state, validation, rollout, or
   anti-scope.
+- Before any non-trivial retained plan, Decision Brief, plan reformulation, or
+  governance-sensitive recommendation, make the `grill-me` gate status explicit
+  as `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`.
 - Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Treat cross-skill contracts as owner-level contracts. Reference another skill by name and the behavior it owns; do not link to another skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, or `agents/` files.
 - Require an explicit checkpoint before moving from `plan` or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
-- Use review lenses inside `review` mode instead of duplicating their playbooks here: `internal-code-review` for code defects, `internal-systems-review` for architecture, workflow, cross-cutting impact, and blind spots, and the future security lens only under the promotion rule in `references/wrapper-alignment.md`.
+- Use review lenses inside `review` mode instead of duplicating their playbooks here: `internal-code-review` for code defects, `internal-high-level-review` for architecture, workflow, cross-cutting impact, and blind spots, and the future security lens only under the promotion rule in `references/wrapper-alignment.md`.
 - Use `internal-gateway-critical-master` as a visible critical phase when pressure testing is needed; do not duplicate its challenge logic here.
 - Use imported support only as conditional lenses through `references/wrapper-alignment.md`. Prefer internal owners for debugging, TDD, performance, and systems review.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
@@ -123,18 +126,24 @@ Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, a
 Before a non-trivial or ambiguous request moves from evidence gathering into a retained plan, run a lightweight Spec Sufficiency Gate. The gate does not block simple, mechanical, or already concrete tasks. It must make visible the objective, assumptions that can change delivery, success criteria, boundaries, validation path, and open questions. If a vague request cannot be reframed into testable success criteria from repository evidence, stop for `grill-me` or an explicit `ASK` outcome instead of drafting around the gap.
 
 Before writing any `plan-only` output, non-trivial retained plan, or plan
-reformulation, check whether `grill-me` is mandatory. It is mandatory when the
-user asks to clarify before planning, when the request touches agents, skills,
-workflow, catalog, governance, or routing, or when missing context, target
-state, anti-scope, owner, validation, or user decisions could change scope,
-owner, target state, validation, rollout, or anti-scope. Before asking
-questions, inspect the repository when the answer is recoverable from files.
-Treat those cases as `plan-only (clarify-first)` even when the user did not
-explicitly ask to be grilled. A detailed prompt, apparent solution, or large
-evidence pass does not waive the gate when unresolved user-only decisions still
-remain. Comparison, integration, or architecture-judgment requests should
-default to the clarify-first gate whenever the repository cannot recover the
-user's preferred owner, anti-scope, rollout posture, or validation bar.
+reformulation, check whether `grill-me` is mandatory and state the gate result
+before the plan content. Use exactly one of:
+
+- `grill-me required`: user-only decisions remain and can change scope, owner,
+  target state, validation, rollout, or anti-scope.
+- `grill-me satisfied`: the needed user decisions were already answered or
+  explicitly accepted and still match the current scope.
+- `grill-me not applicable`: the work is concrete, mechanical, or fully
+  recoverable from repository evidence.
+
+`grill-me` is mandatory when the user asks to clarify before planning, when the
+request touches agents, skills, workflow, catalog, governance, or routing, or
+when missing context, target state, anti-scope, owner, validation, or user
+decisions could change scope, owner, target state, validation, rollout, or
+anti-scope. Before asking questions, inspect the repository when the answer is
+recoverable from files. Unresolved user decisions could change scope, owner,
+target state, validation, rollout, or anti-scope.
+Treat those cases as `plan-only (clarify-first)` even when the user did not explicitly ask to be grilled. A detailed prompt, apparent solution, or large evidence pass does not waive the gate when unresolved user-only decisions still remain. Comparison, integration, or architecture-judgment requests should default to the clarify-first gate whenever the repository cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar.
 
 When `grill-me` is mandatory, stop before writing the plan.
 Then provide numbered questions with a recommended answer for each, using
@@ -211,7 +220,7 @@ these checks. Do not claim completion from intent, stale output, or a delegated
 success report.
 
 For large retained plans, multi-area diffs, always-on guidance changes, or
-validator changes, use `internal-systems-review` for plan-completion audit and
+validator changes, use `internal-high-level-review` for plan-completion audit and
 scope-drift analysis instead of expanding this main skill with audit tables.
 
 If a check fails, fix the issue and rerun the relevant check. If a check cannot run, state the exact validation gap and the closest evidence gathered. Small changes may use concise checks, but the three perspectives must remain distinct.
@@ -235,7 +244,7 @@ Before claiming `review complete` or `no findings`, check that `Review Check 1` 
 Use the smallest review lens that fits the evidence:
 
 - `internal-code-review` for code defects, regressions, tests, and file/line findings.
-- `internal-systems-review` for architecture, workflow, cross-cutting impact, operational fit, and blind spots.
+- `internal-high-level-review` for architecture, workflow, cross-cutting impact, operational fit, and blind spots.
 - Security-specific gaps follow the Future Security Lens rule in `references/wrapper-alignment.md`; until promotion creates the lens, state the gap and route through the closest existing owner.
 
 Keep `internal-gateway-critical-master` as the separate owner for pressure testing, pre-mortems, and hidden assumptions.
@@ -255,7 +264,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Read `references/mode-contracts.md` for detailed mode boundaries, ownership maps, and medium-task thresholds.
 - Read `references/workflow-maps.md` when documenting or validating quick, planned, and audited workflows.
 - Read `references/wrapper-alignment.md` when updating Copilot agent wrappers, runtime portability claims, imported support, future security lens posture, output projection, or tests.
-- Load `internal-systems-review` when completion checks need a full workflow
+- Load `internal-high-level-review` when completion checks need a full workflow
   audit.
 
 ## Validation
@@ -268,7 +277,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Completion claims in `execute` or `apply-plan` passed through `superpowers-verification-before-completion`.
 - Strong `plan complete`, `review complete`, `no findings`, or merge-readiness claims passed through `superpowers-verification-before-completion`.
 - Phase-ending reports state `Lessons` status even when no lesson was retained.
-- `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-systems-review`, or future security-review playbooks.
+- `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-high-level-review`, or future security-review playbooks.
 - `grill-me` blocks plan output when user decisions can change scope, owner,
   target state, validation, rollout, or anti-scope.
 - Imported support follows `references/wrapper-alignment.md` and is never a mandatory engine for gateway phases.

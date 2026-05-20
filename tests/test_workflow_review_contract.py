@@ -263,7 +263,7 @@ def test_gateway_points_to_plan_completion_audit_reference() -> None:
     assert "plan-completion audit" in gateway_text
     assert "Status Vocabulary" not in gateway_text
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        ".github/skills/internal-high-level-review/references/plan-completion-audit.md",
         (
             "Status Vocabulary",
             "`DONE`",
@@ -278,11 +278,11 @@ def test_gateway_points_to_plan_completion_audit_reference() -> None:
 def test_systems_review_lens_referenced() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
-        ("internal-systems-review", "cross-cutting impact", "blind spots"),
+        ("internal-high-level-review", "cross-cutting impact", "blind spots"),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
-        ("internal-systems-review", "plan-completion audit", "scope-drift analysis"),
+        ("internal-high-level-review", "plan-completion audit", "scope-drift analysis"),
     )
 
 
@@ -293,9 +293,9 @@ def test_security_review_promotion_gated() -> None:
     gateway_text = read_text(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
-    systems_review_text = read_text(".github/skills/internal-systems-review/SKILL.md")
+    systems_review_text = read_text(".github/skills/internal-high-level-review/SKILL.md")
     review_lenses_text = read_text(
-        ".github/skills/internal-systems-review/references/review-lenses.md"
+        ".github/skills/internal-high-level-review/references/review-lenses.md"
     )
     assert not Path(".github/skills/internal-security-review").exists()
     assert (
@@ -317,7 +317,7 @@ def test_security_review_promotion_gated() -> None:
 
 def test_plan_completion_audit_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        ".github/skills/internal-high-level-review/references/plan-completion-audit.md",
         (
             "`DONE`",
             "`PARTIAL`",
@@ -332,7 +332,7 @@ def test_plan_completion_audit_reference_exists() -> None:
 
 def test_scope_drift_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/scope-drift.md",
+        ".github/skills/internal-high-level-review/references/scope-drift.md",
         (
             "`ON_SCOPE`",
             "`EXPANDED`",
@@ -366,7 +366,7 @@ def test_scope_challenge_gate_reference_exists() -> None:
 
 def test_review_lenses_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/review-lenses.md",
+        ".github/skills/internal-high-level-review/references/review-lenses.md",
         (
             "## Always-on Lenses",
             "## Cross-cutting Lenses",
@@ -460,7 +460,7 @@ def test_plan_handoff_requires_summary_control_file() -> None:
 
 def test_plan_completion_audit_uses_evidence_envelope_for_removed_plan_files() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/plan-completion-audit.md",
+        ".github/skills/internal-high-level-review/references/plan-completion-audit.md",
         (
             "Evidence Envelope Inputs",
             "Numbered plan files were correctly removed by the `done-*` loop",
@@ -495,7 +495,7 @@ def test_retained_plan_artifact_contract_is_general_not_folder_specific() -> Non
 
 def test_audit_dispatch_reference_exists() -> None:
     assert_contains_all(
-        ".github/skills/internal-systems-review/references/audit-dispatch.md",
+        ".github/skills/internal-high-level-review/references/audit-dispatch.md",
         (
             "More than 6 numbered plan files",
             "400 changed diff lines",

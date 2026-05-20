@@ -41,7 +41,7 @@ Internal replacements:
 - Performance work belongs to `internal-performance-optimization`.
 - Architecture, locality, leverage, cross-boundary review, higher-level code
   orientation, module maps, caller maps, and domain-vocabulary explanations
-  belong to `internal-systems-review`.
+  belong to `internal-high-level-review`.
 - Code defect review belongs to `internal-code-review`.
 - Imported docs and setup conventions stay outside default gateway routing
   unless a future sync-governance decision deliberately changes the managed
@@ -70,7 +70,7 @@ sections.
 - Performance work belongs to `internal-performance-optimization`.
 - Code defect review belongs to `internal-code-review`.
 - Architecture, workflow, cross-cutting impact, operational fit, and blind spots
-  belong to `internal-systems-review`.
+  belong to `internal-high-level-review`.
 - Compression support such as `mattpocock-caveman` stays support-only after
   blockers, risks, and validation evidence are explicit.
 

@@ -12,13 +12,13 @@ items:
     action: alert-only
   - source_family: mattpocock/skills
     upstream_id: improve-codebase-architecture
-    local_owner: internal-systems-review
-    reason: Architecture deepening lenses were extracted into systems review.
+    local_owner: internal-high-level-review
+    reason: Architecture deepening lenses were extracted into high-level review.
     action: alert-only
   - source_family: mattpocock/skills
     upstream_id: zoom-out
-    local_owner: internal-systems-review
-    reason: Codebase orientation, module maps, caller maps, and domain vocabulary were extracted into systems review.
+    local_owner: internal-high-level-review
+    reason: Codebase orientation, module maps, caller maps, and domain vocabulary were extracted into high-level review.
     action: alert-only
   - source_family: mattpocock/skills
     upstream_id: grill-with-docs

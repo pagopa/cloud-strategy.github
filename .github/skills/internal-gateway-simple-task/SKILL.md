@@ -18,7 +18,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `internal-performance-optimization`: measured performance owner before claiming a performance improvement.
 - `internal-github-pr`: PR lifecycle owner before claiming readiness, validity, mergeability, or completion.
 - `internal-code-review`: defect-first review owner before claiming no code findings or code merge readiness.
-- `internal-systems-review`: systems review owner before claiming no systems findings or systems merge readiness.
+- `internal-high-level-review`: systems review owner before claiming no systems findings or systems merge readiness.
 - `superpowers-verification-before-completion`: final evidence gate before completion, readiness, or no-findings claims.
 
 Use this skill as the skill-first fast path for concrete repository-owned work.
@@ -152,7 +152,7 @@ bundle to preload. Use them only before making the matching claim:
   complete.
 - Load `internal-code-review` before saying there are no code findings or code
   merge-readiness blockers.
-- Load `internal-systems-review` before saying there are no systems findings or
+- Load `internal-high-level-review` before saying there are no systems findings or
   systems merge-readiness blockers.
 - Load `superpowers-verification-before-completion` before any completion,
   readiness, merge-ready, no-findings, fixed, covered, or improved claim.

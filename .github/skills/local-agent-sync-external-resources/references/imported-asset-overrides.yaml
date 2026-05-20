@@ -92,6 +92,6 @@ overrides:
       default, while preserving follow-up pressure on contradictions, risks,
       and unresolved decisions.
     patch_path: patches/grill-me.patch
-    expected_content_hash: 0e0e237c993be649a3c2ae46617221d8d6a6deecab32debec6976b23cf71c1d4
+    expected_content_hash: 42ff8e1fc4cf58210762c1c518489305c51c4ceffe291297b78f777a730f847b
     baseline_repo_commit: "e74f006"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

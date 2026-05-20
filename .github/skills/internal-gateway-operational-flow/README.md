@@ -49,7 +49,7 @@ If two modes still fit, choose `plan` and state why the boundary is uncertain.
 | Plan with user grilling before final plan | "Ask all grill-me questions first, then write the plan after my answers." | `plan` plus `grill-me` before final planning. | Numbered questions with recommended answers; after responses, a plan-ready decision frame. |
 | Plan, then critical challenge | "Make a plan, then pressure-test it before implementation." | `full-cycle`, then visible critical phase through `internal-gateway-critical-master`. | Plan, Decision Brief when retained, strongest objections, explicit outcome, and checkpoint before delivery. |
 | Apply retained plan | "Apply this plan under `tmp/superpowers/example`." | `apply-plan` plus `internal-executing-plans`. | Completed items move into `done-*`, active numbered files shrink or delete, and validation evidence is reported. |
-| Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`; add `internal-systems-review` when architecture, workflow, cross-cutting impact, or blind spots are in scope. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
+| Review an existing result | "Review this diff for merge readiness." | `review` plus `internal-code-review`; add `internal-high-level-review` when architecture, workflow, cross-cutting impact, or blind spots are in scope. | Findings first, severity, causal layer, evidence gaps, and fix routing. |
 | Pure challenge | "Attack this proposal before we trust it." | `internal-gateway-critical-master`, not this skill as the primary owner. | Failure modes, hidden assumptions, and a recommendation for reformulation. |
 | Runtime without Copilot agent UI | "Use the operational flow directly in Codex." | Load this skill and references manually. | Text next-step packages replace Copilot handoff buttons. |
 
@@ -149,7 +149,7 @@ Do not execute dubbi-e-domande.md.
 
 ```text
 Review this diff with review mode.
-Use code review for code defects and systems review for cross-cutting impact.
+Use code review for code defects and high-level review for cross-cutting impact.
 Findings first, then evidence gaps, then route each fix to execute, plan,
 critical challenge, or defer.
 ```

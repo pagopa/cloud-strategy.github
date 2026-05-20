@@ -126,7 +126,7 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
     assert {
         "internal-debugging",
         "internal-tdd",
-        "internal-systems-review",
+        "internal-high-level-review",
         "internal-writing-plans",
         "local-agent-sync-external-resources",
     } <= owners

@@ -11,7 +11,7 @@ This index lists every other skill that this file asks the agent to load, route 
 
 - `internal-code-review`: defect-first review after PR body or lifecycle work.
 - `internal-github-actions`: workflow/action pinning and Actions security rules for PRs that touch workflows.
-- `internal-systems-review`: systems-level impact analysis that feeds PR risk.
+- `internal-high-level-review`: systems-level impact analysis that feeds PR risk.
 - `openai-gh-address-comments`: review-thread remediation after PR body work exists.
 - `superpowers-verification-before-completion`: evidence gate before claiming PR readiness, validity, mergeability, or completion.
 
@@ -95,7 +95,7 @@ If the user provides a specification, issue, or acceptance outline:
 
 ## Cross-references
 
-- **internal-systems-review**: for systems-level impact analysis that feeds the risk section.
+- **internal-high-level-review**: for systems-level impact analysis that feeds the risk section.
 - **internal-code-review**: for the review that follows the PR.
 - **internal-github-actions**: for workflow/action pinning and Actions security rules touched by the PR.
 - **openai-gh-address-comments**: for addressing review threads and PR comments after the PR body exists; keep review-thread remediation separate from PR lifecycle/body work.

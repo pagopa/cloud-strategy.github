@@ -394,7 +394,7 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
     systems_review_text = Path(
-        ".github/skills/internal-systems-review/SKILL.md"
+        ".github/skills/internal-high-level-review/SKILL.md"
     ).read_text(encoding="utf-8")
 
     assert "Failure diagnosis belongs to `internal-debugging`" in wrapper_alignment_text
@@ -402,7 +402,7 @@ def test_gateway_support_uses_internal_owners_after_extraction() -> None:
     assert (
         "Code defect review belongs to `internal-code-review`" in wrapper_alignment_text
     )
-    assert "internal-systems-review" in wrapper_alignment_text
+    assert "internal-high-level-review" in wrapper_alignment_text
     assert "## Orientation Map Lens" in systems_review_text
     assert "## Orientation Output" in systems_review_text
     assert "Module map" in systems_review_text

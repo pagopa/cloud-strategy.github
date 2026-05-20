@@ -11,7 +11,7 @@ This index lists every other skill that this file asks the agent to load, route 
 
 - `internal-code-review`: defect-first review when diagnosis exposes unsafe code or missing tests.
 - `internal-performance-optimization`: performance owner when measured slowness or throughput is primary.
-- `internal-systems-review`: systems review when diagnosis exposes architecture, workflow, or ownership gaps.
+- `internal-high-level-review`: systems review when diagnosis exposes architecture, workflow, or ownership gaps.
 - `internal-tdd`: regression-test owner after the root cause is understood.
 - `superpowers-systematic-debugging`: stricter diagnosis discipline for hard, flaky, or guess-prone failures.
 - `superpowers-verification-before-completion`: evidence gate before claiming the original loop is fixed.
@@ -72,7 +72,7 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
   root cause is understood.
 - `internal-code-review`: defect-first review when the diagnosis exposes a code
   smell, missing test, or unsafe fix.
-- `internal-systems-review`: architecture, workflow, or ownership gaps exposed
+- `internal-high-level-review`: architecture, workflow, or ownership gaps exposed
   by missing seams, tangled callers, or cross-boundary drift.
 - Runtime-specific internal skills: language, workflow, Terraform, GitHub
   Actions, or script owners for idiomatic fixes and validation.

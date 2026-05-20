@@ -5,6 +5,16 @@ description: Use when repository-owned work needs a retained numbered plan under
 
 # Internal Writing Plans
 
+## Referenced skills
+
+This index lists every other skill that this file asks the agent to load, route
+to, compare against, or delegate to.
+
+- `grill-me`: retained-plan clarification gate when real user decisions remain after the evidence pass.
+- `internal-executing-plans`: repository-local application owner for approved retained plans.
+- `superpowers-brainstorming`: alternate owner for general design or spec work under `tmp/superpowers/specs/`.
+- `superpowers-writing-plans`: imported plan-authoring depth subordinate to the local retained-plan contract.
+
 Use this skill as the repository-owned wrapper for plan authoring in this repository.
 
 Treat `superpowers-writing-plans` as imported depth and keep any repo-local drift fixes narrow. This skill adds the local contract for when a plan is retained, where it lives, how numbered files are split, what language they use, and what must stay outside the execution loop.
@@ -34,6 +44,18 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Retain a plan only when at least one of these is true: the work crosses turns, spans multiple macro-categories, needs handoff, tracking, or provenance, or includes tradeoffs or uncertainties that should stay reviewable.
 - Start every retained plan with `01-riassunto-direzione-e-decisione.md` so the user can understand the full direction and decide before execution.
 - `01-riassunto-direzione-e-decisione.md` must be exhaustive enough to explain the target state, tradeoffs, execution shape, validation path, and the decision the user is being asked to make.
+- For non-trivial retained plans, `01-riassunto-direzione-e-decisione.md` must
+  declare the `grill-me` gate status as `grill-me required`,
+  `grill-me satisfied`, or `grill-me not applicable` before the plan can move to
+  execution.
+- Use `grill-me required` when unresolved user-only decisions can change scope,
+  owner, target state, validation, rollout, or anti-scope. Stop before writing
+  executable plan content until those decisions are answered or the user
+  explicitly accepts the recommended defaults.
+- Use `grill-me satisfied` only when the relevant decisions were already
+  answered or explicitly accepted and still match the current plan scope.
+- Use `grill-me not applicable` only when the work is concrete, mechanical, or
+  fully recoverable from repository evidence.
 - For non-trivial or ambiguous retained plans, the summary must include a lightweight spec baseline: objective, assumptions that affect delivery, success criteria, boundaries or anti-scope, validation path, and open questions or `none`.
 - Success criteria must be concrete enough to verify. Reframe vague goals into observable conditions when repository evidence supports it, or move the uncertainty to `dubbi-e-domande.md` before execution.
 - The summary file must also include the smallest useful reading path: what to inspect first, which evidence pass proves the plan is still valid, and which files can be deferred.
@@ -74,7 +96,9 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Make `Budget lettura` exclusive: list the current plan files and any exact external artifacts allowed, and state that sibling retained plans are out of scope when not listed.
 - Coverage before compression: when rewriting an existing strategic or monolithic plan, extract the source items first and preserve them in a traceability owner before shortening, splitting, or deleting the source artifact.
 - Prefer the smallest useful retained plan shape: summary, current execution or backlog, and validation. Add more numbered files only for independent macro-categories.
-- Use `grill-me` only after the evidence pass when real user decisions remain. Do not ask questions that repository evidence can answer.
+- Use `grill-me` only after the evidence pass when real user decisions remain,
+  then declare the gate status. Do not ask questions that repository evidence
+  can answer.
 - Keep deferred improvements, retrospectives, and lessons separate from executable steps unless they are required for the requested outcome.
 
 ## Numbered-file shape
@@ -135,6 +159,8 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - The plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
 - `01-riassunto-direzione-e-decisione.md` exists and acts as the control file for the retained plan.
 - The summary file is exhaustive enough for the user to decide whether to approve, challenge, rewrite, or apply the plan.
+- For non-trivial retained plans, the summary file declares `grill-me required`,
+  `grill-me satisfied`, or `grill-me not applicable`.
 - The summary file declares `Uso consigliato` and `Mappa file e ruolo`.
 - The summary file declares `Evidence pass iniziale` and `Budget lettura`.
 - The summary file's `Budget lettura` confines future readers to this plan and exact named evidence; other retained plan folders are excluded unless specifically indicated.

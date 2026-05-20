@@ -26,7 +26,7 @@ SYMPTOM_SKILLS = {
     "performance": ("internal-performance-optimization", "Performance is the primary measured concern."),
     "pr-readiness": ("internal-github-pr", "PR readiness, validity, mergeability, or completion needs PR lifecycle evidence."),
     "code-review": ("internal-code-review", "Line-level code review evidence is requested."),
-    "systems-review": ("internal-systems-review", "Cross-boundary or architecture review evidence is requested."),
+    "systems-review": ("internal-high-level-review", "Cross-boundary or architecture review evidence is requested."),
     "completion-claim": ("superpowers-verification-before-completion", "Completion or readiness claim needs fresh validation evidence."),
     "no-findings": ("internal-code-review", "No-findings claim needs defect-first review evidence."),
     "worktree": ("superpowers-using-git-worktrees", "The task needs isolated workspace setup."),

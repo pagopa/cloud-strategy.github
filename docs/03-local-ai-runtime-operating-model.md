@@ -41,7 +41,7 @@ Keep phase changes explicit in the conversation and follow the selected skill be
 | Execute an approved retained plan | `internal-gateway-operational-flow` in `apply-plan` with `internal-executing-plans` | Matching `done-*` files, plan coverage, contract coverage, and fresh validator output. |
 | Build or edit a concrete low-risk change | `internal-gateway-simple-task` | Focused diff plus the nearest applicable check. |
 | Test-first or regression delivery | `internal-tdd` | Red-green or equivalent behavior evidence before implementation is called complete. |
-| Review an artifact or diff | `internal-gateway-operational-flow` in `review`, then `internal-code-review` or `internal-systems-review` as the lens | Findings are evidence-based, routed, and tied to validation gaps. |
+| Review an artifact or diff | `internal-gateway-operational-flow` in `review`, then `internal-code-review` or `internal-high-level-review` as the lens | Findings are evidence-based, routed, and tied to validation gaps. |
 | Ship or PR-readiness work | `internal-github-pr`, `internal-devops-core-principles`, or the relevant sync owner | Checks, rollout risk, and residual risk are visible before merge or propagation. |
 | Critical challenge or pre-mortem | `internal-gateway-critical-master` | One strongest objection, one outcome route, and a next-step package. |
 | Source catalog sync | `local-agent-sync-external-resources` | Catalog validation and sync-specific evidence. |

@@ -1,7 +1,7 @@
 diff --git a/.github/skills/grill-me/SKILL.md b/.github/skills/grill-me/SKILL.md
 --- a/.github/skills/grill-me/SKILL.md
 +++ b/.github/skills/grill-me/SKILL.md
-@@ -5,6 +5,20 @@
+@@ -5,6 +5,27 @@
 
 -Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
 +# Grill Me
@@ -25,3 +25,10 @@ diff --git a/.github/skills/grill-me/SKILL.md b/.github/skills/grill-me/SKILL.md
 
 -If a question can be answered by exploring the codebase, explore the codebase instead.
 +Do not ask questions that can be answered by exploring the codebase, documentation, or local files.
++
++When this skill is used as a pre-plan gate, leave the caller with one explicit
++gate status:
++
++- `grill-me required`: unresolved user-only decisions still block safe planning.
++- `grill-me satisfied`: the user answered or accepted the required decisions.
++- `grill-me not applicable`: repository evidence fully resolves the decision surface.
