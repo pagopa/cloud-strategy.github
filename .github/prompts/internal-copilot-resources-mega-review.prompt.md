@@ -71,19 +71,6 @@ The review must explain:
 - what should be kept, wrapped, revised, split, merged, moved, retired, created,
   compressed, automated, or reviewed later
 
-Primary priority: improve skills and skill bundles first.
-
-- Treat `.github/skills/**/SKILL.md` and their `references/`, `scripts/`,
-  `assets/`, `agents/openai.yaml`, tests, and paired agents as the primary
-  optimization target.
-- Review prompts as secondary entrypoints that should improve skill selection,
-  skill review, skill maintenance, or skill-driven handoff quality.
-- When a prompt and a skill both need improvement, recommend the skill-side fix
-  first unless the prompt blocks correct skill use.
-- When evidence is limited, prefer a `REVIEW` decision for non-skill resources
-  and spend the detailed analysis budget on the skill contract, trigger,
-  references, tests, and flow behavior.
-
 The review is analysis-only. Do not modify the reviewed resources. If retained
 analysis is needed, write only under `tmp/`.
 
@@ -126,11 +113,11 @@ Review these families when they are in the target or referenced by it:
 - `AGENTS.md`
 - `.github/copilot-instructions.md` and related `.github/copilot-*.md` files
 - `.github/INVENTORY.md`
-- `.github/skills/**/SKILL.md`
-- skill-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
 - `.github/agents/*.agent.md`
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
+- `.github/skills/**/SKILL.md`
+- skill-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
 - AI catalog validators, sync helpers, and inventory scripts under
   `.github/scripts/`
 - tests and fixtures that validate AI catalog behavior, prompt contracts,
@@ -192,25 +179,6 @@ the repository flow:
 
 Use these as an internal checklist, not as a required final outline.
 
-Skills:
-
-- Are skills partitioned correctly?
-- Does each skill have a clear trigger, smallest credible owner, and useful
-  boundary?
-- Is each skill useful, too large, too small, redundant, or stale?
-- Is each skill optimized for context cost and token ROI?
-- Should any skills be merged, retired, split, or renamed?
-- Should any skills become instructions or prompts?
-- Are high-ROI skills missing?
-- Do skills connect cleanly to agents, prompts, instructions, and validation?
-- Are references, scripts, and assets inside the skill bundle justified by
-  repeated need?
-- Do paired agents and skills agree on route, procedure, and deep-detail split?
-- Do tests and validators protect the skill contract strongly enough to allow
-  safe future edits?
-- Is the prompt under review helping the right skill load at the right time, or
-  is it hiding logic that belongs in the skill?
-
 Agents:
 
 - Are the existing agents necessary?
@@ -238,6 +206,21 @@ Instructions:
 - Are workflow depth and optional expertise kept in skills or prompts?
 - Do instructions avoid duplicating repository-wide policy?
 
+Skills:
+
+- Are skills partitioned correctly?
+- Does each skill have a clear trigger, smallest credible owner, and useful
+  boundary?
+- Is each skill useful, too large, too small, redundant, or stale?
+- Is each skill optimized for context cost and token ROI?
+- Should any skills be merged, retired, split, or renamed?
+- Should any skills become instructions or prompts?
+- Are high-ROI skills missing?
+- Do skills connect cleanly to agents, prompts, instructions, and validation?
+- Are references, scripts, and assets inside the skill bundle justified by
+  repeated need?
+- Do paired agents and skills agree on route, procedure, and deep-detail split?
+
 Prompts:
 
 - Are prompts useful, too many, or too few?
@@ -250,8 +233,6 @@ Prompts:
 - Does it define versioning or compatibility expectations when those matter?
 - Are high-ROI prompt entrypoints missing?
 - Should any prompt logic become a skill, instruction, or validator instead?
-- Does the prompt improve skill quality directly, or only produce a broad report
-  that leaves skill fixes unclear?
 
 Bridge and catalog files:
 
@@ -404,7 +385,7 @@ For a fresh retained report, create:
 - `02-target-and-coverage.md`
 - `03-resource-map.md`
 - `04-flow-behavior.md`
-- `05-skill-findings-and-decisions.md`
+- `05-findings-and-decisions.md`
 - `06-tests-and-validation.md`
 - `07-recommendations-and-roadmap.md`
 - `open-questions.md`
@@ -452,15 +433,13 @@ Use this structure in chat or across the retained report files.
 
 ### 7. Main Diagnosis
 
-- Start with skill and skill-bundle diagnosis.
-- Then split into what works, what is redundant, what is fragile, what costs too
-  much context, what blocks productivity, what lacks test coverage, and what is
+- Split into what works, what is redundant, what is fragile, what costs too much
+  context, what blocks productivity, what lacks test coverage, and what is
   missing.
 - Keep each subsection to the highest-signal points.
 
 ### 8. Main Findings
 
-- Put skill findings first.
 - Group by severity or priority.
 - For each finding include `Evidence`, `Problem`, `Impact`, `Recommendation`,
   and `Confidence`.
@@ -468,8 +447,6 @@ Use this structure in chat or across the retained report files.
 ### 9. Decision Table
 
 - Table: `Area | Resource | Status | Evidence | Problem | Decision | Priority`.
-- Sort skill and skill-bundle decisions first, then prompts, then the remaining
-  resource families.
 - Allowed statuses: `KEEP`, `WRAP`, `REVISE`, `COMPRESS`, `SPLIT`, `MERGE`,
   `MOVE`, `RENAME`, `RETIRE`, `CREATE`, `AUTOMATE`, `REVIEW`.
 - Allowed priorities: `P0`, `P1`, `P2`, `P3`.
@@ -483,8 +460,6 @@ Use this structure in chat or across the retained report files.
 
 - Split into `Do now`, `Do later`, and `Do not do now`.
 - `Do now` may include only `HIGH` or `MEDIUM` evidence actions.
-- Put skill improvements first inside `Do now` unless another resource blocks
-  correct skill use.
 - Include a non-binding roadmap split into `Cleanup`, `Rationalization`,
   `Automation`, `Governance`, and `Evolution` when the target is broad enough.
 - Include target architecture differences versus the current state when the
@@ -523,26 +498,23 @@ Before the final answer:
    were checked or marked `VERIFY`.
 5. Confirm test and validation coverage was reviewed for every target where
    tests or validators exist.
-6. Confirm skill and skill-bundle coverage was handled before prompt coverage.
-7. Confirm skill coverage includes partitioning, triggers, usefulness, size,
+6. Confirm skill coverage includes partitioning, triggers, usefulness, size,
    redundancy, token ROI, merge or retirement candidates, conversion to
    instructions or prompts, missing high-ROI skills, agent linkage, and
    validation linkage.
-8. Confirm prompt coverage includes usefulness, count, reuse value, inputs,
+7. Confirm prompt coverage includes usefulness, count, reuse value, inputs,
    outputs, constraints, compatibility expectations, and conversion candidates.
-9. Confirm prompt recommendations remain secondary unless the prompt blocks
-   correct skill use.
-10. Confirm script coverage includes necessity, simplicity, speed, documentation,
+8. Confirm script coverage includes necessity, simplicity, speed, documentation,
    idempotence, error handling, validation value, and automation opportunities.
-11. Confirm every strong recommendation has `HIGH` or `MEDIUM` evidence and cites
+9. Confirm every strong recommendation has `HIGH` or `MEDIUM` evidence and cites
    a real file.
-12. Confirm no destructive decision uses `LOW` evidence.
-13. Confirm every overlap was checked against wrapper, core-skill, prompt,
+10. Confirm no destructive decision uses `LOW` evidence.
+11. Confirm every overlap was checked against wrapper, core-skill, prompt,
    scoped-instruction, and sync-helper roles before being classified as real
    duplication.
-14. Confirm flow behavior was reviewed, not only static file content.
-15. Confirm no reviewed resource was modified.
-16. Report validation commands run, validation gaps, and residual risk.
+12. Confirm flow behavior was reviewed, not only static file content.
+13. Confirm no reviewed resource was modified.
+14. Report validation commands run, validation gaps, and residual risk.
 
 Final response must include:
 
