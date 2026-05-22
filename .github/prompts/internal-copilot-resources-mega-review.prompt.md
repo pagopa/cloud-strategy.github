@@ -33,6 +33,7 @@ Use these repository sources first:
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
+- [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
 - [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
 - [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
 - [.github/skills/internal-copilot-audit/SKILL.md](../skills/internal-copilot-audit/SKILL.md)
@@ -43,6 +44,17 @@ Use these repository sources first:
 Load additional repository skills only when the target resource or its
 references require their owner rules. Do not load every skill only because it
 exists.
+
+Use `LESSONS_LEARNED.md` only when it is explicitly in the target, referenced by
+an in-scope resource, or needed to verify a retained-learning claim. Treat it as
+non-canonical retained evidence until codified in the smallest valid owner.
+
+## Language Rules
+
+- Write the final analysis and summary in the language of the current chat.
+- If the current chat language is ambiguous or mixed, prefer Italian.
+- Keep file paths, enum values, evidence labels, status labels, and command names
+  exactly as requested.
 
 ## Mission
 
@@ -59,11 +71,32 @@ The review must explain:
 - what should be kept, wrapped, revised, split, merged, moved, retired, created,
   compressed, automated, or reviewed later
 
+Primary priority: improve skills and skill bundles first.
+
+- Treat `.github/skills/**/SKILL.md` and their `references/`, `scripts/`,
+  `assets/`, `agents/openai.yaml`, tests, and paired agents as the primary
+  optimization target.
+- Review prompts as secondary entrypoints that should improve skill selection,
+  skill review, skill maintenance, or skill-driven handoff quality.
+- When a prompt and a skill both need improvement, recommend the skill-side fix
+  first unless the prompt blocks correct skill use.
+- When evidence is limited, prefer a `REVIEW` decision for non-skill resources
+  and spend the detailed analysis budget on the skill contract, trigger,
+  references, tests, and flow behavior.
+
 The review is analysis-only. Do not modify the reviewed resources. If retained
 analysis is needed, write only under `tmp/`.
 
 Do not name vendor-specific reasoning engines or compare them. Review consumer
 surfaces, contracts, and repository behavior instead.
+
+Do not produce an encyclopedic review. Include only real problems, important
+tradeoffs, recommended decisions, blocking uncertainties, and high-ROI quick
+wins. If a resource has no meaningful problem, do not spend report space on it
+unless it needs a `KEEP` line in the decision table.
+
+Do not propose new technology before diagnosing the existing repository
+correctly.
 
 ## Target Resolution
 
@@ -93,11 +126,11 @@ Review these families when they are in the target or referenced by it:
 - `AGENTS.md`
 - `.github/copilot-instructions.md` and related `.github/copilot-*.md` files
 - `.github/INVENTORY.md`
+- `.github/skills/**/SKILL.md`
+- skill-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
 - `.github/agents/*.agent.md`
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
-- `.github/skills/**/SKILL.md`
-- skill-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
 - AI catalog validators, sync helpers, and inventory scripts under
   `.github/scripts/`
 - tests and fixtures that validate AI catalog behavior, prompt contracts,
@@ -130,6 +163,8 @@ Before judging quality:
    questions sections.
 10. Decide whether the output can stay in chat or needs a retained report under
     `tmp/`.
+11. If retained analysis will span multiple files, decide where each required
+    output section will live before writing so final coverage is complete.
 
 ## Flow Behavior Review
 
@@ -157,26 +192,6 @@ the repository flow:
 
 Use these as an internal checklist, not as a required final outline.
 
-Agents:
-
-- Are the existing agents necessary?
-- Which agents are redundant, too broad, too narrow, or missing?
-- Does each agent have a distinct route, boundary, tool contract, and output
-  expectation?
-- Does a wrapper stay thin when a core skill owns reusable procedure?
-- Should any agent behavior move into a skill, prompt, or scoped instruction?
-- Are handoffs and stop conditions explicit and user-visible?
-- Are route names and agent names clear enough for selection?
-
-Instructions:
-
-- Are instructions partitioned correctly?
-- Does `applyTo` match the intended path family without excess co-loading?
-- Are some instructions never activated or too generic?
-- Do instructions contain only path-scoped rules that should auto-apply?
-- Are workflow depth and optional expertise kept in skills or prompts?
-- Do instructions avoid duplicating repository-wide policy?
-
 Skills:
 
 - Are skills partitioned correctly?
@@ -191,6 +206,37 @@ Skills:
 - Are references, scripts, and assets inside the skill bundle justified by
   repeated need?
 - Do paired agents and skills agree on route, procedure, and deep-detail split?
+- Do tests and validators protect the skill contract strongly enough to allow
+  safe future edits?
+- Is the prompt under review helping the right skill load at the right time, or
+  is it hiding logic that belongs in the skill?
+
+Agents:
+
+- Are the existing agents necessary?
+- Which agents are redundant, too broad, too narrow, or missing?
+- Which agents can be merged, split, renamed, retired, or converted into skills
+  or prompt files?
+- Is a router or orchestrator needed, and should it only suggest the next owner
+  or also prepare an operating brief?
+- Are any agents mixing planner, executor, reviewer, sync, or challenge roles
+  that should be separated?
+- Does each agent have a distinct route, boundary, tool contract, and output
+  expectation?
+- Does a wrapper stay thin when a core skill owns reusable procedure?
+- Should any agent behavior move into a skill, prompt, or scoped instruction?
+- Are handoffs and stop conditions explicit and user-visible?
+- Are route names and agent names clear enough for selection?
+
+Instructions:
+
+- Are instructions partitioned correctly?
+- Does `applyTo` match the intended path family without excess co-loading?
+- Are some instructions never activated, too generic, too long, or overlapping
+  without a clear reason?
+- Do instructions contain only path-scoped rules that should auto-apply?
+- Are workflow depth and optional expertise kept in skills or prompts?
+- Do instructions avoid duplicating repository-wide policy?
 
 Prompts:
 
@@ -202,7 +248,10 @@ Prompts:
 - Does it collect enough target, depth, and constraint information to avoid
   hidden assumptions?
 - Does it define versioning or compatibility expectations when those matter?
+- Are high-ROI prompt entrypoints missing?
 - Should any prompt logic become a skill, instruction, or validator instead?
+- Does the prompt improve skill quality directly, or only produce a broad report
+  that leaves skill fixes unclear?
 
 Bridge and catalog files:
 
@@ -276,9 +325,25 @@ Rules:
 - Do not recommend `MERGE`, `MOVE`, `SPLIT`, `RETIRE`, or `CREATE` with `LOW`
   evidence.
 - For low confidence, use `REVIEW` or `VERIFY`.
+- Always cite at least one real file for `MERGE`, `MOVE`, `SPLIT`, `RETIRE`,
+  `CREATE`, or `COMPRESS`.
 - Every strong recommendation must cite at least one real file.
 - Separate `EVIDENCE`, `INFERENCE`, `ASSUMPTION`, and `UNKNOWN`.
 - Do not turn an `ASSUMPTION` or `UNKNOWN` into a strong recommendation.
+
+## Prudence Rules
+
+- Do not suggest merge, removal, or relocation only to reduce file count.
+- Use `RETIRE`, `MERGE`, `MOVE`, or `SPLIT` only when the resource lacks a
+  distinct trigger, lacks a distinct responsibility, increases ambiguity,
+  increases maintenance, increases context cost without proportional value,
+  duplicates an existing resource, conflicts with repository policy, or blocks
+  validation.
+- If the benefit is unclear, use `REVIEW` or `VERIFY`, not a destructive
+  decision.
+- Prefer the smallest concrete action that improves routing, evidence,
+  validation, maintainability, or user productivity.
+- Keep unsupported cleanup ideas in low-evidence or open questions.
 
 ## Overlap Classification
 
@@ -325,6 +390,9 @@ Evaluate relevant resources with these criteria:
 If the target is one small resource and `Output preference` does not require a
 file, answer in chat.
 
+If the target is one small resource and retained output is explicitly requested,
+write one concise Markdown file directly under `tmp/` with a clear task name.
+
 If the target spans multiple folders, the full AI catalog, or an existing
 retained report package, write a split retained report under:
 
@@ -336,7 +404,7 @@ For a fresh retained report, create:
 - `02-target-and-coverage.md`
 - `03-resource-map.md`
 - `04-flow-behavior.md`
-- `05-findings-and-decisions.md`
+- `05-skill-findings-and-decisions.md`
 - `06-tests-and-validation.md`
 - `07-recommendations-and-roadmap.md`
 - `open-questions.md`
@@ -384,13 +452,15 @@ Use this structure in chat or across the retained report files.
 
 ### 7. Main Diagnosis
 
-- Split into what works, what is redundant, what is fragile, what costs too much
-  context, what blocks productivity, what lacks test coverage, and what is
+- Start with skill and skill-bundle diagnosis.
+- Then split into what works, what is redundant, what is fragile, what costs too
+  much context, what blocks productivity, what lacks test coverage, and what is
   missing.
 - Keep each subsection to the highest-signal points.
 
 ### 8. Main Findings
 
+- Put skill findings first.
 - Group by severity or priority.
 - For each finding include `Evidence`, `Problem`, `Impact`, `Recommendation`,
   and `Confidence`.
@@ -398,6 +468,8 @@ Use this structure in chat or across the retained report files.
 ### 9. Decision Table
 
 - Table: `Area | Resource | Status | Evidence | Problem | Decision | Priority`.
+- Sort skill and skill-bundle decisions first, then prompts, then the remaining
+  resource families.
 - Allowed statuses: `KEEP`, `WRAP`, `REVISE`, `COMPRESS`, `SPLIT`, `MERGE`,
   `MOVE`, `RENAME`, `RETIRE`, `CREATE`, `AUTOMATE`, `REVIEW`.
 - Allowed priorities: `P0`, `P1`, `P2`, `P3`.
@@ -411,6 +483,8 @@ Use this structure in chat or across the retained report files.
 
 - Split into `Do now`, `Do later`, and `Do not do now`.
 - `Do now` may include only `HIGH` or `MEDIUM` evidence actions.
+- Put skill improvements first inside `Do now` unless another resource blocks
+  correct skill use.
 - Include a non-binding roadmap split into `Cleanup`, `Rationalization`,
   `Automation`, `Governance`, and `Evolution` when the target is broad enough.
 - Include target architecture differences versus the current state when the
@@ -428,6 +502,8 @@ Use this structure in chat or across the retained report files.
 
 - Keep `LOW` and `VERIFY` items separate from strong recommendations.
 - Use: `Item | Why uncertain | What to verify`.
+- Do not include destructive actions such as `RETIRE`, `MERGE`, `MOVE`, or
+  `SPLIT` in this section.
 
 ### 14. Final Critique
 
@@ -447,23 +523,26 @@ Before the final answer:
    were checked or marked `VERIFY`.
 5. Confirm test and validation coverage was reviewed for every target where
    tests or validators exist.
-6. Confirm skill coverage includes partitioning, triggers, usefulness, size,
+6. Confirm skill and skill-bundle coverage was handled before prompt coverage.
+7. Confirm skill coverage includes partitioning, triggers, usefulness, size,
    redundancy, token ROI, merge or retirement candidates, conversion to
    instructions or prompts, missing high-ROI skills, agent linkage, and
    validation linkage.
-7. Confirm prompt coverage includes usefulness, count, reuse value, inputs,
+8. Confirm prompt coverage includes usefulness, count, reuse value, inputs,
    outputs, constraints, compatibility expectations, and conversion candidates.
-8. Confirm script coverage includes necessity, simplicity, speed, documentation,
+9. Confirm prompt recommendations remain secondary unless the prompt blocks
+   correct skill use.
+10. Confirm script coverage includes necessity, simplicity, speed, documentation,
    idempotence, error handling, validation value, and automation opportunities.
-9. Confirm every strong recommendation has `HIGH` or `MEDIUM` evidence and cites
+11. Confirm every strong recommendation has `HIGH` or `MEDIUM` evidence and cites
    a real file.
-10. Confirm no destructive decision uses `LOW` evidence.
-11. Confirm every overlap was checked against wrapper, core-skill, prompt,
+12. Confirm no destructive decision uses `LOW` evidence.
+13. Confirm every overlap was checked against wrapper, core-skill, prompt,
    scoped-instruction, and sync-helper roles before being classified as real
    duplication.
-12. Confirm flow behavior was reviewed, not only static file content.
-13. Confirm no reviewed resource was modified.
-14. Report validation commands run, validation gaps, and residual risk.
+14. Confirm flow behavior was reviewed, not only static file content.
+15. Confirm no reviewed resource was modified.
+16. Report validation commands run, validation gaps, and residual risk.
 
 Final response must include:
 
