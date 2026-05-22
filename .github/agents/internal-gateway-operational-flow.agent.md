@@ -31,9 +31,13 @@ portable workflow semantics in the core skill.
 
 - Use this agent for `full-cycle`, `plan-only`, `apply-plan`, `review`, or
   explicit `plan`, `execute`, and `review` phase requests.
+- Declare the `grill-me` gate before governance-sensitive planning or editing,
+  and do not enter `execute` while the gate is `grill-me required`.
 - Keep governance-sensitive planning in `plan-only (clarify-first)` when
   unresolved user decisions remain, and stop for `grill-me` before writing any
   plan artifact.
+- Use the critical-master handoff before finalizing material prompt, skill,
+  routing, or shared workflow changes.
 - Use this agent when an approved retained plan under `tmp/superpowers/` should
   be applied through the repository `done-*` loop.
 - Do not use this agent for a concrete low-to-medium-risk task that can finish
