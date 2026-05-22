@@ -143,14 +143,24 @@ Before judging quality:
    references.
 6. Map tests and validation entrypoints that cover the target before judging
    whether a resource is safe to revise, merge, move, retire, or keep.
-7. Load only the repository skills that own a relevant decision boundary.
-8. Compare thin wrappers, core skills, prompt entrypoints, scoped instructions,
+7. Check token exposure before recommending expansion: estimate what is
+   always-loaded, what is lazy-loaded, which files exceed token ROI, and whether
+   an existing token-risk validator applies.
+8. Check execution speed before recommending heavier process: identify slow
+   reading paths, slow validators, duplicated review passes, and the shortest
+   evidence path that still proves the claim.
+9. Check actual workflow consumption: distinguish resources that merely exist
+   from resources that are selected by agents, referenced by prompts or skills,
+   discovered by sync, exercised by tests, or invoked by local workflow
+   entrypoints.
+10. Load only the repository skills that own a relevant decision boundary.
+11. Compare thin wrappers, core skills, prompt entrypoints, scoped instructions,
    sync helpers, and tests by role before calling anything duplicated.
-9. Keep a running list of unproven claims and place them in low-evidence or open
+12. Keep a running list of unproven claims and place them in low-evidence or open
    questions sections.
-10. Decide whether the output can stay in chat or needs a retained report under
+13. Decide whether the output can stay in chat or needs a retained report under
     `tmp/`.
-11. If retained analysis will span multiple files, decide where each required
+14. If retained analysis will span multiple files, decide where each required
     output section will live before writing so final coverage is complete.
 
 ## Flow Behavior Review
@@ -168,10 +178,14 @@ the repository flow:
 - Boundary: what it must not own, and which adjacent owner should take over.
 - Evidence path: which validator, script, test, or manual check proves the
   resource still works.
+- Usage proof: which reference, route, sync output, test, workflow, or manual
+  invocation proves the workflow is actually consumed.
 - Failure behavior: what happens when a reference is missing, a target is
   ambiguous, a validator fails, or the selected owner no longer fits.
 - Context cost: what is always visible, what should be lazy-loaded, and what can
   be compressed without losing routing clarity.
+- Execution speed: which required reads, phases, validators, and handoffs slow
+  the path, and which faster evidence path preserves correctness.
 - Propagation: whether changes must update inventory, sync scripts, validators,
   paired agents, paired skills, scoped instructions, or retained reports.
 
