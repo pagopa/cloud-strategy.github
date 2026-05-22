@@ -1,5 +1,5 @@
 ---
-name: "internal-copilot-resources-mega-review"
+name: "internal-ai-resources-review"
 agent: "internal-gateway-operational-flow"
 description: "Review repository-owned AI resources, referenced assets, and flow behavior across AGENTS.md and .github"
 argument-hint: "Target one file, one or more folders, the full AI catalog, or an existing retained report package"

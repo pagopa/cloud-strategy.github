@@ -75,11 +75,11 @@ Keep token-budget estimates in root [`AGENTS.md`](../AGENTS.md); this README int
 Prompt files are parameterized entrypoints for repeatable advisory or orchestration starts. Use them when an operator needs a structured kickoff package rather than always-on policy or a reusable skill body.
 
 - `internal-mega-review`: general advisor-only mega review for one or more repositories; writes retained English review artifacts under `tmp/`.
-- `internal-copilot-resources-mega-review`: focused review for the AI resource control plane itself, including agents, skills, instructions, prompts, scripts, docs, memory, inventory, and governance drift.
+- `internal-ai-resources-review`: focused review for the AI resource control plane itself, including agents, skills, instructions, prompts, scripts, docs, memory, inventory, and governance drift.
 - `internal-agent-plan-next-step`, `internal-agent-review-next-actions`, and `internal-agent-pressure-test-plan`: compact planning, review, and pressure-test entrypoints aligned with the gateway wrapper lanes.
 - `internal-sync-plan` and `internal-architecture-md-creator`: targeted prompts for sync planning and architecture contract refresh work.
 
-Prefer `internal-copilot-resources-mega-review` when the subject is the repository's Copilot or AI catalog. Prefer `internal-mega-review` when the target is a broader repository review outside the catalog-governance surface.
+Prefer `internal-ai-resources-review` when the subject is the repository's AI catalog. Prefer `internal-mega-review` when the target is a broader repository review outside the catalog-governance surface.
 
 ### Agents (`agents/`)
 
