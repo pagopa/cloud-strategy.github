@@ -119,7 +119,9 @@ Use the smallest evidence pass that can safely choose the owner and next action.
 - Open a test or validator only when its assertion, fixture shape, or failure output can change the plan, target state, or stop condition.
 - Treat listed references and support skills as on-demand resources. Do not load every referenced file because it appears in an index or optional map.
 - Token discipline limits the evidence pass. It does not skip a required `grill-me` gate.
+- For governance-sensitive repairs, default to `git status --short`, targeted `rg`, and the smallest relevant `sed` ranges. Do not read whole files, full numbered listings, or broad diffs unless a validator failure or exact contract check requires them.
 - For old-to-new prompt, skill, or workflow comparisons, use a compact matrix instead of reprinting whole files or long diffs. Cite only the relevant sections, changed claims, coverage gaps, risks, and decisions.
+- Before producing diff evidence, prefer `git diff --stat` plus targeted hunks or file/line references. Avoid full diff output when the change can be checked by the matrix and validators.
 - Stop exploration once the plan can state target, assumptions, anti-scope, selected owner, validation path, residual risk, and user decisions.
 - When the user challenges token cost, runtime cost, or slow workflow, treat it as workflow drift. Inspect only the matching skill sections, patch the smallest owner, and validate with the closest available check.
 
@@ -196,6 +198,7 @@ When ambiguity, ownership, governance, or rollout decisions become dominant, sto
 ## Failure And Recovery
 
 - On `execute` or `apply-plan` failure, isolate the failing item, preserve the current evidence, and rerun only the relevant check after a fix.
+- After a validator fails, inspect the first actionable failure before broadening the read or rerunning the full suite. Rerun the failed check first, then run the full requested validation set once at the end.
 - Use `internal-debugging` when the failure is a reproducible bug, test failure, validator drift, sync failure, or unexpected behavior.
 - Lane-change to `plan` when the failure reveals unresolved design, ownership, rollout, or governance ambiguity.
 - Report a blocker when prerequisites, unsafe scope, or missing user input prevents correct continuation.
@@ -220,6 +223,8 @@ For `execute` or `apply-plan`, return a compact execution report with active pha
 ## Output Calibration
 
 Keep reports compact by default. Plan and review outputs should usually stay within about 40 lines, and execution reports should usually stay within about 30 lines. Use a longer report only when the user asks for detail or when findings, blockers, validation evidence, or residual risk require it.
+
+Summarize command output and diff evidence. Do not paste long validator logs, whole files, or full diffs unless the user asks or a finding needs exact text.
 
 Every phase-ending response must include a compact `Lessons` line. State whether a lesson was added, codified in another owner, or not retained; when no lesson was retained, give the short reason. When a durable lesson candidate exists, use `internal-lesson-codification` before editing `LESSONS_LEARNED.md`.
 
@@ -273,3 +278,4 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.
 - `plan-only` identifies focused validators and tests without broad test-file reading unless the exact assertion can change the plan.
+- Governance-sensitive repairs use targeted reads, compact matrices, and focused reruns before any final full validation sweep.
