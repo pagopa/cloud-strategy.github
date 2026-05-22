@@ -1,344 +1,475 @@
 ---
 name: "internal-copilot-resources-mega-review"
-agent: "agent"
-description: "Run a decision-focused mega review of Copilot and AI repository resources with a mandatory pre-analysis control pass, evidence discipline, wrapper-aware overlap checks, and a final completeness pass so nothing important is missed"
+agent: "internal-gateway-operational-flow"
+description: "Review repository-owned AI resources, referenced assets, and flow behavior across AGENTS.md and .github"
+argument-hint: "Target one file, one or more folders, the full AI catalog, or an existing retained report package"
 ---
 
 <!-- markdownlint-disable-file MD041 -->
 
 Primary goal:
-${input:goal:Describe the repository, the review goal, and the main reason for the mega review}
+${input:goal:Describe why this review is needed and what decision it must support}
 
-Paths or asset families in scope:
-${input:scope:List the folders, files, or asset families to inspect}
+Review target:
+${input:target:List one resource, several folders, the full AI catalog, or an existing retained report package}
 
-Target runtimes:
-${input:runtimes:List the main runtimes, for example Claude Opus 4.7, ChatGPT 5.5, and GitHub Copilot}
+Consumer surfaces:
+${input:consumers:List relevant consumers such as GitHub Copilot, Codex, local sync, or write infer from repository evidence}
 
-Known local architecture assumptions:
-${input:assumptions:List important repo-specific assumptions, such as internal wrappers around imported resources}
+Known local assumptions or concerns:
+${input:assumptions:List internal wrappers, imported-resource posture, known drift, prior findings, or write infer from repository evidence}
+
+Desired depth:
+${input:depth:Choose concise, detailed, or exhaustive; default to detailed when unsure}
 
 Constraints and exclusions:
-${input:constraints:List non-negotiables, rollout constraints, things that must not be modified, or evidence limits}
+${input:constraints:List no-touch areas, rollout constraints, evidence limits, or explicit exclusions}
+
+Output preference:
+${input:output:Write chat-only, retained report under tmp/, or infer from target size}
 
 Use these repository sources first:
 
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
-- [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
-- [LESSONS_LEARNED.md](../../LESSONS_LEARNED.md)
 - [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
+- [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
+- [.github/skills/internal-copilot-audit/SKILL.md](../skills/internal-copilot-audit/SKILL.md)
+- [.github/skills/internal-agent-creator/SKILL.md](../skills/internal-agent-creator/SKILL.md)
+- [.github/skills/internal-skill-creator/SKILL.md](../skills/internal-skill-creator/SKILL.md)
+- [.github/skills/internal-copilot-instructions-creator/SKILL.md](../skills/internal-copilot-instructions-creator/SKILL.md)
 
-Language rules:
+Load additional repository skills only when the target resource or its
+references require their owner rules. Do not load every skill only because it
+exists.
 
-- Write the final analysis and summary in the language of the current chat.
-- If the current chat language is ambiguous or mixed, prefer Italian.
-- Keep file paths, enum values, and evidence labels exactly as requested.
+## Mission
 
-Mandatory control pass before any analysis:
+Run an evidence-based review of repository-owned AI resources and their
+referenced local assets.
 
-1. Read `AGENTS.md` and `.github/copilot-instructions.md` before opening the detailed review.
-2. Build an internal coverage checklist for every explicit requirement in this prompt.
-3. Verify which asset families actually exist on disk before making recommendations: agents, skills, instructions, prompt files, scripts, docs, memory, inventory, governance files.
-4. Before calling anything a duplicate, compare contents and roles. Check whether one file is a thin wrapper, convenience entry point, repository-owned internal wrapper, imported depth asset, or sync helper.
-5. When an imported asset overlaps with a domain already covered by an `internal-*` resource, use three-way decision logic: `KEEP`, `WRAP`, or `REVIEW/RETIRE`. Do not collapse the decision to keep-or-delete.
-6. If the retained analysis will span multiple files, decide up front where each requested output section will live so the final report has full coverage.
-7. Keep a running list of anything that is not fully proven. Those items must end up in the low-evidence or open-questions sections, not in strong recommendations.
-8. Treat the questions below as an internal checklist, not as a mechanical final structure.
+The review must explain:
 
-Review objective:
+- what each relevant resource owns
+- how it is activated or consumed
+- which local files it references
+- how it behaves inside the repository operational flow
+- which overlaps, gaps, stale references, and flow risks matter
+- what should be kept, wrapped, revised, split, merged, moved, retired, created,
+  compressed, automated, or reviewed later
 
-Run a decision-focused mega review of the repository as the source of truth for AI resources:
+The review is analysis-only. Do not modify the reviewed resources. If retained
+analysis is needed, write only under `tmp/`.
 
-- agents
-- skills
-- instructions
-- prompt files
-- scripts
-- docs
-- memory
-- inventory
-- governance files
+Do not name vendor-specific reasoning engines or compare them. Review consumer
+surfaces, contracts, and repository behavior instead.
 
-The purpose is not to modify the repository assets themselves. The purpose is to produce an evidence-based and action-oriented analysis that clarifies what should be:
+## Target Resolution
 
-- kept
-- removed
-- merged
-- split
-- renamed
-- compressed
-- moved
-- created
-- automated
+Accept any of these inputs in `Review target`:
 
-Analysis-only rules:
+- one concrete resource path, such as `AGENTS.md`,
+  `.github/agents/<name>.agent.md`, `.github/prompts/<name>.prompt.md`,
+  `.github/instructions/<name>.instructions.md`, or
+  `.github/skills/<name>/SKILL.md`
+- one or more folders, such as `.github/agents/`, `.github/skills/`,
+  `.github/instructions/`, `.github/prompts/`, `.github/scripts/`, or
+  AI-catalog test folders under `tests/`
+- the full AI catalog, meaning `AGENTS.md`, `.github/copilot-*.md`,
+  `.github/INVENTORY.md`, `.github/agents/`, `.github/instructions/`,
+  `.github/prompts/`, `.github/skills/`, AI catalog validation or sync scripts
+  under `.github/scripts/`, and tests that validate those resources
+- an existing retained report package under `tmp/`, in which case review the
+  report against current repository evidence instead of treating it as policy
 
-- Do not patch, rewrite, or refactor existing repository assets.
-- Only write the analysis under `tmp/`.
-- If the retained analysis spans multiple macro-categories, use `tmp/superpowers/<clear-task-name>/` and split it into numbered Markdown files starting with `01-riassunto-esecutivo.md`. Keep open questions in `dubbi-e-domande.md`.
-- If a single concise Markdown file is enough, keep it directly under `tmp/`.
+If a target is ambiguous, resolve obvious repository paths first. Ask only when
+the target cannot be resolved safely from filesystem evidence.
 
-Decision-review rules:
+## Resource Families In Scope
 
-- Do not produce an encyclopedic review.
-- Include only real problems, important tradeoffs, recommended decisions, blocking uncertainties, and high-ROI quick wins.
-- If a resource has no meaningful problem, do not spend report space on it unless it needs a `KEEP` line in the decision table.
+Review these families when they are in the target or referenced by it:
 
-Evidence standard:
+- `AGENTS.md`
+- `.github/copilot-instructions.md` and related `.github/copilot-*.md` files
+- `.github/INVENTORY.md`
+- `.github/agents/*.agent.md`
+- `.github/instructions/*.instructions.md`
+- `.github/prompts/*.prompt.md`
+- `.github/skills/**/SKILL.md`
+- skill-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
+- AI catalog validators, sync helpers, and inventory scripts under
+  `.github/scripts/`
+- tests and fixtures that validate AI catalog behavior, prompt contracts,
+  inventory, sync, token-risk checks, or validation entrypoints
+- local docs, templates, manifests, or retained reports that are explicitly
+  referenced by an in-scope resource
 
-- `ALTA`: supported by specific files and direct comparison.
-- `MEDIA`: supported by patterns observed in the repository.
-- `BASSA`: plausible hypothesis that is not fully verifiable.
-- `DA VERIFICARE`: requires manual confirmation.
+Do not expand into unrelated application, infrastructure, or documentation files
+unless an in-scope AI resource references them or a validator requires them.
 
-Evidence rules:
+## Mandatory Control Pass
 
-- Do not propose `DELETE`, `MERGE`, `MOVE`, `SPLIT`, or `CREATE` with `BASSA` evidence.
-- In those cases use `REVIEW` or `DA VERIFICARE`.
-- Always cite at least one real file for `MERGE`, `DELETE`, `MOVE`, `SPLIT`, `CREATE`, or `COMPRESS`.
-- Distinguish explicitly between `EVIDENCE`, `INFERENCE`, `ASSUMPTION`, and `UNKNOWN` in the analysis.
-- Do not turn `ASSUMPTION` or `UNKNOWN` into strong recommendations.
+Before judging quality:
 
-False-positive protection:
+1. Read `AGENTS.md` and `.github/copilot-instructions.md`.
+2. Read every scoped instruction whose `applyTo` metadata matches reviewed
+   Markdown, script, YAML, or other target paths.
+3. Resolve the target as a single resource, folder set, full catalog, or retained
+   report package.
+4. Verify which in-scope resource families exist on disk.
+5. Build a local reference graph from frontmatter, Markdown links, declared
+   skills, paired agents, `references/`, `scripts/`, `assets/`, and validator
+   references.
+6. Map tests and validation entrypoints that cover the target before judging
+   whether a resource is safe to revise, merge, move, retire, or keep.
+7. Load only the repository skills that own a relevant decision boundary.
+8. Compare thin wrappers, core skills, prompt entrypoints, scoped instructions,
+   sync helpers, and tests by role before calling anything duplicated.
+9. Keep a running list of unproven claims and place them in low-evidence or open
+   questions sections.
+10. Decide whether the output can stay in chat or needs a retained report under
+    `tmp/`.
 
-- Do not call resources duplicated just because they look similar.
-- Before calling something a duplicate, verify real differences in trigger, scope, audience, target model, workflow phase, abstraction level, token cost, frequency of use, operational responsibility, and position in the repository hierarchy.
-- Classify every overlap as one of: `DUPLICAZIONE REALE`, `SOVRAPPOSIZIONE ACCETTABILE`, `SOVRAPPOSIZIONE INTENZIONALE`, `DA VERIFICARE`.
+## Flow Behavior Review
 
-Prudence rules:
+For every material resource or resource group, evaluate how it behaves inside
+the repository flow:
 
-- Do not suggest merge, deletion, or relocation just to reduce file count.
-- A resource should be merged, removed, or moved only if it lacks a distinct trigger, lacks a distinct responsibility, does not improve the ChatGPT 5.5 plus Copilot workflow, increases ambiguity, increases maintenance, increases token cost without proportional benefit, duplicates an existing resource, or conflicts with `AGENTS.md` or `.github/copilot-instructions.md`.
-- If the benefit is unclear, use `REVIEW` or `DA VERIFICARE`, not `DELETE`.
+- Activation: what causes it to load or be selected.
+- Owner: which file owns route, policy, reusable procedure, deep detail,
+  validation, sync, or reporting.
+- Phase behavior: how it supports `plan`, `execute`, `apply-plan`, `review`, or
+  handoff decisions.
+- References: which local files it asks the operator to read, load, run, or keep
+  aligned.
+- Boundary: what it must not own, and which adjacent owner should take over.
+- Evidence path: which validator, script, test, or manual check proves the
+  resource still works.
+- Failure behavior: what happens when a reference is missing, a target is
+  ambiguous, a validator fails, or the selected owner no longer fits.
+- Context cost: what is always visible, what should be lazy-loaded, and what can
+  be compressed without losing routing clarity.
+- Propagation: whether changes must update inventory, sync scripts, validators,
+  paired agents, paired skills, scoped instructions, or retained reports.
 
-Runtime target:
+## Review Questions
 
-- Claude Opus 4.7 for critical review, structured analysis, and deep reasoning.
-- ChatGPT 5.5 for analysis, design, strategy, and evolutionary iteration.
-- GitHub Copilot for operational support inside the IDE and repository.
-- Possible reuse of some resources across ChatGPT 5.5 and Copilot.
+Use these as an internal checklist, not as a required final outline.
 
-Use the following checklist internally.
-
-1. Agents
+Agents:
 
 - Are the existing agents necessary?
-- Which agents can be merged?
-- Which agents are redundant?
-- Which agents are too broad?
-- Which agents are too specific?
-- Which agents should become skills?
-- Which agents should become prompt files?
-- Which agents should be removed?
-- Which agents are missing?
-- Is a router or orchestrator needed?
-- Should a router only suggest the next agent, or also prepare the operating brief?
-- Are there agents that should be separated into planner, executor, and reviewer?
-- Are the agent names clear?
-- Do the agents respect the hierarchy described in `AGENTS.md`?
-- Are the agents useful in the ChatGPT 5.5 to Copilot workflow?
+- Which agents are redundant, too broad, too narrow, or missing?
+- Does each agent have a distinct route, boundary, tool contract, and output
+  expectation?
+- Does a wrapper stay thin when a core skill owns reusable procedure?
+- Should any agent behavior move into a skill, prompt, or scoped instruction?
+- Are handoffs and stop conditions explicit and user-visible?
+- Are route names and agent names clear enough for selection?
 
-1. Instructions
+Instructions:
 
-- Are they partitioned correctly?
-- Do they activate on the right paths?
-- Do they overlap?
-- Are some instructions never activated?
-- Are they too generic?
-- Are they too long?
-- Do they contain rules that belong in skills?
-- Do they contain rules that belong in prompts?
-- Do they duplicate `copilot-instructions.md`?
-- Do they respect the model described in `copilot-instructions.md`?
-- Do they help Copilot without bloating context too much?
+- Are instructions partitioned correctly?
+- Does `applyTo` match the intended path family without excess co-loading?
+- Are some instructions never activated or too generic?
+- Do instructions contain only path-scoped rules that should auto-apply?
+- Are workflow depth and optional expertise kept in skills or prompts?
+- Do instructions avoid duplicating repository-wide policy?
 
-1. Skills
+Skills:
 
-- Are they partitioned correctly?
-- Do they have clear triggers?
-- Are they useful?
-- Are they too large?
-- Are they too small?
-- Are they redundant?
-- Are they optimized for token ROI?
-- Should any skills be merged?
-- Should any skills be removed?
-- Should any skills become instructions?
-- Should any skills become prompts?
-- Are any high-ROI skills missing?
-- Do the skills connect well to the agents?
-- Do the skills support ChatGPT 5.5 and or Copilot well?
+- Are skills partitioned correctly?
+- Does each skill have a clear trigger, smallest credible owner, and useful
+  boundary?
+- Is each skill useful, too large, too small, redundant, or stale?
+- Is each skill optimized for context cost and token ROI?
+- Should any skills be merged, retired, split, or renamed?
+- Should any skills become instructions or prompts?
+- Are high-ROI skills missing?
+- Do skills connect cleanly to agents, prompts, instructions, and validation?
+- Are references, scripts, and assets inside the skill bundle justified by
+  repeated need?
+- Do paired agents and skills agree on route, procedure, and deep-detail split?
 
-1. Prompt files
+Prompts:
 
-- Are the prompts useful?
-- Are there too many or too few?
-- Are they reusable?
-- Do they have clear inputs?
-- Do they have clear outputs?
-- Do they have clear constraints?
-- Do they have versioning?
-- Should any prompts become skills?
-- Should any prompts become instructions?
-- Are any high-ROI prompts missing?
-- Do the prompts help the ChatGPT 5.5 to Copilot handoff?
+- Are prompts useful, too many, or too few?
+- Does each prompt have clear inputs, agent owner, constraints, and expected
+  output?
+- Is the prompt reusable across resource families without hardcoding one
+  consumer surface?
+- Does it collect enough target, depth, and constraint information to avoid
+  hidden assumptions?
+- Does it define versioning or compatibility expectations when those matter?
+- Should any prompt logic become a skill, instruction, or validator instead?
 
-1. Scripts
+Bridge and catalog files:
 
-- Are they still necessary?
-- Are they simple?
-- Are they fast?
-- Are they documented?
-- Are they idempotent?
-- Do they have adequate error handling?
-- Can they generate inventory, maps, or reports?
-- Can they validate agents, skills, instructions, and prompts?
-- Which scripts would immediately improve productivity?
-- Which scripts would help maintain coherence between ChatGPT 5.5 and Copilot?
+- Do `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`
+  agree on precedence, rule placement, and live catalog shape?
+- Are exact catalog paths kept in inventory instead of duplicated in bridge
+  files?
+- Are repository-wide rules stable enough for always-visible guidance?
+- Is there a clear map, decision log, or update guide for maintaining the AI
+  catalog without breaking routing or validation?
 
-1. Docs, memory, and inventory
+Scripts and validators:
 
-- Is there a clear map of the AI resources?
-- Is there a reliable inventory?
-- Is there a `docs/ai-memory/` or equivalent?
-- Is there a decision log?
-- Is there a matrix for agent, skill, prompt, and instruction?
-- Is there a guide for using the repo with ChatGPT 5.5 plus Copilot?
-- Is there a guide for updating the repo without breaking it?
-- Are any documents obsolete or misleading?
-- Does the memory layer reduce token use and ambiguity, or add noise?
+- Are scripts still necessary, simple, fast, documented, and idempotent?
+- Do scripts validate catalog shape, references, frontmatter, inventory, sync, or
+  token-risk claims that humans would otherwise miss?
+- Do scripts have adequate error handling and safe local behavior?
+- Are validation entrypoints discoverable from `Makefile` or `.github/scripts/`?
+- Can scripts generate inventory, maps, reports, or validation evidence?
+- Which automation would immediately reduce drift with the smallest maintenance
+  cost?
 
-1. Token economy
+Tests:
 
-- Where are tokens being wasted?
+- Which tests cover agents, skills, instructions, prompts, inventory, sync,
+  token-risk checks, and prompt contracts?
+- Are tests focused, fast, deterministic, and tied to the catalog contracts they
+  protect?
+- Are there missing tests for high-risk routing, frontmatter, reference graphs,
+  or retained-report output contracts?
+- Do tests fail loudly when a resource is renamed, retired, moved, or left out of
+  inventory?
+- Are fixtures clear enough to explain the expected catalog behavior?
+
+Referenced assets:
+
+- Are linked references present, local, and still useful?
+- Do local references carry deep detail that should not be copied into wrapper
+  agents or top-level skills?
+- Are scripts or assets still needed by the resource that references them?
+
+Context economy:
+
 - What gets loaded too often?
 - What should be lazy-loaded?
-- What belongs in minimal always-on instructions?
-- What belongs in on-demand skills?
-- What belongs in prompt files?
-- What belongs in docs?
-- Where are the expensive duplications?
-- Which resources should be compressed?
-- Which resources truly reduce cost in the ChatGPT 5.5 plus Copilot workflow?
+- What belongs in minimal always-visible guidance?
+- What belongs in on-demand skills, prompt files, scoped instructions, docs, or
+  tests?
+- Which expensive overlaps should be compressed only after role differences are
+  proven?
 
-1. Productivity
+Productivity:
 
-- What truly accelerates the work?
-- What creates friction?
-- What requires too much maintenance?
-- Where is the repository over-engineered?
-- Where is it under-invested?
-- Where is automation missing?
+- What truly accelerates analysis, implementation, review, and verification?
+- What creates friction or requires too much maintenance?
+- Where is the repository over-engineered or under-invested?
 - Which five quick interventions would deliver the highest ROI?
-- Which three things should stop?
-- Which three things should start?
-- What improves the analysis to implementation to verification flow?
+- Which three things should stop and which three should start?
 
-Decision criteria for every resource:
+## Evidence Standard
 
-- Necessity
-- Uniqueness
-- Clarity
-- Activation timing
-- Token ROI
-- Maintainability
-- Composability
-- Risk
-- Productivity impact
-- Hierarchical coherence with `AGENTS.md` and `copilot-instructions.md`
-- Runtime fit for ChatGPT 5.5, Copilot, or both
-- Evidence quality
+Use these evidence labels:
 
-Required output structure:
+- `HIGH`: supported by concrete files and direct comparison.
+- `MEDIUM`: supported by repeated patterns observed in repository evidence.
+- `LOW`: plausible but not fully proven.
+- `VERIFY`: requires manual confirmation or a check that was not run.
 
-1. Executive summary
+Rules:
+
+- Do not recommend `MERGE`, `MOVE`, `SPLIT`, `RETIRE`, or `CREATE` with `LOW`
+  evidence.
+- For low confidence, use `REVIEW` or `VERIFY`.
+- Every strong recommendation must cite at least one real file.
+- Separate `EVIDENCE`, `INFERENCE`, `ASSUMPTION`, and `UNKNOWN`.
+- Do not turn an `ASSUMPTION` or `UNKNOWN` into a strong recommendation.
+
+## Overlap Classification
+
+Do not call resources duplicated only because they share terms or topics. Compare
+actual role, activation, audience, phase, abstraction level, context cost,
+validation, and repository hierarchy.
+
+Classify every overlap as one of:
+
+- `REAL DUPLICATION`
+- `ACCEPTABLE OVERLAP`
+- `INTENTIONAL OVERLAP`
+- `VERIFY`
+
+When an imported or external-pattern resource overlaps with an `internal-*`
+resource, use this decision logic:
+
+- `KEEP`: distinct value and no harmful conflict.
+- `WRAP`: useful external value needs repository-owned boundary control.
+- `REVIEW/RETIRE`: current value is unclear, stale, conflicting, or replaceable.
+
+## Decision Criteria
+
+Evaluate relevant resources with these criteria:
+
+- necessity
+- uniqueness
+- route clarity
+- activation timing
+- owner boundary
+- referenced-resource health
+- context cost and lazy-load fit
+- maintainability
+- composability
+- test coverage and validation path
+- sync and propagation impact
+- user productivity
+- safety and least privilege
+- alignment with `AGENTS.md` and `.github/copilot-instructions.md`
+- evidence quality
+
+## Output Location Rules
+
+If the target is one small resource and `Output preference` does not require a
+file, answer in chat.
+
+If the target spans multiple folders, the full AI catalog, or an existing
+retained report package, write a split retained report under:
+
+- `tmp/superpowers/ai-resource-mega-review/`
+
+For a fresh retained report, create:
+
+- `01-executive-summary.md`
+- `02-target-and-coverage.md`
+- `03-resource-map.md`
+- `04-flow-behavior.md`
+- `05-findings-and-decisions.md`
+- `06-tests-and-validation.md`
+- `07-recommendations-and-roadmap.md`
+- `open-questions.md`
+
+If the folder already exists, preserve prior analysis and add an addendum unless
+the user explicitly asks to replace it.
+
+## Required Output Structure
+
+Use this structure in chat or across the retained report files.
+
+### 1. Executive Summary
 
 - Maximum 10 lines.
-- State the real repository condition: healthy, promising but messy, redundant, too complex, fragile, or well structured but improvable.
+- State the actual condition of the target: healthy, coherent but improvable,
+  redundant, fragile, unclear, stale, or blocked by missing evidence.
 
-1. Observed mental model
+### 2. Target And Coverage
 
-- Maximum 15 lines.
-- Summarize what you learned from `AGENTS.md` and `.github/copilot-instructions.md`.
-- Explain the effective hierarchy between `copilot-instructions.md`, `AGENTS.md`, instructions, agents, skills, prompts, scripts, and docs or memory.
+- State resolved paths.
+- State included and excluded resource families.
+- State which referenced resources were followed.
 
-1. Main diagnosis
+### 3. Repository Hierarchy
 
-- Split into: what works, what is redundant, what is fragile, what costs too many tokens, what blocks productivity, and what is missing.
-- Maximum 3 bullets per section.
+- Summarize the effective precedence between `AGENTS.md`,
+  `.github/copilot-instructions.md`, scoped instructions, agents, skills,
+  prompts, scripts, inventory, and referenced docs.
 
-1. Decision table
+### 4. Resource Map
 
-- Single table with columns: `Area | Resource | Status | Evidence | Problem | Decision | Priority`.
-- Allowed statuses: `KEEP`, `MERGE`, `SPLIT`, `DELETE`, `RENAME`, `MOVE`, `CREATE`, `COMPRESS`, `REVIEW`, `WRAP`.
-- Allowed evidence: `ALTA`, `MEDIA`, `BASSA`, `DA VERIFICARE`.
-- Priorities: `P0`, `P1`, `P2`, `P3`.
+- Table: `Resource | Family | Owner role | Activation | Key references | Validation`.
 
-1. Detected overlaps
+### 5. Flow Behavior
 
-- Table with columns: `Resources involved | Type | Evidence | Assessment | Proposed action`.
-- Allowed types: `DUPLICAZIONE REALE`, `SOVRAPPOSIZIONE ACCETTABILE`, `SOVRAPPOSIZIONE INTENZIONALE`, `DA VERIFICARE`.
+- Explain how the target behaves through planning, execution, review, handoff,
+  failure, validation, and propagation.
+- Include the highest-risk flow mismatch, if any.
 
-1. Low-evidence recommendations
+### 6. Test And Validation Coverage
 
-- Separate all `BASSA` or `DA VERIFICARE` recommendations.
-- Use the exact format: `Recommendation | Why it is not certain | What to verify`.
-- Do not include destructive actions such as `DELETE`, `MERGE`, `MOVE`, or `SPLIT` in this section.
+- State which tests, validators, lint checks, or manual checks cover the target.
+- Identify missing tests or weak assertions for high-risk AI catalog behavior.
+- Distinguish validation that exists from validation that was not run.
 
-1. Quick wins
+### 7. Main Diagnosis
 
-- Maximum 10.
-- Table format: `Quick win | Evidence | Impact | Effort | Why it is worth doing`.
+- Split into what works, what is redundant, what is fragile, what costs too much
+  context, what blocks productivity, what lacks test coverage, and what is
+  missing.
+- Keep each subsection to the highest-signal points.
 
-1. Recommended actions
+### 8. Main Findings
 
-- Split into: `Do now`, `Do later`, `Do not do now`.
-- Maximum 5 items per subsection.
-- The `Do now` subsection may only contain `ALTA` or `MEDIA` evidence actions.
+- Group by severity or priority.
+- For each finding include `Evidence`, `Problem`, `Impact`, `Recommendation`,
+  and `Confidence`.
 
-1. Recommended roadmap
+### 9. Decision Table
 
-- Advice only, not a binding plan.
-- Split into: `Cleanup`, `Rationalization`, `Automation`, `Governance`, `Evolution`.
-- Maximum 3 bullets per phase.
+- Table: `Area | Resource | Status | Evidence | Problem | Decision | Priority`.
+- Allowed statuses: `KEEP`, `WRAP`, `REVISE`, `COMPRESS`, `SPLIT`, `MERGE`,
+  `MOVE`, `RENAME`, `RETIRE`, `CREATE`, `AUTOMATE`, `REVIEW`.
+- Allowed priorities: `P0`, `P1`, `P2`, `P3`.
 
-1. Proposed target architecture
+### 10. Overlaps And Boundaries
 
-- Propose a realistic target repository structure.
-- Explain only the differences versus the current state.
+- Table: `Resources involved | Type | Evidence | Assessment | Proposed action`.
+- Use the overlap classifications exactly.
 
-1. Future rule
+### 11. Recommendations, Roadmap, And Target Rules
 
-- Table with columns: `Type | When to create it | When to avoid it`.
-- Cover: agent, skill, instruction, prompt, script, doc or memory.
+- Split into `Do now`, `Do later`, and `Do not do now`.
+- `Do now` may include only `HIGH` or `MEDIUM` evidence actions.
+- Include a non-binding roadmap split into `Cleanup`, `Rationalization`,
+  `Automation`, `Governance`, and `Evolution` when the target is broad enough.
+- Include target architecture differences versus the current state when the
+  evidence supports a better structure.
+- Include a future-rule table `Type | When to create it | When to avoid it` for
+  agent, skill, instruction, prompt, script, test, and doc when the review makes
+  artifact-placement decisions.
 
-1. Final critique
+### 12. Quick Wins And Automation
+
+- Maximum 10 items.
+- Table: `Action | Evidence | Impact | Effort | First check`.
+
+### 13. Low-Evidence Items And Open Questions
+
+- Keep `LOW` and `VERIFY` items separate from strong recommendations.
+- Use: `Item | Why uncertain | What to verify`.
+
+### 14. Final Critique
 
 - Maximum 10 lines.
-- State clearly: what is being done well, what is likely overcomplicated, what is killing productivity, and what the best next step is.
+- State what works, what is overcomplicated, what slows delivery, what is risky,
+  and the best next step.
 
-Mandatory completeness pass before the final answer:
+## Completeness Pass
 
-1. Re-open every retained analysis file you wrote.
-1. Check that all 12 required output sections exist.
-1. Check that every explicit checklist family above is either answered or explicitly marked as not verifiable.
-1. Check skill coverage especially carefully: partitioning, triggers, usefulness, size, redundancy, token ROI, merge or removal candidates, conversion to instructions or prompts, missing high-ROI skills, linkage to agents, and runtime fit.
-1. If prompt files exist, verify that inputs, outputs, constraints, versioning, reuse value, and missing prompt opportunities are covered explicitly.
-1. If scripts exist, verify that necessity, simplicity, speed, documentation, idempotence, error handling, validation value, and automation opportunities are covered explicitly.
-1. Check that every strong recommendation cites at least one real file and has `ALTA` or `MEDIA` evidence.
-1. Check that the low-evidence section contains no destructive actions.
-1. Check that every apparent duplicate or overlap was tested against thin-wrapper, convenience-entry-point, and internal-wrapper possibilities before being called a real duplication.
-1. If any gap remains, update the retained analysis first and only then present the final summary.
+Before the final answer:
 
-Final operating constraints:
+1. Re-open any retained report file written under `tmp/`.
+2. Confirm the requested target was fully resolved or explicitly marked
+   unresolved.
+3. Confirm every in-scope family was either reviewed or marked not present.
+4. Confirm all referenced local resources that materially affect the decision
+   were checked or marked `VERIFY`.
+5. Confirm test and validation coverage was reviewed for every target where
+   tests or validators exist.
+6. Confirm skill coverage includes partitioning, triggers, usefulness, size,
+   redundancy, token ROI, merge or retirement candidates, conversion to
+   instructions or prompts, missing high-ROI skills, agent linkage, and
+   validation linkage.
+7. Confirm prompt coverage includes usefulness, count, reuse value, inputs,
+   outputs, constraints, compatibility expectations, and conversion candidates.
+8. Confirm script coverage includes necessity, simplicity, speed, documentation,
+   idempotence, error handling, validation value, and automation opportunities.
+9. Confirm every strong recommendation has `HIGH` or `MEDIUM` evidence and cites
+   a real file.
+10. Confirm no destructive decision uses `LOW` evidence.
+11. Confirm every overlap was checked against wrapper, core-skill, prompt,
+   scoped-instruction, and sync-helper roles before being classified as real
+   duplication.
+12. Confirm flow behavior was reviewed, not only static file content.
+13. Confirm no reviewed resource was modified.
+14. Report validation commands run, validation gaps, and residual risk.
 
-- Be concise.
-- Analysis only.
-- Do not modify repository assets.
-- Do not create repository patches.
-- Do not rewrite existing resources.
-- Prefer small, concrete, high-ROI actions.
-- Every strong recommendation needs a practical reason and `ALTA` or `MEDIA` evidence.
-- Do not propose new technology before diagnosing the existing repository correctly.
+Final response must include:
+
+- active phase and owner
+- reviewed target
+- output location, if any
+- top decisions or findings
+- validation evidence or validation gap
+- recommended next step
