@@ -55,6 +55,18 @@ Select one workflow entry point from the user prompt, then run one active phase 
 
 Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skill to expose the staged workflow and delegate deep procedure to the owning support skills.
 
+## Phase Quick Map
+
+Use this map before loading support skills or optional references.
+
+| User intent | Active phase | Primary result |
+| --- | --- | --- |
+| Decide shape, owner, rollout, or validation before edits. | `plan` | Decision frame, anti-scope, validation path, and next-step package. |
+| Make a clear local change with concrete verification. | `execute` | Scoped edit, focused validation, and completion checks. |
+| Apply an approved retained plan folder. | `apply-plan` | `internal-executing-plans` `done-*` loop and retained-plan completion report. |
+| Inspect a concrete artifact, diff, or validation result. | `review` | Findings, severity, causal layer, evidence gaps, and fix routing. |
+| Pressure-test assumptions or failure modes. | `critical` | `internal-gateway-critical-master` outcome and next owner. |
+
 ## Core Contract
 
 - Choose one active phase at a time inside the selected workflow.
@@ -105,6 +117,10 @@ Treat end-to-end application as authorized only when one of these signals is pre
 - `execute`: use when the target state is already clear, verification is concrete, any governance-sensitive `grill-me` gate is `grill-me satisfied` or `grill-me not applicable`, and the work is deterministic local delivery or maintenance.
 - `review`: use when a concrete artifact, diff, or validation result exists and the main job is defect-first evidence, findings, and fix routing.
 - `critical`: use `internal-gateway-critical-master` when a proposal, plan, or decision needs pressure testing before action.
+
+`plan` decides, `execute` changes, `apply-plan` applies approved retained work,
+`review` finds and routes defects, and `critical` challenges assumptions. Do
+not blend these actions in one hidden phase.
 
 Prompt-specific intent wins over the default. A direct review request starts in `review`; a direct retained-plan application starts in `apply-plan`; a `plan-only` request stops before apply. A `clarify-first` request stays inside `plan-only` and loads `grill-me` before producing plan output.
 
@@ -224,6 +240,16 @@ For `execute` or `apply-plan`, return a compact execution report with active pha
 
 Keep reports compact by default. Plan and review outputs should usually stay within about 40 lines, and execution reports should usually stay within about 30 lines. Use a longer report only when the user asks for detail or when findings, blockers, validation evidence, or residual risk require it.
 
+Use the smallest output shape that closes the active phase.
+
+| Phase | Required output | Must not include |
+| --- | --- | --- |
+| `plan` | Gate status, decision, assumptions, anti-scope, validation path, risk, and requested checkpoint. | Applied changes or implied approval to execute. |
+| `execute` | Files changed, scoped result, `Check 1`, `Check 2`, `Check 3`, validation evidence, and residual risk. | New strategy, unrelated improvements, or unverified completion claims. |
+| `apply-plan` | Retained-plan coverage, `done-*` status, blockers or completed items, three checks, and evidence. | Execution of `dubbi-e-domande.md` or unapproved inline plan work. |
+| `review` | Findings first, severity, confidence, causal layer, evidence gap, and fix route. | Silent fixes or initial design work. |
+| `critical` | Strongest objection, why it matters, explicit critical outcome, and next-step package. | Routine implementation or ordinary code review. |
+
 Summarize command output and diff evidence. Do not paste long validator logs, whole files, or full diffs unless the user asks or a finding needs exact text.
 
 Every phase-ending response must include a compact `Lessons` line. State whether a lesson was added, codified in another owner, or not retained; when no lesson was retained, give the short reason. When a durable lesson candidate exists, use `internal-lesson-codification` before editing `LESSONS_LEARNED.md`.
@@ -233,6 +259,10 @@ Use `mattpocock-caveman` only as a compression pass for sync, review, or governa
 ## Review Mode
 
 Review mode owns findings, evidence gaps, regression risk, systems risk, and fix routing. Findings come before summaries, and every actionable finding needs a causal layer plus a route to delivery, planning, critical challenge, or deferred follow-up.
+
+Review mode does not apply fixes. If the user asks to fix review findings in
+the same request, finish the review result first, then move through an explicit
+checkpoint or a user-authorized `execute` phase.
 
 Before claiming `review complete` or `no findings`, check that `Review Check 1` covers the reviewed artifact, diff, or validation result; `Review Check 2` assigns severity, confidence, causal layer, and fix routing for findings or states why none exist; and `Review Check 3` names validation evidence and remaining gaps. Use `superpowers-verification-before-completion` for strong review-completion or merge-readiness claims.
 
