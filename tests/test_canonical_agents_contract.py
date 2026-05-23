@@ -243,6 +243,8 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     metadata_text = Path(
         ".github/skills/internal-gateway-operational-flow/agents/openai.yaml"
     ).read_text(encoding="utf-8")
+    metadata = yaml.safe_load(metadata_text)
+    interface = metadata["interface"]
 
     assert "name: internal-gateway-operational-flow" in skill_text
     assert "## Skill-First Staged Entry Points" in skill_text
@@ -267,7 +269,21 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "explicit checkpoint before moving from `plan`" in skill_text
     assert "user decisions could change scope" in skill_text
     assert "Keep direct entry and manual transitions visible to the user." in skill_text
+    assert "Do not create new gateway skills" in skill_text
     assert "multiple credible paths" in skill_text
+    assert "future security lens name, not yet promoted" in skill_text
+    assert "`Uso consigliato`" in skill_text
+    assert "`Mappa file e ruolo`" in skill_text
+    assert "`Evidence pass iniziale`" in skill_text
+    assert "`Budget lettura`" in skill_text
+    assert "## Completion Checks" in skill_text
+    assert "`Check 1`" in skill_text
+    assert "`Check 2`" in skill_text
+    assert "`Check 3`" in skill_text
+    assert "## Output Calibration" in skill_text
+    assert "Required output" in skill_text
+    assert "Must not include" in skill_text
+    assert "Lessons" in skill_text
     assert "`plan`" in mode_contracts_text
     assert "`execute`" in mode_contracts_text
     assert "`review`" in mode_contracts_text
@@ -287,7 +303,9 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "internal-performance-optimization" in mode_contracts_text
     for retired_id in retired_mattpocock_ids():
         assert retired_id not in wrapper_alignment_text
-    assert "$internal-gateway-operational-flow" in metadata_text
+    assert interface["display_name"] == "Internal Gateway Operational Flow"
+    assert interface["short_description"] == "Skill-first staged operational core"
+    assert "$internal-gateway-operational-flow" in interface["default_prompt"]
 
     operational_frontmatter = load_frontmatter(
         CANONICAL_AGENTS["internal-gateway-operational-flow"]
