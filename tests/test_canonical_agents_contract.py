@@ -438,9 +438,6 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
     lenses_text = Path(
         ".github/skills/internal-gateway-critical-master/references/challenge-lenses.md"
     ).read_text(encoding="utf-8")
-    prompt_text = Path(
-        ".github/prompts/internal-agent-pressure-test-plan.prompt.md"
-    ).read_text(encoding="utf-8")
     metadata_text = Path(
         ".github/skills/internal-gateway-critical-master/agents/openai.yaml"
     ).read_text(encoding="utf-8")
@@ -466,8 +463,6 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
     assert "Explicit outcome" in lenses_text
     assert "Mitigation or condition required before planning or delivery resumes." in lenses_text
     assert_inline_code_tokens(lenses_text, EXPECTED_CRITICAL_OUTCOMES)
-    assert "Mitigation or condition required before planning or delivery resumes" in prompt_text
-    assert_inline_code_tokens(prompt_text, EXPECTED_CRITICAL_OUTCOMES)
     assert "$internal-gateway-critical-master" in metadata_text
 
 
@@ -528,22 +523,33 @@ def test_simple_gateway_claim_gate_contract_stays_in_core_skill() -> None:
 
 def test_prompt_examples_reference_live_gateway_skills_and_agents() -> None:
     prompt_paths = [
-        Path(".github/prompts/internal-agent-pressure-test-plan.prompt.md"),
-        Path(".github/prompts/internal-agent-review-next-actions.prompt.md"),
-        Path(".github/prompts/internal-agent-plan-next-step.prompt.md"),
-        Path(".github/prompts/internal-execute-plan.prompt.md"),
+        Path(".github/prompts/internal-architecture-md-creator.prompt.md"),
+        Path(".github/prompts/internal-mega-review.prompt.md"),
+        Path(".github/prompts/internal-review-ai-resources.prompt.md"),
+        Path(".github/prompts/internal-sync-plan.prompt.md"),
     ]
     combined_text = "\n".join(path.read_text(encoding="utf-8") for path in prompt_paths)
+    live_prompt_paths = {
+        path.as_posix() for path in Path(".github/prompts").glob("*.prompt.md")
+    }
 
+    assert live_prompt_paths == {path.as_posix() for path in prompt_paths}
+    assert 'agent: "agent"' not in combined_text
     assert "internal-gateway-operational-flow.agent.md" in combined_text
-    assert "internal-gateway-critical-master.agent.md" in combined_text
     assert "internal-gateway-operational-flow/SKILL.md" in combined_text
-    assert "internal-gateway-critical-master/SKILL.md" in combined_text
-    assert "internal-agent-support-next-step/SKILL.md" in combined_text
-    assert "internal-agent-operational-flow" not in combined_text
-    assert "internal-agent-critical-master" not in combined_text
-    assert "internal-agent-next-step" not in combined_text
-    assert "internal-agent-lane-change-engine" not in combined_text
+    assert "local-sync-global-copilot-configs-into-repo.agent.md" in combined_text
+    assert "local-agent-sync-global-copilot-configs-into-repo/SKILL.md" in combined_text
+
+
+def test_gateway_support_prompts_are_retired_from_the_live_catalog() -> None:
+    retired_paths = (
+        ".github/prompts/internal-agent-plan-next-step.prompt.md",
+        ".github/prompts/internal-agent-pressure-test-plan.prompt.md",
+        ".github/prompts/internal-agent-review-next-actions.prompt.md",
+        ".github/prompts/internal-execute-plan.prompt.md",
+    )
+
+    assert all(not Path(relative_path).exists() for relative_path in retired_paths)
 
 
 def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:

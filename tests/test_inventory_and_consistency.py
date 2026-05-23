@@ -118,7 +118,7 @@ def test_run_consistency_checks_flags_broken_prompt_local_links(tmp_path: Path) 
         tmp_path / ".github/prompts/internal-valid.prompt.md",
         "---\n"
         "name: internal-valid\n"
-        "agent: agent\n"
+        "agent: internal-gateway-operational-flow\n"
         "description: Valid prompt metadata\n"
         "---\n\n"
         "Prompt target:\n"
@@ -133,6 +133,35 @@ def test_run_consistency_checks_flags_broken_prompt_local_links(tmp_path: Path) 
     assert (
         ".github/prompts/internal-valid.prompt.md",
         "broken-local-link",
+    ) in findings_by_path
+
+
+def test_run_consistency_checks_flags_generic_prompt_agent_owner(tmp_path: Path) -> None:
+    write_file(
+        tmp_path / "AGENTS.md",
+        "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/copilot-instructions.md",
+        "# Copilot Instructions\n\nSee `AGENTS.md` and `.github/INVENTORY.md`.\n",
+    )
+    write_file(
+        tmp_path / ".github/prompts/internal-generic.prompt.md",
+        "---\n"
+        "name: internal-generic\n"
+        "agent: agent\n"
+        "description: Generic agent owner\n"
+        "---\n\n"
+        "${input:subject:Describe the target.}\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
+
+    findings = run_consistency_checks(tmp_path)
+    findings_by_path = {(finding.path, finding.code) for finding in findings}
+
+    assert (
+        ".github/prompts/internal-generic.prompt.md",
+        "prompt-generic-agent",
     ) in findings_by_path
 
 

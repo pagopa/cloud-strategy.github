@@ -317,13 +317,7 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
             "inspect bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
         ),
     )
-    assert_contains_all(
-        ".github/prompts/internal-agent-review-next-actions.prompt.md",
-        (
-            "If `subject` is a repository-owned bundle owner such as `SKILL.md`",
-            "review bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
-        ),
-    )
+    assert not Path(".github/prompts/internal-agent-review-next-actions.prompt.md").exists()
 
 
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:
