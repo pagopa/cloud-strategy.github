@@ -71,6 +71,11 @@ EXPECTED_CRITICAL_OUTCOMES = (
     "accept-with-risk",
 )
 
+SIMPLE_GATEWAY_SKILL = ".github/skills/internal-gateway-simple-task/SKILL.md"
+SIMPLE_GATEWAY_SUPPORT_ROUTING = (
+    ".github/skills/internal-gateway-simple-task/references/support-routing.md"
+)
+
 
 def load_frontmatter(relative_path: str) -> dict[str, object]:
     text = Path(relative_path).read_text(encoding="utf-8")
@@ -100,6 +105,35 @@ def retired_mattpocock_ids() -> tuple[str, ...]:
 def section_between(body: str, heading: str) -> str:
     section = body.split(heading, 1)[1]
     return section.split("\n## ", 1)[0]
+
+
+def referenced_skills_from_skill(skill_text: str) -> list[str]:
+    section = section_between(skill_text, "## Referenced skills")
+    return re.findall(r"^- `([^`]+)`: ", section, flags=re.MULTILINE)
+
+
+def claim_gate_owners_from_skill(skill_text: str) -> list[str]:
+    section = section_between(skill_text, "## Claim Gates")
+    return re.findall(r"^- Load `([^`]+)` before", section, flags=re.MULTILINE)
+
+
+def claim_gate_owners_from_reference(reference_text: str) -> list[str]:
+    section = section_between(reference_text, "## Claim Gates")
+    owners: list[str] = []
+
+    for line in section.splitlines():
+        if not line.startswith("| "):
+            continue
+
+        cells = [cell.strip() for cell in line.split("|")[1:-1]]
+        if len(cells) < 2:
+            continue
+
+        owner = cells[1]
+        if owner.startswith("`") and owner.endswith("`"):
+            owners.append(owner.strip("`"))
+
+    return owners
 
 
 def core_skill(relative_path: str) -> str:
@@ -374,15 +408,13 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
 
 
 def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
-    skill_text = Path(".github/skills/internal-gateway-simple-task/SKILL.md").read_text(
-        encoding="utf-8"
-    )
+    skill_text = Path(SIMPLE_GATEWAY_SKILL).read_text(encoding="utf-8")
     simple_lanes_text = Path(
         ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
     ).read_text(encoding="utf-8")
-    support_routing_text = Path(
-        ".github/skills/internal-gateway-simple-task/references/support-routing.md"
-    ).read_text(encoding="utf-8")
+    support_routing_text = Path(SIMPLE_GATEWAY_SUPPORT_ROUTING).read_text(
+        encoding="utf-8"
+    )
     metadata_text = Path(
         ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
     ).read_text(encoding="utf-8")
@@ -400,6 +432,32 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     assert "`files-touched`" in simple_lanes_text
     assert "internal-copilot-instructions-creator" in support_routing_text
     assert "$internal-gateway-simple-task" in metadata_text
+
+
+def test_simple_gateway_referenced_skills_stay_local_and_live() -> None:
+    skill_text = Path(SIMPLE_GATEWAY_SKILL).read_text(encoding="utf-8")
+    referenced_skills = referenced_skills_from_skill(skill_text)
+
+    assert re.search(r"# Internal Gateway Simple Task\s+## Referenced skills", skill_text)
+    assert "owner index, not a preload bundle" in skill_text
+    assert referenced_skills
+    assert all(Path(f".github/skills/{skill_id}/SKILL.md").is_file() for skill_id in referenced_skills)
+
+
+def test_simple_gateway_claim_gate_contract_stays_in_core_skill() -> None:
+    skill_text = Path(SIMPLE_GATEWAY_SKILL).read_text(encoding="utf-8")
+    support_routing_text = Path(SIMPLE_GATEWAY_SUPPORT_ROUTING).read_text(
+        encoding="utf-8"
+    )
+
+    assert "## grill-me boundary" in skill_text
+    assert "This `grill-me boundary` is canonical for simple mode." in skill_text
+    assert "Do not use simple-mode `grill-me` for pre-plan" in skill_text
+    assert "source of truth for the claim-gate contract" in skill_text
+    assert "mirrors the claim-gate contract in `SKILL.md`" in support_routing_text
+    assert claim_gate_owners_from_skill(skill_text) == claim_gate_owners_from_reference(
+        support_routing_text
+    )
 
 
 def test_prompt_examples_reference_live_gateway_skills_and_agents() -> None:

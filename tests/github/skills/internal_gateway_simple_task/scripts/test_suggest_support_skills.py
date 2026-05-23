@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 from pathlib import Path
 from types import ModuleType
 
+SKILL_PATH = Path(".github/skills/internal-gateway-simple-task/SKILL.md")
+SUPPORT_ROUTING_PATH = Path(
+    ".github/skills/internal-gateway-simple-task/references/support-routing.md"
+)
 SCRIPT_PATH = Path(
     ".github/skills/internal-gateway-simple-task/scripts/suggest_support_skills.py"
 )
@@ -43,6 +48,17 @@ EXPECTED_PATH_SKILLS = {
 
 ALLOWLISTED_EXTERNAL_SKILLS: set[str] = set()
 
+CLAIM_GATE_SYMPTOMS = {
+    "bug",
+    "tdd",
+    "performance",
+    "pr-readiness",
+    "code-review",
+    "no-findings",
+    "systems-review",
+    "completion-claim",
+}
+
 
 def load_script_module() -> ModuleType:
     spec = importlib.util.spec_from_file_location("suggest_support_skills", SCRIPT_PATH)
@@ -54,6 +70,35 @@ def load_script_module() -> ModuleType:
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def section_between(text: str, heading: str) -> str:
+    section = text.split(heading, 1)[1]
+    return section.split("\n## ", 1)[0]
+
+
+def claim_gate_owners_from_skill(skill_text: str) -> set[str]:
+    section = section_between(skill_text, "## Claim Gates")
+    return set(re.findall(r"^- Load `([^`]+)` before", section, flags=re.MULTILINE))
+
+
+def claim_gate_owners_from_reference(reference_text: str) -> set[str]:
+    section = section_between(reference_text, "## Claim Gates")
+    owners: set[str] = set()
+
+    for line in section.splitlines():
+        if not line.startswith("| "):
+            continue
+
+        cells = [cell.strip() for cell in line.split("|")[1:-1]]
+        if len(cells) < 2:
+            continue
+
+        owner = cells[1]
+        if owner.startswith("`") and owner.endswith("`"):
+            owners.add(owner.strip("`"))
+
+    return owners
 
 
 def collect_emitted_skills(module: ModuleType) -> set[str]:
@@ -81,3 +126,19 @@ def test_suggest_support_skills_only_emits_live_skill_ids() -> None:
     )
 
     assert missing == []
+
+
+def test_suggest_support_skills_claim_gate_owners_match_core_contract() -> None:
+    module = load_script_module()
+    skill_claim_gate_owners = claim_gate_owners_from_skill(
+        SKILL_PATH.read_text(encoding="utf-8")
+    )
+    reference_claim_gate_owners = claim_gate_owners_from_reference(
+        SUPPORT_ROUTING_PATH.read_text(encoding="utf-8")
+    )
+    symptom_claim_gate_owners = {
+        module.SYMPTOM_SKILLS[symptom][0] for symptom in CLAIM_GATE_SYMPTOMS
+    }
+
+    assert skill_claim_gate_owners == reference_claim_gate_owners
+    assert symptom_claim_gate_owners == skill_claim_gate_owners
