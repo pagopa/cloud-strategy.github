@@ -789,7 +789,7 @@ def test_detect_token_risks_reports_agents_operational_procedure_markers(
         tmp_path / "AGENTS.md",
         "# AGENTS\n\n"
         "## Retained Plans\n\n"
-        "- Keep unresolved questions in `dubbi-e-domande.md`.\n"
+        "- Keep unresolved questions in `questions.md`.\n"
         "- During execution, create matching `done-*` files.\n",
     )
     write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")

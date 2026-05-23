@@ -18,6 +18,9 @@ def assert_no_plan_procedure_markers(text: str) -> None:
     disallowed_markers = [
         "01-...md",
         "01-contesto-e-vincoli.md",
+        "01-change-summary.md",
+        "02-source-item-ledger.md",
+        "questions.md",
         "dubbi-e-domande.md",
         "done-*",
         "macro-categories",
@@ -153,34 +156,34 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
         "strategic, review-only, or monolithic retained plan into an executable retained plan"
         in writing_skill_text
     )
-    assert "01-riassunto-direzione-e-decisione.md" in writing_skill_text
+    assert "01-change-summary.md" in writing_skill_text
+    assert "02-source-item-ledger.md" in writing_skill_text
     assert "`Uso consigliato`" in writing_skill_text
     assert "`Mappa file e ruolo`" in writing_skill_text
     assert "`Evidence pass iniziale`" in writing_skill_text
     assert "`Budget lettura`" in writing_skill_text
-    assert "control file" in writing_skill_text
-    assert "02-esecuzione.md" in writing_skill_text
-    assert "02-matrice-operativa.md" in writing_skill_text
+    assert "control and coverage file" in writing_skill_text
+    assert "03-execution.md" in writing_skill_text
+    assert "source-item ledger" in writing_skill_text
     assert "macro-category" in writing_skill_text
     assert "monolithic" in writing_skill_text
-    assert "dubbi-e-domande.md" in writing_skill_text
+    assert "questions.md" in writing_skill_text
     assert "Italian" in writing_skill_text
+    assert "Use English file names" in writing_skill_text
     assert (
         "done-*`, `evidence-envelope.md`, and `completion-report.md`"
         in writing_skill_text
     )
     assert "## Local retained-plan contract" in writing_skill_text
-    assert (
-        "preserve the source decision inventory before compression"
-        in writing_skill_text
-    )
-    assert "traceability file must map every source item" in writing_skill_text
+    assert "The ledger is the coverage lock" in writing_skill_text
+    assert "must map every source item" in writing_skill_text
+    assert "stable item id" in writing_skill_text
     assert "observable acceptance evidence" in writing_skill_text
     assert "intended observable evidence for every executable item" in writing_skill_text
     assert "Acceptance criteria must disallow clarification-only completion" in writing_skill_text
     assert "Observable acceptance before execution" in writing_skill_text
     assert (
-        "Do not retire, delete, or replace the source strategic artifact"
+        "Do not retire, delete, or replace a source strategic artifact"
         in writing_skill_text
     )
     assert "## File-role conventions" in writing_skill_text
@@ -198,38 +201,43 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "rg --no-ignore" in writing_skill_text
     assert "Use `grill-me` only after the evidence pass" in writing_skill_text
     assert "## Numbered-file shape" in writing_skill_text
-    assert "### Summary control file" in writing_skill_text
+    assert "### Change summary file" in writing_skill_text
+    assert "### Source item ledger file" in writing_skill_text
     assert "### Executable numbered files" in writing_skill_text
     assert "scanability and decision review" in writing_skill_text
-    assert "`Obiettivo`" in writing_skill_text
-    assert "`Direzione proposta`" in writing_skill_text
+    assert "`Problema da risolvere`" in writing_skill_text
+    assert "`Modifiche proposte`" in writing_skill_text
+    assert "`Perche questa strada`" in writing_skill_text
     assert "`Decisione richiesta`" in writing_skill_text
     assert "`Uso consigliato`" in writing_skill_text
     assert "`Mappa file e ruolo`" in writing_skill_text
     assert "`Evidence pass iniziale`" in writing_skill_text
     assert "`Budget lettura`" in writing_skill_text
     assert "`Stop conditions`" in writing_skill_text
+    assert "`Obiettivo`" in writing_skill_text
     assert "`Logica scelta`" in writing_skill_text
     assert "`Assunzioni chiave`" in writing_skill_text
     assert "`Passi eseguibili`" in writing_skill_text
     assert "`Validazione`" in writing_skill_text
-    assert "numbered control file, not as an executable task list" in writing_skill_text
+    assert "numbered control files, not executable task lists" in writing_skill_text
     assert "5-7 bullets when practical" in writing_skill_text
     assert "1-2 lines when practical" in writing_skill_text
     assert "outside the plan-and-apply loop" in writing_skill_text
     assert (
-        "source-item coverage through `02-matrice-operativa.md`" in writing_skill_text
+        "source-item coverage through `02-source-item-ledger.md`"
+        in writing_skill_text
     )
     assert "Compressing or deleting a strategic source plan" in writing_skill_text
 
     assert "## When to use" in executing_skill_text
     assert "retained numbered plans" in executing_skill_text
-    assert "Read `01-riassunto-direzione-e-decisione.md` first" in executing_skill_text
+    assert "Read `01-change-summary.md` first" in executing_skill_text
+    assert "`02-source-item-ledger.md`" in executing_skill_text
     assert (
-        "Use the summary file to classify folder purpose and file roles"
+        "Use the summary and ledger to classify folder purpose"
         in executing_skill_text
     )
-    assert "source-item coverage owner" in executing_skill_text
+    assert "coverage lock" in executing_skill_text
     assert "intended observable acceptance" in executing_skill_text
     assert "Do not close executable items from summary prose or clarification alone" in executing_skill_text
     assert "missed-work scan" in executing_skill_text
@@ -242,22 +250,23 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     )
     assert "rg --no-ignore" in executing_skill_text
     assert (
-        "classification, reading-budget, and evidence-pass role" in executing_skill_text
+        "decision-summary role" in executing_skill_text
     )
     assert 'generic request such as "analyze this plan"' in executing_skill_text
     assert "done-<source-file-name>.md" in executing_skill_text
-    assert "dubbi-e-domande.md" in executing_skill_text
+    assert "questions.md" in executing_skill_text
     assert "move it into the matching `done-*` file" in executing_skill_text
-    assert "remove it from the active plan file" in executing_skill_text
-    assert "Delete an active plan file" in executing_skill_text
+    assert "remove it from the active executable plan file" in executing_skill_text
+    assert "Delete an active executable plan file" in executing_skill_text
     assert "Continue automatically" in executing_skill_text
     assert "Stop only for real blockers" in executing_skill_text
     assert (
-        "Strategic-to-operational conversions used `02-matrice-operativa.md`"
+        "Strategic-to-operational conversions used `02-source-item-ledger.md`"
         in executing_skill_text
     )
     assert (
-        "traceability matrix has preserved source-item coverage" in executing_skill_text
+        "No `SHIPPED` or complete outcome is claimed while any in-scope source item"
+        in executing_skill_text
     )
 
 
@@ -270,31 +279,27 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
     )
 
     assert "## Required Questions" in scope_challenge_text
+    assert "`coverage`: How does `02-source-item-ledger.md`" in scope_challenge_text
+    assert "`02-source-item-ledger.md` or an equivalently" in scope_challenge_text
     assert (
-        "`coverage`: Which traceability matrix or equivalent owner"
-        in scope_challenge_text
-    )
-    assert (
-        "`02-matrice-operativa.md` or an equivalently clear traceability owner"
-        in scope_challenge_text
-    )
-    assert (
-        "Coverage: <traceability owner, explicit not-applicable, or blocker>"
+        "Coverage: <ledger coverage, explicit not-applicable, or blocker>"
         in scope_challenge_text
     )
     assert "`observable acceptance`: Which diff" in scope_challenge_text
     assert "Observable acceptance: <diff, file, validator" in scope_challenge_text
     assert (
-        "For strategic-to-operational conversions, `READY` also requires explicit source-item coverage"
+        "For non-trivial retained plans, `READY` also requires explicit source-item"
         in scope_challenge_text
     )
 
     assert "| Semantic coverage |" in review_gate_text
+    assert "| Summary focus |" in review_gate_text
+    assert "| File naming |" in review_gate_text
     assert "| Observable acceptance |" in review_gate_text
     assert "clarification-only completion for executable verbs" in review_gate_text
     assert "coverage review comes before shape-only validation" in review_gate_text
     assert (
-        "missing source-item coverage in a strategic-to-operational conversion"
+        "missing source-item coverage for requested work"
         in review_gate_text
     )
 
@@ -314,11 +319,11 @@ def test_plan_wrapper_skills_ship_openai_metadata() -> None:
 
     assert "$internal-writing-plans" in writing_metadata_text
     assert (
-        "always starting with 01-riassunto-direzione-e-decisione.md"
+        "starting with 01-change-summary.md"
         in writing_metadata_text
     )
     assert "$internal-executing-plans" in executing_metadata_text
     assert (
-        "classify retained plan folders from 01-riassunto-direzione-e-decisione.md"
+        "classify retained plan folders from 01-change-summary.md"
         in executing_metadata_text
     )

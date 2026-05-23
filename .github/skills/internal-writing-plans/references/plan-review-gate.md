@@ -21,10 +21,12 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Observable acceptance | Does each executable verb name the expected diff, file state, assertion, or explicit non-action that will prove it was done? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
-| Semantic coverage | When converting an existing strategic or monolithic plan, does the new plan preserve each source item in a traceability matrix or equivalent owner before retiring the source artifact? |
+| Summary focus | Does `01-change-summary.md` contain only the short proposed-change summary, problem, rationale, validation path, and decision request? |
+| Semantic coverage | Does `02-source-item-ledger.md` preserve each requested or source item with stable item id, observable acceptance, evidence class, status, and route before execution starts? |
 | Executor context | Can a smaller or lower-context executor see the key files, validators, owner, assumptions, and stop conditions without rediscovering the plan? |
-| Folder semantics | Does `01-riassunto-direzione-e-decisione.md` state `Uso consigliato` and `Mappa file e ruolo` so a generic reader can tell whether the folder is for review, apply, resume, rewrite, or status only? |
-| Token discipline | Does the summary define `Evidence pass iniziale` and `Budget lettura` so the executor can classify the folder with the fewest safe reads? |
+| File naming | Are new or rewritten retained-plan file names English while the plan content stays Italian by default? |
+| Folder semantics | Does `02-source-item-ledger.md` state `Uso consigliato` and `Mappa file e ruolo` so a generic reader can tell whether the folder is for review, apply, resume, rewrite, or status only? |
+| Token discipline | Does the ledger define `Evidence pass iniziale` and `Budget lettura` so the executor can classify the folder with the fewest safe reads? |
 
 ## Outcomes
 
@@ -45,6 +47,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
   identifiers, file names, commands, and validation steps explicit. Short
   English glosses near critical decisions are allowed when they reduce handoff
   ambiguity.
-- Treat a missing or weak summary control file as a plan-quality defect, not as a documentation nit.
+- Treat a long or overloaded `01-change-summary.md` as a plan-quality defect, not as a documentation nit.
+- Treat a missing or weak source-item ledger as a plan-quality defect, not as a documentation nit.
 - Treat a missing evidence pass or reading budget as a token-waste defect for non-trivial retained plans.
-- Treat missing source-item coverage in a strategic-to-operational conversion as a plan-quality defect, not as an editorial preference.
+- Treat missing source-item coverage for requested work as a plan-quality defect, not as an editorial preference.

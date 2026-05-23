@@ -156,13 +156,14 @@ Review treats missing validation as a finding, not a footnote.
 +-------------------------------+
 | apply-plan entrypoint          |
 | - load internal-executing-plans|
-| - ignore dubbi-e-domande.md   |
+| - ignore questions.md         |
 +-------------------------------+
               |
               v
 +-------------------------------+
 | done-* loop                    |
 | - move completed items         |
+| - preserve ledger coverage     |
 | - delete empty active files    |
 | - continue across plan files   |
 | - stop only for blockers       |

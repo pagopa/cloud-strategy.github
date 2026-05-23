@@ -60,9 +60,11 @@ available, mark it `UNVERIFIABLE` instead of guessing.
 
 ## Procedure
 
-1. Extract every executable item from the plan. Ignore `dubbi-e-domande.md`.
+1. Extract every executable item from the plan. Use `02-source-item-ledger.md`
+   when present, and ignore `questions.md`.
 2. If numbered plan files are absent because the `done-*` loop removed them,
-  use the evidence envelope or reconstruct items from `done-*` files.
+  use the evidence envelope or reconstruct items from `done-*` files and the
+  source-item ledger.
 3. Record the declared target state, anti-scope, owner, and validation path.
 4. Collect observed evidence from changed files, `git diff`, validators, and
    reachable target paths.

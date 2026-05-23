@@ -35,7 +35,7 @@ Execute the plan end to end.
 1. Select the `execute` or `apply-plan` entry point from `internal-gateway-operational-flow`.
 2. Treat this prompt as approval to continue until every executable plan item is implemented, verified, or blocked by a real blocker.
 3. Use `internal-executing-plans` when the input is an approved retained plan under `tmp/superpowers/`.
-4. Do not treat `dubbi-e-domande.md` as executable plan content.
+4. Do not treat `questions.md` or legacy `dubbi-e-domande.md` as executable plan content.
 5. Stop and produce a next-step package only when the plan is missing, ambiguous, unsafe, out of scope, or blocked by missing user input.
 6. Keep edits scoped to the plan, required adjacent contracts, and validation fixes.
 7. Do not silently implement newly discovered improvement ideas unless they are necessary to complete the approved plan.
@@ -44,7 +44,7 @@ Mandatory triple check before completion:
 
 You must check the completed work three times before reporting completion. Each check must use a distinct verification perspective, not a repeated version of the same review, and must be reported separately as `Check 1`, `Check 2`, and `Check 3`. For medium or large plans, treat all three checks as substantive completion gates. For small changes, each check may be concise, but it must still be explicit and separate. Choose stronger strategies when the repository context suggests them, but the three checks must cover at least:
 
-1. Plan coverage: map each requested plan item to an implemented change, explicit non-action, or blocker.
+1. Plan coverage: map each requested plan item or source-item ledger row to an implemented change, explicit non-action, or blocker.
 2. Contract coverage: re-read changed files and relevant repository instructions to check ownership, frontmatter, links, inventory, schemas, and local conventions.
 3. Evidence coverage: run the applicable validators, tests, lint commands, or closest available checks; read the output before making any success claim.
 

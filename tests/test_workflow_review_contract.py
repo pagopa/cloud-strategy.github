@@ -464,9 +464,11 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Residual risks",
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
-            "`SHIPPED` requires passed validators and a completed report",
+            "`SHIPPED` requires passed validators, a completed report",
+            "no open\nsource-item ledger rows",
+            "Source-item ledger status",
             "Intended observable acceptance",
-            "A summary\nthat says an item was done is not evidence",
+            "A summary that says an item was done is not evidence",
             "late-stage packaging artifacts",
             "not after every intermediate patch",
             "item-level evidence",
@@ -481,7 +483,8 @@ def test_resume_protocol_reference_exists() -> None:
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
             "Verify-first Sequence",
-            "`01-riassunto-direzione-e-decisione.md`",
+            "`01-change-summary.md`",
+            "`02-source-item-ledger.md`",
             "Evidence pass iniziale",
             "Budget lettura",
             "rg --no-ignore",
@@ -497,8 +500,8 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
-            "file roles cannot be inferred safely",
-            "before broad reading",
+            "file roles and source coverage cannot be inferred safely",
+            "before broad\n  reading",
             "lacks an item/evidence table or evidence-envelope pointer",
             "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
         ),
@@ -509,13 +512,14 @@ def test_plan_handoff_requires_summary_control_file() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/plan-handoff.md",
         (
-            "`01-riassunto-direzione-e-decisione.md`",
+            "`01-change-summary.md`",
+            "`02-source-item-ledger.md`",
             "`Uso consigliato`",
             "`Mappa file e ruolo`",
             "`Evidence pass iniziale`",
             "`Budget lettura`",
-            "summary control file",
-            "matching `done-*` marker",
+            "source-item coverage",
+            "markers when the folder completes",
             "Observable acceptance for each executable action",
         ),
     )
@@ -539,7 +543,7 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
     executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
 
     assert (
-        "evidence envelope with item, status,\n  evidence, and route"
+        "evidence envelope with item, status, evidence, and route"
         in executing_plans_text
     )
     assert "late-stage evidence packaging" in executing_plans_text

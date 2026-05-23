@@ -12,24 +12,30 @@ Decision Brief from planning. It defines the minimum input contract before the
 ## Required Inputs
 
 - Plan folder under `tmp/superpowers/<clear-action-or-task-name>/`.
-- `01-riassunto-direzione-e-decisione.md` with `Uso consigliato` and `Mappa file e ruolo`.
-- `Evidence pass iniziale` and `Budget lettura` in the summary control file.
-- Numbered executable plan files after the summary control file.
-- A plan for closing the summary control file through a matching `done-*` marker when the folder completes.
+- `01-change-summary.md` with only the concise proposed-change summary, problem,
+  rationale, validation path, and decision request.
+- `02-source-item-ledger.md` with `Uso consigliato`, `Mappa file e ruolo`,
+  `Evidence pass iniziale`, `Budget lettura`, and source-item coverage.
+- Numbered executable plan files after the summary and ledger control files.
+- A plan for closing the summary and ledger files through matching `done-*`
+  markers when the folder completes.
 - Confirmed target state and anti-scope.
 - Selected owner and known lane-change owner.
 - Validation path or explicit validation gap.
 - Observable acceptance for each executable action, especially broad verbs such
    as compress, rewrite, refactor, harden, align, or simplify.
+- A stable ledger row for every requested or source item, with status and route.
 - Stop conditions.
 
 ## Before Starting
 
-1. Read `01-riassunto-direzione-e-decisione.md` first and use it to classify folder purpose, next expected treatment, file roles, and reading budget.
+1. Read `01-change-summary.md` first for human decision context, then read
+   `02-source-item-ledger.md` to classify folder purpose, next expected
+   treatment, file roles, reading budget, and source-item coverage.
 2. Run the declared `Evidence pass iniziale` before broad reading. Use `rg --no-ignore` for retained artifacts under `tmp/` when checking plan claims.
-3. Read `dubbi-e-domande.md` for accepted decisions, then exclude it from the
+3. Read `questions.md` for accepted decisions, then exclude it from the
    executable loop.
-4. Read numbered plan files in order after the summary control file.
+4. Read numbered executable plan files in order after the summary and ledger.
 5. Check whether a Decision Brief exists in chat, a prompt, or a retained plan
    artifact.
 6. If a required input is missing, inspect repository evidence before asking.
@@ -39,8 +45,9 @@ Decision Brief from planning. It defines the minimum input contract before the
 ## Standard Stop Conditions
 
 - Scope moves outside the declared files, owners, or asset family.
-- The summary control file, `Uso consigliato`, or `Mappa file e ruolo` is missing from a non-trivial retained plan.
-- `Evidence pass iniziale` or `Budget lettura` is missing from a non-trivial retained plan.
+- `01-change-summary.md` is missing or overloaded with control details.
+- `02-source-item-ledger.md`, `Uso consigliato`, or `Mappa file e ruolo` is missing from a non-trivial retained plan.
+- `Evidence pass iniziale`, `Budget lettura`, or source-item coverage is missing from a non-trivial retained plan.
 - Owner is missing or the active owner no longer fits.
 - Validation path is absent and no closest check exists.
 - A promotion-gated contract would be violated.

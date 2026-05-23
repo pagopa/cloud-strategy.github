@@ -8,7 +8,7 @@ Use this reference when the staged `plan`, `execute`, `apply-plan`, `review`, or
 | --- | --- | --- |
 | `full-cycle` | Non-trivial work that needs visible planning, optional critical challenge, checkpointed delivery, and final evidence. | Hidden wrapper-agent dispatch or unapproved execute/apply after planning. |
 | `plan-only` | Decisions, retained plans, Decision Briefs, and stop-before-apply workflows. | Silent implementation after the plan is written. |
-| `apply-plan` | Approved retained plan folders under `tmp/superpowers/<clear-action-or-task-name>/` using `internal-executing-plans`, folder-first execution, and explicit completion evidence. | Inline plans without normalization or checkpoint, newly discovered improvements, or `dubbi-e-domande.md` execution. |
+| `apply-plan` | Approved retained plan folders under `tmp/superpowers/<clear-action-or-task-name>/` using `internal-executing-plans`, folder-first execution, source-item ledger coverage, and explicit completion evidence. | Inline plans without normalization or checkpoint, newly discovered improvements, or `questions.md` execution. |
 | `review` | Defect-first findings, evidence gaps, and fix routing. | Applying fixes or writing the initial design. |
 | `mode-explicit` | Direct user requests for `plan`, `execute`, or `review`. | Overriding the user's explicit phase unless the lane no longer fits. |
 
@@ -18,7 +18,7 @@ Use this reference when the staged `plan`, `execute`, `apply-plan`, `review`, or
 | --- | --- | --- |
 | `plan` | Ambiguity resolution, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, or pure pressure testing. |
 | `execute` | Clear local implementation, deterministic realignment, nearby documentation/test updates, and concrete validation. | Strategic tradeoffs, unresolved ownership, non-trivial rollout decisions, review-first asks, or assumption challenge. |
-| `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, blocker handling, cross-file continuation, and completion checks. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, or executing `dubbi-e-domande.md`. |
+| `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, source-item ledger coverage, blocker handling, cross-file continuation, and completion checks. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, or executing `questions.md`. |
 | `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, systems risk, and fix routing. | Applying fixes, designing the initial solution, or open-ended challenge. |
 
 If two modes still plausibly fit, choose `plan` and make the uncertainty explicit.
