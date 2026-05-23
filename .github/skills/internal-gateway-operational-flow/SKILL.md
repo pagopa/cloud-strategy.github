@@ -75,10 +75,7 @@ Use this map before loading support skills or optional references.
 - Always load `grill-me` and `internal-agent-support-next-step` at skill start. Load every other skill only when its phase, handoff, or failure condition becomes active.
 - If the entry point or phase is unclear, use `plan` as the safe fallback instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
-- Treat `grill-me` as a blocking gate before plan output when user
-  decisions may change scope, owner, target state, validation, rollout, or
-  anti-scope.
-- Before any non-trivial retained plan, Decision Brief, plan reformulation, or governance-sensitive work that touches agents, skills, prompts, routing, catalog, validation, shared workflow, or always-on guidance, make the `grill-me` gate status explicit as `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`. Do not enter `execute` while the result is `grill-me required`.
+- Run Gate 0 after the minimum evidence pass before governance-sensitive plan output or editing. Treat `grill-me` as the blocking gate when user decisions may change scope, owner, target state, validation, rollout, or anti-scope, and do not enter `execute` or `apply-plan` while the result is `grill-me required`.
 - Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Treat cross-skill contracts as owner-level contracts. Reference another skill by name and the behavior it owns; do not link to another skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, or `agents/` files.
@@ -91,6 +88,20 @@ Use this map before loading support skills or optional references.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked, unless a governance-sensitive `grill-me required` gate blocks execution.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
 - When a user says expected work was missed, treat it as a workflow defect: compare the original request, retained-plan source items, current diff, and validation evidence before explaining or closing. For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
+
+## Grill-me Gate Protocol
+
+Gate 0 starts after the minimum evidence pass needed to classify the request, target path, owner, anti-scope, and nearest validation. Use `grill-me` only after that evidence pass.
+
+For governance-sensitive work, declare exactly one gate status before any plan output, recommendation, retained plan, Decision Brief, plan reformulation, or edit: `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`.
+
+Use `grill-me required` when user-only decisions remain and can change scope, owner, target state, validation, rollout, or anti-scope. Use `grill-me satisfied` when the needed user decisions were already answered or explicitly accepted and still match the current scope. Use `grill-me not applicable` when the work is concrete, mechanical, or fully recoverable from repository evidence.
+
+Gate 0 is mandatory when the user asks to clarify before planning, when the request touches agents, skills, prompts, workflow, catalog, governance, routing, validation, shared workflow, or always-on guidance, or when missing context, target state, anti-scope, owner, validation, or user decisions could change scope, owner, target state, validation, rollout, or anti-scope. A large context assembly does not waive Gate 0 while unresolved user-only decisions remain.
+
+When the gate result is `grill-me required`, stop before writing the plan, recommendation, retained plan, Decision Brief, or editing files. Do not enter `execute` or `apply-plan` while the gate is `grill-me required`.
+
+If a new instruction or request change could modify scope, owner, target state, validation, rollout, or anti-scope, run a request-change realignment: do the minimum new evidence pass, rerun Gate 0, and stop again if the result is `grill-me required`.
 
 ## Runtime Context And Portability
 
@@ -147,11 +158,7 @@ Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, a
 
 Before a non-trivial or ambiguous request moves from evidence gathering into a retained plan, run a lightweight Spec Sufficiency Gate. The gate does not block simple, mechanical, or already concrete tasks. It must make visible the objective, assumptions that can change delivery, success criteria, boundaries, validation path, and open questions. If a vague request cannot be reframed into testable success criteria from repository evidence, stop for `grill-me` or an explicit `ASK` outcome instead of drafting around the gap.
 
-Before writing any `plan-only` output, non-trivial retained plan, or plan reformulation, check whether `grill-me` is mandatory and state the gate result before the plan content. Use exactly one of:
-
-- `grill-me required`: user-only decisions remain and can change scope, owner, target state, validation, rollout, or anti-scope.
-- `grill-me satisfied`: the needed user decisions were already answered or explicitly accepted and still match the current scope.
-- `grill-me not applicable`: the work is concrete, mechanical, or fully recoverable from repository evidence.
+Before writing any `plan-only` output, non-trivial retained plan, or plan reformulation, apply Gate 0 from `Grill-me Gate Protocol` and state the gate result before the plan content.
 
 `grill-me` is mandatory when the user asks to clarify before planning, when the request touches agents, skills, prompts, workflow, catalog, governance, routing, or validation, or when missing context, target state, anti-scope, owner, validation, or user decisions could change scope, owner, target state, validation, rollout, or anti-scope. Before asking questions, inspect the repository when the answer is recoverable from files.
 Treat those cases as `plan-only (clarify-first)` even when the user did not explicitly ask to be grilled, but only when unresolved user-only decisions remain. A detailed prompt or large evidence pass does not waive the gate when unresolved user-only decisions still remain. Comparison, integration, or architecture-judgment requests should default to the clarify-first gate whenever the repository cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar.
@@ -186,6 +193,8 @@ when the brief must survive a handoff.
 ## Execute Mode
 
 Execute mode owns clear local delivery. It may touch several adjacent files when the target state is already decided and validation is concrete. File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
+
+For governance-sensitive delivery, run Gate 0 after the minimum evidence pass before editing. Direct user authorization does not waive the gate. Do not enter `execute` or `apply-plan` while the gate is `grill-me required`.
 
 For `execute`, keep edits scoped to the requested change, required adjacent contracts, and validation fixes. Do not silently add newly discovered improvements.
 
@@ -276,6 +285,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 
 - `plan-only` stops after the plan, Decision Brief, optional critical pass, and next-step package.
 - `full-cycle` may continue only through visible phase changes and the required pre-execute checkpoint; the entrypoint name alone does not skip that checkpoint.
+- Any request-change realignment reruns Gate 0 before the next governance-sensitive plan output, recommendation, phase transition, or edit.
 - In `full-cycle`, use a visible critical phase when the plan discards two or more credible alternatives, includes an uncertain assumption, or touches governance-sensitive scope such as always-on guidance, sync, validators, or token-risk behavior.
 - For important prompt or skill replacement, shared routing changes, or material governance-sensitive workflow changes, use `internal-gateway-critical-master` before finalizing the plan or immediately after the first compact draft.
 - `apply-plan` stops for missing retained plans, inline plans without checkpoint, or blockers that `internal-executing-plans` identifies.
@@ -299,6 +309,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Phase-ending reports state `Lessons` status even when no lesson was retained.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-high-level-review`, or future security-review playbooks.
 - `grill-me` blocks plan output when user decisions can change scope, owner, target state, validation, rollout, or anti-scope.
+- Gate 0 follows the minimum evidence pass and reruns on request-change realignment before governance-sensitive planning or editing continues.
 - Imported support follows `references/wrapper-alignment.md` and is never a mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

@@ -31,8 +31,10 @@ portable workflow semantics in the core skill.
 
 - Use this agent for `full-cycle`, `plan-only`, `apply-plan`, `review`, or
   explicit `plan`, `execute`, and `review` phase requests.
-- Declare the `grill-me` gate before governance-sensitive planning or editing,
-  and do not enter `execute` while the gate is `grill-me required`.
+- Declare `Gate 0` after the minimum context assembly for
+  governance-sensitive planning or editing, rerun it on request-changing
+  realignment, and do not enter `execute` or `apply-plan` while the gate is
+  `grill-me required`.
 - Keep governance-sensitive planning in `plan-only (clarify-first)` when
   unresolved user decisions remain, and stop for `grill-me` before writing any
   plan artifact.

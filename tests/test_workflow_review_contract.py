@@ -240,6 +240,43 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
     )
 
 
+def test_gate_zero_and_realignment_block_governance_sensitive_execution() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "## Grill-me Gate Protocol",
+            "Gate 0 starts after the minimum evidence pass",
+            "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`.",
+            "run a request-change realignment",
+            "Any request-change realignment reruns Gate 0",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
+        (
+            "run Gate 0 after the minimum evidence pass",
+            "rerun Gate 0 on request-changing realignment",
+            "`execute` and `apply-plan` stay blocked while the Gate 0 result is",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md",
+        (
+            "minimum evidence pass, then",
+            "Gate 0",
+            "rerun Gate 0 before any governance-sensitive plan output or edit",
+        ),
+    )
+    assert_contains_all(
+        ".github/agents/internal-gateway-operational-flow.agent.md",
+        (
+            "`Gate 0`",
+            "request-changing",
+            "do not enter `execute` or `apply-plan` while the gate is",
+        ),
+    )
+
+
 def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",

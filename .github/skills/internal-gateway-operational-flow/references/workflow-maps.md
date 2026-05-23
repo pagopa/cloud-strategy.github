@@ -51,7 +51,8 @@ Use this repository-local variant for small catalog maintenance before escalatin
                v
 +-------------------------------+
 | plan phase                     |
-| - grill-me when needed         |
+| - minimum evidence pass, then  |
+|   Gate 0                       |
 | - retained plan when justified |
 | - Decision Brief projection    |
 +-------------------------------+
@@ -83,6 +84,9 @@ Use this repository-local variant for small catalog maintenance before escalatin
 ```
 
 The full cycle coordinates visible phases. It is not hidden dispatch between wrapper agents.
+Run the minimum evidence pass before Gate 0. If a request-changing
+realignment alters scope, owner, target state, validation, rollout, or
+anti-scope, rerun Gate 0 before any governance-sensitive plan output or edit.
 
 ## Planned Work
 
@@ -95,6 +99,8 @@ The full cycle coordinates visible phases. It is not hidden dispatch between wra
                v
 +-------------------------------+
 | plan mode                      |
+| - minimum evidence pass, then  |
+|   Gate 0                       |
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |

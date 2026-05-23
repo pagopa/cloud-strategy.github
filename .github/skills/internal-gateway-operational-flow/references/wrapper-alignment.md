@@ -31,7 +31,7 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | `plan`, `full-cycle` | The user asks for grilling, governance-sensitive planning still has unresolved user-only decisions, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first, treat the lane as `plan-only (clarify-first)` when those decisions can still change scope, owner, or validation, and use the local bulk-question override before one-at-a-time follow-up. |
+| `grill-me` | `plan`, `full-cycle` | The user asks for grilling, governance-sensitive planning still has unresolved user-only decisions, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first, run Gate 0 after the minimum evidence pass, treat the lane as `plan-only (clarify-first)` when those decisions can still change scope, owner, or validation, and rerun Gate 0 on request-changing realignment before one-at-a-time follow-up. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
 Internal replacements:
@@ -60,9 +60,11 @@ Support selection belongs in the gateway skills, not in wrapper skill-list
 sections.
 
 - Planning support includes `grill-me` only when the operational-flow skill
-  selects it.
+  selects it through Gate 0 after the minimum evidence pass.
 - Governance-sensitive planning with unresolved user choices stays in
   `plan-only (clarify-first)` until `grill-me` resolves those choices.
+- `execute` and `apply-plan` stay blocked while the Gate 0 result is
+  `grill-me required`, including request-changing realignment.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
 - Failure diagnosis belongs to `internal-debugging`.

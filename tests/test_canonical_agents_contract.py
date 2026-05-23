@@ -225,6 +225,30 @@ def test_operational_flow_wrapper_reports_completion_checks() -> None:
     assert "Next-step package" in body or "next-step package" in body
 
 
+def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
+    skill_text = read_body(".github/skills/internal-gateway-operational-flow/SKILL.md")
+    wrapper_text = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
+    wrapper_alignment_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
+    ).read_text(encoding="utf-8")
+    workflow_maps_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
+    ).read_text(encoding="utf-8")
+
+    assert "## Grill-me Gate Protocol" in skill_text
+    assert "Gate 0 starts after the minimum evidence pass" in skill_text
+    assert "request-change realignment" in skill_text
+    assert (
+        "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`."
+        in skill_text
+    )
+    assert "`Gate 0`" in wrapper_text
+    assert_normalized_snippet(wrapper_text, "request-changing realignment")
+    assert "run Gate 0 after the minimum evidence pass" in wrapper_alignment_text
+    assert "minimum evidence pass, then" in workflow_maps_text
+    assert "Gate 0" in workflow_maps_text
+
+
 def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
     readme = Path(".github/agents/README.md").read_text(encoding="utf-8")
 
