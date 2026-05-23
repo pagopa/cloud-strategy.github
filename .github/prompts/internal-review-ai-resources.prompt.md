@@ -107,9 +107,9 @@ If a target is ambiguous, resolve obvious repository paths first. Ask only when
 the target cannot be resolved safely from filesystem evidence.
 
 When the target is `.github/skills/<name>/` or `.github/skills/<name>/SKILL.md`,
-resolve the owning skill bundle, not only the first file opened. Review
-existing sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
-unless the user explicitly excludes them.
+resolve the owning skill bundle and keep its bundle siblings (`references/`,
+`scripts/`, `assets/`, and `agents/openai.yaml`) in scope unless explicitly
+excluded.
 
 ## Resource Families In Scope
 
@@ -142,15 +142,13 @@ Before judging quality:
    Markdown, script, YAML, or other target paths.
 3. Resolve the target as a single resource, folder set, full catalog, or retained
    report package.
-  When the target is a skill bundle, keep the bundle root visible instead of
-  collapsing back to only `SKILL.md` after the first read.
+  For skill bundles, keep the bundle root visible after the first read.
 4. Verify which in-scope resource families exist on disk.
 5. Build a local reference graph from frontmatter, Markdown links, declared
    skills, paired agents, `references/`, `scripts/`, `assets/`, and validator
    references.
-  For a skill bundle target, treat existing sibling `references/`, `scripts/`,
-  `assets/`, and `agents/openai.yaml` as default in-scope coverage unless
-  explicitly excluded.
+  For skill bundles, treat existing bundle siblings as default in-scope
+  coverage unless explicitly excluded.
 6. Map tests and validation entrypoints that cover the target before judging
    whether a resource is safe to revise, merge, move, retire, or keep.
 7. Check token exposure before recommending expansion: estimate what is
@@ -520,9 +518,8 @@ Before the final answer:
 3. Confirm every in-scope family was either reviewed or marked not present.
 4. Confirm all referenced local resources that materially affect the decision
    were checked or marked `VERIFY`.
-  For a skill bundle target, confirm each existing sibling `references/`,
-  `scripts/`, `assets/`, and `agents/openai.yaml` was reviewed or explicitly
-  marked out of scope, absent, or `VERIFY`.
+  For skill bundles, confirm each existing bundle sibling was reviewed or
+  explicitly marked out of scope, absent, or `VERIFY`.
 5. Confirm test and validation coverage was reviewed for every target where
    tests or validators exist.
 6. Confirm skill coverage includes partitioning, triggers, usefulness, size,

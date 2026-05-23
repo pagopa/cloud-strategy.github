@@ -11,6 +11,8 @@ This skill is often invoked by planning or sync lanes, but it can also be used d
 
 Treat the declared governance contract in the relevant agent, root `AGENTS.md`, and `.github/copilot-instructions.md` as the policy source of truth. Treat the current `.github/` catalog on disk as evidence to compare against that policy.
 
+For skill bundles, treat `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` as bundle siblings.
+
 ## When to use
 
 - Audit repository-owned GitHub Copilot assets for overlap, hollow references, stale contracts, naming drift, or governance drift.
@@ -22,7 +24,7 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 - Detect overlapping skills and agents.
 - Detect cleanup recommendations backed only by stale plan paths or files that are absent on the current filesystem.
 - Detect hollow assets that point to missing local files or missing companion skills.
-- Detect review or cleanup scopes that silently collapse a skill bundle to only `SKILL.md` while ignoring existing bundle-local `references/`, `scripts/`, `assets/`, or `agents/openai.yaml`.
+- Detect review or cleanup scopes that silently collapse a skill bundle to only `SKILL.md` while ignoring bundle siblings.
 - Detect declared skills that have no concrete workflow role in the agent or skill surface that declares them.
 - Detect retired frontmatter and stale runtime-specific wording.
 - Detect stale or misleading tool contracts in repository-owned internal agents.
@@ -38,7 +40,7 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 1. Check naming and frontmatter.
 2. Check tool and MCP contract clarity for repository-owned internal agents.
 3. Check broken local references.
-4. For skill bundle targets, check existing bundle-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before calling the target healthy or low risk.
+4. For skill bundle targets, check existing bundle siblings before calling the target healthy or low risk.
 5. Check declared skill contracts and decorative skill usage.
 6. Check trigger overlap.
 7. When adding or tightening exact `applyTo` overlap validation, rerun the overlap scan across the whole repository and register every intentional co-load in the allowlist in the same pass.

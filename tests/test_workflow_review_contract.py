@@ -257,16 +257,31 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
     assert_contains_all(
         ".github/skills/internal-copilot-audit/SKILL.md",
         (
+            "For skill bundles, treat `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` as bundle siblings.",
             "silently collapse a skill bundle to only `SKILL.md`",
-            "For skill bundle targets, check existing bundle-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before calling the target healthy or low risk.",
+            "For skill bundle targets, check existing bundle siblings before calling the target healthy or low risk.",
         ),
     )
     assert_contains_all(
         ".github/prompts/internal-review-ai-resources.prompt.md",
         (
-            "resolve the owning skill bundle, not only the first file opened",
-            "For a skill bundle target, treat existing sibling `references/`, `scripts/`",
-            "For a skill bundle target, confirm each existing sibling `references/`,",
+            "resolve the owning skill bundle and keep its bundle siblings",
+            "For skill bundles, treat existing bundle siblings as default in-scope",
+            "For skill bundles, confirm each existing bundle sibling was reviewed",
+        ),
+    )
+    assert_contains_all(
+        ".github/prompts/internal-mega-review.prompt.md",
+        (
+            "When a repository-owned bundle owner such as `SKILL.md` materially affects a finding",
+            "inspect bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
+        ),
+    )
+    assert_contains_all(
+        ".github/prompts/internal-agent-review-next-actions.prompt.md",
+        (
+            "If `subject` is a repository-owned bundle owner such as `SKILL.md`",
+            "review bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
         ),
     )
 

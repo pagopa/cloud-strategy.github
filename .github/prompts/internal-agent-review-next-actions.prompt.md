@@ -24,6 +24,8 @@ Use these repository sources first:
 - [.github/skills/internal-agent-support-next-step/SKILL.md](../skills/internal-agent-support-next-step/SKILL.md)
 - [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
 
+If `subject` is a repository-owned bundle owner such as `SKILL.md`, review bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action.
+
 Produce review findings with:
 
 1. Severity and confidence on every finding
