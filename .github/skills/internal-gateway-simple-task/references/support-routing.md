@@ -41,7 +41,9 @@ repository evidence, or escalate when the missing owner changes the risk.
 ## Claim Gates
 
 Use this table when the task stays simple but the final answer would make a
-strong status claim.
+strong status claim. It mirrors the claim-gate contract in `SKILL.md`. Update
+the core skill first when an owner changes, then keep this lazy-loaded
+reference aligned.
 
 | Claim before final answer | Required owner | Evidence gate |
 | --- | --- | --- |

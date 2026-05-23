@@ -7,7 +7,7 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 ## Referenced skills
 
-This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to. It is an owner index, not a preload bundle.
 
 - `grill-me`: optional focused clarification support for simple blockers.
 - `internal-gateway-operational-flow`: staged workflow owner when simple work no longer fits.
@@ -138,10 +138,22 @@ really an ownership, rollout, governance, tradeoff, or validation decision,
 escalate instead of questioning inside simple mode. Do not use simple-mode
 `grill-me` for pre-plan decisions.
 
+## grill-me boundary
+
+This `grill-me boundary` is canonical for simple mode. Use `grill-me` only for
+one focused block of clarification when missing user intent, target path, input
+data, local context, or a blocker prevents starting or continuing the active
+simple lane. Do not use simple-mode `grill-me` for pre-plan, ownership,
+rollout, governance, tradeoff, or validation-strategy decisions. Escalate to
+`internal-gateway-operational-flow` instead.
+
 ## Claim Gates
 
-These gates are exceptions to the anti-catalog posture. They are not a support
-bundle to preload. Use them only before making the matching claim:
+This section in `SKILL.md` is the source of truth for the claim-gate contract.
+`references/support-routing.md` is a lazy-loaded operational mirror and must
+stay aligned with these owners. These gates are exceptions to the anti-catalog
+posture. They are not a support bundle to preload. Use them only before making
+the matching claim:
 
 - Load `internal-debugging` before saying the original bug, failure, or loop is
   fixed.
