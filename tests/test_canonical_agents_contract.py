@@ -188,17 +188,27 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
 
     assert "name: internal-gateway-operational-flow" in skill_text
     assert "## Skill-First Staged Entry Points" in skill_text
+    assert "Always preload only `grill-me` and `internal-agent-support-next-step`." in skill_text
+    assert (
+        "Load every other skill only when its phase, handoff, or failure condition becomes active."
+        in skill_text
+    )
     assert "`full-cycle`" in skill_text
     assert "`plan-only`" in skill_text
     assert "`plan-only (clarify-first)`" in skill_text
     assert "`apply-plan`" in skill_text
+    assert "`review`" in skill_text
     assert "`mode-explicit`" in skill_text
+    assert "`grill-me required`" in skill_text
+    assert "`grill-me satisfied`" in skill_text
+    assert "`grill-me not applicable`" in skill_text
     assert "## User Authorization Signals" in skill_text
     assert "`full-cycle` alone" in skill_text
     assert "existing approved retained plan folder" in skill_text
     assert "Decision Brief" in skill_text
     assert "explicit checkpoint before moving from `plan`" in skill_text
     assert "user decisions could change scope" in skill_text
+    assert "Keep direct entry and manual transitions visible to the user." in skill_text
     assert "multiple credible paths" in skill_text
     assert "`plan`" in mode_contracts_text
     assert "`execute`" in mode_contracts_text
