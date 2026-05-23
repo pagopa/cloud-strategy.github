@@ -8,6 +8,8 @@ description: Use when repository-owned work needs a skill-first staged operation
 ## Referenced skills
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+Always preload only `grill-me` and `internal-agent-support-next-step`.
+Treat every other referenced skill as an on-demand dependency, not a preload bundle.
 
 - `grill-me`: pre-plan clarification gate when user decisions can change scope, owner, target state, validation, rollout, or anti-scope.
 - `internal-debugging`: root-cause support when execution, validation, or recovery exposes a real failing loop.
@@ -18,7 +20,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
 - `internal-gateway-simple-task`: simple concrete fast path when staged workflow is too heavy.
 - `internal-lesson-codification`: retained-learning routing when a durable lesson candidate appears before reporting or editing `LESSONS_LEARNED.md`.
-- `internal-security-review`: future security lens name governed by the promotion rule in `references/wrapper-alignment.md`.
+- `internal-security-review`: future security lens name, not yet promoted, governed by the promotion rule in `references/wrapper-alignment.md`.
 - `internal-high-level-review`: systems review, codebase orientation, plan-completion audit, and scope-drift analysis.
 - `superpowers-verification-before-completion`: evidence gate before completion claims in `execute`, `apply-plan`, `plan complete`, `review complete`, or `no findings` states.
 
@@ -71,15 +73,13 @@ Use this map before loading support skills or optional references.
 
 - Choose one active phase at a time inside the selected workflow.
 - Each active phase declares phase, logical owner, scope, anti-scope, action, validation, risk, and the next checkpoint or decision.
+- Always load `grill-me` and `internal-agent-support-next-step` at skill start. Load every other skill only when its phase, handoff, or failure condition becomes active.
 - If the entry point or phase is unclear, use `plan` as the safe fallback instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user.
 - Treat `grill-me` as a blocking gate before plan output when user
   decisions may change scope, owner, target state, validation, rollout, or
   anti-scope.
-- Before any non-trivial retained plan, Decision Brief, plan reformulation, or
-  governance-sensitive recommendation, make the `grill-me` gate status explicit
-  as `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`.
-- Before planning or editing governance-sensitive work that touches agents, skills, prompts, routing, catalog, validation, shared workflow, or always-on guidance, declare the `grill-me` gate status. Do not enter `execute` while the result is `grill-me required`.
+- Before any non-trivial retained plan, Decision Brief, plan reformulation, or governance-sensitive work that touches agents, skills, prompts, routing, catalog, validation, shared workflow, or always-on guidance, make the `grill-me` gate status explicit as `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`. Do not enter `execute` while the result is `grill-me required`.
 - Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Treat cross-skill contracts as owner-level contracts. Reference another skill by name and the behavior it owns; do not link to another skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, or `agents/` files.
@@ -95,8 +95,7 @@ Use this map before loading support skills or optional references.
 
 ## Runtime Context And Portability
 
-This skill owns portable runtime workflow semantics. Do not create or revive a
-separate runtime operating model document for this logic.
+This skill owns portable runtime workflow semantics. Do not create or revive a separate runtime operating model document for this logic.
 
 - Use `references/workflow-maps.md` when a runtime host lacks native instruction, scoped-rule, or skill loading.
 - Treat Copilot agents as wrapper projections and skills as workflow owners. Repository policy and scoped instructions still win on conflicts.
@@ -147,25 +146,20 @@ Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, a
 
 Before a non-trivial or ambiguous request moves from evidence gathering into a retained plan, run a lightweight Spec Sufficiency Gate. The gate does not block simple, mechanical, or already concrete tasks. It must make visible the objective, assumptions that can change delivery, success criteria, boundaries, validation path, and open questions. If a vague request cannot be reframed into testable success criteria from repository evidence, stop for `grill-me` or an explicit `ASK` outcome instead of drafting around the gap.
 
-Before writing any `plan-only` output, non-trivial retained plan, or plan
-reformulation, check whether `grill-me` is mandatory and state the gate result
-before the plan content. Use exactly one of:
+Before writing any `plan-only` output, non-trivial retained plan, or plan reformulation, check whether `grill-me` is mandatory and state the gate result before the plan content. Use exactly one of:
 
 - `grill-me required`: user-only decisions remain and can change scope, owner, target state, validation, rollout, or anti-scope.
 - `grill-me satisfied`: the needed user decisions were already answered or explicitly accepted and still match the current scope.
 - `grill-me not applicable`: the work is concrete, mechanical, or fully recoverable from repository evidence.
 
-`grill-me` is mandatory when the user asks to clarify before planning, when the request touches agents, skills, prompts, workflow, catalog, governance, routing, or validation, or when missing context, target state, anti-scope, owner, validation, or user decisions could change scope, owner, target state, validation, rollout, or anti-scope. Before asking questions, inspect the repository when the answer is recoverable from files. Unresolved user decisions could change scope, owner, target state, validation, rollout, or anti-scope.
-Treat those cases as `plan-only (clarify-first)` even when the user did not explicitly ask to be grilled, but only when unresolved user-only decisions remain. A detailed prompt, apparent solution, or large evidence pass does not waive the gate when unresolved user-only decisions still remain. Comparison, integration, or architecture-judgment requests should default to the clarify-first gate whenever the repository cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar.
+`grill-me` is mandatory when the user asks to clarify before planning, when the request touches agents, skills, prompts, workflow, catalog, governance, routing, or validation, or when missing context, target state, anti-scope, owner, validation, or user decisions could change scope, owner, target state, validation, rollout, or anti-scope. Before asking questions, inspect the repository when the answer is recoverable from files.
+Treat those cases as `plan-only (clarify-first)` even when the user did not explicitly ask to be grilled, but only when unresolved user-only decisions remain. A detailed prompt or large evidence pass does not waive the gate when unresolved user-only decisions still remain. Comparison, integration, or architecture-judgment requests should default to the clarify-first gate whenever the repository cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar.
 
 When the gate result is `grill-me required`, stop before writing the plan or editing files. Then provide numbered questions with a recommended answer for each, using `Question`, `Recommendation`, `Why`, and `Default if accepted`, then wait until the user answers or explicitly accepts the defaults.
-Do not replace those decisions with silent assumptions. After the bulk answer,
-continue one question at a time only for unresolved ambiguity.
+Do not replace those decisions with silent assumptions. After the bulk answer, continue one question at a time only for unresolved ambiguity.
 
 When the target path includes `AGENTS.md`, `.github/copilot-instructions.md`, `.github/INVENTORY.md`, `.github/agents/`, `.github/prompts/`, `.github/skills/`, validators, sync engines, or wrapper agents, treat the plan as governance-sensitive. Include the applicable validation path, such as `make token-risks`, `make github-catalog-validation`, and focused contract tests, or name the explicit validation gap. In `plan-only`, name focused tests by path or command without opening them unless their exact assertions affect the decision.
-Governance-sensitive planning with unresolved user choices must stop for
-`grill-me` before any retained plan, Decision Brief, or recommendation is
-written.
+Governance-sensitive planning with unresolved user choices must stop for `grill-me` before any retained plan, Decision Brief, or recommendation is written.
 
 Before editing a governance-sensitive prompt, skill, agent, route, or validator contract, map the observed workflow errors to required coverage in a compact matrix. Use the matrix to decide whether the change belongs in the skill, paired agent, reference, validator, or docs, then keep the patch in the smallest owner.
 
