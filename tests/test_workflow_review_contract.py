@@ -268,6 +268,9 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
             "resolve the owning skill bundle and keep its bundle siblings",
             "For skill bundles, treat existing bundle siblings as default in-scope",
             "For skill bundles, confirm each existing bundle sibling was reviewed",
+            "smallest evidence pass that can confirm or disconfirm the main",
+            "Use the smallest output shape that supports the decision.",
+            "source-item coverage matrix",
         ),
     )
     assert_contains_all(

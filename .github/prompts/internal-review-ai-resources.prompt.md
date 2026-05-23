@@ -28,22 +28,35 @@ ${input:constraints:List no-touch areas, rollout constraints, evidence limits, o
 Output preference:
 ${input:output:Write chat-only, retained report under tmp/, or infer from target size}
 
-Use these repository sources first:
+## Source Loading Order
+
+Always load:
 
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
-- [.github/INVENTORY.md](../INVENTORY.md)
-- [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
-- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
-- [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
-- [.github/skills/internal-copilot-audit/SKILL.md](../skills/internal-copilot-audit/SKILL.md)
-- [.github/skills/internal-agent-creator/SKILL.md](../skills/internal-agent-creator/SKILL.md)
-- [.github/skills/internal-skill-creator/SKILL.md](../skills/internal-skill-creator/SKILL.md)
-- [.github/skills/internal-copilot-instructions-creator/SKILL.md](../skills/internal-copilot-instructions-creator/SKILL.md)
+- the resolved target path or paths
+- every scoped instruction whose `applyTo` matches an in-scope target path
 
-Load additional repository skills only when the target resource or its
-references require their owner rules. Do not load every skill only because it
-exists.
+Load only when needed:
+
+- [.github/INVENTORY.md](../INVENTORY.md) for catalog-wide naming, discovery,
+  sync, or propagation claims
+- [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md) for repo-wide contract or
+  governance disagreements
+- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
+  and [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
+  for flow, phase, handoff, completion, or retained-plan claims
+- [.github/skills/internal-copilot-audit/SKILL.md](../skills/internal-copilot-audit/SKILL.md)
+  for overlap, hollow-reference, governance-drift, bundle-health, or token-risk
+  decisions
+- [.github/skills/internal-agent-creator/SKILL.md](../skills/internal-agent-creator/SKILL.md),
+  [.github/skills/internal-skill-creator/SKILL.md](../skills/internal-skill-creator/SKILL.md),
+  and [.github/skills/internal-copilot-instructions-creator/SKILL.md](../skills/internal-copilot-instructions-creator/SKILL.md)
+  only when the recommendation would create, split, retire, or replace those
+  resource families
+
+Load optional owner skills only when the target or a live decision boundary
+requires them. Do not load every skill only because it exists.
 
 Use `LESSONS_LEARNED.md` only when it is explicitly in the target, referenced by
 an in-scope resource, or needed to verify a retained-learning claim. Treat it as
@@ -61,47 +74,24 @@ non-canonical retained evidence until codified in the smallest valid owner.
 Run an evidence-based review of repository-owned AI resources and their
 referenced local assets.
 
-The review must explain:
-
-- what each relevant resource owns
-- how it is activated or consumed
-- which local files it references
-- how it behaves inside the repository operational flow
-- which overlaps, gaps, stale references, and flow risks matter
-- what should be kept, wrapped, revised, split, merged, moved, retired, created,
-  compressed, automated, or reviewed later
-
 The review is analysis-only. Do not modify the reviewed resources. If retained
 analysis is needed, write only under `tmp/`.
 
 Do not name vendor-specific reasoning engines or compare them. Review consumer
-surfaces, contracts, and repository behavior instead.
+surfaces, contracts, repository behavior, and validation paths instead.
 
 Do not produce an encyclopedic review. Include only real problems, important
 tradeoffs, recommended decisions, blocking uncertainties, and high-ROI quick
-wins. If a resource has no meaningful problem, do not spend report space on it
-unless it needs a `KEEP` line in the decision table.
-
-Do not propose new technology before diagnosing the existing repository
-correctly.
+wins.
 
 ## Target Resolution
 
 Accept any of these inputs in `Review target`:
 
-- one concrete resource path, such as `AGENTS.md`,
-  `.github/agents/<name>.agent.md`, `.github/prompts/<name>.prompt.md`,
-  `.github/instructions/<name>.instructions.md`, or
-  `.github/skills/<name>/SKILL.md`
-- one or more folders, such as `.github/agents/`, `.github/skills/`,
-  `.github/instructions/`, `.github/prompts/`, `.github/scripts/`, or
-  AI-catalog test folders under `tests/`
-- the full AI catalog, meaning `AGENTS.md`, `.github/copilot-*.md`,
-  `.github/INVENTORY.md`, `.github/agents/`, `.github/instructions/`,
-  `.github/prompts/`, `.github/skills/`, AI catalog validation or sync scripts
-  under `.github/scripts/`, and tests that validate those resources
-- an existing retained report package under `tmp/`, in which case review the
-  report against current repository evidence instead of treating it as policy
+- one concrete resource path
+- one or more relevant folders
+- the full AI catalog
+- an existing retained report package under `tmp/`
 
 If a target is ambiguous, resolve obvious repository paths first. Ask only when
 the target cannot be resolved safely from filesystem evidence.
@@ -111,210 +101,70 @@ resolve the owning skill bundle and keep its bundle siblings (`references/`,
 `scripts/`, `assets/`, and `agents/openai.yaml`) in scope unless explicitly
 excluded.
 
-## Resource Families In Scope
+## Scope Rules
 
-Review these families when they are in the target or referenced by it:
+Review only the target families and direct references needed to support the
+decision.
 
-- `AGENTS.md`
-- `.github/copilot-instructions.md` and related `.github/copilot-*.md` files
-- `.github/INVENTORY.md`
-- `.github/agents/*.agent.md`
-- `.github/instructions/*.instructions.md`
-- `.github/prompts/*.prompt.md`
-- `.github/skills/**/SKILL.md`
-- skill-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
-- AI catalog validators, sync helpers, and inventory scripts under
-  `.github/scripts/`
-- tests and fixtures that validate AI catalog behavior, prompt contracts,
-  inventory, sync, token-risk checks, or validation entrypoints
-- local docs, templates, manifests, or retained reports that are explicitly
-  referenced by an in-scope resource
+For skill bundles, treat existing bundle siblings as default in-scope coverage
+unless explicitly excluded.
+
+For skill bundles, confirm each existing bundle sibling was reviewed or marked
+intentional non-action in the source-item coverage matrix.
 
 Do not expand into unrelated application, infrastructure, or documentation files
 unless an in-scope AI resource references them or a validator requires them.
 
-## Mandatory Control Pass
+## Token And Read Discipline
 
-Before judging quality:
+- Start with the smallest evidence pass that can confirm or disconfirm the main
+  concern.
+- Read the target, controlling owner, nearest validator, and direct references
+  before broad catalog surfaces.
+- Prefer exact path checks, compact tables, and delta notes over long narrative
+  taxonomies.
+- Keep a compact source-item coverage matrix instead of rereading the same
+  surfaces.
+- Expand only when the evidence conflicts, a validator pulls more files in, or a
+  cross-family decision cannot be made locally.
 
-1. Read `AGENTS.md` and `.github/copilot-instructions.md`.
-2. Read every scoped instruction whose `applyTo` metadata matches reviewed
-   Markdown, script, YAML, or other target paths.
-3. Resolve the target as a single resource, folder set, full catalog, or retained
-   report package.
-  For skill bundles, keep the bundle root visible after the first read.
-4. Verify which in-scope resource families exist on disk.
-5. Build a local reference graph from frontmatter, Markdown links, declared
-   skills, paired agents, `references/`, `scripts/`, `assets/`, and validator
+## Review Loop
+
+1. Resolve the target and smallest credible in-scope family set.
+2. Identify owner, activation path, usage proof, and nearest validator or test.
+3. Build the direct reference graph from frontmatter, local links, declared
+   skills, paired agents, bundle siblings, scripts, assets, and validator
    references.
-  For skill bundles, treat existing bundle siblings as default in-scope
-  coverage unless explicitly excluded.
-6. Map tests and validation entrypoints that cover the target before judging
-   whether a resource is safe to revise, merge, move, retire, or keep.
-7. Check token exposure before recommending expansion: estimate what is
-   always-loaded, what is lazy-loaded, which files exceed token ROI, and whether
-   an existing token-risk validator applies.
-8. Check execution speed before recommending heavier process: identify slow
-   reading paths, slow validators, duplicated review passes, and the shortest
-   evidence path that still proves the claim.
-9. Check actual workflow consumption: distinguish resources that merely exist
-   from resources that are selected by agents, referenced by prompts or skills,
-   discovered by sync, exercised by tests, or invoked by local workflow
-   entrypoints.
-10. Load only the repository skills that own a relevant decision boundary.
-11. Compare thin wrappers, core skills, prompt entrypoints, scoped instructions,
-   sync helpers, and tests by role before calling anything duplicated.
-12. Keep a running list of unproven claims and place them in low-evidence or open
-   questions sections.
-13. Decide whether the output can stay in chat or needs a retained report under
-    `tmp/`.
-14. If retained analysis will span multiple files, decide where each required
-    output section will live before writing so final coverage is complete.
+4. Check bundle completeness, validation coverage, propagation impact, context
+   cost, and token ROI.
+5. Keep unproven claims in `LOW` or `VERIFY`, not as strong structural
+   recommendations.
+6. Use the smallest output shape that supports the decision before writing.
 
-## Flow Behavior Review
+## Core Review Lenses
 
-For every material resource or resource group, evaluate how it behaves inside
-the repository flow:
+Check only the lenses that the target actually needs:
 
-- Activation: what causes it to load or be selected.
-- Owner: which file owns route, policy, reusable procedure, deep detail,
-  validation, sync, or reporting.
-- Phase behavior: how it supports `plan`, `execute`, `apply-plan`, `review`, or
-  handoff decisions.
-- References: which local files it asks the operator to read, load, run, or keep
-  aligned.
-- Boundary: what it must not own, and which adjacent owner should take over.
-- Evidence path: which validator, script, test, or manual check proves the
-  resource still works.
-- Usage proof: which reference, route, sync output, test, workflow, or manual
-  invocation proves the workflow is actually consumed.
-- Failure behavior: what happens when a reference is missing, a target is
-  ambiguous, a validator fails, or the selected owner no longer fits.
-- Context cost: what is always visible, what should be lazy-loaded, and what can
-  be compressed without losing routing clarity.
-- Execution speed: which required reads, phases, validators, and handoffs slow
-  the path, and which faster evidence path preserves correctness.
-- Propagation: whether changes must update inventory, sync scripts, validators,
-  paired agents, paired skills, scoped instructions, or retained reports.
+- ownership and boundary clarity
+- activation and usage proof
+- reference health and bundle completeness
+- validation, sync, and propagation coverage
+- context cost, lazy-load fit, and token ROI
+- flow behavior when plan, execute, apply-plan, review, or handoff semantics are
+  part of the target
 
-## Review Questions
+When relevant to the target family, also check these local questions:
 
-Use these as an internal checklist, not as a required final outline.
+- Agents: route clarity, thin-wrapper discipline, tool contract, and stop
+  conditions
+- Instructions: `applyTo` precision, path-scoped fit, and overlap justification
+- Skills: trigger clarity, bundle sibling necessity, paired-wrapper alignment,
+  and lazy-load fit
+- Prompts: input clarity, output calibration, owner routing, and preload budget
+- Scripts, validators, and tests: discoverability, coverage, idempotence, and
+  failure signal quality
 
-Agents:
-
-- Are the existing agents necessary?
-- Which agents are redundant, too broad, too narrow, or missing?
-- Which agents can be merged, split, renamed, retired, or converted into skills
-  or prompt files?
-- Is a router or orchestrator needed, and should it only suggest the next owner
-  or also prepare an operating brief?
-- Are any agents mixing planner, executor, reviewer, sync, or challenge roles
-  that should be separated?
-- Does each agent have a distinct route, boundary, tool contract, and output
-  expectation?
-- Does a wrapper stay thin when a core skill owns reusable procedure?
-- Should any agent behavior move into a skill, prompt, or scoped instruction?
-- Are handoffs and stop conditions explicit and user-visible?
-- Are route names and agent names clear enough for selection?
-
-Instructions:
-
-- Are instructions partitioned correctly?
-- Does `applyTo` match the intended path family without excess co-loading?
-- Are some instructions never activated, too generic, too long, or overlapping
-  without a clear reason?
-- Do instructions contain only path-scoped rules that should auto-apply?
-- Are workflow depth and optional expertise kept in skills or prompts?
-- Do instructions avoid duplicating repository-wide policy?
-
-Skills:
-
-- Are skills partitioned correctly?
-- Does each skill have a clear trigger, smallest credible owner, and useful
-  boundary?
-- Is each skill useful, too large, too small, redundant, or stale?
-- Is each skill optimized for context cost and token ROI?
-- Should any skills be merged, retired, split, or renamed?
-- Should any skills become instructions or prompts?
-- Are high-ROI skills missing?
-- Do skills connect cleanly to agents, prompts, instructions, and validation?
-- Are references, scripts, and assets inside the skill bundle justified by
-  repeated need?
-- Do paired agents and skills agree on route, procedure, and deep-detail split?
-
-Prompts:
-
-- Are prompts useful, too many, or too few?
-- Does each prompt have clear inputs, agent owner, constraints, and expected
-  output?
-- Is the prompt reusable across resource families without hardcoding one
-  consumer surface?
-- Does it collect enough target, depth, and constraint information to avoid
-  hidden assumptions?
-- Does it define versioning or compatibility expectations when those matter?
-- Are high-ROI prompt entrypoints missing?
-- Should any prompt logic become a skill, instruction, or validator instead?
-
-Bridge and catalog files:
-
-- Do `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md`
-  agree on precedence, rule placement, and live catalog shape?
-- Are exact catalog paths kept in inventory instead of duplicated in bridge
-  files?
-- Are repository-wide rules stable enough for always-visible guidance?
-- Is there a clear map, decision log, or update guide for maintaining the AI
-  catalog without breaking routing or validation?
-
-Scripts and validators:
-
-- Are scripts still necessary, simple, fast, documented, and idempotent?
-- Do scripts validate catalog shape, references, frontmatter, inventory, sync, or
-  token-risk claims that humans would otherwise miss?
-- Do scripts have adequate error handling and safe local behavior?
-- Are validation entrypoints discoverable from `Makefile` or `.github/scripts/`?
-- Can scripts generate inventory, maps, reports, or validation evidence?
-- Which automation would immediately reduce drift with the smallest maintenance
-  cost?
-
-Tests:
-
-- Which tests cover agents, skills, instructions, prompts, inventory, sync,
-  token-risk checks, and prompt contracts?
-- Are tests focused, fast, deterministic, and tied to the catalog contracts they
-  protect?
-- Are there missing tests for high-risk routing, frontmatter, reference graphs,
-  or retained-report output contracts?
-- Do tests fail loudly when a resource is renamed, retired, moved, or left out of
-  inventory?
-- Are fixtures clear enough to explain the expected catalog behavior?
-
-Referenced assets:
-
-- Are linked references present, local, and still useful?
-- Do local references carry deep detail that should not be copied into wrapper
-  agents or top-level skills?
-- Are scripts or assets still needed by the resource that references them?
-
-Context economy:
-
-- What gets loaded too often?
-- What should be lazy-loaded?
-- What belongs in minimal always-visible guidance?
-- What belongs in on-demand skills, prompt files, scoped instructions, docs, or
-  tests?
-- Which expensive overlaps should be compressed only after role differences are
-  proven?
-
-Productivity:
-
-- What truly accelerates analysis, implementation, review, and verification?
-- What creates friction or requires too much maintenance?
-- Where is the repository over-engineered or under-invested?
-- Which five quick interventions would deliver the highest ROI?
-- Which three things should stop and which three should start?
-
-## Evidence Standard
+## Evidence And Decision Rules
 
 Use these evidence labels:
 
@@ -328,33 +178,11 @@ Rules:
 - Do not recommend `MERGE`, `MOVE`, `SPLIT`, `RETIRE`, or `CREATE` with `LOW`
   evidence.
 - For low confidence, use `REVIEW` or `VERIFY`.
-- Always cite at least one real file for `MERGE`, `MOVE`, `SPLIT`, `RETIRE`,
-  `CREATE`, or `COMPRESS`.
-- Every strong recommendation must cite at least one real file.
+- Every structural recommendation must cite at least one real file and one
+  `First check` that would confirm or disconfirm the change.
 - Separate `EVIDENCE`, `INFERENCE`, `ASSUMPTION`, and `UNKNOWN`.
-- Do not turn an `ASSUMPTION` or `UNKNOWN` into a strong recommendation.
 
-## Prudence Rules
-
-- Do not suggest merge, removal, or relocation only to reduce file count.
-- Use `RETIRE`, `MERGE`, `MOVE`, or `SPLIT` only when the resource lacks a
-  distinct trigger, lacks a distinct responsibility, increases ambiguity,
-  increases maintenance, increases context cost without proportional value,
-  duplicates an existing resource, conflicts with repository policy, or blocks
-  validation.
-- If the benefit is unclear, use `REVIEW` or `VERIFY`, not a destructive
-  decision.
-- Prefer the smallest concrete action that improves routing, evidence,
-  validation, maintainability, or user productivity.
-- Keep unsupported cleanup ideas in low-evidence or open questions.
-
-## Overlap Classification
-
-Do not call resources duplicated only because they share terms or topics. Compare
-actual role, activation, audience, phase, abstraction level, context cost,
-validation, and repository hierarchy.
-
-Classify every overlap as one of:
+Classify overlaps only as:
 
 - `REAL DUPLICATION`
 - `ACCEPTABLE OVERLAP`
@@ -362,46 +190,41 @@ Classify every overlap as one of:
 - `VERIFY`
 
 When an imported or external-pattern resource overlaps with an `internal-*`
-resource, use this decision logic:
+resource, use `KEEP`, `WRAP`, or `REVIEW/RETIRE` based on actual role,
+activation, context cost, and repository hierarchy.
 
-- `KEEP`: distinct value and no harmful conflict.
-- `WRAP`: useful external value needs repository-owned boundary control.
-- `REVIEW/RETIRE`: current value is unclear, stale, conflicting, or replaceable.
+## Output Calibration
 
-## Decision Criteria
+Use the smallest output shape that supports the decision.
 
-Evaluate relevant resources with these criteria:
+- One resource or one narrow folder: answer in chat unless retained output was
+  explicitly requested.
+- One medium target with retained output: write one concise Markdown file under
+  `tmp/`.
+- Multiple folders, full catalog, or an existing retained report package: write a
+  split retained report under `tmp/superpowers/ai-resource-mega-review/`.
 
-- necessity
-- uniqueness
-- route clarity
-- activation timing
-- owner boundary
-- referenced-resource health
-- context cost and lazy-load fit
-- maintainability
-- composability
-- test coverage and validation path
-- sync and propagation impact
-- user productivity
-- safety and least privilege
-- alignment with `AGENTS.md` and `.github/copilot-instructions.md`
-- evidence quality
+If the retained folder already exists, preserve prior analysis and add only the
+delta or correction needed unless the user explicitly asks to replace it.
 
-## Output Location Rules
+## Required Output Contract
 
-If the target is one small resource and `Output preference` does not require a
-file, answer in chat.
+Every output must include these parts in the smallest workable form:
 
-If the target is one small resource and retained output is explicitly requested,
-write one concise Markdown file directly under `tmp/` with a clear task name.
+1. `Executive summary`: the actual condition of the target in at most 10 lines.
+2. `Target and coverage`: resolved paths, included families, exclusions, and a
+   source-item coverage matrix with `Item | Why in scope | Evidence | State`.
+3. `Main findings`: only high-signal problems, tradeoffs, and blocking
+   uncertainties.
+4. `Decision table`: `Resource | Status | Why | First check`.
+5. `Validation and open questions`: validators run, validators not run, and any
+   unresolved `LOW` or `VERIFY` items.
 
-If the target spans multiple folders, the full AI catalog, or an existing
-retained report package, write a split retained report under:
+Allowed statuses: `KEEP`, `WRAP`, `REVISE`, `COMPRESS`, `SPLIT`, `MERGE`,
+`MOVE`, `RENAME`, `RETIRE`, `CREATE`, `AUTOMATE`, `REVIEW`.
 
-- `tmp/superpowers/ai-resource-mega-review/`
-
-For a fresh retained report, create:
+If you use a split retained package, create only the files that carry distinct
+information from this compact set:
 
 - `01-executive-summary.md`
 - `02-target-and-coverage.md`
@@ -412,101 +235,7 @@ For a fresh retained report, create:
 - `07-recommendations-and-roadmap.md`
 - `open-questions.md`
 
-If the folder already exists, preserve prior analysis and add an addendum unless
-the user explicitly asks to replace it.
-
-## Required Output Structure
-
-Use this structure in chat or across the retained report files.
-
-### 1. Executive Summary
-
-- Maximum 10 lines.
-- State the actual condition of the target: healthy, coherent but improvable,
-  redundant, fragile, unclear, stale, or blocked by missing evidence.
-
-### 2. Target And Coverage
-
-- State resolved paths.
-- State included and excluded resource families.
-- State which referenced resources were followed.
-
-### 3. Repository Hierarchy
-
-- Summarize the effective precedence between `AGENTS.md`,
-  `.github/copilot-instructions.md`, scoped instructions, agents, skills,
-  prompts, scripts, inventory, and referenced docs.
-
-### 4. Resource Map
-
-- Table: `Resource | Family | Owner role | Activation | Key references | Validation`.
-
-### 5. Flow Behavior
-
-- Explain how the target behaves through planning, execution, review, handoff,
-  failure, validation, and propagation.
-- Include the highest-risk flow mismatch, if any.
-
-### 6. Test And Validation Coverage
-
-- State which tests, validators, lint checks, or manual checks cover the target.
-- Identify missing tests or weak assertions for high-risk AI catalog behavior.
-- Distinguish validation that exists from validation that was not run.
-
-### 7. Main Diagnosis
-
-- Split into what works, what is redundant, what is fragile, what costs too much
-  context, what blocks productivity, what lacks test coverage, and what is
-  missing.
-- Keep each subsection to the highest-signal points.
-
-### 8. Main Findings
-
-- Group by severity or priority.
-- For each finding include `Evidence`, `Problem`, `Impact`, `Recommendation`,
-  and `Confidence`.
-
-### 9. Decision Table
-
-- Table: `Area | Resource | Status | Evidence | Problem | Decision | Priority`.
-- Allowed statuses: `KEEP`, `WRAP`, `REVISE`, `COMPRESS`, `SPLIT`, `MERGE`,
-  `MOVE`, `RENAME`, `RETIRE`, `CREATE`, `AUTOMATE`, `REVIEW`.
-- Allowed priorities: `P0`, `P1`, `P2`, `P3`.
-
-### 10. Overlaps And Boundaries
-
-- Table: `Resources involved | Type | Evidence | Assessment | Proposed action`.
-- Use the overlap classifications exactly.
-
-### 11. Recommendations, Roadmap, And Target Rules
-
-- Split into `Do now`, `Do later`, and `Do not do now`.
-- `Do now` may include only `HIGH` or `MEDIUM` evidence actions.
-- Include a non-binding roadmap split into `Cleanup`, `Rationalization`,
-  `Automation`, `Governance`, and `Evolution` when the target is broad enough.
-- Include target architecture differences versus the current state when the
-  evidence supports a better structure.
-- Include a future-rule table `Type | When to create it | When to avoid it` for
-  agent, skill, instruction, prompt, script, test, and doc when the review makes
-  artifact-placement decisions.
-
-### 12. Quick Wins And Automation
-
-- Maximum 10 items.
-- Table: `Action | Evidence | Impact | Effort | First check`.
-
-### 13. Low-Evidence Items And Open Questions
-
-- Keep `LOW` and `VERIFY` items separate from strong recommendations.
-- Use: `Item | Why uncertain | What to verify`.
-- Do not include destructive actions such as `RETIRE`, `MERGE`, `MOVE`, or
-  `SPLIT` in this section.
-
-### 14. Final Critique
-
-- Maximum 10 lines.
-- State what works, what is overcomplicated, what slows delivery, what is risky,
-  and the best next step.
+Do not create filler sections or duplicate the same finding across files.
 
 ## Completeness Pass
 
@@ -515,9 +244,10 @@ Before the final answer:
 1. Re-open any retained report file written under `tmp/`.
 2. Confirm the requested target was fully resolved or explicitly marked
    unresolved.
-3. Confirm every in-scope family was either reviewed or marked not present.
-4. Confirm all referenced local resources that materially affect the decision
-   were checked or marked `VERIFY`.
+3. Confirm every in-scope family was either reviewed, marked not present, or
+   marked intentional non-action.
+4. Confirm every strong recommendation cites real file evidence, a `First check`,
+   and the nearest validator or explicit validation gap.
   For skill bundles, confirm each existing bundle sibling was reviewed or
   explicitly marked out of scope, absent, or `VERIFY`.
 5. Confirm test and validation coverage was reviewed for every target where
