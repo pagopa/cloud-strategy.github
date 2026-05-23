@@ -90,6 +90,7 @@ Use this map before loading support skills or optional references.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked, unless a governance-sensitive `grill-me required` gate blocks execution.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
+- When a user says expected work was missed, treat it as a workflow defect: compare the original request, retained-plan source items, current diff, and validation evidence before explaining or closing.
 
 ## Runtime Context And Portability
 
@@ -134,6 +135,7 @@ Use the smallest evidence pass that can safely choose the owner and next action.
 - Token discipline limits the evidence pass. It does not skip a required `grill-me` gate.
 - For governance-sensitive repairs, default to `git status --short`, targeted `rg`, and the smallest relevant `sed` ranges. Do not read whole files, full numbered listings, or broad diffs unless a validator failure or exact contract check requires them.
 - For old-to-new prompt, skill, or workflow comparisons, use a compact matrix instead of reprinting whole files or long diffs. Cite only the relevant sections, changed claims, coverage gaps, risks, and decisions.
+- For plan execution, maintain a compact source-item coverage matrix with item, intended observable change, evidence class, status, and route. This replaces broad rereading and prevents token-heavy narrative audits.
 - Before producing diff evidence, prefer `git diff --stat` plus targeted hunks or file/line references. Avoid full diff output when the change can be checked by the matrix and validators.
 - Stop exploration once the plan can state target, assumptions, anti-scope, selected owner, validation path, residual risk, and user decisions.
 - When the user challenges token cost, runtime cost, or slow workflow, treat it as workflow drift. Inspect only the matching skill sections, patch the smallest owner, and validate with the closest available check.
@@ -160,6 +162,8 @@ When the target path includes `AGENTS.md`, `.github/copilot-instructions.md`, `.
 Governance-sensitive planning with unresolved user choices must stop for `grill-me` before any retained plan, Decision Brief, or recommendation is written.
 
 Before editing a governance-sensitive prompt, skill, agent, route, or validator contract, map the observed workflow errors to required coverage in a compact matrix. Use the matrix to decide whether the change belongs in the skill, paired agent, reference, validator, or docs, then keep the patch in the smallest owner.
+
+For action verbs such as compress, rewrite, refactor, harden, align, or simplify, define observable acceptance before execution. Examples include removed duplicate clauses, changed target files, added assertions, or an explicit intentional non-action. Do not close those items from clarifying prose alone.
 
 Before claiming `plan complete`, use `Plan Check 1`, `Plan Check 2`, and `Plan Check 3` for the decision frame, handoff alignment, validation gaps, and stop conditions; then apply `superpowers-verification-before-completion`.
 
@@ -218,6 +222,8 @@ Before reporting completion for `execute` or `apply-plan`, run three distinct ve
 - `Check 1`: Plan coverage. Map each requested item, retained-plan item, or observed workflow error to an implemented change, intentional non-action, or blocker.
 - `Check 2`: Contract coverage. Re-read changed files and relevant repository instructions to check ownership, frontmatter, links, inventory, schemas, and local conventions.
 - `Check 3`: Evidence coverage. Run the applicable validators, tests, lint commands, or closest available checks; read the output before claiming success.
+
+For retained plans, `Check 1` must use the current source-item coverage matrix and observed diff or file evidence. If an item was narrowed, skipped, or satisfied differently, mark it as `CHANGED`, `NOT_DONE`, `UNVERIFIABLE`, or intentional non-action before reporting completion.
 
 Use `superpowers-verification-before-completion` as the final evidence gate for these checks. Do not claim completion from intent, stale output, or a delegated success report.
 

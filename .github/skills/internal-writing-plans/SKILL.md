@@ -58,15 +58,18 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
   fully recoverable from repository evidence.
 - For non-trivial or ambiguous retained plans, the summary must include a lightweight spec baseline: objective, assumptions that affect delivery, success criteria, boundaries or anti-scope, validation path, and open questions or `none`.
 - Success criteria must be concrete enough to verify. Reframe vague goals into observable conditions when repository evidence supports it, or move the uncertainty to `dubbi-e-domande.md` before execution.
+- Action verbs such as compress, rewrite, refactor, harden, align, simplify, or validate must have observable acceptance evidence. Name the expected diff, target file state, validator assertion, or explicit non-action before execution.
 - The summary file must also include the smallest useful reading path: what to inspect first, which evidence pass proves the plan is still valid, and which files can be deferred.
 - When converting an existing strategic, review-only, or monolithic plan into an executable retained plan, preserve the source decision inventory before compression, splitting, or deletion.
 - Prefer `02-matrice-operativa.md` as the first executable file when a source artifact must be converted point by point. Use an equivalently clear name only when it better matches the retained plan language.
 - That traceability file must map every source item to one of: executable change, adaptation in another plan file, intentional non-action, deferred follow-up, rejection, or blocker.
+- The traceability file must also name the intended observable evidence for every executable item: diff evidence, file evidence, validator evidence, manual evidence, or an explicit validation gap.
 - Do not retire, delete, or replace the source strategic artifact until the traceability file proves semantic coverage for every source item.
 - After the summary file, use `02-esecuzione.md` when one executable macro-category is enough.
 - When the work spans more than one executable macro-category, continue with `02-...`, `03-...`, and later numbered files by category, for example `02-implementazione.md`, `03-validazione.md`, and `04-rollout.md`.
 - Do not keep one monolithic plan file when the work spans multiple macro-categories.
 - For executable work, make dependency order, acceptance criteria, and verification checkpoints explicit enough that a later executor can prove each item before moving it to `done-*`.
+- Acceptance criteria must disallow clarification-only completion for executable verbs. If a step says to compress, rewrite, refactor, harden, align, or simplify, the plan must say what observable change proves it.
 - For each executable step, name the acceptance condition, verification path, and target files or owner when known. Keep steps small enough to verify without mixing unrelated owners or cleanup.
 - Write those plan files in Italian by default unless the user explicitly asks for another language.
 - Keep unresolved questions, doubts, and user decisions in `dubbi-e-domande.md`.
@@ -95,6 +98,7 @@ Treat `superpowers-writing-plans` as imported depth and keep any repo-local drif
 - Put the evidence pass and first-read budget in `01-riassunto-direzione-e-decisione.md` under `Evidence pass iniziale` and `Budget lettura`.
 - Make `Budget lettura` exclusive: list the current plan files and any exact external artifacts allowed, and state that sibling retained plans are out of scope when not listed.
 - Coverage before compression: when rewriting an existing strategic or monolithic plan, extract the source items first and preserve them in a traceability owner before shortening, splitting, or deleting the source artifact.
+- Observable acceptance before execution: convert broad verbs into measurable evidence while the plan is still cheap to fix, not after the executor has already closed `done-*` files.
 - Prefer the smallest useful retained plan shape: summary, current execution or backlog, and validation. Add more numbered files only for independent macro-categories.
 - Use `grill-me` only after the evidence pass when real user decisions remain,
   then declare the gate status. Do not ask questions that repository evidence

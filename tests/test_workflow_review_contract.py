@@ -196,6 +196,9 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
             "Review Check 1",
             "Review Check 2",
             "Review Check 3",
+            "workflow defect",
+            "source-item coverage matrix",
+            "Do not close those items from clarifying prose alone",
             "## Failure And Recovery",
             "## Output Calibration",
             "about 40 lines",
@@ -413,6 +416,8 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
             "`SHIPPED` requires passed validators and a completed report",
+            "Intended observable acceptance",
+            "A summary\nthat says an item was done is not evidence",
             "late-stage packaging artifacts",
             "not after every intermediate patch",
             "item-level evidence",
@@ -462,6 +467,7 @@ def test_plan_handoff_requires_summary_control_file() -> None:
             "`Budget lettura`",
             "summary control file",
             "matching `done-*` marker",
+            "Observable acceptance for each executable action",
         ),
     )
 

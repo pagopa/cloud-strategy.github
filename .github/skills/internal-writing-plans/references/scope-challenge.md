@@ -23,6 +23,7 @@ Every retained plan must be able to answer these questions:
 5. `stop conditions`: What missing input, unsafe scope, ownership conflict, or
    validation failure must stop execution?
 6. `reading budget`: What is the smallest first read and evidence pass that can classify the folder without broad context loading?
+7. `observable acceptance`: Which diff, file state, validator assertion, manual check, or explicit non-action will prove each executable item?
 
 For strategic-to-operational or monolithic-to-executable conversions, also answer this:
 
@@ -53,6 +54,7 @@ Validator: <command, review path, or explicit gap>
 Stop conditions: <what stops execution>
 Summary file: <present and decision-ready, or missing>
 Reading budget: <first files or checks before broader reading>
+Observable acceptance: <diff, file, validator, manual, explicit non-action, or blocker>
 Coverage: <traceability owner, explicit not-applicable, or blocker>
 ```
 

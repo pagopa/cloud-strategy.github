@@ -40,6 +40,8 @@ portable workflow semantics in the core skill.
   routing, or shared workflow changes.
 - Use this agent when an approved retained plan under `tmp/superpowers/` should
   be applied through the repository `done-*` loop.
+- Treat a user challenge that expected work was missed as a workflow-defect
+  review before any reassurance or closeout.
 - Do not use this agent for a concrete low-to-medium-risk task that can finish
   through the simple fast path.
 - Do not use this agent when the primary need is assumption pressure-testing;
@@ -60,5 +62,6 @@ portable workflow semantics in the core skill.
 - Active entry point and phase
 - Scope, anti-scope, action, validation path, and risk
 - Files changed and residual risk when work was applied
+- Source-item coverage against observed diff, validators, or explicit non-action
 - `Check 1`, `Check 2`, and `Check 3` evidence before completion claims
 - Next-step package when another visible owner should act

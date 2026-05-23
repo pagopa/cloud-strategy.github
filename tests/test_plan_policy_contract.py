@@ -175,6 +175,10 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
         in writing_skill_text
     )
     assert "traceability file must map every source item" in writing_skill_text
+    assert "observable acceptance evidence" in writing_skill_text
+    assert "intended observable evidence for every executable item" in writing_skill_text
+    assert "Acceptance criteria must disallow clarification-only completion" in writing_skill_text
+    assert "Observable acceptance before execution" in writing_skill_text
     assert (
         "Do not retire, delete, or replace the source strategic artifact"
         in writing_skill_text
@@ -226,6 +230,10 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
         in executing_skill_text
     )
     assert "source-item coverage owner" in executing_skill_text
+    assert "intended observable acceptance" in executing_skill_text
+    assert "Do not close executable items from summary prose or clarification alone" in executing_skill_text
+    assert "missed-work scan" in executing_skill_text
+    assert "A `done-*` marker must include or point to item-level evidence" in executing_skill_text
     assert "Evidence pass iniziale" in executing_skill_text
     assert "Budget lettura" in executing_skill_text
     assert (
@@ -274,12 +282,16 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
         "Coverage: <traceability owner, explicit not-applicable, or blocker>"
         in scope_challenge_text
     )
+    assert "`observable acceptance`: Which diff" in scope_challenge_text
+    assert "Observable acceptance: <diff, file, validator" in scope_challenge_text
     assert (
         "For strategic-to-operational conversions, `READY` also requires explicit source-item coverage"
         in scope_challenge_text
     )
 
     assert "| Semantic coverage |" in review_gate_text
+    assert "| Observable acceptance |" in review_gate_text
+    assert "clarification-only completion for executable verbs" in review_gate_text
     assert "coverage review comes before shape-only validation" in review_gate_text
     assert (
         "missing source-item coverage in a strategic-to-operational conversion"

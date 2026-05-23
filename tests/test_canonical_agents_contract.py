@@ -220,6 +220,8 @@ def test_operational_flow_wrapper_reports_completion_checks() -> None:
     body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
 
     assert "`Check 1`, `Check 2`, and `Check 3` evidence" in body
+    assert "Source-item coverage against observed diff" in body
+    assert "workflow-defect" in body
     assert "Next-step package" in body or "next-step package" in body
 
 

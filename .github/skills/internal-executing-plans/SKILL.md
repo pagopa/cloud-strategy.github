@@ -35,6 +35,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - Read `01-riassunto-direzione-e-decisione.md` first when it exists, then read the remaining numbered plan files in order.
 - Before starting a multi-step item, choose the smallest slice that can be completed, verified, and rolled back. Prefer a vertical slice when one end-to-end path can prove value, a contract-first slice when shared interfaces, validators, or owner contracts must align, and a risk-first slice when one uncertainty can invalidate later work.
 - Do not treat a slice as complete until its acceptance condition and fresh evidence are strong enough to move it to the matching `done-*` file. The evidence checkpoint replaces any imported commit requirement; do not create git commits unless the user explicitly asks.
+- For each slice, compare the source item, intended observable acceptance, current diff or file state, and validator evidence before moving it to `done-*`. Do not close executable items from summary prose or clarification alone.
 - Prefer focused validation order for each slice: run the nearest targeted validator or test that can disconfirm the slice before broad suite work, patch, rerun that same targeted check, and use broader repository validation only after the slice is stable.
 - Prefer safe defaults and rollback-friendly edits: additive or minimal changes, reversible plan state, and feature flags or rollout controls only when incomplete behavior might otherwise be exposed.
 - Ignore `dubbi-e-domande.md` during plan application. It stays outside the plan-and-apply loop.
@@ -47,6 +48,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
   Stop as a handoff gap when the gate status is missing or still
   `grill-me required`.
 - When `02-matrice-operativa.md` or an equivalently clear traceability file exists, treat it as the source-item coverage owner and use it before later phase files retire or compress the source artifact.
+- If the traceability owner lacks observable acceptance for a broad action verb, repair the plan item or stop with a handoff gap instead of guessing the completion standard.
 - Use the summary file's `Evidence pass iniziale` and `Budget lettura` before broad reading. If they are missing from a non-trivial retained plan, stop and report the handoff gap.
 - Keep the initial evidence pass to three checks when possible: target existence, riskiest claim, and nearest validator or explicit gap.
 - Use `rg --no-ignore` or an equivalent ignored-file-aware search for retained artifacts under `tmp/`, scoped to the active plan folder by default. Widen only to exact additional paths that were specifically indicated.
@@ -61,6 +63,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - Use `references/completion-report.md` before reporting final retained-plan
   state.
 - Treat `completion-report.md` and `evidence-envelope.md` as late-stage evidence packaging. Refresh them after the current validator and evidence set is stable, not after every intermediate patch.
+- Before final packaging, run a missed-work scan: compare every source item or reconstructed `done-*` item with the observed diff, target files, validators, and explicit non-actions.
 - For non-trivial retained plans, `done-*` files must preserve the completed
   item and evidence, or point to an evidence envelope with item, status,
   evidence, and route.
@@ -71,6 +74,7 @@ Treat `superpowers-executing-plans` and `superpowers-subagent-driven-development
 - Within an active plan file, prefer the smallest independently verifiable slice that can move to `done-*` without batching unrelated items.
 - Keep execution rollback-friendly: prefer narrowly scoped, reversible edits and verify each completed slice before continuing.
 - When an item is completed, move it into the matching `done-*` file and remove it from the active plan file.
+- A `done-*` marker must include or point to item-level evidence. Use status values such as `DONE`, `CHANGED`, `NOT_DONE`, or `UNVERIFIABLE` when the original acceptance changed or cannot be proven.
 - Delete an active plan file once all of its executable items have been moved out and the file is empty.
 - Continue automatically to the next remaining numbered plan file until no numbered plan files remain.
 - Stop only for real blockers that require user input, missing prerequisites, or a materially broken plan.

@@ -19,6 +19,8 @@ Decision Brief from planning. It defines the minimum input contract before the
 - Confirmed target state and anti-scope.
 - Selected owner and known lane-change owner.
 - Validation path or explicit validation gap.
+- Observable acceptance for each executable action, especially broad verbs such
+   as compress, rewrite, refactor, harden, align, or simplify.
 - Stop conditions.
 
 ## Before Starting

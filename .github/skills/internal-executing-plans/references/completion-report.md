@@ -46,12 +46,18 @@ For non-trivial retained plans, include or link an evidence envelope. The
 envelope must map each retained-plan item or reconstructed `done-*` item to a
 status, evidence path or command, and route.
 
+Before assigning `SHIPPED`, compare promised work with observed delivery. Use
+the current diff, touched files, validators, and explicit non-actions. A summary
+that says an item was done is not evidence.
+
 Do not churn the evidence envelope after every local slice when the validator output is still moving. Refresh it when the retained-plan state is coherent enough to support the reported completion state.
 
 Minimum fields:
 
 - Source item or source `done-*` file.
 - Reconstructed item when the original numbered plan file was already removed.
+- Intended observable acceptance, such as diff, file state, validator assertion,
+  manual check, or explicit non-action.
 - Status using `DONE`, `PARTIAL`, `NOT_DONE`, `CHANGED`, or `UNVERIFIABLE`.
 - Evidence path, artifact, or command.
 - Route for unresolved or intentionally deferred work.
