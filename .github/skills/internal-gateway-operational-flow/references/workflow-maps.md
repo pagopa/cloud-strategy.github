@@ -27,6 +27,31 @@ Use this reference when preserving or validating user-visible operational flows.
 
 Use this path when the target state is already known. Do not reopen strategy unless the task reveals real ambiguity.
 
+### Temporary Execution Scratchpad
+
+Use this mini workflow only inside `execute` mode when coordination state is
+cheaper than rediscovering context during a multi-step task.
+
+- Store the scratchpad outside the repository, such as `/tmp`, and never under
+  `tmp/superpowers/`.
+- Treat it as ephemeral execution state, not as a retained plan, approval
+  signal, catalog item, or completion evidence.
+- Skip it for simple one-owner or one-file tasks.
+- Keep it compact enough to refresh at slice boundaries.
+
+```text
+scope:
+anti_scope:
+current_slice:
+acceptance_check:
+touched_files:
+validation_status:
+blockers:
+```
+
+Completion evidence still comes from requested scope coverage, changed-file
+review, and fresh validator or test output.
+
 ### Catalog Fast Path
 
 Use this repository-local variant for small catalog maintenance before escalating to retained planning or review.

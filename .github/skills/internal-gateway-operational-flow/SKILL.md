@@ -200,6 +200,8 @@ For `execute`, keep edits scoped to the requested change, required adjacent cont
 
 For multi-step work, execute the smallest complete slice that can be verified and rolled back independently. Prefer a vertical slice when one end-to-end path can prove value, a contract-first slice when shared interfaces, validators, or owner contracts must align, and a risk-first slice when one uncertainty can invalidate later work. Each slice should have acceptance, fresh evidence, and a clear next slice before expanding scope.
 
+When `execute` work has enough moving parts that a coordination note is cheaper than rediscovery, maintain a temporary execution scratchpad outside the repository, such as `/tmp`. Use the scratchpad only as ephemeral execution state, not as a retained plan, approval signal, catalog item, or completion evidence; never place it under `tmp/superpowers/`. Keep it compact and AI-readable: scope, anti-scope, current slice, acceptance check, touched files, validation status, and blockers. Skip it for simple one-owner or one-file tasks when the scratchpad cost exceeds the coordination risk. Use `references/workflow-maps.md` only when the scratchpad shape needs a reusable template.
+
 Do not rerun the same successful validator without intervening changes unless the rerun adds new evidence. Preserve the prior output and move to the next relevant check.
 
 For small catalog maintenance in this repository, do the `internal-gateway-simple-task` vs `execute` vs `plan` triage before loading optional references, support skills, or review lenses. Start from one owner file plus one nearby validator or test, and take only one extra reference when it changes the next safe action.
