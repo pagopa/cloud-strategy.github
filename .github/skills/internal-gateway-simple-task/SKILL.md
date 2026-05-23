@@ -93,6 +93,7 @@ governance, tradeoffs, or validation strategy remain ambiguous, escalate.
 8. If the task stops being simple, stop and issue an escalation alert.
 
 Keep the first read budget small: one target or owner file, one matching scoped instruction when applicable, and one nearby validator or test found with `rg`. Open tests only when exact assertions, fixtures, or failure output can change the lane.
+Bundle-target maintenance does not stop at the first file. For a repository-owned skill or similar bundle owner, inspect relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`, or mark them as intentional non-action before closure.
 
 ## Quick Lanes
 
@@ -185,6 +186,7 @@ For escalation, return only the escalation alert fields.
 - Work stayed single-lane and single-phase, or escalation was explicit.
 - The target state was concrete enough for a quick lane.
 - Support selection came from evidence, not a broad bundle or partial catalog.
+- Bundle-target work reviewed the owning file plus relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`, or marked them as intentional non-action before closure.
 - `grill-me`, when used, asked only for the minimum context needed and stayed
   within one focused block of clarification.
 - Claim gates were loaded before any fixed, covered, improved, ready,

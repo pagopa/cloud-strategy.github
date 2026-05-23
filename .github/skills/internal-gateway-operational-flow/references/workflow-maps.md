@@ -33,6 +33,7 @@ Use this repository-local variant for small catalog maintenance before escalatin
 
 - Triage `internal-gateway-simple-task` vs `execute` vs `plan` before loading optional references, support skills, or review lenses.
 - Keep the first read budget to one owner file, one nearby validator or test, and one extra reference only when it changes the next safe action.
+- If the target is a repository-owned bundle owner such as `SKILL.md`, inspect the owning bundle root plus relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before closing coverage or intentional non-action.
 - For `plan-only`, use `rg` to identify validators and focused tests; open the
   test file only when the assertion or failure output can change the plan.
 - Use a short execution loop: targeted `rg` or nearby read, patch, nearby test, `make catalog-fast-check`, then `make github-catalog-validation` once at the end.

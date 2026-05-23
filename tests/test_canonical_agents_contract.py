@@ -468,9 +468,11 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     assert "validator passes" in skill_text
     assert "auth, config, secrets, tenant data" in skill_text
     assert "one focused block of clarification" in skill_text
+    assert "relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`" in skill_text
     assert "`support-loaded`" in simple_lanes_text
     assert "`files-touched`" in simple_lanes_text
     assert "internal-copilot-instructions-creator" in support_routing_text
+    assert "Inspect the owning bundle and nearest contract tests" in support_routing_text
     assert "$internal-gateway-simple-task" in metadata_text
 
 

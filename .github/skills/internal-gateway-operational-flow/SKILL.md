@@ -90,7 +90,7 @@ Use this map before loading support skills or optional references.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked, unless a governance-sensitive `grill-me required` gate blocks execution.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
-- When a user says expected work was missed, treat it as a workflow defect: compare the original request, retained-plan source items, current diff, and validation evidence before explaining or closing.
+- When a user says expected work was missed, treat it as a workflow defect: compare the original request, retained-plan source items, current diff, and validation evidence before explaining or closing. For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
 
 ## Runtime Context And Portability
 
@@ -134,6 +134,7 @@ Use the smallest evidence pass that can safely choose the owner and next action.
 - Treat listed references and support skills as on-demand resources. Do not load every referenced file because it appears in an index or optional map.
 - Token discipline limits the evidence pass. It does not skip a required `grill-me` gate.
 - For governance-sensitive repairs, default to `git status --short`, targeted `rg`, and the smallest relevant `sed` ranges. Do not read whole files, full numbered listings, or broad diffs unless a validator failure or exact contract check requires them.
+- When the target is a repository-owned bundle owner such as `SKILL.md`, resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` in the source-item coverage matrix before claiming the scope is complete or an intentional non-action.
 - For old-to-new prompt, skill, or workflow comparisons, use a compact matrix instead of reprinting whole files or long diffs. Cite only the relevant sections, changed claims, coverage gaps, risks, and decisions.
 - For plan execution, maintain a compact source-item coverage matrix with item, intended observable change, evidence class, status, and route. This replaces broad rereading and prevents token-heavy narrative audits.
 - Before producing diff evidence, prefer `git diff --stat` plus targeted hunks or file/line references. Avoid full diff output when the change can be checked by the matrix and validators.

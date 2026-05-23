@@ -240,6 +240,37 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
     )
 
 
+def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.",
+            "resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` in the source-item coverage matrix",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md",
+        (
+            "inspect the owning bundle root plus relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-copilot-audit/SKILL.md",
+        (
+            "silently collapse a skill bundle to only `SKILL.md`",
+            "For skill bundle targets, check existing bundle-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before calling the target healthy or low risk.",
+        ),
+    )
+    assert_contains_all(
+        ".github/prompts/internal-review-ai-resources.prompt.md",
+        (
+            "resolve the owning skill bundle, not only the first file opened",
+            "For a skill bundle target, treat existing sibling `references/`, `scripts/`",
+            "For a skill bundle target, confirm each existing sibling `references/`,",
+        ),
+    )
+
+
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/SKILL.md",

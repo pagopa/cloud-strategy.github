@@ -22,6 +22,7 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 - Detect overlapping skills and agents.
 - Detect cleanup recommendations backed only by stale plan paths or files that are absent on the current filesystem.
 - Detect hollow assets that point to missing local files or missing companion skills.
+- Detect review or cleanup scopes that silently collapse a skill bundle to only `SKILL.md` while ignoring existing bundle-local `references/`, `scripts/`, `assets/`, or `agents/openai.yaml`.
 - Detect declared skills that have no concrete workflow role in the agent or skill surface that declares them.
 - Detect retired frontmatter and stale runtime-specific wording.
 - Detect stale or misleading tool contracts in repository-owned internal agents.
@@ -37,12 +38,13 @@ Treat the declared governance contract in the relevant agent, root `AGENTS.md`, 
 1. Check naming and frontmatter.
 2. Check tool and MCP contract clarity for repository-owned internal agents.
 3. Check broken local references.
-4. Check declared skill contracts and decorative skill usage.
-5. Check trigger overlap.
-6. When adding or tightening exact `applyTo` overlap validation, rerun the overlap scan across the whole repository and register every intentional co-load in the allowlist in the same pass.
-7. Check bridge coherence between `AGENTS.md` and `.github/copilot-instructions.md`.
-8. Check whether skills or agents became redundant after internal replacements were added.
-9. Check whether governance files still describe superseded or removed assets.
+4. For skill bundle targets, check existing bundle-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before calling the target healthy or low risk.
+5. Check declared skill contracts and decorative skill usage.
+6. Check trigger overlap.
+7. When adding or tightening exact `applyTo` overlap validation, rerun the overlap scan across the whole repository and register every intentional co-load in the allowlist in the same pass.
+8. Check bridge coherence between `AGENTS.md` and `.github/copilot-instructions.md`.
+9. Check whether skills or agents became redundant after internal replacements were added.
+10. Check whether governance files still describe superseded or removed assets.
 
 Before classifying a cleanup as high-evidence, verify the candidate paths exist on the current filesystem. Absent paths are stale plan evidence, not executable deletion work.
 
