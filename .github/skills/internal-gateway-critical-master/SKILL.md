@@ -10,6 +10,8 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 ## When to use
 
 - A repository-owned plan, proposal, decision, or assumption set needs pressure before action.
+- A user asks to validate a repository-wide prompt, skill, agent, workflow, or
+  policy change before editing and wants a manual challenge lens first.
 - The main risk is weak reasoning, hidden assumptions, failure modes, or overfit framing.
 - A runtime without Copilot agent UI needs the critical challenge method directly from a skill.
 - A Copilot critical wrapper needs the shared semantic owner for challenge behavior.
@@ -27,6 +29,9 @@ Use this skill as the portable core for critical challenge work. Copilot may exp
 - Use the artifact and the smallest local evidence needed for the challenge.
   Do not open validators, tests, or neighboring references unless a specific
   claim depends on their exact content.
+- When a repository-wide change is being validated before editing, record the
+  strongest objection and the mitigation or condition required before switching
+  the work back to planning or delivery.
 - Pressure-test upside as well as downside: identify what the current framing may be preventing, overcomplicating, or falsely treating as mandatory.
 - Do not implement, routine-review, or finalize the plan through this skill.
 - Close with one explicit outcome: `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.

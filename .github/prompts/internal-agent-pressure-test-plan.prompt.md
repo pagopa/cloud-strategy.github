@@ -34,5 +34,6 @@ Return a compact pressure test with:
 3. Top failure modes
 4. Counter-framing or inversion result
 5. Explicit outcome: `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`
-6. Return-to-owner next-step package when another lane should act
-7. Residual risk if the proposal still goes ahead
+6. Mitigation or condition required before planning or delivery resumes
+7. Return-to-owner next-step package when another lane should act
+8. Residual risk if the proposal still goes ahead

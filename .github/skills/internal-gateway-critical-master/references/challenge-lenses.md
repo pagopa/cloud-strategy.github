@@ -35,13 +35,14 @@ Then reconcile the answer:
 - Keep the strongest supported objection.
 - Downgrade weak claims to hypotheses.
 - Name unresolved uncertainty explicitly.
-- Recommend `plan`, `execute`, or `review` only after the challenge synthesis is complete.
+- Recommend one explicit outcome from `## Outcome Routing` in `SKILL.md` only after the challenge synthesis is complete.
 
 ## Output Pattern
 
 - Strongest objection or assumption gap.
 - Why it matters now.
 - Evidence or uncertainty.
+- Mitigation or condition required before planning or delivery resumes.
 - One reframing move.
 - Closing synthesis after the final consistency gate.
 - Explicit outcome: `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.

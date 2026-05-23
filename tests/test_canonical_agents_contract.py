@@ -56,6 +56,21 @@ EXPECTED_HANDOFF_TARGETS = {
     ],
 }
 
+EXPECTED_AGENT_TOOLS = {
+    "internal-gateway-operational-flow": ["read", "edit", "search", "execute", "web"],
+    "internal-gateway-critical-master": ["read", "search"],
+    "internal-gateway-simple-task": ["read", "edit", "search", "execute", "web"],
+}
+
+EXPECTED_CRITICAL_OUTCOMES = (
+    "reformulate-plan",
+    "de-escalate-to-simple",
+    "execute-clear-next-step",
+    "review-evidence",
+    "continue-critical",
+    "accept-with-risk",
+)
+
 
 def load_frontmatter(relative_path: str) -> dict[str, object]:
     text = Path(relative_path).read_text(encoding="utf-8")
@@ -101,6 +116,15 @@ def assert_no_legacy_agent_headings(body: str) -> None:
         assert heading not in body
 
 
+def assert_inline_code_tokens(text: str, tokens: tuple[str, ...]) -> None:
+    for token in tokens:
+        assert f"`{token}`" in text
+
+
+def assert_normalized_snippet(text: str, snippet: str) -> None:
+    assert " ".join(snippet.split()) in " ".join(text.split())
+
+
 def test_canonical_agents_keep_required_frontmatter_and_core_skill_contracts() -> None:
     for agent_name, relative_path in CANONICAL_AGENTS.items():
         frontmatter = load_frontmatter(relative_path)
@@ -108,7 +132,7 @@ def test_canonical_agents_keep_required_frontmatter_and_core_skill_contracts() -
 
         assert frontmatter["name"] == agent_name
         assert frontmatter["description"].startswith("Use this agent when")
-        assert frontmatter.get("tools")
+        assert frontmatter.get("tools") == EXPECTED_AGENT_TOOLS[agent_name]
         assert frontmatter.get("disable-model-invocation") is True
         assert "agent" not in frontmatter.get("tools", [])
         assert frontmatter.get("agents") in (None, [])
@@ -312,8 +336,12 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
     skill_text = Path(
         ".github/skills/internal-gateway-critical-master/SKILL.md"
     ).read_text(encoding="utf-8")
+    agent_body = read_body(CANONICAL_AGENTS["internal-gateway-critical-master"])
     lenses_text = Path(
         ".github/skills/internal-gateway-critical-master/references/challenge-lenses.md"
+    ).read_text(encoding="utf-8")
+    prompt_text = Path(
+        ".github/prompts/internal-agent-pressure-test-plan.prompt.md"
     ).read_text(encoding="utf-8")
     metadata_text = Path(
         ".github/skills/internal-gateway-critical-master/agents/openai.yaml"
@@ -321,14 +349,27 @@ def test_critical_master_skill_exists_with_challenge_boundary() -> None:
 
     assert "name: internal-gateway-critical-master" in skill_text
     assert "Do not implement, routine-review, or finalize the plan" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "validate a repository-wide prompt, skill, agent, workflow, or policy change before editing",
+    )
+    assert_normalized_snippet(
+        skill_text,
+        "record the strongest objection and the mitigation or condition required before switching the work back to planning or delivery",
+    )
     assert "## Outcome Routing" in skill_text
-    assert "`de-escalate-to-simple`" in skill_text
-    assert "`execute-clear-next-step`" in skill_text
-    assert "`review-evidence`" in skill_text
-    assert "`accept-with-risk`" in skill_text
+    assert_inline_code_tokens(skill_text, EXPECTED_CRITICAL_OUTCOMES)
+    assert_normalized_snippet(
+        agent_body,
+        "validate a repository-wide prompt, skill, agent, workflow, or policy change before editing",
+    )
     assert "Final Consistency Gate" in lenses_text
     assert "Scope compression" in lenses_text
     assert "Explicit outcome" in lenses_text
+    assert "Mitigation or condition required before planning or delivery resumes." in lenses_text
+    assert_inline_code_tokens(lenses_text, EXPECTED_CRITICAL_OUTCOMES)
+    assert "Mitigation or condition required before planning or delivery resumes" in prompt_text
+    assert_inline_code_tokens(prompt_text, EXPECTED_CRITICAL_OUTCOMES)
     assert "$internal-gateway-critical-master" in metadata_text
 
 
