@@ -8,6 +8,7 @@ description: Use when repository-owned work needs a skill-first staged operation
 ## Referenced skills
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+Load these skills by name only when the active phase requires them. This list is an index, not a bundle to preload.
 Always preload only `grill-me` and `internal-agent-support-next-step`.
 Treat every other referenced skill as an on-demand dependency, not a preload bundle.
 
@@ -20,7 +21,7 @@ Treat every other referenced skill as an on-demand dependency, not a preload bun
 - `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
 - `internal-gateway-simple-task`: simple concrete fast path when staged workflow is too heavy.
 - `internal-lesson-codification`: retained-learning routing when a durable lesson candidate appears before reporting or editing `LESSONS_LEARNED.md`.
-- `internal-security-review`: future security lens name, not yet promoted, governed by the promotion rule in `references/wrapper-alignment.md`.
+- `internal-security-review`: future security lens name, not yet promoted (`not yet promoted`; see the Future Security Lens rule in `references/wrapper-alignment.md`).
 - `internal-high-level-review`: systems review, codebase orientation, plan-completion audit, and scope-drift analysis.
 - `superpowers-verification-before-completion`: evidence gate before completion claims in `execute`, `apply-plan`, `plan complete`, `review complete`, or `no findings` states.
 
@@ -55,8 +56,6 @@ Select one workflow entry point from the user prompt, then run one active phase 
 | `review` | The user asks for defect-first review, merge readiness, or evidence analysis. | `review` |
 | `mode-explicit` | The user directly asks for `plan`, `execute`, or `review`. | The named phase |
 
-Do not create new gateway skills for `plan`, `apply`, or `review`. Use this skill to expose the staged workflow and delegate deep procedure to the owning support skills.
-
 ## Phase Quick Map
 
 Use this map before loading support skills or optional references.
@@ -75,7 +74,7 @@ Use this map before loading support skills or optional references.
 - Each active phase declares phase, logical owner, scope, anti-scope, action, validation, risk, and the next checkpoint or decision.
 - Always load `grill-me` and `internal-agent-support-next-step` at skill start. Load every other skill only when its phase, handoff, or failure condition becomes active.
 - If the entry point or phase is unclear, use `plan` as the safe fallback instead of dispatching automatically.
-- Keep direct entry and manual transitions visible to the user.
+- Keep direct entry and manual transitions visible to the user. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
 - Treat `grill-me` as a blocking gate before plan output when user
   decisions may change scope, owner, target state, validation, rollout, or
   anti-scope.
@@ -91,7 +90,6 @@ Use this map before loading support skills or optional references.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - Treat a direct `execute` or approved `apply-plan` request as approval to continue until every in-scope executable item is delivered, verified, or blocked, unless a governance-sensitive `grill-me required` gate blocks execution.
 - Keep newly discovered improvement ideas separate from execution unless they are required to complete the requested scope or fix validation.
-- Use `superpowers-verification-before-completion` before claiming `execute` or `apply-plan` completion so success claims have fresh evidence.
 
 ## Runtime Context And Portability
 
@@ -99,7 +97,7 @@ This skill owns portable runtime workflow semantics. Do not create or revive a s
 
 - Use `references/workflow-maps.md` when a runtime host lacks native instruction, scoped-rule, or skill loading.
 - Treat Copilot agents as wrapper projections and skills as workflow owners. Repository policy and scoped instructions still win on conflicts.
-- Treat context docs, inventory, retained plans, and `done-*` files as evidence. Completion claims still need fresh tool or validator output.
+- Treat context docs, inventory, retained plans, and `done-*` files as evidence inputs, not completion proof by themselves.
 
 ## User Authorization Signals
 
@@ -163,7 +161,7 @@ Governance-sensitive planning with unresolved user choices must stop for `grill-
 
 Before editing a governance-sensitive prompt, skill, agent, route, or validator contract, map the observed workflow errors to required coverage in a compact matrix. Use the matrix to decide whether the change belongs in the skill, paired agent, reference, validator, or docs, then keep the patch in the smallest owner.
 
-Before claiming `plan complete`, check that `Plan Check 1` covers the decision frame, assumptions, anti-scope, and selected owner; `Plan Check 2` keeps the Decision Brief or retained handoff aligned with the plan; and `Plan Check 3` names concrete validation, evidence gaps, and stop conditions. Use `superpowers-verification-before-completion` for strong plan-completion claims.
+Before claiming `plan complete`, use `Plan Check 1`, `Plan Check 2`, and `Plan Check 3` for the decision frame, handoff alignment, validation gaps, and stop conditions; then apply `superpowers-verification-before-completion`.
 
 After creating a retained plan or materially reformulating one, provide a compact Decision Brief in chat. The brief is a projection, not a second canonical plan:
 
@@ -212,7 +210,6 @@ When ambiguity, ownership, governance, or rollout decisions become dominant, sto
 - Use `internal-debugging` when the failure is a reproducible bug, test failure, validator drift, sync failure, or unexpected behavior.
 - Lane-change to `plan` when the failure reveals unresolved design, ownership, rollout, or governance ambiguity.
 - Report a blocker when prerequisites, unsafe scope, or missing user input prevents correct continuation.
-- Never claim completion, `plan complete`, `review complete`, or `no findings` without fresh evidence.
 
 ## Completion Checks
 
@@ -258,7 +255,7 @@ Review mode does not apply fixes. If the user asks to fix review findings in
 the same request, finish the review result first, then move through an explicit
 checkpoint or a user-authorized `execute` phase.
 
-Before claiming `review complete` or `no findings`, check that `Review Check 1` covers the reviewed artifact, diff, or validation result; `Review Check 2` assigns severity, confidence, causal layer, and fix routing for findings or states why none exist; and `Review Check 3` names validation evidence and remaining gaps. Use `superpowers-verification-before-completion` for strong review-completion or merge-readiness claims.
+Before claiming `review complete` or `no findings`, use `Review Check 1`, `Review Check 2`, and `Review Check 3` for artifact coverage, finding severity and routing, validation evidence, and remaining gaps; then apply `superpowers-verification-before-completion`.
 
 Use the smallest review lens that fits the evidence:
 
@@ -292,9 +289,6 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - Every staged phase includes owner, scope, anti-scope, action, validation, risk, and next checkpoint or decision.
 - `internal-agent-support-next-step` is used for every user-visible transition.
 - `apply-plan` uses `internal-executing-plans` and excludes `dubbi-e-domande.md`.
-- `execute` and `apply-plan` complete only after the three distinct completion checks pass or report an explicit validation gap.
-- Completion claims in `execute` or `apply-plan` passed through `superpowers-verification-before-completion`.
-- Strong `plan complete`, `review complete`, `no findings`, or merge-readiness claims passed through `superpowers-verification-before-completion`.
 - Phase-ending reports state `Lessons` status even when no lesson was retained.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-high-level-review`, or future security-review playbooks.
 - `grill-me` blocks plan output when user decisions can change scope, owner, target state, validation, rollout, or anti-scope.

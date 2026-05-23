@@ -71,6 +71,21 @@ EXPECTED_CRITICAL_OUTCOMES = (
     "accept-with-risk",
 )
 
+EXPECTED_OPERATIONAL_ENTRYPOINTS = (
+    "full-cycle",
+    "plan-only",
+    "plan-only (clarify-first)",
+    "apply-plan",
+    "review",
+    "mode-explicit",
+)
+
+EXPECTED_GRILL_ME_GATE_STATES = (
+    "grill-me required",
+    "grill-me satisfied",
+    "grill-me not applicable",
+)
+
 SIMPLE_GATEWAY_SKILL = ".github/skills/internal-gateway-simple-task/SKILL.md"
 SIMPLE_GATEWAY_SUPPORT_ROUTING = (
     ".github/skills/internal-gateway-simple-task/references/support-routing.md"
@@ -248,30 +263,35 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
 
     assert "name: internal-gateway-operational-flow" in skill_text
     assert "## Skill-First Staged Entry Points" in skill_text
+    assert (
+        "Load these skills by name only when the active phase requires them. "
+        "This list is an index, not a bundle to preload."
+        in skill_text
+    )
     assert "Always preload only `grill-me` and `internal-agent-support-next-step`." in skill_text
     assert (
         "Load every other skill only when its phase, handoff, or failure condition becomes active."
         in skill_text
     )
-    assert "`full-cycle`" in skill_text
-    assert "`plan-only`" in skill_text
-    assert "`plan-only (clarify-first)`" in skill_text
-    assert "`apply-plan`" in skill_text
-    assert "`review`" in skill_text
-    assert "`mode-explicit`" in skill_text
-    assert "`grill-me required`" in skill_text
-    assert "`grill-me satisfied`" in skill_text
-    assert "`grill-me not applicable`" in skill_text
+    assert_inline_code_tokens(skill_text, EXPECTED_OPERATIONAL_ENTRYPOINTS)
+    assert_inline_code_tokens(skill_text, EXPECTED_GRILL_ME_GATE_STATES)
     assert "## User Authorization Signals" in skill_text
     assert "`full-cycle` alone" in skill_text
     assert "existing approved retained plan folder" in skill_text
     assert "Decision Brief" in skill_text
     assert "explicit checkpoint before moving from `plan`" in skill_text
     assert "user decisions could change scope" in skill_text
-    assert "Keep direct entry and manual transitions visible to the user." in skill_text
-    assert "Do not create new gateway skills" in skill_text
+    assert (
+        "Keep direct entry and manual transitions visible to the user. "
+        "Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch."
+        in skill_text
+    )
     assert "multiple credible paths" in skill_text
-    assert "future security lens name, not yet promoted" in skill_text
+    assert (
+        "future security lens name, not yet promoted (`not yet promoted`; "
+        "see the Future Security Lens rule in `references/wrapper-alignment.md`)"
+        in skill_text
+    )
     assert "`Uso consigliato`" in skill_text
     assert "`Mappa file e ruolo`" in skill_text
     assert "`Evidence pass iniziale`" in skill_text
