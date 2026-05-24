@@ -96,6 +96,7 @@ Keep the full status table, blocking rules, closure rules, and request-change re
 The agent must not close or skip the loop by itself. Close the loop only after a user closure signal, then continue only while the same Gate 0 answer still fits the current scope.
 
 ## User Authorization Signals
+
 Treat end-to-end application as authorized only when the user explicitly asks to apply, continue into delivery, run the work end to end after `plan` or critical challenge, or invokes `apply-plan` with an approved retained plan folder.
 `full-cycle` alone never skips the visible checkpoint into `execute` or `apply-plan`; when entrypoint signals conflict, choose the lower-action phase.
 

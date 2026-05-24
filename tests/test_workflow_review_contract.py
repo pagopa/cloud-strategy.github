@@ -577,7 +577,7 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
     executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
 
     assert (
-            "evidence envelope with item, status, evidence, and route"
+        "evidence envelope with item, status, evidence, and route"
         in executing_plans_text
     )
     assert "late-stage evidence packaging" in executing_plans_text

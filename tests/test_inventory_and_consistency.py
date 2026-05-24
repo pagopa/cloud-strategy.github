@@ -136,7 +136,9 @@ def test_run_consistency_checks_flags_broken_prompt_local_links(tmp_path: Path) 
     ) in findings_by_path
 
 
-def test_run_consistency_checks_flags_generic_prompt_agent_owner(tmp_path: Path) -> None:
+def test_run_consistency_checks_flags_generic_prompt_agent_owner(
+    tmp_path: Path,
+) -> None:
     write_file(
         tmp_path / "AGENTS.md",
         "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
