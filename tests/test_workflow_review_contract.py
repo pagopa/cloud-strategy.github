@@ -223,9 +223,10 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "Planning, review, execution, and retained-plan application always start",
+            "Planning, review, and retained-plan application always start",
             "Treat planning as `plan-only (clarify-first)`",
             "do not waive Gate 0",
+            "minimal,\n  clear, and concise",
             "Restart Gate 0 before continuing",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
@@ -274,7 +275,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
         (
             "`plan-only (clarify-first)`",
             "rich prompts",
-            "Approved retained-plan execution still starts mandatory Gate 0",
+            "Approved retained-plan execution still starts Gate 0",
         ),
     )
 
@@ -316,13 +317,9 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
             "inspect bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
         ),
     )
-    assert_contains_all(
-        ".github/prompts/internal-agent-review-next-actions.prompt.md",
-        (
-            "If `subject` is a repository-owned bundle owner such as `SKILL.md`",
-            "review bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
-        ),
-    )
+    assert not Path(
+        ".github/prompts/internal-agent-review-next-actions.prompt.md"
+    ).exists()
 
 
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:
@@ -500,7 +497,7 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Residual risks",
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
-            "`SHIPPED` requires passed validators and a completed report",
+            "`SHIPPED` requires passed validators, a completed report",
             "Intended observable acceptance",
             "A summary\nthat says an item was done is not evidence",
             "late-stage packaging artifacts",
@@ -517,7 +514,7 @@ def test_resume_protocol_reference_exists() -> None:
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
             "Verify-first Sequence",
-            "`01-riassunto-direzione-e-decisione.md`",
+            "`01-change-summary.md`",
             "Evidence pass iniziale",
             "Budget lettura",
             "rg --no-ignore",
@@ -533,7 +530,7 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
-            "file roles cannot be inferred safely",
+            "file roles and source coverage cannot be inferred safely",
             "before broad reading",
             "lacks an item/evidence table or evidence-envelope pointer",
             "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
@@ -545,7 +542,7 @@ def test_plan_handoff_requires_summary_control_file() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/plan-handoff.md",
         (
-            "`01-riassunto-direzione-e-decisione.md`",
+            "`01-change-summary.md`",
             "`Uso consigliato`",
             "`Mappa file e ruolo`",
             "`Evidence pass iniziale`",
@@ -575,7 +572,7 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
     executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
 
     assert (
-        "evidence envelope with item, status,\n  evidence, and route"
+            "evidence envelope with item, status, evidence, and route"
         in executing_plans_text
     )
     assert "late-stage evidence packaging" in executing_plans_text

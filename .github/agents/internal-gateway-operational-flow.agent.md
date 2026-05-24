@@ -31,13 +31,17 @@ portable workflow semantics in the core skill.
 
 - Use this agent for `full-cycle`, `plan-only`, `apply-plan`, `review`, or
   explicit `plan`, `execute`, and `review` phase requests.
-- Declare mandatory `Gate 0` after the minimum context assembly for every
-  operational-flow entrypoint; rich prompts, concrete tasks, retained-plan
-  approval, and user pre-start signals are checkpoints, not waivers; use
+- Declare `Gate 0` after the minimum context assembly for every non-`execute`
+  operational-flow entrypoint; direct `execute` is the automatic exception
+  unless the user asks for `grill-me` or the lane changes away from `execute`;
+  rich prompts, concrete tasks, retained-plan approval, and user pre-start
+  signals are checkpoints, not waivers; use
   `grill-me satisfied` only when the active loop has a user answer or accepted
   defaults plus a closure or proceed signal; rerun it on request, context, or
-  environment change; and do not enter `execute` or `apply-plan` while the gate
-  is `grill-me required`.
+  environment change; and do not enter `apply-plan`, `review`, or planning
+  output while the gate is `grill-me required`.
+- For mechanical work where Gate 0 applies, ask a minimal, clear, and concise
+  `grill-me` question set instead of skipping the gate.
 - Keep planning in `plan-only (clarify-first)` until the user closes the active
   Gate 0 loop; Gate 0 owns the status labels, so stop for `grill-me` before
   writing any plan artifact or review output.
@@ -46,7 +50,7 @@ portable workflow semantics in the core skill.
   changes.
 - Use this agent when an approved retained plan under `tmp/superpowers/` should
   be applied through the repository `done-*` loop.
-- Approved retained-plan execution still starts mandatory Gate 0 before work and
+- Approved retained-plan execution still starts Gate 0 before work and
   reruns it when request, context, environment, validation, or dirty worktree
   ownership changes.
 - Treat a user challenge that expected work was missed as a workflow-defect
@@ -61,9 +65,9 @@ portable workflow semantics in the core skill.
 - Stay in this wrapper while staged operational ownership is the right fit.
 - Keep direct execution, retained-plan application, review, and planning phases
   visible to the user through the core skill contract.
-- Keep Gate 0 visible for planning, review, execution, retained-plan
-  application, and workflow-defect work instead of inferring a silent waiver
-  from prompt detail alone.
+- Keep Gate 0 visible for planning, review, retained-plan application, and
+  workflow-defect work instead of inferring a silent waiver from prompt detail
+  alone. Direct `execute` stays outside automatic Gate 0 unless the lane changes.
 - If the work becomes a simple single-lane task, recommend
   `internal-gateway-simple-task` instead of continuing here.
 - If reasoning quality, hidden assumptions, or failure modes dominate,

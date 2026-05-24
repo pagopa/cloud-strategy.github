@@ -56,7 +56,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-debugging` | `execute` or `review` support | Root-cause diagnosis for bugs, test failures, build failures, validator drift, sync failures, and unexpected behavior. |
 | `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |
-| `grill-me` | Mandatory Gate 0 support for every operational-flow entrypoint | Question pressure after the minimum evidence pass and before plan output, recommendation, review output, phase transition, or action; `grill-me satisfied` requires a user answer or accepted defaults in the active loop, a closure or proceed signal, and no remaining user-only decision. |
+| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint | Question pressure after the minimum evidence pass and before plan output, recommendation, review output, phase transition, or retained-plan application; `grill-me satisfied` requires a user answer or accepted defaults in the active loop, a closure or proceed signal, and no remaining user-only decision. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`, including the detailed critical-before-plan requirement for non-trivial retained plans. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |
@@ -77,9 +77,11 @@ reference, or the support skill itself.
 | Runtime wrapper wording, handoff labels, and imported-support posture | `references/wrapper-alignment.md` |
 | Flow diagrams, scratchpad shapes, and host-runtime assembly maps | `references/workflow-maps.md` |
 
-- Preload and start `grill-me` after the minimum evidence pass, and preload
-  `internal-agent-support-next-step` because they are the core gate and handoff
-  helpers for every staged phase.
+- Preload `grill-me` and start it after the minimum evidence pass for every
+  non-`execute` entrypoint. Preload `internal-agent-support-next-step` because
+  it is the core handoff helper for every staged phase.
+- For mechanical work where Gate 0 applies, use a minimal, clear, and concise
+  `grill-me` question set. Do not skip the gate.
 - Load every other support skill only when the active phase, failure condition,
   handoff, review lens, or validation gap makes that owner necessary.
 - Prefer delegating to the named skill over copying its method. This gateway may

@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Gateway Operational Flow"
-  short_description: "Staged workflow with mandatory grill-me Gate 0"
-  default_prompt: "Use $internal-gateway-operational-flow with this request or retained plan folder to choose the visible full-cycle, plan-only, apply-plan, review, or explicit phase workflow. Run the minimum evidence pass, then always start grill-me through Gate 0 before planning, reviewing, transitioning, or editing."
+  short_description: "Staged workflow with grill-me Gate 0"
+  default_prompt: "Use $internal-gateway-operational-flow with this request or retained plan folder to choose the visible full-cycle, plan-only, apply-plan, review, or explicit phase workflow. Run the minimum evidence pass, then start grill-me through Gate 0 for every non-execute entrypoint before planning, reviewing, transitioning, or applying a retained plan."

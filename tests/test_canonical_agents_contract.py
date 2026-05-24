@@ -247,7 +247,7 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "The agent must not close or skip the loop by itself" in skill_text
     assert "Close the loop only after a user closure signal" in skill_text
     assert (
-        "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`."
+        "Direct `execute` is the only automatic Gate 0 exception."
         in skill_text
     )
     assert "`Gate 0`" in wrapper_text
@@ -257,7 +257,7 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     )
     assert_normalized_snippet(wrapper_text, "request, context, or environment change")
     assert "run Gate 0 after the minimum evidence pass" in wrapper_alignment_text
-    assert "Mandatory Gate 0 support" in wrapper_alignment_text
+    assert "Gate 0 support for every non-`execute`" in wrapper_alignment_text
     assert "do not waive Gate 0" in wrapper_alignment_text
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
     assert "minimum evidence pass, then" in workflow_maps_text
@@ -385,7 +385,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert interface["display_name"] == "Internal Gateway Operational Flow"
     assert (
         interface["short_description"]
-        == "Staged workflow with mandatory grill-me Gate 0"
+        == "Staged workflow with grill-me Gate 0"
     )
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
 
@@ -589,8 +589,9 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "Gate 0 status and phase-blocking semantics" in operational_text
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
-    assert "mandatory Gate 0 interview support" in operational_text
-    assert "Planning, review, execution, and retained-plan application always start" in wrapper_alignment_text
+    assert "every non-`execute` operational-flow entrypoint" in operational_text
+    assert "Planning, review, and retained-plan application always start" in wrapper_alignment_text
+    assert "minimal,\n  clear, and concise" in wrapper_alignment_text
     assert "non-trivial retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
