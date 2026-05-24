@@ -225,6 +225,9 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
         (
             "governance-sensitive planning still has unresolved user-only decisions",
             "treat the lane as `plan-only (clarify-first)`",
+            "Rich prompts and pre-start signals do not waive Gate 0.",
+            "Approved retained-plan execution may continue with `grill-me not applicable`",
+            "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )
     assert_contains_all(
@@ -232,11 +235,47 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
         (
             "`plan-only (clarify-first)`",
             "stop for `grill-me` before writing any",
+            "rich prompts",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "## Phase-Local Contracts",
+            "Rich prompts and pre-start signals do not waive Gate 0.",
+            "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
         ),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/README.md",
         ("Treat governance-sensitive planning as `plan-only (clarify-first)`",),
+    )
+
+
+def test_operational_flow_non_waiver_projection_stays_defined() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "## Phase-Local Contracts",
+            "Rich prompts and pre-start signals do not waive Gate 0.",
+            "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
+        (
+            "Rich prompts and pre-start signals do not waive Gate 0.",
+            "Approved retained-plan execution may continue with `grill-me not applicable`",
+            "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
+        ),
+    )
+    assert_contains_all(
+        ".github/agents/internal-gateway-operational-flow.agent.md",
+        (
+            "`plan-only (clarify-first)`",
+            "rich prompts",
+            "Approved retained-plan execution may continue without reopening Gate 0 by",
+        ),
     )
 
 

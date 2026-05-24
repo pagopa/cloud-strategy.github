@@ -27,6 +27,16 @@ Use this reference when preserving or validating user-visible operational flows.
 
 Use this path when the target state is already known. Do not reopen strategy unless the task reveals real ambiguity.
 
+### Progress Beat
+
+Progress beat (between slices, when end-to-end authorization is active and the task has at least two slices):
+
+- Closed slice and the evidence that closed it.
+- Next slice or explicit stop request.
+- Residual risk delta.
+
+Keep the beat <= 3 lines. It is not a Decision Brief and not a final report; do not include three Checks here.
+
 ### Temporary Execution Scratchpad
 
 Use this mini workflow only inside `execute` mode when coordination state is
@@ -113,6 +123,10 @@ Run the minimum evidence pass before Gate 0. If a request-changing
 realignment alters scope, owner, target state, validation, rollout, or
 anti-scope, rerun Gate 0 before any governance-sensitive plan output, phase
 transition, or edit.
+
+Rich prompts and pre-start signals do not waive Gate 0. They may shorten the question pass only when the needed user decisions are already resolved or accepted.
+
+Approved retained-plan execution may continue with `grill-me not applicable` while the request stays stable. If request-changing realignment reopens scope, owner, target state, validation, rollout, or anti-scope, rerun Gate 0 before the next governance-sensitive plan output, phase transition, or edit.
 
 ## Planned Work
 

@@ -88,3 +88,26 @@ Imported support and the future security lens are not gateway owners. Their appr
 - `review` exits to `execute`, `plan`, critical challenge, or deferred follow-up for each actionable finding.
 - Critical challenge exits with `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
 - Any mode may stop and recommend a better lane through `internal-agent-support-lane-change-engine` when the boundary breaks.
+
+## Phase-Local Output Template
+
+Use the active phase-local contract as the compact response frame for non-trivial `plan`, `execute`, or `apply-plan` work.
+
+- Phase and entrypoint
+- Gate 0 status when applicable
+- Compact decision frame: target, anti-scope, and validation path
+- Current slice or completed change
+- Next checkpoint or next slice
+- Residual risk and `Lessons` line
+
+Example:
+
+```text
+Phase: execute (`apply-plan`)
+Gate 0: not applicable (mechanical follow-up after an approved retained plan)
+Decision frame: target = move stale module under deprecated/; anti-scope = no functional change; validation = pytest tests/test_module_paths.py
+Current slice: moved 3 files and updated 2 imports.
+Next checkpoint: rerun targeted pytest, then ask before the next slice.
+Residual risk: low (no external consumers).
+Lessons: none retained.
+```

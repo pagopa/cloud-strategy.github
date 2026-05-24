@@ -32,10 +32,11 @@ portable workflow semantics in the core skill.
 - Use this agent for `full-cycle`, `plan-only`, `apply-plan`, `review`, or
   explicit `plan`, `execute`, and `review` phase requests.
 - Declare `Gate 0` after the minimum context assembly for
-  governance-sensitive planning, phase transition, or editing; treat user
-  pre-start signals as checkpoints, not waivers; rerun it on request-changing
-  realignment; and do not enter `execute` or `apply-plan` while the gate is
-  `grill-me required`.
+  governance-sensitive planning, phase transition, or editing; rich prompts
+  and user pre-start signals are checkpoints, not waivers; use
+  `grill-me satisfied` only when the needed user decisions are already
+  answered or accepted; rerun it on request-changing realignment; and do not
+  enter `execute` or `apply-plan` while the gate is `grill-me required`.
 - Keep governance-sensitive planning in `plan-only (clarify-first)` when
   unresolved user decisions remain; Gate 0 owns the status labels, so stop for `grill-me` before writing any
   plan artifact only to run the question pass.
@@ -43,6 +44,9 @@ portable workflow semantics in the core skill.
   routing, or shared workflow changes.
 - Use this agent when an approved retained plan under `tmp/superpowers/` should
   be applied through the repository `done-*` loop.
+- Approved retained-plan execution may continue without reopening Gate 0 by
+  default, but only while request-changing realignment does not reopen scope,
+  owner, target state, validation, rollout, or anti-scope.
 - Treat a user challenge that expected work was missed as a workflow-defect
   review before any reassurance or closeout.
 - Do not use this agent for a concrete low-to-medium-risk task that can finish
@@ -55,6 +59,9 @@ portable workflow semantics in the core skill.
 - Stay in this wrapper while staged operational ownership is the right fit.
 - Keep direct execution, retained-plan application, review, and planning phases
   visible to the user through the core skill contract.
+- Keep Gate 0 visible for governance-sensitive planning, review, and
+  workflow-defect work instead of inferring a silent waiver from prompt detail
+  alone.
 - If the work becomes a simple single-lane task, recommend
   `internal-gateway-simple-task` instead of continuing here.
 - If reasoning quality, hidden assumptions, or failure modes dominate,

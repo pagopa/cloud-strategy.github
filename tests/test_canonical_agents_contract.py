@@ -240,18 +240,44 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "phase transition" in skill_text
     assert "pre-start checkpoint" in skill_text
     assert "request-change realignment" in skill_text
+    assert "Rich prompts and pre-start signals do not waive Gate 0." in skill_text
     assert (
         "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`."
         in skill_text
     )
     assert "`Gate 0`" in wrapper_text
-    assert "pre-start signals as checkpoints, not waivers" in wrapper_text
+    assert_normalized_snippet(
+        wrapper_text,
+        "rich prompts and user pre-start signals are checkpoints, not waivers",
+    )
     assert_normalized_snippet(wrapper_text, "request-changing realignment")
     assert "run Gate 0 after the minimum evidence pass" in wrapper_alignment_text
     assert "governance-sensitive pre-start delivery" in wrapper_alignment_text
+    assert "Rich prompts and pre-start signals do not waive Gate 0." in wrapper_alignment_text
+    assert (
+        "Approved retained-plan execution may continue with `grill-me not applicable`"
+        in wrapper_alignment_text
+    )
     assert "minimum evidence pass, then" in workflow_maps_text
     assert "phase\ntransition, or edit" in workflow_maps_text
     assert "Gate 0" in workflow_maps_text
+    assert "Rich prompts and pre-start signals do not waive Gate 0." in workflow_maps_text
+
+
+def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> None:
+    skill_text = read_body(".github/skills/internal-gateway-operational-flow/SKILL.md")
+    mode_contracts_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/mode-contracts.md"
+    ).read_text(encoding="utf-8")
+
+    assert "## Phase-Local Contracts" in skill_text
+    assert (
+        "| Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |"
+        in skill_text
+    )
+    assert "## Phase-Local Output Template" in mode_contracts_text
+    assert "Gate 0 status when applicable" in mode_contracts_text
+    assert "Lessons: none retained." in mode_contracts_text
 
 
 def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:

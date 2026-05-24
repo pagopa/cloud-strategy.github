@@ -65,8 +65,17 @@ sections.
 - If governance-sensitive planning still has unresolved user-only decisions,
   treat the lane as `plan-only (clarify-first)` until Gate 0 resolves those
   choices.
+- Rich prompts and pre-start signals do not waive Gate 0. They may support
+  `grill-me satisfied` only when the needed user decisions are already answered
+  or explicitly accepted.
+- `grill-me not applicable` remains valid for concrete, mechanical, or fully
+  recoverable work and does not require a question pass.
 - `execute` and `apply-plan` stay blocked while the Gate 0 result is
   `grill-me required`, including request-changing realignment.
+- Approved retained-plan execution may continue with `grill-me not applicable`
+  while the request stays stable. Rerun Gate 0 before continuing if
+  request-changing realignment reopens scope, owner, target state, validation,
+  rollout, or anti-scope.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
 - Failure diagnosis belongs to `internal-debugging`.
@@ -77,6 +86,9 @@ sections.
   belong to `internal-high-level-review`.
 - Compression support such as `mattpocock-caveman` stays support-only after
   blockers, risks, and validation evidence are explicit.
+- The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.
+  It does not replace a retained plan, is not catalog material, and Copilot
+  wrappers must not expose it as a canonical artifact.
 
 ## Handoff Rules
 
