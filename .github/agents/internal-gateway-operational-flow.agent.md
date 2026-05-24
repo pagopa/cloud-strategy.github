@@ -35,13 +35,15 @@ portable workflow semantics in the core skill.
   governance-sensitive planning, phase transition, or editing; rich prompts
   and user pre-start signals are checkpoints, not waivers; use
   `grill-me satisfied` only when the needed user decisions are already
-  answered or accepted; rerun it on request-changing realignment; and do not
-  enter `execute` or `apply-plan` while the gate is `grill-me required`.
+  answered or accepted in the active loop and the user has given a closure or
+  proceed signal; rerun it on request-changing realignment; and do not enter
+  `execute` or `apply-plan` while the gate is `grill-me required`.
 - Keep governance-sensitive planning in `plan-only (clarify-first)` when
   unresolved user decisions remain; Gate 0 owns the status labels, so stop for `grill-me` before writing any
   plan artifact only to run the question pass.
-- Use the critical-master handoff before finalizing material prompt, skill,
-  routing, or shared workflow changes.
+- Use the critical-master handoff before writing or finalizing non-trivial
+  plans for material prompt, skill, routing, validator, or shared workflow
+  changes.
 - Use this agent when an approved retained plan under `tmp/superpowers/` should
   be applied through the repository `done-*` loop.
 - Approved retained-plan execution may continue without reopening Gate 0 by

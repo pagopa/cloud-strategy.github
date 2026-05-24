@@ -88,6 +88,8 @@ Use this repository-local variant for small catalog maintenance before escalatin
 | plan phase                     |
 | - minimum evidence pass, then  |
 |   Gate 0                       |
+| - critical challenge before    |
+|   non-trivial/governance plan  |
 | - retained plan when justified |
 | - Decision Brief projection    |
 +-------------------------------+
@@ -124,7 +126,7 @@ realignment alters scope, owner, target state, validation, rollout, or
 anti-scope, rerun Gate 0 before any governance-sensitive plan output, phase
 transition, or edit.
 
-Rich prompts and pre-start signals do not waive Gate 0. They may shorten the question pass only when the needed user decisions are already resolved or accepted.
+Rich prompts and pre-start signals do not waive Gate 0. They may shorten the question pass only when the needed user decisions are already resolved or accepted in the active loop. The agent may recommend ending a `grill-me` loop, but it closes only after a user closure signal such as "ok", "chiudi", "va bene", "vai", or an equivalent proceed instruction.
 
 Approved retained-plan execution may continue with `grill-me not applicable` while the request stays stable. If request-changing realignment reopens scope, owner, target state, validation, rollout, or anti-scope, rerun Gate 0 before the next governance-sensitive plan output, phase transition, or edit.
 
@@ -144,6 +146,8 @@ Approved retained-plan execution may continue with `grill-me not applicable` whi
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |
+| - critical challenge when      |
+|   plan risk requires it        |
 +-------------------------------+
                |
                v

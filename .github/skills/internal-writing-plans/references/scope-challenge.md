@@ -24,6 +24,7 @@ Every retained plan must be able to answer these questions:
    validation failure must stop execution?
 6. `reading budget`: What is the smallest first read and evidence pass that can classify the folder without broad context loading?
 7. `observable acceptance`: Which diff, file state, validator assertion, manual check, or explicit non-action will prove each executable item?
+8. `critical challenge`: For non-trivial or governance-sensitive retained plans, what did `internal-gateway-critical-master` challenge before plan files were written, and what outcome must the plan absorb?
 
 For non-trivial retained plans and strategic-to-operational or
 monolithic-to-executable conversions, also answer this:
@@ -46,12 +47,13 @@ compressed.
 
 Use one of these outcomes:
 
-- `READY`: all five answers are concrete enough for execution.
+- `READY`: all required answers are concrete enough for execution.
 - `NEEDS_REVISION`: one or more answers are missing or too vague.
 - `BLOCKED`: a required decision, permission, or evidence source is missing.
 
 For non-trivial retained plans, `READY` also requires explicit source-item
-coverage in the ledger.
+coverage in the ledger and a recorded critical challenge outcome or explicit
+not-applicable reason.
 
 ## Output Template
 
@@ -66,6 +68,7 @@ Summary file: <brief change summary only, overloaded, or missing>
 Source-item ledger: <complete, incomplete, stale, or missing>
 Reading budget: <first files or checks before broader reading>
 Observable acceptance: <diff, file, validator, manual, explicit non-action, or blocker>
+Critical challenge: <outcome, absorbed change, not-applicable, or blocker>
 Coverage: <ledger coverage, explicit not-applicable, or blocker>
 ```
 

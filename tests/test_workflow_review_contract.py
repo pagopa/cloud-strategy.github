@@ -246,10 +246,9 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
         ),
     )
-    assert_contains_all(
-        ".github/skills/internal-gateway-operational-flow/README.md",
-        ("Treat governance-sensitive planning as `plan-only (clarify-first)`",),
-    )
+    assert not Path(
+        ".github/skills/internal-gateway-operational-flow/README.md"
+    ).exists()
 
 
 def test_operational_flow_non_waiver_projection_stays_defined() -> None:
@@ -266,6 +265,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
         (
             "Rich prompts and pre-start signals do not waive Gate 0.",
             "Approved retained-plan execution may continue with `grill-me not applicable`",
+            "the loop closes only after a user closure signal",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )

@@ -12,6 +12,7 @@ to, compare against, or delegate to.
 
 - `grill-me`: retained-plan clarification gate when real user decisions remain after the evidence pass.
 - `internal-executing-plans`: repository-local application owner for approved retained plans.
+- `internal-gateway-critical-master`: critical challenge owner before writing non-trivial or governance-sensitive retained plans.
 - `superpowers-brainstorming`: alternate owner for general design or spec work under `tmp/superpowers/specs/`.
 - `superpowers-writing-plans`: imported plan-authoring depth subordinate to the local retained-plan contract.
 
@@ -52,9 +53,10 @@ must stay outside the execution loop.
 - For non-trivial retained plans, create `02-source-item-ledger.md` immediately after the summary. It is the control and traceability file for the folder.
 - `02-source-item-ledger.md` must declare `grill-me required`, `grill-me satisfied`, or `grill-me not applicable` before the plan can move to execution.
 - Use `grill-me required` when unresolved user-only decisions can change scope, owner, target state, validation, rollout, or anti-scope. Stop before writing executable plan content until those decisions are answered or the user explicitly accepts the recommended defaults.
-- Use `grill-me satisfied` only when the relevant decisions were already answered or explicitly accepted and still match the current plan scope.
+- Use `grill-me satisfied` only when the relevant decisions were answered or explicitly accepted in the active loop, the user gave a closure or proceed signal, the answers still match the current plan scope, and no user-only decision needs another loop.
 - Use `grill-me not applicable` only when the work is concrete, mechanical, or fully recoverable from repository evidence.
 - For non-trivial or ambiguous retained plans, `02-source-item-ledger.md` must include a lightweight spec baseline: objective, assumptions that affect delivery, success criteria, boundaries or anti-scope, validation path, and open questions or `none`.
+- Before writing a non-trivial or governance-sensitive retained plan, use `internal-gateway-critical-master` to challenge the proposed target, anti-scope, owner, validation path, and main tradeoff. If the outcome is `reformulate-plan` or `continue-critical`, resolve that result before writing plan files. If the plan is simple or mechanical, record critical challenge as not applicable in the ledger.
 - Success criteria must be concrete enough to verify. Reframe vague goals into observable conditions when repository evidence supports it, or move the uncertainty to `questions.md` before execution.
 - Action verbs such as compress, rewrite, refactor, harden, align, simplify, or validate must have observable acceptance evidence. Name the expected diff, target file state, validator assertion, or explicit non-action before execution.
 - `02-source-item-ledger.md` must include the smallest useful reading path: what to inspect first, which evidence pass proves the plan is still valid, and which files can be deferred.
@@ -123,6 +125,7 @@ must stay outside the execution loop.
 - `Uso consigliato`
 - `Mappa file e ruolo`
 - `Gate grill-me`
+- `Critical challenge`
 - `Evidence pass iniziale`
 - `Budget lettura`
 - `Target e anti-scope`
@@ -154,15 +157,16 @@ must stay outside the execution loop.
 
 1. Decide first whether retained planning is justified or whether in-chat planning is enough.
 2. Choose a clear task folder name under `tmp/superpowers/`.
-3. Write `01-change-summary.md` first with only the concise modification summary and approval decision.
-4. Write `02-source-item-ledger.md` next with file roles, evidence pass, reading budget, gate status, source items, and observable acceptance.
-5. If the input is an existing strategic, review-only, or monolithic plan, lock source-item coverage in the ledger before defining later execution phases.
-6. Define the executable macro-categories next and choose the smallest post-ledger file shape that fits the work.
-7. Use `03-execution.md` when one executable macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
-8. Give each numbered file the shape above and keep every section compact.
-9. Put open questions and decision requests only in `questions.md`.
-10. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
-11. Run the scope challenge and plan review gate when the retained plan is non-trivial or will be handed to `internal-executing-plans`.
+3. Run the critical challenge before writing plan files when the retained plan is non-trivial or governance-sensitive.
+4. Write `01-change-summary.md` first with only the concise modification summary and approval decision.
+5. Write `02-source-item-ledger.md` next with file roles, evidence pass, reading budget, gate status, critical challenge status, source items, and observable acceptance.
+6. If the input is an existing strategic, review-only, or monolithic plan, lock source-item coverage in the ledger before defining later execution phases.
+7. Define the executable macro-categories next and choose the smallest post-ledger file shape that fits the work.
+8. Use `03-execution.md` when one executable macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
+9. Give each numbered file the shape above and keep every section compact.
+10. Put open questions and decision requests only in `questions.md`.
+11. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
+12. Run the scope challenge and plan review gate when the retained plan is non-trivial or will be handed to `internal-executing-plans`.
 
 ## Validation
 
@@ -172,6 +176,7 @@ must stay outside the execution loop.
 - `01-change-summary.md` exists and contains only a concise proposed-change summary, rationale, validation path, and decision request.
 - `02-source-item-ledger.md` exists and acts as the control and coverage file for the retained plan.
 - For non-trivial retained plans, the ledger declares `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`.
+- Non-trivial or governance-sensitive retained plans run `internal-gateway-critical-master` before plan files are written, or record why critical challenge is not applicable.
 - The ledger declares `Uso consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, and `Budget lettura`.
 - The ledger's `Budget lettura` confines future readers to this plan and exact named evidence; other retained plan folders are excluded unless specifically indicated.
 - The ledger includes every source/requested item with item id, observable acceptance, evidence class, status, and route.

@@ -6,8 +6,8 @@ Use this reference when the staged `plan`, `execute`, `apply-plan`, `review`, or
 
 | Entrypoint | Owns | Must not own |
 | --- | --- | --- |
-| `full-cycle` | Non-trivial work that needs visible planning, optional critical challenge, checkpointed delivery, and final evidence. | Hidden wrapper-agent dispatch or unapproved execute/apply after planning. |
-| `plan-only` | Decisions, retained plans, Decision Briefs, and stop-before-apply workflows. | Silent implementation after the plan is written. |
+| `full-cycle` | Non-trivial work that needs visible planning, Gate 0, critical challenge when the plan is non-trivial or governance-sensitive, checkpointed delivery, and final evidence. | Hidden wrapper-agent dispatch or unapproved execute/apply after planning. |
+| `plan-only` | Decisions, retained plans, Decision Briefs, required critical challenge for non-trivial or governance-sensitive plans, and stop-before-apply workflows. | Silent implementation after the plan is written. |
 | `apply-plan` | Approved retained plan folders under `tmp/superpowers/<clear-action-or-task-name>/` using `internal-executing-plans`, folder-first execution, source-item ledger coverage, and explicit completion evidence. | Inline plans without normalization or checkpoint, newly discovered improvements, or `questions.md` execution. |
 | `review` | Defect-first findings, evidence gaps, and fix routing. | Applying fixes or writing the initial design. |
 | `mode-explicit` | Direct user requests for `plan`, `execute`, or `review`. | Overriding the user's explicit phase unless the lane no longer fits. |
@@ -56,8 +56,8 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-debugging` | `execute` or `review` support | Root-cause diagnosis for bugs, test failures, build failures, validator drift, sync failures, and unexpected behavior. |
 | `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |
-| `grill-me` | Conditional Gate 0 support for `plan` and governance-sensitive pre-start delivery | User-requested or ambiguity-driven question pressure before plan finalization, phase transition, or action when user-only decisions still matter. |
-| `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
+| `grill-me` | Conditional Gate 0 support for `plan` and governance-sensitive pre-start delivery | User-requested or ambiguity-driven question pressure before plan finalization, phase transition, or action when user-only decisions still matter; `grill-me satisfied` requires a user answer or accepted defaults in the active loop, a closure or proceed signal, and no remaining user-only decision. |
+| `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`, including the detailed critical-before-plan requirement for non-trivial retained plans. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |
 | `superpowers-*` workflows | Conditional support | Mandatory only when the task shape actually triggers the workflow. |
@@ -82,7 +82,7 @@ Imported support and the future security lens are not gateway owners. Their appr
 
 ## Mode Exit Rules
 
-- `plan` exits to `execute`, `apply-plan`, `review`, or critical challenge only through a visible next-step package and checkpoint unless the user authorized end-to-end work.
+- `plan` exits to `execute`, `apply-plan`, `review`, or critical challenge only through a visible next-step package and checkpoint unless the user authorized end-to-end work; non-trivial or governance-sensitive plans run the critical challenge before the plan is finalized.
 - `execute` exits to `review` when correctness evidence or merge readiness is the main next need.
 - `apply-plan` exits only after all executable retained-plan items are completed, a real blocker is packaged, or validation exposes a gap that needs another visible owner.
 - `review` exits to `execute`, `plan`, critical challenge, or deferred follow-up for each actionable finding.
@@ -95,6 +95,7 @@ Use the active phase-local contract as the compact response frame for non-trivia
 
 - Phase and entrypoint
 - Gate 0 status when applicable
+- Critical challenge status when non-trivial or governance-sensitive planning applies
 - Compact decision frame: target, anti-scope, and validation path
 - Current slice or completed change
 - Next checkpoint or next slice

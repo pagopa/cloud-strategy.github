@@ -242,6 +242,12 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "request-change realignment" in skill_text
     assert "Rich prompts and pre-start signals do not waive Gate 0." in skill_text
     assert (
+        "The user answered or explicitly accepted defaults in the current Gate 0 loop"
+        in skill_text
+    )
+    assert "the agent may recommend that the loop stop" in skill_text
+    assert "Close the loop only after a user closure signal" in skill_text
+    assert (
         "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`."
         in skill_text
     )
@@ -381,7 +387,10 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     for retired_id in retired_mattpocock_ids():
         assert retired_id not in wrapper_alignment_text
     assert interface["display_name"] == "Internal Gateway Operational Flow"
-    assert interface["short_description"] == "Skill-first staged operational core"
+    assert (
+        interface["short_description"]
+        == "Staged workflow with Gate 0 and visible phase checks"
+    )
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
 
     operational_frontmatter = load_frontmatter(
@@ -393,28 +402,10 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "full-cycle" in operational_body
 
 
-def test_operational_flow_readme_references_live_gateway_skills() -> None:
-    readme_text = Path(
+def test_operational_flow_readme_is_not_required_when_bundle_references_own_detail() -> None:
+    assert not Path(
         ".github/skills/internal-gateway-operational-flow/README.md"
-    ).read_text(encoding="utf-8")
-    referenced_slugs = set(
-        re.findall(r"`(internal-gateway-[A-Za-z0-9-]+)`", readme_text)
-    )
-    live_skill_slugs = {
-        path.name
-        for path in Path(".github/skills").iterdir()
-        if (path / "SKILL.md").is_file()
-    }
-
-    assert referenced_slugs
-    assert referenced_slugs <= live_skill_slugs
-    assert "## Output And Support Calibration" in readme_text
-    assert "about 40 lines" in readme_text
-    assert "about 30 lines" in readme_text
-    assert (
-        "Use imported support only after the gateway phase is selected" in readme_text
-    )
-    assert "mattpocock-caveman" in readme_text
+    ).exists()
 
 
 def test_internal_contract_documents_gateway_wrapper_entrypoints() -> None:
@@ -608,6 +599,7 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
     assert "continue one question at a time" in operational_text
+    assert "Close the loop only after a user closure signal" in operational_text
 
 
 def test_gateway_support_uses_internal_owners_after_extraction() -> None:
