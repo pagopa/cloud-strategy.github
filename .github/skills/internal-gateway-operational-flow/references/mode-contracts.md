@@ -64,6 +64,29 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 
 Imported support and the future security lens are not gateway owners. Their approved use, compression guardrails, and promotion posture live in `wrapper-alignment.md`.
 
+## Support Activation Rules
+
+Use these rules when deciding whether a support skill belongs in `SKILL.md`, a
+reference, or the support skill itself.
+
+| Material | Owner |
+| --- | --- |
+| Phase selection, Gate 0 status, blocking semantics, and completion evidence | `internal-gateway-operational-flow` `SKILL.md` |
+| Support-skill trigger, boundary, and expected return shape | `internal-gateway-operational-flow` `SKILL.md` or this reference |
+| Detailed support procedure, checklist, examples, scripts, and templates | The named support skill or its own references |
+| Runtime wrapper wording, handoff labels, and imported-support posture | `references/wrapper-alignment.md` |
+| Flow diagrams, scratchpad shapes, and host-runtime assembly maps | `references/workflow-maps.md` |
+
+- Preload only `grill-me` and `internal-agent-support-next-step` because they
+  are the core gate and handoff helpers for every staged phase.
+- Load every other support skill only when the active phase, failure condition,
+  handoff, review lens, or validation gap makes that owner necessary.
+- Prefer delegating to the named skill over copying its method. This gateway may
+  state what the support owner must produce, but the support owner defines how.
+- When a support contract needs more than trigger, boundary, and return shape,
+  move the detail to the support skill or to this bundle's references instead
+  of expanding `SKILL.md`.
+
 ## Retired To Current Ownership Mapping
 
 | Retired or old owner | Current owner |
