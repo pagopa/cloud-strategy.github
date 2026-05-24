@@ -199,7 +199,7 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
         in writing_skill_text
     )
     assert "rg --no-ignore" in writing_skill_text
-    assert "Use `grill-me` only after the evidence pass" in writing_skill_text
+    assert "Run the clarification gate only after the evidence pass" in writing_skill_text
     assert "internal-gateway-critical-master" in writing_skill_text
     assert (
         "Before writing a non-trivial or governance-sensitive retained plan"

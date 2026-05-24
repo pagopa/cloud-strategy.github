@@ -10,7 +10,6 @@ description: Use when repository-owned work needs a retained numbered plan under
 This index lists every other skill that this file asks the agent to load, route
 to, compare against, or delegate to.
 
-- `grill-me`: retained-plan clarification gate when real user decisions remain after the evidence pass.
 - `internal-executing-plans`: repository-local application owner for approved retained plans.
 - `internal-gateway-critical-master`: critical challenge owner before writing non-trivial or governance-sensitive retained plans.
 - `superpowers-brainstorming`: alternate owner for general design or spec work under `tmp/superpowers/specs/`.
@@ -51,10 +50,10 @@ must stay outside the execution loop.
 - Start every retained plan with `01-change-summary.md`. This file is only a short summary of the modifications the plan proposes, the problem they solve, and why that direction is worth approval.
 - Keep `01-change-summary.md` concise enough to review quickly. Do not put the file-role map, reading budget, full execution checklist, long rationale, unresolved questions, or copied repository context in it.
 - For non-trivial retained plans, create `02-source-item-ledger.md` immediately after the summary. It is the control and traceability file for the folder.
-- `02-source-item-ledger.md` must declare `grill-me required`, `grill-me satisfied`, or `grill-me not applicable` before the plan can move to execution.
-- Use `grill-me required` when unresolved user-only decisions can change scope, owner, target state, validation, rollout, or anti-scope. Stop before writing executable plan content until those decisions are answered or the user explicitly accepts the recommended defaults.
-- Use `grill-me satisfied` only when the relevant decisions were answered or explicitly accepted in the active loop, the user gave a closure or proceed signal, the answers still match the current plan scope, and no user-only decision needs another loop.
-- Use `grill-me not applicable` only when the work is concrete, mechanical, or fully recoverable from repository evidence.
+- `02-source-item-ledger.md` must declare `clarification required`, `clarification satisfied`, or `clarification not applicable` before the plan can move to execution.
+- Use `clarification required` when unresolved user-only decisions can change scope, owner, target state, validation, rollout, or anti-scope. Stop before writing executable plan content until those decisions are answered or the user explicitly accepts the recommended defaults.
+- Use `clarification satisfied` only when the relevant decisions were answered or explicitly accepted in the active loop, the user gave a closure or proceed signal, the answers still match the current plan scope, and no user-only decision needs another loop.
+- Use `clarification not applicable` only when the work is concrete, mechanical, or fully recoverable from repository evidence.
 - For non-trivial or ambiguous retained plans, `02-source-item-ledger.md` must include a lightweight spec baseline: objective, assumptions that affect delivery, success criteria, boundaries or anti-scope, validation path, and open questions or `none`.
 - Before writing a non-trivial or governance-sensitive retained plan, use `internal-gateway-critical-master` to challenge the proposed target, anti-scope, owner, validation path, and main tradeoff. If the outcome is `reformulate-plan` or `continue-critical`, resolve that result before writing plan files. If the plan is simple or mechanical, record critical challenge as not applicable in the ledger.
 - Success criteria must be concrete enough to verify. Reframe vague goals into observable conditions when repository evidence supports it, or move the uncertainty to `questions.md` before execution.
@@ -100,7 +99,7 @@ must stay outside the execution loop.
 - Coverage before compression: when rewriting an existing strategic or monolithic plan, extract the source items first and preserve them in `02-source-item-ledger.md` before shortening, splitting, or deleting the source artifact.
 - Observable acceptance before execution: convert broad verbs into measurable evidence while the plan is still cheap to fix, not after the executor has already closed `done-*` files.
 - Prefer the smallest useful retained plan shape: brief summary, source-item ledger, current execution or backlog, and validation. Add more numbered files only for independent macro-categories.
-- Use `grill-me` only after the evidence pass when real user decisions remain, then declare the gate status. Do not ask questions that repository evidence can answer.
+- Run the clarification gate only after the evidence pass when real user decisions remain, then declare the gate status. Do not ask questions that repository evidence can answer.
 - Keep deferred improvements, retrospectives, and lessons separate from executable steps unless they are required for the requested outcome.
 
 ## Numbered-file shape
@@ -124,7 +123,7 @@ must stay outside the execution loop.
 - `02-source-item-ledger.md` must include these headings:
 - `Uso consigliato`
 - `Mappa file e ruolo`
-- `Gate grill-me`
+- `Clarification gate`
 - `Critical challenge`
 - `Evidence pass iniziale`
 - `Budget lettura`
@@ -175,7 +174,7 @@ must stay outside the execution loop.
 - Every new or rewritten retained plan file name is English.
 - `01-change-summary.md` exists and contains only a concise proposed-change summary, rationale, validation path, and decision request.
 - `02-source-item-ledger.md` exists and acts as the control and coverage file for the retained plan.
-- For non-trivial retained plans, the ledger declares `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`.
+- For non-trivial retained plans, the ledger declares `clarification required`, `clarification satisfied`, or `clarification not applicable`.
 - Non-trivial or governance-sensitive retained plans run `internal-gateway-critical-master` before plan files are written, or record why critical challenge is not applicable.
 - The ledger declares `Uso consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, and `Budget lettura`.
 - The ledger's `Budget lettura` confines future readers to this plan and exact named evidence; other retained plan folders are excluded unless specifically indicated.
