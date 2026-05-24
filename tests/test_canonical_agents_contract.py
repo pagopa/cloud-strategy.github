@@ -237,15 +237,20 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
 
     assert "## Grill-me Gate Protocol" in skill_text
     assert "Gate 0 starts after the minimum evidence pass" in skill_text
+    assert "phase transition" in skill_text
+    assert "pre-start checkpoint" in skill_text
     assert "request-change realignment" in skill_text
     assert (
         "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`."
         in skill_text
     )
     assert "`Gate 0`" in wrapper_text
+    assert "pre-start signals as checkpoints, not waivers" in wrapper_text
     assert_normalized_snippet(wrapper_text, "request-changing realignment")
     assert "run Gate 0 after the minimum evidence pass" in wrapper_alignment_text
+    assert "governance-sensitive pre-start delivery" in wrapper_alignment_text
     assert "minimum evidence pass, then" in workflow_maps_text
+    assert "phase\ntransition, or edit" in workflow_maps_text
     assert "Gate 0" in workflow_maps_text
 
 
@@ -553,6 +558,9 @@ def test_gateway_support_prompts_are_retired_from_the_live_catalog() -> None:
 
 
 def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
+    grill_me_text = Path(".github/skills/grill-me/SKILL.md").read_text(
+        encoding="utf-8"
+    )
     operational_text = Path(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
@@ -562,8 +570,12 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
 
     assert Path(".github/skills/grill-me/SKILL.md").exists()
     assert not Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
+    assert "confirm context before starting" in grill_me_text
+    assert "pre-plan or pre-start gate" in grill_me_text
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
+    assert "pre-plan and pre-start clarification gate" in operational_text
+    assert "governance-sensitive pre-start delivery" in wrapper_alignment_text
     assert "non-trivial retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text

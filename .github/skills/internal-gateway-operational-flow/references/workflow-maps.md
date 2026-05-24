@@ -111,7 +111,8 @@ Use this repository-local variant for small catalog maintenance before escalatin
 The full cycle coordinates visible phases. It is not hidden dispatch between wrapper agents.
 Run the minimum evidence pass before Gate 0. If a request-changing
 realignment alters scope, owner, target state, validation, rollout, or
-anti-scope, rerun Gate 0 before any governance-sensitive plan output or edit.
+anti-scope, rerun Gate 0 before any governance-sensitive plan output, phase
+transition, or edit.
 
 ## Planned Work
 

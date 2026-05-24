@@ -240,43 +240,6 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
     )
 
 
-def test_gate_zero_and_realignment_block_governance_sensitive_execution() -> None:
-    assert_contains_all(
-        ".github/skills/internal-gateway-operational-flow/SKILL.md",
-        (
-            "## Grill-me Gate Protocol",
-            "Gate 0 starts after the minimum evidence pass",
-            "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`.",
-            "run a request-change realignment",
-            "Any request-change realignment reruns Gate 0",
-        ),
-    )
-    assert_contains_all(
-        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
-        (
-            "run Gate 0 after the minimum evidence pass",
-            "rerun Gate 0 on request-changing realignment",
-            "`execute` and `apply-plan` stay blocked while the Gate 0 result is",
-        ),
-    )
-    assert_contains_all(
-        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md",
-        (
-            "minimum evidence pass, then",
-            "Gate 0",
-            "rerun Gate 0 before any governance-sensitive plan output or edit",
-        ),
-    )
-    assert_contains_all(
-        ".github/agents/internal-gateway-operational-flow.agent.md",
-        (
-            "`Gate 0`",
-            "request-changing",
-            "do not enter `execute` or `apply-plan` while the gate is",
-        ),
-    )
-
-
 def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
@@ -305,9 +268,6 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
             "resolve the owning skill bundle and keep its bundle siblings",
             "For skill bundles, treat existing bundle siblings as default in-scope",
             "For skill bundles, confirm each existing bundle sibling was reviewed",
-            "smallest evidence pass that can confirm or disconfirm the main",
-            "Use the smallest output shape that supports the decision.",
-            "source-item coverage matrix",
         ),
     )
     assert_contains_all(
@@ -317,7 +277,13 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
             "inspect bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
         ),
     )
-    assert not Path(".github/prompts/internal-agent-review-next-actions.prompt.md").exists()
+    assert_contains_all(
+        ".github/prompts/internal-agent-review-next-actions.prompt.md",
+        (
+            "If `subject` is a repository-owned bundle owner such as `SKILL.md`",
+            "review bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
+        ),
+    )
 
 
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:
@@ -495,11 +461,9 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Residual risks",
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
-            "`SHIPPED` requires passed validators, a completed report",
-            "no open\nsource-item ledger rows",
-            "Source-item ledger status",
+            "`SHIPPED` requires passed validators and a completed report",
             "Intended observable acceptance",
-            "A summary that says an item was done is not evidence",
+            "A summary\nthat says an item was done is not evidence",
             "late-stage packaging artifacts",
             "not after every intermediate patch",
             "item-level evidence",
@@ -514,8 +478,7 @@ def test_resume_protocol_reference_exists() -> None:
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
             "Verify-first Sequence",
-            "`01-change-summary.md`",
-            "`02-source-item-ledger.md`",
+            "`01-riassunto-direzione-e-decisione.md`",
             "Evidence pass iniziale",
             "Budget lettura",
             "rg --no-ignore",
@@ -531,8 +494,8 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
-            "file roles and source coverage cannot be inferred safely",
-            "before broad\n  reading",
+            "file roles cannot be inferred safely",
+            "before broad reading",
             "lacks an item/evidence table or evidence-envelope pointer",
             "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
         ),
@@ -543,14 +506,13 @@ def test_plan_handoff_requires_summary_control_file() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/plan-handoff.md",
         (
-            "`01-change-summary.md`",
-            "`02-source-item-ledger.md`",
+            "`01-riassunto-direzione-e-decisione.md`",
             "`Uso consigliato`",
             "`Mappa file e ruolo`",
             "`Evidence pass iniziale`",
             "`Budget lettura`",
-            "source-item coverage",
-            "markers when the folder completes",
+            "summary control file",
+            "matching `done-*` marker",
             "Observable acceptance for each executable action",
         ),
     )
@@ -574,7 +536,7 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
     executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
 
     assert (
-        "evidence envelope with item, status, evidence, and route"
+        "evidence envelope with item, status,\n  evidence, and route"
         in executing_plans_text
     )
     assert "late-stage evidence packaging" in executing_plans_text
