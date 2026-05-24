@@ -5,6 +5,12 @@ description: Interview the user relentlessly about a plan, design, or action con
 
 # Grill Me
 
+## Referenced skills
+
+- None.
+
+## Interview Approach
+
 Interview me relentlessly about every aspect of this plan, design, or action
 context until we reach a shared understanding. Walk down each branch of the
 decision tree, resolving dependencies between decisions one-by-one.
@@ -25,10 +31,5 @@ After the initial numbered list, ask one question at a time only for unresolved 
 
 Do not ask questions that can be answered by exploring the codebase, documentation, or local files.
 
-When this skill is used as a pre-plan or pre-start gate, leave the caller with
-one explicit gate status:
-
-- `grill-me required`: unresolved user-only decisions still block safe planning
-  or action.
-- `grill-me satisfied`: the user answered or accepted the required decisions.
-- `grill-me not applicable`: repository evidence fully resolves the decision surface.
+End by summarizing the resolved decisions, explicit assumptions, and any
+unresolved questions the user chose to accept or defer.

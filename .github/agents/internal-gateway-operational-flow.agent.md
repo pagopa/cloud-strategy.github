@@ -37,8 +37,8 @@ portable workflow semantics in the core skill.
   realignment; and do not enter `execute` or `apply-plan` while the gate is
   `grill-me required`.
 - Keep governance-sensitive planning in `plan-only (clarify-first)` when
-  unresolved user decisions remain, and stop for `grill-me` before writing any
-  plan artifact.
+  unresolved user decisions remain; Gate 0 owns the status labels, so stop for `grill-me` before writing any
+  plan artifact only to run the question pass.
 - Use the critical-master handoff before finalizing material prompt, skill,
   routing, or shared workflow changes.
 - Use this agent when an approved retained plan under `tmp/superpowers/` should

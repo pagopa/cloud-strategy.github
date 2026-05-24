@@ -12,7 +12,7 @@ Load these skills by name only when the active phase requires them. This list is
 Always preload only `grill-me` and `internal-agent-support-next-step`.
 Treat every other referenced skill as an on-demand dependency, not a preload bundle.
 
-- `grill-me`: pre-plan and pre-start clarification gate when user decisions can change scope, owner, target state, validation, rollout, or anti-scope.
+- `grill-me`: self-contained interview support for unresolved user-only decisions in this skill's pre-plan and pre-start clarification gate; this skill owns Gate 0 status and phase-blocking semantics.
 - `internal-debugging`: root-cause support when execution, validation, or recovery exposes a real failing loop.
 - `internal-agent-support-lane-change-engine`: user-visible lane-change response when the selected mode no longer fits.
 - `internal-agent-support-next-step`: durable next-owner, scope, validation, and risk handoff package.
@@ -75,7 +75,7 @@ Use this map before loading support skills or optional references.
 - Always load `grill-me` and `internal-agent-support-next-step` at skill start. Load every other skill only when its phase, handoff, or failure condition becomes active.
 - If the entry point or phase is unclear, use `plan` as the safe fallback instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
-- Run Gate 0 after the minimum evidence pass before governance-sensitive plan output, phase transition, or editing. Treat `grill-me` as the blocking gate when user decisions may change scope, owner, target state, validation, rollout, or anti-scope, and do not enter `execute` or `apply-plan` while the result is `grill-me required`.
+- Run Gate 0 after the minimum evidence pass before governance-sensitive plan output, phase transition, or editing. This skill owns the blocking gate status; use `grill-me` only for the interview pattern when user decisions may change scope, owner, target state, validation, rollout, or anti-scope. Do not enter `execute` or `apply-plan` while the result is `grill-me required`.
 - Use `internal-agent-support-lane-change-engine` when the selected mode no longer fits.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Treat cross-skill contracts as owner-level contracts. Reference another skill by name and the behavior it owns; do not link to another skill's `SKILL.md`, `references/`, `scripts/`, `assets/`, or `agents/` files.
@@ -91,7 +91,7 @@ Use this map before loading support skills or optional references.
 
 ## Grill-me Gate Protocol
 
-Gate 0 starts after the minimum evidence pass needed to classify the request, target path, owner, anti-scope, and nearest validation. Use `grill-me` only after that evidence pass.
+Gate 0 starts after the minimum evidence pass needed to classify the request, target path, owner, anti-scope, and nearest validation. This skill, not `grill-me`, owns Gate 0 status labels and blocking semantics. Use `grill-me` only after that evidence pass, and only as the interview engine for unresolved user-only decisions.
 
 For governance-sensitive work, declare exactly one gate status before any plan output, recommendation, retained plan, Decision Brief, plan reformulation, phase transition, or edit: `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`.
 
@@ -162,7 +162,7 @@ Before a non-trivial or ambiguous request moves from evidence gathering into a r
 
 Before writing any `plan-only` output, non-trivial retained plan, or plan reformulation, apply Gate 0 from `Grill-me Gate Protocol` and state the gate result before the plan content.
 
-`grill-me` is mandatory when the user asks to clarify before planning or before starting, when the request touches agents, skills, prompts, workflow, catalog, governance, routing, or validation, or when missing context, target state, anti-scope, owner, validation, or user decisions could change scope, owner, target state, validation, rollout, or anti-scope. Before asking questions, inspect the repository when the answer is recoverable from files.
+A Gate 0 questioning pass with `grill-me` is mandatory when the user asks to clarify before planning or before starting, when the request touches agents, skills, prompts, workflow, catalog, governance, routing, or validation, or when missing context, target state, anti-scope, owner, validation, or user decisions could change scope, owner, target state, validation, rollout, or anti-scope. Before asking questions, inspect the repository when the answer is recoverable from files.
 Treat those cases as `plan-only (clarify-first)` even when the user did not explicitly ask to be grilled, but only when unresolved user-only decisions remain. A detailed prompt or large evidence pass does not waive the gate when unresolved user-only decisions still remain. Comparison, integration, or architecture-judgment requests should default to the clarify-first gate whenever the repository cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar.
 
 When the gate result is `grill-me required`, stop before writing the plan, changing phase, or editing files. Then provide numbered questions with a recommended answer for each, using `Question`, `Recommendation`, `Why`, and `Default if accepted`, then wait until the user answers or explicitly accepts the defaults.
@@ -312,7 +312,7 @@ Keep `internal-gateway-critical-master` as the separate owner for pressure testi
 - `apply-plan` uses `internal-executing-plans`, requires source-item ledger coverage for non-trivial retained plans, and excludes `questions.md`.
 - Phase-ending reports state `Lessons` status even when no lesson was retained.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-high-level-review`, or future security-review playbooks.
-- `grill-me` blocks plan output, phase transition, or action when user decisions can change scope, owner, target state, validation, rollout, or anti-scope.
+- Gate 0 blocks plan output, phase transition, or action when user decisions can change scope, owner, target state, validation, rollout, or anti-scope; `grill-me` supplies only the self-contained interview pattern.
 - Gate 0 follows the minimum evidence pass and reruns on request-change realignment before governance-sensitive planning, phase transition, or editing continues.
 - Imported support follows `references/wrapper-alignment.md` and is never a mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.

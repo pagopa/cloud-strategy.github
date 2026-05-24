@@ -571,7 +571,9 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert Path(".github/skills/grill-me/SKILL.md").exists()
     assert not Path(".github/skills/mattpocock-grill-me/SKILL.md").exists()
     assert "confirm context before starting" in grill_me_text
-    assert "pre-plan or pre-start gate" in grill_me_text
+    assert "pre-plan or pre-start gate" not in grill_me_text
+    assert "grill-me required" not in grill_me_text
+    assert "Gate 0 status and phase-blocking semantics" in operational_text
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
     assert "pre-plan and pre-start clarification gate" in operational_text
