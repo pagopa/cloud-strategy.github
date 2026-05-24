@@ -130,9 +130,7 @@ def test_suggest_support_skills_only_emits_live_skill_ids() -> None:
 
 def test_suggest_support_skills_claim_gate_owners_match_core_contract() -> None:
     module = load_script_module()
-    skill_claim_gate_owners = claim_gate_owners_from_skill(
-        SKILL_PATH.read_text(encoding="utf-8")
-    )
+    skill_text = SKILL_PATH.read_text(encoding="utf-8")
     reference_claim_gate_owners = claim_gate_owners_from_reference(
         SUPPORT_ROUTING_PATH.read_text(encoding="utf-8")
     )
@@ -140,5 +138,5 @@ def test_suggest_support_skills_claim_gate_owners_match_core_contract() -> None:
         module.SYMPTOM_SKILLS[symptom][0] for symptom in CLAIM_GATE_SYMPTOMS
     }
 
-    assert skill_claim_gate_owners == reference_claim_gate_owners
-    assert symptom_claim_gate_owners == skill_claim_gate_owners
+    assert "single source of truth for claim-gate" in skill_text
+    assert symptom_claim_gate_owners == reference_claim_gate_owners

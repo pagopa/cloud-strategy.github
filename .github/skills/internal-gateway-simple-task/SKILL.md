@@ -75,16 +75,15 @@ Leave simple mode when one of these becomes the real problem:
 
 ## Simple Flow
 
-Use at most one focused block of clarification. If ownership, rollout,
-governance, tradeoffs, or validation strategy remain ambiguous, escalate.
+Use at most one focused block of clarification. `references/clarification-gate.md`
+owns the exit check, single-clarification limit, and escalation triggers for
+simple mode.
 
 1. Inspect local files first when repository evidence can answer the question.
-2. Run the exit check before using `grill-me`: if the prompt needs a plan,
-   retained plan, plan rewrite, or clarify-first planning gate, stop simple
-   mode and issue an escalation alert recommending
-   `internal-gateway-operational-flow`.
-3. If missing context blocks the start and local evidence cannot resolve it, use
-   `grill-me` for the minimum necessary clarification.
+2. Run the exit check in `references/clarification-gate.md` before using
+   `grill-me`.
+3. If missing context still blocks the start and local evidence cannot resolve
+   it, use `grill-me` only within that reference boundary.
 4. Confirm the task still fits one quick lane.
 5. Load only the support skill proved by the prompt, target path, scoped
    instruction, symptom, domain evidence, or validation surface.
@@ -97,16 +96,9 @@ Bundle-target maintenance does not stop at the first file. For a repository-owne
 
 ## Quick Lanes
 
-| Lane | Use when |
-| --- | --- |
-| `answer` | Explain or decide from repository evidence without edits. |
-| `edit` | Make a clear local change and run the closest focused validation. |
-| `diagnose` | Reproduce a failure, drift, or unexpected behavior before fixing it. |
-| `validate` | Check a concrete artifact, command, or result. |
-| `escalate` | Stop when the task becomes staged, review-owned, retained-plan owned, or critical-challenge owned. |
-
-Read `references/simple-lanes.md` when the lane or output shape is still noisy
-after the fast-path boundary is confirmed.
+Use one quick lane: `answer`, `edit`, `diagnose`, `validate`, or `escalate`.
+`references/simple-lanes.md` is the single source of truth for lane selection
+and output shapes after the fast-path boundary is confirmed.
 
 ## Support Selection
 
@@ -122,41 +114,21 @@ If the prompt mentions a domain that is not represented by a known support
 skill, inspect repository evidence and use the closest valid owner. Do not infer
 that an unlisted provider, tool, or runtime is unsupported.
 
-Use the `grill-me boundary` below for clarification. Use `references/support-routing.md` only when several plausible support owners compete. Use `scripts/suggest_support_skills.py` only as an advisory helper for known paths or symptoms.
+Use `references/clarification-gate.md` for clarification boundaries. Use
+`references/support-routing.md` only when several plausible support owners
+compete. Use `scripts/suggest_support_skills.py` only as an advisory helper for
+known paths or symptoms.
 
 ## grill-me boundary
 
-This `grill-me boundary` is canonical for simple mode. Use `grill-me` only for
-one focused block of clarification when missing user intent, target path, input data, local context, or a blocker prevents starting or continuing the active simple lane. Do not use simple-mode `grill-me` for pre-plan, ownership, rollout, governance, tradeoff, or validation-strategy decisions. Escalate to `internal-gateway-operational-flow` instead.
+`references/clarification-gate.md` is the canonical simple-mode boundary for
+the exit check, `grill-me` limit, and escalation triggers.
 
 ## Claim Gates
 
-This section in `SKILL.md` is the source of truth for the claim-gate contract.
-`references/support-routing.md` is a lazy-loaded operational mirror and must
-stay aligned with these owners. These gates are exceptions to the anti-catalog
-posture. They are not a support bundle to preload. Use them only before the matching claim:
-
-- Load `internal-debugging` before saying the original bug, failure, or loop is
-  fixed.
-- Load `internal-tdd` before saying red-green-refactor passed or a regression is
-  covered.
-- Load `internal-performance-optimization` before saying performance improved.
-- Load `internal-github-pr` before saying a PR is ready, valid, mergeable, or
-  complete.
-- Load `internal-code-review` before saying there are no code findings or code
-  merge-readiness blockers.
-- Load `internal-high-level-review` before saying there are no systems findings or
-  systems merge-readiness blockers.
-- Load `superpowers-verification-before-completion` before any completion,
-  readiness, merge-ready, no-findings, fixed, covered, or improved claim.
-- Treat `validator passes` as a completion or passing claim. Re-run the
-  validator and read fresh output before saying it passed.
-- If the touched work includes auth, config, secrets, tenant data, or other
-  sensitive values, add a validation note confirming that nothing sensitive was
-  hardcoded, or state the exact gap.
-
-If a claim gate makes the work review-owned, staged, retained-plan-owned, or
-critical-owned, stop simple mode and escalate instead of making the claim.
+`references/support-routing.md` is the single source of truth for claim-gate
+owners and evidence gates in simple mode. Keep claim gates narrow and load them
+only before the matching status claim.
 
 ## Escalation Alert
 
@@ -172,14 +144,8 @@ with:
 
 ## Output Shape
 
-| Lane | Return |
-| --- | --- |
-| `answer` | Result, evidence inspected, and uncertainty. |
-| `edit` | `lane`, `support-loaded`, `files-touched`, `validation`, and `residual-risk`. |
-| `diagnose` | `lane`, `support-loaded`, reproduced failure, root cause, fix or blocker, and evidence. |
-| `validate` | `lane`, `support-loaded`, check or command, result, and follow-up owner or gap. |
-
-For escalation, return only the escalation alert fields.
+`references/simple-lanes.md` is the single source of truth for lane-specific
+output shapes. For escalation, return only the escalation alert fields.
 
 ## Validation
 

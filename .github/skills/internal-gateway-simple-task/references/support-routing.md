@@ -26,7 +26,7 @@ repository evidence, or escalate when the missing owner changes the risk.
 
 | Signal | Support posture | Boundary |
 | --- | --- | --- |
-| Missing intent, target path, input data, local context, or blocker prevents starting or continuing | Use `grill-me` for one focused block of clarification. | If the answer must settle ownership, rollout, governance, tradeoffs, or validation strategy, escalate instead. |
+| Missing intent, target path, input data, local context, or blocker prevents starting or continuing | Use `grill-me` only within the single-clarification limit in `references/clarification-gate.md`. | If the answer must settle ownership, rollout, governance, tradeoffs, validation strategy, or exceeds that clarification gate, escalate instead. |
 | Bug, failing test, failing build, drift, or unexpected output | Use root-cause debugging support after reproducing the loop. | Do not patch from correlation alone. |
 | Test-first request or executable behavior change | Use test-first support when a meaningful seam exists. | Do not force TDD onto prose, prompt, skill, inventory, or governance text without executable behavior. |
 | Existing diff needs findings or merge readiness | Leave simple mode for review ownership. | Do not turn simple validation into defect-first review. |
@@ -41,9 +41,8 @@ repository evidence, or escalate when the missing owner changes the risk.
 ## Claim Gates
 
 Use this table when the task stays simple but the final answer would make a
-strong status claim. It mirrors the claim-gate contract in `SKILL.md`. Update
-the core skill first when an owner changes, then keep this lazy-loaded
-reference aligned.
+strong status claim. This table is the single source of truth for claim-gate
+ownership in simple mode.
 
 | Claim before final answer | Required owner | Evidence gate |
 | --- | --- | --- |
@@ -57,6 +56,13 @@ reference aligned.
 
 If a required owner makes the work review-owned, staged, retained-plan-owned, or
 critical-owned, stop simple mode and escalate instead of making the claim.
+
+Treat `validator passes` as a passing claim. Re-run the validator and read
+fresh output before saying it passed.
+
+If the touched work includes auth, config, secrets, tenant data, or other
+sensitive values, add a validation note confirming that nothing sensitive was
+hardcoded, or state the exact gap.
 
 ## Anti-Catalog Rule
 
