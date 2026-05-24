@@ -215,18 +215,18 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "Treat those cases as `plan-only (clarify-first)` even when the user did not",
+            "Treat operational-flow planning as `plan-only (clarify-first)`",
             "Comparison, integration, or architecture-judgment requests should",
-            "Governance-sensitive planning with unresolved user choices must stop for",
+            "until the user closes the current `grill-me` loop",
         ),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "governance-sensitive planning still has unresolved user-only decisions",
-            "treat the lane as `plan-only (clarify-first)`",
-            "Rich prompts and pre-start signals do not waive Gate 0.",
-            "Approved retained-plan execution may continue with `grill-me not applicable`",
+            "Planning, review, execution, and retained-plan application always start",
+            "Treat planning as `plan-only (clarify-first)`",
+            "do not waive Gate 0",
+            "Restart Gate 0 before continuing",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )
@@ -234,7 +234,7 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
         ".github/agents/internal-gateway-operational-flow.agent.md",
         (
             "`plan-only (clarify-first)`",
-            "stop for `grill-me` before writing any",
+            "Gate 0 owns the status labels",
             "rich prompts",
         ),
     )
@@ -242,7 +242,7 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "## Phase-Local Contracts",
-            "Rich prompts and pre-start signals do not waive Gate 0.",
+            "do not waive Gate 0",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
         ),
     )
@@ -256,15 +256,15 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "## Phase-Local Contracts",
-            "Rich prompts and pre-start signals do not waive Gate 0.",
+            "do not waive Gate 0",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
         ),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "Rich prompts and pre-start signals do not waive Gate 0.",
-            "Approved retained-plan execution may continue with `grill-me not applicable`",
+            "do not waive Gate 0",
+            "Restart Gate 0 before continuing",
             "the loop closes only after a user closure signal",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
@@ -274,7 +274,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
         (
             "`plan-only (clarify-first)`",
             "rich prompts",
-            "Approved retained-plan execution may continue without reopening Gate 0 by",
+            "Approved retained-plan execution still starts mandatory Gate 0",
         ),
     )
 

@@ -31,7 +31,7 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | Gate 0 support for `plan`, `full-cycle`, and governance-sensitive pre-start delivery | The user asks for grilling, signals they are done providing context before action, governance-sensitive planning or delivery still has unresolved user-only decisions, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first, run Gate 0 after the minimum evidence pass, keep Gate 0 status and phase blocking owned by `internal-gateway-operational-flow`, use `plan-only (clarify-first)` for planning decisions that can change scope, owner, or validation, block `execute` or `apply-plan` while `grill-me required` remains active, require a user answer or accepted defaults plus a closure/proceed signal before `grill-me satisfied`, and rerun Gate 0 on request-changing realignment before one-at-a-time follow-up. |
+| `grill-me` | Mandatory Gate 0 support for every operational-flow entrypoint | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation. | Inspect repository evidence first, run Gate 0 after the minimum evidence pass, keep Gate 0 status and phase blocking owned by `internal-gateway-operational-flow`, use `plan-only (clarify-first)` before planning output, block `execute` or `apply-plan` while `grill-me required` remains active, require a user answer or accepted defaults plus a closure/proceed signal before `grill-me satisfied`, and rerun Gate 0 on request, context, or environment change. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
 Internal replacements:
@@ -59,27 +59,23 @@ State security-specific gaps and route them through the closest existing owner.
 Support selection belongs in the gateway skills, not in wrapper skill-list
 sections.
 
-- Planning and pre-start support include `grill-me` only when the
-  operational-flow skill selects it through Gate 0 after the minimum evidence
-  pass.
-- If governance-sensitive planning still has unresolved user-only decisions,
-  treat the lane as `plan-only (clarify-first)` until Gate 0 resolves those
-  choices.
-- Rich prompts and pre-start signals do not waive Gate 0. They may support
-  `grill-me satisfied` only when the needed user decisions are already answered
-  or explicitly accepted in the active loop.
-- The agent may recommend ending a `grill-me` loop when no user-only decision
-  remains, but the loop closes only after a user closure signal such as "ok",
+- Planning, review, execution, and retained-plan application always start
+  `grill-me` through Gate 0 after the minimum evidence pass.
+- Treat planning as `plan-only (clarify-first)` until the user closes the active
+  `grill-me` loop.
+- Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, fully
+  recoverable repository evidence, and pre-start signals do not waive Gate 0.
+  They may shorten the question set or support a recommendation to stop, but
+  they do not replace explicit user closure.
+- The agent may recommend ending a `grill-me` loop when the answers are
+  coherent, but the loop closes only after a user closure signal such as "ok",
   "chiudi", "va bene", "vai", "procedi", accepted defaults, or an equivalent
   proceed instruction.
-- `grill-me not applicable` remains valid for concrete, mechanical, or fully
-  recoverable work and does not require a question pass.
 - `execute` and `apply-plan` stay blocked while the Gate 0 result is
   `grill-me required`, including request-changing realignment.
-- Approved retained-plan execution may continue with `grill-me not applicable`
-  while the request stays stable. Rerun Gate 0 before continuing if
-  request-changing realignment reopens scope, owner, target state, validation,
-  rollout, or anti-scope.
+- Restart Gate 0 before continuing if request, context, target path,
+  environment, tool output, dependency state, validation, or dirty worktree
+  ownership changes.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
 - Non-trivial or governance-sensitive retained-plan authoring belongs to

@@ -87,7 +87,7 @@ Use this repository-local variant for small catalog maintenance before escalatin
 +-------------------------------+
 | plan phase                     |
 | - minimum evidence pass, then  |
-|   Gate 0                       |
+|   mandatory grill-me Gate 0    |
 | - critical challenge before    |
 |   non-trivial/governance plan  |
 | - retained plan when justified |
@@ -121,14 +121,14 @@ Use this repository-local variant for small catalog maintenance before escalatin
 ```
 
 The full cycle coordinates visible phases. It is not hidden dispatch between wrapper agents.
-Run the minimum evidence pass before Gate 0. If a request-changing
+Run the minimum evidence pass before mandatory `grill-me` Gate 0. If a request-changing
 realignment alters scope, owner, target state, validation, rollout, or
 anti-scope, rerun Gate 0 before any governance-sensitive plan output, phase
 transition, or edit.
 
-Rich prompts and pre-start signals do not waive Gate 0. They may shorten the question pass only when the needed user decisions are already resolved or accepted in the active loop. The agent may recommend ending a `grill-me` loop, but it closes only after a user closure signal such as "ok", "chiudi", "va bene", "vai", or an equivalent proceed instruction.
+Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0. They may shorten the question pass or support a recommendation to stop. The agent may recommend ending a `grill-me` loop, but it closes only after a user closure signal such as "ok", "chiudi", "va bene", "vai", or an equivalent proceed instruction.
 
-Approved retained-plan execution may continue with `grill-me not applicable` while the request stays stable. If request-changing realignment reopens scope, owner, target state, validation, rollout, or anti-scope, rerun Gate 0 before the next governance-sensitive plan output, phase transition, or edit.
+Approved retained-plan execution still starts `grill-me` before work begins. If request, context, environment, tool output, dependency state, validation, rollout, or anti-scope changes, rerun Gate 0 before the next plan output, review output, phase transition, or edit.
 
 ## Planned Work
 
@@ -142,7 +142,7 @@ Approved retained-plan execution may continue with `grill-me not applicable` whi
 +-------------------------------+
 | plan mode                      |
 | - minimum evidence pass, then  |
-|   Gate 0                       |
+|   mandatory grill-me Gate 0    |
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |

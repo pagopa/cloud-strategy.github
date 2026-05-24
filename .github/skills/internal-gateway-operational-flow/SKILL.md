@@ -12,7 +12,7 @@ Load these skills by name only when the active phase requires them. This list is
 Always preload only `grill-me` and `internal-agent-support-next-step`.
 Treat every other referenced skill as an on-demand dependency, not a preload bundle.
 
-- `grill-me`: self-contained interview support for unresolved user-only decisions in this skill's pre-plan and pre-start clarification gate; this skill owns Gate 0 status and phase-blocking semantics.
+- `grill-me`: mandatory Gate 0 interview support after the minimum evidence pass; this skill owns Gate 0 status and phase-blocking semantics.
 - `internal-agent-support-next-step`: durable next-owner, scope, validation, and risk handoff package.
 - `internal-agent-support-lane-change-engine`: user-visible lane-change response when the selected mode no longer fits.
 - `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
@@ -51,7 +51,7 @@ Select one workflow entry point from the user prompt, then run one active phase 
 | --- | --- | --- |
 | `full-cycle` | The user asks for end-to-end non-trivial work or explicitly wants plan, challenge, apply, and review. | `plan` |
 | `plan-only` | The user asks for a plan, decision brief, or retained plan without implementation. | `plan` |
-| `plan-only (clarify-first)` | The user wants `grill-me` questions, or Gate 0 finds unresolved user-only decisions before any plan output. | `plan` with `grill-me` |
+| `plan-only (clarify-first)` | The user wants `grill-me` questions, or Gate 0 must run before plan output. | `plan` with `grill-me` |
 | `apply-plan` | The user asks to apply an approved retained plan under `tmp/superpowers/`. | `execute` with `internal-executing-plans` |
 | `review` | The user asks for defect-first review, merge readiness, or evidence analysis. | `review` |
 | `mode-explicit` | The user directly asks for `plan`, `execute`, or `review`. | The named phase |
@@ -60,20 +60,20 @@ Select one workflow entry point from the user prompt, then run one active phase 
 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `plan` | Decisions, ownership, rollout, validation, or tradeoffs remain. | Declare before non-trivial plan output when Gate 0 applies; run critical challenge before non-trivial or governance-sensitive plans. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes or imply execute approval. | `internal-writing-plans`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
-| `execute` | Target state and validation are concrete. | Block while governance-sensitive user decisions remain. | Scoped edits, focused validation, and slice reports. | Add unrelated improvements or reopen strategy silently. | `internal-debugging`, `internal-tdd`, and runtime delivery skills. | `Check 1-3` plus fresh evidence. |
-| `apply-plan` | An approved retained plan folder is the execution target. | Usually `grill-me not applicable` unless request-change realignment reopens decisions. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
-| `review` | A concrete artifact, diff, or validation result exists. | Declare only when the review scope is governance-sensitive or can change decisions. | Findings, severity, evidence gaps, and fix routing. | Apply fixes or design the initial solution. | `internal-code-review`, `internal-high-level-review`. | `Review Check 1-3` and named evidence gaps. |
+| `plan` | Decisions, ownership, rollout, validation, or tradeoffs remain. | Start after the minimum evidence pass before plan output; run critical challenge before non-trivial or governance-sensitive plans. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes or imply execute approval. | `internal-writing-plans`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
+| `execute` | Target state and validation are concrete. | Start after the minimum evidence pass before editing; block until the user closes the active `grill-me` loop. | Scoped edits, focused validation, and slice reports. | Add unrelated improvements or reopen strategy silently. | `internal-debugging`, `internal-tdd`, and runtime delivery skills. | `Check 1-3` plus fresh evidence. |
+| `apply-plan` | An approved retained plan folder is the execution target. | Start before retained-plan execution and restart on request, context, or environment change. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
+| `review` | A concrete artifact, diff, or validation result exists. | Start before review output and restart when scope, evidence, or environment changes. | Findings, severity, evidence gaps, and fix routing. | Apply fixes or design the initial solution. | `internal-code-review`, `internal-high-level-review`. | `Review Check 1-3` and named evidence gaps. |
 | `critical` | Assumptions, proposal, or decision need pressure testing. | Not owned here; use the critical owner. | Strongest objection, lens, and explicit outcome. | Implement or routine-review. | `internal-gateway-critical-master`. | One critical outcome and next-step package. |
 
 ## Core Contract
 
 - Choose one active phase at a time inside the selected workflow.
 - Each active phase declares phase, logical owner, scope, anti-scope, action, validation, risk, and the next checkpoint or decision.
-- Always load `grill-me` and `internal-agent-support-next-step` at skill start. Load every other skill only when its phase, handoff, or failure condition becomes active.
+- Always load `grill-me` and `internal-agent-support-next-step` at skill start. After the minimum evidence pass, always start the `grill-me` Gate 0 loop before plan output, recommendation, phase transition, review output, or edits. Load every other skill only when its phase, handoff, or failure condition becomes active.
 - If the entry point or phase is unclear, use `plan` as the safe fallback instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
-- Treat Gate 0 as the first-class pre-plan and pre-start decision gate. Run Gate 0 after the minimum evidence pass before governance-sensitive plan output, phase transition, or editing. This skill owns the blocking gate status; use `grill-me` only for the interview pattern when user decisions may change scope, owner, target state, validation, rollout, or anti-scope.
+- Treat Gate 0 as the first-class pre-plan and pre-start decision gate. Run Gate 0 after the minimum evidence pass before every plan output, recommendation, phase transition, review output, or edit. This skill owns the blocking gate status; use `grill-me` as the mandatory interview pattern and let only the user close or stop the loop.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Require an explicit checkpoint before moving from `plan` or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
 - Use review lenses inside `review` mode instead of duplicating their playbooks here.
@@ -83,29 +83,28 @@ Select one workflow entry point from the user prompt, then run one active phase 
 
 ## Grill-me Gate Protocol
 
-Gate 0 starts after the minimum evidence pass needed to classify the request, target path, owner, anti-scope, and nearest validation. This skill, not `grill-me`, owns Gate 0 status labels and blocking semantics. Use `grill-me` only after that evidence pass, and only as the interview engine for unresolved user-only decisions.
+Gate 0 starts after the minimum evidence pass needed to classify the request, target path, owner, anti-scope, and nearest validation. This skill, not `grill-me`, owns Gate 0 status labels and blocking semantics. Use `grill-me` after that evidence pass for every operational-flow request.
 
-For governance-sensitive work, declare exactly one gate status before any plan output, recommendation, retained plan, Decision Brief, plan reformulation, phase transition, or edit: `grill-me required`, `grill-me satisfied`, or `grill-me not applicable`.
+Declare exactly one gate status before any plan output, recommendation, retained plan, Decision Brief, plan reformulation, review output, phase transition, or edit: `grill-me required` or `grill-me satisfied`.
 
 | Status | Use when | Effect |
 | --- | --- | --- |
-| `grill-me required` | User-only decisions remain and can change scope, owner, target state, validation, rollout, or anti-scope. | Stop before plan output, recommendation, phase transition, or edit. |
+| `grill-me required` | The mandatory Gate 0 loop has not been explicitly closed by the user for the current request, context, and environment. | Stop before plan output, recommendation, review output, phase transition, or edit; ask the `grill-me` question set. |
 | `grill-me satisfied` | The user answered or explicitly accepted defaults in the current Gate 0 loop, gave a closure or proceed signal, the answers still match the current scope, and no unresolved decision needs another loop. | Continue with the current phase while the request remains stable. |
-| `grill-me not applicable` | The work is concrete, mechanical, or fully recoverable from repository evidence. | Continue without a question pass; rerun Gate 0 on request change. |
 
-Rich prompts and pre-start signals do not waive Gate 0. They may support `grill-me satisfied` only when the needed user decisions are already answered or accepted in the active loop, and `grill-me not applicable` only for concrete, mechanical, or fully recoverable work.
+Rich prompts, concrete tasks, mechanical tasks, fully recoverable repository evidence, retained-plan approval, and pre-start signals do not waive Gate 0. They may shorten the question set or support a recommendation to stop, but they do not replace an explicit user closure signal.
 
-Gate 0 is mandatory when the user asks to clarify before planning or starting, when the request touches agents, skills, prompts, workflow, catalog, governance, routing, validation, shared workflow, or always-on guidance, or when missing context, target state, anti-scope, owner, validation, or user decisions could change scope, owner, target state, validation, rollout, or anti-scope.
+Gate 0 is mandatory for every selected operational-flow entrypoint. The agent must not decide that `grill-me` is unnecessary. When the request touches agents, skills, prompts, workflow, catalog, governance, routing, validation, shared workflow, or always-on guidance, keep the question set broad enough to cover scope, owner, target state, validation, rollout, anti-scope, dirty worktree ownership, and stop conditions.
 
-When the gate result is `grill-me required`, stop before writing the plan, recommendation, retained plan, Decision Brief, changing phase, or editing files. Then provide numbered questions with a recommended answer for each, using `Question`, `Recommendation`, `Why`, and `Default if accepted`, then wait until the user answers or explicitly accepts the defaults. Do not replace those decisions with silent assumptions. After the bulk answer, continue one question at a time only for unresolved ambiguity.
+When the gate result is `grill-me required`, stop before writing the plan, recommendation, retained plan, Decision Brief, review output, changing phase, or editing files. Then provide numbered questions with a recommended answer for each, using `Question`, `Recommendation`, `Why`, and `Default if accepted`, then wait until the user answers or explicitly accepts the defaults. Do not replace those decisions with silent assumptions. After the bulk answer, continue one question at a time only for unresolved ambiguity.
 
 Do not enter `execute` or `apply-plan` while the gate is `grill-me required`.
 
-If a new instruction or request change could modify scope, owner, target state, validation, rollout, or anti-scope, run a request-change realignment: do the minimum new evidence pass, rerun Gate 0, and stop again if the result is `grill-me required`.
+If a new instruction, request change, target-path change, environment change, tool-output change, dependency change, validation change, or dirty-worktree change appears, run a request-change realignment: do the minimum new evidence pass, restart `grill-me`, and stop again while the result is `grill-me required`.
 
 When the user signals that context input is complete, for example with "go", "vai", "procedi", "start", "apply", or "ho finito", treat the next governance-sensitive action as a pre-start checkpoint, not as a waiver.
 
-Inside an active `grill-me` loop, the agent may recommend that the loop stop when the answers are coherent and no further user-only decision remains. The agent must not close the loop by itself. Close the loop only after a user closure signal such as "ok", "chiudi", "va bene", "vai", "procedi", accepting the defaults, or an equivalent instruction to continue.
+Inside an active `grill-me` loop, the agent may recommend how far the user should continue or that the loop can stop when the answers are coherent. The agent must not close or skip the loop by itself. Close the loop only after a user closure signal such as "ok", "chiudi", "va bene", "vai", "procedi", accepting the defaults, or an equivalent instruction to continue.
 
 ## User Authorization Signals
 
@@ -116,7 +115,7 @@ Treat end-to-end application as authorized only when the user explicitly asks to
 ## Phase Selection
 
 - `plan`: use when ambiguity, ownership, rollout, tradeoffs, multiple credible paths, or non-trivial repository-owned authoring must be settled before editing.
-- `execute`: use when the target state is already clear, verification is concrete, any governance-sensitive `grill-me` gate is `grill-me satisfied` or `grill-me not applicable`, and the work is deterministic local delivery or maintenance.
+- `execute`: use when the target state is already clear, verification is concrete, the mandatory `grill-me` gate is `grill-me satisfied`, and the work is deterministic local delivery or maintenance.
 - `review`: use when a concrete artifact, diff, or validation result exists and the main job is defect-first evidence, findings, and fix routing.
 - `critical`: use `internal-gateway-critical-master` when a proposal, plan, or decision needs pressure testing before action.
 
@@ -132,7 +131,7 @@ For small catalog maintenance, do the `internal-gateway-simple-task` vs `execute
 
 Plan mode owns the decision frame, assumptions, tradeoffs, selected direction, and next-step package. It does not silently become execution after the design is settled.
 
-Before any non-trivial or governance-sensitive plan output, apply Gate 0 and state the gate result. Treat those cases as `plan-only (clarify-first)` even when the user did not explicitly ask to be grilled, but only when unresolved user-only decisions remain. Comparison, integration, or architecture-judgment requests should default to the clarify-first gate whenever repository evidence cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar. Governance-sensitive planning with unresolved user choices must stop for `grill-me` before any retained plan, Decision Brief, or recommendation is written.
+Before any plan output, apply Gate 0 and state the gate result. Treat operational-flow planning as `plan-only (clarify-first)` until the user closes the current `grill-me` loop. Comparison, integration, or architecture-judgment requests should use a broader question set when repository evidence cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar.
 
 When the target path includes `AGENTS.md`, `.github/copilot-instructions.md`, `.github/INVENTORY.md`, `.github/agents/`, `.github/prompts/`, `.github/skills/`, validators, sync engines, or wrapper agents, include the applicable validation path, such as `make token-risks`, `make github-catalog-validation`, focused contract tests, or an explicit gap.
 
@@ -148,7 +147,7 @@ For medium or difficult tasks that close `plan` without a retained plan, provide
 
 Execute mode owns clear local delivery. It may touch several adjacent files when the target state is already decided and validation is concrete. File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
 
-For governance-sensitive delivery, run Gate 0 after the minimum evidence pass before editing. For `execute`, keep edits scoped to the requested change, required adjacent contracts, and validation fixes. Do not silently add newly discovered improvements.
+For delivery, run Gate 0 after the minimum evidence pass before editing. For `execute`, keep edits scoped to the requested change, required adjacent contracts, and validation fixes. Do not silently add newly discovered improvements.
 
 For multi-step work, execute the smallest complete slice that can be verified and rolled back independently. Between slices, emit a short progress beat only when end-to-end authorization is active and the work has at least two slices.
 

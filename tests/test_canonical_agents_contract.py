@@ -83,7 +83,6 @@ EXPECTED_OPERATIONAL_ENTRYPOINTS = (
 EXPECTED_GRILL_ME_GATE_STATES = (
     "grill-me required",
     "grill-me satisfied",
-    "grill-me not applicable",
 )
 
 SIMPLE_GATEWAY_SKILL = ".github/skills/internal-gateway-simple-task/SKILL.md"
@@ -240,12 +239,12 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "phase transition" in skill_text
     assert "pre-start checkpoint" in skill_text
     assert "request-change realignment" in skill_text
-    assert "Rich prompts and pre-start signals do not waive Gate 0." in skill_text
+    assert "Rich prompts, concrete tasks, mechanical tasks" in skill_text
     assert (
         "The user answered or explicitly accepted defaults in the current Gate 0 loop"
         in skill_text
     )
-    assert "the agent may recommend that the loop stop" in skill_text
+    assert "The agent must not close or skip the loop by itself" in skill_text
     assert "Close the loop only after a user closure signal" in skill_text
     assert (
         "Do not enter `execute` or `apply-plan` while the gate is `grill-me required`."
@@ -254,20 +253,17 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "`Gate 0`" in wrapper_text
     assert_normalized_snippet(
         wrapper_text,
-        "rich prompts and user pre-start signals are checkpoints, not waivers",
+        "rich prompts, concrete tasks, retained-plan approval",
     )
-    assert_normalized_snippet(wrapper_text, "request-changing realignment")
+    assert_normalized_snippet(wrapper_text, "request, context, or environment change")
     assert "run Gate 0 after the minimum evidence pass" in wrapper_alignment_text
-    assert "governance-sensitive pre-start delivery" in wrapper_alignment_text
-    assert "Rich prompts and pre-start signals do not waive Gate 0." in wrapper_alignment_text
-    assert (
-        "Approved retained-plan execution may continue with `grill-me not applicable`"
-        in wrapper_alignment_text
-    )
+    assert "Mandatory Gate 0 support" in wrapper_alignment_text
+    assert "do not waive Gate 0" in wrapper_alignment_text
+    assert "Restart Gate 0 before continuing" in wrapper_alignment_text
     assert "minimum evidence pass, then" in workflow_maps_text
     assert "phase\ntransition, or edit" in workflow_maps_text
     assert "Gate 0" in workflow_maps_text
-    assert "Rich prompts and pre-start signals do not waive Gate 0." in workflow_maps_text
+    assert "do not waive Gate 0" in workflow_maps_text
 
 
 def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> None:
@@ -282,7 +278,7 @@ def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> 
         in skill_text
     )
     assert "## Phase-Local Output Template" in mode_contracts_text
-    assert "Gate 0 status when applicable" in mode_contracts_text
+    assert "Gate 0 status" in mode_contracts_text
     assert "Lessons: none retained." in mode_contracts_text
 
 
@@ -343,7 +339,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "existing approved retained plan folder" in skill_text
     assert "Decision Brief" in skill_text
     assert "explicit checkpoint before moving from `plan`" in skill_text
-    assert "user decisions could change scope" in skill_text
+    assert "current request, context, and environment" in skill_text
     assert (
         "Keep direct entry and manual transitions visible to the user. "
         "Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch."
@@ -389,7 +385,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert interface["display_name"] == "Internal Gateway Operational Flow"
     assert (
         interface["short_description"]
-        == "Staged workflow with Gate 0 and visible phase checks"
+        == "Staged workflow with mandatory grill-me Gate 0"
     )
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
 
@@ -593,8 +589,8 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "Gate 0 status and phase-blocking semantics" in operational_text
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
-    assert "pre-plan and pre-start clarification gate" in operational_text
-    assert "governance-sensitive pre-start delivery" in wrapper_alignment_text
+    assert "mandatory Gate 0 interview support" in operational_text
+    assert "Planning, review, execution, and retained-plan application always start" in wrapper_alignment_text
     assert "non-trivial retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text
