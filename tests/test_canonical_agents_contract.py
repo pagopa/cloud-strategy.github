@@ -90,6 +90,18 @@ SIMPLE_GATEWAY_SKILL = ".github/skills/internal-gateway-simple-task/SKILL.md"
 SIMPLE_GATEWAY_SUPPORT_ROUTING = (
     ".github/skills/internal-gateway-simple-task/references/support-routing.md"
 )
+SIMPLE_GATEWAY_CLARIFICATION_GATE = (
+    ".github/skills/internal-gateway-simple-task/references/clarification-gate.md"
+)
+EXPECTED_SIMPLE_CLAIM_GATE_OWNERS = [
+    "internal-debugging",
+    "internal-tdd",
+    "internal-performance-optimization",
+    "internal-github-pr",
+    "internal-code-review",
+    "internal-high-level-review",
+    "superpowers-verification-before-completion",
+]
 
 
 def load_frontmatter(relative_path: str) -> dict[str, object]:
@@ -493,6 +505,9 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     simple_lanes_text = Path(
         ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
     ).read_text(encoding="utf-8")
+    clarification_gate_text = Path(SIMPLE_GATEWAY_CLARIFICATION_GATE).read_text(
+        encoding="utf-8"
+    )
     support_routing_text = Path(SIMPLE_GATEWAY_SUPPORT_ROUTING).read_text(
         encoding="utf-8"
     )
@@ -506,14 +521,17 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     assert "## Escalation Triggers" in skill_text
     assert "durable lesson candidate" in skill_text
     assert "internal-lesson-codification" in skill_text
-    assert "validator passes" in skill_text
-    assert "auth, config, secrets, tenant data" in skill_text
+    assert "references/clarification-gate.md" in skill_text
     assert "one focused block of clarification" in skill_text
     assert "relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`" in skill_text
+    assert "Simple mode allows at most one focused `grill-me` block." in clarification_gate_text
+    assert "clarify-first workflow" in clarification_gate_text
     assert "`support-loaded`" in simple_lanes_text
     assert "`files-touched`" in simple_lanes_text
     assert "internal-copilot-instructions-creator" in support_routing_text
     assert "Inspect the owning bundle and nearest contract tests" in support_routing_text
+    assert "validator passes" in support_routing_text
+    assert "auth, config, secrets, tenant data" in support_routing_text
     assert "$internal-gateway-simple-task" in metadata_text
 
 
@@ -529,18 +547,23 @@ def test_simple_gateway_referenced_skills_stay_local_and_live() -> None:
 
 def test_simple_gateway_claim_gate_contract_stays_in_core_skill() -> None:
     skill_text = Path(SIMPLE_GATEWAY_SKILL).read_text(encoding="utf-8")
+    clarification_gate_text = Path(SIMPLE_GATEWAY_CLARIFICATION_GATE).read_text(
+        encoding="utf-8"
+    )
     support_routing_text = Path(SIMPLE_GATEWAY_SUPPORT_ROUTING).read_text(
         encoding="utf-8"
     )
 
     assert "## grill-me boundary" in skill_text
-    assert "This `grill-me boundary` is canonical for simple mode." in skill_text
-    assert "Do not use simple-mode `grill-me` for pre-plan" in skill_text
-    assert "source of truth for the claim-gate contract" in skill_text
-    assert "mirrors the claim-gate contract in `SKILL.md`" in support_routing_text
-    assert claim_gate_owners_from_skill(skill_text) == claim_gate_owners_from_reference(
-        support_routing_text
+    assert "canonical simple-mode boundary" in skill_text
+    assert "single source of truth for claim-gate" in skill_text
+    assert "Simple mode allows at most one focused `grill-me` block." in clarification_gate_text
+    assert "`grill-me` in simple mode must not decide:" in clarification_gate_text
+    assert_normalized_snippet(
+        support_routing_text,
+        "single source of truth for claim-gate ownership in simple mode",
     )
+    assert claim_gate_owners_from_reference(support_routing_text) == EXPECTED_SIMPLE_CLAIM_GATE_OWNERS
 
 
 def test_prompt_examples_reference_live_gateway_skills_and_agents() -> None:

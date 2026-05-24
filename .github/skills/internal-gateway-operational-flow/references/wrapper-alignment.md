@@ -31,7 +31,7 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Inspect repository evidence first, run Gate 0 after the minimum evidence pass, keep Gate 0 status and phase blocking owned by `internal-gateway-operational-flow`, use `define` before planning output, block `plan`, `apply-plan`, `review`, and planning output while `grill-me required` remains active, require a user answer or accepted defaults plus a closure/proceed signal before `grill-me satisfied`, and rerun Gate 0 on request, context, or environment change. |
+| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Follow `gate-0-protocol.md` for status, closure, blocking, and realignment; wrapper docs must not restate the full Gate 0 protocol. |
 | `superpowers-brainstorming` | Conditional `define` support | Creative, product, UX, architecture, or design-ambiguous work needs option exploration and design approval before planning. | Keep `grill-me` as the Gate 0 pillar; use brainstorming only after the minimum evidence pass shows options can change the plan; skip it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when target state and validation are concrete. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
@@ -60,26 +60,22 @@ State security-specific gaps and route them through the closest existing owner.
 Support selection belongs in the gateway skills, not in wrapper skill-list
 sections.
 
-- Planning, review, and retained-plan application always start in `define`
-  with `grill-me` through Gate 0 after the minimum evidence pass. Direct
-  `execute` is the automatic Gate 0 exception unless the user asks for
-  `grill-me` or the lane changes away from `execute`.
+- Planning, review, and retained-plan application still enter `define` through
+  Gate 0 after the minimum evidence pass. Direct `execute` remains the only
+  automatic Gate 0 exception unless the user asks for `grill-me` or the lane
+  changes away from `execute`.
+- Planning, review, and retained-plan application always start in `define`.
 - Treat planning as `define` until the user closes the active `grill-me` loop.
+- Wrapper projections should still run Gate 0 after the minimum evidence pass.
+- Keep the detailed Gate 0 closure, blocking, and realignment rules in
+  `gate-0-protocol.md`; wrappers, READMEs, and tests should reference that file
+  instead of restating the protocol.
 - Treat `plan-only (clarify-first)` as a legacy input spelling for `define-first`,
   not as a separate phase.
-- Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, fully
-  recoverable repository evidence, and pre-start signals do not waive Gate 0
-  when Gate 0 applies. For mechanical work covered by Gate 0, ask a minimal,
+- Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, fully recoverable repository evidence, and pre-start signals do not waive Gate 0. For mechanical work covered by Gate 0, ask a minimal,
   clear, and concise question set instead of skipping `grill-me`.
-- The agent may recommend ending a `grill-me` loop when the answers are
-  coherent, but the loop closes only after a user closure signal such as "ok",
-  "chiudi", "va bene", "vai", "procedi", accepted defaults, or an equivalent
-  proceed instruction.
-- `plan`, `apply-plan`, `review`, and planning output stay blocked while the Gate 0
-  result is `grill-me required`, including request-changing realignment.
-- Restart Gate 0 before continuing if request, context, target path,
-  environment, tool output, dependency state, validation, or dirty worktree
-  ownership changes.
+- In wrapper projection terms, the loop closes only after a user closure signal.
+- Restart Gate 0 before continuing if request, context, target path, environment, tool output, dependency state, validation, or dirty worktree ownership changes.
 - `superpowers-brainstorming` is optional support inside `define` only when
   option exploration or design approval is still the real work.
 - Retained-plan execution belongs to `internal-executing-plans` after

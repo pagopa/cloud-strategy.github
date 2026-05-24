@@ -127,17 +127,18 @@ Use this repository-local variant for small catalog maintenance before escalatin
 +-------------------------------+
 ```
 
-The full cycle coordinates visible phases. It is not hidden dispatch between wrapper agents.
-Run the minimum evidence pass before `grill-me` Gate 0 for every non-`execute`
-entrypoint. Gate 0 runs inside the `define` state before downstream plan,
-review, retained-plan application, or phase transition. If a request-changing
-realignment alters scope, owner, target state, validation, rollout, or
-anti-scope, rerun Gate 0 before any governance-sensitive plan output, phase
-transition, or edit.
+The full cycle coordinates visible phases. It is not hidden dispatch between
+wrapper agents.
 
-Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0 when Gate 0 applies. For mechanical work covered by Gate 0, use a minimal, clear, and concise question pass. The agent may recommend ending a `grill-me` loop, but it closes only after a user closure signal such as "ok", "chiudi", "va bene", "vai", or an equivalent proceed instruction.
+For the detailed Gate 0 status, closure, blocking, and realignment rules that
+govern every non-`execute` entrypoint, see
+[`gate-0-protocol.md`](gate-0-protocol.md). At map level, keep two invariants
+visible: run the minimum evidence pass before Gate 0, and keep downstream plan,
+review, and retained-plan application blocked until the user closes the active
+`grill-me` loop.
 
-Approved retained-plan execution still starts `grill-me` before work begins. If request, context, environment, tool output, dependency state, validation, rollout, or anti-scope changes, rerun Gate 0 before the next plan output, review output, phase transition, or edit.
+Run the minimum evidence pass, then start Gate 0 inside `define` before downstream plan, review, retained-plan application, or phase
+transition, or edit. Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0.
 
 ## Define Work
 
