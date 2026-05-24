@@ -499,7 +499,7 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Lessons: added | codified in <owner> | none - <short reason>",
             "`SHIPPED` requires passed validators, a completed report",
             "Intended observable acceptance",
-            "A summary\nthat says an item was done is not evidence",
+            "A summary that says an item was done is not evidence",
             "late-stage packaging artifacts",
             "not after every intermediate patch",
             "item-level evidence",
@@ -531,7 +531,7 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
             "file roles and source coverage cannot be inferred safely",
-            "before broad reading",
+            "before reading broadly",
             "lacks an item/evidence table or evidence-envelope pointer",
             "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
         ),
@@ -547,8 +547,8 @@ def test_plan_handoff_requires_summary_control_file() -> None:
             "`Mappa file e ruolo`",
             "`Evidence pass iniziale`",
             "`Budget lettura`",
-            "summary control file",
-            "matching `done-*` marker",
+            "summary and ledger control files",
+            "matching `done-*`\n  markers",
             "Observable acceptance for each executable action",
         ),
     )
