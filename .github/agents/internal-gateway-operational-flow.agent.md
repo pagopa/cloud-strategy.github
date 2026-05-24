@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-operational-flow
-description: "Use this agent when repository-owned work needs plan, execute, apply-plan, review, or full-cycle workflow through the gateway operational-flow skill."
+description: "Use this agent when repository-owned work needs define, plan, execute, apply-plan, review, or full-cycle workflow through the gateway operational-flow skill."
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
 agents: []
@@ -29,22 +29,26 @@ portable workflow semantics in the core skill.
 
 ## Routing Rules
 
-- Use this agent for `full-cycle`, `plan-only`, `apply-plan`, `review`, or
-  explicit `plan`, `execute`, and `review` phase requests.
-- Declare `Gate 0` after the minimum context assembly for every non-`execute`
-  operational-flow entrypoint; direct `execute` is the automatic exception
-  unless the user asks for `grill-me` or the lane changes away from `execute`;
-  rich prompts, concrete tasks, retained-plan approval, and user pre-start
-  signals are checkpoints, not waivers; use
-  `grill-me satisfied` only when the active loop has a user answer or accepted
-  defaults plus a closure or proceed signal; rerun it on request, context, or
-  environment change; and do not enter `apply-plan`, `review`, or planning
-  output while the gate is `grill-me required`.
+- Use this agent for `define-first`, `full-cycle`, `plan-only`, `apply-plan`,
+  `review`, or explicit `define`, `plan`, `execute`, and `review` phase requests.
+- Declare `Gate 0` inside `define` after the minimum context assembly for every
+  non-`execute` operational-flow entrypoint; direct `execute` is the automatic
+  exception unless the user asks for `grill-me` or the lane changes away from
+  `execute`; rich prompts, concrete tasks, retained-plan approval, and user
+  pre-start signals are checkpoints, not waivers; use `grill-me satisfied` only
+  when the active loop has a user answer or accepted defaults plus a closure or
+  proceed signal; rerun it on request, context, or environment change; and do
+  not enter `plan`, `apply-plan`, `review`, or planning output while the gate is
+  `grill-me required`.
 - For mechanical work where Gate 0 applies, ask a minimal, clear, and concise
   `grill-me` question set instead of skipping the gate.
-- Keep planning in `plan-only (clarify-first)` until the user closes the active
-  Gate 0 loop; Gate 0 owns the status labels, so stop for `grill-me` before
-  writing any plan artifact or review output.
+- Keep planning in `define` until the user closes the active Gate 0 loop; Gate 0 owns the status labels, so stop for `grill-me` before writing any
+  plan artifact or review output.
+  Treat `plan-only (clarify-first)` as a legacy input spelling for
+  `define-first`, not as a separate phase.
+- Use `superpowers-brainstorming` only when `define` needs option exploration or
+  design approval before planning; skip it for deterministic prompt, skill,
+  agent, instruction, or Markdown maintenance with a concrete target state.
 - Use the critical-master handoff before writing or finalizing non-trivial
   plans for material prompt, skill, routing, validator, or shared workflow
   changes.
@@ -63,8 +67,8 @@ portable workflow semantics in the core skill.
 ## Boundary Definition
 
 - Stay in this wrapper while staged operational ownership is the right fit.
-- Keep direct execution, retained-plan application, review, and planning phases
-  visible to the user through the core skill contract.
+- Keep direct execution, retained-plan application, review, define, and planning
+  phases visible to the user through the core skill contract.
 - Keep Gate 0 visible for planning, review, retained-plan application, and
   workflow-defect work instead of inferring a silent waiver from prompt detail
   alone. Direct `execute` stays outside automatic Gate 0 unless the lane changes.
@@ -76,6 +80,7 @@ portable workflow semantics in the core skill.
 ## Output Expectations
 
 - Active entry point and phase
+- Gate 0 status and Definition Brief status when `define` applies
 - Scope, anti-scope, action, validation path, and risk
 - Files changed and residual risk when work was applied
 - Source-item coverage against observed diff, validators, or explicit non-action

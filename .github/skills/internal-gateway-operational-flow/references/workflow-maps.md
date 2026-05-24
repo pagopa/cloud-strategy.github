@@ -85,9 +85,16 @@ Use this repository-local variant for small catalog maintenance before escalatin
                |
                v
 +-------------------------------+
-| plan phase                     |
+| define state                   |
 | - minimum evidence pass, then  |
 |   grill-me Gate 0              |
+| - optional brainstorming       |
+| - Definition Brief             |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| plan phase                     |
 | - critical challenge before    |
 |   non-trivial/governance plan  |
 | - retained plan when justified |
@@ -122,7 +129,8 @@ Use this repository-local variant for small catalog maintenance before escalatin
 
 The full cycle coordinates visible phases. It is not hidden dispatch between wrapper agents.
 Run the minimum evidence pass before `grill-me` Gate 0 for every non-`execute`
-entrypoint. If a request-changing
+entrypoint. Gate 0 runs inside the `define` state before downstream plan,
+review, retained-plan application, or phase transition. If a request-changing
 realignment alters scope, owner, target state, validation, rollout, or
 anti-scope, rerun Gate 0 before any governance-sensitive plan output, phase
 transition, or edit.
@@ -130,6 +138,44 @@ transition, or edit.
 Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0 when Gate 0 applies. For mechanical work covered by Gate 0, use a minimal, clear, and concise question pass. The agent may recommend ending a `grill-me` loop, but it closes only after a user closure signal such as "ok", "chiudi", "va bene", "vai", or an equivalent proceed instruction.
 
 Approved retained-plan execution still starts `grill-me` before work begins. If request, context, environment, tool output, dependency state, validation, rollout, or anti-scope changes, rerun Gate 0 before the next plan output, review output, phase transition, or edit.
+
+## Define Work
+
+```text
++--------------------------------+
+| Intent, success, constraints,   |
+| anti-scope, or options unclear  |
++--------------------------------+
+               |
+               v
++-------------------------------+
+| define state                   |
+| - smallest evidence pass       |
+| - grill-me Gate 0              |
+| - optional brainstorming       |
+| - assumptions surfaced         |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| Definition Brief               |
+| Outcome, owner/user, success,  |
+| constraints, anti-scope,       |
+| validation, stop conditions    |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| plan, review, critical, or     |
+| stop after define-first        |
++-------------------------------+
+```
+
+Use `superpowers-brainstorming` only when `define` needs option exploration,
+creative or design-ambiguous work, or design approval before a plan. Keep
+`grill-me` as the required Gate 0 support. Skip brainstorming for deterministic
+repository-owned maintenance when target state and validation are already
+concrete.
 
 ## Planned Work
 
@@ -141,9 +187,13 @@ Approved retained-plan execution still starts `grill-me` before work begins. If 
                |
                v
 +-------------------------------+
+| define state if needed         |
+| - Gate 0 and Definition Brief  |
++-------------------------------+
+               |
+               v
++-------------------------------+
 | plan mode                      |
-| - minimum evidence pass, then  |
-|   grill-me Gate 0              |
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |
@@ -178,6 +228,14 @@ Planning output should be compact enough for the next owner or runtime to act wi
               |
               v
 +-----------------------------+
+| define pre-review gate      |
+| - scope and evidence check  |
+| - grill-me if decisions can |
+|   change the review output  |
++-----------------------------+
+              |
+              v
++-----------------------------+
 | review mode                  |
 | - findings first             |
 | - severity and confidence    |
@@ -201,6 +259,13 @@ Review treats missing validation as a finding, not a footnote.
 +-------------------------------+
 | User invokes skill or wrapper  |
 | with an approved tmp/ folder   |
++-------------------------------+
+              |
+              v
++-------------------------------+
+| define pre-start gate          |
+| - confirm scope and anti-scope |
+| - rerun on context change      |
 +-------------------------------+
               |
               v

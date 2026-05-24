@@ -73,6 +73,7 @@ EXPECTED_CRITICAL_OUTCOMES = (
 
 EXPECTED_OPERATIONAL_ENTRYPOINTS = (
     "full-cycle",
+    "define-first",
     "plan-only",
     "plan-only (clarify-first)",
     "apply-plan",
@@ -277,8 +278,11 @@ def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> 
         "| Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |"
         in skill_text
     )
+    assert "`define`" in skill_text
+    assert "Define Check 1" in skill_text
     assert "## Phase-Local Output Template" in mode_contracts_text
     assert "Gate 0 status" in mode_contracts_text
+    assert "Definition Brief status" in mode_contracts_text
     assert "Lessons: none retained." in mode_contracts_text
 
 
@@ -385,7 +389,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert interface["display_name"] == "Internal Gateway Operational Flow"
     assert (
         interface["short_description"]
-        == "Staged workflow with grill-me Gate 0"
+        == "Define-to-review workflow with grill-me Gate 0"
     )
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
 
@@ -393,7 +397,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         CANONICAL_AGENTS["internal-gateway-operational-flow"]
     )
     operational_body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
-    assert "plan, execute, apply-plan, review" in operational_frontmatter["description"]
+    assert "define, plan, execute, apply-plan, review" in operational_frontmatter["description"]
     assert "multiple credible paths" in skill_text
     assert "full-cycle" in operational_body
 

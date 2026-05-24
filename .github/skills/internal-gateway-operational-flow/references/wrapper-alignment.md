@@ -9,7 +9,7 @@ The active Copilot UX uses one thin wrapper per gateway skill.
 
 | Wrapper | Core skill | Route |
 | --- | --- | --- |
-| `internal-gateway-operational-flow` | `internal-gateway-operational-flow` | `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases. |
+| `internal-gateway-operational-flow` | `internal-gateway-operational-flow` | `define`, `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `define`, `plan`, `execute`, or `review` phases. |
 | `internal-gateway-critical-master` | `internal-gateway-critical-master` | Critical challenge, pre-mortem, hidden-assumption tests, failure modes, and reframing before action. |
 | `internal-gateway-simple-task` | `internal-gateway-simple-task` | Concrete low-to-medium-risk answer, edit, diagnose, validate, or escalate tasks that do not need staged workflow. |
 
@@ -31,7 +31,8 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Inspect repository evidence first, run Gate 0 after the minimum evidence pass, keep Gate 0 status and phase blocking owned by `internal-gateway-operational-flow`, use `plan-only (clarify-first)` before planning output, block `apply-plan`, `review`, and planning output while `grill-me required` remains active, require a user answer or accepted defaults plus a closure/proceed signal before `grill-me satisfied`, and rerun Gate 0 on request, context, or environment change. |
+| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Inspect repository evidence first, run Gate 0 after the minimum evidence pass, keep Gate 0 status and phase blocking owned by `internal-gateway-operational-flow`, use `define` before planning output, block `plan`, `apply-plan`, `review`, and planning output while `grill-me required` remains active, require a user answer or accepted defaults plus a closure/proceed signal before `grill-me satisfied`, and rerun Gate 0 on request, context, or environment change. |
+| `superpowers-brainstorming` | Conditional `define` support | Creative, product, UX, architecture, or design-ambiguous work needs option exploration and design approval before planning. | Keep `grill-me` as the Gate 0 pillar; use brainstorming only after the minimum evidence pass shows options can change the plan; skip it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when target state and validation are concrete. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
 Internal replacements:
@@ -59,12 +60,13 @@ State security-specific gaps and route them through the closest existing owner.
 Support selection belongs in the gateway skills, not in wrapper skill-list
 sections.
 
-- Planning, review, and retained-plan application always start `grill-me`
-  through Gate 0 after the minimum evidence pass. Direct `execute` is the
-  automatic Gate 0 exception unless the user asks for `grill-me` or the lane
-  changes away from `execute`.
-- Treat planning as `plan-only (clarify-first)` until the user closes the active
-  `grill-me` loop.
+- Planning, review, and retained-plan application always start in `define`
+  with `grill-me` through Gate 0 after the minimum evidence pass. Direct
+  `execute` is the automatic Gate 0 exception unless the user asks for
+  `grill-me` or the lane changes away from `execute`.
+- Treat planning as `define` until the user closes the active `grill-me` loop.
+- Treat `plan-only (clarify-first)` as a legacy input spelling for `define-first`,
+  not as a separate phase.
 - Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, fully
   recoverable repository evidence, and pre-start signals do not waive Gate 0
   when Gate 0 applies. For mechanical work covered by Gate 0, ask a minimal,
@@ -73,11 +75,13 @@ sections.
   coherent, but the loop closes only after a user closure signal such as "ok",
   "chiudi", "va bene", "vai", "procedi", accepted defaults, or an equivalent
   proceed instruction.
-- `apply-plan`, `review`, and planning output stay blocked while the Gate 0
+- `plan`, `apply-plan`, `review`, and planning output stay blocked while the Gate 0
   result is `grill-me required`, including request-changing realignment.
 - Restart Gate 0 before continuing if request, context, target path,
   environment, tool output, dependency state, validation, or dirty worktree
   ownership changes.
+- `superpowers-brainstorming` is optional support inside `define` only when
+  option exploration or design approval is still the real work.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
 - Non-trivial or governance-sensitive retained-plan authoring belongs to

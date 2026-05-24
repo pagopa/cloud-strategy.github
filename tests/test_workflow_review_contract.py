@@ -35,14 +35,14 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
 
-    assert "plan, execute, apply-plan, review" in operational_flow_agent_text
+    assert "define, plan, execute, apply-plan, review" in operational_flow_agent_text
     assert "single-lane and single-phase" in simple_task_agent_text
     assert (
         "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
         in operating_model_text
     )
     assert (
-        "If the entry point or phase is unclear, use `plan` as the safe fallback"
+        "If the entry point or phase is unclear, use `define` as the safe fallback"
         in operating_model_text
     )
 
@@ -189,6 +189,7 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "## User Authorization Signals",
+            "`define-first`",
             "`plan-only (clarify-first)`",
             "Plan Check 1",
             "Plan Check 2",
@@ -215,26 +216,29 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "Treat operational-flow planning as `plan-only (clarify-first)`",
+            "Treat operational-flow planning as `define`",
             "Comparison, integration, or architecture-judgment requests should",
             "until the user closes the current `grill-me` loop",
+            "Use `superpowers-brainstorming` only when",
         ),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "Planning, review, and retained-plan application always start",
-            "Treat planning as `plan-only (clarify-first)`",
+            "Planning, review, and retained-plan application always start in `define`",
+            "Treat planning as `define`",
+            "legacy input spelling for `define-first`",
             "do not waive Gate 0",
             "minimal,\n  clear, and concise",
             "Restart Gate 0 before continuing",
+            "superpowers-brainstorming",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )
     assert_contains_all(
         ".github/agents/internal-gateway-operational-flow.agent.md",
         (
-            "`plan-only (clarify-first)`",
+            "`define-first`",
             "Gate 0 owns the status labels",
             "rich prompts",
         ),
@@ -244,6 +248,7 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
         (
             "## Phase-Local Contracts",
             "do not waive Gate 0",
+            "Definition Brief",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
         ),
     )
@@ -273,7 +278,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
     assert_contains_all(
         ".github/agents/internal-gateway-operational-flow.agent.md",
         (
-            "`plan-only (clarify-first)`",
+            "`define-first`",
             "rich prompts",
             "Approved retained-plan execution still starts Gate 0",
         ),

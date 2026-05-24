@@ -1,27 +1,29 @@
 # Mode Contracts
 
-Use this reference when the staged `plan`, `execute`, `apply-plan`, `review`, or critical boundary needs more detail than the main skill should carry.
+Use this reference when the staged `define`, `plan`, `execute`, `apply-plan`, `review`, or critical boundary needs more detail than the main skill should carry.
 
 ## Staged Entrypoints
 
 | Entrypoint | Owns | Must not own |
 | --- | --- | --- |
-| `full-cycle` | Non-trivial work that needs visible planning, Gate 0, critical challenge when the plan is non-trivial or governance-sensitive, checkpointed delivery, and final evidence. | Hidden wrapper-agent dispatch or unapproved execute/apply after planning. |
-| `plan-only` | Decisions, retained plans, Decision Briefs, required critical challenge for non-trivial or governance-sensitive plans, and stop-before-apply workflows. | Silent implementation after the plan is written. |
+| `full-cycle` | Non-trivial work that needs visible define, planning, Gate 0, critical challenge when the plan is non-trivial or governance-sensitive, checkpointed delivery, and final evidence. | Hidden wrapper-agent dispatch or unapproved execute/apply after planning. |
+| `define-first` | Pre-plan clarification, brainstorming, `grill-me`, assumption surfacing, success criteria, option narrowing, and a Definition Brief. | Implementation planning, retained-plan authoring, or silent execution. |
+| `plan-only` | Confirmed definition, decisions, retained plans, Decision Briefs, required critical challenge for non-trivial or governance-sensitive plans, and stop-before-apply workflows. | Silent implementation after the plan is written. |
 | `apply-plan` | Approved retained plan folders under `tmp/superpowers/<clear-action-or-task-name>/` using `internal-executing-plans`, folder-first execution, source-item ledger coverage, and explicit completion evidence. | Inline plans without normalization or checkpoint, newly discovered improvements, or `questions.md` execution. |
 | `review` | Defect-first findings, evidence gaps, and fix routing. | Applying fixes or writing the initial design. |
-| `mode-explicit` | Direct user requests for `plan`, `execute`, or `review`. | Overriding the user's explicit phase unless the lane no longer fits. |
+| `mode-explicit` | Direct user requests for `define`, `plan`, `execute`, or `review`. | Overriding the user's explicit phase unless the lane no longer fits. |
 
 ## Mode Boundaries
 
 | Mode | Owns | Does not own |
 | --- | --- | --- |
-| `plan` | Ambiguity resolution, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, or pure pressure testing. |
+| `define` | Initial brainstorming, user intent, success criteria, constraints, anti-scope, option exploration, Gate 0 closure, and Definition Briefs. | Implementation plans, retained-plan authoring, local edits, or proof of completion. |
+| `plan` | Ambiguity resolution after the definition is confirmed, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, open-ended brainstorming, or pure pressure testing. |
 | `execute` | Clear local implementation, deterministic realignment, nearby documentation/test updates, and concrete validation. | Strategic tradeoffs, unresolved ownership, non-trivial rollout decisions, review-first asks, or assumption challenge. |
 | `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, source-item ledger coverage, blocker handling, cross-file continuation, and completion checks. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, or executing `questions.md`. |
 | `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, systems risk, and fix routing. | Applying fixes, designing the initial solution, or open-ended challenge. |
 
-If two modes still plausibly fit, choose `plan` and make the uncertainty explicit.
+If intent or success criteria are not confirmed, choose `define`. If two post-definition modes still plausibly fit, choose `plan` and make the uncertainty explicit.
 
 ## Medium-Task Thresholds
 
@@ -47,7 +49,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 
 | Skill | Primary mode or wrapper | When it wins |
 | --- | --- | --- |
-| `internal-gateway-operational-flow` | Skill-first staged workflow for `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit modes | Portable operational workflow core across Copilot, ChatGPT, Codex, and other runtimes. |
+| `internal-gateway-operational-flow` | Skill-first staged workflow for `define`, `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit modes | Portable operational workflow core across Copilot, ChatGPT, Codex, and other runtimes. |
 | `internal-gateway-critical-master` | Critical wrapper and pressure-test workflows | Challenge, pre-mortem, hidden assumptions, failure modes, and reframing. |
 | `internal-agent-support-lane-change-engine` | Shared by operational wrappers and sync command centers | Stop-and-recommend protocol when the selected mode or lane no longer fits. |
 | `internal-agent-support-next-step` | All operational wrappers | Shared user-visible package for already-selected owner, scope, action, validation, and risk. |
@@ -56,7 +58,8 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-debugging` | `execute` or `review` support | Root-cause diagnosis for bugs, test failures, build failures, validator drift, sync failures, and unexpected behavior. |
 | `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |
-| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint | Question pressure after the minimum evidence pass and before plan output, recommendation, review output, phase transition, or retained-plan application; `grill-me satisfied` requires a user answer or accepted defaults in the active loop, a closure or proceed signal, and no remaining user-only decision. |
+| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | Question pressure after the minimum evidence pass and before plan output, recommendation, review output, phase transition, or retained-plan application; `grill-me satisfied` requires a user answer or accepted defaults in the active loop, a closure or proceed signal, and no remaining user-only decision. |
+| `superpowers-brainstorming` | Conditional `define` support | Creative, product, UX, architecture, or design-ambiguous work needs divergent and convergent option exploration before planning; skip it for deterministic prompt, skill, agent, instruction, or Markdown maintenance with a concrete target state. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`, including the detailed critical-before-plan requirement for non-trivial retained plans. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local implementation, `plan` when design dominates | Tactical delivery versus strategy split. |
@@ -71,17 +74,21 @@ reference, or the support skill itself.
 
 | Material | Owner |
 | --- | --- |
-| Phase selection, Gate 0 status, blocking semantics, and completion evidence | `internal-gateway-operational-flow` `SKILL.md` |
+| Phase selection, `define` state, Gate 0 status, blocking semantics, and completion evidence | `internal-gateway-operational-flow` `SKILL.md` |
 | Support-skill trigger, boundary, and expected return shape | `internal-gateway-operational-flow` `SKILL.md` or this reference |
 | Detailed support procedure, checklist, examples, scripts, and templates | The named support skill or its own references |
 | Runtime wrapper wording, handoff labels, and imported-support posture | `references/wrapper-alignment.md` |
 | Flow diagrams, scratchpad shapes, and host-runtime assembly maps | `references/workflow-maps.md` |
 
-- Preload `grill-me` and start it after the minimum evidence pass for every
-  non-`execute` entrypoint. Preload `internal-agent-support-next-step` because
+- Preload `grill-me` and start it inside `define` after the minimum evidence
+  pass for every non-`execute` entrypoint. Preload
+  `internal-agent-support-next-step` because
   it is the core handoff helper for every staged phase.
 - For mechanical work where Gate 0 applies, use a minimal, clear, and concise
   `grill-me` question set. Do not skip the gate.
+- Load `superpowers-brainstorming` only when `define` needs option exploration
+  or design approval before planning; do not use it as mandatory support for
+  deterministic repository-owned maintenance.
 - Load every other support skill only when the active phase, failure condition,
   handoff, review lens, or validation gap makes that owner necessary.
 - Prefer delegating to the named skill over copying its method. This gateway may
@@ -108,10 +115,11 @@ reference, or the support skill itself.
 
 ## Mode Exit Rules
 
+- `define` exits to `plan`, `review`, or critical challenge only through a Definition Brief, visible next-step package, and checkpoint unless the user explicitly requested `define-first` only.
 - `plan` exits to `execute`, `apply-plan`, `review`, or critical challenge only through a visible next-step package and checkpoint unless the user authorized end-to-end work; non-trivial or governance-sensitive plans run the critical challenge before the plan is finalized.
 - `execute` exits to `review` when correctness evidence or merge readiness is the main next need.
 - `apply-plan` exits only after all executable retained-plan items are completed, a real blocker is packaged, or validation exposes a gap that needs another visible owner.
-- `review` exits to `execute`, `plan`, critical challenge, or deferred follow-up for each actionable finding.
+- `review` exits to `execute`, `define`, `plan`, critical challenge, or deferred follow-up for each actionable finding.
 - Critical challenge exits with `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
 - Any mode may stop and recommend a better lane through `internal-agent-support-lane-change-engine` when the boundary breaks.
 
@@ -121,6 +129,7 @@ Use the active phase-local contract as the compact response frame for non-trivia
 
 - Phase and entrypoint
 - Gate 0 status
+- Definition Brief status when `define` applies
 - Critical challenge status when non-trivial or governance-sensitive planning applies
 - Compact decision frame: target, anti-scope, and validation path
 - Current slice or completed change
@@ -132,6 +141,7 @@ Example:
 ```text
 Phase: execute (`apply-plan`)
 Gate 0: satisfied (user closed the mandatory `grill-me` loop for this request)
+Definition Brief: satisfied (approved retained plan already defines target and anti-scope)
 Decision frame: target = move stale module under deprecated/; anti-scope = no functional change; validation = pytest tests/test_module_paths.py
 Current slice: moved 3 files and updated 2 imports.
 Next checkpoint: rerun targeted pytest, then ask before the next slice.
