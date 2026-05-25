@@ -164,10 +164,14 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "`Budget lettura`" in writing_skill_text
     assert "control and coverage file" in writing_skill_text
     assert "03-execution.md" in writing_skill_text
+    assert "04-implementation-contract.md" in writing_skill_text
     assert "source-item ledger" in writing_skill_text
     assert "macro-category" in writing_skill_text
     assert "monolithic" in writing_skill_text
     assert "questions.md" in writing_skill_text
+    assert "Implementation contract: not applicable" in writing_skill_text
+    assert "Create `questions.md` for every retained plan" in writing_skill_text
+    assert "continue with `05-...` and later numbered files" in writing_skill_text
     assert "Italian" in writing_skill_text
     assert "Use English file names" in writing_skill_text
     assert (
@@ -216,6 +220,7 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "## Numbered-file shape" in writing_skill_text
     assert "### Change summary file" in writing_skill_text
     assert "### Source item ledger file" in writing_skill_text
+    assert "### Implementation contract file" in writing_skill_text
     assert "### Executable numbered files" in writing_skill_text
     assert "scanability and decision review" in writing_skill_text
     assert "`Problema da risolvere`" in writing_skill_text
@@ -227,11 +232,15 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "`Evidence pass iniziale`" in writing_skill_text
     assert "`Budget lettura`" in writing_skill_text
     assert "`Stop conditions`" in writing_skill_text
+    assert "`Sorgenti esatte`" in writing_skill_text
+    assert "`File target esatti`" in writing_skill_text
+    assert "`Patch intent by file`" in writing_skill_text
     assert "`Obiettivo`" in writing_skill_text
     assert "`Logica scelta`" in writing_skill_text
     assert "`Assunzioni chiave`" in writing_skill_text
     assert "`Passi eseguibili`" in writing_skill_text
     assert "`Validazione`" in writing_skill_text
+    assert "Reserve `04-implementation-contract.md`" in writing_skill_text
     assert "numbered control files, not executable task lists" in writing_skill_text
     assert "5-7 bullets when practical" in writing_skill_text
     assert "1-2 lines when practical" in writing_skill_text
@@ -245,9 +254,12 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "retained numbered plans" in executing_skill_text
     assert "Read `01-change-summary.md` first" in executing_skill_text
     assert "`02-source-item-ledger.md`" in executing_skill_text
+    assert "04-implementation-contract.md" in executing_skill_text
     assert (
         "Use the summary and ledger to classify folder purpose" in executing_skill_text
     )
+    assert "support/control file" in executing_skill_text
+    assert "Do not treat it as a standalone checklist" in executing_skill_text
     assert "coverage lock" in executing_skill_text
     assert "intended observable acceptance" in executing_skill_text
     assert (
@@ -270,11 +282,13 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert 'generic request such as "analyze this plan"' in executing_skill_text
     assert "done-<source-file-name>.md" in executing_skill_text
     assert "questions.md" in executing_skill_text
+    assert "when it exists or when the plan shape requires it" in executing_skill_text
     assert "move it into the matching `done-*` file" in executing_skill_text
     assert "remove it from the active executable plan file" in executing_skill_text
     assert "Delete an active executable plan file" in executing_skill_text
     assert "Continue automatically" in executing_skill_text
     assert "Stop only for real blockers" in executing_skill_text
+    assert "remaining executable numbered plan files" in executing_skill_text
     assert (
         "Strategic-to-operational conversions used `02-source-item-ledger.md`"
         in executing_skill_text
@@ -295,11 +309,13 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
 
     assert "## Required Questions" in scope_challenge_text
     assert "`coverage`: How does `02-source-item-ledger.md`" in scope_challenge_text
+    assert "`implementation contract`: Does `04-implementation-contract.md`" in scope_challenge_text
     assert "`02-source-item-ledger.md` or an equivalently" in scope_challenge_text
     assert (
         "Coverage: <ledger coverage, explicit not-applicable, or blocker>"
         in scope_challenge_text
     )
+    assert "Implementation contract: <complete, not applicable, missing, or blocker>" in scope_challenge_text
     assert "`observable acceptance`: Which diff" in scope_challenge_text
     assert "Observable acceptance: <diff, file, validator" in scope_challenge_text
     assert (
@@ -311,6 +327,8 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
     assert "| Summary focus |" in review_gate_text
     assert "| File naming |" in review_gate_text
     assert "| Observable acceptance |" in review_gate_text
+    assert "| Implementation contract |" in review_gate_text
+    assert "Implementation contract: not applicable" in review_gate_text
     assert "clarification-only completion for executable verbs" in review_gate_text
     assert "coverage review comes before shape-only validation" in review_gate_text
     assert "missing source-item coverage for requested work" in review_gate_text
