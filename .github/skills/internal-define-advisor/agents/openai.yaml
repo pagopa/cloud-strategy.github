@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal Define Advisor"
-  short_description: "Pre-action advice for define decisions"
-  default_prompt: "Use $internal-define-advisor when pre-action uncertainty remains about workflow, AI asset, tool, validation, anti-scope, overkill, or simple-task fit. Keep the advice simple. Use grill-me for unresolved user-only decisions and idea-refine only when real option exploration is needed."

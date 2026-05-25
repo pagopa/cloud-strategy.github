@@ -1,6 +1,6 @@
 # Advisory Question Bank
 
-Use this reference when `internal-define-advisor` needs `grill-me` coverage for unresolved user-only decisions.
+Use this reference when `internal-idea-define-advisor` needs `grill-me` coverage for unresolved user-only decisions.
 
 Ask only the branches that local evidence cannot recover. Keep the question set proportionate to the decision risk.
 

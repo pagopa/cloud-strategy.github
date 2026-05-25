@@ -59,7 +59,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-tdd` | `execute` support | Repository-local TDD owner for red-green-refactor work through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Performance owner for measured latency, throughput, profiling, query-plan, and regression-budget work. |
 | `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | Question pressure after the minimum evidence pass and before plan output, recommendation, review output, phase transition, or retained-plan application. Follow `references/gate-0-protocol.md` for status, closure, blocking, and realignment. |
-| `internal-define-advisor` | Conditional `define` support | Pre-action fit questions about tools, skills, agents, workflow, owners, overkill, and simple-task suitability before planning or execution. |
+| `internal-idea-define-advisor` | Conditional `define` support | Pre-action fit questions about tools, skills, agents, workflow, owners, overkill, and simple-task suitability before planning or execution. |
 | `superpowers-brainstorming` | Conditional `define` support | Creative, product, UX, architecture, or design-ambiguous work needs divergent and convergent option exploration before planning; skip it for deterministic prompt, skill, agent, instruction, or Markdown maintenance with a concrete target state. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`, including the detailed critical-before-plan requirement for non-trivial retained plans. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking and blocker stops under `tmp/superpowers/<clear-action-or-task-name>/`. |
@@ -86,7 +86,7 @@ reference, or the support skill itself.
 - Follow `references/gate-0-protocol.md` for Gate 0 question depth, closure,
   and realignment. For mechanical work, keep the question set minimal but do
   not skip the gate.
-- Load `internal-define-advisor` inside `define` when the main question is pre-action fit for a tool, skill, agent, workflow, owner, or simple-task path rather than requirement discovery.
+- Load `internal-idea-define-advisor` inside `define` when the main question is pre-action fit for a tool, skill, agent, workflow, owner, or simple-task path rather than requirement discovery.
 - Load `superpowers-brainstorming` only when `define` needs option exploration
   or design approval before planning; do not use it as mandatory support for
   deterministic repository-owned maintenance.

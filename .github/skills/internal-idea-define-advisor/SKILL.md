@@ -1,9 +1,9 @@
 ---
-name: internal-define-advisor
+name: internal-idea-define-advisor
 description: Use when a repository-owned request has pre-action uncertainty about owner, workflow, AI asset, tool, validation, anti-scope, overkill, or simple-task fit.
 ---
 
-# Internal Define Advisor
+# Internal Idea Define Advisor
 
 ## Referenced skills
 

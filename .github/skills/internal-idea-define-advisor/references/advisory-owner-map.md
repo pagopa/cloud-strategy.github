@@ -1,6 +1,6 @@
 # Advisory Owner Map
 
-Use this reference when `internal-define-advisor` must explain which simple path or support should be recommended next without turning the skill into a hidden router.
+Use this reference when `internal-idea-define-advisor` must explain which simple path or support should be recommended next without turning the skill into a hidden router.
 
 ## Relationship Labels
 

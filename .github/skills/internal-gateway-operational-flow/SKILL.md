@@ -13,7 +13,7 @@ Always preload only `grill-me` and `internal-agent-support-next-step`.
 Treat every other referenced skill as an on-demand dependency, not a preload bundle.
 
 - `grill-me`: Gate 0 interview support after the minimum evidence pass for every non-`execute` operational-flow entrypoint; this skill owns Gate 0 status and phase-blocking semantics inside the `define` state.
-- `internal-define-advisor`: pre-action advisory brain inside `define` for tool, skill, agent, workflow, owner, overkill, comparison, and simple-task fit decisions.
+- `internal-idea-define-advisor`: pre-action advisory brain inside `define` for tool, skill, agent, workflow, owner, overkill, comparison, and simple-task fit decisions.
 - `internal-agent-support-next-step`: durable next-owner, scope, validation, and risk handoff package.
 - `internal-agent-support-lane-change-engine`: user-visible lane-change response when the selected mode no longer fits.
 - `internal-gateway-critical-master`: visible critical challenge and pressure-test owner.
@@ -63,7 +63,7 @@ Select one workflow entry point from the user prompt, then run one active phase 
 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan, recommendation, review, phase transition, or retained-plan application. | Confirmed intent, assumptions, option frame, Definition Brief, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, explicit user closure, and named validation path or gap. |
+| `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan, recommendation, review, phase transition, or retained-plan application. | Confirmed intent, assumptions, option frame, Definition Brief, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, explicit user closure, and named validation path or gap. |
 | `plan` | A confirmed definition exists, but decisions, ownership, rollout, validation, or tradeoffs remain. | Gate 0 must already be satisfied for the current request, or `define` must run first. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes, restart open-ended brainstorming, or imply execute approval. | `internal-writing-plans`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
 | `execute` | Target state and validation are concrete. | Do not start Gate 0 for direct `execute` unless the user explicitly asks for `grill-me` or the lane changes away from `execute`. | Scoped edits, focused validation, and slice reports. | Add unrelated improvements or reopen strategy silently. | `internal-debugging`, `internal-tdd`, and runtime delivery skills. | `Check 1-3` plus fresh evidence. |
 | `apply-plan` | An approved retained plan folder is the execution target. | Gate 0 must be satisfied through `define` before retained-plan execution and rerun on request, context, or environment change. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
@@ -78,7 +78,7 @@ Select one workflow entry point from the user prompt, then run one active phase 
 - If the entry point or phase is unclear, use `define` as the safe fallback when user intent or success is not confirmed; otherwise use `plan` instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
 - Treat Gate 0 as the first-class `define` gate for non-`execute` entrypoints. Run Gate 0 after the minimum evidence pass before plan output, recommendation, phase transition, review output, or retained-plan application. This skill owns the blocking gate status; use `grill-me` as the interview pattern and let only the user close or stop the loop.
-- Use `internal-define-advisor` inside `define` when the user asks whether to use, compare, create, route, defer, or simplify an AI asset, tool, workflow, or owner before planning or execution.
+- Use `internal-idea-define-advisor` inside `define` when the user asks whether to use, compare, create, route, defer, or simplify an AI asset, tool, workflow, or owner before planning or execution.
 - Use `superpowers-brainstorming` only inside `define` when the work needs option exploration, divergent/convergent design thinking, or design approval before a plan. Do not invoke it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when the target state and validation are already concrete.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Require an explicit checkpoint before moving from `plan`, `define`, or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
@@ -124,7 +124,7 @@ For small catalog maintenance, do the `internal-gateway-simple-task` vs `execute
 
 Define mode owns the pre-plan clarification state. Start with the smallest evidence pass that can recover the target path, owner, nearby validation, existing patterns, and anti-scope. Then run Gate 0 through `grill-me`, surface assumptions before plan content, and keep option exploration to the smallest set that can still change the path.
 
-When the main define question is pre-action fit rather than requirement discovery, delegate the advisory reasoning to `internal-define-advisor`. Keep Gate 0 status and phase transitions owned here.
+When the main define question is pre-action fit rather than requirement discovery, delegate the advisory reasoning to `internal-idea-define-advisor`. Keep Gate 0 status and phase transitions owned here.
 
 Use `superpowers-brainstorming` only when the work is truly design-ambiguous. Before leaving `define`, produce a compact Definition Brief that covers outcome, target user or owner, success criteria, constraints and anti-scope, selected direction or open options, validation path or explicit gap, and stop conditions. Use `Define Check 1-3` before moving on; otherwise stay in `define`.
 
