@@ -1,6 +1,6 @@
 ---
 name: "internal-mega-review"
-agent: "agent"
+agent: "internal-gateway-operational-flow"
 description: "Run a complete advisor-only mega review for one or more repositories and write split English analysis under each repo tmp/"
 argument-hint: "Repository paths or names; optional focus and constraints; retained output is English"
 ---
@@ -82,6 +82,7 @@ For each repository:
 4. If the repository contains technologies, frameworks, or tooling not explicitly anticipated here, extend the review to cover them from first principles instead of skipping them.
 5. Never invent technologies, workflows, or controls that are not present.
 6. Prefer repository evidence over assumptions, and explicit uncertainty over false confidence.
+7. When a repository-owned bundle owner such as `SKILL.md` materially affects a finding, inspect bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action.
 
 ## 5. Inventory First
 

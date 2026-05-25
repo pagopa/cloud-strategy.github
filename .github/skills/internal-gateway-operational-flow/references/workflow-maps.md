@@ -27,12 +27,48 @@ Use this reference when preserving or validating user-visible operational flows.
 
 Use this path when the target state is already known. Do not reopen strategy unless the task reveals real ambiguity.
 
+### Progress Beat
+
+Progress beat (between slices, when end-to-end authorization is active and the task has at least two slices):
+
+- Closed slice and the evidence that closed it.
+- Next slice or explicit stop request.
+- Residual risk delta.
+
+Keep the beat <= 3 lines. It is not a Decision Brief and not a final report; do not include three Checks here.
+
+### Temporary Execution Scratchpad
+
+Use this mini workflow only inside `execute` mode when coordination state is
+cheaper than rediscovering context during a multi-step task.
+
+- Store the scratchpad outside the repository, such as `/tmp`, and never under
+  `tmp/superpowers/`.
+- Treat it as ephemeral execution state, not as a retained plan, approval
+  signal, catalog item, or completion evidence.
+- Skip it for simple one-owner or one-file tasks.
+- Keep it compact enough to refresh at slice boundaries.
+
+```text
+scope:
+anti_scope:
+current_slice:
+acceptance_check:
+touched_files:
+validation_status:
+blockers:
+```
+
+Completion evidence still comes from requested scope coverage, changed-file
+review, and fresh validator or test output.
+
 ### Catalog Fast Path
 
 Use this repository-local variant for small catalog maintenance before escalating to retained planning or review.
 
 - Triage `internal-gateway-simple-task` vs `execute` vs `plan` before loading optional references, support skills, or review lenses.
 - Keep the first read budget to one owner file, one nearby validator or test, and one extra reference only when it changes the next safe action.
+- If the target is a repository-owned bundle owner such as `SKILL.md`, inspect the owning bundle root plus relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before closing coverage or intentional non-action.
 - For `plan-only`, use `rg` to identify validators and focused tests; open the
   test file only when the assertion or failure output can change the plan.
 - Use a short execution loop: targeted `rg` or nearby read, patch, nearby test, `make catalog-fast-check`, then `make github-catalog-validation` once at the end.
@@ -49,8 +85,18 @@ Use this repository-local variant for small catalog maintenance before escalatin
                |
                v
 +-------------------------------+
+| define state                   |
+| - minimum evidence pass, then  |
+|   grill-me Gate 0              |
+| - optional brainstorming       |
+| - Definition Brief             |
++-------------------------------+
+               |
+               v
++-------------------------------+
 | plan phase                     |
-| - grill-me when needed         |
+| - critical challenge before    |
+|   non-trivial/governance plan  |
 | - retained plan when justified |
 | - Decision Brief projection    |
 +-------------------------------+
@@ -81,7 +127,56 @@ Use this repository-local variant for small catalog maintenance before escalatin
 +-------------------------------+
 ```
 
-The full cycle coordinates visible phases. It is not hidden dispatch between wrapper agents.
+The full cycle coordinates visible phases. It is not hidden dispatch between
+wrapper agents.
+
+For the detailed Gate 0 status, closure, blocking, and realignment rules that
+govern every non-`execute` entrypoint, see
+[`gate-0-protocol.md`](gate-0-protocol.md). At map level, keep two invariants
+visible: run the minimum evidence pass before Gate 0, and keep downstream plan,
+review, and retained-plan application blocked until the user closes the active
+`grill-me` loop.
+
+Run the minimum evidence pass, then start Gate 0 inside `define` before downstream plan, review, retained-plan application, or phase
+transition, or edit. Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0.
+
+## Define Work
+
+```text
++--------------------------------+
+| Intent, success, constraints,   |
+| anti-scope, or options unclear  |
++--------------------------------+
+               |
+               v
++-------------------------------+
+| define state                   |
+| - smallest evidence pass       |
+| - grill-me Gate 0              |
+| - optional brainstorming       |
+| - assumptions surfaced         |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| Definition Brief               |
+| Outcome, owner/user, success,  |
+| constraints, anti-scope,       |
+| validation, stop conditions    |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| plan, review, critical, or     |
+| stop after define-first        |
++-------------------------------+
+```
+
+Use `superpowers-brainstorming` only when `define` needs option exploration,
+creative or design-ambiguous work, or design approval before a plan. Keep
+`grill-me` as the required Gate 0 support. Skip brainstorming for deterministic
+repository-owned maintenance when target state and validation are already
+concrete.
 
 ## Planned Work
 
@@ -93,10 +188,18 @@ The full cycle coordinates visible phases. It is not hidden dispatch between wra
                |
                v
 +-------------------------------+
+| define state if needed         |
+| - Gate 0 and Definition Brief  |
++-------------------------------+
+               |
+               v
++-------------------------------+
 | plan mode                      |
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |
+| - critical challenge when      |
+|   plan risk requires it        |
 +-------------------------------+
                |
                v
@@ -122,6 +225,14 @@ Planning output should be compact enough for the next owner or runtime to act wi
 +-----------------------------+
 | Concrete change, artifact,   |
 | or validation result exists  |
++-----------------------------+
+              |
+              v
++-----------------------------+
+| define pre-review gate      |
+| - scope and evidence check  |
+| - grill-me if decisions can |
+|   change the review output  |
 +-----------------------------+
               |
               v
@@ -153,15 +264,23 @@ Review treats missing validation as a finding, not a footnote.
               |
               v
 +-------------------------------+
+| define pre-start gate          |
+| - confirm scope and anti-scope |
+| - rerun on context change      |
++-------------------------------+
+              |
+              v
++-------------------------------+
 | apply-plan entrypoint          |
 | - load internal-executing-plans|
-| - ignore dubbi-e-domande.md   |
+| - ignore questions.md         |
 +-------------------------------+
               |
               v
 +-------------------------------+
 | done-* loop                    |
 | - move completed items         |
+| - preserve ledger coverage     |
 | - delete empty active files    |
 | - continue across plan files   |
 | - stop only for blockers       |

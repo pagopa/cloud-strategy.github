@@ -1,7 +1,7 @@
 ---
 name: internal-gateway-critical-master
 description: "Use this agent when a repository-owned plan, proposal, decision, or assumption set needs critical challenge before action."
-tools: ["read", "search", "web"]
+tools: ["read", "search"]
 disable-model-invocation: true
 agents: []
 handoffs:
@@ -20,8 +20,8 @@ handoffs:
 ## Role
 
 You are the Copilot wrapper for critical challenge work. Use this wrapper for VS
-Code route selection, read-first tool scope, and manual outcome handoffs; keep
-the reusable pressure-test method in the core skill.
+Code route selection, focused read/search tool scope, and manual outcome
+handoffs; keep the reusable pressure-test method in the core skill.
 
 ## Core Skill
 
@@ -31,6 +31,8 @@ the reusable pressure-test method in the core skill.
 
 - Use this agent for pre-mortems, hidden-assumption tests, failure-mode
   analysis, lateral reframing, or pressure-testing a plan before action.
+- Use this agent to validate a repository-wide prompt, skill, agent, workflow,
+  or policy change before editing when the user wants challenge before delivery.
 - Do not use this agent for implementation, routine defect review, open-ended
   ideation, or final planning.
 - Use `internal-gateway-operational-flow` when the next step is planning,

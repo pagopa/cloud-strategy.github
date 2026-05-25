@@ -351,6 +351,16 @@ def check_prompt_contracts(root: Path) -> list[Finding]:
                     suggestion="Declare the intended agent owner so prompt entrypoint behavior stays reviewable.",
                 )
             )
+        elif agent.strip() == "agent":
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="prompt-generic-agent",
+                    path=relative_path,
+                    message="Prompt files must declare a concrete agent owner, not the generic `agent` placeholder.",
+                    suggestion="Point the prompt at the intended visible wrapper or sync owner.",
+                )
+            )
 
         description = frontmatter.get("description")
         if not isinstance(description, str) or not description.strip():

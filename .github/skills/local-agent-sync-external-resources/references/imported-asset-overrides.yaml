@@ -90,8 +90,9 @@ overrides:
       Default the initial grilling pass to a dependency-ordered numbered
       question set with clear recommendations that the user can accept by
       default, while preserving follow-up pressure on contradictions, risks,
-      and unresolved decisions.
+      and unresolved decisions; keep operational gate semantics in
+      internal-gateway-operational-flow.
     patch_path: patches/grill-me.patch
-    expected_content_hash: 42ff8e1fc4cf58210762c1c518489305c51c4ceffe291297b78f777a730f847b
+    expected_content_hash: 54b4dba5fc48941f93ed6c11bf50f943f5a26e44bc48b87e6ee864ebc16778a0
     baseline_repo_commit: "e74f006"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

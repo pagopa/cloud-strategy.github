@@ -1,0 +1,46 @@
+# Gate 0 Protocol
+
+Use this reference when Gate 0 activation, status, blocking, closure, or
+request-change realignment needs more detail than the main gateway skill should
+carry.
+
+## Activation
+
+- Run the minimum evidence pass first, then start Gate 0 inside `define` for
+  every non-`execute` operational-flow entrypoint.
+- Gate 0 applies before plan output, recommendation, retained-plan
+  application, review output, phase transition, or governance-sensitive edit.
+- Rich prompts, concrete tasks, mechanical tasks, retained-plan approval,
+  recoverable repository evidence, and pre-start signals do not waive Gate 0.
+  For mechanical work, ask a minimal, clear, and concise `grill-me` question
+  set instead of skipping the gate.
+
+## Status
+
+| Status | Use when | Effect |
+| --- | --- | --- |
+| `grill-me required` | The mandatory Gate 0 loop has not been explicitly closed by the user for the current request, context, and environment. | Stop before plan output, recommendation, review output, phase transition, retained-plan application, or edit; ask the `grill-me` question set. |
+| `grill-me satisfied` | The user answered or explicitly accepted defaults in the current Gate 0 loop, gave a closure or proceed signal, the answers still match the current scope, and no unresolved user-only decision remains. | Continue with the current phase while the request remains stable. |
+
+`grill-me` supplies the interview shape. `internal-gateway-operational-flow`
+owns Gate 0 status labels and blocking semantics.
+
+## Blocking And Closure
+
+- Declare exactly one Gate 0 status before downstream plan output,
+  recommendation, Decision Brief, review output, phase transition, or edit.
+- Keep `plan`, `apply-plan`, `review`, and planning output blocked while the
+  result is `grill-me required`. Direct `execute` is the only automatic Gate 0
+  exception.
+- When the gate is `grill-me required`, stop and ask numbered questions using
+  `Question`, `Recommendation`, `Why`, and `Default if accepted`.
+- Only the user may close or stop the loop. The agent may recommend closure,
+  but must wait for a user closure signal such as "ok", "chiudi", "va bene",
+  "vai", "procedi", accepted defaults, or an equivalent proceed instruction.
+
+## Realignment
+
+- If request, target path, context, environment, tool output, dependency
+  state, validation posture, or dirty-worktree ownership changes, run the
+  minimum new evidence pass, restart Gate 0, and stop again while the result is
+  `grill-me required`.

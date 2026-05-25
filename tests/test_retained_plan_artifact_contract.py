@@ -22,9 +22,18 @@ COMPLETION_REPORT_FIELDS = (
     "Intentional non-actions:",
     "Validators:",
     "Evidence envelope:",
+    "Source-item ledger:",
     "Evidence gaps:",
     "Residual risks:",
     "Follow-up suggestions:",
+)
+
+OPEN_COMPLETION_STATUSES = (
+    "PENDING",
+    "PARTIAL",
+    "NOT_DONE",
+    "UNVERIFIABLE",
+    "BLOCKED",
 )
 
 
@@ -77,6 +86,11 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
             violations.append(
                 f"{envelope_path} is missing Evidence path or command column"
             )
+        for status in OPEN_COMPLETION_STATUSES:
+            if f"| {status} |" in envelope_text:
+                violations.append(
+                    f"{envelope_path} contains open completion status {status}"
+                )
 
         for done_file in folder_done_files:
             if f"`{done_file.name}`" not in envelope_text:
@@ -137,6 +151,23 @@ def test_completed_retained_plan_validation_rejects_active_numbered_files(
 
     assert completed_retained_plan_violations(tmp_path) == [
         f"{plan_folder} still has active numbered plan files"
+    ]
+
+
+def test_completed_retained_plan_validation_rejects_open_statuses(
+    tmp_path: Path,
+) -> None:
+    plan_folder = write_completed_plan_folder(tmp_path)
+    (plan_folder / "evidence-envelope.md").write_text(
+        "# Evidence Envelope\n\n"
+        "| Source item | Status | Evidence path or command |\n"
+        "| --- | --- | --- |\n"
+        "| `done-01-sample.md` | PENDING | `pytest` |\n",
+        encoding="utf-8",
+    )
+
+    assert completed_retained_plan_violations(tmp_path) == [
+        f"{plan_folder / 'evidence-envelope.md'} contains open completion status PENDING"
     ]
 
 

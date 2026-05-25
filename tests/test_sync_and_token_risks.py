@@ -328,8 +328,8 @@ def test_build_sync_plan_includes_prompt_assets_in_managed_inventory(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/prompts/internal-agent-review-next-actions.prompt.md",
-        "---\ndescription: Review next actions\n---\n",
+        source_root / ".github/prompts/internal-review-ai-resources.prompt.md",
+        "---\ndescription: Review AI resources\n---\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
@@ -339,11 +339,11 @@ def test_build_sync_plan_includes_prompt_assets_in_managed_inventory(
 
     assert (
         "create",
-        ".github/prompts/internal-agent-review-next-actions.prompt.md",
+        ".github/prompts/internal-review-ai-resources.prompt.md",
     ) in actions
     assert "## Prompts" in plan.generated_inventory
     assert (
-        "- `.github/prompts/internal-agent-review-next-actions.prompt.md`"
+        "- `.github/prompts/internal-review-ai-resources.prompt.md`"
         in plan.generated_inventory
     )
 
@@ -789,7 +789,7 @@ def test_detect_token_risks_reports_agents_operational_procedure_markers(
         tmp_path / "AGENTS.md",
         "# AGENTS\n\n"
         "## Retained Plans\n\n"
-        "- Keep unresolved questions in `dubbi-e-domande.md`.\n"
+        "- Keep unresolved questions in `questions.md`.\n"
         "- During execution, create matching `done-*` files.\n",
     )
     write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")

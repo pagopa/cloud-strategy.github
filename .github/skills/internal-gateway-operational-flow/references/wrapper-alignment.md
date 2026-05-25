@@ -9,7 +9,7 @@ The active Copilot UX uses one thin wrapper per gateway skill.
 
 | Wrapper | Core skill | Route |
 | --- | --- | --- |
-| `internal-gateway-operational-flow` | `internal-gateway-operational-flow` | `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases. |
+| `internal-gateway-operational-flow` | `internal-gateway-operational-flow` | `define`, `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `define`, `plan`, `execute`, or `review` phases. |
 | `internal-gateway-critical-master` | `internal-gateway-critical-master` | Critical challenge, pre-mortem, hidden-assumption tests, failure modes, and reframing before action. |
 | `internal-gateway-simple-task` | `internal-gateway-simple-task` | Concrete low-to-medium-risk answer, edit, diagnose, validate, or escalate tasks that do not need staged workflow. |
 
@@ -31,7 +31,8 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | `plan`, `full-cycle` | The user asks for grilling, governance-sensitive planning still has unresolved user-only decisions, real ambiguity remains, or a non-trivial retained plan needs question pressure before approval. | Inspect repository evidence first, treat the lane as `plan-only (clarify-first)` when those decisions can still change scope, owner, or validation, and use the local bulk-question override before one-at-a-time follow-up. |
+| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Follow `gate-0-protocol.md` for status, closure, blocking, and realignment; wrapper docs must not restate the full Gate 0 protocol. |
+| `superpowers-brainstorming` | Conditional `define` support | Creative, product, UX, architecture, or design-ambiguous work needs option exploration and design approval before planning. | Keep `grill-me` as the Gate 0 pillar; use brainstorming only after the minimum evidence pass shows options can change the plan; skip it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when target state and validation are concrete. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
 Internal replacements:
@@ -59,12 +60,29 @@ State security-specific gaps and route them through the closest existing owner.
 Support selection belongs in the gateway skills, not in wrapper skill-list
 sections.
 
-- Planning support includes `grill-me` only when the operational-flow skill
-  selects it.
-- Governance-sensitive planning with unresolved user choices stays in
-  `plan-only (clarify-first)` until `grill-me` resolves those choices.
+- Planning, review, and retained-plan application still enter `define` through
+  Gate 0 after the minimum evidence pass. Direct `execute` remains the only
+  automatic Gate 0 exception unless the user asks for `grill-me` or the lane
+  changes away from `execute`.
+- Planning, review, and retained-plan application always start in `define`.
+- Treat planning as `define` until the user closes the active `grill-me` loop.
+- Wrapper projections should still run Gate 0 after the minimum evidence pass.
+- Keep the detailed Gate 0 closure, blocking, and realignment rules in
+  `gate-0-protocol.md`; wrappers, READMEs, and tests should reference that file
+  instead of restating the protocol.
+- Treat `plan-only (clarify-first)` as a legacy input spelling for `define-first`,
+  not as a separate phase.
+- Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, fully recoverable repository evidence, and pre-start signals do not waive Gate 0. For mechanical work covered by Gate 0, ask a minimal,
+  clear, and concise question set instead of skipping `grill-me`.
+- In wrapper projection terms, the loop closes only after a user closure signal.
+- Restart Gate 0 before continuing if request, context, target path, environment, tool output, dependency state, validation, or dirty worktree ownership changes.
+- `superpowers-brainstorming` is optional support inside `define` only when
+  option exploration or design approval is still the real work.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
+- Non-trivial or governance-sensitive retained-plan authoring belongs to
+  `internal-writing-plans`, including the detailed critical-before-plan
+  requirement that uses `internal-gateway-critical-master`.
 - Failure diagnosis belongs to `internal-debugging`.
 - Test-first delivery belongs to `internal-tdd`.
 - Performance work belongs to `internal-performance-optimization`.
@@ -73,6 +91,9 @@ sections.
   belong to `internal-high-level-review`.
 - Compression support such as `mattpocock-caveman` stays support-only after
   blockers, risks, and validation evidence are explicit.
+- The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.
+  It does not replace a retained plan, is not catalog material, and Copilot
+  wrappers must not expose it as a canonical artifact.
 
 ## Handoff Rules
 

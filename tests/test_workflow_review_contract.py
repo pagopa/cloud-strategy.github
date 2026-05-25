@@ -35,14 +35,14 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     )
 
-    assert "plan, execute, apply-plan, review" in operational_flow_agent_text
+    assert "define, plan, execute, apply-plan, review" in operational_flow_agent_text
     assert "single-lane and single-phase" in simple_task_agent_text
     assert (
         "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
         in operating_model_text
     )
     assert (
-        "If the entry point or phase is unclear, use `plan` as the safe fallback"
+        "If the entry point or phase is unclear, use `define` as the safe fallback"
         in operating_model_text
     )
 
@@ -189,6 +189,7 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "## User Authorization Signals",
+            "`define-first`",
             "`plan-only (clarify-first)`",
             "Plan Check 1",
             "Plan Check 2",
@@ -196,6 +197,9 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
             "Review Check 1",
             "Review Check 2",
             "Review Check 3",
+            "workflow defect",
+            "source-item coverage matrix",
+            "Do not close those items from clarifying prose alone",
             "## Failure And Recovery",
             "## Output Calibration",
             "about 40 lines",
@@ -212,29 +216,115 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "Treat those cases as `plan-only (clarify-first)` even when the user did not",
+            "Treat operational-flow planning as `define`",
             "Comparison, integration, or architecture-judgment requests should",
-            "Governance-sensitive planning with unresolved user choices must stop for",
+            "until the user closes the current `grill-me` loop",
+            "Use `superpowers-brainstorming` only when",
         ),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "governance-sensitive planning still has unresolved user-only decisions",
-            "treat the lane as `plan-only (clarify-first)`",
+            "Planning, review, and retained-plan application always start in `define`",
+            "Treat planning as `define`",
+            "legacy input spelling for `define-first`",
+            "do not waive Gate 0",
+            "minimal,\n  clear, and concise",
+            "Restart Gate 0 before continuing",
+            "superpowers-brainstorming",
+            "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )
     assert_contains_all(
         ".github/agents/internal-gateway-operational-flow.agent.md",
         (
-            "`plan-only (clarify-first)`",
-            "stop for `grill-me` before writing any",
+            "`define-first`",
+            "Gate 0 owns the status labels",
+            "rich prompts",
         ),
     )
     assert_contains_all(
-        ".github/skills/internal-gateway-operational-flow/README.md",
-        ("Treat governance-sensitive planning as `plan-only (clarify-first)`",),
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "## Phase-Local Contracts",
+            "do not waive Gate 0",
+            "Definition Brief",
+            "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
+        ),
     )
+    assert not Path(
+        ".github/skills/internal-gateway-operational-flow/README.md"
+    ).exists()
+
+
+def test_operational_flow_non_waiver_projection_stays_defined() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "## Phase-Local Contracts",
+            "do not waive Gate 0",
+            "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
+        (
+            "do not waive Gate 0",
+            "Restart Gate 0 before continuing",
+            "the loop closes only after a user closure signal",
+            "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
+        ),
+    )
+    assert_contains_all(
+        ".github/agents/internal-gateway-operational-flow.agent.md",
+        (
+            "`define-first`",
+            "rich prompts",
+            "Approved retained-plan execution still starts Gate 0",
+        ),
+    )
+
+
+def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md",
+        (
+            "For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.",
+            "resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` in the source-item coverage matrix",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md",
+        (
+            "inspect the owning bundle root plus relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-copilot-audit/SKILL.md",
+        (
+            "For skill bundles, treat `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` as bundle siblings.",
+            "silently collapse a skill bundle to only `SKILL.md`",
+            "For skill bundle targets, check existing bundle siblings before calling the target healthy or low risk.",
+        ),
+    )
+    assert_contains_all(
+        ".github/prompts/internal-review-ai-resources.prompt.md",
+        (
+            "resolve the owning skill bundle and keep its bundle siblings",
+            "For skill bundles, treat existing bundle siblings as default in-scope",
+            "For skill bundles, confirm each existing bundle sibling was reviewed",
+        ),
+    )
+    assert_contains_all(
+        ".github/prompts/internal-mega-review.prompt.md",
+        (
+            "When a repository-owned bundle owner such as `SKILL.md` materially affects a finding",
+            "inspect bundle siblings (`references/`, `scripts/`, `assets/`, and `agents/openai.yaml`) or mark the intentional non-action",
+        ),
+    )
+    assert not Path(
+        ".github/prompts/internal-agent-review-next-actions.prompt.md"
+    ).exists()
 
 
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:
@@ -412,7 +502,9 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "Residual risks",
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
-            "`SHIPPED` requires passed validators and a completed report",
+            "`SHIPPED` requires passed validators, a completed report",
+            "Intended observable acceptance",
+            "A summary that says an item was done is not evidence",
             "late-stage packaging artifacts",
             "not after every intermediate patch",
             "item-level evidence",
@@ -427,7 +519,7 @@ def test_resume_protocol_reference_exists() -> None:
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
             "Verify-first Sequence",
-            "`01-riassunto-direzione-e-decisione.md`",
+            "`01-change-summary.md`",
             "Evidence pass iniziale",
             "Budget lettura",
             "rg --no-ignore",
@@ -443,8 +535,8 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/resume-protocol.md",
         (
-            "file roles cannot be inferred safely",
-            "before broad reading",
+            "file roles and source coverage cannot be inferred safely",
+            "before reading broadly",
             "lacks an item/evidence table or evidence-envelope pointer",
             "reconstruct the item from reachable artifacts or mark it `UNVERIFIABLE`",
         ),
@@ -455,13 +547,14 @@ def test_plan_handoff_requires_summary_control_file() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/plan-handoff.md",
         (
-            "`01-riassunto-direzione-e-decisione.md`",
+            "`01-change-summary.md`",
             "`Uso consigliato`",
             "`Mappa file e ruolo`",
             "`Evidence pass iniziale`",
             "`Budget lettura`",
-            "summary control file",
-            "matching `done-*` marker",
+            "summary and ledger control files",
+            "matching `done-*`\n  markers",
+            "Observable acceptance for each executable action",
         ),
     )
 
@@ -484,7 +577,7 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
     executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
 
     assert (
-        "evidence envelope with item, status,\n  evidence, and route"
+        "evidence envelope with item, status, evidence, and route"
         in executing_plans_text
     )
     assert "late-stage evidence packaging" in executing_plans_text

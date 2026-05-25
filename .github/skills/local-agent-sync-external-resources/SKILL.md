@@ -11,6 +11,10 @@ This skill owns the reusable catalog-governance procedure behind that agent. Kee
 
 Use the current repository state as evidence and starting context, but anchor decisions to the declared contract in the relevant agent, root `AGENTS.md`, and `.github/copilot-instructions.md`.
 
+When exact upstream family scope, normalized local ids, retained support-only
+posture, or approved imported-override context matters, read
+`references/managed-resource-scope.md`.
+
 Use `internal-skill-creator` first when a sync decision requires creating, replacing, or materially rewriting one repository-owned skill. It is the canonical local entrypoint for repository-owned skill work in this repository.
 
 Use `openai-skill-creator` only for the remaining bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation work after `internal-skill-creator` has established the repository-owned skill boundary and decided the local ownership outcome.
