@@ -45,6 +45,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
+- `.github/skills/idea-refine/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
 - `.github/skills/internal-agent-support-next-step/SKILL.md`
@@ -66,6 +67,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-copilot-instructions-creator/SKILL.md`
 - `.github/skills/internal-ddd/SKILL.md`
 - `.github/skills/internal-debugging/SKILL.md`
+- `.github/skills/internal-define-advisor/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-executing-plans/SKILL.md`

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Define Advisor"
+  short_description: "Pre-action advice for define decisions"
+  default_prompt: "Use $internal-define-advisor to decide before acting, using grill-me for unresolved decisions and idea-refine only when option exploration is needed."
