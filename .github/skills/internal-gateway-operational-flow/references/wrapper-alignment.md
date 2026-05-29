@@ -66,6 +66,10 @@ sections.
   changes away from `execute`.
 - Planning, review, and retained-plan application always start in `define`.
 - Treat planning as `define` until the user closes the active `grill-me` loop.
+- For `define-first`, brainstorming, and clarify-first entrypoints, closing Gate
+  0 does not change the active phase. The agent may recommend moving to `plan`,
+  but must wait for the user to explicitly request planning before producing
+  plan output.
 - Wrapper projections should still run Gate 0 after the minimum evidence pass.
 - Keep the detailed Gate 0 closure, blocking, and realignment rules in
   `gate-0-protocol.md`; wrappers, READMEs, and tests should reference that file

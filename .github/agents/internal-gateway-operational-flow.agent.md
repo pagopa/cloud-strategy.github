@@ -42,8 +42,11 @@ portable workflow semantics in the core skill.
   `grill-me required`.
 - For mechanical work where Gate 0 applies, ask a minimal, clear, and concise
   `grill-me` question set instead of skipping the gate.
-- Keep planning in `define` until the user closes the active Gate 0 loop; Gate 0 owns the status labels, so stop for `grill-me` before writing any
-  plan artifact or review output.
+- Keep planning in `define` until the user closes the active Gate 0 loop; Gate 0
+  owns the status labels, so stop for `grill-me` before writing any plan
+  artifact or review output. For `define-first`, brainstorming, and clarify-first
+  entrypoints, closing Gate 0 does not change the active phase; recommend
+  `plan` only when ready and wait for the user to explicitly request planning.
   Treat `plan-only (clarify-first)` as a legacy input spelling for
   `define-first`, not as a separate phase.
 - Use `superpowers-brainstorming` only when `define` needs option exploration or

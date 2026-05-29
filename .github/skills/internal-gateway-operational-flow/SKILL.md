@@ -82,6 +82,10 @@ Select one workflow entry point from the user prompt, then run one active phase 
 - Use `superpowers-brainstorming` only inside `define` when the work needs option exploration, divergent/convergent design thinking, or design approval before a plan. Do not invoke it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when the target state and validation are already concrete.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Require an explicit checkpoint before moving from `plan`, `define`, or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
+- For `define-first`, brainstorming, and clarify-first entrypoints, closing Gate
+  0 does not change the active phase. Stay in `define` after `grill-me` is
+  satisfied, recommend `plan` only when ready, and wait for the user to
+  explicitly request planning before producing plan output.
 - Use review lenses inside `review` mode instead of duplicating their playbooks here.
 - Use `internal-gateway-critical-master` before finalizing, or immediately after a compact draft, when replacing an important prompt or skill, changing shared routing semantics, or materially changing governance-sensitive workflow behavior.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
@@ -101,6 +105,10 @@ The agent must not close or skip the loop by itself. Close the loop only after a
 
 Treat end-to-end application as authorized only when the user explicitly asks to apply, continue into delivery, run the work end to end after `plan` or critical challenge, or invokes `apply-plan` with an approved retained plan folder.
 `full-cycle` alone never skips the visible checkpoint into `execute` or `apply-plan`; when entrypoint signals conflict, choose the lower-action phase.
+For `define-first`, brainstorming, and clarify-first entrypoints, agreement,
+option selection, accepted defaults, or approval-like replies only update the
+definition. They do not authorize `plan`; wait for a request that directly asks
+for planning or names the next phase.
 
 ## Phase Selection
 
@@ -126,7 +134,12 @@ Define mode owns the pre-plan clarification state. Start with the smallest evide
 
 When the main define question is pre-action fit rather than requirement discovery, delegate the advisory reasoning to `internal-idea-define-advisor`. Keep Gate 0 status and phase transitions owned here.
 
-Use `superpowers-brainstorming` only when the work is truly design-ambiguous. Before leaving `define`, produce a compact Definition Brief that covers outcome, target user or owner, success criteria, constraints and anti-scope, selected direction or open options, validation path or explicit gap, and stop conditions. Use `Define Check 1-3` before moving on; otherwise stay in `define`.
+Use `superpowers-brainstorming` only when the work is truly design-ambiguous.
+Before recommending an exit from `define`, produce a compact Definition Brief
+that covers outcome, target user or owner, success criteria, constraints and
+anti-scope, selected direction or open options, validation path or explicit gap,
+and stop conditions. Use `Define Check 1-3`, then stop in `define` unless the
+user explicitly requests the next phase.
 
 ## Plan Mode
 
@@ -185,7 +198,8 @@ Review mode owns findings, evidence gaps, regression risk, systems risk, and fix
 
 ## Staged Checkpoints
 
-- `define-first` stops after the Definition Brief and next-step package unless the user approves moving into `plan`.
+- `define-first` stops after the Definition Brief and next-step package unless
+  the user explicitly requests moving into `plan`.
 - `plan-only` stops after the Definition Brief when needed, the plan, Decision Brief, required critical pass for non-trivial or governance-sensitive plans, and next-step package.
 - `full-cycle` may continue only through visible phase changes and the required pre-execute checkpoint; the entrypoint name alone does not skip that checkpoint.
 - Any request-change realignment reruns Gate 0 before the next governance-sensitive plan output, recommendation, phase transition, or edit.

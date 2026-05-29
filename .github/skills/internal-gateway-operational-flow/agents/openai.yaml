@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Gateway Operational Flow"
   short_description: "Define-to-review workflow with grill-me Gate 0"
-  default_prompt: "Use $internal-gateway-operational-flow with this request or retained plan folder to choose the visible define-first, full-cycle, plan-only, apply-plan, review, or explicit phase workflow. Run the minimum evidence pass, then start define with grill-me Gate 0 for every non-execute entrypoint before planning, reviewing, transitioning, or applying a retained plan."
+  default_prompt: "Use $internal-gateway-operational-flow with this request or retained plan folder to choose the visible define-first, full-cycle, plan-only, apply-plan, review, or explicit phase workflow. Run the minimum evidence pass, then start define with grill-me Gate 0 for every non-execute entrypoint before planning, reviewing, transitioning, or applying a retained plan. For define-first or brainstorming, stay in define until the user explicitly requests planning."

@@ -38,6 +38,20 @@ owns Gate 0 status labels and blocking semantics.
   but must wait for a user closure signal such as "ok", "chiudi", "va bene",
   "vai", "procedi", accepted defaults, or an equivalent proceed instruction.
 
+## Phase Transition Authorization
+
+- Closing Gate 0 changes the gate status only. It does not change the active
+  phase.
+- For `define-first`, brainstorming, and clarify-first entrypoints, the
+  workflow remains in `define` after `grill-me` is satisfied.
+- The agent may say that the definition looks ready and may recommend moving to
+  `plan`, but must wait for the user to explicitly request that phase.
+- Agreement, option selection, accepted defaults, or approval-like replies only
+  update the definition. They do not authorize plan output.
+- A valid transition request must directly ask for planning or name the next
+  phase, such as `passa a plan`, `write the plan`, `create the implementation
+  plan`, or an equivalent instruction.
+
 ## Realignment
 
 - If request, target path, context, environment, tool output, dependency

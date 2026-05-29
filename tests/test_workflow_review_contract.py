@@ -22,6 +22,15 @@ def assert_contains_all(relative_path: str, snippets: tuple[str, ...]) -> None:
         assert snippet in text, f"{relative_path} is missing {snippet!r}"
 
 
+def assert_contains_all_normalized(relative_path: str, snippets: tuple[str, ...]) -> None:
+    text = " ".join(read_text(relative_path).split())
+
+    for snippet in snippets:
+        assert " ".join(snippet.split()) in text, (
+            f"{relative_path} is missing {snippet!r}"
+        )
+
+
 def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execution() -> (
     None
 ):
@@ -185,7 +194,7 @@ def test_gateway_contains_completion_checks() -> None:
 
 
 def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "## User Authorization Signals",
@@ -208,25 +217,28 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
             "make token-risks",
             "make github-catalog-validation",
             "`full-cycle` alone",
+            "closing Gate 0 does not change the active phase",
         ),
     )
 
 
 def test_governance_sensitive_plans_default_to_clarify_first() -> None:
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "Treat operational-flow planning as `define`",
             "Comparison, integration, or architecture-judgment requests should",
             "until the user closes the current `grill-me` loop",
+            "agreement, option selection, accepted defaults, or approval-like replies only update the definition",
             "Use `superpowers-brainstorming` only when",
         ),
     )
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
             "Planning, review, and retained-plan application always start in `define`",
             "Treat planning as `define`",
+            "closing Gate 0 does not change the active phase",
             "legacy input spelling for `define-first`",
             "do not waive Gate 0",
             "minimal,\n  clear, and concise",
@@ -235,15 +247,16 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/agents/internal-gateway-operational-flow.agent.md",
         (
             "`define-first`",
             "Gate 0 owns the status labels",
+            "closing Gate 0 does not change the active phase",
             "rich prompts",
         ),
     )
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "## Phase-Local Contracts",
@@ -264,6 +277,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
             "## Phase-Local Contracts",
             "do not waive Gate 0",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
+            "For `define-first`, brainstorming, and clarify-first entrypoints",
         ),
     )
     assert_contains_all(

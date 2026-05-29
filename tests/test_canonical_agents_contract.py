@@ -243,6 +243,9 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
+    gate_protocol_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/gate-0-protocol.md"
+    ).read_text(encoding="utf-8")
     workflow_maps_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
     ).read_text(encoding="utf-8")
@@ -259,6 +262,14 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     )
     assert "The agent must not close or skip the loop by itself" in skill_text
     assert "Close the loop only after a user closure signal" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "closing Gate 0 does not change the active phase",
+    )
+    assert_normalized_snippet(
+        skill_text,
+        "wait for the user to explicitly request planning",
+    )
     assert "Direct `execute` is the only automatic Gate 0 exception." in skill_text
     assert "`Gate 0`" in wrapper_text
     assert_normalized_snippet(
@@ -270,6 +281,9 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "Gate 0 support for every non-`execute`" in wrapper_alignment_text
     assert "do not waive Gate 0" in wrapper_alignment_text
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
+    assert "## Phase Transition Authorization" in gate_protocol_text
+    assert "Closing Gate 0 changes the gate status only" in gate_protocol_text
+    assert "A valid transition request must directly ask for planning" in gate_protocol_text
     assert "minimum evidence pass, then" in workflow_maps_text
     assert "phase\ntransition, or edit" in workflow_maps_text
     assert "Gate 0" in workflow_maps_text
@@ -403,6 +417,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         == "Define-to-review workflow with grill-me Gate 0"
     )
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
+    assert "stay in define until the user explicitly requests planning" in interface["default_prompt"]
 
     operational_frontmatter = load_frontmatter(
         CANONICAL_AGENTS["internal-gateway-operational-flow"]
