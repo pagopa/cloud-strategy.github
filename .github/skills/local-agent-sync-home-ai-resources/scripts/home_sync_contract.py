@@ -10,11 +10,12 @@ BUNDLED_SKILL_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_SUPPORT_MATRIX_PATH = Path("references/runtime-support-matrix.yaml")
 HOME_SYNC_CATALOG_PATH = Path("references/home-sync-catalog.yaml")
 STATE_ROOT_RELATIVE = Path(".sync/cloud-strategy-governance/home-ai-resources")
-TARGET_ORDER = ("codex", "vscode", "antigravity")
+TARGET_ORDER = ("codex", "copilot", "claude", "opencode")
 TARGET_SKILL_ROOTS = {
-    "codex": Path(".codex/skills"),
-    "vscode": Path(".copilot/skills"),
-    "antigravity": Path(".gemini/antigravity/skills"),
+    "codex": Path(".agents/skills"),
+    "copilot": Path(".agents/skills"),
+    "claude": Path(".agents/skills"),
+    "opencode": Path(".agents/skills"),
 }
 
 

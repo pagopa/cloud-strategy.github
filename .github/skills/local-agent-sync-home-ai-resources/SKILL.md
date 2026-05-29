@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-home-ai-resources
-description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, VS Code, or experimental Antigravity targets.
+description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, Copilot, Claude Code, or OpenCode targets.
 ---
 
 # Local Agent Sync Home AI Resources
@@ -30,6 +30,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 ## Core Operating Contract
 
 - Treat this repository as the source of truth for allowlisted home-sync resources.
+- Sync is unidirectional: repo → home only. Block any attempt to sync from home to repo.
 - Default to `plan` and keep `apply` explicit.
 - Limit v1 default materialization to documented direct-copy resource families.
 - Preserve unmanaged target-local files and directories.
@@ -47,14 +48,12 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 
 ## Target Selection
 
-- Accept `codex`, `vscode`, `antigravity`, comma-separated combinations, and `all`.
+- Accept `codex`, `copilot`, `claude`, `opencode`, comma-separated combinations, `cross`, `all`, or `tutto`.
 - Normalize whitespace, deduplicate, and order targets deterministically.
-- Resolve skill roots as `~/.codex/skills`, `~/.copilot/skills`, and `~/.gemini/antigravity/skills`.
-- Do not use `.agents` as a home sync target.
-- Keep adjacent runtime resource roots in the support matrix; keep the default materialization flow limited to the skill roots above.
-- Keep `antigravity` selectable for `plan`, `audit`, and `doctor` while its runtime semantics remain undocumented.
-- Block default `apply` unless the matrix row is `Documented` and `direct_copy_possible: true`.
-- Require an explicit experimental override for non-`Documented` rows.
+- Resolve skill roots as `~/.agents/skills` for all targets (scenario B: unification).
+- When multiple targets resolve to the same physical path, perform the copy operation only once (physical deduplication).
+- After apply, verify every copied resource by re-reading the target and comparing hashes.
+- Block reverse sync: source root must not be under home root.
 
 ## Source And Materialization Policy
 

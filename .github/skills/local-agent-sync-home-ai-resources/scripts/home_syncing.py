@@ -133,11 +133,13 @@ class HomeSyncPlan:
         }
 
 
+CROSS_ALIASES = {"cross", "all", "tutto"}
+
 def parse_targets(raw_targets: str) -> tuple[str, ...]:
     normalized = [part.strip().lower() for part in raw_targets.split(",") if part.strip()]
     if not normalized:
         raise ValueError("unknown-target: no targets selected")
-    if normalized == ["all"]:
+    if len(normalized) == 1 and normalized[0] in CROSS_ALIASES:
         return TARGET_ORDER
 
     requested = set(normalized)
@@ -163,6 +165,8 @@ def build_home_sync_plan(
     source_root = source_root.resolve()
     home_root = home_root.resolve()
     state_root = state_root_for_home(home_root)
+    if is_relative_to(source_root, state_root):
+        raise RuntimeError("reverse-sync-blocked: source_root is under the home sync state, sync must be repo → home only")
     runtime_rows = load_runtime_support_matrix(source_root)
     catalog = load_home_sync_catalog(source_root)
     manifest_payload, manifest_error = load_manifest(state_root / MANIFEST_PATH)
@@ -281,6 +285,7 @@ def apply_home_sync_plan(
         Path(operation.path).mkdir(parents=True, exist_ok=True)
 
     desired_by_path = {resource.target_path: resource for resource in plan.desired_resources}
+    copied_paths: set[str] = set()
     for operation in plan.operations:
         if operation.action not in {"copy", "delete"}:
             continue
@@ -290,9 +295,21 @@ def apply_home_sync_plan(
                 remove_resource(target_path)
             continue
 
+        if target_path.as_posix() in copied_paths:
+            continue
+
         managed_resource = desired_by_path[operation.path]
         source_path = plan.source_root / managed_resource.source_path
         copy_resource(source_path, target_path)
+        copied_paths.add(target_path.as_posix())
+
+    for resource in plan.desired_resources:
+        target_path = Path(resource.target_path)
+        if not target_path.exists():
+            raise RuntimeError(f"post-apply-verify-failed: {target_path} missing after copy")
+        current_hash = hash_resource(target_path)
+        if current_hash != resource.source_hash:
+            raise RuntimeError(f"post-apply-verify-failed: {target_path} hash mismatch (expected {resource.source_hash}, got {current_hash})")
 
     manifest_path = plan.state_root / MANIFEST_PATH
     manifest_path.write_text(render_json(build_manifest_payload(plan)), encoding="utf-8")

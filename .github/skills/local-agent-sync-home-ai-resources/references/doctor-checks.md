@@ -14,18 +14,24 @@ Use this checklist when `doctor` needs to explain readiness before a local home 
 
 ## Codex Checks
 
-- Confirm `~/.codex/skills` exists or can be created safely.
+- Confirm `~/.agents/skills` exists or can be created safely.
 - Confirm allowlisted skill bundles contain `SKILL.md`.
 - Confirm bundle-relative `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` paths stay self-contained.
 
-## VS Code Checks
+## Copilot Checks
 
-- Confirm `~/.copilot/skills` exists or can be created safely.
-- Confirm `~/.copilot/agents` and `~/.copilot/instructions` are recognized only as non-v1 resource roots for the current `skills`-only apply flow.
-- Confirm no non-v1 `agents` or `instructions` materialization is included in a `skills`-only apply run.
+- Confirm `~/.agents/skills` exists or can be created safely.
+- Confirm allowlisted skill bundles contain `SKILL.md`.
+- Confirm bundle-relative paths stay self-contained.
 
-## Antigravity Checks
+## Claude Checks
 
-- Confirm `~/.gemini/antigravity/skills` resolves inside the user home directory.
-- Confirm the run is `plan`, `audit`, or `doctor`, unless an explicit experimental override is present.
-- Confirm the matrix still marks the runtime as undocumented before blocking `apply`.
+- Confirm `~/.agents/skills` exists or can be created safely.
+- Confirm allowlisted skill bundles contain `SKILL.md`.
+- Confirm bundle-relative paths stay self-contained.
+
+## OpenCode Checks
+
+- Confirm `~/.agents/skills` exists or can be created safely.
+- Confirm allowlisted skill bundles contain `SKILL.md`.
+- Confirm bundle-relative paths stay self-contained.

@@ -40,8 +40,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--targets",
-        default="codex,vscode",
-        help="Target runtimes: codex, vscode, comma-separated combinations, or all.",
+        default="codex,copilot,claude,opencode",
+        help="Target runtimes: codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
     )
     parser.add_argument(
         "--create-missing-dirs",

@@ -3,49 +3,40 @@ rows:
   - target: codex
     resource_family: skills
     support_level: Documented
-    home_path: ~/.codex/skills/<skill>/
+    home_path: ~/.agents/skills/<skill>/
     direct_copy_possible: true
     translation_required: false
     include_in_v1: true
     evidence:
       - https://developers.openai.com/codex/skills
     notes: Direct-copy bundles with SKILL.md, references, scripts, assets, and agents/openai.yaml.
-  - target: vscode
+  - target: copilot
     resource_family: skills
     support_level: Documented
-    home_path: ~/.copilot/skills/<skill>/
+    home_path: ~/.agents/skills/<skill>/
     direct_copy_possible: true
     translation_required: false
     include_in_v1: true
     evidence:
       - https://code.visualstudio.com/docs/copilot/customization/agent-skills
-    notes: Prefer ~/.copilot/skills as the canonical VS Code target.
-  - target: vscode
-    resource_family: custom_agents
-    support_level: Documented
-    home_path: ~/.copilot/agents/*.agent.md
-    direct_copy_possible: true
-    translation_required: false
-    include_in_v1: false
-    evidence:
-      - https://code.visualstudio.com/docs/copilot/customization/custom-agents
-    notes: Direct copy is possible, but keep agents out of the current skills-only v1 default.
-  - target: vscode
-    resource_family: instructions
-    support_level: Documented
-    home_path: ~/.copilot/instructions/**/*.instructions.md
-    direct_copy_possible: true
-    translation_required: false
-    include_in_v1: false
-    evidence:
-      - https://code.visualstudio.com/docs/copilot/customization/custom-instructions
-    notes: Keep always-on instruction sync out of the current skills-only v1 default.
-  - target: antigravity
+    notes: GitHub Copilot supports Agent Skills standard via ~/.agents/skills/.
+  - target: claude
     resource_family: skills
-    support_level: User-provided / To verify
-    home_path: ~/.gemini/antigravity/skills/<skill>/
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
     direct_copy_possible: true
     translation_required: false
-    include_in_v1: false
-    evidence: []
-    notes: User-provided home path exists; keep apply experimental until runtime semantics are documented.
+    include_in_v1: true
+    evidence:
+      - https://docs.anthropic.com/en/docs/claude-code/skills
+    notes: Claude Code supports Agent Skills standard via ~/.agents/skills/ (compatibility path).
+  - target: opencode
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://opencode.ai/docs/skills
+    notes: OpenCode supports Agent Skills standard via ~/.agents/skills/.

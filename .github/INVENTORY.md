@@ -67,7 +67,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-copilot-instructions-creator/SKILL.md`
 - `.github/skills/internal-ddd/SKILL.md`
 - `.github/skills/internal-debugging/SKILL.md`
-- `.github/skills/internal-idea-define-advisor/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-executing-plans/SKILL.md`
@@ -85,6 +84,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-high-level-review/SKILL.md`
+- `.github/skills/internal-idea-define-advisor/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-kubernetes/SKILL.md`
 - `.github/skills/internal-lesson-codification/SKILL.md`

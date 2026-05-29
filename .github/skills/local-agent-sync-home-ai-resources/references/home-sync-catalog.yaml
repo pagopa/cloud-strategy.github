@@ -9,8 +9,9 @@ resources:
     source_path: .github/skills/local-agent-sync-home-ai-resources
     include_targets:
       - codex
-      - vscode
-      - antigravity
+      - copilot
+      - claude
+      - opencode
     target_support: See runtime support matrix
     notes: Self-contained home-sync owner bundle with scripts, references, and metadata.
   - resource_id: antigravity-api-design-principles
@@ -18,8 +19,9 @@ resources:
     source_path: .github/skills/antigravity-api-design-principles
     include_targets:
       - codex
-      - vscode
-      - antigravity
+      - copilot
+      - claude
+      - opencode
     target_support: See runtime support matrix
     notes: Portable reference skill with direct-copy bundle shape.
   - resource_id: awesome-copilot-agentic-eval
@@ -27,8 +29,9 @@ resources:
     source_path: .github/skills/awesome-copilot-agentic-eval
     include_targets:
       - codex
-      - vscode
-      - antigravity
+      - copilot
+      - claude
+      - opencode
     target_support: See runtime support matrix
     notes: Portable evaluation workflow skill with repository-contained references.
   - resource_id: openai-skill-creator
@@ -36,7 +39,8 @@ resources:
     source_path: .github/skills/openai-skill-creator
     include_targets:
       - codex
-      - vscode
-      - antigravity
+      - copilot
+      - claude
+      - opencode
     target_support: See runtime support matrix
     notes: Portable authoring skill that already ships deterministic helper scripts.
