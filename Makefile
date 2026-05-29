@@ -11,10 +11,10 @@ CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
+	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation graphify-update test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -45,6 +45,9 @@ catalog-fast-check: scripts-bootstrap
 
 github-catalog-validation: python-version-check
 	@bash ./github_catalog_validation.sh
+
+graphify-update:
+	@$(SCRIPTS_RUNNER) graphify_update --root .
 
 test: scripts-bootstrap
 	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q

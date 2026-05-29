@@ -10,6 +10,7 @@ import audit_copilot_catalog
 import build_inventory
 import check_catalog_consistency
 import detect_token_risks
+import graphify_update
 import github_catalog_validation
 import sync_copilot_catalog
 import validate_internal_skills
@@ -123,6 +124,7 @@ def test_github_catalog_validation_main_runs_required_targets_then_token_risks(
             root=str(tmp_path),
             skip_token_risks=False,
             token_risks_only=False,
+            graphify=False,
         ),
     )
     monkeypatch.setattr(github_catalog_validation.subprocess, "run", fake_run)
@@ -163,6 +165,7 @@ def test_github_catalog_validation_main_honors_token_risks_only(
             root=str(tmp_path),
             skip_token_risks=False,
             token_risks_only=True,
+            graphify=False,
         ),
     )
     monkeypatch.setattr(github_catalog_validation.subprocess, "run", fake_run)
@@ -171,6 +174,153 @@ def test_github_catalog_validation_main_honors_token_risks_only(
 
     assert exit_code == 0
     assert called_targets == ["token-risks"]
+
+
+def test_github_catalog_validation_main_runs_only_graphify_target(
+    monkeypatch, tmp_path: Path
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    called_targets: list[str] = []
+
+    def fake_run(command: list[str], cwd: Path, check: bool) -> SimpleNamespace:
+        assert check is False
+        assert Path(cwd) == tmp_path
+        called_targets.append(command[1])
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(
+        github_catalog_validation,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            skip_token_risks=False,
+            token_risks_only=False,
+            graphify=True,
+        ),
+    )
+    monkeypatch.setattr(github_catalog_validation.subprocess, "run", fake_run)
+
+    exit_code = github_catalog_validation.main()
+
+    assert exit_code == 0
+    assert called_targets == ["graphify-update"]
+
+
+def test_graphify_update_main_stages_only_allowlisted_files_and_runs_graphify(
+    monkeypatch, tmp_path: Path
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / "INTERNAL_CONTRACT.md", "# Contract\n")
+    write_file(tmp_path / "LESSONS_LEARNED.md", "# Lessons\n")
+    write_file(tmp_path / "Makefile", "help:\n\t@true\n")
+    write_file(tmp_path / ".pre-commit-config.yaml", "repos: []\n")
+    write_file(tmp_path / "docs/01-local-architecture.md", "# Architecture\n")
+    write_file(tmp_path / ".github/skills/internal-demo/SKILL.md", "# Demo\n")
+    write_file(tmp_path / "tests/test_out_of_scope.py", "def test_noop():\n    assert True\n")
+    write_file(tmp_path / "notes.txt", "ignore me\n")
+
+    git_output = "\n".join(
+        [
+            "AGENTS.md",
+            "INTERNAL_CONTRACT.md",
+            "LESSONS_LEARNED.md",
+            "Makefile",
+            ".pre-commit-config.yaml",
+            "docs/01-local-architecture.md",
+            ".github/skills/internal-demo/SKILL.md",
+            "tests/test_out_of_scope.py",
+            "notes.txt",
+        ]
+    )
+    called_commands: list[tuple[Path, list[str]]] = []
+
+    def fake_run(command: list[str], cwd: Path, check: bool, text: bool = False, capture_output: bool = False):
+        assert check is False
+        working_directory = Path(cwd)
+        called_commands.append((working_directory, command))
+
+        if command[:4] == ["git", "ls-files", "--cached", "--others"]:
+            assert working_directory == tmp_path
+            assert text is True
+            assert capture_output is True
+            return SimpleNamespace(returncode=0, stdout=git_output, stderr="")
+
+        if command == ["git", "init", "--quiet"]:
+            assert working_directory == tmp_path / "tmp/graphify"
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        if command == ["git", "add", "--all"]:
+            assert working_directory == tmp_path / "tmp/graphify"
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        if command == ["graphify", "update", "tmp/graphify"]:
+            assert working_directory == tmp_path
+            graph_path = tmp_path / "tmp/graphify/graphify-out/graph.json"
+            graph_path.parent.mkdir(parents=True, exist_ok=True)
+            graph_path.write_text("{}\n", encoding="utf-8")
+            root_manifest = tmp_path / "graphify-out/manifest.json"
+            root_manifest.parent.mkdir(parents=True, exist_ok=True)
+            root_manifest.write_text("{}\n", encoding="utf-8")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        raise AssertionError(f"Unexpected command: {command}")
+
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(root=str(tmp_path)),
+    )
+    monkeypatch.setattr(graphify_update.shutil, "which", lambda command: "/usr/local/bin/graphify" if command == "graphify" else None)
+    monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
+
+    exit_code = graphify_update.main()
+
+    assert exit_code == 0
+    assert called_commands == [
+        (tmp_path, ["git", "ls-files", "--cached", "--others", "--exclude-standard"]),
+        (tmp_path / "tmp/graphify", ["git", "init", "--quiet"]),
+        (tmp_path / "tmp/graphify", ["git", "add", "--all"]),
+        (tmp_path, ["graphify", "update", "tmp/graphify"]),
+    ]
+    assert (tmp_path / "tmp/graphify/AGENTS.md").exists()
+    assert (tmp_path / "tmp/graphify/INTERNAL_CONTRACT.md").exists()
+    assert (tmp_path / "tmp/graphify/LESSONS_LEARNED.md").exists()
+    assert (tmp_path / "tmp/graphify/Makefile").exists()
+    assert (tmp_path / "tmp/graphify/.pre-commit-config.yaml").exists()
+    assert (tmp_path / "tmp/graphify/docs/01-local-architecture.md").exists()
+    assert (tmp_path / "tmp/graphify/.github/skills/internal-demo/SKILL.md").exists()
+    assert not (tmp_path / "tmp/graphify/tests/test_out_of_scope.py").exists()
+    assert not (tmp_path / "tmp/graphify/notes.txt").exists()
+    assert (tmp_path / "tmp/graphify/graphify-out/graph.json").exists()
+    assert not (tmp_path / "graphify-out").exists()
+
+
+def test_graphify_update_main_fails_fast_when_graphify_is_missing(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    called_commands: list[list[str]] = []
+
+    def fake_run(command: list[str], cwd: Path, check: bool, text: bool = False, capture_output: bool = False):
+        del cwd, check, text, capture_output
+        called_commands.append(command)
+        return SimpleNamespace(returncode=0, stdout="AGENTS.md\n", stderr="")
+
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(root=str(tmp_path)),
+    )
+    monkeypatch.setattr(graphify_update.shutil, "which", lambda command: None)
+    monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
+
+    exit_code = graphify_update.main()
+
+    assert exit_code == 1
+    assert called_commands == [["git", "ls-files", "--cached", "--others", "--exclude-standard"]]
+    assert "Missing required command: graphify" in capsys.readouterr().out
 
 
 def test_build_inventory_main_check_detects_inventory_drift(

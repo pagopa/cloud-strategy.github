@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Graphify"
+  short_description: "Use the local Graphify knowledge graph"
+  default_prompt: "Use $internal-graphify to refresh or consult the local repository graph before answering a structure or impact question."
