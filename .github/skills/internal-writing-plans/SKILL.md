@@ -155,6 +155,7 @@ must stay outside the execution loop.
 - `Blocker e stop conditions`
 - `Formato report finale`
 - When external sources are required, pin each one with an exact URL plus commit, tag, digest, or an explicit fallback rule before execution.
+- When the contract contains code snippets, regexes, path constructions, or naming conventions, add a `Fragile patterns` or `Risky assumptions` sub-section that flags categories which look deterministic but break with compound file extensions, encoding edge cases, or repository-specific naming. Examples: `Path.stem` on files with multiple extensions (e.g. `.agent.md`), `Path.suffix` on dot-prefixed names, regexes that assume single-line frontmatter, shell globs that skip hidden files, and string interpolation that assumes no dashes or dots in identifiers. The executor must validate every such pattern against real files, not copy it uncritically.
 
 ### Executable numbered files
 
