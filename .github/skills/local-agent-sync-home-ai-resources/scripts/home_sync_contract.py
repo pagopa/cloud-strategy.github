@@ -66,6 +66,14 @@ def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
     catalog_path = resolve_skill_reference(source_root, HOME_SYNC_CATALOG_PATH)
     payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8")) or {}
     resources = payload.get("resources", [])
+    defaults = payload.get("defaults", {})
+    include_local = bool(defaults.get("include_local_skills", False))
+    filtered = []
+    for resource in resources:
+        rid = resource.get("resource_id", "")
+        if not include_local and rid.startswith("local-"):
+            continue
+        filtered.append(resource)
     return [
         CatalogResource(
             resource_id=resource["resource_id"],
@@ -75,7 +83,7 @@ def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
             target_support=resource.get("target_support", "Unknown / To verify"),
             notes=resource.get("notes", ""),
         )
-        for resource in resources
+        for resource in filtered
     ]
 
 
