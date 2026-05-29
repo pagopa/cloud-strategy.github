@@ -14,21 +14,25 @@ plan execution. The goal is to recover from evidence, not memory.
 1. Read `01-change-summary.md` first when present, then
    `02-source-item-ledger.md`, and recover the intended folder purpose, `Uso
    consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, `Budget
-   lettura`, and source-item coverage.
+  lettura`, source-item coverage, and whether `04-implementation-contract.md`
+  should exist.
 2. Run the shortest safe evidence pass before reading broadly: target existence, riskiest claim, and nearest validator or explicit gap.
 3. Use `rg --no-ignore` or equivalent ignored-file-aware search for retained artifacts under `tmp/`.
 4. List every `done-*` file in the retained plan folder.
-5. List every remaining numbered plan file and ignore `questions.md` as an
-   executable file.
+5. List every remaining executable numbered plan file, ignore `questions.md` as an
+  executable file, and treat `04-implementation-contract.md` as a support/control
+  file.
 6. Check whether each `done-*` file preserves the completed item and evidence,
   or points to an evidence envelope.
 7. Check whether the source-item ledger exists and whether every row has a
    credible status, evidence, and route.
-8. Read `questions.md` only for accepted decisions that affect execution.
-9. Check `git status` and `git diff` for uncommitted evidence of completed work.
-10. Re-run the validators declared by the plan, or name the closest available
+8. Read `04-implementation-contract.md` when present or required and compare it
+  with touched files, validators, blockers, and any external pins or fallback.
+9. Read `questions.md` only for accepted decisions that affect execution.
+10. Check `git status` and `git diff` for uncommitted evidence of completed work.
+11. Re-run the validators declared by the plan, or name the closest available
    validator and the gap.
-11. Produce a status report before editing canonical files.
+12. Produce a status report before editing canonical files.
 
 ## Status Report Template
 
@@ -51,6 +55,7 @@ Next action: <lowest-numbered safe step>
 - If `01-change-summary.md` or `02-source-item-ledger.md` is missing or stale
   enough that file roles and source coverage cannot be inferred safely, stop and
   reopen the plan-handoff gap before execution resumes.
+- If `04-implementation-contract.md` is required but missing or too weak to recover exact sources, target files, validators, blockers, or required external pins, stop and reopen the plan-handoff gap before execution resumes.
 - If `Evidence pass iniziale`, `Budget lettura`, or source-item coverage is
   missing, reconstruct the minimum pass from reachable evidence before broad
   reading, or mark the resume state `UNVERIFIABLE`.

@@ -347,6 +347,9 @@ def test_plan_review_gate_supports_lower_context_executors() -> None:
             "smaller or lower-context executor",
             "Short",
             "English glosses near critical decisions",
+            "Implementation contract",
+            "Implementation contract: not applicable",
+            "exact pin or explicit fallback",
         ),
     )
 
@@ -508,6 +511,8 @@ def test_completion_report_requires_evidence_envelope() -> None:
             "late-stage packaging artifacts",
             "not after every intermediate patch",
             "item-level evidence",
+            "04-implementation-contract.md",
+            "required external pin",
             "mark the item `UNVERIFIABLE` instead of",
             "claiming `SHIPPED`",
         ),
@@ -520,9 +525,11 @@ def test_resume_protocol_reference_exists() -> None:
         (
             "Verify-first Sequence",
             "`01-change-summary.md`",
+            "`04-implementation-contract.md`",
             "Evidence pass iniziale",
             "Budget lettura",
             "rg --no-ignore",
+            "support/control",
             "`done-*`",
             "`git diff`",
             "validators",
@@ -548,10 +555,12 @@ def test_plan_handoff_requires_summary_control_file() -> None:
         ".github/skills/internal-executing-plans/references/plan-handoff.md",
         (
             "`01-change-summary.md`",
+            "`04-implementation-contract.md`",
             "`Uso consigliato`",
             "`Mappa file e ruolo`",
             "`Evidence pass iniziale`",
             "`Budget lettura`",
+            "`questions.md`",
             "summary and ledger control files",
             "matching `done-*`\n  markers",
             "Observable acceptance for each executable action",
@@ -580,6 +589,8 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
         "evidence envelope with item, status, evidence, and route"
         in executing_plans_text
     )
+    assert "04-implementation-contract.md" in executing_plans_text
+    assert "standalone checklist" in executing_plans_text
     assert "late-stage evidence packaging" in executing_plans_text
     assert "not after every intermediate patch" in executing_plans_text
     assert "Source item or source `done-*` file" not in executing_plans_text

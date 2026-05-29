@@ -153,6 +153,7 @@ transition, or edit. Rich prompts, concrete tasks, mechanical tasks, retained-pl
 | define state                   |
 | - smallest evidence pass       |
 | - grill-me Gate 0              |
+| - optional pre-action advisory |
 | - optional brainstorming       |
 | - assumptions surfaced         |
 +-------------------------------+

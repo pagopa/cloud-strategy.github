@@ -16,7 +16,9 @@ Decision Brief from planning. It defines the minimum input contract before the
   rationale, validation path, and decision request.
 - `02-source-item-ledger.md` with `Uso consigliato`, `Mappa file e ruolo`,
   `Evidence pass iniziale`, `Budget lettura`, and source-item coverage.
+- `04-implementation-contract.md` for non-trivial or lower-context retained plans, or an explicit `Implementation contract: not applicable` statement when the local contract allows it.
 - Numbered executable plan files after the summary and ledger control files.
+- `questions.md` with accepted user-only decisions or `- none`.
 - A plan for closing the summary and ledger files through matching `done-*`
   markers when the folder completes.
 - Confirmed target state and anti-scope.
@@ -35,7 +37,7 @@ Decision Brief from planning. It defines the minimum input contract before the
 2. Run the declared `Evidence pass iniziale` before broad reading. Use `rg --no-ignore` for retained artifacts under `tmp/` when checking plan claims.
 3. Read `questions.md` for accepted decisions, then exclude it from the
    executable loop.
-4. Read numbered executable plan files in order after the summary and ledger.
+4. Read `04-implementation-contract.md` after the summary and ledger when present or required, then read numbered executable plan files in order.
 5. Check whether a Decision Brief exists in chat, a prompt, or a retained plan
    artifact.
 6. If a required input is missing, inspect repository evidence before asking.
@@ -48,6 +50,7 @@ Decision Brief from planning. It defines the minimum input contract before the
 - `01-change-summary.md` is missing or overloaded with control details.
 - `02-source-item-ledger.md`, `Uso consigliato`, or `Mappa file e ruolo` is missing from a non-trivial retained plan.
 - `Evidence pass iniziale`, `Budget lettura`, or source-item coverage is missing from a non-trivial retained plan.
+- `04-implementation-contract.md` is missing, stale, or too weak to recover exact sources, target files, validators, blockers, or required external pins for a non-trivial or lower-context retained plan.
 - Owner is missing or the active owner no longer fits.
 - Validation path is absent and no closest check exists.
 - A promotion-gated contract would be violated.

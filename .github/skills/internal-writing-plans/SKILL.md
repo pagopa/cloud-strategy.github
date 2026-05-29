@@ -50,6 +50,7 @@ must stay outside the execution loop.
 - Start every retained plan with `01-change-summary.md`. This file is only a short summary of the modifications the plan proposes, the problem they solve, and why that direction is worth approval.
 - Keep `01-change-summary.md` concise enough to review quickly. Do not put the file-role map, reading budget, full execution checklist, long rationale, unresolved questions, or copied repository context in it.
 - For non-trivial retained plans, create `02-source-item-ledger.md` immediately after the summary. It is the control and traceability file for the folder.
+- Use this baseline for every retained plan: `01-change-summary.md`, `02-source-item-ledger.md`, the first executable numbered file, `04-implementation-contract.md`, and `questions.md`.
 - `02-source-item-ledger.md` must declare `clarification required`, `clarification satisfied`, or `clarification not applicable` before the plan can move to execution.
 - Use `clarification required` when unresolved user-only decisions can change scope, owner, target state, validation, rollout, or anti-scope. Stop before writing executable plan content until those decisions are answered or the user explicitly accepts the recommended defaults.
 - Use `clarification satisfied` only when the relevant decisions were answered or explicitly accepted in the active loop, the user gave a closure or proceed signal, the answers still match the current plan scope, and no user-only decision needs another loop.
@@ -66,11 +67,16 @@ must stay outside the execution loop.
   explicit validation gap.
 - The ledger is the coverage lock. Do not retire, delete, or replace a source strategic artifact until every source item has a ledger row and a destination or explicit non-action.
 - After the ledger file, use `03-execution.md` when one executable macro-category is enough.
-- When the work spans more than one executable macro-category, continue with `03-...`, `04-...`, and later numbered files by category, for example `03-implementation.md`, `04-validation.md`, and `05-rollout.md`.
+- Every retained plan must include `04-implementation-contract.md`.
+- Use `Implementation contract: not applicable` only when the plan does not create or modify skills, agents, prompts, instructions, workflows, imported assets, linked files, validators, inventory, or shared runtime behavior.
+- When `04-implementation-contract.md` is applicable, name the exact sources, any external pin or explicit fallback, exact target files, minimum template or draft shape when needed, patch intent for existing files, validation commands in order, blockers, and final report format.
+- Write `04-implementation-contract.md` so a smaller or lower-context executor can apply the plan without rediscovering hidden assumptions.
+- When the work spans more than one executable macro-category, keep `03-...` as the first executable numbered file, reserve `04-implementation-contract.md` as the support/control contract, and continue with `05-...` and later numbered files by category.
 - Do not keep one monolithic plan file when the work spans multiple macro-categories.
 - For executable work, make dependency order, acceptance criteria, and verification checkpoints explicit enough that a later executor can prove each item before moving it to `done-*`.
 - Acceptance criteria must disallow clarification-only completion for executable verbs. If a step says to compress, rewrite, refactor, harden, align, or simplify, the plan must say what observable change proves it.
 - For each executable step, name the acceptance condition, verification path, and target files or owner when known. Keep steps small enough to verify without mixing unrelated owners or cleanup.
+- Create `questions.md` for every retained plan. Use `- none` when no user-only blocker or decision remains.
 - Keep unresolved questions, doubts, and user decisions in `questions.md`.
 - `questions.md` is not an execution-plan file and must stay outside the plan-and-apply loop.
 - Use `done-*`, `evidence-envelope.md`, and `completion-report.md` only as execution-state artifacts after `apply-plan`; do not use them as authoring files.
@@ -84,7 +90,8 @@ must stay outside the execution loop.
 - Treat `02-source-item-ledger.md` as the traceability owner for strategic-to-operational conversions.
 - In `02-source-item-ledger.md`, include `Uso consigliato` with the next expected treatment, such as `review`, `apply-plan`, `resume`, or `rewrite`.
 - In `02-source-item-ledger.md`, include `Mappa file e ruolo` so the reader can classify each file as summary, ledger, execution, validation, rollout, questions, or status artifact without guessing.
-- Treat `questions.md` as the only place for unresolved questions and user decisions.
+- Treat `04-implementation-contract.md` as the support/control file for exact sources, target files, template hints, patch intent, validation order, blockers, and final report packaging.
+- Treat `questions.md` as the only place for unresolved questions and user decisions, even when it only contains `- none`.
 - Treat `done-*`, `evidence-envelope.md`, and `completion-report.md` as status artifacts that describe applied work, not pending plan intent.
 - For legacy folders, read `01-riassunto-direzione-e-decisione.md`, `02-matrice-operativa.md`, `02-esecuzione.md`, and `dubbi-e-domande.md` only as backward-compatible inputs. New or rewritten plans must use English file names.
 - If the summary file, ledger, or file-role map is missing from a non-trivial plan, the retained plan is not executor-friendly yet and should be revised before `apply-plan`.
@@ -133,14 +140,31 @@ must stay outside the execution loop.
 - `Source item ledger`
 - The ledger table must preserve every requested or source item with stable ids before executable files are finalized.
 
+### Implementation contract file
+
+- `04-implementation-contract.md` must exist in every retained plan.
+- Use `Implementation contract: not applicable` only when the plan does not create or modify skills, agents, prompts, instructions, workflows, imported assets, linked files, validators, inventory, or shared runtime behavior.
+- When applicable, `04-implementation-contract.md` must include these headings:
+- `Scopo`
+- `Sorgenti esatte`
+- `Fonti esterne`
+- `File target esatti`
+- `Decisioni architetturali gia prese`
+- `Patch intent by file`
+- `Validation commands`
+- `Blocker e stop conditions`
+- `Formato report finale`
+- When external sources are required, pin each one with an exact URL plus commit, tag, digest, or an explicit fallback rule before execution.
+
 ### Executable numbered files
 
-- Each executable numbered file after the ledger file must include these headings:
+- Each executable numbered file in the active execution track must include these headings:
 - `Obiettivo`
 - `Logica scelta`
 - `Assunzioni chiave`
 - `Passi eseguibili`
 - `Validazione`
+- Reserve `04-implementation-contract.md` as the implementation contract support file. It does not use the executable numbered-file shape.
 - Treat `01-change-summary.md` and `02-source-item-ledger.md` as numbered control files, not executable task lists. During `apply-plan`, use them for classification, coverage, and evidence, then close them through the same `done-*` evidence loop when the folder completes.
 - Keep each section to 5-7 bullets when practical.
 - Keep bullets to 1-2 lines when practical.
@@ -161,9 +185,9 @@ must stay outside the execution loop.
 5. Write `02-source-item-ledger.md` next with file roles, evidence pass, reading budget, gate status, critical challenge status, source items, and observable acceptance.
 6. If the input is an existing strategic, review-only, or monolithic plan, lock source-item coverage in the ledger before defining later execution phases.
 7. Define the executable macro-categories next and choose the smallest post-ledger file shape that fits the work.
-8. Use `03-execution.md` when one executable macro-category is enough, or create one numbered plan file per category when more than one macro-category exists.
+8. Use `03-execution.md` when one executable macro-category is enough, reserve `04-implementation-contract.md` for the support contract, and continue with `05-...` style numbered plan files when more executable macro-categories exist.
 9. Give each numbered file the shape above and keep every section compact.
-10. Put open questions and decision requests only in `questions.md`.
+10. Create `questions.md`, then put open questions and decision requests only there or write `- none` when nothing remains.
 11. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
 12. Run the scope challenge and plan review gate when the retained plan is non-trivial or will be handed to `internal-executing-plans`.
 
@@ -179,12 +203,13 @@ must stay outside the execution loop.
 - The ledger declares `Uso consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, and `Budget lettura`.
 - The ledger's `Budget lettura` confines future readers to this plan and exact named evidence; other retained plan folders are excluded unless specifically indicated.
 - The ledger includes every source/requested item with item id, observable acceptance, evidence class, status, and route.
-- `03-execution.md` is used when one executable macro-category is enough; `03-...`, `04-...`, `05-...` style plan files exist when more than one macro-category exists.
+- `03-execution.md` is used when one executable macro-category is enough; `03-...`, `05-...`, and later numbered plan files exist when more than one executable macro-category exists because `04-implementation-contract.md` stays reserved as the support contract.
+- `04-implementation-contract.md` exists for every retained plan and either contains the support contract or exactly `Implementation contract: not applicable`.
 - Strategic-to-operational conversions preserve source-item coverage through `02-source-item-ledger.md` before the source artifact is retired.
 - The source strategic artifact is not deleted, replaced, or compressed beyond recognition until the ledger maps each source item to a destination or explicit non-action.
 - Plan content is in Italian unless the user asked otherwise.
 - The numbered files follow the local shape contract with explicit headings and short bullets.
-- `questions.md` exists when needed and remains separate from executable plan files.
+- `questions.md` exists for every retained plan and remains separate from executable plan files.
 - Non-trivial retained plans can answer the scope challenge fields: target, anti-scope, owner, validator, and stop conditions.
 - The plan does not rely on imported `superpowers-*` skills as the policy owner; any repo-local drift fix stays narrow and subordinate to this wrapper.
 
@@ -193,11 +218,13 @@ must stay outside the execution loop.
 - Creating a retained plan artifact for a clear, local, quick task that should stay in chat.
 - Turning `01-change-summary.md` into a long control file instead of a concise summary of proposed modifications.
 - Omitting `02-source-item-ledger.md`, causing the executor to lose the original item list after active files are emptied or deleted.
+- Omitting `04-implementation-contract.md` and forcing the executor to infer exact targets, validators, or blockers from chat or broad repo reading.
 - Omitting the initial evidence pass or reading budget, causing the next agent to read the whole folder before knowing the lane.
 - Compressing or deleting a strategic source plan before extracting the source-item ledger.
 - Reading sibling retained plans to "understand context" when the user only passed one plan folder.
 - Writing the whole plan in one Markdown file.
 - Writing long narrative paragraphs or duplicating canonical context instead of keeping the plan scannable.
+- Treating `questions.md` as optional instead of creating it and writing `- none` when nothing remains.
 - Mixing executable checklist items with open questions.
 - Putting the plan under `docs/` instead of `tmp/superpowers/`.
 - Using Italian file names even though only plan content should default to Italian.
