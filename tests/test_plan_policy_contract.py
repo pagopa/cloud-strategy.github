@@ -309,13 +309,19 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
 
     assert "## Required Questions" in scope_challenge_text
     assert "`coverage`: How does `02-source-item-ledger.md`" in scope_challenge_text
-    assert "`implementation contract`: Does `04-implementation-contract.md`" in scope_challenge_text
+    assert (
+        "`implementation contract`: Does `04-implementation-contract.md`"
+        in scope_challenge_text
+    )
     assert "`02-source-item-ledger.md` or an equivalently" in scope_challenge_text
     assert (
         "Coverage: <ledger coverage, explicit not-applicable, or blocker>"
         in scope_challenge_text
     )
-    assert "Implementation contract: <complete, not applicable, missing, or blocker>" in scope_challenge_text
+    assert (
+        "Implementation contract: <complete, not applicable, missing, or blocker>"
+        in scope_challenge_text
+    )
     assert "`observable acceptance`: Which diff" in scope_challenge_text
     assert "Observable acceptance: <diff, file, validator" in scope_challenge_text
     assert (
