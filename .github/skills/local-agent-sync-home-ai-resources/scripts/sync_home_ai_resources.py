@@ -177,13 +177,52 @@ def emit_output(
     targets = ", ".join(payload.get("selected_targets", [])) or "none"
     log_info(f"Mode: {mode}")
     log_info(f"Selected targets: {targets}")
+
+    copied = payload.get("copied", [])
+    skipped = payload.get("skipped", [])
+    blocked = payload.get("blocked", [])
+    conflicts = payload.get("conflicts", [])
+    stale = [
+        op.get("path")
+        for op in payload.get("operations", [])
+        if isinstance(op, dict) and op.get("action") == "stale-managed"
+    ]
+    source_resources = payload.get("source_resources_considered")
+
+    log_info(
+        f"Resources: {len(copied)} to copy, {len(skipped)} skipped, "
+        f"{len(blocked)} blocked, {len(conflicts)} conflicts"
+        + (f", {len(stale)} stale-managed" if stale else "")
+        + (f" ({source_resources} source resources considered)" if isinstance(source_resources, int) else "")
+    )
+
+    blocked_codes = payload.get("blocked_codes", [])
+    if blocked_codes:
+        log_error(f"Blocked codes: {', '.join(blocked_codes)}")
+
     for path in payload.get("missing_dirs", []):
         log_info(f"Missing directory: {path}")
-    for code in payload.get("blocked_codes", []):
-        log_error(f"Blocked by: {code}")
+
+    residual_drift = payload.get("residual_drift", [])
+    if residual_drift:
+        log_info(f"Residual drift: {len(residual_drift)} path(s)")
+
+    validation = payload.get("validation")
+    if isinstance(validation, str):
+        log_info(f"Validation: {validation}")
+
+    next_step = payload.get("next_step")
+    if isinstance(next_step, str) and next_step:
+        log_info(f"Next step: {next_step}")
+
     state_path = payload.get("state_path")
     if isinstance(state_path, str):
         log_info(f"State file: {state_path}")
+
+    manifest_path = payload.get("manifest_path")
+    if isinstance(manifest_path, str):
+        log_info(f"Manifest: {manifest_path}")
+
     if failure_message:
         log_error(failure_message)
 
