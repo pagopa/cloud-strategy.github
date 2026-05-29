@@ -954,3 +954,33 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
+- resource_id: internal-gateway-operational-flow
+  source_family: agents
+  source_path: .github/agents/internal-gateway-operational-flow.agent.md
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Gateway agent for staged workflow orchestration.
+- resource_id: internal-gateway-critical-master
+  source_family: agents
+  source_path: .github/agents/internal-gateway-critical-master.agent.md
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Gateway agent for critical challenge and pressure testing.
+- resource_id: internal-gateway-simple-task
+  source_family: agents
+  source_path: .github/agents/internal-gateway-simple-task.agent.md
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Gateway agent for simple fast-path tasks.

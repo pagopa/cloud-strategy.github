@@ -15,7 +15,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 
 ## When to use
 
-- Plan a local home-directory sync for supported AI runtime resources.
+- Plan a local home-directory sync for supported AI runtime resources, including skills and agents.
 - Audit drift between repository-managed resources and the local runtime copies under the user home directory.
 - Run readiness or doctor checks before touching runtime-owned directories.
 - Apply an already reviewed plan for supported direct-copy resource families.
@@ -25,7 +25,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Source-side catalog governance in this repository; use `local-sync-external-resources` instead.
 - Consumer-repository baseline sync; use `local-sync-global-copilot-configs-into-repo` instead.
 - Personal configuration merge, runtime adapter generation, or general dotfiles management.
-- Undocumented runtime families that would require format translation in v1.
+- Undocumented runtime families that would require format translation in v1 (except allowlisted agent translation for Claude, OpenCode, and Codex).
 
 ## Core Operating Contract
 
@@ -59,7 +59,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 
 - Read the runtime contract from `references/runtime-support-matrix.yaml` and the readable summary in `references/runtime-support-matrix.md`.
 - Read the source allowlist from `references/home-sync-catalog.yaml`.
-- Include only allowlisted `skills` in v1.
+- Include only allowlisted `skills` and `agents` in v1.
 - Copy managed resources instead of creating symlinks.
 - Preserve target-local content that is outside the manifest.
 - Record source hashes and managed target paths in the local manifest.

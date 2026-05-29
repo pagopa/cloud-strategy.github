@@ -16,9 +16,12 @@ from home_sync_contract import (
     load_home_sync_catalog,
     load_runtime_support_matrix,
     resolve_support_row,
+    runtime_agent_root,
     runtime_skill_root,
     state_root_for_home,
 )
+
+from agent_translation import target_extension, translate_agent_for_target
 
 MANIFEST_PATH = "manifest.json"
 LAST_PLAN_PATH = "last-plan.json"
@@ -186,13 +189,13 @@ def build_home_sync_plan(
         if not source_path.exists():
             add_resource_blockers(operations, home_root, resource, targets, "source-missing")
             continue
-        if not is_valid_skill_bundle(source_path):
-            add_resource_blockers(operations, home_root, resource, targets, "source-invalid-skill")
+        if not is_valid_resource(source_path, resource.source_family):
+            add_resource_blockers(operations, home_root, resource, targets, resource_block_code(resource.source_family))
             continue
 
         source_hash = hash_resource(source_path)
         for target in intersection_targets(resource, targets):
-            target_path = runtime_skill_root(home_root, target) / resource.resource_id
+            target_path = resource_target_path(home_root, resource, target)
             support_row = resolve_support_row(runtime_rows, target, resource.source_family)
             if support_row is None:
                 unsupported_families_by_target[target].add(resource.source_family)
@@ -300,13 +303,18 @@ def apply_home_sync_plan(
 
         managed_resource = desired_by_path[operation.path]
         source_path = plan.source_root / managed_resource.source_path
-        copy_resource(source_path, target_path)
+        if managed_resource.resource_family == "agents" and managed_resource.target != "copilot":
+            _apply_translated_agent(source_path, target_path, managed_resource.target)
+        else:
+            copy_resource(source_path, target_path)
         copied_paths.add(target_path.as_posix())
 
     for resource in plan.desired_resources:
         target_path = Path(resource.target_path)
         if not target_path.exists():
             raise RuntimeError(f"post-apply-verify-failed: {target_path} missing after copy")
+        if resource.resource_family == "agents" and resource.target != "copilot":
+            continue
         current_hash = hash_resource(target_path)
         if current_hash != resource.source_hash:
             raise RuntimeError(f"post-apply-verify-failed: {target_path} hash mismatch (expected {resource.source_hash}, got {current_hash})")
@@ -373,6 +381,10 @@ def run_doctor(
         add_doctor_target_check(checks, blocked_codes, target, target_root)
         support_row = resolve_support_row(runtime_rows, target, "skills")
         add_doctor_support_check(checks, blocked_codes, target, target_root, support_row, experimental_targets)
+        agent_root = runtime_agent_root(home_root, target)
+        agent_support_row = resolve_support_row(runtime_rows, target, "agents")
+        if agent_support_row is not None:
+            add_doctor_target_check(checks, blocked_codes, target, agent_root)
 
     for resource in catalog:
         source_path = source_root / resource.source_path
@@ -480,12 +492,13 @@ def add_resource_blockers(
     reason = {
         "source-missing": "Catalog entry points to a source path that does not exist.",
         "source-invalid-skill": "Source skill bundle is missing SKILL.md.",
+        "source-invalid-agent": "Source agent file is missing or not a .md file.",
     }[code]
     for target in intersection_targets(resource, targets):
         add_blocked_operation(
             operations,
             target,
-            runtime_skill_root(home_root, target) / resource.resource_id,
+            resource_target_path(home_root, resource, target),
             code,
             reason,
             resource,
@@ -724,6 +737,30 @@ def is_valid_skill_bundle(path: Path) -> bool:
     return path.is_dir() and (path / "SKILL.md").is_file()
 
 
+def is_valid_resource(path: Path, source_family: str) -> bool:
+    if source_family == "agents":
+        return path.is_file() and path.suffix == ".md"
+    return is_valid_skill_bundle(path)
+
+
+def resource_target_path(
+    home_root: Path,
+    resource: CatalogResource,
+    target: str,
+) -> Path:
+    if resource.source_family == "agents":
+        agent_root = runtime_agent_root(home_root, target)
+        ext = target_extension(target)
+        return agent_root / f"{resource.resource_id}{ext}"
+    return runtime_skill_root(home_root, target) / resource.resource_id
+
+
+def resource_block_code(source_family: str) -> str:
+    if source_family == "agents":
+        return "source-invalid-agent"
+    return "source-invalid-skill"
+
+
 def hash_resource(path: Path) -> str:
     if path.is_file():
         return sha256_bytes(path.read_bytes())
@@ -778,11 +815,26 @@ def support_action_for_mode(
     mode: str,
     experimental_targets: bool,
 ) -> tuple[str | None, str | None]:
-    if support_row.support_level == "Documented" and support_row.direct_copy_possible:
+    if support_row.support_level == "Documented" and (
+        support_row.direct_copy_possible or support_row.translation_required
+    ):
         return None, None
     if mode == "apply" and not experimental_targets:
         return "blocked", "docs-unverified"
     return "warning", "docs-unverified"
+
+
+def _apply_translated_agent(
+    source_path: Path,
+    target_path: Path,
+    target: str,
+) -> None:
+    config_path = source_path.parent / source_path.name.replace(".agent.md", ".agent-config.yaml")
+    if not config_path.exists():
+        config_path = None
+    translated = translate_agent_for_target(source_path, target, config_path)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(translated, encoding="utf-8")
 
 
 def write_snapshot(plan: HomeSyncPlan, relative_path: str) -> Path:

@@ -17,6 +17,12 @@ TARGET_SKILL_ROOTS = {
     "claude": Path(".agents/skills"),
     "opencode": Path(".agents/skills"),
 }
+TARGET_AGENT_ROOTS = {
+    "codex": Path(".codex/agents"),
+    "copilot": Path(".copilot/agents"),
+    "claude": Path(".claude/agents"),
+    "opencode": Path(".config/opencode/agents"),
+}
 
 
 @dataclass(frozen=True)
@@ -105,6 +111,15 @@ def state_root_for_home(home_root: Path) -> Path:
 
 def runtime_skill_root(home_root: Path, target: str) -> Path:
     return home_root / TARGET_SKILL_ROOTS[target]
+
+
+def runtime_agent_root(home_root: Path, target: str) -> Path:
+    return home_root / TARGET_AGENT_ROOTS[target]
+
+
+def load_agent_catalog(source_root: Path) -> list[CatalogResource]:
+    catalog = load_home_sync_catalog(source_root)
+    return [resource for resource in catalog if resource.source_family == "agents"]
 
 
 def resolve_support_row(
