@@ -53,7 +53,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Resolve skill roots as `~/.agents/skills` for all targets (scenario B: unification).
 - When multiple targets resolve to the same physical path, perform the copy operation only once (physical deduplication).
 - After apply, verify every copied resource by re-reading the target and comparing hashes.
-- Block reverse sync: source root must not be under home root.
+- Block reverse sync: source root must not be under the home sync state directory.
 
 ## Source And Materialization Policy
 
