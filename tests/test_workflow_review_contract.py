@@ -240,8 +240,8 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
             "Treat planning as `define`",
             "closing Gate 0 does not change the active phase",
             "legacy input spelling for `define-first`",
-            "do not waive Gate 0",
-            "minimal,\n  clear, and concise",
+            "non-waiver",
+            "mechanical-work",
             "Restart Gate 0 before continuing",
             "superpowers-brainstorming",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
@@ -283,7 +283,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "do not waive Gate 0",
+            "non-waiver",
             "Restart Gate 0 before continuing",
             "the loop closes only after a user closure signal",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",

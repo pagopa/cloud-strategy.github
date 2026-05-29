@@ -60,10 +60,6 @@ State security-specific gaps and route them through the closest existing owner.
 Support selection belongs in the gateway skills, not in wrapper skill-list
 sections.
 
-- Planning, review, and retained-plan application still enter `define` through
-  Gate 0 after the minimum evidence pass. Direct `execute` remains the only
-  automatic Gate 0 exception unless the user asks for `grill-me` or the lane
-  changes away from `execute`.
 - Planning, review, and retained-plan application always start in `define`.
 - Treat planning as `define` until the user closes the active `grill-me` loop.
 - For `define-first`, brainstorming, and clarify-first entrypoints, closing Gate
@@ -71,13 +67,12 @@ sections.
   but must wait for the user to explicitly request planning before producing
   plan output.
 - Wrapper projections should still run Gate 0 after the minimum evidence pass.
-- Keep the detailed Gate 0 closure, blocking, and realignment rules in
-  `gate-0-protocol.md`; wrappers, READMEs, and tests should reference that file
-  instead of restating the protocol.
+- Keep the detailed Gate 0 closure, blocking, non-waiver, mechanical-work,
+  phase-transition, and realignment rules in `gate-0-protocol.md`; wrappers,
+  READMEs, and tests should reference that file instead of restating the
+  protocol.
 - Treat `plan-only (clarify-first)` as a legacy input spelling for `define-first`,
   not as a separate phase.
-- Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, fully recoverable repository evidence, and pre-start signals do not waive Gate 0. For mechanical work covered by Gate 0, ask a minimal,
-  clear, and concise question set instead of skipping `grill-me`.
 - In wrapper projection terms, the loop closes only after a user closure signal.
 - Restart Gate 0 before continuing if request, context, target path, environment, tool output, dependency state, validation, or dirty worktree ownership changes.
 - `superpowers-brainstorming` is optional support inside `define` only when

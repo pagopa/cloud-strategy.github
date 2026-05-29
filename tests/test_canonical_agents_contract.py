@@ -257,7 +257,7 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "request-change realignment" in skill_text
     assert "Rich prompts, concrete tasks, mechanical tasks" in skill_text
     assert (
-        "The user answered or explicitly accepted defaults in the current Gate 0 loop"
+        "the user answered or explicitly accepted defaults in the current Gate 0 loop"
         in skill_text
     )
     assert "The agent must not close or skip the loop by itself" in skill_text
@@ -279,15 +279,14 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert_normalized_snippet(wrapper_text, "request, context, or environment change")
     assert "run Gate 0 after the minimum evidence pass" in wrapper_alignment_text
     assert "Gate 0 support for every non-`execute`" in wrapper_alignment_text
-    assert "do not waive Gate 0" in wrapper_alignment_text
+    assert "non-waiver" in wrapper_alignment_text
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
     assert "## Phase Transition Authorization" in gate_protocol_text
     assert "Closing Gate 0 changes the gate status only" in gate_protocol_text
     assert "A valid transition request must directly ask for planning" in gate_protocol_text
-    assert "minimum evidence pass, then" in workflow_maps_text
-    assert "phase\ntransition, or edit" in workflow_maps_text
+    assert "run the minimum evidence pass before Gate 0" in workflow_maps_text
+    assert "Do not restate the non-waiver or phase-transition details in maps." in workflow_maps_text
     assert "Gate 0" in workflow_maps_text
-    assert "do not waive Gate 0" in workflow_maps_text
 
 
 def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> None:
@@ -375,11 +374,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         in skill_text
     )
     assert "multiple credible paths" in skill_text
-    assert (
-        "future security lens name, not yet promoted (`not yet promoted`; "
-        "see the Future Security Lens rule in `references/wrapper-alignment.md`)"
-        in skill_text
-    )
+    assert "Future Security Lens rule in `references/wrapper-alignment.md`" in skill_text
     assert "`Uso consigliato`" in skill_text
     assert "`Mappa file e ruolo`" in skill_text
     assert "`Evidence pass iniziale`" in skill_text
@@ -429,6 +424,21 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     )
     assert "multiple credible paths" in skill_text
     assert "full-cycle" in operational_body
+
+
+def test_operational_flow_referenced_skills_stay_live_and_one_per_bullet() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    referenced_skills = referenced_skills_from_skill(skill_text)
+
+    assert referenced_skills
+    assert "internal-security-review" not in referenced_skills
+    assert all("," not in skill_id for skill_id in referenced_skills)
+    assert all(
+        Path(f".github/skills/{skill_id}/SKILL.md").is_file()
+        for skill_id in referenced_skills
+    )
 
 
 def test_operational_flow_readme_is_not_required_when_bundle_references_own_detail() -> (
@@ -660,7 +670,7 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
         "Planning, review, and retained-plan application always start"
         in wrapper_alignment_text
     )
-    assert "minimal,\n  clear, and concise" in wrapper_alignment_text
+    assert "mechanical-work" in wrapper_alignment_text
     assert "non-trivial retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text
     assert "provide numbered questions with a recommended answer" in operational_text

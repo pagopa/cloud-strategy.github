@@ -136,9 +136,7 @@ govern every non-`execute` entrypoint, see
 visible: run the minimum evidence pass before Gate 0, and keep downstream plan,
 review, and retained-plan application blocked until the user closes the active
 `grill-me` loop.
-
-Run the minimum evidence pass, then start Gate 0 inside `define` before downstream plan, review, retained-plan application, or phase
-transition, or edit. Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0.
+Do not restate the non-waiver or phase-transition details in maps.
 
 ## Define Work
 
