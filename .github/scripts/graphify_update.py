@@ -24,7 +24,8 @@ ALLOWED_FILES = frozenset(
         ".pre-commit-config.yaml",
     }
 )
-GRAPHIFY_STAGING_RELATIVE = Path("tmp/graphify")
+GRAPHIFY_WORKSPACE_RELATIVE = Path("tmp/.graphify")
+GRAPHIFY_STAGING_RELATIVE = GRAPHIFY_WORKSPACE_RELATIVE / "graphify"
 GRAPHIFY_OUTPUT_RELATIVE = GRAPHIFY_STAGING_RELATIVE / "graphify-out/graph.json"
 
 
@@ -156,14 +157,14 @@ def main() -> int:
     if exit_code != 0:
         return exit_code
 
-    log_info("Preparing Graphify corpus under tmp/graphify.")
+    log_info(f"Preparing Graphify corpus under {GRAPHIFY_STAGING_RELATIVE.as_posix()}.")
     staging_root = rebuild_staging_corpus(root, allowlisted_paths)
     log_info(f"Staged {len(allowlisted_paths)} repository files for Graphify.")
     log_info("Initializing a temporary Git index for the staged Graphify corpus.")
     exit_code = initialize_staging_git_repo(staging_root)
     if exit_code != 0:
         return exit_code
-    log_info("Running graphify update tmp/graphify")
+    log_info(f"Running graphify update {GRAPHIFY_STAGING_RELATIVE.as_posix()}")
     exit_code = run_graphify_update(root)
     cleanup_unexpected_root_output(root, existed_before=root_output_existed)
     return exit_code

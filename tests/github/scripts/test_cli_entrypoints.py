@@ -247,16 +247,16 @@ def test_graphify_update_main_stages_only_allowlisted_files_and_runs_graphify(
             return SimpleNamespace(returncode=0, stdout=git_output, stderr="")
 
         if command == ["git", "init", "--quiet"]:
-            assert working_directory == tmp_path / "tmp/graphify"
+            assert working_directory == tmp_path / "tmp/.graphify/graphify"
             return SimpleNamespace(returncode=0, stdout="", stderr="")
 
         if command == ["git", "add", "--all"]:
-            assert working_directory == tmp_path / "tmp/graphify"
+            assert working_directory == tmp_path / "tmp/.graphify/graphify"
             return SimpleNamespace(returncode=0, stdout="", stderr="")
 
-        if command == ["graphify", "update", "tmp/graphify"]:
+        if command == ["graphify", "update", "tmp/.graphify/graphify"]:
             assert working_directory == tmp_path
-            graph_path = tmp_path / "tmp/graphify/graphify-out/graph.json"
+            graph_path = tmp_path / "tmp/.graphify/graphify/graphify-out/graph.json"
             graph_path.parent.mkdir(parents=True, exist_ok=True)
             graph_path.write_text("{}\n", encoding="utf-8")
             root_manifest = tmp_path / "graphify-out/manifest.json"
@@ -279,20 +279,20 @@ def test_graphify_update_main_stages_only_allowlisted_files_and_runs_graphify(
     assert exit_code == 0
     assert called_commands == [
         (tmp_path, ["git", "ls-files", "--cached", "--others", "--exclude-standard"]),
-        (tmp_path / "tmp/graphify", ["git", "init", "--quiet"]),
-        (tmp_path / "tmp/graphify", ["git", "add", "--all"]),
-        (tmp_path, ["graphify", "update", "tmp/graphify"]),
+        (tmp_path / "tmp/.graphify/graphify", ["git", "init", "--quiet"]),
+        (tmp_path / "tmp/.graphify/graphify", ["git", "add", "--all"]),
+        (tmp_path, ["graphify", "update", "tmp/.graphify/graphify"]),
     ]
-    assert (tmp_path / "tmp/graphify/AGENTS.md").exists()
-    assert (tmp_path / "tmp/graphify/INTERNAL_CONTRACT.md").exists()
-    assert (tmp_path / "tmp/graphify/LESSONS_LEARNED.md").exists()
-    assert (tmp_path / "tmp/graphify/Makefile").exists()
-    assert (tmp_path / "tmp/graphify/.pre-commit-config.yaml").exists()
-    assert (tmp_path / "tmp/graphify/docs/01-local-architecture.md").exists()
-    assert (tmp_path / "tmp/graphify/.github/skills/internal-demo/SKILL.md").exists()
-    assert not (tmp_path / "tmp/graphify/tests/test_out_of_scope.py").exists()
-    assert not (tmp_path / "tmp/graphify/notes.txt").exists()
-    assert (tmp_path / "tmp/graphify/graphify-out/graph.json").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/AGENTS.md").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/INTERNAL_CONTRACT.md").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/LESSONS_LEARNED.md").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/Makefile").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/.pre-commit-config.yaml").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/docs/01-local-architecture.md").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/.github/skills/internal-demo/SKILL.md").exists()
+    assert not (tmp_path / "tmp/.graphify/graphify/tests/test_out_of_scope.py").exists()
+    assert not (tmp_path / "tmp/.graphify/graphify/notes.txt").exists()
+    assert (tmp_path / "tmp/.graphify/graphify/graphify-out/graph.json").exists()
     assert not (tmp_path / "graphify-out").exists()
 
 
