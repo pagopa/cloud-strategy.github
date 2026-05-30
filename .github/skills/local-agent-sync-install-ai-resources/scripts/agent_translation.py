@@ -163,9 +163,6 @@ def _translate_for_opencode(frontmatter: dict, body: str) -> str:
     if permission:
         opencode_fm["permission"] = permission
 
-    if frontmatter.get("disable-model-invocation"):
-        opencode_fm["hidden"] = True
-
     output = render_frontmatter_md(opencode_fm)
     output += body.rstrip() + "\n"
 
