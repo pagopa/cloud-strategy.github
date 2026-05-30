@@ -17,8 +17,8 @@ Use this reference when the staged `define`, `plan`, `execute`, `apply-plan`, `r
 
 | Mode | Owns | Does not own |
 | --- | --- | --- |
-| `define` | Initial brainstorming, user intent, success criteria, constraints, anti-scope, option exploration, Gate 0 closure, and Definition Briefs. | Implementation plans, retained-plan authoring, local edits, or proof of completion. |
-| `plan` | Ambiguity resolution after the definition is confirmed, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, open-ended brainstorming, or pure pressure testing. |
+| `define` | Initial brainstorming, user intent, success criteria, constraints, anti-scope, option exploration, Gate 0 closure, Definition Briefs, and Pre-Plan Critical Pass. | Implementation plans, retained-plan authoring, local edits, or proof of completion. |
+| `plan` | Ambiguity resolution after the definition is confirmed with `pre-plan critical: confident`, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, open-ended brainstorming, or pure pressure testing. |
 | `execute` | Clear local implementation, deterministic realignment, nearby documentation/test updates, and concrete validation. | Strategic tradeoffs, unresolved ownership, non-trivial rollout decisions, review-first asks, or assumption challenge. |
 | `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, source-item ledger coverage, blocker handling, cross-file continuation, and completion checks. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, or executing `questions.md`. |
 | `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, systems risk, and fix routing. | Applying fixes, designing the initial solution, or open-ended challenge. |

@@ -200,11 +200,15 @@ concrete.
 +-------------------------------+
 | define state if needed         |
 | - Gate 0 and Definition Brief  |
+| - Pre-Plan Critical Pass       |
+|   (blocks plan until confident)|
 +-------------------------------+
                |
                v
 +-------------------------------+
 | plan mode                      |
+| - requires pre-plan critical:  |
+|   confident                    |
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |

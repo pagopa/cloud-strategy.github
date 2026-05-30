@@ -55,6 +55,10 @@ owns Gate 0 status labels and blocking semantics.
   - On `reopen`: declare `pre-plan critical: reopen`, present objections to the
     user, and re-enter `define` with the critical findings as new input. Restart
     Gate 0 if scope, owner, target state, validation, or anti-scope changed.
+- The Pre-Plan Critical Pass blocks plan output the same way Gate 0 does.
+  When the status is `pre-plan critical: reopen`, plan output and transition
+  recommendations remain blocked until the define-critical cycle resolves to
+  `confident`. Do not produce plan output while the critical pass is `reopen`.
 - The agent may say that the definition looks ready and may recommend moving to
   `plan` only after the Pre-Plan Critical Pass returns `confident`. The agent
   must still wait for the user to explicitly request that phase.
@@ -70,6 +74,11 @@ owns Gate 0 status labels and blocking semantics.
   state, validation posture, or dirty-worktree ownership changes during a
   `define` or `plan` phase, run the minimum new evidence pass, restart Gate 0,
   and stop again while the result is `grill-me required`.
-- Realignment does not restart Gate 0 for `apply-plan`, `review`, or `execute`
-  entrypoints. If a lane-change from execution back to `plan` is needed, Gate 0
-  restarts in the new `define` or `plan` phase.
+- After Gate 0 is re-satisfied following a realignment, re-run the Pre-Plan
+  Critical Pass. The previous `confident` outcome is invalidated because the
+  definition it challenged has changed. Do not carry a stale `confident`
+  forward into `plan`.
+- Realignment does not restart Gate 0 or the Pre-Plan Critical Pass for
+  `apply-plan`, `review`, or `execute` entrypoints. If a lane-change from
+  execution back to `plan` is needed, Gate 0 and the Pre-Plan Critical Pass
+  restart in the new `define` or `plan` phase.
