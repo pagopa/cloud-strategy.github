@@ -31,7 +31,7 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Follow `gate-0-protocol.md` for status, closure, blocking, and realignment; wrapper docs must not restate the full Gate 0 protocol. |
+| `grill-me` | Gate 0 support for every non-`execute`, non-`apply-plan` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute` or `apply-plan`. | Follow `gate-0-protocol.md` for status, closure, blocking, and realignment; wrapper docs must not restate the full Gate 0 protocol. |
 | `superpowers-brainstorming` | Conditional `define` support | Creative, product, UX, architecture, or design-ambiguous work needs option exploration and design approval before planning. | Keep `grill-me` as the Gate 0 pillar; use brainstorming only after the minimum evidence pass shows options can change the plan; skip it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when target state and validation are concrete. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
@@ -40,8 +40,8 @@ Internal replacements:
 - Failure diagnosis belongs to `internal-debugging`.
 - Test-first delivery belongs to `internal-tdd`.
 - Performance work belongs to `internal-performance-optimization`.
-- Architecture, locality, leverage, cross-boundary review, higher-level code
-  orientation, module maps, caller maps, and domain-vocabulary explanations
+- Architecture, locality, leverage, cross-boundary review, cross-cutting impact, higher-level code
+  orientation, module maps, caller maps, blind spots, and domain-vocabulary explanations
   belong to `internal-high-level-review`.
 - Code defect review belongs to `internal-code-review`.
 - Imported docs and setup conventions stay outside default gateway routing
@@ -62,10 +62,11 @@ sections.
 
 - Planning, review, and retained-plan application always start in `define`.
 - Treat planning as `define` until the user closes the active `grill-me` loop.
-- For `define-first`, brainstorming, and `idea-first` entrypoints, closing Gate
-  0 does not change the active phase. The agent may recommend moving to `plan`,
-  but must wait for the user to explicitly request planning before producing
-  plan output.
+- For `define-first`, brainstorming, and clarify-first entrypoints, closing Gate
+  0 does not change the active phase. Treat `plan-only (clarify-first)` as a
+  legacy input spelling for `define-first`, not as a separate phase. The agent
+  may recommend moving to `plan`, but must wait for the user to explicitly
+  request planning before producing plan output.
 - Wrapper projections should still run Gate 0 after the minimum evidence pass.
 - Keep the detailed Gate 0 closure, blocking, non-waiver, mechanical-work,
   phase-transition, and realignment rules in `gate-0-protocol.md`; wrappers,
@@ -78,12 +79,6 @@ sections.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
 - Retained-plan authoring belongs to `internal-writing-plans`.
-- Failure diagnosis belongs to `internal-debugging`.
-- Test-first delivery belongs to `internal-tdd`.
-- Performance work belongs to `internal-performance-optimization`.
-- Code defect review belongs to `internal-code-review`.
-- Architecture, workflow, cross-cutting impact, operational fit, and blind spots
-  belong to `internal-high-level-review`.
 - Compression support such as `mattpocock-caveman` stays support-only after
   blockers, risks, and validation evidence are explicit.
 - The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.

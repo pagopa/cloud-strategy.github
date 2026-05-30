@@ -42,27 +42,11 @@ It stays lightweight and does not own phase transitions, hidden dispatch, or fil
 1. Run the smallest evidence pass that can recover target, candidate owner, nearby validation, and anti-scope.
 2. Classify the question before recommending action: owner fit, workflow fit, AI asset fit, tool or validator fit, overkill check, or simple-task fit.
 3. Use `grill-me` only when unresolved user-only decisions can still change scope, owner, target state, validation, rollout, or anti-scope.
-4. Use `idea-refine` only when the decision is genuinely exploratory rather than deterministic maintenance.
+4. Use `idea-refine` only when the decision is genuinely exploratory rather than deterministic maintenance. See `references/advisory-owner-map.md` for `idea-refine` activation rules.
 5. Recommend the next visible path or `none`. Keep the recommendation advisory; do not apply it silently.
 6. Stop at a checkpoint unless the user explicitly approves the next visible owner.
-
-## `idea-refine` Activation
-
-Use `idea-refine` when one or more of these are true:
-
-- Two or more credible directions remain after the minimum evidence pass.
-- The user asks for option exploration, concept shaping, or assumption stress-testing before choosing a path.
-- The next action depends on converging multiple viable boundaries rather than selecting an already-known direct path.
-
-Do not use `idea-refine` when one or more of these are true:
-
-- The task is a concrete maintenance or routing decision with one dominant answer from local evidence.
-- The only missing input is a user approval, preference, or small clarification that `grill-me` can gather directly.
-- The work is already approved for `execute`, `apply-plan`, or a specific next path.
-
-Fallback:
-
-- If exploration is unnecessary, stay with the minimum evidence pass plus `grill-me`.
+7. Do not define surrounding workflow rules here. Keep flow-specific handling outside this bundle.
+8. If the best next step is direct completion and risk is low, recommend `internal-gateway-simple-task` with target, action, validation, and risk.
 
 ## Gate 0 Advisory Packet
 
@@ -73,21 +57,10 @@ Every response that closes this skill should include:
 - `Open decisions`: user-only decisions or `none`.
 - `Recommended default`: the default answer and why.
 - `Alternatives considered`: realistic alternatives and why they lose or remain viable.
-- `Use idea-refine`: `yes` or `no`, with reason.
-- `Simple-task candidate`: `yes` or `no`, with reason.
-- `Best next path`: next skill, tool, workflow, or `none`.
+- `Recommended next path`: next skill, tool, workflow, or `none`. Sub-fields: `Use idea-refine` (`yes`/`no`, with reason), `Simple-task candidate` (`yes`/`no`, with reason).
 - `Anti-scope`: what must not happen yet.
 - `Validation path or gap`: command, review path, or explicit gap.
-- `Stop condition`: where the agent must pause.
-- `Checkpoint question`: the exact approval or decision needed from the user.
-
-## Guardrails
-
-- Do not create a skill, create an agent, write a retained plan, modify files, or transition phases by implication.
-- Do not define surrounding workflow rules here. Keep flow-specific handling outside this bundle.
-- Do not use `idea-refine` as mandatory support for deterministic maintenance or simple tool-fit decisions.
-- Do not hide dispatch. Recommend the next path visibly and wait for the user's checkpoint when action would begin.
-- If the best next step is direct completion and risk is low, recommend `internal-gateway-simple-task` with target, action, validation, and risk.
+- `Stop & checkpoint`: where the agent must pause and the exact approval or decision needed from the user.
 
 ## Validation
 

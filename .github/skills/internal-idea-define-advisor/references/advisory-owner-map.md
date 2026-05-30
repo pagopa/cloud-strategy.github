@@ -36,10 +36,3 @@ Negative triggers:
 Fallback:
 
 - If positive triggers are weak or absent, stay with the minimum evidence pass plus `grill-me`.
-
-## Stop Conditions
-
-- Stop when the user has not approved the next visible path.
-- Stop when the request is already in `execute`, `apply-plan`, `review`, or critical mode and the lane is settled.
-- Stop when the work becomes catalog governance, consumer propagation, or broad sync maintenance.
-- Stop when local evidence shows that only a concrete implementation step remains.

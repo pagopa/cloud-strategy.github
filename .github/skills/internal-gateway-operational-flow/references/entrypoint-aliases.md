@@ -6,12 +6,12 @@ Use this reference when a user prompt uses wording that matches an entrypoint bu
 
 | Entrypoint | Aliases |
 | --- | --- |
-| `full-cycle` | `end-to-end`, `e2e`, `start-to-finish`, `complete-workflow`, `from-scratch`, `do-it-all` |
-| `define-first` | `idea-first`, `refine-first`, `shape-idea`, `ideation`, `concept-first`, `requirements-first`, `discovery-first`, `brainstorm-first`, `understand-first`, `figure-this-out-first` |
-| `plan-only` | `plan-first`, `write-plan`, `create-plan`, `decision-brief`, `retained-plan-only`, `plan-without-execute` |
-| `apply-plan` | `run-plan`, `execute-plan`, `implement-plan`, `run-approved-plan`, `apply-retained-plan` |
+| `full-cycle` | `end-to-end`, `e2e`, `start-to-finish`, `complete-workflow`, `from-scratch` |
+| `define-first` | `idea-first`, `refine-first`, `shape-idea`, `ideation`, `concept-first`, `requirements-first`, `discovery-first` |
+| `plan-only` | `plan-first`, `write-plan`, `create-plan`, `decision-brief`, `retained-plan-only` |
+| `apply-plan` | `run-plan`, `execute-plan`, `implement-plan`, `run-approved-plan` |
 | `review` | `check-this`, `audit`, `code-review`, `validate`, `defect-review`, `merge-readiness`, `review-changes` |
-| `mode-explicit` | `direct-mode`, `explicit-phase`, `go-to-plan`, `switch-to-execute`, `run-define`, `run-plan`, `run-execute`, `run-review`, `challenge-this`, `pressure-test`, `pre-mortem` |
+| `mode-explicit` | `direct-mode`, `explicit-phase`, `go-to-plan`, `switch-to-execute`, `run-define`, `run-plan`, `run-execute`, `run-review` |
 
 ## Notes
 

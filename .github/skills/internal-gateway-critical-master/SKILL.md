@@ -44,9 +44,9 @@ Before applying a lens, name the claim, decision, or artifact under challenge in
 
 1. Identify the single strongest objection or assumption gap.
 2. Explain why it matters now.
-3. Apply one useful lens: inversion, counterfactual, role reversal, scope compression, time shift, or opportunity cost.
+3. Apply one useful lens from `references/challenge-lenses.md`.
 4. Produce a closing synthesis instead of endless skepticism.
-5. Run the final consistency gate: ask what is most likely correct and what may be incorrect, contradictory, overstated, or hallucinated.
+5. Run the final consistency gate per `references/challenge-lenses.md`.
 6. Reconcile the gate before responding, preserving supported pressure points and downgrading uncertainty.
 
 ## Boundaries

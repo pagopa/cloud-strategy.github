@@ -270,7 +270,7 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
         skill_text,
         "wait for the user to explicitly request planning",
     )
-    assert "Direct `execute` is the only automatic Gate 0 exception." in skill_text
+    assert "Direct `execute` and `apply-plan` are the only automatic Gate 0 exceptions." in skill_text
     assert "`Gate 0`" in wrapper_text
     assert_normalized_snippet(
         wrapper_text,
@@ -400,7 +400,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "`review`" in mode_contracts_text
     assert "`apply-plan`" in mode_contracts_text
     assert "Codex plugin or Codex CLI" in workflow_maps_text
-    assert "Retained Plan Application" in workflow_maps_text
+    assert "Apply/Execute Plan" in workflow_maps_text
     assert "internal-gateway-operational-flow" in wrapper_alignment_text
     assert not Path(
         ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
@@ -676,7 +676,7 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "Gate 0 status and phase-blocking semantics" in operational_text
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
-    assert "every non-`execute` operational-flow entrypoint" in operational_text
+    assert "Gate 0 does not apply to direct `execute` or `apply-plan` entrypoints" in operational_text
     assert (
         "Planning, review, and retained-plan application always start"
         in wrapper_alignment_text
@@ -741,3 +741,55 @@ def test_old_cross_lane_engine_is_not_live_catalog_contract() -> None:
 
     for relative_path in CANONICAL_AGENTS.values():
         assert OLD_CROSS_LANE_ENGINE not in read_body(relative_path)
+
+
+def test_operational_flow_pre_plan_critical_pass_and_review_gate_stay_present() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    gate_protocol_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/gate-0-protocol.md"
+    ).read_text(encoding="utf-8")
+
+    assert "### Pre-Plan Critical Pass" in skill_text
+    assert "pre-plan critical: confident" in skill_text
+    assert "pre-plan critical: reopen" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "automatically load `internal-gateway-critical-master` and run a critical challenge against the Definition Brief",
+    )
+    assert "Do not skip it" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "plan output remains blocked until the cycle resolves",
+    )
+    assert "### Review Gate" in skill_text
+    assert "review gate: satisfied" in skill_text
+    assert "review gate: reopen" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "do not emit the final review verdict while the gate is `reopen`",
+    )
+    assert "Pre-Plan Critical Pass" in gate_protocol_text
+    assert "pre-plan critical: confident" in gate_protocol_text
+    assert "pre-plan critical: reopen" in gate_protocol_text
+
+
+def test_entrypoint_aliases_reference_exists_and_is_linked() -> None:
+    aliases_path = Path(
+        ".github/skills/internal-gateway-operational-flow/references/entrypoint-aliases.md"
+    )
+    assert aliases_path.exists()
+
+    aliases_text = aliases_path.read_text(encoding="utf-8")
+    assert "## Alias index" in aliases_text
+    assert "| `full-cycle` |" in aliases_text
+    assert "| `define-first` |" in aliases_text
+    assert "| `plan-only` |" in aliases_text
+    assert "| `apply-plan` |" in aliases_text
+    assert "| `review` |" in aliases_text
+
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    assert "references/entrypoint-aliases.md" in skill_text
