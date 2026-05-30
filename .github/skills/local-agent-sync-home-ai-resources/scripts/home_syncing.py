@@ -289,6 +289,7 @@ def apply_home_sync_plan(
 
     desired_by_path = {resource.target_path: resource for resource in plan.desired_resources}
     copied_paths: set[str] = set()
+    actual_content_hashes: dict[str, str] = {}
     for operation in plan.operations:
         if operation.action not in {"copy", "delete"}:
             continue
@@ -307,20 +308,22 @@ def apply_home_sync_plan(
             _apply_translated_agent(source_path, target_path, managed_resource.target)
         else:
             copy_resource(source_path, target_path)
+        actual_content_hashes[target_path.as_posix()] = hash_resource(target_path)
         copied_paths.add(target_path.as_posix())
 
     for resource in plan.desired_resources:
         target_path = Path(resource.target_path)
         if not target_path.exists():
             raise RuntimeError(f"post-apply-verify-failed: {target_path} missing after copy")
-        if resource.resource_family == "agents" and resource.target != "copilot":
-            continue
-        current_hash = hash_resource(target_path)
-        if current_hash != resource.source_hash:
-            raise RuntimeError(f"post-apply-verify-failed: {target_path} hash mismatch (expected {resource.source_hash}, got {current_hash})")
+        actual_hash = actual_content_hashes.get(target_path.as_posix())
+        if actual_hash is None:
+            actual_hash = hash_resource(target_path)
+        expected_hash = actual_content_hashes.get(target_path.as_posix(), resource.source_hash)
+        if actual_hash != expected_hash:
+            raise RuntimeError(f"post-apply-verify-failed: {target_path} hash mismatch (expected {expected_hash}, got {actual_hash})")
 
     manifest_path = plan.state_root / MANIFEST_PATH
-    manifest_path.write_text(render_json(build_manifest_payload(plan)), encoding="utf-8")
+    manifest_path.write_text(render_json(build_manifest_payload(plan, actual_content_hashes)), encoding="utf-8")
     return manifest_path
 
 
@@ -847,8 +850,19 @@ def write_snapshot(plan: HomeSyncPlan, relative_path: str) -> Path:
     return snapshot_path
 
 
-def build_manifest_payload(plan: HomeSyncPlan) -> dict[str, object]:
+def build_manifest_payload(
+    plan: HomeSyncPlan,
+    actual_content_hashes: dict[str, str] | None = None,
+) -> dict[str, object]:
     blocked_paths = {operation.path for operation in plan.operations if operation.action == "blocked"}
+    managed_resources = []
+    for resource in plan.desired_resources:
+        if resource.target_path in blocked_paths:
+            continue
+        entry = resource.to_dict()
+        if actual_content_hashes and resource.target_path in actual_content_hashes:
+            entry["content_hash"] = actual_content_hashes[resource.target_path]
+        managed_resources.append(entry)
     return {
         "schema_version": 1,
         "generated_at": now_isoformat(),
@@ -856,11 +870,7 @@ def build_manifest_payload(plan: HomeSyncPlan) -> dict[str, object]:
         "source_revision": plan.source_revision,
         "state_root": plan.state_root.as_posix(),
         "targets": list(plan.selected_targets),
-        "managed_resources": [
-            resource.to_dict()
-            for resource in plan.desired_resources
-            if resource.target_path not in blocked_paths
-        ],
+        "managed_resources": managed_resources,
     }
 
 

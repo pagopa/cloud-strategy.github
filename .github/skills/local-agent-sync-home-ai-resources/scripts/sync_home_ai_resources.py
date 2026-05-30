@@ -176,32 +176,53 @@ def emit_output(
     mode = payload.get("mode", "plan")
     targets = ", ".join(payload.get("selected_targets", [])) or "none"
     log_info(f"Mode: {mode}")
-    log_info(f"Selected targets: {targets}")
+    log_info(f"Targets: {targets}")
 
-    copied = payload.get("copied", [])
-    skipped = payload.get("skipped", [])
-    blocked = payload.get("blocked", [])
-    conflicts = payload.get("conflicts", [])
-    stale = [
-        op.get("path")
-        for op in payload.get("operations", [])
-        if isinstance(op, dict) and op.get("action") == "stale-managed"
-    ]
+    operations = payload.get("operations", [])
+    copied_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "copy"]
+    skipped_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "skip"]
+    blocked_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "blocked"]
+    stale_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "stale-managed"]
+    mkdir_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "mkdir"]
     source_resources = payload.get("source_resources_considered")
 
     log_info(
-        f"Resources: {len(copied)} to copy, {len(skipped)} skipped, "
-        f"{len(blocked)} blocked, {len(conflicts)} conflicts"
-        + (f", {len(stale)} stale-managed" if stale else "")
-        + (f" ({source_resources} source resources considered)" if isinstance(source_resources, int) else "")
+        f"Summary: {len(copied_ops)} to copy, {len(skipped_ops)} up-to-date, "
+        f"{len(blocked_ops)} blocked"
+        + (f", {len(stale_ops)} stale" if stale_ops else "")
+        + (f" ({source_resources} resources considered)" if isinstance(source_resources, int) else "")
     )
+
+    if copied_ops:
+        copied_resources: dict[str, dict[str, list[str]]] = {}
+        for op in copied_ops:
+            rid = op.get("resource_id", "unknown")
+            target = op.get("target", "?")
+            path = op.get("path", "")
+            family = "agents" if "/agents/" in path else "skills"
+            if rid not in copied_resources:
+                copied_resources[rid] = {"skills": [], "agents": []}
+            copied_resources[rid][family].append(target)
+        for rid, families in sorted(copied_resources.items()):
+            parts = []
+            for family in ("skills", "agents"):
+                if families[family]:
+                    parts.append(f"{family}→{','.join(families[family])}")
+            log_info(f"  + {rid} ({'; '.join(parts)})")
 
     blocked_codes = payload.get("blocked_codes", [])
     if blocked_codes:
         log_error(f"Blocked codes: {', '.join(blocked_codes)}")
+        blocked_by_code: dict[str, list[str]] = {}
+        for op in blocked_ops:
+            code = op.get("code", "unknown")
+            path = op.get("path", "")
+            blocked_by_code.setdefault(code, []).append(path)
+        for code, paths in sorted(blocked_by_code.items()):
+            log_error(f"  [{code}] {len(paths)} path(s)")
 
     for path in payload.get("missing_dirs", []):
-        log_info(f"Missing directory: {path}")
+        log_info(f"Missing dir: {path}")
 
     residual_drift = payload.get("residual_drift", [])
     if residual_drift:
@@ -213,11 +234,11 @@ def emit_output(
 
     next_step = payload.get("next_step")
     if isinstance(next_step, str) and next_step:
-        log_info(f"Next step: {next_step}")
+        log_info(f"Next: {next_step}")
 
     state_path = payload.get("state_path")
     if isinstance(state_path, str):
-        log_info(f"State file: {state_path}")
+        log_info(f"State: {state_path}")
 
     manifest_path = payload.get("manifest_path")
     if isinstance(manifest_path, str):
