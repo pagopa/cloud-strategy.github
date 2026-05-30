@@ -18,23 +18,23 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Plan a local home-directory sync for supported AI runtime resources, including skills and agents.
 - Audit drift between repository-managed resources and the local runtime copies under the user home directory.
 - Run readiness or doctor checks before touching runtime-owned directories.
-- Apply an already reviewed plan for supported direct-copy resource families.
+- Apply an already reviewed plan for supported direct-copy skill families and allowlisted agent translations.
 
 ## When not to use
 
 - Source-side catalog governance in this repository; use `local-sync-external-resources` instead.
 - Consumer-repository baseline sync; use `local-sync-global-copilot-configs-into-repo` instead.
 - Personal configuration merge, runtime adapter generation, or general dotfiles management.
-- Undocumented runtime families that would require format translation in v1 (except allowlisted agent translation for Claude, OpenCode, and Codex).
+- Undocumented runtime families outside the allowlisted direct-copy skills and translated agents for Claude, OpenCode, and Codex.
 
 ## Core Operating Contract
 
 - Treat this repository as the source of truth for allowlisted home-sync resources.
 - Sync is unidirectional: repo → home only. Block any attempt to sync from home to repo.
 - Default to `plan` and keep `apply` explicit.
-- Limit v1 default materialization to documented direct-copy resource families.
+- Limit v1 default materialization to documented direct-copy skill families and allowlisted agent translations for Codex, Claude, and OpenCode.
 - Preserve unmanaged target-local files and directories.
-- Prune only stale managed assets, and only when explicit approval is present.
+- Prune only stale managed assets, and only when explicit approval is present and the manifest entry passes schema validation, path confinement, and content-hash drift checks.
 - Keep local sync state under `~/.sync/cloud-strategy-governance/home-ai-resources/`.
 - Block `apply` when runtime support is undocumented, target paths are unsafe, or ownership evidence is missing.
 
@@ -61,8 +61,9 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Read the source allowlist from `references/home-sync-catalog.yaml`.
 - Include only allowlisted `skills` and `agents` in v1.
 - Copy managed resources instead of creating symlinks.
+- Translate allowlisted `.agent.md` sources deterministically for Codex, Claude, and OpenCode targets.
 - Preserve target-local content that is outside the manifest.
-- Record source hashes and managed target paths in the local manifest.
+- Record source hashes, expected content hashes, and managed target paths in the local manifest.
 - Exclude runtime-generated bundle artifacts such as `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, and `.pyo` from hashes and copies.
 
 ## Bundled Automation
@@ -76,6 +77,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 
 - Block unmanaged overwrite.
 - Block managed overwrite when the target content diverged from the last recorded manifest.
+- Block stale managed delete when the manifest entry is invalid, escapes the expected runtime root, or the file content drifted from the recorded hash.
 - Block unsafe home paths, unsupported symlink hops, missing target roots without explicit create approval, and undocumented runtime claims.
 - Keep the canonical error taxonomy in `references/error-codes.md`.
 - Keep the doctor checklist in `references/doctor-checks.md`.

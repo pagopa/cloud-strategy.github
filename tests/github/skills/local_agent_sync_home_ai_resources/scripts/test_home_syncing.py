@@ -212,3 +212,144 @@ def test_skill_bundle_sync_scripts_can_load_bundled_references(
     )
 
     assert plan.source_resources_considered >= 1
+
+
+def test_stale_manifest_path_escapes_home_is_blocked(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+    )
+    manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["managed_resources"][0]["target_path"] = "/tmp/escaped/path"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    catalog_path = (
+        source_root
+        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+    )
+    catalog_path.write_text(
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: false\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: false\n"
+        "resources: []\n",
+        encoding="utf-8",
+    )
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+        prune_managed=True,
+    )
+    blocked_ops = [op for op in plan.operations if op.action == "blocked"]
+    assert any(
+        op.code in {"unsafe-home-path", "symlink-not-allowed"} for op in blocked_ops
+    )
+
+
+def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+    )
+    manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
+
+    copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
+    copied_skill.write_text("# drifted content\n", encoding="utf-8")
+
+    catalog_path = (
+        source_root
+        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+    )
+    catalog_path.write_text(
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: false\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: false\n"
+        "resources: []\n",
+        encoding="utf-8",
+    )
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+        prune_managed=True,
+    )
+    blocked_ops = [op for op in plan.operations if op.action == "blocked"]
+    assert any(op.code == "stale-content-drifted" for op in blocked_ops)
+
+
+def test_doctor_checks_include_agent_roots(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    checks, blocked_codes = home_syncing.run_doctor(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+    )
+
+    codex_checks = [c for c in checks if c.get("name") == "target-root:codex"]
+    assert len(codex_checks) == 2
+    paths = {c["path"] for c in codex_checks}
+    assert any(".agents/skills" in p for p in paths)
+    assert any(".codex/agents" in p for p in paths)
+
+
+def test_triple_apply_skip_plan_sequence_is_convergent(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    plan1 = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+    )
+    manifest_path = apply_home_sync_plan(plan1, create_missing_dirs=True)
+    manifest1 = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    plan2 = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+    )
+    manifest_path2 = apply_home_sync_plan(plan2)
+    manifest2 = json.loads(manifest_path2.read_text(encoding="utf-8"))
+
+    plan3 = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="plan",
+    )
+    skip_ops = [op for op in plan3.operations if op.action == "skip"]
+    assert len(skip_ops) == 1
+
+    assert (
+        manifest1["managed_resources"][0]["content_hash"]
+        == manifest2["managed_resources"][0]["content_hash"]
+    )
