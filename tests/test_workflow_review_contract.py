@@ -22,7 +22,9 @@ def assert_contains_all(relative_path: str, snippets: tuple[str, ...]) -> None:
         assert snippet in text, f"{relative_path} is missing {snippet!r}"
 
 
-def assert_contains_all_normalized(relative_path: str, snippets: tuple[str, ...]) -> None:
+def assert_contains_all_normalized(
+    relative_path: str, snippets: tuple[str, ...]
+) -> None:
     text = " ".join(read_text(relative_path).split())
 
     for snippet in snippets:

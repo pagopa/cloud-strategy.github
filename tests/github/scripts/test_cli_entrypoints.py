@@ -10,8 +10,8 @@ import audit_copilot_catalog
 import build_inventory
 import check_catalog_consistency
 import detect_token_risks
-import graphify_update
 import github_catalog_validation
+import graphify_update
 import sync_copilot_catalog
 import validate_internal_skills
 
@@ -207,12 +207,19 @@ def test_github_catalog_validation_main_runs_only_graphify_target(
 
 
 def _fake_git_ls_files(stdout: str):
-    def fake_run(command: list[str], cwd: Path, check: bool, text: bool = False, capture_output: bool = False):
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
         if command[:4] == ["git", "ls-files", "--cached", "--others"]:
             return SimpleNamespace(returncode=0, stdout=stdout, stderr="")
         if command[:3] == ["git", "rev-parse", "--short"]:
             return SimpleNamespace(returncode=0, stdout="abc1234\n", stderr="")
         raise AssertionError(f"Unexpected command: {command}")
+
     return fake_run
 
 
@@ -227,7 +234,9 @@ def test_graphify_update_main_generates_output_and_metadata(
     write_file(tmp_path / ".pre-commit-config.yaml", "repos: []\n")
     write_file(tmp_path / "docs/01-local-architecture.md", "# Architecture\n")
     write_file(tmp_path / ".github/skills/internal-demo/SKILL.md", "# Demo\n")
-    write_file(tmp_path / "tests/test_out_of_scope.py", "def test_noop():\n    assert True\n")
+    write_file(
+        tmp_path / "tests/test_out_of_scope.py", "def test_noop():\n    assert True\n"
+    )
     write_file(tmp_path / "notes.txt", "ignore me\n")
 
     git_output = "\n".join(
@@ -245,7 +254,13 @@ def test_graphify_update_main_generates_output_and_metadata(
     )
     called_commands: list[tuple[Path, list[str]]] = []
 
-    def fake_run(command: list[str], cwd: Path, check: bool, text: bool = False, capture_output: bool = False):
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
         assert check is False
         working_directory = Path(cwd)
         called_commands.append((working_directory, command))
@@ -275,7 +290,11 @@ def test_graphify_update_main_generates_output_and_metadata(
         "parse_args",
         lambda: argparse.Namespace(root=str(tmp_path), check=False),
     )
-    monkeypatch.setattr(graphify_update.shutil, "which", lambda command: "/usr/local/bin/graphify" if command == "graphify" else None)
+    monkeypatch.setattr(
+        graphify_update.shutil,
+        "which",
+        lambda command: "/usr/local/bin/graphify" if command == "graphify" else None,
+    )
     monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
 
     exit_code = graphify_update.main()
@@ -285,7 +304,11 @@ def test_graphify_update_main_generates_output_and_metadata(
     assert (tmp_path / "graphify-out/graph.html").exists()
     assert (tmp_path / "graphify-out/GRAPH_REPORT.md").exists()
     assert (tmp_path / "graphify-out/.internal-graphify-refresh.json").exists()
-    metadata = json.loads((tmp_path / "graphify-out/.internal-graphify-refresh.json").read_text(encoding="utf-8"))
+    metadata = json.loads(
+        (tmp_path / "graphify-out/.internal-graphify-refresh.json").read_text(
+            encoding="utf-8"
+        )
+    )
     assert metadata["commit"] == "abc1234"
     assert metadata["source"] == "graphify_update.py"
     assert "AGENTS.md" in metadata["governed_files"]
@@ -301,7 +324,13 @@ def test_graphify_update_main_check_passes_when_fresh(
 
     git_output = "AGENTS.md\n"
 
-    def fake_run(command: list[str], cwd: Path, check: bool, text: bool = False, capture_output: bool = False):
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
         if command[:4] == ["git", "ls-files", "--cached", "--others"]:
             return SimpleNamespace(returncode=0, stdout=git_output, stderr="")
         if command[:3] == ["git", "rev-parse", "--short"]:
@@ -313,7 +342,11 @@ def test_graphify_update_main_check_passes_when_fresh(
         "parse_args",
         lambda: argparse.Namespace(root=str(tmp_path), check=True),
     )
-    monkeypatch.setattr(graphify_update.shutil, "which", lambda command: "/usr/local/bin/graphify" if command == "graphify" else None)
+    monkeypatch.setattr(
+        graphify_update.shutil,
+        "which",
+        lambda command: "/usr/local/bin/graphify" if command == "graphify" else None,
+    )
     monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
 
     out_dir = tmp_path / "graphify-out"
@@ -339,7 +372,13 @@ def test_graphify_update_main_check_fails_when_stale(
 
     git_output = "AGENTS.md\n"
 
-    def fake_run(command: list[str], cwd: Path, check: bool, text: bool = False, capture_output: bool = False):
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
         if command[:4] == ["git", "ls-files", "--cached", "--others"]:
             return SimpleNamespace(returncode=0, stdout=git_output, stderr="")
         if command[:3] == ["git", "rev-parse", "--short"]:
@@ -351,7 +390,11 @@ def test_graphify_update_main_check_fails_when_stale(
         "parse_args",
         lambda: argparse.Namespace(root=str(tmp_path), check=True),
     )
-    monkeypatch.setattr(graphify_update.shutil, "which", lambda command: "/usr/local/bin/graphify" if command == "graphify" else None)
+    monkeypatch.setattr(
+        graphify_update.shutil,
+        "which",
+        lambda command: "/usr/local/bin/graphify" if command == "graphify" else None,
+    )
     monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
 
     out_dir = tmp_path / "graphify-out"
@@ -362,7 +405,14 @@ def test_graphify_update_main_check_fails_when_stale(
 
     # Write metadata with old commit
     out_dir.joinpath(".internal-graphify-refresh.json").write_text(
-        json.dumps({"commit": "abc1234", "corpus_hash": "old", "governed_files": ["AGENTS.md"], "source": "test"}),
+        json.dumps(
+            {
+                "commit": "abc1234",
+                "corpus_hash": "old",
+                "governed_files": ["AGENTS.md"],
+                "source": "test",
+            }
+        ),
         encoding="utf-8",
     )
 
@@ -379,7 +429,13 @@ def test_graphify_update_main_fails_fast_when_graphify_is_missing(
     write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
     called_commands: list[list[str]] = []
 
-    def fake_run(command: list[str], cwd: Path, check: bool, text: bool = False, capture_output: bool = False):
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
         del cwd, check, text, capture_output
         called_commands.append(command)
         return SimpleNamespace(returncode=0, stdout="AGENTS.md\n", stderr="")
@@ -395,7 +451,9 @@ def test_graphify_update_main_fails_fast_when_graphify_is_missing(
     exit_code = graphify_update.main()
 
     assert exit_code == 1
-    assert called_commands == [["git", "ls-files", "--cached", "--others", "--exclude-standard"]]
+    assert called_commands == [
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard"]
+    ]
     assert "Missing required command: graphify" in capsys.readouterr().out
 
 

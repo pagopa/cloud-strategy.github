@@ -402,12 +402,13 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
         mode="plan",
     )
 
-    resource_ids = {op.resource_id for op in plan.operations if hasattr(op, "resource_id")}
+    resource_ids = {
+        op.resource_id for op in plan.operations if hasattr(op, "resource_id")
+    }
     planned_paths = {op.path for op in plan.operations if hasattr(op, "path")}
 
     assert "internal-graphify" in resource_ids or any(
-        ".agents/skills/internal-graphify" in str(op.path)
-        for op in plan.operations
+        ".agents/skills/internal-graphify" in str(op.path) for op in plan.operations
     )
 
 

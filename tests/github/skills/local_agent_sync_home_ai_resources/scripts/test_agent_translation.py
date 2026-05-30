@@ -213,6 +213,7 @@ class TestCodexTranslation:
         }
         body = "Instructions here.\n"
         from agent_translation import _translate_for_codex
+
         result = _translate_for_codex(fm, body)
         assert "name" in result
         assert "test-agent" in result
@@ -221,12 +222,11 @@ class TestCodexTranslation:
     def test_codex_handoffs_in_instructions(self):
         fm = {
             "name": "test",
-            "handoffs": [
-                {"label": "Go", "agent": "other", "prompt": "Do task"}
-            ],
+            "handoffs": [{"label": "Go", "agent": "other", "prompt": "Do task"}],
         }
         body = "Main body.\n"
         from agent_translation import _translate_for_codex
+
         result = _translate_for_codex(fm, body)
         assert "Handoffs" in result
         assert "other" in result
@@ -235,6 +235,7 @@ class TestCodexTranslation:
         fm = {"name": "minimal"}
         body = "Body.\n"
         from agent_translation import _translate_for_codex
+
         result = _translate_for_codex(fm, body)
         assert "name = " in result
 

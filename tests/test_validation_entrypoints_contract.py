@@ -41,7 +41,10 @@ def test_makefile_exposes_explicit_catalog_fast_check_entrypoint() -> None:
 def test_makefile_exposes_explicit_graphify_update_entrypoint() -> None:
     makefile_text = read_text("Makefile")
 
-    assert ".PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update" in makefile_text
+    assert (
+        ".PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update"
+        in makefile_text
+    )
     assert "graphify-update:" in makefile_text
     assert "$(SCRIPTS_RUNNER) graphify_update --root ." in makefile_text
 
@@ -78,5 +81,8 @@ def test_graphify_wrapper_documents_the_graphify_shortcut() -> None:
     runner_text = read_text(".github/scripts/run.sh")
 
     assert "bash ./github_catalog_validation.sh --graphify" in root_wrapper
-    assert "bash ./.github/scripts/github_catalog_validation.sh --graphify" in scripts_wrapper
+    assert (
+        "bash ./.github/scripts/github_catalog_validation.sh --graphify"
+        in scripts_wrapper
+    )
     assert "graphify_update" in runner_text

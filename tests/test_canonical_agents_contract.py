@@ -283,9 +283,15 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
     assert "## Phase Transition Authorization" in gate_protocol_text
     assert "Closing Gate 0 changes the gate status only" in gate_protocol_text
-    assert "A valid transition request must directly ask for planning" in gate_protocol_text
+    assert (
+        "A valid transition request must directly ask for planning"
+        in gate_protocol_text
+    )
     assert "run the minimum evidence pass before Gate 0" in workflow_maps_text
-    assert "Do not restate the non-waiver or phase-transition details in maps." in workflow_maps_text
+    assert (
+        "Do not restate the non-waiver or phase-transition details in maps."
+        in workflow_maps_text
+    )
     assert "Gate 0" in workflow_maps_text
 
 
@@ -374,7 +380,9 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         in skill_text
     )
     assert "multiple credible paths" in skill_text
-    assert "Future Security Lens rule in `references/wrapper-alignment.md`" in skill_text
+    assert (
+        "Future Security Lens rule in `references/wrapper-alignment.md`" in skill_text
+    )
     assert "`Uso consigliato`" in skill_text
     assert "`Mappa file e ruolo`" in skill_text
     assert "`Evidence pass iniziale`" in skill_text
@@ -412,7 +420,10 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         == "Define-to-review workflow with grill-me Gate 0"
     )
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
-    assert "stay in define until the user explicitly requests planning" in interface["default_prompt"]
+    assert (
+        "stay in define until the user explicitly requests planning"
+        in interface["default_prompt"]
+    )
 
     operational_frontmatter = load_frontmatter(
         CANONICAL_AGENTS["internal-gateway-operational-flow"]
