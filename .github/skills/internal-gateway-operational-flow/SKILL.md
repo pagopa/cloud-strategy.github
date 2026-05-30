@@ -66,10 +66,10 @@ Select one workflow entry point from the user prompt, then run one active phase 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
 | `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan output or recommendation. Gate 0 is pre-`plan` only; it does not block `apply-plan`, `review`, or `execute`. | Confirmed intent, assumptions, option frame, Definition Brief, Pre-Plan Critical Pass, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, Pre-Plan Critical Pass outcome (`confident` or `reopen`), explicit user closure, and named validation path or gap. |
-| `plan` | A confirmed definition exists with `pre-plan critical: confident`, but decisions, ownership, rollout, validation, or tradeoffs remain. | Gate 0 must already be satisfied and the Pre-Plan Critical Pass must have returned `confident` for the current definition, or `define` must run first. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes, restart open-ended brainstorming, or imply execute approval. | `internal-writing-plans`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
+| `plan` | A confirmed definition exists with `pre-plan critical: confident`, but decisions, ownership, rollout, validation, or tradeoffs remain. | Gate 0 must already be satisfied and the Pre-Plan Critical Pass must have returned `confident` for the current definition, or `define` must run first. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes, restart open-ended brainstorming, or imply execute approval. | `internal-writing-plans`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
 | `execute` | Target state and validation are concrete. | Do not start Gate 0 for direct `execute` unless the user explicitly asks for `grill-me` or the lane changes away from `execute`. | Scoped edits, focused validation, and slice reports. | Add unrelated improvements or reopen strategy silently. | `internal-debugging`, `internal-tdd`, and runtime delivery skills. | `Check 1-3` plus fresh evidence. |
 | `apply-plan` | An approved retained plan folder is the execution target. | Gate 0 not required; the approved retained plan is the authorization signal. The `define` phase already happened during plan authoring. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
-| `review` | A concrete artifact, diff, or validation result exists. | Gate 0 not required; review scope is self-contained from the artifact under review. | Findings, severity, evidence gaps, and fix routing. | Apply fixes or design the initial solution. | `internal-code-review`, `internal-high-level-review`. | `Review Check 1-3` and named evidence gaps. |
+| `review` | A concrete artifact, diff, or validation result exists. | Gate 0 not required; review scope is self-contained from the artifact under review. | Findings, severity, evidence gaps, and fix routing. | Apply fixes or design the initial solution. | `internal-code-review`, `internal-high-level-review`, `grill-me`, `internal-gateway-critical-master`. | Review Gate (`grill-me satisfied` and `pre-verdict critical: confident`), `Review Check 1-3`, and named evidence gaps. |
 | `critical` | Assumptions, proposal, or decision need pressure testing. | Not owned here; use the critical owner. | Strongest objection, lens, and explicit outcome. | Implement or routine-review. | `internal-gateway-critical-master`. | One critical outcome and next-step package. |
 
 ## Core Contract
@@ -85,7 +85,6 @@ Select one workflow entry point from the user prompt, then run one active phase 
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
 - Require an explicit checkpoint before moving from `plan`, `define`, or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
 - Use review lenses inside `review` mode instead of duplicating their playbooks here.
-- Use `internal-gateway-critical-master` before finalizing, or immediately after a compact draft, when replacing an important prompt or skill, changing shared routing semantics, or materially changing governance-sensitive workflow behavior.
 - Run the Pre-Plan Critical Pass automatically after Gate 0 closure and `Define Check 1-3` inside `define` for `define-first`, `full-cycle`, `plan-only`, and `mode-explicit` entrypoints. The critical pass validates the Definition Brief before any transition to `plan` and blocks plan output until `confident` is declared. On `confident`, update the brief and stop. On `reopen`, re-enter `define` with the critical findings. See the Define Mode section for the full contract.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - When a user says expected work was missed, treat it as a workflow defect: compare the original request, retained-plan source items, current diff, and validation evidence before explaining or closing. For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
@@ -173,7 +172,7 @@ user decision to continue or accept with risk.
 
 ## Plan Mode
 
-Plan mode owns the decision frame, selected direction, tradeoffs, validation path, and next-step package. It requires a satisfied `define` state with `pre-plan critical: confident` and keeps retained-plan file shape, ledger fields, and detailed critical-before-plan authoring delegated to `internal-writing-plans`.
+Plan mode owns the decision frame, selected direction, tradeoffs, validation path, and next-step package. It requires a satisfied `define` state with `pre-plan critical: confident` and keeps retained-plan file shape and ledger fields delegated to `internal-writing-plans`.
 
 Before any plan output, require a satisfied `define` state and a `pre-plan critical: confident` outcome for the current definition. When `pre-plan critical: confident` is missing, lane-change back to `define` and run the Pre-Plan Critical Pass before producing plan output. Treat operational-flow planning as `define` until the user closes the current `grill-me` loop and the critical pass returns `confident`. Comparison, integration, or architecture-judgment requests should use a broader question set when repository evidence cannot recover the user's preferred owner, anti-scope, rollout posture, or validation bar.
 
@@ -221,12 +220,21 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 | `plan` | Gate status, `pre-plan critical: confident` status, decision, assumptions, anti-scope, validation path, risk, and requested checkpoint. | Applied changes or implied approval to execute. |
 | `execute` | Files changed, scoped result, `Check 1`, `Check 2`, `Check 3`, validation evidence, and residual risk. | New strategy, unrelated improvements, or unverified completion claims. |
 | `apply-plan` | Retained-plan ledger coverage, `done-*` status, blockers or completed items, three checks, and evidence. | Execution of `questions.md` or unapproved inline plan work. |
-| `review` | Findings first, severity, confidence, causal layer, evidence gap, and fix route. | Silent fixes or initial design work. |
+| `review` | Review Gate status (`satisfied` or `reopen`), findings first, severity, confidence, causal layer, evidence gap, and fix route. | Silent fixes, initial design work, or final verdict without review gate closure. |
 | `critical` | Strongest objection, why it matters, explicit critical outcome, and next-step package. | Routine implementation or ordinary code review. |
 
 ## Review Mode
 
 Review mode owns findings, evidence gaps, regression risk, systems risk, and fix routing. It does not apply fixes before a checkpoint or user-authorized `execute` phase. Use `Review Check 1`, `Review Check 2`, and `Review Check 3` plus `superpowers-verification-before-completion` before claiming `review complete` or `no findings`, then route code defects to `internal-code-review` and cross-cutting concerns to `internal-high-level-review`.
+
+### Review Gate
+
+Before declaring `review complete` or emitting the final verdict, load `grill-me` and `internal-gateway-critical-master` and run them against the review findings and recommendations. Declare either `review gate: satisfied` or `review gate: reopen` before the final verdict.
+
+- **Satisfied**: `grill-me` is satisfied for the review scope and the critical challenge returns `confident` for the findings and fix routing. Emit the final verdict.
+- **Reopen**: the critical challenge surfaces an unresolved assumption, blind spot, or evidence gap in the review. Present the objection to the user, absorb the finding into the review, and re-run the gate before the final verdict.
+
+The review gate blocks the final verdict the same way Gate 0 blocks plan output: do not emit the final review verdict while the gate is `reopen`.
 
 ## Staged Checkpoints
 
@@ -236,8 +244,7 @@ Review mode owns findings, evidence gaps, regression risk, systems risk, and fix
   `reopen`, the workflow re-enters `define` before any plan transition.
 - `plan-only` stops after the Definition Brief when needed, the Pre-Plan
   Critical Pass (`confident` or `reopen` cycle), the plan, Decision Brief,
-  required critical pass for non-trivial or governance-sensitive plans, and
-  next-step package.
+  and next-step package.
 - `full-cycle` may continue only through visible phase changes, the Pre-Plan
   Critical Pass (`confident`), and the required pre-execute checkpoint; the
   entrypoint name alone does not skip the critical pass or the checkpoint.

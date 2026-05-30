@@ -77,9 +77,7 @@ sections.
   option exploration or design approval is still the real work.
 - Retained-plan execution belongs to `internal-executing-plans` after
   `apply-plan` is selected.
-- Non-trivial or governance-sensitive retained-plan authoring belongs to
-  `internal-writing-plans`, including the detailed critical-before-plan
-  requirement that uses `internal-gateway-critical-master`.
+- Retained-plan authoring belongs to `internal-writing-plans`.
 - Failure diagnosis belongs to `internal-debugging`.
 - Test-first delivery belongs to `internal-tdd`.
 - Performance work belongs to `internal-performance-optimization`.

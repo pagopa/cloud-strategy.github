@@ -211,12 +211,6 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert (
         "Run the clarification gate only after the evidence pass" in writing_skill_text
     )
-    assert "internal-gateway-critical-master" in writing_skill_text
-    assert (
-        "Before writing a non-trivial or governance-sensitive retained plan"
-        in writing_skill_text
-    )
-    assert "`Critical challenge`" in writing_skill_text
     assert "## Numbered-file shape" in writing_skill_text
     assert "### Change summary file" in writing_skill_text
     assert "### Source item ledger file" in writing_skill_text
@@ -338,9 +332,8 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
     assert "clarification-only completion for executable verbs" in review_gate_text
     assert "coverage review comes before shape-only validation" in review_gate_text
     assert "missing source-item coverage for requested work" in review_gate_text
-    assert "Critical challenge" in scope_challenge_text
-    assert "Critical challenge" in review_gate_text
-    assert "internal-gateway-critical-master" in review_gate_text
+    assert "observable acceptance" in scope_challenge_text
+    assert "observable acceptance" in review_gate_text
 
 
 def test_plan_wrapper_skills_ship_openai_metadata() -> None:
@@ -358,7 +351,6 @@ def test_plan_wrapper_skills_ship_openai_metadata() -> None:
 
     assert "$internal-writing-plans" in writing_metadata_text
     assert "starting with 01-change-summary.md" in writing_metadata_text
-    assert "critical challenge" in writing_metadata_text
     assert "$internal-executing-plans" in executing_metadata_text
     assert (
         "classify retained plan folders from 01-change-summary.md"

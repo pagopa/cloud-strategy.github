@@ -97,8 +97,6 @@ Use this repository-local variant for small catalog maintenance before escalatin
                v
 +-------------------------------+
 | plan phase                     |
-| - critical challenge before    |
-|   non-trivial/governance plan  |
 | - retained plan when justified |
 | - Decision Brief projection    |
 +-------------------------------+
@@ -212,8 +210,6 @@ concrete.
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |
-| - critical challenge when      |
-|   plan risk requires it        |
 +-------------------------------+
                |
                v
@@ -256,6 +252,13 @@ Planning output should be compact enough for the next owner or runtime to act wi
 | - severity and confidence    |
 | - causal layer               |
 | - fix routing plan           |
++-----------------------------+
+              |
+              v
++-----------------------------+
+| Review Gate                  |
+| - grill-me satisfied         |
+| - critical-master confident  |
 +-----------------------------+
               |
               v

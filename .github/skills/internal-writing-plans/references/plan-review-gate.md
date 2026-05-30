@@ -21,7 +21,6 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Observable acceptance | Does each executable verb name the expected diff, file state, assertion, or explicit non-action that will prove it was done? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
-| Critical challenge | Did non-trivial or governance-sensitive retained-plan authoring use `internal-gateway-critical-master` before plan files were written, and did the plan absorb the outcome? |
 | Summary focus | Does `01-change-summary.md` contain only the short proposed-change summary, problem, rationale, validation path, and decision request? |
 | Semantic coverage | Does `02-source-item-ledger.md` preserve each requested or source item with stable item id, observable acceptance, evidence class, status, and route before execution starts? |
 | Implementation contract | Does `04-implementation-contract.md` name the exact sources, target files, validation order, blockers, and any external pin or fallback, or clearly say `Implementation contract: not applicable`? |
@@ -45,7 +44,6 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 - Do not add persona agents, runtime-specific frontmatter, or external workflow
   dependencies.
 - For strategic-to-operational conversions, coverage review comes before shape-only validation.
-- Treat a missing critical challenge for non-trivial or governance-sensitive retained plans as a plan-quality defect unless the ledger records an explicit not-applicable reason.
 - For plans intended for a smaller or lower-context executor, keep technical
   identifiers, file names, commands, and validation steps explicit. Short
   English glosses near critical decisions are allowed when they reduce handoff
