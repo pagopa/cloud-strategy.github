@@ -109,6 +109,32 @@ must stay outside the execution loop.
 - Run the clarification gate only after the evidence pass when real user decisions remain, then declare the gate status. Do not ask questions that repository evidence can answer.
 - Keep deferred improvements, retrospectives, and lessons separate from executable steps unless they are required for the requested outcome.
 
+## Close artifacts
+
+- Every completed plan must produce `completion-report.md` and `evidence-envelope.md` before creating `done-*` files.
+- `completion-report.md` must include all of these fields: `Completion Report`, `Active phase and owner:`, `State:`, `Files changed:`, `Completed items:`, `Intentional non-actions:`, `Validators:`, `Evidence envelope:`, `Source-item ledger:`, `Evidence gaps:`, `Residual risks:`, `Follow-up suggestions:`.
+- `evidence-envelope.md` must contain a table with three columns: `Source item`, `Status`, `Evidence path or command`.
+- `evidence-envelope.md` must reference every `done-*` file with backticks (e.g. `` `done-01-sample.md` ``).
+- `evidence-envelope.md` must not contain open completion statuses: `PENDING`, `PARTIAL`, `NOT_DONE`, `UNVERIFIABLE`, `BLOCKED`.
+- All active numbered files (`\d{2}-.+.md`) must be removed before creating `done-*` files.
+
+## Done shape
+
+- Every `done-*` file must record the HEAD commit at verification time (e.g. `Verified on: <commit>`).
+- Every `done-*` file must record the verification commands that were executed, preferably with abbreviated output or a commit reference.
+- Validation commands in `done-*` files must be re-executed and reported with output; do not cite results from previous runs.
+- Listing results without a trace of when they were produced is not enough.
+
+## Close Checklist
+
+Before creating `done-*` files, verify:
+- [ ] All numbered files have been removed or moved into `done-*`.
+- [ ] `completion-report.md` exists with all mandatory fields.
+- [ ] `evidence-envelope.md` exists with the three-column table and no open completion statuses.
+- [ ] `evidence-envelope.md` references every `done-*`.
+- [ ] Every `done-*` records the HEAD commit and the re-executed commands.
+- [ ] `make skill-lint` and relevant tests pass on the current HEAD.
+
 ## Numbered-file shape
 
 - Optimize retained plan files for scanability and decision review rather than exhaustive prose.
@@ -191,6 +217,7 @@ must stay outside the execution loop.
 10. Create `questions.md`, then put open questions and decision requests only there or write `- none` when nothing remains.
 11. Keep executable next steps in the numbered plan files without mixing unresolved questions into them.
 12. Run the scope challenge and plan review gate when the retained plan is non-trivial or will be handed to `internal-executing-plans`.
+13. Run the `Close Checklist` before creating `done-*` files and declaring the plan completed.
 
 ## Validation
 
