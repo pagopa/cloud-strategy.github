@@ -1,18 +1,18 @@
 ---
 name: internal-graphify
-description: Use when a codebase question needs the local Graphify knowledge graph to inspect repository structure, paths, communities, or affected files.
+description: Use when a codebase question needs the local Graphify knowledge graph to inspect repository structure, paths, communities, or affected files within this repository.
 ---
 
 # Internal Graphify
 
 ## Referenced skills
 
-- None.
+- `graphify`: upstream skill for general graph queries. Load it only when the upstream contract is sufficient and this repository does not expose internal markers.
 
 ## When to use
 
 - A codebase question needs graph-style structure, communities, paths, or affected-file analysis rather than plain text search alone.
-- The local Graphify output under `tmp/.graphify/graphify/graphify-out/` already exists, or the task explicitly allows refreshing it with `make graphify-update`.
+- The local Graphify output under `graphify-out/` already exists and is fresh, or the task explicitly allows refreshing it with `make graphify-update`.
 - The question is easier to answer with `graphify query`, `graphify explain`, `graphify path`, or `graphify affected` than with one-off file reads.
 
 ## When not to use
@@ -20,35 +20,50 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 - The task only needs a direct file lookup, symbol lookup, or a simple `rg` search.
 - The graph is missing or stale and the user did not ask for a refresh.
 - The task would require CI, hooks, background refresh, external APIs, or versioned Graphify output.
+- The current repository does not expose `.github/skills/internal-graphify/SKILL.md`, `.github/scripts/graphify_update.py`, `.graphifyignore`, or the expected `Makefile` targets. In that case, prefer the upstream `graphify` skill.
 
 ## Graph Contract
 
 - Canonical refresh command: `make graphify-update`
-- Canonical output path: `tmp/.graphify/graphify/graphify-out/graph.json`
-- Graphify workspace path: `tmp/.graphify/`
-- Working corpus path: `tmp/.graphify/graphify/`
+- Canonical check command: `make graphify-check`
+- Canonical output path: `graphify-out/graph.json`
+- Additional artifacts: `graphify-out/graph.html`, `graphify-out/GRAPH_REPORT.md`
 - Treat the graph as local disposable build output. Do not commit it.
+- Do not read Graphify artifacts directly with `rg` or file reads unless performing an explicit audit.
 
 ## Freshness Policy
 
 - Refresh only when the graph is missing, clearly stale for the active question, or the user explicitly asks.
 - After meaningful repository changes in the area under investigation, prefer `make graphify-update` before trusting older graph answers.
 - If the refresh command fails or `graph.json` is missing, fall back to normal repository search and say that the graph is unavailable.
+- `make graphify-check` exits non-zero when the graph is stale, incomplete, or contains source paths outside the governed corpus.
+
+## Activation Gate
+
+This skill applies repository-local guardrails only when the current working directory exposes all of the following:
+
+- `.github/skills/internal-graphify/SKILL.md`
+- `.github/scripts/graphify_update.py`
+- `.graphifyignore`
+- `Makefile` with `graphify-update` and `graphify-check` targets
+
+When any of these markers is missing, this skill must not propose `make graphify-update` or assume `graphify-out/` exists. Fall back to the upstream `graphify` skill or to standard search.
 
 ## Workflow
 
-1. Check whether `tmp/.graphify/graphify/graphify-out/graph.json` exists and is fresh enough for the current question.
-2. If refresh is needed and allowed, run `make graphify-update`.
-3. Use the smallest Graphify command that answers the question.
-4. Verify concrete claims against real repository files before finalizing the answer.
-5. Fall back to `rg`, targeted file reads, or symbol search when Graphify output is missing, ambiguous, or not precise enough.
+1. Verify that the repository exposes the activation gate markers above.
+2. Check whether `graphify-out/graph.json` exists and is fresh enough for the current question.
+3. If refresh is needed and allowed, run `make graphify-update`.
+4. Use the smallest Graphify command that answers the question.
+5. Verify concrete claims against real repository files before finalizing the answer.
+6. Fall back to `rg`, targeted file reads, or symbol search when Graphify output is missing, ambiguous, or not precise enough.
 
 ## Command Hints
 
 - Use `graphify query` for high-level repository structure or community questions.
 - Use `graphify explain <path>` to summarize a file or folder role.
 - Use `graphify path <from> <to>` to inspect relationship chains.
-- Use `graphify affected <path>` to inspect likely impact around a file or area.
+- Use `graphify affected <path>` to inspect likely impact around a file or area. Treat this as best-effort; always verify real callers with `rg` or targeted source reads.
 
 ## Output Expectations
 
@@ -59,4 +74,5 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 ## Validation
 
 - `make graphify-update`
+- `make graphify-check`
 - `make skill-lint`

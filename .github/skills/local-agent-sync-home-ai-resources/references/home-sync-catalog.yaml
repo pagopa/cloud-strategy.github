@@ -984,3 +984,13 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Gateway agent for simple fast-path tasks.
+- resource_id: internal-graphify
+  source_family: skills
+  source_path: .github/skills/internal-graphify
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Repository-local Graphify support with upstream compatibility and activation gate.

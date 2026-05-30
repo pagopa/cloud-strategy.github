@@ -49,6 +49,8 @@ def test_split_frontmatter_returns_empty_mapping_for_invalid_yaml() -> None:
         (".github/skills/local-demo/SKILL.md", True, False),
         (".github/agents/internal-sync-helper.agent.md", False, True),
         (".github/skills/internal-demo/agents/internal-sync-helper.yaml", False, True),
+        (".github/skills/internal-graphify/SKILL.md", False, True),
+        (".github/skills/internal-graphify/agents/openai.yaml", False, True),
         ("docs/readme.md", False, False),
     ],
 )

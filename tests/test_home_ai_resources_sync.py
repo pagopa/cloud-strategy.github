@@ -84,7 +84,7 @@ def test_main_plan_emits_json_for_selected_targets(
     monkeypatch.setattr(
         sync_home_ai_resources,
         "parse_args",
-        lambda: argparse.Namespace(
+        lambda _=None: argparse.Namespace(
             command="plan",
             source_root=str(source_root),
             home_root=str(home_root),
@@ -117,7 +117,7 @@ def test_main_apply_blocks_docs_unverified_targets(
     monkeypatch.setattr(
         sync_home_ai_resources,
         "parse_args",
-        lambda: argparse.Namespace(
+        lambda _=None: argparse.Namespace(
             command="apply",
             source_root=str(source_root),
             home_root=str(home_root),

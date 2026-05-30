@@ -24,6 +24,7 @@ LEGACY_AGENT_TOOL_IDS = {
 IGNORED_SYNC_FILENAMES = {"README.md", "CHANGELOG.md"}
 IGNORED_SYNC_PARTS = {"__pycache__", ".venv"}
 CONSUMER_SYNC_EXCLUDED_PREFIX = "internal-sync-"
+CONSUMER_SYNC_EXCLUDED_PATH_PREFIXES = frozenset({".github/skills/internal-graphify"})
 LESSONS_PATH = "LESSONS_LEARNED.md"
 ARCHITECTURE_PATH = "docs/01-local-architecture.md"
 REPOSITORY_CONTEXT_PATH = "docs/02-local-repository-context.md"
@@ -338,7 +339,12 @@ def is_imported_asset(relative_path: str) -> bool:
 
 def is_consumer_sync_excluded_path(relative_path: str) -> bool:
     path = Path(relative_path)
-    return any(part.startswith(CONSUMER_SYNC_EXCLUDED_PREFIX) for part in path.parts)
+    if any(part.startswith(CONSUMER_SYNC_EXCLUDED_PREFIX) for part in path.parts):
+        return True
+    for excluded_prefix in CONSUMER_SYNC_EXCLUDED_PATH_PREFIXES:
+        if relative_path.startswith(excluded_prefix + "/") or relative_path == excluded_prefix:
+            return True
+    return False
 
 
 def resolve_markdown_target(root: Path, current_file: Path, target: str) -> Path | None:

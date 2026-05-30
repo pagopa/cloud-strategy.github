@@ -15,3 +15,7 @@ env/
 
 .DS_Store
 ._*
+
+# Graphify official upstream output and temporary root artifacts
+/graphify-out/
+/.graphify_*

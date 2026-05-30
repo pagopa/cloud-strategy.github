@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 
 def find_repo_root(start: Path) -> Path:
@@ -353,3 +354,68 @@ def test_triple_apply_skip_plan_sequence_is_convergent(tmp_path: Path) -> None:
         manifest1["managed_resources"][0]["content_hash"]
         == manifest2["managed_resources"][0]["content_hash"]
     )
+
+
+def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    write_file(
+        source_root / ".github/skills/internal-graphify/SKILL.md",
+        "---\nname: internal-graphify\n---\n\n# Internal Graphify\n",
+    )
+    write_file(
+        source_root / ".github/skills/internal-graphify/agents/openai.yaml",
+        "interface:\n  display_name: Internal Graphify\n",
+    )
+
+    catalog_path = (
+        source_root
+        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+    )
+    catalog_path.write_text(
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: false\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: false\n"
+        "resources:\n"
+        "  - resource_id: demo-skill\n"
+        "    source_family: skills\n"
+        "    source_path: .github/skills/demo-skill\n"
+        "    include_targets:\n"
+        "      - codex\n"
+        "  - resource_id: internal-graphify\n"
+        "    source_family: skills\n"
+        "    source_path: .github/skills/internal-graphify\n"
+        "    include_targets:\n"
+        "      - codex\n",
+        encoding="utf-8",
+    )
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="plan",
+    )
+
+    resource_ids = {op.resource_id for op in plan.operations if hasattr(op, "resource_id")}
+    planned_paths = {op.path for op in plan.operations if hasattr(op, "path")}
+
+    assert "internal-graphify" in resource_ids or any(
+        ".agents/skills/internal-graphify" in str(op.path)
+        for op in plan.operations
+    )
+
+
+def test_home_sync_catalog_contains_internal_graphify_in_real_repo() -> None:
+    catalog_path = (
+        REPO_ROOT
+        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+    )
+    catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+    resource_ids = {r["resource_id"] for r in catalog.get("resources", [])}
+    assert "internal-graphify" in resource_ids
