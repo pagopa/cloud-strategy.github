@@ -45,6 +45,7 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - `doctor`: verify runtime roots, permissions, symlink posture, manifest health, and support-matrix readiness.
 - `apply`: explicit only. Materialize only approved and safe operations.
 - `dry-run`: alias of `plan`, not a separate behavior.
+- `bisync`: bidirectional sync between `.github/skills/` and `~/.agents/skills/` using mtime resolution. Use `bisync plan` to detect drift and `bisync apply` to resolve it.
 
 ## Target Selection
 

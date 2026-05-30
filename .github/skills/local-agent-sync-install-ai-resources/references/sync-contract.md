@@ -90,3 +90,33 @@ Text and JSON reporting should expose at least:
 - Repository Bash wrapper: `.github/scripts/sync_home_ai_resources.sh`
 
 Prefer the bundled scripts when the skill is direct-copied into a home runtime. Prefer the repository wrappers when running from this source repository because they reuse the repository maintenance-tool environment.
+
+## Bisync Contract
+
+The `bisync` mode provides bidirectional synchronization between `.github/skills/` and `~/.agents/skills/` using mtime-based conflict resolution.
+
+### Logic
+
+1. Scan both directories and collect all skill names (union)
+2. For each skill present in both sides:
+   - Compute content hash (excluding `__pycache__`, `.pyc`, `.pyo`, `.venv`, `.pytest_cache`)
+   - If hashes match → `in-sync`
+   - If hashes differ → compare max mtime across all files in the bundle
+   - The side with the newer mtime wins
+3. For skills only in one side → report as `only-repo` or `only-home` (manual action required)
+
+### Commands
+
+- `bisync plan`: detect drift and show direction (read-only)
+- `bisync apply`: copy winner → loser for each drifted skill
+
+### Safety
+
+- `plan` is read-only and safe to run anytime
+- `apply` copies entire skill bundles to maintain consistency
+- Post-apply verification: re-run `bisync plan` to confirm 0 drift
+
+### Exclusions
+
+- `__pycache__`, `.pyc`, `.pyo`, `.venv`, `.pytest_cache` are excluded from hash and mtime calculations
+- `local-agent-sync-*` skills are repo-only and not included in bisync
