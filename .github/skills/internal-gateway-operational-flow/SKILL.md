@@ -12,7 +12,7 @@ Load these skills by name only when the active phase requires them. This list is
 Always preload only `grill-me` and `internal-agent-support-next-step`.
 Treat every other referenced skill as an on-demand dependency, not a preload bundle.
 
-- `grill-me`: Gate 0 interview support after the minimum evidence pass for every non-`execute` operational-flow entrypoint; this skill owns Gate 0 status and phase-blocking semantics inside the `define` state.
+- `grill-me`: Gate 0 interview support after the minimum evidence pass for pre-`plan` entrypoints (`define-first`, `plan-only`, `full-cycle` before a confirmed definition exists); this skill owns Gate 0 status and phase-blocking semantics inside the `define` state.
 - `internal-idea-define-advisor`: pre-action advisory brain inside `define` for tool, skill, agent, workflow, owner, overkill, comparison, and simple-task fit decisions.
 - `internal-agent-support-next-step`: durable next-owner, scope, validation, and risk handoff package.
 - `internal-agent-support-lane-change-engine`: user-visible lane-change response when the selected mode no longer fits.
@@ -58,29 +58,29 @@ Select one workflow entry point from the user prompt, then run one active phase 
 | `define-first` | The user wants brainstorming, clarification, `grill-me`, idea refinement, or success criteria before a plan. | `define` |
 | `plan-only` | The user asks for a plan, decision brief, or retained plan without implementation. | `define` when intent, success, boundary, or options are not confirmed; otherwise `plan` |
 | `plan-only (clarify-first)` | Legacy input spelling for `define-first`; keep as compatibility, not as a separate phase. | `define` |
-| `apply-plan` | The user asks to apply an approved retained plan under `tmp/superpowers/`. | `define` pre-start gate, then `apply-plan` with `internal-executing-plans` |
-| `review` | The user asks for defect-first review, merge readiness, or evidence analysis. | `define` pre-review gate unless scope is already confirmed, then `review` |
+| `apply-plan` | The user asks to apply an approved retained plan under `tmp/superpowers/`. | `apply-plan` with `internal-executing-plans`; Gate 0 not required because the approved plan is the authorization signal |
+| `review` | The user asks for defect-first review, merge readiness, or evidence analysis. | `review`; Gate 0 not required because review scope is self-contained |
 | `mode-explicit` | The user directly asks for `define`, `plan`, `execute`, or `review`. | The named phase |
 
 ## Phase-Local Contracts
 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan, recommendation, review, phase transition, or retained-plan application. | Confirmed intent, assumptions, option frame, Definition Brief, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, explicit user closure, and named validation path or gap. |
+| `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan output or recommendation. Gate 0 is pre-`plan` only; it does not block `apply-plan`, `review`, or `execute`. | Confirmed intent, assumptions, option frame, Definition Brief, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, explicit user closure, and named validation path or gap. |
 | `plan` | A confirmed definition exists, but decisions, ownership, rollout, validation, or tradeoffs remain. | Gate 0 must already be satisfied for the current request, or `define` must run first. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes, restart open-ended brainstorming, or imply execute approval. | `internal-writing-plans`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
 | `execute` | Target state and validation are concrete. | Do not start Gate 0 for direct `execute` unless the user explicitly asks for `grill-me` or the lane changes away from `execute`. | Scoped edits, focused validation, and slice reports. | Add unrelated improvements or reopen strategy silently. | `internal-debugging`, `internal-tdd`, and runtime delivery skills. | `Check 1-3` plus fresh evidence. |
-| `apply-plan` | An approved retained plan folder is the execution target. | Gate 0 must be satisfied through `define` before retained-plan execution and rerun on request, context, or environment change. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
-| `review` | A concrete artifact, diff, or validation result exists. | Gate 0 must be satisfied through `define` before review output and rerun when scope, evidence, or environment changes. | Findings, severity, evidence gaps, and fix routing. | Apply fixes or design the initial solution. | `internal-code-review`, `internal-high-level-review`. | `Review Check 1-3` and named evidence gaps. |
+| `apply-plan` | An approved retained plan folder is the execution target. | Gate 0 not required; the approved retained plan is the authorization signal. The `define` phase already happened during plan authoring. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
+| `review` | A concrete artifact, diff, or validation result exists. | Gate 0 not required; review scope is self-contained from the artifact under review. | Findings, severity, evidence gaps, and fix routing. | Apply fixes or design the initial solution. | `internal-code-review`, `internal-high-level-review`. | `Review Check 1-3` and named evidence gaps. |
 | `critical` | Assumptions, proposal, or decision need pressure testing. | Not owned here; use the critical owner. | Strongest objection, lens, and explicit outcome. | Implement or routine-review. | `internal-gateway-critical-master`. | One critical outcome and next-step package. |
 
 ## Core Contract
 
 - Choose one active phase at a time inside the selected workflow.
 - Each active phase declares phase, logical owner, scope, anti-scope, action, validation, risk, and the next checkpoint or decision.
-- Always load `grill-me` and `internal-agent-support-next-step` at skill start. After the minimum evidence pass, start Gate 0 for every non-`execute` entrypoint before downstream action. Load every other skill only when its phase, handoff, or failure condition becomes active.
+- Always load `grill-me` and `internal-agent-support-next-step` at skill start. After the minimum evidence pass, start Gate 0 before `plan` output when the entrypoint is `define-first`, `plan-only`, or `full-cycle` without a confirmed definition. Do not start Gate 0 for `apply-plan`, `review`, or `execute` entrypoints. Load every other skill only when its phase, handoff, or failure condition becomes active.
 - If the entry point or phase is unclear, use `define` as the safe fallback when user intent or success is not confirmed; otherwise use `plan` instead of dispatching automatically.
 - Keep direct entry and manual transitions visible to the user. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
-- Treat Gate 0 as the first-class `define` gate for non-`execute` entrypoints. This skill owns the blocking gate status; use `grill-me` as the interview pattern and keep the detailed protocol in [references/gate-0-protocol.md](references/gate-0-protocol.md).
+- Treat Gate 0 as the pre-`plan` `define` gate. It blocks plan output and recommendations but does not block `apply-plan`, `review`, or `execute`. This skill owns the blocking gate status; use `grill-me` as the interview pattern and keep the detailed protocol in [references/gate-0-protocol.md](references/gate-0-protocol.md).
 - Use `internal-idea-define-advisor` inside `define` when the user asks whether to use, compare, create, route, defer, or simplify an AI asset, tool, workflow, or owner before planning or execution.
 - Use `superpowers-brainstorming` only inside `define` when the work needs option exploration, divergent/convergent design thinking, or design approval before a plan. Do not invoke it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when the target state and validation are already concrete.
 - Use `internal-agent-support-next-step` whenever a phase ends with a recommended next owner, scope, action, validation path, and risk note.
@@ -92,11 +92,11 @@ Select one workflow entry point from the user prompt, then run one active phase 
 
 ## Grill-me Gate Protocol
 
-Gate 0 starts after the minimum evidence pass and remains the first-class `define` gate for every non-`execute` operational-flow entrypoint. Declare either `grill-me required` or `grill-me satisfied` before any plan output, recommendation, retained-plan application, review output, phase transition, or edit.
+Gate 0 starts after the minimum evidence pass and is the pre-`plan` `define` gate. Declare either `grill-me required` or `grill-me satisfied` before any plan output or recommendation. Gate 0 does not apply to `apply-plan`, `review`, or `execute` entrypoints; when the user already has an approved retained plan and asks to execute or apply it, proceed directly to execution and verification.
 
-`grill-me satisfied` means the user answered or explicitly accepted defaults in the current Gate 0 loop for the current request, context, and environment. Do not replace those decisions with silent assumptions. Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0.
+`grill-me satisfied` means the user answered or explicitly accepted defaults in the current Gate 0 loop for the current request, context, and environment. Do not replace those decisions with silent assumptions.
 
-Keep the full status table, blocking rules, closure rules, phase transition authorization, and request-change realignment in [references/gate-0-protocol.md](references/gate-0-protocol.md). This skill keeps only the phase contract: provide numbered questions with a recommended answer when the gate is still required, then continue one question at a time for unresolved ambiguity. Direct `execute` is the only automatic Gate 0 exception. If request-change realignment changes scope, owner, target state, validation, or rollout, treat the next governance-sensitive action as a pre-start checkpoint and restart the gate.
+Keep the full status table, blocking rules, closure rules, phase transition authorization, and request-change realignment in [references/gate-0-protocol.md](references/gate-0-protocol.md). This skill keeps only the phase contract: provide numbered questions with a recommended answer when the gate is still required, then continue one question at a time for unresolved ambiguity. `apply-plan`, `review`, and `execute` are automatic Gate 0 exceptions because the planning decisions already happened. If request-change realignment changes scope, owner, target state, validation, or rollout during a `plan` or `define` phase, treat the next governance-sensitive action as a pre-start checkpoint and restart the gate.
 
 The agent must not close or skip the loop by itself. Close the loop only after a user closure signal, then continue only while the same Gate 0 answer still fits the current scope.
 
@@ -203,7 +203,7 @@ Review mode owns findings, evidence gaps, regression risk, systems risk, and fix
   the user explicitly requests moving into `plan`.
 - `plan-only` stops after the Definition Brief when needed, the plan, Decision Brief, required critical pass for non-trivial or governance-sensitive plans, and next-step package.
 - `full-cycle` may continue only through visible phase changes and the required pre-execute checkpoint; the entrypoint name alone does not skip that checkpoint.
-- Any request-change realignment reruns Gate 0 before the next governance-sensitive plan output, recommendation, phase transition, or edit.
+- Any request-change realignment reruns Gate 0 before the next governance-sensitive plan output or recommendation, but not before `apply-plan`, `review`, or `execute`.
 - `apply-plan` stops for missing retained plans, inline plans without checkpoint, or blockers that `internal-executing-plans` identifies.
 - `review` routes each actionable finding to delivery, planning, critical challenge, or defer.
 
@@ -224,7 +224,7 @@ Review mode owns findings, evidence gaps, regression risk, systems risk, and fix
 - `apply-plan` uses `internal-executing-plans`, requires source-item ledger coverage for non-trivial retained plans, and excludes `questions.md`.
 - Phase-ending reports state `Lessons` status even when no lesson was retained.
 - `review` mode uses the relevant review lens instead of cloning `internal-code-review`, `internal-high-level-review`, or future security-lens playbooks; see the Future Security Lens rule in `references/wrapper-alignment.md`.
-- Gate 0 blocks plan output, phase transition, or action when user decisions can change scope, owner, target state, validation, rollout, or anti-scope; `grill-me` supplies only the self-contained interview pattern.
+- Gate 0 blocks plan output and recommendations when user decisions can change scope, owner, target state, validation, rollout, or anti-scope; it does not block `apply-plan`, `review`, or `execute`; `grill-me` supplies only the self-contained interview pattern.
 - Imported support follows `references/wrapper-alignment.md` and is never a mandatory engine for gateway phases.
 - Critical challenge is visible and owned by `internal-gateway-critical-master`.
 - Copilot wrapper agents remain wrappers and do not re-list long workflow tables owned by this skill or its references.

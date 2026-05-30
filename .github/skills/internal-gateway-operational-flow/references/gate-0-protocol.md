@@ -7,19 +7,21 @@ carry.
 ## Activation
 
 - Run the minimum evidence pass first, then start Gate 0 inside `define` for
-  every non-`execute` operational-flow entrypoint.
-- Gate 0 applies before plan output, recommendation, retained-plan
-  application, review output, phase transition, or governance-sensitive edit.
+  pre-`plan` entrypoints (`define-first`, `plan-only`, `full-cycle` without a
+  confirmed definition).
+- Gate 0 applies before plan output and recommendations. It does not apply to
+  `apply-plan`, `review`, or `execute` entrypoints; when the user already has
+  an approved retained plan and asks to execute or apply it, proceed directly.
 - Rich prompts, concrete tasks, mechanical tasks, retained-plan approval,
-  recoverable repository evidence, and pre-start signals do not waive Gate 0.
-  For mechanical work, ask a minimal, clear, and concise `grill-me` question
-  set instead of skipping the gate.
+  recoverable repository evidence, and pre-start signals do not waive Gate 0
+  for pre-`plan` entrypoints. For mechanical work, ask a minimal, clear, and
+  concise `grill-me` question set instead of skipping the gate.
 
 ## Status
 
 | Status | Use when | Effect |
 | --- | --- | --- |
-| `grill-me required` | The mandatory Gate 0 loop has not been explicitly closed by the user for the current request, context, and environment. | Stop before plan output, recommendation, review output, phase transition, retained-plan application, or edit; ask the `grill-me` question set. |
+| `grill-me required` | The mandatory Gate 0 loop has not been explicitly closed by the user for the current request, context, and environment. | Stop before plan output or recommendation; ask the `grill-me` question set. Does not block `apply-plan`, `review`, or `execute`. |
 | `grill-me satisfied` | The user answered or explicitly accepted defaults in the current Gate 0 loop, gave a closure or proceed signal, the answers still match the current scope, and no unresolved user-only decision remains. | Continue with the current phase while the request remains stable. |
 
 `grill-me` supplies the interview shape. `internal-gateway-operational-flow`
@@ -27,11 +29,12 @@ owns Gate 0 status labels and blocking semantics.
 
 ## Blocking And Closure
 
-- Declare exactly one Gate 0 status before downstream plan output,
-  recommendation, Decision Brief, review output, phase transition, or edit.
-- Keep `plan`, `apply-plan`, `review`, and planning output blocked while the
-  result is `grill-me required`. Direct `execute` is the only automatic Gate 0
-  exception.
+- Declare exactly one Gate 0 status before downstream plan output or
+  recommendation.
+- Keep `plan` and planning output blocked while the result is
+  `grill-me required`. `apply-plan`, `review`, and `execute` are automatic
+  Gate 0 exceptions because the planning decisions already happened during
+  plan authoring.
 - When the gate is `grill-me required`, stop and ask numbered questions using
   `Question`, `Recommendation`, `Why`, and `Default if accepted`.
 - Only the user may close or stop the loop. The agent may recommend closure,
@@ -55,6 +58,9 @@ owns Gate 0 status labels and blocking semantics.
 ## Realignment
 
 - If request, target path, context, environment, tool output, dependency
-  state, validation posture, or dirty-worktree ownership changes, run the
-  minimum new evidence pass, restart Gate 0, and stop again while the result is
-  `grill-me required`.
+  state, validation posture, or dirty-worktree ownership changes during a
+  `define` or `plan` phase, run the minimum new evidence pass, restart Gate 0,
+  and stop again while the result is `grill-me required`.
+- Realignment does not restart Gate 0 for `apply-plan`, `review`, or `execute`
+  entrypoints. If a lane-change from execution back to `plan` is needed, Gate 0
+  restarts in the new `define` or `plan` phase.
