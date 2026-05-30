@@ -1,5 +1,5 @@
 ---
-name: local-sync-home-ai-resources
+name: local-sync-install-ai-resources
 description: Use this agent when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, Copilot, Claude Code, or OpenCode targets.
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
@@ -16,7 +16,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 
 ## Core Skill
 
-- `local-agent-sync-home-ai-resources`
+- `local-agent-sync-install-ai-resources`
 
 ## Routing Rules
 

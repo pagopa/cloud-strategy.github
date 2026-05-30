@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-SKILL_ROOT_RELATIVE = Path(".github/skills/local-agent-sync-home-ai-resources")
+SKILL_ROOT_RELATIVE = Path(".github/skills/local-agent-sync-install-ai-resources")
 BUNDLED_SKILL_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_SUPPORT_MATRIX_PATH = Path("references/runtime-support-matrix.yaml")
 HOME_SYNC_CATALOG_PATH = Path("references/home-sync-catalog.yaml")

@@ -7,7 +7,7 @@ import yaml
 SYNC_AGENTS = {
     "local-sync-external-resources": ".github/agents/local-sync-external-resources.agent.md",
     "local-sync-global-copilot-configs-into-repo": ".github/agents/local-sync-global-copilot-configs-into-repo.agent.md",
-    "local-sync-home-ai-resources": ".github/agents/local-sync-home-ai-resources.agent.md",
+    "local-sync-install-ai-resources": ".github/agents/local-sync-install-ai-resources.agent.md",
 }
 
 WATCHLIST_PATH = Path(
@@ -26,7 +26,7 @@ EXPECTED_CORE_SKILLS = {
     "local-sync-global-copilot-configs-into-repo": (
         "local-agent-sync-global-copilot-configs-into-repo"
     ),
-    "local-sync-home-ai-resources": "local-agent-sync-home-ai-resources",
+    "local-sync-install-ai-resources": "local-agent-sync-install-ai-resources",
 }
 
 

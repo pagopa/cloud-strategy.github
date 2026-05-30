@@ -18,7 +18,7 @@ def find_repo_root(start: Path) -> Path:
 
 REPO_ROOT = find_repo_root(Path(__file__))
 SKILL_SCRIPTS_ROOT = (
-    REPO_ROOT / ".github/skills/local-agent-sync-home-ai-resources/scripts"
+    REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 )
 sys.path.insert(0, SKILL_SCRIPTS_ROOT.as_posix())
 

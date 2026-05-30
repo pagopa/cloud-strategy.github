@@ -1,5 +1,5 @@
 ---
-name: local-agent-sync-home-ai-resources
+name: local-agent-sync-install-ai-resources
 description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, Copilot, Claude Code, or OpenCode targets.
 ---
 
@@ -9,7 +9,7 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 
 - None.
 
-Use this skill as the operating engine for `.github/agents/local-sync-home-ai-resources.agent.md`.
+Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 
 Keep the paired agent short. Keep route, boundary, approval posture, and output expectations in the agent. Keep reusable sync workflow, target policy, safety gates, and reporting posture here. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
 
@@ -93,6 +93,6 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 
 - Rebuild `.github/INVENTORY.md` when the bundle or related scripts change by using `./.github/scripts/build_inventory.sh --root .`.
 - Run `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks` after bundle or automation changes.
-- Run `bash -n .github/skills/local-agent-sync-home-ai-resources/scripts/run.sh .github/scripts/sync_home_ai_resources.sh` after shell wrapper changes.
+- Run `bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh .github/scripts/sync_home_ai_resources.sh` after shell wrapper changes.
 - Run focused agent or skill contract tests for the touched bundle.
 - Run focused sync tests for target parsing, support-matrix policy, manifest handling, overwrite gates, and missing-directory behavior when automation changes.

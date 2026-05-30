@@ -33,7 +33,7 @@ def initialize_source_repo(root: Path) -> None:
     )
     write_file(
         root
-        / ".github/skills/local-agent-sync-home-ai-resources/references/runtime-support-matrix.yaml",
+        / ".github/skills/local-agent-sync-install-ai-resources/references/runtime-support-matrix.yaml",
         "version: 1\n"
         "rows:\n"
         "  - target: codex\n"
@@ -57,7 +57,7 @@ def initialize_source_repo(root: Path) -> None:
     )
     write_file(
         root
-        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml",
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml",
         "version: 1\n"
         "defaults:\n"
         "  include_internal_skills: false\n"

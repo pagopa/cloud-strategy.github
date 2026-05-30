@@ -103,7 +103,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-writing-plans/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
-- `.github/skills/local-agent-sync-home-ai-resources/SKILL.md`
+- `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/mattpocock-caveman/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
@@ -139,7 +139,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/agents/internal-gateway-simple-task.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`
-- `.github/agents/local-sync-home-ai-resources.agent.md`
+- `.github/agents/local-sync-install-ai-resources.agent.md`
 
 ## Prompts
 

@@ -18,7 +18,7 @@ def find_repo_root(start: Path) -> Path:
 
 REPO_ROOT = find_repo_root(Path(__file__))
 SKILL_SCRIPTS_ROOT = (
-    REPO_ROOT / ".github/skills/local-agent-sync-home-ai-resources/scripts"
+    REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 )
 
 
@@ -75,7 +75,7 @@ def initialize_source_repo(root: Path) -> None:
     )
     write_file(
         root
-        / ".github/skills/local-agent-sync-home-ai-resources/references/runtime-support-matrix.yaml",
+        / ".github/skills/local-agent-sync-install-ai-resources/references/runtime-support-matrix.yaml",
         "version: 1\n"
         "rows:\n"
         "  - target: codex\n"
@@ -99,7 +99,7 @@ def initialize_source_repo(root: Path) -> None:
     )
     write_file(
         root
-        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml",
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml",
         "version: 1\n"
         "defaults:\n"
         "  include_internal_skills: false\n"
@@ -234,7 +234,7 @@ def test_stale_manifest_path_escapes_home_is_blocked(tmp_path: Path) -> None:
 
     catalog_path = (
         source_root
-        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
     )
     catalog_path.write_text(
         "version: 1\n"
@@ -277,7 +277,7 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
 
     catalog_path = (
         source_root
-        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
     )
     catalog_path.write_text(
         "version: 1\n"
@@ -373,7 +373,7 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
 
     catalog_path = (
         source_root
-        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
     )
     catalog_path.write_text(
         "version: 1\n"
@@ -415,7 +415,7 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
 def test_home_sync_catalog_contains_internal_graphify_in_real_repo() -> None:
     catalog_path = (
         REPO_ROOT
-        / ".github/skills/local-agent-sync-home-ai-resources/references/home-sync-catalog.yaml"
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
     )
     catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
     resource_ids = {r["resource_id"] for r in catalog.get("resources", [])}

@@ -14,7 +14,7 @@ from pathlib import Path
 
 SKILL_SCRIPT_DIR = (
     Path(__file__).resolve().parents[1]
-    / "skills/local-agent-sync-home-ai-resources/scripts"
+    / "skills/local-agent-sync-install-ai-resources/scripts"
 )
 SKILL_CLI_PATH = SKILL_SCRIPT_DIR / "sync_home_ai_resources.py"
 
