@@ -11,7 +11,7 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 
-Keep the paired agent short. Keep route, boundary, approval posture, and output expectations in the agent. Keep reusable sync workflow, target policy, safety gates, and reporting posture here. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
+The paired agent is a thin UX wrapper; this skill owns all business logic, sequencing, approval posture, safety gates, and reporting. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
 
 ## When to use
 
@@ -37,15 +37,36 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Prune only stale managed assets, and only when explicit approval is present and the manifest entry passes schema validation, path confinement, and content-hash drift checks.
 - Keep local sync state under `~/.sync/cloud-strategy-governance/home-ai-resources/`.
 - Block `apply` when runtime support is undocumented, target paths are unsafe, or ownership evidence is missing.
+- Keep runtime support evidence explicit through the paired references instead of inferring undocumented home paths.
+
+## Output Expectations
+
+- Selected mode, selected targets, and why that mode is valid.
+- Source resources considered and the runtime support evidence used.
+- Missing directories, conflicts, or documentation gates that block `apply`.
+- Managed versus preserved target-local outcomes and any approved prune behavior.
+- Validation results, remaining blockers, and explicit validation gaps.
 
 ## Mode Selection
 
-- `plan`: default mode. Produce a readable dry run and machine-readable state.
+- `plan`: produce a readable dry run and machine-readable state.
 - `audit`: compare source, manifest, and managed target paths without writing runtime files.
 - `doctor`: verify runtime roots, permissions, symlink posture, manifest health, and support-matrix readiness.
 - `apply`: explicit only. Materialize only approved and safe operations.
 - `dry-run`: alias of `plan`, not a separate behavior.
 - `bisync`: bidirectional sync between `.github/skills/` and `~/.agents/skills/` using mtime resolution. Use `bisync plan` to detect drift and `bisync apply` to resolve it.
+
+## Default Sync Sequence
+
+When the user says "sync" without specifying a mode, follow this sequence in order:
+
+1. **bisync plan** — detect mtime drift between `.github/skills/` and `~/.agents/skills/`. Resolve any `only-repo` or `only-home` drift before continuing.
+2. **plan** — produce the full sync plan for all targets. Surface blocked paths early.
+3. **audit** — if plan shows blocked paths, run audit to diagnose the exact conflicts.
+4. **Resolve blockers** — remove or reconcile conflicting home files before attempting apply. `apply` refuses to run when any `blocked_codes` exist.
+5. **apply** — only on explicit user request, only after zero blockers remain.
+
+Do not skip bisync. Do not attempt apply without first confirming zero blockers via plan or audit.
 
 ## Target Selection
 
@@ -82,6 +103,14 @@ Keep the paired agent short. Keep route, boundary, approval posture, and output 
 - Block unsafe home paths, unsupported symlink hops, missing target roots without explicit create approval, and undocumented runtime claims.
 - Keep the canonical error taxonomy in `references/error-codes.md`.
 - Keep the doctor checklist in `references/doctor-checks.md`.
+
+## Conflict Resolution
+
+When plan or audit reports blocked paths, resolve them before apply:
+
+- `target-exists-unmanaged`: the target file or directory exists at home but is not in the sync manifest. Remove it manually so sync can recreate it from source.
+- `target-modified-managed`: the target is in the manifest but its content diverged from the last recorded hash. Remove it manually so sync can restore the source-of-truth version.
+- After removing conflicting files, re-run plan to confirm zero blockers before applying.
 
 ## Load On Demand
 
