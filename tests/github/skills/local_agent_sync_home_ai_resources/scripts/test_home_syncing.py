@@ -86,19 +86,10 @@ def initialize_source_repo(root: Path) -> None:
         "    include_in_v1: true\n"
         "    evidence: []\n"
         "    notes: Codex direct-copy skill support.\n"
-        "  - target: vscode\n"
-        "    resource_family: skills\n"
-        "    support_level: Documented\n"
-        "    home_path: ~/.copilot/skills/<skill>/\n"
-        "    direct_copy_possible: true\n"
-        "    translation_required: false\n"
-        "    include_in_v1: true\n"
-        "    evidence: []\n"
-        "    notes: VS Code direct-copy skill support.\n"
-        "  - target: antigravity\n"
+        "  - target: opencode\n"
         "    resource_family: skills\n"
         "    support_level: User-provided / To verify\n"
-        "    home_path: ~/.gemini/antigravity/skills/<skill>/\n"
+        "    home_path: ~/.config/opencode/skills/<skill>/\n"
         "    direct_copy_possible: true\n"
         "    translation_required: false\n"
         "    include_in_v1: false\n"
@@ -119,16 +110,15 @@ def initialize_source_repo(root: Path) -> None:
         "    source_path: .github/skills/demo-skill\n"
         "    include_targets:\n"
         "      - codex\n"
-        "      - vscode\n"
-        "      - antigravity\n"
+        "      - opencode\n"
         "    target_support: Documented\n"
         "    notes: Demo bundle.\n",
     )
 
 
 def test_parse_targets_normalizes_known_values_and_rejects_unknowns() -> None:
-    assert parse_targets(" vscode, codex , codex ") == ("codex", "vscode")
-    assert parse_targets("all") == ("codex", "vscode", "antigravity")
+    assert parse_targets(" opencode, codex , codex ") == ("codex", "opencode")
+    assert parse_targets("all") == ("codex", "copilot", "claude", "opencode")
 
     with pytest.raises(ValueError, match="unknown-target"):
         parse_targets("codex,unknown")
@@ -141,13 +131,13 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
 
-    unmanaged_target = home_root / ".codex/skills/demo-skill"
+    unmanaged_target = home_root / ".agents/skills/demo-skill"
     write_file(unmanaged_target / "SKILL.md", "# unmanaged\n")
 
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex,antigravity"),
+        targets=parse_targets("codex,opencode"),
         mode="apply",
     )
     operation_codes = {
@@ -186,13 +176,13 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
         apply_home_sync_plan(plan)
 
     manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
-    copied_skill = home_root / ".codex/skills/demo-skill/SKILL.md"
+    copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
     assert copied_skill.is_file()
-    assert not (home_root / ".codex/skills/demo-skill/scripts/.venv").exists()
-    assert not (home_root / ".codex/skills/demo-skill/__pycache__").exists()
-    assert not (home_root / ".codex/skills/demo-skill/.pytest_cache").exists()
+    assert not (home_root / ".agents/skills/demo-skill/scripts/.venv").exists()
+    assert not (home_root / ".agents/skills/demo-skill/__pycache__").exists()
+    assert not (home_root / ".agents/skills/demo-skill/.pytest_cache").exists()
     assert manifest["targets"] == ["codex"]
     assert manifest["managed_resources"][0]["resource_id"] == "demo-skill"
 

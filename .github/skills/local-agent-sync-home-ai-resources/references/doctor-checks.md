@@ -15,23 +15,31 @@ Use this checklist when `doctor` needs to explain readiness before a local home 
 ## Codex Checks
 
 - Confirm `~/.agents/skills` exists or can be created safely.
+- Confirm `~/.codex/agents` exists or can be created safely.
 - Confirm allowlisted skill bundles contain `SKILL.md`.
+- Confirm allowlisted agent source files are valid `.agent.md` files.
 - Confirm bundle-relative `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` paths stay self-contained.
 
 ## Copilot Checks
 
 - Confirm `~/.agents/skills` exists or can be created safely.
+- Confirm `~/.copilot/agents` exists or can be created safely.
 - Confirm allowlisted skill bundles contain `SKILL.md`.
+- Confirm allowlisted agent source files are valid `.agent.md` files.
 - Confirm bundle-relative paths stay self-contained.
 
 ## Claude Checks
 
 - Confirm `~/.agents/skills` exists or can be created safely.
+- Confirm `~/.claude/agents` exists or can be created safely.
 - Confirm allowlisted skill bundles contain `SKILL.md`.
+- Confirm allowlisted agent source files are valid `.agent.md` files.
 - Confirm bundle-relative paths stay self-contained.
 
 ## OpenCode Checks
 
 - Confirm `~/.agents/skills` exists or can be created safely.
+- Confirm `~/.config/opencode/agents` exists or can be created safely.
 - Confirm allowlisted skill bundles contain `SKILL.md`.
+- Confirm allowlisted agent source files are valid `.agent.md` files.
 - Confirm bundle-relative paths stay self-contained.

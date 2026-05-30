@@ -2,7 +2,7 @@
 """Purpose: repo-local wrapper for the bundled home AI resource sync skill script.
 
 Usage examples:
-  python3 ./.github/scripts/sync_home_ai_resources.py plan --targets codex,vscode
+  python3 ./.github/scripts/sync_home_ai_resources.py plan --targets codex,copilot,claude,opencode
   python3 ./.github/scripts/sync_home_ai_resources.py apply --targets codex --create-missing-dirs
 """
 

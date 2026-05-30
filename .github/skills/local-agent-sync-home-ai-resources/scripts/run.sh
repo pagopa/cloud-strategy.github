@@ -2,7 +2,7 @@
 #
 # Purpose: Bootstrap this skill's local Python environment and run the home AI resource sync tool.
 # Usage examples:
-#   ./scripts/run.sh plan --targets codex,vscode
+#   ./scripts/run.sh plan --targets codex,copilot,claude,opencode
 #   ./scripts/run.sh apply --targets codex --create-missing-dirs
 
 set -Eeuo pipefail

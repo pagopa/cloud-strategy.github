@@ -45,10 +45,10 @@ def initialize_source_repo(root: Path) -> None:
         "    include_in_v1: true\n"
         "    evidence: []\n"
         "    notes: Codex direct-copy skill support.\n"
-        "  - target: antigravity\n"
+        "  - target: opencode\n"
         "    resource_family: skills\n"
         "    support_level: User-provided / To verify\n"
-        "    home_path: ~/.gemini/antigravity/skills/<skill>/\n"
+        "    home_path: ~/.config/opencode/skills/<skill>/\n"
         "    direct_copy_possible: true\n"
         "    translation_required: false\n"
         "    include_in_v1: false\n"
@@ -69,7 +69,7 @@ def initialize_source_repo(root: Path) -> None:
         "    source_path: .github/skills/demo-skill\n"
         "    include_targets:\n"
         "      - codex\n"
-        "      - antigravity\n"
+        "      - opencode\n"
         "    target_support: Documented\n"
         "    notes: Demo bundle.\n",
     )
@@ -104,7 +104,8 @@ def test_main_plan_emits_json_for_selected_targets(
     assert exit_code == 0
     assert payload["mode"] == "plan"
     assert payload["selected_targets"] == ["codex"]
-    assert payload["missing_dirs"] == [str(home_root / ".codex/skills")]
+    assert str(home_root / ".agents/skills") in payload["missing_dirs"]
+    assert str(home_root / ".codex/agents") in payload["missing_dirs"]
 
 
 def test_main_apply_blocks_docs_unverified_targets(
@@ -120,7 +121,7 @@ def test_main_apply_blocks_docs_unverified_targets(
             command="apply",
             source_root=str(source_root),
             home_root=str(home_root),
-            targets="antigravity",
+            targets="opencode",
             create_missing_dirs=False,
             prune_managed=False,
             experimental_targets=False,

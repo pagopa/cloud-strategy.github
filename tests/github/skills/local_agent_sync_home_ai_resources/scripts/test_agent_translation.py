@@ -8,7 +8,19 @@ from pathlib import Path
 import pytest
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+def find_repo_root(start: Path) -> Path:
+    for candidate in start.resolve().parents:
+        if (candidate / "AGENTS.md").is_file():
+            return candidate
+    raise FileNotFoundError(f"Unable to find repository root from {start}")
+
+
+REPO_ROOT = find_repo_root(Path(__file__))
+SKILL_SCRIPTS_ROOT = (
+    REPO_ROOT / ".github/skills/local-agent-sync-home-ai-resources/scripts"
+)
+sys.path.insert(0, SKILL_SCRIPTS_ROOT.as_posix())
 
 from agent_translation import (  # noqa: E402
     _build_claude_tools,

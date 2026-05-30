@@ -220,6 +220,13 @@ def build_home_sync_plan(
             ):
                 continue
 
+            content_hash = source_hash
+            if resource.source_family == "agents" and target != "copilot":
+                content_hash = _compute_agent_translation_hash(
+                    source_root=source_root,
+                    source_path=resource.source_path,
+                    target=target,
+                )
             managed_resource = ManagedResource(
                 target=target,
                 resource_id=resource.resource_id,
@@ -227,7 +234,7 @@ def build_home_sync_plan(
                 source_path=resource.source_path,
                 target_path=target_path.as_posix(),
                 source_hash=source_hash,
-                content_hash=source_hash,
+                content_hash=content_hash,
                 last_action="copy",
             )
             desired_resources.append(managed_resource)
@@ -241,7 +248,7 @@ def build_home_sync_plan(
                 changed_only,
             )
 
-    add_stale_managed_operations(operations, manifest_payload, desired_resources, targets, mode, prune_managed)
+    add_stale_managed_operations(operations, manifest_payload, desired_resources, targets, mode, prune_managed, home_root)
     return HomeSyncPlan(
         source_root=source_root,
         home_root=home_root,
@@ -318,7 +325,7 @@ def apply_home_sync_plan(
         actual_hash = actual_content_hashes.get(target_path.as_posix())
         if actual_hash is None:
             actual_hash = hash_resource(target_path)
-        expected_hash = actual_content_hashes.get(target_path.as_posix(), resource.source_hash)
+        expected_hash = resource.content_hash
         if actual_hash != expected_hash:
             raise RuntimeError(f"post-apply-verify-failed: {target_path} hash mismatch (expected {expected_hash}, got {actual_hash})")
 
@@ -385,9 +392,9 @@ def run_doctor(
         support_row = resolve_support_row(runtime_rows, target, "skills")
         add_doctor_support_check(checks, blocked_codes, target, target_root, support_row, experimental_targets)
         agent_root = runtime_agent_root(home_root, target)
+        add_doctor_target_check(checks, blocked_codes, target, agent_root)
         agent_support_row = resolve_support_row(runtime_rows, target, "agents")
-        if agent_support_row is not None:
-            add_doctor_target_check(checks, blocked_codes, target, agent_root)
+        add_doctor_support_check(checks, blocked_codes, target, agent_root, agent_support_row, experimental_targets)
 
     for resource in catalog:
         source_path = source_root / resource.source_path
@@ -461,28 +468,41 @@ def add_target_root_operations(
     mode: str,
 ) -> None:
     for target in targets:
-        target_root = runtime_skill_root(home_root, target)
-        if not target_root.exists():
-            missing_dirs.append(target_root.as_posix())
-            operations.append(
-                HomeSyncOperation(
-                    target=target,
-                    action="mkdir",
-                    path=target_root.as_posix(),
-                    reason="Target runtime root is missing and may need directory creation.",
-                    code="needs-directory-create",
-                )
-            )
-            continue
+        skill_root = runtime_skill_root(home_root, target)
+        _add_root_operation(operations, missing_dirs, home_root, target, skill_root, mode)
+        agent_root = runtime_agent_root(home_root, target)
+        _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
 
-        safety_operation = assess_target_root_safety(
-            home_root=home_root,
-            target=target,
-            target_root=target_root,
-            mode=mode,
+
+def _add_root_operation(
+    operations: list[HomeSyncOperation],
+    missing_dirs: list[str],
+    home_root: Path,
+    target: str,
+    target_root: Path,
+    mode: str,
+) -> None:
+    if not target_root.exists():
+        missing_dirs.append(target_root.as_posix())
+        operations.append(
+            HomeSyncOperation(
+                target=target,
+                action="mkdir",
+                path=target_root.as_posix(),
+                reason="Target runtime root is missing and may need directory creation.",
+                code="needs-directory-create",
+            )
         )
-        if safety_operation is not None:
-            operations.append(safety_operation)
+        return
+
+    safety_operation = assess_target_root_safety(
+        home_root=home_root,
+        target=target,
+        target_root=target_root,
+        mode=mode,
+    )
+    if safety_operation is not None:
+        operations.append(safety_operation)
 
 
 def add_resource_blockers(
@@ -640,14 +660,66 @@ def add_stale_managed_operations(
     targets: tuple[str, ...],
     mode: str,
     prune_managed: bool,
+    home_root: Path,
 ) -> None:
     desired_paths = {resource.target_path for resource in desired_resources}
-    for item in manifest_payload.get("managed_resources", []):
+    managed_resources = manifest_payload.get("managed_resources")
+    if not isinstance(managed_resources, list):
+        operations.append(
+            HomeSyncOperation(
+                target="state",
+                action="blocked",
+                path=(home_root / ".sync").as_posix(),
+                reason="Manifest managed_resources is not a list; cannot trust stale items.",
+                code="manifest-corrupt",
+            )
+        )
+        return
+
+    for item in managed_resources:
         if not isinstance(item, dict) or item.get("target") not in targets:
             continue
         target_path = item.get("target_path")
         if not isinstance(target_path, str) or target_path in desired_paths:
             continue
+
+        confinement_code = _stale_confinement_check(
+            item=item,
+            target_path=target_path,
+            home_root=home_root,
+            mode=mode,
+        )
+        if confinement_code is not None:
+            operations.append(
+                HomeSyncOperation(
+                    target=str(item.get("target", "")),
+                    action="blocked",
+                    path=target_path,
+                    reason="Stale managed target fails trust-boundary check; delete is not safe.",
+                    code=confinement_code,
+                    resource_id=str(item.get("resource_id", "")),
+                )
+            )
+            continue
+
+        hash_code = _stale_hash_check(
+            item=item,
+            target_path=target_path,
+            mode=mode,
+        )
+        if hash_code is not None:
+            operations.append(
+                HomeSyncOperation(
+                    target=str(item.get("target", "")),
+                    action="blocked",
+                    path=target_path,
+                    reason="Stale managed target content drift detected; delete is not safe.",
+                    code=hash_code,
+                    resource_id=str(item.get("resource_id", "")),
+                )
+            )
+            continue
+
         action = "delete" if mode == "apply" and prune_managed else "stale-managed"
         operations.append(
             HomeSyncOperation(
@@ -659,6 +731,69 @@ def add_stale_managed_operations(
                 resource_id=str(item.get("resource_id")),
             )
         )
+
+
+def _stale_confinement_check(
+    *,
+    item: dict[str, object],
+    target_path: str,
+    home_root: Path,
+    mode: str,
+) -> str | None:
+    required_keys = {"target", "resource_family", "resource_id", "content_hash"}
+    if not required_keys.issubset(item.keys()):
+        return "manifest-corrupt"
+
+    resolved_home = home_root.resolve()
+    stale_path = Path(target_path).expanduser()
+    if not stale_path.is_absolute():
+        stale_path = home_root / target_path
+    resolved_stale = stale_path.resolve()
+
+    if not is_relative_to(resolved_stale, resolved_home):
+        if stale_path.is_symlink() or any(p.is_symlink() for p in stale_path.parents):
+            return "symlink-not-allowed"
+        return "unsafe-home-path"
+
+    target_name = str(item.get("target", ""))
+    resource_family = str(item.get("resource_family", ""))
+    if resource_family == "agents":
+        expected_root = runtime_agent_root(home_root, target_name).resolve()
+    elif resource_family == "skills":
+        expected_root = runtime_skill_root(home_root, target_name).resolve()
+    else:
+        return "unsafe-home-path"
+
+    if not is_relative_to(resolved_stale, expected_root):
+        return "unsafe-home-path"
+
+    if stale_path.is_symlink() or any(p.is_symlink() for p in stale_path.parents):
+        return "symlink-not-allowed"
+
+    return None
+
+
+def _stale_hash_check(
+    *,
+    item: dict[str, object],
+    target_path: str,
+    mode: str,
+) -> str | None:
+    stale_path = Path(target_path).expanduser()
+    if not stale_path.is_absolute():
+        return "stale-path-unresolvable"
+    if not stale_path.exists():
+        return None
+
+    manifest_content_hash = item.get("content_hash")
+    if not isinstance(manifest_content_hash, str):
+        return None
+
+    current_hash = hash_resource(stale_path)
+    if current_hash != manifest_content_hash:
+        return "stale-content-drifted"
+
+    return None
 
 
 def add_doctor_target_check(
@@ -719,9 +854,21 @@ def load_manifest(path: Path) -> tuple[dict[str, object], str | None]:
     if not path.exists():
         return {"managed_resources": []}, None
     try:
-        return json.loads(path.read_text(encoding="utf-8")), None
+        payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return {"managed_resources": []}, "manifest-corrupt"
+    if not isinstance(payload, dict):
+        return {"managed_resources": []}, "manifest-corrupt"
+    if not isinstance(payload.get("managed_resources"), list):
+        return {"managed_resources": []}, "manifest-corrupt"
+    for i, item in enumerate(payload.get("managed_resources", [])):
+        if not isinstance(item, dict):
+            return {"managed_resources": []}, "manifest-corrupt"
+        if not isinstance(item.get("target"), str):
+            return {"managed_resources": []}, "manifest-corrupt"
+        if not isinstance(item.get("target_path"), str):
+            return {"managed_resources": []}, "manifest-corrupt"
+    return payload, None
 
 
 def index_manifest(payload: dict[str, object]) -> dict[str, dict[str, object]]:
@@ -825,6 +972,20 @@ def support_action_for_mode(
     if mode == "apply" and not experimental_targets:
         return "blocked", "docs-unverified"
     return "warning", "docs-unverified"
+
+
+def _compute_agent_translation_hash(
+    *,
+    source_root: Path,
+    source_path: str,
+    target: str,
+) -> str:
+    source = source_root / source_path
+    config_path = source.parent / source.name.replace(".agent.md", ".agent-config.yaml")
+    if not config_path.exists():
+        config_path = None
+    translated = translate_agent_for_target(source, target, config_path)
+    return sha256_bytes(translated.encode("utf-8"))
 
 
 def _apply_translated_agent(

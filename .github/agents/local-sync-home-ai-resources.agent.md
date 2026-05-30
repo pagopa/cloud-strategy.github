@@ -29,7 +29,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 ## Boundary Definition
 
 - Stay in this lane while the task is planning, auditing, doctoring, or applying local home sync for allowlisted AI runtime resources.
-- Mirror only allowlisted direct-copy resource families declared by the paired skill and preserve unmanaged target-local content.
+- Mirror only allowlisted resource families (direct-copy skills and translated agents for supported targets) and preserve unmanaged target-local content.
 - Keep `apply` conservative: no undocumented runtime families, no config merges, and no destructive pruning without explicit approval.
 - If the request becomes source-side catalog maintenance, consumer-repository sync, or format translation, explain the mismatch and recommend the better owner visibly.
 - Do not route, dispatch, or delegate from this lane.

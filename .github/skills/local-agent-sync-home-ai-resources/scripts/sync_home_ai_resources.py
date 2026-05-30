@@ -2,7 +2,7 @@
 """Purpose: plan and apply local home-directory AI resource sync operations.
 
 Usage examples:
-  python3 scripts/sync_home_ai_resources.py plan --targets codex,vscode
+  python3 scripts/sync_home_ai_resources.py plan --targets codex,copilot,claude,opencode
   python3 scripts/sync_home_ai_resources.py apply --targets codex --create-missing-dirs
 """
 

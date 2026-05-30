@@ -20,4 +20,6 @@ Use these stable error identifiers for planner, doctor, audit, and apply output.
 | `source-invalid-skill` | A source skill bundle is incomplete for direct-copy sync. | Block that resource and fix the bundle. |
 | `stale-managed` | A previously managed target is no longer planned. | Mark for prune, but do not delete automatically. |
 | `prune-not-approved` | A stale managed resource could be removed, but prune was not approved. | Keep the file and report the follow-up. |
+| `stale-content-drifted` | A stale managed file was modified since its last manifest entry. | Block delete until reviewed. |
+| `stale-path-unresolvable` | A stale managed path from the manifest cannot be resolved safely. | Block delete and surface the path. |
 | `reverse-sync-blocked` | Source root is under the home sync state directory (`~/.sync/...`), indicating attempted reverse sync. | Block immediately. Sync must be repo → home only. |
