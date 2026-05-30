@@ -90,6 +90,8 @@ Use this repository-local variant for small catalog maintenance before escalatin
 |   grill-me Gate 0              |
 | - optional brainstorming       |
 | - Definition Brief             |
+| - Pre-Plan Critical Pass       |
+|   (auto after Gate 0 closure)  |
 +-------------------------------+
                |
                v
@@ -162,6 +164,15 @@ Do not restate the non-waiver or phase-transition details in maps.
 | Outcome, owner/user, success,  |
 | constraints, anti-scope,       |
 | validation, stop conditions    |
++-------------------------------+
+               |
+               v
++-------------------------------+
+| Pre-Plan Critical Pass         |
+| (automatic after Gate 0 +      |
+|  Define Check 1-3)             |
+| - confident: update brief, stop|
+| - reopen: re-enter define      |
 +-------------------------------+
                |
                v

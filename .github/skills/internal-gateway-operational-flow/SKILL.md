@@ -65,7 +65,7 @@ Select one workflow entry point from the user prompt, then run one active phase 
 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan output or recommendation. Gate 0 is pre-`plan` only; it does not block `apply-plan`, `review`, or `execute`. | Confirmed intent, assumptions, option frame, Definition Brief, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, explicit user closure, and named validation path or gap. |
+| `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan output or recommendation. Gate 0 is pre-`plan` only; it does not block `apply-plan`, `review`, or `execute`. | Confirmed intent, assumptions, option frame, Definition Brief, Pre-Plan Critical Pass, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, Pre-Plan Critical Pass outcome (`confident` or `reopen`), explicit user closure, and named validation path or gap. |
 | `plan` | A confirmed definition exists, but decisions, ownership, rollout, validation, or tradeoffs remain. | Gate 0 must already be satisfied for the current request, or `define` must run first. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes, restart open-ended brainstorming, or imply execute approval. | `internal-writing-plans`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
 | `execute` | Target state and validation are concrete. | Do not start Gate 0 for direct `execute` unless the user explicitly asks for `grill-me` or the lane changes away from `execute`. | Scoped edits, focused validation, and slice reports. | Add unrelated improvements or reopen strategy silently. | `internal-debugging`, `internal-tdd`, and runtime delivery skills. | `Check 1-3` plus fresh evidence. |
 | `apply-plan` | An approved retained plan folder is the execution target. | Gate 0 not required; the approved retained plan is the authorization signal. The `define` phase already happened during plan authoring. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
@@ -86,6 +86,7 @@ Select one workflow entry point from the user prompt, then run one active phase 
 - Require an explicit checkpoint before moving from `plan`, `define`, or critical challenge into `execute` or `apply-plan`, unless the user already authorized end-to-end application after the critique passes.
 - Use review lenses inside `review` mode instead of duplicating their playbooks here.
 - Use `internal-gateway-critical-master` before finalizing, or immediately after a compact draft, when replacing an important prompt or skill, changing shared routing semantics, or materially changing governance-sensitive workflow behavior.
+- Run the Pre-Plan Critical Pass automatically after Gate 0 closure and `Define Check 1-3` inside `define` for `define-first`, `full-cycle`, and `plan-only` entrypoints. The critical pass validates the Definition Brief before any transition to `plan`. On `confident`, update the brief and stop. On `reopen`, re-enter `define` with the critical findings. See the Define Mode section for the full contract.
 - Keep sync command centers outside this model; they retain their repo-only sync engines.
 - When a user says expected work was missed, treat it as a workflow defect: compare the original request, retained-plan source items, current diff, and validation evidence before explaining or closing. For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
 
@@ -136,8 +137,32 @@ Use `superpowers-brainstorming` only when the work is truly design-ambiguous.
 Before recommending an exit from `define`, produce a compact Definition Brief
 that covers outcome, target user or owner, success criteria, constraints and
 anti-scope, selected direction or open options, validation path or explicit gap,
-and stop conditions. Use `Define Check 1-3`, then stop in `define` unless the
-phase transition authorization in [references/gate-0-protocol.md](references/gate-0-protocol.md) is satisfied.
+and stop conditions. Use `Define Check 1-3`, then run the Pre-Plan Critical
+Pass before stopping.
+
+### Pre-Plan Critical Pass
+
+After Gate 0 is `grill-me satisfied` and `Define Check 1-3` pass, automatically
+load `internal-gateway-critical-master` and run a critical challenge against the
+Definition Brief before recommending a transition to `plan`. This pass is
+mandatory for `define-first`, `full-cycle`, and `plan-only` entrypoints when a
+definition was produced in the current session. Do not skip it silently.
+
+The critical pass produces one of two outcomes:
+
+- **Confident**: the definition holds under pressure. Update the Definition Brief
+  with any insights surfaced by the critical pass, declare `pre-plan critical:
+  confident`, and stop in `define` waiting for the user to request `plan`.
+- **Reopen**: the critical pass surfaces a significant unresolved objection,
+  hidden assumption, or scope gap. Declare `pre-plan critical: reopen`, present
+  the objection to the user, and re-enter `define` with the critical findings
+  as new input. Run Gate 0 again if the scope, owner, target state, validation,
+  or anti-scope changed.
+
+The define-critical cycle may repeat but must remain visible to the user. Each
+cycle must show the critical outcome, the objection or confidence reason, and
+the updated Definition Brief. Do not loop more than twice without an explicit
+user decision to continue or accept with risk.
 
 ## Plan Mode
 
@@ -185,7 +210,7 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 
 | Phase | Required output | Must not include |
 | --- | --- | --- |
-| `define` | Gate status, Definition Brief, assumptions, selected direction or open options, validation path, anti-scope, risk, and requested checkpoint. | Implementation plan, applied changes, or implied approval to execute. |
+| `define` | Gate status, Definition Brief, Pre-Plan Critical Pass outcome (`confident` or `reopen`), assumptions, selected direction or open options, validation path, anti-scope, risk, and requested checkpoint. | Implementation plan, applied changes, or implied approval to execute. |
 | `plan` | Gate status, decision, assumptions, anti-scope, validation path, risk, and requested checkpoint. | Applied changes or implied approval to execute. |
 | `execute` | Files changed, scoped result, `Check 1`, `Check 2`, `Check 3`, validation evidence, and residual risk. | New strategy, unrelated improvements, or unverified completion claims. |
 | `apply-plan` | Retained-plan ledger coverage, `done-*` status, blockers or completed items, three checks, and evidence. | Execution of `questions.md` or unapproved inline plan work. |
@@ -198,8 +223,10 @@ Review mode owns findings, evidence gaps, regression risk, systems risk, and fix
 
 ## Staged Checkpoints
 
-- `define-first` stops after the Definition Brief and next-step package unless
-  the user explicitly requests moving into `plan`.
+- `define-first` stops after the Definition Brief, the Pre-Plan Critical Pass
+  (`confident` or `reopen` cycle), and next-step package unless the user
+  explicitly requests moving into `plan`. When the critical pass returns
+  `reopen`, the workflow re-enters `define` before any plan transition.
 - `plan-only` stops after the Definition Brief when needed, the plan, Decision Brief, required critical pass for non-trivial or governance-sensitive plans, and next-step package.
 - `full-cycle` may continue only through visible phase changes and the required pre-execute checkpoint; the entrypoint name alone does not skip that checkpoint.
 - Any request-change realignment reruns Gate 0 before the next governance-sensitive plan output or recommendation, but not before `apply-plan`, `review`, or `execute`.

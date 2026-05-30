@@ -47,8 +47,17 @@ owns Gate 0 status labels and blocking semantics.
   phase.
 - For `define-first`, brainstorming, and `idea-first` entrypoints, the
   workflow remains in `define` after `grill-me` is satisfied.
+- After Gate 0 closure and `Define Check 1-3`, the Pre-Plan Critical Pass runs
+  automatically before any transition recommendation. The critical pass loads
+  `internal-gateway-critical-master` and challenges the Definition Brief.
+  - On `confident`: update the Definition Brief with critical insights, declare
+    `pre-plan critical: confident`, and stop in `define`.
+  - On `reopen`: declare `pre-plan critical: reopen`, present objections to the
+    user, and re-enter `define` with the critical findings as new input. Restart
+    Gate 0 if scope, owner, target state, validation, or anti-scope changed.
 - The agent may say that the definition looks ready and may recommend moving to
-  `plan`, but must wait for the user to explicitly request that phase.
+  `plan` only after the Pre-Plan Critical Pass returns `confident`. The agent
+  must still wait for the user to explicitly request that phase.
 - Agreement, option selection, accepted defaults, or approval-like replies only
   update the definition. They do not authorize plan output.
 - A valid transition request must directly ask for planning or name the next

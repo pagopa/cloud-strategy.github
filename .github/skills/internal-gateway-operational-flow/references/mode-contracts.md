@@ -117,9 +117,12 @@ reference, or the support skill itself.
 ## Mode Exit Rules
 
 - `define` exits to `plan`, `review`, or critical challenge only through a
-  Definition Brief, visible next-step package, and checkpoint unless the user
-  explicitly requested `define-first` only. Use `gate-0-protocol.md` for
-  `define-first`, brainstorming, and `idea-first` transition authorization.
+  Definition Brief, a Pre-Plan Critical Pass with `confident` outcome, visible
+  next-step package, and checkpoint unless the user explicitly requested
+  `define-first` only. When the Pre-Plan Critical Pass returns `reopen`, the
+  workflow re-enters `define` with the critical findings before any exit. Use
+  `gate-0-protocol.md` for `define-first`, brainstorming, and `idea-first`
+  transition authorization.
 - `plan` exits to `execute`, `apply-plan`, `review`, or critical challenge only through a visible next-step package and checkpoint unless the user authorized end-to-end work; non-trivial or governance-sensitive plans run the critical challenge before the plan is finalized.
 - `execute` exits to `review` when correctness evidence or merge readiness is the main next need.
 - `apply-plan` exits only after all executable retained-plan items are completed, a real blocker is packaged, or validation exposes a gap that needs another visible owner.
