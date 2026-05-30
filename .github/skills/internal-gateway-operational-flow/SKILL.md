@@ -52,15 +52,14 @@ This skill owns phase activation, blocking gates, and cross-surface handoff shap
 
 Select one workflow entry point from the user prompt, then run one active phase at a time inside that workflow.
 
-| Entrypoint | Use when | First active phase |
-| --- | --- | --- |
-| `full-cycle` | The user asks for end-to-end non-trivial work or explicitly wants define, plan, challenge, apply, and review. | `define` unless a confirmed definition already exists |
-| `define-first` | The user wants brainstorming, clarification, `grill-me`, idea refinement, or success criteria before a plan. | `define` |
-| `plan-only` | The user asks for a plan, decision brief, or retained plan without implementation. | `define` when intent, success, boundary, or options are not confirmed; otherwise `plan` |
-| `plan-only (clarify-first)` | Legacy input spelling for `define-first`; keep as compatibility, not as a separate phase. | `define` |
-| `apply-plan` | The user asks to apply an approved retained plan under `tmp/superpowers/`. | `apply-plan` with `internal-executing-plans`; Gate 0 not required because the approved plan is the authorization signal |
-| `review` | The user asks for defect-first review, merge readiness, or evidence analysis. | `review`; Gate 0 not required because review scope is self-contained |
-| `mode-explicit` | The user directly asks for `define`, `plan`, `execute`, or `review`. | The named phase |
+| Entrypoint | Use when | First active phase | Common aliases |
+| --- | --- | --- | --- |
+| `full-cycle` | The user asks for end-to-end non-trivial work or explicitly wants define, plan, challenge, apply, and review. | `define` unless a confirmed definition already exists | `end-to-end`, `e2e`, `start-to-finish`, `complete-workflow`, `from-scratch` |
+| `define-first` | The user wants brainstorming, clarification, `grill-me`, idea refinement, or success criteria before a plan. | `define` | `idea-first`, `refine-first`, `shape-idea`, `ideation`, `concept-first`, `requirements-first`, `discovery-first` |
+| `plan-only` | The user asks for a plan, decision brief, or retained plan without implementation. | `define` when intent, success, boundary, or options are not confirmed; otherwise `plan` | `plan-first`, `write-plan`, `create-plan`, `decision-brief`, `retained-plan-only` |
+| `apply-plan` | The user asks to apply an approved retained plan under `tmp/superpowers/`. | `apply-plan` with `internal-executing-plans`; Gate 0 not required because the approved plan is the authorization signal | `run-plan`, `execute-plan`, `implement-plan`, `run-approved-plan` |
+| `review` | The user asks for defect-first review, merge readiness, or evidence analysis. | `review`; Gate 0 not required because review scope is self-contained | `check-this`, `audit`, `code-review`, `validate`, `defect-review`, `merge-readiness`, `review-changes` |
+| `mode-explicit` | The user directly asks for `define`, `plan`, `execute`, or `review`. | The named phase | `direct-mode`, `explicit-phase`, `go-to-plan`, `switch-to-execute`, `run-define`, `run-plan`, `run-execute`, `run-review` |
 
 ## Phase-Local Contracts
 
@@ -104,7 +103,7 @@ The agent must not close or skip the loop by itself. Close the loop only after a
 
 Treat end-to-end application as authorized only when the user explicitly asks to apply, continue into delivery, run the work end to end after `plan` or critical challenge, or invokes `apply-plan` with an approved retained plan folder.
 `full-cycle` alone never skips the visible checkpoint into `execute` or `apply-plan`; when entrypoint signals conflict, choose the lower-action phase.
-For `define-first`, brainstorming, and clarify-first entrypoints, agreement,
+For `define-first`, brainstorming, and `idea-first` entrypoints, agreement,
 option selection, accepted defaults, or approval-like replies only update the
 definition; closing Gate 0 does not change the active phase or authorize
 `plan`; wait for the user to explicitly request planning or name the next phase.
@@ -117,11 +116,11 @@ definition; closing Gate 0 does not change the active phase or authorize
 - `review`: use when a concrete artifact, diff, or validation result exists and the main job is defect-first evidence, findings, and fix routing.
 - `critical`: use `internal-gateway-critical-master` when a proposal, plan, or decision needs pressure testing before action.
 
-Prompt-specific intent wins. A direct review request starts in `review`; a direct retained-plan application starts in `apply-plan`; a `plan-only` request stops before apply. A `clarify-first`, `brainstorm`, or `grill-me` request starts in `define` before producing plan output.
+Prompt-specific intent wins. A direct review request starts in `review`; a direct retained-plan application starts in `apply-plan`; a `plan-only` request stops before apply. An `idea-first`, `brainstorm`, or `grill-me` request starts in `define` before producing plan output.
 
 When the user references a retained plan folder generically, inspect the folder first. Read `01-change-summary.md`, then use `02-source-item-ledger.md` plus the retained-plan handoff contract owned by `internal-executing-plans` to classify scope, reading budget, and source-item coverage.
 
-The detailed retained-plan control fields still live in the plan owners: `Uso consigliato`, `Mappa file e ruolo`, `Evidence pass iniziale`, and `Budget lettura` remain delegated to `internal-writing-plans` and `internal-executing-plans`.
+The detailed retained-plan control fields still live in the plan owners: `Recommended usage`, `File map and role`, `Initial evidence pass`, and `Reading budget` remain delegated to `internal-writing-plans` and `internal-executing-plans`.
 
 Use the smallest evidence pass that can safely choose the owner and next action. When the target is a repository-owned bundle owner such as `SKILL.md`, resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` in the source-item coverage matrix before claiming the scope is complete or an intentional non-action.
 
@@ -189,7 +188,7 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 | `define` | Gate status, Definition Brief, assumptions, selected direction or open options, validation path, anti-scope, risk, and requested checkpoint. | Implementation plan, applied changes, or implied approval to execute. |
 | `plan` | Gate status, decision, assumptions, anti-scope, validation path, risk, and requested checkpoint. | Applied changes or implied approval to execute. |
 | `execute` | Files changed, scoped result, `Check 1`, `Check 2`, `Check 3`, validation evidence, and residual risk. | New strategy, unrelated improvements, or unverified completion claims. |
-| `apply-plan` | Retained-plan ledger coverage, `done-*` status, blockers or completed items, three checks, and evidence. | Execution of `questions.md`, legacy `dubbi-e-domande.md`, or unapproved inline plan work. |
+| `apply-plan` | Retained-plan ledger coverage, `done-*` status, blockers or completed items, three checks, and evidence. | Execution of `questions.md` or unapproved inline plan work. |
 | `review` | Findings first, severity, confidence, causal layer, evidence gap, and fix route. | Silent fixes or initial design work. |
 | `critical` | Strongest objection, why it matters, explicit critical outcome, and next-step package. | Routine implementation or ordinary code review. |
 
@@ -214,6 +213,7 @@ Review mode owns findings, evidence gaps, regression risk, systems risk, and fix
 - Read `references/mode-contracts.md` for detailed mode boundaries, ownership maps, support activation rules, and medium-task thresholds.
 - Read `references/workflow-maps.md` when documenting or validating quick, planned, and audited workflows.
 - Read `references/wrapper-alignment.md` when updating Copilot agent wrappers, runtime portability claims, imported support, future security lens posture, output projection, or tests.
+- Read `references/entrypoint-aliases.md` when the user prompt uses wording that matches an entrypoint without naming it exactly.
 - Load `internal-high-level-review` when completion checks need a full workflow audit.
 
 ## Validation

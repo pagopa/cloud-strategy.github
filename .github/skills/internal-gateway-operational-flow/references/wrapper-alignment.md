@@ -62,7 +62,7 @@ sections.
 
 - Planning, review, and retained-plan application always start in `define`.
 - Treat planning as `define` until the user closes the active `grill-me` loop.
-- For `define-first`, brainstorming, and clarify-first entrypoints, closing Gate
+- For `define-first`, brainstorming, and `idea-first` entrypoints, closing Gate
   0 does not change the active phase. The agent may recommend moving to `plan`,
   but must wait for the user to explicitly request planning before producing
   plan output.
@@ -71,8 +71,6 @@ sections.
   phase-transition, and realignment rules in `gate-0-protocol.md`; wrappers,
   READMEs, and tests should reference that file instead of restating the
   protocol.
-- Treat `plan-only (clarify-first)` as a legacy input spelling for `define-first`,
-  not as a separate phase.
 - In wrapper projection terms, the loop closes only after a user closure signal.
 - Restart Gate 0 before continuing if request, context, target path, environment, tool output, dependency state, validation, or dirty worktree ownership changes.
 - `superpowers-brainstorming` is optional support inside `define` only when
