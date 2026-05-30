@@ -2,7 +2,7 @@
 
 Use this reference when preserving or validating user-visible operational flows. These maps describe workflow semantics; Copilot agent `handoffs:` buttons are only one UI projection.
 
-## Quick Execution
+## Direct Task / Quick Edit
 
 ```text
 +-----------------------------+
@@ -75,7 +75,7 @@ Use this repository-local variant for small catalog maintenance before escalatin
 - Add `CATALOG_FAST_INCLUDE_TOKEN_RISKS=1` only when the change touches always-on guidance or shared contracts.
 - Do not open a retained plan or full review mode for one-file or one-owner fixes that fit in the current turn.
 
-## Staged Full Cycle
+## End-to-End Delivery / Full Cycle
 
 ```text
 +--------------------------------+
@@ -138,7 +138,7 @@ review, and retained-plan application blocked until the user closes the active
 `grill-me` loop.
 Do not restate the non-waiver or phase-transition details in maps.
 
-## Define Work
+## Idea, Brainstorming & Exploration / Define & Scope
 
 ```text
 +--------------------------------+
@@ -186,7 +186,7 @@ creative or design-ambiguous work, or design approval before a plan. Keep
 repository-owned maintenance when target state and validation are already
 concrete.
 
-## Planned Work
+## Strategy & Decision Framing / Plan & Design
 
 ```text
 +--------------------------------+
@@ -229,7 +229,7 @@ concrete.
 
 Planning output should be compact enough for the next owner or runtime to act without rediscovering the full problem.
 
-## Audited Work
+## Review & Quality Gate / Audit & Validate
 
 ```text
 +-----------------------------+
@@ -271,7 +271,7 @@ Planning output should be compact enough for the next owner or runtime to act wi
 
 Review treats missing validation as a finding, not a footnote.
 
-## Retained Plan Application
+## Apply/Execute Plan / Apply Retained Plan
 
 ```text
 +-------------------------------+
