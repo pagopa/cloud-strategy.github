@@ -44,6 +44,7 @@ The paired agent is a thin UX wrapper; this skill owns all business logic, seque
 - Selected mode, selected targets, and why that mode is valid.
 - Source resources considered and the runtime support evidence used.
 - Missing directories, conflicts, or documentation gates that block `apply`.
+- **For every blocked path, conflict, stale-managed entry, or non-ok doctor check, include a human-readable motivation that explains the policy or safety reason behind the recommendation.**
 - Managed versus preserved target-local outcomes and any approved prune behavior.
 - Validation results, remaining blockers, and explicit validation gaps.
 
@@ -108,8 +109,8 @@ Do not skip bisync. Do not attempt apply without first confirming zero blockers 
 
 When plan or audit reports blocked paths, resolve them before apply:
 
-- `target-exists-unmanaged`: the target file or directory exists at home but is not in the sync manifest. Remove it manually so sync can recreate it from source.
-- `target-modified-managed`: the target is in the manifest but its content diverged from the last recorded hash. Remove it manually so sync can restore the source-of-truth version.
+- `target-exists-unmanaged`: the target file or directory exists at home but is not in the sync manifest. **Motivation:** sync blocks unmanaged overwrite to protect locally created or installed files from being silently replaced by repository-managed copies. Remove it manually so sync can recreate it from source.
+- `target-modified-managed`: the target is in the manifest but its content diverged from the last recorded hash. **Motivation:** sync blocks overwrite to prevent losing local edits or runtime-generated changes that occurred after the last manifest entry. Remove it manually so sync can restore the source-of-truth version.
 - After removing conflicting files, re-run plan to confirm zero blockers before applying.
 
 ## Load On Demand

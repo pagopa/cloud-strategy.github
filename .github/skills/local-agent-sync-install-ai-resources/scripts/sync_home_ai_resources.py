@@ -213,13 +213,30 @@ def emit_output(
     blocked_codes = payload.get("blocked_codes", [])
     if blocked_codes:
         log_error(f"Blocked codes: {', '.join(blocked_codes)}")
-        blocked_by_code: dict[str, list[str]] = {}
+        blocked_by_code: dict[str, list[dict]] = {}
         for op in blocked_ops:
             code = op.get("code", "unknown")
+            blocked_by_code.setdefault(code, []).append(op)
+        for code, ops in sorted(blocked_by_code.items()):
+            log_error(f"  [{code}] {len(ops)} path(s)")
+            for op in ops:
+                path = op.get("path", "")
+                reason = op.get("reason", "")
+                if reason:
+                    log_error(f"    - {path}: {reason}")
+                else:
+                    log_error(f"    - {path}")
+
+    if stale_ops:
+        log_info(f"Stale managed resources: {len(stale_ops)}")
+        for op in stale_ops:
             path = op.get("path", "")
-            blocked_by_code.setdefault(code, []).append(path)
-        for code, paths in sorted(blocked_by_code.items()):
-            log_error(f"  [{code}] {len(paths)} path(s)")
+            reason = op.get("reason", "")
+            code = op.get("code", "")
+            if code:
+                log_info(f"  ~ {path} [{code}]: {reason}")
+            else:
+                log_info(f"  ~ {path}: {reason}")
 
     for path in payload.get("missing_dirs", []):
         log_info(f"Missing dir: {path}")

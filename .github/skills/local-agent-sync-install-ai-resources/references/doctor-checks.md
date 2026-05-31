@@ -2,6 +2,10 @@
 
 Use this checklist when `doctor` needs to explain readiness before a local home sync.
 
+## Motivation rule
+
+For every check that is not `ok`, include a short **motivation** that explains why the current state triggers the reported status and why that status matters for the next mode the user may run. Do not report only the symptom; state the policy or safety reason behind the recommendation.
+
 ## Common Checks
 
 - Confirm the selected runtime targets are known.

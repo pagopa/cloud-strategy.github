@@ -513,9 +513,9 @@ def add_resource_blockers(
     code: str,
 ) -> None:
     reason = {
-        "source-missing": "Catalog entry points to a source path that does not exist.",
-        "source-invalid-skill": "Source skill bundle is missing SKILL.md.",
-        "source-invalid-agent": "Source agent file is missing or not a .md file.",
+        "source-missing": "Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
+        "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid direct-copy skill bundle must contain SKILL.md.",
+        "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for translation.",
     }[code]
     for target in intersection_targets(resource, targets):
         add_blocked_operation(
@@ -572,9 +572,9 @@ def add_support_operation(
             action=support_action,
             path=target_path.as_posix(),
             reason=(
-                "Runtime support for this target remains undocumented for apply."
+                "Runtime support for this target remains undocumented for apply. Blocked because the support matrix lacks explicit evidence that this family is safe to materialize for the selected target."
                 if support_action == "blocked"
-                else "Runtime support for this target remains undocumented; report only."
+                else "Runtime support for this target remains undocumented; report only. Plan and audit are allowed, but apply requires verified support evidence."
             ),
             code=support_code,
             source_path=resource.source_path,
@@ -602,7 +602,7 @@ def add_materialization_operation(
                 target=target,
                 target_path=target_path,
                 code="target-exists-unmanaged",
-                reason="Target already exists but is not manifest-managed.",
+                reason="Target already exists but is not manifest-managed. Blocked to protect locally created or installed files from being silently overwritten by repository-managed copies.",
                 resource=resource,
             )
             return
@@ -612,7 +612,7 @@ def add_materialization_operation(
                 target=target,
                 target_path=target_path,
                 code="target-modified-managed",
-                reason="Managed target diverged from the last recorded manifest hash.",
+                reason="Managed target diverged from the last recorded manifest hash. Blocked to prevent losing local edits or runtime-generated changes that occurred after the last sync.",
                 resource=resource,
             )
             return
@@ -646,7 +646,7 @@ def add_materialization_operation(
             target=target,
             action="copy",
             path=target_path.as_posix(),
-            reason="Copy the allowlisted source bundle into the selected runtime home path.",
+            reason="Copy the allowlisted source bundle into the selected runtime home path. The source hash matches the expected manifest state and the target path is safe to materialize.",
             source_path=resource.source_path,
             resource_id=resource.resource_id,
         )
@@ -695,7 +695,7 @@ def add_stale_managed_operations(
                     target=str(item.get("target", "")),
                     action="blocked",
                     path=target_path,
-                    reason="Stale managed target fails trust-boundary check; delete is not safe.",
+                    reason="Stale managed target fails trust-boundary check; delete is not safe. The path may escape the expected home root, cross a symlink, or belong to a different runtime family.",
                     code=confinement_code,
                     resource_id=str(item.get("resource_id", "")),
                 )
@@ -713,7 +713,7 @@ def add_stale_managed_operations(
                     target=str(item.get("target", "")),
                     action="blocked",
                     path=target_path,
-                    reason="Stale managed target content drift detected; delete is not safe.",
+                    reason="Stale managed target content drift detected; delete is not safe. The file was modified after the last sync, so removing it could discard local changes.",
                     code=hash_code,
                     resource_id=str(item.get("resource_id", "")),
                 )
@@ -726,7 +726,11 @@ def add_stale_managed_operations(
                 target=str(item.get("target")),
                 action=action,
                 path=target_path,
-                reason="Previously managed target is no longer planned.",
+                reason=(
+                    "Previously managed target is no longer planned. Removed because --prune-managed is enabled and all safety checks passed."
+                    if action == "delete"
+                    else "Previously managed target is no longer planned. Kept by default because prune requires explicit approval (--prune-managed) to prevent accidental data loss."
+                ),
                 code=None if action == "delete" else "prune-not-approved",
                 resource_id=str(item.get("resource_id")),
             )
@@ -1061,7 +1065,7 @@ def assess_target_root_safety(
             target=target,
             action="blocked" if mode == "apply" else "warning",
             path=target_root.as_posix(),
-            reason="Runtime target root resolves outside the selected home directory.",
+            reason="Runtime target root resolves outside the selected home directory. Blocked to enforce path confinement and prevent writing to unexpected locations.",
             code=code,
         )
 
@@ -1070,7 +1074,7 @@ def assess_target_root_safety(
             target=target,
             action="blocked" if mode == "apply" else "warning",
             path=target_root.as_posix(),
-            reason="Runtime target root is not readable and writable enough for this mode.",
+            reason="Runtime target root is not readable and writable enough for this mode. Blocked to prevent I/O failures and partial materialization that could corrupt the home runtime state.",
             code="permission-denied",
         )
 
