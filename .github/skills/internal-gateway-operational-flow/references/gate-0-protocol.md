@@ -80,6 +80,6 @@ owns Gate 0 status labels and blocking semantics.
   definition it challenged has changed. Do not carry a stale `confident`
   forward into `plan`.
 - Realignment does not restart Gate 0 or the Pre-Plan Critical Pass for
-  `execute` entrypoints. If a lane-change from
+  `execute` or `apply-plan` entrypoints. If a lane-change from
   execution back to `plan` is needed, Gate 0 and the Pre-Plan Critical Pass
   restart in the new `define` or `plan` phase.

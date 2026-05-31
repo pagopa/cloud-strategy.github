@@ -281,16 +281,11 @@ Review treats missing validation as a finding, not a footnote.
               |
               v
 +-------------------------------+
-| define pre-start gate          |
-| - confirm scope and anti-scope |
-| - rerun on context change      |
-+-------------------------------+
-              |
-              v
-+-------------------------------+
 | apply-plan entrypoint          |
 | - load internal-executing-plans|
 | - ignore questions.md         |
+| - Gate 0 does not restart for  |
+|   an approved retained plan    |
 +-------------------------------+
               |
               v
@@ -317,10 +312,10 @@ Inline plans must be normalized into a retained plan or pass an explicit checkpo
 
 | Runtime surface | Projection |
 | --- | --- |
-| GitHub Copilot in VS Code | Users may select wrapper agents and approve `handoffs: send=false` buttons. |
-| GitHub.com or chat-only surfaces | Read this skill and use text next-step packages. |
-| ChatGPT 5.5 or Opus 4.6 | Treat `SKILL.md` and references as manual operating guidance. |
-| Codex plugin or Codex CLI | Load relevant skills directly; do not rely on Copilot agent UI. |
+| IDE with agent UI (e.g., VS Code + Copilot) | Users may select wrapper agents and approve `handoffs: send=false` buttons. |
+| Web or chat-only runtime | Read this skill and use text next-step packages; no agent UI available. |
+| Model-first surface without agent UI | Treat `SKILL.md` and references as manual operating guidance. |
+| CLI or plugin runtime with skill loading | Load relevant skills directly; do not rely on host-specific agent wrappers. |
 
 The workflow must remain understandable when no runtime can invoke a Copilot custom agent.
 

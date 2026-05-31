@@ -74,20 +74,12 @@ reference, or the support skill itself.
 | Flow diagrams, scratchpad shapes, and host-runtime assembly maps | `references/workflow-maps.md` |
 
 - Preload `grill-me` and `internal-agent-support-next-step` at skill start.
-- Follow `references/gate-0-protocol.md` for Gate 0 question depth, closure,
-  and realignment. For mechanical work, keep the question set minimal but do
-  not skip the gate.
-- Load `internal-idea-define-advisor` inside `define` when the main question is pre-action fit for a tool, skill, agent, workflow, owner, or simple-task path rather than requirement discovery.
-- Load `superpowers-brainstorming` only when `define` needs option exploration
-  or design approval before planning; do not use it as mandatory support for
-  deterministic repository-owned maintenance.
-- Load every other support skill only when the active phase, failure condition,
-  handoff, review lens, or validation gap makes that owner necessary.
-- Prefer delegating to the named skill over copying its method. This gateway may
-  state what the support owner must produce, but the support owner defines how.
-- When a support contract needs more than trigger, boundary, and return shape,
-  move the detail to the support skill or to this bundle's references instead
-  of expanding `SKILL.md`.
+- Follow `references/gate-0-protocol.md` for Gate 0 depth, closure, and realignment.
+- Load `internal-idea-define-advisor` inside `define` for pre-action fit questions.
+- Load `superpowers-brainstorming` only when `define` needs option exploration; skip it for deterministic repository-owned maintenance.
+- Load every other support skill only when the active phase, failure condition, handoff, review lens, or validation gap makes that owner necessary.
+- Prefer delegating to the named skill over copying its method.
+- When a support contract needs more than trigger, boundary, and return shape, move the detail to the support skill or bundle references instead of expanding `SKILL.md`.
 
 ## Retired To Current Ownership Mapping
 

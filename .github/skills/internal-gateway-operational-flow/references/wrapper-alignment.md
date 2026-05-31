@@ -57,33 +57,16 @@ State security-specific gaps and route them through the closest existing owner.
 
 ## Support Posture
 
-Support selection belongs in the gateway skills, not in wrapper skill-list
-sections.
+Support selection belongs in the gateway skills, not in wrapper skill-list sections.
 
-- Planning, review, and retained-plan application always start in `define`.
-- Treat planning as `define` until the user closes the active `grill-me` loop.
-- For `define-first`, brainstorming, and clarify-first entrypoints, closing Gate
-  0 does not change the active phase. Treat `plan-only (clarify-first)` as a
-  legacy input spelling for `define-first`, not as a separate phase. The agent
-  may recommend moving to `plan`, but must wait for the user to explicitly
-  request planning before producing plan output.
-- Wrapper projections should still run Gate 0 after the minimum evidence pass.
-- Keep the detailed Gate 0 closure, blocking, non-waiver, mechanical-work,
-  phase-transition, and realignment rules in `gate-0-protocol.md`; wrappers,
-  READMEs, and tests should reference that file instead of restating the
-  protocol.
+- Gate 0 closure, blocking, non-waiver, phase-transition, and realignment rules live exclusively in `gate-0-protocol.md`. Wrappers, READMEs, and tests reference that file instead of restating the protocol.
 - In wrapper projection terms, the loop closes only after a user closure signal.
 - Restart Gate 0 before continuing if request, context, target path, environment, tool output, dependency state, validation, or dirty worktree ownership changes.
-- `superpowers-brainstorming` is optional support inside `define` only when
-  option exploration or design approval is still the real work.
-- Retained-plan execution belongs to `internal-executing-plans` after
-  `apply-plan` is selected.
+- `superpowers-brainstorming` is optional support inside `define` only when option exploration is the real work.
+- Retained-plan execution belongs to `internal-executing-plans` after `apply-plan` is selected.
 - Retained-plan authoring belongs to `internal-writing-plans`.
-- Compression support such as `mattpocock-caveman` stays support-only after
-  blockers, risks, and validation evidence are explicit.
-- The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.
-  It does not replace a retained plan, is not catalog material, and Copilot
-  wrappers must not expose it as a canonical artifact.
+- Compression support stays support-only after blockers, risks, and validation evidence are explicit.
+- The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection. It does not replace a retained plan and is not a canonical artifact.
 
 ## Handoff Rules
 
