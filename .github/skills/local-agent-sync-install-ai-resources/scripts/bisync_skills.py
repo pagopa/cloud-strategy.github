@@ -63,7 +63,7 @@ def hash_bundle(directory: Path) -> str:
     return hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
 
 
-def is_repo_clean(source_root: Path) -> tuple[bool, str]:
+def is_repo_clean(source_root: Path) -> tuple[bool, str, str]:
     result = subprocess.run(
         ["git", "status", "--porcelain", "--untracked-files=all"],
         cwd=source_root,
@@ -72,10 +72,14 @@ def is_repo_clean(source_root: Path) -> tuple[bool, str]:
         check=False,
     )
     if result.returncode != 0:
-        return False, "bisync-repo-git-failed: unable to run git status"
+        return False, "bisync-repo-git-failed", "Unable to run git status before bisync apply."
     if result.stdout.strip():
-        return False, f"bisync-repo-dirty: repository has uncommitted or untracked changes"
-    return True, ""
+        return (
+            False,
+            "bisync-repo-dirty",
+            "Repository has uncommitted or untracked changes.",
+        )
+    return True, "", ""
 
 
 def compute_next_action(
@@ -365,9 +369,9 @@ def apply_bisync_plan(
     if plan.blocked_codes:
         return plan
 
-    clean, reason = is_repo_clean(source_root)
+    clean, blocked_code, reason = is_repo_clean(source_root)
     if not clean:
-        plan.blocked_codes = [reason]
+        plan.blocked_codes = [blocked_code]
         plan.mode = "apply"
         plan.next_step = "Repository is not clean. Bisync apply is blocked. Commit or stash changes."
         plan.next_action = {
@@ -377,7 +381,11 @@ def apply_bisync_plan(
             "command": "",
             "reason": reason,
         }
-        plan.verification = {"status": "blocked", "reason": reason}
+        plan.verification = {
+            "status": "blocked",
+            "code": blocked_code,
+            "reason": reason,
+        }
         return plan
 
     drifts_to_resolve = [d for d in plan.drifts if d.drift_type == "drift"]
@@ -401,12 +409,13 @@ def apply_bisync_plan(
             if drift.direction == "repo-to-home"
             else drift.home_hash
         )
-        if actual_hash != (drift.home_hash if drift.direction == "repo-to-home" else drift.repo_hash):
-            plan.blocked_codes.append(
-                f"bisync-verify-failed:{drift.skill_name}"
-            )
+        if actual_hash != expected_hash:
+            plan.blocked_codes.append("bisync-verify-failed")
+            plan.blocked_codes = sorted(set(plan.blocked_codes))
             plan.verification = {
                 "status": "blocked",
+                "code": "bisync-verify-failed",
+                "skill": drift.skill_name,
                 "reason": f"Post-copy hash mismatch for {drift.skill_name}",
             }
             plan.next_step = _next_step_for_bisync(plan)
@@ -418,15 +427,22 @@ def apply_bisync_plan(
     post_plan = build_bisync_plan(source_root, home_root, mode="verify")
     if post_plan.drifts or post_plan.blocked_codes:
         plan.blocked_codes.extend(post_plan.blocked_codes)
+        if post_plan.drifts:
+            plan.blocked_codes.append("bisync-residual-drift")
         plan.blocked_codes = sorted(set(plan.blocked_codes))
         plan.verification = {
             "status": "blocked",
+            "code": "bisync-residual-drift" if post_plan.drifts else "bisync-post-apply-blocked",
             "reason": f"Post-apply drift still detected: {len(post_plan.drifts)} drift(s)",
             "residual_drifts": [d.to_dict() for d in post_plan.drifts],
         }
         plan.next_step = _next_step_for_bisync(plan)
         plan.next_action = compute_next_action(
-            plan.blocked_codes, bool(plan.drifts), "apply", source_root, home_root
+            plan.blocked_codes,
+            bool(post_plan.drifts),
+            "apply",
+            source_root,
+            home_root,
         )
         return plan
 

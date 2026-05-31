@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from pathlib import Path
 
 import sync_home_ai_resources
@@ -137,3 +138,133 @@ def test_main_apply_blocks_docs_unverified_targets(
     assert exit_code == 1
     assert payload["mode"] == "apply"
     assert payload["blocked_codes"] == ["docs-unverified"]
+
+
+def test_bisync_plan_json_output(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    source_root.mkdir()
+    home_root.mkdir()
+    write_file(source_root / ".gitkeep", "")
+    (source_root / ".github" / "skills").mkdir(parents=True, exist_ok=True)
+    (home_root / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "init", "-b", "main"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "add", "-A"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "initial"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="bisync",
+            bisync_command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            format="json",
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert "drifts" in payload
+    assert "next_action" in payload
+    assert "blocked_codes" in payload
+    assert "action" in payload["next_action"]
+
+
+def test_bisync_apply_returns_nonzero_on_blockers(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    source_root.mkdir()
+    home_root.mkdir()
+    (source_root / ".github" / "skills").mkdir(parents=True, exist_ok=True)
+    (home_root / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="bisync",
+            bisync_command="apply",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            format="json",
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert payload["next_action"]["allowed"] is False
+
+
+def test_plan_next_action_present(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="codex",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="json",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert "next_action" in payload
+    assert "next_step" in payload
+    assert "action" in payload["next_action"]
+    assert "allowed" in payload["next_action"]
+    assert "requires_explicit_approval" in payload["next_action"]
