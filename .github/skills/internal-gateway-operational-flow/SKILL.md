@@ -176,6 +176,14 @@ For governance-sensitive prompts, skills, agents, routes, or validators, map the
 
 Before claiming `plan complete`, use `Plan Check 1`, `Plan Check 2`, and `Plan Check 3` plus `superpowers-verification-before-completion`. After retained-plan authoring or major reformulation, emit a compact Decision Brief. Use `internal-agent-support-next-step` for durable Decision Brief handoff fields when the brief must survive a handoff. For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief` only as a chat projection.
 
+### Plan-Complete Gate
+
+A retained plan is not `plan complete` until all of these are satisfied:
+
+- Each ledger row has exactly one route: an executable file reference, an intentional non-action, a deferred follow-up with owner, a rejection, or a real blocker. Do not claim `plan complete` when any row has ambiguous routing or multiple owners in the same executable track.
+- `questions.md` contains `- none` or lists only items that are real blockers with an explicit owner and stop condition. Do not claim `plan complete` with unresolved user-only decisions still in `questions.md`.
+- An explicit owner-class audit must run when the plan touches both always-on guidance (`AGENTS.md`, `.github/copilot-instructions.md`) and skill files. The audit must name each owner class present in the ledger and confirm that no single executable track mixes `mirrored instruction baseline`, `skill-depth`, `release/release-please`, `validator/ops`, or `new-owner follow-up` items without a justified exception.
+
 ## Execute Mode
 
 Execute mode owns clear local delivery once the target state and validation are concrete. Keep edits scoped, use the smallest independently verifiable slice, and do not silently reopen strategy.
