@@ -85,4 +85,11 @@ docs-lint:
 		printf '%s\n' 'npx not installed; skipping markdown lint.'; \
 	fi
 
+PLAN_FOLDER ?=
+PLAN_STAGE ?= handoff
+
+retained-plan-check: scripts-bootstrap
+	@if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required (e.g. make retained-plan-check PLAN_FOLDER=tmp/superpowers/my-plan)' >&2; exit 1; fi
+	@$(SCRIPTS_RUNNER) validate_retained_plans --plan-folder "$(PLAN_FOLDER)" --stage "$(PLAN_STAGE)"
+
 all: lint test catalog-check

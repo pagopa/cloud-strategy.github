@@ -14,6 +14,7 @@ import github_catalog_validation
 import graphify_update
 import sync_copilot_catalog
 import validate_internal_skills
+import validate_retained_plans
 
 
 def write_file(path: Path, content: str) -> None:
@@ -638,3 +639,143 @@ def test_sync_copilot_catalog_apply_aborts_when_source_has_blocking_findings(
     assert (
         "Source repository has blocking governance findings" in capsys.readouterr().out
     )
+
+
+# validate_retained_plans CLI
+
+
+def _write_compact_plan(plan_folder: Path) -> None:
+    plan_folder.mkdir(parents=True, exist_ok=True)
+    (plan_folder / "01-change-summary.md").write_text("# Summary\n\nChange.\n", encoding="utf-8")
+    (plan_folder / "02-source-item-ledger.md").write_text(
+        "# Ledger\n\n"
+        "## Recommended use\napply-plan\n\n"
+        "## Plan profile\ncompact\n\n"
+        "## File map and role\n| File | Ruolo |\n| --- | --- |\n| 01 | summary |\n\n"
+        "## Clarification gate\nclarification satisfied\n\n"
+        "## Initial evidence pass\ntarget, validator\n\n"
+        "## Reading budget\nthis folder only\n\n"
+        "## Target and anti-scope\nT.\n\n"
+        "## Owner and validator\nT.\n\n"
+        "## Stop conditions\nT.\n\n"
+        "## Source item ledger\n| ID | Source item | Acceptance | Evidence | Status | Route |\n"
+        "| --- | --- | --- | --- | --- | --- |\n"
+        "| T-01 | Test | diff | diff | PENDING | 03 |\n",
+        encoding="utf-8",
+    )
+    (plan_folder / "03-execution.md").write_text("# Execution\n\n## Objective\nT.\n\n"
+        "## Chosen logic\nT.\n\n## Key assumptions\nT.\n\n## Executable steps\n1. T.\n\n"
+        "## Validation\nT.\n", encoding="utf-8")
+    (plan_folder / "questions.md").write_text("# Questions\n\n- none\n", encoding="utf-8")
+
+
+def test_validate_retained_plans_handoff_compact_ready(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    monkeypatch.setattr(
+        validate_retained_plans,
+        "parse_args",
+        lambda: argparse.Namespace(
+            plan_folder=plan_folder, stage="handoff", format="text"
+        ),
+    )
+
+    exit_code = validate_retained_plans.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Profile: compact" in output
+    assert "Result: READY" in output
+
+
+def test_validate_retained_plans_handoff_reports_missing_files(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    plan_folder = tmp_path / "plan"
+    plan_folder.mkdir()
+    monkeypatch.setattr(
+        validate_retained_plans,
+        "parse_args",
+        lambda: argparse.Namespace(
+            plan_folder=plan_folder, stage="handoff", format="text"
+        ),
+    )
+
+    exit_code = validate_retained_plans.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "missing-ledger" in output
+
+
+def test_validate_retained_plans_handoff_json_output(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    monkeypatch.setattr(
+        validate_retained_plans,
+        "parse_args",
+        lambda: argparse.Namespace(
+            plan_folder=plan_folder, stage="handoff", format="json"
+        ),
+    )
+
+    exit_code = validate_retained_plans.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["profile"] == "compact"
+    assert payload["ready"] is True
+
+
+def test_validate_retained_plans_completion_ready(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    plan_folder = tmp_path / "plan"
+    plan_folder.mkdir()
+    write_file(plan_folder / "done-01.md", "# Done\n")
+    write_file(
+        plan_folder / "evidence-envelope.md",
+        "# Evidence Envelope\n\n"
+        "| Source item | Status | Evidence path or command |\n"
+        "| --- | --- | --- |\n"
+        "| `done-01.md` | DONE | `pytest` |\n",
+    )
+    write_file(plan_folder / "completion-report.md", "Completion Report\n"
+        "Active phase and owner:\nState:\nFiles changed:\nCompleted items:\n"
+        "Intentional non-actions:\nValidators:\nEvidence envelope:\nSource-item ledger:\n"
+        "Evidence gaps:\nResidual risks:\nFollow-up suggestions:\n")
+    monkeypatch.setattr(
+        validate_retained_plans,
+        "parse_args",
+        lambda: argparse.Namespace(
+            plan_folder=plan_folder, stage="completion", format="text"
+        ),
+    )
+
+    exit_code = validate_retained_plans.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Result: READY" in output
+
+
+def test_validate_retained_plans_rejects_missing_folder(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    monkeypatch.setattr(
+        validate_retained_plans,
+        "parse_args",
+        lambda: argparse.Namespace(
+            plan_folder=tmp_path / "nonexistent", stage="handoff", format="text"
+        ),
+    )
+
+    exit_code = validate_retained_plans.main()
+    output = capsys.readouterr().err
+
+    assert exit_code == 1
+    assert "Not a directory" in output
