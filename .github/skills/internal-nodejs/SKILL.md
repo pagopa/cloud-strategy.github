@@ -1,6 +1,6 @@
 ---
 name: internal-nodejs
-description: Use when creating, editing, or reviewing JavaScript, Node.js, TypeScript, package.json, or tsconfig.json work before project depth is needed.
+description: Use when creating, editing, or reviewing JavaScript, Node.js, TypeScript, package.json, tsconfig.json, or package-manager lockfile work before project depth is needed.
 ---
 
 # Internal Node.js
@@ -15,7 +15,7 @@ package architecture, or deterministic test design becomes the real issue.
 
 ## When to use
 
-- `.js`, `.cjs`, `.mjs`, `.ts`, `.tsx`, `package.json`, or `tsconfig.json` changes.
+- `.js`, `.cjs`, `.mjs`, `.ts`, `.tsx`, `package.json`, `tsconfig.json`, or Node.js package-manager lockfile changes.
 - Lightweight Node.js or TypeScript reviews focused on readability, boundary hygiene, dependency intent, scripts, engines, or compiler options.
 - Small module edits where the target package and validation path are concrete.
 

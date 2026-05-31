@@ -123,8 +123,24 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
     ):
         add(suggestions, "internal-azure-devops", "Azure DevOps pipeline path.")
         return
+    if normalized in {".github/dependabot.yml", ".github/dependabot.yaml"}:
+        add(suggestions, "awesome-copilot-dependabot", "Dependabot configuration path.")
+        return
+    if name in {
+        "package-lock.json",
+        "npm-shrinkwrap.json",
+        "pnpm-lock.yaml",
+        "yarn.lock",
+        "bun.lock",
+        "bun.lockb",
+    }:
+        add(suggestions, "internal-nodejs", "Node.js package-manager lockfile path.")
+        return
     if name.startswith("dockerfile") or "docker-compose" in name or "compose." in name:
         add(suggestions, "internal-docker", "Docker or Compose path.")
+        return
+    if name == "chart.yaml":
+        add(suggestions, "internal-kubernetes", "Helm chart metadata path.")
         return
     if "/workflows/" in lowered and suffix in {".yml", ".yaml"}:
         add(suggestions, "internal-github-actions", "GitHub Actions workflow path.")

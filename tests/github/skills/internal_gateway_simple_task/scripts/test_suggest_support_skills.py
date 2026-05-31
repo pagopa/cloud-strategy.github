@@ -30,15 +30,22 @@ REPRESENTATIVE_PATHS = (
     "services/api/main.go",
     "src/index.ts",
     "package.json",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "bun.lockb",
     "pom.xml",
     "src/main/java/App.java",
     "Makefile",
     "docs/guide.md",
     "data/registry.json",
     "azure-pipelines.yml",
+    ".github/dependabot.yml",
+    ".pre-commit-config.yaml",
     ".github/CODEOWNERS",
     ".github/workflows/ci.yml",
     ".github/actions/test/action.yml",
+    "Chart.yaml",
     "Dockerfile",
     "compose.yaml",
     "k8s/app/deployment.yaml",
@@ -63,15 +70,22 @@ EXPECTED_SKILLS_BY_PATH = {
     "services/api/main.go": {"internal-go"},
     "src/index.ts": {"internal-project-nodejs"},
     "package.json": {"internal-nodejs"},
+    "package-lock.json": {"internal-nodejs"},
+    "pnpm-lock.yaml": {"internal-nodejs"},
+    "yarn.lock": {"internal-nodejs"},
+    "bun.lockb": {"internal-nodejs"},
     "pom.xml": {"internal-java"},
     "src/main/java/App.java": {"internal-project-java"},
     "Makefile": {"internal-makefile"},
     "docs/guide.md": {"internal-markdown"},
     "data/registry.json": {"internal-json"},
     "azure-pipelines.yml": {"internal-azure-devops"},
+    ".github/dependabot.yml": {"awesome-copilot-dependabot"},
+    ".pre-commit-config.yaml": {"internal-yaml"},
     ".github/CODEOWNERS": {"internal-github-governance"},
     ".github/workflows/ci.yml": {"internal-github-actions"},
     ".github/actions/test/action.yml": {"internal-github-action-composite"},
+    "Chart.yaml": {"internal-kubernetes"},
     "Dockerfile": {"internal-docker"},
     "compose.yaml": {"internal-docker"},
     "k8s/app/deployment.yaml": {"internal-kubernetes"},
@@ -193,6 +207,17 @@ def test_suggest_support_skills_keeps_generic_json_edit_on_json_owner_only() -> 
     assert set(suggestions) == {"internal-json"}
 
 
+def test_suggest_support_skills_routes_node_lockfiles_to_nodejs_owner() -> None:
+    module = load_script_module()
+
+    for path_text in ("package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb"):
+        suggestions: dict[str, set[str]] = {}
+
+        module.suggest_for_path(path_text, suggestions)
+
+        assert set(suggestions) == {"internal-nodejs"}
+
+
 def test_suggest_support_skills_keeps_generic_python_and_bash_on_base_owner_only() -> None:
     module = load_script_module()
 
@@ -228,6 +253,33 @@ def test_suggest_support_skills_keeps_generic_markdown_on_markdown_owner_only() 
     module.suggest_for_path("docs/guide.md", suggestions)
 
     assert set(suggestions) == {"internal-markdown"}
+
+
+def test_suggest_support_skills_routes_dependabot_yaml_to_dependabot_owner() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path(".github/dependabot.yml", suggestions)
+
+    assert set(suggestions) == {"awesome-copilot-dependabot"}
+
+
+def test_suggest_support_skills_keeps_precommit_yaml_on_generic_yaml_owner() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path(".pre-commit-config.yaml", suggestions)
+
+    assert set(suggestions) == {"internal-yaml"}
+
+
+def test_suggest_support_skills_routes_chart_yaml_to_kubernetes_owner() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path("Chart.yaml", suggestions)
+
+    assert set(suggestions) == {"internal-kubernetes"}
 
 
 def test_suggest_support_skills_routes_internal_agent_paths_to_agent_creator() -> None:
