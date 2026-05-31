@@ -304,9 +304,18 @@ Review treats missing validation as a finding, not a footnote.
 | Check 2 contract coverage      |
 | Check 3 evidence coverage      |
 +-------------------------------+
+              |
+              v
++-------------------------------+
+| Check 4 close packaging        |
+| - evidence envelope + report   |
+| - matching done-* markers      |
+| - remove all numbered files    |
+| - preserve and close ledger    |
++-------------------------------+
 ```
 
-Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies.
+Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies. `apply-plan` cannot report `SHIPPED` before `Check 4` verifies the physical close package.
 
 ## Runtime Projection
 

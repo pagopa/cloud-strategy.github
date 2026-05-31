@@ -245,10 +245,10 @@ def completion_validate(plan_folder: Path) -> CompletionReport:
         completion_report_present=False,
     )
 
-    # Active numbered files
-    control_files = {"01-change-summary.md", "02-source-item-ledger.md", "04-implementation-contract.md"}
+    # Completion packaging removes all closed numbered plan files, including
+    # summary, ledger, and implementation-contract controls.
     for md_path in sorted(plan_folder.glob("*.md")):
-        if NUMBERED_FILE_PATTERN.match(md_path.name) and md_path.name not in control_files:
+        if NUMBERED_FILE_PATTERN.match(md_path.name):
             report.active_numbered_remaining.append(md_path.name)
 
     if report.active_numbered_remaining:

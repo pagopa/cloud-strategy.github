@@ -253,6 +253,23 @@ def test_completion_rejects_active_numbered_files(tmp_path: Path) -> None:
     assert any(f.code == "active-numbered-files" for f in report.findings)
 
 
+def test_completion_rejects_numbered_control_files(tmp_path: Path) -> None:
+    plan = tmp_path / "plan"
+    plan.mkdir()
+    write_file(plan / "01-change-summary.md", "# Summary\n")
+    write_file(plan / "02-source-item-ledger.md", "# Ledger\n")
+    write_file(plan / "04-implementation-contract.md", "# Contract\n")
+    write_file(plan / "evidence-envelope.md", "| Status |\n| --- |\n")
+    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    report = completion_validate(plan)
+    assert not report.ready
+    assert report.active_numbered_remaining == [
+        "01-change-summary.md",
+        "02-source-item-ledger.md",
+        "04-implementation-contract.md",
+    ]
+
+
 def test_completion_rejects_open_statuses(tmp_path: Path) -> None:
     plan = tmp_path / "plan"
     plan.mkdir()

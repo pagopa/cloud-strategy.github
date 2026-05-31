@@ -365,6 +365,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "`Check 1`" in skill_text
     assert "`Check 2`" in skill_text
     assert "`Check 3`" in skill_text
+    assert "`Check 4`" in skill_text
     assert "## Output Calibration" in skill_text
     assert "Required output" in skill_text
     assert "Must not include" in skill_text

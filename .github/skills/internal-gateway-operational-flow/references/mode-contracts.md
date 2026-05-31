@@ -9,7 +9,7 @@ Use this reference when the staged `define`, `plan`, `execute`, `apply-plan`, `r
 | `define` | Initial brainstorming, user intent, success criteria, constraints, anti-scope, option exploration, Gate 0 closure, Definition Briefs, and Pre-Plan Critical Pass. | Implementation plans, retained-plan authoring, local edits, or proof of completion. |
 | `plan` | Ambiguity resolution after the definition is confirmed with `pre-plan critical: confident`, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution once the target state is settled, defect-first validation, open-ended brainstorming, or pure pressure testing. |
 | `execute` | Clear local implementation, deterministic realignment, nearby documentation/test updates, and concrete validation. | Strategic tradeoffs, unresolved ownership, non-trivial rollout decisions, review-first asks, or assumption challenge. |
-| `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, source-item ledger coverage, blocker handling, cross-file continuation, and completion checks. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, or executing `questions.md`. |
+| `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, source-item ledger coverage, blocker handling, cross-file continuation, completion checks, and physical close packaging. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, executing `questions.md`, or reporting `SHIPPED` before close packaging. |
 | `review` | Findings, severity, confidence, causal layer, validation evidence, regression risk, systems risk, fix routing, and Review Gate. | Applying fixes, designing the initial solution, or open-ended challenge. |
 | `critical` | Challenge, pre-mortem, hidden-assumption tests, failure modes, and reframing. | Implement or routine-review. |
 
@@ -108,7 +108,7 @@ reference, or the support skill itself.
   transition authorization.
 - `plan` exits to `execute`, `apply-plan`, `review`, or critical challenge only through a visible next-step package and checkpoint unless the user authorized end-to-end work.
 - `execute` exits to `review` when correctness evidence or merge readiness is the main next need.
-- `apply-plan` exits only after all executable retained-plan items are completed, a real blocker is packaged, or validation exposes a gap that needs another visible owner.
+- `apply-plan` exits as `SHIPPED` only after all executable retained-plan items are completed and retained-plan `Check 4` verifies the physical close package. A real blocker or validation gap exits only with its explicit non-shipped state and visible next owner.
 - `review` exits to `execute`, `define`, `plan`, critical challenge, or deferred follow-up for each actionable finding only after the Review Gate is satisfied.
 - Critical challenge exits with `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
 - Any mode may stop and recommend a better lane through `internal-agent-support-lane-change-engine` when the boundary breaks.

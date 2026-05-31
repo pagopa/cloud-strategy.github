@@ -15,15 +15,15 @@ Treat `completion-report.md` and `evidence-envelope.md` as late-stage packaging 
 
 | State | Criteria |
 | --- | --- |
-| `SHIPPED` | All in-scope ledger items are implemented or intentionally closed, validators passed, required evidence envelope coverage exists, and the completion report is filled. |
+| `SHIPPED` | All in-scope ledger items are implemented or intentionally closed, validators passed, required evidence envelope coverage exists, no numbered plan files remain, and the completion report is filled. |
 | `APPLIED_UNVERIFIED` | Edits were applied, but required validator, review, or evidence coverage is missing. |
 | `PARTIAL` | Some in-scope items remain incomplete or intentionally deferred. |
 | `BLOCKED` | A real blocker prevents correct continuation. |
 | `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. |
 
-`SHIPPED` requires passed validators, a completed report, and no open
-source-item ledger rows. Non-trivial retained plans also require an evidence
-envelope or equivalent item-level evidence for every requested or source item.
+`SHIPPED` requires passed validators, a completed report, no numbered plan files,
+and no open source-item ledger rows. Non-trivial retained plans also require an
+evidence envelope or equivalent item-level evidence for every requested or source item.
 If validators or evidence coverage cannot run, or any row remains `PENDING`,
 `PARTIAL`, `NOT_DONE`, `UNVERIFIABLE`, or `BLOCKED`, use
 `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED` with the explicit gap.

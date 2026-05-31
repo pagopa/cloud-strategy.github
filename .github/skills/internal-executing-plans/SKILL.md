@@ -44,10 +44,11 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
    targeted check, then move to the next slice.
 4. **Track via ledger**: The ledger is the single live state. Update row status
    after each slice. Do not create `done-*` markers during partial work.
-5. **Package final**: After all executable files are cleared, run full validator
-   suite, missed-work scan, then create `evidence-envelope.md` →
-   `completion-report.md` → `done-*` markers → delete empty source files →
-   close ledger.
+5. **Package final**: After all executable files are cleared, run the full
+   validator suite and missed-work scan, then create `evidence-envelope.md` →
+   `completion-report.md` → matching `done-*` markers → preserve the closed
+   ledger in the envelope → remove all closed numbered plan files, including
+   control files.
 
 ## Execution Contract
 
@@ -58,8 +59,10 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
 - Use `rg --no-ignore` for retained artifacts under `tmp/`, scoped to the active folder.
 - `done-*` files are packaging only: create them after evidence envelope, not
   during partial work.
-- Delete empty executable source files after items are moved out.
-- Delete ledger only after evidence envelope preserves every row.
+- Remove all closed numbered plan files, including summary, live ledger,
+  implementation contract, and executable files, after matching `done-*`
+  markers preserve their completed items.
+- Remove the live ledger only after the evidence envelope preserves every row.
 - Continue across executable files until all are cleared or a real blocker stops
   execution.
 - Stop only for real blockers: missing prerequisites, concurrency on target files,
@@ -98,6 +101,8 @@ Load references on demand only when the active phase needs them.
 - Evidence pass followed; sibling plans not read unless listed in budget.
 - `done-*` created only after evidence envelope, not during partial work.
 - Ledger rows closed with evidence before deletion.
+- Physical close packaging removed all closed numbered plan files and preserved
+  every removed item and ledger row in the evidence envelope before `SHIPPED`.
 - No `SHIPPED` claim while any item is `PENDING`, `PARTIAL`, `NOT_DONE`,
   `UNVERIFIABLE`, or `BLOCKED`.
 - No git commit unless user explicitly requested.

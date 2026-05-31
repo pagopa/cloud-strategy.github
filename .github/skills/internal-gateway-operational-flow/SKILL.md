@@ -70,7 +70,7 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 | `define` | Intent, success criteria, target user or owner, constraints, anti-scope, or solution options are not yet confirmed. | Start after the minimum evidence pass and before any downstream plan output or recommendation. Gate 0 is pre-`plan` only; direct `execute` and `apply-plan` are the only automatic Gate 0 exceptions. | Confirmed intent, assumptions, option frame, Definition Brief, Pre-Plan Critical Pass, and next-step package. | Write an implementation plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | `Define Check 1-3`, Pre-Plan Critical Pass outcome (`confident` or `reopen`), explicit user closure, and named validation path or gap. |
 | `plan` | A confirmed definition exists with `pre-plan critical: confident`, but decisions, ownership, rollout, validation, or tradeoffs remain. | Gate 0 must already be satisfied and the Pre-Plan Critical Pass must have returned `confident` for the current definition, or `define` must run first. | Decision frame, retained plan, Decision Brief, and next-step package. | Apply changes, restart open-ended brainstorming, or imply execute approval. | `internal-writing-plans`, `internal-agent-support-next-step`. | `Plan Check 1-3`, named validators, or an explicit gap. |
 | `execute` | Target state and validation are concrete. | Do not start Gate 0 for direct `execute` unless the user explicitly asks for `grill-me` or the lane changes away from `execute`. | Scoped edits, focused validation, and slice reports. | Add unrelated improvements or reopen strategy silently. | `internal-debugging`, `internal-tdd`, and runtime delivery skills. | `Check 1-3` plus fresh evidence. |
-| `apply-plan` | An approved retained plan folder is the execution target. | Gate 0 does not restart for an approved retained plan. | `done-*` loop, ledger coverage, and retained-plan completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, and `Check 1-3`. |
+| `apply-plan` | An approved retained plan folder is the execution target. | Gate 0 does not restart for an approved retained plan. | `done-*` loop, ledger coverage, retained-plan close packaging, and completion evidence. | Execute `questions.md` or unapproved inline plans. | `internal-executing-plans`. | Ledger coverage, `done-*` state, `Check 1-3`, and retained-plan `Check 4`. |
 | `review` | A concrete artifact, diff, or validation result exists. | Gate 0 applies as a pre-start define gate before review output. | Findings, severity, evidence gaps, and fix routing. | Apply fixes or design the initial solution. | `internal-code-review`, `internal-high-level-review`, `grill-me`, `internal-gateway-critical-master`. | Review Gate (`grill-me satisfied` and `pre-verdict critical: confident`), `Review Check 1-3`, and named evidence gaps. |
 | `critical` | Assumptions, proposal, or decision need pressure testing. | Not owned here; use the critical owner. | Strongest objection, lens, and explicit outcome. | Implement or routine-review. | `internal-gateway-critical-master`. | One critical outcome and next-step package. |
 
@@ -158,11 +158,12 @@ Before the final verdict, run `grill-me` and `internal-gateway-critical-master` 
 
 ## Completion Checks
 
-Before reporting completion for `execute` or `apply-plan`, run three distinct verification checks.
+Before reporting completion for `execute` or `apply-plan`, run three distinct verification checks. For `apply-plan`, run the retained-plan-only fourth check before any completion claim.
 
 - `Check 1`: Plan coverage. Map each requested item, retained-plan ledger row, or observed workflow error to an implemented change, intentional non-action, or blocker.
 - `Check 2`: Contract coverage. Re-read changed files and relevant repository instructions to check ownership, frontmatter, links, inventory, schemas, and local conventions.
 - `Check 3`: Evidence coverage. Run the applicable validators, tests, lint commands, or closest available checks; read the output before claiming success.
+- `Check 4` (`apply-plan` only): Close packaging. Delegate the physical close to `internal-executing-plans`, then verify `evidence-envelope.md`, `completion-report.md`, matching `done-*` markers, removal of all closed numbered plan files, and closed ledger preservation. Do not report `SHIPPED` while active numbered plan files or open ledger rows remain.
 
 For retained plans, `Check 1` must use `02-source-item-ledger.md` or a reconstructed evidence envelope plus observed diff or file evidence. Use `superpowers-verification-before-completion` as the final evidence gate. For large retained plans, multi-area diffs, always-on guidance changes, or validator changes, use `internal-high-level-review` for plan-completion audit and scope-drift analysis.
 
@@ -177,7 +178,7 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 | `define` | Gate status, Definition Brief, Pre-Plan Critical Pass outcome, assumptions, selected direction or open options, validation path, anti-scope, risk, and requested checkpoint. | Implementation plan, applied changes, or implied approval to execute. |
 | `plan` | Gate status, `pre-plan critical: confident` status, decision, assumptions, anti-scope, validation path, risk, and requested checkpoint. | Applied changes or implied approval to execute. |
 | `execute` | Files changed, scoped result, `Check 1`, `Check 2`, `Check 3`, validation evidence, and residual risk. | New strategy, unrelated improvements, or unverified completion claims. |
-| `apply-plan` | Retained-plan ledger coverage, `done-*` status, blockers or completed items, three checks, and evidence. | Execution of `questions.md` or unapproved inline plan work. |
+| `apply-plan` | Retained-plan ledger coverage, `done-*` status, blockers or completed items, `Check 1-4`, close-package state, and evidence. | Execution of `questions.md` or unapproved inline plan work. |
 | `review` | Review Gate status, findings first, severity, confidence, causal layer, evidence gap, and fix route. | Silent fixes, initial design work, or final verdict without review gate closure. |
 | `critical` | Strongest objection, why it matters, explicit critical outcome, and next-step package. | Routine implementation or ordinary code review. |
 
@@ -205,7 +206,7 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 - Entry point and active phase are explicit, or the workflow falls back to `define` or `plan`.
 - Every phase includes owner, scope, anti-scope, action, validation, risk, and next checkpoint.
 - `internal-agent-support-next-step` is used for every user-visible transition.
-- `apply-plan` uses `internal-executing-plans`, requires source-item ledger coverage, and excludes `questions.md`.
+- `apply-plan` uses `internal-executing-plans`, requires source-item ledger coverage, excludes `questions.md`, and cannot report `SHIPPED` before retained-plan `Check 4` closes physical artifacts.
 - Phase-ending reports state `Lessons` status even when no lesson was retained.
 - `review` uses the relevant review lens; see Future Security Lens rule in `references/wrapper-alignment.md`.
 - Gate 0 blocks plan output when user decisions can change scope, owner, target state, validation, rollout, or anti-scope; `execute` is the only automatic exception.
