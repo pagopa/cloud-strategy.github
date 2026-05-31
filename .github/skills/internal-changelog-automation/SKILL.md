@@ -63,6 +63,8 @@ Call out versioning mismatches explicitly when the described changes and the rel
 - Prefer machine-collected input plus human curation over pure free-text generation.
 - If the repo uses PR templates or labels, align the automation to them.
 - State the current activation gap explicitly when the repository still relies on manual changelog updates.
+- In `release-please` manifest mode, any commit that touches a configured package path, including a dummy `.release-trigger`, makes that package eligible for the next release; placeholder directories must not remain in the `packages` map.
+- If a repository needs both component tags such as `actions-vX.Y.Z` and a whole-repo tag such as `vX.Y.Z`, configure the manifest root path `.` as its own release-please package with `include-component-in-tag: false`.
 
 ## Anti-Patterns
 

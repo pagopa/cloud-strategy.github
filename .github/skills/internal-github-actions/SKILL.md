@@ -24,6 +24,8 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 - Keep step names and logs in English.
 - Read GitHub's official workflow syntax and context-availability documentation before making or validating changes that depend on expression scope, context usage, or key-specific rules; do not rely on memory.
 - Validate `workflow_dispatch` free-form inputs before shell or deploy steps consume them.
+- Before enabling auto-merge for a release PR, re-verify the PR through GitHub API/CLI data and enforce branch, author, state, and cross-repository checks instead of trusting upstream action outputs alone.
+- Manual `release-please` tests on non-production branches should pass `skip-github-release: true`; otherwise a branch-validation run can create real tags and GitHub Releases.
 
 ## Reference map
 

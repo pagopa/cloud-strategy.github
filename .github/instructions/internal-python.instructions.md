@@ -24,6 +24,7 @@ applyTo: "**/*.py"
 - For new scripts that may need external packages, write a short dependency decision note comparing the standard library with realistic third-party candidates before coding.
 - If external libraries are introduced, lock them in `requirements.txt` with exact pins and hashes.
 - Do not add local vendored libraries, wheelhouses, copied site-packages, fallback dependency mirrors, or deprecated alternate dependency paths unless explicitly requested.
+- Validate Python with the repository-declared runtime selector, such as `.python-version`, workflow configuration, or the deployed Lambda runtime, before falling back to the ambient `python3`; do not rewrite source for an older local interpreter when the repository declares a newer runtime.
 
 ## Use the right Python skill
 

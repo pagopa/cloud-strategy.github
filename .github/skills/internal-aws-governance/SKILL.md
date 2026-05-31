@@ -41,6 +41,7 @@ This skill owns governance logic after the broad structure is known. It helps se
 - Prefer roles and federation over long-lived IAM users unless there is a proven reason not to.
 - Make scope explicit: root, OU, account set, or single account.
 - Make exception handling explicit when a control is not universal.
+- When AWS returns `AccessDenied` with \"explicit deny in a service control policy\", treat the SCP as the blocking control and inspect its exception scope; target-account IAM role grants cannot override an explicit SCP deny.
 
 Load `references/guardrail-map.md` when the correct governance surface is ambiguous or when the user needs a deeper split between IAM, trust, SCP, and boundary controls.
 

@@ -20,4 +20,6 @@ applyTo: "**/actions/**/action.y*ml"
 - Move longer logic into dedicated scripts instead of large inline `run:` blocks.
 - Document inputs, outputs, and a minimal usage example next to the action.
 - Keep a lightweight happy-path validation path before release, such as a smoke workflow or fixture-based script.
+- When extracting an existing validation workflow into a local wrapper action, preserve current default validation semantics and make stricter policy such as scope allowlists opt-in unless the user explicitly requests the tighter gate.
+- Repository-owned release wrapper actions should require release config and manifest paths to stay repository-relative and inside `GITHUB_WORKSPACE`; validating only that the file exists and is JSON is too weak for a privileged action contract.
 - Preserve backward-compatible input and output contracts when modifying an existing composite action.

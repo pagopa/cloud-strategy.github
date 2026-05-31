@@ -28,6 +28,10 @@ applyTo: "**/*.tf"
 - Use `ignore_changes` only with documented rationale.
 - Prefer least-privilege IAM/RBAC and narrow network exposure in the infrastructure being declared.
 - Enable encryption at rest and in transit when the platform supports it.
+- Terraform `try(...)` does not fall back when a decoded YAML attribute exists but is `null`; normalize decoded YAML with `coalesce(..., [])` or an explicit `== null ? [] : ...` guard before `for_each` or `flatten` over optional collections.
+- When renaming physical Terraform-managed resources across numbered roots, policy JSON, tfvars, and StackSet templates, validate every downstream physical-name reference against the resource actually created, not just the intended naming plan, or mismatched principals and group names can leave orphaned cross-root references.
+- When refactoring a TF repo whose state is shared with a legacy repo, never run `terraform init/plan/apply` during the refactor; restructure code only and keep `backend.tfvars` keys identical so state addressing does not change.
+- Splitting a TF resource into a new module without first migrating its state will trigger a destroy on next apply; keep the resource duplicated in the old module (with a TEMPORARY marker) until `terraform state mv` is performed.
 
 ## Provider lock and isolation
 
@@ -35,6 +39,7 @@ applyTo: "**/*.tf"
 - Refresh checksums with `terraform providers lock` covering at minimum `windows_amd64`, `darwin_amd64`, `darwin_arm64`, `linux_amd64`, and `linux_arm64`, for example: `terraform providers lock -platform=windows_amd64 -platform=darwin_amd64 -platform=darwin_arm64 -platform=linux_amd64 -platform=linux_arm64`.
 - Root configurations validated in isolation must declare their own `terraform { required_version, required_providers }` block so `terraform validate` and TFLint stay deterministic regardless of caller directory.
 - Child modules that read adjacent templates or query files must resolve them from `path.module` so validation stays stable across CI runners and local shells.
+- For manual `terraform validate` on roots that already have backend-oriented `.terraform` data, use an isolated `TF_DATA_DIR` together with `init -backend=false -lockfile=readonly`; otherwise cached backend metadata can trigger irrelevant cloud credential checks and obscure whether the configuration itself is valid.
 
 ## Use the skill for deeper guidance
 

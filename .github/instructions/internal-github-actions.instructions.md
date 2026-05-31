@@ -17,6 +17,8 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 - Pass secrets only through `secrets.*` or protected environments; never hardcode them in `env`.
 - For production deployments, use protected `environment:` gates with required reviewers instead of relying on branch conditions alone.
 - Treat self-hosted runners as trusted infrastructure and scope them to the repositories, runner groups, and network access they actually need.
+- In release workflows that mint a GitHub App token, keep the job-level `GITHUB_TOKEN` at no additional permissions and grant write access only to the minted App installation token.
+- Manual release workflows that can run on arbitrary branches should use a protected GitHub `environment` gate so `workflow_dispatch` does not mint high-privilege release credentials without reviewer control.
 
 ## Family baseline
 
@@ -35,6 +37,9 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 - Keep cache keys deterministic from lockfiles, tool versions, or other stable inputs instead of timestamps or branch-only entropy.
 - Set explicit artifact `retention-days` when artifacts bridge review, release, or deploy stages.
 - Validate `workflow_dispatch` free-form inputs before shell, deploy, or infrastructure steps consume them.
+- When secret-, var-, or context-derived values are reused across `with` or `run`, map them into step-local `env` first; this reduces direct expression-expansion warnings and keeps privileged values scoped to the steps that need them.
+- When renaming a GitHub Actions job that is represented as a repository ruleset required check, update the emitted job `name` and the catalog `rulesets.overrides.required-checks` entry in the same change; the human-facing check name is the contract that branch protections wait for, so stale catalog names can block merges even when the workflow logic is valid.
+- When a workflow root depends on a shared module, include that module path in the workflow trigger filters for both plan and apply; otherwise module-only fixes can be valid locally but never run automatically in CI/CD.
 - Path-specific instructions can use `excludeAgent: "code-review"` or `excludeAgent: "cloud-agent"` when workflow guidance must be scoped to one GitHub Copilot surface, but treat that as a deliberate optimization rather than a default requirement.
 
 ## Use the skill for deeper guidance
