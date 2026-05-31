@@ -5,7 +5,11 @@ description: Use when creating or modifying Node.js or TypeScript project code s
 
 # Node.js Project Skill
 
-Follow `.github/instructions/internal-nodejs.instructions.md` for the baseline Node.js rules. This skill adds project-specific guidance only.
+## Referenced skills
+
+- `internal-nodejs`: shared JavaScript, Node.js, TypeScript, package metadata, and test-stack baseline.
+
+Load `internal-nodejs` for the shared Node.js and TypeScript baseline. This skill adds project-specific guidance only.
 
 ## When to use
 
@@ -22,7 +26,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 
 ## Test stack
 
-- Follow the repository test-stack defaults from the instruction owner.
+- Follow the repository test-stack defaults from `internal-nodejs`.
 - If the repository already uses Jest, stay with local Jest conventions instead of introducing mixed test stacks.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 

@@ -108,7 +108,7 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical" in copilot_text
     )
     assert (
-        "dedicated retained-plan skills and scoped lessons instructions" in copilot_text
+        "dedicated retained-plan skills and lesson-codification owners" in copilot_text
     )
     assert (
         "Use plan mode when ambiguity, ownership, rollout, validation, or "

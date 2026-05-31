@@ -5,7 +5,11 @@ description: Use when creating or modifying Python package or application code w
 
 # Python Project Skill
 
-Follow `.github/instructions/internal-python.instructions.md` for the baseline Python rules. This skill adds application-specific guidance only.
+## Referenced skills
+
+- `internal-python`: shared Python runtime, typing, dependency, testing, and readability baseline.
+
+Load `internal-python` for the shared Python baseline. This skill adds application-specific guidance only.
 
 ## When to use
 
@@ -31,7 +35,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 
 ## Testing
 
-- Follow the repository pytest defaults from the instruction owner.
+- Follow the repository pytest defaults from `internal-python`.
 - BDD-like names: `given_when_then` style.
 - Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
 - Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.

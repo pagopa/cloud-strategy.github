@@ -1,6 +1,6 @@
 # Java Anti-Patterns
 
-Reference: `instructions/internal-java.instructions.md`
+Baseline owner: `internal-java`
 
 ## Critical
 

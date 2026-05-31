@@ -39,7 +39,6 @@ Use these repository sources first:
 - [.github/skills/internal-copilot-audit/SKILL.md](../skills/internal-copilot-audit/SKILL.md)
 - [.github/skills/internal-agent-creator/SKILL.md](../skills/internal-agent-creator/SKILL.md)
 - [.github/skills/internal-skill-creator/SKILL.md](../skills/internal-skill-creator/SKILL.md)
-- [.github/skills/internal-copilot-instructions-creator/SKILL.md](../skills/internal-copilot-instructions-creator/SKILL.md)
 
 Load additional repository skills only when the target resource or its
 references require their owner rules. Do not load every skill only because it
@@ -90,15 +89,14 @@ correctly.
 Accept any of these inputs in `Review target`:
 
 - one concrete resource path, such as `AGENTS.md`,
-  `.github/agents/<name>.agent.md`, `.github/prompts/<name>.prompt.md`,
-  `.github/instructions/<name>.instructions.md`, or
+  `.github/agents/<name>.agent.md`, `.github/prompts/<name>.prompt.md`, or
   `.github/skills/<name>/SKILL.md`
 - one or more folders, such as `.github/agents/`, `.github/skills/`,
-  `.github/instructions/`, `.github/prompts/`, `.github/scripts/`, or
-  AI-catalog test folders under `tests/`
+  `.github/prompts/`, `.github/scripts/`, or AI-catalog test folders under
+  `tests/`
 - the full AI catalog, meaning `AGENTS.md`, `.github/copilot-*.md`,
-  `.github/INVENTORY.md`, `.github/agents/`, `.github/instructions/`,
-  `.github/prompts/`, `.github/skills/`, AI catalog validation or sync scripts
+  `.github/INVENTORY.md`, `.github/agents/`, `.github/prompts/`,
+  `.github/skills/`, AI catalog validation or sync scripts
   under `.github/scripts/`, and tests that validate those resources
 - an existing retained report package under `tmp/`, in which case review the
   report against current repository evidence instead of treating it as policy
@@ -119,7 +117,6 @@ Review these families when they are in the target or referenced by it:
 - `.github/copilot-instructions.md` and related `.github/copilot-*.md` files
 - `.github/INVENTORY.md`
 - `.github/agents/*.agent.md`
-- `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 - `.github/skills/**/SKILL.md`
 - skill-local `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
@@ -138,8 +135,8 @@ unless an in-scope AI resource references them or a validator requires them.
 Before judging quality:
 
 1. Read `AGENTS.md` and `.github/copilot-instructions.md`.
-2. Read every scoped instruction whose `applyTo` metadata matches reviewed
-   Markdown, script, YAML, or other target paths.
+2. Load the smallest relevant domain skill from the reviewed Markdown, script,
+  YAML, or other target paths.
 3. Resolve the target as a single resource, folder set, full catalog, or retained
    report package.
   For skill bundles, keep the bundle root visible after the first read.
@@ -162,8 +159,8 @@ Before judging quality:
    discovered by sync, exercised by tests, or invoked by local workflow
    entrypoints.
 10. Load only the repository skills that own a relevant decision boundary.
-11. Compare thin wrappers, core skills, prompt entrypoints, scoped instructions,
-   sync helpers, and tests by role before calling anything duplicated.
+11. Compare thin wrappers, core skills, prompt entrypoints, Copilot projections,
+  sync helpers, and tests by role before calling anything duplicated.
 12. Keep a running list of unproven claims and place them in low-evidence or open
    questions sections.
 13. Decide whether the output can stay in chat or needs a retained report under
@@ -195,7 +192,7 @@ the repository flow:
 - Execution speed: which required reads, phases, validators, and handoffs slow
   the path, and which faster evidence path preserves correctness.
 - Propagation: whether changes must update inventory, sync scripts, validators,
-  paired agents, paired skills, scoped instructions, or retained reports.
+  paired agents, paired skills, domain skills, or retained reports.
 
 ## Review Questions
 
@@ -218,15 +215,13 @@ Agents:
 - Are handoffs and stop conditions explicit and user-visible?
 - Are route names and agent names clear enough for selection?
 
-Instructions:
+Copilot projections and domain baselines:
 
-- Are instructions partitioned correctly?
-- Does `applyTo` match the intended path family without excess co-loading?
-- Are some instructions never activated, too generic, too long, or overlapping
-  without a clear reason?
-- Do instructions contain only path-scoped rules that should auto-apply?
-- Are workflow depth and optional expertise kept in skills or prompts?
-- Do instructions avoid duplicating repository-wide policy?
+- Are repository-wide projection files compact and aligned with `AGENTS.md`?
+- Are technical baselines partitioned into the smallest useful umbrella skills?
+- Are specialist skills loaded only when path, task, framework, or validation
+  evidence proves they are needed?
+- Do domain skills avoid duplicating repository-wide policy?
 
 Skills:
 
@@ -301,8 +296,8 @@ Context economy:
 - What gets loaded too often?
 - What should be lazy-loaded?
 - What belongs in minimal always-visible guidance?
-- What belongs in on-demand skills, prompt files, scoped instructions, docs, or
-  tests?
+- What belongs in on-demand skills, prompt files, validators, docs, owned files,
+  or tests?
 - Which expensive overlaps should be compressed only after role differences are
   proven?
 
@@ -434,8 +429,8 @@ Use this structure in chat or across the retained report files.
 ### 3. Repository Hierarchy
 
 - Summarize the effective precedence between `AGENTS.md`,
-  `.github/copilot-instructions.md`, scoped instructions, agents, skills,
-  prompts, scripts, inventory, and referenced docs.
+  `.github/copilot-instructions.md`, agents, skills, prompts, scripts,
+  validators, inventory, and referenced docs.
 
 ### 4. Resource Map
 

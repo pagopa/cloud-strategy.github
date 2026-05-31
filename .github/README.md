@@ -20,7 +20,7 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 | Path | Purpose |
 | --- | --- |
 | `copilot-instructions.md` | Compact Copilot-native projection of repo-wide policy, validation expectations, direct-entry operating model, and completion-report contract. |
-| `INVENTORY.md` | Exact path inventory for live instructions, skills, and agents. |
+| `INVENTORY.md` | Exact path inventory for live skills, agents, prompts, and any migration-era legacy files still on disk. |
 | `copilot-code-review-instructions.md` | Review-specific severity and defect-first guidance. |
 | `copilot-commit-message-instructions.md` | Commit message conventions. |
 | `security-baseline.md` | Cross-cutting security bar for workflows and infrastructure changes. |
@@ -30,14 +30,18 @@ This directory is the source-side catalog for reusable GitHub Copilot customizat
 | `PULL_REQUEST_TEMPLATE.md` | PR section order for this repository. |
 | `dependabot.yml` | Dependency update configuration for GitHub Actions, script requirements, and pre-commit hooks in this source repository. |
 
-### Instructions (`instructions/`)
+### Skill-first technical baselines
 
-Instructions are path-driven and auto-apply via `applyTo`.
+Reusable technical guidance now lives in skills. Load the smallest skill that
+matches the file type, runtime, command surface, validation signal, or domain
+evidence.
 
-- Repository-owned `internal-*` instructions: `internal-bash`, `internal-docker`, `internal-github-action-composite`, `internal-github-actions`, `internal-java`, `internal-json`, `internal-lambda`, `internal-makefile`, `internal-markdown`, `internal-nodejs`, `internal-python`, `internal-terraform`, `internal-yaml`
-- Imported `awesome-copilot-*` instructions: `awesome-copilot-azure-devops-pipelines`, `awesome-copilot-go`, `awesome-copilot-kubernetes-manifests`, `awesome-copilot-shell`
+- Shared technical baselines: `internal-bash`, `internal-docker`, `internal-go`, `internal-java`, `internal-json`, `internal-makefile`, `internal-markdown`, `internal-nodejs`, `internal-python`, `internal-terraform`, `internal-yaml`
+- Workflow and platform baselines: `internal-azure-devops`, `internal-github-actions`, `internal-github-action-composite`, `internal-kubernetes`, `internal-kubernetes-deployment`, `internal-aws-lambda`
 
-Use instructions as automatic file-path guidance. Do not restate path-driven behavior in skills when `applyTo` already resolves it.
+Use umbrella skills for lightweight defaults and co-load specialist skills only
+when the task needs workflow depth, framework-specific behavior, or reusable
+procedure.
 
 ### Skills (`skills/`)
 
@@ -75,7 +79,7 @@ Keep token-budget estimates in root [`AGENTS.md`](../AGENTS.md); this README int
 Prompt files are parameterized entrypoints for repeatable advisory or orchestration starts. Use them when an operator needs a structured kickoff package rather than always-on policy or a reusable skill body.
 
 - `internal-mega-review`: general advisor-only mega review for one or more repositories; writes retained English review artifacts under `tmp/`.
-- `internal-review-ai-resources`: focused review for the AI resource control plane itself, including agents, skills, instructions, prompts, scripts, docs, memory, inventory, and governance drift.
+- `internal-review-ai-resources`: focused review for the AI resource control plane itself, including agents, skills, prompts, scripts, docs, memory, inventory, and governance drift.
 - `internal-agent-plan-next-step`, `internal-agent-review-next-actions`, and `internal-agent-pressure-test-plan`: compact planning, review, and pressure-test entrypoints aligned with the gateway wrapper lanes.
 - `internal-sync-plan` and `internal-architecture-md-creator`: targeted prompts for sync planning and architecture contract refresh work.
 

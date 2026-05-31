@@ -4,7 +4,7 @@
 The script is advisory. It maps known paths and symptoms to likely repository
 support owners, but absence from this helper is not evidence that a provider,
 runtime, or domain is unsupported. Final selection still belongs to repository
-evidence, matching scoped instructions, and explicit user-selected skills.
+evidence, path-to-skill routing, and explicit user-selected skills.
 """
 
 from __future__ import annotations
@@ -82,29 +82,54 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
         add(suggestions, "internal-skill-creator", "Repository-owned skill path.")
     if normalized.startswith(".github/agents/internal-"):
         add(suggestions, "internal-agent-creator", "Repository-owned agent path.")
-    if normalized.startswith(".github/instructions/"):
-        add(suggestions, "internal-copilot-instructions-creator", "Scoped instruction path.")
+    if name == "codeowners":
+        add(suggestions, "internal-github-governance", "CODEOWNERS governance path.")
+    if name in {"makefile", "gnumakefile"} or suffix == ".mk":
+        add(suggestions, "internal-makefile", "Makefile or make include path.")
+    if (
+        name in {"azure-pipelines.yml", "azure-pipelines.yaml"}
+        or name.startswith("azure-pipelines")
+        or name.endswith(".pipeline.yml")
+        or name.endswith(".pipeline.yaml")
+    ):
+        add(suggestions, "internal-azure-devops", "Azure DevOps pipeline path.")
+    if "lambda" in lowered and suffix in {".py", ".js", ".ts", ".tf"}:
+        add(suggestions, "internal-aws-lambda", "Lambda-related file path.")
 
     if suffix == ".py":
+        add(suggestions, "internal-python", "Python file path.")
         if "/scripts/" in lowered or lowered.startswith(".github/scripts/"):
             add(suggestions, "internal-script-python", "Python operational script path.")
         else:
             add(suggestions, "internal-project-python", "Python package or application path.")
     elif suffix == ".sh":
+        add(suggestions, "internal-bash", "Shell or Bash file path.")
         add(suggestions, "internal-script-bash", "Bash script path.")
     elif suffix == ".tf":
         add(suggestions, "internal-terraform", "Terraform file path.")
+    elif suffix == ".go" or name in {"go.mod", "go.sum"}:
+        add(suggestions, "internal-go", "Go source or module path.")
     elif suffix in {".js", ".cjs", ".mjs", ".ts", ".tsx"} or name in {
         "package.json",
         "tsconfig.json",
     }:
+        add(suggestions, "internal-nodejs", "JavaScript, Node.js, or TypeScript path.")
         add(suggestions, "internal-project-nodejs", "Node.js or TypeScript path.")
     elif suffix == ".java" or name in {"pom.xml", "build.gradle", "build.gradle.kts"}:
+        add(suggestions, "internal-java", "Java source or build metadata path.")
         add(suggestions, "internal-project-java", "Java project path.")
+    elif suffix == ".md":
+        add(suggestions, "internal-markdown", "Markdown file path.")
+    elif suffix == ".json" and any(
+        part in lowered for part in ("authorizations/", "organization/", "src/", "data/")
+    ):
+        add(suggestions, "internal-json", "Repository-owned JSON registry or data path.")
 
     if "/workflows/" in lowered and suffix in {".yml", ".yaml"}:
+        add(suggestions, "internal-yaml", "YAML file path.")
         add(suggestions, "internal-github-actions", "GitHub Actions workflow path.")
     if "/actions/" in lowered and name in {"action.yml", "action.yaml"}:
+        add(suggestions, "internal-yaml", "YAML file path.")
         add(suggestions, "internal-github-action-composite", "Composite action metadata path.")
     if name.startswith("dockerfile") or "docker-compose" in name or "compose." in name:
         add(suggestions, "internal-docker", "Docker or Compose path.")
@@ -112,14 +137,17 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
         ".yml",
         ".yaml",
     }:
+        add(suggestions, "internal-yaml", "YAML file path.")
         add(suggestions, "internal-kubernetes", "Kubernetes manifest path.")
+    elif suffix in {".yml", ".yaml"}:
+        add(suggestions, "internal-yaml", "YAML file path.")
 
 
 def render_text(suggestions: dict[str, set[str]]) -> None:
     if not suggestions:
         print(
-            "No path or symptom-based support hint. Inspect files, scoped instructions, "
-            "and explicit user-selected domains first."
+            "No path or symptom-based support hint. Inspect files, domain skills, "
+            "and explicit user-selected owners first."
         )
         return
 

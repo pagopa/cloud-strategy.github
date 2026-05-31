@@ -24,29 +24,10 @@ from .shared import (
     resolve_markdown_target,
 )
 
-APPLY_TO_OVERLAP_ALLOWLIST = (
-    {
-        "apply_to": "**/*.sh",
-        "paths": frozenset(
-            {
-                ".github/instructions/awesome-copilot-shell.instructions.md",
-                ".github/instructions/internal-bash.instructions.md",
-            }
-        ),
-        "reason": "Intentional co-load: imported generic shell guidance plus repository-specific Bash launcher rules.",
-        "owner": ".github/instructions/internal-bash.instructions.md",
-    },
-    {
-        "apply_to": "**/actions/**/action.y*ml",
-        "paths": frozenset(
-            {
-                ".github/instructions/internal-github-action-composite.instructions.md",
-                ".github/instructions/internal-github-actions.instructions.md",
-            }
-        ),
-        "reason": "Intentional co-load: composite-action rules extend the GitHub Actions baseline.",
-        "owner": ".github/instructions/internal-github-action-composite.instructions.md",
-    },
+RESIDUAL_INSTRUCTION_REFERENCE_PATTERNS = (
+    (re.compile(r"\.github/instructions"), "source instruction directory"),
+    (re.compile(r"instructions/[^`\s)]+\.instructions\.md"), "instruction file path"),
+    (re.compile(r"\bapplyTo\b"), "instruction frontmatter key"),
 )
 
 
@@ -59,7 +40,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_repo_owned_agent_sections(root))
     findings.extend(check_duplicate_frontmatter_names(root))
     findings.extend(check_prompt_contracts(root))
-    findings.extend(check_instruction_apply_to_overlaps(root))
+    findings.extend(check_residual_instruction_family_references(root))
     findings.extend(check_imported_asset_overrides(root))
     findings.extend(check_superpowers_import_naming(root))
     findings.extend(check_broken_local_links(root))
@@ -388,118 +369,33 @@ def check_prompt_contracts(root: Path) -> list[Finding]:
     return findings
 
 
-def check_instruction_apply_to_overlaps(root: Path) -> list[Finding]:
-    instructions_root = root / ".github/instructions"
-    if not instructions_root.exists():
-        return []
-
-    paths_by_apply_to: dict[str, list[str]] = defaultdict(list)
-    for path in sorted(instructions_root.glob("*.instructions.md")):
-        if not path.is_file():
-            continue
-        relative_path = path.relative_to(root).as_posix()
-        for apply_to in normalize_apply_to_patterns(load_frontmatter(path).get("applyTo")):
-            paths_by_apply_to[apply_to].append(relative_path)
-
+def check_residual_instruction_family_references(root: Path) -> list[Finding]:
     findings: list[Finding] = []
-    for apply_to, paths in sorted(paths_by_apply_to.items()):
-        if len(paths) < 2 or is_apply_to_overlap_allowlisted(apply_to, paths):
+    for path in iter_markdown_assets(root):
+        relative_path = path.relative_to(root).as_posix()
+        if (
+            relative_path == INVENTORY_PATH
+            or relative_path == ".github/CHANGELOG.md"
+            or relative_path == ".github/DEPRECATION.md"
+            or relative_path.startswith(".github/instructions/")
+        ):
             continue
-        findings.append(
-            Finding(
-                severity="blocking",
-                code="instruction-applyto-overlap",
-                path=paths[0],
-                message=(
-                    f"Multiple instruction files declare the same applyTo pattern `{apply_to}`: "
-                    f"{', '.join(paths)}."
-                ),
-                suggestion=(
-                    "Keep only one owner for the exact glob or register an intentional co-load in "
-                    "APPLY_TO_OVERLAP_ALLOWLIST with reason and owner."
-                ),
-            )
-        )
-    return findings
 
-
-def normalize_apply_to_patterns(value: object) -> list[str]:
-    if isinstance(value, str):
-        raw_values = [value]
-    elif isinstance(value, list):
-        raw_values = [item for item in value if isinstance(item, str)]
-    else:
-        return []
-
-    patterns: list[str] = []
-    for raw_value in raw_values:
-        patterns.extend(pattern.strip() for pattern in raw_value.split(",") if pattern.strip())
-    return patterns
-
-
-def collect_matching_instruction_paths(root: Path, target_path: str) -> list[str]:
-    instructions_root = root / ".github/instructions"
-    if not instructions_root.exists():
-        return []
-
-    normalized_target = normalize_instruction_target_path(target_path)
-    if not normalized_target:
-        return []
-
-    matching_paths: list[str] = []
-    for path in sorted(instructions_root.glob("*.instructions.md")):
-        if not path.is_file():
-            continue
-        patterns = normalize_apply_to_patterns(load_frontmatter(path).get("applyTo"))
-        if any(apply_to_pattern_matches_target(pattern, normalized_target) for pattern in patterns):
-            matching_paths.append(path.relative_to(root).as_posix())
-    return matching_paths
-
-
-def apply_to_pattern_matches_target(pattern: str, target_path: str) -> bool:
-    normalized_pattern = normalize_instruction_target_path(pattern)
-    normalized_target = normalize_instruction_target_path(target_path)
-    if not normalized_pattern or not normalized_target:
-        return False
-    return re.fullmatch(apply_to_pattern_to_regex(normalized_pattern), normalized_target) is not None
-
-
-def normalize_instruction_target_path(value: str) -> str:
-    normalized = value.strip().replace("\\", "/")
-    while normalized.startswith("./"):
-        normalized = normalized[2:]
-    return normalized.lstrip("/")
-
-
-def apply_to_pattern_to_regex(pattern: str) -> str:
-    regex_parts: list[str] = []
-    index = 0
-    while index < len(pattern):
-        char = pattern[index]
-        if char == "*" and index + 1 < len(pattern) and pattern[index + 1] == "*":
-            if index + 2 < len(pattern) and pattern[index + 2] == "/":
-                regex_parts.append(r"(?:[^/]+/)*")
-                index += 3
+        text = read_text(path)
+        for pattern, label in RESIDUAL_INSTRUCTION_REFERENCE_PATTERNS:
+            if not pattern.search(text):
                 continue
-            regex_parts.append(r".*")
-            index += 2
-            continue
-        if char == "*":
-            regex_parts.append(r"[^/]*")
-        elif char == "?":
-            regex_parts.append(r"[^/]")
-        else:
-            regex_parts.append(re.escape(char))
-        index += 1
-    return "".join(regex_parts)
-
-
-def is_apply_to_overlap_allowlisted(apply_to: str, paths: list[str]) -> bool:
-    path_set = frozenset(paths)
-    for entry in APPLY_TO_OVERLAP_ALLOWLIST:
-        if entry["apply_to"] == apply_to and entry["paths"] == path_set:
-            return True
-    return False
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="residual-instruction-reference",
+                    path=relative_path,
+                    message=f"Active Markdown still references the retired instruction family via {label}.",
+                    suggestion="Route the rule to the smallest valid skill, agent, prompt, validator, or owned file before removing the legacy family.",
+                )
+            )
+            break
+    return findings
 
 
 def normalize_agent_tools(tools: object) -> tuple[list[str], str | None]:
@@ -955,7 +851,6 @@ def collect_repository_owned_markdown_paths(root: Path) -> list[Path]:
         ".github/copilot-instructions.md",
         ".github/agents/internal-*.agent.md",
         ".github/agents/local-*.agent.md",
-        ".github/instructions/internal-*.instructions.md",
         ".github/prompts/*.prompt.md",
         ".github/skills/internal-*/**/*.md",
         ".github/skills/local-*/**/*.md",
@@ -973,7 +868,6 @@ def collect_catalog_candidate_paths(root: Path) -> list[str]:
         and path.relative_to(root).as_posix().startswith(
             (
                 ".github/agents/",
-                ".github/instructions/",
                 ".github/prompts/",
                 ".github/skills/",
             )

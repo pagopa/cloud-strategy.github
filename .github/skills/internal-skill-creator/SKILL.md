@@ -107,6 +107,8 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - Each referenced-skill item must name the skill in backticks and state the load, route, delegation, or comparison condition in one short phrase.
 - Update `## Referenced skills` whenever adding, removing, renaming, or repairing a skill reference. Treat stale or missing skill names as validation failures.
 - When a skill sits behind a paired agent or local references, keep one owner per detail layer: route and boundary in the agent, reusable workflow in `SKILL.md`, and deep detail in `references/`.
+- When editing internal or local skill references, keep deep reusable tables, templates, and detailed checklists in `references/`; do not copy the same material back into `SKILL.md` or a paired agent.
+- If a reference becomes the canonical detail owner, trim matching duplication from the paired `SKILL.md` or agent in the same change.
 - Prefer `references/` over new `scripts/` for static tables, starter templates, and audit taxonomies. Add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - When direct-copy portability or out-of-repo execution is part of the skill contract, keep the required deterministic automation inside the skill bundle and leave repository entrypoints as thin wrappers.
 - Keep cross-references explicit instead of duplicating large chunks of generic bundle guidance.

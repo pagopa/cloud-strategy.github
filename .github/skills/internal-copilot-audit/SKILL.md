@@ -43,7 +43,7 @@ For skill bundles, treat `references/`, `scripts/`, `assets/`, and `agents/opena
 4. For skill bundle targets, check existing bundle siblings before calling the target healthy or low risk.
 5. Check declared skill contracts and decorative skill usage.
 6. Check trigger overlap.
-7. When adding or tightening exact `applyTo` overlap validation, rerun the overlap scan across the whole repository and register every intentional co-load in the allowlist in the same pass.
+7. When adding or tightening path-to-owner overlap validation, rerun the overlap scan across the whole repository and register every intentional co-load in the allowlist in the same pass.
 8. Check bridge coherence between `AGENTS.md` and `.github/copilot-instructions.md`.
 9. Check whether skills or agents became redundant after internal replacements were added.
 10. Check whether governance files still describe superseded or removed assets.

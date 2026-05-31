@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Bash"
+  short_description: "Shell safety and Bash routing"
+  default_prompt: "Use $internal-bash for shell or Bash safety, quoting, parser, and validation guidance."

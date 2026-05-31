@@ -552,7 +552,7 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     assert "clarify-first workflow" in clarification_gate_text
     assert "`support-loaded`" in simple_lanes_text
     assert "`files-touched`" in simple_lanes_text
-    assert "internal-copilot-instructions-creator" in support_routing_text
+    assert "matching authoring owner" in support_routing_text
     assert (
         "Inspect the owning bundle and nearest contract tests" in support_routing_text
     )

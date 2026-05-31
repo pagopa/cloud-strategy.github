@@ -15,19 +15,18 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
         "AGENTS.md": [
             "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work",
             "Treat retained plans and retained learning as non-canonical",
-            "Keep file shape, execution workflow, and ledger row rules in their scoped owners",
+            "Keep file shape, execution workflow, and ledger row rules in retained-plan skills or owned files",
         ],
         ".github/copilot-instructions.md": [
             "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical",
-            "dedicated retained-plan skills and scoped lessons instructions",
+            "dedicated retained-plan skills and lesson-codification owners",
             "ledger row rules",
         ],
-        ".github/instructions/internal-lessons-learned.instructions.md": [
-            'applyTo: "LESSONS_LEARNED.md"',
-            "Follow the file's `Entry Rules`.",
-            "current on-disk contents",
-            "preserve unrelated rows",
-            "smallest valid canonical owner",
+        ".github/skills/internal-lesson-codification/SKILL.md": [
+            "This skill owns the codification workflow.",
+            "ledger row format, which stays in `LESSONS_LEARNED.md`",
+            "First try to codify the lesson in the smallest valid canonical owner.",
+            "Use the ledger only for stable, reusable, repository-relevant lessons",
         ],
         "LESSONS_LEARNED.md": [
             "Before editing this file, read its current on-disk contents",

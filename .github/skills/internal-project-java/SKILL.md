@@ -5,7 +5,12 @@ description: Use when creating or modifying Java project code and the main conce
 
 # Java Project Skill
 
-Follow `.github/instructions/internal-java.instructions.md` for the baseline Java rules. This skill adds project-specific guidance only.
+## Referenced skills
+
+- `internal-java`: shared Java readability, build metadata, and JUnit baseline.
+- `internal-spring-boot-development`: Spring Boot framework-specific depth when the project uses Spring.
+
+Load `internal-java` for the shared Java baseline. This skill adds project-specific guidance only.
 
 ## When to use
 
@@ -22,7 +27,7 @@ Load `references/examples.md` when you need a minimal class or test example.
 
 ## Test stack
 
-- Follow the JUnit 5 defaults from the instruction owner.
+- Follow the JUnit 5 defaults from `internal-java`.
 - Use `@ParameterizedTest`, `assertAll`, `@Nested`, and `@Tag` when they improve test clarity rather than just adding ceremony.
 - Use Spring test slices such as `@WebMvcTest` or `@DataJpaTest` before defaulting to full-context tests.
 - Use Testcontainers when integration tests need real databases or external dependencies.

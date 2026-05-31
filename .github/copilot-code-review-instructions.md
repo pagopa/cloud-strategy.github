@@ -52,13 +52,13 @@ Every finding must include:
 ## Escalation rules
 
 - Any repeated anti-pattern (3+ times in the same diff) escalates one severity level.
-- Any deviation from the matching `instructions/*.instructions.md` file is at minimum a `Nit`.
+- Any deviation from the matching language or domain skill baseline is at minimum a `Nit`.
 - Any violation of `security-baseline.md` is at minimum a `Major`.
 
 ## Token-aware review protocol
 
-- Load only the diff, directly related files, and the matching instruction files.
-- Use `.github/skills/internal-code-review/SKILL.md` as the detailed anti-pattern catalog for Python, Bash, and Terraform.
+- Load only the diff, directly related files, and the relevant language or domain skills.
+- Use `.github/skills/internal-code-review/SKILL.md` as the detailed anti-pattern catalog for Python, Bash, Terraform, Java, and Node.js/TypeScript.
 - Do not inline long language-specific catalogs when the `code-review` skill is available.
 
 ## Focus by area

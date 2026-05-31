@@ -158,6 +158,8 @@ def _translate_for_opencode(frontmatter: dict, body: str) -> str:
         opencode_fm["description"] = frontmatter["description"]
 
     opencode_fm["mode"] = "subagent"
+    if frontmatter.get("disable-model-invocation") is True:
+        opencode_fm["hidden"] = True
 
     permission: dict[str, object] = _build_opencode_permission(frontmatter)
     if permission:

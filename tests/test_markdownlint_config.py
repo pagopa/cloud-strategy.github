@@ -18,7 +18,6 @@ def test_markdownlint_ignores_local_venv_and_preserved_upstream_assets() -> None
 
     assert "tmp/**" in ignores
     assert ".github/scripts/.venv/**" in ignores
-    assert ".github/instructions/awesome-copilot-*.instructions.md" in ignores
     assert ".github/skills/antigravity-*/**" in ignores
     assert ".github/skills/awesome-copilot-*/**" in ignores
     assert ".github/skills/mattpocock-*/**" in ignores
@@ -31,5 +30,4 @@ def test_markdownlint_config_documents_why_special_paths_are_ignored() -> None:
 
     assert "dedicated contract tests cover tmp/superpowers artifacts" in config_text
     assert "generated tooling state" in config_text
-    assert "Preserve imported awesome-copilot instructions verbatim" in config_text
     assert "Preserve imported support skill families verbatim" in config_text

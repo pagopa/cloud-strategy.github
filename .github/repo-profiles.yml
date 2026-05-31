@@ -26,49 +26,41 @@ _common_skills: &common_skills
 profiles:
   minimal:
     description: Baseline setup for small repositories.
-    recommended_instructions:
-      - instructions/internal-markdown.instructions.md
-      - instructions/internal-yaml.instructions.md
-      - instructions/internal-json.instructions.md
     recommended_skills:
+      - skills/internal-markdown/SKILL.md
+      - skills/internal-yaml/SKILL.md
+      - skills/internal-json/SKILL.md
       - skills/internal-github-actions/SKILL.md
 
   backend-java:
     description: Java service repositories.
-    recommended_instructions:
-      - instructions/internal-java.instructions.md
-      - instructions/internal-github-actions.instructions.md
-      - instructions/internal-markdown.instructions.md
     recommended_skills:
+      - skills/internal-java/SKILL.md
       - skills/internal-project-java/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-markdown/SKILL.md
 
   backend-nodejs:
     description: Node.js service repositories.
-    recommended_instructions:
-      - instructions/internal-nodejs.instructions.md
-      - instructions/internal-github-actions.instructions.md
-      - instructions/internal-markdown.instructions.md
     recommended_skills:
+      - skills/internal-nodejs/SKILL.md
       - skills/internal-project-nodejs/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-markdown/SKILL.md
 
   backend-python:
     description: Python service repositories.
-    recommended_instructions:
-      - instructions/internal-python.instructions.md
-      - instructions/internal-github-actions.instructions.md
-      - instructions/internal-markdown.instructions.md
     recommended_skills:
+      - skills/internal-python/SKILL.md
       - skills/internal-project-python/SKILL.md
       - skills/internal-github-actions/SKILL.md
+      - skills/internal-markdown/SKILL.md
 
   document-heavy:
     description: Repositories that regularly create or edit office documents and slide decks.
-    recommended_instructions:
-      - instructions/internal-markdown.instructions.md
-      - instructions/internal-yaml.instructions.md
     recommended_skills:
+      - skills/internal-markdown/SKILL.md
+      - skills/internal-yaml/SKILL.md
       - skills/openai-docx/SKILL.md
       - skills/openai-pdf/SKILL.md
       - skills/openai-slides/SKILL.md
@@ -76,21 +68,18 @@ profiles:
 
   infrastructure-heavy:
     description: Infrastructure repositories with Terraform as primary language.
-    recommended_instructions:
-      - instructions/internal-terraform.instructions.md
-      - instructions/internal-github-actions.instructions.md
-      - instructions/internal-yaml.instructions.md
     recommended_skills:
       - skills/internal-terraform/SKILL.md
+      - skills/internal-github-actions/SKILL.md
+      - skills/internal-yaml/SKILL.md
       - skills/internal-cloud-policy/SKILL.md
 
   azure-platform:
     description: Azure platform, landing-zone, or governance repositories that need cost-aware guidance.
-    recommended_instructions:
-      - instructions/internal-terraform.instructions.md
-      - instructions/internal-yaml.instructions.md
-      - instructions/internal-markdown.instructions.md
     recommended_skills:
+      - skills/internal-terraform/SKILL.md
+      - skills/internal-yaml/SKILL.md
+      - skills/internal-markdown/SKILL.md
       - skills/internal-azure-strategic/SKILL.md
       - skills/internal-azure-organization-structure/SKILL.md
       - skills/internal-azure-governance/SKILL.md
@@ -99,13 +88,10 @@ profiles:
 
   mixed-platform:
     description: Repositories mixing app code, CI/CD, and some infrastructure.
-    recommended_instructions:
-      - instructions/internal-java.instructions.md
-      - instructions/internal-nodejs.instructions.md
-      - instructions/internal-github-actions.instructions.md
-      - instructions/internal-terraform.instructions.md
     recommended_skills:
+      - skills/internal-java/SKILL.md
       - skills/internal-project-java/SKILL.md
+      - skills/internal-nodejs/SKILL.md
       - skills/internal-project-nodejs/SKILL.md
       - skills/internal-github-actions/SKILL.md
       - skills/internal-terraform/SKILL.md

@@ -5,8 +5,8 @@
 ## Where Adjacent Content Belongs
 
 - Use `docs/02-repository-context.md` for stable local operating context, glossary, ownership notes, and non-policy interpretation aids.
-- Use `AGENTS.md`, `.github/copilot-instructions.md`, or scoped `.github/instructions/*.instructions.md` for binding instruction policy.
-- Use relevant `SKILL.md` files for workflow depth, runtime consumption behavior, and reusable operating procedures.
+- Use `AGENTS.md` and `.github/copilot-instructions.md` for repository-wide bridge policy.
+- Use relevant `SKILL.md` files for technical baselines, workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Use `LESSONS_LEARNED.md` for durable lessons that still need codification.
 
 ## Repository

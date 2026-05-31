@@ -31,9 +31,9 @@ Sources:
 - Skills:
   `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/skills`
   (commit date: 2026-05-15)
-- Instructions:
+- Retired instruction source:
   `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/instructions`
-  (commit date: 2026-05-15)
+  (commit date: 2026-05-15; alert-only watchlist, not managed source scope)
 
 Managed assets:
 
@@ -46,10 +46,8 @@ Managed assets:
   `awesome-copilot-cloud-design-patterns`; `codeql` ->
   `awesome-copilot-codeql`; `dependabot` -> `awesome-copilot-dependabot`;
   `secret-scanning` -> `awesome-copilot-secret-scanning`.
-- Instructions: `awesome-copilot-azure-devops-pipelines.instructions.md`;
-  `awesome-copilot-go.instructions.md`;
-  `awesome-copilot-kubernetes-manifests.instructions.md`;
-  `awesome-copilot-shell.instructions.md`.
+Retired upstream instruction assets are tracked in the alert-only watchlist when
+their content has a repository-owned replacement owner.
 
 ### `obra/superpowers`
 

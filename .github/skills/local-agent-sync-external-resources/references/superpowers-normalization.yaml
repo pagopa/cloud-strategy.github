@@ -59,7 +59,6 @@ managed_patches:
 live_scan:
   include:
     - .github/agents
-    - .github/instructions
     - .github/prompts
     - .github/scripts
     - .github/skills

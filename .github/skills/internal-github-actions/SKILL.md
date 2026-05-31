@@ -5,6 +5,12 @@ description: Use when authoring or revising GitHub Actions workflows, reusable w
 
 # GitHub Actions Skill
 
+## Referenced skills
+
+- `internal-devops-core-principles`: delivery-system strategy, release safety, operational readiness, and incident learning.
+- `internal-github-action-composite`: composite-action authoring and step-level reuse.
+- `internal-terraform`: Terraform resources deployed by CI/CD.
+
 ## When to use
 
 - Create or modify GitHub Actions workflows under `.github/workflows/`.
@@ -17,7 +23,6 @@ Use `internal-devops-core-principles` when the question is delivery strategy, re
 
 ## Mandatory rules
 
-- Follow `.github/instructions/internal-github-actions.instructions.md`.
 - Prefer OIDC for cloud authentication.
 - Pin every third-party action to a full-length SHA with adjacent release comment.
 - Keep `permissions` least-privilege.

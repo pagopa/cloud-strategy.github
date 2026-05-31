@@ -5,7 +5,7 @@ Protect correctness, security, simplicity, and maintainability.
 ## Critical Copilot Window
 
 - Treat `AGENTS.md` as the strategic operating bridge, precedence anchor, tactical-default owner, and rule-placement authority.
-- Keep operational procedures out of `AGENTS.md`; use scoped instructions for path rules and skills for workflows.
+- Keep operational procedures out of `AGENTS.md`; use skills for technical baselines, workflow depth, and reusable procedures.
 - Treat this file as the Copilot-native projection; it must work when only the first 4,000 characters are read.
 - Use least privilege for permissions, tokens, roles, workflows, and automation.
 - Keep no hardcoded secrets: never write credentials, keys, tokens, or sensitive tenant values.
@@ -23,14 +23,15 @@ Protect correctness, security, simplicity, and maintainability.
 - The default authoring language for repository artifacts is English.
 - Leave `README.md` files unchanged unless the user explicitly asks.
 - Do not edit imported upstream assets in place unless the need is strong, explicit, and registered.
-- Keep `.github/INVENTORY.md` generated; do not turn policy, docs, or instructions into catalog copies.
+- Keep `.github/INVENTORY.md` generated; do not turn policy, docs, or skill guidance into catalog copies.
 
 ## Context Loading
 
 - Read `AGENTS.md` first when policy, precedence, ownership, or rule placement matters.
-- Load every `.github/instructions/*.instructions.md` file whose `applyTo` metadata or task domain matches the target.
-- Load task-specific skills only when workflow depth, decision trees, or domain procedure is needed.
-- Let scoped policy win over conflicting skill workflow.
+- Select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence.
+- Start with the umbrella domain skill when the domain is clear, then add specialist depth only after evidence shows it is needed.
+- Load task-specific skills or references only when workflow depth, decision trees, or domain procedure is needed.
+- Let the smallest valid owner win when broad guidance conflicts with file-owned rules or narrower skill contracts.
 - Read `.github/copilot-instructions.override.md` before synced defaults when present.
 - Use repository architecture and repository context docs for boundaries and non-policy context.
 - Use relevant skills when workflow depth or runtime consumption behavior matters.
@@ -39,9 +40,9 @@ Protect correctness, security, simplicity, and maintainability.
 
 - Use plan mode when ambiguity, ownership, rollout, validation, or multiple credible paths remain.
 - Use execute mode only when the target state and validation path are concrete.
-- When the selected owner no longer fits, stop and make the better owner visible before continuing.
+- If the selected owner stops fitting, pause and name the better owner before continuing.
 - Do not report completion from intent alone; cite validation evidence or name the explicit gap.
-- Prefer the simplest correct change with the smallest credible blast radius.
+- Choose the narrowest correct change that satisfies the request.
 - Preserve existing conventions unless the task changes them.
 - Keep policy, projection, inventory, local context, and skill-owned workflows separate.
 - Allow user-selected gateway skills with visible phases; keep hidden front-door routing and hidden peer dispatch disallowed.
@@ -50,10 +51,10 @@ Protect correctness, security, simplicity, and maintainability.
 - Handle failures evidence-first: inspect the signal, fix the root cause when clear, and ask only for unsafe or missing decisions.
 - Do not add unrequested abstractions, logging, broad rewrites, or unrelated fixes.
 
-## Retained Artifacts
+## Retained Work
 
 - Treat retained plans and `LESSONS_LEARNED.md` as non-canonical until codified in the smallest valid owner.
-- Use dedicated retained-plan skills and scoped lessons instructions for file shape, execution workflow, and ledger row rules.
+- Use dedicated retained-plan skills and lesson-codification owners for file shape, execution workflow, and ledger row rules.
 
 ## Repo-specific operational checkpoints
 

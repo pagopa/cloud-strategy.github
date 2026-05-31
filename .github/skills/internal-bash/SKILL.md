@@ -1,0 +1,38 @@
+---
+name: internal-bash
+description: Use when editing shell or Bash files that need lightweight safety, quoting, parser, or validation guidance.
+---
+
+# Internal Bash
+
+## Referenced skills
+
+- `internal-script-bash`: standalone Bash scripts, shell utilities, wrappers, launchers, and operator-facing behavior.
+
+## When to use
+
+- `.sh` files and Bash snippets where the main need is a shared safety baseline.
+- Shell embedded in repository automation when no narrower owner has stronger rules.
+- Quick checks for quoting, strict mode, guard clauses, temp files, and parser choices.
+
+## When not to use
+
+- Standalone script design, launcher behavior, operator UX, or script templates; use `internal-script-bash`.
+- Bash embedded in GitHub composite actions; use `internal-github-action-composite`.
+- GitHub workflow-level behavior; use `internal-github-actions`.
+
+## Baseline
+
+- Prefer `#!/usr/bin/env bash` for repository-owned Bash scripts.
+- Use `set -euo pipefail` unless the script has a documented compatibility reason.
+- Quote variable expansions and use arrays for dynamic commands.
+- Prefer `[[ ]]`, `local`, and readable guard clauses when Bash is available.
+- Use `mktemp` plus cleanup traps for temporary state.
+- Validate required external commands with `command -v` before first use.
+- Use structured parsers such as `jq` or `yq` for JSON and YAML when available.
+
+## Validation
+
+- `bash -n <script>.sh` for syntax.
+- `shellcheck -s bash <script>.sh` when available.
+- Run the repository wrapper or focused script command when behavior changes.

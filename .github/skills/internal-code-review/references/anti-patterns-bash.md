@@ -1,6 +1,6 @@
 # Bash Anti-Patterns
 
-Reference: `instructions/internal-bash.instructions.md`
+Baseline owner: `internal-bash`
 
 ## Critical
 

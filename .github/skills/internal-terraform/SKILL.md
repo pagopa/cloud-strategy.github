@@ -5,6 +5,11 @@ description: Use when adding, refactoring, or reviewing Terraform or OpenTofu co
 
 # Terraform Skill
 
+## Referenced skills
+
+- `terraform-terraform-search-import`: unmanaged-resource discovery and Terraform import workflows.
+- `terraform-terraform-test`: `.tftest.hcl` coverage, mocks, and Terraform test execution.
+
 ## When to use
 
 - Add or modify resources, variables, outputs, data sources in existing configurations.
@@ -25,7 +30,6 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 
 ## Mandatory rules
 
-- Follow `.github/instructions/internal-terraform.instructions.md` for provider and external module pinning.
 - Use `snake_case` for all Terraform identifiers.
 - Add `description` and `type` to every variable.
 - Avoid `default` values in variables for non-module components; pass configurations via `.tfvars`.

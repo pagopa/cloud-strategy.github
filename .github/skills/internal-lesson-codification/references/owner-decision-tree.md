@@ -6,7 +6,7 @@ Use this reference when a lesson's canonical owner is not obvious.
 
 | Lesson shape | Preferred owner |
 | --- | --- |
-| Path-specific editing rule or file-family constraint | `.github/instructions/*.instructions.md` |
+| Path-specific editing rule or file-family constraint | Relevant umbrella or specialist skill, owned file, validator, or repository config |
 | Reusable workflow, procedure, decision tree, or domain operating method | `.github/skills/*/SKILL.md` or a skill reference |
 | VS Code route UX, handoff, tool boundary, or agent persona contract | `.github/agents/*.agent.md` |
 | Reusable user-invoked output template or prompt-shaped interaction | `.github/prompts/*.prompt.md` |
@@ -33,7 +33,7 @@ Treat `AGENTS.md` and `.github/copilot-instructions.md` as the last resort.
 Before proposing either file, verify:
 
 - The lesson is repository-wide, stable, and not path-specific.
-- The lesson must be visible before scoped instructions or skills can load.
+- The lesson must be visible before skills or narrower owners can load.
 - It is not a workflow detail, checklist, command playbook, or catalog inventory.
 - The proposed wording is compact enough for the always-on token budget.
 - The matching projection impact is understood for `.github/copilot-instructions.md`.

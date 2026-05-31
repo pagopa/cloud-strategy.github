@@ -5,7 +5,11 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 
 # Python Script Skill
 
-Follow `.github/instructions/internal-python.instructions.md` for the baseline Python rules. This skill adds standalone-script guidance only.
+## Referenced skills
+
+- `internal-python`: shared Python runtime, typing, dependency, testing, and readability baseline.
+
+Load `internal-python` for the shared Python baseline. This skill adds standalone-script guidance only.
 
 ## When to use
 
@@ -34,7 +38,7 @@ Follow `.github/instructions/internal-python.instructions.md` for the baseline P
 
 ## Dependency decision note
 
-When the instruction owner requires a dependency decision note, keep it short, for example:
+When the Python baseline requires a dependency decision note, keep it short, for example:
 
 ```text
 Dependency decision note
@@ -62,7 +66,7 @@ Keep these rules visible while drafting:
 
 ## Testing
 
-- Follow the repository pytest defaults from the instruction owner.
+- Follow the repository pytest defaults from `internal-python`.
 - Use coverage reports to inspect missing behavior on touched code, not to force blanket 100% coverage.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 - Prefer existing repository commands such as `make lint`, `make test`, or a shared script runner before inventing a one-off validation path.

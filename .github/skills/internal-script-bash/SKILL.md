@@ -5,7 +5,11 @@ description: Use when creating or modifying standalone Bash scripts or shell uti
 
 # Bash Script Skill
 
-Follow `.github/instructions/internal-bash.instructions.md` for the baseline Bash rules. This skill adds script-specific hardening guidance only.
+## Referenced skills
+
+- `internal-bash`: shared shell safety, quoting, parser, and validation baseline.
+
+Load `internal-bash` for the shared Bash baseline. This skill adds script-specific hardening guidance only.
 
 ## When to use
 

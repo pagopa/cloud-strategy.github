@@ -1,4 +1,4 @@
-# AGENTS.md - Instruction Architecture Bridge
+# AGENTS.md - Skill-First AI Configuration Bridge
 
 This file is the repository strategic operating bridge for AI configuration.
 Keep it compact, stable, and free of volatile inventory or surface-specific
@@ -8,7 +8,7 @@ playbooks.
 
 - `AGENTS.md` must define stable repository-wide policy, precedence, tactical operating defaults, ownership boundaries, and routing anchors only.
 - Do not put operational procedures, checklists, file-shape recipes, command playbooks, or tool-specific workflows here.
-- Put each rule in the smallest valid owner: scoped instructions for path rules, skills for workflows, agents for route UX, docs for context, validators for enforceable checks, and owned files for their local editing rules.
+- Put each rule in the smallest valid owner: skills for technical baselines and workflows, agents for route UX, docs for context, validators for enforceable checks, sync owners for propagation, and owned files for their local editing rules.
 
 ## Writing Style
 
@@ -23,23 +23,23 @@ playbooks.
 - `.github/copilot-instructions.md` is the repo-wide Copilot projection; keep it aligned when repository-wide defaults change.
 - `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
 - Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
-- `.github/instructions/*.instructions.md` owns scoped path or domain rules; narrower matching scope overrides broad defaults only inside that scope.
+- `.github/skills/` owns repository-owned reusable guidance. Umbrella skills own lightweight technical-domain baselines; specialist skills and bundle references own deeper procedures.
 - Use `docs/01-local-architecture.md` for repository architecture and `docs/02-local-repository-context.md` for non-policy local context.
 - Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
 
 ## Context And Scope
 
-- For runtimes without native scoped-instruction loading, match known target paths against `.github/instructions/*.instructions.md` `applyTo` metadata before editing, reviewing, or asserting scoped policy.
-- Read every matching instruction as manual context.
-- Co-load relevant skills when the task needs workflow, decision trees, domain depth, or reusable procedures.
-- Use scoped instructions and skills together when both apply; applicable policy and scoped rules win if a skill procedure conflicts.
+- For runtimes without native skill loading, select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence, then read that `SKILL.md` as manual context.
+- Load umbrella domain skills before specialist depth when the domain is clear but the workflow depth is not yet proven.
+- Co-load specialist skills or bundle references only when the task needs workflow, decision trees, domain depth, or reusable procedures.
+- Use the smallest valid owner to resolve conflicts; file-owned rules and narrower skill contracts win over broad defaults inside their own scope.
 - Treat `.github/agents/*.agent.md` as surface-specific wrapper projections; reusable behavior stays in skills when a runtime lacks wrapper UI.
 - If no target path is known, infer obvious domains only, such as Python, GitHub Actions, Kubernetes, Docker, Markdown, or Terraform; otherwise ask for the target path before making path-scoped claims.
 
 ## Authoring Defaults
 
-- The default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it.
+- The default authoring language for repository artifacts is English unless a narrower owned file, skill, or local exception explicitly overrides it.
 - User chat may be Italian; repository-owned retained plans may use Italian when the retained-plan policy applies.
 - Keep repository-owned AI configuration files as Markdown. Use XML only as runtime prompt-assembly delimiters, never as source format.
 - Do not modify `README.md` files unless the user explicitly asks.
@@ -76,7 +76,7 @@ playbooks.
 - Keep transient planning, brainstorming, and Superpowers-generated working files out of `docs/`.
 - `tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work, but they do not replace canonical policy owners.
 - Treat retained plans and retained learning as non-canonical until codified in the smallest valid owner.
-- Keep file shape, execution workflow, and ledger row rules in their scoped owners, not here.
+- Keep file shape, execution workflow, and ledger row rules in retained-plan skills or owned files, not here.
 
 ## Token And Drift Control
 

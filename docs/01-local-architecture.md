@@ -9,20 +9,19 @@
 - Use `docs/02-local-repository-context.md` for stable local operating context, glossary, ownership notes,
   and repository-specific interpretation aids.
   These aids must not override policy.
-- Use `AGENTS.md`, `.github/copilot-instructions.md`, or scoped `.github/instructions/*.instructions.md`
-  for binding instruction policy.
-- Use relevant `SKILL.md` files for workflow depth, runtime consumption behavior, and reusable operating procedures.
+- Use `AGENTS.md` and `.github/copilot-instructions.md` for repository-wide bridge policy and projection.
+- Use relevant `SKILL.md` files for technical baselines, workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Use `LESSONS_LEARNED.md` only for durable lessons that are pending codification elsewhere.
 
 ## Repository
 
-`cloud-strategy.github` is the source-of-truth repository for GitHub Copilot customization, repository instruction
-architecture, catalog governance, and sync tooling used by the cloud strategy workspace.
+`cloud-strategy.github` is the source-of-truth repository for GitHub Copilot customization, skill-first architecture,
+catalog governance, and sync tooling used by the cloud strategy workspace.
 
 ## Purpose
 
 The repository does not host a product runtime. It hosts an AI governance supply chain: repository-owned skills,
-Copilot wrapper agents, instructions, prompts, inventory, validation scripts, and sync contracts. These assets are
+Copilot wrapper agents, prompts, inventory, validation scripts, and sync contracts. These assets are
 authored here, then validated or projected into consumer repositories.
 
 ## System Boundaries
@@ -32,7 +31,7 @@ In scope:
 - Repository-wide AI governance policy in `AGENTS.md` and `.github/copilot-instructions.md`.
 - Repo-specific architecture and context documents in `docs/01-local-architecture.md` and `docs/02-local-repository-context.md`.
 - Live resource inventory in `.github/INVENTORY.md`.
-- Agent, skill, instruction, prompt, template, and sync assets under `.github/`.
+- Agent, skill, prompt, template, and sync assets under `.github/`.
 - Catalog validation and synchronization scripts under `.github/scripts/`.
 - Contract and regression tests under `tests/`.
 - Supporting documentation in `INTERNAL_CONTRACT.md`.
@@ -51,11 +50,10 @@ Out of scope:
 | Copilot projection | `.github/copilot-instructions.md` | Repo-wide behavior visible to native Copilot flows. |
 | Architecture contract | `docs/01-local-architecture.md` | Repo-specific architecture, boundaries, flows, and validation surface. |
 | Repository context | `docs/02-local-repository-context.md` | Stable local context, glossary, and non-policy interpretation aids. |
-| Catalog inventory | `.github/INVENTORY.md` | Generated catalog surface for agents, skills, instructions, prompts, and related assets. |
+| Catalog inventory | `.github/INVENTORY.md` | Generated catalog surface for agents, skills, prompts, and related assets. |
 | Consumer-local scaffolds | `.github/templates/` | Source-side templates used by sync automation to create target-owned knowledge files and override layers. |
 | Copilot wrapper agents | `.github/agents/` | VS Code route selection, tool scope, and manual handoff UX for operational skills plus repo-only sync command centers. |
 | Reusable skills | `.github/skills/` | Skill-first operational core, on-demand workflows, references, validation guidance, and sync support depth. |
-| Scoped instructions | `.github/instructions/` | Path or domain-specific authoring rules. |
 | Automation scripts | `.github/scripts/` | Inventory build, catalog consistency, token-risk detection, skill validation, and sync planning. |
 | Regression tests | `tests/` | Contract checks for agents, inventory, imported assets, plan policy, scripts, and completion reports. |
 
@@ -99,9 +97,9 @@ Observed validation entrypoints include:
 | Risk | Current evidence | Recommended handling |
 | --- | --- | --- |
 | Catalog drift | Sync and inventory scripts exist, plus tests, but catalog families evolve over time. | Keep inventory generation, sync discovery, and validators updated in the same change. |
-| Overloaded always-on guidance | Multiple projections and scoped resources exist. | Keep high-volume detail in skills or references, not repo-wide instructions or wrapper agents. |
+| Overloaded always-on guidance | Multiple projections and lazy-loaded resources exist. | Keep high-volume detail in skills or references, not repo-wide guidance or wrapper agents. |
 | Consumer override ambiguity | Local override layer exists by contract. | Require explicit override scope, reason, and disclosure when followed. |
-| Knowledge document shadow policy | `docs/02-local-repository-context.md` can look instruction-like if unconstrained. | Keep it descriptive and move binding behavior to canonical instruction surfaces. |
+| Knowledge document shadow policy | `docs/02-local-repository-context.md` can look policy-like if unconstrained. | Keep it descriptive and move binding behavior to the smallest valid canonical owner. |
 
 ## Contract Status
 

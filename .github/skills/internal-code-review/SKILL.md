@@ -58,7 +58,7 @@ Establish these review inputs before grading the diff:
 ## Escalation rules
 
 - Any single anti-pattern repeated three or more times in the same diff escalates one severity level (e.g., `Nit` → `Minor`, `Minor` → `Major`).
-- Any deviation from the matching `instructions/*.instructions.md` is at minimum a `Nit`.
+- Any deviation from the matching language or domain skill baseline is at minimum a `Nit`.
 - Any violation of `security-baseline.md` is at minimum a `Major`.
 
 ## Anti-pattern catalogs

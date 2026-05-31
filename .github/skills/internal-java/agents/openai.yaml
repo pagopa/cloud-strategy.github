@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Java"
+  short_description: "Java baseline and routing"
+  default_prompt: "Use $internal-java for Java code or Java build metadata changes."

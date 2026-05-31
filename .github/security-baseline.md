@@ -35,9 +35,9 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 - Protect production environments with required reviewers and deployment rules.
 - Set explicit `timeout-minutes` and `concurrency` on jobs.
 
-## Instruction and artifact safety
+## Guidance and artifact safety
 
-- Avoid instructions that request hidden or sensitive data.
+- Avoid guidance that requests hidden or sensitive data.
 - Prohibit plaintext tokens, keys, and passwords in examples.
 - Use explicit guardrails for destructive operations.
 - Require deterministic, reviewable output in generated artifacts.
@@ -50,23 +50,23 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 
 ## Change governance
 
-- Document breaking changes to instructions, skills, or agents in `.github/CHANGELOG.md`.
-- Use a deprecation window before removing instructions, skills, or agents in active use.
+- Document breaking changes to skills, agents, prompts, validators, or bridge policy in `.github/CHANGELOG.md`.
+- Use a deprecation window before removing skills or agents in active use unless a documented exception applies.
 - Keep a rollback path for workflow and policy changes.
 
 ## Enforcement status
 
 | Control | Status | Tool |
 | --- | --- | --- |
-| Third-party action SHA pinning | Manual review | `internal-github-actions.instructions.md` + PR review |
-| Minimal workflow permissions | Manual review | `internal-github-actions.instructions.md` + PR review |
-| Docker image digest pinning | Manual review | `internal-docker.instructions.md` + PR review |
+| Third-party action SHA pinning | Manual review | `internal-github-actions` + PR review |
+| Minimal workflow permissions | Manual review | `internal-github-actions` + PR review |
+| Docker image digest pinning | Manual review | `internal-docker` + PR review |
 | Validate `.github/**` in CI | Automated | `.github/workflows/_github-catalog-validation.yml` |
 | `shellcheck` on `.github/scripts/` | Automated | pre-commit + CI |
 | Secret placeholder avoidance in examples/generated artifacts | Partial | pre-commit hooks + review |
-| OIDC over long-lived secrets | Manual review | `internal-github-actions.instructions.md` |
+| OIDC over long-lived secrets | Manual review | `internal-github-actions` |
 | IAM least privilege (AWS/Azure/GCP) | Manual review | `internal-code-review` + `internal-terraform` |
-| Supply chain hardening | Manual review | `internal-github-actions.instructions.md` + `internal-code-review` |
+| Supply chain hardening | Manual review | `internal-github-actions` + `internal-code-review` |
 | Branch protection for `.github/**` | Manual review | repository settings requiring `_github-catalog-validation` |
 | Read-only reviewer agents | Manual review | agent review |
 | CHANGELOG-based change governance | Manual review | PR review |

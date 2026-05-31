@@ -1,6 +1,6 @@
 # Node.js / TypeScript Anti-Patterns
 
-Reference: `instructions/internal-nodejs.instructions.md`
+Baseline owner: `internal-nodejs`
 
 ## Critical
 

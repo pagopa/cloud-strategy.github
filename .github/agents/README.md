@@ -20,8 +20,8 @@ these agents provide VS Code route selection, tool scope, and manual handoff UX.
 
 1. Apply repository non-negotiables from `copilot-instructions.md`.
 2. Apply the explicit user request and selected gateway skill or wrapper.
-3. Apply matching `instructions/*.instructions.md` by path.
-4. Apply referenced skill details.
+3. Load the smallest matching domain skill from the target path, command surface, validation signal, or repository evidence.
+4. Co-load referenced specialist skill details only when the task needs deeper procedure.
 
 ## Active Gateway Wrappers
 
@@ -148,7 +148,7 @@ managed baseline into another repository.
 | --- | --- | --- |
 | "Update one README section and run the related test." | `internal-gateway-simple-task` | Scope and validation are already concrete. |
 | "Apply the approved retained plan under `tmp/superpowers/example`." | `internal-gateway-operational-flow` | `apply-plan` needs the retained-plan `done-*` loop. |
-| "Decide whether this should be an agent, a skill, or an instruction." | `internal-gateway-operational-flow` | The core work is ownership and placement. |
+| "Decide whether this should be an agent, a skill, a prompt, or a validator." | `internal-gateway-operational-flow` | The core work is ownership and placement. |
 | "Review these agent changes for routing regressions." | `internal-gateway-operational-flow` | The job is defect-first validation through review mode. |
 | "Attack this plan before I apply it." | `internal-gateway-critical-master` | The job is assumption pressure-testing. |
 | "Refresh the managed `obra-*` skills from upstream." | `local-sync-external-resources` | The job is source-side external catalog sync. |

@@ -1,0 +1,46 @@
+---
+name: internal-python
+description: Use when editing Python files that need lightweight runtime, typing, testing, dependency, or readability guidance before script or project depth is needed.
+---
+
+# Internal Python
+
+## Referenced skills
+
+- `internal-script-python`: standalone Python scripts, CLIs, and operator-facing toolkits.
+- `internal-project-python`: Python packages, application code, service boundaries, and framework-owned flows.
+
+## When to use
+
+- `.py` changes where the first need is the shared Python baseline.
+- Lightweight reviews of typing, guard clauses, tests, runtime version, imports, or dependencies.
+- Small Python fixes where it is not yet clear whether script or project depth is needed.
+
+## When not to use
+
+- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-script-python`.
+- Package, application, service, or framework-owned behavior; use `internal-project-python`.
+- Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
+
+## Baseline
+
+- Prefer early returns, guard clauses, clear names, and readable control flow.
+- Add type hints on public or non-trivial function signatures.
+- Keep comments, docstrings, logs, exceptions, and CLI output in English.
+- Use the repository-declared runtime before falling back to ambient `python3`.
+- When a test must modify `sys.path` before importing a standalone script, keep the affected import after that setup and mark only that import with `# noqa: E402`; remove truly unused imports or variables instead of suppressing them.
+- Add or update tests for testable logic.
+- Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
+- If external packages are introduced, keep exact pins and hashes in the owning requirements file.
+
+## Dependency And Runtime Depth
+
+Use `internal-script-python` when dependency bootstrap, launcher behavior, local virtual environments, or direct operator execution is the main concern.
+
+Use `internal-project-python` when importable behavior, service boundaries, application tests, or framework flows are the main concern.
+
+## Validation
+
+- Run the nearest focused `pytest` command when behavior changes.
+- Run `python -m py_compile <file>` or `python -m compileall <path>` for syntax-only changes.
+- Use the repository wrapper or runtime selector when one exists.

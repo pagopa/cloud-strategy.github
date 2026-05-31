@@ -13,13 +13,12 @@ validation path. Do not load a support bundle because it might become useful.
 Prefer support signals in this order:
 
 1. Explicit user-selected skill or domain.
-2. Scoped instruction that applies to the target path.
-3. File type, runtime, framework, command, or schema surface.
-4. Reproduced failure loop or validation output.
-5. Cloud, provider, platform, or governance evidence in the prompt or files.
-6. Existing nearby patterns in the same repository area.
+2. File type, path family, runtime, framework, command, or schema surface.
+3. Reproduced failure loop or validation output.
+4. Cloud, provider, platform, or governance evidence in the prompt or files.
+5. Existing nearby patterns in the same repository area.
 
-If no strong signal exists, do not guess. Stay in the quick lane with scoped
+If no strong signal exists, do not guess. Stay in the quick lane with local
 repository evidence, or escalate when the missing owner changes the risk.
 
 ## Support Buckets
@@ -32,7 +31,7 @@ repository evidence, or escalate when the missing owner changes the risk.
 | Existing diff needs findings or merge readiness | Leave simple mode for review ownership. | Do not turn simple validation into defect-first review. |
 | User asks to zoom out, understand unfamiliar code, or map modules and callers | Use `internal-high-level-review` as orientation support while staying descriptive. | Do not turn orientation into findings unless concrete systems risk is evidenced. |
 | Architecture, workflow, cross-cutting impact, or blind spots dominate | Leave simple mode for systems review ownership. | Do not keep editing while ownership or rollout is unsettled. |
-| Repository-owned skill, agent, prompt, or instruction work | Use the matching authoring owner when route, boundary, validation, or bundle structure changes. Inspect the owning bundle and nearest contract tests before calling it a pure copyedit. Use `internal-copilot-instructions-creator` when instruction compatibility or `applyTo` behavior is part of the change. | Pure copyedits can remain simple after that bundle check. |
+| Repository-owned skill, agent, prompt, or AI configuration work | Use the matching authoring owner when route, boundary, validation, or bundle structure changes. Inspect the owning bundle and nearest contract tests before calling it a pure copyedit. | Pure copyedits can remain simple after that bundle check. |
 | Runtime, language, infrastructure, or platform file | Use the matching domain owner only after the path or task proves it. | Do not list or preload every possible operational skill. |
 | Cloud or provider work | Use provider/domain support only when the prompt, files, commands, or validation surface identify it. | Do not infer unsupported status from an absent example. |
 | Performance is the primary measured concern | Use performance support with baseline and before/after evidence. | Do not optimize from intuition alone. |
@@ -76,5 +75,5 @@ activate only when called or proven by context.
 
 Run `scripts/suggest_support_skills.py` only when paths or symptoms are known and
 support selection is noisy. Treat its output as hints. The agent still must
-inspect local files and matching scoped instructions before editing or claiming
+inspect local files and relevant domain skills before editing or claiming
 policy.

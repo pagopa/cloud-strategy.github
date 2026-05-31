@@ -264,9 +264,9 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
-- resource_id: internal-aws-serverless
+- resource_id: internal-aws-lambda
   source_family: skills
-  source_path: .github/skills/internal-aws-serverless
+  source_path: .github/skills/internal-aws-lambda
   include_targets:
   - codex
   - copilot
@@ -277,6 +277,16 @@ resources:
 - resource_id: internal-aws-strategic
   source_family: skills
   source_path: .github/skills/internal-aws-strategic
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-azure-devops
+  source_family: skills
+  source_path: .github/skills/internal-azure-devops
   include_targets:
   - codex
   - copilot
@@ -317,6 +327,16 @@ resources:
 - resource_id: internal-azure-strategic
   source_family: skills
   source_path: .github/skills/internal-azure-strategic
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-bash
+  source_family: skills
+  source_path: .github/skills/internal-bash
   include_targets:
   - codex
   - copilot
@@ -367,16 +387,6 @@ resources:
 - resource_id: internal-copilot-docs-research
   source_family: skills
   source_path: .github/skills/internal-copilot-docs-research
-  include_targets:
-  - codex
-  - copilot
-  - claude
-  - opencode
-  target_support: See runtime support matrix
-  notes: Auto-included skill bundle.
-- resource_id: internal-copilot-instructions-creator
-  source_family: skills
-  source_path: .github/skills/internal-copilot-instructions-creator
   include_targets:
   - codex
   - copilot
@@ -564,6 +574,16 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
+- resource_id: internal-go
+  source_family: skills
+  source_path: .github/skills/internal-go
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
 - resource_id: internal-high-level-review
   source_family: skills
   source_path: .github/skills/internal-high-level-review
@@ -577,6 +597,26 @@ resources:
 - resource_id: internal-idea-define-advisor
   source_family: skills
   source_path: .github/skills/internal-idea-define-advisor
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-java
+  source_family: skills
+  source_path: .github/skills/internal-java
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-json
+  source_family: skills
+  source_path: .github/skills/internal-json
   include_targets:
   - codex
   - copilot
@@ -607,6 +647,36 @@ resources:
 - resource_id: internal-lesson-codification
   source_family: skills
   source_path: .github/skills/internal-lesson-codification
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-makefile
+  source_family: skills
+  source_path: .github/skills/internal-makefile
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-markdown
+  source_family: skills
+  source_path: .github/skills/internal-markdown
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-nodejs
+  source_family: skills
+  source_path: .github/skills/internal-nodejs
   include_targets:
   - codex
   - copilot
@@ -657,6 +727,16 @@ resources:
 - resource_id: internal-project-python
   source_family: skills
   source_path: .github/skills/internal-project-python
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-python
+  source_family: skills
+  source_path: .github/skills/internal-python
   include_targets:
   - codex
   - copilot
@@ -727,6 +807,16 @@ resources:
 - resource_id: internal-writing-plans
   source_family: skills
   source_path: .github/skills/internal-writing-plans
+  include_targets:
+  - codex
+  - copilot
+  - claude
+  - opencode
+  target_support: See runtime support matrix
+  notes: Auto-included skill bundle.
+- resource_id: internal-yaml
+  source_family: skills
+  source_path: .github/skills/internal-yaml
   include_targets:
   - codex
   - copilot

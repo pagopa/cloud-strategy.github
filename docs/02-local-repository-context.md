@@ -9,16 +9,16 @@
 
 - System boundaries, component responsibilities, architecture flow, and validation surfaces live in
   `docs/01-local-architecture.md`.
-- Binding rules live in `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents.
+- Binding rules live in `AGENTS.md`, `.github/copilot-instructions.md`, skills, agents, prompts, validators, or owned files.
 - Runtime workflow behavior lives in relevant skills, especially `internal-gateway-operational-flow`.
 - Lessons that are still pending codification live in `LESSONS_LEARNED.md`.
 
 ## Scope
 
 This file is repo-specific and descriptive. It may inform interpretation, but it must not override `AGENTS.md`,
-`.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, or consumer-local override files. When a
-runtime assembles manual context, this document is equivalent to a `<context policy="false">` block. It can explain
-local facts, but it is not an instruction source.
+`.github/copilot-instructions.md`, skills, agents, prompts, validators, owned files, or consumer-local override files.
+When a runtime assembles manual context, this document is equivalent to a `<context policy="false">` block. It can
+explain local facts, but it is not an instruction source.
 
 Consumer repositories may receive a scaffold for their own `docs/02-local-repository-context.md`, but sync must preserve
 their target-owned content after creation.
@@ -57,5 +57,5 @@ their target-owned content after creation.
 
 - This file describes why a local convention exists. Binding behavior lives in the canonical owner listed in the
   architecture or policy files.
-- When context here contradicts a canonical instruction surface, treat the contradiction as documentation drift.
+- When context here contradicts a canonical owner, treat the contradiction as documentation drift.
   Correct the drift in this file or in the canonical owner.

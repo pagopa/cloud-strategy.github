@@ -32,8 +32,8 @@ It is single-lane and single-phase by design. It keeps small and medium tasks li
 - One quick lane can finish: `answer`, `edit`, `diagnose`, `validate`, or
   `escalate`.
 - Repeated low-risk edits may stay simple only when they apply the same already-decided pattern and share one validation path.
-- Support selection follows the request, target path, scoped instructions, local
-  evidence, or an explicit skill call.
+- Support selection follows the request, target path, command surface, local
+  evidence, validation signal, or an explicit skill call.
 - A heavier gateway de-escalates because only a clear answer, local edit,
   diagnosis, or deterministic validation remains.
 
@@ -58,7 +58,7 @@ It is single-lane and single-phase by design. It keeps small and medium tasks li
 
 Leave simple mode when one of these becomes the real problem:
 
-- The change redesigns ownership, routing, catalog boundaries, `applyTo`,
+- The change redesigns ownership, routing, catalog boundaries,
   frontmatter contracts, sync behavior, or precedence.
 - The work touches `AGENTS.md`, `.github/copilot-instructions.md`,
   `.github/INVENTORY.md`, validators, sync engines, retained-plan engines, or
@@ -85,13 +85,13 @@ simple mode.
 3. If missing context still blocks the start and local evidence cannot resolve
    it, use `grill-me` only within that reference boundary.
 4. Confirm the task still fits one quick lane.
-5. Load only the support skill proved by the prompt, target path, scoped
-   instruction, symptom, domain evidence, or validation surface.
+5. Load only the support skill proved by the prompt, target path, command
+  surface, symptom, domain evidence, or validation surface.
 6. Answer, edit, diagnose, or validate without creating a retained plan.
 7. Run focused validation, or name the explicit validation gap.
 8. If the task stops being simple, stop and issue an escalation alert.
 
-Keep the first read budget small: one target or owner file, one matching scoped instruction when applicable, and one nearby validator or test found with `rg`. Open tests only when exact assertions, fixtures, or failure output can change the lane.
+Keep the first read budget small: one target or owner file, one likely domain skill when applicable, and one nearby validator or test found with `rg`. Open tests only when exact assertions, fixtures, or failure output can change the lane.
 Bundle-target maintenance does not stop at the first file. For a repository-owned skill or similar bundle owner, inspect relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`, or mark them as intentional non-action before closure.
 
 ## Quick Lanes
@@ -105,7 +105,7 @@ and output shapes after the fast-path boundary is confirmed.
 Do not maintain a finite list of operational skills here. Select support by evidence:
 
 - explicit user-selected skill or domain
-- matching scoped instructions for the target path
+- file type, path family, runtime, command surface, or schema signal
 - file type, runtime, framework, or command surface
 - reproduced failure loop or validation signal
 - cloud, provider, platform, or governance evidence in the prompt or files

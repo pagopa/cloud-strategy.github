@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Go"
+  short_description: "Lightweight Go baseline routing"
+  default_prompt: "Use $internal-go for Go code, module, or dependency metadata changes."

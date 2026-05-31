@@ -28,7 +28,7 @@ COPILOT_REVIEW_WINDOW_REQUIRED_MARKERS = (
     "first 4,000 characters",
     "least privilege",
     "no hardcoded secrets",
-    "Apply only the instruction files relevant",
+    "Select the smallest relevant skill",
     "Run the applicable validation",
 )
 AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
@@ -57,7 +57,6 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_skill_description_trigger_collisions(root))
     findings.extend(check_internal_agent_skill_list_size(root))
     findings.extend(check_internal_root_policy_overlap(root))
-    findings.extend(check_instruction_skill_policy_overlap(root))
     findings.extend(check_paired_agent_skill_overlap(root))
     return sorted(findings, key=finding_sort_key)
 
@@ -85,7 +84,7 @@ def check_root_always_on_budget(root: Path) -> list[Finding]:
                 f"soft target ({estimated_tokens} estimated tokens, target {ROOT_ALWAYS_ON_TOKEN_TARGET})."
             ),
             suggestion=(
-                "Classify each global section as required always-on, Copilot-native projection, scoped instruction, "
+                "Classify each global section as required always-on, Copilot-native projection, "
                 "skill, context, inventory, or removal before trimming."
             ),
         )
@@ -110,8 +109,8 @@ def check_agents_operational_procedure_markers(root: Path) -> list[Finding]:
             code="agents-operational-procedure-marker",
             path="AGENTS.md",
             message=(
-                "AGENTS.md contains operational procedure markers that belong in scoped "
-                f"instructions, skills, or owned files: {', '.join(markers)}."
+                "AGENTS.md contains operational procedure markers that belong in "
+                f"skills or owned files: {', '.join(markers)}."
             ),
             suggestion=(
                 "Keep AGENTS.md to stable policy, precedence, ownership boundaries, and "
@@ -146,7 +145,7 @@ def check_copilot_review_window(root: Path) -> list[Finding]:
                 f"all review-critical anchors: {', '.join(missing_markers)}."
             ),
             suggestion=(
-                "Keep the bridge reference, security guardrails, relevant-instruction rule, and validation rule "
+                "Keep the bridge reference, security guardrails, relevant-skill rule, and validation rule "
                 "inside the first 4,000 characters before deeper governance detail."
             ),
         )
@@ -435,43 +434,6 @@ def check_internal_root_policy_overlap(root: Path) -> list[Finding]:
                 suggestion="Keep repository-wide bridge policy in AGENTS.md plus .github/copilot-instructions.md and reduce the lower-layer asset to local scope.",
             )
         )
-    return findings
-
-
-def check_instruction_skill_policy_overlap(root: Path) -> list[Finding]:
-    instructions_root = root / ".github/instructions"
-    skills_root = root / ".github/skills"
-    if not instructions_root.exists() or not skills_root.exists():
-        return []
-
-    skill_paths = sorted(skills_root.glob("internal-*/SKILL.md"))
-    findings: list[Finding] = []
-    for instruction_path in sorted(instructions_root.glob("internal-*.instructions.md")):
-        topic = instruction_path.name.removesuffix(".instructions.md").removeprefix("internal-")
-        instruction_lines = significant_text_lines(read_text(instruction_path))
-        if not instruction_lines:
-            continue
-
-        for skill_path in skill_paths:
-            if topic not in skill_path.parent.name:
-                continue
-
-            overlap = significant_text_lines(read_text(skill_path)) & instruction_lines
-            if len(overlap) < 3:
-                continue
-
-            findings.append(
-                Finding(
-                    severity="non-blocking",
-                    code="instruction-skill-policy-overlap",
-                    path=skill_path.relative_to(root).as_posix(),
-                    message=(
-                        "The internal skill repeats too many instruction-owned policy lines from "
-                        f"{instruction_path.relative_to(root).as_posix()} ({len(overlap)} overlapping lines)."
-                    ),
-                    suggestion="Keep baseline policy in the matching instruction file and narrow the skill to examples, workflow, and specialization.",
-                )
-            )
     return findings
 
 

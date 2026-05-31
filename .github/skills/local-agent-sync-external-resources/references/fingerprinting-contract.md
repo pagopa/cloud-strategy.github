@@ -72,7 +72,6 @@ Infer `kind` from the path when possible:
 
 - `.github/skills/*/SKILL.md` -> `skill`
 - `.github/agents/*.agent.md` -> `agent`
-- `.github/instructions/*.instructions.md` -> `instruction`
 - fallback -> `file`
 
 ## Real Change vs Noise
