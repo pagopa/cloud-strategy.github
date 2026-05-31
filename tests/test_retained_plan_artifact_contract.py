@@ -17,6 +17,8 @@ COMPLETION_REPORT_FIELDS = (
     "Completion Report",
     "Active phase and owner:",
     "State:",
+    "Continuation:",
+    "User action required:",
     "Files changed:",
     "Completed items:",
     "Intentional non-actions:",
@@ -25,6 +27,7 @@ COMPLETION_REPORT_FIELDS = (
     "Source-item ledger:",
     "Evidence gaps:",
     "Residual risks:",
+    "Next-step package:",
     "Follow-up suggestions:",
 )
 

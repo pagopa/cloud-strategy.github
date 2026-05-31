@@ -13,13 +13,13 @@ Treat `completion-report.md` and `evidence-envelope.md` as late-stage packaging 
 
 ## Completion States
 
-| State | Criteria |
-| --- | --- |
-| `SHIPPED` | All in-scope ledger items are implemented or intentionally closed, validators passed, required evidence envelope coverage exists, no numbered plan files remain, and the completion report is filled. |
-| `APPLIED_UNVERIFIED` | Edits were applied, but required validator, review, or evidence coverage is missing. |
-| `PARTIAL` | Some in-scope items remain incomplete or intentionally deferred. |
-| `BLOCKED` | A real blocker prevents correct continuation. |
-| `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. |
+| State | Criteria | Folder behavior | Continuation |
+| --- | --- | --- | --- |
+| `SHIPPED` | All in-scope ledger items are implemented or intentionally closed, validators passed, required evidence envelope coverage exists, no numbered plan files remain, and the completion report is filled. | Create matching `done-*` markers and remove numbered plan files only after the evidence envelope and report are stable. | `none` |
+| `APPLIED_UNVERIFIED` | Edits were applied, but required validator, review, or evidence coverage is missing. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. | `continuing` or `waiting` |
+| `PARTIAL` | Some in-scope items remain incomplete or intentionally deferred. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. | `continuing` or `waiting` |
+| `BLOCKED` | A real blocker prevents correct continuation. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. Record the blocker and next-step package. | `waiting` |
+| `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. | Keep numbered plan files and the live ledger in place unless a later `SHIPPED` package supersedes the folder. Do not create new `done-*` markers for the rolled-back state. | `waiting` or `none` |
 
 `SHIPPED` requires passed validators, a completed report, no numbered plan files,
 and no open source-item ledger rows. Non-trivial retained plans also require an
@@ -27,11 +27,21 @@ evidence envelope or equivalent item-level evidence for every requested or sourc
 If validators or evidence coverage cannot run, or any row remains `PENDING`,
 `PARTIAL`, `NOT_DONE`, `UNVERIFIABLE`, or `BLOCKED`, use
 `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED` with the explicit gap.
+Only `SHIPPED` is a close-package state. Every other state is a live-folder
+state and must preserve the retained plan for resume or manual continuation.
+
+When the state is not `SHIPPED`, the report must also declare:
+
+- `Continuation`: `continuing` or `waiting`.
+- `User action required`: mandatory when `Continuation` is `waiting`.
+- `Next-step package`: `Owner`, `Scope`, `Action`, `Validation`, and `Risk`.
 
 ## Required Fields
 
 - Active phase and owner.
 - Completion state.
+- Continuation.
+- User action required.
 - Files changed.
 - Items completed.
 - Intentional non-actions.
@@ -41,6 +51,7 @@ If validators or evidence coverage cannot run, or any row remains `PENDING`,
 - Evidence gaps.
 - Residual risks.
 - Lessons status, including `added`, `codified`, or `none`.
+- Next-step package.
 - Follow-up suggestions separated from required work.
 
 ## Evidence Envelope
@@ -72,6 +83,11 @@ If the ledger is absent or stale and cannot be reconstructed from source plan
 files, `done-*` files, and reachable artifacts, mark the completion state
 `PARTIAL` or `APPLIED_UNVERIFIED`; do not claim `SHIPPED`.
 
+If the completion state is `APPLIED_UNVERIFIED`, `PARTIAL`, `BLOCKED`, or
+`ROLLED_BACK`, do not use the report as permission to remove numbered plan files
+or the live ledger. Those states document a live retained-plan folder, not a
+physical close package.
+
 ## Review Tiers
 
 | Tier | Trigger | Minimum lenses |
@@ -86,6 +102,8 @@ files, `done-*` files, and reachable artifacts, mark the completion state
 Completion Report
 Active phase and owner: <phase, owner>
 State: SHIPPED | APPLIED_UNVERIFIED | PARTIAL | BLOCKED | ROLLED_BACK
+Continuation: none | continuing | waiting
+User action required: <exact required user/external action, or none>
 Files changed: <paths>
 Completed items: <items>
 Intentional non-actions: <items or none>
@@ -95,5 +113,6 @@ Source-item ledger: <all rows closed, gaps listed, or unavailable>
 Evidence gaps: <gaps or none>
 Residual risks: <risks or none>
 Lessons: added | codified in <owner> | none - <short reason>
+Next-step package: Owner=<...>; Scope=<...>; Action=<...>; Validation=<...>; Risk=<...>
 Follow-up suggestions: <separate optional ideas>
 ```

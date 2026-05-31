@@ -489,11 +489,15 @@ def test_completion_report_requires_evidence_envelope() -> None:
         ".github/skills/internal-executing-plans/references/completion-report.md",
         (
             "Evidence envelope",
+            "Continuation",
+            "User action required",
+            "Next-step package",
             "Evidence gaps",
             "Residual risks",
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
             "`SHIPPED` requires passed validators, a completed report",
+            "Only `SHIPPED` is a close-package state",
             "no numbered plan files",
             "Intended observable acceptance",
             "A summary that says an item was done is not evidence",
@@ -515,6 +519,7 @@ def test_resume_protocol_reference_exists() -> None:
             "Verify-first Sequence",
             "`01-change-summary.md`",
             "`04-implementation-contract.md`",
+            "`State`, `Continuation`, and",
             "Initial evidence pass",
             "Reading budget",
             "rg --no-ignore",
@@ -551,6 +556,7 @@ def test_plan_handoff_requires_summary_control_file() -> None:
             "`Reading budget`",
             "`questions.md`",
             "summary and ledger control files",
+            "completes as `SHIPPED`",
             "matching `done-*`\n  markers",
             "Observable acceptance for each executable action",
         ),
@@ -601,9 +607,12 @@ def test_apply_plan_requires_physical_close_packaging_before_shipped() -> None:
     for text in (gateway_text, mode_contracts_text, workflow_maps_text):
         assert "Check 4" in text
         assert "physical close" in text.lower()
+        assert "Continuation" in text
     assert "matching `done-*` markers" in gateway_text
     assert "removal of all closed numbered plan files" in gateway_text
-    assert "remove all closed numbered plan files" in executing_text
+    assert "Only `SHIPPED` creates new `done-*` markers" in executing_text
+    assert "Non-`SHIPPED` exits keep the live ledger and numbered files in place" in executing_text
+    assert "Remove all closed numbered plan files" in executing_text
     assert "remove the live ledger only after" in executing_text.lower()
 
 

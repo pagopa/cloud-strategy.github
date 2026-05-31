@@ -231,6 +231,8 @@ def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
 def test_operational_flow_wrapper_reports_completion_checks() -> None:
     body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
 
+    assert "State and Continuation" in body
+    assert "User action required" in body
     assert "`Check 1`, `Check 2`, and `Check 3` evidence" in body
     assert "Source-item coverage against observed diff" in body
     assert "workflow-defect" in body
@@ -293,6 +295,8 @@ def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> 
     assert "`define`" in skill_text
     assert "Define Check 1" in skill_text
     assert "## Phase-Local Output Template" in mode_contracts_text
+    assert "State" in mode_contracts_text
+    assert "Continuation" in mode_contracts_text
     assert "Gate 0 status" in mode_contracts_text
     assert "Definition Brief status" in mode_contracts_text
     assert "Lessons: none retained." in mode_contracts_text
@@ -367,6 +371,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "`Check 2`" in skill_text
     assert "`Check 3`" in skill_text
     assert "`Check 4`" in skill_text
+    assert "State:` and `Continuation:`" in skill_text or "`State:` and `Continuation:`" in skill_text
     assert "## Output Calibration" in skill_text
     assert "Required output" in skill_text
     assert "Must not include" in skill_text
@@ -393,6 +398,8 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert interface["display_name"] == "Internal Gateway Operational Flow"
     assert "workflow" in interface["short_description"]
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
+    assert "state" in interface["default_prompt"].lower()
+    assert "continuation" in interface["default_prompt"].lower()
     assert (
         "stay in define" in interface["default_prompt"].lower()
     )

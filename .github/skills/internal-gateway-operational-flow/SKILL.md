@@ -81,6 +81,10 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 - Unclear entry point: use `define` when intent is unconfirmed; otherwise use `plan`.
 - Keep direct entry and manual transitions visible. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
 - Use `internal-agent-support-next-step` at every phase-ending transition.
+- If `execute`, `apply-plan`, or `review` stops without a terminal success
+  claim, start the response with `State:` and `Continuation:`. Use
+  `internal-agent-support-next-step`, and add `User action required:` when
+  `Continuation` is `waiting`.
 - Require an explicit checkpoint before moving into `execute` or `apply-plan` from `plan`, `define`, or critical challenge, unless the user already authorized end-to-end application.
 - Use `internal-gateway-critical-master` before finalizing material prompt, skill, routing, validator, or shared workflow changes.
 - When expected work was missed: compare the original request, ledger, diff, and validation evidence before closing. For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
@@ -166,6 +170,15 @@ Before reporting completion for `execute` or `apply-plan`, run three distinct ve
 - `Check 3`: Evidence coverage. Run the applicable validators, tests, lint commands, or closest available checks; read the output before claiming success.
 - `Check 4` (`apply-plan` only): Close packaging. Delegate the physical close to `internal-executing-plans`, then verify `evidence-envelope.md`, `completion-report.md`, matching `done-*` markers, removal of all closed numbered plan files, and closed ledger preservation. Do not report `SHIPPED` while active numbered plan files or open ledger rows remain.
 
+For any non-terminal `execute`, `apply-plan`, or `review` stop, make the stop
+state explicit instead of implying completion. `apply-plan` uses the completion
+state vocabulary owned by `internal-executing-plans` and its completion-report
+reference. Non-`SHIPPED` retained-plan exits must keep
+the live folder in place, declare `Continuation: continuing` or
+`Continuation: waiting`, and include a visible next-step package. When the stop
+depends on user input, approval, or an external prerequisite, add `User action
+required:` with the exact missing action.
+
 For retained plans, `Check 1` must use `02-source-item-ledger.md` or a reconstructed evidence envelope plus observed diff or file evidence. Use `superpowers-verification-before-completion` as the final evidence gate. For large retained plans, multi-area diffs, always-on guidance changes, or validator changes, use `internal-high-level-review` for plan-completion audit and scope-drift analysis.
 
 Every phase-ending response must include a compact `Lessons` line. State whether a lesson was added, codified in another owner, or not retained; when a durable lesson candidate exists, use `internal-lesson-codification` before editing `LESSONS_LEARNED.md`.
@@ -178,9 +191,9 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 | --- | --- | --- |
 | `define` | Gate status, Definition Brief, Pre-Plan Critical Pass outcome, assumptions, selected direction or open options, validation path, anti-scope, risk, and requested checkpoint. | Implementation plan, applied changes, or implied approval to execute. |
 | `plan` | Gate status, `pre-plan critical: confident` status, decision, assumptions, anti-scope, validation path, risk, and requested checkpoint. | Applied changes or implied approval to execute. |
-| `execute` | Files changed, scoped result, `Check 1`, `Check 2`, `Check 3`, validation evidence, and residual risk. | New strategy, unrelated improvements, or unverified completion claims. |
-| `apply-plan` | Retained-plan ledger coverage, `done-*` status, blockers or completed items, `Check 1-4`, close-package state, and evidence. | Execution of `questions.md` or unapproved inline plan work. |
-| `review` | Review Gate status, findings first, severity, confidence, causal layer, evidence gap, and fix route. | Silent fixes, initial design work, or final verdict without review gate closure. |
+| `execute` | `State`, `Continuation`, `User action required` when waiting, files changed, scoped result, `Check 1`, `Check 2`, `Check 3`, validation evidence, and residual risk. | New strategy, unrelated improvements, or unverified completion claims. |
+| `apply-plan` | `State`, `Continuation`, `User action required` when waiting, retained-plan ledger coverage, `done-*` status, blockers or completed items, `Check 1-4`, close-package state, evidence, and next-step package when not `SHIPPED`. | Execution of `questions.md` or unapproved inline plan work. |
+| `review` | `State`, `Continuation`, `User action required` when waiting, Review Gate status, findings first, severity, confidence, causal layer, evidence gap, and fix route. | Silent fixes, initial design work, or final verdict without review gate closure. |
 | `critical` | Strongest objection, why it matters, explicit critical outcome, and next-step package. | Routine implementation or ordinary code review. |
 
 ## Staged Checkpoints
@@ -188,7 +201,7 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 - `define-first` stops after the Definition Brief, the Pre-Plan Critical Pass, and next-step package unless the user explicitly requests `plan`.
 - `plan-only` stops after the plan, Decision Brief, and next-step package.
 - `full-cycle` continues only through visible phase changes; the entrypoint name alone does not skip the Pre-Plan Critical Pass or the pre-execute checkpoint.
-- `apply-plan` stops for missing retained plans, inline plans without checkpoint, or blockers.
+- `apply-plan` stops for missing retained plans, inline plans without checkpoint, or blockers, and those non-`SHIPPED` stops must include explicit `State`, `Continuation`, and next-step package fields.
 - `review` routes each actionable finding to delivery, planning, critical challenge, or defer.
 - Any request-change realignment reruns Gate 0 and the Pre-Plan Critical Pass before the next governance-sensitive plan output.
 
@@ -208,6 +221,9 @@ Keep reports compact by default. Plan and review outputs should usually stay wit
 - Every phase includes owner, scope, anti-scope, action, validation, risk, and next checkpoint.
 - `internal-agent-support-next-step` is used for every user-visible transition.
 - `apply-plan` uses `internal-executing-plans`, requires source-item ledger coverage, excludes `questions.md`, and cannot report `SHIPPED` before retained-plan `Check 4` closes physical artifacts.
+- Non-terminal `execute`, `apply-plan`, and `review` exits start with explicit
+  `State` and `Continuation`; `Continuation: waiting` also requires `User action
+  required` plus a visible next-step package.
 - Phase-ending reports state `Lessons` status even when no lesson was retained.
 - `review` uses the relevant review lens; see Future Security Lens rule in `references/wrapper-alignment.md`.
 - Gate 0 blocks plan output when user decisions can change scope, owner, target state, validation, rollout, or anti-scope; direct `execute` is the only automatic exception, and `apply-plan` uses a visible pre-start gate.

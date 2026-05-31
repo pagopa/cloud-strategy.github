@@ -73,6 +73,10 @@ Support selection belongs in the gateway skills, not in wrapper skill-list secti
 - Keep every Copilot wrapper handoff `send: false`.
 - Keep handoff labels user-facing with `Next step:` or `Next action:`.
 - Keep text next-step packages in responses because non-Copilot runtimes may ignore wrapper frontmatter.
+- For non-terminal `execute`, `apply-plan`, or `review` stops, pair the text
+  next-step package with explicit `State` and `Continuation`; add `User action
+  required` when the workflow is waiting on the user or an external
+  prerequisite.
 - Do not use wrapper handoffs as hidden dispatch.
 - Gateway wrappers may expose manual handoffs to the other gateway wrappers when
   the current lane no longer fits.

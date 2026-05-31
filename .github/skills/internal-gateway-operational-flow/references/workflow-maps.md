@@ -307,7 +307,17 @@ Review treats missing validation as a finding, not a footnote.
               |
               v
 +-------------------------------+
+| If state is not SHIPPED       |
+| - keep live folder + ledger   |
+| - no new done-* markers       |
+| - report State + Continuation |
+| - emit next-step package      |
++-------------------------------+
+              |
+              v
++-------------------------------+
 | Check 4 close packaging        |
+| (SHIPPED only)                 |
 | - evidence envelope + report   |
 | - matching done-* markers      |
 | - remove all numbered files    |
@@ -315,7 +325,7 @@ Review treats missing validation as a finding, not a footnote.
 +-------------------------------+
 ```
 
-Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies. `apply-plan` cannot report `SHIPPED` before `Check 4` verifies the physical close package.
+Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies. `apply-plan` cannot report `SHIPPED` before `Check 4` verifies the physical close package. Non-`SHIPPED` states keep the retained plan live and must say whether execution is `continuing` or `waiting`.
 
 ## Runtime Projection
 

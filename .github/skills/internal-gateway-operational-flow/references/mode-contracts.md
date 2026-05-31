@@ -107,8 +107,8 @@ reference, or the support skill itself.
   `gate-0-protocol.md` for `define-first`, brainstorming, and clarify-first
   transition authorization.
 - `plan` exits to `execute`, `apply-plan`, `review`, or critical challenge only through a visible next-step package and checkpoint unless the user authorized end-to-end work.
-- `execute` exits to `review` when correctness evidence or merge readiness is the main next need.
-- `apply-plan` exits as `SHIPPED` only after all executable retained-plan items are completed and retained-plan `Check 4` verifies the physical close package. A real blocker or validation gap exits only with its explicit non-shipped state and visible next owner.
+- `execute` exits to `review` when correctness evidence or merge readiness is the main next need. Any non-complete stop must declare explicit `State`, `Continuation`, and a visible next-step package.
+- `apply-plan` exits as `SHIPPED` only after all executable retained-plan items are completed and retained-plan `Check 4` verifies the physical close package. A real blocker or validation gap exits only with its explicit non-shipped state, `Continuation`, and visible next-step package. `done-*` markers are reserved for `SHIPPED`.
 - `review` exits to `execute`, `define`, `plan`, critical challenge, or deferred follow-up for each actionable finding only after the Review Gate is satisfied.
 - Critical challenge exits with `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
 - Any mode may stop and recommend a better lane through `internal-agent-support-lane-change-engine` when the boundary breaks.
@@ -118,23 +118,30 @@ reference, or the support skill itself.
 Use the active phase-local contract as the compact response frame for non-trivial `plan`, `execute`, or `apply-plan` work.
 
 - Phase and entrypoint
+- State
+- Continuation
+- User action required when `Continuation: waiting`
 - Gate 0 status
 - Definition Brief status when `define` applies
 - Review Gate status when `review` applies
 - Compact decision frame: target, anti-scope, and validation path
 - Current slice or completed change
 - Next checkpoint or next slice
+- Next-step package when stopping without terminal completion
 - Residual risk and `Lessons` line
 
 Example:
 
 ```text
 Phase: execute (`apply-plan`)
+State: BLOCKED
+Continuation: waiting
+User action required: install the missing dependency, then approve the next apply step
 Gate 0: satisfied (user closed the mandatory pre-start `grill-me` loop for this approved retained plan)
 Definition Brief: satisfied (approved retained plan already defines target and anti-scope)
-Decision frame: target = move stale module under deprecated/; anti-scope = no functional change; validation = pytest tests/test_module_paths.py
-Current slice: moved 3 files and updated 2 imports.
-Next checkpoint: rerun targeted pytest, then ask before the next slice.
-Residual risk: low (no external consumers).
+Decision frame: target = run sync plan after repository validation; anti-scope = no manual home copy; validation = sync plan, then sync audit
+Current slice: repository-owned patch and focused validation completed; sync plan blocked on missing prerequisite.
+Next-step package: Owner=internal-gateway-operational-flow; Scope=runtime sync branch; Action=resume from the blocked sync step; Validation=rerun sync plan then sync audit; Risk=manual closeout would misreport the retained-plan state.
+Residual risk: medium (plan stays live until the external prerequisite is resolved).
 Lessons: none retained.
 ```

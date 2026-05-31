@@ -44,11 +44,14 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
    targeted check, then move to the next slice.
 4. **Track via ledger**: The ledger is the single live state. Update row status
    after each slice. Do not create `done-*` markers during partial work.
-5. **Package final**: After all executable files are cleared, run the full
-   validator suite and missed-work scan, then create `evidence-envelope.md` →
-   `completion-report.md` → matching `done-*` markers → preserve the closed
-   ledger in the envelope → remove all closed numbered plan files, including
-   control files.
+5. **Report or package**: When execution reaches a stable stop state, choose a
+   completion state from `references/completion-report.md`. Only `SHIPPED`
+   creates `evidence-envelope.md` → `completion-report.md` → matching `done-*`
+   markers → closed-ledger preservation → removal of all closed numbered plan
+   files, including control files. Non-`SHIPPED` states update evidence and
+   report artifacts only when the stop state is stable enough to explain, keep
+   the live ledger and numbered files in place, and end with a visible next-step
+   package.
 
 ## Execution Contract
 
@@ -59,6 +62,10 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
 - Use `rg --no-ignore` for retained artifacts under `tmp/`, scoped to the active folder.
 - `done-*` files are packaging only: create them after evidence envelope, not
   during partial work.
+- Only `SHIPPED` creates new `done-*` markers or removes numbered plan files.
+- Non-`SHIPPED` exits keep the live ledger and numbered files in place even when
+  `completion-report.md` or `evidence-envelope.md` is updated to record the stop
+  state.
 - Remove all closed numbered plan files, including summary, live ledger,
   implementation contract, and executable files, after matching `done-*`
   markers preserve their completed items.
@@ -67,6 +74,9 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
   execution.
 - Stop only for real blockers: missing prerequisites, concurrency on target files,
   or a materially broken plan.
+- When execution stops without `SHIPPED`, start the report with `State:` and
+  `Continuation:`. Use `internal-agent-support-next-step` fields, and include
+  `User action required:` when `Continuation` is `waiting`.
 
 ## Slice Strategy
 
@@ -85,6 +95,23 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
 | `INTENTIONAL_NON_ACTION` | Explicitly excluded |
 | `PARTIAL`, `NOT_DONE`, `UNVERIFIABLE`, `BLOCKED` | Not completion states |
 
+## Exit State Contract
+
+The completion-state vocabulary and folder-behavior rules live in
+`references/completion-report.md`.
+
+- `SHIPPED` is the only close-package state. It is the only state that creates
+  matching `done-*` markers and removes numbered plan files.
+- `APPLIED_UNVERIFIED`, `PARTIAL`, `BLOCKED`, and `ROLLED_BACK` are live-folder
+  states. Keep numbered plan files and the live ledger in place.
+- A non-`SHIPPED` exit must still be explicit. Declare `State:` and
+  `Continuation:` and provide a visible next-step package.
+- `Continuation: waiting` means the executor is stopped on user input,
+  approval, or an external prerequisite. Add `User action required:` with the
+  exact missing action.
+- `Continuation: continuing` means the owner can safely continue later from the
+  current retained-plan state without redefining the plan.
+
 ## References
 
 - `references/plan-handoff.md`: minimum input contract before execution.
@@ -100,6 +127,8 @@ Load references on demand only when the active phase needs them.
 - Summary, ledger, and implementation contract read in order.
 - Evidence pass followed; sibling plans not read unless listed in budget.
 - `done-*` created only after evidence envelope, not during partial work.
+- No new `done-*` markers appear for `APPLIED_UNVERIFIED`, `PARTIAL`,
+  `BLOCKED`, or `ROLLED_BACK`.
 - Ledger rows closed with evidence before deletion.
 - Physical close packaging removed all closed numbered plan files and preserved
   every removed item and ledger row in the evidence envelope before `SHIPPED`.
@@ -113,6 +142,8 @@ Load references on demand only when the active phase needs them.
 - Moving large batches without slice-level acceptance and evidence.
 - Skipping summary or ledger and guessing folder purpose.
 - Creating `done-*` during partial work instead of final packaging.
+- Ending in `BLOCKED`, `PARTIAL`, or `APPLIED_UNVERIFIED` without an explicit
+  `State`, `Continuation`, and next-step package.
 - Treating `questions.md` as a task list.
 - Stopping after one numbered file when others remain.
 - Claiming completion while ledger rows are still open.

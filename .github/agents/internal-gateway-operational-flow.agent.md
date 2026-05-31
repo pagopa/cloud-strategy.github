@@ -61,6 +61,8 @@ portable workflow semantics in the core skill.
 ## Output Expectations
 
 - Active entry point and phase
+- State and Continuation when work stops before terminal completion
+- User action required when the workflow is waiting
 - Gate 0 status and Definition Brief status when `define` applies
 - Scope, anti-scope, action, validation path, and risk
 - Files changed and residual risk when work was applied
