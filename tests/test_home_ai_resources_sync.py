@@ -268,3 +268,18 @@ def test_plan_next_action_present(
     assert "action" in payload["next_action"]
     assert "allowed" in payload["next_action"]
     assert "requires_explicit_approval" in payload["next_action"]
+
+
+def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
+    skill_path = (
+        Path(__file__).resolve().parent
+        / "../.github/skills/local-agent-sync-install-ai-resources/SKILL.md"
+    ).resolve()
+    content = skill_path.read_text(encoding="utf-8")
+
+    assert "## Deterministic Operator Protocol" in content
+    assert "Install sync is unidirectional: repo -> home only." in content
+    assert "The `bisync` lane provides explicit bidirectional synchronization" in content
+    assert "Do not infer the mode, do not skip blockers" in content
+    assert "next_action` as user approval for `apply`" in content
+    assert "non-thinking" not in content.lower()

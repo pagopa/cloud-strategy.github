@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -44,8 +45,8 @@ def load_bisync_module():
 
 
 bisync_skills = load_bisync_module()
-build_bisync_plan = bisync_skills.build_bisync_plan
 apply_bisync_plan = bisync_skills.apply_bisync_plan
+build_bisync_plan = bisync_skills.build_bisync_plan
 BisyncDriftEntry = bisync_skills.BisyncDriftEntry
 BisyncPlan = bisync_skills.BisyncPlan
 
@@ -57,7 +58,7 @@ def write_file(path: Path, content: str) -> None:
 
 def init_git_repo(root: Path) -> None:
     root.mkdir(parents=True, exist_ok=True)
-    write_file(root / ".gitkeep", "")
+    write_file(root / "AGENTS.md", "# AGENTS\n")
     subprocess.run(
         ["git", "init", "-b", "main"],
         cwd=root,
@@ -95,197 +96,286 @@ def init_git_repo(root: Path) -> None:
     )
 
 
+def commit_all(root: Path, message: str) -> None:
+    subprocess.run(
+        ["git", "add", "-A"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+
 def make_skill(root: Path, skill_name: str, content: str) -> Path:
     skill_dir = root / skill_name
     write_file(skill_dir / "SKILL.md", content)
     write_file(
         skill_dir / "agents" / "openai.yaml",
-        f"interface:\n  display_name: \"{skill_name}\"\n  short_description: \"Test skill\"\n  default_prompt: \"Use ${skill_name}.\"\n",
+        "interface:\n"
+        f"  display_name: \"{skill_name}\"\n"
+        "  short_description: \"Test skill\"\n"
+        f"  default_prompt: \"Use ${skill_name}.\"\n",
     )
     return skill_dir
 
 
-def test_build_plan_in_sync(tmp_path: Path) -> None:
+def set_tree_mtime(root: Path, timestamp: float) -> None:
+    for path in sorted(root.rglob("*")):
+        os.utime(path, (timestamp, timestamp))
+    os.utime(root, (timestamp, timestamp))
+
+
+def test_build_plan_in_sync_with_ignored_runtime_artifacts(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    make_skill(source / ".github" / "skills", "alpha-skill", "# Alpha\n")
-    make_skill(home / ".agents" / "skills", "alpha-skill", "# Alpha\n")
+    source_skill = make_skill(source / ".github" / "skills", "alpha-skill", "# Alpha\n")
+    home_skill = make_skill(home / ".agents" / "skills", "alpha-skill", "# Alpha\n")
+    write_file(source_skill / "__pycache__" / "ignored.pyc", "source\n")
+    write_file(home_skill / "__pycache__" / "ignored.pyc", "home\n")
+    write_file(source_skill / ".venv" / "marker.txt", "source\n")
+    write_file(home_skill / ".venv" / "marker.txt", "home\n")
 
     plan = build_bisync_plan(source, home, mode="plan")
+
     assert plan.drifts == []
     assert plan.blocked_codes == []
     assert plan.verification["status"] == "ok"
 
 
-def test_build_plan_repo_to_home(tmp_path: Path) -> None:
+def test_build_plan_detects_repo_to_home_direction(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    make_skill(source / ".github" / "skills", "beta-skill", "# Beta source\n")
-    make_skill(home / ".agents" / "skills", "beta-skill", "# Beta home\n")
+    source_skill = make_skill(source / ".github" / "skills", "beta-skill", "# Beta source\n")
+    home_skill = make_skill(home / ".agents" / "skills", "beta-skill", "# Beta home\n")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
 
     plan = build_bisync_plan(source, home, mode="plan")
+
     assert len(plan.drifts) == 1
     drift = plan.drifts[0]
     assert drift.skill_name == "beta-skill"
     assert drift.drift_type == "drift"
-    assert drift.direction in ("repo-to-home", "home-to-repo")
+    assert drift.direction == "repo-to-home"
 
 
-def test_build_plan_only_repo(tmp_path: Path) -> None:
+def test_build_plan_detects_home_to_repo_direction(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    source_skill = make_skill(source / ".github" / "skills", "gamma-skill", "# Gamma source\n")
+    home_skill = make_skill(home / ".agents" / "skills", "gamma-skill", "# Gamma home\n")
+    set_tree_mtime(source_skill, 100.0)
+    set_tree_mtime(home_skill, 200.0)
+
+    plan = build_bisync_plan(source, home, mode="plan")
+
+    assert len(plan.drifts) == 1
+    drift = plan.drifts[0]
+    assert drift.skill_name == "gamma-skill"
+    assert drift.drift_type == "drift"
+    assert drift.direction == "home-to-repo"
+
+
+def test_build_plan_blocks_equal_mtime(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    source_skill = make_skill(source / ".github" / "skills", "equal-skill", "# Equal source\n")
+    home_skill = make_skill(home / ".agents" / "skills", "equal-skill", "# Equal home\n")
+    set_tree_mtime(source_skill, 100.0)
+    set_tree_mtime(home_skill, 100.0)
+
+    plan = build_bisync_plan(source, home, mode="plan")
+
+    assert len(plan.drifts) == 1
+    assert plan.drifts[0].drift_type == "equal-mtime"
+    assert plan.blocked_codes == ["bisync-equal-mtime"]
+    assert plan.next_action["allowed"] is False
+
+
+def test_build_plan_blocks_only_repo_and_only_home(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
     (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
-    make_skill(source / ".github" / "skills", "gamma-skill", "# Gamma\n")
+    make_skill(source / ".github" / "skills", "repo-only", "# Repo only\n")
+    make_skill(home / ".agents" / "skills", "home-only", "# Home only\n")
 
     plan = build_bisync_plan(source, home, mode="plan")
-    assert len(plan.drifts) == 1
-    drift = plan.drifts[0]
-    assert drift.skill_name == "gamma-skill"
-    assert drift.drift_type == "only-repo"
-    assert "bisync-only-repo" in plan.blocked_codes
+
+    drift_types = {drift.skill_name: drift.drift_type for drift in plan.drifts}
+    assert drift_types == {"repo-only": "only-repo", "home-only": "only-home"}
+    assert plan.blocked_codes == ["bisync-only-home", "bisync-only-repo"]
 
 
-def test_build_plan_only_home(tmp_path: Path) -> None:
+def test_excludes_local_agent_sync_bundles_from_scan(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    (source / ".github" / "skills").mkdir(parents=True, exist_ok=True)
-    make_skill(home / ".agents" / "skills", "delta-skill", "# Delta\n")
-
-    plan = build_bisync_plan(source, home, mode="plan")
-    assert len(plan.drifts) == 1
-    drift = plan.drifts[0]
-    assert drift.skill_name == "delta-skill"
-    assert drift.drift_type == "only-home"
-    assert "bisync-only-home" in plan.blocked_codes
-
-
-def test_excludes_local_agent_sync_bundles(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    home = tmp_path / "home"
-    init_git_repo(source)
-    make_skill(source / ".github" / "skills", "local-agent-sync-install-ai-resources", "# Sync\n")
+    make_skill(
+        source / ".github" / "skills",
+        "local-agent-sync-install-ai-resources",
+        "# Sync bundle\n",
+    )
+    make_skill(
+        home / ".agents" / "skills",
+        "local-agent-sync-install-ai-resources",
+        "# Diverged sync bundle\n",
+    )
     make_skill(source / ".github" / "skills", "normal-skill", "# Normal\n")
     make_skill(home / ".agents" / "skills", "normal-skill", "# Normal\n")
 
     plan = build_bisync_plan(source, home, mode="plan")
-    skill_names = {d.skill_name for d in plan.drifts}
-    assert "local-agent-sync-install-ai-resources" not in skill_names
+
+    assert {drift.skill_name for drift in plan.drifts} == set()
 
 
-def test_build_plan_equal_mtime_blocker(tmp_path: Path) -> None:
+def test_apply_blocks_dirty_repository_without_writes(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    make_skill(source / ".github" / "skills", "equal-skill", "# Equal src\n")
-    make_skill(home / ".agents" / "skills", "equal-skill", "# Equal dst\n")
-
-    plan = build_bisync_plan(source, home, mode="plan")
-    drift_types = {d.drift_type for d in plan.drifts}
-    assert drift_types <= {"drift", "equal-mtime"}
-
-
-def test_apply_blocked_when_plan_has_blockers(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    home = tmp_path / "home"
-    init_git_repo(source)
-    (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
-    make_skill(source / ".github" / "skills", "only-repo-skill", "# Only repo\n")
-
-    plan = build_bisync_plan(source, home, mode="plan")
-    assert "bisync-only-repo" in plan.blocked_codes
-
-    result = apply_bisync_plan(source, home, plan)
-    assert "bisync-only-repo" in result.blocked_codes
-
-
-def test_apply_blocked_dirty_repository(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    home = tmp_path / "home"
-    init_git_repo(source)
-    (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
-    make_skill(source / ".github" / "skills", "clean-skill", "# Clean src\n")
-    make_skill(home / ".agents" / "skills", "clean-skill", "# Clean home\n")
-
+    source_skill = make_skill(source / ".github" / "skills", "dirty-skill", "# Source\n")
+    home_skill = make_skill(home / ".agents" / "skills", "dirty-skill", "# Home\n")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
     write_file(source / "dirty.txt", "dirty\n")
 
     plan = build_bisync_plan(source, home, mode="plan")
     result = apply_bisync_plan(source, home, plan)
-    assert any("bisync-repo-dirty" in code for code in result.blocked_codes)
+
+    assert result.blocked_codes == ["bisync-repo-dirty"]
+    assert result.verification["code"] == "bisync-repo-dirty"
+    assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Home\n"
 
 
-def test_apply_success_repo_to_home(tmp_path: Path) -> None:
+def test_apply_repo_to_home_converges(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
-    make_skill(source / ".github" / "skills", "apply-skill", "# Apply content\n")
-    subprocess.run(
-        ["git", "add", "-A"], cwd=source, text=True, capture_output=True, check=True,
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "add apply-skill"],
-        cwd=source, text=True, capture_output=True, check=True,
-    )
+    source_skill = make_skill(source / ".github" / "skills", "apply-skill", "# Source\n")
+    home_skill = make_skill(home / ".agents" / "skills", "apply-skill", "# Home\n")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
+    commit_all(source, "add apply-skill")
 
     plan = build_bisync_plan(source, home, mode="plan")
-    assert len(plan.drifts) == 1
-    assert plan.drifts[0].drift_type == "only-repo"
-
-    write_file(home / ".agents" / "skills" / "apply-skill" / "SKILL.md", "# Old content\n")
-
-    plan2 = build_bisync_plan(source, home, mode="plan")
-    drifts_only = [d for d in plan2.drifts if d.drift_type == "drift"]
-    if not drifts_only:
-        return
-
-    result = apply_bisync_plan(source, home, plan2)
-    assert result.blocked_codes == []
-
-
-def test_apply_verification_converges(tmp_path: Path) -> None:
-    source = tmp_path / "source"
-    home = tmp_path / "home"
-    init_git_repo(source)
-    (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
-    make_skill(source / ".github" / "skills", "conv-skill", "# Converge\n")
-    make_skill(home / ".agents" / "skills", "conv-skill", "# Converge home\n")
-    subprocess.run(
-        ["git", "add", "-A"], cwd=source, text=True, capture_output=True, check=True,
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "add conv-skill"],
-        cwd=source, text=True, capture_output=True, check=True,
-    )
-
-    plan = build_bisync_plan(source, home, mode="plan")
-    drifts_only = [d for d in plan.drifts if d.drift_type == "drift"]
-    if not drifts_only:
-        return
-
     result = apply_bisync_plan(source, home, plan)
-    assert not result.blocked_codes
+
+    assert result.blocked_codes == []
+    assert result.verification["status"] == "converged"
+    assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Source\n"
+    verify_plan = build_bisync_plan(source, home, mode="plan")
+    assert verify_plan.drifts == []
 
 
-def test_plan_json_output_contains_next_action(tmp_path: Path) -> None:
+def test_apply_home_to_repo_converges(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
+    source_skill = make_skill(source / ".github" / "skills", "return-skill", "# Repo\n")
+    home_skill = make_skill(home / ".agents" / "skills", "return-skill", "# Home\n")
+    set_tree_mtime(source_skill, 100.0)
+    set_tree_mtime(home_skill, 200.0)
+    commit_all(source, "add return-skill")
 
     plan = build_bisync_plan(source, home, mode="plan")
-    payload = plan.to_dict()
-    assert "next_action" in payload
-    assert "next_step" in payload
-    assert "action" in payload["next_action"]
-    assert "allowed" in payload["next_action"]
-    assert "requires_explicit_approval" in payload["next_action"]
+    result = apply_bisync_plan(source, home, plan)
+
+    assert result.blocked_codes == []
+    assert result.verification["status"] == "converged"
+    assert (source_skill / "SKILL.md").read_text(encoding="utf-8") == "# Home\n"
+    verify_plan = build_bisync_plan(source, home, mode="plan")
+    assert verify_plan.drifts == []
 
 
-def test_plan_json_output_drifts_have_skill_key(tmp_path: Path) -> None:
+def test_apply_reports_verify_failure_with_stable_code(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    source_skill = make_skill(source / ".github" / "skills", "verify-skill", "# Source\n")
+    home_skill = make_skill(home / ".agents" / "skills", "verify-skill", "# Home\n")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
+    commit_all(source, "add verify-skill")
+
+    plan = build_bisync_plan(source, home, mode="plan")
+    original_hash_bundle = bisync_skills.hash_bundle
+
+    def fake_hash_bundle(path: Path) -> str:
+        if path == home_skill:
+            return "bad-hash"
+        return original_hash_bundle(path)
+
+    monkeypatch.setattr(bisync_skills, "hash_bundle", fake_hash_bundle)
+    result = apply_bisync_plan(source, home, plan)
+
+    assert result.blocked_codes == ["bisync-verify-failed"]
+    assert result.verification["code"] == "bisync-verify-failed"
+    assert result.verification["skill"] == "verify-skill"
+
+
+def test_apply_reports_residual_drift_with_stable_code(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    source_skill = make_skill(source / ".github" / "skills", "residual-skill", "# Source\n")
+    home_skill = make_skill(home / ".agents" / "skills", "residual-skill", "# Home\n")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
+    commit_all(source, "add residual-skill")
+
+    plan = build_bisync_plan(source, home, mode="plan")
+    original_build_bisync_plan = bisync_skills.build_bisync_plan
+
+    def fake_build_bisync_plan(
+        source_root: Path,
+        home_root: Path,
+        *,
+        mode: str = "plan",
+    ) -> BisyncPlan:
+        if mode == "verify":
+            return BisyncPlan(
+                source_root=source_root,
+                home_root=home_root,
+                source_skills_root=source_root / ".github" / "skills",
+                home_skills_root=home_root / ".agents" / "skills",
+                mode=mode,
+                drifts=[
+                    BisyncDriftEntry(
+                        skill_name="residual-skill",
+                        drift_type="drift",
+                        direction="repo-to-home",
+                        repo_path=(source_root / ".github" / "skills" / "residual-skill").as_posix(),
+                        home_path=(home_root / ".agents" / "skills" / "residual-skill").as_posix(),
+                    )
+                ],
+                blocked_codes=[],
+            )
+        return original_build_bisync_plan(source_root, home_root, mode=mode)
+
+    monkeypatch.setattr(bisync_skills, "build_bisync_plan", fake_build_bisync_plan)
+    result = apply_bisync_plan(source, home, plan)
+
+    assert "bisync-residual-drift" in result.blocked_codes
+    assert result.verification["code"] == "bisync-residual-drift"
+    assert result.next_action["allowed"] is False
+
+
+def test_plan_json_output_contains_structured_next_action(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
@@ -295,15 +385,20 @@ def test_plan_json_output_drifts_have_skill_key(tmp_path: Path) -> None:
     plan = build_bisync_plan(source, home, mode="plan")
     payload = plan.to_dict()
     json_str = json.dumps(payload, sort_keys=True)
+
     assert "json-skill" in json_str
+    assert payload["next_action"]["action"] == "resolve_blockers"
+    assert payload["next_action"]["allowed"] is False
+    assert payload["next_action"]["requires_explicit_approval"] is True
 
 
-def test_source_root_missing_skills_dir(tmp_path: Path) -> None:
+def test_source_root_missing_skills_dir_returns_blocker(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     source.mkdir()
     home.mkdir()
 
     plan = build_bisync_plan(source, home, mode="plan")
+
     assert "bisync-source-missing" in plan.blocked_codes
     assert plan.next_action["allowed"] is False
