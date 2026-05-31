@@ -42,6 +42,14 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 - When a workflow root depends on a shared module, include that module path in the workflow trigger filters for both plan and apply; otherwise module-only fixes can be valid locally but never run automatically in CI/CD.
 - Path-specific instructions can use `excludeAgent: "code-review"` or `excludeAgent: "cloud-agent"` when workflow guidance must be scoped to one GitHub Copilot surface, but treat that as a deliberate optimization rather than a default requirement.
 
+## Lane separation
+
+When a plan or instruction set contains multiple lanes (for example, a baseline lane and a release-specific lane), keep the lanes visually separated in the target file.
+
+- If a secondary lane has more than one item, give it a dedicated subsection under the relevant heading (for example, `## Release safety notes`).
+- If a secondary lane has exactly one item, prefix its bullet with a lane marker such as `[Release safety]` inside the primary section.
+- Do not mix release-specific notes into general mandatory rules without a visual or structural separator.
+
 ## Use the skill for deeper guidance
 
 - Load `.github/skills/internal-github-actions/SKILL.md` for workflow-vs-reusable-vs-composite decisions, reusable workflow templates, cache and artifact patterns, and workflow hardening checklists.

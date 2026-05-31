@@ -84,6 +84,24 @@ final completion proof.
 - Continue automatically to the next remaining executable numbered plan file until no executable numbered plan files remain.
 - Stop only for real blockers that require user input, missing prerequisites, or a materially broken plan.
 
+## Pre-edit mapping for multi-item plans
+
+When a retained plan has more than 10 items to codify across multiple target files, produce an explicit item-to-position map before the first edit.
+
+- The map must declare: item id, target file, target section, and insertion point (before/after which heading or bullet).
+- Write the map to a temporary file inside the plan folder (for example, `zz-mapping-review.md`) and keep it until final verification.
+- Do not start editing target files until the map has been produced.
+- Treat the map as a review artifact: it allows a quick desk-check without reading all target files in parallel during the edit phase.
+
+## Row-by-row editing discipline
+
+Never use `replaceAll` to modify status markers (`PENDING`, `DONE`, `NO-ACTION`, `DEFERRED`, `CHANGED`) inside a ledger or source-item table.
+
+- Source lesson texts often contain the same keywords in their descriptive prose.
+- `replaceAll` across an entire file risks marking unrelated rows or corrupting informative text.
+- Use row-specific `edit` with an `oldString` that includes at least the item id and two lines of surrounding context.
+- This applies to ledgers, evidence envelopes, and any table where a status column coexists with descriptive text.
+
 ## Relationship to execution engines
 
 - Use this skill first for the repository-local execution policy.
