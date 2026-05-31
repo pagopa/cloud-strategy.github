@@ -18,14 +18,20 @@ REPRESENTATIVE_PATHS = (
     ".github/skills/internal-demo/SKILL.md",
     ".github/agents/internal-demo.agent.md",
     ".github/skills/internal-demo/references/usage.md",
+    ".github/skills/internal-yaml/SKILL.md",
+    ".github/skills/internal-yaml/references/example.md",
+    ".github/skills/internal-yaml/scripts/helper.py",
     ".github/scripts/tool.py",
     "src/app.py",
+    "tools/check.py",
     "scripts/demo.sh",
+    "bin/check.sh",
     "infra/main.tf",
     "services/api/main.go",
     "src/index.ts",
     "package.json",
     "pom.xml",
+    "src/main/java/App.java",
     "Makefile",
     "docs/guide.md",
     "data/registry.json",
@@ -36,35 +42,45 @@ REPRESENTATIVE_PATHS = (
     "Dockerfile",
     "compose.yaml",
     "k8s/app/deployment.yaml",
+    "config/app.yaml",
+    "config/app.json",
     "src/payment_lambda.py",
 )
 
-EXPECTED_PATH_SKILLS = {
-    "internal-skill-creator",
-    "internal-agent-creator",
-    "internal-azure-devops",
-    "internal-aws-lambda",
-    "internal-bash",
-    "internal-go",
-    "internal-github-governance",
-    "internal-java",
-    "internal-json",
-    "internal-makefile",
-    "internal-markdown",
-    "internal-nodejs",
-    "internal-python",
-    "internal-yaml",
-    "internal-script-python",
-    "internal-project-python",
-    "internal-script-bash",
-    "internal-terraform",
-    "internal-project-nodejs",
-    "internal-project-java",
-    "internal-github-actions",
-    "internal-github-action-composite",
-    "internal-docker",
-    "internal-kubernetes",
+EXPECTED_SKILLS_BY_PATH = {
+    ".github/skills/internal-demo/SKILL.md": {"internal-skill-creator"},
+    ".github/agents/internal-demo.agent.md": {"internal-agent-creator"},
+    ".github/skills/internal-demo/references/usage.md": {"internal-skill-creator"},
+    ".github/skills/internal-yaml/SKILL.md": {"internal-skill-creator"},
+    ".github/skills/internal-yaml/references/example.md": {"internal-skill-creator"},
+    ".github/skills/internal-yaml/scripts/helper.py": {"internal-skill-creator"},
+    ".github/scripts/tool.py": {"internal-script-python"},
+    "src/app.py": {"internal-project-python"},
+    "tools/check.py": {"internal-python"},
+    "scripts/demo.sh": {"internal-script-bash"},
+    "bin/check.sh": {"internal-bash"},
+    "infra/main.tf": {"internal-terraform"},
+    "services/api/main.go": {"internal-go"},
+    "src/index.ts": {"internal-project-nodejs"},
+    "package.json": {"internal-nodejs"},
+    "pom.xml": {"internal-java"},
+    "src/main/java/App.java": {"internal-project-java"},
+    "Makefile": {"internal-makefile"},
+    "docs/guide.md": {"internal-markdown"},
+    "data/registry.json": {"internal-json"},
+    "azure-pipelines.yml": {"internal-azure-devops"},
+    ".github/CODEOWNERS": {"internal-github-governance"},
+    ".github/workflows/ci.yml": {"internal-github-actions"},
+    ".github/actions/test/action.yml": {"internal-github-action-composite"},
+    "Dockerfile": {"internal-docker"},
+    "compose.yaml": {"internal-docker"},
+    "k8s/app/deployment.yaml": {"internal-kubernetes"},
+    "config/app.yaml": {"internal-yaml"},
+    "config/app.json": {"internal-json"},
+    "src/payment_lambda.py": {"internal-aws-lambda"},
 }
+
+EXPECTED_PATH_SKILLS = {skill for skills in EXPECTED_SKILLS_BY_PATH.values() for skill in skills}
 
 ALLOWLISTED_EXTERNAL_SKILLS: set[str] = set()
 
@@ -146,6 +162,81 @@ def test_suggest_support_skills_only_emits_live_skill_ids() -> None:
     )
 
     assert missing == []
+
+
+def test_suggest_support_skills_prefers_single_narrowest_owner_per_path() -> None:
+    module = load_script_module()
+
+    for path_text, expected_skills in EXPECTED_SKILLS_BY_PATH.items():
+        suggestions: dict[str, set[str]] = {}
+
+        module.suggest_for_path(path_text, suggestions)
+
+        assert set(suggestions) == expected_skills
+
+
+def test_suggest_support_skills_keeps_simple_yaml_edit_on_yaml_owner_only() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path("config/app.yaml", suggestions)
+
+    assert set(suggestions) == {"internal-yaml"}
+
+
+def test_suggest_support_skills_keeps_generic_json_edit_on_json_owner_only() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path("config/app.json", suggestions)
+
+    assert set(suggestions) == {"internal-json"}
+
+
+def test_suggest_support_skills_keeps_generic_python_and_bash_on_base_owner_only() -> None:
+    module = load_script_module()
+
+    python_suggestions: dict[str, set[str]] = {}
+    bash_suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path("tools/check.py", python_suggestions)
+    module.suggest_for_path("bin/check.sh", bash_suggestions)
+
+    assert set(python_suggestions) == {"internal-python"}
+    assert set(bash_suggestions) == {"internal-bash"}
+
+
+def test_suggest_support_skills_routes_bundle_siblings_to_skill_creator() -> None:
+    module = load_script_module()
+
+    for path_text in (
+        ".github/skills/internal-yaml/SKILL.md",
+        ".github/skills/internal-yaml/references/example.md",
+        ".github/skills/internal-yaml/scripts/helper.py",
+    ):
+        suggestions: dict[str, set[str]] = {}
+
+        module.suggest_for_path(path_text, suggestions)
+
+        assert set(suggestions) == {"internal-skill-creator"}
+
+
+def test_suggest_support_skills_keeps_generic_markdown_on_markdown_owner_only() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path("docs/guide.md", suggestions)
+
+    assert set(suggestions) == {"internal-markdown"}
+
+
+def test_suggest_support_skills_routes_internal_agent_paths_to_agent_creator() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path(".github/agents/internal-demo.agent.md", suggestions)
+
+    assert set(suggestions) == {"internal-agent-creator"}
 
 
 def test_suggest_support_skills_claim_gate_owners_match_core_contract() -> None:

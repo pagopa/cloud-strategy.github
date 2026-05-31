@@ -7,6 +7,10 @@ description: Use when creating or modifying a reusable GitHub composite action u
 
 ## Referenced skills
 
+Treat the referenced skills below as on-demand supports. Do not preload them
+for every composite action edit; load only the owner proved by the reusable
+unit, extracted script depth, or broader workflow question.
+
 - `internal-github-actions`: GitHub Actions workflow umbrella and reuse-pattern selection.
 - `internal-script-bash`: extracted shell scripts inside composite actions.
 

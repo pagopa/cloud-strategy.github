@@ -7,6 +7,10 @@ description: Use when editing shell or Bash files that need lightweight safety, 
 
 ## Referenced skills
 
+Treat the referenced skill below as an on-demand owner. Do not preload it just
+because the file is Bash; load it only when the task shifts from embedded shell
+safety to standalone script behavior.
+
 - `internal-script-bash`: standalone Bash scripts, shell utilities, wrappers, launchers, and operator-facing behavior.
 
 ## When to use

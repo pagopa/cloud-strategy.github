@@ -9,7 +9,9 @@ description: Use when creating or modifying Node.js or TypeScript project code s
 
 - `internal-nodejs`: shared JavaScript, Node.js, TypeScript, package metadata, and test-stack baseline.
 
-Load `internal-nodejs` for the shared Node.js and TypeScript baseline. This skill adds project-specific guidance only.
+Load `internal-nodejs` only for the shared Node.js and TypeScript baseline
+concerns that the current project task actually needs. This skill adds
+project-specific guidance only.
 
 ## When to use
 

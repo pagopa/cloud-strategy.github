@@ -7,11 +7,15 @@ description: Use when editing YAML or YML files that need formatting, schema awa
 
 ## Referenced skills
 
-- `internal-github-actions`: GitHub Actions workflows.
-- `internal-github-action-composite`: GitHub composite action metadata.
-- `internal-kubernetes`: Kubernetes manifests and deployment routing.
-- `internal-terraform`: Terraform-adjacent generated or configuration checks when HCL ownership dominates.
-- `internal-azure-devops`: Azure DevOps pipeline YAML.
+Treat the referenced skills below as on-demand owners. Do not preload them for
+every YAML edit; load them only when path, platform semantics, runtime, or
+validation need proves a narrower schema-aware owner.
+
+- `internal-github-actions`: GitHub Actions workflows when `.github/workflows/` or workflow behavior is the target.
+- `internal-github-action-composite`: GitHub composite action metadata when `action.yml` or `action.yaml` is the target.
+- `internal-kubernetes`: Kubernetes manifests and deployment routing when workload, service, rollout, or cluster semantics are the real problem.
+- `internal-terraform`: Terraform-adjacent generated or configuration checks when HCL ownership dominates and YAML is incidental.
+- `internal-azure-devops`: Azure DevOps pipeline YAML when pipeline behavior is the target.
 
 ## When to use
 

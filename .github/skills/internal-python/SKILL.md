@@ -7,8 +7,11 @@ description: Use when editing Python files that need lightweight runtime, typing
 
 ## Referenced skills
 
-- `internal-script-python`: standalone Python scripts, CLIs, and operator-facing toolkits.
-- `internal-project-python`: Python packages, application code, service boundaries, and framework-owned flows.
+Treat the referenced skills below as on-demand owners. Do not preload them for
+every Python edit; load them only when the task proves script or project depth.
+
+- `internal-script-python`: standalone Python scripts, CLIs, and operator-facing toolkits when dependency bootstrap, launcher behavior, or direct execution becomes the main concern.
+- `internal-project-python`: Python packages, application code, service boundaries, and framework-owned flows when importable behavior or service structure becomes the main concern.
 
 ## When to use
 

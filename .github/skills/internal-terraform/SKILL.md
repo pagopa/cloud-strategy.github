@@ -7,8 +7,12 @@ description: Use when adding, refactoring, or reviewing Terraform or OpenTofu co
 
 ## Referenced skills
 
-- `terraform-terraform-search-import`: unmanaged-resource discovery and Terraform import workflows.
-- `terraform-terraform-test`: `.tftest.hcl` coverage, mocks, and Terraform test execution.
+Treat the referenced skills below as on-demand complements. Do not preload them
+for ordinary Terraform authoring; load them only when import workflows or
+Terraform-native test behavior becomes part of the task.
+
+- `terraform-terraform-search-import`: unmanaged-resource discovery and Terraform import workflows when existing resources must enter Terraform state.
+- `terraform-terraform-test`: `.tftest.hcl` coverage, mocks, and Terraform test execution when Terraform-native testing is part of the job.
 
 ## When to use
 

@@ -7,6 +7,10 @@ description: Use when authoring, reviewing, or routing Azure DevOps pipelines or
 
 ## Referenced skills
 
+Treat the referenced skills below as on-demand supports. Do not preload them
+for every pipeline task; load only the owner proved by YAML structure, CLI
+operations, or the active Azure DevOps surface.
+
 - `internal-yaml`: baseline YAML structure when editing Azure DevOps pipeline YAML.
 - `awesome-copilot-azure-devops-cli`: Azure DevOps CLI operations, projects, repos, pipelines, builds, pull requests, work items, artifacts, and service endpoints.
 

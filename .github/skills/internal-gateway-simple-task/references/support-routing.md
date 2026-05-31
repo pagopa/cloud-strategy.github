@@ -7,6 +7,12 @@ still noisy. Keep support conditional and minimal.
 
 Load support for the first real blocker, file type, runtime, domain signal, or
 validation path. Do not load a support bundle because it might become useful.
+Treat a support skill's `## Referenced skills` section as an owner index, not a
+reason to preload its neighbors. Follow those references only when current
+evidence proves the narrower owner.
+When a path helper is used, prefer the single narrowest owner proved by that
+path. Do not emit a base-plus-depth stack or a referenced-skill chain for a
+simple edit unless the path itself proves both owners are independently needed.
 
 ## Evidence Order
 

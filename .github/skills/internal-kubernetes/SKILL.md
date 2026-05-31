@@ -7,9 +7,13 @@ description: Use when the task involves Kubernetes but the winning lane is not o
 
 ## Referenced skills
 
-- `internal-yaml`: YAML formatting and schema-awareness baseline for manifest syntax concerns.
-- `internal-kubernetes-deployment`: workload manifests, service exposure, probes, autoscaling, rollout strategy, and production hardening.
-- `antigravity-kubernetes-architect`: Kubernetes platform architecture, GitOps operating model, service mesh, and multi-cluster strategy.
+Treat the referenced skills below as on-demand owners. Do not preload the whole
+Kubernetes family; load them only when the request proves whether syntax,
+workload delivery, or platform architecture is the real problem.
+
+- `internal-yaml`: YAML formatting and schema-awareness baseline when manifest syntax itself is the blocker.
+- `internal-kubernetes-deployment`: workload manifests, service exposure, probes, autoscaling, rollout strategy, and production hardening when delivery semantics are the task.
+- `antigravity-kubernetes-architect`: Kubernetes platform architecture, GitOps operating model, service mesh, and multi-cluster strategy when platform shape is the task.
 
 Use this skill to choose the right Kubernetes lane before drafting guidance or editing delivery assets.
 

@@ -9,7 +9,9 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 
 - `internal-python`: shared Python runtime, typing, dependency, testing, and readability baseline.
 
-Load `internal-python` for the shared Python baseline. This skill adds standalone-script guidance only.
+Load `internal-python` only for the shared Python baseline concerns that the
+current script task actually needs. This skill adds standalone-script guidance
+only.
 
 ## When to use
 

@@ -8,6 +8,9 @@ description: Use when a repository-owned request has pre-action uncertainty abou
 ## Referenced skills
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+Treat the referenced skills below as on-demand supports. Do not preload them
+just because the request is still undecided; load only the owner proved by the
+active uncertainty or next visible checkpoint.
 
 - `grill-me`: mandatory proportional interview pattern for unresolved Gate 0 decisions.
 - `idea-refine`: optional option-exploration support when several credible directions remain after the minimum evidence pass.

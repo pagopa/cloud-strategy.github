@@ -8,6 +8,9 @@ description: Use when creating, updating, validating, or merging GitHub pull req
 ## Referenced skills
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+Treat the referenced skills below as on-demand supports. Do not preload them
+for every PR task; load only the owner proved by the touched surface, review
+need, workflow change, or lifecycle claim.
 
 - `internal-code-review`: defect-first review after PR body or lifecycle work.
 - `internal-github-actions`: workflow/action pinning and Actions security rules for PRs that touch workflows.

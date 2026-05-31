@@ -9,7 +9,9 @@ description: Use when creating or modifying standalone Bash scripts or shell uti
 
 - `internal-bash`: shared shell safety, quoting, parser, and validation baseline.
 
-Load `internal-bash` for the shared Bash baseline. This skill adds script-specific hardening guidance only.
+Load `internal-bash` only for the shared Bash baseline concerns that the
+current script task actually needs. This skill adds script-specific hardening
+guidance only.
 
 ## When to use
 

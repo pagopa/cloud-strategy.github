@@ -7,6 +7,10 @@ description: Use when authoring or revising GitHub Actions workflows, reusable w
 
 ## Referenced skills
 
+Treat the referenced skills below as on-demand supports. Do not preload them
+for every workflow edit; load only the owner proved by the workflow surface,
+reuse decision, delivery question, or infrastructure coupling.
+
 - `internal-devops-core-principles`: delivery-system strategy, release safety, operational readiness, and incident learning.
 - `internal-github-action-composite`: composite-action authoring and step-level reuse.
 - `internal-terraform`: Terraform resources deployed by CI/CD.

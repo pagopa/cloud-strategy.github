@@ -8,6 +8,9 @@ description: Use when a task needs systems-level evidence about architecture, wo
 ## Referenced skills
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+Treat the referenced skills below as on-demand supports. Do not preload them
+for every review; load only the owner proved by the active lens, review scope,
+or final claim.
 
 - `internal-code-review`: line-level defect review owner.
 - `internal-gateway-critical-master`: pressure-test owner when the main need is challenge rather than review evidence.

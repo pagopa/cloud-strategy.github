@@ -10,7 +10,9 @@ description: Use when creating or modifying Java project code and the main conce
 - `internal-java`: shared Java readability, build metadata, and JUnit baseline.
 - `internal-spring-boot-development`: Spring Boot framework-specific depth when the project uses Spring.
 
-Load `internal-java` for the shared Java baseline. This skill adds project-specific guidance only.
+Load `internal-java` only for the shared Java baseline concerns that the
+current project task actually needs. This skill adds project-specific guidance
+only.
 
 ## When to use
 

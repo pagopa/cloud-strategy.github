@@ -862,6 +862,45 @@ def test_detect_token_risks_reports_root_always_on_budget(tmp_path: Path) -> Non
     assert "root-always-on-budget" in finding_codes
 
 
+def test_detect_token_risks_reports_delegated_review_prompt_budget(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/prompts/internal-review-ai-resources.prompt.md",
+        "---\nname: internal-review-ai-resources\n---\n\n"
+        + ("Reusable review workflow detail stays inline.\n" * 500),
+    )
+
+    findings = detect_token_risks(tmp_path)
+    matching = [
+        finding for finding in findings if finding.code == "delegated-review-prompt-budget"
+    ]
+
+    assert len(matching) == 1
+    assert matching[0].path == ".github/prompts/internal-review-ai-resources.prompt.md"
+
+
+def test_detect_token_risks_ignores_other_large_prompts_for_delegated_review_budget(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/prompts/internal-mega-review.prompt.md",
+        "---\nname: internal-mega-review\n---\n\n"
+        + ("Intentionally broad prompt detail.\n" * 1000),
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "delegated-review-prompt-budget" not in finding_codes
+
+
 def test_detect_token_risks_reports_agents_operational_procedure_markers(
     tmp_path: Path,
 ) -> None:

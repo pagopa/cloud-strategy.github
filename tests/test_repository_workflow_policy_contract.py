@@ -9,6 +9,11 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
+def section_between(body: str, heading: str) -> str:
+    section = body.split(heading, 1)[1]
+    return section.split("\n## ", 1)[0]
+
+
 def test_github_pr_skill_owns_pr_merge_and_terminal_state_guardrails() -> None:
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
@@ -65,6 +70,57 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
         in copilot_text
     )
     assert "Load task-specific skills or references only when workflow depth" in copilot_text
+
+
+def test_lightweight_skill_references_stay_on_demand() -> None:
+    checklist_text = read_text(
+        ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
+    )
+    support_routing_text = read_text(
+        ".github/skills/internal-gateway-simple-task/references/support-routing.md"
+    )
+
+    assert "`## Referenced skills` as an audit index, not a preload bundle" in checklist_text
+    assert "Add file extensions or path tokens in `description:` only when they materially disambiguate the owner" in checklist_text
+    assert "Treat a support skill's `## Referenced skills` section as an owner index" in support_routing_text
+    assert "prefer the single narrowest owner proved by that" in support_routing_text
+
+    lightweight_skill_paths = (
+        ".github/skills/internal-bash/SKILL.md",
+        ".github/skills/internal-go/SKILL.md",
+        ".github/skills/internal-java/SKILL.md",
+        ".github/skills/internal-nodejs/SKILL.md",
+        ".github/skills/internal-python/SKILL.md",
+        ".github/skills/internal-yaml/SKILL.md",
+        ".github/skills/internal-kubernetes/SKILL.md",
+        ".github/skills/internal-terraform/SKILL.md",
+    )
+
+    for relative_path in lightweight_skill_paths:
+        referenced_section = section_between(read_text(relative_path), "## Referenced skills")
+
+        assert "on-demand" in referenced_section
+        assert "Do not preload" in referenced_section
+        assert "only when" in referenced_section
+
+
+def test_lightweight_workflow_and_review_skills_keep_references_on_demand() -> None:
+    skill_paths = (
+        ".github/skills/internal-idea-define-advisor/SKILL.md",
+        ".github/skills/internal-debugging/SKILL.md",
+        ".github/skills/internal-high-level-review/SKILL.md",
+        ".github/skills/internal-github-pr/SKILL.md",
+        ".github/skills/internal-github-actions/SKILL.md",
+        ".github/skills/internal-github-action-composite/SKILL.md",
+        ".github/skills/internal-azure-devops/SKILL.md",
+    )
+
+    for relative_path in skill_paths:
+        referenced_section = section_between(read_text(relative_path), "## Referenced skills")
+
+        assert "on-demand" in referenced_section
+        assert "Do not preload" in referenced_section
+        assert "only the owner proved" in referenced_section
 
 
 def test_terraform_lock_matrix_policy_stays_visible() -> None:

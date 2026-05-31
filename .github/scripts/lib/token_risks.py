@@ -21,6 +21,8 @@ ROOT_POLICY_MARKERS = ("AGENTS.md", ".github/copilot-instructions.md", ".github/
 INVENTORY_LINE_PATTERN = re.compile(r"^- `?\.github/[^`]+`?(?::|\s*$)")
 IMPORTED_SKILL_DESCRIPTION_LIMIT = 500
 ESTIMATED_TOKEN_BYTES = 4
+DELEGATED_REVIEW_PROMPT_PATH = ".github/prompts/internal-review-ai-resources.prompt.md"
+DELEGATED_REVIEW_PROMPT_TOKEN_TARGET = 1100
 ROOT_ALWAYS_ON_PATHS = ("AGENTS.md", ".github/copilot-instructions.md")
 ROOT_ALWAYS_ON_TOKEN_TARGET = 4000
 COPILOT_CODE_REVIEW_CHAR_LIMIT = 4000
@@ -50,6 +52,7 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_bridge_overlap(root))
     findings.extend(check_agents_operational_procedure_markers(root))
     findings.extend(check_root_always_on_budget(root))
+    findings.extend(check_delegated_review_prompt_budget(root))
     findings.extend(check_copilot_review_window(root))
     findings.extend(check_inventory_dumps(root))
     findings.extend(check_duplicate_markdown_bodies(root))
@@ -86,6 +89,32 @@ def check_root_always_on_budget(root: Path) -> list[Finding]:
             suggestion=(
                 "Classify each global section as required always-on, Copilot-native projection, "
                 "skill, context, inventory, or removal before trimming."
+            ),
+        )
+    ]
+
+
+def check_delegated_review_prompt_budget(root: Path) -> list[Finding]:
+    path = root / DELEGATED_REVIEW_PROMPT_PATH
+    if not path.exists():
+        return []
+
+    estimated_tokens = estimate_tokens(path)
+    if estimated_tokens <= DELEGATED_REVIEW_PROMPT_TOKEN_TARGET:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="delegated-review-prompt-budget",
+            path=DELEGATED_REVIEW_PROMPT_PATH,
+            message=(
+                "The delegated AI resource review prompt exceeds its soft token target "
+                f"({estimated_tokens} estimated tokens, target {DELEGATED_REVIEW_PROMPT_TOKEN_TARGET})."
+            ),
+            suggestion=(
+                "Keep user inputs and the analysis-only boundary in the prompt, but move reusable workflow "
+                "detail into .github/skills/internal-ai-resource-review/."
             ),
         )
     ]

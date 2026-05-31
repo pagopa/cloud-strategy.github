@@ -7,6 +7,10 @@ description: Use when creating, editing, or reviewing Go files, modules, or depe
 
 ## Referenced skills
 
+Treat the referenced skill below as an on-demand owner. Do not preload it for
+routine Go edits; load it only when architecture, concurrency, profiling, CLI
+shape, or production readiness becomes the real problem.
+
 - `antigravity-golang-pro`: advanced Go architecture, concurrency, profiling, CLIs, services, and production readiness.
 
 ## When to use

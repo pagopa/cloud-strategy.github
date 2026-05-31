@@ -284,12 +284,17 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
             "For skill bundle targets, check existing bundle siblings before calling the target healthy or low risk.",
         ),
     )
-    assert_contains_all(
-        ".github/prompts/internal-review-ai-resources.prompt.md",
+    assert_contains_all_normalized(
+        ".github/skills/internal-ai-resource-review/references/review-profiles.md",
         (
-            "resolve the owning skill bundle and keep its bundle siblings",
-            "For skill bundles, treat existing bundle siblings as default in-scope",
-            "For skill bundles, confirm each existing bundle sibling was reviewed",
+            "defaults to `bundle`. Include existing `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.",
+            "Read every existing sibling under `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`, or mark intentional non-action.",
+        ),
+    )
+    assert_contains_all_normalized(
+        ".github/skills/internal-ai-resource-review/references/report-contract.md",
+        (
+            "Bundle reviews confirm each existing bundle sibling was reviewed or marked intentional non-action.",
         ),
     )
     assert_contains_all(
@@ -302,6 +307,40 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
     assert not Path(
         ".github/prompts/internal-agent-review-next-actions.prompt.md"
     ).exists()
+
+
+def test_internal_ai_resource_review_skill_owns_multi_profile_review_contract() -> None:
+    assert_contains_all_normalized(
+        ".github/skills/internal-ai-resource-review/SKILL.md",
+        (
+            "`focused`",
+            "`bundle`",
+            "`catalog`",
+            "`retained-report`",
+            "`internal-copilot-audit`",
+            "Keep `internal-copilot-audit` as the drift lens",
+        ),
+    )
+    assert_contains_all(
+        ".github/skills/internal-ai-resource-review/references/review-checklist.md",
+        (
+            "Compatibility with paired wrappers",
+            "Propagation requirements across inventory",
+            "Periodic review posture",
+            "Retirement readiness",
+            "Load `internal-copilot-audit` instead of cloning its checklist",
+        ),
+    )
+
+
+def test_internal_review_prompt_delegates_to_skill_and_stays_thin() -> None:
+    prompt_text = read_text(".github/prompts/internal-review-ai-resources.prompt.md")
+
+    assert "internal-ai-resource-review" in prompt_text
+    assert "analysis-only" in prompt_text
+    assert "## Required Output Structure" not in prompt_text
+    assert "## Evidence Standard" not in prompt_text
+    assert "## Review Questions" not in prompt_text
 
 
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:

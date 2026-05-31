@@ -7,7 +7,11 @@ description: Use when creating, editing, or reviewing JavaScript, Node.js, TypeS
 
 ## Referenced skills
 
-- `internal-project-nodejs`: Node.js or TypeScript services, APIs, middleware, modules, and deterministic tests.
+Treat the referenced skill below as an on-demand owner. Do not preload it for
+every Node.js or TypeScript edit; load it only when application structure,
+package architecture, or deterministic test design becomes the real issue.
+
+- `internal-project-nodejs`: Node.js or TypeScript services, APIs, middleware, modules, and deterministic tests when project-level architecture becomes the main concern.
 
 ## When to use
 

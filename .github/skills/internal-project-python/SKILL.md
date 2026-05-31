@@ -9,7 +9,9 @@ description: Use when creating or modifying Python package or application code w
 
 - `internal-python`: shared Python runtime, typing, dependency, testing, and readability baseline.
 
-Load `internal-python` for the shared Python baseline. This skill adds application-specific guidance only.
+Load `internal-python` only for the shared Python baseline concerns that the
+current project task actually needs. This skill adds application-specific
+guidance only.
 
 ## When to use
 
