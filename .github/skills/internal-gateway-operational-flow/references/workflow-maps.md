@@ -284,8 +284,8 @@ Review treats missing validation as a finding, not a footnote.
 | apply-plan entrypoint          |
 | - load internal-executing-plans|
 | - ignore questions.md         |
-| - Gate 0 does not restart for  |
-|   an approved retained plan    |
+| - run visible define pre-start |
+|   Gate 0 before execution      |
 +-------------------------------+
               |
               v

@@ -33,8 +33,9 @@ portable workflow semantics in the core skill.
   `review`, or explicit `define`, `plan`, `execute`, and `review` phase requests.
 - Gate 0 semantics live in the core skill and `references/gate-0-protocol.md`;
   this wrapper owns only route selection, not gate procedure.
-- Direct `execute` is the automatic Gate 0 exception. Approved `apply-plan` is
-  an operational entrypoint that does not restart Gate 0.
+- Direct `execute` is the only automatic Gate 0 exception. Approved
+  `apply-plan` still runs the visible pre-start gate before retained-plan
+  execution.
 - Keep planning in `define` until the user closes Gate 0 and the
   Pre-Plan Critical Pass returns `confident`. Do not produce plan output while
   Gate 0 is still required.

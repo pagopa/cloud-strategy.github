@@ -140,3 +140,12 @@ def test_suggest_support_skills_claim_gate_owners_match_core_contract() -> None:
 
     assert "single source of truth for claim-gate" in skill_text
     assert symptom_claim_gate_owners == reference_claim_gate_owners
+
+
+def test_suggest_support_skills_normalizes_absolute_repo_owned_paths() -> None:
+    module = load_script_module()
+    suggestions: dict[str, set[str]] = {}
+
+    module.suggest_for_path(str(SKILL_PATH.resolve()), suggestions)
+
+    assert "internal-skill-creator" in suggestions

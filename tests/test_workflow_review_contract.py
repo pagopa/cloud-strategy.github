@@ -246,6 +246,8 @@ def test_governance_sensitive_plans_default_to_clarify_first() -> None:
             "## Phase State Machine",
             "Definition Brief",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
+            "Direct `execute` is the only automatic Gate 0 exception",
+            "`apply-plan` and `review` use a visible define pre-start gate",
         ),
     )
     assert not Path(

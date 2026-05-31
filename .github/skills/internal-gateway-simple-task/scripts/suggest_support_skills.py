@@ -58,8 +58,22 @@ def add(suggestions: dict[str, set[str]], skill: str, reason: str) -> None:
     suggestions.setdefault(skill, set()).add(reason)
 
 
+def normalize_path_text(path_text: str) -> str:
+    path = Path(path_text).expanduser()
+
+    if path.is_absolute():
+        repo_root = Path.cwd().resolve()
+
+        try:
+            return path.resolve().relative_to(repo_root).as_posix()
+        except ValueError:
+            return path.as_posix()
+
+    return path.as_posix()
+
+
 def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
-    normalized = Path(path_text).as_posix()
+    normalized = normalize_path_text(path_text)
     lowered = normalized.lower()
     name = Path(normalized).name.lower()
     suffix = Path(lowered).suffix

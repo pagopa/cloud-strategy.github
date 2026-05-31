@@ -260,7 +260,8 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
         "closing Gate 0 does not change the active phase",
     )
     assert "wait for" in skill_text and "explicit" in skill_text and "planning request" in skill_text
-    assert "Direct `execute` and `apply-plan` are the only automatic" in skill_text
+    assert "Direct `execute` is the only automatic Gate 0 exception" in skill_text
+    assert "visible define pre-start gate before retained-plan execution" in skill_text
     assert "Gate 0" in wrapper_text
     assert "Gate 0 support for every non-`execute`" in wrapper_alignment_text
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
@@ -631,6 +632,9 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     operational_text = Path(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
+    metadata_text = Path(
+        ".github/skills/internal-gateway-operational-flow/agents/openai.yaml"
+    ).read_text(encoding="utf-8")
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
@@ -643,7 +647,8 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "Gate 0" in operational_text
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
-    assert "Direct `execute` and `apply-plan` are the only automatic exceptions" in operational_text
+    assert "Direct `execute` is the only automatic Gate 0 exception" in operational_text
+    assert "approved `apply-plan` still starts with the visible pre-start gate" in metadata_text.lower()
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
     assert "non-trivial" in operational_text and "retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text
