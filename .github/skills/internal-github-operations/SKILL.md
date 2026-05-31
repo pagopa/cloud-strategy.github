@@ -39,6 +39,7 @@ This skill owns the operational side of the platform: workflow health, runner ev
 - Prefer preflight and staged validation before wide rollout when permissions, runners, or release automation could break.
 - Keep audit, evidence, and reporting tied to the decision that needs confirmation.
 - Name what is confirmed, what is inferred, and what still needs a real test.
+- When querying GitHub security alert endpoints with `gh api`, force `--method GET` or encode filters directly in the query string; adding form fields such as `-f state=open` without an explicit GET can produce misleading `404` responses even when the endpoint is available.
 
 Load `references/validation-and-evidence.md` when the user needs a deeper checklist for preflight, rollout validation, runner evidence, or audit proof.
 

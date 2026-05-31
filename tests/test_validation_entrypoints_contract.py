@@ -38,6 +38,17 @@ def test_makefile_exposes_explicit_catalog_fast_check_entrypoint() -> None:
     assert "CATALOG_FAST_INCLUDE_TOKEN_RISKS=1" in makefile_text
 
 
+def test_makefile_exposes_explicit_graphify_update_entrypoint() -> None:
+    makefile_text = read_text("Makefile")
+
+    assert (
+        ".PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update"
+        in makefile_text
+    )
+    assert "graphify-update:" in makefile_text
+    assert "$(SCRIPTS_RUNNER) graphify_update --root ." in makefile_text
+
+
 def test_docs_lint_target_does_not_require_npm_network_outside_ci() -> None:
     makefile_text = read_text("Makefile")
 
@@ -62,3 +73,16 @@ def test_github_catalog_validation_workflow_uses_canonical_wrapper_entrypoints()
         in workflow_text
     )
     assert "python ./.github/scripts/github_catalog_validation.py" not in workflow_text
+
+
+def test_graphify_wrapper_documents_the_graphify_shortcut() -> None:
+    root_wrapper = read_text("github_catalog_validation.sh")
+    scripts_wrapper = read_text(".github/scripts/github_catalog_validation.sh")
+    runner_text = read_text(".github/scripts/run.sh")
+
+    assert "bash ./github_catalog_validation.sh --graphify" in root_wrapper
+    assert (
+        "bash ./.github/scripts/github_catalog_validation.sh --graphify"
+        in scripts_wrapper
+    )
+    assert "graphify_update" in runner_text

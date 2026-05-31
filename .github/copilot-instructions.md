@@ -55,6 +55,14 @@ Protect correctness, security, simplicity, and maintainability.
 - Treat retained plans and `LESSONS_LEARNED.md` as non-canonical until codified in the smallest valid owner.
 - Use dedicated retained-plan skills and scoped lessons instructions for file shape, execution workflow, and ledger row rules.
 
+## Repo-specific operational checkpoints
+
+The following checkpoints apply to work in this repository specifically; they reference local tooling and thresholds that may differ in consumer repositories.
+
+- After inserting more than 5 items into always-on guidance files or major AI assets, run `make token-risks` or `python3 ./.github/scripts/detect_token_risks.py --root .` before creating `done-*` markers.
+- Address actionable findings before declaring a slice or plan file complete.
+- Consumer repositories are not required to run the same command; they should use their own token-risk detector if one exists.
+
 ## Validation And Reporting
 
 - Run the validator that exists; use the closest check when no dedicated validator exists.

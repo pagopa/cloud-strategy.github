@@ -5,16 +5,23 @@ from pathlib import Path
 
 import yaml
 
-SKILL_ROOT_RELATIVE = Path(".github/skills/local-agent-sync-home-ai-resources")
+SKILL_ROOT_RELATIVE = Path(".github/skills/local-agent-sync-install-ai-resources")
 BUNDLED_SKILL_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_SUPPORT_MATRIX_PATH = Path("references/runtime-support-matrix.yaml")
 HOME_SYNC_CATALOG_PATH = Path("references/home-sync-catalog.yaml")
 STATE_ROOT_RELATIVE = Path(".sync/cloud-strategy-governance/home-ai-resources")
-TARGET_ORDER = ("codex", "vscode", "antigravity")
+TARGET_ORDER = ("codex", "copilot", "claude", "opencode")
 TARGET_SKILL_ROOTS = {
-    "codex": Path(".codex/skills"),
-    "vscode": Path(".copilot/skills"),
-    "antigravity": Path(".gemini/antigravity/skills"),
+    "codex": Path(".agents/skills"),
+    "copilot": Path(".agents/skills"),
+    "claude": Path(".agents/skills"),
+    "opencode": Path(".agents/skills"),
+}
+TARGET_AGENT_ROOTS = {
+    "codex": Path(".codex/agents"),
+    "copilot": Path(".copilot/agents"),
+    "claude": Path(".claude/agents"),
+    "opencode": Path(".config/opencode/agents"),
 }
 
 
@@ -65,6 +72,14 @@ def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
     catalog_path = resolve_skill_reference(source_root, HOME_SYNC_CATALOG_PATH)
     payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8")) or {}
     resources = payload.get("resources", [])
+    defaults = payload.get("defaults", {})
+    include_local = bool(defaults.get("include_local_skills", False))
+    filtered = []
+    for resource in resources:
+        rid = resource.get("resource_id", "")
+        if not include_local and rid.startswith("local-"):
+            continue
+        filtered.append(resource)
     return [
         CatalogResource(
             resource_id=resource["resource_id"],
@@ -74,7 +89,7 @@ def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
             target_support=resource.get("target_support", "Unknown / To verify"),
             notes=resource.get("notes", ""),
         )
-        for resource in resources
+        for resource in filtered
     ]
 
 
@@ -96,6 +111,15 @@ def state_root_for_home(home_root: Path) -> Path:
 
 def runtime_skill_root(home_root: Path, target: str) -> Path:
     return home_root / TARGET_SKILL_ROOTS[target]
+
+
+def runtime_agent_root(home_root: Path, target: str) -> Path:
+    return home_root / TARGET_AGENT_ROOTS[target]
+
+
+def load_agent_catalog(source_root: Path) -> list[CatalogResource]:
+    catalog = load_home_sync_catalog(source_root)
+    return [resource for resource in catalog if resource.source_family == "agents"]
 
 
 def resolve_support_row(

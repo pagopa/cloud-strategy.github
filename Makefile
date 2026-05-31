@@ -9,12 +9,12 @@ SCRIPTS_VENV := .github/scripts/.venv
 CATALOG_FAST_TESTS := tests/test_inventory_and_consistency.py tests/test_validation_entrypoints_contract.py tests/test_retained_plan_artifact_contract.py tests/github/scripts/test_cli_entrypoints.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
-MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**"
+MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update graphify-check test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
+	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation graphify-update test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -45,6 +45,12 @@ catalog-fast-check: scripts-bootstrap
 
 github-catalog-validation: python-version-check
 	@bash ./github_catalog_validation.sh
+
+graphify-update:
+	@$(SCRIPTS_RUNNER) graphify_update --root .
+
+graphify-check:
+	@$(SCRIPTS_RUNNER) graphify_update --root . --check
 
 test: scripts-bootstrap
 	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q
@@ -78,5 +84,12 @@ docs-lint:
 	else \
 		printf '%s\n' 'npx not installed; skipping markdown lint.'; \
 	fi
+
+PLAN_FOLDER ?=
+PLAN_STAGE ?= handoff
+
+retained-plan-check: scripts-bootstrap
+	@if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required (e.g. make retained-plan-check PLAN_FOLDER=tmp/superpowers/my-plan)' >&2; exit 1; fi
+	@$(SCRIPTS_RUNNER) validate_retained_plans --plan-folder "$(PLAN_FOLDER)" --stage "$(PLAN_STAGE)"
 
 all: lint test catalog-check

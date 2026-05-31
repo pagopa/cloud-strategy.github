@@ -2,7 +2,7 @@
 """Purpose: repo-local wrapper for the bundled home AI resource sync skill script.
 
 Usage examples:
-  python3 ./.github/scripts/sync_home_ai_resources.py plan --targets codex,vscode
+  python3 ./.github/scripts/sync_home_ai_resources.py plan --targets codex,copilot,claude,opencode
   python3 ./.github/scripts/sync_home_ai_resources.py apply --targets codex --create-missing-dirs
 """
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 SKILL_SCRIPT_DIR = (
     Path(__file__).resolve().parents[1]
-    / "skills/local-agent-sync-home-ai-resources/scripts"
+    / "skills/local-agent-sync-install-ai-resources/scripts"
 )
 SKILL_CLI_PATH = SKILL_SCRIPT_DIR / "sync_home_ai_resources.py"
 

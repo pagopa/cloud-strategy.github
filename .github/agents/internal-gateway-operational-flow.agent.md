@@ -31,32 +31,17 @@ portable workflow semantics in the core skill.
 
 - Use this agent for `define-first`, `full-cycle`, `plan-only`, `apply-plan`,
   `review`, or explicit `define`, `plan`, `execute`, and `review` phase requests.
-- Declare `Gate 0` inside `define` after the minimum context assembly for every
-  non-`execute` operational-flow entrypoint; direct `execute` is the automatic
-  exception unless the user asks for `grill-me` or the lane changes away from
-  `execute`; rich prompts, concrete tasks, retained-plan approval, and user
-  pre-start signals are checkpoints, not waivers; use `grill-me satisfied` only
-  when the active loop has a user answer or accepted defaults plus a closure or
-  proceed signal; rerun it on request, context, or environment change; and do
-  not enter `plan`, `apply-plan`, `review`, or planning output while the gate is
-  `grill-me required`.
-- For mechanical work where Gate 0 applies, ask a minimal, clear, and concise
-  `grill-me` question set instead of skipping the gate.
-- Keep planning in `define` until the user closes the active Gate 0 loop; Gate 0 owns the status labels, so stop for `grill-me` before writing any
-  plan artifact or review output.
-  Treat `plan-only (clarify-first)` as a legacy input spelling for
-  `define-first`, not as a separate phase.
-- Use `superpowers-brainstorming` only when `define` needs option exploration or
-  design approval before planning; skip it for deterministic prompt, skill,
-  agent, instruction, or Markdown maintenance with a concrete target state.
+- Gate 0 semantics live in the core skill and `references/gate-0-protocol.md`;
+  this wrapper owns only route selection, not gate procedure.
+- Direct `execute` is the only automatic Gate 0 exception. Approved
+  `apply-plan` still runs the visible pre-start gate before retained-plan
+  execution.
+- Keep planning in `define` until the user closes Gate 0 and the
+  Pre-Plan Critical Pass returns `confident`. Do not produce plan output while
+  Gate 0 is still required.
 - Use the critical-master handoff before writing or finalizing non-trivial
   plans for material prompt, skill, routing, validator, or shared workflow
   changes.
-- Use this agent when an approved retained plan under `tmp/superpowers/` should
-  be applied through the repository `done-*` loop.
-- Approved retained-plan execution still starts Gate 0 before work and
-  reruns it when request, context, environment, validation, or dirty worktree
-  ownership changes.
 - Treat a user challenge that expected work was missed as a workflow-defect
   review before any reassurance or closeout.
 - Do not use this agent for a concrete low-to-medium-risk task that can finish
@@ -67,11 +52,7 @@ portable workflow semantics in the core skill.
 ## Boundary Definition
 
 - Stay in this wrapper while staged operational ownership is the right fit.
-- Keep direct execution, retained-plan application, review, define, and planning
-  phases visible to the user through the core skill contract.
-- Keep Gate 0 visible for planning, review, retained-plan application, and
-  workflow-defect work instead of inferring a silent waiver from prompt detail
-  alone. Direct `execute` stays outside automatic Gate 0 unless the lane changes.
+- Keep phases visible to the user through the core skill contract.
 - If the work becomes a simple single-lane task, recommend
   `internal-gateway-simple-task` instead of continuing here.
 - If reasoning quality, hidden assumptions, or failure modes dominate,
@@ -80,6 +61,8 @@ portable workflow semantics in the core skill.
 ## Output Expectations
 
 - Active entry point and phase
+- State and Continuation when work stops before terminal completion
+- User action required when the workflow is waiting
 - Gate 0 status and Definition Brief status when `define` applies
 - Scope, anti-scope, action, validation path, and risk
 - Files changed and residual risk when work was applied

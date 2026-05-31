@@ -231,6 +231,8 @@ def test_canonical_agents_expose_manual_next_step_handoffs() -> None:
 def test_operational_flow_wrapper_reports_completion_checks() -> None:
     body = read_body(CANONICAL_AGENTS["internal-gateway-operational-flow"])
 
+    assert "State and Continuation" in body
+    assert "User action required" in body
     assert "`Check 1`, `Check 2`, and `Check 3` evidence" in body
     assert "Source-item coverage against observed diff" in body
     assert "workflow-defect" in body
@@ -243,37 +245,40 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
+    gate_protocol_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/gate-0-protocol.md"
+    ).read_text(encoding="utf-8")
     workflow_maps_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
     ).read_text(encoding="utf-8")
 
-    assert "## Grill-me Gate Protocol" in skill_text
-    assert "Gate 0 starts after the minimum evidence pass" in skill_text
+    assert "## Gate 0" in skill_text
+    assert "Gate 0 is the pre-`plan` `define` gate" in skill_text
     assert "phase transition" in skill_text
-    assert "pre-start checkpoint" in skill_text
     assert "request-change realignment" in skill_text
-    assert "Rich prompts, concrete tasks, mechanical tasks" in skill_text
-    assert (
-        "The user answered or explicitly accepted defaults in the current Gate 0 loop"
-        in skill_text
-    )
-    assert "The agent must not close or skip the loop by itself" in skill_text
-    assert "Close the loop only after a user closure signal" in skill_text
-    assert "Direct `execute` is the only automatic Gate 0 exception." in skill_text
-    assert "`Gate 0`" in wrapper_text
+    assert "close only after a user closure signal" in skill_text
     assert_normalized_snippet(
-        wrapper_text,
-        "rich prompts, concrete tasks, retained-plan approval",
+        skill_text,
+        "closing Gate 0 does not change the active phase",
     )
-    assert_normalized_snippet(wrapper_text, "request, context, or environment change")
-    assert "run Gate 0 after the minimum evidence pass" in wrapper_alignment_text
+    assert "wait for" in skill_text and "explicit" in skill_text and "planning request" in skill_text
+    assert "Direct `execute` is the only automatic Gate 0 exception" in skill_text
+    assert "visible define pre-start gate before retained-plan execution" in skill_text
+    assert "Gate 0" in wrapper_text
     assert "Gate 0 support for every non-`execute`" in wrapper_alignment_text
-    assert "do not waive Gate 0" in wrapper_alignment_text
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
-    assert "minimum evidence pass, then" in workflow_maps_text
-    assert "phase\ntransition, or edit" in workflow_maps_text
+    assert "## Phase Transition Authorization" in gate_protocol_text
+    assert "Closing Gate 0 changes the gate status only" in gate_protocol_text
+    assert (
+        "A valid transition request must directly ask for planning"
+        in gate_protocol_text
+    )
+    assert "run the minimum evidence pass before Gate 0" in workflow_maps_text
+    assert (
+        "Do not restate the non-waiver or phase-transition details in maps."
+        in workflow_maps_text
+    )
     assert "Gate 0" in workflow_maps_text
-    assert "do not waive Gate 0" in workflow_maps_text
 
 
 def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> None:
@@ -282,7 +287,7 @@ def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> 
         ".github/skills/internal-gateway-operational-flow/references/mode-contracts.md"
     ).read_text(encoding="utf-8")
 
-    assert "## Phase-Local Contracts" in skill_text
+    assert "## Phase State Machine" in skill_text
     assert (
         "| Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |"
         in skill_text
@@ -290,6 +295,8 @@ def test_operational_flow_phase_local_contracts_and_templates_stay_defined() -> 
     assert "`define`" in skill_text
     assert "Define Check 1" in skill_text
     assert "## Phase-Local Output Template" in mode_contracts_text
+    assert "State" in mode_contracts_text
+    assert "Continuation" in mode_contracts_text
     assert "Gate 0 status" in mode_contracts_text
     assert "Definition Brief status" in mode_contracts_text
     assert "Lessons: none retained." in mode_contracts_text
@@ -334,7 +341,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     interface = metadata["interface"]
 
     assert "name: internal-gateway-operational-flow" in skill_text
-    assert "## Skill-First Staged Entry Points" in skill_text
+    assert "## Entry Points" in skill_text
     assert (
         "Load these skills by name only when the active phase requires them. "
         "This list is an index, not a bundle to preload." in skill_text
@@ -349,31 +356,22 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     )
     assert_inline_code_tokens(skill_text, EXPECTED_OPERATIONAL_ENTRYPOINTS)
     assert_inline_code_tokens(skill_text, EXPECTED_GRILL_ME_GATE_STATES)
-    assert "## User Authorization Signals" in skill_text
-    assert "`full-cycle` alone" in skill_text
-    assert "existing approved retained plan folder" in skill_text
+    assert "entrypoint name alone does not skip" in skill_text
+    assert "approved retained plan" in skill_text
     assert "Decision Brief" in skill_text
-    assert "explicit checkpoint before moving from `plan`" in skill_text
-    assert "current request, context, and environment" in skill_text
+    assert "explicit checkpoint before moving" in skill_text
     assert (
-        "Keep direct entry and manual transitions visible to the user. "
+        "Keep direct entry and manual transitions visible. "
         "Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch."
         in skill_text
     )
-    assert "multiple credible paths" in skill_text
-    assert (
-        "future security lens name, not yet promoted (`not yet promoted`; "
-        "see the Future Security Lens rule in `references/wrapper-alignment.md`)"
-        in skill_text
-    )
-    assert "`Uso consigliato`" in skill_text
-    assert "`Mappa file e ruolo`" in skill_text
-    assert "`Evidence pass iniziale`" in skill_text
-    assert "`Budget lettura`" in skill_text
+    assert "Future Security Lens" in skill_text
     assert "## Completion Checks" in skill_text
     assert "`Check 1`" in skill_text
     assert "`Check 2`" in skill_text
     assert "`Check 3`" in skill_text
+    assert "`Check 4`" in skill_text
+    assert "State:` and `Continuation:`" in skill_text or "`State:` and `Continuation:`" in skill_text
     assert "## Output Calibration" in skill_text
     assert "Required output" in skill_text
     assert "Must not include" in skill_text
@@ -382,8 +380,8 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "`execute`" in mode_contracts_text
     assert "`review`" in mode_contracts_text
     assert "`apply-plan`" in mode_contracts_text
-    assert "Codex plugin or Codex CLI" in workflow_maps_text
-    assert "Retained Plan Application" in workflow_maps_text
+    assert "CLI or plugin runtime" in workflow_maps_text
+    assert "Apply/Execute Plan" in workflow_maps_text
     assert "internal-gateway-operational-flow" in wrapper_alignment_text
     assert not Path(
         ".github/skills/internal-gateway-operational-flow/references/imported-support-routing.md"
@@ -398,11 +396,13 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     for retired_id in retired_mattpocock_ids():
         assert retired_id not in wrapper_alignment_text
     assert interface["display_name"] == "Internal Gateway Operational Flow"
-    assert (
-        interface["short_description"]
-        == "Define-to-review workflow with grill-me Gate 0"
-    )
+    assert "workflow" in interface["short_description"]
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
+    assert "state" in interface["default_prompt"].lower()
+    assert "continuation" in interface["default_prompt"].lower()
+    assert (
+        "stay in define" in interface["default_prompt"].lower()
+    )
 
     operational_frontmatter = load_frontmatter(
         CANONICAL_AGENTS["internal-gateway-operational-flow"]
@@ -414,6 +414,21 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     )
     assert "multiple credible paths" in skill_text
     assert "full-cycle" in operational_body
+
+
+def test_operational_flow_referenced_skills_stay_live_and_one_per_bullet() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    referenced_skills = referenced_skills_from_skill(skill_text)
+
+    assert referenced_skills
+    assert "internal-security-review" not in referenced_skills
+    assert all("," not in skill_id for skill_id in referenced_skills)
+    assert all(
+        Path(f".github/skills/{skill_id}/SKILL.md").is_file()
+        for skill_id in referenced_skills
+    )
 
 
 def test_operational_flow_readme_is_not_required_when_bundle_references_own_detail() -> (
@@ -456,11 +471,7 @@ def test_gateway_catalog_fast_path_stays_local_before_optional_support() -> None
         ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
     ).read_text(encoding="utf-8")
 
-    assert "internal-gateway-simple-task` vs `execute` vs `plan` triage" in skill_text
-    assert (
-        "before loading optional references, support skills, or review lenses"
-        in skill_text
-    )
+    assert "`internal-gateway-simple-task` vs `execute` vs `plan` triage" in skill_text
     assert "one owner file plus one nearby validator or test" in skill_text
     assert "### Catalog Fast Path" in workflow_maps_text
     assert "`make catalog-fast-check`" in workflow_maps_text
@@ -628,6 +639,9 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     operational_text = Path(
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
+    metadata_text = Path(
+        ".github/skills/internal-gateway-operational-flow/agents/openai.yaml"
+    ).read_text(encoding="utf-8")
     wrapper_alignment_text = Path(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md"
     ).read_text(encoding="utf-8")
@@ -637,20 +651,15 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "confirm context before starting" in grill_me_text
     assert "pre-plan or pre-start gate" not in grill_me_text
     assert "grill-me required" not in grill_me_text
-    assert "Gate 0 status and phase-blocking semantics" in operational_text
+    assert "Gate 0" in operational_text
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
-    assert "every non-`execute` operational-flow entrypoint" in operational_text
-    assert (
-        "Planning, review, and retained-plan application always start"
-        in wrapper_alignment_text
-    )
-    assert "minimal,\n  clear, and concise" in wrapper_alignment_text
-    assert "non-trivial retained plan" in operational_text
+    assert "Direct `execute` is the only automatic Gate 0 exception" in operational_text
+    assert "approved `apply-plan` still starts with the visible pre-start gate" in metadata_text.lower()
+    assert "Restart Gate 0 before continuing" in wrapper_alignment_text
+    assert "non-trivial" in operational_text and "retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text
-    assert "provide numbered questions with a recommended answer" in operational_text
-    assert "continue one question at a time" in operational_text
-    assert "Close the loop only after a user closure signal" in operational_text
+    assert "close only after a user closure signal" in operational_text.lower()
 
 
 def test_gateway_support_uses_internal_owners_after_extraction() -> None:
@@ -705,3 +714,55 @@ def test_old_cross_lane_engine_is_not_live_catalog_contract() -> None:
 
     for relative_path in CANONICAL_AGENTS.values():
         assert OLD_CROSS_LANE_ENGINE not in read_body(relative_path)
+
+
+def test_operational_flow_pre_plan_critical_pass_and_review_gate_stay_present() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    gate_protocol_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/gate-0-protocol.md"
+    ).read_text(encoding="utf-8")
+
+    assert "### Pre-Plan Critical Pass" in skill_text
+    assert "pre-plan critical: confident" in skill_text
+    assert "pre-plan critical: reopen" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "automatically load `internal-gateway-critical-master` and run a critical challenge against the Definition Brief",
+    )
+    assert "Do not skip it" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "plan output remains blocked until the cycle resolves",
+    )
+    assert "### Review Gate" in skill_text
+    assert "review gate: satisfied" in skill_text
+    assert "review gate: reopen" in skill_text
+    assert_normalized_snippet(
+        skill_text,
+        "do not emit the final review verdict while the gate is `reopen`",
+    )
+    assert "Pre-Plan Critical Pass" in gate_protocol_text
+    assert "pre-plan critical: confident" in gate_protocol_text
+    assert "pre-plan critical: reopen" in gate_protocol_text
+
+
+def test_entrypoint_aliases_reference_exists_and_is_linked() -> None:
+    aliases_path = Path(
+        ".github/skills/internal-gateway-operational-flow/references/entrypoint-aliases.md"
+    )
+    assert aliases_path.exists()
+
+    aliases_text = aliases_path.read_text(encoding="utf-8")
+    assert "## Alias index" in aliases_text
+    assert "| `full-cycle` |" in aliases_text
+    assert "| `define-first` |" in aliases_text
+    assert "| `plan-only` |" in aliases_text
+    assert "| `apply-plan` |" in aliases_text
+    assert "| `review` |" in aliases_text
+
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    assert "references/entrypoint-aliases.md" in skill_text

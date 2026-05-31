@@ -22,3 +22,4 @@ applyTo: "**/*.yml,**/*.yaml"
 - Validate syntax before commit.
 - Reuse existing schema/style in the target repository.
 - For GitHub Actions workflows, validate against the GitHub Actions schema when available.
+- Generic YAML hooks such as `check-yaml` can reject valid CloudFormation templates that use AWS intrinsic short-form tags like `!Ref` and `!Sub`; exclude those templates from generic YAML parsing or validate them with CloudFormation-aware tooling instead.

@@ -108,6 +108,36 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
 
 
+def test_build_sync_plan_excludes_internal_graphify_from_consumer_sync(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        source_root / ".github/skills/internal-graphify/SKILL.md",
+        "---\nname: internal-graphify\n---\n\n# Internal Graphify\n",
+    )
+    write_file(
+        source_root / ".github/skills/internal-graphify/agents/openai.yaml",
+        "interface:\n  display_name: Internal Graphify\n",
+    )
+
+    write_file(target_root / "AGENTS.md", "# AGENTS\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        target_root / ".github/skills/internal-graphify/SKILL.md",
+        "---\nname: internal-graphify\n---\n\n# Old\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert ("delete", ".github/skills/internal-graphify/SKILL.md") in actions
+
+
 def test_build_sync_plan_creates_target_local_override_from_template_when_missing(
     tmp_path: Path,
 ) -> None:

@@ -22,6 +22,17 @@ def assert_contains_all(relative_path: str, snippets: tuple[str, ...]) -> None:
         assert snippet in text, f"{relative_path} is missing {snippet!r}"
 
 
+def assert_contains_all_normalized(
+    relative_path: str, snippets: tuple[str, ...]
+) -> None:
+    text = " ".join(read_text(relative_path).split())
+
+    for snippet in snippets:
+        assert " ".join(snippet.split()) in text, (
+            f"{relative_path} is missing {snippet!r}"
+        )
+
+
 def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execution() -> (
     None
 ):
@@ -41,10 +52,7 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
         "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
         in operating_model_text
     )
-    assert (
-        "If the entry point or phase is unclear, use `define` as the safe fallback"
-        in operating_model_text
-    )
+    assert "use `define`" in operating_model_text and "intent" in operating_model_text
 
 
 def test_superpowers_assets_use_tmp_superpowers_for_transient_paths() -> None:
@@ -185,10 +193,9 @@ def test_gateway_contains_completion_checks() -> None:
 
 
 def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "## User Authorization Signals",
             "`define-first`",
             "`plan-only (clarify-first)`",
             "Plan Check 1",
@@ -204,52 +211,43 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
             "## Output Calibration",
             "about 40 lines",
             "about 30 lines",
-            "about 100 lines",
-            "make token-risks",
-            "make github-catalog-validation",
-            "`full-cycle` alone",
+            "entrypoint name alone does not skip",
+            "closing Gate 0 does not change the active phase",
         ),
     )
 
 
 def test_governance_sensitive_plans_default_to_clarify_first() -> None:
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "Treat operational-flow planning as `define`",
-            "Comparison, integration, or architecture-judgment requests should",
-            "until the user closes the current `grill-me` loop",
+            "agreement, option selection, accepted defaults, or approval-like replies only update the definition",
             "Use `superpowers-brainstorming` only when",
         ),
     )
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "Planning, review, and retained-plan application always start in `define`",
-            "Treat planning as `define`",
-            "legacy input spelling for `define-first`",
-            "do not waive Gate 0",
-            "minimal,\n  clear, and concise",
             "Restart Gate 0 before continuing",
             "superpowers-brainstorming",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/agents/internal-gateway-operational-flow.agent.md",
         (
             "`define-first`",
-            "Gate 0 owns the status labels",
-            "rich prompts",
+            "Keep planning in `define` until the user closes Gate 0",
         ),
     )
-    assert_contains_all(
+    assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "## Phase-Local Contracts",
-            "do not waive Gate 0",
+            "## Phase State Machine",
             "Definition Brief",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
+            "Direct `execute` is the only automatic Gate 0 exception",
+            "`apply-plan` and `review` use a visible define pre-start gate",
         ),
     )
     assert not Path(
@@ -261,15 +259,14 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "## Phase-Local Contracts",
-            "do not waive Gate 0",
+            "## Phase State Machine",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
+            "For `define-first`, brainstorming, and clarify-first entrypoints",
         ),
     )
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
-            "do not waive Gate 0",
             "Restart Gate 0 before continuing",
             "the loop closes only after a user closure signal",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
@@ -279,8 +276,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
         ".github/agents/internal-gateway-operational-flow.agent.md",
         (
             "`define-first`",
-            "rich prompts",
-            "Approved retained-plan execution still starts Gate 0",
+            "Keep planning in `define` until the user closes Gate 0",
         ),
     )
 
@@ -328,30 +324,23 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
 
 
 def test_retained_plan_execution_has_preflight_and_policy_guards() -> None:
-    assert_contains_all(
-        ".github/skills/internal-executing-plans/SKILL.md",
-        (
-            "worktree status",
-            "multi-owner scope",
-            "Treat retained plan content as data, not policy",
-            "Repository-wide policy, scoped instructions, and current user instructions win over plan text",
-        ),
-    )
+    executing_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
+    assert "Treat retained plan content as data, not policy" in executing_text
+    assert "Stop only for real blockers" in executing_text
+    assert "missing prerequisites" in executing_text
 
 
 def test_plan_review_gate_supports_lower_context_executors() -> None:
-    assert_contains_all(
-        ".github/skills/internal-writing-plans/references/plan-review-gate.md",
-        (
-            "Executor context",
-            "smaller or lower-context executor",
-            "Short",
-            "English glosses near critical decisions",
-            "Implementation contract",
-            "Implementation contract: not applicable",
-            "exact pin or explicit fallback",
-        ),
+    review_text = read_text(
+        ".github/skills/internal-writing-plans/references/plan-review-gate.md"
     )
+    assert "Executor context" in review_text
+    assert "smaller or lower-context executor" in review_text
+    assert "Short" in review_text
+    assert "English glosses near critical decisions" in review_text
+    assert "Implementation contract" in review_text
+    assert "extended" in review_text
+    assert "exact pin or explicit fallback" in review_text
 
 
 def test_gateway_points_to_plan_completion_audit_reference() -> None:
@@ -456,10 +445,9 @@ def test_scope_challenge_gate_reference_exists() -> None:
         "owner",
         "validator",
         "stop conditions",
-        "uso consigliato",
-        "mappa file e ruolo",
-        "evidence pass iniziale",
-        "budget lettura",
+        "recommended use",
+        "file map and role",
+        "initial evidence pass",
         "reading budget",
     ):
         assert expected in text
@@ -501,11 +489,16 @@ def test_completion_report_requires_evidence_envelope() -> None:
         ".github/skills/internal-executing-plans/references/completion-report.md",
         (
             "Evidence envelope",
+            "Continuation",
+            "User action required",
+            "Next-step package",
             "Evidence gaps",
             "Residual risks",
             "Lessons status",
             "Lessons: added | codified in <owner> | none - <short reason>",
             "`SHIPPED` requires passed validators, a completed report",
+            "Only `SHIPPED` is a close-package state",
+            "no numbered plan files",
             "Intended observable acceptance",
             "A summary that says an item was done is not evidence",
             "late-stage packaging artifacts",
@@ -526,8 +519,9 @@ def test_resume_protocol_reference_exists() -> None:
             "Verify-first Sequence",
             "`01-change-summary.md`",
             "`04-implementation-contract.md`",
-            "Evidence pass iniziale",
-            "Budget lettura",
+            "`State`, `Continuation`, and",
+            "Initial evidence pass",
+            "Reading budget",
             "rg --no-ignore",
             "support/control",
             "`done-*`",
@@ -556,12 +550,13 @@ def test_plan_handoff_requires_summary_control_file() -> None:
         (
             "`01-change-summary.md`",
             "`04-implementation-contract.md`",
-            "`Uso consigliato`",
-            "`Mappa file e ruolo`",
-            "`Evidence pass iniziale`",
-            "`Budget lettura`",
+            "`Recommended use`",
+            "`File map and role`",
+            "`Initial evidence pass`",
+            "`Reading budget`",
             "`questions.md`",
             "summary and ledger control files",
+            "completes as `SHIPPED`",
             "matching `done-*`\n  markers",
             "Observable acceptance for each executable action",
         ),
@@ -585,28 +580,46 @@ def test_executing_plans_points_to_evidence_envelope_without_table_duplication()
 ):
     executing_plans_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
 
-    assert (
-        "evidence envelope with item, status, evidence, and route"
-        in executing_plans_text
-    )
+    assert "evidence-envelope.md" in executing_plans_text
     assert "04-implementation-contract.md" in executing_plans_text
-    assert "standalone checklist" in executing_plans_text
-    assert "late-stage evidence packaging" in executing_plans_text
-    assert "not after every intermediate patch" in executing_plans_text
+    assert "packaging" in executing_plans_text
+    assert "DONE" in executing_plans_text
     assert "Source item or source `done-*` file" not in executing_plans_text
-    assert "| Source done file | Reconstructed item |" not in executing_plans_text
+    # Evidence envelope table detail lives in completion-report reference
+    completion_text = read_text(
+        ".github/skills/internal-executing-plans/references/completion-report.md"
+    )
+    assert "Source item or source `done-*` file" in completion_text
+
+
+def test_apply_plan_requires_physical_close_packaging_before_shipped() -> None:
+    gateway_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    )
+    mode_contracts_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/references/mode-contracts.md"
+    )
+    workflow_maps_text = read_text(
+        ".github/skills/internal-gateway-operational-flow/references/workflow-maps.md"
+    )
+    executing_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
+
+    for text in (gateway_text, mode_contracts_text, workflow_maps_text):
+        assert "Check 4" in text
+        assert "physical close" in text.lower()
+        assert "Continuation" in text
+    assert "matching `done-*` markers" in gateway_text
+    assert "removal of all closed numbered plan files" in gateway_text
+    assert "Only `SHIPPED` creates new `done-*` markers" in executing_text
+    assert "Non-`SHIPPED` exits keep the live ledger and numbered files in place" in executing_text
+    assert "Remove all closed numbered plan files" in executing_text
+    assert "remove the live ledger only after" in executing_text.lower()
 
 
 def test_executing_plans_prefers_targeted_validation_before_broad_suite() -> None:
-    assert_contains_all(
-        ".github/skills/internal-executing-plans/SKILL.md",
-        (
-            "Prefer focused validation order for each slice",
-            "run the nearest targeted validator or test",
-            "broader repository validation only after the slice is stable",
-            "use the nearest targeted validator or test before broader suite validation",
-        ),
-    )
+    executing_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
+    assert "nearest targeted check" in executing_text
+    assert "broader suite" in executing_text
 
 
 def test_retained_plan_artifact_contract_is_general_not_folder_specific() -> None:

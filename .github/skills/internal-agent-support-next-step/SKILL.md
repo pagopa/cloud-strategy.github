@@ -29,6 +29,11 @@ When a next step is needed, include this compact package:
 - `Action`: one concrete next action the next owner should take.
 - `Validation`: command, review path, evidence, or explicit gap the next owner must address.
 - `Risk`: residual risk, rollback note, or reason the transition should stay manual.
+- `Continuation`: `continuing` when the current owner can safely keep going after
+  the next slice, or `waiting` when user input, approval, or an external
+  prerequisite must land first.
+- `User action required`: mandatory when `Continuation` is `waiting`; say
+  exactly what the user or operator must do next.
 
 Keep the package short. Prefer one line per field unless the validation path or risk note genuinely needs more detail.
 
@@ -56,6 +61,8 @@ For each actionable review finding, name one routing outcome:
 
 - The next owner is already selected and exact.
 - The package includes owner, scope, action, validation, and risk.
+- The package includes `Continuation`, and includes `User action required` when
+  `Continuation` is `waiting`.
 - Decision Brief handoffs include target state, anti-scope, suggested owner,
   evidence source, validation path, known risks, and stop conditions.
 - The transition remains user-visible and manual unless the user explicitly asked otherwise.

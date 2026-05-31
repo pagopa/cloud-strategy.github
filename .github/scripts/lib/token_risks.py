@@ -35,11 +35,11 @@ AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
     "## Retained Plans",
     "## Retained Learning",
     "01-...md",
-    "01-contesto-e-vincoli.md",
+    "01-context-and-constraints.md",
     "01-change-summary.md",
     "02-source-item-ledger.md",
     "questions.md",
-    "dubbi-e-domande.md",
+    "doubts-and-questions.md",
     "done-*",
     "continue through the remaining numbered plan files",
 )

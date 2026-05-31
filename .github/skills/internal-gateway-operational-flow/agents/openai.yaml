@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Gateway Operational Flow"
-  short_description: "Define-to-review workflow with grill-me Gate 0"
-  default_prompt: "Use $internal-gateway-operational-flow with this request or retained plan folder to choose the visible define-first, full-cycle, plan-only, apply-plan, review, or explicit phase workflow. Run the minimum evidence pass, then start define with grill-me Gate 0 for every non-execute entrypoint before planning, reviewing, transitioning, or applying a retained plan."
+  short_description: "Staged define-to-review workflow with one active phase at a time"
+  default_prompt: "Use $internal-gateway-operational-flow to run the visible staged workflow. Choose one active phase from the state machine. Follow gate-0-protocol.md for Gate 0 depth. Stay in define until the user explicitly requests the next phase. Direct `execute` is the only automatic Gate 0 exception; approved `apply-plan` still starts with the visible pre-start gate. When stopping before terminal completion, declare explicit `State` and `Continuation`."

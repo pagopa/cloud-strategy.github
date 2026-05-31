@@ -1,0 +1,82 @@
+version: 1
+rows:
+  - target: codex
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://developers.openai.com/codex/skills
+    notes: Direct-copy bundles with SKILL.md, references, scripts, assets, and agents/openai.yaml.
+  - target: copilot
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/agent-skills
+    notes: GitHub Copilot supports Agent Skills standard via ~/.agents/skills/.
+  - target: claude
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://docs.anthropic.com/en/docs/claude-code/skills
+    notes: Claude Code supports Agent Skills standard via ~/.agents/skills/ (compatibility path).
+  - target: opencode
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://opencode.ai/docs/skills
+    notes: OpenCode supports Agent Skills standard via ~/.agents/skills/.
+  - target: codex
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.codex/agents/
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: true
+    evidence:
+      - https://developers.openai.com/codex/agents
+    notes: Requires MD to TOML translation.
+  - target: copilot
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.copilot/agents/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/custom-agents
+    notes: Direct copy of .agent.md files.
+  - target: claude
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.claude/agents/
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: true
+    evidence:
+      - https://docs.anthropic.com/en/docs/claude-code/sub-agents
+    notes: Requires frontmatter translation (tools CSV, handoffs to body).
+  - target: opencode
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.config/opencode/agents/
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: true
+    evidence:
+      - https://opencode.ai/docs/agents/
+    notes: Requires frontmatter translation (permission object, handoffs to body).

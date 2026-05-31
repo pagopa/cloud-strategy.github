@@ -33,6 +33,7 @@ applyTo: "**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts"
 - Keep environment variables configuration-only; secrets must come from managed secret stores.
 - For queue-triggered Lambdas, pair the source queue with explicit DLQ/redrive configuration and a visibility timeout sized relative to the function timeout.
 - When the event source supports partial batch failure reporting, enable it and return only failed record identifiers for retry.
+- For Terraform-managed Lambda ZIP artifacts generated locally by `archive_file`, do not ignore `aws_lambda_function.filename` and do not store machine-specific absolute artifact paths in state; the AWS provider needs the current run's local ZIP path when code hash, runtime, or other code-update inputs change.
 
 ## Runtime cross-references
 

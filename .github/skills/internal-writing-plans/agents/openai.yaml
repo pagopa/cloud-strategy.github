@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Writing Plans"
-  short_description: "Repo wrapper for numbered plan authoring with critical checks"
-  default_prompt: "Use $internal-writing-plans to author retained repository-owned numbered plans under tmp/superpowers, run critical challenge when the plan is non-trivial or governance-sensitive, starting with 01-change-summary.md, 02-source-item-ledger.md, and questions.md when needed."
+  short_description: "Repo wrapper for numbered plan authoring"
+  default_prompt: "Use $internal-writing-plans to author retained repository-owned numbered plans under tmp/superpowers. Choose compact (default: summary, ledger, execution, questions) or extended (adds implementation contract). Keep 01-change-summary.md concise. Emit a Decision Brief before handoff to internal-executing-plans."

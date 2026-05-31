@@ -14,13 +14,13 @@ Decision Brief from planning. It defines the minimum input contract before the
 - Plan folder under `tmp/superpowers/<clear-action-or-task-name>/`.
 - `01-change-summary.md` with only the concise proposed-change summary, problem,
   rationale, validation path, and decision request.
-- `02-source-item-ledger.md` with `Uso consigliato`, `Mappa file e ruolo`,
-  `Evidence pass iniziale`, `Budget lettura`, and source-item coverage.
+- `02-source-item-ledger.md` with `Recommended use`, `File map and role`,
+  `Initial evidence pass`, `Reading budget`, and source-item coverage.
 - `04-implementation-contract.md` for non-trivial or lower-context retained plans, or an explicit `Implementation contract: not applicable` statement when the local contract allows it.
 - Numbered executable plan files after the summary and ledger control files.
 - `questions.md` with accepted user-only decisions or `- none`.
 - A plan for closing the summary and ledger files through matching `done-*`
-  markers when the folder completes.
+  markers when the folder completes as `SHIPPED`.
 - Confirmed target state and anti-scope.
 - Selected owner and known lane-change owner.
 - Validation path or explicit validation gap.
@@ -34,7 +34,7 @@ Decision Brief from planning. It defines the minimum input contract before the
 1. Read `01-change-summary.md` first for human decision context, then read
    `02-source-item-ledger.md` to classify folder purpose, next expected
    treatment, file roles, reading budget, and source-item coverage.
-2. Run the declared `Evidence pass iniziale` before broad reading. Use `rg --no-ignore` for retained artifacts under `tmp/` when checking plan claims.
+2. Run the declared `Initial evidence pass` before broad reading. Use `rg --no-ignore` for retained artifacts under `tmp/` when checking plan claims.
 3. Read `questions.md` for accepted decisions, then exclude it from the
    executable loop.
 4. Read `04-implementation-contract.md` after the summary and ledger when present or required, then read numbered executable plan files in order.
@@ -48,8 +48,8 @@ Decision Brief from planning. It defines the minimum input contract before the
 
 - Scope moves outside the declared files, owners, or asset family.
 - `01-change-summary.md` is missing or overloaded with control details.
-- `02-source-item-ledger.md`, `Uso consigliato`, or `Mappa file e ruolo` is missing from a non-trivial retained plan.
-- `Evidence pass iniziale`, `Budget lettura`, or source-item coverage is missing from a non-trivial retained plan.
+- `02-source-item-ledger.md`, `Recommended use`, or `File map and role` is missing from a non-trivial retained plan.
+- `Initial evidence pass`, `Reading budget`, or source-item coverage is missing from a non-trivial retained plan.
 - `04-implementation-contract.md` is missing, stale, or too weak to recover exact sources, target files, validators, blockers, or required external pins for a non-trivial or lower-context retained plan.
 - Owner is missing or the active owner no longer fits.
 - Validation path is absent and no closest check exists.

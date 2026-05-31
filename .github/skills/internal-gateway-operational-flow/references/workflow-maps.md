@@ -2,7 +2,7 @@
 
 Use this reference when preserving or validating user-visible operational flows. These maps describe workflow semantics; Copilot agent `handoffs:` buttons are only one UI projection.
 
-## Quick Execution
+## Direct Task / Quick Edit
 
 ```text
 +-----------------------------+
@@ -75,7 +75,7 @@ Use this repository-local variant for small catalog maintenance before escalatin
 - Add `CATALOG_FAST_INCLUDE_TOKEN_RISKS=1` only when the change touches always-on guidance or shared contracts.
 - Do not open a retained plan or full review mode for one-file or one-owner fixes that fit in the current turn.
 
-## Staged Full Cycle
+## End-to-End Delivery / Full Cycle
 
 ```text
 +--------------------------------+
@@ -90,13 +90,13 @@ Use this repository-local variant for small catalog maintenance before escalatin
 |   grill-me Gate 0              |
 | - optional brainstorming       |
 | - Definition Brief             |
+| - Pre-Plan Critical Pass       |
+|   (auto after Gate 0 closure)  |
 +-------------------------------+
                |
                v
 +-------------------------------+
 | plan phase                     |
-| - critical challenge before    |
-|   non-trivial/governance plan  |
 | - retained plan when justified |
 | - Decision Brief projection    |
 +-------------------------------+
@@ -136,11 +136,9 @@ govern every non-`execute` entrypoint, see
 visible: run the minimum evidence pass before Gate 0, and keep downstream plan,
 review, and retained-plan application blocked until the user closes the active
 `grill-me` loop.
+Do not restate the non-waiver or phase-transition details in maps.
 
-Run the minimum evidence pass, then start Gate 0 inside `define` before downstream plan, review, retained-plan application, or phase
-transition, or edit. Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, and pre-start signals do not waive Gate 0.
-
-## Define Work
+## Idea, Brainstorming & Exploration / Define & Scope
 
 ```text
 +--------------------------------+
@@ -168,6 +166,15 @@ transition, or edit. Rich prompts, concrete tasks, mechanical tasks, retained-pl
                |
                v
 +-------------------------------+
+| Pre-Plan Critical Pass         |
+| (automatic after Gate 0 +      |
+|  Define Check 1-3)             |
+| - confident: update brief, stop|
+| - reopen: re-enter define      |
++-------------------------------+
+               |
+               v
++-------------------------------+
 | plan, review, critical, or     |
 | stop after define-first        |
 +-------------------------------+
@@ -179,7 +186,7 @@ creative or design-ambiguous work, or design approval before a plan. Keep
 repository-owned maintenance when target state and validation are already
 concrete.
 
-## Planned Work
+## Strategy & Decision Framing / Plan & Design
 
 ```text
 +--------------------------------+
@@ -191,16 +198,18 @@ concrete.
 +-------------------------------+
 | define state if needed         |
 | - Gate 0 and Definition Brief  |
+| - Pre-Plan Critical Pass       |
+|   (blocks plan until confident)|
 +-------------------------------+
                |
                v
 +-------------------------------+
 | plan mode                      |
+| - requires pre-plan critical:  |
+|   confident                    |
 | - decision frame               |
 | - assumptions and tradeoffs    |
 | - selected direction           |
-| - critical challenge when      |
-|   plan risk requires it        |
 +-------------------------------+
                |
                v
@@ -220,7 +229,7 @@ concrete.
 
 Planning output should be compact enough for the next owner or runtime to act without rediscovering the full problem.
 
-## Audited Work
+## Review & Quality Gate / Audit & Validate
 
 ```text
 +-----------------------------+
@@ -247,6 +256,13 @@ Planning output should be compact enough for the next owner or runtime to act wi
               |
               v
 +-----------------------------+
+| Review Gate                  |
+| - grill-me satisfied         |
+| - critical-master confident  |
++-----------------------------+
+              |
+              v
++-----------------------------+
 | Route each actionable item   |
 | to execute, plan, critical,  |
 | or defer                     |
@@ -255,7 +271,7 @@ Planning output should be compact enough for the next owner or runtime to act wi
 
 Review treats missing validation as a finding, not a footnote.
 
-## Retained Plan Application
+## Apply/Execute Plan / Apply Retained Plan
 
 ```text
 +-------------------------------+
@@ -265,16 +281,11 @@ Review treats missing validation as a finding, not a footnote.
               |
               v
 +-------------------------------+
-| define pre-start gate          |
-| - confirm scope and anti-scope |
-| - rerun on context change      |
-+-------------------------------+
-              |
-              v
-+-------------------------------+
 | apply-plan entrypoint          |
 | - load internal-executing-plans|
 | - ignore questions.md         |
+| - run visible define pre-start |
+|   Gate 0 before execution      |
 +-------------------------------+
               |
               v
@@ -293,18 +304,37 @@ Review treats missing validation as a finding, not a footnote.
 | Check 2 contract coverage      |
 | Check 3 evidence coverage      |
 +-------------------------------+
+              |
+              v
++-------------------------------+
+| If state is not SHIPPED       |
+| - keep live folder + ledger   |
+| - no new done-* markers       |
+| - report State + Continuation |
+| - emit next-step package      |
++-------------------------------+
+              |
+              v
++-------------------------------+
+| Check 4 close packaging        |
+| (SHIPPED only)                 |
+| - evidence envelope + report   |
+| - matching done-* markers      |
+| - remove all numbered files    |
+| - preserve and close ledger    |
++-------------------------------+
 ```
 
-Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies.
+Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies. `apply-plan` cannot report `SHIPPED` before `Check 4` verifies the physical close package. Non-`SHIPPED` states keep the retained plan live and must say whether execution is `continuing` or `waiting`.
 
 ## Runtime Projection
 
 | Runtime surface | Projection |
 | --- | --- |
-| GitHub Copilot in VS Code | Users may select wrapper agents and approve `handoffs: send=false` buttons. |
-| GitHub.com or chat-only surfaces | Read this skill and use text next-step packages. |
-| ChatGPT 5.5 or Opus 4.6 | Treat `SKILL.md` and references as manual operating guidance. |
-| Codex plugin or Codex CLI | Load relevant skills directly; do not rely on Copilot agent UI. |
+| IDE with agent UI (e.g., VS Code + Copilot) | Users may select wrapper agents and approve `handoffs: send=false` buttons. |
+| Web or chat-only runtime | Read this skill and use text next-step packages; no agent UI available. |
+| Model-first surface without agent UI | Treat `SKILL.md` and references as manual operating guidance. |
+| CLI or plugin runtime with skill loading | Load relevant skills directly; do not rely on host-specific agent wrappers. |
 
 The workflow must remain understandable when no runtime can invoke a Copilot custom agent.
 

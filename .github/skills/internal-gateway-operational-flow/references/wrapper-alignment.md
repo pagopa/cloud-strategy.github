@@ -31,7 +31,7 @@ gateway lane. Internal owners win when they already cover the local contract.
 
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
-| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Follow `gate-0-protocol.md` for status, closure, blocking, and realignment; wrapper docs must not restate the full Gate 0 protocol. |
+| `grill-me` | Gate 0 support for every non-`execute` operational-flow entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. `apply-plan` and `review` use the same visible define pre-start gate. | Follow `gate-0-protocol.md` for status, closure, blocking, and realignment; wrapper docs must not restate the full Gate 0 protocol. |
 | `superpowers-brainstorming` | Conditional `define` support | Creative, product, UX, architecture, or design-ambiguous work needs option exploration and design approval before planning. | Keep `grill-me` as the Gate 0 pillar; use brainstorming only after the minimum evidence pass shows options can change the plan; skip it for deterministic repository-owned maintenance of prompt, skill, agent, instruction, or Markdown assets when target state and validation are concrete. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use it as primary reasoning, planning, review, or evidence gathering. |
 
@@ -40,8 +40,8 @@ Internal replacements:
 - Failure diagnosis belongs to `internal-debugging`.
 - Test-first delivery belongs to `internal-tdd`.
 - Performance work belongs to `internal-performance-optimization`.
-- Architecture, locality, leverage, cross-boundary review, higher-level code
-  orientation, module maps, caller maps, and domain-vocabulary explanations
+- Architecture, locality, leverage, cross-boundary review, cross-cutting impact, higher-level code
+  orientation, module maps, caller maps, blind spots, and domain-vocabulary explanations
   belong to `internal-high-level-review`.
 - Code defect review belongs to `internal-code-review`.
 - Imported docs and setup conventions stay outside default gateway routing
@@ -57,49 +57,26 @@ State security-specific gaps and route them through the closest existing owner.
 
 ## Support Posture
 
-Support selection belongs in the gateway skills, not in wrapper skill-list
-sections.
+Support selection belongs in the gateway skills, not in wrapper skill-list sections.
 
-- Planning, review, and retained-plan application still enter `define` through
-  Gate 0 after the minimum evidence pass. Direct `execute` remains the only
-  automatic Gate 0 exception unless the user asks for `grill-me` or the lane
-  changes away from `execute`.
-- Planning, review, and retained-plan application always start in `define`.
-- Treat planning as `define` until the user closes the active `grill-me` loop.
-- Wrapper projections should still run Gate 0 after the minimum evidence pass.
-- Keep the detailed Gate 0 closure, blocking, and realignment rules in
-  `gate-0-protocol.md`; wrappers, READMEs, and tests should reference that file
-  instead of restating the protocol.
-- Treat `plan-only (clarify-first)` as a legacy input spelling for `define-first`,
-  not as a separate phase.
-- Rich prompts, concrete tasks, mechanical tasks, retained-plan approval, fully recoverable repository evidence, and pre-start signals do not waive Gate 0. For mechanical work covered by Gate 0, ask a minimal,
-  clear, and concise question set instead of skipping `grill-me`.
+- Gate 0 closure, blocking, non-waiver, phase-transition, and realignment rules live exclusively in `gate-0-protocol.md`. Wrappers, READMEs, and tests reference that file instead of restating the protocol.
 - In wrapper projection terms, the loop closes only after a user closure signal.
 - Restart Gate 0 before continuing if request, context, target path, environment, tool output, dependency state, validation, or dirty worktree ownership changes.
-- `superpowers-brainstorming` is optional support inside `define` only when
-  option exploration or design approval is still the real work.
-- Retained-plan execution belongs to `internal-executing-plans` after
-  `apply-plan` is selected.
-- Non-trivial or governance-sensitive retained-plan authoring belongs to
-  `internal-writing-plans`, including the detailed critical-before-plan
-  requirement that uses `internal-gateway-critical-master`.
-- Failure diagnosis belongs to `internal-debugging`.
-- Test-first delivery belongs to `internal-tdd`.
-- Performance work belongs to `internal-performance-optimization`.
-- Code defect review belongs to `internal-code-review`.
-- Architecture, workflow, cross-cutting impact, operational fit, and blind spots
-  belong to `internal-high-level-review`.
-- Compression support such as `mattpocock-caveman` stays support-only after
-  blockers, risks, and validation evidence are explicit.
-- The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.
-  It does not replace a retained plan, is not catalog material, and Copilot
-  wrappers must not expose it as a canonical artifact.
+- `superpowers-brainstorming` is optional support inside `define` only when option exploration is the real work.
+- Retained-plan execution belongs to `internal-executing-plans` after `apply-plan` is selected.
+- Retained-plan authoring belongs to `internal-writing-plans`.
+- Compression support stays support-only after blockers, risks, and validation evidence are explicit.
+- The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection. It does not replace a retained plan and is not a canonical artifact.
 
 ## Handoff Rules
 
 - Keep every Copilot wrapper handoff `send: false`.
 - Keep handoff labels user-facing with `Next step:` or `Next action:`.
 - Keep text next-step packages in responses because non-Copilot runtimes may ignore wrapper frontmatter.
+- For non-terminal `execute`, `apply-plan`, or `review` stops, pair the text
+  next-step package with explicit `State` and `Continuation`; add `User action
+  required` when the workflow is waiting on the user or an external
+  prerequisite.
 - Do not use wrapper handoffs as hidden dispatch.
 - Gateway wrappers may expose manual handoffs to the other gateway wrappers when
   the current lane no longer fits.
