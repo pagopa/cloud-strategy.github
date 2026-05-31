@@ -12,6 +12,12 @@ import argparse
 import json
 from pathlib import Path
 
+from bisync_skills import (
+    apply_bisync_plan,
+    build_bisync_plan,
+    run_bisync_apply,
+    run_bisync_plan,
+)
 from home_syncing import (
     apply_home_sync_plan,
     build_home_sync_plan,
@@ -27,48 +33,74 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Plan, audit, doctor, or apply allowlisted home AI resource sync operations."
     )
-    parser.add_argument(
-        "command",
-        choices=["plan", "apply", "audit", "doctor", "dry-run"],
-        help="Run a dry plan, audit, readiness checks, or apply the planned changes.",
-    )
-    parser.add_argument("--source-root", default=".", help="Source repository root.")
-    parser.add_argument(
+    subparsers = parser.add_subparsers(dest="command", required=False)
+    subparsers.required = True
+
+    for cmd in ("plan", "apply", "audit", "doctor", "dry-run"):
+        cmd_parser = subparsers.add_parser(cmd, help=f"Run {cmd} sync operation.")
+        cmd_parser.add_argument("--source-root", default=".", help="Source repository root.")
+        cmd_parser.add_argument(
+            "--home-root",
+            default=str(Path.home()),
+            help="Home directory root to target. Defaults to the current user home.",
+        )
+        cmd_parser.add_argument(
+            "--targets",
+            default="codex,copilot,claude,opencode",
+            help="Target runtimes: codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
+        )
+        cmd_parser.add_argument(
+            "--create-missing-dirs",
+            action="store_true",
+            help="Allow apply to create missing runtime directories.",
+        )
+        cmd_parser.add_argument(
+            "--prune-managed",
+            action="store_true",
+            help="Allow apply to delete stale manifest-managed resources.",
+        )
+        cmd_parser.add_argument(
+            "--experimental-targets",
+            action="store_true",
+            help="Allow apply-like execution against undocumented targets.",
+        )
+        cmd_parser.add_argument(
+            "--format", choices=["text", "json"], default="text", help="Output format."
+        )
+        cmd_parser.add_argument(
+            "--fast",
+            action="store_true",
+            help="Prefer manifest-focused audit or plan evaluation when possible.",
+        )
+        cmd_parser.add_argument(
+            "--changed-only",
+            action="store_true",
+            help="Skip unchanged manifest-managed resources when possible.",
+        )
+
+    bisync_parser = subparsers.add_parser("bisync", help="Bidirectional sync between repo skills and home skills.")
+    bisync_sub = bisync_parser.add_subparsers(dest="bisync_command", required=True)
+    bisync_plan = bisync_sub.add_parser("plan", help="Detect drift without writing.")
+    bisync_plan.add_argument("--source-root", default=".", help="Source repository root.")
+    bisync_plan.add_argument(
         "--home-root",
         default=str(Path.home()),
-        help="Home directory root to target. Defaults to the current user home.",
+        help="Home directory root.",
     )
-    parser.add_argument(
-        "--targets",
-        default="codex,copilot,claude,opencode",
-        help="Target runtimes: codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
+    bisync_plan.add_argument(
+        "--format", choices=["text", "json"], default="text", help="Output format."
     )
-    parser.add_argument(
-        "--create-missing-dirs",
-        action="store_true",
-        help="Allow apply to create missing runtime directories.",
+    bisync_apply = bisync_sub.add_parser("apply", help="Apply bisync resolution.")
+    bisync_apply.add_argument("--source-root", default=".", help="Source repository root.")
+    bisync_apply.add_argument(
+        "--home-root",
+        default=str(Path.home()),
+        help="Home directory root.",
     )
-    parser.add_argument(
-        "--prune-managed",
-        action="store_true",
-        help="Allow apply to delete stale manifest-managed resources.",
+    bisync_apply.add_argument(
+        "--format", choices=["text", "json"], default="text", help="Output format."
     )
-    parser.add_argument(
-        "--experimental-targets",
-        action="store_true",
-        help="Allow apply-like execution against undocumented targets.",
-    )
-    parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
-    parser.add_argument(
-        "--fast",
-        action="store_true",
-        help="Prefer manifest-focused audit or plan evaluation when possible.",
-    )
-    parser.add_argument(
-        "--changed-only",
-        action="store_true",
-        help="Skip unchanged manifest-managed resources when possible.",
-    )
+
     return parser.parse_args(argv)
 
 
@@ -77,6 +109,11 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def run(args: argparse.Namespace) -> int:
+    if args.command == "bisync":
+        if args.bisync_command == "plan":
+            return run_bisync_plan(args)
+        return run_bisync_apply(args)
+
     source_root = find_repo_root(Path(args.source_root))
     home_root = Path(args.home_root).expanduser().resolve()
     try:

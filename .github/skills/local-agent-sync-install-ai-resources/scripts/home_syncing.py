@@ -132,6 +132,12 @@ class HomeSyncPlan:
                 missing_dirs=self.missing_dirs,
                 residual_drift=self.residual_drift,
             ),
+            "next_action": next_action_for_plan(
+                mode=self.mode,
+                blocked_codes=blocked_codes,
+                missing_dirs=self.missing_dirs,
+                residual_drift=self.residual_drift,
+            ),
             "operations": [operation.to_dict() for operation in self.operations],
         }
 
@@ -1157,6 +1163,70 @@ def next_step_for_plan(
     if mode == "apply":
         return "Inspect the manifest and run audit or doctor for follow-up evidence."
     return "Review the generated output and continue with the next safe mode."
+
+
+def next_action_for_plan(
+    *,
+    mode: str,
+    blocked_codes: list[str],
+    missing_dirs: tuple[str, ...],
+    residual_drift: tuple[str, ...],
+) -> dict[str, object]:
+    if blocked_codes:
+        return {
+            "action": "resolve_blockers",
+            "allowed": False,
+            "requires_explicit_approval": True,
+            "command": "",
+            "reason": f"Blocked codes prevent apply. Resolve each blocker manually.",
+        }
+    if missing_dirs and mode != "apply":
+        return {
+            "action": "apply",
+            "allowed": True,
+            "requires_explicit_approval": True,
+            "command": "apply --create-missing-dirs --targets <targets>",
+            "reason": "Plan is ready. Missing directories need creation. Run apply --create-missing-dirs to proceed.",
+        }
+    if residual_drift:
+        return {
+            "action": "resolve_blockers",
+            "allowed": False,
+            "requires_explicit_approval": True,
+            "command": "",
+            "reason": "Residual drift detected. Resolve each conflict before apply.",
+        }
+    if mode == "plan":
+        return {
+            "action": "apply",
+            "allowed": True,
+            "requires_explicit_approval": True,
+            "command": "apply --targets <targets>",
+            "reason": "Plan is ready with zero blockers. Run apply when ready.",
+        }
+    if mode == "audit":
+        return {
+            "action": "review",
+            "allowed": False,
+            "requires_explicit_approval": False,
+            "command": "",
+            "reason": "Audit complete. Review the audit snapshot.",
+        }
+    if mode == "apply":
+        return {
+            "action": "done",
+            "allowed": False,
+            "requires_explicit_approval": False,
+            "command": "",
+            "reason": "Apply completed. Manifest updated.",
+        }
+    return {
+        "action": "unknown",
+        "allowed": False,
+        "requires_explicit_approval": True,
+        "command": "",
+        "reason": "Review the generated output.",
+    }
 
 
 def git_revision(root: Path) -> str | None:

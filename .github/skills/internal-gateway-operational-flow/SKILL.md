@@ -132,7 +132,7 @@ For governance-sensitive work, map the workflow error to the smallest owner and 
 
 Before `plan complete`, use `Plan Check 1`, `Plan Check 2`, and `Plan Check 3` plus `superpowers-verification-before-completion` and emit a compact Decision Brief. For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief` only as a chat projection.
 
-A retained plan is not complete until every ledger row has exactly one route and `questions.md` contains `- none` or only real blockers.
+A retained plan is not complete until every ledger row has exactly one route, `questions.md` contains `- none` or only real blockers, and an explicit owner-class audit passes when the plan spans both always-on guidance (`AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/`) and skill files (`.github/skills/`, `~/.agents/skills/`). The audit must confirm no row mixes always-on baseline edits with skill-depth edits in a single track.
 
 ### Execute
 
