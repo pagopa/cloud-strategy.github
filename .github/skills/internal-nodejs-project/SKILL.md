@@ -1,5 +1,5 @@
 ---
-name: internal-project-nodejs
+name: internal-nodejs-project
 description: Use when creating or modifying Node.js or TypeScript project code such as services, APIs, middleware, or modules, and the main concern is application code rather than Docker, workflows, or infrastructure.
 ---
 

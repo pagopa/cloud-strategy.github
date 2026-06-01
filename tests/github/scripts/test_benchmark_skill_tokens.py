@@ -37,11 +37,11 @@ def test_benchmark_detects_no_chain_risk_for_self_contained_skills() -> None:
 
     # Self-contained skills modified in this plan should have no chain risks
     self_contained_skills = {
-        "internal-script-python",
-        "internal-project-python",
-        "internal-script-bash",
-        "internal-project-nodejs",
-        "internal-project-java",
+        "internal-python-script",
+        "internal-python-project",
+        "internal-bash-script",
+        "internal-nodejs-project",
+        "internal-java-project",
     }
 
     for scenario in output["scenarios"]:

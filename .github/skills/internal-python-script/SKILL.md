@@ -1,5 +1,5 @@
 ---
-name: internal-script-python
+name: internal-python-script
 description: Use when creating or modifying standalone Python scripts, CLIs, or small operator-facing toolkits whose primary contract is direct execution rather than reusable package or application code.
 ---
 
@@ -14,7 +14,7 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 
 ## When not to use
 
-- Package, application, service, or framework-owned behavior; use `internal-project-python`.
+- Package, application, service, or framework-owned behavior; use `internal-python-project`.
 - Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
 
 ## Boundary

@@ -139,7 +139,7 @@ Include:
   Use when the next need is RBAC model, managed identity boundaries, PIM/PAM posture, Policy design, or guardrail definition.
 - `internal-azure-operations`
   Use when the next need is Azure Monitor, backup, Site Recovery validation, reporting, audit evidence, preflight, or post-rollout checks.
-- `internal-terraform`, `internal-script-python`, `internal-script-bash`
+- `internal-terraform`, `internal-python-script`, `internal-bash-script`
   Use when the decision is settled and implementation begins.
 
 ## Anti-patterns

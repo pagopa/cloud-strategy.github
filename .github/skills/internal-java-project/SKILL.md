@@ -1,5 +1,5 @@
 ---
-name: internal-project-java
+name: internal-java-project
 description: Use when creating or modifying Java project code and the main concern is Java application structure, tests, or library/service design rather than Spring Boot framework choices.
 ---
 

@@ -160,14 +160,14 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
 
     if suffix == ".py":
         if is_script_path(lowered):
-            add(suggestions, "internal-script-python", "Python operational script path.")
+            add(suggestions, "internal-python-script", "Python operational script path.")
         elif is_python_project_path(lowered):
-            add(suggestions, "internal-project-python", "Python package or application path.")
+            add(suggestions, "internal-python-project", "Python package or application path.")
         else:
             add(suggestions, "internal-python", "Python file path.")
     elif suffix == ".sh":
         if is_script_path(lowered) or name == "run.sh":
-            add(suggestions, "internal-script-bash", "Bash script path.")
+            add(suggestions, "internal-bash-script", "Bash script path.")
         else:
             add(suggestions, "internal-bash", "Shell or Bash file path.")
     elif suffix == ".tf":
@@ -181,12 +181,12 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
         if name in {"package.json", "tsconfig.json"}:
             add(suggestions, "internal-nodejs", "JavaScript, Node.js, or TypeScript metadata path.")
         elif is_node_project_path(lowered):
-            add(suggestions, "internal-project-nodejs", "Node.js or TypeScript project path.")
+            add(suggestions, "internal-nodejs-project", "Node.js or TypeScript project path.")
         else:
             add(suggestions, "internal-nodejs", "JavaScript, Node.js, or TypeScript path.")
     elif suffix == ".java":
         if is_java_project_path(lowered):
-            add(suggestions, "internal-project-java", "Java project path.")
+            add(suggestions, "internal-java-project", "Java project path.")
         else:
             add(suggestions, "internal-java", "Java source path.")
     elif name in {"pom.xml", "build.gradle", "build.gradle.kts"}:

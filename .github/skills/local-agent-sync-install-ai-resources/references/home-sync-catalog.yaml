@@ -714,9 +714,9 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
-- resource_id: internal-project-java
+- resource_id: internal-java-project
   source_family: skills
-  source_path: .github/skills/internal-project-java
+  source_path: .github/skills/internal-java-project
   include_targets:
   - codex
   - copilot
@@ -724,9 +724,9 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
-- resource_id: internal-project-nodejs
+- resource_id: internal-nodejs-project
   source_family: skills
-  source_path: .github/skills/internal-project-nodejs
+  source_path: .github/skills/internal-nodejs-project
   include_targets:
   - codex
   - copilot
@@ -734,9 +734,9 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
-- resource_id: internal-project-python
+- resource_id: internal-python-project
   source_family: skills
-  source_path: .github/skills/internal-project-python
+  source_path: .github/skills/internal-python-project
   include_targets:
   - codex
   - copilot
@@ -754,9 +754,9 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
-- resource_id: internal-script-bash
+- resource_id: internal-bash-script
   source_family: skills
-  source_path: .github/skills/internal-script-bash
+  source_path: .github/skills/internal-bash-script
   include_targets:
   - codex
   - copilot
@@ -764,9 +764,9 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
-- resource_id: internal-script-python
+- resource_id: internal-python-script
   source_family: skills
-  source_path: .github/skills/internal-script-python
+  source_path: .github/skills/internal-python-script
   include_targets:
   - codex
   - copilot
@@ -784,9 +784,9 @@ resources:
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
-- resource_id: internal-spring-boot-development
+- resource_id: internal-java-spring-boot-development
   source_family: skills
-  source_path: .github/skills/internal-spring-boot-development
+  source_path: .github/skills/internal-java-spring-boot-development
   include_targets:
   - codex
   - copilot

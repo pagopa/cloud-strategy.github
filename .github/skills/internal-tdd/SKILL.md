@@ -11,9 +11,9 @@ This index lists every other skill that this file asks the agent to load, route 
 
 - `internal-code-review`: defect-first review of test quality, coverage gaps, and false-confidence seams.
 - `internal-debugging`: root-cause diagnosis before regression tests when the failure is not understood.
-- `internal-project-java`: Java test layout, fixtures, and assertions.
-- `internal-project-nodejs`: Node.js or TypeScript test layout, fixtures, and assertions.
-- `internal-project-python`: Python test layout, fixtures, and assertions.
+- `internal-java-project`: Java test layout, fixtures, and assertions.
+- `internal-nodejs-project`: Node.js or TypeScript test layout, fixtures, and assertions.
+- `internal-python-project`: Python test layout, fixtures, and assertions.
 - `superpowers-test-driven-development`: strict red-green-refactor execution for explicit TDD workflow requests.
 - `superpowers-verification-before-completion`: evidence gate before claiming red-green-refactor or regression coverage.
 
@@ -80,7 +80,7 @@ For Markdown-only, agent, skill, instruction, inventory, or governance-text chan
   red-green-refactor completion or regression coverage.
 - `internal-debugging`: root-cause diagnosis before the regression test when the
   failure is not yet understood.
-- `internal-project-python`, `internal-project-nodejs`, `internal-project-java`,
+- `internal-python-project`, `internal-nodejs-project`, `internal-java-project`,
   and other stack owners: idiomatic test placement, fixtures, and assertions.
 - `internal-code-review`: defect-first review of test quality, coverage gaps,
   and false-confidence seams.

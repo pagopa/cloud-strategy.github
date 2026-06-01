@@ -137,7 +137,7 @@ Include:
   Use when the next need is IAM model, workload identity federation, Org Policy design, or guardrail definition.
 - `internal-gcp-operations`
   Use when the next need is Cloud Monitoring, backup, DR validation, inventory, reporting, preflight, or post-rollout checks.
-- `internal-terraform`, `internal-script-python`, `internal-script-bash`
+- `internal-terraform`, `internal-python-script`, `internal-bash-script`
   Use when the decision is settled and implementation begins.
 
 ## Common mistakes

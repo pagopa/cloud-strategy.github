@@ -1,5 +1,5 @@
 ---
-name: internal-spring-boot-development
+name: internal-java-spring-boot-development
 description: Use when Spring Boot framework choices drive the work, such as controllers, configuration properties, repositories, scheduled jobs, or Spring-specific tests.
 ---
 
@@ -7,7 +7,7 @@ description: Use when Spring Boot framework choices drive the work, such as cont
 
 ## Referenced skills
 
-- `internal-project-java`: Java application, library, service, and package structure depth.
+- `internal-java-project`: Java application, library, service, and package structure depth.
 
 When the task needs general Java readability, build metadata, or JUnit
 baseline guidance beyond Spring-specific concerns, consult `internal-java`.

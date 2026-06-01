@@ -1,5 +1,5 @@
 ---
-name: internal-script-bash
+name: internal-bash-script
 description: Use when creating or modifying standalone Bash scripts or shell utilities with operator-facing behavior, rather than Bash embedded inside composite actions or CI workflows.
 ---
 

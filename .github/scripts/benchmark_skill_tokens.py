@@ -17,14 +17,14 @@ ESTIMATED_TOKEN_BYTES = 4
 
 SCENARIOS = [
     ("Python generic", "tools/check.py", "internal-python"),
-    ("Python script", ".github/scripts/tool.py", "internal-script-python"),
-    ("Python project", "src/app.py", "internal-project-python"),
+    ("Python script", ".github/scripts/tool.py", "internal-python-script"),
+    ("Python project", "src/app.py", "internal-python-project"),
     ("Bash generic", "bin/check.sh", "internal-bash"),
-    ("Bash script", "scripts/demo.sh", "internal-script-bash"),
+    ("Bash script", "scripts/demo.sh", "internal-bash-script"),
     ("Node metadata", "package.json", "internal-nodejs"),
-    ("Node project", "src/index.ts", "internal-project-nodejs"),
+    ("Node project", "src/index.ts", "internal-nodejs-project"),
     ("Java metadata", "pom.xml", "internal-java"),
-    ("Java project", "src/main/java/App.java", "internal-project-java"),
+    ("Java project", "src/main/java/App.java", "internal-java-project"),
     ("YAML generic", "config/app.yaml", "internal-yaml"),
     ("Terraform", "infra/main.tf", "internal-terraform"),
 ]

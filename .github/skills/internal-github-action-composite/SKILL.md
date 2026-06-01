@@ -12,7 +12,7 @@ for every composite action edit; load only the owner proved by the reusable
 unit, extracted script depth, or broader workflow question.
 
 - `internal-github-actions`: GitHub Actions workflow umbrella and reuse-pattern selection.
-- `internal-script-bash`: extracted shell scripts inside composite actions.
+- `internal-bash-script`: extracted shell scripts inside composite actions.
 
 ## When to use
 
@@ -70,7 +70,7 @@ unit, extracted script depth, or broader workflow question.
 ## Cross-references
 
 - **internal-github-actions**: for the umbrella GitHub Actions lane and reuse-pattern selection.
-- **internal-script-bash**: for extracted shell scripts inside the action.
+- **internal-bash-script**: for extracted shell scripts inside the action.
 
 ## Validation checklist
 

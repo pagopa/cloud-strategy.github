@@ -1,5 +1,5 @@
 ---
-name: internal-project-python
+name: internal-python-project
 description: Use when creating or modifying Python package or application code whose primary contract is imported behavior, service boundaries, or framework-owned flows rather than operator-facing scripts.
 ---
 
@@ -14,7 +14,7 @@ description: Use when creating or modifying Python package or application code w
 
 ## When not to use
 
-- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-script-python`.
+- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-python-script`.
 - Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
 
 ## Boundary
