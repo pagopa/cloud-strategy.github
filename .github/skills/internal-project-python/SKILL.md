@@ -5,14 +5,6 @@ description: Use when creating or modifying Python package or application code w
 
 # Python Project Skill
 
-## Referenced skills
-
-- `internal-python`: shared Python runtime, typing, dependency, testing, and readability baseline.
-
-Load `internal-python` only for the shared Python baseline concerns that the
-current project task actually needs. This skill adds application-specific
-guidance only.
-
 ## When to use
 
 - Services, use cases, adapters, packages, and modules in Python applications.
@@ -20,11 +12,25 @@ guidance only.
 - Reusable Python code whose primary contract is imported behavior rather than operator-facing execution.
 - Python application code that should keep logging neutral or framework-native; operator-facing emoji output belongs to CLI, script, or delivery boundaries instead.
 
+## When not to use
+
+- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-script-python`.
+- Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
+
 ## Boundary
 
 - This skill covers structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
 - Small operator-facing tools remain out of scope even when they have multiple files or tests.
 - A `lib/` folder, root-level tests, or multiple entrypoints alone do not make a tool application code.
+
+## Compact Python baseline
+
+- Prefer early returns, guard clauses, clear names, and readable control flow.
+- Add type hints on public or non-trivial function signatures.
+- Keep comments, docstrings, logs, exceptions, and CLI output in English.
+- Use the repository-declared runtime before falling back to ambient `python3`.
+- Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
+- If external packages are introduced, keep exact pins and hashes in the owning requirements file.
 
 ## Application-specific guidance
 
@@ -37,7 +43,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 
 ## Testing
 
-- Follow the repository pytest defaults from `internal-python`.
+- Follow the repository pytest defaults.
 - BDD-like names: `given_when_then` style.
 - Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
 - Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.
@@ -58,17 +64,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 
 ## Common mistakes
 
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Business logic mixed with I/O (DB calls, HTTP) | Untestable, hard to refactor | Extract pure logic into service/domain modules |
-| Mutable default arguments (`def f(items=[])`) | Shared state between calls — classic Python gotcha | Use `None` default + create inside function |
-| Bare `except:` or `except Exception:` | Swallows `KeyboardInterrupt`, `SystemExit` | Catch specific exceptions |
-| No type hints on public API | Hard to understand contracts, no static analysis | Add type hints on function signatures |
-| Tests that depend on execution order | Fragile test suite, non-deterministic failures | Each test must be self-contained |
-| Forcing async into CPU-bound or simple flows | Adds complexity without throughput benefit | Keep it synchronous unless I/O concurrency is the real bottleneck |
-| Mocking internal implementation details | Makes tests brittle and hides real regressions | Mock only true external boundaries |
-| Treating line coverage as the goal | Inflates test volume without improving defect detection | Target coverage around changed behavior and risky paths |
-| God classes with 10+ methods | Hard to test, hard to reason about | Split by responsibility into focused classes |
+Load `references/common-mistakes.md` for the full mistake table.
 
 ## Validation
 

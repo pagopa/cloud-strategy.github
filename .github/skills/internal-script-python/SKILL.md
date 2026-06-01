@@ -5,20 +5,17 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 
 # Python Script Skill
 
-## Referenced skills
-
-- `internal-python`: shared Python runtime, typing, dependency, testing, and readability baseline.
-
-Load `internal-python` only for the shared Python baseline concerns that the
-current script task actually needs. This skill adds standalone-script guidance
-only.
-
 ## When to use
 
 - New standalone Python scripts.
 - Existing Python scripts that need updates.
 - CLI tools, one-off automation, data processing.
 - Small multi-entrypoint toolkits whose primary contract is operator-facing execution rather than reusable package APIs.
+
+## When not to use
+
+- Package, application, service, or framework-owned behavior; use `internal-project-python`.
+- Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
 
 ## Boundary
 
@@ -37,6 +34,15 @@ only.
 - Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
 - Reach for `pathlib`, context managers, and small helper functions before adding framework-like structure to a script.
 - Add machine-readable output such as `--format json` only when the tool has a real automation consumer. Keep text output as the default operator path.
+
+## Compact Python baseline
+
+- Prefer early returns, guard clauses, clear names, and readable control flow.
+- Add type hints on public or non-trivial function signatures.
+- Keep comments, docstrings, logs, exceptions, and CLI output in English.
+- Use the repository-declared runtime before falling back to ambient `python3`.
+- Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
+- If external packages are introduced, keep exact pins and hashes in the owning requirements file.
 
 ## Dependency decision note
 
@@ -68,7 +74,7 @@ Keep these rules visible while drafting:
 
 ## Testing
 
-- Follow the repository pytest defaults from `internal-python`.
+- Follow the repository pytest defaults.
 - Use coverage reports to inspect missing behavior on touched code, not to force blanket 100% coverage.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 - Prefer existing repository commands such as `make lint`, `make test`, or a shared script runner before inventing a one-off validation path.
@@ -81,24 +87,7 @@ Keep these rules visible while drafting:
 
 ## Common mistakes
 
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Missing `if __name__ == "__main__":` guard | Script runs on import, breaks testing and reuse | Always guard the entry point |
-| Using `print()` for errors | Errors go to stdout, mixed with normal output | Use `print(..., file=sys.stderr)` or `logging` |
-| Bare `except:` or `except Exception:` at top level | Swallows all errors including KeyboardInterrupt | Catch specific exceptions; let unexpected ones propagate |
-| Hardcoded file paths | Non-portable across machines | Use `argparse`, `pathlib`, or environment variables |
-| No argument parsing | Caller has to modify script source to change behavior | Use `argparse` for any configurable parameter |
-| Installing deps globally or without hash-locked version pinning | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins and hashes |
-| Adding an empty `requirements.txt` to a stdlib-only tool | Adds noise and implies missing setup steps | Omit `requirements.txt` when the script uses only the standard library |
-| Wrapping a stdlib-only script in Bash | Adds setup indirection without solving a real dependency problem | Document direct `python3 <script>.py` execution and skip the wrapper |
-| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to run the tool safely | Generate a self-contained folder and add `run.sh` plus `requirements.txt` only when external packages are needed |
-| Treating a multi-entrypoint toolkit as app code just because it has `lib/` and tests | Pushes script tooling into the wrong guidance lane | Keep it in `internal-script-python` when the primary contract is still direct execution |
-| Copying the same `.venv` bootstrap and dependency install code into every wrapper | Maintenance drift and inconsistent operator behavior | Use one shared `run.sh` and let thin wrappers delegate to it |
-| Assuming the tool will always run from the repository root | Breaks when operators call it from subdirectories or nested paths | Resolve the repo root from an explicit `--root` or path argument when needed |
-| Adding JSON output without a real machine consumer | Increases surface area and maintenance cost | Keep text output first and add `--format json` only when automation needs it |
-| Defaulting to stdlib without comparing mature libraries | Leaves avoidable boilerplate, edge cases, and custom parsing logic in the script | Write the dependency decision note first and choose the option that makes the final code simpler |
-| Rejecting a useful dependency just to keep dependency count low | Optimizes the wrong thing and increases custom code | Optimize for simpler final code and justified value, not dependency minimization |
-| Forcing async or framework abstractions into a simple tool | Raises complexity without improving the script | Keep the script synchronous and direct unless concurrency is essential |
+Load `references/common-mistakes.md` for the full mistake table.
 
 ## Validation
 

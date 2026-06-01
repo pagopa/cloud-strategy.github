@@ -5,18 +5,24 @@ description: Use when creating or modifying Node.js or TypeScript project code s
 
 # Node.js Project Skill
 
-## Referenced skills
-
-- `internal-nodejs`: shared JavaScript, Node.js, TypeScript, package metadata, and test-stack baseline.
-
-Load `internal-nodejs` only for the shared Node.js and TypeScript baseline
-concerns that the current project task actually needs. This skill adds
-project-specific guidance only.
-
 ## When to use
 
 - Services, handlers, adapters, and utility modules.
 - Refactoring or extending existing Node.js components.
+
+## When not to use
+
+- Generic JSON formatting is the only concern and the file is not Node.js project metadata.
+- Frontend design or browser UI behavior is the dominant task.
+
+## Compact Node.js baseline
+
+- Keep business logic in focused modules, separate from transport adapters and infrastructure wiring.
+- Prefer early returns, clear domain names, and straightforward control flow.
+- Use `node:test` and `node:assert/strict` unless the repository already standardizes on another test framework.
+- Keep `package.json` scripts, engines, and dependency intent explicit.
+- Prefer strict `tsconfig.json` settings unless a documented compatibility reason exists.
+- Preserve the existing module system and package conventions unless the task explicitly changes them.
 
 ## Project-specific guidance
 
@@ -28,7 +34,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 
 ## Test stack
 
-- Follow the repository test-stack defaults from `internal-nodejs`.
+- Follow the repository test-stack defaults.
 - If the repository already uses Jest, stay with local Jest conventions instead of introducing mixed test stacks.
 - For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
 
@@ -48,17 +54,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 
 ## Common mistakes
 
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Mixing async/sync without `await` | Unhandled promise rejections, silent failures | Always `await` async calls; use `async` on the function |
-| Business logic inside route handlers | Untestable, coupled to Express/framework | Extract to service modules, inject dependencies |
-| Using `var` instead of `const`/`let` | Hoisting bugs, scope confusion | Use `const` by default, `let` only when reassignment is needed |
-| Bare `catch(err) {}` that swallows errors | Silent failures, impossible to debug | Log the error and rethrow, or handle specifically |
-| No input validation on API boundaries | Runtime crashes on malformed input | Validate and fail fast at handler entry |
-| Callback-style code in modern Node.js | Hard to read, callback hell | Use async/await with Promises |
-| Mixing Jest and `node:test` in the same project without reason | Duplicated conventions and confusing tooling | Follow the test stack already used by the repository |
-| Changing module system casually | Breaks tooling, imports, and runtime behavior | Stay with the existing ESM/CJS choice unless the migration is explicit |
-| Using `Promise.all` on dependent work | Masks ordering assumptions and makes failures harder to interpret | Keep dependent async steps sequential |
+Load `references/common-mistakes.md` for the full mistake table.
 
 ## Validation
 

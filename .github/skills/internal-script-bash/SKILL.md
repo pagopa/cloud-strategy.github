@@ -5,18 +5,25 @@ description: Use when creating or modifying standalone Bash scripts or shell uti
 
 # Bash Script Skill
 
-## Referenced skills
-
-- `internal-bash`: shared shell safety, quoting, parser, and validation baseline.
-
-Load `internal-bash` only for the shared Bash baseline concerns that the
-current script task actually needs. This skill adds script-specific hardening
-guidance only.
-
 ## When to use
 
 - New Bash scripts.
 - Existing Bash scripts that need updates.
+
+## When not to use
+
+- Bash embedded in GitHub composite actions; use `internal-github-action-composite`.
+- GitHub workflow-level behavior; use `internal-github-actions`.
+
+## Compact Bash baseline
+
+- Prefer `#!/usr/bin/env bash` for repository-owned Bash scripts.
+- Use `set -euo pipefail` unless the script has a documented compatibility reason.
+- Quote variable expansions and use arrays for dynamic commands.
+- Prefer `[[ ]]`, `local`, and readable guard clauses when Bash is available.
+- Use `mktemp` plus cleanup traps for temporary state.
+- Validate required external commands with `command -v` before first use.
+- Use structured parsers such as `jq` or `yq` for JSON and YAML when available.
 
 ## Script-specific hardening guidance
 
@@ -34,12 +41,7 @@ Load `references/templates.md` when you need the starter script, the standard ar
 
 ## Common mistakes
 
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Skipping dependency checks for required commands | Failures surface late and with weaker operator context | Check `command -v` before the first call |
-| Building dynamic commands as strings | Quoting and argument boundaries become fragile | Use arrays plus `printf` for operator-facing formatting |
-| Destructive commands without rerun safety | Repeated execution can corrupt state or surprise operators | Add `--dry-run` and make the mutation idempotent |
-| Rewriting parser or cleanup scaffolding from scratch | Operator UX and failure handling drift between scripts | Reuse the starter and helper patterns from `references/templates.md` |
+Load `references/common-mistakes.md` for the full mistake table.
 
 ## Validation
 
