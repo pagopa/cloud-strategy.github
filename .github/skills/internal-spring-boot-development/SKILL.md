@@ -7,13 +7,12 @@ description: Use when Spring Boot framework choices drive the work, such as cont
 
 ## Referenced skills
 
-- `internal-java`: shared Java readability, build metadata, and JUnit baseline.
 - `internal-project-java`: Java application, library, service, and package structure depth.
 
-Load `internal-java` only for the shared Java baseline concerns that the
-current Spring task actually needs. Use this skill only when the Spring Boot
-framework choices materially affect the design, wiring, testing, or
-configuration.
+When the task needs general Java readability, build metadata, or JUnit
+baseline guidance beyond Spring-specific concerns, consult `internal-java`.
+Use this skill only when the Spring Boot framework choices materially
+affect the design, wiring, testing, or configuration.
 
 ## When to use
 
