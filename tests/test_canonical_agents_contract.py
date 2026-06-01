@@ -347,7 +347,11 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         "This list is an index, not a bundle to preload." in skill_text
     )
     assert (
-        "Always preload only `grill-me` and `internal-agent-support-next-step`."
+        "Load `grill-me` when Gate 0 activates."
+        in skill_text
+    )
+    assert (
+        "Load `internal-agent-support-next-step` when a transition"
         in skill_text
     )
     assert (

@@ -1,6 +1,6 @@
 # Workflow Maps
 
-Use this reference when preserving or validating user-visible operational flows. These maps describe workflow semantics; Copilot agent `handoffs:` buttons are only one UI projection.
+Use this reference when preserving or validating user-visible operational flows.
 
 ## Direct Task / Quick Edit
 
@@ -9,71 +9,30 @@ Use this reference when preserving or validating user-visible operational flows.
 | Clear edit or deterministic  |
 | local task                   |
 +-----------------------------+
-              |
-              v
+               |
+               v
 +-----------------------------+
 | execute mode                 |
 | - applies the change         |
-| - keeps scope local          |
 | - runs concrete checks       |
 +-----------------------------+
-              |
-              v
+               |
+               v
 +-----------------------------+
 | Outcome with validation      |
 | and residual risk            |
 +-----------------------------+
 ```
 
-Use this path when the target state is already known. Do not reopen strategy unless the task reveals real ambiguity.
-
-### Progress Beat
-
-Progress beat (between slices, when end-to-end authorization is active and the task has at least two slices):
-
-- Closed slice and the evidence that closed it.
-- Next slice or explicit stop request.
-- Residual risk delta.
-
-Keep the beat <= 3 lines. It is not a Decision Brief and not a final report; do not include three Checks here.
-
-### Temporary Execution Scratchpad
-
-Use this mini workflow only inside `execute` mode when coordination state is
-cheaper than rediscovering context during a multi-step task.
-
-- Store the scratchpad outside the repository, such as `/tmp`, and never under
-  `tmp/superpowers/`.
-- Treat it as ephemeral execution state, not as a retained plan, approval
-  signal, catalog item, or completion evidence.
-- Skip it for simple one-owner or one-file tasks.
-- Keep it compact enough to refresh at slice boundaries.
-
-```text
-scope:
-anti_scope:
-current_slice:
-acceptance_check:
-touched_files:
-validation_status:
-blockers:
-```
-
-Completion evidence still comes from requested scope coverage, changed-file
-review, and fresh validator or test output.
-
 ### Catalog Fast Path
 
-Use this repository-local variant for small catalog maintenance before escalating to retained planning or review.
+Small catalog maintenance before escalating to retained planning or review.
 
-- Triage `internal-gateway-simple-task` vs `execute` vs `plan` before loading optional references, support skills, or review lenses.
-- Keep the first read budget to one owner file, one nearby validator or test, and one extra reference only when it changes the next safe action.
+- Triage `internal-gateway-simple-task` vs `execute` vs `plan` before loading optional references or review lenses.
+- First read budget: one owner file, one nearby validator or test, one extra reference only when it changes the next safe action.
 - If the target is a repository-owned bundle owner such as `SKILL.md`, inspect the owning bundle root plus relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before closing coverage or intentional non-action.
-- For `plan-only`, use `rg` to identify validators and focused tests; open the
-  test file only when the assertion or failure output can change the plan.
-- Use a short execution loop: targeted `rg` or nearby read, patch, nearby test, `make catalog-fast-check`, then `make github-catalog-validation` once at the end.
+- Use a short loop: targeted `rg` or nearby read, patch, nearby test, `make catalog-fast-check`, then `make github-catalog-validation` once at the end.
 - Add `CATALOG_FAST_INCLUDE_TOKEN_RISKS=1` only when the change touches always-on guidance or shared contracts.
-- Do not open a retained plan or full review mode for one-file or one-owner fixes that fit in the current turn.
 
 ## End-to-End Delivery / Full Cycle
 
@@ -88,23 +47,15 @@ Use this repository-local variant for small catalog maintenance before escalatin
 | define state                   |
 | - minimum evidence pass, then  |
 |   grill-me Gate 0              |
-| - optional brainstorming       |
 | - Definition Brief             |
 | - Pre-Plan Critical Pass       |
-|   (auto after Gate 0 closure)  |
 +-------------------------------+
                |
                v
 +-------------------------------+
 | plan phase                     |
 | - retained plan when justified |
-| - Decision Brief projection    |
-+-------------------------------+
-               |
-               v
-+-------------------------------+
-| visible critical phase when    |
-| reasoning risk needs pressure  |
+| - Decision Brief               |
 +-------------------------------+
                |
                v
@@ -127,15 +78,7 @@ Use this repository-local variant for small catalog maintenance before escalatin
 +-------------------------------+
 ```
 
-The full cycle coordinates visible phases. It is not hidden dispatch between
-wrapper agents.
-
-For the detailed Gate 0 status, closure, blocking, and realignment rules that
-govern every non-`execute` entrypoint, see
-[`gate-0-protocol.md`](gate-0-protocol.md). At map level, keep two invariants
-visible: run the minimum evidence pass before Gate 0, and keep downstream plan,
-review, and retained-plan application blocked until the user closes the active
-`grill-me` loop.
+For Gate 0 status, closure, blocking, and realignment, see [`gate-0-protocol.md`](gate-0-protocol.md). At map level: run the minimum evidence pass before Gate 0, and keep downstream plan, review, and retained-plan application blocked until the user closes the active `grill-me` loop.
 Do not restate the non-waiver or phase-transition details in maps.
 
 ## Idea, Brainstorming & Exploration / Define & Scope
@@ -151,26 +94,8 @@ Do not restate the non-waiver or phase-transition details in maps.
 | define state                   |
 | - smallest evidence pass       |
 | - grill-me Gate 0              |
-| - optional pre-action advisory |
-| - optional brainstorming       |
-| - assumptions surfaced         |
-+-------------------------------+
-               |
-               v
-+-------------------------------+
-| Definition Brief               |
-| Outcome, owner/user, success,  |
-| constraints, anti-scope,       |
-| validation, stop conditions    |
-+-------------------------------+
-               |
-               v
-+-------------------------------+
-| Pre-Plan Critical Pass         |
-| (automatic after Gate 0 +      |
-|  Define Check 1-3)             |
-| - confident: update brief, stop|
-| - reopen: re-enter define      |
+| - Definition Brief             |
+| - Pre-Plan Critical Pass       |
 +-------------------------------+
                |
                v
@@ -180,11 +105,7 @@ Do not restate the non-waiver or phase-transition details in maps.
 +-------------------------------+
 ```
 
-Use `superpowers-brainstorming` only when `define` needs option exploration,
-creative or design-ambiguous work, or design approval before a plan. Keep
-`grill-me` as the required Gate 0 support. Skip brainstorming for deterministic
-repository-owned maintenance when target state and validation are already
-concrete.
+Use `superpowers-brainstorming` only when `define` needs option exploration or design-ambiguous work. Skip for deterministic repository-owned maintenance when target state and validation are concrete.
 
 ## Strategy & Decision Framing / Plan & Design
 
@@ -199,7 +120,6 @@ concrete.
 | define state if needed         |
 | - Gate 0 and Definition Brief  |
 | - Pre-Plan Critical Pass       |
-|   (blocks plan until confident)|
 +-------------------------------+
                |
                v
@@ -207,16 +127,12 @@ concrete.
 | plan mode                      |
 | - requires pre-plan critical:  |
 |   confident                    |
-| - decision frame               |
-| - assumptions and tradeoffs    |
-| - selected direction           |
+| - decision frame and tradeoffs |
 +-------------------------------+
                |
                v
 +-------------------------------+
 | Next-step package              |
-| Owner, scope, action,          |
-| validation, risk               |
 +-------------------------------+
                |
                v
@@ -227,41 +143,29 @@ concrete.
 +-------------------------------+
 ```
 
-Planning output should be compact enough for the next owner or runtime to act without rediscovering the full problem.
-
 ## Review & Quality Gate / Audit & Validate
 
 ```text
 +-----------------------------+
-| Concrete change, artifact,   |
-| or validation result exists  |
+| Concrete change or artifact  |
 +-----------------------------+
-              |
-              v
-+-----------------------------+
-| define pre-review gate      |
-| - scope and evidence check  |
-| - grill-me if decisions can |
-|   change the review output  |
-+-----------------------------+
-              |
-              v
+               |
+               v
 +-----------------------------+
 | review mode                  |
 | - findings first             |
 | - severity and confidence    |
-| - causal layer               |
 | - fix routing plan           |
 +-----------------------------+
-              |
-              v
+               |
+               v
 +-----------------------------+
 | Review Gate                  |
 | - grill-me satisfied         |
 | - critical-master confident  |
 +-----------------------------+
-              |
-              v
+               |
+               v
 +-----------------------------+
 | Route each actionable item   |
 | to execute, plan, critical,  |
@@ -269,52 +173,47 @@ Planning output should be compact enough for the next owner or runtime to act wi
 +-----------------------------+
 ```
 
-Review treats missing validation as a finding, not a footnote.
-
 ## Apply/Execute Plan / Apply Retained Plan
 
 ```text
 +-------------------------------+
-| User invokes skill or wrapper  |
-| with an approved tmp/ folder   |
+| User invokes skill with        |
+| approved tmp/ folder           |
 +-------------------------------+
-              |
-              v
+               |
+               v
 +-------------------------------+
 | apply-plan entrypoint          |
 | - load internal-executing-plans|
 | - ignore questions.md         |
-| - run visible define pre-start |
+| - visible define pre-start     |
 |   Gate 0 before execution      |
 +-------------------------------+
-              |
-              v
+               |
+               v
 +-------------------------------+
 | done-* loop                    |
 | - move completed items         |
 | - preserve ledger coverage     |
-| - delete empty active files    |
 | - continue across plan files   |
-| - stop only for blockers       |
 +-------------------------------+
-              |
-              v
+               |
+               v
 +-------------------------------+
 | Check 1 plan coverage          |
 | Check 2 contract coverage      |
 | Check 3 evidence coverage      |
 +-------------------------------+
-              |
-              v
+               |
+               v
 +-------------------------------+
-| If state is not SHIPPED       |
+| If not SHIPPED                 |
 | - keep live folder + ledger   |
-| - no new done-* markers       |
 | - report State + Continuation |
 | - emit next-step package      |
 +-------------------------------+
-              |
-              v
+               |
+               v
 +-------------------------------+
 | Check 4 close packaging        |
 | (SHIPPED only)                 |
@@ -325,53 +224,22 @@ Review treats missing validation as a finding, not a footnote.
 +-------------------------------+
 ```
 
-Inline plans must be normalized into a retained plan or pass an explicit checkpoint before this path applies. `apply-plan` cannot report `SHIPPED` before `Check 4` verifies the physical close package. Non-`SHIPPED` states keep the retained plan live and must say whether execution is `continuing` or `waiting`.
+`apply-plan` cannot report `SHIPPED` before Check 4 verifies the physical close package. Non-`SHIPPED` states keep the retained plan live and must say whether execution is `continuing` or `waiting`.
 
 ## Runtime Projection
 
 | Runtime surface | Projection |
 | --- | --- |
-| IDE with agent UI (e.g., VS Code + Copilot) | Users may select wrapper agents and approve `handoffs: send=false` buttons. |
-| Web or chat-only runtime | Read this skill and use text next-step packages; no agent UI available. |
-| Model-first surface without agent UI | Treat `SKILL.md` and references as manual operating guidance. |
-| CLI or plugin runtime with skill loading | Load relevant skills directly; do not rely on host-specific agent wrappers. |
-
-The workflow must remain understandable when no runtime can invoke a Copilot custom agent.
+| IDE with agent UI | Users select wrapper agents and approve `handoffs: send=false` buttons. |
+| Web or chat-only | Text next-step packages; no agent UI. |
+| CLI or plugin runtime with skill loading | Load relevant skills directly. |
 
 ## Runtime Context Assembly
 
-Use this section when a host runtime lacks native skill loading or repository
-context assembly.
+For runtimes without native skill loading:
 
-1. Read `AGENTS.md` for repository-wide policy, precedence, owner visibility,
-   and rule placement.
-2. Read `.github/copilot-instructions.md` as the Copilot-native projection when
-   the task may run in a Copilot surface or the projection affects shared
-   behavior.
-3. Select the smallest relevant skill from the prompt, target path, command
-   surface, validation signal, or repository evidence, then read that `SKILL.md`
-   as manual context.
-4. Load only the support skills or references that
-   can change the current phase.
-5. Use repository context docs, generated inventory, retained plans, and
-   `done-*` files as descriptive evidence.
-6. Use fresh tool or validator output before any completion, passing, or
-   no-finding claim.
-
-Keep prompt assembly external to the repository source files. XML-style
-delimiters may separate loaded context at runtime, but source assets remain
-Markdown.
-
-## Context Trust Levels
-
-| Context type | Trust posture |
-| --- | --- |
-| Current user request and system or developer instructions | Binding for the current session, subject to repository policy and safety rules. |
-| `AGENTS.md` and `.github/copilot-instructions.md` | Binding repository-wide policy and Copilot projection for the current repository. |
-| Relevant `SKILL.md` files | Workflow guidance and technical-domain baselines for the selected task owner; narrower owners win on conflicts. |
-| Repository context docs, generated inventory, retained plans, and `done-*` files | Descriptive evidence. Use them to understand state, not as canonical policy. |
-| Imported or comparison material under `tmp/` | Comparative data only unless the active plan names it as evidence. |
-| Tool output, validator output, and terminal logs | Fresh evidence that must be read before completion or no-finding claims. |
-
-When context conflicts, surface the conflict and reconcile it against the
-smallest valid owner instead of silently choosing the longer or newer text.
+1. Read `AGENTS.md` for repository-wide policy.
+2. Read `.github/copilot-instructions.md` as the Copilot-native projection.
+3. Select the smallest relevant skill from the prompt, target path, or validation signal, then read that `SKILL.md`.
+4. Load only support skills that can change the current phase.
+5. Use fresh tool or validator output before any completion claim.

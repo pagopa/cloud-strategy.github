@@ -106,6 +106,73 @@ def build_scenario_report(root: Path) -> list[dict[str, Any]]:
     return reports
 
 
+GATEWAY_SKILL = "internal-gateway-operational-flow"
+
+GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
+    "Direct execute": [GATEWAY_SKILL],
+    "Define Gate 0": [GATEWAY_SKILL, "grill-me", "internal-gateway-operational-flow"],
+    "Define advisory and critical": [
+        GATEWAY_SKILL, "grill-me", "internal-idea-define-advisor",
+        "internal-gateway-critical-master",
+    ],
+    "Plan handoff": [GATEWAY_SKILL, "internal-writing-plans", "internal-agent-support-next-step"],
+    "Approved apply-plan": [GATEWAY_SKILL, "internal-executing-plans"],
+    "Review verdict": [
+        GATEWAY_SKILL, "internal-code-review", "internal-high-level-review",
+        "internal-gateway-critical-master",
+    ],
+}
+
+GATEWAY_OUTPUT_FIELD_SCENARIOS: dict[str, list[str]] = {
+    "Terminal direct execute": ["result", "evidence", "risk"],
+    "Define checkpoint": ["gate", "brief", "validation", "risk", "checkpoint"],
+    "Plan checkpoint": ["decision", "validation", "risk", "checkpoint"],
+    "Non-terminal apply-plan stop": ["state", "continuation", "user_action", "evidence", "next_step"],
+    "Review verdict": ["finding", "confidence", "evidence_gap", "risk", "route"],
+}
+
+
+def build_gateway_report(root: Path) -> dict[str, Any]:
+    core_bytes = len((root / ".github" / "skills" / GATEWAY_SKILL / "SKILL.md").read_bytes())
+    bundle_dir = root / ".github" / "skills" / GATEWAY_SKILL
+    bundle_bytes = sum(
+        len(p.read_bytes()) for p in bundle_dir.rglob("*") if p.is_file()
+    )
+
+    context_scenarios: list[dict[str, Any]] = []
+    for name, skills in GATEWAY_REQUIRED_CONTEXT_SCENARIOS.items():
+        total_bytes = 0
+        for skill_name in skills:
+            skill_path = root / ".github" / "skills" / skill_name / "SKILL.md"
+            if skill_path.exists():
+                total_bytes += len(skill_path.read_bytes())
+        context_scenarios.append({
+            "scenario": name,
+            "required_skills": skills,
+            "bytes": total_bytes,
+            "estimated_tokens": (total_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        })
+
+    output_scenarios: list[dict[str, Any]] = []
+    for name, fields in GATEWAY_OUTPUT_FIELD_SCENARIOS.items():
+        field_bytes = sum(len(f.encode("utf-8")) for f in fields)
+        output_scenarios.append({
+            "scenario": name,
+            "fields": fields,
+            "field_count": len(fields),
+            "field_bytes": field_bytes,
+        })
+
+    return {
+        "core_bytes": core_bytes,
+        "core_estimated_tokens": (core_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "bundle_bytes": bundle_bytes,
+        "bundle_estimated_tokens": (bundle_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "required_context_scenarios": context_scenarios,
+        "output_field_scenarios": output_scenarios,
+    }
+
+
 def build_description_report(root: Path) -> list[dict[str, Any]]:
     reports: list[dict[str, Any]] = []
     skills_root = root / ".github" / "skills"
@@ -143,18 +210,21 @@ def main() -> int:
 
     scenario_reports = build_scenario_report(root)
     description_reports = build_description_report(root)
+    gateway_report = build_gateway_report(root)
 
-    # Sort descriptions by token count descending
     description_reports.sort(key=lambda r: r["description_tokens"], reverse=True)
 
     output = {
         "scenarios": scenario_reports,
         "descriptions": description_reports,
+        "gateway": gateway_report,
         "summary": {
             "total_scenarios": len(scenario_reports),
             "total_skills_measured": len(description_reports),
             "highest_description_tokens": description_reports[0]["description_tokens"] if description_reports else 0,
             "highest_scenario_proxy": max((r["scenario_proxy"] for r in scenario_reports), default=0),
+            "gateway_core_bytes": gateway_report["core_bytes"],
+            "gateway_bundle_bytes": gateway_report["bundle_bytes"],
         },
     }
 

@@ -47,6 +47,14 @@ AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
 )
 
 
+GATEWAY_CORE_SKILL_PATH = ".github/skills/internal-gateway-operational-flow/SKILL.md"
+GATEWAY_CORE_BYTE_BUDGET = 16286
+GATEWAY_REQUIRED_CONTEXT_BYTE_BUDGET = 30000
+GATEWAY_UNIVERSAL_PRELOAD_MARKERS = (
+    "Always preload only `grill-me` and `internal-agent-support-next-step`.",
+)
+
+
 def detect_token_risks(root: Path) -> list[Finding]:
     findings: list[Finding] = []
     findings.extend(check_bridge_overlap(root))
@@ -61,6 +69,8 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_internal_agent_skill_list_size(root))
     findings.extend(check_internal_root_policy_overlap(root))
     findings.extend(check_paired_agent_skill_overlap(root))
+    findings.extend(check_gateway_core_budget(root))
+    findings.extend(check_gateway_universal_preload_regression(root))
     return sorted(findings, key=finding_sort_key)
 
 
@@ -513,6 +523,61 @@ def check_paired_agent_skill_overlap(root: Path) -> list[Finding]:
             )
         )
     return findings
+
+
+def check_gateway_core_budget(root: Path) -> list[Finding]:
+    path = root / GATEWAY_CORE_SKILL_PATH
+    if not path.exists():
+        return []
+
+    byte_count = len(path.read_bytes())
+    if byte_count <= GATEWAY_CORE_BYTE_BUDGET:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="gateway-core-byte-budget",
+            path=GATEWAY_CORE_SKILL_PATH,
+            message=(
+                "The operational-flow core SKILL.md exceeds its structural byte budget "
+                f"({byte_count} bytes, target {GATEWAY_CORE_BYTE_BUDGET})."
+            ),
+            suggestion=(
+                "Compress the core around exclusive reference ownership and phase-local "
+                "support loading; do not delete useful lazy depth solely for bundle size."
+            ),
+        )
+    ]
+
+
+def check_gateway_universal_preload_regression(root: Path) -> list[Finding]:
+    path = root / GATEWAY_CORE_SKILL_PATH
+    if not path.exists():
+        return []
+
+    text = read_text(path)
+    found_markers = [
+        marker for marker in GATEWAY_UNIVERSAL_PRELOAD_MARKERS if marker in text
+    ]
+    if not found_markers:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="gateway-universal-preload-regression",
+            path=GATEWAY_CORE_SKILL_PATH,
+            message=(
+                "The operational-flow core still contains universal preload instructions "
+                f"that should be phase-local: {', '.join(repr(m) for m in found_markers)}."
+            ),
+            suggestion=(
+                "Load grill-me when Gate 0 activates and internal-agent-support-next-step "
+                "when a transition package is needed; do not preload universally."
+            ),
+        )
+    ]
 
 
 def extract_section_bullets(text: str, heading: str) -> list[str]:
