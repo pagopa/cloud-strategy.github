@@ -103,8 +103,6 @@ def detect_kind(relative_path: str) -> str:
         return "skill"
     if relative_path.startswith(".github/agents/") and relative_path.endswith(".agent.md"):
         return "agent"
-    if relative_path.startswith(".github/instructions/") and relative_path.endswith(".instructions.md"):
-        return "instruction"
     return "file"
 
 

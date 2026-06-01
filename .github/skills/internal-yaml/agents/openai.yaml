@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal YAML"
+  short_description: "YAML formatting and routing"
+  default_prompt: "Use $internal-yaml for YAML formatting, schema awareness, or domain-owner routing."

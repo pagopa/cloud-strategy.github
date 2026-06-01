@@ -119,9 +119,9 @@ def make_skill(root: Path, skill_name: str, content: str) -> Path:
     write_file(
         skill_dir / "agents" / "openai.yaml",
         "interface:\n"
-        f"  display_name: \"{skill_name}\"\n"
-        "  short_description: \"Test skill\"\n"
-        f"  default_prompt: \"Use ${skill_name}.\"\n",
+        f'  display_name: "{skill_name}"\n'
+        '  short_description: "Test skill"\n'
+        f'  default_prompt: "Use ${skill_name}."\n',
     )
     return skill_dir
 
@@ -154,7 +154,9 @@ def test_build_plan_detects_repo_to_home_direction(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    source_skill = make_skill(source / ".github" / "skills", "beta-skill", "# Beta source\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "beta-skill", "# Beta source\n"
+    )
     home_skill = make_skill(home / ".agents" / "skills", "beta-skill", "# Beta home\n")
     set_tree_mtime(home_skill, 100.0)
     set_tree_mtime(source_skill, 200.0)
@@ -172,8 +174,12 @@ def test_build_plan_detects_home_to_repo_direction(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    source_skill = make_skill(source / ".github" / "skills", "gamma-skill", "# Gamma source\n")
-    home_skill = make_skill(home / ".agents" / "skills", "gamma-skill", "# Gamma home\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "gamma-skill", "# Gamma source\n"
+    )
+    home_skill = make_skill(
+        home / ".agents" / "skills", "gamma-skill", "# Gamma home\n"
+    )
     set_tree_mtime(source_skill, 100.0)
     set_tree_mtime(home_skill, 200.0)
 
@@ -190,8 +196,12 @@ def test_build_plan_blocks_equal_mtime(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    source_skill = make_skill(source / ".github" / "skills", "equal-skill", "# Equal source\n")
-    home_skill = make_skill(home / ".agents" / "skills", "equal-skill", "# Equal home\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "equal-skill", "# Equal source\n"
+    )
+    home_skill = make_skill(
+        home / ".agents" / "skills", "equal-skill", "# Equal home\n"
+    )
     set_tree_mtime(source_skill, 100.0)
     set_tree_mtime(home_skill, 100.0)
 
@@ -244,7 +254,9 @@ def test_apply_blocks_dirty_repository_without_writes(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    source_skill = make_skill(source / ".github" / "skills", "dirty-skill", "# Source\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "dirty-skill", "# Source\n"
+    )
     home_skill = make_skill(home / ".agents" / "skills", "dirty-skill", "# Home\n")
     set_tree_mtime(home_skill, 100.0)
     set_tree_mtime(source_skill, 200.0)
@@ -262,7 +274,9 @@ def test_apply_repo_to_home_converges(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    source_skill = make_skill(source / ".github" / "skills", "apply-skill", "# Source\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "apply-skill", "# Source\n"
+    )
     home_skill = make_skill(home / ".agents" / "skills", "apply-skill", "# Home\n")
     set_tree_mtime(home_skill, 100.0)
     set_tree_mtime(source_skill, 200.0)
@@ -304,7 +318,9 @@ def test_apply_reports_verify_failure_with_stable_code(
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    source_skill = make_skill(source / ".github" / "skills", "verify-skill", "# Source\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "verify-skill", "# Source\n"
+    )
     home_skill = make_skill(home / ".agents" / "skills", "verify-skill", "# Home\n")
     set_tree_mtime(home_skill, 100.0)
     set_tree_mtime(source_skill, 200.0)
@@ -332,7 +348,9 @@ def test_apply_reports_residual_drift_with_stable_code(
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
-    source_skill = make_skill(source / ".github" / "skills", "residual-skill", "# Source\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "residual-skill", "# Source\n"
+    )
     home_skill = make_skill(home / ".agents" / "skills", "residual-skill", "# Home\n")
     set_tree_mtime(home_skill, 100.0)
     set_tree_mtime(source_skill, 200.0)
@@ -359,8 +377,12 @@ def test_apply_reports_residual_drift_with_stable_code(
                         skill_name="residual-skill",
                         drift_type="drift",
                         direction="repo-to-home",
-                        repo_path=(source_root / ".github" / "skills" / "residual-skill").as_posix(),
-                        home_path=(home_root / ".agents" / "skills" / "residual-skill").as_posix(),
+                        repo_path=(
+                            source_root / ".github" / "skills" / "residual-skill"
+                        ).as_posix(),
+                        home_path=(
+                            home_root / ".agents" / "skills" / "residual-skill"
+                        ).as_posix(),
                     )
                 ],
                 blocked_codes=[],

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Makefile"
+  short_description: "Makefile targets and recipes"
+  default_prompt: "Use $internal-makefile for Makefile or .mk target, recipe, and validation changes."

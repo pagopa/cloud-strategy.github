@@ -4,13 +4,15 @@
 
 This repository is the source baseline for reusable GitHub Copilot customization assets synced into consumer repositories.
 
-## Instruction architecture
+## Skill-first architecture
 
 - `AGENTS.md` is the strategic entrypoint, precedence anchor, and cross-surface bridge.
 - `.github/copilot-instructions.md` is the repo-wide Copilot projection for native Copilot flows.
-- `.github/instructions/*.instructions.md` are path-specific or domain-specific projections.
+- `.github/skills/` owns reusable technical baselines, workflow depth, and specialist procedures.
+- `.github/agents/` owns wrapper selection, tool scope, and user-visible handoff UX.
+- Prompts, validators, docs, and owned files carry their own local contracts when they are the smallest valid owner.
 - `.github/INVENTORY.md` owns the live catalog of managed assets; do not move volatile inventory into `AGENTS.md`.
-- The default authoring language for repository artifacts is English unless a scoped instruction explicitly overrides it.
+- The default authoring language for repository artifacts is English unless a narrower owned file or local exception explicitly overrides it.
 
 ## Naming conventions
 
@@ -21,9 +23,9 @@ This repository is the source baseline for reusable GitHub Copilot customization
 
 ## Adding or updating assets
 
-- Instructions: keep frontmatter `description` and `applyTo`, use repository-agnostic wording, and avoid stack duplication already covered by a skill.
 - Skills: keep `name`, `description`, `## When to use`, and one validation/testing section.
 - Agents: keep `name`, `description`, `tools`, and the current section structure used in this repository: `## Role`, `## Mandatory Engine Skills`, `## Optional Support Skills`, `## Core Rules`, `## Routing Rules`, `## Boundary Definition`, and `## Output Expectations`.
+- Prompts: keep frontmatter `name`, `agent`, and `description`, plus explicit input placeholders.
 
 ## Validation before PR
 

@@ -40,7 +40,9 @@ def assert_no_plan_procedure_markers_in_agents(text: str) -> None:
         "continue through the remaining numbered plan files",
     ]
     for marker in disallowed_in_agents:
-        assert marker not in text, f"AGENTS.md must not contain plan procedure marker: {marker}"
+        assert marker not in text, (
+            f"AGENTS.md must not contain plan procedure marker: {marker}"
+        )
 
 
 def assert_no_plan_procedure_markers_in_copilot(text: str) -> None:
@@ -57,7 +59,9 @@ def assert_no_plan_procedure_markers_in_copilot(text: str) -> None:
         "continue through the remaining numbered plan files",
     ]
     for marker in disallowed_in_copilot:
-        assert marker not in text, f"copilot-instructions.md must not contain plan procedure marker: {marker}"
+        assert marker not in text, (
+            f"copilot-instructions.md must not contain plan procedure marker: {marker}"
+        )
 
 
 def test_root_policy_files_define_repository_plan_defaults() -> None:
@@ -108,7 +112,7 @@ def test_root_policy_files_define_repository_plan_defaults() -> None:
         "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical" in copilot_text
     )
     assert (
-        "dedicated retained-plan skills and scoped lessons instructions" in copilot_text
+        "dedicated retained-plan skills and lesson-codification owners" in copilot_text
     )
     assert (
         "Use plan mode when ambiguity, ownership, rollout, validation, or "
@@ -198,7 +202,9 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "English" in writing_skill_text
     assert "Use English file names" in writing_skill_text
     assert "`Recommended use`" in writing_skill_text
-    assert "`Plan profile`" in writing_skill_text or "Plan profile" in writing_skill_text
+    assert (
+        "`Plan profile`" in writing_skill_text or "Plan profile" in writing_skill_text
+    )
     assert "`File map and role`" in writing_skill_text
     assert "`Initial evidence pass`" in writing_skill_text
     assert "`Reading budget`" in writing_skill_text
@@ -273,9 +279,7 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
     assert "For `extended` profiles" in scope_challenge_text
     assert "For `compact` profiles" in scope_challenge_text
     assert "`observable acceptance`: Which diff" in scope_challenge_text
-    assert (
-        "`02-source-item-ledger.md` or an equivalently" in scope_challenge_text
-    )
+    assert "`02-source-item-ledger.md` or an equivalently" in scope_challenge_text
     assert (
         "Coverage: <ledger coverage, explicit not-applicable, or blocker>"
         in scope_challenge_text
@@ -288,9 +292,7 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
         "For non-trivial retained plans, `READY` also requires explicit source-item"
         in scope_challenge_text
     )
-    assert (
-        "Profile: <compact, extended, or legacy>" in scope_challenge_text
-    )
+    assert "Profile: <compact, extended, or legacy>" in scope_challenge_text
 
     assert "| Semantic coverage |" in review_gate_text
     assert "| Summary focus |" in review_gate_text

@@ -4,27 +4,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 ## Instructions
 
-- `.github/instructions/awesome-copilot-azure-devops-pipelines.instructions.md`
-- `.github/instructions/awesome-copilot-go.instructions.md`
-- `.github/instructions/awesome-copilot-kubernetes-manifests.instructions.md`
-- `.github/instructions/awesome-copilot-shell.instructions.md`
-- `.github/instructions/internal-bash.instructions.md`
-- `.github/instructions/internal-codeowners.instructions.md`
-- `.github/instructions/internal-copilot-agent-authoring.instructions.md`
-- `.github/instructions/internal-copilot-skill-reference-authoring.instructions.md`
-- `.github/instructions/internal-docker.instructions.md`
-- `.github/instructions/internal-github-action-composite.instructions.md`
-- `.github/instructions/internal-github-actions.instructions.md`
-- `.github/instructions/internal-java.instructions.md`
-- `.github/instructions/internal-json.instructions.md`
-- `.github/instructions/internal-lambda.instructions.md`
-- `.github/instructions/internal-lessons-learned.instructions.md`
-- `.github/instructions/internal-makefile.instructions.md`
-- `.github/instructions/internal-markdown.instructions.md`
-- `.github/instructions/internal-nodejs.instructions.md`
-- `.github/instructions/internal-python.instructions.md`
-- `.github/instructions/internal-terraform.instructions.md`
-- `.github/instructions/internal-yaml.instructions.md`
+No instruction files currently ship in the live catalog.
 
 ## Skills
 
@@ -50,22 +30,24 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
 - `.github/skills/internal-agent-support-next-step/SKILL.md`
+- `.github/skills/internal-ai-resource-review/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
+- `.github/skills/internal-aws-lambda/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
 - `.github/skills/internal-aws-organization-structure/SKILL.md`
-- `.github/skills/internal-aws-serverless/SKILL.md`
 - `.github/skills/internal-aws-strategic/SKILL.md`
+- `.github/skills/internal-azure-devops/SKILL.md`
 - `.github/skills/internal-azure-governance/SKILL.md`
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
 - `.github/skills/internal-azure-strategic/SKILL.md`
+- `.github/skills/internal-bash/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-copilot-docs-research/SKILL.md`
-- `.github/skills/internal-copilot-instructions-creator/SKILL.md`
 - `.github/skills/internal-ddd/SKILL.md`
 - `.github/skills/internal-debugging/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
@@ -84,17 +66,24 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-operations/SKILL.md`
 - `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
+- `.github/skills/internal-go/SKILL.md`
 - `.github/skills/internal-graphify/SKILL.md`
 - `.github/skills/internal-high-level-review/SKILL.md`
 - `.github/skills/internal-idea-define-advisor/SKILL.md`
+- `.github/skills/internal-java/SKILL.md`
+- `.github/skills/internal-json/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
 - `.github/skills/internal-kubernetes/SKILL.md`
 - `.github/skills/internal-lesson-codification/SKILL.md`
+- `.github/skills/internal-makefile/SKILL.md`
+- `.github/skills/internal-markdown/SKILL.md`
+- `.github/skills/internal-nodejs/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
 - `.github/skills/internal-project-java/SKILL.md`
 - `.github/skills/internal-project-nodejs/SKILL.md`
 - `.github/skills/internal-project-python/SKILL.md`
+- `.github/skills/internal-python/SKILL.md`
 - `.github/skills/internal-script-bash/SKILL.md`
 - `.github/skills/internal-script-python/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
@@ -102,6 +91,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-tdd/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/internal-writing-plans/SKILL.md`
+- `.github/skills/internal-yaml/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`

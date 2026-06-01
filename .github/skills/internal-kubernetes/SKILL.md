@@ -5,6 +5,16 @@ description: Use when the task involves Kubernetes but the winning lane is not o
 
 # Internal Kubernetes
 
+## Referenced skills
+
+Treat the referenced skills below as on-demand owners. Do not preload the whole
+Kubernetes family; load them only when the request proves whether syntax,
+workload delivery, or platform architecture is the real problem.
+
+- `internal-yaml`: YAML formatting and schema-awareness baseline when manifest syntax itself is the blocker.
+- `internal-kubernetes-deployment`: workload manifests, service exposure, probes, autoscaling, rollout strategy, and production hardening when delivery semantics are the task.
+- `antigravity-kubernetes-architect`: Kubernetes platform architecture, GitOps operating model, service mesh, and multi-cluster strategy when platform shape is the task.
+
 Use this skill to choose the right Kubernetes lane before drafting guidance or editing delivery assets.
 
 ## When to use
@@ -20,7 +30,7 @@ Use this skill to choose the right Kubernetes lane before drafting guidance or e
 2. Pick the winning Kubernetes asset.
    Use `antigravity-kubernetes-architect` for platform architecture and `internal-kubernetes-deployment` for workload manifests, rollout safety, and production hardening.
 3. Keep adjacent guidance scoped.
-   Let `awesome-copilot-kubernetes-manifests.instructions.md` auto-apply on manifest files instead of restating YAML rules here.
+   Use `internal-yaml` only for YAML formatting or parser concerns; use the deployment or architecture owner for Kubernetes semantics.
 4. Return one clear next lane.
    State which skill wins, why it wins, and what validation or artifact should follow.
 
@@ -43,6 +53,6 @@ Load `references/routing-matrix.md` when the request mixes platform, manifest, a
 ## Output requirements
 
 - selected Kubernetes lane
-- winning skill or instruction and why
+- winning skill and why
 - key assumptions or missing inputs
 - next artifact or validation step

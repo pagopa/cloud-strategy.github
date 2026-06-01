@@ -154,7 +154,7 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 - Use `scripts/run.sh` when a portable skill-local environment is needed; it installs the locked `PyYAML` dependency from `scripts/requirements.txt`.
 - Keep library behavior inside `scripts/home_syncing.py`, bisync logic inside `scripts/bisync_skills.py`, and reference loading inside `scripts/home_sync_contract.py`.
 
-## Safety Gates
+## Install Safety Gates
 
 - Block unmanaged overwrite.
 - Block managed overwrite when the target content diverged from the last recorded manifest.
@@ -164,7 +164,7 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 - Keep the canonical error taxonomy in `references/error-codes.md`.
 - Keep the doctor checklist in `references/doctor-checks.md`.
 
-## Conflict Resolution
+## Install Conflict Resolution
 
 When plan or audit reports blocked paths, resolve them before apply:
 

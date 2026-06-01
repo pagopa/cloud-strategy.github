@@ -5,7 +5,7 @@
 ## Where Adjacent Content Belongs
 
 - Use `docs/01-architecture.md` for architecture, boundaries, flows, and validation surfaces.
-- Use `AGENTS.md`, `.github/copilot-instructions.md`, scoped instructions, skills, or agents for binding rules.
+- Use `AGENTS.md`, `.github/copilot-instructions.md`, skills, agents, prompts, validators, or owned files for binding rules.
 - Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Use `LESSONS_LEARNED.md` for lessons that are still pending codification.
 
@@ -31,4 +31,4 @@ This file is repo-specific and descriptive. It may inform interpretation, but it
 
 ## Non-Policy Notes
 
-- Move binding behavior to `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/skills/`, or the appropriate local override surface.
+- Move binding behavior to `AGENTS.md`, `.github/copilot-instructions.md`, `.github/skills/`, agents, prompts, validators, owned files, or the appropriate local override surface.

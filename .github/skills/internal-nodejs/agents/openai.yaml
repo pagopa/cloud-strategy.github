@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Node.js"
+  short_description: "Node.js and TypeScript routing"
+  default_prompt: "Use $internal-nodejs for JavaScript, Node.js, TypeScript, package.json, or tsconfig.json work."

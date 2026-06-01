@@ -9,12 +9,17 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
+def section_between(body: str, heading: str) -> str:
+    section = body.split(heading, 1)[1]
+    return section.split("\n## ", 1)[0]
+
+
 def test_github_pr_skill_owns_pr_merge_and_terminal_state_guardrails() -> None:
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
     github_pr_skill_text = read_text(".github/skills/internal-github-pr/SKILL.md")
-    codeowners_instruction_text = read_text(
-        ".github/instructions/internal-codeowners.instructions.md"
+    github_governance_skill_text = read_text(
+        ".github/skills/internal-github-governance/SKILL.md"
     )
     inventory_text = read_text(".github/INVENTORY.md")
     internal_contract_text = read_text("INTERNAL_CONTRACT.md")
@@ -29,10 +34,10 @@ def test_github_pr_skill_owns_pr_merge_and_terminal_state_guardrails() -> None:
     )
     assert "`gh pr view --json state,mergedAt`" in github_pr_skill_text
     assert "Follow `AGENTS.md` for repository workflow reminders" not in copilot_text
-    assert "@your-org/platform-governance-team" in codeowners_instruction_text
+    assert "@your-org/platform-governance-team" in github_governance_skill_text
     assert ".github/skills/internal-github-pr/SKILL.md" in inventory_text
     assert ".github/skills/internal-pr-editor/SKILL.md" not in inventory_text
-    assert ".github/instructions/internal-codeowners.instructions.md" in inventory_text
+    assert ".github/skills/internal-github-governance/SKILL.md" in inventory_text
 
     assert (
         "repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-owned"
@@ -54,17 +59,84 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     assert "smallest valid owner" in agents_text
 
     assert "## Context And Scope" in agents_text
-    assert ".github/instructions/*.instructions.md" in agents_text
-    assert "`applyTo` metadata" in agents_text
-    assert "Read every matching instruction as manual context" in agents_text
-    assert "Co-load relevant skills" in agents_text
-    assert "skill procedure conflicts" in agents_text
+    assert "select the smallest relevant skill" in agents_text
+    assert "then read that `SKILL.md` as manual context" in agents_text
+    assert "Load umbrella domain skills before specialist depth" in agents_text
+    assert "Co-load specialist skills or bundle references only when" in agents_text
+    assert "Use the smallest valid owner to resolve conflicts" in agents_text
 
     assert (
-        "Load every `.github/instructions/*.instructions.md` file whose `applyTo` metadata or task domain matches"
+        "Select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence"
         in copilot_text
     )
-    assert "Load task-specific skills only when workflow depth" in copilot_text
+    assert (
+        "Load task-specific skills or references only when workflow depth"
+        in copilot_text
+    )
+
+
+def test_lightweight_skill_references_stay_on_demand() -> None:
+    checklist_text = read_text(
+        ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
+    )
+    support_routing_text = read_text(
+        ".github/skills/internal-gateway-simple-task/references/support-routing.md"
+    )
+
+    assert (
+        "`## Referenced skills` as an audit index, not a preload bundle"
+        in checklist_text
+    )
+    assert (
+        "Add file extensions or path tokens in `description:` only when they materially disambiguate the owner"
+        in checklist_text
+    )
+    assert (
+        "Treat a support skill's `## Referenced skills` section as an owner index"
+        in support_routing_text
+    )
+    assert "prefer the single narrowest owner proved by that" in support_routing_text
+
+    lightweight_skill_paths = (
+        ".github/skills/internal-bash/SKILL.md",
+        ".github/skills/internal-go/SKILL.md",
+        ".github/skills/internal-java/SKILL.md",
+        ".github/skills/internal-nodejs/SKILL.md",
+        ".github/skills/internal-python/SKILL.md",
+        ".github/skills/internal-yaml/SKILL.md",
+        ".github/skills/internal-kubernetes/SKILL.md",
+        ".github/skills/internal-terraform/SKILL.md",
+    )
+
+    for relative_path in lightweight_skill_paths:
+        referenced_section = section_between(
+            read_text(relative_path), "## Referenced skills"
+        )
+
+        assert "on-demand" in referenced_section
+        assert "Do not preload" in referenced_section
+        assert "only when" in referenced_section
+
+
+def test_lightweight_workflow_and_review_skills_keep_references_on_demand() -> None:
+    skill_paths = (
+        ".github/skills/internal-idea-define-advisor/SKILL.md",
+        ".github/skills/internal-debugging/SKILL.md",
+        ".github/skills/internal-high-level-review/SKILL.md",
+        ".github/skills/internal-github-pr/SKILL.md",
+        ".github/skills/internal-github-actions/SKILL.md",
+        ".github/skills/internal-github-action-composite/SKILL.md",
+        ".github/skills/internal-azure-devops/SKILL.md",
+    )
+
+    for relative_path in skill_paths:
+        referenced_section = section_between(
+            read_text(relative_path), "## Referenced skills"
+        )
+
+        assert "on-demand" in referenced_section
+        assert "Do not preload" in referenced_section
+        assert "only the owner proved" in referenced_section
 
 
 def test_terraform_lock_matrix_policy_stays_visible() -> None:
@@ -109,27 +181,19 @@ def test_dependabot_tracks_source_repository_dependency_manifests() -> None:
     assert "pre-commit-minor-patch" in updates[("pre-commit", "/")]["groups"]
 
 
-def test_recent_lessons_are_codified_in_scoped_owners() -> None:
-    python_instruction_text = read_text(
-        ".github/instructions/internal-python.instructions.md"
-    )
-    github_actions_instruction_text = read_text(
-        ".github/instructions/internal-github-actions.instructions.md"
-    )
+def test_recent_lessons_are_codified_in_skill_owners() -> None:
+    python_skill_text = read_text(".github/skills/internal-python/SKILL.md")
     github_actions_skill_text = read_text(
         ".github/skills/internal-github-actions/SKILL.md"
     )
 
-    assert (
-        "modify `sys.path` before importing a standalone script"
-        in python_instruction_text
-    )
-    assert "# noqa: E402" in python_instruction_text
-    assert "remove truly unused imports or variables" in python_instruction_text
+    assert "modify `sys.path` before importing a standalone script" in python_skill_text
+    assert "# noqa: E402" in python_skill_text
+    assert "remove truly unused imports or variables" in python_skill_text
 
     assert (
-        "Do not place runner-derived paths such as `runner.temp` in workflow-root `env`"
-        in github_actions_instruction_text
+        "Using `runner.temp` or other runner-scoped contexts in workflow-root `env`"
+        in github_actions_skill_text
     )
     assert (
         "Smoke-testing a repository wrapper around an external CLI"

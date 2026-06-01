@@ -8,6 +8,9 @@ description: Use when a bug, test failure, build failure, validator drift, sync 
 ## Referenced skills
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
+Treat the referenced skills below as on-demand supports. Do not preload them
+for every failure loop; load only the owner proved by the active diagnosis,
+next claim, or validated handoff.
 
 - `internal-code-review`: defect-first review when diagnosis exposes unsafe code or missing tests.
 - `internal-performance-optimization`: performance owner when measured slowness or throughput is primary.

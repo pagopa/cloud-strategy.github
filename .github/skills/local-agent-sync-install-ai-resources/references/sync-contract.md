@@ -109,7 +109,7 @@ Prefer the bundled scripts when the skill is direct-copied into a home runtime. 
 
 The install lane provides unidirectional `repo -> home` materialization of allowlisted resources.
 
-### Modes
+### Install Modes
 
 - `plan`: dry run that produces a readable diff and machine-readable state. Read-only.
 - `audit`: compare source, manifest, and managed target paths. Read-only.
@@ -135,7 +135,7 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 
 The `bisync` lane provides explicit bidirectional reconciliation between `.github/skills/` and `~/.agents/skills/`. It is a separate lane from install sync.
 
-### Modes
+### Bisync Modes
 
 - `bisync plan`: detect drift. Read-only. Produces a drift list with entries for `repo-to-home`, `home-to-repo`, `only-repo`, `only-home`, and `equal-mtime`.
 - `bisync apply`: resolve drift by copying winner to loser. Writes to both repo and home as needed.

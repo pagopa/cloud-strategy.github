@@ -34,6 +34,9 @@ TEST_OWNERS = {
         ".github/scripts/lib/syncing.py",
         ".github/scripts/lib/token_risks.py",
     },
+    "tests/github/scripts/test_benchmark_skill_tokens.py": {
+        ".github/scripts/benchmark_skill_tokens.py",
+    },
     "tests/github/scripts/lib/test_retained_plans.py": {
         ".github/scripts/lib/retained_plans.py",
     },

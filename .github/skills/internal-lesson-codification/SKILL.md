@@ -7,7 +7,7 @@ description: Use before adding, updating, or codifying retained lessons, LESSONS
 
 Use this skill to decide how a newly discovered lesson should be handled before editing `LESSONS_LEARNED.md` or any always-on guidance.
 
-This skill owns the codification workflow. It does not own the ledger row format, which stays in `LESSONS_LEARNED.md` and `.github/instructions/internal-lessons-learned.instructions.md`.
+This skill owns the codification workflow. It does not own the ledger row format, which stays in `LESSONS_LEARNED.md`.
 
 ## When to use
 

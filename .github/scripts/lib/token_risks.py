@@ -21,6 +21,8 @@ ROOT_POLICY_MARKERS = ("AGENTS.md", ".github/copilot-instructions.md", ".github/
 INVENTORY_LINE_PATTERN = re.compile(r"^- `?\.github/[^`]+`?(?::|\s*$)")
 IMPORTED_SKILL_DESCRIPTION_LIMIT = 500
 ESTIMATED_TOKEN_BYTES = 4
+DELEGATED_REVIEW_PROMPT_PATH = ".github/prompts/internal-review-ai-resources.prompt.md"
+DELEGATED_REVIEW_PROMPT_TOKEN_TARGET = 1100
 ROOT_ALWAYS_ON_PATHS = ("AGENTS.md", ".github/copilot-instructions.md")
 ROOT_ALWAYS_ON_TOKEN_TARGET = 4000
 COPILOT_CODE_REVIEW_CHAR_LIMIT = 4000
@@ -28,7 +30,7 @@ COPILOT_REVIEW_WINDOW_REQUIRED_MARKERS = (
     "first 4,000 characters",
     "least privilege",
     "no hardcoded secrets",
-    "Apply only the instruction files relevant",
+    "Select the smallest relevant skill",
     "Run the applicable validation",
 )
 AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
@@ -45,11 +47,20 @@ AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
 )
 
 
+GATEWAY_CORE_SKILL_PATH = ".github/skills/internal-gateway-operational-flow/SKILL.md"
+GATEWAY_CORE_BYTE_BUDGET = 16286
+GATEWAY_REQUIRED_CONTEXT_BYTE_BUDGET = 30000
+GATEWAY_UNIVERSAL_PRELOAD_MARKERS = (
+    "Always preload only `grill-me` and `internal-agent-support-next-step`.",
+)
+
+
 def detect_token_risks(root: Path) -> list[Finding]:
     findings: list[Finding] = []
     findings.extend(check_bridge_overlap(root))
     findings.extend(check_agents_operational_procedure_markers(root))
     findings.extend(check_root_always_on_budget(root))
+    findings.extend(check_delegated_review_prompt_budget(root))
     findings.extend(check_copilot_review_window(root))
     findings.extend(check_inventory_dumps(root))
     findings.extend(check_duplicate_markdown_bodies(root))
@@ -57,8 +68,9 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_skill_description_trigger_collisions(root))
     findings.extend(check_internal_agent_skill_list_size(root))
     findings.extend(check_internal_root_policy_overlap(root))
-    findings.extend(check_instruction_skill_policy_overlap(root))
     findings.extend(check_paired_agent_skill_overlap(root))
+    findings.extend(check_gateway_core_budget(root))
+    findings.extend(check_gateway_universal_preload_regression(root))
     return sorted(findings, key=finding_sort_key)
 
 
@@ -85,8 +97,34 @@ def check_root_always_on_budget(root: Path) -> list[Finding]:
                 f"soft target ({estimated_tokens} estimated tokens, target {ROOT_ALWAYS_ON_TOKEN_TARGET})."
             ),
             suggestion=(
-                "Classify each global section as required always-on, Copilot-native projection, scoped instruction, "
+                "Classify each global section as required always-on, Copilot-native projection, "
                 "skill, context, inventory, or removal before trimming."
+            ),
+        )
+    ]
+
+
+def check_delegated_review_prompt_budget(root: Path) -> list[Finding]:
+    path = root / DELEGATED_REVIEW_PROMPT_PATH
+    if not path.exists():
+        return []
+
+    estimated_tokens = estimate_tokens(path)
+    if estimated_tokens <= DELEGATED_REVIEW_PROMPT_TOKEN_TARGET:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="delegated-review-prompt-budget",
+            path=DELEGATED_REVIEW_PROMPT_PATH,
+            message=(
+                "The delegated AI resource review prompt exceeds its soft token target "
+                f"({estimated_tokens} estimated tokens, target {DELEGATED_REVIEW_PROMPT_TOKEN_TARGET})."
+            ),
+            suggestion=(
+                "Keep user inputs and the analysis-only boundary in the prompt, but move reusable workflow "
+                "detail into .github/skills/internal-ai-resource-review/."
             ),
         )
     ]
@@ -110,8 +148,8 @@ def check_agents_operational_procedure_markers(root: Path) -> list[Finding]:
             code="agents-operational-procedure-marker",
             path="AGENTS.md",
             message=(
-                "AGENTS.md contains operational procedure markers that belong in scoped "
-                f"instructions, skills, or owned files: {', '.join(markers)}."
+                "AGENTS.md contains operational procedure markers that belong in "
+                f"skills or owned files: {', '.join(markers)}."
             ),
             suggestion=(
                 "Keep AGENTS.md to stable policy, precedence, ownership boundaries, and "
@@ -146,7 +184,7 @@ def check_copilot_review_window(root: Path) -> list[Finding]:
                 f"all review-critical anchors: {', '.join(missing_markers)}."
             ),
             suggestion=(
-                "Keep the bridge reference, security guardrails, relevant-instruction rule, and validation rule "
+                "Keep the bridge reference, security guardrails, relevant-skill rule, and validation rule "
                 "inside the first 4,000 characters before deeper governance detail."
             ),
         )
@@ -438,43 +476,6 @@ def check_internal_root_policy_overlap(root: Path) -> list[Finding]:
     return findings
 
 
-def check_instruction_skill_policy_overlap(root: Path) -> list[Finding]:
-    instructions_root = root / ".github/instructions"
-    skills_root = root / ".github/skills"
-    if not instructions_root.exists() or not skills_root.exists():
-        return []
-
-    skill_paths = sorted(skills_root.glob("internal-*/SKILL.md"))
-    findings: list[Finding] = []
-    for instruction_path in sorted(instructions_root.glob("internal-*.instructions.md")):
-        topic = instruction_path.name.removesuffix(".instructions.md").removeprefix("internal-")
-        instruction_lines = significant_text_lines(read_text(instruction_path))
-        if not instruction_lines:
-            continue
-
-        for skill_path in skill_paths:
-            if topic not in skill_path.parent.name:
-                continue
-
-            overlap = significant_text_lines(read_text(skill_path)) & instruction_lines
-            if len(overlap) < 3:
-                continue
-
-            findings.append(
-                Finding(
-                    severity="non-blocking",
-                    code="instruction-skill-policy-overlap",
-                    path=skill_path.relative_to(root).as_posix(),
-                    message=(
-                        "The internal skill repeats too many instruction-owned policy lines from "
-                        f"{instruction_path.relative_to(root).as_posix()} ({len(overlap)} overlapping lines)."
-                    ),
-                    suggestion="Keep baseline policy in the matching instruction file and narrow the skill to examples, workflow, and specialization.",
-                )
-            )
-    return findings
-
-
 def check_paired_agent_skill_overlap(root: Path) -> list[Finding]:
     agents_root = root / ".github/agents"
     skills_root = root / ".github/skills"
@@ -522,6 +523,61 @@ def check_paired_agent_skill_overlap(root: Path) -> list[Finding]:
             )
         )
     return findings
+
+
+def check_gateway_core_budget(root: Path) -> list[Finding]:
+    path = root / GATEWAY_CORE_SKILL_PATH
+    if not path.exists():
+        return []
+
+    byte_count = len(path.read_bytes())
+    if byte_count <= GATEWAY_CORE_BYTE_BUDGET:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="gateway-core-byte-budget",
+            path=GATEWAY_CORE_SKILL_PATH,
+            message=(
+                "The operational-flow core SKILL.md exceeds its structural byte budget "
+                f"({byte_count} bytes, target {GATEWAY_CORE_BYTE_BUDGET})."
+            ),
+            suggestion=(
+                "Compress the core around exclusive reference ownership and phase-local "
+                "support loading; do not delete useful lazy depth solely for bundle size."
+            ),
+        )
+    ]
+
+
+def check_gateway_universal_preload_regression(root: Path) -> list[Finding]:
+    path = root / GATEWAY_CORE_SKILL_PATH
+    if not path.exists():
+        return []
+
+    text = read_text(path)
+    found_markers = [
+        marker for marker in GATEWAY_UNIVERSAL_PRELOAD_MARKERS if marker in text
+    ]
+    if not found_markers:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="gateway-universal-preload-regression",
+            path=GATEWAY_CORE_SKILL_PATH,
+            message=(
+                "The operational-flow core still contains universal preload instructions "
+                f"that should be phase-local: {', '.join(repr(m) for m in found_markers)}."
+            ),
+            suggestion=(
+                "Load grill-me when Gate 0 activates and internal-agent-support-next-step "
+                "when a transition package is needed; do not preload universally."
+            ),
+        )
+    ]
 
 
 def extract_section_bullets(text: str, heading: str) -> list[str]:

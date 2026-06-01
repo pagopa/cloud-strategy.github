@@ -22,7 +22,7 @@ OFFICE_SUPPORT_ONLY_SKILLS = (
 
 def collect_inventory_sections(root: Path) -> dict[str, list[str]]:
     return {
-        "Instructions": path_list(root, ".github/instructions/**/*.instructions.md"),
+        "Instructions": [],
         "Skills": path_list(root, ".github/skills/**/SKILL.md"),
         "Agents": path_list(root, ".github/agents/*.agent.md"),
         "Prompts": path_list(root, ".github/prompts/*.prompt.md"),

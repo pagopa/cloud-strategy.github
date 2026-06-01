@@ -1,6 +1,6 @@
 # Terraform Anti-Patterns
 
-Reference: `instructions/internal-terraform.instructions.md`
+Baseline owner: `internal-terraform`
 
 ## Critical
 

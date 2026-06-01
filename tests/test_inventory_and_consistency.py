@@ -5,6 +5,8 @@ from pathlib import Path
 from lib.catalog_checks import check_superpowers_import_naming, run_consistency_checks
 from lib.inventory import build_inventory_markdown
 
+LEGACY_INSTRUCTION_DIR = ".github/" + "instructions"
+
 
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -16,10 +18,6 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
     write_file(
         tmp_path / ".github/agents/internal-gateway-simple-task.agent.md",
         "---\nname: internal-gateway-simple-task\ntools: [read]\n---\n",
-    )
-    write_file(
-        tmp_path / ".github/instructions/internal-python.instructions.md",
-        "---\ndescription: Python\napplyTo: '**/*.py'\n---\n",
     )
     write_file(
         tmp_path / ".github/skills/internal-catalog/SKILL.md",
@@ -34,10 +32,24 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
 
     assert "## Instructions" in inventory
     assert "## Prompts" in inventory
-    assert "- `.github/instructions/internal-python.instructions.md`" in inventory
+    assert "No instruction files currently ship in the live catalog." in inventory
     assert "- `.github/skills/internal-catalog/SKILL.md`" in inventory
     assert "- `.github/agents/internal-gateway-simple-task.agent.md`" in inventory
     assert "- `.github/prompts/internal-agent-plan-next-step.prompt.md`" in inventory
+
+
+def test_build_inventory_markdown_keeps_retired_instruction_section_empty(
+    tmp_path: Path,
+) -> None:
+    write_file(
+        tmp_path / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        "---\ndescription: Python\n---\n",
+    )
+
+    inventory = build_inventory_markdown(tmp_path)
+
+    assert "No instruction files currently ship in the live catalog." in inventory
+    assert "internal-python.instructions.md" not in inventory
 
 
 def test_run_consistency_checks_flags_prompt_inventory_drift(tmp_path: Path) -> None:
@@ -394,7 +406,7 @@ def test_run_consistency_checks_flags_skill_usage_contract_without_optional_supp
     ) in findings_by_path
 
 
-def test_run_consistency_checks_flags_unallowlisted_instruction_apply_to_overlap(
+def test_run_consistency_checks_flags_active_residual_instruction_reference(
     tmp_path: Path,
 ) -> None:
     write_file(
@@ -406,71 +418,19 @@ def test_run_consistency_checks_flags_unallowlisted_instruction_apply_to_overlap
         "# Copilot Instructions\n\nSee `AGENTS.md` and `.github/INVENTORY.md`.\n",
     )
     write_file(
-        tmp_path / ".github/instructions/internal-one.instructions.md",
-        "---\ndescription: One\napplyTo: '**/*.txt'\n---\n",
-    )
-    write_file(
-        tmp_path / ".github/instructions/internal-two.instructions.md",
-        "---\ndescription: Two\napplyTo: '**/*.txt'\n---\n",
-    )
-    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
-
-    findings = run_consistency_checks(tmp_path)
-    findings_by_code = {finding.code for finding in findings}
-
-    assert "instruction-applyto-overlap" in findings_by_code
-
-
-def test_run_consistency_checks_allows_intentional_shell_apply_to_overlap(
-    tmp_path: Path,
-) -> None:
-    write_file(
-        tmp_path / "AGENTS.md",
-        "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
-    )
-    write_file(
-        tmp_path / ".github/copilot-instructions.md",
-        "# Copilot Instructions\n\nSee `AGENTS.md` and `.github/INVENTORY.md`.\n",
-    )
-    write_file(
-        tmp_path / ".github/instructions/awesome-copilot-shell.instructions.md",
-        "---\ndescription: Shell\napplyTo: '**/*.sh'\n---\n",
-    )
-    write_file(
-        tmp_path / ".github/instructions/internal-bash.instructions.md",
-        "---\ndescription: Bash\napplyTo: '**/*.sh'\n---\n",
+        tmp_path / ".github/skills/internal-demo/SKILL.md",
+        "---\n"
+        "name: internal-demo\n"
+        "description: Use when demo validation needs a fixture.\n"
+        "---\n\n"
+        "# Internal Demo\n\n"
+        "## When to use\n\n"
+        "Use this skill for tests.\n\n"
+        f"See `{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md`.\n",
     )
     write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
 
     findings = run_consistency_checks(tmp_path)
     findings_by_code = {finding.code for finding in findings}
 
-    assert "instruction-applyto-overlap" not in findings_by_code
-
-
-def test_run_consistency_checks_allows_intentional_composite_action_apply_to_overlap(
-    tmp_path: Path,
-) -> None:
-    write_file(
-        tmp_path / "AGENTS.md",
-        "# AGENTS\n\n- Use `.github/copilot-instructions.md`.\n- Use `.github/INVENTORY.md`.\n",
-    )
-    write_file(
-        tmp_path / ".github/copilot-instructions.md",
-        "# Copilot Instructions\n\nSee `AGENTS.md` and `.github/INVENTORY.md`.\n",
-    )
-    write_file(
-        tmp_path / ".github/instructions/internal-github-actions.instructions.md",
-        "---\ndescription: GitHub Actions\napplyTo: '**/workflows/**,**/actions/**/action.y*ml'\n---\n",
-    )
-    write_file(
-        tmp_path
-        / ".github/instructions/internal-github-action-composite.instructions.md",
-        "---\ndescription: Composite actions\napplyTo: '**/actions/**/action.y*ml'\n---\n",
-    )
-    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
-
-    findings = run_consistency_checks(tmp_path)
-    findings_by_code = {finding.code for finding in findings}
-
-    assert "instruction-applyto-overlap" not in findings_by_code
+    assert "residual-instruction-reference" in findings_by_code

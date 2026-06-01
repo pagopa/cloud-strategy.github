@@ -21,6 +21,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Avoid describing the workflow in `description:`. That creates shortcuts and weakens body retrieval.
 - Make `description:` read like realistic user intent, not like a capability summary or mini playbook.
 - If `description:` names too many adjacent lanes, treat it as overlap until proven otherwise.
+- Add file extensions or path tokens in `description:` only when they materially disambiguate the owner. Do not add long suffix lists when path-based routing or the skill body already proves the lane.
 - Use words an agent would actually search for: symptoms, overlaps, file paths, task verbs, and validation terms.
 - Prefer direct action-shaped names when naming a new skill.
 
@@ -38,6 +39,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - For material skill-bundle revisions, measure the touched bundle or loaded files before and after the first material patch with the same token estimate; if no exact script exists, state the closest measurement.
 - Prefer focused references or reusable scripts over broad context dumps when a change needs supporting detail.
 - Cross-reference reusable material instead of restating it.
+- For lightweight or umbrella skills, treat `## Referenced skills` as an audit index, not a preload bundle. State that named skills stay on-demand and load only when the file, framework, runtime, blocker, or validation path proves that owner.
 - If local references own the deep tables, templates, or examples, point to them instead of copying them back into `SKILL.md`.
 - Prefer moving static lookup tables, starter templates, and detailed taxonomies into `references/`.
 - Prefer new `references/` over new `scripts/` unless the workflow is deterministic, repeated, and execution-heavy.

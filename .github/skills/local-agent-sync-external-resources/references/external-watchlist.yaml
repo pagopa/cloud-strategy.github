@@ -1,5 +1,25 @@
 version: 1
 items:
+  - source_family: github/awesome-copilot
+    upstream_id: azure-devops-pipelines.instructions.md
+    local_owner: internal-azure-devops
+    reason: Azure DevOps pipeline guidance was extracted into a repository-owned skill-first owner.
+    action: alert-only
+  - source_family: github/awesome-copilot
+    upstream_id: go.instructions.md
+    local_owner: internal-go
+    reason: Go guidance was extracted into a repository-owned skill-first owner.
+    action: alert-only
+  - source_family: github/awesome-copilot
+    upstream_id: kubernetes-manifests.instructions.md
+    local_owner: internal-kubernetes
+    reason: Kubernetes manifest guidance was extracted into repository-owned Kubernetes skills.
+    action: alert-only
+  - source_family: github/awesome-copilot
+    upstream_id: shell.instructions.md
+    local_owner: internal-bash
+    reason: Shell guidance was extracted into the repository-owned Bash baseline and script skill split.
+    action: alert-only
   - source_family: mattpocock/skills
     upstream_id: diagnose
     local_owner: internal-debugging

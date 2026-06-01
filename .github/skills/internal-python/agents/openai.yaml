@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Python"
+  short_description: "Python baseline and routing"
+  default_prompt: "Use $internal-python for Python runtime, typing, testing, dependency, or readability guidance."

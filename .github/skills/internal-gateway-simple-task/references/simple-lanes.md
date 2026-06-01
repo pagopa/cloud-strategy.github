@@ -7,7 +7,7 @@ lane or output shape still needs a quick decision.
 
 | Lane | Use when | Support posture | Validation |
 | --- | --- | --- | --- |
-| `answer` | The user needs a direct explanation, decision, or repository-context answer. | Load only scoped instructions or a domain owner when facts depend on them. | Cite inspected files or state the evidence gap. |
+| `answer` | The user needs a direct explanation, decision, or repository-context answer. | Load only the relevant domain owner when facts depend on it. | Cite inspected files or state the evidence gap. |
 | `edit` | The target file and desired outcome are clear. | Load the smallest file-type, runtime, authoring, or domain owner proved by evidence. | Run the closest validator, test, lint, syntax check, or focused manual check. |
 | `diagnose` | A failure, bug, drift, or unexpected behavior is present. | Reproduce the loop first, then add runtime or domain support only if needed. | The original loop must pass after the fix, or the blocker must be explicit. |
 | `validate` | The main job is checking an existing artifact, command, or result. | Load the owner for the validation surface only when needed. | Report the exact check, result, and remaining gap. |
@@ -15,8 +15,8 @@ lane or output shape still needs a quick decision.
 
 ## Examples
 
-- Clear prose or skill wording fix: inspect the paired asset and scoped
-  instructions, edit the smallest owner, then run the closest skill or Markdown
+- Clear prose or skill wording fix: inspect the paired asset and relevant
+  domain owner, edit the smallest owner, then run the closest skill or Markdown
   validation.
 - Small code or script change: inspect local patterns, load the matching runtime
   support only if needed, edit, then run the focused executable check.

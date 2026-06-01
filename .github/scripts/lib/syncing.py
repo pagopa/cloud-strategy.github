@@ -257,7 +257,6 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
         if catalog_path.startswith(
             (
                 ".github/agents/",
-                ".github/instructions/",
                 ".github/prompts/",
                 ".github/skills/",
             )
@@ -636,7 +635,6 @@ def discover_source_sync_files(root: Path) -> set[str]:
         if (root / relative_path).exists()
     )
     files.update(all_files_under(root, ".github/agents"))
-    files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     files.discard(COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH)

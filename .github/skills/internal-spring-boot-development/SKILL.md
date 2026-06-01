@@ -5,7 +5,14 @@ description: Use when Spring Boot framework choices drive the work, such as cont
 
 # Internal Spring Boot Development
 
-Follow `.github/instructions/internal-java.instructions.md` for the baseline Java rules. Use this skill only when the Spring Boot framework choices materially affect the design, wiring, testing, or configuration.
+## Referenced skills
+
+- `internal-project-java`: Java application, library, service, and package structure depth.
+
+When the task needs general Java readability, build metadata, or JUnit
+baseline guidance beyond Spring-specific concerns, consult `internal-java`.
+Use this skill only when the Spring Boot framework choices materially
+affect the design, wiring, testing, or configuration.
 
 ## When to use
 

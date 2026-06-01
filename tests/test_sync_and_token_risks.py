@@ -14,6 +14,9 @@ from lib.token_risks import (
     estimate_tokens,
 )
 
+LEGACY_INSTRUCTION_DIR = ".github/" + "instructions"
+LEGACY_APPLY_TO_KEY = "apply" + "To"
+
 
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -106,6 +109,61 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     assert ("delete", ".github/agents/custom.agent.md") in actions
     assert ("update", ".github/agents/internal-fast.agent.md") in actions
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
+
+
+def test_build_sync_plan_does_not_ship_source_instruction_family(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        source_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\n---\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    planned_paths = {operation.path for operation in plan.operations}
+
+    assert (
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
+    )
+
+
+def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        target_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\n---\n",
+    )
+    write_file(
+        target_root / LEGACY_INSTRUCTION_DIR / "local-team.instructions.md",
+        f"---\ndescription: Local team\n{LEGACY_APPLY_TO_KEY}: '**/*.md'\n---\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert (
+        "delete",
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
+    ) in actions
+    assert (
+        "preserve",
+        f"{LEGACY_INSTRUCTION_DIR}/local-team.instructions.md",
+    ) in actions
 
 
 def test_build_sync_plan_excludes_internal_graphify_from_consumer_sync(
@@ -666,7 +724,7 @@ def test_apply_sync_plan_keeps_no_pending_marker_when_source_has_rows(
         "## Pending Rules\n\n"
         "| Date | Lesson | Status | Intended canonical target |\n"
         "| --- | --- | --- | --- |\n"
-        "| 2026-04-16 | Centralize shared Terraform lesson | pending | .github/instructions/internal-terraform.instructions.md |\n"
+        "| 2026-04-16 | Centralize shared Terraform lesson | pending | .github/skills/internal-terraform/SKILL.md |\n"
     )
     target_lessons = (
         "# Lessons\n\n"
@@ -812,6 +870,47 @@ def test_detect_token_risks_reports_root_always_on_budget(tmp_path: Path) -> Non
     assert "root-always-on-budget" in finding_codes
 
 
+def test_detect_token_risks_reports_delegated_review_prompt_budget(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/prompts/internal-review-ai-resources.prompt.md",
+        "---\nname: internal-review-ai-resources\n---\n\n"
+        + ("Reusable review workflow detail stays inline.\n" * 500),
+    )
+
+    findings = detect_token_risks(tmp_path)
+    matching = [
+        finding
+        for finding in findings
+        if finding.code == "delegated-review-prompt-budget"
+    ]
+
+    assert len(matching) == 1
+    assert matching[0].path == ".github/prompts/internal-review-ai-resources.prompt.md"
+
+
+def test_detect_token_risks_ignores_other_large_prompts_for_delegated_review_budget(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
+    write_file(
+        tmp_path / ".github/prompts/internal-mega-review.prompt.md",
+        "---\nname: internal-mega-review\n---\n\n"
+        + ("Intentionally broad prompt detail.\n" * 1000),
+    )
+
+    findings = detect_token_risks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "delegated-review-prompt-budget" not in finding_codes
+
+
 def test_detect_token_risks_reports_agents_operational_procedure_markers(
     tmp_path: Path,
 ) -> None:
@@ -855,8 +954,7 @@ def test_detect_token_risks_ignores_structural_bridge_references(
         "# AGENTS\n\n"
         "- Use `.github/copilot-instructions.md` as the repo-wide projection.\n"
         "- Use `.github/INVENTORY.md` as the live catalog.\n"
-        "- Use `.github/instructions/` for scoped guidance.\n"
-        "- Use `.github/skills/` when a reusable workflow is relevant.\n"
+        "- Use `.github/skills/` when a reusable workflow or technical baseline is relevant.\n"
         "- Use `.github/agents/` when a stable owner is relevant.\n"
         "- Keep `.github/copilot-instructions.override.md` local to consumer repositories.\n",
     )
@@ -903,41 +1001,6 @@ def test_detect_token_risks_reports_internal_root_policy_overlap(
     finding_codes = {finding.code for finding in findings}
 
     assert "internal-root-policy-overlap" in finding_codes
-
-
-def test_detect_token_risks_reports_instruction_skill_policy_overlap(
-    tmp_path: Path,
-) -> None:
-    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
-    write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
-    write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
-    write_file(
-        tmp_path / ".github/instructions/internal-python.instructions.md",
-        "---\n"
-        "description: Python\n"
-        "applyTo: '**/*.py'\n"
-        "---\n\n"
-        "# Python Instructions\n\n"
-        "- Use emoji logs for key execution states.\n"
-        "- Prefer early return and clear guard clauses.\n"
-        "- Unit tests are required for testable logic.\n",
-    )
-    write_file(
-        tmp_path / ".github/skills/internal-project-python/SKILL.md",
-        "---\n"
-        "name: internal-project-python\n"
-        "description: Python project skill\n"
-        "---\n\n"
-        "# Python Project Skill\n\n"
-        "- Use emoji logs for key execution states.\n"
-        "- Prefer early return and clear guard clauses.\n"
-        "- Unit tests are required for testable logic.\n",
-    )
-
-    findings = detect_token_risks(tmp_path)
-    finding_codes = {finding.code for finding in findings}
-
-    assert "instruction-skill-policy-overlap" in finding_codes
 
 
 def test_detect_token_risks_reports_paired_agent_skill_overlap(tmp_path: Path) -> None:

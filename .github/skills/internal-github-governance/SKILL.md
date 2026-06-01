@@ -25,6 +25,7 @@ This skill owns governance logic after the broad operating model is known. It he
 ## Main domains covered
 
 - rulesets and branch protection
+- CODEOWNERS review ownership and placeholder-owner readiness
 - repository and organization permissions model
 - GitHub Apps permissions
 - GitHub Actions permissions
@@ -36,6 +37,8 @@ This skill owns governance logic after the broad operating model is known. It he
 ## Core rules
 
 - Keep org-level guardrails distinct from repo or environment grants.
+- Keep `CODEOWNERS` entries explicit enough that reviewers can tell whether a rule is source-owned, template-owned, or consumer-owned.
+- Allow `@your-org/platform-governance-team` only in template repositories; consumer repositories must replace that placeholder before review enforcement.
 - Prefer GitHub Apps or OIDC-based federation over long-lived personal tokens or static cloud secrets unless there is a proven reason not to.
 - Make scope explicit: enterprise, organization, repository set, or environment.
 - Make exception handling explicit when a control is not universal.
@@ -89,3 +92,4 @@ For broader asks, return:
 - Confirm trust boundaries are explicit for Apps, Actions, OIDC, secrets, or Copilot policy choices.
 - Confirm staged rollout validation is named before high-blast-radius ruleset, permission, or environment changes.
 - Confirm the answer says when operational proof should move to `internal-github-operations`.
+- Before enabling CODEOWNERS-backed review enforcement in a consumer repository, confirm no template placeholder owner remains.

@@ -1,6 +1,6 @@
 # Python Anti-Patterns
 
-Reference: `instructions/internal-python.instructions.md`
+Baseline owner: `internal-python`
 
 ## Critical
 

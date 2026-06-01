@@ -5,6 +5,15 @@ description: Use when creating or modifying a reusable GitHub composite action u
 
 # GitHub Composite Action Skill
 
+## Referenced skills
+
+Treat the referenced skills below as on-demand supports. Do not preload them
+for every composite action edit; load only the owner proved by the reusable
+unit, extracted script depth, or broader workflow question.
+
+- `internal-github-actions`: GitHub Actions workflow umbrella and reuse-pattern selection.
+- `internal-script-bash`: extracted shell scripts inside composite actions.
+
 ## When to use
 
 - Create a new reusable composite action under `.github/actions/`.
@@ -28,7 +37,6 @@ description: Use when creating or modifying a reusable GitHub composite action u
 
 ## Mandatory rules
 
-- Follow `.github/instructions/internal-github-action-composite.instructions.md`.
 - Pass expression inputs via `env:` instead of interpolating `${{ }}` directly in `run:`.
 - Keep `shell: bash` explicit on composite steps.
 - Start shell blocks with `set -euo pipefail`.
