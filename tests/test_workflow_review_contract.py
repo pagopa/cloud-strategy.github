@@ -124,11 +124,20 @@ def test_repo_owned_agent_and_reference_authoring_guardrails_stay_scoped() -> No
         ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
     )
 
-    legacy_combined_path = Path(".github") / "instructions" / "internal-copilot-agent-skill-authoring.instructions.md"
+    legacy_combined_path = (
+        Path(".github")
+        / "instructions"
+        / "internal-copilot-agent-skill-authoring.instructions.md"
+    )
     assert not legacy_combined_path.exists()
-    assert "treat them as benchmark evidence and migration input" in agent_development_text
+    assert (
+        "treat them as benchmark evidence and migration input" in agent_development_text
+    )
     assert "Do not introduce `## Mandatory Engine Skills`" in agent_contract_text
-    assert "keep deep reusable tables, templates, and detailed checklists in `references/`" in skill_creator_text
+    assert (
+        "keep deep reusable tables, templates, and detailed checklists in `references/`"
+        in skill_creator_text
+    )
     assert (
         "When an existing core skill or reference is the detailed contract owner"
         in agent_development_text
@@ -631,7 +640,10 @@ def test_apply_plan_requires_physical_close_packaging_before_shipped() -> None:
     assert "matching `done-*` markers" in gateway_text
     assert "removal of all closed numbered plan files" in gateway_text
     assert "Only `SHIPPED` creates new `done-*` markers" in executing_text
-    assert "Non-`SHIPPED` exits keep the live ledger and numbered files in place" in executing_text
+    assert (
+        "Non-`SHIPPED` exits keep the live ledger and numbered files in place"
+        in executing_text
+    )
     assert "Remove all closed numbered plan files" in executing_text
     assert "remove the live ledger only after" in executing_text.lower()
 

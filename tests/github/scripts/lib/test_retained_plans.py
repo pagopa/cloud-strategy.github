@@ -12,12 +12,12 @@ SCRIPT_DIR = Path(__file__).resolve().parents[4] / ".github" / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from lib.retained_plans import (  # noqa: E402
-    COMPLETION_REPORT_FIELDS,
     COMPACT_REQUIRED_FILES,
+    COMPLETION_REPORT_FIELDS,
     EXTENDED_REQUIRED_FILES,
     PlanProfile,
-    handoff_validate,
     completion_validate,
+    handoff_validate,
 )
 
 
@@ -113,7 +113,9 @@ def test_classify_legacy_no_ledger(tmp_path: Path) -> None:
 def test_classify_legacy_no_profile_declared(tmp_path: Path) -> None:
     folder = tmp_path / "plan"
     folder.mkdir()
-    write_file(folder / "02-source-item-ledger.md", "# Ledger\n\nNo profile declared.\n")
+    write_file(
+        folder / "02-source-item-ledger.md", "# Ledger\n\nNo profile declared.\n"
+    )
     profile = PlanProfile.classify(folder)
     assert profile.name == "legacy"
 
@@ -219,7 +221,8 @@ def test_handoff_legacy_plan(tmp_path: Path) -> None:
     # Legacy has no required files, so no file errors
     # But missing ledger is still flagged
     assert any(
-        f.code == "missing-ledger" or f.code.startswith("missing-") for f in report.findings
+        f.code == "missing-ledger" or f.code.startswith("missing-")
+        for f in report.findings
     )
 
 
@@ -237,7 +240,9 @@ def test_completion_ready(tmp_path: Path) -> None:
         "| --- | --- | --- |\n"
         "| `done-01-sample.md` | DONE | `pytest` |\n",
     )
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     assert report.ready
 
@@ -247,7 +252,9 @@ def test_completion_rejects_active_numbered_files(tmp_path: Path) -> None:
     plan.mkdir()
     write_file(plan / "03-still-active.md", "# Active\n")
     write_file(plan / "evidence-envelope.md", "| Status |\n| --- |\n")
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     assert not report.ready
     assert any(f.code == "active-numbered-files" for f in report.findings)
@@ -260,7 +267,9 @@ def test_completion_rejects_numbered_control_files(tmp_path: Path) -> None:
     write_file(plan / "02-source-item-ledger.md", "# Ledger\n")
     write_file(plan / "04-implementation-contract.md", "# Contract\n")
     write_file(plan / "evidence-envelope.md", "| Status |\n| --- |\n")
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     assert not report.ready
     assert report.active_numbered_remaining == [
@@ -281,7 +290,9 @@ def test_completion_rejects_open_statuses(tmp_path: Path) -> None:
         "| --- | --- | --- |\n"
         "| `done-01.md` | PENDING | `pytest` |\n",
     )
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     assert not report.ready
     assert any(f.code == "open-status" for f in report.findings)
@@ -292,7 +303,9 @@ def test_completion_rejects_missing_evidence_columns(tmp_path: Path) -> None:
     plan.mkdir()
     write_file(plan / "done-01.md", "# Done\n")
     write_file(plan / "evidence-envelope.md", "# Evidence\n\nJust text.\n")
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     assert not report.ready
     assert any(f.code == "missing-status-column" for f in report.findings)
@@ -310,7 +323,9 @@ def test_completion_rejects_missing_done_reference_in_envelope(tmp_path: Path) -
         "| --- | --- | --- |\n"
         "| `done-01.md` | DONE | `pytest` |\n",
     )
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     assert not report.ready
     assert any(f.code == "missing-done-reference" for f in report.findings)
@@ -336,7 +351,9 @@ def test_completion_rejects_missing_report_fields(tmp_path: Path) -> None:
 def test_completion_missing_envelope(tmp_path: Path) -> None:
     plan = tmp_path / "plan"
     plan.mkdir()
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     assert not report.ready
     assert any(f.code == "missing-evidence-envelope" for f in report.findings)
@@ -381,7 +398,9 @@ def test_completion_json_output(tmp_path: Path) -> None:
         "| --- | --- | --- |\n"
         "| `done-01.md` | DONE | `pytest` |\n",
     )
-    write_file(plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n")
+    write_file(
+        plan / "completion-report.md", "\n".join(COMPLETION_REPORT_FIELDS) + "\n"
+    )
     report = completion_validate(plan)
     d = report.as_dict()
     assert d["ready"] is True

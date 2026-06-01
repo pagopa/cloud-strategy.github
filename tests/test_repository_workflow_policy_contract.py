@@ -69,7 +69,10 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
         "Select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence"
         in copilot_text
     )
-    assert "Load task-specific skills or references only when workflow depth" in copilot_text
+    assert (
+        "Load task-specific skills or references only when workflow depth"
+        in copilot_text
+    )
 
 
 def test_lightweight_skill_references_stay_on_demand() -> None:
@@ -80,9 +83,18 @@ def test_lightweight_skill_references_stay_on_demand() -> None:
         ".github/skills/internal-gateway-simple-task/references/support-routing.md"
     )
 
-    assert "`## Referenced skills` as an audit index, not a preload bundle" in checklist_text
-    assert "Add file extensions or path tokens in `description:` only when they materially disambiguate the owner" in checklist_text
-    assert "Treat a support skill's `## Referenced skills` section as an owner index" in support_routing_text
+    assert (
+        "`## Referenced skills` as an audit index, not a preload bundle"
+        in checklist_text
+    )
+    assert (
+        "Add file extensions or path tokens in `description:` only when they materially disambiguate the owner"
+        in checklist_text
+    )
+    assert (
+        "Treat a support skill's `## Referenced skills` section as an owner index"
+        in support_routing_text
+    )
     assert "prefer the single narrowest owner proved by that" in support_routing_text
 
     lightweight_skill_paths = (
@@ -97,7 +109,9 @@ def test_lightweight_skill_references_stay_on_demand() -> None:
     )
 
     for relative_path in lightweight_skill_paths:
-        referenced_section = section_between(read_text(relative_path), "## Referenced skills")
+        referenced_section = section_between(
+            read_text(relative_path), "## Referenced skills"
+        )
 
         assert "on-demand" in referenced_section
         assert "Do not preload" in referenced_section
@@ -116,7 +130,9 @@ def test_lightweight_workflow_and_review_skills_keep_references_on_demand() -> N
     )
 
     for relative_path in skill_paths:
-        referenced_section = section_between(read_text(relative_path), "## Referenced skills")
+        referenced_section = section_between(
+            read_text(relative_path), "## Referenced skills"
+        )
 
         assert "on-demand" in referenced_section
         assert "Do not preload" in referenced_section
@@ -171,10 +187,7 @@ def test_recent_lessons_are_codified_in_skill_owners() -> None:
         ".github/skills/internal-github-actions/SKILL.md"
     )
 
-    assert (
-        "modify `sys.path` before importing a standalone script"
-        in python_skill_text
-    )
+    assert "modify `sys.path` before importing a standalone script" in python_skill_text
     assert "# noqa: E402" in python_skill_text
     assert "remove truly unused imports or variables" in python_skill_text
 

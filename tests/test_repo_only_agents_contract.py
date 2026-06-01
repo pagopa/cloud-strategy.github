@@ -125,7 +125,11 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
         "mattpocock/skills",
     }
     assert all(item["action"] == "alert-only" for item in items)
-    assert {"azure-devops-pipelines.instructions.md", "go.instructions.md", "zoom-out"} <= upstream_ids
+    assert {
+        "azure-devops-pipelines.instructions.md",
+        "go.instructions.md",
+        "zoom-out",
+    } <= upstream_ids
     assert {
         "internal-azure-devops",
         "internal-go",

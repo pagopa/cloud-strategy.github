@@ -140,9 +140,7 @@ def test_main_apply_blocks_docs_unverified_targets(
     assert payload["blocked_codes"] == ["docs-unverified"]
 
 
-def test_bisync_plan_json_output(
-    monkeypatch, tmp_path: Path, capsys
-) -> None:
+def test_bisync_plan_json_output(monkeypatch, tmp_path: Path, capsys) -> None:
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"
     source_root.mkdir()
@@ -236,9 +234,7 @@ def test_bisync_apply_returns_nonzero_on_blockers(
     assert payload["next_action"]["allowed"] is False
 
 
-def test_plan_next_action_present(
-    monkeypatch, tmp_path: Path, capsys
-) -> None:
+def test_plan_next_action_present(monkeypatch, tmp_path: Path, capsys) -> None:
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
@@ -279,7 +275,9 @@ def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
 
     assert "## Deterministic Operator Protocol" in content
     assert "Install sync is unidirectional: repo -> home only." in content
-    assert "The `bisync` lane provides explicit bidirectional synchronization" in content
+    assert (
+        "The `bisync` lane provides explicit bidirectional synchronization" in content
+    )
     assert "Do not infer the mode, do not skip blockers" in content
     assert "next_action` as user approval for `apply`" in content
     assert "non-thinking" not in content.lower()

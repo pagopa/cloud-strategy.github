@@ -94,7 +94,9 @@ EXPECTED_SKILLS_BY_PATH = {
     "src/payment_lambda.py": {"internal-aws-lambda"},
 }
 
-EXPECTED_PATH_SKILLS = {skill for skills in EXPECTED_SKILLS_BY_PATH.values() for skill in skills}
+EXPECTED_PATH_SKILLS = {
+    skill for skills in EXPECTED_SKILLS_BY_PATH.values() for skill in skills
+}
 
 ALLOWLISTED_EXTERNAL_SKILLS: set[str] = set()
 
@@ -218,7 +220,9 @@ def test_suggest_support_skills_routes_node_lockfiles_to_nodejs_owner() -> None:
         assert set(suggestions) == {"internal-nodejs"}
 
 
-def test_suggest_support_skills_keeps_generic_python_and_bash_on_base_owner_only() -> None:
+def test_suggest_support_skills_keeps_generic_python_and_bash_on_base_owner_only() -> (
+    None
+):
     module = load_script_module()
 
     python_suggestions: dict[str, set[str]] = {}

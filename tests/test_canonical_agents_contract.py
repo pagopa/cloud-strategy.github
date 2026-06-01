@@ -261,7 +261,11 @@ def test_operational_flow_gate_zero_projection_stays_aligned() -> None:
         skill_text,
         "closing Gate 0 does not change the active phase",
     )
-    assert "wait for" in skill_text and "explicit" in skill_text and "planning request" in skill_text
+    assert (
+        "wait for" in skill_text
+        and "explicit" in skill_text
+        and "planning request" in skill_text
+    )
     assert "Direct `execute` is the only automatic Gate 0 exception" in skill_text
     assert "visible define pre-start gate before retained-plan execution" in skill_text
     assert "Gate 0" in wrapper_text
@@ -346,14 +350,8 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
         "Load these skills by name only when the active phase requires them. "
         "This list is an index, not a bundle to preload." in skill_text
     )
-    assert (
-        "Load `grill-me` when Gate 0 activates."
-        in skill_text
-    )
-    assert (
-        "Load `internal-agent-support-next-step` when a transition"
-        in skill_text
-    )
+    assert "Load `grill-me` when Gate 0 activates." in skill_text
+    assert "Load `internal-agent-support-next-step` when a transition" in skill_text
     assert (
         "Load every other skill only when its phase, handoff, or failure condition becomes active."
         in skill_text
@@ -375,7 +373,10 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "`Check 2`" in skill_text
     assert "`Check 3`" in skill_text
     assert "`Check 4`" in skill_text
-    assert "State:` and `Continuation:`" in skill_text or "`State:` and `Continuation:`" in skill_text
+    assert (
+        "State:` and `Continuation:`" in skill_text
+        or "`State:` and `Continuation:`" in skill_text
+    )
     assert "## Output Calibration" in skill_text
     assert "Required output" in skill_text
     assert "Must not include" in skill_text
@@ -404,9 +405,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "$internal-gateway-operational-flow" in interface["default_prompt"]
     assert "state" in interface["default_prompt"].lower()
     assert "continuation" in interface["default_prompt"].lower()
-    assert (
-        "stay in define" in interface["default_prompt"].lower()
-    )
+    assert "stay in define" in interface["default_prompt"].lower()
 
     operational_frontmatter = load_frontmatter(
         CANONICAL_AGENTS["internal-gateway-operational-flow"]
@@ -659,7 +658,10 @@ def test_grill_me_is_conditional_plan_support_not_renamed_or_copied() -> None:
     assert "grill-me" in operational_text
     assert "grill-me" in wrapper_alignment_text
     assert "Direct `execute` is the only automatic Gate 0 exception" in operational_text
-    assert "approved `apply-plan` still starts with the visible pre-start gate" in metadata_text.lower()
+    assert (
+        "approved `apply-plan` still starts with the visible pre-start gate"
+        in metadata_text.lower()
+    )
     assert "Restart Gate 0 before continuing" in wrapper_alignment_text
     assert "non-trivial" in operational_text and "retained plan" in operational_text
     assert "Do not replace those decisions with silent assumptions" in operational_text

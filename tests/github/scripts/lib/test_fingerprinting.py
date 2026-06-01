@@ -53,7 +53,9 @@ def test_build_fingerprint_normalizes_text_and_leaves_binary_content_unchanged(
     fingerprint = build_fingerprint(root, text_path, source_ref_base="source-root")
 
     assert fingerprint.kind == "skill"
-    assert fingerprint.source_ref == "source-root/.github/skills/internal-python/SKILL.md"
+    assert (
+        fingerprint.source_ref == "source-root/.github/skills/internal-python/SKILL.md"
+    )
     assert fingerprint.metadata["bytes"] == len(b"line one\r\nline two\r\n\r\n")
     assert fingerprint.metadata["normalized_bytes"] == len(b"line one\nline two\n")
     assert normalize_content("binary.bin", b"\xff\x00") == b"\xff\x00"

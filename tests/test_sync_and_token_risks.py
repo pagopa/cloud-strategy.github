@@ -129,7 +129,9 @@ def test_build_sync_plan_does_not_ship_source_instruction_family(
     plan = build_sync_plan(source_root, target_root)
     planned_paths = {operation.path for operation in plan.operations}
 
-    assert f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
+    assert (
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
+    )
 
 
 def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
@@ -154,8 +156,14 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("delete", f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md") in actions
-    assert ("preserve", f"{LEGACY_INSTRUCTION_DIR}/local-team.instructions.md") in actions
+    assert (
+        "delete",
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
+    ) in actions
+    assert (
+        "preserve",
+        f"{LEGACY_INSTRUCTION_DIR}/local-team.instructions.md",
+    ) in actions
 
 
 def test_build_sync_plan_excludes_internal_graphify_from_consumer_sync(
@@ -876,7 +884,9 @@ def test_detect_token_risks_reports_delegated_review_prompt_budget(
 
     findings = detect_token_risks(tmp_path)
     matching = [
-        finding for finding in findings if finding.code == "delegated-review-prompt-budget"
+        finding
+        for finding in findings
+        if finding.code == "delegated-review-prompt-budget"
     ]
 
     assert len(matching) == 1
