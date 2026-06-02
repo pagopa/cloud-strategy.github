@@ -2,7 +2,8 @@
 """Deterministic bundle-local audit helper for internal-gateway-idea-brainstorming.
 
 Reports file inventory, byte/token estimates, loaded vs on-demand buckets,
-required sibling presence, and compact contract marker checks.
+required sibling presence, compact contract marker checks, and cross-bundle
+consumer contract verification.
 The script is read-only and advisory. It does not infer whether a user answer
 is correct or which route should win.
 """
@@ -34,12 +35,32 @@ REQUIRED_MARKERS: dict[str, str] = {
     "manual-next-owner-confirmation": "Stop and ask for explicit user confirmation before any next-owner transition",
     "chat-only-simple-task-brief": "chat-only `Simple Task Brief`",
     "no-hidden-dispatch": "no hidden dispatch",
+    "risk-in-definition-brief": "Risk",
+    "remediation-grill-me-interview": "remediation decisions open",
+}
+
+CROSS_BUNDLE_CHECKS: dict[str, dict[str, str]] = {
+    "operational-flow-gate-0-protocol": {
+        "relative_path": "internal-gateway-operational-flow/references/gate-0-protocol.md",
+        "pattern": "Validated Definition Brief Intake",
+        "description": "Consumer gate-0-protocol must define validated-brief intake conditions.",
+    },
+    "operational-flow-skill": {
+        "relative_path": "internal-gateway-operational-flow/SKILL.md",
+        "pattern": "validated Definition Brief from",
+        "description": "Consumer operational-flow skill must accept validated-brief intake.",
+    },
+    "grill-me-follow-up-override": {
+        "relative_path": "grill-me/SKILL.md",
+        "pattern": "caller may override the follow-up pacing",
+        "description": "grill-me must support caller-owned follow-up override.",
+    },
 }
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Audit idea-gateway bundle shape and contract markers."
+        description="Audit idea-gateway bundle shape, contract markers, and cross-bundle consumer contracts."
     )
     parser.add_argument(
         "--format",
@@ -50,7 +71,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Fail when a required marker, sibling, or structural expectation is missing.",
+        help="Fail when a required marker, sibling, cross-bundle check, or structural expectation is missing.",
     )
     parser.add_argument(
         "--dir",
@@ -103,6 +124,26 @@ def check_siblings(bundle_dir: Path) -> dict[str, bool]:
     }
 
 
+def check_cross_bundle(bundle_dir: Path) -> dict[str, dict]:
+    skills_dir = bundle_dir.parent
+    results: dict[str, dict] = {}
+    for check_id, spec in CROSS_BUNDLE_CHECKS.items():
+        target = skills_dir / spec["relative_path"]
+        present = target.is_file()
+        found = False
+        if present:
+            text = target.read_text(encoding="utf-8")
+            found = spec["pattern"].lower() in text.lower()
+        results[check_id] = {
+            "file": spec["relative_path"],
+            "description": spec["description"],
+            "file_present": present,
+            "pattern_found": found,
+            "pass": present and found,
+        }
+    return results
+
+
 def build_report(bundle_dir: Path) -> dict:
     all_files = collect_files(bundle_dir)
     files_detail: list[dict] = []
@@ -120,6 +161,8 @@ def build_report(bundle_dir: Path) -> dict:
             "estimated_tokens": tokens,
         })
         totals[bucket] += tokens
+        if rel.suffix == ".py":
+            totals["script_code"] += tokens
 
     skill_md = bundle_dir / "SKILL.md"
     skill_text = skill_md.read_text(encoding="utf-8") if skill_md.exists() else ""
@@ -130,6 +173,13 @@ def build_report(bundle_dir: Path) -> dict:
     siblings = check_siblings(bundle_dir)
     missing_siblings = [k for k, v in siblings.items() if not v]
 
+    cross_bundle = check_cross_bundle(bundle_dir)
+    cross_bundle_failures = [
+        f"{check_id}: {check['description']}"
+        for check_id, check in cross_bundle.items()
+        if not check["pass"]
+    ]
+
     findings: list[str] = []
     if missing_markers:
         for m in missing_markers:
@@ -137,6 +187,9 @@ def build_report(bundle_dir: Path) -> dict:
     if missing_siblings:
         for s in missing_siblings:
             findings.append(f"missing expected sibling: {s}")
+    if cross_bundle_failures:
+        for f in cross_bundle_failures:
+            findings.append(f"cross-bundle check failed: {f}")
 
     return {
         "bundle_dir": bundle_dir.as_posix(),
@@ -145,6 +198,7 @@ def build_report(bundle_dir: Path) -> dict:
         "total_estimated_tokens": sum(totals.values()),
         "markers": markers,
         "siblings": siblings,
+        "cross_bundle": cross_bundle,
         "findings": findings,
         "strict_ok": len(findings) == 0,
     }
@@ -174,6 +228,15 @@ def render_text(report: dict) -> None:
     for path, present in report["siblings"].items():
         status = "PASS" if present else "FAIL"
         print(f"  [{status}] {path}")
+    print()
+    print("Cross-bundle consumer checks:")
+    for check_id, check in report["cross_bundle"].items():
+        status = "PASS" if check["pass"] else "FAIL"
+        print(f"  [{status}] {check_id}: {check['description']}")
+        if not check["file_present"]:
+            print(f"          file missing: {check['file']}")
+        elif not check["pattern_found"]:
+            print(f"          pattern not found: {check['file']}")
     print()
     if report["findings"]:
         print("Findings:")

@@ -100,7 +100,7 @@ Build the decision ledger. Use the guided decision interview to resolve material
 
 ### Converge
 
-When material branches are resolved, produce a Definition Brief with these fields: `Intent`, `Recovered evidence`, `Resolved decisions`, `Open decisions`, `Direction or options`, `Anti-scope`, `Validation path or gap`, and `Stop & checkpoint`. See `references/brief-contract.md` for the full field contract.
+When material branches are resolved, produce a Definition Brief with these fields: `Intent`, `Recovered evidence`, `Resolved decisions`, `Open decisions`, `Direction or options`, `Anti-scope`, `Validation path or gap`, `Risk`, and `Stop & checkpoint`. See `references/brief-contract.md` for the full field contract.
 
 ### Critical
 
@@ -114,6 +114,8 @@ Declare `pre-plan critical: confident` or `pre-plan critical: reopen`. When `reo
 Do not loop more than twice without explicit user decision.
 
 ### Handoff
+
+When findings leave material remediation decisions open, require a `grill-me` interview before recommending planning or delivery. Only require it when the decisions are material and the remediation choices are not self-evident from repository evidence.
 
 When `pre-plan critical: confident`, recommend exactly one next owner:
 

@@ -50,4 +50,5 @@ Each row in the decision ledger:
 
 - Use `grill-me` for branch discovery when the evidence pass leaves unresolved user-only decisions.
 - Inherit `grill-me`'s numbered initial question block and default-acceptance behavior.
+- Declare the caller-owned override for iterative numbered follow-up blocks when using `grill-me` for branch discovery.
 - Keep the interview iterative by asking focused follow-up blocks when later branches remain.

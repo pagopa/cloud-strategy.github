@@ -25,10 +25,17 @@ Use this reference when `internal-gateway-idea-brainstorming` must decide how a 
 
 ## Validated Definition Brief Intake
 
-- A Definition Brief produced by this gateway and passing critical challenge may enter `internal-gateway-operational-flow` `plan` after an explicit checkpoint.
-- The gateway stops at that checkpoint. The user confirms and invokes `internal-gateway-operational-flow` manually in a separate turn.
-- Operational flow must not repeat ideation or its critical pass.
-- If the brief is later invalidated by realignment, route back to this gateway.
+A Definition Brief produced by this gateway may enter `internal-gateway-operational-flow` `plan` without repeating Gate 0 or the Pre-Plan Critical Pass when all of these conditions hold:
+
+- Origin: produced by `internal-gateway-idea-brainstorming`.
+- Gate status: `grill-me satisfied` in the current cycle.
+- Critical pass: `pre-plan critical: confident`.
+- Scope unchanged: no realignment changed scope, owner, target state, validation, or anti-scope since the last critical pass.
+- Explicit checkpoint: the gateway stopped at `Handoff checkpoint: ready-for-owner-change`.
+
+When these conditions hold, the operational flow consumer accepts the intake and continues with the next phase without re-running Gate 0 or the critical pass. The user confirms and invokes `internal-gateway-operational-flow` manually in a separate turn.
+
+If realignment later changes scope, owner, target state, validation, or anti-scope, the intake is invalidated. Restart Gate 0 and the Pre-Plan Critical Pass in the operational flow define phase.
 
 ## Simple Task Handoff
 

@@ -84,7 +84,7 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 ## Gate 0
 
-Gate 0 is the pre-`plan` `define` gate. It blocks plan output and recommendations. Direct `execute` is the only automatic exception. `apply-plan` starts with a visible define pre-start gate before retained-plan execution.
+Gate 0 blocks plan output. Direct `execute` is the only automatic exception. A validated Definition Brief from `internal-gateway-idea-brainstorming` with `grill-me satisfied`, `pre-plan critical: confident`, and unchanged scope enters `plan` without repeating Gate 0 or the critical pass; see [references/gate-0-protocol.md](references/gate-0-protocol.md). `apply-plan` starts with a visible define pre-start gate.
 
 This skill owns blocking status. `grill-me` supplies the interview pattern. Status table, blocking rules, closure rules, phase transition authorization, and request-change realignment live in [references/gate-0-protocol.md](references/gate-0-protocol.md).
 

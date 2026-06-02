@@ -93,6 +93,6 @@ overrides:
       and unresolved decisions; keep operational gate semantics in
       internal-gateway-operational-flow.
     patch_path: patches/grill-me.patch
-    expected_content_hash: 54b4dba5fc48941f93ed6c11bf50f943f5a26e44bc48b87e6ee864ebc16778a0
+    expected_content_hash: 32bb78a434c38bbc2af1eea970236ba989270eb1b631e8d4f2d8928a0a125d62
     baseline_repo_commit: "e74f006"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

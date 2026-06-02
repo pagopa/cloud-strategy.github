@@ -15,6 +15,7 @@ Produced at the end of `converge` and consumed by `internal-gateway-operational-
 | `Direction or options` | yes | The chosen path or the narrowed set. |
 | `Anti-scope` | yes | What must not happen yet. |
 | `Validation path or gap` | yes | Command, review path, or explicit gap. |
+| `Risk` | yes | Residual risk or rollback note. |
 | `Stop & checkpoint` | yes | Where to pause and the exact approval needed. |
 
 ## Simple Task Brief

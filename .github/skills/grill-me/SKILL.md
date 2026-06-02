@@ -29,6 +29,8 @@ Do not treat accepted recommendations as the end of the grilling process. If acc
 
 After the initial numbered list, ask one question at a time only for unresolved ambiguity, dependent follow-up decisions, or branches that cannot be settled from the user's bulk response.
 
+A caller may override the follow-up pacing with iterative numbered blocks. When a caller declares that override, replace the default one-at-a-time follow-up with the caller's pacing.
+
 Do not ask questions that can be answered by exploring the codebase, documentation, or local files.
 
 End by summarizing the resolved decisions, explicit assumptions, and any

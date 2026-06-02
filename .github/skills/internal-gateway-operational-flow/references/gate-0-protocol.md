@@ -69,6 +69,29 @@ owns Gate 0 status labels and blocking semantics.
   phase, such as `write the plan`, `create the implementation
   plan`, or an equivalent instruction.
 
+## Validated Definition Brief Intake
+
+A Definition Brief produced by `internal-gateway-idea-brainstorming` may enter
+`plan` without repeating Gate 0 or the Pre-Plan Critical Pass when all of these
+conditions hold:
+
+- Origin: produced by `internal-gateway-idea-brainstorming`.
+- Gate status: `grill-me satisfied` in the current cycle.
+- Critical pass: `pre-plan critical: confident`.
+- Scope unchanged: no realignment changed scope, owner, target state,
+  validation, or anti-scope since the last critical pass.
+- Explicit checkpoint: the idea gateway stopped at
+  `Handoff checkpoint: ready-for-owner-change`.
+
+When these conditions hold, the operational flow consumer accepts the intake,
+treats `grill-me satisfied` and `pre-plan critical: confident` as already met,
+and continues with the next phase. Generic non-`execute` entrypoints that do not
+meet every condition still require Gate 0.
+
+If realignment later changes scope, owner, target state, validation, or
+anti-scope, the intake is invalidated. Restart Gate 0 and the Pre-Plan Critical
+Pass in `define`.
+
 ## Realignment
 
 - If request, target path, context, environment, tool output, dependency
