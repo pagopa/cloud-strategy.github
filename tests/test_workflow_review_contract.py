@@ -505,6 +505,7 @@ def test_completion_report_states_present() -> None:
             "`PARTIAL`",
             "`BLOCKED`",
             "`ROLLED_BACK`",
+            "`CANCELLED`",
             "Review Tiers",
         ),
     )

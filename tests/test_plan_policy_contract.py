@@ -16,7 +16,6 @@ WRITING_REFERENCES = {
 }
 
 EXECUTING_REFERENCES = {
-    "legacy-plan-compatibility": ".github/skills/internal-executing-plans/references/legacy-plan-compatibility.md",
     "plan-handoff": ".github/skills/internal-executing-plans/references/plan-handoff.md",
     "resume-protocol": ".github/skills/internal-executing-plans/references/resume-protocol.md",
     "completion-report": ".github/skills/internal-executing-plans/references/completion-report.md",
@@ -184,22 +183,21 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     compact_contract_text = read_text(WRITING_REFERENCES["compact-plan-contract"])
     scope_challenge_text = read_text(WRITING_REFERENCES["scope-challenge"])
     review_gate_text = read_text(WRITING_REFERENCES["plan-review-gate"])
-    legacy_compat_text = read_text(EXECUTING_REFERENCES["legacy-plan-compatibility"])
 
-    # Writing skill — profile selection and core contract
+    # Writing skill — profile selection and core contract (current-only)
     assert "## When to use" in writing_skill_text
     assert PLAN_TASK_PATH in writing_skill_text
     assert "crosses turns" in writing_skill_text
     assert "## Profile Selection" in writing_skill_text
     assert "`compact`" in writing_skill_text
     assert "`extended`" in writing_skill_text
-    assert "`legacy`" in writing_skill_text
+    assert "`legacy`" not in writing_skill_text
     assert "01-change-summary.md" in writing_skill_text
     assert "02-source-item-ledger.md" in writing_skill_text
     assert "03-execution.md" in writing_skill_text
     assert "04-implementation-contract.md" in writing_skill_text
     assert "questions.md" in writing_skill_text
-    assert "English" in writing_skill_text
+    assert "Italian" in writing_skill_text
     assert "Use English file names" in writing_skill_text
     assert "`Recommended use`" in writing_skill_text
     assert (
@@ -213,12 +211,12 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "clarification gate" in writing_skill_text
     assert "`done-*`" in writing_skill_text
     assert "final packaging" in writing_skill_text
-    assert "outside the plan-and-apply loop" not in writing_skill_text
     assert "scope-challenge.md" in writing_skill_text
     assert "plan-review-gate.md" in writing_skill_text
     assert "Decision Brief" in writing_skill_text
+    assert "plan_authoring.py" in writing_skill_text or "bundle-local" in writing_skill_text
 
-    # Executing skill — core algorithm and ledger tracking
+    # Executing skill — core algorithm and ledger tracking (current-only)
     assert "## When to use" in executing_skill_text
     assert "retained numbered plans" in executing_skill_text
     assert "Read `01-change-summary.md`" in executing_skill_text
@@ -236,33 +234,33 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "questions.md" in executing_skill_text
     assert "Stop only for real blockers" in executing_skill_text
     assert "No `SHIPPED`" in executing_skill_text
+    assert "unsupported-plan-contract" in executing_skill_text
+    assert "plan_execution.py" in executing_skill_text or "bundle-local" in executing_skill_text
 
-    # Compact plan reference — schema and escalation
+    # Compact plan reference — current-only schema
     assert "## Compact File Shape" in compact_contract_text
     assert "## Escalation To Extended" in compact_contract_text
-    assert "## Template: 01-change-summary.md" in compact_contract_text
+    assert "## Template: 01-change-summary.md (Italian)" in compact_contract_text
     assert "## Template: 03-execution.md" in compact_contract_text
-    assert "## Legacy Folder Classification" in compact_contract_text
+    assert "unsupported-plan-contract" in compact_contract_text
     assert "`Plan profile`" in compact_contract_text
 
-    # Scope challenge — profile-aware
+    # Scope challenge — profile-aware, current-only
     assert "## Required Questions" in scope_challenge_text
     assert "`coverage`: How does `02-source-item-ledger.md`" in scope_challenge_text
     assert "`extended` profiles" in scope_challenge_text
     assert "`compact` profiles" in scope_challenge_text
     assert "`implementation contract`" in scope_challenge_text
     assert "`profile`" in scope_challenge_text
+    assert "`summary language`" in scope_challenge_text
+    assert "`summary clarity`" in scope_challenge_text
+    assert "unsupported-plan-contract" in scope_challenge_text
 
-    # Plan review gate — profile-aware
+    # Plan review gate — current-only
     assert "| Implementation contract |" in review_gate_text
     assert "| Profile |" in review_gate_text
     assert "missing source-item coverage for requested work" in review_gate_text
-
-    # Legacy compatibility reference
-    assert "## Profile Classification" in legacy_compat_text
-    assert "legacy" in legacy_compat_text.lower()
-    assert "## Legacy File Name Mappings" in legacy_compat_text
-    assert "01-summary-direction-and-decision.md" in legacy_compat_text
+    assert "unsupported-plan-contract" in review_gate_text or "unsupported" in review_gate_text.lower()
 
 
 def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
@@ -292,7 +290,7 @@ def test_plan_gates_require_traceability_for_strategic_conversions() -> None:
         "For non-trivial retained plans, `READY` also requires explicit source-item"
         in scope_challenge_text
     )
-    assert "Profile: <compact, extended, or legacy>" in scope_challenge_text
+    assert "Profile: <compact or extended>" in scope_challenge_text
 
     assert "| Semantic coverage |" in review_gate_text
     assert "| Summary focus |" in review_gate_text
@@ -322,5 +320,6 @@ def test_plan_wrapper_skills_ship_openai_metadata() -> None:
 
     assert "$internal-writing-plans" in writing_metadata_text
     assert "compact" in writing_metadata_text.lower()
+    assert "Italian" in writing_metadata_text
     assert "$internal-executing-plans" in executing_metadata_text
-    assert "classify retained plan folders" in executing_metadata_text
+    assert "reject unsupported profiles" in executing_metadata_text.lower()

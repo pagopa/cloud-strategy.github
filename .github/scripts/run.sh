@@ -41,7 +41,6 @@ Tools:
     sync_home_ai_resources
   sync_copilot_catalog
     validate_internal_skills
-    validate_retained_plans
 EOF
 }
 
@@ -141,9 +140,6 @@ resolve_script() {
             ;;
         validate_internal_skills|validate_internal_skills.py)
             printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"
-            ;;
-        validate_retained_plans|validate_retained_plans.py)
-            printf '%s\n' "$SCRIPT_DIR/validate_retained_plans.py"
             ;;
         *)
             return 1
