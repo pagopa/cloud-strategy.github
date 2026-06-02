@@ -12,11 +12,14 @@ Decision Brief from planning. It defines the minimum input contract before the
 ## Required Inputs
 
 - Plan folder under `tmp/superpowers/<clear-action-or-task-name>/`.
-- `01-change-summary.md` with only the concise proposed-change summary, problem,
-  rationale, validation path, and decision request.
+- `Plan profile` declared as `compact` or `extended` in `02-source-item-ledger.md`.
+  Unsupported or missing profiles return `unsupported-plan-contract`.
+- `01-change-summary.md`: Italian decision summary with required sections and
+  a `Risorsa | Azione | Scopo` table for non-trivial plans. Non-executable.
 - `02-source-item-ledger.md` with `Recommended use`, `File map and role`,
   `Initial evidence pass`, `Reading budget`, and source-item coverage.
-- `04-implementation-contract.md` for non-trivial or lower-context retained plans, or an explicit `Implementation contract: not applicable` statement when the local contract allows it.
+- `04-implementation-contract.md` for `extended` profiles, or an explicit
+  `Implementation contract: not applicable` statement for `compact`.
 - Numbered executable plan files after the summary and ledger control files.
 - `questions.md` with accepted user-only decisions or `- none`.
 - A plan for closing the summary and ledger files through matching `done-*`
@@ -46,8 +49,11 @@ Decision Brief from planning. It defines the minimum input contract before the
 
 ## Standard Stop Conditions
 
+- `Plan profile` is missing, unsupported, or cannot be classified as `compact`
+  or `extended`. Return `unsupported-plan-contract`.
 - Scope moves outside the declared files, owners, or asset family.
-- `01-change-summary.md` is missing or overloaded with control details.
+- `01-change-summary.md` is missing, overloaded with control details, written in
+  English, or missing the `Risorsa | Azione | Scopo` table for non-trivial plans.
 - `02-source-item-ledger.md`, `Recommended use`, or `File map and role` is missing from a non-trivial retained plan.
 - `Initial evidence pass`, `Reading budget`, or source-item coverage is missing from a non-trivial retained plan.
 - `04-implementation-contract.md` is missing, stale, or too weak to recover exact sources, target files, validators, blockers, or required external pins for a non-trivial or lower-context retained plan.

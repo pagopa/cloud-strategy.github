@@ -9,6 +9,12 @@ plan execution. The goal is to recover from evidence, not memory.
 - Adopt verify-first recovery only. Do not import HOTL state files or runtime
   commands.
 
+## Profile Gate
+
+Before any inspection, verify the `Plan profile` is `compact` or `extended`.
+Unsupported or missing profiles return `unsupported-plan-contract` and the
+resume attempt stops.
+
 ## Verify-first Sequence
 
 1. Read `01-change-summary.md` first when present, then
@@ -20,18 +26,18 @@ plan execution. The goal is to recover from evidence, not memory.
 3. Use `rg --no-ignore` or equivalent ignored-file-aware search for retained artifacts under `tmp/`.
 4. List every `done-*` file in the retained plan folder.
 5. List every remaining executable numbered plan file, ignore `questions.md` as an
-  executable file, and treat `04-implementation-contract.md` as a support/control
-  file.
+   executable file, and treat `04-implementation-contract.md` as a support/control
+   file.
 6. Check whether each `done-*` file preserves the completed item and evidence,
-  or points to an evidence envelope.
+   or points to an evidence envelope.
 7. Check whether the source-item ledger exists and whether every row has a
    credible status, evidence, and route.
 8. Read `04-implementation-contract.md` when present or required and compare it
-  with touched files, validators, blockers, and any external pins or fallback.
+   with touched files, validators, blockers, and any external pins or fallback.
 9. Read `questions.md` only for accepted decisions that affect execution.
 10. Check `git status` and `git diff` for uncommitted evidence of completed work.
 11. Re-run the validators declared by the plan, or name the closest available
-   validator and the gap.
+    validator and the gap.
 12. If `completion-report.md` exists, read its `State`, `Continuation`, and
     `User action required` fields before assuming the folder is closed or ready
     to continue.

@@ -28,15 +28,18 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
 ## When not to use
 
 - Reviewing or challenging a plan; use `internal-gateway-operational-flow`.
-- Treating `questions.md` or legacy `doubts-and-questions.md` as executable files.
+- Treating `questions.md` as an executable file.
 - Editing imported `superpowers-*` assets.
+- Executing folders without a declared `compact` or `extended` profile;
+  those return `unsupported-plan-contract`.
 
 ## Core Algorithm
 
 1. **Classify**: Read `01-change-summary.md` → `02-source-item-ledger.md` →
    `04-implementation-contract.md` (when present). Determine folder purpose,
    profile, file roles, reading budget, target, anti-scope, owner, validator,
-   stop conditions, and source-item coverage.
+   stop conditions, and source-item coverage. Reject unsupported profiles
+   immediately.
 2. **Evidence pass**: Run the ledger's declared pass. Fallback: target existence,
    riskiest claim, nearest validator.
 3. **Execute**: Process remaining numbered executable files in order. For each
@@ -77,6 +80,9 @@ execution loop, ledger-as-live-state tracking, and final evidence packaging.
 - When execution stops without `SHIPPED`, start the report with `State:` and
   `Continuation:`. Use `internal-agent-support-next-step` fields, and include
   `User action required:` when `Continuation` is `waiting`.
+- The bundle-local execution CLI under `scripts/plan_execution.py` provides
+  `inspect`, `resume`, `checkpoint`, and `completion-check` commands for
+  deterministic read-only inspection. Load on demand when those checks are needed.
 
 ## Slice Strategy
 
@@ -117,7 +123,6 @@ The completion-state vocabulary and folder-behavior rules live in
 - `references/plan-handoff.md`: minimum input contract before execution.
 - `references/resume-protocol.md`: verify-first recovery after interruption.
 - `references/completion-report.md`: completion states, evidence envelope, report template.
-- `references/legacy-plan-compatibility.md`: legacy folder classification and backward-compatible reading.
 
 Load references on demand only when the active phase needs them.
 
@@ -135,6 +140,8 @@ Load references on demand only when the active phase needs them.
 - No `SHIPPED` claim while any item is `PENDING`, `PARTIAL`, `NOT_DONE`,
   `UNVERIFIABLE`, or `BLOCKED`.
 - No git commit unless user explicitly requested.
+- Folders without `compact` or `extended` profiles are rejected with
+  `unsupported-plan-contract`.
 
 ## Common mistakes
 
@@ -147,3 +154,4 @@ Load references on demand only when the active phase needs them.
 - Treating `questions.md` as a task list.
 - Stopping after one numbered file when others remain.
 - Claiming completion while ledger rows are still open.
+- Accepting unsupported or missing profiles.

@@ -11,6 +11,12 @@ Treat `completion-report.md` and `evidence-envelope.md` as late-stage packaging 
 - Comparative source: `tmp/external-comparison/hotl-plugin/docs/contracts/execution-report-output.md`.
 - Adopt completion semantics only. Do not import external runtime reporting.
 
+## Profile Gate
+
+Before any completion-phase validation, verify the `Plan profile` is `compact`
+or `extended`. Unsupported or missing profiles return `unsupported-plan-contract`
+and the completion attempt stops.
+
 ## Completion States
 
 | State | Criteria | Folder behavior | Continuation |
@@ -20,6 +26,7 @@ Treat `completion-report.md` and `evidence-envelope.md` as late-stage packaging 
 | `PARTIAL` | Some in-scope items remain incomplete or intentionally deferred. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. | `continuing` or `waiting` |
 | `BLOCKED` | A real blocker prevents correct continuation. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. Record the blocker and next-step package. | `waiting` |
 | `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. | Keep numbered plan files and the live ledger in place unless a later `SHIPPED` package supersedes the folder. Do not create new `done-*` markers for the rolled-back state. | `waiting` or `none` |
+| `CANCELLED` | Explicitly evidenced as `INTENTIONAL_NON_ACTION` with documented reason. Not a substitute for missing evidence. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. Record the cancellation rationale in the completion report. | `none` |
 
 `SHIPPED` requires passed validators, a completed report, no numbered plan files,
 and no open source-item ledger rows. Non-trivial retained plans also require an
@@ -29,6 +36,11 @@ If validators or evidence coverage cannot run, or any row remains `PENDING`,
 `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED` with the explicit gap.
 Only `SHIPPED` is a close-package state. Every other state is a live-folder
 state and must preserve the retained plan for resume or manual continuation.
+
+`CANCELLED` is accepted only when the plan was explicitly abandoned by user
+decision and the cancellation is recorded as `INTENTIONAL_NON_ACTION` with a
+documented reason in the ledger. Otherwise the ledger row remains open and
+the state is `PARTIAL` or `BLOCKED`.
 
 When the state is not `SHIPPED`, the report must also declare:
 
@@ -83,8 +95,8 @@ If the ledger is absent or stale and cannot be reconstructed from source plan
 files, `done-*` files, and reachable artifacts, mark the completion state
 `PARTIAL` or `APPLIED_UNVERIFIED`; do not claim `SHIPPED`.
 
-If the completion state is `APPLIED_UNVERIFIED`, `PARTIAL`, `BLOCKED`, or
-`ROLLED_BACK`, do not use the report as permission to remove numbered plan files
+If the completion state is `APPLIED_UNVERIFIED`, `PARTIAL`, `BLOCKED`,
+`ROLLED_BACK`, or `CANCELLED`, do not use the report as permission to remove numbered plan files
 or the live ledger. Those states document a live retained-plan folder, not a
 physical close package.
 
@@ -101,7 +113,7 @@ physical close package.
 ```text
 Completion Report
 Active phase and owner: <phase, owner>
-State: SHIPPED | APPLIED_UNVERIFIED | PARTIAL | BLOCKED | ROLLED_BACK
+State: SHIPPED | APPLIED_UNVERIFIED | PARTIAL | BLOCKED | ROLLED_BACK | CANCELLED
 Continuation: none | continuing | waiting
 User action required: <exact required user/external action, or none>
 Files changed: <paths>
