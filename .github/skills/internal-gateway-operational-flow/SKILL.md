@@ -16,7 +16,6 @@ Treat every referenced skill as an on-demand dependency, not a preload bundle.
 - `internal-agent-support-lane-change-engine`: lane-change when mode no longer fits.
 - `internal-gateway-critical-master`: critical challenge owner.
 - `internal-gateway-simple-task`: simple fast path.
-- `superpowers-brainstorming`: option-exploration inside `define`.
 - `internal-writing-plans`: retained-plan authoring under `tmp/superpowers/`.
 - `internal-executing-plans`: retained-plan execution for `apply-plan`.
 - `internal-code-review`: code-defect review lens.
@@ -48,9 +47,8 @@ Select one entry point from the user prompt, then run one active phase at a time
 | Entrypoint | Use when | First active phase |
 | --- | --- | --- |
 | `full-cycle` | End-to-end non-trivial work. | `define` unless confirmed definition exists |
-| `define-first` | Brainstorming, clarification, or success criteria before a plan. | `define` |
+| `define-first` | Operational clarification or success criteria before a plan. | `define` |
 | `plan-only` | Plan or retained plan without implementation. | `define` when unconfirmed; otherwise `plan` |
-| `plan-only (clarify-first)` | Legacy spelling for `define-first`. | `define` |
 | `apply-plan` | Apply approved retained plan. | `apply-plan` with `internal-executing-plans` |
 | `review` | Defect-first review or evidence analysis. | `review` |
 | `mode-explicit` | Direct `define`, `plan`, `execute`, or `review`. | The named phase |
@@ -61,7 +59,7 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `define` | Intent, success, owner, constraints, anti-scope, or options not confirmed. | After minimum evidence pass. Direct `execute` is the only automatic Gate 0 exception; `apply-plan` and `review` use a visible define pre-start gate. | Definition Brief, Pre-Plan Critical Pass, next-step. Delegate idea work to `internal-gateway-idea-brainstorming`. | Write plan, apply changes, or imply execute approval. | `grill-me`, `internal-gateway-idea-brainstorming`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | Define Check 1-3, Pre-Plan Critical Pass (`confident` or `reopen`), user closure. |
+| `define` | Intent, success, owner, constraints, anti-scope, or options not confirmed. | After minimum evidence pass. Direct `execute` is the only automatic Gate 0 exception; `apply-plan` and `review` use a visible define pre-start gate. | Definition Brief, Pre-Plan Critical Pass, next-step. Recommend `internal-gateway-idea-brainstorming` visibly when substantive idea work appears. | Write plan, apply changes, or imply execute approval. | `grill-me`, `internal-gateway-idea-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | Define Check 1-3, Pre-Plan Critical Pass (`confident` or `reopen`), user closure. |
 | `plan` | Confirmed definition with `pre-plan critical: confident`; decisions or tradeoffs remain. | Must be satisfied with `confident`. | Decision frame, retained plan, Decision Brief, next-step. | Apply changes or imply execute approval. | `internal-writing-plans`, `internal-agent-support-next-step`. | Plan Check 1-3, validators, or gap. |
 | `execute` | Target state and validation are concrete. | Do not start unless user asks or lane changes. | Scoped edits, focused validation. | Unrelated improvements or silent strategy changes. | `internal-debugging`, `internal-tdd`. | Check 1-3 plus fresh evidence. |
 | `apply-plan` | Approved retained plan folder. | Visible define pre-start gate before execution. | `done-*` loop, ledger coverage, close packaging. | Execute `questions.md` or unapproved plans. | `internal-executing-plans`. | Ledger, `done-*`, Check 1-4. |
@@ -98,7 +96,7 @@ If request-change realignment changes scope, owner, target state, validation, or
 
 ### Define
 
-Smallest evidence pass, then Gate 0 through `grill-me`. Use `superpowers-brainstorming` only when design-ambiguous. Delegate idea work to `internal-gateway-idea-brainstorming`. Accept a validated Definition Brief into `plan` after a checkpoint without repeating ideation.
+Smallest evidence pass, then Gate 0 through `grill-me`. When substantive unresolved idea work appears, stop and recommend `internal-gateway-idea-brainstorming` visibly. Accept a validated Definition Brief into `plan` after a checkpoint without repeating ideation.
 
 Before exiting, produce a Definition Brief: outcome, owner, success criteria, constraints, anti-scope, direction or options, validation path or gap, stop conditions. Use Define Check 1-3, then the Pre-Plan Critical Pass.
 
@@ -113,7 +111,7 @@ Declare `pre-plan critical: confident` or `pre-plan critical: reopen`. When `reo
 
 Do not loop more than twice without explicit user decision.
 
-For `define-first`, brainstorming, and clarify-first entrypoints, closing Gate 0 does not change the active phase; agreement, option selection, accepted defaults, or approval-like replies only update the definition; wait for explicit planning request.
+For `define-first`, closing Gate 0 does not change the active phase; agreement, accepted defaults, or approval-like replies only update the definition; wait for explicit planning request.
 
 ### Plan
 

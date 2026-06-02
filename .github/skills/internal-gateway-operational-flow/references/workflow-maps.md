@@ -105,7 +105,7 @@ Do not restate the non-waiver or phase-transition details in maps.
 +-------------------------------+
 ```
 
-Use `superpowers-brainstorming` only when `define` needs option exploration or design-ambiguous work. Skip for deterministic repository-owned maintenance when target state and validation are concrete.
+When substantive idea work appears, stop and recommend `internal-gateway-idea-brainstorming` visibly. Operational `define` keeps only clarification needed for the staged workflow.
 
 ## Strategy & Decision Framing / Plan & Design
 

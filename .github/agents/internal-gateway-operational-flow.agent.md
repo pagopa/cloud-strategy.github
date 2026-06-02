@@ -50,6 +50,8 @@ portable workflow semantics in the core skill.
   review before any reassurance or closeout.
 - Do not use this agent for a concrete low-to-medium-risk task that can finish
   through the simple fast path.
+- Do not use this agent for substantive idea definition, brainstorming, or
+  option exploration; recommend `internal-gateway-idea-brainstorming` visibly.
 - Do not use this agent when the primary need is assumption pressure-testing;
   recommend `internal-gateway-critical-master` instead.
 
@@ -59,6 +61,8 @@ portable workflow semantics in the core skill.
 - Keep phases visible to the user through the core skill contract.
 - If the work becomes a simple single-lane task, recommend
   `internal-gateway-simple-task` instead of continuing here.
+- If substantive unresolved idea work appears, recommend
+  `internal-gateway-idea-brainstorming` instead of continuing here.
 - If reasoning quality, hidden assumptions, or failure modes dominate,
   recommend `internal-gateway-critical-master` instead of routing automatically.
 

@@ -46,7 +46,7 @@ owns Gate 0 status labels and blocking semantics.
 
 - Closing Gate 0 changes the gate status only. It does not change the active
   phase.
-- For `define-first`, brainstorming, and clarify-first entrypoints, the
+- For `define-first`, the
   workflow remains in `define` after `grill-me` is satisfied.
 - After Gate 0 closure and `Define Check 1-3`, the Pre-Plan Critical Pass runs
   automatically before any transition recommendation. The critical pass loads

@@ -22,7 +22,6 @@ Keep imported support conditional, never a mandatory engine. Internal owners win
 | Support | Gateway phase | Use when | Guardrail |
 | --- | --- | --- | --- |
 | `grill-me` | Gate 0 support for every non-`execute` entrypoint inside `define` | The operational-flow skill has enough evidence to classify request, target path, owner, anti-scope, and nearest validation, and the selected entrypoint is not direct `execute`. | Follow `gate-0-protocol.md`; wrapper docs must not restate the full Gate 0 protocol. |
-| `superpowers-brainstorming` | Conditional `define` support | Creative or design-ambiguous work needs option exploration before planning. | Keep `grill-me` as the Gate 0 pillar; skip for deterministic repository-owned maintenance. |
 | `mattpocock-caveman` | Support only | A long sync, review, or governance report needs compression after blockers, risks, and validation evidence are explicit. | Never use as primary reasoning, planning, review, or evidence gathering. |
 
 Internal replacements:
@@ -32,6 +31,7 @@ Internal replacements:
 - Performance work belongs to `internal-performance-optimization`.
 - Architecture, cross-cutting impact, blind spots, and code orientation belong to `internal-high-level-review`.
 - Code defect review belongs to `internal-code-review`.
+- Substantive idea definition belongs to `internal-gateway-idea-brainstorming`.
 
 ## Future Security Lens
 
@@ -46,7 +46,7 @@ Support selection belongs in the gateway skills, not in wrapper skill-list secti
 - Gate 0 closure, blocking, non-waiver, phase-transition, and realignment rules live exclusively in `gate-0-protocol.md`. Wrappers, READMEs, and tests reference that file instead of restating the protocol.
 - Restart Gate 0 before continuing if request, context, target path, environment, tool output, dependency state, validation, or dirty worktree ownership changes.
 - In wrapper projection terms, the loop closes only after a user closure signal.
-- `superpowers-brainstorming` is optional support inside `define` only when option exploration is the real work.
+- Substantive idea work leaves operational `define` through a visible recommendation to `internal-gateway-idea-brainstorming`.
 - Retained-plan execution belongs to `internal-executing-plans` after `apply-plan` is selected.
 - Retained-plan authoring belongs to `internal-writing-plans`.
 - Compression support stays support-only after blockers, risks, and validation evidence are explicit.

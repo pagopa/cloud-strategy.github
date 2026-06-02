@@ -6,7 +6,7 @@ Use this reference when the staged `define`, `plan`, `execute`, `apply-plan`, `r
 
 | Entrypoint / Mode | Owns | Must not own |
 | --- | --- | --- |
-| `define` | Initial brainstorming, user intent, success criteria, constraints, anti-scope, option exploration, Gate 0 closure, Definition Briefs, and Pre-Plan Critical Pass. | Implementation plans, retained-plan authoring, local edits, or proof of completion. |
+| `define` | Operational clarification, user intent, success criteria, constraints, anti-scope, Gate 0 closure, Definition Briefs, and Pre-Plan Critical Pass. | Substantive ideation, implementation plans, retained-plan authoring, local edits, or proof of completion. |
 | `plan` | Ambiguity resolution after the definition is confirmed with `pre-plan critical: confident`, decision records, retained plans, rollout shape, governance calls, and non-trivial repository-owned authoring. | Routine local execution, defect-first validation, open-ended brainstorming, or pure pressure testing. |
 | `execute` | Clear local implementation, deterministic realignment, nearby documentation/test updates, and concrete validation. | Strategic tradeoffs, unresolved ownership, non-trivial rollout decisions, review-first asks, or assumption challenge. |
 | `apply-plan` | Repository-owned retained plan folder application with `done-*` tracking, source-item ledger coverage, blocker handling, cross-file continuation, completion checks, and physical close packaging. | Creating or approving the plan, applying inline plans without checkpoint, silently expanding scope, executing `questions.md`, or reporting `SHIPPED` before close packaging. |
@@ -51,7 +51,6 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-performance-optimization` | `execute` or `review` support | Measured latency, throughput, profiling, and regression-budget work. |
 | `grill-me` | Gate 0 support for every non-`execute` entrypoint inside `define` | Question pressure after minimum evidence pass. Follow `references/gate-0-protocol.md`. |
 | `internal-gateway-idea-brainstorming` | Conditional `define` support | Substantive idea definition, convergence, and validated handoff before operational planning. |
-| `superpowers-brainstorming` | Conditional `define` support | Creative or design-ambiguous work needs option exploration; skip for deterministic maintenance. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | Runtime-specific internal skills | `execute` for local, `plan` when design dominates | Tactical delivery versus strategy split. |
@@ -74,8 +73,7 @@ Use these rules when deciding whether a support skill belongs in `SKILL.md`, a r
 
 - Load `grill-me` when Gate 0 activates. Load `internal-agent-support-next-step` when a transition package is needed.
 - Follow `references/gate-0-protocol.md` for Gate 0 depth, closure, and realignment.
-- Load `internal-gateway-idea-brainstorming` inside `define` when substantive unresolved idea work is discovered.
-- Load `superpowers-brainstorming` only when `define` needs option exploration; skip it for deterministic repository-owned maintenance.
+- Stop and recommend `internal-gateway-idea-brainstorming` visibly when `define` discovers substantive unresolved idea work.
 - Load every other support skill only when the active phase, failure condition, handoff, review lens, or validation gap makes that owner necessary.
 - Prefer delegating to the named skill over copying its method.
 - When a support contract needs more than trigger, boundary, and return shape, move the detail to the support skill or bundle references instead of expanding `SKILL.md`.
