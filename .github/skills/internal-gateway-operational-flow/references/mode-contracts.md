@@ -50,7 +50,7 @@ File count and adjacent boundary crossing are heuristics, not automatic planning
 | `internal-tdd` | `execute` support | Red-green-refactor through public interfaces when an executable seam exists. |
 | `internal-performance-optimization` | `execute` or `review` support | Measured latency, throughput, profiling, and regression-budget work. |
 | `grill-me` | Gate 0 support for every non-`execute` entrypoint inside `define` | Question pressure after minimum evidence pass. Follow `references/gate-0-protocol.md`. |
-| `internal-idea-define-advisor` | Conditional `define` support | Pre-action fit questions about tools, skills, agents, workflow, owners. |
+| `internal-gateway-idea-brainstorming` | Conditional `define` support | Substantive idea definition, convergence, and validated handoff before operational planning. |
 | `superpowers-brainstorming` | Conditional `define` support | Creative or design-ambiguous work needs option exploration; skip for deterministic maintenance. |
 | `internal-writing-plans` | `plan` mode | Retained repository-owned plan authoring under `tmp/superpowers/<clear-action-or-task-name>/`. |
 | `internal-executing-plans` | `apply-plan` execution engine | Repository-owned plan application with `done-*` tracking under `tmp/superpowers/<clear-action-or-task-name>/`. |
@@ -74,7 +74,7 @@ Use these rules when deciding whether a support skill belongs in `SKILL.md`, a r
 
 - Load `grill-me` when Gate 0 activates. Load `internal-agent-support-next-step` when a transition package is needed.
 - Follow `references/gate-0-protocol.md` for Gate 0 depth, closure, and realignment.
-- Load `internal-idea-define-advisor` inside `define` for pre-action fit questions.
+- Load `internal-gateway-idea-brainstorming` inside `define` when substantive unresolved idea work is discovered.
 - Load `superpowers-brainstorming` only when `define` needs option exploration; skip it for deterministic repository-owned maintenance.
 - Load every other support skill only when the active phase, failure condition, handoff, review lens, or validation gap makes that owner necessary.
 - Prefer delegating to the named skill over copying its method.

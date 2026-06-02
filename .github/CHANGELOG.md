@@ -8,6 +8,15 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-06-02
+
+- Added `internal-gateway-idea-brainstorming` as a visible fourth gateway skill and thin Copilot wrapper agent, owning substantive idea definition, guided decision interview, convergence, Definition Brief, mandatory critical pass, and validated handoff before operational planning.
+- Absorbed and retired `internal-idea-define-advisor`, moving its useful owner-map and question-bank concepts into the new gateway bundle without a compatibility stub or alias.
+- Narrowed `internal-gateway-operational-flow` to delegate unresolved idea work visibly to the new gateway and consume validated Definition Brief handoffs for `plan` without repeating ideation or its critical pass.
+- Added native guided decision interview semantics: evidence-first discovery, one material decision question per turn, visible recommendation and rationale, explicit user answer, compact decision ledger, proportional depth, and checkpoint states.
+- Updated adjacent routing owners (`internal-agent-support-next-step`, `internal-agent-support-lane-change-engine`, `internal-gateway-simple-task`, `internal-gateway-critical-master`) to recognize the new gateway in handoffs and lane-change recommendations.
+- Updated `.github/agents/README.md`, `.github/README.md`, `INTERNAL_CONTRACT.md`, `docs`, wrapper-alignment, mode-contracts, subagent-patterns, home-sync catalog, token benchmarks, and regression tests for the four-gateway model.
+
 ## 2026-05-19
 
 - Migrated the repository to the skill-first Copilot model under the approved architecture-migration exception: replacement owners, routing, references, and validators moved first, `.github/instructions/` was removed afterward, `internal-aws-serverless` was replaced by `internal-aws-lambda`, and no standards release was published as part of the repository edit.

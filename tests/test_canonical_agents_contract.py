@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml
 
 CANONICAL_AGENTS = {
+    "internal-gateway-idea-brainstorming": ".github/agents/internal-gateway-idea-brainstorming.agent.md",
     "internal-gateway-operational-flow": ".github/agents/internal-gateway-operational-flow.agent.md",
     "internal-gateway-critical-master": ".github/agents/internal-gateway-critical-master.agent.md",
     "internal-gateway-simple-task": ".github/agents/internal-gateway-simple-task.agent.md",
@@ -21,42 +22,60 @@ LEGACY_AGENT_HEADINGS = (
 )
 
 EXPECTED_CORE_SKILLS = {
+    "internal-gateway-idea-brainstorming": "internal-gateway-idea-brainstorming",
     "internal-gateway-operational-flow": "internal-gateway-operational-flow",
     "internal-gateway-critical-master": "internal-gateway-critical-master",
     "internal-gateway-simple-task": "internal-gateway-simple-task",
 }
 
 EXPECTED_HANDOFF_LABELS = {
+    "internal-gateway-idea-brainstorming": [
+        "Next step: Use simple fast path",
+        "Next step: Continue through staged operational flow",
+        "Next step: Pressure-test decision",
+    ],
     "internal-gateway-operational-flow": [
         "Next step: Pressure-test decision",
         "Next action: Use simple fast path",
+        "Next step: Explore idea definition",
     ],
     "internal-gateway-critical-master": [
         "Next step: Continue through staged flow",
         "Next action: Use simple fast path",
+        "Next step: Reopen idea definition",
     ],
     "internal-gateway-simple-task": [
         "Next step: Use staged operational flow",
         "Next step: Pressure-test task",
+        "Next step: Explore idea definition",
     ],
 }
 
 EXPECTED_HANDOFF_TARGETS = {
+    "internal-gateway-idea-brainstorming": [
+        "internal-gateway-simple-task",
+        "internal-gateway-operational-flow",
+        "internal-gateway-critical-master",
+    ],
     "internal-gateway-operational-flow": [
         "internal-gateway-critical-master",
         "internal-gateway-simple-task",
+        "internal-gateway-idea-brainstorming",
     ],
     "internal-gateway-critical-master": [
         "internal-gateway-operational-flow",
         "internal-gateway-simple-task",
+        "internal-gateway-idea-brainstorming",
     ],
     "internal-gateway-simple-task": [
         "internal-gateway-operational-flow",
         "internal-gateway-critical-master",
+        "internal-gateway-idea-brainstorming",
     ],
 }
 
 EXPECTED_AGENT_TOOLS = {
+    "internal-gateway-idea-brainstorming": ["read", "edit", "search", "execute", "web"],
     "internal-gateway-operational-flow": ["read", "edit", "search", "execute", "web"],
     "internal-gateway-critical-master": ["read", "search"],
     "internal-gateway-simple-task": ["read", "edit", "search", "execute", "web"],
@@ -315,7 +334,8 @@ def test_agents_readme_documents_ascii_workflows_and_usage_examples() -> None:
     assert "internal-gateway-operational-flow" in readme
     assert "internal-gateway-critical-master" in readme
     assert "internal-gateway-simple-task" in readme
-    assert "### 4. Sync Workflows" in readme
+    assert "internal-gateway-idea-brainstorming" in readme
+    assert "### 5. Sync Workflows" in readme
     assert "local-sync-external-resources" in readme
     assert "local-sync-global-copilot-configs-into-repo" in readme
     assert "## Use Examples" in readme
@@ -364,7 +384,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "explicit checkpoint before moving" in skill_text
     assert (
         "Keep direct entry and manual transitions visible. "
-        "Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch."
+        "Do not create hidden front-door routers or hidden peer dispatch."
         in skill_text
     )
     assert "Future Security Lens" in skill_text
@@ -446,8 +466,8 @@ def test_internal_contract_documents_gateway_wrapper_entrypoints() -> None:
     contract_text = Path("INTERNAL_CONTRACT.md").read_text(encoding="utf-8")
 
     assert (
-        "`internal-gateway-operational-flow`, `internal-gateway-simple-task`, and "
-        "`internal-gateway-critical-master` remain the current Copilot wrapper entrypoints"
+        "`internal-gateway-idea-brainstorming`, `internal-gateway-operational-flow`, "
+        "`internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints"
         in contract_text
     )
     assert "fails safe to `internal-gateway-operational-flow`" in contract_text
@@ -475,7 +495,7 @@ def test_gateway_catalog_fast_path_stays_local_before_optional_support() -> None
     ).read_text(encoding="utf-8")
 
     assert "`internal-gateway-simple-task` vs `execute` vs `plan` triage" in skill_text
-    assert "one owner file plus one nearby validator or test" in skill_text
+    assert "one owner file plus one nearby validator" in skill_text
     assert "### Catalog Fast Path" in workflow_maps_text
     assert "`make catalog-fast-check`" in workflow_maps_text
     assert "`make github-catalog-validation` once at the end" in workflow_maps_text

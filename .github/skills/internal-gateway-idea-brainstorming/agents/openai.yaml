@@ -1,0 +1,6 @@
+interface:
+  display_name: "Internal Gateway Idea Brainstorming"
+  short_description: "Idea definition and validated handoff before planning"
+  default_prompt: "Use $internal-gateway-idea-brainstorming when a repository-owned request starts with a vague idea, unclear goal, or unresolved option set. Run the evidence pass first, then the guided decision interview: one material decision question per turn with recommendation and rationale. Wait for explicit user answers. After convergence, produce a Definition Brief and run the mandatory critical pass. Recommend the next owner visibly: simple-task, operational-flow plan, critical-master, or continued idea definition."
+name: internal-gateway-idea-brainstorming
+description: Use when a repository-owned request starts with a vague idea, unclear goal, unresolved option set, or needs substantive definition, convergence, or validated handoff before operational planning or simple execution.

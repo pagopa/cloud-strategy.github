@@ -11,7 +11,7 @@ Load these skills by name only when the active phase requires them. This list is
 Treat every referenced skill as an on-demand dependency, not a preload bundle.
 
 - `grill-me`: Gate 0 interview; load when Gate 0 activates.
-- `internal-idea-define-advisor`: pre-action advisory inside `define`.
+- `internal-gateway-idea-brainstorming`: substantive idea owner; load when `define` exposes unresolved idea work.
 - `internal-agent-support-next-step`: handoff package; load when a transition is needed.
 - `internal-agent-support-lane-change-engine`: lane-change when mode no longer fits.
 - `internal-gateway-critical-master`: critical challenge owner.
@@ -61,7 +61,7 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `define` | Intent, success, owner, constraints, anti-scope, or options not confirmed. | After minimum evidence pass. Direct `execute` is the only automatic Gate 0 exception; `apply-plan` and `review` use a visible define pre-start gate. | Definition Brief, Pre-Plan Critical Pass, next-step. | Write plan, apply changes, or imply execute approval. | `grill-me`, `internal-idea-define-advisor`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | Define Check 1-3, Pre-Plan Critical Pass (`confident` or `reopen`), user closure. |
+| `define` | Intent, success, owner, constraints, anti-scope, or options not confirmed. | After minimum evidence pass. Direct `execute` is the only automatic Gate 0 exception; `apply-plan` and `review` use a visible define pre-start gate. | Definition Brief, Pre-Plan Critical Pass, next-step. Delegate idea work to `internal-gateway-idea-brainstorming`. | Write plan, apply changes, or imply execute approval. | `grill-me`, `internal-gateway-idea-brainstorming`, `superpowers-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | Define Check 1-3, Pre-Plan Critical Pass (`confident` or `reopen`), user closure. |
 | `plan` | Confirmed definition with `pre-plan critical: confident`; decisions or tradeoffs remain. | Must be satisfied with `confident`. | Decision frame, retained plan, Decision Brief, next-step. | Apply changes or imply execute approval. | `internal-writing-plans`, `internal-agent-support-next-step`. | Plan Check 1-3, validators, or gap. |
 | `execute` | Target state and validation are concrete. | Do not start unless user asks or lane changes. | Scoped edits, focused validation. | Unrelated improvements or silent strategy changes. | `internal-debugging`, `internal-tdd`. | Check 1-3 plus fresh evidence. |
 | `apply-plan` | Approved retained plan folder. | Visible define pre-start gate before execution. | `done-*` loop, ledger coverage, close packaging. | Execute `questions.md` or unapproved plans. | `internal-executing-plans`. | Ledger, `done-*`, Check 1-4. |
@@ -73,16 +73,16 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 - One active phase at a time.
 - Load `grill-me` when Gate 0 activates. Load `internal-agent-support-next-step` when a transition package is needed. Load every other skill only when its phase, handoff, or failure condition becomes active.
 - Unclear entry: use `define` when intent is unconfirmed; otherwise `plan`.
-- Keep direct entry and manual transitions visible. Do not create new gateway skills, hidden front-door routers, or hidden peer dispatch.
+- Keep direct entry and manual transitions visible. Do not create hidden front-door routers or hidden peer dispatch.
 - Use `internal-agent-support-next-step` at every phase-ending transition.
-- Non-terminal stops: start with `State:` and `Continuation:`; add `User action required:` when `Continuation` is `waiting`.
-- Require an explicit checkpoint before moving into `execute` or `apply-plan` from `plan`, `define`, or critical challenge, unless the user authorized end-to-end application.
+- Non-terminal stops: start with `State:` and `Continuation:`; add `User action required:` when `Continuation: waiting`.
+- Require an explicit checkpoint before moving into `execute` or `apply-plan` from `plan`, `define`, or critical challenge, unless the user authorized end-to-end.
 - Use `internal-gateway-critical-master` before finalizing material prompt, skill, routing, validator, or shared workflow changes.
 - Missed work: compare request, ledger, diff, and evidence before closing.
 - Treat a user challenge that expected work was missed as a workflow defect review.
-- resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` in the source-item coverage matrix before claiming the scope is complete or an intentional non-action. For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
-- Small catalog maintenance: `internal-gateway-simple-task` vs `execute` vs `plan` triage first. Start from one owner file plus one nearby validator or test.
-- File count and adjacent boundary crossing are heuristics, not automatic planning triggers.
+- Resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` before claiming completion or an intentional non-action.
+- Small catalog maintenance: `internal-gateway-simple-task` vs `execute` vs `plan` triage first. Start from one owner file plus one nearby validator.
+- File count and adjacent boundary crossing are heuristics, not automatic triggers.
 
 ## Gate 0
 
@@ -98,7 +98,7 @@ If request-change realignment changes scope, owner, target state, validation, or
 
 ### Define
 
-Smallest evidence pass, then Gate 0 through `grill-me`. Use `superpowers-brainstorming` only when design-ambiguous. Delegate pre-action fit to `internal-idea-define-advisor`.
+Smallest evidence pass, then Gate 0 through `grill-me`. Use `superpowers-brainstorming` only when design-ambiguous. Delegate idea work to `internal-gateway-idea-brainstorming`. Accept a validated Definition Brief into `plan` after a checkpoint without repeating ideation.
 
 Before exiting, produce a Definition Brief: outcome, owner, success criteria, constraints, anti-scope, direction or options, validation path or gap, stop conditions. Use Define Check 1-3, then the Pre-Plan Critical Pass.
 

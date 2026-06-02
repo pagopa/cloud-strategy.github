@@ -46,8 +46,9 @@ It is single-lane and single-phase by design. It keeps small and medium tasks li
   `apply-plan`, retained-plan execution, or merge-readiness review. Stop and
   recommend `internal-gateway-operational-flow`.
 - The user asks to create, rewrite, or clarify context before a plan. Stop and
-  recommend `internal-gateway-operational-flow` so its pre-plan `grill-me`
-  gate can run.
+  recommend `internal-gateway-idea-brainstorming` when the need is substantive
+  ideation, or `internal-gateway-operational-flow` when the need is operational
+  mode ambiguity.
 - The primary request is pressure testing, pre-mortem analysis, hidden
   assumptions, or failure modes. Stop and recommend
   `internal-gateway-critical-master`.

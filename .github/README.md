@@ -89,12 +89,12 @@ Prefer `internal-review-ai-resources` when the subject is the repository's AI ca
 
 See [`agents/README.md`](agents/README.md) for the selection guide.
 
-- Canonical repository-owned gateway agents: `internal-gateway-operational-flow`, `internal-gateway-critical-master`, `internal-gateway-simple-task`
+- Canonical repository-owned gateway agents: `internal-gateway-idea-brainstorming`, `internal-gateway-operational-flow`, `internal-gateway-critical-master`, `internal-gateway-simple-task`
 - Deprecated compatibility operational agents: `internal-delivery-operator`, `internal-planning-leader`, `internal-review-guard`, `internal-critical-master`
 - Repository-owned source-side sync and governance agents: `local-sync-external-resources`, `local-sync-global-copilot-configs-into-repo`
 - No imported support agents currently ship in the live catalog.
 
-The current repository-owned operating model uses direct entry to the three gateway wrappers. When the right owner is unclear, default to `internal-gateway-operational-flow`. Deprecated compatibility wrappers must stay non-canonical during the deprecation window.
+The current repository-owned operating model uses direct entry to the four gateway wrappers. When the right owner is unclear and the ambiguity is substantive ideation versus operational mode, enter `internal-gateway-operational-flow` conservatively and recommend `internal-gateway-idea-brainstorming` visibly if idea work is proved. Deprecated compatibility wrappers must stay non-canonical during the deprecation window.
 
 ### Scripts and workflow
 

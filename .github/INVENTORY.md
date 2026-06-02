@@ -42,6 +42,7 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
 - `.github/skills/internal-azure-strategic/SKILL.md`
+- `.github/skills/internal-bash-script/SKILL.md`
 - `.github/skills/internal-bash/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
@@ -54,6 +55,7 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-executing-plans/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
+- `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
 - `.github/skills/internal-gateway-operational-flow/SKILL.md`
 - `.github/skills/internal-gateway-simple-task/SKILL.md`
 - `.github/skills/internal-gcp-governance/SKILL.md`
@@ -69,7 +71,8 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-go/SKILL.md`
 - `.github/skills/internal-graphify/SKILL.md`
 - `.github/skills/internal-high-level-review/SKILL.md`
-- `.github/skills/internal-idea-define-advisor/SKILL.md`
+- `.github/skills/internal-java-project/SKILL.md`
+- `.github/skills/internal-java-spring-boot-development/SKILL.md`
 - `.github/skills/internal-java/SKILL.md`
 - `.github/skills/internal-json/SKILL.md`
 - `.github/skills/internal-kubernetes-deployment/SKILL.md`
@@ -77,13 +80,10 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-lesson-codification/SKILL.md`
 - `.github/skills/internal-makefile/SKILL.md`
 - `.github/skills/internal-markdown/SKILL.md`
+- `.github/skills/internal-nodejs-project/SKILL.md`
 - `.github/skills/internal-nodejs/SKILL.md`
 - `.github/skills/internal-oop-design-patterns/SKILL.md`
 - `.github/skills/internal-performance-optimization/SKILL.md`
-- `.github/skills/internal-bash-script/SKILL.md`
-- `.github/skills/internal-java-project/SKILL.md`
-- `.github/skills/internal-java-spring-boot-development/SKILL.md`
-- `.github/skills/internal-nodejs-project/SKILL.md`
 - `.github/skills/internal-python-project/SKILL.md`
 - `.github/skills/internal-python-script/SKILL.md`
 - `.github/skills/internal-python/SKILL.md`
@@ -126,6 +126,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 ## Agents
 
 - `.github/agents/internal-gateway-critical-master.agent.md`
+- `.github/agents/internal-gateway-idea-brainstorming.agent.md`
 - `.github/agents/internal-gateway-operational-flow.agent.md`
 - `.github/agents/internal-gateway-simple-task.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`

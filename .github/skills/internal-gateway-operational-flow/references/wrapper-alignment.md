@@ -8,6 +8,7 @@ The active Copilot UX uses one thin wrapper per gateway skill.
 
 | Wrapper | Core skill | Route |
 | --- | --- | --- |
+| `internal-gateway-idea-brainstorming` | `internal-gateway-idea-brainstorming` | Substantive idea definition, brainstorming, clarification, convergence, and validated handoff before planning. |
 | `internal-gateway-operational-flow` | `internal-gateway-operational-flow` | `define`, `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit phases. |
 | `internal-gateway-critical-master` | `internal-gateway-critical-master` | Critical challenge, pre-mortem, hidden-assumption tests, failure modes, and reframing. |
 | `internal-gateway-simple-task` | `internal-gateway-simple-task` | Concrete low-to-medium-risk answer, edit, diagnose, validate, or escalate. |
@@ -67,4 +68,4 @@ The repo-only sync agents remain outside the compressed operational model. They 
 
 ## README Projection
 
-`.github/agents/README.md` may document wrapper usage and ASCII flows, but the semantic owners are the three gateway skills. Keep README examples aligned with this bundle instead of adding a second operational contract.
+`.github/agents/README.md` may document wrapper usage and ASCII flows, but the semantic owners are the four gateway skills. Keep README examples aligned with this bundle instead of adding a second operational contract.

@@ -6,6 +6,9 @@ these agents provide VS Code route selection, tool scope, and manual handoff UX.
 
 ## Skill-First Core
 
+- `internal-gateway-idea-brainstorming` owns substantive idea definition,
+  brainstorming, clarification, convergence, and validated handoff before
+  operational planning.
 - `internal-gateway-operational-flow` owns the staged workflow for `full-cycle`,
   `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or
   `review` phases.
@@ -27,6 +30,7 @@ these agents provide VS Code route selection, tool scope, and manual handoff UX.
 
 | Wrapper | Core skill | Use when |
 | --- | --- | --- |
+| `internal-gateway-idea-brainstorming` | `internal-gateway-idea-brainstorming` | A vague idea, unclear goal, or unresolved option set needs substantive definition before planning or execution. |
 | `internal-gateway-operational-flow` | `internal-gateway-operational-flow` | Work needs `plan`, `execute`, `apply-plan`, `review`, `full-cycle`, or a visible next-step package. |
 | `internal-gateway-critical-master` | `internal-gateway-critical-master` | A proposal, plan, decision, or assumption set needs pressure before action. |
 | `internal-gateway-simple-task` | `internal-gateway-simple-task` | A concrete low-to-medium-risk task can finish through one focused lane. |
@@ -38,7 +42,43 @@ dispatch rules. A box is an owner, an arrow is a transition that should remain
 visible to the user, and `handoffs: send=false` means VS Code may offer a button
 but the user still reviews and approves the next message.
 
-### 1. Simple Fast Path
+### 1. Idea Definition and Brainstorming
+
+```text
++--------------------------------+
+| User brings a vague idea,      |
+| unclear goal, or unresolved    |
+| option set                     |
++--------------------------------+
+                |
+                v
++--------------------------------+
+| internal-gateway-idea-         |
+| brainstorming                  |
+| - evidence pass               |
+| - guided decision interview   |
+| - convergence               |
+| - mandatory critical pass     |
++--------------------------------+
+                |
+                v
++--------------------------------+
+| Validated Definition Brief    |
+| or Simple Task Brief          |
++--------------------------------+
+                |
+    +-----------+-----------+
+    |                       |
+    v                       v
++----------------+   +------------------------+
+| simple task    |   | operational-flow plan  |
++----------------+   +------------------------+
+```
+
+Use this path when the primary need is clarifying what should be done before
+choosing how to plan or execute it.
+
+### 2. Simple Fast Path
 
 ```text
 +-----------------------------+
@@ -64,7 +104,7 @@ but the user still reviews and approves the next message.
 Use this path when the target state is already clear and the work does not need
 retained-plan execution, review mode, rollout decisions, or pressure testing.
 
-### 2. Staged Operational Flow
+### 3. Staged Operational Flow
 
 ```text
 +--------------------------------+
@@ -91,7 +131,7 @@ Use this path for `full-cycle`, `plan-only`, `apply-plan`, `review`, or explicit
 `plan`, `execute`, and `review` requests. The wrapper is broad because the core
 skill owns the phase boundaries.
 
-### 3. Critical Challenge
+### 4. Critical Challenge
 
 ```text
 +--------------------------------+
@@ -119,7 +159,7 @@ skill owns the phase boundaries.
 Use this path when the risky part is reasoning quality, not an already-observed
 defect or a routine implementation step.
 
-### 4. Sync Workflows
+### 5. Sync Workflows
 
 The two sync agents are repo-only command centers. They are not substitutes for
 gateway wrappers.
@@ -146,9 +186,10 @@ managed baseline into another repository.
 
 | User request shape | Start with | Why |
 | --- | --- | --- |
+| "I have a vague idea for a new automation but I'm not sure what to build." | `internal-gateway-idea-brainstorming` | The primary need is clarifying what should be done. |
 | "Update one README section and run the related test." | `internal-gateway-simple-task` | Scope and validation are already concrete. |
 | "Apply the approved retained plan under `tmp/superpowers/example`." | `internal-gateway-operational-flow` | `apply-plan` needs the retained-plan `done-*` loop. |
-| "Decide whether this should be an agent, a skill, a prompt, or a validator." | `internal-gateway-operational-flow` | The core work is ownership and placement. |
+| "Decide whether this should be an agent, a skill, a prompt, or a validator." | `internal-gateway-idea-brainstorming` | The core work is ownership and placement before planning. |
 | "Review these agent changes for routing regressions." | `internal-gateway-operational-flow` | The job is defect-first validation through review mode. |
 | "Attack this plan before I apply it." | `internal-gateway-critical-master` | The job is assumption pressure-testing. |
 | "Refresh the managed `obra-*` skills from upstream." | `local-sync-external-resources` | The job is source-side external catalog sync. |
@@ -161,6 +202,9 @@ a hidden router.
 
 ## Owner Selection
 
+- `internal-gateway-idea-brainstorming`: vague ideas, unclear goals, unresolved
+  option sets, substantive definition, convergence, and validated handoff before
+  planning.
 - `internal-gateway-simple-task`: concrete low-to-medium-risk answer, edit,
   diagnose, validate, or escalate tasks.
 - `internal-gateway-operational-flow`: staged planning, execution, retained-plan
@@ -173,10 +217,14 @@ a hidden router.
   propagation.
 
 Safe fallback: use `internal-gateway-operational-flow` when two or more gateway
-owners still plausibly fit.
+owners still plausibly fit. If the ambiguity is substantive ideation versus
+operational mode, enter `internal-gateway-operational-flow` conservatively and
+recommend `internal-gateway-idea-brainstorming` visibly if idea work is proved.
 
 ## When Not To Use
 
+- Do not use `internal-gateway-idea-brainstorming` when the target state, scope,
+  owner, and validation path are already concrete enough to act.
 - Do not use `internal-gateway-simple-task` for retained-plan execution, review
   mode, or governance-sensitive redesign.
 - Do not use `internal-gateway-operational-flow` for a simple single-lane task
@@ -188,7 +236,7 @@ owners still plausibly fit.
 
 ## Next Steps
 
-The three gateway wrappers can expose VS Code `handoffs:` buttons for
+The four gateway wrappers can expose VS Code `handoffs:` buttons for
 user-visible transitions. The buttons keep `send: false`; the user still
 approves the move. Responses should also include a compact next-step package
 because some surfaces may ignore handoff buttons.

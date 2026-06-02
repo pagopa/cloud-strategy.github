@@ -241,11 +241,11 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
-  - `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
+  - `internal-gateway-idea-brainstorming`, `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
+  - `internal-gateway-idea-brainstorming`, `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
   - `internal-gateway-operational-flow` supports `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases without creating dedicated gateway skills for each phase
-  - ambiguous or mixed-shape entry fails safe to `internal-gateway-operational-flow`
+  - ambiguous or mixed-shape entry fails safe to `internal-gateway-operational-flow`, which may recommend `internal-gateway-idea-brainstorming` visibly when substantive ideation is proved
   - unclear target state and multiple credible paths are explicit planning triggers
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit

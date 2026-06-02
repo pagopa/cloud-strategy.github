@@ -35,10 +35,16 @@ Use this skill as the shared lane-mismatch engine for repository-owned internal 
 | --- | --- | --- |
 | `internal-gateway-operational-flow` | The work has become a concrete low-to-medium-risk single-lane task | `internal-gateway-simple-task` |
 | `internal-gateway-operational-flow` | Assumption stress-testing becomes the main need | `internal-gateway-critical-master` |
+| `internal-gateway-operational-flow` | Substantive unresolved idea work is discovered | `internal-gateway-idea-brainstorming` |
 | `internal-gateway-simple-task` | Planning, retained-plan execution, review, governance, or rollout becomes dominant | `internal-gateway-operational-flow` |
 | `internal-gateway-simple-task` | Assumption stress-testing becomes the main need | `internal-gateway-critical-master` |
+| `internal-gateway-simple-task` | Unclear objective or option work remains open | `internal-gateway-idea-brainstorming` |
 | `internal-gateway-critical-master` | The next step is planning, execution, apply-plan, or evidence review | `internal-gateway-operational-flow` |
 | `internal-gateway-critical-master` | The critique leaves only a concrete low-to-medium-risk local task | `internal-gateway-simple-task` |
+| `internal-gateway-critical-master` | Challenge reopens substantive idea definition | `internal-gateway-idea-brainstorming` |
+| `internal-gateway-idea-brainstorming` | Validated Definition Brief needs operational planning | `internal-gateway-operational-flow` |
+| `internal-gateway-idea-brainstorming` | Idea resolves to one quick concrete lane | `internal-gateway-simple-task` |
+| `internal-gateway-idea-brainstorming` | Assumption stress-testing becomes the main need | `internal-gateway-critical-master` |
 | `local-sync-external-resources` | The source-side catalog direction is still ambiguous or needs repo-owned authoring decisions first | `internal-gateway-operational-flow` |
 | `local-sync-external-resources` | The real job is consumer-repository baseline propagation | `local-sync-global-copilot-configs-into-repo` |
 | `local-sync-external-resources` | The work reduced to a clear local edit outside catalog-governance scope | `internal-gateway-simple-task` |

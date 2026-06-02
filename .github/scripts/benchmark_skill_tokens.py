@@ -111,8 +111,8 @@ GATEWAY_SKILL = "internal-gateway-operational-flow"
 GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
     "Direct execute": [GATEWAY_SKILL],
     "Define Gate 0": [GATEWAY_SKILL, "grill-me", "internal-gateway-operational-flow"],
-    "Define advisory and critical": [
-        GATEWAY_SKILL, "grill-me", "internal-idea-define-advisor",
+    "Define idea and critical": [
+        GATEWAY_SKILL, "grill-me", "internal-gateway-idea-brainstorming",
         "internal-gateway-critical-master",
     ],
     "Plan handoff": [GATEWAY_SKILL, "internal-writing-plans", "internal-agent-support-next-step"],

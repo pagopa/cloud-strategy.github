@@ -13,6 +13,10 @@ handoffs:
     agent: "internal-gateway-simple-task"
     prompt: "Handle only the concrete low-to-medium-risk task above. Keep the work single-lane, run focused validation, and stop if staged workflow is needed."
     send: false
+  - label: "Next step: Explore idea definition"
+    agent: "internal-gateway-idea-brainstorming"
+    prompt: "The work above exposed a substantive unresolved idea, goal, or option set. Take ownership, run the guided decision interview, and return a validated Definition Brief or Simple Task Brief."
+    send: false
 ---
 
 # Internal Gateway Operational Flow

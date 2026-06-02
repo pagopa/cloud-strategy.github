@@ -13,6 +13,10 @@ handoffs:
     agent: "internal-gateway-critical-master"
     prompt: "Pressure-test the reasoning, assumptions, or failure modes that made this task leave the simple fast path. Return one explicit critical outcome."
     send: false
+  - label: "Next step: Explore idea definition"
+    agent: "internal-gateway-idea-brainstorming"
+    prompt: "The work above exposed unclear objectives or unresolved options that need substantive idea definition before execution. Take ownership and return a validated Definition Brief or Simple Task Brief."
+    send: false
 ---
 
 # Internal Gateway Simple Task

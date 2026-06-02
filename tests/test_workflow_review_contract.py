@@ -49,7 +49,7 @@ def test_canonical_routing_contract_keeps_deterministic_repo_owned_work_in_execu
     assert "define, plan, execute, apply-plan, review" in operational_flow_agent_text
     assert "single-lane and single-phase" in simple_task_agent_text
     assert (
-        "File count and adjacent boundary crossing are heuristics, not automatic planning triggers."
+        "File count and adjacent boundary crossing are heuristics, not automatic triggers."
         in operating_model_text
     )
     assert "use `define`" in operating_model_text and "intent" in operating_model_text
@@ -195,7 +195,6 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
             "Review Check 2",
             "Review Check 3",
             "workflow defect",
-            "source-item coverage matrix",
             "Do not close those items from clarifying prose alone",
             "## Failure And Recovery",
             "## Output Calibration",
@@ -275,8 +274,7 @@ def test_bundle_level_review_scope_stays_explicit_for_skill_targets() -> None:
     assert_contains_all(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "For bundle targets, include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.",
-            "resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml` in the source-item coverage matrix",
+            "Resolve the owning bundle root and include relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`",
         ),
     )
     assert_contains_all(

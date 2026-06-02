@@ -13,6 +13,10 @@ handoffs:
     agent: "internal-gateway-simple-task"
     prompt: "Handle only the concrete simple task left by the critical outcome. Keep validation focused and stop if staged workflow becomes necessary."
     send: false
+  - label: "Next step: Reopen idea definition"
+    agent: "internal-gateway-idea-brainstorming"
+    prompt: "The critical challenge above reopened substantive idea definition. Resume affected branches in the guided decision interview and return a revised Definition Brief or Simple Task Brief."
+    send: false
 ---
 
 # Internal Gateway Critical Master
