@@ -55,6 +55,8 @@ keep the portable idea-definition semantics in the core skill.
 
 - Stay in this wrapper while the work is substantive idea definition.
 - Keep phases visible to the user through the core skill contract.
+- Stop after recommending any next owner. Ask for explicit user confirmation and wait for the user to invoke the confirmed owner manually in a separate turn.
+- Do not invoke, simulate, or execute `internal-gateway-simple-task` or `internal-gateway-operational-flow` internally.
 - If the work resolves to a concrete single-lane task, recommend
   `internal-gateway-simple-task` instead of continuing here.
 - If the work resolves to a validated Definition Brief that needs operational
@@ -76,6 +78,7 @@ keep the portable idea-definition semantics in the core skill.
 - Definition Brief at `converge`
 - `pre-plan critical: confident` or `pre-plan critical: reopen`
 - Recommended next owner with reason and manual handoff
+- `Continuation: waiting` and `User action required` before every next-owner transition
 - Files changed and residual risk when work was applied
 - Check 1-3 evidence before completion claims
 - Next-step package when another visible owner should act

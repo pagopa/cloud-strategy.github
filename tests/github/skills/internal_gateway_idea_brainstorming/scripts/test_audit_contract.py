@@ -69,14 +69,15 @@ def test_required_markers_are_checked() -> None:
     report = run_audit_json()
     expected_markers = {
         "evidence-first-discovery",
-        "one-question-per-turn",
-        "explicit-user-answer",
+        "iterative-question-blocks",
+        "visible-default-acceptance",
         "decision-ledger",
         "interview-ready-for-critical",
         "interview-reopen",
         "handoff-ready-for-owner-change",
         "mandatory-critical-pass",
         "exactly-one-next-owner",
+        "manual-next-owner-confirmation",
         "chat-only-simple-task-brief",
         "no-hidden-dispatch",
     }
@@ -140,14 +141,15 @@ def test_strict_fails_when_sibling_is_missing(tmp_path: Path) -> None:
     (fixture / "SKILL.md").write_text(
         "# Idea skill\n"
         "Inspect repository evidence first\n"
-        "one unresolved material decision question per turn\n"
-        "explicit answer\n"
+        "numbered question block\n"
+        "visible recommendations as accepted\n"
         "decision ledger\n"
         "Interview checkpoint: ready-for-critical\n"
         "Interview checkpoint: reopen\n"
         "Handoff checkpoint: ready-for-owner-change\n"
         "mandatory critical pass\n"
         "exactly one next owner\n"
+        "Stop and ask for explicit user confirmation before any next-owner transition\n"
         "chat-only `Simple Task Brief`\n"
         "no hidden dispatch\n"
     )

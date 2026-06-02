@@ -119,8 +119,9 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
     upstream_ids = {item["upstream_id"] for item in items}
 
     assert payload["version"] == 1
-    assert len(items) == 10
+    assert len(items) == 11
     assert {item["source_family"] for item in items} == {
+        "addyosmani/agent-skills",
         "github/awesome-copilot",
         "mattpocock/skills",
     }
@@ -128,6 +129,7 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
     assert {
         "azure-devops-pipelines.instructions.md",
         "go.instructions.md",
+        "idea-refine",
         "zoom-out",
     } <= upstream_ids
     assert {
@@ -138,6 +140,7 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
         "internal-debugging",
         "internal-tdd",
         "internal-high-level-review",
+        "internal-gateway-idea-brainstorming",
         "internal-writing-plans",
         "local-agent-sync-external-resources",
     } <= owners

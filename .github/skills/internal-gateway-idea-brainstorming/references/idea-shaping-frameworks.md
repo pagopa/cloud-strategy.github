@@ -1,5 +1,7 @@
 # Ideation Frameworks Reference
 
+Adapted from `addyosmani/agent-skills` release `0.6.1`. See `LICENSE.idea-refine-upstream`.
+
 Use these frameworks selectively. Pick the lens that fits the idea - do not mechanically run every framework. The goal is to unlock thinking, not to follow a checklist.
 
 ## SCAMPER

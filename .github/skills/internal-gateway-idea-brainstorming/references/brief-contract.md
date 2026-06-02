@@ -41,4 +41,7 @@ Produced at `handoff` when the critical pass is `confident`.
 | `Action` | yes | One concrete next action. |
 | `Validation` | yes | Command, review path, evidence, or explicit gap. |
 | `Risk` | yes | Residual risk or rollback note. |
-| `Continuation` | yes | `continuing` or `waiting`. |
+| `Continuation` | yes | Always `waiting` at a next-owner transition. |
+| `User action required` | yes | Ask the user to confirm the recommended gate and invoke the named owner manually in a separate turn. |
+
+The gateway stops after emitting this package. It must not invoke, simulate, or execute the recommended owner internally.

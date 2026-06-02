@@ -13,7 +13,6 @@ just because the request is still undecided; load only the owner proved by the
 active uncertainty or next visible checkpoint.
 
 - `grill-me`: branch-discovery method; load when unresolved branches need user interview after evidence pass.
-- `idea-refine`: optional support for raw multi-direction option shaping; load only when several credible concept directions remain.
 - `superpowers-brainstorming`: optional support for design or spec approval workflows; load only when creative exploration is needed.
 - `internal-gateway-critical-master`: mandatory critical challenge owner; load before finalizing any substantive definition.
 - `internal-gateway-simple-task`: candidate next owner when the idea resolves to one quick concrete lane.
@@ -57,17 +56,18 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 | Phase | Enters when | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- |
-| `discover` | Idea, goal, or options are vague or unresolved. | Evidence pass, decision-ledger build, guided decision interview. | Skip evidence, ask bulk questions, or apply silent defaults. | `grill-me`, `idea-refine`, `superpowers-brainstorming` | Decision ledger, resolved branches, checkpoint state. |
+| `discover` | Idea, goal, or options are vague or unresolved. | Evidence pass, decision-ledger build, guided decision interview. | Skip evidence, ask unstructured questions, or apply silent defaults. | `grill-me`, `superpowers-brainstorming` | Decision ledger, resolved branches, checkpoint state. |
 | `converge` | Material branches are resolved and a compact decision ledger exists. | Summary, Definition Brief draft, `Interview checkpoint: ready-for-critical`. | Emit plan, apply changes, or imply execute approval. | `internal-gateway-critical-master` | Definition Brief, checkpoint state. |
 | `critical` | Definition Brief is ready and needs mandatory challenge. | `confident` or `reopen`, visible next-owner recommendation. | Implement or routine-review. | `internal-gateway-critical-master` | Critical outcome, `Handoff checkpoint: ready-for-owner-change` when applicable. |
-| `handoff` | Critical pass is `confident` and next owner is clear. | `Recommended next owner`, manual transition package. | Auto-dispatch or hidden router behavior. | `internal-agent-support-next-step` | Next-step package with owner, scope, action, validation, risk. |
+| `handoff` | Critical pass is `confident` and next owner is clear. | `Recommended next owner`, manual transition package, explicit confirmation request. | Auto-dispatch, internal next-owner execution, or hidden router behavior. | `internal-agent-support-next-step` | Next-step package with owner, scope, action, validation, risk, and `Continuation: waiting`. |
 
 ## Core Invariants
 
 - One active phase at a time.
-- Load `grill-me` only for branch discovery after the evidence pass; load `idea-refine` or `superpowers-brainstorming` only when their distinct positive triggers are met.
+- Load `grill-me` only for branch discovery after the evidence pass; load `superpowers-brainstorming` only when its distinct positive trigger is met.
 - Return from any optional exploration support to this gateway before convergence, critical pass, or handoff.
 - Keep direct entry and manual transitions visible. Do not create hidden front-door routers or hidden peer dispatch.
+- Stop and ask for explicit user confirmation before any next-owner transition. The user invokes `internal-gateway-simple-task` or `internal-gateway-operational-flow` manually in a separate turn.
 - Use `internal-agent-support-next-step` at every phase-ending transition.
 - Non-terminal stops: start with `State:` and `Continuation:`; add `User action required:` when `Continuation` is `waiting`.
 - Require an explicit checkpoint before moving into `plan`, `execute`, or peer transitions.
@@ -76,13 +76,13 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 ## Guided Decision Interview
 
-This gateway owns a native guided decision interview. Do not delegate the interview pacing to `grill-me` or reduce it to a bulk questionnaire.
+This gateway uses `grill-me` for a guided decision interview in iterative numbered question blocks.
 
-**Core pacing**: Inspect repository evidence first. Build a compact decision ledger ordered by dependency. Ask one unresolved material decision question per turn, including a recommended answer, rationale, and default when useful. Wait for the user's explicit answer before resolving the branch. Do not treat branch confirmations as phase-transition checkpoints.
+**Core pacing**: Inspect repository evidence first. Build a compact decision ledger ordered by dependency. Load `grill-me`, then immediately ask the unresolved material decisions in one numbered question block. Each question includes a recommendation, rationale, and default when useful. Treat visible recommendations as accepted unless the user overrides them by question number or gives different direction. After the user's bulk response, ask another numbered question block when unresolved ambiguity, dependent follow-up decisions, or reopened branches remain. Do not treat branch confirmations as phase-transition checkpoints.
 
 After all material branches resolve, emit `Interview checkpoint: ready-for-critical`. After a `confident` critical outcome, emit `Handoff checkpoint: ready-for-owner-change` only when recommending a peer transition. When the critical pass or realignment reopens definition, resume only the affected branches unless impact is broad, and declare `Interview checkpoint: reopen`.
 
-Interview depth is proportional: simple cases may close quickly; unresolved dependent branches continue one turn at a time. Do not force a bulk initial questionnaire.
+Interview depth is proportional: simple cases may close after one block; unresolved dependent branches continue in focused follow-up blocks. Do not fall back to one-question-per-turn pacing.
 
 See `references/guided-decision-interview.md` for full pacing rules, decision-ledger fields, and checkpoint state definitions.
 
@@ -94,7 +94,7 @@ Run the smallest evidence pass that can recover target, candidate owner, nearby 
 Build the decision ledger. Use the guided decision interview to resolve material branches.
 
 - Use `grill-me` only for branch-discovery interviews after the evidence pass.
-- Use `idea-refine` only when the decision is genuinely exploratory rather than deterministic maintenance. See `references/compatibility-matrix.md` for `idea-refine` activation rules.
+- When several credible concept directions remain, read `references/idea-shaping-frameworks.md` and `references/idea-evaluation-criteria.md` selectively before convergence.
 - Use `superpowers-brainstorming` only when a design or spec approval workflow is needed.
 - Return from any optional exploration support to this gateway before convergence.
 
@@ -122,7 +122,7 @@ When `pre-plan critical: confident`, recommend exactly one next owner:
 - `internal-gateway-critical-master` when assumptions need deeper pressure-testing.
 - Continue idea definition when unresolved branches remain.
 
-Emit `Recommended next owner` with reason and a manual handoff. Include `Owner`, `Scope`, `Action`, `Validation`, `Risk`, and `Continuation`. See `references/brief-contract.md` for the field contract.
+Emit `Recommended next owner` with reason and a manual handoff. Include `Owner`, `Scope`, `Action`, `Validation`, `Risk`, `Continuation: waiting`, and `User action required`. Stop after the recommendation. Do not invoke, simulate, or execute the next owner internally. The user must confirm the next gate and invoke `internal-gateway-simple-task` or `internal-gateway-operational-flow` manually in a separate turn. See `references/brief-contract.md` for the field contract.
 
 ## Simple Task Brief
 
@@ -145,20 +145,23 @@ Read on demand, not as a default bundle.
 - `references/guided-decision-interview.md`: interview pacing, ledger fields, checkpoint states.
 - `references/compatibility-matrix.md`: routing matrix for all entrypoints and realignment cases.
 - `references/brief-contract.md`: Definition Brief, Simple Task Brief, and recommended-next-owner field contracts.
+- `references/idea-shaping-frameworks.md`: optional divergent lenses for concept-heavy exploration.
+- `references/idea-evaluation-criteria.md`: optional evaluation rubric for narrowing credible concept directions.
 - Load `internal-high-level-review` for plan-completion audit and scope-drift analysis.
 
 ## Validation
 
 - Entry point and phase are explicit, or workflow falls back to `discover`.
 - Every phase includes owner, scope, anti-scope, action, validation, risk, and checkpoint.
-- The guided decision interview inspects evidence first, asks one material question per turn, exposes recommendation and rationale, waits for explicit answer, and records resolved branches.
+- The guided decision interview inspects evidence first, asks iterative numbered question blocks through `grill-me`, exposes recommendation and rationale, records accepted defaults or overrides, and records resolved branches.
 - Branch answers do not create repeated phase-transition checkpoints.
 - One `Interview checkpoint: ready-for-critical` after material branches resolve.
 - One `Handoff checkpoint: ready-for-owner-change` only before peer owner change.
 - Reopen resumes affected branches unless impact is broad.
-- `grill-me` is used proportionally; `idea-refine` and `superpowers-brainstorming` are used only when distinct positive triggers apply.
+- `grill-me` is used proportionally; `superpowers-brainstorming` is used only when its distinct positive trigger applies.
 - Optional exploration supports return to this gateway before convergence, critical pass, or handoff.
 - The gateway recommends exactly one next owner when evidence supports a lane change.
+- Every next-owner recommendation stops with `Continuation: waiting` and asks for explicit user confirmation; the gateway does not execute the recommended owner internally.
 - Simple tasks use a chat-only `Simple Task Brief`; no retained mini-plan is created.
 - Manual handoffs remain visible; no hidden dispatch or front-door router exists.
 - Run `scripts/audit_contract.py --format json` for deterministic bundle token and marker evidence.

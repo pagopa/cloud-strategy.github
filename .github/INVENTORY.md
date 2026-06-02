@@ -26,7 +26,6 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
 - `.github/skills/graphify/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
-- `.github/skills/idea-refine/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
 - `.github/skills/internal-agent-support-next-step/SKILL.md`

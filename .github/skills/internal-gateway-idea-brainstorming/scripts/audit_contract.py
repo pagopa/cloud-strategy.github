@@ -23,14 +23,15 @@ IGNORE_DIRS = {"__pycache__"}
 
 REQUIRED_MARKERS: dict[str, str] = {
     "evidence-first-discovery": "Inspect repository evidence first",
-    "one-question-per-turn": "one unresolved material",
-    "explicit-user-answer": "explicit answer",
+    "iterative-question-blocks": "numbered question block",
+    "visible-default-acceptance": "visible recommendations as accepted",
     "decision-ledger": "decision ledger",
     "interview-ready-for-critical": "Interview checkpoint: ready-for-critical",
     "interview-reopen": "Interview checkpoint: reopen",
     "handoff-ready-for-owner-change": "Handoff checkpoint: ready-for-owner-change",
     "mandatory-critical-pass": "mandatory critical pass",
     "exactly-one-next-owner": "exactly one next owner",
+    "manual-next-owner-confirmation": "Stop and ask for explicit user confirmation before any next-owner transition",
     "chat-only-simple-task-brief": "chat-only `Simple Task Brief`",
     "no-hidden-dispatch": "no hidden dispatch",
 }

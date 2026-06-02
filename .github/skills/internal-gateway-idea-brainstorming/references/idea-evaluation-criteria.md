@@ -1,5 +1,7 @@
 # Refinement and Evaluation Criteria
 
+Adapted from `addyosmani/agent-skills` release `0.6.1`. See `LICENSE.idea-refine-upstream`.
+
 Use this rubric during Phase 2 (Evaluate and Converge) to stress-test idea directions. Not every criterion applies to every idea, so use judgment about which dimensions matter most for the specific context.
 
 ## Core Evaluation Dimensions

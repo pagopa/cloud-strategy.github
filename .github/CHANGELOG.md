@@ -13,7 +13,8 @@ Use this format for new updates:
 - Added `internal-gateway-idea-brainstorming` as a visible fourth gateway skill and thin Copilot wrapper agent, owning substantive idea definition, guided decision interview, convergence, Definition Brief, mandatory critical pass, and validated handoff before operational planning.
 - Absorbed and retired `internal-idea-define-advisor`, moving its useful owner-map and question-bank concepts into the new gateway bundle without a compatibility stub or alias.
 - Narrowed `internal-gateway-operational-flow` to delegate unresolved idea work visibly to the new gateway and consume validated Definition Brief handoffs for `plan` without repeating ideation or its critical pass.
-- Added native guided decision interview semantics: evidence-first discovery, one material decision question per turn, visible recommendation and rationale, explicit user answer, compact decision ledger, proportional depth, and checkpoint states.
+- Added guided decision interview semantics: evidence-first discovery, iterative numbered question blocks through `grill-me`, visible defaults, compact decision ledger, proportional depth, and checkpoint states.
+- Retired the standalone `idea-refine` skill immediately after extracting its useful shaping frameworks and evaluation criteria into `internal-gateway-idea-brainstorming` references, preserving its upstream license and removing the competing runtime entrypoint.
 - Updated adjacent routing owners (`internal-agent-support-next-step`, `internal-agent-support-lane-change-engine`, `internal-gateway-simple-task`, `internal-gateway-critical-master`) to recognize the new gateway in handoffs and lane-change recommendations.
 - Updated `.github/agents/README.md`, `.github/README.md`, `INTERNAL_CONTRACT.md`, `docs`, wrapper-alignment, mode-contracts, subagent-patterns, home-sync catalog, token benchmarks, and regression tests for the four-gateway model.
 

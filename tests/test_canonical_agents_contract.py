@@ -799,8 +799,8 @@ def test_idea_gateway_contract_markers_preserved_in_core() -> None:
     ).read_text(encoding="utf-8")
 
     assert "Inspect repository evidence first" in skill_text
-    assert "one unresolved material" in skill_text
-    assert "explicit answer" in skill_text
+    assert "numbered question block" in skill_text
+    assert "visible recommendations as accepted" in skill_text
     assert "decision ledger" in skill_text
     assert "`Interview checkpoint: ready-for-critical`" in skill_text
     assert "`Interview checkpoint: reopen`" in skill_text
@@ -829,8 +829,9 @@ def test_idea_gateway_restricts_optional_exploration_supports() -> None:
     ).read_text(encoding="utf-8")
 
     assert "`grill-me`: branch-discovery" in skill_text
-    assert "`idea-refine`: optional support" in skill_text
     assert "`superpowers-brainstorming`: optional support" in skill_text
+    assert "`references/idea-shaping-frameworks.md`" in skill_text
+    assert "`references/idea-evaluation-criteria.md`" in skill_text
     assert (
         "Return from any optional exploration support to this gateway before convergence"
         in skill_text
@@ -855,7 +856,10 @@ def test_idea_gateway_handoff_recommends_single_discrete_owner() -> None:
         in skill_text
     )
     assert "`Recommended next owner` with reason" in skill_text
-    assert "`Owner`, `Scope`, `Action`, `Validation`, `Risk`, and `Continuation`" in skill_text
+    assert "`Owner`, `Scope`, `Action`, `Validation`, `Risk`, `Continuation: waiting`, and `User action required`" in skill_text
+    assert "Stop after the recommendation" in skill_text
+    assert "Do not invoke, simulate, or execute the next owner internally" in skill_text
+    assert "invoke `internal-gateway-simple-task` or `internal-gateway-operational-flow` manually in a separate turn" in skill_text
 
 
 def test_idea_gateway_audit_script_referenced_in_validation() -> None:
