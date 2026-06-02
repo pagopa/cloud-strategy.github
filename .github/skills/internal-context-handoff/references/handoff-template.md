@@ -1,0 +1,73 @@
+# Handoff Template
+
+Load this reference when the skill body directs field-selection rules or adaptive compression shape.
+
+## Field-selection rules (all profiles)
+
+- Include only fields that apply to the current discussion.
+- Prefer concrete over speculative: include only what is known, decided, or observably pending.
+- Redact secrets, credentials, tokens, keys, and sensitive values with `[REDACTED]`.
+- Cite file paths, command output, or validation evidence when available.
+- Declare evidence gaps explicitly instead of guessing.
+
+## Compact (default)
+
+Use for single-step discussions, simple questions, or when the next agent needs minimal context.
+
+```markdown
+## Context handoff
+
+**Goal:** [one-line primary objective]
+**Current state:** [one-line status]
+**Key decisions:** [bulleted list or "None."]
+**Anti-scope:** [what to avoid, or "None."]
+**Next step:** [one concrete action]
+**Resume instructions:** [one-line guidance for the next agent]
+```
+
+## Standard
+
+Use for multi-step technical work, repository tasks, or when evidence gaps matter.
+
+Add these fields after `Key decisions` and before `Anti-scope`:
+
+```markdown
+**Evidence:**
+  - [validations run, command output, or "None available."]
+  - Git: [branch, status summary, or "Not inspected."]
+**Unfinished work:** [bulleted list or "None."]
+**Validation path:** [remaining checks, commands, or "Not yet defined."]
+**Risks:** [active risks or "None identified."]
+```
+
+`Compact` fields remain. `Evidence`, `Unfinished work`, `Validation path`, and `Risks` are additions.
+
+## Deep
+
+Use for complex, high-risk, or contradictory state that `standard` cannot safely compress.
+
+Add these fields after `Risks` and before `Anti-scope`:
+
+```markdown
+**Open uncertainties:** [contradictions, unknowns, or ambiguous outcomes that must be preserved without choosing silently.]
+```
+
+`Compact` and `standard` fields remain. `Open uncertainties` is the addition.
+
+## Redaction notation
+
+Replace any detected secret, credential, token, key, or sensitive value with:
+
+```
+[REDACTED]
+```
+
+Never include the original value. Report the field type (e.g., `[REDACTED: API key]`) only when identifying the type adds safety without leaking the value.
+
+## Optional persistence note
+
+When file persistence is requested, append this line before `Resume instructions`:
+
+```markdown
+**Persisted to:** `tmp/context-handoffs/<timestamp>-<slug>.md`
+```
