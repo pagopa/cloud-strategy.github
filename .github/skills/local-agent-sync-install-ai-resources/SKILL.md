@@ -51,10 +51,15 @@ When the desired active runtimes change, pair `--retire-targets <targets>` with 
 
 When the user says "sync" without a mode:
 
-1. Run `bisync plan`. Stop on blockers.
-2. Run `plan` for the requested targets. Stop on blockers.
-3. Report both results. Do not apply automatically.
-4. Wait for explicit user request to apply either lane.
+1. Run install `plan` for the requested targets. Stop on blockers.
+2. Resolve any install-lane blockers before proceeding.
+3. Run `bisync plan`. Stop on blockers.
+4. Report both results. Do not apply automatically.
+5. Wait for explicit user request to apply either lane.
+
+Install must run before bisync because bisync modifies `~/.agents/skills/` directories that the install manifest tracks. Running install first copies fresh content from the repo with matching manifest hashes; bisync then finds both sides already aligned, avoiding spurious `target-modified-managed` blockers.
+
+When applying, run install `apply` first, then `bisync apply`. Both lanes must be explicitly requested.
 
 ### Stop Conditions
 
@@ -65,6 +70,7 @@ Stop and report when any of these occur:
 - `next_action.requires_explicit_approval` is `true` and the user has not explicitly approved.
 - `bisync apply` was requested without a prior `bisync plan`.
 - The source repository has uncommitted or untracked changes during `bisync apply`.
+- After `bisync apply` modifies `~/.agents/skills/` files that the install lane also manages, re-run install `plan` and resolve any `target-modified-managed` blockers caused by stale manifest hashes before considering the sync complete.
 
 ### Output
 
@@ -179,7 +185,7 @@ When plan or audit reports blocked paths, resolve them before apply:
 
 When `bisync plan` reports blocker entries, resolve them before `bisync apply`:
 
-- `bisync-only-repo`: the skill exists only in the source repo. Remove from home manually or decide to skip.
+- `bisync-only-repo`: the skill exists only in the source repo. Copy it into home manually (preferred when the skill is newer in repo) or decide the repo-only status is intentional and skip it.
 - `bisync-only-home`: the skill exists only in the home directory. Remove from home manually or decide to add to repo.
 - `bisync-equal-mtime`: hashes differ but mtime is equal for both sides. Decide which side wins and touch the winner to advance mtime.
 
