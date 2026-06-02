@@ -45,6 +45,7 @@ Every mode has exactly one command. Do not infer the mode, do not skip blockers,
 | `apply` | Install lane materialization | `./.github/scripts/sync_home_ai_resources.py apply --targets <targets> --home-root ~` |
 
 For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh` and omit `--home-root` (defaults to `$HOME`).
+When the desired active runtimes change, pair `--retire-targets <targets>` with `--prune-managed` to remove runtime-specific managed copies and drop those targets from the manifest while keeping the remaining targets active.
 
 ### Default Sync Sequence
 
@@ -81,10 +82,11 @@ Report `next_action` to the user. Do not execute `command` from `next_action` un
 - Default to `plan` and keep `apply` explicit.
 - Limit v1 default materialization to documented direct-copy skill families and allowlisted agent translations for Codex, Claude, and OpenCode.
 - Preserve unmanaged target-local files and directories.
-- Prune only stale managed assets, and only when explicit approval is present and the manifest entry passes schema validation, path confinement, and content-hash drift checks.
+- Prune only stale managed assets, including manifest-managed resources whose source bundle was removed from the repo, and only when explicit approval is present and the manifest entry passes schema validation, path confinement, and content-hash drift checks.
 - Keep local sync state under `~/.sync/cloud-strategy-governance/home-ai-resources/`.
 - Block `apply` when runtime support is undocumented, target paths are unsafe, or ownership evidence is missing.
 - Keep runtime support evidence explicit through the paired references instead of inferring undocumented home paths.
+- Use `--retire-targets` when the managed target set should shrink, for example removing `claude` while keeping `codex` and `copilot`.
 
 ## Bisync Lane
 
@@ -146,6 +148,7 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 - Translate allowlisted `.agent.md` sources deterministically for Codex, Claude, and OpenCode targets.
 - Preserve target-local content that is outside the manifest.
 - Record source hashes, expected content hashes, and managed target paths in the local manifest.
+- Keep the manifest target set aligned with the requested active targets; retired targets leave the manifest only through an explicit run that names them in `--retire-targets`.
 - Exclude runtime-generated bundle artifacts such as `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, and `.pyo` from hashes and copies.
 
 ## Bundled Automation
@@ -170,6 +173,8 @@ When plan or audit reports blocked paths, resolve them before apply:
 
 - `target-exists-unmanaged`: the target file or directory exists at home but is not in the sync manifest. Remove it manually so sync can recreate it from source.
 - `target-modified-managed`: the target is in the manifest but its content diverged from the last recorded hash. Remove it manually so sync can restore the source-of-truth version.
+- `stale-managed` with a removed source bundle: the resource was managed previously but its source bundle no longer exists in the repo. Re-run with `--prune-managed` after review to remove the stale managed copy.
+- `retire-target-overlap`: the same target was requested as both active and retired. Remove the overlap and re-run.
 - After removing conflicting files, re-run plan to confirm zero blockers before applying.
 
 When `bisync plan` reports blocker entries, resolve them before `bisync apply`:

@@ -412,6 +412,189 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
     )
 
 
+def test_removed_source_bundle_becomes_stale_managed_instead_of_source_missing(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+    )
+    apply_home_sync_plan(plan, create_missing_dirs=True)
+
+    skill_dir = source_root / ".github/skills/demo-skill"
+    for path in sorted(skill_dir.rglob("*"), reverse=True):
+        if path.is_file():
+            path.unlink()
+        elif path.is_dir():
+            path.rmdir()
+    skill_dir.rmdir()
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex"),
+        mode="apply",
+        prune_managed=True,
+    )
+    codes = {op.code for op in plan.operations if op.code}
+    delete_paths = {op.path for op in plan.operations if op.action == "delete"}
+
+    assert "source-missing" not in codes
+    assert str(home_root / ".agents/skills/demo-skill") in delete_paths
+
+
+def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        home_syncing,
+        "translate_agent_for_target",
+        lambda source_path, target, config_path=None: f"# translated for {target}\n",
+    )
+
+    support_matrix_path = (
+        source_root
+        / ".github/skills/local-agent-sync-install-ai-resources/references/runtime-support-matrix.yaml"
+    )
+    support_matrix_path.write_text(
+        "version: 1\n"
+        "rows:\n"
+        "  - target: codex\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Codex direct-copy skill support.\n"
+        "  - target: copilot\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Copilot direct-copy skill support.\n"
+        "  - target: claude\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Claude direct-copy skill support.\n"
+        "  - target: codex\n"
+        "    resource_family: agents\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.codex/agents/<agent>.md\n"
+        "    direct_copy_possible: false\n"
+        "    translation_required: true\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Codex agent translation support.\n"
+        "  - target: copilot\n"
+        "    resource_family: agents\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.copilot/agents/<agent>.md\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Copilot agent direct-copy support.\n"
+        "  - target: claude\n"
+        "    resource_family: agents\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.claude/agents/<agent>.md\n"
+        "    direct_copy_possible: false\n"
+        "    translation_required: true\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Claude agent translation support.\n",
+        encoding="utf-8",
+    )
+    catalog_path = (
+        source_root
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
+    )
+    catalog_path.write_text(
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: false\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: false\n"
+        "resources:\n"
+        "  - resource_id: demo-skill\n"
+        "    source_family: skills\n"
+        "    source_path: .github/skills/demo-skill\n"
+        "    include_targets:\n"
+        "      - codex\n"
+        "      - copilot\n"
+        "      - claude\n"
+        "    target_support: Documented\n"
+        "    notes: Demo bundle.\n",
+        encoding="utf-8",
+    )
+    agent_path = source_root / ".github/agents/demo.agent.md"
+    write_file(
+        agent_path,
+        "---\n"
+        "name: demo\n"
+        "description: Demo agent.\n"
+        "---\n\n"
+        "# Demo agent\n",
+    )
+    catalog_payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+    catalog_payload["resources"].append(
+        {
+            "resource_id": "demo",
+            "source_family": "agents",
+            "source_path": ".github/agents/demo.agent.md",
+            "include_targets": ["codex", "copilot", "claude"],
+            "target_support": "Documented",
+            "notes": "Demo agent.",
+        }
+    )
+    catalog_path.write_text(yaml.safe_dump(catalog_payload, sort_keys=False), encoding="utf-8")
+
+    initial_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex,copilot,claude"),
+        mode="apply",
+    )
+    manifest_path = apply_home_sync_plan(initial_plan, create_missing_dirs=True)
+
+    retire_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex,copilot"),
+        retired_targets=parse_targets("claude"),
+        mode="apply",
+        prune_managed=True,
+    )
+    apply_home_sync_plan(retire_plan, prune_managed=True)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert manifest["targets"] == ["codex", "copilot"]
+    assert not (home_root / ".claude/agents/demo.md").exists()
+    assert (home_root / ".copilot/agents/demo.agent.md").is_file()
+    assert (home_root / ".agents/skills/demo-skill").is_dir()
+    assert all(entry["target"] != "claude" for entry in manifest["managed_resources"])
+
+
 def test_home_sync_catalog_contains_internal_graphify_in_real_repo() -> None:
     catalog_path = (
         REPO_ROOT

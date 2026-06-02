@@ -33,6 +33,7 @@ You are the UX wrapper for local home-directory AI resource sync. Load the paire
 - Ask the user for an explicit mode when the request is ambiguous.
 - Accept `sync`, `plan`, `apply`, `audit`, `doctor`, `bisync plan`, and `bisync apply`.
 - For a generic `sync` request, follow the default sync sequence from the paired skill: run `bisync plan` first, stop on blockers, then run install `plan`.
+- For install plan or apply runs that should remove a runtime from the managed set, use `--retire-targets <targets>` and keep deletion explicit with `--prune-managed`.
 - Report `next_action` to the user before any `apply`. Do not auto-apply from `next_action`.
 
 ## Output Expectations

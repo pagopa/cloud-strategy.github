@@ -27,8 +27,9 @@ Optional debug logs may live under `logs/` when the implementation needs durable
 - Copy files and directories. Do not create symlinks in v1.
 - Preserve unmanaged target-local files.
 - Record one manifest row per managed target resource.
-- Prune only resources that were previously manifest-managed and are now absent from the new plan.
+- Prune only resources that were previously manifest-managed and are now absent from the new plan, including resources whose source bundle disappeared from the repo after an earlier sync.
 - Require explicit prune approval before deleting stale managed resources.
+- Treat `--retire-targets` as the explicit declaration that a previously active runtime should leave the managed target set on the next plan or apply.
 - Exclude runtime-generated bundle artifacts from hashes and copies: `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, and `.pyo`.
 
 ## Manifest Fields
@@ -122,6 +123,7 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 - Block `apply` when `blocked_codes` are present.
 - Block `apply` when runtime targets are undocumented and `--experimental-targets` is not set.
 - Block `apply` on unmanaged overwrite, modified managed files, and stale-content drift.
+- Block planning and apply when a target appears in both `--targets` and `--retire-targets`.
 - Block `apply` when source root falls under home sync state directory.
 - Block `apply` when manifest is corrupt.
 
@@ -129,6 +131,7 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 
 - Verify every copied resource by hash comparison.
 - Write updated manifest with content hashes.
+- Rewrite the manifest target set to the requested active targets only; retired targets are removed from manifest state after a successful apply.
 - Report residual drift entries.
 
 ## Bisync Contract

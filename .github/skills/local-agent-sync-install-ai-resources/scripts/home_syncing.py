@@ -86,6 +86,7 @@ class HomeSyncPlan:
     state_root: Path
     mode: str
     selected_targets: tuple[str, ...]
+    retired_targets: tuple[str, ...]
     source_revision: str | None
     source_resources_considered: int
     operations: tuple[HomeSyncOperation, ...]
@@ -109,6 +110,7 @@ class HomeSyncPlan:
         return {
             "mode": self.mode,
             "selected_targets": list(self.selected_targets),
+            "retired_targets": list(self.retired_targets),
             "source_root": self.source_root.as_posix(),
             "home_root": self.home_root.as_posix(),
             "state_root": self.state_root.as_posix(),
@@ -166,6 +168,7 @@ def build_home_sync_plan(
     targets: tuple[str, ...],
     mode: str,
     *,
+    retired_targets: tuple[str, ...] = (),
     experimental_targets: bool = False,
     prune_managed: bool = False,
     fast: bool = False,
@@ -180,6 +183,7 @@ def build_home_sync_plan(
     catalog = load_home_sync_catalog(source_root)
     manifest_payload, manifest_error = load_manifest(state_root / MANIFEST_PATH)
     manifest_index = index_manifest(manifest_payload)
+    manifest_target_paths = set(manifest_index)
 
     operations: list[HomeSyncOperation] = []
     desired_resources: list[ManagedResource] = []
@@ -193,7 +197,13 @@ def build_home_sync_plan(
     for resource in catalog_resources:
         source_path = source_root / resource.source_path
         if not source_path.exists():
-            add_resource_blockers(operations, home_root, resource, targets, "source-missing")
+            add_missing_source_operations(
+                operations,
+                home_root,
+                resource,
+                targets,
+                manifest_target_paths,
+            )
             continue
         if not is_valid_resource(source_path, resource.source_family):
             add_resource_blockers(operations, home_root, resource, targets, resource_block_code(resource.source_family))
@@ -254,13 +264,23 @@ def build_home_sync_plan(
                 changed_only,
             )
 
-    add_stale_managed_operations(operations, manifest_payload, desired_resources, targets, mode, prune_managed, home_root)
+    add_stale_managed_operations(
+        operations,
+        manifest_payload,
+        desired_resources,
+        targets,
+        retired_targets,
+        mode,
+        prune_managed,
+        home_root,
+    )
     return HomeSyncPlan(
         source_root=source_root,
         home_root=home_root,
         state_root=state_root,
         mode=mode,
         selected_targets=targets,
+        retired_targets=retired_targets,
         source_revision=git_revision(source_root),
         source_resources_considered=len(catalog_resources),
         operations=tuple(operations),
@@ -534,6 +554,27 @@ def add_resource_blockers(
         )
 
 
+def add_missing_source_operations(
+    operations: list[HomeSyncOperation],
+    home_root: Path,
+    resource: CatalogResource,
+    targets: tuple[str, ...],
+    manifest_target_paths: set[str],
+) -> None:
+    for target in intersection_targets(resource, targets):
+        target_path = resource_target_path(home_root, resource, target)
+        if target_path.as_posix() in manifest_target_paths:
+            continue
+        add_blocked_operation(
+            operations,
+            target=target,
+            target_path=target_path,
+            code="source-missing",
+            reason="Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
+            resource=resource,
+        )
+
+
 def add_blocked_operation(
     operations: list[HomeSyncOperation],
     target: str,
@@ -664,11 +705,13 @@ def add_stale_managed_operations(
     manifest_payload: dict[str, object],
     desired_resources: list[ManagedResource],
     targets: tuple[str, ...],
+    retired_targets: tuple[str, ...],
     mode: str,
     prune_managed: bool,
     home_root: Path,
 ) -> None:
     desired_paths = {resource.target_path for resource in desired_resources}
+    scoped_targets = set(targets) | set(retired_targets)
     managed_resources = manifest_payload.get("managed_resources")
     if not isinstance(managed_resources, list):
         operations.append(
@@ -683,7 +726,7 @@ def add_stale_managed_operations(
         return
 
     for item in managed_resources:
-        if not isinstance(item, dict) or item.get("target") not in targets:
+        if not isinstance(item, dict) or item.get("target") not in scoped_targets:
             continue
         target_path = item.get("target_path")
         if not isinstance(target_path, str) or target_path in desired_paths:

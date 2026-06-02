@@ -90,6 +90,7 @@ def test_main_plan_emits_json_for_selected_targets(
             source_root=str(source_root),
             home_root=str(home_root),
             targets="codex",
+            retire_targets="",
             create_missing_dirs=False,
             prune_managed=False,
             experimental_targets=False,
@@ -123,6 +124,7 @@ def test_main_apply_blocks_docs_unverified_targets(
             source_root=str(source_root),
             home_root=str(home_root),
             targets="opencode",
+            retire_targets="",
             create_missing_dirs=False,
             prune_managed=False,
             experimental_targets=False,
@@ -246,6 +248,7 @@ def test_plan_next_action_present(monkeypatch, tmp_path: Path, capsys) -> None:
             source_root=str(source_root),
             home_root=str(home_root),
             targets="codex",
+            retire_targets="",
             create_missing_dirs=False,
             prune_managed=False,
             experimental_targets=False,
@@ -264,6 +267,38 @@ def test_plan_next_action_present(monkeypatch, tmp_path: Path, capsys) -> None:
     assert "action" in payload["next_action"]
     assert "allowed" in payload["next_action"]
     assert "requires_explicit_approval" in payload["next_action"]
+
+
+def test_main_plan_blocks_overlap_between_active_and_retired_targets(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="codex,claude",
+            retire_targets="claude",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="json",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert payload["blocked_codes"] == ["retire-target-overlap"]
+    assert payload["retired_targets"] == ["claude"]
 
 
 def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:

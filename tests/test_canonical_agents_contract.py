@@ -94,7 +94,6 @@ EXPECTED_OPERATIONAL_ENTRYPOINTS = (
     "full-cycle",
     "define-first",
     "plan-only",
-    "plan-only (clarify-first)",
     "apply-plan",
     "review",
     "mode-explicit",

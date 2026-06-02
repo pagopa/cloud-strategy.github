@@ -187,7 +187,6 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
             "`define-first`",
-            "`plan-only (clarify-first)`",
             "Plan Check 1",
             "Plan Check 2",
             "Plan Check 3",
@@ -206,19 +205,19 @@ def test_gateway_plan_review_and_recovery_gates_are_explicit() -> None:
     )
 
 
-def test_governance_sensitive_plans_default_to_clarify_first() -> None:
+def test_governance_sensitive_plans_default_to_operational_definition() -> None:
     assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/SKILL.md",
         (
-            "agreement, option selection, accepted defaults, or approval-like replies only update the definition",
-            "Use `superpowers-brainstorming` only when",
+            "agreement, accepted defaults, or approval-like replies only update the definition",
+            "recommend `internal-gateway-idea-brainstorming` visibly",
         ),
     )
     assert_contains_all_normalized(
         ".github/skills/internal-gateway-operational-flow/references/wrapper-alignment.md",
         (
             "Restart Gate 0 before continuing",
-            "superpowers-brainstorming",
+            "Substantive idea work leaves operational `define`",
             "The `Mini Decision Brief` introduced by `SKILL.md` remains a chat projection.",
         ),
     )
@@ -250,7 +249,7 @@ def test_operational_flow_non_waiver_projection_stays_defined() -> None:
         (
             "## Phase State Machine",
             "For medium or difficult tasks that close `plan` without a retained plan, provide a compact `Mini Decision Brief`",
-            "For `define-first`, brainstorming, and clarify-first entrypoints",
+            "For `define-first`, closing Gate 0 does not change the active phase",
         ),
     )
     assert_contains_all(
