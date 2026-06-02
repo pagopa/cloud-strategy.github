@@ -37,11 +37,11 @@ mandatory critical pass, and visible next-owner recommendation.
 
 ## When not to use
 
-- The target state, scope, owner, and validation path are already concrete enough to act; recommend `internal-gateway-simple-task` or the already-selected path.
+- The target state, scope, owner, and validation path are already concrete; recommend `internal-gateway-simple-task` or the already-selected path.
 - The user explicitly asks for `execute`, `apply-plan`, defect-first `review`, or critical challenge and the lane is already settled.
 - A retained plan folder is already approved for execution; route to `internal-gateway-operational-flow` `apply-plan`.
 - The request is catalog governance, consumer propagation, or broad sync maintenance rather than a pre-action fit decision.
-- The request is purely operational mode ambiguity with no substantive ideation need; route to `internal-gateway-operational-flow`.
+- Purely operational mode ambiguity with no substantive ideation need; route to `internal-gateway-operational-flow`.
 
 ## Entry Points
 
@@ -78,18 +78,13 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 This gateway owns a native guided decision interview. Do not delegate the interview pacing to `grill-me` or reduce it to a bulk questionnaire.
 
-1. **Inspect repository evidence first.** Read files, paths, commands, or existing decisions before asking the user.
-2. **Build a compact decision ledger.** Order decisions by dependency. Record each branch, its status, and the evidence that resolved it.
-3. **Ask one unresolved material decision question per turn.** Include a recommended answer, rationale, and explicit default when useful.
-4. **Wait for the user's explicit answer.** Treat a clear affirmative reply as acceptance of the visible recommendation. Record the resolved branch before advancing.
-5. **Do not treat branch confirmations as phase-transition checkpoints.** A branch answer updates the decision ledger; it does not automatically move to `converge` or `critical`.
-6. **After all material branches resolve, summarize the compact decision ledger and wait at `Interview checkpoint: ready-for-critical`.**
-7. **After a `confident` critical outcome, emit `Handoff checkpoint: ready-for-owner-change` only when recommending a peer transition.**
-8. **When the critical pass or a later realignment reopens definition, resume only the affected branches** unless the impact is broad, and declare `Interview checkpoint: reopen`.
+**Core pacing**: Inspect repository evidence first. Build a compact decision ledger ordered by dependency. Ask one unresolved material decision question per turn, including a recommended answer, rationale, and default when useful. Wait for the user's explicit answer before resolving the branch. Do not treat branch confirmations as phase-transition checkpoints.
 
-Interview depth is proportional: simple recoverable cases may close after a small number of questions, while unresolved dependent branches continue one turn at a time. Do not force a bulk initial questionnaire.
+After all material branches resolve, emit `Interview checkpoint: ready-for-critical`. After a `confident` critical outcome, emit `Handoff checkpoint: ready-for-owner-change` only when recommending a peer transition. When the critical pass or realignment reopens definition, resume only the affected branches unless impact is broad, and declare `Interview checkpoint: reopen`.
 
-See `references/guided-decision-interview.md` for pacing, decision-ledger fields, proportional depth, reopen behavior, and checkpoint states.
+Interview depth is proportional: simple cases may close quickly; unresolved dependent branches continue one turn at a time. Do not force a bulk initial questionnaire.
+
+See `references/guided-decision-interview.md` for full pacing rules, decision-ledger fields, and checkpoint state definitions.
 
 ## Phase Rules
 
@@ -105,18 +100,7 @@ Build the decision ledger. Use the guided decision interview to resolve material
 
 ### Converge
 
-When material branches are resolved, produce a Definition Brief:
-
-- `Intent`: what the user is trying to decide or achieve.
-- `Recovered evidence`: files, repository facts, or source facts used.
-- `Resolved decisions`: branches closed through the interview or evidence.
-- `Open decisions`: user-only decisions or `none`.
-- `Direction or options`: the chosen path or the narrowed set.
-- `Anti-scope`: what must not happen yet.
-- `Validation path or gap`: command, review path, or explicit gap.
-- `Stop & checkpoint`: where the agent must pause and the exact approval needed.
-
-Before exiting `converge`, use Define Check 1-3, then emit `Interview checkpoint: ready-for-critical`.
+When material branches are resolved, produce a Definition Brief with these fields: `Intent`, `Recovered evidence`, `Resolved decisions`, `Open decisions`, `Direction or options`, `Anti-scope`, `Validation path or gap`, and `Stop & checkpoint`. See `references/brief-contract.md` for the full field contract.
 
 ### Critical
 
@@ -138,28 +122,11 @@ When `pre-plan critical: confident`, recommend exactly one next owner:
 - `internal-gateway-critical-master` when assumptions need deeper pressure-testing.
 - Continue idea definition when unresolved branches remain.
 
-Emit `Recommended next owner` with reason and a manual handoff. Include:
-
-- `Owner`: exact next agent or skill owner.
-- `Scope`: files, directories, artifacts, or decision surface in scope.
-- `Action`: one concrete next action.
-- `Validation`: command, review path, evidence, or explicit gap.
-- `Risk`: residual risk, rollback note, or reason the transition should stay manual.
-- `Continuation`: `continuing` or `waiting`.
-
-For simple recoverable ideas that resolve directly, emit a chat-only `Simple Task Brief` instead of a retained plan artifact.
+Emit `Recommended next owner` with reason and a manual handoff. Include `Owner`, `Scope`, `Action`, `Validation`, `Risk`, and `Continuation`. See `references/brief-contract.md` for the field contract.
 
 ## Simple Task Brief
 
-When the idea resolves to one quick concrete lane, emit a chat-only `Simple Task Brief`:
-
-- `Target`: what should be done.
-- `Action`: one concrete action.
-- `Validation`: focused validation path or explicit gap.
-- `Risk`: residual risk.
-- `Next owner`: `internal-gateway-simple-task`.
-
-Do not create a retained mini-plan for simple tasks.
+When the idea resolves to one quick concrete lane, emit a chat-only `Simple Task Brief` with `Target`, `Action`, `Validation`, `Risk`, and `Next owner`: `internal-gateway-simple-task`. Do not create a retained mini-plan for simple tasks. See `references/brief-contract.md` for the field contract.
 
 ## Routing Fallback Rules
 
@@ -194,3 +161,4 @@ Read on demand, not as a default bundle.
 - The gateway recommends exactly one next owner when evidence supports a lane change.
 - Simple tasks use a chat-only `Simple Task Brief`; no retained mini-plan is created.
 - Manual handoffs remain visible; no hidden dispatch or front-door router exists.
+- Run `scripts/audit_contract.py --format json` for deterministic bundle token and marker evidence.

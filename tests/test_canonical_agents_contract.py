@@ -791,3 +791,76 @@ def test_entrypoint_aliases_reference_exists_and_is_linked() -> None:
         ".github/skills/internal-gateway-operational-flow/SKILL.md"
     ).read_text(encoding="utf-8")
     assert "references/entrypoint-aliases.md" in skill_text
+
+
+def test_idea_gateway_contract_markers_preserved_in_core() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Inspect repository evidence first" in skill_text
+    assert "one unresolved material" in skill_text
+    assert "explicit answer" in skill_text
+    assert "decision ledger" in skill_text
+    assert "`Interview checkpoint: ready-for-critical`" in skill_text
+    assert "`Interview checkpoint: reopen`" in skill_text
+    assert "`Handoff checkpoint: ready-for-owner-change`" in skill_text
+    assert "mandatory critical pass" in skill_text
+    assert "exactly one next owner" in skill_text
+    assert "chat-only `Simple Task Brief`" in skill_text
+    assert "no hidden dispatch" in skill_text
+
+
+def test_idea_gateway_keeps_manual_handoff_no_hidden_dispatch() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Do not create hidden front-door routers" in skill_text
+    assert "hidden peer dispatch" in skill_text
+    assert "exactly one next owner" in skill_text
+    assert "Manual handoffs remain visible" in skill_text
+    assert "no hidden dispatch" in skill_text
+
+
+def test_idea_gateway_restricts_optional_exploration_supports() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "`grill-me`: branch-discovery" in skill_text
+    assert "`idea-refine`: optional support" in skill_text
+    assert "`superpowers-brainstorming`: optional support" in skill_text
+    assert (
+        "Return from any optional exploration support to this gateway before convergence"
+        in skill_text
+    )
+
+
+def test_idea_gateway_handoff_recommends_single_discrete_owner() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert (
+        "`internal-gateway-simple-task` when the idea resolved to one quick concrete lane"
+        in skill_text
+    )
+    assert (
+        "`internal-gateway-operational-flow` `plan` when a validated Definition Brief"
+        in skill_text
+    )
+    assert (
+        "`internal-gateway-critical-master` when assumptions need deeper pressure-testing"
+        in skill_text
+    )
+    assert "`Recommended next owner` with reason" in skill_text
+    assert "`Owner`, `Scope`, `Action`, `Validation`, `Risk`, and `Continuation`" in skill_text
+
+
+def test_idea_gateway_audit_script_referenced_in_validation() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "scripts/audit_contract.py" in skill_text
