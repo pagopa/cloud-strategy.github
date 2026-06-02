@@ -25,7 +25,9 @@ Every retained plan must be able to answer these questions:
 6. `reading budget`: What is the smallest first read and evidence pass that can classify the folder without broad context loading?
 7. `observable acceptance`: Which diff, file state, validator assertion, manual check, or explicit non-action will prove each executable item?
 8. `implementation contract`: For `extended` profiles, does `04-implementation-contract.md` list the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, the implementation contract is not required.
-9. `profile`: Is `Plan profile` declared as `compact`, `extended`, or classifiable as `legacy`?
+9. `profile`: Is `Plan profile` declared as `compact` or `extended`? Currently, no other profiles are supported. Missing or unrecognized profiles return `unsupported-plan-contract`.
+10. `summary language`: Is `01-change-summary.md` written in Italian with clear subsections and a `Risorsa | Azione | Scopo` table for non-trivial plans?
+11. `summary clarity`: Are changed resources and intended actions obvious in the summary without reading deeper files?
 
 For non-trivial retained plans and strategic-to-operational or
 monolithic-to-executable conversions, also answer this:
@@ -34,12 +36,12 @@ monolithic-to-executable conversions, also answer this:
    source item before execution or before the source artifact is retired?
 
 For retained plans with numbered files, confirm that `01-change-summary.md` is a
-brief change summary only, and that `02-source-item-ledger.md` exposes the same
-target, anti-scope, owner, validator, and stop conditions, plus `Recommended use`,
-`Plan profile`, `File map and role`, `Initial evidence pass`, `Reading budget`,
-and source-item coverage. Confirm that `04-implementation-contract.md` is present
-for `extended` profiles, and that `questions.md` remains separate from executable
-files.
+brief decision summary only (Italian, non-executable), and that
+`02-source-item-ledger.md` exposes the same target, anti-scope, owner, validator,
+and stop conditions, plus `Recommended use`, `Plan profile`, `File map and role`,
+`Initial evidence pass`, `Reading budget`, and source-item coverage. Confirm that
+`04-implementation-contract.md` is present for `extended` profiles, and that
+`questions.md` remains separate from executable files.
 
 For retained plans that rewrite an existing strategic or review-only artifact,
 confirm that the folder contains `02-source-item-ledger.md` or an equivalently
@@ -67,8 +69,9 @@ Anti-scope: <explicit exclusions>
 Owner: <primary owner and lane-change owner>
 Validator: <command, review path, or explicit gap>
 Stop conditions: <what stops execution>
-Profile: <compact, extended, or legacy>
-Summary file: <brief change summary only, overloaded, or missing>
+Profile: <compact or extended>
+Summary language: <Italian with required sections and resource table, or missing>
+Summary clarity: <resources and actions obvious, or unclear>
 Source-item ledger: <complete, incomplete, stale, or missing>
 Reading budget: <first files or checks before broader reading>
 Observable acceptance: <diff, file, validator, manual, explicit non-action, or blocker>

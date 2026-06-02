@@ -47,6 +47,7 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
 - `.github/skills/internal-code-review/SKILL.md`
+- `.github/skills/internal-context-handoff/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-copilot-docs-research/SKILL.md`
 - `.github/skills/internal-ddd/SKILL.md`

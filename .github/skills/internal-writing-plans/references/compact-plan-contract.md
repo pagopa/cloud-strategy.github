@@ -3,9 +3,8 @@
 Schema, templates, and escalation rules for the `compact` retained-plan profile.
 Load this reference only when writing or validating a `compact` plan.
 
-Plan content defaults to English per the repository authoring policy. The
-templates below describe the required structure and field names; actual plan
-content uses English.
+`01-change-summary.md` is written in Italian per the retained-plan authoring
+contract. All other plan content uses English.
 
 ## Profile Declaration
 
@@ -15,11 +14,15 @@ Declare the profile in `02-source-item-ledger.md`:
 Plan profile: compact
 ```
 
+Missing profiles are rejected. Do not infer `compact` or `extended` from folder
+content. Folders without a declared `Plan profile` return
+`unsupported-plan-contract`.
+
 ## Compact File Shape
 
 | File | Role | Mandatory |
 | --- | --- | --- |
-| `01-change-summary.md` | Concise change summary: problem, proposed changes, rationale, validation, decision request. ~10 bullets. | Yes |
+| `01-change-summary.md` | Italian human-readable decision summary. Non-executable. | Yes |
 | `02-source-item-ledger.md` | Control file with `Recommended use`, `Plan profile`, `File map and role`, clarification gate, evidence pass, budget, target, anti-scope, owner, validator, stop conditions, source-item ledger table. | Yes |
 | `03-execution.md` | First and only executable file. Uses the executable numbered-file shape: `Objective`, `Chosen logic`, `Key assumptions`, `Executable steps`, `Validation`. | Yes |
 | `questions.md` | User-only decisions. Write `- none` when nothing remains. | Yes |
@@ -39,15 +42,17 @@ Escalate from `compact` to `extended` when any of these is true:
 When escalating, add `04-implementation-contract.md` and additional numbered files
 by category (`05-...`). Update `Plan profile` to `extended`.
 
-## Template: 01-change-summary.md
+## Template: 01-change-summary.md (Italian)
 
-Required sections (headings in English per the plan-content language default):
+Required sections in Italian:
 
-- `Problem to solve` — concrete problem statement.
-- `Proposed changes` — proposed changes, 3–5 bullets.
-- `Why this path` — rationale, 1–2 bullets.
-- `Validation` — validation path.
-- `Decision requested` — decision request.
+- `Problema da risolvere` — concrete problem statement.
+- `Risultato atteso` — expected outcome, short bullet list.
+- `Risorse coinvolte` — table with columns `Risorsa | Azione | Scopo`. Required
+  for non-trivial plans. Each row names the resource, the action, and its purpose.
+- `Comportamento scelto` — chosen behavior and boundary rules.
+- `Validazione prevista` — validation path.
+- `Decisione richiesta` — decision request.
 
 ## Template: 03-execution.md
 
@@ -79,10 +84,3 @@ Required sections:
 - `Acceptance evidence`: concrete command, path, or condition.
 - `Status`: `PENDING` initially.
 - `Route`: which plan file or explicit non-action owns this item.
-
-## Legacy Folder Classification
-
-Folders without a declared `Plan profile` are classified as `legacy`. Legacy
-folders follow backward-compatible reading rules defined in
-`internal-executing-plans/references/legacy-plan-compatibility.md`. Do not require
-`compact` or `extended` fields in legacy folders.

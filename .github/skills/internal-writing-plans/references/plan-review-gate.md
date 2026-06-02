@@ -21,12 +21,13 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Observable acceptance | Does each executable verb name the expected diff, file state, assertion, or explicit non-action that will prove it was done? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
-| Summary focus | Does `01-change-summary.md` contain only the short proposed-change summary, problem, rationale, validation path, and decision request? |
+| Summary focus | Does `01-change-summary.md` contain only the Italian decision summary with required sections and a `Risorsa | Azione | Scopo` table for non-trivial plans? |
+| Summary clarity | Are changed resources and intended actions obvious in the summary? |
 | Semantic coverage | Does `02-source-item-ledger.md` preserve each requested or source item with stable item id, observable acceptance, evidence class, status, and route before execution starts? |
 | Implementation contract | For `extended` profiles, does `04-implementation-contract.md` name the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, the contract is not required. |
-| Profile | Is `Plan profile` declared as `compact`, `extended`, or classifiable as `legacy`? |
+| Profile | Is `Plan profile` declared as `compact` or `extended`? Missing or unsupported profiles return `unsupported-plan-contract`. |
 | Executor context | Can a smaller or lower-context executor see the key files, validators, owner, assumptions, and stop conditions without rediscovering the plan? |
-| File naming | Are new or rewritten retained-plan file names English while the plan content stays English by default? |
+| File naming | Are plan file names English while `01-change-summary.md` is Italian and all executable/control files are English? |
 | Folder semantics | Does `02-source-item-ledger.md` state `Recommended use` and `File map and role` so a generic reader can tell whether the folder is for review, apply, resume, rewrite, or status only? |
 | Token discipline | Does the ledger define `Initial evidence pass` and `Reading budget` so the executor can classify the folder with the fewest safe reads? |
 
@@ -53,6 +54,9 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 - Treat a missing `questions.md` as a plan-quality defect for retained plans; use `- none` when no user-only blocker remains.
 - When external evidence is needed, require an exact pin or explicit fallback in `04-implementation-contract.md` before approving execution.
 - Treat a long or overloaded `01-change-summary.md` as a plan-quality defect, not as a documentation nit.
+- Treat an English `01-change-summary.md` as a plan-quality defect per the current retained-plan contract (Italian only).
+- Treat an unclear resource table or missing resource-action-purpose columns in `01-change-summary.md` as a plan-quality defect.
 - Treat a missing or weak source-item ledger as a plan-quality defect, not as a documentation nit.
 - Treat a missing evidence pass or reading budget as a token-waste defect for non-trivial retained plans.
 - Treat missing source-item coverage for requested work as a plan-quality defect, not as an editorial preference.
+- Treat an unsupported or missing `Plan profile` as a plan-quality defect.

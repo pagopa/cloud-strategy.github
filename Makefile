@@ -88,8 +88,15 @@ docs-lint:
 PLAN_FOLDER ?=
 PLAN_STAGE ?= handoff
 
-retained-plan-check: scripts-bootstrap
+PLAN_AUTHORING_CLI := .github/skills/internal-writing-plans/scripts/plan_authoring.py
+PLAN_EXECUTING_CLI := .github/skills/internal-executing-plans/scripts/plan_execution.py
+
+retained-plan-check: python-version-check
 	@if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required (e.g. make retained-plan-check PLAN_FOLDER=tmp/superpowers/my-plan)' >&2; exit 1; fi
-	@$(SCRIPTS_RUNNER) validate_retained_plans --plan-folder "$(PLAN_FOLDER)" --stage "$(PLAN_STAGE)"
+	@case "$(PLAN_STAGE)" in \
+		handoff) $(PYTHON) $(PLAN_AUTHORING_CLI) handoff-check "$(PLAN_FOLDER)" ;; \
+		completion) $(PYTHON) $(PLAN_EXECUTING_CLI) completion-check "$(PLAN_FOLDER)" ;; \
+		*) printf '%s\n' 'PLAN_STAGE must be handoff or completion.' >&2; exit 1 ;; \
+	esac
 
 all: lint test catalog-check
