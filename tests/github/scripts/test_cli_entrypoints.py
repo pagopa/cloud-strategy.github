@@ -279,7 +279,6 @@ def test_graphify_update_main_generates_output_and_metadata(
             out_dir = tmp_path / "graphify-out"
             out_dir.mkdir(parents=True, exist_ok=True)
             (out_dir / "graph.json").write_text("{}", encoding="utf-8")
-            (out_dir / "graph.html").write_text("<html></html>", encoding="utf-8")
             (out_dir / "GRAPH_REPORT.md").write_text("# Report\n", encoding="utf-8")
             return SimpleNamespace(returncode=0, stdout="", stderr="")
 
@@ -301,7 +300,6 @@ def test_graphify_update_main_generates_output_and_metadata(
 
     assert exit_code == 0
     assert (tmp_path / "graphify-out/graph.json").exists()
-    assert (tmp_path / "graphify-out/graph.html").exists()
     assert (tmp_path / "graphify-out/GRAPH_REPORT.md").exists()
     assert (tmp_path / "graphify-out/.internal-graphify-refresh.json").exists()
     metadata = json.loads(
@@ -314,6 +312,77 @@ def test_graphify_update_main_generates_output_and_metadata(
     assert "AGENTS.md" in metadata["governed_files"]
     assert "tests/test_out_of_scope.py" not in metadata["governed_files"]
     assert "notes.txt" not in metadata["governed_files"]
+
+
+def test_graphify_update_main_retries_with_force_when_incremental_graph_is_stale(
+    monkeypatch, tmp_path: Path
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+
+    git_output = "AGENTS.md\n"
+    called_commands: list[list[str]] = []
+
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
+        assert check is False
+        called_commands.append(command)
+
+        if command[:4] == ["git", "ls-files", "--cached", "--others"]:
+            assert cwd == tmp_path
+            assert text is True
+            assert capture_output is True
+            return SimpleNamespace(returncode=0, stdout=git_output, stderr="")
+
+        if command[:3] == ["git", "rev-parse", "--short"]:
+            return SimpleNamespace(returncode=0, stdout="abc1234\n", stderr="")
+
+        if command == ["graphify", "update", "."]:
+            out_dir = tmp_path / "graphify-out"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            (out_dir / "graph.json").write_text(
+                json.dumps({"nodes": [{"source_file": "missing.py"}]}),
+                encoding="utf-8",
+            )
+            (out_dir / "GRAPH_REPORT.md").write_text("# Report\n", encoding="utf-8")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        if command == ["graphify", "update", ".", "--force"]:
+            out_dir = tmp_path / "graphify-out"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            assert not (out_dir / "graph.json").exists()
+            (out_dir / "graph.json").write_text(
+                json.dumps({"nodes": [{"source_file": "AGENTS.md"}]}),
+                encoding="utf-8",
+            )
+            (out_dir / "GRAPH_REPORT.md").write_text("# Report\n", encoding="utf-8")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        raise AssertionError(f"Unexpected command: {command}")
+
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(root=str(tmp_path), check=False),
+    )
+    monkeypatch.setattr(
+        graphify_update.shutil,
+        "which",
+        lambda command: "/usr/local/bin/graphify" if command == "graphify" else None,
+    )
+    monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
+
+    exit_code = graphify_update.main()
+
+    assert exit_code == 0
+    assert ["graphify", "update", "."] in called_commands
+    assert ["graphify", "update", ".", "--force"] in called_commands
+    assert (tmp_path / "graphify-out/.internal-graphify-refresh.json").exists()
 
 
 def test_graphify_update_main_check_passes_when_fresh(
@@ -352,7 +421,6 @@ def test_graphify_update_main_check_passes_when_fresh(
     out_dir = tmp_path / "graphify-out"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "graph.json").write_text("{}", encoding="utf-8")
-    (out_dir / "graph.html").write_text("<html></html>", encoding="utf-8")
     (out_dir / "GRAPH_REPORT.md").write_text("# Report\n", encoding="utf-8")
 
     governed_paths, _ = graphify_update.list_governed_repo_files(tmp_path)
@@ -400,7 +468,6 @@ def test_graphify_update_main_check_fails_when_stale(
     out_dir = tmp_path / "graphify-out"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "graph.json").write_text("{}", encoding="utf-8")
-    (out_dir / "graph.html").write_text("<html></html>", encoding="utf-8")
     (out_dir / "GRAPH_REPORT.md").write_text("# Report\n", encoding="utf-8")
 
     # Write metadata with old commit

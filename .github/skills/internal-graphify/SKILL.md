@@ -27,7 +27,8 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 - Canonical refresh command: `make graphify-update`
 - Canonical check command: `make graphify-check`
 - Canonical output path: `graphify-out/graph.json`
-- Additional artifacts: `graphify-out/graph.html`, `graphify-out/GRAPH_REPORT.md`
+- Required local artifacts: `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`
+- Optional visualization artifact: `graphify-out/graph.html`
 - Treat the graph as local disposable build output. Do not commit it.
 - Do not read Graphify artifacts directly with `rg` or file reads unless performing an explicit audit.
 
@@ -36,7 +37,8 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 - Refresh only when the graph is missing, clearly stale for the active question, or the user explicitly asks.
 - After meaningful repository changes in the area under investigation, prefer `make graphify-update` before trusting older graph answers.
 - If the refresh command fails or `graph.json` is missing, fall back to normal repository search and say that the graph is unavailable.
-- `make graphify-check` exits non-zero when the graph is stale, incomplete, or contains source paths outside the governed corpus.
+- `make graphify-check` exits non-zero when the required local artifacts are stale, incomplete, or contain source paths outside the governed corpus.
+- This repository does not require local hook automation for Graphify. If automation is revisited later, keep it local and non-blocking.
 
 ## Activation Gate
 

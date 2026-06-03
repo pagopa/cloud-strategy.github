@@ -32,6 +32,8 @@ GRAPHIFY_REFRESH_METADATA = GRAPHIFY_OUTPUT_DIR / ".internal-graphify-refresh.js
 GRAPHIFY_GRAPH_JSON = GRAPHIFY_OUTPUT_DIR / "graph.json"
 GRAPHIFY_GRAPH_HTML = GRAPHIFY_OUTPUT_DIR / "graph.html"
 GRAPHIFY_GRAPH_REPORT = GRAPHIFY_OUTPUT_DIR / "GRAPH_REPORT.md"
+GRAPHIFY_REQUIRED_OUTPUTS = (GRAPHIFY_GRAPH_JSON, GRAPHIFY_GRAPH_REPORT)
+GRAPHIFY_REBUILD_OUTPUTS = (GRAPHIFY_GRAPH_JSON, GRAPHIFY_GRAPH_HTML, GRAPHIFY_GRAPH_REPORT)
 
 
 def parse_args() -> argparse.Namespace:
@@ -127,9 +129,12 @@ def ensure_graphify_available() -> int:
     return 0
 
 
-def run_graphify_update(root: Path) -> int:
+def run_graphify_update(root: Path, *, force: bool = False) -> int:
+    command = ["graphify", "update", "."]
+    if force:
+        command.append("--force")
     result = subprocess.run(
-        ["graphify", "update", "."],
+        command,
         cwd=root,
         check=False,
     )
@@ -140,12 +145,24 @@ def run_graphify_update(root: Path) -> int:
 
 
 def verify_graphify_output_exists(root: Path) -> int:
-    for expected_path in (GRAPHIFY_GRAPH_HTML, GRAPHIFY_GRAPH_JSON, GRAPHIFY_GRAPH_REPORT):
+    for expected_path in GRAPHIFY_REQUIRED_OUTPUTS:
         full_path = root / expected_path
         if not full_path.is_file():
             log_error(f"Expected Graphify output was not created: {expected_path.as_posix()}")
             return 1
+    if not (root / GRAPHIFY_GRAPH_HTML).is_file():
+        log_info(
+            "Optional Graphify HTML visualization was not created; continuing with "
+            "graph.json and GRAPH_REPORT.md only."
+        )
     return 0
+
+
+def remove_graphify_outputs(root: Path) -> None:
+    for output_path in GRAPHIFY_REBUILD_OUTPUTS:
+        full_path = root / output_path
+        if full_path.exists():
+            full_path.unlink()
 
 
 def verify_graph_source_paths(root: Path, governed_paths: list[Path]) -> int:
@@ -278,7 +295,22 @@ def main() -> int:
 
     exit_code = verify_graph_source_paths(root, governed_paths)
     if exit_code != 0:
-        return exit_code
+        log_info(
+            "Retrying graphify update with --force after clearing the previous graph snapshot "
+            "to drop stale nodes after deletions or refactors."
+        )
+        remove_graphify_outputs(root)
+        exit_code = run_graphify_update(root, force=True)
+        if exit_code != 0:
+            return exit_code
+
+        exit_code = verify_graphify_output_exists(root)
+        if exit_code != 0:
+            return exit_code
+
+        exit_code = verify_graph_source_paths(root, governed_paths)
+        if exit_code != 0:
+            return exit_code
 
     write_refresh_metadata(root, governed_paths)
     log_success(
