@@ -11,14 +11,15 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 
 ## When to use
 
-- A codebase question needs graph-style structure, communities, paths, or affected-file analysis rather than plain text search alone.
-- The local Graphify output under `graphify-out/` already exists and is fresh, or the task explicitly allows refreshing it with `make graphify-update`.
-- The question is easier to answer with `graphify query`, `graphify explain`, `graphify path`, or `graphify affected` than with one-off file reads.
+- Use Graphify first for structure questions: community layout, ownership clusters, path relationships, affected-area analysis, or broad repository orientation.
+- Use file-first search first for exact file lookup, symbol lookup, single-line verification, or final claim verification.
+- Use Graphify only when the local graph is fresh enough for the current question, or when the task explicitly allows `make graphify-update`.
+- Use Graphify when the question is easier to answer with `graphify query`, `graphify explain`, `graphify path`, or `graphify affected` than with one-off file reads.
 
 ## When not to use
 
 - The task only needs a direct file lookup, symbol lookup, or a simple `rg` search.
-- The graph is missing or stale and the user did not ask for a refresh.
+- The graph is missing, stale, or ambiguous and the user did not ask for a refresh.
 - The task would require CI, hooks, background refresh, external APIs, or versioned Graphify output.
 - The current repository does not expose `.github/skills/internal-graphify/SKILL.md`, `.github/scripts/graphify_update.py`, `.graphifyignore`, or the expected `Makefile` targets. In that case, prefer the upstream `graphify` skill.
 
@@ -35,8 +36,9 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 ## Freshness Policy
 
 - Refresh only when the graph is missing, clearly stale for the active question, or the user explicitly asks.
+- Treat `make graphify-check` as the freshness gate. Trust graph-derived hints only when it passes, or when the current commit and governed corpus hash still match the last refresh evidence in `graphify-out/.internal-graphify-refresh.json`.
 - After meaningful repository changes in the area under investigation, prefer `make graphify-update` before trusting older graph answers.
-- If the refresh command fails or `graph.json` is missing, fall back to normal repository search and say that the graph is unavailable.
+- If the refresh command fails, `graph.json` is missing, or the graph answer is still imprecise after refresh, fall back to `rg`, targeted reads, or symbol search and say that the graph is unavailable for the claim you are making.
 - `make graphify-check` exits non-zero when the required local artifacts are stale, incomplete, or contain source paths outside the governed corpus.
 - This repository does not require local hook automation for Graphify. If automation is revisited later, keep it local and non-blocking.
 
@@ -58,7 +60,7 @@ When any of these markers is missing, this skill must not propose `make graphify
 3. If refresh is needed and allowed, run `make graphify-update`.
 4. Use the smallest Graphify command that answers the question.
 5. Verify concrete claims against real repository files before finalizing the answer.
-6. Fall back to `rg`, targeted file reads, or symbol search when Graphify output is missing, ambiguous, or not precise enough.
+6. Fall back to `rg`, targeted file reads, or symbol search when Graphify output is missing, stale, ambiguous, or not precise enough.
 
 ## Command Hints
 
@@ -70,8 +72,10 @@ When any of these markers is missing, this skill must not propose `make graphify
 ## Output Expectations
 
 - State whether the answer came from an existing graph, a refreshed graph, or fallback search.
+- Mention the freshness basis when graph-derived hints were used.
 - Mention the Graphify command when it materially informed the answer.
 - Separate graph-derived hints from file-verified facts.
+- For ROI questions, report the smallest honest signal available: `existing graph`, `refreshed graph`, or `fallback search`, plus whether the graph was fresh enough for trust.
 
 ## Validation
 

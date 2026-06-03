@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Graphify"
   short_description: "Use the local Graphify knowledge graph for this repository"
-  default_prompt: "Use $internal-graphify when the repository exposes its activation gate markers and the question needs graph-style structure, communities, paths, or affected files. Verify graph-derived claims against real source files before finalizing the answer."
+  default_prompt: "Use $internal-graphify when the repository exposes its activation gate markers and the question needs graph-style structure, communities, paths, affected files, or broad repository orientation. Use file-first search for exact lookup, symbol lookup, and final verification. Trust graph-derived hints only when the graph is fresh enough or explicitly refreshed, and report whether the answer came from an existing graph, a refreshed graph, or fallback search."
