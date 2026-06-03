@@ -30,6 +30,7 @@ REQUIRED_MARKERS: dict[str, str] = {
     "interview-ready-for-critical": "Interview checkpoint: ready-for-critical",
     "interview-reopen": "Interview checkpoint: reopen",
     "handoff-ready-for-owner-change": "Handoff checkpoint: ready-for-owner-change",
+    "handoff-lock": "handoff lock",
     "mandatory-critical-pass": "mandatory critical pass",
     "exactly-one-next-owner": "exactly one next owner",
     "manual-next-owner-confirmation": "Stop and ask for explicit user confirmation before any next-owner transition",
@@ -44,6 +45,11 @@ CROSS_BUNDLE_CHECKS: dict[str, dict[str, str]] = {
         "relative_path": "internal-gateway-operational-flow/references/gate-0-protocol.md",
         "pattern": "Validated Definition Brief Intake",
         "description": "Consumer gate-0-protocol must define validated-brief intake conditions.",
+    },
+    "operational-flow-handoff-lock": {
+        "relative_path": "internal-gateway-operational-flow/references/gate-0-protocol.md",
+        "pattern": "Handoff lock cleared",
+        "description": "Consumer gate-0-protocol must require cleared handoff lock for validated intake.",
     },
     "operational-flow-skill": {
         "relative_path": "internal-gateway-operational-flow/SKILL.md",

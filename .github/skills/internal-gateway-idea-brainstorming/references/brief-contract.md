@@ -43,6 +43,17 @@ Produced at `handoff` when the critical pass is `confident`.
 | `Validation` | yes | Command, review path, evidence, or explicit gap. |
 | `Risk` | yes | Residual risk or rollback note. |
 | `Continuation` | yes | Always `waiting` at a next-owner transition. |
-| `User action required` | yes | Ask the user to confirm the recommended gate and invoke the named owner manually in a separate turn. |
+| `User action required` | yes | Ask the user to confirm the recommended gate and invoke the named owner manually in a separate turn. State that proposals or wording preferences alone do not authorize delivery work. |
 
 The gateway stops after emitting this package. It must not invoke, simulate, or execute the recommended owner internally.
+
+## Handoff Lock
+
+`Continuation: waiting` activates a handoff lock. The lock stays active until the
+user explicitly invokes the recommended owner or gives unambiguous imperative
+approval for the named action and scope.
+
+Messages that only propose wording, suggest an option, discuss an alternative,
+or refine the idea do not clear the lock. In that case, keep the work inside
+`internal-gateway-idea-brainstorming`, update the brief or ledger if useful,
+ask one direct confirmation question, and stop without editing files.

@@ -82,11 +82,18 @@ conditions hold:
   validation, or anti-scope since the last critical pass.
 - Explicit checkpoint: the idea gateway stopped at
   `Handoff checkpoint: ready-for-owner-change`.
+- Handoff lock cleared: the user explicitly invoked this owner or gave
+  unambiguous imperative approval for the named action and scope.
 
 When these conditions hold, the operational flow consumer accepts the intake,
 treats `grill-me satisfied` and `pre-plan critical: confident` as already met,
 and continues with the next phase. Generic non-`execute` entrypoints that do not
 meet every condition still require Gate 0.
+
+If the next user message after the idea-gateway handoff only proposes wording,
+suggests an alternative, or refines the idea, the handoff lock is not cleared.
+Return to the idea gateway state or ask one direct confirmation question before
+planning or delivery output.
 
 If realignment later changes scope, owner, target state, validation, or
 anti-scope, the intake is invalidated. Restart Gate 0 and the Pre-Plan Critical

@@ -32,8 +32,14 @@ A Definition Brief produced by this gateway may enter `internal-gateway-operatio
 - Critical pass: `pre-plan critical: confident`.
 - Scope unchanged: no realignment changed scope, owner, target state, validation, or anti-scope since the last critical pass.
 - Explicit checkpoint: the gateway stopped at `Handoff checkpoint: ready-for-owner-change`.
+- Handoff lock cleared: the user explicitly invoked the recommended owner or gave unambiguous imperative approval for the named action and scope.
 
 When these conditions hold, the operational flow consumer accepts the intake and continues with the next phase without re-running Gate 0 or the critical pass. The user confirms and invokes `internal-gateway-operational-flow` manually in a separate turn.
+
+If the next user message after handoff only proposes wording, suggests an
+alternative, or refines the idea, the handoff lock remains active. Stay in this
+gateway, update the brief if needed, ask one direct confirmation question, and
+do not perform delivery work.
 
 If realignment later changes scope, owner, target state, validation, or anti-scope, the intake is invalidated. Restart Gate 0 and the Pre-Plan Critical Pass in the operational flow define phase.
 
@@ -41,6 +47,7 @@ If realignment later changes scope, owner, target state, validation, or anti-sco
 
 - When the idea resolves to one quick concrete lane, emit a chat-only `Simple Task Brief` and recommend `internal-gateway-simple-task`.
 - Stop and ask the user to confirm and invoke `internal-gateway-simple-task` manually in a separate turn.
+- Do not treat a proposal, preference, or suggested edit as confirmation unless it also explicitly approves the named owner/action/scope.
 - Do not create a retained mini-plan.
 
 ## Optional Exploration Supports

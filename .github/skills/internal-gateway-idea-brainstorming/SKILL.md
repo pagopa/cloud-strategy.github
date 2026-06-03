@@ -59,7 +59,7 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 | `discover` | Idea, goal, or options are vague or unresolved. | Evidence pass, decision-ledger build, guided decision interview. | Skip evidence, ask unstructured questions, or apply silent defaults. | `grill-me`, `superpowers-brainstorming` | Decision ledger, resolved branches, checkpoint state. |
 | `converge` | Material branches are resolved and a compact decision ledger exists. | Summary, Definition Brief draft, `Interview checkpoint: ready-for-critical`. | Emit plan, apply changes, or imply execute approval. | `internal-gateway-critical-master` | Definition Brief, checkpoint state. |
 | `critical` | Definition Brief is ready and needs mandatory challenge. | `confident` or `reopen`, visible next-owner recommendation. | Implement or routine-review. | `internal-gateway-critical-master` | Critical outcome, `Handoff checkpoint: ready-for-owner-change` when applicable. |
-| `handoff` | Critical pass is `confident` and next owner is clear. | `Recommended next owner`, manual transition package, explicit confirmation request. | Auto-dispatch, internal next-owner execution, or hidden router behavior. | `internal-agent-support-next-step` | Next-step package with owner, scope, action, validation, risk, and `Continuation: waiting`. |
+| `handoff` | Critical pass is `confident` and next owner is clear. | `Recommended next owner`, manual transition package, explicit confirmation request. | Auto-dispatch, internal next-owner execution, hidden router behavior, or file edits from implied consent. | `internal-agent-support-next-step` | Next-step package with owner, scope, action, validation, risk, `Continuation: waiting`, and active handoff lock. |
 
 ## Core Invariants
 
@@ -68,6 +68,9 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 - Return from any optional exploration support to this gateway before convergence, critical pass, or handoff.
 - Keep direct entry and manual transitions visible. Do not create hidden front-door routers or hidden peer dispatch.
 - Stop and ask for explicit user confirmation before any next-owner transition. The user invokes `internal-gateway-simple-task` or `internal-gateway-operational-flow` manually in a separate turn.
+- Treat `Continuation: waiting` as an active handoff lock. While locked, do not edit files, run delivery validation, invoke the next owner, or treat a user proposal as approval.
+- Clear the handoff lock only when the user explicitly invokes the recommended owner or gives an unambiguous imperative approval for the named action and scope, such as "use `internal-gateway-simple-task` and modify X", "confermo, procedi con quella modifica", or "esegui/applica il next step".
+- If the user's next message is a suggestion, alternative, preference, or design discussion, stay in this gateway, update the decision ledger or brief if needed, and ask for confirmation again before any delivery work.
 - Use `internal-agent-support-next-step` at every phase-ending transition.
 - Non-terminal stops: start with `State:` and `Continuation:`; add `User action required:` when `Continuation` is `waiting`.
 - Require an explicit checkpoint before moving into `plan`, `execute`, or peer transitions.
@@ -126,6 +129,8 @@ When `pre-plan critical: confident`, recommend exactly one next owner:
 
 Emit `Recommended next owner` with reason and a manual handoff. Include `Owner`, `Scope`, `Action`, `Validation`, `Risk`, `Continuation: waiting`, and `User action required`. Stop after the recommendation. Do not invoke, simulate, or execute the next owner internally. The user must confirm the next gate and invoke `internal-gateway-simple-task` or `internal-gateway-operational-flow` manually in a separate turn. See `references/brief-contract.md` for the field contract.
 
+After stopping, keep the handoff lock active across the next user turn. A message that proposes content, wording, scope, or implementation detail is not confirmation by itself. If confirmation is missing or ambiguous, respond with the current state, the recommended owner, and one direct confirmation question; do not perform edits in that turn.
+
 ## Simple Task Brief
 
 When the idea resolves to one quick concrete lane, emit a chat-only `Simple Task Brief` with `Target`, `Action`, `Validation`, `Risk`, and `Next owner`: `internal-gateway-simple-task`. Do not create a retained mini-plan for simple tasks. See `references/brief-contract.md` for the field contract.
@@ -164,6 +169,7 @@ Read on demand, not as a default bundle.
 - Optional exploration supports return to this gateway before convergence, critical pass, or handoff.
 - The gateway recommends exactly one next owner when evidence supports a lane change.
 - Every next-owner recommendation stops with `Continuation: waiting` and asks for explicit user confirmation; the gateway does not execute the recommended owner internally.
+- The handoff lock is enforced after `Continuation: waiting`: proposals, refinements, or preferences do not clear it unless the user also gives explicit approval for the named owner/action/scope.
 - Simple tasks use a chat-only `Simple Task Brief`; no retained mini-plan is created.
 - Manual handoffs remain visible; no hidden dispatch or front-door router exists.
 - Run `scripts/audit_contract.py --format json` for deterministic bundle token and marker evidence.

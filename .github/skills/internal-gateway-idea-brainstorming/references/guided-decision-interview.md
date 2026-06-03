@@ -14,7 +14,8 @@ Use this reference when `internal-gateway-idea-brainstorming` needs the exact pa
 8. Do not treat branch confirmations as phase-transition checkpoints.
 9. After all material branches resolve, summarize the compact decision ledger and declare `Interview checkpoint: ready-for-critical`.
 10. After a `confident` critical outcome, declare `Handoff checkpoint: ready-for-owner-change` only when recommending a peer transition.
-11. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview checkpoint: reopen`.
+11. Treat `Continuation: waiting` as a handoff lock after `ready-for-owner-change`; proposals, alternatives, or wording preferences do not clear the lock without explicit owner/action/scope approval.
+12. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview checkpoint: reopen`.
 
 ## Decision Ledger Fields
 
@@ -36,7 +37,7 @@ Each row in the decision ledger:
 | `interviewing` | Active question in progress. | While awaiting a user answer to a material decision question. |
 | `ready-for-critical` | All material branches resolved; waiting for critical challenge. | After decision-ledger summary and before loading `internal-gateway-critical-master`. |
 | `reopen` | Critical pass or realignment reopened one or more branches. | When resuming affected branches after `reopen`. |
-| `ready-for-owner-change` | Confident critical outcome; ready to recommend the next owner and stop. | Only before a peer transition; the user confirms and invokes the next owner manually in a separate turn. |
+| `ready-for-owner-change` | Confident critical outcome; ready to recommend the next owner and stop with a handoff lock. | Only before a peer transition; the user confirms and invokes the next owner manually in a separate turn. |
 
 ## Proportional Depth
 
