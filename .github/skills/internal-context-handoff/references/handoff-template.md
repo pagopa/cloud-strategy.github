@@ -58,7 +58,7 @@ Add these fields after `Risks` and before `Anti-scope`:
 
 Replace any detected secret, credential, token, key, or sensitive value with:
 
-```
+```text
 [REDACTED]
 ```
 

@@ -21,7 +21,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Observable acceptance | Does each executable verb name the expected diff, file state, assertion, or explicit non-action that will prove it was done? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
-| Summary focus | Does `01-change-summary.md` contain only the Italian decision summary with required sections and a `Risorsa | Azione | Scopo` table for non-trivial plans? |
+| Summary focus | Does `01-change-summary.md` contain only the Italian decision summary with required sections and a `Risorsa \| Azione \| Scopo` table for non-trivial plans? |
 | Summary clarity | Are changed resources and intended actions obvious in the summary? |
 | Semantic coverage | Does `02-source-item-ledger.md` preserve each requested or source item with stable item id, observable acceptance, evidence class, status, and route before execution starts? |
 | Implementation contract | For `extended` profiles, does `04-implementation-contract.md` name the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, the contract is not required. |
