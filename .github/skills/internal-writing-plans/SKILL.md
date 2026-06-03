@@ -16,6 +16,10 @@ Repository-owned wrapper for retained plan authoring. This skill owns when a pla
 is retained, where it lives, file names, content language, and the authoring-to-handoff
 contract.
 
+Treat the plan contract and bundle-local validator as the first check. Use local
+retained-plan examples only when the contract, validator, or required references
+still leave residual ambiguity.
+
 ## When to use
 
 - Retaining a plan because work crosses turns, spans multiple macro-categories,
