@@ -84,7 +84,7 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 ## Gate 0
 
-Gate 0 blocks plan output. Direct `execute` is the only automatic exception. A validated Definition Brief from `internal-gateway-idea-brainstorming` with `grill-me satisfied`, `pre-plan critical: confident`, unchanged scope, and a cleared handoff lock enters `plan` without repeating Gate 0 or the critical pass; see [references/gate-0-protocol.md](references/gate-0-protocol.md). `apply-plan` starts with a visible define pre-start gate.
+Gate 0 blocks plan output. Direct `execute` only auto-exempts. A validated Definition Brief from idea gateway with `Idea Gate 0: grill-me satisfied`, `Critical Gate 2: confident`, `Handoff Gate 3: ready-for-owner-change`, unchanged scope, and cleared handoff lock enters `plan` without repeating Gate 0 or critical pass; see [references/gate-0-protocol.md](references/gate-0-protocol.md). `apply-plan` starts with a visible define pre-start gate.
 
 This skill owns blocking status. `grill-me` supplies the interview pattern. Status table, blocking rules, closure rules, phase transition authorization, and request-change realignment live in [references/gate-0-protocol.md](references/gate-0-protocol.md).
 

@@ -16,11 +16,13 @@ Produced at the end of `converge` and consumed by `internal-gateway-operational-
 | `Anti-scope` | yes | What must not happen yet. |
 | `Validation path or gap` | yes | Command, review path, or explicit gap. |
 | `Risk` | yes | Residual risk or rollback note. |
-| `Stop & checkpoint` | yes | Where to pause and the exact approval needed. |
+| `Stop & checkpoint` | yes | Named gate state and the exact approval needed. |
 
 ## Simple Task Brief
 
 Produced when the idea resolves to one quick concrete lane. Chat-only; not a retained plan artifact.
+Do not produce it before Idea Gate 0 is `grill-me satisfied` and Critical Gate 2
+is `confident`.
 
 | Field | Required | Description |
 | --- | --- | --- |
@@ -38,6 +40,7 @@ Produced at `handoff` when the critical pass is `confident`.
 | --- | --- | --- |
 | `Recommended next owner` | yes | Exact agent or skill owner. |
 | `Reason` | yes | Why this owner fits the resolved idea. |
+| `Gate` | yes | Always `Handoff Gate 3: ready-for-owner-change` at a next-owner transition. |
 | `Scope` | yes | Files, directories, artifacts, or decision surface in scope. |
 | `Action` | yes | One concrete next action. |
 | `Validation` | yes | Command, review path, evidence, or explicit gap. |

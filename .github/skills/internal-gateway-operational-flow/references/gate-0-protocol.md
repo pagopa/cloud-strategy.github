@@ -76,19 +76,20 @@ A Definition Brief produced by `internal-gateway-idea-brainstorming` may enter
 conditions hold:
 
 - Origin: produced by `internal-gateway-idea-brainstorming`.
-- Gate status: `grill-me satisfied` in the current cycle.
-- Critical pass: `pre-plan critical: confident`.
+- Idea Gate 0: `grill-me satisfied` in the current cycle.
+- Interview Gate 1: `ready-for-critical` was declared before critical challenge.
+- Critical Gate 2: `confident`.
 - Scope unchanged: no realignment changed scope, owner, target state,
   validation, or anti-scope since the last critical pass.
 - Explicit checkpoint: the idea gateway stopped at
-  `Handoff checkpoint: ready-for-owner-change`.
+  `Handoff Gate 3: ready-for-owner-change`.
 - Handoff lock cleared: the user explicitly invoked this owner or gave
   unambiguous imperative approval for the named action and scope.
 
 When these conditions hold, the operational flow consumer accepts the intake,
-treats `grill-me satisfied` and `pre-plan critical: confident` as already met,
-and continues with the next phase. Generic non-`execute` entrypoints that do not
-meet every condition still require Gate 0.
+treats `Idea Gate 0: grill-me satisfied` and `Critical Gate 2: confident` as
+already met, and continues with the next phase. Generic non-`execute`
+entrypoints that do not meet every condition still require Gate 0.
 
 If the next user message after the idea-gateway handoff only proposes wording,
 suggests an alternative, or refines the idea, the handoff lock is not cleared.
