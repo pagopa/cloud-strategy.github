@@ -5,8 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 SCRIPT_PATH = Path(
     ".github/skills/internal-gateway-idea-brainstorming/scripts/audit_contract.py"
 )

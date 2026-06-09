@@ -198,7 +198,7 @@ def test_bisync_plan_json_output(monkeypatch, tmp_path: Path, capsys) -> None:
         ),
     )
 
-    exit_code = sync_home_ai_resources.main()
+    sync_home_ai_resources.main()
     payload = json.loads(capsys.readouterr().out)
 
     assert "drifts" in payload

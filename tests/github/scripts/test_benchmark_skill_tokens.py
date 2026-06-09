@@ -5,8 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 BENCHMARK_SCRIPT = Path(".github/scripts/benchmark_skill_tokens.py")
 
 

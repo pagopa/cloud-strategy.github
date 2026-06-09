@@ -270,7 +270,7 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
         targets=parse_targets("codex"),
         mode="apply",
     )
-    manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
+    apply_home_sync_plan(plan, create_missing_dirs=True)
 
     copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
     copied_skill.write_text("# drifted content\n", encoding="utf-8")
@@ -405,8 +405,6 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
     resource_ids = {
         op.resource_id for op in plan.operations if hasattr(op, "resource_id")
     }
-    planned_paths = {op.path for op in plan.operations if hasattr(op, "path")}
-
     assert "internal-graphify" in resource_ids or any(
         ".agents/skills/internal-graphify" in str(op.path) for op in plan.operations
     )
