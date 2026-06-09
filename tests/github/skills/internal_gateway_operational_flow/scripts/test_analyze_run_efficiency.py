@@ -84,6 +84,8 @@ def test_basic_requests_shape_text_output() -> None:
         path = f.name
     result = run_analyzer(path, "--format", "text")
     assert result.returncode == 0
+    assert "Structural input cost" in result.stdout
+    assert "Repository-controllable loop signals" in result.stdout
     assert "Total requests: 2" in result.stdout
     assert "Total input tokens: 400" in result.stdout
     assert "Cached input: 150" in result.stdout
@@ -263,3 +265,298 @@ def test_user_prompt_aggregates_grouped_by_prompt() -> None:
     assert upa[0]["input_tokens"] == 30
     assert upa[1]["requests"] == 1
     assert upa[1]["input_tokens"] == 30
+
+
+def test_prompt_export_shape_deduplicates_by_prompt_id_and_uses_chatml_success_logs(
+    tmp_path: Path,
+) -> None:
+    older = tmp_path / "older-prompt-export.json"
+    newer = tmp_path / "newer-prompt-export.json"
+    older.write_text(
+        json.dumps(
+            {
+                "exportedAt": "2026-06-09T10:00:00Z",
+                "prompts": [
+                    {
+                        "promptId": "prompt-123",
+                        "logCount": 1,
+                        "logs": [
+                            {
+                                "kind": "ChatMLSuccess",
+                                "request": {
+                                    "metadata": {
+                                        "usage": {
+                                            "promptTokens": 100,
+                                            "cachedPromptTokens": 25,
+                                            "completionTokens": 10,
+                                            "reasoningTokens": 2,
+                                        }
+                                    },
+                                },
+                            }
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    newer.write_text(
+        json.dumps(
+            {
+                "exportedAt": "2026-06-09T11:00:00Z",
+                "prompts": [
+                    {
+                        "promptId": "prompt-123",
+                        "logCount": 3,
+                        "logs": [
+                            {
+                                "kind": "ChatMLSuccess",
+                                "request": {
+                                    "metadata": {
+                                        "usage": {
+                                            "promptTokens": 200,
+                                            "prompt_tokens_details": {"cached_tokens": 50},
+                                            "completionTokens": 20,
+                                            "reasoningTokens": 5,
+                                        }
+                                    },
+                                },
+                            },
+                            {
+                                "kind": "Other",
+                                "promptText": "sentinel prompt text",
+                            },
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_analyzer(str(older), str(newer), "--format", "json")
+    assert result.returncode == 0
+    data = json.loads(result.stdout)
+
+    assert data["summary"]["total_requests"] == 1
+    assert data["summary"]["total_model_calls"] == 1
+    assert data["summary"]["total_input_tokens"] == 200
+    assert data["summary"]["cached_input_tokens"] == 50
+    assert data["summary"]["uncached_input_tokens"] == 150
+    assert data["summary"]["completion_tokens"] == 20
+    assert data["summary"]["reasoning_tokens"] == 5
+    assert data["summary"]["cache_rate"] == 0.25
+    assert data["summary"]["input_output_ratio"] == 8.0
+    assert len(data["sources"]) == 1
+    assert data["sources"][0]["kind"] == "prompt_history"
+    assert data["sources"][0]["first_input_tokens"] == 200
+    assert data["sources"][0]["last_input_tokens"] == 200
+    assert data["sources"][0]["context_growth_factor"] == 1.0
+    assert "sentinel prompt text" not in result.stdout
+    assert "sentinel prompt text" not in result.stderr
+
+
+def test_otel_debug_log_shape_exposes_tool_and_loop_metrics(tmp_path: Path) -> None:
+    log_path = tmp_path / "otel-session.json"
+    log_path.write_text(
+        json.dumps(
+            {
+                "resourceSpans": [
+                    {
+                        "resource": {
+                            "attributes": [
+                                {"key": "service.name", "value": {"stringValue": "demo"}},
+                            ]
+                        },
+                        "scopeSpans": [
+                            {
+                                "spans": [
+                                    {
+                                        "name": "model-1",
+                                        "attributes": {
+                                            "gen_ai.session.id": "session-42",
+                                            "gen_ai.request.model": "gpt-4.1",
+                                            "gen_ai.usage.input_tokens": 100,
+                                            "gen_ai.usage.input_tokens_details.cached_tokens": 20,
+                                            "gen_ai.usage.output_tokens": 10,
+                                            "gen_ai.usage.output_tokens_details.reasoning_tokens": 2,
+                                            "duration_ms": 10,
+                                        },
+                                    },
+                                    {
+                                        "name": "tool-search-a",
+                                        "attributes": {
+                                            "gen_ai.session.id": "session-42",
+                                            "tool.name": "search",
+                                            "tool.kind": "lookup",
+                                            "tool.command": "--redacted--",
+                                            "duration_ms": 2,
+                                        },
+                                    },
+                                    {
+                                        "name": "tool-search-b",
+                                        "attributes": {
+                                            "gen_ai.session.id": "session-42",
+                                            "tool.name": "search",
+                                            "tool.kind": "lookup",
+                                            "tool.command": "--redacted--",
+                                            "duration_ms": 2,
+                                        },
+                                    },
+                                    {
+                                        "name": "validation-1",
+                                        "attributes": {
+                                            "gen_ai.session.id": "session-42",
+                                            "tool.name": "pytest",
+                                            "tool.category": "validation",
+                                            "validation.command": "pytest -q unit",
+                                            "duration_ms": 3,
+                                        },
+                                    },
+                                    {
+                                        "name": "validation-2",
+                                        "attributes": {
+                                            "gen_ai.session.id": "session-42",
+                                            "tool.name": "pytest",
+                                            "tool.category": "validation",
+                                            "validation.command": "pytest -q unit",
+                                            "duration_ms": 3,
+                                        },
+                                    },
+                                    {
+                                        "name": "patch-step",
+                                        "attributes": {
+                                            "gen_ai.session.id": "session-42",
+                                            "tool.name": "apply_patch",
+                                            "action.type": "patch",
+                                            "duration_ms": 1,
+                                        },
+                                    },
+                                    {
+                                        "name": "model-2",
+                                        "attributes": {
+                                            "gen_ai.session.id": "session-42",
+                                            "gen_ai.request.model": "gpt-4.1",
+                                            "gen_ai.usage.input_tokens": 13_000,
+                                            "gen_ai.usage.input_tokens_details.cached_tokens": 200,
+                                            "gen_ai.usage.output_tokens": 1,
+                                            "gen_ai.usage.output_tokens_details.reasoning_tokens": 1,
+                                            "duration_ms": 20,
+                                        },
+                                    },
+                                ]
+                            }
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_analyzer(str(log_path), "--format", "json")
+    assert result.returncode == 0
+    data = json.loads(result.stdout)
+
+    assert data["summary"]["total_requests"] == 2
+    assert data["summary"]["total_input_tokens"] == 13_100
+    assert data["summary"]["cached_input_tokens"] == 220
+    assert data["summary"]["uncached_input_tokens"] == 12_880
+    assert data["summary"]["completion_tokens"] == 11
+    assert data["summary"]["reasoning_tokens"] == 3
+    assert data["summary"]["calls_above_context_threshold"] == 1
+    assert data["summary"]["low_output_calls"] == 2
+    assert data["summary"]["low_output_input_tokens"] == 13_100
+    assert data["summary"]["tool_calls_by_tool"] == {"apply_patch": 1, "pytest": 2, "search": 2}
+    assert data["summary"]["repeated_identical_tool_calls"] == 2
+    assert data["summary"]["repeated_validation_commands"] == 1
+    assert data["summary"]["pre_action_tool_calls"] == 4
+    assert data["sources"][0]["first_input_tokens"] == 100
+    assert data["sources"][0]["last_input_tokens"] == 13_000
+    assert data["sources"][0]["context_growth_factor"] == 130.0
+    assert data["sources"][0]["calls_above_context_threshold"] == 1
+    assert data["sources"][0]["low_output_calls"] == 2
+
+
+def test_multiple_input_paths_and_privacy_do_not_leak_sensitive_content(
+    tmp_path: Path,
+) -> None:
+    prompt_export = tmp_path / "sensitive-prompt-export.json"
+    otel_log = tmp_path / "sensitive-otel-log.json"
+    prompt_export.write_text(
+        json.dumps(
+            {
+                "exportedAt": "2026-06-09T12:00:00Z",
+                "prompts": [
+                    {
+                        "promptId": "prompt-sensitive",
+                        "logCount": 1,
+                        "logs": [
+                            {
+                                "kind": "ChatMLSuccess",
+                                "request": {
+                                    "metadata": {
+                                        "usage": {
+                                            "promptTokens": 10,
+                                            "completionTokens": 1,
+                                        }
+                                    },
+                                    "userPrompt": "sentinel user prompt text",
+                                    "toolArgs": {"secret": "sentinel tool argument"},
+                                    "toolResult": "sentinel tool result",
+                                    "sourcePath": "/tmp/sentinel/source/path",
+                                },
+                            }
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    otel_log.write_text(
+        json.dumps(
+            {
+                "resourceSpans": [
+                    {
+                        "scopeSpans": [
+                            {
+                                "spans": [
+                                    {
+                                        "name": "model-privacy",
+                                        "attributes": {
+                                            "gen_ai.session.id": "privacy-session",
+                                            "gen_ai.request.model": "gpt-4.1",
+                                            "gen_ai.usage.input_tokens": 20,
+                                            "gen_ai.usage.output_tokens": 2,
+                                            "tool.command": "sentinel command text",
+                                            "tool.arguments": "sentinel tool argument",
+                                            "tool.result": "sentinel tool result",
+                                            "source.path": "/tmp/sentinel/source/path",
+                                        },
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_analyzer(str(prompt_export), str(otel_log), "--format", "json")
+    assert result.returncode == 0
+    assert "sentinel user prompt text" not in result.stdout
+    assert "sentinel tool argument" not in result.stdout
+    assert "sentinel tool result" not in result.stdout
+    assert "sentinel command text" not in result.stdout
+    assert "sentinel user prompt text" not in result.stderr
+    assert "sentinel tool argument" not in result.stderr
+    assert "sentinel tool result" not in result.stderr
+    assert "sentinel command text" not in result.stderr
+    assert "sensitive-prompt-export.json" not in result.stdout
+    assert "sensitive-otel-log.json" not in result.stdout
+    assert "/tmp/sentinel/source/path" not in result.stdout
+    assert "/tmp/sentinel/source/path" not in result.stderr

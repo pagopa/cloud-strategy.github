@@ -70,7 +70,7 @@ Stop and report when any of these occur:
 - `next_action.requires_explicit_approval` is `true` and the user has not explicitly approved.
 - `bisync apply` was requested without a prior `bisync plan`.
 - The source repository has uncommitted or untracked changes during `bisync apply`.
-- After `bisync apply` modifies `~/.agents/skills/` files that the install lane also manages, re-run install `plan` and resolve any `target-modified-managed` blockers caused by stale manifest hashes before considering the sync complete.
+- After `bisync apply` modifies `~/.agents/skills/` files that the install lane also manages, re-run install `plan`. Verified repo-to-home bisync copies refresh the manifest state; if `target-modified-managed` still appears, treat it as a real local divergence and review the path instead of deleting it as a routine recovery step.
 
 ### Output
 
@@ -179,7 +179,7 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 When plan or audit reports blocked paths, resolve them before apply:
 
 - `target-exists-unmanaged`: the target file or directory exists at home but is not in the sync manifest. Remove it manually so sync can recreate it from source.
-- `target-modified-managed`: the target is in the manifest but its content diverged from the last recorded hash. Remove it manually so sync can restore the source-of-truth version.
+- `target-modified-managed`: the target is in the manifest but its content diverged from the last recorded hash. Re-run install `plan` after a verified repo-to-home bisync; if the blocker remains, review the path as a genuine local divergence.
 - `stale-managed` with a removed source bundle: the resource was managed previously but its source bundle no longer exists in the repo. Re-run with `--prune-managed` after review to remove the stale managed copy.
 - `retire-target-overlap`: the same target was requested as both active and retired. Remove the overlap and re-run.
 - After removing conflicting files, re-run plan to confirm zero blockers before applying.

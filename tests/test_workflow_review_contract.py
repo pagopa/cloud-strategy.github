@@ -620,6 +620,16 @@ def test_advisory_analyzer_safety_is_contracted() -> None:
     assert "no prompt text" in script_text or "tool arguments" in script_text or "Never emits" in script_text
 
 
+def test_advisory_efficiency_reference_keeps_compact_decision_framework() -> None:
+    ref_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/advisory-efficiency.md"
+    ).read_text(encoding="utf-8")
+
+    assert "classify -> bounded evidence pass -> action-readiness checkpoint -> focused action -> focused validation -> one broad final validation" in ref_text
+    assert "Do not rerun an unchanged validation command unless external state changed or the prior result was incomplete" in ref_text
+    assert "compact decision projections" in ref_text
+
+
 def test_plan_handoff_requires_summary_control_file() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/plan-handoff.md",

@@ -28,6 +28,7 @@ from home_syncing import (
     write_doctor_snapshot,
     write_plan_snapshot,
 )
+from sync_output import build_compact_install_output
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -72,7 +73,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             help="Allow apply-like execution against undocumented targets.",
         )
         cmd_parser.add_argument(
-            "--format", choices=["text", "json"], default="text", help="Output format."
+            "--format",
+            choices=["text", "json", "compact"],
+            default="text",
+            help="Output format.",
         )
         cmd_parser.add_argument(
             "--fast",
@@ -95,7 +99,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Home directory root.",
     )
     bisync_plan.add_argument(
-        "--format", choices=["text", "json"], default="text", help="Output format."
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
     )
     bisync_apply = bisync_sub.add_parser("apply", help="Apply bisync resolution.")
     bisync_apply.add_argument("--source-root", default=".", help="Source repository root.")
@@ -105,7 +112,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Home directory root.",
     )
     bisync_apply.add_argument(
-        "--format", choices=["text", "json"], default="text", help="Output format."
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
     )
 
     return parser.parse_args(argv)
@@ -234,6 +244,13 @@ def emit_output(
     format_name: str,
     failure_message: str | None = None,
 ) -> None:
+    if format_name == "compact":
+        compact_payload = build_compact_install_output(payload)
+        if failure_message and "error" not in compact_payload:
+            compact_payload["error"] = failure_message
+        print(json.dumps(compact_payload, indent=2, sort_keys=True))
+        return
+
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
         return

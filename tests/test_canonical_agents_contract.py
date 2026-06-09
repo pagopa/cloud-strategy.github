@@ -931,7 +931,13 @@ def test_operational_flow_advisory_efficiency_and_stop_conditions() -> None:
     ).read_text(encoding="utf-8")
 
     assert "Advisory Efficiency And Stop Conditions" in skill_text
+    assert "classify -> bounded evidence pass -> action-readiness checkpoint -> focused action -> focused validation -> one broad final validation" in ref_text
     assert "fewer model turns" in ref_text
     assert "compact handoffs" in ref_text
+    assert "evidence-pass budget" in ref_text
+    assert "batch independent reads/searches" in ref_text
+    assert "compact decision projections" in ref_text
+    assert "Do not rerun an unchanged validation command unless external state changed or the prior result was incomplete" in ref_text
+    assert "Replan when scope, owner, target state, validation, rollout, or anti-scope changes" in ref_text
     assert "Do not treat call count or token count as permission to skip mandatory evidence" in ref_text
     assert "Metrics are advisory only" in ref_text

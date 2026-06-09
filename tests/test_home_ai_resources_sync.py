@@ -119,6 +119,49 @@ def test_main_plan_emits_json_for_selected_targets(
     assert str(home_root / ".codex/agents") not in payload["missing_dirs"]
 
 
+def test_main_plan_emits_compact_projection_for_selected_targets(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            retire_targets="",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="compact",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["mode"] == "plan"
+    assert "status" in payload
+    assert payload["selected_targets_count"] == 1
+    assert payload["retired_targets_count"] == 0
+    assert payload["source_resources_considered"] >= 1
+    assert "operations" not in payload
+    assert "copied" not in payload
+    assert "skipped" not in payload
+    assert "blocked" not in payload
+    assert "conflicts" not in payload
+    assert "missing_dirs" not in payload
+    assert "state_path" in payload
+    assert "manifest_path" not in payload
+
+
 def test_main_apply_blocks_docs_unverified_targets(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
@@ -214,6 +257,82 @@ def test_bisync_plan_json_output(monkeypatch, tmp_path: Path, capsys) -> None:
     assert "next_action" in payload
     assert "blocked_codes" in payload
     assert "action" in payload["next_action"]
+
+
+def test_bisync_plan_emits_compact_projection(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    source_root.mkdir()
+    home_root.mkdir()
+    write_file(source_root / ".github/skills/repo-only/SKILL.md", "# Repo only\n")
+    write_file(home_root / ".agents/skills/home-only/SKILL.md", "# Home only\n")
+    (source_root / ".github" / "skills").mkdir(parents=True, exist_ok=True)
+    (home_root / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "init", "-b", "main"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "add", "-A"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "initial"],
+        cwd=source_root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="bisync",
+            bisync_command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            format="compact",
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert payload["mode"] == "plan"
+    assert "status" in payload
+    assert payload["drift_total"] == 2
+    assert payload["direction_counts"] == {"repo_to_home": 0, "home_to_repo": 0}
+    assert payload["bucket_counts"] == {
+        "only_repo": 1,
+        "only_home": 1,
+        "equal_mtime": 0,
+    }
+    assert "drifts" not in payload
+    assert "state_path" not in payload
 
 
 def test_bisync_apply_returns_nonzero_on_blockers(
@@ -358,4 +477,28 @@ def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
     )
     assert "Do not infer the mode, do not skip blockers" in content
     assert "next_action` as user approval for `apply`" in content
+    assert "remove it manually so sync can restore the source-of-truth version" not in (
+        content.lower()
+    )
+    assert "routine recovery step" in content
     assert "non-thinking" not in content.lower()
+
+
+def test_sync_contract_documents_verified_bisync_reconciliation() -> None:
+    contract_path = (
+        Path(__file__).resolve().parent
+        / "../.github/skills/local-agent-sync-install-ai-resources/references/sync-contract.md"
+    ).resolve()
+    error_codes_path = (
+        Path(__file__).resolve().parent
+        / "../.github/skills/local-agent-sync-install-ai-resources/references/error-codes.md"
+    ).resolve()
+    contract_content = contract_path.read_text(encoding="utf-8")
+    error_codes_content = error_codes_path.read_text(encoding="utf-8")
+
+    assert "stale `target-modified-managed` blocker" in contract_content
+    assert "bisync-manifest-reconcile-failed" in contract_content
+    assert "bisync-manifest-reconcile-failed" in error_codes_content
+    assert "remove it manually so sync can restore the source-of-truth version" not in (
+        error_codes_content.lower()
+    )

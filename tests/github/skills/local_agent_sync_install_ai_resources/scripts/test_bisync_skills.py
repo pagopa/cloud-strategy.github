@@ -270,7 +270,9 @@ def test_apply_blocks_dirty_repository_without_writes(tmp_path: Path) -> None:
     assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Home\n"
 
 
-def test_apply_repo_to_home_converges(tmp_path: Path) -> None:
+def test_apply_repo_to_home_blocks_without_manifest_reconciliation(
+    tmp_path: Path,
+) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
@@ -285,11 +287,10 @@ def test_apply_repo_to_home_converges(tmp_path: Path) -> None:
     plan = build_bisync_plan(source, home, mode="plan")
     result = apply_bisync_plan(source, home, plan)
 
-    assert result.blocked_codes == []
-    assert result.verification["status"] == "converged"
+    assert result.blocked_codes == ["bisync-manifest-reconcile-failed"]
+    assert result.verification["code"] == "bisync-manifest-reconcile-failed"
     assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Source\n"
-    verify_plan = build_bisync_plan(source, home, mode="plan")
-    assert verify_plan.drifts == []
+    assert result.next_action["allowed"] is False
 
 
 def test_apply_home_to_repo_converges(tmp_path: Path) -> None:
@@ -355,6 +356,37 @@ def test_apply_reports_residual_drift_with_stable_code(
     set_tree_mtime(home_skill, 100.0)
     set_tree_mtime(source_skill, 200.0)
     commit_all(source, "add residual-skill")
+
+    state_root = home / ".sync/cloud-strategy-governance/home-ai-resources"
+    state_root.mkdir(parents=True, exist_ok=True)
+    manifest_path = state_root / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "generated_at": "2026-06-09T00:00:00Z",
+                "source_root": source.as_posix(),
+                "source_revision": "initial",
+                "state_root": state_root.as_posix(),
+                "targets": ["skills"],
+                "managed_resources": [
+                    {
+                        "target": "skills",
+                        "resource_family": "skills",
+                        "resource_id": "residual-skill",
+                        "source_path": ".github/skills/residual-skill",
+                        "target_path": home_skill.as_posix(),
+                        "source_hash": bisync_skills.hash_bundle(source_skill),
+                        "content_hash": bisync_skills.hash_bundle(home_skill),
+                        "last_action": "copy",
+                    }
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
 
     plan = build_bisync_plan(source, home, mode="plan")
     original_build_bisync_plan = bisync_skills.build_bisync_plan

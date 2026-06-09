@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -47,6 +49,80 @@ home_syncing = load_skill_module()
 apply_home_sync_plan = home_syncing.apply_home_sync_plan
 build_home_sync_plan = home_syncing.build_home_sync_plan
 parse_targets = home_syncing.parse_targets
+
+
+def load_bisync_module():
+    inserted_path = False
+    if SKILL_SCRIPTS_ROOT.as_posix() not in sys.path:
+        sys.path.insert(0, SKILL_SCRIPTS_ROOT.as_posix())
+        inserted_path = True
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "_test_local_bisync_skills",
+            SKILL_SCRIPTS_ROOT / "bisync_skills.py",
+        )
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        if inserted_path:
+            sys.path.remove(SKILL_SCRIPTS_ROOT.as_posix())
+
+
+bisync_skills = load_bisync_module()
+apply_bisync_plan = bisync_skills.apply_bisync_plan
+build_bisync_plan = bisync_skills.build_bisync_plan
+
+
+def init_git_repo(root: Path) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "init", "-b", "main"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+
+def commit_all(root: Path, message: str) -> None:
+    subprocess.run(
+        ["git", "add", "-A"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+
+def set_tree_mtime(root: Path, timestamp: float) -> None:
+    for path in sorted(root.rglob("*")):
+        os.utime(path, (timestamp, timestamp))
+    os.utime(root, (timestamp, timestamp))
 
 
 def write_file(path: Path, content: str) -> None:
@@ -381,6 +457,87 @@ def test_triple_apply_skip_plan_sequence_is_convergent(tmp_path: Path) -> None:
         manifest1["managed_resources"][0]["content_hash"]
         == manifest2["managed_resources"][0]["content_hash"]
     )
+
+
+def test_repo_to_home_bisync_refreshes_install_manifest(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    init_git_repo(source_root)
+    commit_all(source_root, "initial source bundle")
+
+    install_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    manifest_path = apply_home_sync_plan(install_plan, create_missing_dirs=True)
+
+    source_skill = source_root / ".github/skills/demo-skill"
+    home_skill = home_root / ".agents/skills/demo-skill"
+    write_file(source_skill / "SKILL.md", "# Source v2\n")
+    commit_all(source_root, "repo-to-home drift")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
+
+    bisync_plan = build_bisync_plan(source_root, home_root, mode="plan")
+    assert any(
+        drift.direction == "repo-to-home" for drift in bisync_plan.drifts
+    )
+
+    bisync_result = apply_bisync_plan(source_root, home_root, bisync_plan)
+    assert bisync_result.blocked_codes == []
+    assert bisync_result.verification["status"] == "converged"
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    managed = manifest["managed_resources"][0]
+    assert managed["source_hash"] == home_syncing.hash_resource(source_skill)
+    assert managed["content_hash"] == home_syncing.hash_resource(home_skill)
+
+    post_bisync_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    blocked_codes = {
+        operation.code for operation in post_bisync_plan.operations if operation.code
+    }
+    assert "target-modified-managed" not in blocked_codes
+
+
+def test_direct_home_edit_still_blocks_target_modified_managed(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    init_git_repo(source_root)
+    commit_all(source_root, "initial source bundle")
+
+    install_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    apply_home_sync_plan(install_plan, create_missing_dirs=True)
+
+    copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
+    copied_skill.write_text("# locally edited\n", encoding="utf-8")
+
+    blocked_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    blocked_codes = {
+        operation.code for operation in blocked_plan.operations if operation.code
+    }
+
+    assert "target-modified-managed" in blocked_codes
 
 
 def test_home_sync_plan_includes_internal_graphify_when_present_in_source(

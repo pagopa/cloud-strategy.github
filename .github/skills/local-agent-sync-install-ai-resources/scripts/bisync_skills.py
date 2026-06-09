@@ -19,6 +19,9 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from home_syncing import reconcile_manifest_entry_after_bisync_copy
+from sync_output import build_compact_bisync_output
+
 IGNORED_SYNC_PARTS: tuple[str, ...] = (".venv", "__pycache__", ".pytest_cache")
 IGNORED_SYNC_SUFFIXES: tuple[str, ...] = (".pyc", ".pyo")
 EXCLUDED_BUNDLE_PREFIX: str = "local-agent-sync-"
@@ -424,6 +427,28 @@ def apply_bisync_plan(
             )
             return plan
 
+        if drift.direction == "repo-to-home":
+            reconcile_code = reconcile_manifest_entry_after_bisync_copy(
+                source_root=source_root,
+                home_root=home_root,
+                source_path=src,
+                target_path=dst,
+            )
+            if reconcile_code is not None:
+                plan.blocked_codes.append(reconcile_code)
+                plan.blocked_codes = sorted(set(plan.blocked_codes))
+                plan.verification = {
+                    "status": "blocked",
+                    "code": reconcile_code,
+                    "skill": drift.skill_name,
+                    "reason": f"Manifest reconciliation failed after verified copy for {drift.skill_name}",
+                }
+                plan.next_step = _next_step_for_bisync(plan)
+                plan.next_action = compute_next_action(
+                    plan.blocked_codes, bool(plan.drifts), "apply", source_root, home_root
+                )
+                return plan
+
     post_plan = build_bisync_plan(source_root, home_root, mode="verify")
     if post_plan.drifts or post_plan.blocked_codes:
         plan.blocked_codes.extend(post_plan.blocked_codes)
@@ -518,6 +543,9 @@ def _resolve_source_root(args: argparse.Namespace) -> Path:
 
 def _emit_bisync_output(plan: BisyncPlan, format_name: str) -> None:
     payload = plan.to_dict()
+    if format_name == "compact":
+        print(json.dumps(build_compact_bisync_output(payload), indent=2, sort_keys=True))
+        return
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
@@ -572,7 +600,10 @@ def build_bisync_parser() -> argparse.ArgumentParser:
         help="Home directory root.",
     )
     plan_parser.add_argument(
-        "--format", choices=["text", "json"], default="text", help="Output format."
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
     )
     apply_parser = subparsers.add_parser("apply", help="Apply bisync resolution")
     apply_parser.add_argument("--source-root", default=".", help="Source repository root.")
@@ -582,7 +613,10 @@ def build_bisync_parser() -> argparse.ArgumentParser:
         help="Home directory root.",
     )
     apply_parser.add_argument(
-        "--format", choices=["text", "json"], default="text", help="Output format."
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
     )
     return parser
 

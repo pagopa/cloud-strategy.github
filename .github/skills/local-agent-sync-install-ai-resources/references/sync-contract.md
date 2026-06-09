@@ -131,6 +131,8 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 
 - Verify every copied resource by hash comparison.
 - Write updated manifest with content hashes.
+- When `bisync apply` copies a repo-wins bundle into home and the install manifest tracks that target, refresh the matching manifest entry so the next install plan does not report a stale `target-modified-managed` blocker for the verified copy.
+- If reconciliation cannot be proven safe after a bisync copy, return `bisync-manifest-reconcile-failed` and keep the blocker visible instead of claiming convergence.
 - Rewrite the manifest target set to the requested active targets only; retired targets are removed from manifest state after a successful apply.
 - Report residual drift entries.
 

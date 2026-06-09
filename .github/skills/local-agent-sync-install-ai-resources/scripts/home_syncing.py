@@ -929,6 +929,49 @@ def load_manifest(path: Path) -> tuple[dict[str, object], str | None]:
     return payload, None
 
 
+def reconcile_manifest_entry_after_bisync_copy(
+    *,
+    source_root: Path,
+    home_root: Path,
+    source_path: Path,
+    target_path: Path,
+) -> str | None:
+    manifest_path = state_root_for_home(home_root) / MANIFEST_PATH
+    manifest_payload, manifest_error = load_manifest(manifest_path)
+    if manifest_error is not None:
+        return "bisync-manifest-reconcile-failed"
+
+    managed_resources = manifest_payload.get("managed_resources")
+    if not isinstance(managed_resources, list):
+        return "bisync-manifest-reconcile-failed"
+
+    manifest_index = index_manifest(manifest_payload)
+    manifest_entry = manifest_index.get(target_path.as_posix())
+    if manifest_entry is None:
+        return "bisync-manifest-reconcile-failed"
+    try:
+        source_path_rel = source_path.relative_to(source_root).as_posix()
+    except ValueError:
+        return "bisync-manifest-reconcile-failed"
+    if manifest_entry.get("source_path") != source_path_rel:
+        return "bisync-manifest-reconcile-failed"
+
+    try:
+        source_hash = hash_resource(source_path)
+        target_hash = hash_resource(target_path)
+    except (OSError, PermissionError, ValueError):
+        return "bisync-manifest-reconcile-failed"
+
+    if source_hash != target_hash:
+        return "bisync-manifest-reconcile-failed"
+
+    manifest_entry["source_hash"] = source_hash
+    manifest_entry["content_hash"] = target_hash
+    manifest_entry["last_action"] = "bisync-copy"
+    manifest_path.write_text(render_json(manifest_payload), encoding="utf-8")
+    return None
+
+
 def index_manifest(payload: dict[str, object]) -> dict[str, dict[str, object]]:
     return {
         item["target_path"]: item
