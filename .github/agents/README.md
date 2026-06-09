@@ -22,4 +22,4 @@ repo-only sync workflows.
 | `internal-gateway-critical-master` | `internal-gateway-critical-master` | A proposal or plan needs pressure before action. |
 | `internal-gateway-simple-task` | `internal-gateway-simple-task` | A concrete low-to-medium-risk task can finish through one focused lane. |
 
-Approved `extended` retained plans route directly to `internal-executing-plans`.
+Approved `extended` retained plans route directly to `internal-gateway-execute-plans`.

@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-AUTHORING_CLI = Path(".github/skills/internal-writing-plans/scripts/plan_authoring.py").resolve()
+AUTHORING_CLI = Path(".github/skills/internal-gateway-writing-plans/scripts/plan_authoring.py").resolve()
 
 
 def run_cli(*args: str | Path) -> subprocess.CompletedProcess[str]:
@@ -30,7 +30,7 @@ def _write_compact_plan(plan_folder: Path) -> None:
 def _write_extended_plan(plan_folder: Path) -> None:
     _write_compact_plan(plan_folder)
     (plan_folder / "02-source-item-ledger.md").write_text(
-        "## Recommended use\nexecute after explicit approval\n\n## Recommended consumer\ninternal-executing-plans\n\n## Plan profile\nextended\n\n## File map and role\nx\n\n## Clarification gate\nclarification satisfied\n\n## Target and anti-scope\nx\n\n## Owner and validator\nx\n\n## Stop conditions\nx\n",
+        "## Recommended use\nexecute after explicit approval\n\n## Recommended consumer\ninternal-gateway-execute-plans\n\n## Plan profile\nextended\n\n## File map and role\nx\n\n## Clarification gate\nclarification satisfied\n\n## Target and anti-scope\nx\n\n## Owner and validator\nx\n\n## Stop conditions\nx\n",
         encoding="utf-8",
     )
     (plan_folder / "04-implementation-contract.md").write_text("# Implementation Contract\n", encoding="utf-8")
@@ -57,7 +57,7 @@ def test_audit_rejects_profile_consumer_mismatch(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_compact_plan(plan_folder)
     ledger_path = plan_folder / "02-source-item-ledger.md"
-    ledger_path.write_text(ledger_path.read_text(encoding="utf-8").replace("internal-gateway-simple-task", "internal-executing-plans"), encoding="utf-8")
+    ledger_path.write_text(ledger_path.read_text(encoding="utf-8").replace("internal-gateway-simple-task", "internal-gateway-execute-plans"), encoding="utf-8")
     result = run_cli("audit", plan_folder)
     assert "profile-consumer-mismatch" in result.stdout
 

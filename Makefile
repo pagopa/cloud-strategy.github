@@ -88,8 +88,8 @@ docs-lint:
 PLAN_FOLDER ?=
 PLAN_STAGE ?= handoff
 
-PLAN_AUTHORING_CLI := .github/skills/internal-writing-plans/scripts/plan_authoring.py
-PLAN_EXECUTING_CLI := .github/skills/internal-executing-plans/scripts/plan_execution.py
+PLAN_AUTHORING_CLI := .github/skills/internal-gateway-writing-plans/scripts/plan_authoring.py
+PLAN_EXECUTING_CLI := .github/skills/internal-gateway-execute-plans/scripts/plan_execution.py
 
 retained-plan-check: python-version-check
 	@if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required (e.g. make retained-plan-check PLAN_FOLDER=tmp/superpowers/my-plan)' >&2; exit 1; fi

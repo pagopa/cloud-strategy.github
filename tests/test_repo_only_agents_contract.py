@@ -141,7 +141,7 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
         "internal-tdd",
         "internal-high-level-review",
         "internal-gateway-idea-brainstorming",
-        "internal-writing-plans",
+        "internal-gateway-writing-plans",
         "local-agent-sync-external-resources",
     } <= owners
 

@@ -42,7 +42,7 @@ items:
     action: alert-only
   - source_family: mattpocock/skills
     upstream_id: grill-with-docs
-    local_owner: internal-writing-plans
+    local_owner: internal-gateway-writing-plans
     reason: Glossary and ADR side effects are not default repository conventions.
     action: alert-only
   - source_family: mattpocock/skills

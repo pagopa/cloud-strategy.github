@@ -13,7 +13,7 @@ by the active uncertainty or next checkpoint.
 
 - `grill-me`: guided decision interview.
 - `internal-gateway-critical-master`: mandatory critical challenge owner.
-- `internal-writing-plans`: retained-plan authoring after a confident critical outcome.
+- `internal-gateway-writing-plans`: retained-plan authoring after a confident critical outcome.
 - `internal-agent-support-next-step`: next-step package formatting.
 
 Portable skill-first idea gateway. This skill now owns substantive idea work
@@ -28,14 +28,14 @@ through retained-plan creation. It stops before execution.
 
 - The target state and validation path are already concrete; use `internal-gateway-simple-task`.
 - The primary request is defect-first review; use `internal-gateway-review`.
-- A retained plan folder is already approved for execution; route to `internal-gateway-simple-task` for `compact` or `internal-executing-plans` for `extended`.
+- A retained plan folder is already approved for execution; route to `internal-gateway-simple-task` for `compact` or `internal-gateway-execute-plans` for `extended`.
 
 ## Core Invariants
 
 - Same-conversation support-skill loading is not a lane change.
 - Idea Gate 0 remains mandatory.
 - Use `internal-gateway-critical-master` before finalizing any substantive definition.
-- After a confident critical outcome, load `internal-writing-plans`, create the retained plan, and stop before execution.
+- After a confident critical outcome, load `internal-gateway-writing-plans`, create the retained plan, and stop before execution.
 
 ## Flow
 
@@ -48,5 +48,5 @@ through retained-plan creation. It stops before execution.
 ## Validation
 
 - The gateway keeps `idea -> critical -> retained plan` in one conversation.
-- `internal-writing-plans` owns profile selection.
+- `internal-gateway-writing-plans` owns profile selection.
 - Execution stays a manual boundary after plan creation.

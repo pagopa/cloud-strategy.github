@@ -17,7 +17,7 @@ def test_agents_and_policy_promote_conversational_gateways() -> None:
 def test_idea_gateway_owns_retained_planning() -> None:
     skill_text = read_text(".github/skills/internal-gateway-idea-brainstorming/SKILL.md")
     assert "retained plan" in skill_text
-    assert "internal-writing-plans" in skill_text
+    assert "internal-gateway-writing-plans" in skill_text
     assert "stop before execution" in skill_text
 
 
@@ -26,18 +26,18 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
     agent_text = read_text(".github/agents/internal-gateway-review.agent.md")
     assert "defect-first review" in skill_text
     assert "does not apply fixes" in skill_text
-    assert "internal-writing-plans" in skill_text
+    assert "internal-gateway-writing-plans" in skill_text
     assert "internal-gateway-simple-task" in agent_text
 
 
 def test_compact_and_extended_execution_owners_are_split() -> None:
-    writing_text = read_text(".github/skills/internal-writing-plans/SKILL.md")
+    writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
     simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
-    executing_text = read_text(".github/skills/internal-executing-plans/SKILL.md")
+    executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
     assert "Recommended consumer" in writing_text
     assert "internal-gateway-simple-task" in writing_text
-    assert "internal-executing-plans" in writing_text
+    assert "internal-gateway-execute-plans" in writing_text
     assert "`compact`" in simple_text
     assert "retained-plan execution" in simple_text
     assert "approved `extended`" in executing_text
-    assert "internal-executing-plans" in executing_text
+    assert "internal-gateway-execute-plans" in executing_text

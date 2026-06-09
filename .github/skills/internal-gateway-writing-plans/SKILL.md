@@ -1,14 +1,14 @@
 ---
-name: internal-writing-plans
+name: internal-gateway-writing-plans
 description: Use when repository-owned work needs a retained numbered plan under tmp/superpowers/<clear-action-or-task-name>/ and the plan must follow the local English-content execution-plan contract.
 ---
 
-# Internal Writing Plans
+# Internal Gateway Writing Plans
 
 ## Referenced skills
 
 - `internal-gateway-simple-task`: approved `compact` plan consumer.
-- `internal-executing-plans`: approved `extended` plan consumer.
+- `internal-gateway-execute-plans`: approved `extended` plan consumer.
 
 Repository-owned wrapper for retained plan authoring. This skill owns retained
 plan creation, profile selection, where the plan lives, file names, content
@@ -21,7 +21,7 @@ language, and the authoring-to-execution handoff contract.
 - Converting a monolithic or overgrown plan into the local numbered-plan
   structure.
 - Preparing a plan for `internal-gateway-simple-task` or
-  `internal-executing-plans`.
+  `internal-gateway-execute-plans`.
 
 ## When not to use
 
@@ -58,7 +58,7 @@ can provide.
   gate status, `Initial evidence pass`, `Reading budget`, target, anti-scope,
   owner, validator, stop conditions, and `Source item ledger`.
 - `Recommended consumer`: `internal-gateway-simple-task` for `compact`;
-  `internal-executing-plans` for `extended`.
+  `internal-gateway-execute-plans` for `extended`.
 - `03-execution.md`: first executable file.
 - `questions.md`: user-only decisions only. Write `- none` when nothing remains.
 - `04-implementation-contract.md` is required for every `extended` plan.

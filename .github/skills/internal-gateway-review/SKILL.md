@@ -10,7 +10,7 @@ description: Use when repository-owned work needs same-conversation defect-first
 - `internal-code-review`
 - `internal-high-level-review`
 - `internal-gateway-critical-master`
-- `internal-writing-plans`
+- `internal-gateway-writing-plans`
 - `internal-agent-support-next-step`
 
 Portable review orchestrator. This skill owns review scope, lens selection,
@@ -25,5 +25,5 @@ does not apply fixes.
 ## Validation
 
 - Findings stay defect-first.
-- Retained remediation plans are authored by `internal-writing-plans`.
+- Retained remediation plans are authored by `internal-gateway-writing-plans`.
 - The gateway stops before fixes.

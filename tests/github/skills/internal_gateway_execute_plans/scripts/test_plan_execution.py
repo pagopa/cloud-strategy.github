@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 EXECUTING_CLI = Path(
-    ".github/skills/internal-executing-plans/scripts/plan_execution.py"
+    ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
 ).resolve()
 
 
@@ -340,8 +340,8 @@ def test_completion_unsupported_rejected(tmp_path: Path) -> None:
 
 def test_copied_bundle_runs_independently(tmp_path: Path) -> None:
     """A copied skill bundle runs its CLI with ambient Python stdlib only."""
-    bundle_copy = tmp_path / "internal-executing-plans"
-    shutil.copytree(Path(".github/skills/internal-executing-plans"), bundle_copy)
+    bundle_copy = tmp_path / "internal-gateway-execute-plans"
+    shutil.copytree(Path(".github/skills/internal-gateway-execute-plans"), bundle_copy)
     cli = bundle_copy / "scripts" / "plan_execution.py"
 
     plan_folder = tmp_path / "plan"
@@ -367,11 +367,11 @@ def test_copied_bundle_no_cross_bundle_import(tmp_path: Path) -> None:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 if (
-                    "internal-writing-plans" in alias.name
+                    "internal-gateway-writing-plans" in alias.name
                     or "retained_plans" in alias.name
                 ):
                     pytest.fail(f"Cross-bundle import found: {ast.dump(node)}")
         elif isinstance(node, ast.ImportFrom):
             module = node.module or ""
-            if "internal-writing-plans" in module or "retained_plans" in module:
+            if "internal-gateway-writing-plans" in module or "retained_plans" in module:
                 pytest.fail(f"Cross-bundle import found: {ast.dump(node)}")

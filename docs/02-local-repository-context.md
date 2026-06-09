@@ -12,7 +12,7 @@
 - Binding rules live in `AGENTS.md`, `.github/copilot-instructions.md`, skills, agents, prompts, validators, or owned files.
 - Runtime workflow behavior lives in relevant skills, especially
   `internal-gateway-idea-brainstorming`, `internal-gateway-review`,
-  `internal-gateway-simple-task`, and `internal-executing-plans`.
+  `internal-gateway-simple-task`, and `internal-gateway-execute-plans`.
 - Lessons that are still pending codification live in `LESSONS_LEARNED.md`.
 
 ## Scope

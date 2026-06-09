@@ -73,7 +73,7 @@ The key invariant is separation of policy, projection, inventory, local context,
 `.github/INVENTORY.md` owns the volatile generated catalog. `docs/01-local-architecture.md` and
 `docs/02-local-repository-context.md` remain repo-specific. Runtime consumption behavior lives in relevant skills,
 especially `internal-gateway-idea-brainstorming`, `internal-gateway-review`,
-`internal-gateway-simple-task`, and `internal-executing-plans`.
+`internal-gateway-simple-task`, and `internal-gateway-execute-plans`.
 
 ## Validation Surface
 

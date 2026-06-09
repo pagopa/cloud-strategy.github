@@ -56,9 +56,9 @@ repository projects AI configuration into other repositories.
 
 - `internal-gateway-idea-brainstorming` owns same-conversation `idea -> critical -> retained plan` workflows.
 - `internal-gateway-review` owns same-conversation `review -> critical -> remediation plan` workflows.
-- `internal-writing-plans` owns retained-plan profile selection and recommended-consumer declaration.
+- `internal-gateway-writing-plans` owns retained-plan profile selection and recommended-consumer declaration.
 - `internal-gateway-simple-task` owns direct execution and approved `compact` retained-plan consumption.
-- `internal-executing-plans` owns approved `extended` retained-plan execution and final packaging.
+- `internal-gateway-execute-plans` owns approved `extended` retained-plan execution and final packaging.
 - `internal-gateway-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
 - Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; support-skill loading inside one conversation is not a lane change.
 - Use direct owner selection or user-selected gateway skills with visible phases. Do not add a repository-owned hidden front-door router or hidden peer dispatch.

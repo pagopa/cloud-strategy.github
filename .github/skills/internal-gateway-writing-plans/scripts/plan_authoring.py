@@ -58,7 +58,7 @@ def classify_profile(plan_folder: Path) -> str:
 
 
 def expected_consumer(profile: str) -> str:
-    return "internal-gateway-simple-task" if profile == "compact" else "internal-executing-plans"
+    return "internal-gateway-simple-task" if profile == "compact" else "internal-gateway-execute-plans"
 
 
 def extract_recommended_consumer(ledger_text: str) -> str | None:

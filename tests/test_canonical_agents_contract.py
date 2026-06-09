@@ -34,5 +34,5 @@ def test_review_gateway_is_canonical_and_operational_flow_wrapper_is_retired() -
 def test_agents_readme_mentions_review_gateway_and_extended_execution_boundary() -> None:
     readme = Path(".github/agents/README.md").read_text(encoding="utf-8")
     assert "internal-gateway-review" in readme
-    assert "internal-executing-plans" in readme
+    assert "internal-gateway-execute-plans" in readme
     assert "internal-gateway-operational-flow" not in readme
