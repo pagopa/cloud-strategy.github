@@ -56,7 +56,7 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-executing-plans/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
-- `.github/skills/internal-gateway-operational-flow/SKILL.md`
+- `.github/skills/internal-gateway-review/SKILL.md`
 - `.github/skills/internal-gateway-simple-task/SKILL.md`
 - `.github/skills/internal-gcp-governance/SKILL.md`
 - `.github/skills/internal-gcp-operations/SKILL.md`
@@ -127,7 +127,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 
 - `.github/agents/internal-gateway-critical-master.agent.md`
 - `.github/agents/internal-gateway-idea-brainstorming.agent.md`
-- `.github/agents/internal-gateway-operational-flow.agent.md`
+- `.github/agents/internal-gateway-review.agent.md`
 - `.github/agents/internal-gateway-simple-task.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`

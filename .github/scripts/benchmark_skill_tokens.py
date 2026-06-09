@@ -106,7 +106,7 @@ def build_scenario_report(root: Path) -> list[dict[str, Any]]:
     return reports
 
 
-GATEWAY_SKILL = "internal-gateway-operational-flow"
+GATEWAY_SKILL = "internal-gateway-idea-brainstorming"
 
 GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
     "Direct execute": [GATEWAY_SKILL],

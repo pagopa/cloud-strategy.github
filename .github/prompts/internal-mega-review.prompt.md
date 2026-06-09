@@ -1,6 +1,6 @@
 ---
 name: "internal-mega-review"
-agent: "internal-gateway-operational-flow"
+agent: "internal-gateway-review"
 description: "Run a complete advisor-only mega review for one or more repositories and write split English analysis under each repo tmp/"
 argument-hint: "Repository paths or names; optional focus and constraints; retained output is English"
 ---
@@ -26,7 +26,7 @@ Use these standards-repository sources first for governance, evidence, and split
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
-- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
+- [.github/agents/internal-gateway-review.agent.md](../agents/internal-gateway-review.agent.md)
 - [.github/agents/internal-gateway-critical-master.agent.md](../agents/internal-gateway-critical-master.agent.md)
 - [.github/skills/internal-writing-plans/SKILL.md](../skills/internal-writing-plans/SKILL.md)
 

@@ -5,7 +5,7 @@ description: Use when completing tasks, implementing major features, or before m
 
 # Requesting Code Review
 
-Request `internal-gateway-operational-flow` in review mode to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context for continued work.
+Request `internal-gateway-review` to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation, never your session's history. This keeps the reviewer focused on the work product and preserves your own context for continued work.
 
 **Core principle:** Review early, review often.
 
@@ -31,7 +31,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 **2. Prepare review-mode request:**
 
-Use a user-visible `internal-gateway-operational-flow` review-mode request, fill template at `code-reviewer.md`
+Use a user-visible `internal-gateway-review` request and fill the template at `code-reviewer.md`
 
 **Placeholders:**
 - `{DESCRIPTION}` - Brief summary of what you built
@@ -55,7 +55,7 @@ You: Let me request code review before proceeding.
 BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
 HEAD_SHA=$(git rev-parse HEAD)
 
-[Request internal-gateway-operational-flow review mode]
+[Request internal-gateway-review]
   DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
   PLAN_OR_REQUIREMENTS: Task 2 from tmp/superpowers/plans/deployment-plan.md
   BASE_SHA: a7981ec

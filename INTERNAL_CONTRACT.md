@@ -73,7 +73,10 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Scope:
   - `AGENTS.md`
   - `.github/copilot-instructions.md`
-  - `.github/skills/internal-gateway-operational-flow/**`
+  - `.github/skills/internal-gateway-idea-brainstorming/**`
+  - `.github/skills/internal-gateway-review/**`
+  - `.github/skills/internal-gateway-simple-task/**`
+  - `.github/skills/internal-executing-plans/**`
   - `.github/skills/internal-gateway-simple-task/**`
   - routing helpers, validators, and tests
 - Expected behavior:
@@ -93,12 +96,12 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `docs/02-local-repository-context.md`
   - `.github/templates/01-architecture.md.template`
   - `.github/templates/02-repository-context.md.template`
-  - `.github/skills/internal-gateway-operational-flow/**`
+  - `.github/skills/internal-gateway-review/**`
   - sync automation and sync-contract tests
 - Expected behavior:
   - `docs/01-local-architecture.md` is the repository-specific architecture contract and is scaffolded into consumers only when missing
   - `docs/02-local-repository-context.md` is descriptive local context and cannot override binding policy
-  - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-operational-flow`
+  - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-idea-brainstorming`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-executing-plans`
   - the retired `docs/03-local-ai-runtime-operating-model.md` file is not recreated or synchronized into consumers
   - sync automation preserves existing consumer-local architecture and context documents after initial scaffold creation
   - `.github/templates/` remains source-side scaffold material and is not mirrored as a target catalog family
@@ -241,11 +244,11 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-gateway-idea-brainstorming`, `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
-  - `internal-gateway-idea-brainstorming`, `internal-gateway-operational-flow`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
+  - `internal-gateway-idea-brainstorming`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
+  - `internal-gateway-idea-brainstorming`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
-  - `internal-gateway-operational-flow` supports `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases without creating dedicated gateway skills for each phase
-  - ambiguous or mixed-shape entry fails safe to `internal-gateway-operational-flow`, which may recommend `internal-gateway-idea-brainstorming` visibly when substantive ideation is proved
+  - retained execution stays separate: `internal-gateway-simple-task` consumes approved `compact` plans and `internal-executing-plans` consumes approved `extended` plans
+  - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea-brainstorming`
   - unclear target state and multiple credible paths are explicit planning triggers
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit

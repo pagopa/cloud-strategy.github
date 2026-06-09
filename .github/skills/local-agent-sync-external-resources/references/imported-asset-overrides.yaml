@@ -76,7 +76,7 @@ overrides:
       Keep the reviewer handoff aligned with the canonical internal gateway
       review owner and with tmp/superpowers plan paths.
     patch_path: patches/superpowers-requesting-code-review.patch
-    expected_content_hash: 8fae45ce34f6f94eae032d62792f04a54784a61d7715fea7f532375148842d7e
+    expected_content_hash: 93330304c6c4a9b70cc94c03500e0d05845b64394afdd630a63abbc758098d58
     baseline_repo_commit: "f2cbfbe"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
@@ -91,7 +91,7 @@ overrides:
       question set with clear recommendations that the user can accept by
       default, while preserving follow-up pressure on contradictions, risks,
       and unresolved decisions; keep operational gate semantics in
-      internal-gateway-operational-flow.
+      internal-gateway-review.
     patch_path: patches/grill-me.patch
     expected_content_hash: 32bb78a434c38bbc2af1eea970236ba989270eb1b631e8d4f2d8928a0a125d62
     baseline_repo_commit: "e74f006"

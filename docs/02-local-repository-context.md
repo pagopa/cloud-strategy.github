@@ -10,7 +10,9 @@
 - System boundaries, component responsibilities, architecture flow, and validation surfaces live in
   `docs/01-local-architecture.md`.
 - Binding rules live in `AGENTS.md`, `.github/copilot-instructions.md`, skills, agents, prompts, validators, or owned files.
-- Runtime workflow behavior lives in relevant skills, especially `internal-gateway-operational-flow`.
+- Runtime workflow behavior lives in relevant skills, especially
+  `internal-gateway-idea-brainstorming`, `internal-gateway-review`,
+  `internal-gateway-simple-task`, and `internal-executing-plans`.
 - Lessons that are still pending codification live in `LESSONS_LEARNED.md`.
 
 ## Scope

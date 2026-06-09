@@ -6,7 +6,7 @@ diff --git a/.github/skills/superpowers-requesting-code-review/SKILL.md b/.githu
  # Requesting Code Review
 
 -Dispatch a code reviewer subagent to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context for continued work.
-+Request `internal-gateway-operational-flow` in review mode to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context for continued work.
++Request `internal-gateway-review` to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation and preserves your own context for continued work.
 
  **Core principle:** Review early, review often.
 
@@ -16,7 +16,7 @@ diff --git a/.github/skills/superpowers-requesting-code-review/SKILL.md b/.githu
 +**2. Prepare review-mode request:**
 
 -Use Task tool with `general-purpose` type, fill template at `code-reviewer.md`
-+Use a user-visible `internal-gateway-operational-flow` review-mode request, fill template at `code-reviewer.md`
++Use a user-visible `internal-gateway-review` request, fill template at `code-reviewer.md`
 
  **Placeholders:**
 @@ -55,14 +55,14 @@ You: Let me request code review before proceeding.
@@ -24,7 +24,7 @@ diff --git a/.github/skills/superpowers-requesting-code-review/SKILL.md b/.githu
  HEAD_SHA=$(git rev-parse HEAD)
 
 -[Dispatch code reviewer subagent]
-+[Request internal-gateway-operational-flow review mode]
++[Request internal-gateway-review]
    DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
 -  PLAN_OR_REQUIREMENTS: Task 2 from docs/superpowers/plans/deployment-plan.md
 +  PLAN_OR_REQUIREMENTS: Task 2 from tmp/superpowers/plans/deployment-plan.md

@@ -32,7 +32,7 @@ retire, and anti-drift procedure in the paired core skill.
   audit, plan, or dry run.
 - Treat `apply` as invalid until `internal-copilot-audit` has completed
   preflight and no unresolved `blocking` findings remain.
-- Start with `internal-gateway-operational-flow` when the catalog problem still
+- Start with `internal-gateway-idea-brainstorming` when the catalog problem still
   needs option framing, staged planning, or a user-supplied multi-step
   remediation plan.
 - Use `internal-agent-creator` when the task is one concrete agent contract,
