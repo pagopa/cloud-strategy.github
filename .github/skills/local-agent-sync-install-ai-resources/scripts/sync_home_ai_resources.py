@@ -2,9 +2,9 @@
 """Purpose: plan and apply local home-directory AI resource sync operations.
 
 Usage examples:
-  python3 scripts/sync_home_ai_resources.py plan --targets codex,copilot,claude,opencode
-  python3 scripts/sync_home_ai_resources.py apply --targets codex --create-missing-dirs
-  python3 scripts/sync_home_ai_resources.py apply --targets codex,copilot --retire-targets claude --prune-managed
+    python3 scripts/sync_home_ai_resources.py plan --targets skills
+    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs
+    python3 scripts/sync_home_ai_resources.py apply --targets skills,codex --retire-targets claude --prune-managed
 """
 
 from __future__ import annotations
@@ -47,8 +47,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         )
         cmd_parser.add_argument(
             "--targets",
-            default="codex,copilot,claude,opencode",
-            help="Target runtimes: codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
+            default="skills",
+            help="Target runtimes: skills, codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
         )
         if cmd != "doctor":
             cmd_parser.add_argument(

@@ -78,6 +78,15 @@ def initialize_source_repo(root: Path) -> None:
         / ".github/skills/local-agent-sync-install-ai-resources/references/runtime-support-matrix.yaml",
         "version: 1\n"
         "rows:\n"
+        "  - target: skills\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Shared skill support.\n"
         "  - target: codex\n"
         "    resource_family: skills\n"
         "    support_level: Documented\n"
@@ -119,7 +128,8 @@ def initialize_source_repo(root: Path) -> None:
 
 def test_parse_targets_normalizes_known_values_and_rejects_unknowns() -> None:
     assert parse_targets(" opencode, codex , codex ") == ("codex", "opencode")
-    assert parse_targets("all") == ("codex", "copilot", "claude", "opencode")
+    assert parse_targets("skills") == ("skills",)
+    assert parse_targets("all") == ("skills", "codex", "copilot", "claude", "opencode")
 
     with pytest.raises(ValueError, match="unknown-target"):
         parse_targets("codex,unknown")
@@ -138,7 +148,7 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex,opencode"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
     operation_codes = {
@@ -146,7 +156,7 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
     }
 
     assert "target-exists-unmanaged" in operation_codes
-    assert "docs-unverified" in operation_codes
+    assert "docs-unverified" not in operation_codes
 
 
 def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest(
@@ -169,7 +179,7 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
 
@@ -184,7 +194,7 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
     assert not (home_root / ".agents/skills/demo-skill/scripts/.venv").exists()
     assert not (home_root / ".agents/skills/demo-skill/__pycache__").exists()
     assert not (home_root / ".agents/skills/demo-skill/.pytest_cache").exists()
-    assert manifest["targets"] == ["codex"]
+    assert manifest["targets"] == ["skills"]
     assert manifest["managed_resources"][0]["resource_id"] == "demo-skill"
 
 
@@ -208,7 +218,7 @@ def test_skill_bundle_sync_scripts_can_load_bundled_references(
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="plan",
     )
 
@@ -223,7 +233,7 @@ def test_stale_manifest_path_escapes_home_is_blocked(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
     manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
@@ -249,7 +259,7 @@ def test_stale_manifest_path_escapes_home_is_blocked(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
         prune_managed=True,
     )
@@ -267,7 +277,7 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
     apply_home_sync_plan(plan, create_missing_dirs=True)
@@ -292,7 +302,7 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
         prune_managed=True,
     )
@@ -301,6 +311,23 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
 
 
 def test_doctor_checks_include_agent_roots(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    checks, blocked_codes = home_syncing.run_doctor(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+    )
+
+    skill_checks = [c for c in checks if c.get("name") == "target-root:skills"]
+    assert len(skill_checks) == 1
+    assert skill_checks[0]["path"].endswith(".agents/skills")
+    assert all(".codex/agents" not in c["path"] for c in checks)
+
+
+def test_doctor_checks_keep_agent_roots_for_runtime_targets(tmp_path: Path) -> None:
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
@@ -420,7 +447,7 @@ def test_removed_source_bundle_becomes_stale_managed_instead_of_source_missing(
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
     apply_home_sync_plan(plan, create_missing_dirs=True)
@@ -436,7 +463,7 @@ def test_removed_source_bundle_becomes_stale_managed_instead_of_source_missing(
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
         prune_managed=True,
     )

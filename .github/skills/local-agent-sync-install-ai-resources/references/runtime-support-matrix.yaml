@@ -1,5 +1,15 @@
 version: 1
 rows:
+  - target: skills
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - https://code.visualstudio.com/docs/copilot/customization/agent-skills
+    notes: Shared Agent Skills direct-copy bundle support via ~/.agents/skills/.
   - target: codex
     resource_family: skills
     support_level: Documented

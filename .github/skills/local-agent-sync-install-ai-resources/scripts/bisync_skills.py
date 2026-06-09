@@ -545,6 +545,7 @@ def _emit_bisync_output(plan: BisyncPlan, format_name: str) -> None:
             else:
                 winner, loser = "home", "repo"
             print(f"    winner: {winner}")
+            print(f"    loser: {loser}")
 
     if plan.blocked_codes:
         print(f"\n\u26a0\ufe0f  Blocked: {', '.join(plan.blocked_codes)}")

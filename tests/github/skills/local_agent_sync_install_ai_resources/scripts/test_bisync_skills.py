@@ -414,6 +414,29 @@ def test_plan_json_output_contains_structured_next_action(tmp_path: Path) -> Non
     assert payload["next_action"]["requires_explicit_approval"] is True
 
 
+def test_emit_text_output_groups_repo_home_buckets(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    make_skill(source / ".github" / "skills", "repo-only", "# Repo only\n")
+    make_skill(home / ".agents" / "skills", "home-only", "# Home only\n")
+    source_skill = make_skill(source / ".github" / "skills", "direction-skill", "# Repo\n")
+    home_skill = make_skill(home / ".agents" / "skills", "direction-skill", "# Home\n")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
+
+    plan = build_bisync_plan(source, home, mode="plan")
+    bisync_skills._emit_bisync_output(plan, "text")
+    output = capsys.readouterr().out
+
+    assert "repo-only" in output
+    assert "home-only" in output
+    assert "repo-to-home" in output
+    assert "winner: repo" in output
+    assert "loser: home" in output
+    assert "blocker: bisync-only-repo" in output
+
+
 def test_source_root_missing_skills_dir_returns_blocker(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"

@@ -12,6 +12,7 @@ from pathlib import Path
 from home_sync_contract import (
     CatalogResource,
     RuntimeSupportRow,
+    has_agent_root,
     TARGET_ORDER,
     load_home_sync_catalog,
     load_runtime_support_matrix,
@@ -417,10 +418,11 @@ def run_doctor(
         add_doctor_target_check(checks, blocked_codes, target, target_root)
         support_row = resolve_support_row(runtime_rows, target, "skills")
         add_doctor_support_check(checks, blocked_codes, target, target_root, support_row, experimental_targets)
-        agent_root = runtime_agent_root(home_root, target)
-        add_doctor_target_check(checks, blocked_codes, target, agent_root)
-        agent_support_row = resolve_support_row(runtime_rows, target, "agents")
-        add_doctor_support_check(checks, blocked_codes, target, agent_root, agent_support_row, experimental_targets)
+        if has_agent_root(target):
+            agent_root = runtime_agent_root(home_root, target)
+            add_doctor_target_check(checks, blocked_codes, target, agent_root)
+            agent_support_row = resolve_support_row(runtime_rows, target, "agents")
+            add_doctor_support_check(checks, blocked_codes, target, agent_root, agent_support_row, experimental_targets)
 
     for resource in catalog:
         source_path = source_root / resource.source_path
@@ -496,8 +498,9 @@ def add_target_root_operations(
     for target in targets:
         skill_root = runtime_skill_root(home_root, target)
         _add_root_operation(operations, missing_dirs, home_root, target, skill_root, mode)
-        agent_root = runtime_agent_root(home_root, target)
-        _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
+        if has_agent_root(target):
+            agent_root = runtime_agent_root(home_root, target)
+            _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
 
 
 def _add_root_operation(
@@ -811,6 +814,8 @@ def _stale_confinement_check(
     target_name = str(item.get("target", ""))
     resource_family = str(item.get("resource_family", ""))
     if resource_family == "agents":
+        if not has_agent_root(target_name):
+            return "unsafe-home-path"
         expected_root = runtime_agent_root(home_root, target_name).resolve()
     elif resource_family == "skills":
         expected_root = runtime_skill_root(home_root, target_name).resolve()
@@ -933,7 +938,13 @@ def index_manifest(payload: dict[str, object]) -> dict[str, dict[str, object]]:
 
 
 def intersection_targets(resource: CatalogResource, targets: tuple[str, ...]) -> tuple[str, ...]:
-    return tuple(target for target in targets if target in resource.include_targets)
+    selected_targets: list[str] = []
+    for target in targets:
+        if target == "skills" and resource.source_family == "skills":
+            selected_targets.append(target)
+        elif target in resource.include_targets:
+            selected_targets.append(target)
+    return tuple(selected_targets)
 
 
 def is_valid_skill_bundle(path: Path) -> bool:
@@ -952,6 +963,8 @@ def resource_target_path(
     target: str,
 ) -> Path:
     if resource.source_family == "agents":
+        if not has_agent_root(target):
+            raise ValueError(f"Target {target} does not support agents")
         agent_root = runtime_agent_root(home_root, target)
         ext = target_extension(target)
         return agent_root / f"{resource.resource_id}{ext}"

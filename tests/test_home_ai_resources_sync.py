@@ -37,6 +37,15 @@ def initialize_source_repo(root: Path) -> None:
         / ".github/skills/local-agent-sync-install-ai-resources/references/runtime-support-matrix.yaml",
         "version: 1\n"
         "rows:\n"
+        "  - target: skills\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Shared skill support.\n"
         "  - target: codex\n"
         "    resource_family: skills\n"
         "    support_level: Documented\n"
@@ -89,7 +98,7 @@ def test_main_plan_emits_json_for_selected_targets(
             command="plan",
             source_root=str(source_root),
             home_root=str(home_root),
-            targets="codex",
+            targets="skills",
             retire_targets="",
             create_missing_dirs=False,
             prune_managed=False,
@@ -105,9 +114,9 @@ def test_main_plan_emits_json_for_selected_targets(
 
     assert exit_code == 0
     assert payload["mode"] == "plan"
-    assert payload["selected_targets"] == ["codex"]
+    assert payload["selected_targets"] == ["skills"]
     assert str(home_root / ".agents/skills") in payload["missing_dirs"]
-    assert str(home_root / ".codex/agents") in payload["missing_dirs"]
+    assert str(home_root / ".codex/agents") not in payload["missing_dirs"]
 
 
 def test_main_apply_blocks_docs_unverified_targets(
@@ -301,6 +310,39 @@ def test_main_plan_blocks_overlap_between_active_and_retired_targets(
     assert payload["retired_targets"] == ["claude"]
 
 
+def test_skill_bundle_default_targets_focus_on_shared_skills(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            retire_targets="",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="text",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Targets: skills" in output
+    assert ".agents/skills" in output
+    assert ".codex/agents" not in output
+
+
 def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
     skill_path = (
         Path(__file__).resolve().parent
@@ -310,6 +352,7 @@ def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
 
     assert "## Deterministic Operator Protocol" in content
     assert "Install sync is unidirectional: repo -> home only." in content
+    assert "default `skills` target" in content
     assert (
         "The `bisync` lane provides explicit bidirectional synchronization" in content
     )

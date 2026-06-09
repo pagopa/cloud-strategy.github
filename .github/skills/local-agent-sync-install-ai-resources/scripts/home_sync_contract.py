@@ -10,8 +10,9 @@ BUNDLED_SKILL_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_SUPPORT_MATRIX_PATH = Path("references/runtime-support-matrix.yaml")
 HOME_SYNC_CATALOG_PATH = Path("references/home-sync-catalog.yaml")
 STATE_ROOT_RELATIVE = Path(".sync/cloud-strategy-governance/home-ai-resources")
-TARGET_ORDER = ("codex", "copilot", "claude", "opencode")
+TARGET_ORDER = ("skills", "codex", "copilot", "claude", "opencode")
 TARGET_SKILL_ROOTS = {
+    "skills": Path(".agents/skills"),
     "codex": Path(".agents/skills"),
     "copilot": Path(".agents/skills"),
     "claude": Path(".agents/skills"),
@@ -115,6 +116,10 @@ def runtime_skill_root(home_root: Path, target: str) -> Path:
 
 def runtime_agent_root(home_root: Path, target: str) -> Path:
     return home_root / TARGET_AGENT_ROOTS[target]
+
+
+def has_agent_root(target: str) -> bool:
+    return target in TARGET_AGENT_ROOTS
 
 
 def load_agent_catalog(source_root: Path) -> list[CatalogResource]:

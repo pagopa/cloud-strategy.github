@@ -11,11 +11,11 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 
-The paired agent is a thin UX wrapper; this skill owns all business logic, sequencing, approval posture, safety gates, and reporting. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
+The paired agent is a thin UX wrapper; this skill owns all business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
 
 ## When to use
 
-- Plan a local home-directory sync for supported AI runtime resources, including skills and agents.
+- Plan a local home-directory sync for supported AI runtime resources, including shared skills and runtime-specific agents.
 - Audit drift between repository-managed resources and the local runtime copies under the user home directory.
 - Run readiness or doctor checks before touching runtime-owned directories.
 - Apply an already reviewed plan for supported direct-copy skill families and allowlisted agent translations.
@@ -36,7 +36,7 @@ Every mode has exactly one command. Do not infer the mode, do not skip blockers,
 
 | User request | Lane | Command |
 | --- | --- | --- |
-| Generic `sync` without a mode | Run `bisync plan` first, stop on blockers, then run install `plan` | See `Default Sync Sequence` below |
+| Generic `sync` without a mode | Run install `plan` for `skills` first, then run `bisync plan` | See `Default Sync Sequence` below |
 | `bisync plan` | Bidirectional drift detection (read-only) | `./.github/scripts/sync_home_ai_resources.py bisync plan --home-root ~` |
 | `bisync apply` | Bidirectional drift resolution (writes to both sides) | `./.github/scripts/sync_home_ai_resources.py bisync apply --home-root ~` |
 | `plan` | Install lane dry run | `./.github/scripts/sync_home_ai_resources.py plan --targets <targets> --home-root ~` |
@@ -51,9 +51,9 @@ When the desired active runtimes change, pair `--retire-targets <targets>` with 
 
 When the user says "sync" without a mode:
 
-1. Run install `plan` for the requested targets. Stop on blockers.
+1. Run install `plan` for the default `skills` target. Stop on blockers.
 2. Resolve any install-lane blockers before proceeding.
-3. Run `bisync plan`. Stop on blockers.
+3. Run `bisync plan`. Stop on blockers. The text output groups repo-only, home-only, repo-to-home, home-to-repo, and equal-mtime buckets so repo/home differences are obvious in one scan.
 4. Report both results. Do not apply automatically.
 5. Wait for explicit user request to apply either lane.
 
@@ -100,7 +100,7 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 
 ### Commands
 
-- `bisync plan`: detect drift (read-only). Reports `repo-to-home`, `home-to-repo`, `only-repo`, `only-home`, and `equal-mtime` entries.
+- `bisync plan`: detect drift (read-only). Reports `repo-to-home`, `home-to-repo`, `only-repo`, `only-home`, and `equal-mtime` entries, with explicit winner and blocker context.
 - `bisync apply`: resolve drift by copying the winner bundle to the loser side. Applies only `repo-to-home` and `home-to-repo` entries. Blocks on all other cases.
 
 ### Safety Gates
@@ -122,6 +122,7 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 - Source resources considered and the runtime support evidence used.
 - Missing directories, conflicts, or documentation gates that block `apply`.
 - For every blocked path, conflict, stale-managed entry, or non-ok doctor check, include a human-readable motivation that explains the policy or safety reason behind the recommendation.
+- Repo/home bucket labels and winner/blocker summaries for bisync output.
 - Managed versus preserved target-local outcomes and any approved prune behavior.
 - Validation results, remaining blockers, and explicit validation gaps.
 - `next_step` (text) and `next_action` (structured object).
