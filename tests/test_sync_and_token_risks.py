@@ -166,7 +166,7 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
     ) in actions
 
 
-def test_build_sync_plan_excludes_internal_graphify_from_consumer_sync(
+def test_build_sync_plan_includes_internal_graphify_in_consumer_sync(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -193,7 +193,7 @@ def test_build_sync_plan_excludes_internal_graphify_from_consumer_sync(
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("delete", ".github/skills/internal-graphify/SKILL.md") in actions
+    assert ("update", ".github/skills/internal-graphify/SKILL.md") in actions
 
 
 def test_build_sync_plan_creates_target_local_override_from_template_when_missing(

@@ -1,19 +1,19 @@
 ---
 name: internal-graphify
-description: Use when a codebase question needs the local Graphify knowledge graph to inspect repository structure, paths, communities, or affected files within this repository.
+description: Use when a codebase question needs the Graphify knowledge graph to inspect repository structure, paths, communities, or affected files across repositories, and the local graph is fresh enough for trust.
 ---
 
 # Internal Graphify
 
 ## Referenced skills
 
-- `graphify`: upstream skill for general graph queries. Load it only when the upstream contract is sufficient and this repository does not expose internal markers.
+- `graphify`: upstream skill for general graph queries. Load it only when the local graph is unavailable and the upstream contract is sufficient.
 
 ## When to use
 
 - Use Graphify first for structure questions: community layout, ownership clusters, path relationships, affected-area analysis, or broad repository orientation.
 - Use file-first search first for exact file lookup, symbol lookup, single-line verification, or final claim verification.
-- Use Graphify only when the local graph is fresh enough for the current question, or when the task explicitly allows `make graphify-update`.
+- Use Graphify only when the local graph is fresh enough for the current question, or when the task explicitly allows a refresh.
 - Use Graphify when the question is easier to answer with `graphify query`, `graphify explain`, `graphify path`, or `graphify affected` than with one-off file reads.
 
 ## When not to use
@@ -21,12 +21,16 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 - The task only needs a direct file lookup, symbol lookup, or a simple `rg` search.
 - The graph is missing, stale, or ambiguous and the user did not ask for a refresh.
 - The task would require CI, hooks, background refresh, external APIs, or versioned Graphify output.
-- The current repository does not expose `.github/skills/internal-graphify/SKILL.md`, `.github/scripts/graphify_update.py`, `.graphifyignore`, or the expected `Makefile` targets. In that case, prefer the upstream `graphify` skill.
+- The current repository does not expose the configured activation gate markers. In that case, use standard search. The upstream `graphify` skill is for repositories without this wrapper or for general graph creation outside the local activation gate.
+
+## Precedence
+
+When the current repository exposes this skill, it is the canonical entry point for all Graphify queries against this repository. Do not bypass this wrapper by invoking the upstream `graphify` skill directly for the same repository; the upstream skill does not enforce the local freshness gate or stale-safety fallback. This wrapper owns the trust decision for the local graph.
 
 ## Graph Contract
 
-- Canonical refresh command: `make graphify-update`
-- Canonical check command: `make graphify-check`
+- Canonical refresh command: `make graphify-update` (configurable local seam)
+- Canonical check command: `make graphify-check` (configurable local seam)
 - Canonical output path: `graphify-out/graph.json`
 - Required local artifacts: `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`
 - Optional visualization artifact: `graphify-out/graph.html`
@@ -35,29 +39,31 @@ description: Use when a codebase question needs the local Graphify knowledge gra
 
 ## Freshness Policy
 
+- `graphify-out/` presence alone is never sufficient for trust.
+- Trust graph-derived hints only when freshness evidence is current and valid.
 - Refresh only when the graph is missing, clearly stale for the active question, or the user explicitly asks.
-- Treat `make graphify-check` as the freshness gate. Trust graph-derived hints only when it passes, or when the current commit and governed corpus hash still match the last refresh evidence in `graphify-out/.internal-graphify-refresh.json`.
-- After meaningful repository changes in the area under investigation, prefer `make graphify-update` before trusting older graph answers.
+- Treat the canonical check command as the freshness gate. Trust graph-derived hints only when it passes, or when the current commit and governed corpus hash still match the last refresh evidence.
+- After meaningful repository changes in the area under investigation, prefer a refresh before trusting older graph answers.
 - If the refresh command fails, `graph.json` is missing, or the graph answer is still imprecise after refresh, fall back to `rg`, targeted reads, or symbol search and say that the graph is unavailable for the claim you are making.
-- `make graphify-check` exits non-zero when the required local artifacts are stale, incomplete, or contain source paths outside the governed corpus.
-- This repository does not require local hook automation for Graphify. If automation is revisited later, keep it local and non-blocking.
+- The canonical check command exits non-zero when the required local artifacts are stale, incomplete, or contain source paths outside the governed corpus.
+- No repository requires local hook automation for Graphify. If automation is revisited later, keep it local and non-blocking.
 
 ## Activation Gate
 
-This skill applies repository-local guardrails only when the current working directory exposes all of the following:
+This skill applies when the current working directory exposes the configured activation gate. The default gate markers are:
 
 - `.github/skills/internal-graphify/SKILL.md`
 - `.github/scripts/graphify_update.py`
 - `.graphifyignore`
 - `Makefile` with `graphify-update` and `graphify-check` targets
 
-When any of these markers is missing, this skill must not propose `make graphify-update` or assume `graphify-out/` exists. Fall back to the upstream `graphify` skill or to standard search.
+When activation gate markers are missing, this skill must not propose a refresh or assume `graphify-out/` exists. Fall back to standard search or the upstream `graphify` skill. Missing local seam always resolves to safe fallback, not silent graph trust.
 
 ## Workflow
 
 1. Verify that the repository exposes the activation gate markers above.
 2. Check whether `graphify-out/graph.json` exists and is fresh enough for the current question.
-3. If refresh is needed and allowed, run `make graphify-update`.
+3. If refresh is needed and allowed, run the canonical refresh command.
 4. Use the smallest Graphify command that answers the question.
 5. Verify concrete claims against real repository files before finalizing the answer.
 6. Fall back to `rg`, targeted file reads, or symbol search when Graphify output is missing, stale, ambiguous, or not precise enough.
@@ -71,6 +77,7 @@ When any of these markers is missing, this skill must not propose `make graphify
 
 ## Output Expectations
 
+- Always report graph status: `fresh`, `stale`, `missing-evidence`, `missing-config`, or `fallback-used`.
 - State whether the answer came from an existing graph, a refreshed graph, or fallback search.
 - Mention the freshness basis when graph-derived hints were used.
 - Mention the Graphify command when it materially informed the answer.

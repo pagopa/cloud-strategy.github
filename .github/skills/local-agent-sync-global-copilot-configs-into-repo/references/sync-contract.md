@@ -23,7 +23,7 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 Do not sync `README.md`, changelogs, other workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
 Use `.github/templates/` only as standards-repository scaffold source material; do not mirror it into consumer repositories as an operational catalog family.
 Do not sync consumer-facing resources whose file or directory name starts with `internal-sync-`; those remain source-only operational controls for the standards repository.
-Also exclude the exact source-only bundle `.github/skills/internal-graphify` from consumer mirroring; it is a repository-local Graphify support layer tied to this repository's activation gate and upstream contract.
+Include `.github/skills/internal-graphify` in consumer mirroring as the shared Graphify wrapper with a portable trust contract and explicit stale fallback.
 Treat `LESSONS_LEARNED.md` as a structure-managed exception: sync the source template and contract, but preserve target-authored pending lesson rows instead of copying source rows into consumer repositories.
 When a consumer-local creator depends on shared runtime-critical rules, keep a self-contained mirror of those rules inside the creator bundle and track the mirror path in the source inventory plus the target `.github/copilot-sync.manifest.json`; do not assume cross-bundle references or target-local extras will be present at runtime.
 

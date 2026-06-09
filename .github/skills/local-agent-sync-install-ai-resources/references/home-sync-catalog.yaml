@@ -1093,4 +1093,4 @@ resources:
   - claude
   - opencode
   target_support: See runtime support matrix
-  notes: Repository-local Graphify support with upstream compatibility and activation gate.
+  notes: Shared Graphify wrapper with portable trust contract and explicit stale fallback. Not repository-local-only.

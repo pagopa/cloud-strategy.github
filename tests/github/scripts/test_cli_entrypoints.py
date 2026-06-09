@@ -489,6 +489,50 @@ def test_graphify_update_main_check_fails_when_stale(
     assert "stale" in capsys.readouterr().out.lower()
 
 
+def test_graphify_update_main_check_fails_when_metadata_is_missing(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+
+    git_output = "AGENTS.md\n"
+
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
+        if command[:4] == ["git", "ls-files", "--cached", "--others"]:
+            return SimpleNamespace(returncode=0, stdout=git_output, stderr="")
+        if command[:3] == ["git", "rev-parse", "--short"]:
+            return SimpleNamespace(returncode=0, stdout="abc1234\n", stderr="")
+        raise AssertionError(f"Unexpected command: {command}")
+
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(root=str(tmp_path), check=True),
+    )
+    monkeypatch.setattr(
+        graphify_update.shutil,
+        "which",
+        lambda command: "/usr/local/bin/graphify" if command == "graphify" else None,
+    )
+    monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
+
+    out_dir = tmp_path / "graphify-out"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "graph.json").write_text("{}", encoding="utf-8")
+    (out_dir / "GRAPH_REPORT.md").write_text("# Report\n", encoding="utf-8")
+
+    exit_code = graphify_update.main()
+
+    assert exit_code == 1
+    assert "missing" in capsys.readouterr().out.lower()
+
+
 def test_graphify_update_main_fails_fast_when_graphify_is_missing(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
