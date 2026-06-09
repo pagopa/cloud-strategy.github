@@ -573,6 +573,21 @@ def test_simple_gateway_covers_fast_path_and_misuse_boundaries() -> None:
     assert "clarify-first workflow" in clarification_gate_text
     assert "`support-loaded`" in simple_lanes_text
     assert "`files-touched`" in simple_lanes_text
+    # SIMPLE-01–05: deterministic-failure fast-path contract markers
+    assert "exact failure anchors" in skill_text
+    assert "falsifiable hypothesis" in skill_text
+    assert "verify the exact context" in skill_text
+    assert "multi-hunk" in skill_text
+    assert "closure work" in skill_text
+    assert "Extract exact anchors" in simple_lanes_text
+    assert "falsifiable hypothesis" in simple_lanes_text
+    assert "cheapest check" in simple_lanes_text
+    assert "smallest grounded edit" in simple_lanes_text
+    assert "exact context of every hunk" in simple_lanes_text
+    assert_normalized_snippet(
+        simple_lanes_text,
+        "original failure loop remains required before any fixed or resolved claim",
+    )
     assert "matching authoring owner" in support_routing_text
     assert (
         "Inspect the owning bundle and nearest contract tests" in support_routing_text

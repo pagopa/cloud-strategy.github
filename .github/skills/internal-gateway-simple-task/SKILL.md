@@ -93,7 +93,10 @@ simple mode.
 8. If the task stops being simple, stop and issue an escalation alert.
 
 Keep the first read budget small: one target or owner file, one likely domain skill when applicable, and one nearby validator or test found with `rg`. Open tests only when exact assertions, fixtures, or failure output can change the lane.
-Bundle-target maintenance does not stop at the first file. For a repository-owned skill or similar bundle owner, inspect relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`, or mark them as intentional non-action before closure.
+
+For deterministic failure output with exact test names, paths, symbols, or expected strings, use those exact failure anchors to drive targeted search and read only nearby context before expanding. Stop exploration once one falsifiable hypothesis, an exact patch target, and a cheap falsifying check exist — the next action is the smallest grounded edit. Before multi-file or multi-hunk patches, verify the exact context of every hunk against the file. References and neighboring owners load only when exact evidence leaves a material ambiguity.
+
+Bundle-target maintenance does not stop at the first file. For a repository-owned skill or similar bundle owner, inspect relevant sibling `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`, or mark them as intentional non-action before closure. Treat sibling inspection as closure work rather than unconditional preload — load siblings only when the exact edit target or validation evidence leaves a material gap.
 
 ## Quick Lanes
 
