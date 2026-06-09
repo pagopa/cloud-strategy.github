@@ -12,7 +12,7 @@ Treat every referenced skill as an on-demand dependency. Do not preload them
 just because the request is still undecided; load only the owner proved by the
 active uncertainty or next visible checkpoint.
 
-- `grill-me`: mandatory Idea Gate 0 interview method; load after every evidence pass before convergence or handoff.
+- `grill-me`: branch-discovery and mandatory Idea Gate 0 interview method; load after every evidence pass before convergence or handoff.
 - `superpowers-brainstorming`: optional support for design or spec approval workflows; load only when creative exploration is needed.
 - `internal-gateway-critical-master`: mandatory critical challenge owner; load before finalizing any substantive definition.
 - `internal-gateway-simple-task`: candidate next owner when the idea resolves to one quick concrete lane.
@@ -91,9 +91,11 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 This gateway uses `grill-me` for a guided decision interview in iterative numbered question blocks.
 
+Contract markers preserved in core: `Interview checkpoint: ready-for-critical`, `Interview checkpoint: reopen`, and `Handoff checkpoint: ready-for-owner-change` remain the portable checkpoint aliases for the gate states below.
+
 **Core pacing**: Inspect repository evidence first. Build a compact decision ledger ordered by dependency. Load `grill-me`, then immediately ask one numbered Idea Gate 0 question block. Include unresolved material decisions and at least one human confirmation question when the evidence appears complete. Each question includes a recommendation, rationale, and default when useful. Treat visible recommendations as accepted unless the user overrides them by question number or gives different direction. After the user's bulk response, ask another numbered question block when unresolved ambiguity, dependent follow-up decisions, or reopened branches remain. Do not treat branch confirmations as phase-transition checkpoints.
 
-After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, emit `Interview Gate 1: ready-for-critical`. After `Critical Gate 2: confident`, emit `Handoff Gate 3: ready-for-owner-change` only when recommending a peer transition. When the critical pass or realignment reopens definition, resume only the affected branches unless impact is broad, and declare `Interview Gate 1: reopen`.
+After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, emit `Interview Gate 1: ready-for-critical`. The portable alias is `Interview checkpoint: ready-for-critical`. After `Critical Gate 2: confident`, emit `Handoff Gate 3: ready-for-owner-change` only when recommending a peer transition. The portable alias is `Handoff checkpoint: ready-for-owner-change`. When the critical pass or realignment reopens definition, resume only the affected branches unless impact is broad, and declare `Interview Gate 1: reopen`. The portable alias is `Interview checkpoint: reopen`.
 
 Interview depth is proportional after the mandatory gate exists: simple cases may close after one block, but no case may skip Idea Gate 0. Unresolved dependent branches continue in focused follow-up blocks. Do not fall back to one-question-per-turn pacing.
 
