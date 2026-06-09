@@ -77,6 +77,8 @@ def test_required_markers_are_checked() -> None:
         "manual-next-owner-confirmation",
         "chat-only-simple-task-brief",
         "no-hidden-dispatch",
+        "material-evidence-axes",
+        "evidence-complete-stop",
     }
     assert set(report["markers"].keys()) == expected_markers
 
@@ -157,6 +159,8 @@ def test_strict_fails_when_sibling_is_missing(tmp_path: Path) -> None:
         "Stop and ask for explicit user confirmation before any next-owner transition\n"
         "chat-only `Simple Task Brief`\n"
         "no hidden dispatch\n"
+        "material evidence axes\n"
+        "Stop exploration when material axes are resolved or explicitly recorded as gaps\n"
     )
 
     result = subprocess.run(

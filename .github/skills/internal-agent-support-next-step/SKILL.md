@@ -37,6 +37,10 @@ When a next step is needed, include this compact package:
 
 Keep the package short. Prefer one line per field unless the validation path or risk note genuinely needs more detail.
 
+### Short Confirmation Semantics
+
+Short confirmations such as "ok" apply only to the immediately preceding complete visible checkpoint when that checkpoint already states owner, action, and scope. A short confirmation does not authorize work introduced after the confirmed package or clear an ambiguous handoff lock. Explicit invocations and unambiguous imperatives remain the strongest authorization signals.
+
 Use `references/decision-brief.md` when the next-step package must become a
 Decision Brief for retained planning, execution handoff, or cross-surface
 continuation.

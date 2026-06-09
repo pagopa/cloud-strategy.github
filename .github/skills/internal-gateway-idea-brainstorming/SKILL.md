@@ -113,6 +113,14 @@ Build the decision ledger. Use the guided decision interview to resolve material
 - Use `superpowers-brainstorming` only when a design or spec approval workflow is needed.
 - Return from any optional exploration support to this gateway before convergence.
 
+#### Material Evidence Completeness
+
+Before convergence or recommending a next owner, confirm that material evidence axes proved relevant by the prompt, path, cross-boundary claim, or repository evidence have been inspected. Relevant axes include runtime, data or freshness, routing, propagation, and validation when the claim depends on them.
+
+- Treat the axes as a decision aid, not a mandatory universal checklist. Small local ideas are not forced through irrelevant axes.
+- Record unresolved material evidence gaps explicitly in the decision ledger or Definition Brief before finalizing.
+- Stop exploration when material axes are resolved or explicitly recorded as gaps, the next decision is identified, and one validation path exists.
+
 ### Converge
 
 When material branches are resolved and Idea Gate 0 is `grill-me satisfied`, produce a Definition Brief with these fields: `Intent`, `Recovered evidence`, `Resolved decisions`, `Open decisions`, `Direction or options`, `Anti-scope`, `Validation path or gap`, `Risk`, and `Stop & checkpoint`. See `references/brief-contract.md` for the full field contract.

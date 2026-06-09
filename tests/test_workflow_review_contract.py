@@ -571,6 +571,55 @@ def test_resume_protocol_reconstructs_done_files_without_evidence() -> None:
     )
 
 
+def test_gate_zero_protocol_has_short_confirmation_semantics() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/gate-0-protocol.md",
+        (
+            "Short Confirmation Semantics",
+            "Short confirmations such as",
+            "confirm only the immediately preceding complete checkpoint",
+            "does not authorize work introduced after the confirmed package",
+            "Keep explicit invocations and unambiguous imperatives as the strongest authorization signals",
+        ),
+    )
+
+
+def test_gate_zero_protocol_restarts_for_material_decisions() -> None:
+    assert_contains_all(
+        ".github/skills/internal-gateway-operational-flow/references/gate-0-protocol.md",
+        (
+            "Material-Decision Realignment",
+            "new material choice affecting",
+            "scope, owner, target state, validation, rollout, or anti-scope",
+            "reopen Gate 0",
+            "Do not let repository evidence silently choose",
+        ),
+    )
+
+
+def test_next_step_skill_limits_short_confirmation_scope() -> None:
+    assert_contains_all(
+        ".github/skills/internal-agent-support-next-step/SKILL.md",
+        (
+            "Short Confirmation Semantics",
+            "apply only to the immediately preceding complete visible checkpoint",
+            "does not authorize work introduced after the confirmed package",
+            "Explicit invocations and unambiguous imperatives remain the strongest authorization signals",
+        ),
+    )
+
+
+def test_advisory_analyzer_safety_is_contracted() -> None:
+    script_text = Path(
+        ".github/skills/internal-gateway-operational-flow/scripts/analyze_run_efficiency.py"
+    ).read_text(encoding="utf-8")
+
+    assert "advisory threshold" in script_text
+    assert "diagnostic/advisory only" in script_text
+    assert "no prompt text" in script_text or "Never emits prompt text" in script_text
+    assert "no prompt text" in script_text or "tool arguments" in script_text or "Never emits" in script_text
+
+
 def test_plan_handoff_requires_summary_control_file() -> None:
     assert_contains_all(
         ".github/skills/internal-executing-plans/references/plan-handoff.md",

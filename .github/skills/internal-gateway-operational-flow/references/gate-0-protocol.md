@@ -42,6 +42,10 @@ owns Gate 0 status labels and blocking semantics.
   but must wait for a user closure signal such as "ok", "go", "proceed",
   "close", accepted defaults, or an equivalent proceed instruction.
 
+### Short Confirmation Semantics
+
+Short confirmations such as "ok" confirm only the immediately preceding complete checkpoint when that checkpoint already states owner, action, and scope. A short confirmation does not authorize work introduced after the confirmed package or clear an ambiguous handoff lock. Keep explicit invocations and unambiguous imperatives as the strongest authorization signals.
+
 ## Phase Transition Authorization
 
 - Closing Gate 0 changes the gate status only. It does not change the active
@@ -114,3 +118,11 @@ Pass in `define`.
   active `execute`. After the visible `apply-plan` pre-start gate closes,
   retained-plan execution continues without restarting Gate 0 unless the lane
   changes back to `define` or `plan`.
+
+### Material-Decision Realignment
+
+Review or critical findings that introduce a new material choice affecting
+scope, owner, target state, validation, rollout, or anti-scope reopen Gate 0
+before planning or delivery recommendation. Resume only affected branches when
+impact is local. Do not let repository evidence silently choose between
+materially different rollout or ownership strategies.

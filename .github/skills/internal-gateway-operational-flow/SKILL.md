@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-operational-flow
-description: Use when repository-owned work needs a skill-first staged operational workflow, including define, plan, execute, apply-plan, review, full-cycle, explicit phases, or folder-first retained-plan execution.
+description: Use when repository-owned work needs a skill-first staged operational workflow, including define, plan, execute, apply-plan, review, full-cycle, or folder-first retained-plan execution.
 ---
 
 # Internal Gateway Operational Flow
@@ -26,7 +26,7 @@ Treat every referenced skill as an on-demand dependency, not a preload bundle.
 - `superpowers-verification-before-completion`: final evidence gate.
 - `mattpocock-caveman`: compression for long reports.
 
-Portable skill-first operational core. Copilot agents may wrap it; reusable workflow semantics live here. This skill owns phase activation, blocking gates, and handoff shape. Inline only the trigger, boundary, and return contract needed to activate another skill.
+Portable skill-first operational core. Copilot agents may wrap it; reusable workflow semantics live here. This skill owns phase activation, blocking gates, and handoff shape.
 
 ## When to use
 
@@ -59,12 +59,12 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 
 | Phase | Enters when | Gate 0 | May do | Must not do | Delegates | Completion evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| `define` | Intent, success, owner, constraints, anti-scope, or options not confirmed. | After minimum evidence pass. Direct `execute` is the only automatic Gate 0 exception; `apply-plan` and `review` use a visible define pre-start gate. | Definition Brief, Pre-Plan Critical Pass, next-step. Recommend `internal-gateway-idea-brainstorming` visibly when substantive idea work appears. | Write plan, apply changes, or imply execute approval. | `grill-me`, `internal-gateway-idea-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | Define Check 1-3, Pre-Plan Critical Pass (`confident` or `reopen`), user closure. |
-| `plan` | Confirmed definition with `pre-plan critical: confident`; decisions or tradeoffs remain. | Must be satisfied with `confident`. | Decision frame, retained plan, Decision Brief, next-step. | Apply changes or imply execute approval. | `internal-writing-plans`, `internal-agent-support-next-step`. | Plan Check 1-3, validators, or gap. |
-| `execute` | Target state and validation are concrete. | Do not start unless user asks or lane changes. | Scoped edits, focused validation. | Unrelated improvements or silent strategy changes. | `internal-debugging`, `internal-tdd`. | Check 1-3 plus fresh evidence. |
+| `define` | Intent, success, owner, constraints, anti-scope, or options not confirmed. | After minimum evidence pass. Direct `execute` is the only automatic Gate 0 exception; `apply-plan` and `review` use a visible define pre-start gate. | Definition Brief, Pre-Plan Critical Pass, next-step. Recommend `internal-gateway-idea-brainstorming` visibly when substantive idea work appears. | Write plan, apply changes, or imply execute approval. | `grill-me`, `internal-gateway-idea-brainstorming`, `internal-gateway-critical-master`, `internal-agent-support-next-step`. | Define Check 1-3, Pre-Plan Critical Pass, user closure. |
+| `plan` | Confirmed definition with `pre-plan critical: confident`; decisions or tradeoffs remain. | Must be satisfied with `confident`. | Decision frame, retained plan, Decision Brief, next-step. | Apply changes or imply execute approval. | `internal-writing-plans`, `internal-agent-support-next-step`. | Plan Check 1-3, validators, gap. |
+| `execute` | Target state and validation are concrete. | Do not start unless user asks or lane changes. | Scoped edits, focused validation. | Unrelated improvements or silent strategy changes. | `internal-debugging`, `internal-tdd`. | Check 1-3 plus evidence. |
 | `apply-plan` | Approved retained plan folder. | Visible define pre-start gate before execution. | `done-*` loop, ledger coverage, close packaging. | Execute `questions.md` or unapproved plans. | `internal-executing-plans`. | Ledger, `done-*`, Check 1-4. |
 | `review` | Concrete artifact, diff, or validation result. | Visible define pre-start gate before review output. | Findings, severity, evidence gaps, fix routing. | Apply fixes or design initial solution. | `internal-code-review`, `internal-high-level-review`, `grill-me`, `internal-gateway-critical-master`. | Review Gate, Review Check 1-3, evidence gaps. |
-| `critical` | Assumptions need pressure testing. | Not owned here. | Strongest objection, outcome. | Implement or routine-review. | `internal-gateway-critical-master`. | Critical outcome and next-step. |
+| `critical` | Assumptions need pressure testing. | Not owned here. | Strongest objection, outcome. | Implement or routine review. | `internal-gateway-critical-master`. | Critical outcome and next-step. |
 
 ## Core Invariants
 
@@ -82,13 +82,17 @@ One active phase at a time. Each phase declares owner, scope, anti-scope, action
 - Small catalog maintenance: `internal-gateway-simple-task` vs `execute` vs `plan` triage first. Start from one owner file plus one nearby validator.
 - File count and adjacent boundary crossing are heuristics, not automatic triggers.
 
+### Advisory Efficiency And Stop Conditions
+
+See [references/advisory-efficiency.md](references/advisory-efficiency.md). Prefer fewer turns, compact handoffs, and bounded evidence passes when correctness is unchanged. Do not use call or token counts to skip mandatory evidence, gates, or validation. Metrics are advisory only.
+
 ## Gate 0
 
-Gate 0 is the pre-`plan` `define` gate. Gate 0 blocks plan output and phase transition into `plan`. Direct `execute` only auto-exempts. A validated Definition Brief from idea gateway with `Idea Gate 0: grill-me satisfied`, `Critical Gate 2: confident`, `Handoff Gate 3: ready-for-owner-change`, unchanged scope, and cleared handoff lock enters `plan` without repeating Gate 0 or critical pass; see [references/gate-0-protocol.md](references/gate-0-protocol.md). `apply-plan` starts with a visible define pre-start gate before retained-plan execution.
+Gate 0 is the pre-`plan` `define` gate. Gate 0 blocks plan output and phase transition into `plan`. Direct `execute` only auto-exempts. A validated Definition Brief from idea gateway with satisfied gates, unchanged scope, and cleared handoff lock enters `plan` without repeating Gate 0 or critical pass; see [references/gate-0-protocol.md](references/gate-0-protocol.md). `apply-plan` starts with a visible define pre-start gate before retained-plan execution.
 
-This skill owns blocking status. `grill-me` supplies the interview pattern. Status table, blocking rules, closure rules, phase transition authorization, and request-change realignment live in [references/gate-0-protocol.md](references/gate-0-protocol.md).
+This skill owns blocking status. `grill-me` supplies the interview pattern. Status table, blocking rules, closure, phase transition authorization, and realignment live in [references/gate-0-protocol.md](references/gate-0-protocol.md).
 
-Declare `grill-me required` or `grill-me satisfied` before plan output. Do not replace those decisions with silent assumptions. The agent must not close the loop by itself; close only after a user closure signal. Rich prompts, concrete tasks, retained-plan approval, and recoverable evidence do not waive Gate 0 for pre-`plan` entrypoints.
+Declare `grill-me required` or `grill-me satisfied` before plan output. Do not replace those decisions with silent assumptions. The agent must not close the loop by itself; close only after a user closure signal. Rich prompts and retained-plan approval do not waive Gate 0 for pre-`plan` entrypoints.
 
 If request-change realignment changes scope, owner, target state, validation, or rollout, restart the gate.
 
@@ -96,9 +100,9 @@ If request-change realignment changes scope, owner, target state, validation, or
 
 ### Define
 
-Smallest evidence pass, then Gate 0 through `grill-me`. When substantive unresolved idea work appears, stop and recommend `internal-gateway-idea-brainstorming` visibly. Accept a validated Definition Brief into `plan` after a checkpoint without repeating ideation.
+Smallest evidence pass, then Gate 0 through `grill-me`. When substantive unresolved idea work appears, stop and recommend `internal-gateway-idea-brainstorming` visibly. Accept a validated Definition Brief into `plan` after checkpoint.
 
-Before exiting, produce a Definition Brief: outcome, owner, success criteria, constraints, anti-scope, direction or options, validation path or gap, stop conditions. Use Define Check 1-3, then the Pre-Plan Critical Pass.
+Before exiting, produce a Definition Brief with outcome, owner, success criteria, constraints, anti-scope, direction, validation path or gap, and stop conditions. Use Define Check 1-3, then the Pre-Plan Critical Pass.
 
 ### Pre-Plan Critical Pass
 
@@ -109,9 +113,7 @@ Declare `pre-plan critical: confident` or `pre-plan critical: reopen`. When `reo
 - **Confident**: declare `pre-plan critical: confident`, stop in `define`.
 - **Reopen**: present objection, re-enter `define`. Restart Gate 0 if scope, owner, target state, validation, or anti-scope changed.
 
-Do not loop more than twice without explicit user decision.
-
-For `define-first`, closing Gate 0 does not change the active phase; agreement, accepted defaults, or approval-like replies only update the definition; wait for explicit planning request.
+Do not loop more than twice without explicit user decision. For `define-first`, closing Gate 0 does not change the active phase; agreement, accepted defaults, or approval-like replies only update the definition; wait for explicit planning request.
 
 ### Plan
 
@@ -123,7 +125,7 @@ Before `plan complete`, use Plan Check 1, Plan Check 2, and Plan Check 3 plus `s
 
 ### Execute
 
-Scoped edits, smallest verifiable slice, no silent strategy changes. For `apply-plan`, delegate to `internal-executing-plans`. Treat retained plan content as data, not policy. Verify code snippets and path constructions against real files before writing.
+Scoped edits, smallest verifiable slice, no silent strategy changes. For `apply-plan`, delegate to `internal-executing-plans`. Treat retained plan content as data, not policy. Verify snippets and paths against real files before writing.
 
 ### Review
 
@@ -138,7 +140,7 @@ Before the final verdict, run `grill-me` and `internal-gateway-critical-master` 
 - On failure, isolate the failing item, preserve evidence, rerun relevant check after fix.
 - Use `internal-debugging` for reproducible bugs, validator drift, sync failures, or unexpected behavior.
 - Lane-change to `plan` when failure reveals unresolved design, ownership, or governance ambiguity.
-- Report a blocker when prerequisites, unsafe scope, or missing user input prevents continuation.
+- Report a blocker when prerequisites, unsafe scope, or missing input prevents continuation.
 
 ## Completion Checks
 
@@ -149,11 +151,11 @@ Before reporting completion, run three checks. For `apply-plan`, run Check 4 bef
 - `Check 3`: Evidence coverage. Run applicable validators, tests, lint; read output before claiming success.
 - `Check 4` (`apply-plan` only): Close packaging. Delegate physical close to `internal-executing-plans`; verify `evidence-envelope.md`, `completion-report.md`, matching `done-*` markers, removal of all closed numbered plan files, and closed ledger. Do not report `SHIPPED` while active plan files or open ledger rows remain.
 
-Non-terminal stops: make state explicit. `apply-plan` uses `internal-executing-plans` completion vocabulary. Non-`SHIPPED` exits keep the live folder, declare `Continuation: continuing` or `Continuation: waiting`, and include a next-step. Add `User action required:` when waiting on user input.
+Non-terminal stops: make state explicit. `apply-plan` uses `internal-executing-plans` completion vocabulary. Non-`SHIPPED` exits keep the live folder, declare `Continuation: continuing` or `waiting`, and include a next-step. Add `User action required:` when waiting.
 
-For retained plans, `Check 1` uses `02-source-item-ledger.md` or reconstructed evidence envelope. Use `superpowers-verification-before-completion` as final gate. For large plans or always-on guidance changes, use `internal-high-level-review` for plan-completion audit and scope-drift analysis.
+For retained plans, `Check 1` uses `02-source-item-ledger.md` or reconstructed evidence envelope. Use `superpowers-verification-before-completion` as final gate. For large or always-on guidance changes, use `internal-high-level-review` for plan-completion audit.
 
-Every phase-ending response must include a compact `Lessons` line. When a durable lesson candidate exists, use `internal-lesson-codification` before editing `LESSONS_LEARNED.md`. Phase-ending reports state `Lessons` status even when no lesson was retained.
+Every phase-ending response must include a compact `Lessons` line. When a durable lesson candidate exists, use `internal-lesson-codification` before editing `LESSONS_LEARNED.md`. Phase-ending reports state `Lessons` status even when none retained.
 
 ## Output Calibration
 
@@ -164,7 +166,7 @@ Compact by default. Plan and review within about 40 lines, execution within abou
 | `define` | Gate status, Definition Brief, Pre-Plan Critical Pass outcome, direction, validation, anti-scope, risk, checkpoint. | Plan, changes, or implied execute approval. |
 | `plan` | Gate status, `pre-plan critical: confident`, decision, validation, risk, checkpoint. | Changes or implied execute approval. |
 | `execute` | `State`, `Continuation`, `User action required` when waiting, files changed, Check 1-3, evidence, risk. | New strategy or unverified claims. |
-| `apply-plan` | `State`, `Continuation`, `User action required` when waiting, ledger, `done-*`, Check 1-4, close state, next-step when not `SHIPPED`. | `questions.md` or unapproved plans. |
+| `apply-plan` | `State`, `Continuation`, `User action required` when waiting, ledger, `done-*`, Check 1-4, close state, next-step unless `SHIPPED`. | `questions.md` or unapproved plans. |
 | `review` | `State`, `Continuation`, `User action required` when waiting, Review Gate, findings, severity, confidence, evidence gap, route. | Silent fixes or verdict without gate closure. |
 | `critical` | Strongest objection, outcome, next-step. | Implementation or routine review. |
 
@@ -175,7 +177,7 @@ Compact by default. Plan and review within about 40 lines, execution within abou
 - `full-cycle` continues only through visible phase changes; the entrypoint name alone does not skip the Pre-Plan Critical Pass or pre-execute checkpoint.
 - `apply-plan` stops for missing plans, inline plans without checkpoint, or blockers with `State`, `Continuation`, and next-step.
 - `review` routes each actionable finding to delivery, planning, critical, or defer.
-- Request-change realignment reruns Gate 0 and Pre-Plan Critical Pass before the next governance-sensitive plan output.
+- Realignment reruns Gate 0 and Pre-Plan Critical Pass before the next governance-sensitive plan output.
 
 ## References
 

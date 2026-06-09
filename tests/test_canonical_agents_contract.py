@@ -888,3 +888,50 @@ def test_idea_gateway_audit_script_referenced_in_validation() -> None:
     ).read_text(encoding="utf-8")
 
     assert "scripts/audit_contract.py" in skill_text
+
+
+def test_idea_gateway_material_evidence_completeness_is_defined() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Material Evidence Completeness" in skill_text
+    assert "material evidence axes" in skill_text
+    assert "runtime, data or freshness, routing, propagation, and validation" in skill_text
+    assert "decision aid, not a mandatory universal checklist" in skill_text
+    assert "Stop exploration when material axes are resolved or explicitly recorded as gaps" in skill_text
+
+
+def test_critical_master_uses_review_evidence_for_missing_proof() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-critical-master/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Evidence-Aware Outcome" in skill_text
+    assert "review-evidence" in skill_text
+    assert "missing material evidence" in skill_text
+
+
+def test_critical_master_records_critical_deduplication() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-critical-master/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Critical Deduplication" in skill_text
+    assert "reuse the previous `confident` result" in skill_text
+    assert "Invalidate the result only when scope, owner, target state, validation, rollout, anti-scope, or material evidence changes" in skill_text
+
+
+def test_operational_flow_advisory_efficiency_and_stop_conditions() -> None:
+    skill_text = Path(
+        ".github/skills/internal-gateway-operational-flow/SKILL.md"
+    ).read_text(encoding="utf-8")
+    ref_text = Path(
+        ".github/skills/internal-gateway-operational-flow/references/advisory-efficiency.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Advisory Efficiency And Stop Conditions" in skill_text
+    assert "fewer model turns" in ref_text
+    assert "compact handoffs" in ref_text
+    assert "Do not treat call count or token count as permission to skip mandatory evidence" in ref_text
+    assert "Metrics are advisory only" in ref_text

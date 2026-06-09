@@ -35,6 +35,8 @@ REQUIRED_MARKERS: dict[str, str] = {
     "manual-next-owner-confirmation": "Stop and ask for explicit user confirmation before any next-owner transition",
     "chat-only-simple-task-brief": "chat-only `Simple Task Brief`",
     "no-hidden-dispatch": "no hidden dispatch",
+    "material-evidence-axes": "material evidence axes",
+    "evidence-complete-stop": "Stop exploration when material axes are resolved or explicitly recorded as gaps",
 }
 
 CROSS_BUNDLE_CHECKS: dict[str, dict[str, str]] = {

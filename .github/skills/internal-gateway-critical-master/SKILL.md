@@ -49,6 +49,14 @@ Before applying a lens, name the claim, decision, or artifact under challenge in
 5. Run the final consistency gate per `references/challenge-lenses.md`.
 6. Reconcile the gate before responding, preserving supported pressure points and downgrading uncertainty.
 
+### Evidence-Aware Outcome
+
+A critical challenge cannot return an architecture-ready or transition-ready conclusion when its strongest objection is missing material evidence. When the challenge is blocked by an evidence gap, use the existing outcome `review-evidence`. Callers translate `review-evidence` to the appropriate reopen state, such as `Critical Gate 2: reopen` or `pre-plan critical: reopen`, and resume only the affected branches.
+
+### Critical Deduplication
+
+Record whether the Definition Brief materially changed after the critical pass. When the brief is unchanged, reuse the previous `confident` result instead of rerunning the final critical pass. Invalidate the result only when scope, owner, target state, validation, rollout, anti-scope, or material evidence changes.
+
 ## Boundaries
 
 - Use `internal-gateway-operational-flow` `plan-only` or `full-cycle` when the main job is reformulating the plan.
