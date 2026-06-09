@@ -383,8 +383,7 @@ def test_skill_first_operational_core_exists_with_required_staged_entrypoints() 
     assert "explicit checkpoint before moving" in skill_text
     assert (
         "Keep direct entry and manual transitions visible. "
-        "Do not create hidden front-door routers or hidden peer dispatch."
-        in skill_text
+        "Do not create hidden front-door routers or hidden peer dispatch." in skill_text
     )
     assert "Future Security Lens" in skill_text
     assert "## Completion Checks" in skill_text
@@ -856,10 +855,16 @@ def test_idea_gateway_handoff_recommends_single_discrete_owner() -> None:
         in skill_text
     )
     assert "`Recommended next owner` with reason" in skill_text
-    assert "`Owner`, `Scope`, `Action`, `Validation`, `Risk`, `Continuation: waiting`, and `User action required`" in skill_text
+    assert (
+        "`Owner`, `Scope`, `Action`, `Validation`, `Risk`, `Continuation: waiting`, and `User action required`"
+        in skill_text
+    )
     assert "Stop after the recommendation" in skill_text
     assert "Do not invoke, simulate, or execute the next owner internally" in skill_text
-    assert "invoke `internal-gateway-simple-task` or `internal-gateway-operational-flow` manually in a separate turn" in skill_text
+    assert (
+        "invoke `internal-gateway-simple-task` or `internal-gateway-operational-flow` manually in a separate turn"
+        in skill_text
+    )
 
 
 def test_idea_gateway_audit_script_referenced_in_validation() -> None:

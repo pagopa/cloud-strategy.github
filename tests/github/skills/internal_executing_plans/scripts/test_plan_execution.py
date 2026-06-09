@@ -10,7 +10,9 @@ from pathlib import Path
 
 import pytest
 
-EXECUTING_CLI = Path(".github/skills/internal-executing-plans/scripts/plan_execution.py").resolve()
+EXECUTING_CLI = Path(
+    ".github/skills/internal-executing-plans/scripts/plan_execution.py"
+).resolve()
 
 
 def run_cli(*args: str | Path) -> subprocess.CompletedProcess[str]:
@@ -52,7 +54,9 @@ def _write_compact_plan(plan_folder: Path) -> None:
         "## Key assumptions\nNone.\n\n## Executable steps\n1. Do it.\n\n## Validation\nTest.\n",
         encoding="utf-8",
     )
-    (plan_folder / "questions.md").write_text("# Questions\n\n- none\n", encoding="utf-8")
+    (plan_folder / "questions.md").write_text(
+        "# Questions\n\n- none\n", encoding="utf-8"
+    )
 
 
 def _write_completed_plan(plan_folder: Path) -> None:
@@ -139,7 +143,8 @@ def test_resume_live_folder_state(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_compact_plan(plan_folder)
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nState: PARTIAL\nContinuation: continuing\n", encoding="utf-8"
+        "Completion Report\nState: PARTIAL\nContinuation: continuing\n",
+        encoding="utf-8",
     )
     result = run_cli("resume", plan_folder)
     assert result.returncode == 0
@@ -336,9 +341,7 @@ def test_completion_unsupported_rejected(tmp_path: Path) -> None:
 def test_copied_bundle_runs_independently(tmp_path: Path) -> None:
     """A copied skill bundle runs its CLI with ambient Python stdlib only."""
     bundle_copy = tmp_path / "internal-executing-plans"
-    shutil.copytree(
-        Path(".github/skills/internal-executing-plans"), bundle_copy
-    )
+    shutil.copytree(Path(".github/skills/internal-executing-plans"), bundle_copy)
     cli = bundle_copy / "scripts" / "plan_execution.py"
 
     plan_folder = tmp_path / "plan"
@@ -363,7 +366,10 @@ def test_copied_bundle_no_cross_bundle_import(tmp_path: Path) -> None:
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if "internal-writing-plans" in alias.name or "retained_plans" in alias.name:
+                if (
+                    "internal-writing-plans" in alias.name
+                    or "retained_plans" in alias.name
+                ):
                     pytest.fail(f"Cross-bundle import found: {ast.dump(node)}")
         elif isinstance(node, ast.ImportFrom):
             module = node.module or ""

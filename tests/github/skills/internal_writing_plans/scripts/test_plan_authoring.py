@@ -11,7 +11,9 @@ from pathlib import Path
 
 import pytest
 
-AUTHORING_CLI = Path(".github/skills/internal-writing-plans/scripts/plan_authoring.py").resolve()
+AUTHORING_CLI = Path(
+    ".github/skills/internal-writing-plans/scripts/plan_authoring.py"
+).resolve()
 
 
 def run_cli(*args: str | Path) -> subprocess.CompletedProcess[str]:
@@ -89,7 +91,9 @@ def _write_compact_plan(plan_folder: Path) -> None:
         "## Key assumptions\nNone.\n\n## Executable steps\n1. Do it.\n\n## Validation\nTest.\n",
         encoding="utf-8",
     )
-    (plan_folder / "questions.md").write_text("# Questions\n\n- none\n", encoding="utf-8")
+    (plan_folder / "questions.md").write_text(
+        "# Questions\n\n- none\n", encoding="utf-8"
+    )
 
 
 def _write_extended_plan(plan_folder: Path) -> None:
@@ -146,7 +150,9 @@ def test_audit_missing_required_file(tmp_path: Path) -> None:
 def test_audit_missing_ledger_fields(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     plan_folder.mkdir()
-    (plan_folder / "01-change-summary.md").write_text("## Problema da risolvere\nx\n", encoding="utf-8")
+    (plan_folder / "01-change-summary.md").write_text(
+        "## Problema da risolvere\nx\n", encoding="utf-8"
+    )
     (plan_folder / "02-source-item-ledger.md").write_text(
         "## Plan profile\ncompact\n\nJust profile.\n", encoding="utf-8"
     )
@@ -271,7 +277,8 @@ def test_handoff_check_missing_summary_language(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_compact_plan(plan_folder)
     (plan_folder / "01-change-summary.md").write_text(
-        "## Risorse coinvolte\n| Risorsa | Azione | Scopo |\n| X | Y | Z |\n", encoding="utf-8"
+        "## Risorse coinvolte\n| Risorsa | Azione | Scopo |\n| X | Y | Z |\n",
+        encoding="utf-8",
     )
     result = run_cli("handoff-check", plan_folder)
     assert result.returncode != 0
@@ -307,9 +314,7 @@ def test_tokens_json_output(tmp_path: Path) -> None:
 def test_copied_bundle_runs_independently(tmp_path: Path) -> None:
     """A copied skill bundle runs its CLI with ambient Python stdlib only."""
     bundle_copy = tmp_path / "internal-writing-plans"
-    shutil.copytree(
-        Path(".github/skills/internal-writing-plans"), bundle_copy
-    )
+    shutil.copytree(Path(".github/skills/internal-writing-plans"), bundle_copy)
     cli = bundle_copy / "scripts" / "plan_authoring.py"
 
     plan_folder = tmp_path / "plan"
@@ -333,7 +338,10 @@ def test_copied_bundle_no_cross_bundle_import(tmp_path: Path) -> None:
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if "internal-executing-plans" in alias.name or "retained_plans" in alias.name:
+                if (
+                    "internal-executing-plans" in alias.name
+                    or "retained_plans" in alias.name
+                ):
                     pytest.fail(f"Cross-bundle import found: {ast.dump(node)}")
         elif isinstance(node, ast.ImportFrom):
             module = node.module or ""
@@ -349,7 +357,9 @@ def test_shared_parity_unsupported_contract_rejected(tmp_path: Path) -> None:
     authoring_result = run_cli("handoff-check", plan_folder)
     assert "unsupported-plan-contract" in authoring_result.stdout
 
-    executing_cli = Path(".github/skills/internal-executing-plans/scripts/plan_execution.py").resolve()
+    executing_cli = Path(
+        ".github/skills/internal-executing-plans/scripts/plan_execution.py"
+    ).resolve()
     exec_result = subprocess.run(
         [sys.executable, str(executing_cli), "inspect", str(plan_folder)],
         capture_output=True,
@@ -366,7 +376,9 @@ def test_shared_parity_compact_accepted(tmp_path: Path) -> None:
     authoring_result = run_cli("handoff-check", plan_folder)
     assert authoring_result.returncode == 0
 
-    executing_cli = Path(".github/skills/internal-executing-plans/scripts/plan_execution.py").resolve()
+    executing_cli = Path(
+        ".github/skills/internal-executing-plans/scripts/plan_execution.py"
+    ).resolve()
     exec_result = subprocess.run(
         [sys.executable, str(executing_cli), "inspect", str(plan_folder)],
         capture_output=True,

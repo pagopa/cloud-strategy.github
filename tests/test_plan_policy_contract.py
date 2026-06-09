@@ -214,7 +214,10 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "scope-challenge.md" in writing_skill_text
     assert "plan-review-gate.md" in writing_skill_text
     assert "Decision Brief" in writing_skill_text
-    assert "plan_authoring.py" in writing_skill_text or "bundle-local" in writing_skill_text
+    assert (
+        "plan_authoring.py" in writing_skill_text
+        or "bundle-local" in writing_skill_text
+    )
 
     # Executing skill — core algorithm and ledger tracking (current-only)
     assert "## When to use" in executing_skill_text
@@ -235,7 +238,10 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "Stop only for real blockers" in executing_skill_text
     assert "No `SHIPPED`" in executing_skill_text
     assert "unsupported-plan-contract" in executing_skill_text
-    assert "plan_execution.py" in executing_skill_text or "bundle-local" in executing_skill_text
+    assert (
+        "plan_execution.py" in executing_skill_text
+        or "bundle-local" in executing_skill_text
+    )
 
     # Compact plan reference — current-only schema
     assert "## Compact File Shape" in compact_contract_text
@@ -260,7 +266,10 @@ def test_plan_wrapper_skills_define_local_plan_contracts() -> None:
     assert "| Implementation contract |" in review_gate_text
     assert "| Profile |" in review_gate_text
     assert "missing source-item coverage for requested work" in review_gate_text
-    assert "unsupported-plan-contract" in review_gate_text or "unsupported" in review_gate_text.lower()
+    assert (
+        "unsupported-plan-contract" in review_gate_text
+        or "unsupported" in review_gate_text.lower()
+    )
 
 
 def test_plan_gates_require_traceability_for_strategic_conversions() -> None:

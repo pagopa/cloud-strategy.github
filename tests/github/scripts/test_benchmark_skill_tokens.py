@@ -62,10 +62,17 @@ def test_gateway_scenarios_have_unique_required_skill_lists() -> None:
 def test_idea_gateway_scenarios_exist_and_are_unique() -> None:
     output = run_benchmark()
     idea_scenarios = output["idea_gateway"]["context_scenarios"]
-    assert len(idea_scenarios) >= 4, f"Expected >=4 idea-gateway scenarios, got {len(idea_scenarios)}"
+    assert len(idea_scenarios) >= 4, (
+        f"Expected >=4 idea-gateway scenarios, got {len(idea_scenarios)}"
+    )
 
     scenario_names = {s["scenario"] for s in idea_scenarios}
-    expected = {"Idea core entry", "Interview support", "Mandatory critical pass", "Visible handoff"}
+    expected = {
+        "Idea core entry",
+        "Interview support",
+        "Mandatory critical pass",
+        "Visible handoff",
+    }
     missing = expected - scenario_names
     assert not missing, f"Missing idea-gateway scenarios: {missing}"
 

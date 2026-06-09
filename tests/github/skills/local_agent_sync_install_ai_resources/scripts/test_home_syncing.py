@@ -550,11 +550,7 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
     agent_path = source_root / ".github/agents/demo.agent.md"
     write_file(
         agent_path,
-        "---\n"
-        "name: demo\n"
-        "description: Demo agent.\n"
-        "---\n\n"
-        "# Demo agent\n",
+        "---\nname: demo\ndescription: Demo agent.\n---\n\n# Demo agent\n",
     )
     catalog_payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
     catalog_payload["resources"].append(
@@ -567,7 +563,9 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
             "notes": "Demo agent.",
         }
     )
-    catalog_path.write_text(yaml.safe_dump(catalog_payload, sort_keys=False), encoding="utf-8")
+    catalog_path.write_text(
+        yaml.safe_dump(catalog_payload, sort_keys=False), encoding="utf-8"
+    )
 
     initial_plan = build_home_sync_plan(
         source_root=source_root,

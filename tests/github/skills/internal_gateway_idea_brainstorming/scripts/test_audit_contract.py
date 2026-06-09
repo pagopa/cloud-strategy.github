@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 SCRIPT_PATH = Path(
     ".github/skills/internal-gateway-idea-brainstorming/scripts/audit_contract.py"
 )
@@ -125,7 +124,15 @@ def test_strict_fails_when_marker_is_missing_in_fixture(tmp_path: Path) -> None:
     (fixture / "agents" / "openai.yaml").write_text("name: fixture\n")
 
     result = subprocess.run(
-        [sys.executable, str(SCRIPT_PATH), "--format", "json", "--strict", "--dir", str(fixture)],
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--format",
+            "json",
+            "--strict",
+            "--dir",
+            str(fixture),
+        ],
         capture_output=True,
         text=True,
     )
@@ -155,7 +162,15 @@ def test_strict_fails_when_sibling_is_missing(tmp_path: Path) -> None:
     )
 
     result = subprocess.run(
-        [sys.executable, str(SCRIPT_PATH), "--format", "json", "--strict", "--dir", str(fixture)],
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--format",
+            "json",
+            "--strict",
+            "--dir",
+            str(fixture),
+        ],
         capture_output=True,
         text=True,
     )

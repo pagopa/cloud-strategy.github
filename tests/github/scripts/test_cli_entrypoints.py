@@ -705,5 +705,3 @@ def test_sync_copilot_catalog_apply_aborts_when_source_has_blocking_findings(
     assert (
         "Source repository has blocking governance findings" in capsys.readouterr().out
     )
-
-
