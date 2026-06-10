@@ -39,6 +39,9 @@ TEST_OWNERS = {
     "tests/github/scripts/test_analyze_copilot_debug_logs.py": {
         ".github/scripts/analyze_copilot_debug_logs.py",
     },
+    "tests/github/scripts/test_analyze_copilot_prompt_exports.py": {
+        ".github/scripts/analyze_copilot_prompt_exports.py",
+    },
 }
 
 
