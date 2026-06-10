@@ -53,6 +53,7 @@ EXTENDED_CONTRACT_SECTIONS = (
     "Blockers and fallback rules",
     "External pins",
 )
+NON_ACTION_ROUTES = frozenset({"closed", "manual", "gap", "not applicable", "n/a", "none"})
 
 
 @dataclass
@@ -277,6 +278,12 @@ def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", normalized).strip()
 
 
+def _split_ledger_row(row: str) -> list[str]:
+    # Split only on markdown cell delimiters (space-pipe-space), not inline pipes.
+    stripped = row.strip().strip("|").strip()
+    return [cell.strip() for cell in re.split(r"\s+\|\s+", stripped)]
+
+
 def _is_placeholder(text: str) -> bool:
     normalized = _normalize_text(text)
     if not normalized:
@@ -331,7 +338,7 @@ def _validate_folder_name(plan_folder: Path, profile: str) -> list[Finding]:
             )
         ]
     if folder_name in GENERIC_TMP_NAMES:
-        return [Finding("unclear-temp-directory-name", f"Temporary plan folder name is too generic: {plan_folder.name}")]
+            cells = _split_ledger_row(row)
     tokens = [token for token in re.split(r"[-_]+", folder_name) if token]
     if len(tokens) < 2:
         return [Finding("unclear-temp-directory-name", f"Temporary plan folder name must communicate action or context: {plan_folder.name}")]
@@ -409,11 +416,44 @@ def _validate_ledger(plan_folder: Path, profile: str) -> list[Finding]:
         findings.append(Finding("missing-source-item-coverage", "Source item ledger has no executable coverage rows"))
     else:
         for row in ledger_rows:
-            cells = [cell.strip() for cell in row.strip().strip("|").split("|")]
+            cells = _split_ledger_row(row)
             if len(cells) < 7 or any(_is_placeholder(cell) for cell in cells[:6]):
                 findings.append(Finding("placeholder-ledger-row", f"Ledger row is incomplete or placeholder-only: {row}"))
                 break
+            route_cell = _normalize_route_cell(cells[6])
+            if not route_cell:
+                findings.append(Finding("missing-ledger-route", f"Ledger row route is empty: {row}"))
+                continue
+            if route_cell.lower() in NON_ACTION_ROUTES:
+                continue
+            referenced_files = _extract_route_files(route_cell)
+            if not referenced_files:
+                findings.append(
+                    Finding(
+                        "invalid-ledger-route",
+                        f"Ledger row route must reference numbered files or explicit non-action routes: {cells[6]}",
+                    )
+                )
+                continue
+            missing = [file_name for file_name in referenced_files if not (plan_folder / file_name).is_file()]
+            if missing:
+                findings.append(
+                    Finding(
+                        "missing-route-target",
+                        f"Ledger route references missing numbered files: {', '.join(missing)}",
+                    )
+                )
     return findings
+
+
+def _normalize_route_cell(route_cell: str) -> str:
+    normalized = route_cell.replace("`", " ")
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized.strip()
+
+
+def _extract_route_files(route_cell: str) -> list[str]:
+    return re.findall(r"\b\d{2}-[A-Za-z0-9._-]+\.md\b", route_cell)
 
 
 def _extract_step_blocks(execution_text: str) -> list[tuple[str, str]]:
@@ -477,6 +517,18 @@ def _validate_extended_contract(plan_folder: Path) -> list[Finding]:
     contract_text = contract_path.read_text(encoding="utf-8")
     for heading in EXTENDED_CONTRACT_SECTIONS:
         _check_required_section_content(findings, contract_text, heading, code_prefix="implementation-contract")
+
+    validation_commands = _section_body(contract_text, "Validation commands")
+    has_order_signal = bool(re.search(r"run in this order", validation_commands, re.IGNORECASE)) or bool(
+        re.search(r"^\s*\d+\.\s+", validation_commands, re.MULTILINE)
+    )
+    if validation_commands and not has_order_signal:
+        findings.append(
+            Finding(
+                "implementation-contract-validation-order",
+                "Extended validation commands must include execution order (numbered list or 'Run in this order').",
+            )
+        )
 
     external_pins = _section_body(contract_text, "External pins")
     if external_pins and _is_placeholder(external_pins):
@@ -550,12 +602,27 @@ def cmd_handoff_check(plan_folder: Path, format: str = "text") -> int:
             findings.append(Finding("clarification-required", "Clarification gate is still required"))
     if not (plan_folder / "questions.md").is_file():
         findings.append(Finding("missing-questions", "questions.md is missing", "WARNING"))
+    else:
+        questions_text = (plan_folder / "questions.md").read_text(encoding="utf-8")
+        if _questions_blocking(questions_text):
+            findings.append(Finding("open-questions-blocking", "questions.md must be '- none' before execution handoff"))
     findings.extend(_validate_lower_context_compatibility(plan_folder, profile))
-    _emit_findings(findings, format, warnings=_token_warnings(plan_folder))
+    _emit_findings(findings, format, warnings=_token_warnings(plan_folder, profile))
     return 0 if not any(f.severity == "ERROR" for f in findings) else 1
 
 
-def _token_warnings(plan_folder: Path) -> list[str]:
+def _questions_blocking(questions_text: str) -> bool:
+    bullets = []
+    for line in questions_text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("-") or stripped.startswith("*"):
+            bullets.append(stripped.lstrip("-* ").strip().lower())
+    return bullets != ["none"]
+
+
+def _token_warnings(plan_folder: Path, profile: str | None = None) -> list[str]:
     file_tokens: list[tuple[str, int]] = []
     total_tokens = 0
     for md_path in sorted(plan_folder.glob("*.md")):
@@ -563,10 +630,24 @@ def _token_warnings(plan_folder: Path) -> list[str]:
         file_tokens.append((md_path.name, tokens))
         total_tokens += tokens
     warnings: list[str] = []
+    if profile is None:
+        detected = classify_profile(plan_folder)
+        profile = detected if detected in SUPPORTED_PROFILES else None
+
+    token_map = {name: tokens for name, tokens in file_tokens}
+    execution_tokens = token_map.get("03-execution.md", 0)
+
+    if profile == "compact":
+        if total_tokens > 1600:
+            warnings.append("Compact plan estimated token weight is high; escalate to extended or trim slices.")
+        if execution_tokens > 600:
+            warnings.append("Compact execution file is oversized; keep 03-execution.md concise or escalate to extended.")
+
     control_names = {"01-change-summary.md", "02-source-item-ledger.md", "04-implementation-contract.md"}
     control_tokens = sum(tokens for name, tokens in file_tokens if name in control_names)
-    if total_tokens and control_tokens / total_tokens > 0.7:
+    if profile != "compact" and total_tokens and control_tokens / total_tokens > 0.7:
         warnings.append("Initial control read is disproportionately large; compress or split the control files.")
+
     for name, tokens in file_tokens:
         if tokens > 1200:
             warnings.append(f"Estimated token weight is high for {name}; split or compress by delivery slice.")
@@ -582,7 +663,8 @@ def cmd_tokens(plan_folder: Path, format: str = "text") -> int:
         tokens = math.ceil(size / 4)
         file_tokens.append((md_path.name, tokens))
     total_tokens = math.ceil(total_bytes / 4)
-    warnings = _token_warnings(plan_folder)
+    detected = classify_profile(plan_folder)
+    warnings = _token_warnings(plan_folder, detected if detected in SUPPORTED_PROFILES else None)
     if format == "json":
         json.dump(
             {

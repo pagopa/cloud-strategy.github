@@ -29,7 +29,11 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Executor context | Can a smaller or lower-context executor see the key files, validators, owner, assumptions, and stop conditions without rediscovering the plan? |
 | File naming | Are plan file names English while `01-change-summary.md` is Italian and all executable/control files are English? |
 | Folder semantics | Does `02-source-item-ledger.md` state `Recommended use` and `File map and role` so a generic reader can tell whether the folder is for review, apply, resume, rewrite, or status only? |
+| Route map | Do ledger `Route` values map to existing executable numbered files, or to explicit non-action routes such as `closed`, `manual`, `gap`, or `not applicable`? |
+| Open questions | Is `questions.md` present and set to `- none` for execution handoff, or explicitly blocking handoff? |
+| Lifecycle status | Is plan state explicit (`scaffold`, `ready`, or `closed`) so an executor does not infer readiness? |
 | Token discipline | Does the ledger define `Initial evidence pass` and `Reading budget` so the executor can classify the folder with the fewest safe reads? |
+| Profile token budget | Are token expectations proportional to profile (`compact` small/fast, `extended` thinking-first) and enforced without vendor model names? |
 
 ## Outcomes
 

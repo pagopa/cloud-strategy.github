@@ -35,12 +35,15 @@ language, and the authoring-to-execution handoff contract.
 Choose the smallest profile that safely fits the work. Declare the profile in
 `02-source-item-ledger.md` under `Plan profile`.
 
+`init` creates a scaffold only. A retained plan is execution-ready only after
+`handoff-check` returns ready and `questions.md` is `- none`.
+
 New `compact` plans should use `tmp/superpowers/mini-plan-*`.
 
 | Profile | When | Required files |
 | --- | --- | --- |
-| `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. | `01-change-summary.md`, `02-source-item-ledger.md`, `03-execution.md`, `questions.md` |
-| `extended` | Cross-family changes, higher risk, low-context executor, multiple validators, or multi-slice execution state. | Compact files plus `04-implementation-contract.md`, additional numbered files by category (`05-...`). |
+| `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. Best fit for small/fast executors after positive handoff validation. | `01-change-summary.md`, `02-source-item-ledger.md`, `03-execution.md`, `questions.md` |
+| `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Thinking-first profile with explicit control files and deterministic read order. | Compact files plus `04-implementation-contract.md`, additional numbered files by category (`05-...`). |
 
 Do not use `compact` when the executor needs exact sources, target files,
 validators, blockers, or external pins that only `04-implementation-contract.md`
@@ -79,6 +82,7 @@ can provide.
 7. Write executable numbered files in order.
 8. Create `questions.md` with `- none` or open user-only decisions.
 9. Run scope challenge and plan review gate for non-trivial plans.
+10. Run `handoff-check`; execute only when ready.
 
 ## Validation
 

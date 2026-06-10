@@ -75,7 +75,7 @@ def _write_extended_plan(plan_folder: Path) -> None:
         "# Implementation Contract\n\n"
         "## Sources\n- `.github/skills/internal-gateway-writing-plans/scripts/plan_authoring.py`\n\n"
         "## Candidate targets\n- The bundle-local authoring CLI and focused fixtures.\n\n"
-        "## Validation commands\n- pytest -q tests/github/skills/internal_gateway_writing_plans/scripts/test_plan_authoring.py\n\n"
+        "## Validation commands\nRun in this order:\n1. pytest -q tests/github/skills/internal_gateway_writing_plans/scripts/test_plan_authoring.py\n\n"
         "## Blockers and fallback rules\n- Stop if validation would require subjective scoring.\n\n"
         "## External pins\nno external evidence\n",
         encoding="utf-8",
@@ -183,3 +183,68 @@ def test_handoff_check_rejects_heading_only_extended_contract(tmp_path: Path) ->
     payload = json.loads(result.stdout)
     assert result.returncode == 1
     assert any(f["code"].startswith("implementation-contract-") for f in payload["findings"])
+
+
+def test_handoff_check_rejects_missing_route_targets(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-missing-route-target"
+    _write_compact_plan(plan_folder)
+    ledger_path = plan_folder / "02-source-item-ledger.md"
+    ledger_path.write_text(
+        ledger_path.read_text(encoding="utf-8").replace("`03-execution.md`", "`07-non-existent.md`"),
+        encoding="utf-8",
+    )
+    result = run_cli("handoff-check", plan_folder, "--format", "json")
+    payload = json.loads(result.stdout)
+    assert result.returncode == 1
+    assert any(f["code"] == "missing-route-target" for f in payload["findings"])
+
+
+def test_handoff_check_blocks_open_questions(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-open-question"
+    _write_compact_plan(plan_folder)
+    (plan_folder / "questions.md").write_text("# Questions\n\n- confirm route ownership\n", encoding="utf-8")
+    result = run_cli("handoff-check", plan_folder, "--format", "json")
+    payload = json.loads(result.stdout)
+    assert result.returncode == 1
+    assert any(f["code"] == "open-questions-blocking" for f in payload["findings"])
+
+
+def test_handoff_check_warns_on_oversized_compact_execution(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-heavy-execution"
+    _write_compact_plan(plan_folder)
+    heavy_block = "A" * 2800
+    (plan_folder / "03-execution.md").write_text(
+        "# Execution\n\n"
+        "## Objective\nKeep compact validation deterministic.\n\n"
+        "## Chosen logic\nLarge payload to trigger warning.\n\n"
+        "## Key assumptions\nThe test controls markdown size.\n\n"
+        "## Executable steps\n"
+        f"1. Trim oversized execution content. {heavy_block}\n"
+        "   Target: `03-execution.md`\n"
+        "   Acceptance: warning appears for compact profile.\n"
+        "   Validation: handoff-check json output.\n"
+        "   Fallback: escalate to extended profile.\n\n"
+        "## Validation\n- handoff-check\n",
+        encoding="utf-8",
+    )
+    result = run_cli("handoff-check", plan_folder, "--format", "json")
+    payload = json.loads(result.stdout)
+    assert result.returncode == 0
+    assert any("Compact execution file is oversized" in warning for warning in payload["warnings"])
+
+
+def test_handoff_check_rejects_extended_contract_without_ordered_validation(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "extended-without-ordered-validation"
+    _write_extended_plan(plan_folder)
+    contract_path = plan_folder / "04-implementation-contract.md"
+    contract_path.write_text(
+        contract_path.read_text(encoding="utf-8").replace(
+            "Run in this order:\n1. pytest -q tests/github/skills/internal_gateway_writing_plans/scripts/test_plan_authoring.py",
+            "- pytest -q tests/github/skills/internal_gateway_writing_plans/scripts/test_plan_authoring.py",
+        ),
+        encoding="utf-8",
+    )
+    result = run_cli("handoff-check", plan_folder, "--format", "json")
+    payload = json.loads(result.stdout)
+    assert result.returncode == 1
+    assert any(f["code"] == "implementation-contract-validation-order" for f in payload["findings"])

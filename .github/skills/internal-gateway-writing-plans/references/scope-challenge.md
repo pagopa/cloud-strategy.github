@@ -28,6 +28,9 @@ Every retained plan must be able to answer these questions:
 9. `profile`: Is `Plan profile` declared as `compact` or `extended`? Currently, no other profiles are supported. Missing or unrecognized profiles return `unsupported-plan-contract`.
 10. `summary language`: Is `01-change-summary.md` written in Italian with clear subsections and a `Risorsa | Azione | Scopo` table for non-trivial plans?
 11. `summary clarity`: Are changed resources and intended actions obvious in the summary without reading deeper files?
+12. `route map`: Do `Source item ledger` routes point to existing numbered files or explicit non-action routes?
+13. `questions state`: Is `questions.md` either `- none` (ready) or explicitly blocking execution handoff?
+14. `token budget`: Is token weight proportional to profile so first reads stay within a practical budget?
 
 For non-trivial retained plans and strategic-to-operational or
 monolithic-to-executable conversions, also answer this:

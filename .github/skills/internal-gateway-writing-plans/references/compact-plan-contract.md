@@ -30,6 +30,24 @@ content. Folders without a declared `Plan profile` return
 | `questions.md` | User-only decisions. Write `- none` when nothing remains. | Yes |
 | `done-*`, `evidence-envelope.md`, `completion-report.md` | Final packaging artifacts created after execution, not during authoring. | No (authoring) |
 
+## Compact Read Order
+
+Mandatory first reads:
+
+1. `01-change-summary.md`
+2. `02-source-item-ledger.md`
+3. `03-execution.md`
+
+Optional reads:
+
+- `questions.md` only to confirm `- none` before execution handoff.
+
+Excluded reads:
+
+- `done-*`, `evidence-envelope.md`, and `completion-report.md` during authoring.
+
+`compact` is ready for a small/fast executor only after `handoff-check` is ready.
+
 ## Escalation To Extended
 
 Escalate from `compact` to `extended` when any of these is true:
@@ -43,6 +61,18 @@ Escalate from `compact` to `extended` when any of these is true:
 
 When escalating, add `04-implementation-contract.md` and additional numbered files
 by category (`05-...`). Update `Plan profile` to `extended`.
+
+## Lifecycle States
+
+- `scaffold`: created by `init`; not ready for execution.
+- `ready`: `handoff-check` ready and `questions.md` is `- none`.
+- `closed`: execution and packaging handled by the approved consumer.
+
+## Compact Token Expectations
+
+- Keep total estimated tokens small enough for a small/fast executor handoff.
+- Keep `03-execution.md` concise and concrete; long procedural detail is an
+  escalation signal to `extended`.
 
 ## Template: 01-change-summary.md (Italian)
 
