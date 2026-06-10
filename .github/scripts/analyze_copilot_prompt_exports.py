@@ -81,6 +81,17 @@ def first_str(mapping: dict[str, object], *keys: str) -> str:
     return ""
 
 
+def tool_name_from_log(log: dict[str, object]) -> str:
+    tool_value = log.get("tool")
+    if isinstance(tool_value, str) and tool_value:
+        return tool_value
+    if isinstance(tool_value, dict):
+        tool_name = first_str(tool_value, "tool_name", "toolName", "name", "id", "tool")
+        if tool_name:
+            return tool_name
+    return first_str(log, "tool_name", "toolName", "name")
+
+
 def measure_payload_bytes(value: object) -> int:
     if value is None:
         return 0
@@ -119,10 +130,10 @@ def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
         completion_details = read_dict(usage.get("completion_tokens_details") or usage.get("completionTokensDetails"))
         reasoning_tokens = first_int(completion_details, "reasoning_tokens", "reasoningTokens") or 0
 
-    tool_name = first_str(log, "tool_name", "toolName", "name")
+    tool_name = tool_name_from_log(log)
     kind = normalized_kind(log.get("kind") or log.get("type"))
     tool_kind = normalized_kind(tool_name)
-    is_tool = bool(tool_name) and ("tool" in tool_kind or "tool" in kind)
+    is_tool = "tool" in kind or "tool" in tool_kind
     payload_bytes = 0
     if is_tool:
         payload_bytes = measure_payload_bytes(log.get("args") or log.get("arguments") or log.get("input"))

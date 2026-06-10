@@ -39,10 +39,10 @@ def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(tmp_path: Pat
                         },
                     },
                     {
-                        "name": "tool_search",
                         "kind": "toolCall",
+                        "tool": "tool_search",
                         "args": {"query": "graphify"},
-                        "response": {"message": "BBBBB"},
+                        "result": {"message": "BBBBB"},
                         "metadata": {
                             "usage": {
                                 "prompt_tokens": 40,
@@ -51,10 +51,10 @@ def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(tmp_path: Pat
                         },
                     },
                     {
-                        "name": "retry_tool_search",
                         "kind": "toolCall",
-                        "args": {"query": "graphify"},
-                        "response": {"message": "BBBBB"},
+                        "tool": {"name": "retry_tool_search"},
+                        "arguments": {"query": "graphify"},
+                        "output": {"message": "BBBBB"},
                         "metadata": {
                             "usage": {
                                 "prompt_tokens": 40,
@@ -85,7 +85,9 @@ def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(tmp_path: Pat
     assert payload["aggregate"]["completion_tokens"] == 16
     assert payload["aggregate"]["reasoning_tokens"] == 3
     assert payload["aggregate"]["max_prompt_tokens"] == 100
+    assert payload["aggregate"]["tool_calls"] == 2
     assert payload["aggregate"]["tool_counts_by_name"] == {"retry_tool_search": 1, "tool_search": 1}
+    assert payload["aggregate"]["tool_payload_bytes"] > 0
     assert payload["aggregate"]["top_tool_payloads"][0]["tool_name"] == "retry_tool_search"
     assert payload["aggregate"]["top_tool_payloads"][0]["payload_bytes"] >= payload["aggregate"]["top_tool_payloads"][1]["payload_bytes"]
     assert payload["aggregate"]["retry_like_duplicate_count"] == 1
