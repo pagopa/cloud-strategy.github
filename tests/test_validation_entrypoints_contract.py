@@ -63,7 +63,9 @@ def test_internal_graphify_requires_prepare_before_structural_use() -> None:
     assert "Canonical structural-use preparation command: `make graphify-prepare`" in skill_text
     assert "Before every structural Graphify command, run `make graphify-prepare`" in skill_text
     assert "--resolve-node" in skill_text
+    assert "Do not pass wrapper-resolved node ids to `graphify path`" in skill_text
     assert "make graphify-prepare" in agent_text
+    assert "Treat `graphify path` as best-effort label search only" in agent_text
 
 
 def test_docs_lint_target_does_not_require_npm_network_outside_ci() -> None:

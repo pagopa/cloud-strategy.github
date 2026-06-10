@@ -33,7 +33,7 @@ When the current repository exposes this skill, it is the canonical entry point 
 - Canonical check command: `make graphify-check` (configurable local seam)
 - Canonical structural-use preparation command: `make graphify-prepare` (configurable local seam)
 - Optional local stale-marker command: `python3 ./.github/scripts/graphify_update.py --root . --mark-stale <paths...>`
-- Node resolution command for path-sensitive CLI calls: `python3 ./.github/scripts/graphify_update.py --root . --resolve-node <path-or-label>`
+- Node resolution command for `graphify explain` and `graphify affected`: `python3 ./.github/scripts/graphify_update.py --root . --resolve-node <path-or-label>`
 - Canonical output path: `graphify-out/graph.json`
 - Required local artifacts: `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`
 - Optional visualization artifact: `graphify-out/graph.html`
@@ -77,7 +77,7 @@ When activation gate markers are missing, this skill must not propose a refresh 
 
 - Use `graphify query` for high-level repository structure or community questions.
 - Use `graphify explain $(python3 ./.github/scripts/graphify_update.py --root . --resolve-node <path-or-label>)` when a full repository path or duplicate label might not resolve directly.
-- Use `graphify path <from> <to>` to inspect relationship chains.
+- Use `graphify path <from> <to>` only as best-effort label lookup. Do not pass wrapper-resolved node ids to `graphify path`; if label resolution is ambiguous or misleading, fall back to `graphify query` plus file verification.
 - Use `graphify affected $(python3 ./.github/scripts/graphify_update.py --root . --resolve-node <path-or-label>)` to inspect likely impact around a file or area. Treat this as best-effort; always verify real callers with `rg` or targeted source reads.
 
 ## Output Expectations
