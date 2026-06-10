@@ -484,6 +484,8 @@ def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
     assert "## Deterministic Operator Protocol" in content
     assert "Install sync is unidirectional: repo -> home only." in content
     assert "default `skills` target" in content
+    assert "python3 ./.github/scripts/sync_home_ai_resources.py" in content
+    assert "--format compact" in content
     assert (
         "The `bisync` lane provides explicit bidirectional synchronization" in content
     )
@@ -543,8 +545,8 @@ def test_agent_and_skill_align_on_table_first_reporting() -> None:
     agent_content = agent_path.read_text(encoding="utf-8")
     skill_content = skill_path.read_text(encoding="utf-8")
 
-    assert "table-first report layout" in agent_content
-    assert "why each blocker matters" in agent_content
+    assert "table-first report layout" not in agent_content
+    assert "why each blocker matters" not in agent_content
     assert "table-first report" in skill_content
 
 
@@ -561,7 +563,7 @@ def test_agent_and_skill_align_on_default_sync_sequence() -> None:
     skill_content = skill_path.read_text(encoding="utf-8")
 
     expected = "run install `plan` first for the default `skills` target"
-    assert expected in agent_content
+    assert expected not in agent_content
     assert "Run install `plan` for the default `skills` target. Stop on blockers." in skill_content
 
 

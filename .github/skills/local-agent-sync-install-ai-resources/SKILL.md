@@ -10,6 +10,7 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 - None.
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
+Canonical command examples use `python3 ./.github/scripts/sync_home_ai_resources.py --format compact`.
 
 The paired agent is a thin UX wrapper; this skill owns all business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. The user-visible report must stay table-first: blockers explain why the run stopped, plan output explains what will change and why, and apply output explains exactly what changed and how it was verified. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
 
@@ -37,12 +38,12 @@ Every mode has exactly one command. Do not infer the mode, do not skip blockers,
 | User request | Lane | Command |
 | --- | --- | --- |
 | Generic `sync` without a mode | Run install `plan` for `skills` first, then run `bisync plan` | See `Default Sync Sequence` below |
-| `bisync plan` | Bidirectional drift detection (read-only) | `./.github/scripts/sync_home_ai_resources.py bisync plan --home-root ~` |
-| `bisync apply` | Bidirectional drift resolution (writes to both sides) | `./.github/scripts/sync_home_ai_resources.py bisync apply --home-root ~` |
-| `plan` | Install lane dry run | `./.github/scripts/sync_home_ai_resources.py plan --targets <targets> --home-root ~` |
-| `audit` | Compare source, manifest, and target paths | `./.github/scripts/sync_home_ai_resources.py audit --targets <targets> --home-root ~` |
-| `doctor` | Readiness checks for runtime roots and support matrix | `./.github/scripts/sync_home_ai_resources.py doctor --targets <targets> --home-root ~` |
-| `apply` | Install lane materialization | `./.github/scripts/sync_home_ai_resources.py apply --targets <targets> --home-root ~` |
+| `bisync plan` | Bidirectional drift detection (read-only) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync plan --home-root ~` |
+| `bisync apply` | Bidirectional drift resolution (writes to both sides) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync apply --home-root ~` |
+| `plan` | Install lane dry run | `python3 ./.github/scripts/sync_home_ai_resources.py plan --targets <targets> --home-root ~` |
+| `audit` | Compare source, manifest, and target paths | `python3 ./.github/scripts/sync_home_ai_resources.py audit --targets <targets> --home-root ~` |
+| `doctor` | Readiness checks for runtime roots and support matrix | `python3 ./.github/scripts/sync_home_ai_resources.py doctor --targets <targets> --home-root ~` |
+| `apply` | Install lane materialization | `python3 ./.github/scripts/sync_home_ai_resources.py apply --targets <targets> --home-root ~` |
 
 For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh` and omit `--home-root` (defaults to `$HOME`).
 When the desired active runtimes change, pair `--retire-targets <targets>` with `--prune-managed` to remove runtime-specific managed copies and drop those targets from the manifest while keeping the remaining targets active.
@@ -179,7 +180,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 ## Bundled Automation
 
-- Prefer `./.github/scripts/sync_home_ai_resources.py` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior.
+- Prefer `python3 ./.github/scripts/sync_home_ai_resources.py` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior, and keep `--format compact` on model-facing runs.
 - Use `scripts/run.sh` when a portable skill-local environment is needed; it installs the locked `PyYAML` dependency from `scripts/requirements.txt`.
 - Keep library behavior inside `scripts/home_syncing.py`, bisync logic inside `scripts/bisync_skills.py`, and reference loading inside `scripts/home_sync_contract.py`.
 
