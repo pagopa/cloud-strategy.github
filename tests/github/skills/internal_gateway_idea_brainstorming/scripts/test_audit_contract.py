@@ -16,7 +16,16 @@ def run_json(*args: str) -> dict:
 
 def test_audit_reports_minimal_marker_shape() -> None:
     report = run_json()
-    assert set(report["markers"]) == {"critical", "planning", "stop_before_execution"}
+    assert set(report["markers"]) == {
+        "critical",
+        "planning",
+        "stop_before_execution",
+        "plan_approval_gate",
+        "handoff_gate_4",
+        "ask_before_critical",
+        "explicit_plan_approval",
+        "alias_mapping",
+    }
     assert report["strict_ok"] is True
 
 

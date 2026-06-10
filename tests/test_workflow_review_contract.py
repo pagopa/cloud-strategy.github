@@ -16,9 +16,24 @@ def test_agents_and_policy_promote_conversational_gateways() -> None:
 
 def test_idea_gateway_owns_retained_planning() -> None:
     skill_text = read_text(".github/skills/internal-gateway-idea-brainstorming/SKILL.md")
+    reference_text = read_text(
+        ".github/skills/internal-gateway-idea-brainstorming/references/guided-decision-interview.md"
+    )
+    runtime_text = read_text(
+        ".github/skills/internal-gateway-idea-brainstorming/agents/openai.yaml"
+    )
     assert "retained plan" in skill_text
     assert "internal-gateway-writing-plans" in skill_text
     assert "stop before execution" in skill_text
+    assert "Plan Approval Gate 3" in skill_text
+    assert "Handoff Gate 4" in skill_text
+    assert "ask whether to continue" in skill_text
+    assert "go`/`ok`/`procedi" in skill_text
+    assert "Plan Approval Gate 3: waiting" in reference_text
+    assert "Handoff Gate 4: plan-created" in reference_text
+    assert "mini-plan" in reference_text
+    assert "go/ok/procedi" in runtime_text
+    assert "At Interview Gate 1: ready-for-critical, ask whether to continue" in runtime_text
 
 
 def test_review_gateway_exists_and_stops_before_fixes() -> None:

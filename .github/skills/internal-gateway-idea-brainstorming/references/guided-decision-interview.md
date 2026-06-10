@@ -12,10 +12,12 @@ Use this reference when `internal-gateway-idea-brainstorming` needs the exact pa
 6. Record accepted defaults and overrides in the decision ledger before advancing.
 7. After the user's bulk response, declare Idea Gate 0 as `grill-me required` or `grill-me satisfied`. Ask another numbered question block only for unresolved ambiguity, dependent follow-up decisions, or reopened branches.
 8. Do not treat branch confirmations as phase-transition checkpoints.
-9. After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, summarize the compact decision ledger and declare `Interview Gate 1: ready-for-critical`.
-10. After `Critical Gate 2: confident`, declare `Handoff Gate 3: ready-for-owner-change` only when recommending a peer transition.
-11. Treat `Continuation: waiting` as a handoff lock after `ready-for-owner-change`; proposals, alternatives, or wording preferences do not clear the lock without explicit owner/action/scope approval.
-12. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview Gate 1: reopen`.
+9. After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, summarize the compact decision ledger and declare `Interview Gate 1: ready-for-critical` only when assumptions/defaults are accepted, no ledger contradictions remain, and the validation path is identified.
+10. At `Interview Gate 1: ready-for-critical`, ask whether to continue to critical before loading `internal-gateway-critical-master`.
+11. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview Gate 1: reopen`.
+12. After `Critical Gate 2: confident`, declare `Plan Approval Gate 3: waiting` and ask for explicit `go`/`ok`/`procedi` or equivalent approval before loading `internal-gateway-writing-plans`.
+13. Only after explicit approval, declare `Plan Approval Gate 3: approved`, create the retained plan, then declare `Handoff Gate 4: plan-created`.
+14. Treat `Continuation: waiting` as a handoff lock after `Handoff Gate 4: plan-created`; proposals, alternatives, or wording preferences do not clear the lock without explicit owner/action/scope approval.
 
 ## Decision Ledger Fields
 
@@ -29,7 +31,7 @@ Each row in the decision ledger:
 | `Recommendation` | The recommended answer and rationale. |
 | `User answer` | The explicit user reply, or `pending`. |
 | `Impact` | `local` or `broad`; used during reopen to decide branch scope. |
-| `Gate` | The active gate affected by the branch: `Idea Gate 0`, `Interview Gate 1`, `Critical Gate 2`, or `Handoff Gate 3`. |
+| `Gate` | The active gate affected by the branch: `Idea Gate 0`, `Interview Gate 1`, `Critical Gate 2`, `Plan Approval Gate 3`, or `Handoff Gate 4`. |
 
 ## Checkpoint States
 
@@ -41,7 +43,15 @@ Each row in the decision ledger:
 | `Interview Gate 1: reopen` | Critical pass or realignment reopened one or more branches. | When resuming affected branches after `reopen`. |
 | `Critical Gate 2: confident` | Critical challenge found the Definition Brief fit for handoff. | Before recommending the next owner. |
 | `Critical Gate 2: reopen` | Critical challenge found material issues. | Before returning to affected branches in `discover`. |
-| `Handoff Gate 3: ready-for-owner-change` | Confident critical outcome; ready to recommend the next owner and stop with a handoff lock. | Only before a peer transition; the user confirms and invokes the next owner manually in a separate turn. |
+| `Plan Approval Gate 3: waiting` | Critical is confident but planning approval is pending. | Immediately after `Critical Gate 2: confident` and before loading `internal-gateway-writing-plans`. |
+| `Plan Approval Gate 3: approved` | Explicit plan approval was received. | After explicit `go`/`ok`/`procedi` or equivalent approval. |
+| `Handoff Gate 4: plan-created` | Retained plan was created and execution is blocked. | After plan creation with `Continuation: waiting` and stop-before-execution behavior. |
+
+## Plan Alias Mapping
+
+- `mini-plan` maps to canonical `compact` and recommended consumer `internal-gateway-simple-task`.
+- `plan` maps to canonical `extended` and recommended consumer `internal-gateway-execute-plans`.
+- Alias labels are conversational only; canonical profile terms remain `compact` and `extended`.
 
 ## Proportional Depth
 
