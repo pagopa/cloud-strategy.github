@@ -38,3 +38,13 @@ def test_gateway_handoff_references_use_canonical_execution_owner() -> None:
     assert "internal-executing-plans" not in compatibility_text
     assert "internal-gateway-execute-plans" in handoff_text
     assert "internal-executing-plans" not in handoff_text
+
+
+def test_wrapper_prompts_respect_compact_and_extended_consumers() -> None:
+    writing_wrapper = read_text(".github/skills/internal-gateway-writing-plans/agents/openai.yaml")
+    simple_wrapper = read_text(".github/skills/internal-gateway-simple-task/agents/openai.yaml")
+    execute_wrapper = read_text(".github/skills/internal-gateway-execute-plans/agents/openai.yaml")
+    assert "route compact plans to internal-gateway-simple-task" in writing_wrapper
+    assert "extended plans to internal-gateway-execute-plans" in writing_wrapper
+    assert "Approved compact retained plans are supported" in simple_wrapper
+    assert "Compact execution belongs to internal-gateway-simple-task" in execute_wrapper

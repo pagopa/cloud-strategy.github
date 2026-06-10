@@ -47,4 +47,5 @@ retained-plan execution.
 
 - Work stayed single-lane and single-phase, or escalation was explicit.
 - Approved `compact` retained-plan execution stayed lightweight, used the `mini-plan-*` folder convention, and did not copy the extended `done-*` packaging loop.
+- `compact` closeout still uses the shared completion contract: `State: SHIPPED` is the only state that permits `done-*` markers and numbered-file removal.
 - Focused validation ran before completion claims, or the exact validation gap was reported.

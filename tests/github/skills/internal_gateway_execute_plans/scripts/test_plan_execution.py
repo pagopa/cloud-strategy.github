@@ -23,6 +23,24 @@ def run_cli(*args: str | Path) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _write_profile_ledger(plan_folder: Path, profile: str = "compact") -> None:
+    (plan_folder / "02-source-item-ledger.md").write_text(
+        "# Ledger\n\n"
+        "## Recommended use\napply-plan\n\n"
+        f"## Plan profile\n{profile}\n\n"
+        "## File map and role\n| File | Role |\n| --- | --- |\n| 01 | summary |\n\n"
+        "## Clarification gate\nclarification satisfied\n\n"
+        "## Target and anti-scope\nTarget.\n\n"
+        "## Owner and validator\nOwner.\n\n"
+        "## Stop conditions\nNone.\n\n"
+        "## Source item ledger\n"
+        "| ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| X-01 | Test | diff | diff | pytest | DONE | done-01 |\n",
+        encoding="utf-8",
+    )
+
+
 def _write_compact_plan(plan_folder: Path) -> None:
     plan_folder.mkdir(parents=True, exist_ok=True)
     (plan_folder / "01-change-summary.md").write_text(
@@ -34,21 +52,7 @@ def _write_compact_plan(plan_folder: Path) -> None:
         "## Decisione richiesta\nApprove.\n",
         encoding="utf-8",
     )
-    (plan_folder / "02-source-item-ledger.md").write_text(
-        "# Ledger\n\n"
-        "## Recommended use\napply-plan\n\n"
-        "## Plan profile\ncompact\n\n"
-        "## File map and role\n| File | Role |\n| --- | --- |\n| 01 | summary |\n\n"
-        "## Clarification gate\nclarification satisfied\n\n"
-        "## Target and anti-scope\nTarget.\n\n"
-        "## Owner and validator\nOwner.\n\n"
-        "## Stop conditions\nNone.\n\n"
-        "## Source item ledger\n"
-        "| ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |\n"
-        "| --- | --- | --- | --- | --- | --- | --- |\n"
-        "| X-01 | Test | diff | diff | pytest | PENDING | 03 |\n",
-        encoding="utf-8",
-    )
+    _write_profile_ledger(plan_folder, profile="compact")
     (plan_folder / "03-execution.md").write_text(
         "# Execution\n\n## Objective\nTest.\n\n## Chosen logic\nTest.\n\n"
         "## Key assumptions\nNone.\n\n## Executable steps\n1. Do it.\n\n## Validation\nTest.\n",
@@ -72,6 +76,7 @@ def _write_completed_plan(plan_folder: Path) -> None:
     )
     (plan_folder / "completion-report.md").write_text(
         "Completion Report\n"
+        "Plan profile: compact\n"
         "Active phase and owner: execute\n"
         "State: SHIPPED\n"
         "Continuation: none\n"
@@ -234,7 +239,7 @@ def test_completion_rejects_open_statuses(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nState: SHIPPED\n"
+        "Completion Report\nPlan profile: compact\nState: SHIPPED\n"
         "Continuation: none\nUser action required: none\nFiles changed: test\n"
         "Completed items: all\nIntentional non-actions: none\nValidators: pytest\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: all closed\n"
@@ -251,7 +256,7 @@ def test_completion_rejects_not_shipped_state(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_completed_plan(plan_folder)
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nState: PARTIAL\n"
+        "Completion Report\nPlan profile: compact\nState: PARTIAL\n"
         "Continuation: waiting\nUser action required: approve\nFiles changed: test\n"
         "Completed items: some\nIntentional non-actions: none\nValidators: pytest\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: open\n"
@@ -268,7 +273,7 @@ def test_completion_missing_envelope(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     plan_folder.mkdir()
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nState: SHIPPED\n"
+        "Completion Report\nPlan profile: compact\nState: SHIPPED\n"
         "Continuation: none\nUser action required: none\nFiles changed: test\n"
         "Completed items: all\nIntentional non-actions: none\nValidators: pytest\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: all closed\n"
@@ -294,7 +299,7 @@ def test_completion_missing_done_reference(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nState: SHIPPED\n"
+        "Completion Report\nPlan profile: compact\nState: SHIPPED\n"
         "Continuation: none\nUser action required: none\nFiles changed: test\n"
         "Completed items: all\nIntentional non-actions: none\nValidators: pytest\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: all closed\n"
@@ -312,7 +317,7 @@ def test_completion_cancelled_not_equivalent_to_shipped(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_completed_plan(plan_folder)
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nState: CANCELLED\n"
+        "Completion Report\nPlan profile: compact\nState: CANCELLED\n"
         "Continuation: none\nUser action required: none\nFiles changed: test\n"
         "Completed items: none\nIntentional non-actions: cancelled\nValidators: none\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: open\n"
@@ -328,8 +333,34 @@ def test_completion_cancelled_not_equivalent_to_shipped(tmp_path: Path) -> None:
 def test_completion_unsupported_rejected(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     plan_folder.mkdir()
-    # With no active numbered files, profile gate is skipped; reports package gaps
     (plan_folder / "03-still-active.md").write_text("# Active\n", encoding="utf-8")
+    result = run_cli("completion-check", plan_folder)
+    assert result.returncode != 0
+    assert "unsupported-plan-contract" in result.stdout
+
+
+def test_completion_rejects_missing_profile_when_packaged(tmp_path: Path) -> None:
+    """completion-check enforces the profile gate even with no active numbered files."""
+    plan_folder = tmp_path / "plan"
+    _write_completed_plan(plan_folder)
+    (plan_folder / "completion-report.md").write_text(
+        "Completion Report\n"
+        "Active phase and owner: execute\n"
+        "State: SHIPPED\n"
+        "Continuation: none\n"
+        "User action required: none\n"
+        "Files changed: test\n"
+        "Completed items: all\n"
+        "Intentional non-actions: none\n"
+        "Validators: pytest\n"
+        "Evidence envelope: evidence-envelope.md\n"
+        "Source-item ledger: all closed\n"
+        "Evidence gaps: none\n"
+        "Residual risks: none\n"
+        "Next-step package: none\n"
+        "Follow-up suggestions: none\n",
+        encoding="utf-8",
+    )
     result = run_cli("completion-check", plan_folder)
     assert result.returncode != 0
     assert "unsupported-plan-contract" in result.stdout

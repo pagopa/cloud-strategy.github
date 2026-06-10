@@ -69,3 +69,14 @@ def test_compact_and_extended_execution_owners_are_split() -> None:
     assert "internal-executing-plans" not in critical_text
     assert "approved `extended`" in executing_text
     assert "internal-gateway-execute-plans" in executing_text
+
+
+def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
+    simple_wrapper = read_text(".github/skills/internal-gateway-simple-task/agents/openai.yaml")
+    execute_wrapper = read_text(".github/skills/internal-gateway-execute-plans/agents/openai.yaml")
+    completion_reference = read_text(
+        ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
+    )
+    assert "Approved compact retained plans are supported" in simple_wrapper
+    assert "Compact execution belongs to internal-gateway-simple-task" in execute_wrapper
+    assert "`compact` execution remains owned by `internal-gateway-simple-task`" in completion_reference.lower()

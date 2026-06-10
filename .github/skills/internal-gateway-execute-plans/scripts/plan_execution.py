@@ -57,13 +57,22 @@ class Finding:
 def classify_profile(plan_folder: Path) -> str:
     """Classify plan profile. Returns profile name or 'unsupported'."""
     ledger_path = plan_folder / "02-source-item-ledger.md"
-    if not ledger_path.is_file():
-        return "unsupported"
-    text = ledger_path.read_text(encoding="utf-8")
-    if re.search(r"Plan profile[:\s]+extended", text):
-        return "extended"
-    if re.search(r"Plan profile[:\s]+compact", text):
-        return "compact"
+    if ledger_path.is_file():
+        text = ledger_path.read_text(encoding="utf-8")
+        if re.search(r"Plan profile[:\s]+extended", text):
+            return "extended"
+        if re.search(r"Plan profile[:\s]+compact", text):
+            return "compact"
+
+    # Packaged folders may no longer include numbered source files.
+    report_path = plan_folder / "completion-report.md"
+    if report_path.is_file():
+        report_text = report_path.read_text(encoding="utf-8")
+        if re.search(r"Plan profile[:\s]+extended", report_text):
+            return "extended"
+        if re.search(r"Plan profile[:\s]+compact", report_text):
+            return "compact"
+
     return "unsupported"
 
 
@@ -222,13 +231,12 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
     dones = done_files(plan_folder)
     findings: list[Finding] = []
 
-    # Profile gate: only check when active numbered files exist.
-    # SHIPPED removes all numbered files; profile was verified during planning.
-    if active:
-        _profile, profile_findings = _check_unsupported(plan_folder)
-        if _profile is None:
-            _emit_findings(profile_findings, format)
-            return 1
+    # Profile gate is always required during completion checks, including
+    # packaged folders where numbered plan files were already removed.
+    _profile, profile_findings = _check_unsupported(plan_folder)
+    if _profile is None:
+        _emit_findings(profile_findings, format)
+        return 1
 
     # Active numbered files must be gone for SHIPPED
     if active:
