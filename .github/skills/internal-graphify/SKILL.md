@@ -31,8 +31,9 @@ When the current repository exposes this skill, it is the canonical entry point 
 
 - Canonical refresh command: `make graphify-update` (configurable local seam)
 - Canonical check command: `make graphify-check` (configurable local seam)
+- Canonical structural-use preparation command: `make graphify-prepare` (configurable local seam)
 - Optional local stale-marker command: `python3 ./.github/scripts/graphify_update.py --root . --mark-stale <paths...>`
-- Optional lazy structural-use preparation: `python3 ./.github/scripts/graphify_update.py --root . --prepare-structural-use`
+- Node resolution command for path-sensitive CLI calls: `python3 ./.github/scripts/graphify_update.py --root . --resolve-node <path-or-label>`
 - Canonical output path: `graphify-out/graph.json`
 - Required local artifacts: `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`
 - Optional visualization artifact: `graphify-out/graph.html`
@@ -43,6 +44,7 @@ When the current repository exposes this skill, it is the canonical entry point 
 
 - `graphify-out/` presence alone is never sufficient for trust.
 - Trust graph-derived hints only when freshness evidence is current and valid.
+- Before every structural Graphify command, run `make graphify-prepare` and continue only when it reports `status: fresh`.
 - Refresh only when the graph is missing, clearly stale for the active question, or the user explicitly asks.
 - Treat the canonical check command as the freshness gate. Trust graph-derived hints only when it passes, or when the current commit and governed corpus hash still match the last refresh evidence.
 - After meaningful repository changes in the area under investigation, prefer a refresh before trusting older graph answers.
@@ -58,15 +60,15 @@ This skill applies when the current working directory exposes the configured act
 - `.github/skills/internal-graphify/SKILL.md`
 - `.github/scripts/graphify_update.py`
 - `.graphifyignore`
-- `Makefile` with `graphify-update` and `graphify-check` targets
+- `Makefile` with `graphify-update`, `graphify-check`, and `graphify-prepare` targets
 
 When activation gate markers are missing, this skill must not propose a refresh or assume `graphify-out/` exists. Fall back to standard search or the upstream `graphify` skill. Missing local seam always resolves to safe fallback, not silent graph trust.
 
 ## Workflow
 
 1. Verify that the repository exposes the activation gate markers above.
-2. Check whether `graphify-out/graph.json` exists and is fresh enough for the current question.
-3. If refresh is needed and allowed, run the canonical refresh command or the lazy structural-use preparation seam.
+2. Run `make graphify-prepare` before `graphify query`, `graphify explain`, `graphify path`, or `graphify affected`.
+3. If preparation returns `fallback-used`, use `rg`, targeted reads, or symbol search instead of Graphify for the claim.
 4. Use the smallest Graphify command that answers the question.
 5. Verify concrete claims against real repository files before finalizing the answer.
 6. Fall back to `rg`, targeted file reads, or symbol search when Graphify output is missing, stale, ambiguous, or not precise enough.
@@ -74,9 +76,9 @@ When activation gate markers are missing, this skill must not propose a refresh 
 ## Command Hints
 
 - Use `graphify query` for high-level repository structure or community questions.
-- Use `graphify explain <path>` to summarize a file or folder role.
+- Use `graphify explain $(python3 ./.github/scripts/graphify_update.py --root . --resolve-node <path-or-label>)` when a full repository path or duplicate label might not resolve directly.
 - Use `graphify path <from> <to>` to inspect relationship chains.
-- Use `graphify affected <path>` to inspect likely impact around a file or area. Treat this as best-effort; always verify real callers with `rg` or targeted source reads.
+- Use `graphify affected $(python3 ./.github/scripts/graphify_update.py --root . --resolve-node <path-or-label>)` to inspect likely impact around a file or area. Treat this as best-effort; always verify real callers with `rg` or targeted source reads.
 
 ## Output Expectations
 
@@ -91,4 +93,5 @@ When activation gate markers are missing, this skill must not propose a refresh 
 
 - `make graphify-update`
 - `make graphify-check`
+- `make graphify-prepare`
 - `make skill-lint`

@@ -136,9 +136,9 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 - Selected mode, selected targets, and why that mode is valid.
 - Source resources considered and the runtime support evidence used.
 - A mode-appropriate table layout from `references/sync-contract.md`:
-	- readiness and blocker table for `doctor`
-	- planned changes plus blockers-and-skips tables for `plan`, `audit`, and `bisync plan`
-	- completed actions plus residual issues tables for `apply` and `bisync apply`
+  - readiness and blocker table for `doctor`
+  - planned changes plus blockers-and-skips tables for `plan`, `audit`, and `bisync plan`
+  - completed actions plus residual issues tables for `apply` and `bisync apply`
 - Missing directories, conflicts, or documentation gates that block `apply`.
 - For every blocked path, conflict, stale-managed entry, or non-ok doctor check, include a human-readable motivation that explains the policy or safety reason behind the recommendation.
 - For every proposed or completed modification, include the reason the tool chose that action, such as newer repo content, newer home content, stale managed state, prune approval, or preserved unmanaged content.

@@ -533,6 +533,112 @@ def test_graphify_update_main_check_fails_when_metadata_is_missing(
     assert "missing" in capsys.readouterr().out.lower()
 
 
+def test_graphify_update_main_resolves_source_path_to_unique_node_id(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    out_dir = tmp_path / "graphify-out"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "graph.json").write_text(
+        json.dumps(
+            {
+                "nodes": [
+                    {
+                        "id": "github_skills_internal_graphify_skill_md",
+                        "label": "SKILL.md",
+                        "norm_label": "skill.md",
+                        "source_file": ".github/skills/internal-graphify/SKILL.md",
+                        "source_location": "L1",
+                    },
+                    {
+                        "id": "internal_graphify_skill_when_to_use",
+                        "label": "When to use",
+                        "norm_label": "when to use",
+                        "source_file": ".github/skills/internal-graphify/SKILL.md",
+                        "source_location": "L13",
+                    },
+                    {
+                        "id": "github_skills_other_skill_md",
+                        "label": "SKILL.md",
+                        "norm_label": "skill.md",
+                        "source_file": ".github/skills/other/SKILL.md",
+                        "source_location": "L1",
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            check=False,
+            mark_stale=None,
+            prepare_structural_use=False,
+            resolve_node=".github/skills/internal-graphify/SKILL.md",
+        ),
+    )
+
+    exit_code = graphify_update.main()
+
+    assert exit_code == 0
+    assert capsys.readouterr().out.strip() == "github_skills_internal_graphify_skill_md"
+
+
+def test_graphify_update_main_reports_ambiguous_node_resolution(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    out_dir = tmp_path / "graphify-out"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "graph.json").write_text(
+        json.dumps(
+            {
+                "nodes": [
+                    {
+                        "id": "first_parse_args",
+                        "label": "parse_args()",
+                        "norm_label": "parse_args()",
+                        "source_file": ".github/scripts/first.py",
+                        "source_location": "L10",
+                    },
+                    {
+                        "id": "second_parse_args",
+                        "label": "parse_args()",
+                        "norm_label": "parse_args()",
+                        "source_file": ".github/scripts/second.py",
+                        "source_location": "L20",
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            check=False,
+            mark_stale=None,
+            prepare_structural_use=False,
+            resolve_node="parse_args()",
+        ),
+    )
+
+    exit_code = graphify_update.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "Graphify node lookup is ambiguous" in output
+    assert ".github/scripts/first.py" in output
+    assert ".github/scripts/second.py" in output
+
+
 def test_graphify_update_mark_stale_ignores_out_of_scope_paths(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:

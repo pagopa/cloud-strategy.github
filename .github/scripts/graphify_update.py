@@ -58,6 +58,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Perform one lazy refresh when needed before structural Graphify use and emit status JSON.",
     )
+    parser.add_argument(
+        "--resolve-node",
+        metavar="QUERY",
+        help="Resolve a Graphify node label, id, or repository path to a unique node id.",
+    )
     return parser.parse_args()
 
 
@@ -260,6 +265,138 @@ def verify_graph_source_paths(root: Path, governed_paths: list[Path]) -> int:
     return 0
 
 
+def load_graph_nodes(root: Path) -> tuple[list[dict[str, object]], int]:
+    graph_path = root / GRAPHIFY_GRAPH_JSON
+    if not graph_path.is_file():
+        log_error("Graph JSON is missing; cannot resolve Graphify nodes.")
+        return [], 1
+
+    try:
+        graph_data = json.loads(graph_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        log_error(f"Graph JSON is not valid JSON: {exc}")
+        return [], 1
+
+    raw_nodes = graph_data.get("nodes")
+    if not isinstance(raw_nodes, list):
+        log_error("Graph JSON does not contain a node list.")
+        return [], 1
+
+    nodes = [node for node in raw_nodes if isinstance(node, dict)]
+    if not nodes:
+        log_error("Graph JSON does not contain any resolvable nodes.")
+        return [], 1
+
+    return nodes, 0
+
+
+def node_text(node: dict[str, object], key: str) -> str:
+    value = node.get(key)
+    return value if isinstance(value, str) else ""
+
+
+def node_identifier(node: dict[str, object]) -> str:
+    return node_text(node, "id") or node_text(node, "label")
+
+
+def relative_lookup_path(root: Path, lookup: str) -> str | None:
+    text = lookup.strip()
+    if not text:
+        return None
+
+    candidate = Path(text).expanduser()
+    if candidate.is_absolute():
+        try:
+            return candidate.resolve().relative_to(root.resolve()).as_posix()
+        except ValueError:
+            return None
+
+    normalized = text[2:] if text.startswith("./") else text
+    if "/" in normalized or (root / normalized).exists():
+        return Path(normalized).as_posix()
+    return None
+
+
+def preferred_source_file_nodes(
+    nodes: list[dict[str, object]], relative_path: str
+) -> list[dict[str, object]]:
+    basename = Path(relative_path).name
+    return [
+        node
+        for node in nodes
+        if node_text(node, "source_file") == relative_path
+        and (
+            node_text(node, "source_location") == "L1"
+            or node_text(node, "label") == basename
+        )
+    ]
+
+
+def describe_node_candidate(node: dict[str, object]) -> str:
+    source_file = node_text(node, "source_file") or "unknown source"
+    source_location = node_text(node, "source_location")
+    location = f" {source_location}" if source_location else ""
+    return f"- {node_identifier(node)} ({source_file}{location})"
+
+
+def print_ambiguous_node_lookup(lookup: str, candidates: list[dict[str, object]]) -> int:
+    log_error(f"Graphify node lookup is ambiguous for {lookup!r}.")
+    for candidate in candidates[:8]:
+        print(describe_node_candidate(candidate))
+    if len(candidates) > 8:
+        print(f"... and {len(candidates) - 8} more")
+    return 1
+
+
+def resolve_graphify_node_id(root: Path, lookup: str) -> int:
+    nodes, exit_code = load_graph_nodes(root)
+    if exit_code != 0:
+        return exit_code
+
+    text = lookup.strip()
+    if not text:
+        log_error("Graphify node lookup cannot be empty.")
+        return 1
+
+    relative_path = relative_lookup_path(root, text)
+    if relative_path is not None:
+        path_matches = [
+            node for node in nodes if node_text(node, "source_file") == relative_path
+        ]
+        if path_matches:
+            preferred_matches = preferred_source_file_nodes(nodes, relative_path)
+            if len(preferred_matches) == 1:
+                print(node_identifier(preferred_matches[0]))
+                return 0
+            if len(path_matches) == 1:
+                print(node_identifier(path_matches[0]))
+                return 0
+            return print_ambiguous_node_lookup(text, path_matches)
+
+    id_matches = [node for node in nodes if node_text(node, "id") == text]
+    if len(id_matches) == 1:
+        print(node_identifier(id_matches[0]))
+        return 0
+    if len(id_matches) > 1:
+        return print_ambiguous_node_lookup(text, id_matches)
+
+    normalized_text = text.lower()
+    label_matches = [
+        node
+        for node in nodes
+        if node_text(node, "label") == text
+        or node_text(node, "norm_label") == normalized_text
+    ]
+    if len(label_matches) == 1:
+        print(node_identifier(label_matches[0]))
+        return 0
+    if len(label_matches) > 1:
+        return print_ambiguous_node_lookup(text, label_matches)
+
+    log_error(f"No Graphify node matched {text!r}.")
+    return 1
+
+
 def run_graphify_check(root: Path) -> int:
     log_info("Running Graphify freshness and completeness check.")
 
@@ -438,6 +575,9 @@ def main() -> int:
 
     if getattr(args, "prepare_structural_use", False):
         return prepare_structural_use(root)
+
+    if getattr(args, "resolve_node", None) is not None:
+        return resolve_graphify_node_id(root, args.resolve_node)
 
     if args.check:
         exit_code = ensure_graphify_available()
