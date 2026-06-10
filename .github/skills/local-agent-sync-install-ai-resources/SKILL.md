@@ -11,7 +11,7 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 
-The paired agent is a thin UX wrapper; this skill owns all business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
+The paired agent is a thin UX wrapper; this skill owns all business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. The user-visible report must stay table-first: blockers explain why the run stopped, plan output explains what will change and why, and apply output explains exactly what changed and how it was verified. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
 
 ## When to use
 
@@ -116,12 +116,30 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 - `only-repo` and `only-home`: manual intervention required. Decide which side to keep or remove.
 - `equal-mtime`: hashes differ but mtime is equal. Manual decision required because the winner cannot be determined from timestamps alone.
 
+## Reporting Contract
+
+Use a table-first report for every mode. Do not dump raw JSON unless the user explicitly asks for it. Lead with one short status line that states mode, targets, result, blocker count, and `next_action.action`.
+
+Then follow the exact text layout in `references/sync-contract.md`:
+
+- `doctor`: readiness summary plus a blocker table that answers what failed, why it matters, and what the user must do next.
+- `plan`, `audit`, and `bisync plan`: a planned-changes table plus a blockers-and-skips table. For every proposed modification, explain the decision cause, for example repo copy is newer, home copy is newer, a managed resource is stale, or runtime support is not documented enough for apply.
+- `apply` and `bisync apply`: an actions-performed table plus a residual-issues table when needed. List each copied, updated, pruned, preserved, skipped, or unchanged resource and state why it was handled that way and how it was verified.
+
+Never report blocker codes alone. Translate each code into a plain-language reason and the required follow-up. Never say a resource will change without stating what evidence selected the winner or triggered the recommendation. When nothing changes, say so explicitly and still report validation and `next_action`.
+
 ## Output Expectations
 
+- One-line status header with mode, selected targets, overall status, blocker count, and `next_action.action`.
 - Selected mode, selected targets, and why that mode is valid.
 - Source resources considered and the runtime support evidence used.
+- A mode-appropriate table layout from `references/sync-contract.md`:
+	- readiness and blocker table for `doctor`
+	- planned changes plus blockers-and-skips tables for `plan`, `audit`, and `bisync plan`
+	- completed actions plus residual issues tables for `apply` and `bisync apply`
 - Missing directories, conflicts, or documentation gates that block `apply`.
 - For every blocked path, conflict, stale-managed entry, or non-ok doctor check, include a human-readable motivation that explains the policy or safety reason behind the recommendation.
+- For every proposed or completed modification, include the reason the tool chose that action, such as newer repo content, newer home content, stale managed state, prune approval, or preserved unmanaged content.
 - Repo/home bucket labels and winner/blocker summaries for bisync output.
 - Managed versus preserved target-local outcomes and any approved prune behavior.
 - Validation results, remaining blockers, and explicit validation gaps.

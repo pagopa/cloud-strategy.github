@@ -38,4 +38,6 @@ You are the UX wrapper for local home-directory AI resource sync. Load the paire
 
 ## Output Expectations
 
-- Report mode, targets, blockers, next_action, and validation result as defined by the paired skill.
+- Use the paired skill's table-first report layout: status summary first, then readiness, planned-changes, blocker, or completion tables as required by the active mode.
+- Report mode, targets, blockers, why each blocker matters, what will change or changed, `next_action`, and validation result as defined by the paired skill.
+- Do not surface blocker codes without the plain-language reason and required follow-up.

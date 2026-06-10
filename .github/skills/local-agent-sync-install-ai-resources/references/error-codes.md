@@ -2,6 +2,8 @@
 
 Use these stable error identifiers for planner, doctor, audit, and apply output.
 
+When rendering a user-visible report, convert each active code into a plain-language `why blocked` or `why skipped` explanation by combining the `Meaning` and `Rationale` columns. Do not surface a bare code without the policy reason behind it.
+
 | Code | Meaning | Default route | Rationale |
 | --- | --- | --- | --- |
 | `unknown-target` | The selected runtime target is not supported by the parser. | Stop and correct the target selection. | Prevents misconfigured or typoed targets from being silently ignored. |

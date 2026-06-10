@@ -81,6 +81,67 @@ Text and JSON reporting should expose at least:
 - `next_step`
 - `next_action` (structured object with `action`, `allowed`, `requires_explicit_approval`, `command`, `reason`)
 
+Text reports must use a table-first layout rather than a raw field dump.
+
+### Shared Header
+
+Always start with a short status line that includes:
+
+- mode
+- selected targets
+- overall result or status
+- blocker count
+- `next_action.action`
+
+### Doctor And Readiness Report
+
+After the shared header, include a short readiness summary and a single table with this shape:
+
+| Check or path | Status | Why it matters | What blocks next | Recommended action |
+| --- | --- | --- | --- | --- |
+
+Use this table for missing roots, documentation gaps, manifest problems, permission failures, and unsafe paths.
+
+### Plan, Audit, And Bisync Plan Report
+
+After the shared header, show one change-oriented table and one blocker table when they are non-empty.
+
+Planned changes table:
+
+| Resource or path | Lane | Planned action | Why this will change | Evidence or winner |
+| --- | --- | --- | --- | --- |
+
+Typical reasons include repo bundle newer than home, home bundle newer than repo, first-run install into a missing directory, stale managed resource marked for optional prune, or unmanaged content preserved by policy.
+
+Blockers and skips table:
+
+| Code or status | Resource or path | Why blocked or skipped | Required user action |
+| --- | --- | --- | --- |
+
+Populate `Why blocked or skipped` from the error-code meaning plus rationale, not from the code alone.
+
+### Apply And Bisync Apply Completion Report
+
+After the shared header, show one completed-actions table and one residual-issues table when needed.
+
+Completed actions table:
+
+| Resource or path | Action performed | Why it was done | Result | Verification |
+| --- | --- | --- | --- | --- |
+
+Allowed action labels include `copied`, `updated`, `pruned`, `preserved`, `skipped`, and `no-op`.
+
+Residual issues table:
+
+| Resource or path | Residual issue | Why it remains | Required follow-up |
+| --- | --- | --- | --- |
+
+`Verification` should state the strongest evidence available, for example hash match, manifest updated, post-apply plan clean, or explicit validation gap.
+
+### No-Op Reporting
+
+When no changes are proposed or applied, report `no-op` explicitly with the reason and still surface validation and `next_action`.
+
 ### Next Action Schema
 
 ```json

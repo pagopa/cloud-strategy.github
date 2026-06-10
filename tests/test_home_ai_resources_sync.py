@@ -477,6 +477,10 @@ def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
     )
     assert "Do not infer the mode, do not skip blockers" in content
     assert "next_action` as user approval for `apply`" in content
+    assert "## Reporting Contract" in content
+    assert "table-first report" in content
+    assert "planned-changes table" in content
+    assert "actions-performed table" in content
     assert "remove it manually so sync can restore the source-of-truth version" not in (
         content.lower()
     )
@@ -498,7 +502,35 @@ def test_sync_contract_documents_verified_bisync_reconciliation() -> None:
 
     assert "stale `target-modified-managed` blocker" in contract_content
     assert "bisync-manifest-reconcile-failed" in contract_content
+    assert "Text reports must use a table-first layout" in contract_content
+    assert "### Plan, Audit, And Bisync Plan Report" in contract_content
+    assert (
+        "| Resource or path | Lane | Planned action | Why this will change | Evidence or winner |"
+        in contract_content
+    )
+    assert (
+        "| Resource or path | Action performed | Why it was done | Result | Verification |"
+        in contract_content
+    )
     assert "bisync-manifest-reconcile-failed" in error_codes_content
+    assert "combining the `Meaning` and `Rationale` columns" in error_codes_content
     assert "remove it manually so sync can restore the source-of-truth version" not in (
         error_codes_content.lower()
     )
+
+
+def test_agent_and_skill_align_on_table_first_reporting() -> None:
+    agent_path = (
+        Path(__file__).resolve().parent
+        / "../.github/agents/local-sync-install-ai-resources.agent.md"
+    ).resolve()
+    skill_path = (
+        Path(__file__).resolve().parent
+        / "../.github/skills/local-agent-sync-install-ai-resources/SKILL.md"
+    ).resolve()
+    agent_content = agent_path.read_text(encoding="utf-8")
+    skill_content = skill_path.read_text(encoding="utf-8")
+
+    assert "table-first report layout" in agent_content
+    assert "why each blocker matters" in agent_content
+    assert "table-first report" in skill_content

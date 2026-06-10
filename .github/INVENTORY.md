@@ -53,11 +53,12 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-debugging/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
-- `.github/skills/internal-executing-plans/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
+- `.github/skills/internal-gateway-execute-plans/SKILL.md`
 - `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
 - `.github/skills/internal-gateway-review/SKILL.md`
 - `.github/skills/internal-gateway-simple-task/SKILL.md`
+- `.github/skills/internal-gateway-writing-plans/SKILL.md`
 - `.github/skills/internal-gcp-governance/SKILL.md`
 - `.github/skills/internal-gcp-operations/SKILL.md`
 - `.github/skills/internal-gcp-organization-structure/SKILL.md`
@@ -90,7 +91,6 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-tdd/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
-- `.github/skills/internal-writing-plans/SKILL.md`
 - `.github/skills/internal-yaml/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
