@@ -1,6 +1,6 @@
 version: 1
 defaults:
-  include_internal_skills: false
+  include_internal_skills: true
   include_local_skills: false
   include_unlisted_skills: false
 resources:
