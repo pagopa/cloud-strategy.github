@@ -17,6 +17,8 @@ Portable review orchestrator. This skill owns review scope, lens selection,
 findings consolidation, critical support, and remediation-plan transition. It
 does not apply fixes.
 
+See `references/review-gate.md` for the review output contract and gate states.
+
 ## When to use
 
 - The user asks for review of a concrete artifact, diff, workflow, or bundle.
@@ -25,5 +27,6 @@ does not apply fixes.
 ## Validation
 
 - Findings stay defect-first.
+- Review output carries findings, severity, confidence, evidence gap, route or next owner, and a Review Gate outcome before the final verdict.
 - Retained remediation plans are authored by `internal-gateway-writing-plans`.
 - The gateway stops before fixes.

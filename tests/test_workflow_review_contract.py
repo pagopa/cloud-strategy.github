@@ -24,10 +24,17 @@ def test_idea_gateway_owns_retained_planning() -> None:
 def test_review_gateway_exists_and_stops_before_fixes() -> None:
     skill_text = read_text(".github/skills/internal-gateway-review/SKILL.md")
     agent_text = read_text(".github/agents/internal-gateway-review.agent.md")
+    review_gate_text = read_text(".github/skills/internal-gateway-review/references/review-gate.md")
+    review_gate_lower = review_gate_text.lower()
     assert "defect-first review" in skill_text
     assert "does not apply fixes" in skill_text
     assert "internal-gateway-writing-plans" in skill_text
     assert "internal-gateway-simple-task" in agent_text
+    assert "Review Gate" in review_gate_text
+    assert "severity" in review_gate_lower
+    assert "confidence" in review_gate_lower
+    assert "evidence gap" in review_gate_lower
+    assert "route or next owner" in review_gate_lower
 
 
 def test_compact_and_extended_execution_owners_are_split() -> None:

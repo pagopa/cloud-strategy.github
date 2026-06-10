@@ -26,3 +26,12 @@ def test_executing_plans_accepts_only_extended_consumers() -> None:
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
     assert "approved `extended`" in executing_text
     assert "Reject any folder whose recommended consumer is not `internal-gateway-execute-plans`" in executing_text
+
+
+def test_gateway_handoff_references_use_canonical_execution_owner() -> None:
+    compatibility_text = read_text(".github/skills/internal-gateway-idea-brainstorming/references/compatibility-matrix.md")
+    handoff_text = read_text(".github/skills/internal-gateway-execute-plans/references/plan-handoff.md")
+    assert "internal-gateway-execute-plans" in compatibility_text
+    assert "internal-executing-plans" not in compatibility_text
+    assert "internal-gateway-execute-plans" in handoff_text
+    assert "internal-executing-plans" not in handoff_text

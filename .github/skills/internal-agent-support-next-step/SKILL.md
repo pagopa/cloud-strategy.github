@@ -11,7 +11,7 @@ chosen or confirmed.
 ## When to use
 
 - `internal-gateway-idea-brainstorming`, `internal-gateway-review`,
-  `internal-gateway-simple-task`, `internal-executing-plans`, or
+  `internal-gateway-simple-task`, `internal-gateway-execute-plans`, or
   `internal-gateway-critical-master` stop with a visible transition.
 
 ## Package Contract

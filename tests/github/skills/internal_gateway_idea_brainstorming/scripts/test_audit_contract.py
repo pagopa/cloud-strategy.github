@@ -23,3 +23,9 @@ def test_audit_reports_minimal_marker_shape() -> None:
 def test_audit_script_emits_json_for_invocation() -> None:
     report = run_json()
     assert isinstance(report, dict)
+
+
+def test_audit_script_checks_the_canonical_planning_owner() -> None:
+    script_text = SCRIPT_PATH.read_text(encoding="utf-8")
+    assert "internal-gateway-writing-plans" in script_text
+    assert "internal-writing-plans" not in script_text

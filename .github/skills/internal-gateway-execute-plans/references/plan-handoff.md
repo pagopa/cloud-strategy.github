@@ -1,8 +1,8 @@
 # Plan Handoff
 
-Use this reference when `internal-executing-plans` receives a retained plan or
-Decision Brief from planning. It defines the minimum input contract before the
-`done-*` loop starts.
+Use this reference when `internal-gateway-execute-plans` receives a retained
+plan or Decision Brief from planning. It defines the minimum input contract
+before the `done-*` loop starts.
 
 ## Source Pattern
 

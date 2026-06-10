@@ -56,6 +56,19 @@ def test_gateway_scenarios_have_unique_required_skill_lists() -> None:
             f"Duplicate skills in scenario '{scenario['scenario']}': {skills}"
         )
 
+    by_name = {scenario["scenario"]: scenario["required_skills"] for scenario in gateway_scenarios}
+    assert by_name["Plan handoff"] == [
+        "internal-gateway-idea-brainstorming",
+        "internal-gateway-writing-plans",
+        "internal-agent-support-next-step",
+    ]
+    assert by_name["Approved apply-plan"] == [
+        "internal-gateway-idea-brainstorming",
+        "internal-gateway-execute-plans",
+    ]
+    assert "internal-writing-plans" not in by_name["Plan handoff"]
+    assert "internal-executing-plans" not in by_name["Approved apply-plan"]
+
 
 def test_idea_gateway_scenarios_exist_and_are_unique() -> None:
     output = run_benchmark()

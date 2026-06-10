@@ -33,4 +33,4 @@ agents.
 | `internal-gateway-critical-master` | The next step is planning | `internal-gateway-idea-brainstorming` |
 | `internal-gateway-critical-master` | The next step is evidence-first review | `internal-gateway-review` |
 | `internal-gateway-idea-brainstorming` | A retained `compact` plan is approved for execution | `internal-gateway-simple-task` |
-| `internal-gateway-idea-brainstorming` | A retained `extended` plan is approved for execution | `internal-executing-plans` |
+| `internal-gateway-idea-brainstorming` | A retained `extended` plan is approved for execution | `internal-gateway-execute-plans` |

@@ -115,8 +115,8 @@ GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
         GATEWAY_SKILL, "grill-me", "internal-gateway-idea-brainstorming",
         "internal-gateway-critical-master",
     ],
-    "Plan handoff": [GATEWAY_SKILL, "internal-writing-plans", "internal-agent-support-next-step"],
-    "Approved apply-plan": [GATEWAY_SKILL, "internal-executing-plans"],
+    "Plan handoff": [GATEWAY_SKILL, "internal-gateway-writing-plans", "internal-agent-support-next-step"],
+    "Approved apply-plan": [GATEWAY_SKILL, "internal-gateway-execute-plans"],
     "Review verdict": [
         GATEWAY_SKILL, "internal-code-review", "internal-high-level-review",
         "internal-gateway-critical-master",
