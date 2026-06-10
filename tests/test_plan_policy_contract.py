@@ -17,9 +17,12 @@ def test_root_policy_files_keep_retained_plan_defaults_outside_always_on_detail(
 
 def test_writing_plans_declares_profile_consumer_contract() -> None:
     writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
+    compact_reference = read_text(".github/skills/internal-gateway-writing-plans/references/compact-plan-contract.md")
     assert "Recommended consumer" in writing_text
     assert "internal-gateway-simple-task" in writing_text
     assert "internal-gateway-execute-plans" in writing_text
+    assert "mini-plan-*" in compact_reference
+    assert "Esecuzione prevista" in compact_reference
 
 
 def test_executing_plans_accepts_only_extended_consumers() -> None:

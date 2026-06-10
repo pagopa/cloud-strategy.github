@@ -35,6 +35,8 @@ language, and the authoring-to-execution handoff contract.
 Choose the smallest profile that safely fits the work. Declare the profile in
 `02-source-item-ledger.md` under `Plan profile`.
 
+New `compact` plans should use `tmp/superpowers/mini-plan-*`.
+
 | Profile | When | Required files |
 | --- | --- | --- |
 | `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. | `01-change-summary.md`, `02-source-item-ledger.md`, `03-execution.md`, `questions.md` |
@@ -52,7 +54,7 @@ can provide.
 - `01-change-summary.md`: Italian human-readable decision summary with
   `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte` table
   (`Risorsa | Azione | Scopo`), `Comportamento scelto`, `Validazione prevista`,
-  and `Decisione richiesta`.
+  `Esecuzione prevista`, and `Decisione richiesta`.
 - `02-source-item-ledger.md`: control file with `Recommended use`,
   `Plan profile`, `Recommended consumer`, `File map and role`, clarification
   gate status, `Initial evidence pass`, `Reading budget`, target, anti-scope,

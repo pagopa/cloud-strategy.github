@@ -19,6 +19,7 @@ COMPACT_REQUIRED_FILES = frozenset(
 )
 EXTENDED_REQUIRED_FILES = COMPACT_REQUIRED_FILES | {"04-implementation-contract.md"}
 SUPPORTED_PROFILES = frozenset({"compact", "extended"})
+COMPACT_FOLDER_PREFIX = "mini-plan-"
 LEDGER_REQUIRED_FIELDS = (
     "Recommended use",
     "Recommended consumer",
@@ -37,6 +38,7 @@ ITALIAN_SUMMARY_SECTIONS = (
     "Risorse coinvolte",
     "Comportamento scelto",
     "Validazione prevista",
+    "Esecuzione prevista",
     "Decisione richiesta",
 )
 RESOURCE_TABLE_HEADER_RE = re.compile(r"\|?\s*Risorsa\s*\|\s*Azione\s*\|\s*Scopo\s*\|?")
@@ -85,6 +87,11 @@ def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
         print(f"ERROR: {plan_folder} already exists", file=sys.stderr)
         return 1
 
+    folder_findings = _validate_folder_name(plan_folder, profile)
+    if folder_findings:
+        print(f"ERROR: {folder_findings[0].message}", file=sys.stderr)
+        return 1
+
     plan_folder.mkdir(parents=True)
     (plan_folder / "01-change-summary.md").write_text(
         textwrap.dedent(
@@ -110,6 +117,10 @@ def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
             TODO
 
             ## Validazione prevista
+
+            TODO
+
+            ## Esecuzione prevista
 
             TODO
 
@@ -307,11 +318,18 @@ def _check_required_section_content(
         findings.append(Finding(f"{code_prefix}-placeholder", f"Section contains placeholder-only content: {heading}"))
 
 
-def _validate_folder_name(plan_folder: Path) -> list[Finding]:
+def _validate_folder_name(plan_folder: Path, profile: str) -> list[Finding]:
     parts = plan_folder.parts
     if "tmp" not in parts:
         return []
     folder_name = plan_folder.name.strip().lower()
+    if profile == "compact" and not folder_name.startswith(COMPACT_FOLDER_PREFIX):
+        return [
+            Finding(
+                "compact-folder-prefix-required",
+                f"Compact retained-plan folders must use mini-plan-*; got {plan_folder.name}",
+            )
+        ]
     if folder_name in GENERIC_TMP_NAMES:
         return [Finding("unclear-temp-directory-name", f"Temporary plan folder name is too generic: {plan_folder.name}")]
     tokens = [token for token in re.split(r"[-_]+", folder_name) if token]
@@ -494,7 +512,7 @@ def _validate(plan_folder: Path, profile: str) -> list[Finding]:
         if not (plan_folder / name).is_file():
             findings.append(Finding("missing-required-files", f"Missing required file: {name}"))
 
-    findings.extend(_validate_folder_name(plan_folder))
+    findings.extend(_validate_folder_name(plan_folder, profile))
 
     summary_path = plan_folder / "01-change-summary.md"
     if summary_path.is_file():

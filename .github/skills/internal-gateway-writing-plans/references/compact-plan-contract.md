@@ -3,6 +3,8 @@
 Schema, templates, and escalation rules for the `compact` retained-plan profile.
 Load this reference only when writing or validating a `compact` plan.
 
+New `compact` plans should use `tmp/superpowers/mini-plan-*`.
+
 `01-change-summary.md` is written in Italian per the retained-plan authoring
 contract. All other plan content uses English.
 
@@ -52,6 +54,8 @@ Required sections in Italian:
   for non-trivial plans. Each row names the resource, the action, and its purpose.
 - `Comportamento scelto` — chosen behavior and boundary rules.
 - `Validazione prevista` — validation path.
+- `Esecuzione prevista` — route visibility, including profile, consumer, folder
+  prefix, and execution file.
 - `Decisione richiesta` — decision request.
 
 ## Template: 03-execution.md

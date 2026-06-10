@@ -21,6 +21,7 @@ def _write_compact_plan(plan_folder: Path) -> None:
         "## Risorse coinvolte\n| Risorsa | Azione | Scopo |\n| --- | --- | --- |\n| Skill | update | Tighten handoff |\n"
         "## Comportamento scelto\nControlli semantici minimi e deterministici.\n"
         "## Validazione prevista\nPytest focalizzato e handoff-check.\n"
+        "## Esecuzione prevista\nProfilo: compact. Consumer: internal-gateway-simple-task. Prefisso cartella: mini-plan-*. File esecutivo: 03-execution.md.\n"
         "## Decisione richiesta\nApprovare l'esecuzione del piano.\n",
         encoding="utf-8",
     )
@@ -62,6 +63,14 @@ def _write_extended_plan(plan_folder: Path) -> None:
         ledger_text.replace("internal-gateway-simple-task", "internal-gateway-execute-plans").replace("compact", "extended"),
         encoding="utf-8",
     )
+    summary_path = plan_folder / "01-change-summary.md"
+    summary_path.write_text(
+        summary_path.read_text(encoding="utf-8").replace(
+            "Profilo: compact. Consumer: internal-gateway-simple-task. Prefisso cartella: mini-plan-*. File esecutivo: 03-execution.md.",
+            "Profilo: extended. Consumer: internal-gateway-execute-plans. File esecutivo: 03-execution.md. Contratto: 04-implementation-contract.md.",
+        ),
+        encoding="utf-8",
+    )
     (plan_folder / "04-implementation-contract.md").write_text(
         "# Implementation Contract\n\n"
         "## Sources\n- `.github/skills/internal-gateway-writing-plans/scripts/plan_authoring.py`\n\n"
@@ -74,11 +83,20 @@ def _write_extended_plan(plan_folder: Path) -> None:
 
 
 def test_init_creates_compact_scaffold(tmp_path: Path) -> None:
-    plan_folder = tmp_path / "my-plan"
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-my-plan"
     result = run_cli("init", plan_folder)
     assert result.returncode == 0
     ledger = (plan_folder / "02-source-item-ledger.md").read_text(encoding="utf-8")
     assert "internal-gateway-simple-task" in ledger
+    summary = (plan_folder / "01-change-summary.md").read_text(encoding="utf-8")
+    assert "Esecuzione prevista" in summary
+
+
+def test_init_rejects_non_prefixed_compact_folder(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "tmp" / "superpowers" / "handoff-plan"
+    result = run_cli("init", plan_folder)
+    assert result.returncode != 0
+    assert "mini-plan-*" in result.stderr
 
 
 def test_init_creates_extended_scaffold(tmp_path: Path) -> None:
@@ -91,7 +109,7 @@ def test_init_creates_extended_scaffold(tmp_path: Path) -> None:
 
 
 def test_audit_compact_ready(tmp_path: Path) -> None:
-    plan_folder = tmp_path / "improve-handoff-contract"
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-improve-handoff-contract"
     _write_compact_plan(plan_folder)
     result = run_cli("audit", plan_folder, "--format", "json")
     payload = json.loads(result.stdout)
@@ -100,7 +118,7 @@ def test_audit_compact_ready(tmp_path: Path) -> None:
 
 
 def test_audit_rejects_profile_consumer_mismatch(tmp_path: Path) -> None:
-    plan_folder = tmp_path / "plan"
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-consumer-mismatch"
     _write_compact_plan(plan_folder)
     ledger_path = plan_folder / "02-source-item-ledger.md"
     ledger_path.write_text(ledger_path.read_text(encoding="utf-8").replace("internal-gateway-simple-task", "internal-gateway-execute-plans"), encoding="utf-8")
@@ -118,7 +136,7 @@ def test_handoff_check_extended_ready(tmp_path: Path) -> None:
 
 
 def test_handoff_check_rejects_placeholder_sections(tmp_path: Path) -> None:
-    plan_folder = tmp_path / "placeholder-plan"
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-placeholder-plan"
     _write_compact_plan(plan_folder)
     (plan_folder / "03-execution.md").write_text("# Execution\n\n## Objective\nTODO\n", encoding="utf-8")
     result = run_cli("handoff-check", plan_folder, "--format", "json")
@@ -128,7 +146,7 @@ def test_handoff_check_rejects_placeholder_sections(tmp_path: Path) -> None:
 
 
 def test_handoff_check_rejects_impossible_execution_order(tmp_path: Path) -> None:
-    plan_folder = tmp_path / "impossible-order-plan"
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-impossible-order-plan"
     _write_extended_plan(plan_folder)
     (plan_folder / "03-execution.md").write_text(
         "# Execution\n\n"
@@ -158,7 +176,7 @@ def test_handoff_check_rejects_impossible_execution_order(tmp_path: Path) -> Non
 
 
 def test_handoff_check_rejects_heading_only_extended_contract(tmp_path: Path) -> None:
-    plan_folder = tmp_path / "heading-only-extended-plan"
+    plan_folder = tmp_path / "tmp" / "superpowers" / "heading-only-extended-plan"
     _write_extended_plan(plan_folder)
     (plan_folder / "04-implementation-contract.md").write_text("# Implementation Contract\n", encoding="utf-8")
     result = run_cli("handoff-check", plan_folder, "--format", "json")

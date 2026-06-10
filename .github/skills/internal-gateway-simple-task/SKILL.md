@@ -30,7 +30,7 @@ retained-plan execution.
 
 - Ownership, rollout, governance, or cross-boundary tradeoffs still need a decision; use `internal-gateway-idea-brainstorming`.
 - The request is defect-first review; use `internal-gateway-review`.
-- The request is approved `extended` retained-plan execution; use `internal-executing-plans`.
+- The request is approved `extended` retained-plan execution; use `internal-gateway-execute-plans`.
 - The primary request is pressure testing; use `internal-gateway-critical-master`.
 
 ## Simple Flow
@@ -38,7 +38,7 @@ retained-plan execution.
 1. Inspect local files first.
 2. Use at most one focused clarification block.
 3. Confirm the task still fits one quick lane.
-4. For approved `compact` plans, read `01-change-summary.md` and `02-source-item-ledger.md` first and verify the consumer contract.
+4. For approved `compact` plans, read `01-change-summary.md` and `02-source-item-ledger.md` first, verify the consumer contract, and confirm the folder uses the `mini-plan-*` prefix.
 5. Execute the one concrete lane.
 6. Run focused validation or name the explicit gap.
 7. If the task stops being simple, stop and issue an escalation alert.
@@ -46,5 +46,5 @@ retained-plan execution.
 ## Validation
 
 - Work stayed single-lane and single-phase, or escalation was explicit.
-- Approved `compact` retained-plan execution stayed lightweight and did not copy the extended `done-*` packaging loop.
+- Approved `compact` retained-plan execution stayed lightweight, used the `mini-plan-*` folder convention, and did not copy the extended `done-*` packaging loop.
 - Focused validation ran before completion claims, or the exact validation gap was reported.

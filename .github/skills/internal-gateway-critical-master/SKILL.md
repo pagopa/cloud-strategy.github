@@ -13,13 +13,13 @@ Use this skill as the portable core for critical challenge work.
 
 ## When not to use
 
-- The next step is retained planning, implementation, or evidence-first review; use `internal-gateway-idea-brainstorming`, `internal-gateway-simple-task`, `internal-executing-plans`, or `internal-gateway-review`.
+- The next step is retained planning, implementation, or evidence-first review; use `internal-gateway-idea-brainstorming`, `internal-gateway-simple-task`, `internal-gateway-execute-plans`, or `internal-gateway-review`.
 
 ## Boundaries
 
 - Use `internal-gateway-idea-brainstorming` when the main job is reformulating the plan.
 - Use `internal-gateway-simple-task` when the critique leaves a concrete local task.
-- Use `internal-executing-plans` for approved `extended` retained-plan execution.
+- Use `internal-gateway-execute-plans` for approved `extended` retained-plan execution.
 - Use `internal-gateway-review` when the next step is evidence-based validation of a concrete change.
 
 ## Outcome Routing
@@ -28,7 +28,7 @@ Use this skill as the portable core for critical challenge work.
 | --- | --- | --- |
 | `reformulate-plan` | Planning must be rewritten. | `internal-gateway-idea-brainstorming` |
 | `de-escalate-to-simple` | A concrete local task remains. | `internal-gateway-simple-task` |
-| `execute-clear-next-step` | Execution is approved and clear. | `internal-gateway-simple-task` or `internal-executing-plans` |
+| `execute-clear-next-step` | Execution is approved and clear. | `internal-gateway-simple-task` or `internal-gateway-execute-plans` |
 | `review-evidence` | The next risk is correctness evidence. | `internal-gateway-review` |
 | `continue-critical` | Another pressure-test loop is needed. | `internal-gateway-critical-master` |
 | `accept-with-risk` | The user may proceed while accepting a named residual risk. | Current workflow with explicit risk note |

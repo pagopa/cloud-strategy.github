@@ -55,11 +55,17 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
 def test_compact_and_extended_execution_owners_are_split() -> None:
     writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
     simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    critical_text = read_text(".github/skills/internal-gateway-critical-master/SKILL.md")
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
     assert "Recommended consumer" in writing_text
     assert "internal-gateway-simple-task" in writing_text
     assert "internal-gateway-execute-plans" in writing_text
+    assert "mini-plan-*" in simple_text
     assert "`compact`" in simple_text
     assert "retained-plan execution" in simple_text
+    assert "internal-gateway-execute-plans" in simple_text
+    assert "internal-executing-plans" not in simple_text
+    assert "internal-gateway-execute-plans" in critical_text
+    assert "internal-executing-plans" not in critical_text
     assert "approved `extended`" in executing_text
     assert "internal-gateway-execute-plans" in executing_text
