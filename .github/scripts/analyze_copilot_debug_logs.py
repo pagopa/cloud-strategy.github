@@ -23,6 +23,8 @@ VOLATILE_KEYS = frozenset(
     }
 )
 
+MEMORY_PATH_SENTINEL = "/memories/repo/"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Summarize Copilot debug logs and snapshot exports.")
@@ -80,6 +82,27 @@ def measure_payload_bytes(value: object) -> int:
     normalized = strip_volatile(value)
     payload = json.dumps(normalized, sort_keys=True, separators=(",", ":"))
     return len(payload.encode("utf-8"))
+
+
+def contains_text(value: object, needle: str) -> bool:
+    if isinstance(value, str):
+        return needle in value
+    if isinstance(value, dict):
+        return any(contains_text(item, needle) for item in value.values())
+    if isinstance(value, list):
+        return any(contains_text(item, needle) for item in value)
+    return False
+
+
+def normalized_kind(value: object) -> str:
+    return str(value or "").replace("_", "").replace("-", "").lower()
+
+
+def candidate_payload_bytes(mapping: dict[str, object], *keys: str) -> int:
+    for key in keys:
+        if key in mapping:
+            return measure_payload_bytes(mapping.get(key))
+    return 0
 
 
 def read_otlp_value(value: object) -> object:
@@ -175,15 +198,23 @@ def summarize_otlp_span(span: dict[str, object]) -> dict[str, object]:
     input_tokens = extract_int(attributes, "gen_ai.usage.input_tokens") or 0
     output_tokens = extract_int(attributes, "gen_ai.usage.output_tokens") or 0
     tool_name = str(attributes.get("gen_ai.tool.name") or "")
+    tool_result_value = attributes.get("gen_ai.tool.call.result")
+    is_tool_call = 1 if tool_name else 0
+    is_model_request = 1 if not tool_name else 0
     tool_result_bytes = measure_payload_bytes(attributes.get("gen_ai.tool.call.result"))
     is_error = 1 if otlp_status_code(span) == 2 or attributes.get("copilot_chat.event_category") == "error" else 0
     return {
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
-        "tool_calls": 1 if tool_name else 0,
+        "model_request_count": is_model_request,
+        "tool_call_count": is_tool_call,
+        "tool_calls": is_tool_call,
+        "request_message_bytes": candidate_payload_bytes(attributes, "gen_ai.input.value", "gen_ai.input.messages", "gen_ai.prompt"),
         "tool_result_bytes": tool_result_bytes,
+        "tool_schema_bytes": candidate_payload_bytes(attributes, "gen_ai.tool.schemas", "gen_ai.tool.schema", "gen_ai.tools"),
         "error_count": is_error,
         "invocation_error_count": is_error,
+        "missing_memory_path_error_count": 1 if contains_text(tool_result_value, MEMORY_PATH_SENTINEL) else 0,
         "graphify_invocation_count": 1 if "graphify" in tool_name else 0,
         "graphify_discovery_count": 1 if "discover" in tool_name or "tool_search" in tool_name else 0,
     }
@@ -200,10 +231,15 @@ def summarize_otlp_export(resource_spans: list[dict[str, object]], *, source_nam
             spans.extend(normalize_log_records(scope_span.get("spans")))
 
         request_spans: list[dict[str, object]] = []
+        model_request_count = 0
+        tool_call_count = 0
+        request_message_bytes = 0
+        tool_schema_bytes = 0
         tool_result_bytes = 0
         tool_calls = 0
         error_count = 0
         invocation_error_count = 0
+        missing_memory_path_error_count = 0
         graphify_invocation_count = 0
         graphify_discovery_count = 0
         input_tokens_total = 0
@@ -215,34 +251,50 @@ def summarize_otlp_export(resource_spans: list[dict[str, object]], *, source_nam
                 request_spans.append(span_summary)
                 input_tokens_total += as_int(span_summary["input_tokens"])
                 output_tokens_total += as_int(span_summary["output_tokens"])
-            tool_calls += as_int(span_summary["tool_calls"])
+            model_request_count += as_int(span_summary["model_request_count"])
+            tool_call_count += as_int(span_summary["tool_call_count"])
+            request_message_bytes += as_int(span_summary["request_message_bytes"])
+            tool_schema_bytes += as_int(span_summary["tool_schema_bytes"])
+            tool_calls += as_int(span_summary["tool_call_count"])
             tool_result_bytes += as_int(span_summary["tool_result_bytes"])
             error_count += as_int(span_summary["error_count"])
             invocation_error_count += as_int(span_summary["invocation_error_count"])
+            missing_memory_path_error_count += as_int(span_summary["missing_memory_path_error_count"])
             graphify_invocation_count += as_int(span_summary["graphify_invocation_count"])
             graphify_discovery_count += as_int(span_summary["graphify_discovery_count"])
 
         context_series = [as_int(item["input_tokens"]) for item in request_spans if item.get("input_tokens") is not None]
+        context_growth_tokens = max(context_series[-1] - context_series[0], 0) if len(context_series) > 1 else 0
         session_id = resource_attrs.get("session.id") or resource_attrs.get("session_id") or source_name or "unknown-session"
         title = resource_attrs.get("service.name") or resource_attrs.get("session.title") or session_id
         summaries.append(
             {
                 "session_id": session_id,
                 "title": title,
-                "request_count": len(request_spans),
+                "model_request_count": model_request_count,
+                "tool_call_count": tool_call_count,
+                "request_count": model_request_count + tool_call_count,
                 "input_tokens": input_tokens_total,
                 "output_tokens": output_tokens_total,
                 "cache_read_tokens": None,
+                "estimated_cache_read_tokens": None,
                 "non_cached_input_tokens": None,
+                "estimated_non_cached_input_tokens": None,
                 "aiu_total": None,
+                "estimated_aiu_total": None,
+                "request_message_bytes": request_message_bytes,
                 "tool_calls": tool_calls,
                 "tool_result_bytes": tool_result_bytes,
                 "tool_result_volume_bytes": tool_result_bytes,
+                "tool_schema_bytes": tool_schema_bytes,
                 "error_count": error_count,
                 "invocation_error_count": invocation_error_count,
+                "missing_memory_path_error_count": missing_memory_path_error_count,
                 "graphify_invocation_count": graphify_invocation_count,
                 "graphify_discovery_count": graphify_discovery_count,
                 "max_context_tokens": max(context_series) if context_series else 0,
+                "runtime_context_tokens": max(context_series) if context_series else 0,
+                "context_growth_tokens": context_growth_tokens,
                 "first_context_tokens": context_series[0] if context_series else 0,
                 "last_context_tokens": context_series[-1] if context_series else 0,
                 "tool_schema_count": None,
