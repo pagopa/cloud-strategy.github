@@ -28,7 +28,7 @@ Use these standards-repository sources first for governance, evidence, and split
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [.github/agents/internal-gateway-review.agent.md](../agents/internal-gateway-review.agent.md)
 - [.github/agents/internal-gateway-critical-master.agent.md](../agents/internal-gateway-critical-master.agent.md)
-- [.github/skills/internal-writing-plans/SKILL.md](../skills/internal-writing-plans/SKILL.md)
+- [.github/skills/internal-gateway-writing-plans/SKILL.md](../skills/internal-gateway-writing-plans/SKILL.md)
 
 For this mega-review prompt, the English retained artifact contract below overrides any legacy non-English filename examples in those sources.
 
