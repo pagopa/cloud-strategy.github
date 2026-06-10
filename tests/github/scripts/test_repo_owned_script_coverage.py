@@ -36,6 +36,9 @@ TEST_OWNERS = {
     "tests/github/scripts/test_benchmark_skill_tokens.py": {
         ".github/scripts/benchmark_skill_tokens.py",
     },
+    "tests/github/scripts/test_analyze_copilot_debug_logs.py": {
+        ".github/scripts/analyze_copilot_debug_logs.py",
+    },
 }
 
 

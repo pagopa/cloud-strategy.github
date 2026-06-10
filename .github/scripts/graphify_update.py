@@ -15,7 +15,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from lib.shared import find_repo_root, git_revision, log_error, log_info, log_success
+from lib.shared import find_repo_root, git_revision, log_error, log_info, log_success, log_warn
 
 ALLOWED_DIRECTORY_ROOTS = frozenset({".github", "docs"})
 ALLOWED_FILES = frozenset(
@@ -29,6 +29,7 @@ ALLOWED_FILES = frozenset(
 )
 GRAPHIFY_OUTPUT_DIR = Path("graphify-out")
 GRAPHIFY_REFRESH_METADATA = GRAPHIFY_OUTPUT_DIR / ".internal-graphify-refresh.json"
+GRAPHIFY_STATE_METADATA = GRAPHIFY_OUTPUT_DIR / ".internal-graphify-state.json"
 GRAPHIFY_GRAPH_JSON = GRAPHIFY_OUTPUT_DIR / "graph.json"
 GRAPHIFY_GRAPH_HTML = GRAPHIFY_OUTPUT_DIR / "graph.html"
 GRAPHIFY_GRAPH_REPORT = GRAPHIFY_OUTPUT_DIR / "GRAPH_REPORT.md"
@@ -45,6 +46,17 @@ def parse_args() -> argparse.Namespace:
         "--check",
         action="store_true",
         help="Check whether the existing Graphify output is fresh and complete instead of refreshing.",
+    )
+    parser.add_argument(
+        "--mark-stale",
+        nargs="*",
+        default=None,
+        help="Mark Graphify stale for the next structural use when governed paths changed.",
+    )
+    parser.add_argument(
+        "--prepare-structural-use",
+        action="store_true",
+        help="Perform one lazy refresh when needed before structural Graphify use and emit status JSON.",
     )
     return parser.parse_args()
 
@@ -122,6 +134,31 @@ def read_refresh_metadata(root: Path) -> dict[str, object] | None:
         return None
 
 
+def read_state_metadata(root: Path) -> dict[str, object] | None:
+    metadata_path = root / GRAPHIFY_STATE_METADATA
+    if not metadata_path.is_file():
+        return None
+    try:
+        return json.loads(metadata_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+
+
+def write_state_metadata(root: Path, payload: dict[str, object]) -> None:
+    metadata_path = root / GRAPHIFY_STATE_METADATA
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def clear_state_metadata(root: Path) -> None:
+    metadata_path = root / GRAPHIFY_STATE_METADATA
+    if metadata_path.exists():
+        metadata_path.unlink()
+
+
 def ensure_graphify_available() -> int:
     if shutil.which("graphify") is None:
         log_error("Missing required command: graphify")
@@ -156,6 +193,23 @@ def verify_graphify_output_exists(root: Path) -> int:
             "graph.json and GRAPH_REPORT.md only."
         )
     return 0
+
+
+def relative_governed_path(root: Path, changed_path: str) -> Path | None:
+    candidate = Path(changed_path).expanduser()
+    if not candidate.is_absolute():
+        candidate = (root / candidate).resolve()
+    else:
+        candidate = candidate.resolve()
+    try:
+        relative = candidate.relative_to(root.resolve())
+    except ValueError:
+        return None
+    if relative.parts and relative.parts[0] == GRAPHIFY_OUTPUT_DIR.name:
+        return None
+    if not is_allowlisted(relative):
+        return None
+    return relative
 
 
 def remove_graphify_outputs(root: Path) -> None:
@@ -252,31 +306,16 @@ def run_graphify_check(root: Path) -> int:
     return 0
 
 
-def main() -> int:
-    args = parse_args()
-    root = find_repo_root(Path(args.root))
-
-    if args.check:
-        exit_code = ensure_graphify_available()
-        if exit_code != 0:
-            return exit_code
-        return run_graphify_check(root)
-
-    governed_paths, exit_code = list_governed_repo_files(root)
-    if exit_code != 0:
-        return exit_code
-    if not governed_paths:
-        log_error("No governed repository files were found for Graphify.")
-        return 1
-
-    exit_code = ensure_graphify_available()
-    if exit_code != 0:
-        return exit_code
-
+def refresh_graphify_outputs(
+    root: Path,
+    governed_paths: list[Path],
+    *,
+    allow_missing_refresh_metadata: bool = False,
+) -> int:
     root_output = root / GRAPHIFY_OUTPUT_DIR
     if root_output.exists():
         metadata_path = root / GRAPHIFY_REFRESH_METADATA
-        if not metadata_path.is_file():
+        if not metadata_path.is_file() and not allow_missing_refresh_metadata:
             log_error(
                 f"A pre-existing {GRAPHIFY_OUTPUT_DIR.as_posix()}/ folder was found without "
                 "internal refresh metadata. Refusing to overwrite. "
@@ -313,11 +352,111 @@ def main() -> int:
             return exit_code
 
     write_refresh_metadata(root, governed_paths)
+    clear_state_metadata(root)
     log_success(
         f"Graphify output is ready under {GRAPHIFY_OUTPUT_DIR.as_posix()}/ "
         f"and metadata was written to {GRAPHIFY_REFRESH_METADATA.as_posix()}."
     )
     return 0
+
+
+def mark_graphify_stale(root: Path, changed_paths: list[str]) -> int:
+    governed_changes = [
+        relative.as_posix()
+        for changed_path in changed_paths
+        if (relative := relative_governed_path(root, changed_path)) is not None
+    ]
+    if not governed_changes:
+        log_info("No governed repository changes detected for Graphify stale marking.")
+        return 0
+    try:
+        write_state_metadata(
+            root,
+            {
+                "status": "stale",
+                "changed_paths": sorted(set(governed_changes)),
+                "source": "graphify_update.py",
+            },
+        )
+    except OSError as exc:
+        log_warn(f"Failed to write Graphify stale marker; continuing non-blocking: {exc}")
+        return 0
+    log_info("Marked Graphify stale for the next structural use.")
+    return 0
+
+
+def emit_prepare_status(status: str, *, refreshed: bool, reason: str) -> int:
+    print(
+        json.dumps(
+            {"status": status, "refreshed": refreshed, "reason": reason},
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
+def prepare_structural_use(root: Path) -> int:
+    state = read_state_metadata(root)
+    if state and state.get("status") == "stale":
+        needs_refresh = True
+        reason = "stale-marker"
+    else:
+        needs_refresh = run_graphify_check(root) != 0
+        reason = "fresh" if not needs_refresh else "freshness-check"
+
+    if not needs_refresh:
+        return emit_prepare_status("fresh", refreshed=False, reason=reason)
+
+    governed_paths, exit_code = list_governed_repo_files(root)
+    if exit_code != 0 or not governed_paths:
+        return emit_prepare_status("fallback-used", refreshed=False, reason="governed-corpus-unavailable")
+
+    exit_code = ensure_graphify_available()
+    if exit_code != 0:
+        return emit_prepare_status("fallback-used", refreshed=False, reason="graphify-unavailable")
+
+    exit_code = refresh_graphify_outputs(
+        root,
+        governed_paths,
+        allow_missing_refresh_metadata=True,
+    )
+    if exit_code != 0:
+        return emit_prepare_status("fallback-used", refreshed=False, reason="refresh-failed")
+
+    if run_graphify_check(root) != 0:
+        return emit_prepare_status("fallback-used", refreshed=True, reason="refresh-unverified")
+    return emit_prepare_status("fresh", refreshed=True, reason="lazy-refresh")
+
+
+def main() -> int:
+    args = parse_args()
+    root = find_repo_root(Path(args.root))
+
+    if getattr(args, "mark_stale", None) is not None:
+        return mark_graphify_stale(root, args.mark_stale)
+
+    if getattr(args, "prepare_structural_use", False):
+        return prepare_structural_use(root)
+
+    if args.check:
+        exit_code = ensure_graphify_available()
+        if exit_code != 0:
+            return exit_code
+        return run_graphify_check(root)
+
+    governed_paths, exit_code = list_governed_repo_files(root)
+    if exit_code != 0:
+        return exit_code
+    if not governed_paths:
+        log_error("No governed repository files were found for Graphify.")
+        return 1
+
+    exit_code = ensure_graphify_available()
+    if exit_code != 0:
+        return exit_code
+
+    return refresh_graphify_outputs(root, governed_paths)
 
 
 if __name__ == "__main__":

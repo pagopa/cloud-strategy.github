@@ -74,7 +74,7 @@ Stop and report when any of these occur:
 
 ### Output
 
-Every command produces JSON output with `--format json` and text output by default. The payload always includes:
+Machine-readable output is available as `--format compact` or `--format json`. Prefer `--format compact` for model-facing runs so the result stays bounded while preserving blockers, validation, `next_step`, `next_action`, and changed-resource evidence. Reserve `--format json` for explicit audit, durable file output, or debugging. The payload always includes:
 
 - `next_step`: human-readable next instruction (backward compatible).
 - `next_action`: structured object with `action`, `allowed`, `requires_explicit_approval`, `command`, and `reason`.

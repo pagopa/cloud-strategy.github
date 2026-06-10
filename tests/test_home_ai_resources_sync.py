@@ -331,6 +331,18 @@ def test_bisync_plan_emits_compact_projection(
         "only_home": 1,
         "equal_mtime": 0,
     }
+    assert payload["changed_resources"] == [
+        {
+            "blocked_codes": ["bisync-only-home"],
+            "skill": "home-only",
+            "type": "only-home",
+        },
+        {
+            "blocked_codes": ["bisync-only-repo"],
+            "skill": "repo-only",
+            "type": "only-repo",
+        },
+    ]
     assert "drifts" not in payload
     assert "state_path" not in payload
 
@@ -534,3 +546,52 @@ def test_agent_and_skill_align_on_table_first_reporting() -> None:
     assert "table-first report layout" in agent_content
     assert "why each blocker matters" in agent_content
     assert "table-first report" in skill_content
+
+
+def test_agent_and_skill_align_on_default_sync_sequence() -> None:
+    agent_path = (
+        Path(__file__).resolve().parent
+        / "../.github/agents/local-sync-install-ai-resources.agent.md"
+    ).resolve()
+    skill_path = (
+        Path(__file__).resolve().parent
+        / "../.github/skills/local-agent-sync-install-ai-resources/SKILL.md"
+    ).resolve()
+    agent_content = agent_path.read_text(encoding="utf-8")
+    skill_content = skill_path.read_text(encoding="utf-8")
+
+    expected = "run install `plan` first for the default `skills` target"
+    assert expected in agent_content
+    assert "Run install `plan` for the default `skills` target. Stop on blockers." in skill_content
+
+
+def test_main_plan_compact_output_preserves_changed_resource_evidence(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            retire_targets="",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="compact",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["changed_resources"]
+    assert any(item["action"] == "mkdir" for item in payload["changed_resources"])

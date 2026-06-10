@@ -31,6 +31,8 @@ When the current repository exposes this skill, it is the canonical entry point 
 
 - Canonical refresh command: `make graphify-update` (configurable local seam)
 - Canonical check command: `make graphify-check` (configurable local seam)
+- Optional local stale-marker command: `python3 ./.github/scripts/graphify_update.py --root . --mark-stale <paths...>`
+- Optional lazy structural-use preparation: `python3 ./.github/scripts/graphify_update.py --root . --prepare-structural-use`
 - Canonical output path: `graphify-out/graph.json`
 - Required local artifacts: `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`
 - Optional visualization artifact: `graphify-out/graph.html`
@@ -44,6 +46,7 @@ When the current repository exposes this skill, it is the canonical entry point 
 - Refresh only when the graph is missing, clearly stale for the active question, or the user explicitly asks.
 - Treat the canonical check command as the freshness gate. Trust graph-derived hints only when it passes, or when the current commit and governed corpus hash still match the last refresh evidence.
 - After meaningful repository changes in the area under investigation, prefer a refresh before trusting older graph answers.
+- A local stale marker may request one lazy refresh before the next structural Graphify use, but it never replaces the corpus-hash freshness gate.
 - If the refresh command fails, `graph.json` is missing, or the graph answer is still imprecise after refresh, fall back to `rg`, targeted reads, or symbol search and say that the graph is unavailable for the claim you are making.
 - The canonical check command exits non-zero when the required local artifacts are stale, incomplete, or contain source paths outside the governed corpus.
 - No repository requires local hook automation for Graphify. If automation is revisited later, keep it local and non-blocking.
@@ -63,7 +66,7 @@ When activation gate markers are missing, this skill must not propose a refresh 
 
 1. Verify that the repository exposes the activation gate markers above.
 2. Check whether `graphify-out/graph.json` exists and is fresh enough for the current question.
-3. If refresh is needed and allowed, run the canonical refresh command.
+3. If refresh is needed and allowed, run the canonical refresh command or the lazy structural-use preparation seam.
 4. Use the smallest Graphify command that answers the question.
 5. Verify concrete claims against real repository files before finalizing the answer.
 6. Fall back to `rg`, targeted file reads, or symbol search when Graphify output is missing, stale, ambiguous, or not precise enough.

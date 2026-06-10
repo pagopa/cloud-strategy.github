@@ -533,6 +533,94 @@ def test_graphify_update_main_check_fails_when_metadata_is_missing(
     assert "missing" in capsys.readouterr().out.lower()
 
 
+def test_graphify_update_mark_stale_ignores_out_of_scope_paths(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    write_file(tmp_path / "notes.txt", "ignore me\n")
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            check=False,
+            mark_stale=["notes.txt", "graphify-out/graph.json"],
+            prepare_structural_use=False,
+        ),
+    )
+
+    exit_code = graphify_update.main()
+
+    assert exit_code == 0
+    assert not (tmp_path / "graphify-out/.internal-graphify-state.json").exists()
+    assert "No governed repository changes detected" in capsys.readouterr().out
+
+
+def test_graphify_update_prepare_structural_use_refreshes_once_when_marked_stale(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(tmp_path / "Makefile", "help:\n\t@true\n")
+    write_file(tmp_path / ".pre-commit-config.yaml", "repos: []\n")
+    write_file(tmp_path / ".github/skills/internal-demo/SKILL.md", "# Demo\n")
+    (tmp_path / "graphify-out").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "graphify-out/.internal-graphify-state.json").write_text(
+        json.dumps({"status": "stale", "changed_paths": ["AGENTS.md"]}),
+        encoding="utf-8",
+    )
+    git_output = "\n".join(
+        [
+            "AGENTS.md",
+            "Makefile",
+            ".pre-commit-config.yaml",
+            ".github/skills/internal-demo/SKILL.md",
+        ]
+    )
+    called_commands: list[list[str]] = []
+
+    def fake_run(
+        command: list[str],
+        cwd: Path,
+        check: bool,
+        text: bool = False,
+        capture_output: bool = False,
+    ):
+        if command[:4] == ["git", "ls-files", "--cached", "--others"]:
+            return SimpleNamespace(returncode=0, stdout=git_output, stderr="")
+        if command[:3] == ["git", "rev-parse", "--short"]:
+            return SimpleNamespace(returncode=0, stdout="abc1234\n", stderr="")
+        if command == ["graphify", "update", "."]:
+            called_commands.append(command)
+            out_dir = tmp_path / "graphify-out"
+            write_file(out_dir / "graph.json", json.dumps({"nodes": []}))
+            write_file(out_dir / "GRAPH_REPORT.md", "# Report\n")
+            return SimpleNamespace(returncode=0)
+        raise AssertionError(f"Unexpected command: {command}")
+
+    monkeypatch.setattr(
+        graphify_update,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            check=False,
+            mark_stale=None,
+            prepare_structural_use=True,
+        ),
+    )
+    monkeypatch.setattr(graphify_update.shutil, "which", lambda command: "/usr/local/bin/graphify")
+    monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
+
+    exit_code = graphify_update.main()
+    output = capsys.readouterr().out
+    payload = json.loads(output[output.rfind("{"):])
+
+    assert exit_code == 0
+    assert called_commands == [["graphify", "update", "."]]
+    assert payload["status"] == "fresh"
+    assert payload["refreshed"] is True
+
+
 def test_graphify_update_main_fails_fast_when_graphify_is_missing(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
