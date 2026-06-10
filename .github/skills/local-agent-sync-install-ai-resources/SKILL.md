@@ -71,6 +71,7 @@ Stop and report when any of these occur:
 - `bisync apply` was requested without a prior `bisync plan`.
 - The source repository has uncommitted or untracked changes during `bisync apply`.
 - After `bisync apply` modifies `~/.agents/skills/` files that the install lane also manages, re-run install `plan`. Verified repo-to-home bisync copies refresh the manifest state; if `target-modified-managed` still appears, treat it as a real local divergence and review the path instead of deleting it as a routine recovery step.
+- If `bisync apply` is blocked by `bisync-repo-dirty` and the local workspace has unrelated uncommitted changes, run bisync from a clean detached worktree at the same commit and pass it through `--source-root`.
 
 ### Output
 
@@ -207,6 +208,7 @@ When `bisync plan` reports blocker entries, resolve them before `bisync apply`:
 - `bisync-only-repo`: the skill exists only in the source repo. Copy it into home manually (preferred when the skill is newer in repo) or decide the repo-only status is intentional and skip it.
 - `bisync-only-home`: the skill exists only in the home directory. Remove from home manually or decide to add to repo.
 - `bisync-equal-mtime`: hashes differ but mtime is equal for both sides. Decide which side wins and touch the winner to advance mtime.
+- `bisync-repo-dirty`: repository has uncommitted or untracked changes. Commit or stash, or run `bisync apply` from a clean detached worktree by setting `--source-root` to that clean checkout.
 
 ## Load On Demand
 

@@ -948,7 +948,8 @@ def reconcile_manifest_entry_after_bisync_copy(
     manifest_index = index_manifest(manifest_payload)
     manifest_entry = manifest_index.get(target_path.as_posix())
     if manifest_entry is None:
-        return "bisync-manifest-reconcile-failed"
+        # The copied bundle is not install-managed, so there is nothing to reconcile.
+        return None
     try:
         source_path_rel = source_path.relative_to(source_root).as_posix()
     except ValueError:

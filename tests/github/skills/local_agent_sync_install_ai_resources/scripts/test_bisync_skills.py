@@ -270,7 +270,7 @@ def test_apply_blocks_dirty_repository_without_writes(tmp_path: Path) -> None:
     assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Home\n"
 
 
-def test_apply_repo_to_home_blocks_without_manifest_reconciliation(
+def test_apply_repo_to_home_converges_without_manifest_entry(
     tmp_path: Path,
 ) -> None:
     source = tmp_path / "source"
@@ -287,10 +287,50 @@ def test_apply_repo_to_home_blocks_without_manifest_reconciliation(
     plan = build_bisync_plan(source, home, mode="plan")
     result = apply_bisync_plan(source, home, plan)
 
+    assert result.blocked_codes == []
+    assert result.verification["status"] == "converged"
+    assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Source\n"
+
+
+def test_apply_repo_to_home_blocks_on_manifest_source_mismatch(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    state_root = home / ".sync" / "cloud-strategy-governance" / "home-ai-resources"
+    manifest_path = state_root / "manifest.json"
+    init_git_repo(source)
+    source_skill = make_skill(
+        source / ".github" / "skills", "managed-skill", "# Source\n"
+    )
+    home_skill = make_skill(home / ".agents" / "skills", "managed-skill", "# Home\n")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
+    commit_all(source, "add managed-skill")
+
+    state_root.mkdir(parents=True, exist_ok=True)
+    manifest_payload = {
+        "managed_resources": [
+            {
+                "target": "skills",
+                "resource_family": "skills",
+                "resource_id": "managed-skill",
+                "source_path": ".github/skills/not-managed-skill",
+                "target_path": home_skill.as_posix(),
+                "source_hash": "",
+                "content_hash": "",
+                "last_action": "copy",
+            }
+        ]
+    }
+    manifest_path.write_text(json.dumps(manifest_payload), encoding="utf-8")
+
+    plan = build_bisync_plan(source, home, mode="plan")
+    result = apply_bisync_plan(source, home, plan)
+
     assert result.blocked_codes == ["bisync-manifest-reconcile-failed"]
     assert result.verification["code"] == "bisync-manifest-reconcile-failed"
     assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Source\n"
-    assert result.next_action["allowed"] is False
 
 
 def test_apply_home_to_repo_converges(tmp_path: Path) -> None:
