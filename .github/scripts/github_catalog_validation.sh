@@ -4,7 +4,6 @@
 # Usage examples:
 #   bash ./.github/scripts/github_catalog_validation.sh
 #   bash ./.github/scripts/github_catalog_validation.sh --skip-token-risks
-#   bash ./.github/scripts/github_catalog_validation.sh --graphify
 
 set -Eeuo pipefail
 

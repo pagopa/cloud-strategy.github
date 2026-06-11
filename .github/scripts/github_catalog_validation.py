@@ -5,7 +5,6 @@ Usage examples:
   python3 ./.github/scripts/github_catalog_validation.py --root .
   python3 ./.github/scripts/github_catalog_validation.py --root . --skip-token-risks
   python3 ./.github/scripts/github_catalog_validation.py --root . --token-risks-only
-    python3 ./.github/scripts/github_catalog_validation.py --root . --graphify
 """
 
 from __future__ import annotations
@@ -34,11 +33,6 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run only the optional token-risk scan.",
     )
-    parser.add_argument(
-        "--graphify",
-        action="store_true",
-        help="Run only the manual Graphify update target.",
-    )
     return parser.parse_args()
 
 
@@ -62,8 +56,6 @@ def run_make_target(root: Path, target: str, *, optional: bool) -> int:
 def main() -> int:
     args = parse_args()
     root = find_repo_root(Path(args.root))
-    if args.graphify:
-        return run_make_target(root, "graphify-update", optional=False)
 
     run_required_targets = not args.token_risks_only
     run_token_risks = args.token_risks_only or not args.skip_token_risks

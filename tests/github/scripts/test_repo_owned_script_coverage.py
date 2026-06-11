@@ -9,7 +9,6 @@ TEST_OWNERS = {
         ".github/scripts/build_inventory.py",
         ".github/scripts/check_catalog_consistency.py",
         ".github/scripts/detect_token_risks.py",
-        ".github/scripts/graphify_update.py",
         ".github/scripts/sync_copilot_catalog.py",
         ".github/scripts/validate_internal_skills.py",
     },

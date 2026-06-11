@@ -70,7 +70,6 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
-- `.github/skills/internal-graphify/SKILL.md`
 - `.github/skills/internal-high-level-review/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`

@@ -166,7 +166,7 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
     ) in actions
 
 
-def test_build_sync_plan_includes_internal_graphify_in_consumer_sync(
+def test_build_sync_plan_includes_graphify_skill_in_consumer_sync(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -175,25 +175,21 @@ def test_build_sync_plan_includes_internal_graphify_in_consumer_sync(
     write_file(source_root / "AGENTS.md", "# AGENTS\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
-        source_root / ".github/skills/internal-graphify/SKILL.md",
-        "---\nname: internal-graphify\n---\n\n# Internal Graphify\n",
-    )
-    write_file(
-        source_root / ".github/skills/internal-graphify/agents/openai.yaml",
-        "interface:\n  display_name: Internal Graphify\n",
+        source_root / ".github/skills/graphify/SKILL.md",
+        "---\nname: graphify\n---\n\n# Graphify\n",
     )
 
     write_file(target_root / "AGENTS.md", "# AGENTS\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
-        target_root / ".github/skills/internal-graphify/SKILL.md",
-        "---\nname: internal-graphify\n---\n\n# Old\n",
+        target_root / ".github/skills/graphify/SKILL.md",
+        "---\nname: graphify\n---\n\n# Old\n",
     )
 
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("update", ".github/skills/internal-graphify/SKILL.md") in actions
+    assert ("update", ".github/skills/graphify/SKILL.md") in actions
 
 
 def test_build_sync_plan_creates_target_local_override_from_template_when_missing(

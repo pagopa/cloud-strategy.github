@@ -38,40 +38,22 @@ def test_makefile_exposes_explicit_catalog_fast_check_entrypoint() -> None:
     assert "CATALOG_FAST_INCLUDE_TOKEN_RISKS=1" in makefile_text
 
 
-def test_makefile_exposes_explicit_graphify_update_entrypoint() -> None:
+def test_makefile_does_not_expose_legacy_graphify_wrapper_entrypoints() -> None:
     makefile_text = read_text("Makefile")
 
     assert (
-        ".PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update graphify-check graphify-prepare"
+        ".PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test"
         in makefile_text
     )
-    assert "graphify-update:" in makefile_text
-    assert "$(SCRIPTS_RUNNER) graphify_update --root ." in makefile_text
-    assert "graphify-check:" in makefile_text
-    assert "$(SCRIPTS_RUNNER) graphify_update --root . --check" in makefile_text
-    assert "graphify-prepare:" in makefile_text
-    assert (
-        "$(SCRIPTS_RUNNER) graphify_update --root . --prepare-structural-use"
-        in makefile_text
-    )
+    assert "graphify-update:" not in makefile_text
+    assert "graphify-check:" not in makefile_text
+    assert "graphify-prepare:" not in makefile_text
+    assert "graphify_update" not in makefile_text
 
 
-def test_internal_graphify_requires_prepare_before_structural_use() -> None:
-    skill_text = read_text(".github/skills/internal-graphify/SKILL.md")
-    agent_text = read_text(".github/skills/internal-graphify/agents/openai.yaml")
-
-    assert (
-        "Canonical structural-use preparation command: `make graphify-prepare`"
-        in skill_text
-    )
-    assert (
-        "Before every structural Graphify command, run `make graphify-prepare`"
-        in skill_text
-    )
-    assert "--resolve-node" in skill_text
-    assert "Do not pass wrapper-resolved node ids to `graphify path`" in skill_text
-    assert "make graphify-prepare" in agent_text
-    assert "Treat `graphify path` as best-effort label search only" in agent_text
+def test_internal_graphify_wrapper_files_are_removed() -> None:
+    assert not Path(".github/skills/internal-graphify/SKILL.md").exists()
+    assert not Path(".github/skills/internal-graphify/agents/openai.yaml").exists()
 
 
 def test_docs_lint_target_does_not_require_npm_network_outside_ci() -> None:
@@ -100,14 +82,11 @@ def test_github_catalog_validation_workflow_uses_canonical_wrapper_entrypoints()
     assert "python ./.github/scripts/github_catalog_validation.py" not in workflow_text
 
 
-def test_graphify_wrapper_documents_the_graphify_shortcut() -> None:
+def test_graphify_wrapper_shortcut_is_removed_from_validation_wrappers() -> None:
     root_wrapper = read_text("github_catalog_validation.sh")
     scripts_wrapper = read_text(".github/scripts/github_catalog_validation.sh")
     runner_text = read_text(".github/scripts/run.sh")
 
-    assert "bash ./github_catalog_validation.sh --graphify" in root_wrapper
-    assert (
-        "bash ./.github/scripts/github_catalog_validation.sh --graphify"
-        in scripts_wrapper
-    )
-    assert "graphify_update" in runner_text
+    assert "--graphify" not in root_wrapper
+    assert "--graphify" not in scripts_wrapper
+    assert "graphify_update" not in runner_text
