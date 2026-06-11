@@ -56,7 +56,10 @@ def test_gateway_scenarios_have_unique_required_skill_lists() -> None:
             f"Duplicate skills in scenario '{scenario['scenario']}': {skills}"
         )
 
-    by_name = {scenario["scenario"]: scenario["required_skills"] for scenario in gateway_scenarios}
+    by_name = {
+        scenario["scenario"]: scenario["required_skills"]
+        for scenario in gateway_scenarios
+    }
     assert by_name["Plan handoff"] == [
         "internal-gateway-idea-brainstorming",
         "internal-gateway-writing-plans",

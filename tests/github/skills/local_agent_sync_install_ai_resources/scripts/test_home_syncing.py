@@ -482,9 +482,7 @@ def test_repo_to_home_bisync_refreshes_install_manifest(tmp_path: Path) -> None:
     set_tree_mtime(source_skill, 200.0)
 
     bisync_plan = build_bisync_plan(source_root, home_root, mode="plan")
-    assert any(
-        drift.direction == "repo-to-home" for drift in bisync_plan.drifts
-    )
+    assert any(drift.direction == "repo-to-home" for drift in bisync_plan.drifts)
 
     bisync_result = apply_bisync_plan(source_root, home_root, bisync_plan)
     assert bisync_result.blocked_codes == []

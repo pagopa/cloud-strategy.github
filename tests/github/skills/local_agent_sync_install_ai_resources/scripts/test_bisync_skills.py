@@ -486,13 +486,17 @@ def test_plan_json_output_contains_structured_next_action(tmp_path: Path) -> Non
     assert payload["next_action"]["requires_explicit_approval"] is True
 
 
-def test_emit_text_output_groups_repo_home_buckets(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_emit_text_output_groups_repo_home_buckets(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
     make_skill(source / ".github" / "skills", "repo-only", "# Repo only\n")
     make_skill(home / ".agents" / "skills", "home-only", "# Home only\n")
-    source_skill = make_skill(source / ".github" / "skills", "direction-skill", "# Repo\n")
+    source_skill = make_skill(
+        source / ".github" / "skills", "direction-skill", "# Repo\n"
+    )
     home_skill = make_skill(home / ".agents" / "skills", "direction-skill", "# Home\n")
     set_tree_mtime(home_skill, 100.0)
     set_tree_mtime(source_skill, 200.0)

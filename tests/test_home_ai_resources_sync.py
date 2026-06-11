@@ -564,7 +564,10 @@ def test_agent_and_skill_align_on_default_sync_sequence() -> None:
 
     expected = "run install `plan` first for the default `skills` target"
     assert expected not in agent_content
-    assert "Run install `plan` for the default `skills` target. Stop on blockers." in skill_content
+    assert (
+        "Run install `plan` for the default `skills` target. Stop on blockers."
+        in skill_content
+    )
 
 
 def test_main_plan_compact_output_preserves_changed_resource_evidence(

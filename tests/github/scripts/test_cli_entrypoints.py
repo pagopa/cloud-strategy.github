@@ -714,12 +714,14 @@ def test_graphify_update_prepare_structural_use_refreshes_once_when_marked_stale
             prepare_structural_use=True,
         ),
     )
-    monkeypatch.setattr(graphify_update.shutil, "which", lambda command: "/usr/local/bin/graphify")
+    monkeypatch.setattr(
+        graphify_update.shutil, "which", lambda command: "/usr/local/bin/graphify"
+    )
     monkeypatch.setattr(graphify_update.subprocess, "run", fake_run)
 
     exit_code = graphify_update.main()
     output = capsys.readouterr().out
-    payload = json.loads(output[output.rfind("{"):])
+    payload = json.loads(output[output.rfind("{") :])
 
     assert exit_code == 0
     assert called_commands == [["graphify", "update", "."]]

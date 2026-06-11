@@ -15,7 +15,9 @@ def test_agents_and_policy_promote_conversational_gateways() -> None:
 
 
 def test_idea_gateway_owns_retained_planning() -> None:
-    skill_text = read_text(".github/skills/internal-gateway-idea-brainstorming/SKILL.md")
+    skill_text = read_text(
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+    )
     reference_text = read_text(
         ".github/skills/internal-gateway-idea-brainstorming/references/guided-decision-interview.md"
     )
@@ -33,13 +35,18 @@ def test_idea_gateway_owns_retained_planning() -> None:
     assert "Handoff Gate 4: plan-created" in reference_text
     assert "mini-plan" in reference_text
     assert "go/ok/procedi" in runtime_text
-    assert "At Interview Gate 1: ready-for-critical, ask whether to continue" in runtime_text
+    assert (
+        "At Interview Gate 1: ready-for-critical, ask whether to continue"
+        in runtime_text
+    )
 
 
 def test_review_gateway_exists_and_stops_before_fixes() -> None:
     skill_text = read_text(".github/skills/internal-gateway-review/SKILL.md")
     agent_text = read_text(".github/agents/internal-gateway-review.agent.md")
-    review_gate_text = read_text(".github/skills/internal-gateway-review/references/review-gate.md")
+    review_gate_text = read_text(
+        ".github/skills/internal-gateway-review/references/review-gate.md"
+    )
     review_gate_lower = review_gate_text.lower()
     assert "defect-first review" in skill_text
     assert "does not apply fixes" in skill_text
@@ -55,7 +62,9 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
 def test_compact_and_extended_execution_owners_are_split() -> None:
     writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
     simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
-    critical_text = read_text(".github/skills/internal-gateway-critical-master/SKILL.md")
+    critical_text = read_text(
+        ".github/skills/internal-gateway-critical-master/SKILL.md"
+    )
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
     assert "Recommended consumer" in writing_text
     assert "internal-gateway-simple-task" in writing_text
@@ -72,11 +81,20 @@ def test_compact_and_extended_execution_owners_are_split() -> None:
 
 
 def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
-    simple_wrapper = read_text(".github/skills/internal-gateway-simple-task/agents/openai.yaml")
-    execute_wrapper = read_text(".github/skills/internal-gateway-execute-plans/agents/openai.yaml")
+    simple_wrapper = read_text(
+        ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
+    )
+    execute_wrapper = read_text(
+        ".github/skills/internal-gateway-execute-plans/agents/openai.yaml"
+    )
     completion_reference = read_text(
         ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
     )
     assert "Approved compact retained plans are supported" in simple_wrapper
-    assert "Compact execution belongs to internal-gateway-simple-task" in execute_wrapper
-    assert "`compact` execution remains owned by `internal-gateway-simple-task`" in completion_reference.lower()
+    assert (
+        "Compact execution belongs to internal-gateway-simple-task" in execute_wrapper
+    )
+    assert (
+        "`compact` execution remains owned by `internal-gateway-simple-task`"
+        in completion_reference.lower()
+    )

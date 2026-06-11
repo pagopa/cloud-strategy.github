@@ -5,13 +5,18 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 SCRIPT = Path(".github/scripts/analyze_copilot_debug_logs.py").resolve()
 
 
 def run_script(*paths: Path, format: str = "json") -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPT), *[str(path) for path in paths], "--format", format],
+        [
+            sys.executable,
+            str(SCRIPT),
+            *[str(path) for path in paths],
+            "--format",
+            format,
+        ],
         capture_output=True,
         text=True,
         check=True,
@@ -27,8 +32,14 @@ def test_analyzer_summarizes_otlp_and_dedupes_prompt_exports(tmp_path: Path) -> 
                     {
                         "resource": {
                             "attributes": [
-                                {"key": "service.name", "value": {"stringValue": "copilot-chat"}},
-                                {"key": "session.id", "value": {"stringValue": "sess-1"}},
+                                {
+                                    "key": "service.name",
+                                    "value": {"stringValue": "copilot-chat"},
+                                },
+                                {
+                                    "key": "session.id",
+                                    "value": {"stringValue": "sess-1"},
+                                },
                             ]
                         },
                         "scopeSpans": [
@@ -38,28 +49,60 @@ def test_analyzer_summarizes_otlp_and_dedupes_prompt_exports(tmp_path: Path) -> 
                                         "name": "chat:gpt-5.4-mini",
                                         "status": {"code": 0},
                                         "attributes": [
-                                            {"key": "gen_ai.usage.input_tokens", "value": {"intValue": 40}},
-                                            {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 8}},
+                                            {
+                                                "key": "gen_ai.usage.input_tokens",
+                                                "value": {"intValue": 40},
+                                            },
+                                            {
+                                                "key": "gen_ai.usage.output_tokens",
+                                                "value": {"intValue": 8},
+                                            },
                                         ],
                                     },
                                     {
                                         "name": "tool_search",
                                         "status": {"code": 0},
                                         "attributes": [
-                                            {"key": "gen_ai.usage.input_tokens", "value": {"intValue": 10}},
-                                            {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 1}},
-                                            {"key": "gen_ai.tool.name", "value": {"stringValue": "tool_search"}},
-                                            {"key": "gen_ai.tool.call.result", "value": {"stringValue": "AAAA"}},
+                                            {
+                                                "key": "gen_ai.usage.input_tokens",
+                                                "value": {"intValue": 10},
+                                            },
+                                            {
+                                                "key": "gen_ai.usage.output_tokens",
+                                                "value": {"intValue": 1},
+                                            },
+                                            {
+                                                "key": "gen_ai.tool.name",
+                                                "value": {"stringValue": "tool_search"},
+                                            },
+                                            {
+                                                "key": "gen_ai.tool.call.result",
+                                                "value": {"stringValue": "AAAA"},
+                                            },
                                         ],
                                     },
                                     {
                                         "name": "graphify_query",
                                         "status": {"code": 2},
                                         "attributes": [
-                                            {"key": "gen_ai.usage.input_tokens", "value": {"intValue": 10}},
-                                            {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 3}},
-                                            {"key": "gen_ai.tool.name", "value": {"stringValue": "graphify_query"}},
-                                            {"key": "gen_ai.tool.call.result", "value": {"stringValue": "BBBBB"}},
+                                            {
+                                                "key": "gen_ai.usage.input_tokens",
+                                                "value": {"intValue": 10},
+                                            },
+                                            {
+                                                "key": "gen_ai.usage.output_tokens",
+                                                "value": {"intValue": 3},
+                                            },
+                                            {
+                                                "key": "gen_ai.tool.name",
+                                                "value": {
+                                                    "stringValue": "graphify_query"
+                                                },
+                                            },
+                                            {
+                                                "key": "gen_ai.tool.call.result",
+                                                "value": {"stringValue": "BBBBB"},
+                                            },
                                         ],
                                     },
                                 ]
@@ -98,7 +141,10 @@ def test_analyzer_summarizes_otlp_and_dedupes_prompt_exports(tmp_path: Path) -> 
         ],
     }
     prompt_a.write_text(json.dumps(prompt_payload), encoding="utf-8")
-    prompt_b.write_text(json.dumps({**prompt_payload, "exportedAt": "2026-06-10T08:40:00Z"}), encoding="utf-8")
+    prompt_b.write_text(
+        json.dumps({**prompt_payload, "exportedAt": "2026-06-10T08:40:00Z"}),
+        encoding="utf-8",
+    )
 
     result = run_script(otlp_path, prompt_a, prompt_b)
     payload = json.loads(result.stdout)
@@ -114,7 +160,9 @@ def test_analyzer_summarizes_otlp_and_dedupes_prompt_exports(tmp_path: Path) -> 
     assert payload["aggregate"]["cache_read_tokens"] == 150
     assert payload["aggregate"]["non_cached_input_tokens"] == 50
     assert payload["aggregate"]["aiu_total"] == 12.5
-    assert all("cccccc" not in json.dumps(session).lower() for session in payload["sessions"])
+    assert all(
+        "cccccc" not in json.dumps(session).lower() for session in payload["sessions"]
+    )
 
 
 def test_analyzer_reports_unsupported_schema(tmp_path: Path) -> None:
@@ -138,7 +186,9 @@ def test_analyzer_can_render_markdown(tmp_path: Path) -> None:
                     {
                         "id": "sess-2",
                         "title": "Sync reporting",
-                        "requests": [{"input_tokens": 10, "output_tokens": 5, "tool_calls": []}],
+                        "requests": [
+                            {"input_tokens": 10, "output_tokens": 5, "tool_calls": []}
+                        ],
                     }
                 ]
             }

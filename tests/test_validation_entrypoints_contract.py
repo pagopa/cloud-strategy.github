@@ -60,8 +60,14 @@ def test_internal_graphify_requires_prepare_before_structural_use() -> None:
     skill_text = read_text(".github/skills/internal-graphify/SKILL.md")
     agent_text = read_text(".github/skills/internal-graphify/agents/openai.yaml")
 
-    assert "Canonical structural-use preparation command: `make graphify-prepare`" in skill_text
-    assert "Before every structural Graphify command, run `make graphify-prepare`" in skill_text
+    assert (
+        "Canonical structural-use preparation command: `make graphify-prepare`"
+        in skill_text
+    )
+    assert (
+        "Before every structural Graphify command, run `make graphify-prepare`"
+        in skill_text
+    )
     assert "--resolve-node" in skill_text
     assert "Do not pass wrapper-resolved node ids to `graphify path`" in skill_text
     assert "make graphify-prepare" in agent_text

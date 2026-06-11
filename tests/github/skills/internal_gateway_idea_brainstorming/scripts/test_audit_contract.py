@@ -5,12 +5,18 @@ import subprocess
 import sys
 from pathlib import Path
 
-
-SCRIPT_PATH = Path(".github/skills/internal-gateway-idea-brainstorming/scripts/audit_contract.py")
+SCRIPT_PATH = Path(
+    ".github/skills/internal-gateway-idea-brainstorming/scripts/audit_contract.py"
+)
 
 
 def run_json(*args: str) -> dict:
-    result = subprocess.run([sys.executable, str(SCRIPT_PATH), *args], capture_output=True, text=True, check=True)
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT_PATH), *args],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
     return json.loads(result.stdout)
 
 
