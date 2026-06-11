@@ -36,7 +36,7 @@ profiles:
     description: Java service repositories.
     recommended_skills:
       - skills/internal-java/SKILL.md
-      - skills/internal-project-java/SKILL.md
+      - skills/internal-java-project/SKILL.md
       - skills/internal-github-actions/SKILL.md
       - skills/internal-markdown/SKILL.md
 
@@ -44,7 +44,7 @@ profiles:
     description: Node.js service repositories.
     recommended_skills:
       - skills/internal-nodejs/SKILL.md
-      - skills/internal-project-nodejs/SKILL.md
+      - skills/internal-nodejs-project/SKILL.md
       - skills/internal-github-actions/SKILL.md
       - skills/internal-markdown/SKILL.md
 
@@ -52,7 +52,7 @@ profiles:
     description: Python service repositories.
     recommended_skills:
       - skills/internal-python/SKILL.md
-      - skills/internal-project-python/SKILL.md
+      - skills/internal-python-project/SKILL.md
       - skills/internal-github-actions/SKILL.md
       - skills/internal-markdown/SKILL.md
 
@@ -90,8 +90,8 @@ profiles:
     description: Repositories mixing app code, CI/CD, and some infrastructure.
     recommended_skills:
       - skills/internal-java/SKILL.md
-      - skills/internal-project-java/SKILL.md
+      - skills/internal-java-project/SKILL.md
       - skills/internal-nodejs/SKILL.md
-      - skills/internal-project-nodejs/SKILL.md
+      - skills/internal-nodejs-project/SKILL.md
       - skills/internal-github-actions/SKILL.md
       - skills/internal-terraform/SKILL.md

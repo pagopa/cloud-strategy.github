@@ -12,6 +12,7 @@ from pathlib import Path
 from home_sync_contract import (
     CatalogResource,
     RuntimeSupportRow,
+    has_agent_root,
     TARGET_ORDER,
     load_home_sync_catalog,
     load_runtime_support_matrix,
@@ -86,6 +87,7 @@ class HomeSyncPlan:
     state_root: Path
     mode: str
     selected_targets: tuple[str, ...]
+    retired_targets: tuple[str, ...]
     source_revision: str | None
     source_resources_considered: int
     operations: tuple[HomeSyncOperation, ...]
@@ -109,6 +111,7 @@ class HomeSyncPlan:
         return {
             "mode": self.mode,
             "selected_targets": list(self.selected_targets),
+            "retired_targets": list(self.retired_targets),
             "source_root": self.source_root.as_posix(),
             "home_root": self.home_root.as_posix(),
             "state_root": self.state_root.as_posix(),
@@ -166,6 +169,7 @@ def build_home_sync_plan(
     targets: tuple[str, ...],
     mode: str,
     *,
+    retired_targets: tuple[str, ...] = (),
     experimental_targets: bool = False,
     prune_managed: bool = False,
     fast: bool = False,
@@ -180,6 +184,7 @@ def build_home_sync_plan(
     catalog = load_home_sync_catalog(source_root)
     manifest_payload, manifest_error = load_manifest(state_root / MANIFEST_PATH)
     manifest_index = index_manifest(manifest_payload)
+    manifest_target_paths = set(manifest_index)
 
     operations: list[HomeSyncOperation] = []
     desired_resources: list[ManagedResource] = []
@@ -193,7 +198,13 @@ def build_home_sync_plan(
     for resource in catalog_resources:
         source_path = source_root / resource.source_path
         if not source_path.exists():
-            add_resource_blockers(operations, home_root, resource, targets, "source-missing")
+            add_missing_source_operations(
+                operations,
+                home_root,
+                resource,
+                targets,
+                manifest_target_paths,
+            )
             continue
         if not is_valid_resource(source_path, resource.source_family):
             add_resource_blockers(operations, home_root, resource, targets, resource_block_code(resource.source_family))
@@ -254,13 +265,23 @@ def build_home_sync_plan(
                 changed_only,
             )
 
-    add_stale_managed_operations(operations, manifest_payload, desired_resources, targets, mode, prune_managed, home_root)
+    add_stale_managed_operations(
+        operations,
+        manifest_payload,
+        desired_resources,
+        targets,
+        retired_targets,
+        mode,
+        prune_managed,
+        home_root,
+    )
     return HomeSyncPlan(
         source_root=source_root,
         home_root=home_root,
         state_root=state_root,
         mode=mode,
         selected_targets=targets,
+        retired_targets=retired_targets,
         source_revision=git_revision(source_root),
         source_resources_considered=len(catalog_resources),
         operations=tuple(operations),
@@ -397,10 +418,11 @@ def run_doctor(
         add_doctor_target_check(checks, blocked_codes, target, target_root)
         support_row = resolve_support_row(runtime_rows, target, "skills")
         add_doctor_support_check(checks, blocked_codes, target, target_root, support_row, experimental_targets)
-        agent_root = runtime_agent_root(home_root, target)
-        add_doctor_target_check(checks, blocked_codes, target, agent_root)
-        agent_support_row = resolve_support_row(runtime_rows, target, "agents")
-        add_doctor_support_check(checks, blocked_codes, target, agent_root, agent_support_row, experimental_targets)
+        if has_agent_root(target):
+            agent_root = runtime_agent_root(home_root, target)
+            add_doctor_target_check(checks, blocked_codes, target, agent_root)
+            agent_support_row = resolve_support_row(runtime_rows, target, "agents")
+            add_doctor_support_check(checks, blocked_codes, target, agent_root, agent_support_row, experimental_targets)
 
     for resource in catalog:
         source_path = source_root / resource.source_path
@@ -476,8 +498,9 @@ def add_target_root_operations(
     for target in targets:
         skill_root = runtime_skill_root(home_root, target)
         _add_root_operation(operations, missing_dirs, home_root, target, skill_root, mode)
-        agent_root = runtime_agent_root(home_root, target)
-        _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
+        if has_agent_root(target):
+            agent_root = runtime_agent_root(home_root, target)
+            _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
 
 
 def _add_root_operation(
@@ -531,6 +554,27 @@ def add_resource_blockers(
             code,
             reason,
             resource,
+        )
+
+
+def add_missing_source_operations(
+    operations: list[HomeSyncOperation],
+    home_root: Path,
+    resource: CatalogResource,
+    targets: tuple[str, ...],
+    manifest_target_paths: set[str],
+) -> None:
+    for target in intersection_targets(resource, targets):
+        target_path = resource_target_path(home_root, resource, target)
+        if target_path.as_posix() in manifest_target_paths:
+            continue
+        add_blocked_operation(
+            operations,
+            target=target,
+            target_path=target_path,
+            code="source-missing",
+            reason="Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
+            resource=resource,
         )
 
 
@@ -664,11 +708,13 @@ def add_stale_managed_operations(
     manifest_payload: dict[str, object],
     desired_resources: list[ManagedResource],
     targets: tuple[str, ...],
+    retired_targets: tuple[str, ...],
     mode: str,
     prune_managed: bool,
     home_root: Path,
 ) -> None:
     desired_paths = {resource.target_path for resource in desired_resources}
+    scoped_targets = set(targets) | set(retired_targets)
     managed_resources = manifest_payload.get("managed_resources")
     if not isinstance(managed_resources, list):
         operations.append(
@@ -683,7 +729,7 @@ def add_stale_managed_operations(
         return
 
     for item in managed_resources:
-        if not isinstance(item, dict) or item.get("target") not in targets:
+        if not isinstance(item, dict) or item.get("target") not in scoped_targets:
             continue
         target_path = item.get("target_path")
         if not isinstance(target_path, str) or target_path in desired_paths:
@@ -768,6 +814,8 @@ def _stale_confinement_check(
     target_name = str(item.get("target", ""))
     resource_family = str(item.get("resource_family", ""))
     if resource_family == "agents":
+        if not has_agent_root(target_name):
+            return "unsafe-home-path"
         expected_root = runtime_agent_root(home_root, target_name).resolve()
     elif resource_family == "skills":
         expected_root = runtime_skill_root(home_root, target_name).resolve()
@@ -881,6 +929,50 @@ def load_manifest(path: Path) -> tuple[dict[str, object], str | None]:
     return payload, None
 
 
+def reconcile_manifest_entry_after_bisync_copy(
+    *,
+    source_root: Path,
+    home_root: Path,
+    source_path: Path,
+    target_path: Path,
+) -> str | None:
+    manifest_path = state_root_for_home(home_root) / MANIFEST_PATH
+    manifest_payload, manifest_error = load_manifest(manifest_path)
+    if manifest_error is not None:
+        return "bisync-manifest-reconcile-failed"
+
+    managed_resources = manifest_payload.get("managed_resources")
+    if not isinstance(managed_resources, list):
+        return "bisync-manifest-reconcile-failed"
+
+    manifest_index = index_manifest(manifest_payload)
+    manifest_entry = manifest_index.get(target_path.as_posix())
+    if manifest_entry is None:
+        # The copied bundle is not install-managed, so there is nothing to reconcile.
+        return None
+    try:
+        source_path_rel = source_path.relative_to(source_root).as_posix()
+    except ValueError:
+        return "bisync-manifest-reconcile-failed"
+    if manifest_entry.get("source_path") != source_path_rel:
+        return "bisync-manifest-reconcile-failed"
+
+    try:
+        source_hash = hash_resource(source_path)
+        target_hash = hash_resource(target_path)
+    except (OSError, PermissionError, ValueError):
+        return "bisync-manifest-reconcile-failed"
+
+    if source_hash != target_hash:
+        return "bisync-manifest-reconcile-failed"
+
+    manifest_entry["source_hash"] = source_hash
+    manifest_entry["content_hash"] = target_hash
+    manifest_entry["last_action"] = "bisync-copy"
+    manifest_path.write_text(render_json(manifest_payload), encoding="utf-8")
+    return None
+
+
 def index_manifest(payload: dict[str, object]) -> dict[str, dict[str, object]]:
     return {
         item["target_path"]: item
@@ -890,7 +982,13 @@ def index_manifest(payload: dict[str, object]) -> dict[str, dict[str, object]]:
 
 
 def intersection_targets(resource: CatalogResource, targets: tuple[str, ...]) -> tuple[str, ...]:
-    return tuple(target for target in targets if target in resource.include_targets)
+    selected_targets: list[str] = []
+    for target in targets:
+        if target == "skills" and resource.source_family == "skills":
+            selected_targets.append(target)
+        elif target in resource.include_targets:
+            selected_targets.append(target)
+    return tuple(selected_targets)
 
 
 def is_valid_skill_bundle(path: Path) -> bool:
@@ -909,6 +1007,8 @@ def resource_target_path(
     target: str,
 ) -> Path:
     if resource.source_family == "agents":
+        if not has_agent_root(target):
+            raise ValueError(f"Target {target} does not support agents")
         agent_root = runtime_agent_root(home_root, target)
         ext = target_extension(target)
         return agent_root / f"{resource.resource_id}{ext}"

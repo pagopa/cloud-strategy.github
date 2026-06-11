@@ -12,7 +12,7 @@ claim from chat memory, a `done-*` marker, or intent alone.
 
 ## Activation
 
-Use the inline `Completion Checks` from `internal-gateway-operational-flow` for
+Use the inline completion evidence from the active gateway owner for
 small, direct tasks. Run this full audit when any condition is true:
 
 - The retained plan has more than 6 executable items or numbered plan files.

@@ -2,6 +2,10 @@
 
 Protect correctness, security, simplicity, and maintainability.
 
+`<shared-baseline>`
+
+This block is the Copilot-native projection of the shared repository baseline.
+
 ## Critical Copilot Window
 
 - Treat `AGENTS.md` as the strategic operating bridge, precedence anchor, tactical-default owner, and rule-placement authority.
@@ -56,14 +60,6 @@ Protect correctness, security, simplicity, and maintainability.
 - Treat retained plans and `LESSONS_LEARNED.md` as non-canonical until codified in the smallest valid owner.
 - Use dedicated retained-plan skills and lesson-codification owners for file shape, execution workflow, and ledger row rules.
 
-## Repo-specific operational checkpoints
-
-The following checkpoints apply to work in this repository specifically; they reference local tooling and thresholds that may differ in consumer repositories.
-
-- After inserting more than 5 items into always-on guidance files or major AI assets, run `make token-risks` or `python3 ./.github/scripts/detect_token_risks.py --root .` before creating `done-*` markers.
-- Address actionable findings before declaring a slice or plan file complete.
-- Consumer repositories are not required to run the same command; they should use their own token-risk detector if one exists.
-
 ## Validation And Reporting
 
 - Run the validator that exists; use the closest check when no dedicated validator exists.
@@ -73,3 +69,20 @@ The following checkpoints apply to work in this repository specifically; they re
 - Report completed work with outcome, changed files, validation results, and remaining gaps.
 - Include detailed resource sections only when the user asks or a narrower contract requires them.
 - Use light emoji markers only where the owning skill defines user-facing macro-category headings; keep technical paths, commands, identifiers, and schema fields plain.
+
+`</shared-baseline>`
+
+`<standards-repository-local-rules>`
+
+This block applies only to this Copilot customization and governance repository.
+Do not treat it as a consumer-repository default without an explicit sync
+contract change.
+
+## Standards Repository Checkpoints
+
+- Treat this repository as the source of the shared AI configuration baseline, catalog automation, and sync tooling.
+- After inserting more than 5 items into always-on guidance files or major AI assets, run `make token-risks` or `python3 ./.github/scripts/detect_token_risks.py --root .` before creating `done-*` markers.
+- Address actionable source-side findings before declaring a slice or plan file complete.
+- Keep consumer-facing defaults target-agnostic; consumer repositories should use their own token-risk detector if one exists.
+
+`</standards-repository-local-rules>`

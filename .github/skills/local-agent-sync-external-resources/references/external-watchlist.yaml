@@ -42,11 +42,16 @@ items:
     action: alert-only
   - source_family: mattpocock/skills
     upstream_id: grill-with-docs
-    local_owner: internal-writing-plans
+    local_owner: internal-gateway-writing-plans
     reason: Glossary and ADR side effects are not default repository conventions.
     action: alert-only
   - source_family: mattpocock/skills
     upstream_id: setup-matt-pocock-skills
     local_owner: local-agent-sync-external-resources
     reason: Setup conventions are not part of the managed source catalog.
+    action: alert-only
+  - source_family: addyosmani/agent-skills
+    upstream_id: idea-refine
+    local_owner: internal-gateway-idea-brainstorming
+    reason: Useful shaping frameworks and evaluation criteria were extracted into the repository-owned idea gateway; the competing autonomous workflow was retired.
     action: alert-only

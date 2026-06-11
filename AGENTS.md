@@ -4,6 +4,11 @@ This file is the repository strategic operating bridge for AI configuration.
 Keep it compact, stable, and free of volatile inventory or surface-specific
 playbooks.
 
+`<shared-baseline>`
+
+This block defines guidance intended to travel as the shared baseline when this
+repository projects AI configuration into other repositories.
+
 ## Rule Placement
 
 - `AGENTS.md` must define stable repository-wide policy, precedence, tactical operating defaults, ownership boundaries, and routing anchors only.
@@ -42,15 +47,20 @@ playbooks.
 - The default authoring language for repository artifacts is English unless a narrower owned file, skill, or local exception explicitly overrides it.
 - User chat may be Italian; repository-owned retained plans may use Italian when the retained-plan policy applies.
 - Keep repository-owned AI configuration files as Markdown. Use XML only as runtime prompt-assembly delimiters, never as source format.
+- XML-style code-span markers may delimit scope blocks in Markdown AI configuration when the content remains Markdown and the markers clarify runtime, sync, or locality boundaries.
 - Do not modify `README.md` files unless the user explicitly asks.
 - For vendor-owned or schema-driven surfaces, read primary documentation when correctness depends on platform semantics.
 - Update validators, tests, sync discovery, or non-README technical docs when a contract, catalog family, or shared runtime behavior changes.
 
 ## Operational Ownership
 
-- `internal-gateway-operational-flow` owns the reusable skill-first staged semantics for `full-cycle`, `plan-only`, `apply-plan`, `review`, and explicit `plan`, `execute`, or `review` phases.
+- `internal-gateway-idea-brainstorming` owns same-conversation `idea -> critical -> retained plan` workflows.
+- `internal-gateway-review` owns same-conversation `review -> critical -> remediation plan` workflows.
+- `internal-gateway-writing-plans` owns retained-plan profile selection and recommended-consumer declaration.
+- `internal-gateway-simple-task` owns direct execution and approved `compact` retained-plan consumption.
+- `internal-gateway-execute-plans` owns approved `extended` retained-plan execution and final packaging.
 - `internal-gateway-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
-- Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; reusable behavior stays in skills.
+- Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; support-skill loading inside one conversation is not a lane change.
 - Use direct owner selection or user-selected gateway skills with visible phases. Do not add a repository-owned hidden front-door router or hidden peer dispatch.
 - Light emoji markers may appear in user-facing macro-category headings when the owning skill defines them; do not use them in paths, commands, identifiers, schema fields, or copied technical values.
 
@@ -81,5 +91,32 @@ playbooks.
 ## Token And Drift Control
 
 - The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md`; its soft target is 4,000 estimated tokens measured as `ceil(UTF-8 bytes / 4)` by the validator.
-- Run `make token-risks` or `python3 ./.github/scripts/detect_token_risks.py --root .` after changes that affect always-on guidance or major AI assets.
 - Keep duplication deliberate. Duplicate only rules that must remain visible in a specific surface and are compact enough to validate.
+
+`</shared-baseline>`
+
+`<standards-repository-local-rules>`
+
+This block applies only to this standards repository. Do not treat these rules
+as consumer-repository defaults without an explicit sync contract change.
+
+## Standards Repository Role
+
+- This repository owns the shared Copilot customization baseline, governance contracts, catalog automation, and source-side sync tooling.
+- Source-managed AI assets live mainly under `.github/`; local architecture and context live in `docs/01-local-architecture.md` and `docs/02-local-repository-context.md`.
+- Source-side sync command centers and sync support skills own propagation behavior. Keep their procedures in the owning sync assets, not in this bridge.
+- Keep consumer-facing defaults target-agnostic. Do not encode this repository's local paths, validators, or workflow checkpoints into shared guidance unless the sync contract deliberately makes them shared.
+
+## Standards Repository Validation
+
+- Run `make token-risks` or `python3 ./.github/scripts/detect_token_risks.py --root .` after changes that affect always-on guidance or major AI assets in this repository.
+- Run the closest source-side validator for changed governance contracts, catalog families, sync behavior, or AI runtime assets.
+- Address actionable source-side findings before declaring this repository's AI configuration complete.
+
+## Standards Repository Locality
+
+- Repo-local retained plans, brainstorming artifacts, and temporary analysis stay under `tmp/` or the owned retained-artifact locations named by skills.
+- Consumer repositories may receive local scaffolds or override layers, but those target-local files remain owned by the consumer after materialization.
+- Treat this block as source-local policy until sync automation or the sync contract gains explicit support for excluding or transforming it.
+
+`</standards-repository-local-rules>`

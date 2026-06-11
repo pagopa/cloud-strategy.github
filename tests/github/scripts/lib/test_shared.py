@@ -49,8 +49,8 @@ def test_split_frontmatter_returns_empty_mapping_for_invalid_yaml() -> None:
         (".github/skills/local-demo/SKILL.md", True, False),
         (".github/agents/internal-sync-helper.agent.md", False, True),
         (".github/skills/internal-demo/agents/internal-sync-helper.yaml", False, True),
-        (".github/skills/internal-graphify/SKILL.md", False, True),
-        (".github/skills/internal-graphify/agents/openai.yaml", False, True),
+        (".github/skills/internal-graphify/SKILL.md", False, False),
+        (".github/skills/internal-graphify/agents/openai.yaml", False, False),
         ("docs/readme.md", False, False),
     ],
 )
@@ -63,7 +63,7 @@ def test_local_and_consumer_excluded_path_helpers(
 
 def test_find_repo_root_and_resolve_markdown_target(tmp_path: Path) -> None:
     root = tmp_path
-    current_file = root / ".github/agents/internal-gateway-operational-flow.agent.md"
+    current_file = root / ".github/agents/internal-gateway-review.agent.md"
     (root / ".github/agents").mkdir(parents=True, exist_ok=True)
     (root / "docs").mkdir(parents=True, exist_ok=True)
     current_file.write_text("# delivery operator\n", encoding="utf-8")

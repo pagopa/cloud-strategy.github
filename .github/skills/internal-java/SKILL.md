@@ -10,8 +10,8 @@ description: Use when creating, editing, or reviewing Java files or Java build m
 Treat the referenced skills below as on-demand owners. Do not preload them for
 every Java edit; load them only when the task proves which owner is needed.
 
-- `internal-project-java`: Java package, module, service, library, and deterministic test design when application or library structure becomes the main concern.
-- `internal-spring-boot-development`: Spring Boot controllers, configuration, repositories, scheduled jobs, and framework tests when framework behavior becomes the main concern.
+- `internal-java-project`: Java package, module, service, library, and deterministic test design when application or library structure becomes the main concern.
+- `internal-java-spring-boot-development`: Spring Boot controllers, configuration, repositories, scheduled jobs, and framework tests when framework behavior becomes the main concern.
 
 ## When to use
 
@@ -21,8 +21,8 @@ every Java edit; load them only when the task proves which owner is needed.
 
 ## When not to use
 
-- Java application or library structure is the main concern; use `internal-project-java`.
-- Spring Boot framework behavior drives the work; use `internal-spring-boot-development`.
+- Java application or library structure is the main concern; use `internal-java-project`.
+- Spring Boot framework behavior drives the work; use `internal-java-spring-boot-development`.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
 ## Baseline

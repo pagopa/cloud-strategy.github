@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Graphify"
   short_description: "Use the local Graphify knowledge graph for this repository"
-  default_prompt: "Use $internal-graphify when the repository exposes its activation gate markers and the question needs graph-style structure, communities, paths, or affected files. Verify graph-derived claims against real source files before finalizing the answer."
+  default_prompt: "Use $internal-graphify when the repository exposes its activation gate markers and the question needs graph-style structure, communities, paths, affected files, or broad repository orientation. Before any structural Graphify command, run `make graphify-prepare` and continue only when it reports fresh status. Use file-first search for exact lookup, symbol lookup, and final verification. Use the local `--resolve-node` helper for `graphify explain` and `graphify affected` when full paths or duplicate labels do not resolve in Graphify. Treat `graphify path` as best-effort label search only; do not assume wrapper-resolved node ids work with it. Report whether the answer came from an existing graph, a refreshed graph, or fallback search."

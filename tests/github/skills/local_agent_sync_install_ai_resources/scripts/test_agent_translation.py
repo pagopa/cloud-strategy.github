@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -207,6 +208,8 @@ class TestTargetExtension:
 
 class TestCodexTranslation:
     def test_codex_basic(self):
+        if importlib.util.find_spec("tomli_w") is None:
+            pytest.skip("tomli_w not installed")
         fm = {
             "name": "test-agent",
             "description": "A test agent",
@@ -220,6 +223,8 @@ class TestCodexTranslation:
         assert "developer_instructions" in result
 
     def test_codex_handoffs_in_instructions(self):
+        if importlib.util.find_spec("tomli_w") is None:
+            pytest.skip("tomli_w not installed")
         fm = {
             "name": "test",
             "handoffs": [{"label": "Go", "agent": "other", "prompt": "Do task"}],
@@ -232,6 +237,8 @@ class TestCodexTranslation:
         assert "other" in result
 
     def test_codex_omit_tools_from_frontmatter(self):
+        if importlib.util.find_spec("tomli_w") is None:
+            pytest.skip("tomli_w not installed")
         fm = {"name": "minimal"}
         body = "Body.\n"
         from agent_translation import _translate_for_codex
@@ -240,27 +247,29 @@ class TestCodexTranslation:
         assert "name = " in result
 
     def test_codex_real_file(self):
-        source = Path(".github/agents/internal-gateway-operational-flow.agent.md")
+        if importlib.util.find_spec("tomli_w") is None:
+            pytest.skip("tomli_w not installed")
+        source = Path(".github/agents/internal-gateway-review.agent.md")
         if not source.exists():
             pytest.skip("Source file not available")
         result = translate_agent_for_target(source, "codex")
         assert "name = " in result
         assert "developer_instructions" in result
-        assert "internal-gateway-operational-flow" in result
+        assert "internal-gateway-review" in result
 
 
 class TestIntegrationWithRealFiles:
-    def test_operational_flow_to_claude(self):
-        source = Path(".github/agents/internal-gateway-operational-flow.agent.md")
+    def test_review_gateway_to_claude(self):
+        source = Path(".github/agents/internal-gateway-review.agent.md")
         if not source.exists():
             pytest.skip("Source file not available")
         result = translate_agent_for_target(source, "claude")
         fm, body = parse_frontmatter_and_body(result)
-        assert fm["name"] == "internal-gateway-operational-flow"
+        assert fm["name"] == "internal-gateway-review"
         assert "Handoffs" in body
 
-    def test_operational_flow_to_opencode(self):
-        source = Path(".github/agents/internal-gateway-operational-flow.agent.md")
+    def test_review_gateway_to_opencode(self):
+        source = Path(".github/agents/internal-gateway-review.agent.md")
         if not source.exists():
             pytest.skip("Source file not available")
         result = translate_agent_for_target(source, "opencode")

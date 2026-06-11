@@ -130,7 +130,7 @@ def test_run_consistency_checks_flags_broken_prompt_local_links(tmp_path: Path) 
         tmp_path / ".github/prompts/internal-valid.prompt.md",
         "---\n"
         "name: internal-valid\n"
-        "agent: internal-gateway-operational-flow\n"
+        "agent: internal-gateway-review\n"
         "description: Valid prompt metadata\n"
         "---\n\n"
         "Prompt target:\n"

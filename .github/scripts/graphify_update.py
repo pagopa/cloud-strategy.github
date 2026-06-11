@@ -15,7 +15,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from lib.shared import find_repo_root, git_revision, log_error, log_info, log_success
+from lib.shared import find_repo_root, git_revision, log_error, log_info, log_success, log_warn
 
 ALLOWED_DIRECTORY_ROOTS = frozenset({".github", "docs"})
 ALLOWED_FILES = frozenset(
@@ -29,9 +29,12 @@ ALLOWED_FILES = frozenset(
 )
 GRAPHIFY_OUTPUT_DIR = Path("graphify-out")
 GRAPHIFY_REFRESH_METADATA = GRAPHIFY_OUTPUT_DIR / ".internal-graphify-refresh.json"
+GRAPHIFY_STATE_METADATA = GRAPHIFY_OUTPUT_DIR / ".internal-graphify-state.json"
 GRAPHIFY_GRAPH_JSON = GRAPHIFY_OUTPUT_DIR / "graph.json"
 GRAPHIFY_GRAPH_HTML = GRAPHIFY_OUTPUT_DIR / "graph.html"
 GRAPHIFY_GRAPH_REPORT = GRAPHIFY_OUTPUT_DIR / "GRAPH_REPORT.md"
+GRAPHIFY_REQUIRED_OUTPUTS = (GRAPHIFY_GRAPH_JSON, GRAPHIFY_GRAPH_REPORT)
+GRAPHIFY_REBUILD_OUTPUTS = (GRAPHIFY_GRAPH_JSON, GRAPHIFY_GRAPH_HTML, GRAPHIFY_GRAPH_REPORT)
 
 
 def parse_args() -> argparse.Namespace:
@@ -43,6 +46,22 @@ def parse_args() -> argparse.Namespace:
         "--check",
         action="store_true",
         help="Check whether the existing Graphify output is fresh and complete instead of refreshing.",
+    )
+    parser.add_argument(
+        "--mark-stale",
+        nargs="*",
+        default=None,
+        help="Mark Graphify stale for the next structural use when governed paths changed.",
+    )
+    parser.add_argument(
+        "--prepare-structural-use",
+        action="store_true",
+        help="Perform one lazy refresh when needed before structural Graphify use and emit status JSON.",
+    )
+    parser.add_argument(
+        "--resolve-node",
+        metavar="QUERY",
+        help="Resolve a Graphify node label, id, or repository path to a unique node id.",
     )
     return parser.parse_args()
 
@@ -120,6 +139,31 @@ def read_refresh_metadata(root: Path) -> dict[str, object] | None:
         return None
 
 
+def read_state_metadata(root: Path) -> dict[str, object] | None:
+    metadata_path = root / GRAPHIFY_STATE_METADATA
+    if not metadata_path.is_file():
+        return None
+    try:
+        return json.loads(metadata_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+
+
+def write_state_metadata(root: Path, payload: dict[str, object]) -> None:
+    metadata_path = root / GRAPHIFY_STATE_METADATA
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def clear_state_metadata(root: Path) -> None:
+    metadata_path = root / GRAPHIFY_STATE_METADATA
+    if metadata_path.exists():
+        metadata_path.unlink()
+
+
 def ensure_graphify_available() -> int:
     if shutil.which("graphify") is None:
         log_error("Missing required command: graphify")
@@ -127,9 +171,12 @@ def ensure_graphify_available() -> int:
     return 0
 
 
-def run_graphify_update(root: Path) -> int:
+def run_graphify_update(root: Path, *, force: bool = False) -> int:
+    command = ["graphify", "update", "."]
+    if force:
+        command.append("--force")
     result = subprocess.run(
-        ["graphify", "update", "."],
+        command,
         cwd=root,
         check=False,
     )
@@ -140,12 +187,41 @@ def run_graphify_update(root: Path) -> int:
 
 
 def verify_graphify_output_exists(root: Path) -> int:
-    for expected_path in (GRAPHIFY_GRAPH_HTML, GRAPHIFY_GRAPH_JSON, GRAPHIFY_GRAPH_REPORT):
+    for expected_path in GRAPHIFY_REQUIRED_OUTPUTS:
         full_path = root / expected_path
         if not full_path.is_file():
             log_error(f"Expected Graphify output was not created: {expected_path.as_posix()}")
             return 1
+    if not (root / GRAPHIFY_GRAPH_HTML).is_file():
+        log_info(
+            "Optional Graphify HTML visualization was not created; continuing with "
+            "graph.json and GRAPH_REPORT.md only."
+        )
     return 0
+
+
+def relative_governed_path(root: Path, changed_path: str) -> Path | None:
+    candidate = Path(changed_path).expanduser()
+    if not candidate.is_absolute():
+        candidate = (root / candidate).resolve()
+    else:
+        candidate = candidate.resolve()
+    try:
+        relative = candidate.relative_to(root.resolve())
+    except ValueError:
+        return None
+    if relative.parts and relative.parts[0] == GRAPHIFY_OUTPUT_DIR.name:
+        return None
+    if not is_allowlisted(relative):
+        return None
+    return relative
+
+
+def remove_graphify_outputs(root: Path) -> None:
+    for output_path in GRAPHIFY_REBUILD_OUTPUTS:
+        full_path = root / output_path
+        if full_path.exists():
+            full_path.unlink()
 
 
 def verify_graph_source_paths(root: Path, governed_paths: list[Path]) -> int:
@@ -187,6 +263,138 @@ def verify_graph_source_paths(root: Path, governed_paths: list[Path]) -> int:
         return 1
 
     return 0
+
+
+def load_graph_nodes(root: Path) -> tuple[list[dict[str, object]], int]:
+    graph_path = root / GRAPHIFY_GRAPH_JSON
+    if not graph_path.is_file():
+        log_error("Graph JSON is missing; cannot resolve Graphify nodes.")
+        return [], 1
+
+    try:
+        graph_data = json.loads(graph_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        log_error(f"Graph JSON is not valid JSON: {exc}")
+        return [], 1
+
+    raw_nodes = graph_data.get("nodes")
+    if not isinstance(raw_nodes, list):
+        log_error("Graph JSON does not contain a node list.")
+        return [], 1
+
+    nodes = [node for node in raw_nodes if isinstance(node, dict)]
+    if not nodes:
+        log_error("Graph JSON does not contain any resolvable nodes.")
+        return [], 1
+
+    return nodes, 0
+
+
+def node_text(node: dict[str, object], key: str) -> str:
+    value = node.get(key)
+    return value if isinstance(value, str) else ""
+
+
+def node_identifier(node: dict[str, object]) -> str:
+    return node_text(node, "id") or node_text(node, "label")
+
+
+def relative_lookup_path(root: Path, lookup: str) -> str | None:
+    text = lookup.strip()
+    if not text:
+        return None
+
+    candidate = Path(text).expanduser()
+    if candidate.is_absolute():
+        try:
+            return candidate.resolve().relative_to(root.resolve()).as_posix()
+        except ValueError:
+            return None
+
+    normalized = text[2:] if text.startswith("./") else text
+    if "/" in normalized or (root / normalized).exists():
+        return Path(normalized).as_posix()
+    return None
+
+
+def preferred_source_file_nodes(
+    nodes: list[dict[str, object]], relative_path: str
+) -> list[dict[str, object]]:
+    basename = Path(relative_path).name
+    return [
+        node
+        for node in nodes
+        if node_text(node, "source_file") == relative_path
+        and (
+            node_text(node, "source_location") == "L1"
+            or node_text(node, "label") == basename
+        )
+    ]
+
+
+def describe_node_candidate(node: dict[str, object]) -> str:
+    source_file = node_text(node, "source_file") or "unknown source"
+    source_location = node_text(node, "source_location")
+    location = f" {source_location}" if source_location else ""
+    return f"- {node_identifier(node)} ({source_file}{location})"
+
+
+def print_ambiguous_node_lookup(lookup: str, candidates: list[dict[str, object]]) -> int:
+    log_error(f"Graphify node lookup is ambiguous for {lookup!r}.")
+    for candidate in candidates[:8]:
+        print(describe_node_candidate(candidate))
+    if len(candidates) > 8:
+        print(f"... and {len(candidates) - 8} more")
+    return 1
+
+
+def resolve_graphify_node_id(root: Path, lookup: str) -> int:
+    nodes, exit_code = load_graph_nodes(root)
+    if exit_code != 0:
+        return exit_code
+
+    text = lookup.strip()
+    if not text:
+        log_error("Graphify node lookup cannot be empty.")
+        return 1
+
+    relative_path = relative_lookup_path(root, text)
+    if relative_path is not None:
+        path_matches = [
+            node for node in nodes if node_text(node, "source_file") == relative_path
+        ]
+        if path_matches:
+            preferred_matches = preferred_source_file_nodes(nodes, relative_path)
+            if len(preferred_matches) == 1:
+                print(node_identifier(preferred_matches[0]))
+                return 0
+            if len(path_matches) == 1:
+                print(node_identifier(path_matches[0]))
+                return 0
+            return print_ambiguous_node_lookup(text, path_matches)
+
+    id_matches = [node for node in nodes if node_text(node, "id") == text]
+    if len(id_matches) == 1:
+        print(node_identifier(id_matches[0]))
+        return 0
+    if len(id_matches) > 1:
+        return print_ambiguous_node_lookup(text, id_matches)
+
+    normalized_text = text.lower()
+    label_matches = [
+        node
+        for node in nodes
+        if node_text(node, "label") == text
+        or node_text(node, "norm_label") == normalized_text
+    ]
+    if len(label_matches) == 1:
+        print(node_identifier(label_matches[0]))
+        return 0
+    if len(label_matches) > 1:
+        return print_ambiguous_node_lookup(text, label_matches)
+
+    log_error(f"No Graphify node matched {text!r}.")
+    return 1
 
 
 def run_graphify_check(root: Path) -> int:
@@ -235,31 +443,16 @@ def run_graphify_check(root: Path) -> int:
     return 0
 
 
-def main() -> int:
-    args = parse_args()
-    root = find_repo_root(Path(args.root))
-
-    if args.check:
-        exit_code = ensure_graphify_available()
-        if exit_code != 0:
-            return exit_code
-        return run_graphify_check(root)
-
-    governed_paths, exit_code = list_governed_repo_files(root)
-    if exit_code != 0:
-        return exit_code
-    if not governed_paths:
-        log_error("No governed repository files were found for Graphify.")
-        return 1
-
-    exit_code = ensure_graphify_available()
-    if exit_code != 0:
-        return exit_code
-
+def refresh_graphify_outputs(
+    root: Path,
+    governed_paths: list[Path],
+    *,
+    allow_missing_refresh_metadata: bool = False,
+) -> int:
     root_output = root / GRAPHIFY_OUTPUT_DIR
     if root_output.exists():
         metadata_path = root / GRAPHIFY_REFRESH_METADATA
-        if not metadata_path.is_file():
+        if not metadata_path.is_file() and not allow_missing_refresh_metadata:
             log_error(
                 f"A pre-existing {GRAPHIFY_OUTPUT_DIR.as_posix()}/ folder was found without "
                 "internal refresh metadata. Refusing to overwrite. "
@@ -278,14 +471,132 @@ def main() -> int:
 
     exit_code = verify_graph_source_paths(root, governed_paths)
     if exit_code != 0:
-        return exit_code
+        log_info(
+            "Retrying graphify update with --force after clearing the previous graph snapshot "
+            "to drop stale nodes after deletions or refactors."
+        )
+        remove_graphify_outputs(root)
+        exit_code = run_graphify_update(root, force=True)
+        if exit_code != 0:
+            return exit_code
+
+        exit_code = verify_graphify_output_exists(root)
+        if exit_code != 0:
+            return exit_code
+
+        exit_code = verify_graph_source_paths(root, governed_paths)
+        if exit_code != 0:
+            return exit_code
 
     write_refresh_metadata(root, governed_paths)
+    clear_state_metadata(root)
     log_success(
         f"Graphify output is ready under {GRAPHIFY_OUTPUT_DIR.as_posix()}/ "
         f"and metadata was written to {GRAPHIFY_REFRESH_METADATA.as_posix()}."
     )
     return 0
+
+
+def mark_graphify_stale(root: Path, changed_paths: list[str]) -> int:
+    governed_changes = [
+        relative.as_posix()
+        for changed_path in changed_paths
+        if (relative := relative_governed_path(root, changed_path)) is not None
+    ]
+    if not governed_changes:
+        log_info("No governed repository changes detected for Graphify stale marking.")
+        return 0
+    try:
+        write_state_metadata(
+            root,
+            {
+                "status": "stale",
+                "changed_paths": sorted(set(governed_changes)),
+                "source": "graphify_update.py",
+            },
+        )
+    except OSError as exc:
+        log_warn(f"Failed to write Graphify stale marker; continuing non-blocking: {exc}")
+        return 0
+    log_info("Marked Graphify stale for the next structural use.")
+    return 0
+
+
+def emit_prepare_status(status: str, *, refreshed: bool, reason: str) -> int:
+    print(
+        json.dumps(
+            {"status": status, "refreshed": refreshed, "reason": reason},
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
+def prepare_structural_use(root: Path) -> int:
+    state = read_state_metadata(root)
+    if state and state.get("status") == "stale":
+        needs_refresh = True
+        reason = "stale-marker"
+    else:
+        needs_refresh = run_graphify_check(root) != 0
+        reason = "fresh" if not needs_refresh else "freshness-check"
+
+    if not needs_refresh:
+        return emit_prepare_status("fresh", refreshed=False, reason=reason)
+
+    governed_paths, exit_code = list_governed_repo_files(root)
+    if exit_code != 0 or not governed_paths:
+        return emit_prepare_status("fallback-used", refreshed=False, reason="governed-corpus-unavailable")
+
+    exit_code = ensure_graphify_available()
+    if exit_code != 0:
+        return emit_prepare_status("fallback-used", refreshed=False, reason="graphify-unavailable")
+
+    exit_code = refresh_graphify_outputs(
+        root,
+        governed_paths,
+        allow_missing_refresh_metadata=True,
+    )
+    if exit_code != 0:
+        return emit_prepare_status("fallback-used", refreshed=False, reason="refresh-failed")
+
+    if run_graphify_check(root) != 0:
+        return emit_prepare_status("fallback-used", refreshed=True, reason="refresh-unverified")
+    return emit_prepare_status("fresh", refreshed=True, reason="lazy-refresh")
+
+
+def main() -> int:
+    args = parse_args()
+    root = find_repo_root(Path(args.root))
+
+    if getattr(args, "mark_stale", None) is not None:
+        return mark_graphify_stale(root, args.mark_stale)
+
+    if getattr(args, "prepare_structural_use", False):
+        return prepare_structural_use(root)
+
+    if getattr(args, "resolve_node", None) is not None:
+        return resolve_graphify_node_id(root, args.resolve_node)
+
+    if args.check:
+        exit_code = ensure_graphify_available()
+        if exit_code != 0:
+            return exit_code
+        return run_graphify_check(root)
+
+    governed_paths, exit_code = list_governed_repo_files(root)
+    if exit_code != 0:
+        return exit_code
+    if not governed_paths:
+        log_error("No governed repository files were found for Graphify.")
+        return 1
+
+    exit_code = ensure_graphify_available()
+    if exit_code != 0:
+        return exit_code
+
+    return refresh_graphify_outputs(root, governed_paths)
 
 
 if __name__ == "__main__":

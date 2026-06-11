@@ -2,8 +2,9 @@
 """Purpose: plan and apply local home-directory AI resource sync operations.
 
 Usage examples:
-  python3 scripts/sync_home_ai_resources.py plan --targets codex,copilot,claude,opencode
-  python3 scripts/sync_home_ai_resources.py apply --targets codex --create-missing-dirs
+    python3 scripts/sync_home_ai_resources.py plan --targets skills
+    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs
+    python3 scripts/sync_home_ai_resources.py apply --targets skills,codex --retire-targets claude --prune-managed
 """
 
 from __future__ import annotations
@@ -27,6 +28,7 @@ from home_syncing import (
     write_doctor_snapshot,
     write_plan_snapshot,
 )
+from sync_output import build_compact_install_output
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -46,9 +48,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         )
         cmd_parser.add_argument(
             "--targets",
-            default="codex,copilot,claude,opencode",
-            help="Target runtimes: codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
+            default="skills",
+            help="Target runtimes: skills, codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
         )
+        if cmd != "doctor":
+            cmd_parser.add_argument(
+                "--retire-targets",
+                default="",
+                help="Previously synced runtimes to retire from the manifest and prune when combined with --prune-managed. Example: claude",
+            )
         cmd_parser.add_argument(
             "--create-missing-dirs",
             action="store_true",
@@ -65,7 +73,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             help="Allow apply-like execution against undocumented targets.",
         )
         cmd_parser.add_argument(
-            "--format", choices=["text", "json"], default="text", help="Output format."
+            "--format",
+            choices=["text", "json", "compact"],
+            default="text",
+            help="Output format.",
         )
         cmd_parser.add_argument(
             "--fast",
@@ -88,7 +99,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Home directory root.",
     )
     bisync_plan.add_argument(
-        "--format", choices=["text", "json"], default="text", help="Output format."
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
     )
     bisync_apply = bisync_sub.add_parser("apply", help="Apply bisync resolution.")
     bisync_apply.add_argument("--source-root", default=".", help="Source repository root.")
@@ -98,7 +112,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Home directory root.",
     )
     bisync_apply.add_argument(
-        "--format", choices=["text", "json"], default="text", help="Output format."
+        "--format",
+        choices=["text", "json", "compact"],
+        default="text",
+        help="Output format.",
     )
 
     return parser.parse_args(argv)
@@ -118,14 +135,34 @@ def run(args: argparse.Namespace) -> int:
     home_root = Path(args.home_root).expanduser().resolve()
     try:
         targets = parse_targets(args.targets)
+        retire_targets = ()
+        if getattr(args, "retire_targets", "").strip():
+            retire_targets = parse_targets(args.retire_targets)
     except ValueError as error:
         payload = {
             "mode": normalize_mode(args.command),
             "selected_targets": [],
+            "retired_targets": [],
             "blocked_codes": ["unknown-target"],
             "error": str(error),
         }
         emit_output(payload, format_name=args.format, failure_message=str(error))
+        return 1
+
+    overlap = sorted(set(targets) & set(retire_targets))
+    if overlap:
+        message = (
+            "retire-target-overlap: selected and retired targets must be disjoint: "
+            + ", ".join(overlap)
+        )
+        payload = {
+            "mode": normalize_mode(args.command),
+            "selected_targets": list(targets),
+            "retired_targets": list(retire_targets),
+            "blocked_codes": ["retire-target-overlap"],
+            "error": message,
+        }
+        emit_output(payload, format_name=args.format, failure_message=message)
         return 1
 
     command = normalize_mode(args.command)
@@ -157,6 +194,7 @@ def run(args: argparse.Namespace) -> int:
         source_root=source_root,
         home_root=home_root,
         targets=targets,
+        retired_targets=retire_targets,
         mode=command,
         experimental_targets=args.experimental_targets,
         prune_managed=args.prune_managed,
@@ -206,14 +244,24 @@ def emit_output(
     format_name: str,
     failure_message: str | None = None,
 ) -> None:
+    if format_name == "compact":
+        compact_payload = build_compact_install_output(payload)
+        if failure_message and "error" not in compact_payload:
+            compact_payload["error"] = failure_message
+        print(json.dumps(compact_payload, indent=2, sort_keys=True))
+        return
+
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
 
     mode = payload.get("mode", "plan")
     targets = ", ".join(payload.get("selected_targets", [])) or "none"
+    retired_targets = ", ".join(payload.get("retired_targets", []))
     log_info(f"Mode: {mode}")
     log_info(f"Targets: {targets}")
+    if retired_targets:
+        log_info(f"Retire targets: {retired_targets}")
 
     operations = payload.get("operations", [])
     copied_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "copy"]

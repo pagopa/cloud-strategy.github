@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -49,6 +51,80 @@ build_home_sync_plan = home_syncing.build_home_sync_plan
 parse_targets = home_syncing.parse_targets
 
 
+def load_bisync_module():
+    inserted_path = False
+    if SKILL_SCRIPTS_ROOT.as_posix() not in sys.path:
+        sys.path.insert(0, SKILL_SCRIPTS_ROOT.as_posix())
+        inserted_path = True
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "_test_local_bisync_skills",
+            SKILL_SCRIPTS_ROOT / "bisync_skills.py",
+        )
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        if inserted_path:
+            sys.path.remove(SKILL_SCRIPTS_ROOT.as_posix())
+
+
+bisync_skills = load_bisync_module()
+apply_bisync_plan = bisync_skills.apply_bisync_plan
+build_bisync_plan = bisync_skills.build_bisync_plan
+
+
+def init_git_repo(root: Path) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "init", "-b", "main"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+
+def commit_all(root: Path, message: str) -> None:
+    subprocess.run(
+        ["git", "add", "-A"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+
+def set_tree_mtime(root: Path, timestamp: float) -> None:
+    for path in sorted(root.rglob("*")):
+        os.utime(path, (timestamp, timestamp))
+    os.utime(root, (timestamp, timestamp))
+
+
 def write_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
@@ -78,6 +154,15 @@ def initialize_source_repo(root: Path) -> None:
         / ".github/skills/local-agent-sync-install-ai-resources/references/runtime-support-matrix.yaml",
         "version: 1\n"
         "rows:\n"
+        "  - target: skills\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Shared skill support.\n"
         "  - target: codex\n"
         "    resource_family: skills\n"
         "    support_level: Documented\n"
@@ -119,7 +204,8 @@ def initialize_source_repo(root: Path) -> None:
 
 def test_parse_targets_normalizes_known_values_and_rejects_unknowns() -> None:
     assert parse_targets(" opencode, codex , codex ") == ("codex", "opencode")
-    assert parse_targets("all") == ("codex", "copilot", "claude", "opencode")
+    assert parse_targets("skills") == ("skills",)
+    assert parse_targets("all") == ("skills", "codex", "copilot", "claude", "opencode")
 
     with pytest.raises(ValueError, match="unknown-target"):
         parse_targets("codex,unknown")
@@ -138,7 +224,7 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex,opencode"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
     operation_codes = {
@@ -146,7 +232,7 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
     }
 
     assert "target-exists-unmanaged" in operation_codes
-    assert "docs-unverified" in operation_codes
+    assert "docs-unverified" not in operation_codes
 
 
 def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest(
@@ -169,7 +255,7 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
 
@@ -184,7 +270,7 @@ def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest
     assert not (home_root / ".agents/skills/demo-skill/scripts/.venv").exists()
     assert not (home_root / ".agents/skills/demo-skill/__pycache__").exists()
     assert not (home_root / ".agents/skills/demo-skill/.pytest_cache").exists()
-    assert manifest["targets"] == ["codex"]
+    assert manifest["targets"] == ["skills"]
     assert manifest["managed_resources"][0]["resource_id"] == "demo-skill"
 
 
@@ -208,7 +294,7 @@ def test_skill_bundle_sync_scripts_can_load_bundled_references(
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="plan",
     )
 
@@ -223,7 +309,7 @@ def test_stale_manifest_path_escapes_home_is_blocked(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
     manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
@@ -249,7 +335,7 @@ def test_stale_manifest_path_escapes_home_is_blocked(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
         prune_managed=True,
     )
@@ -267,10 +353,10 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
     )
-    manifest_path = apply_home_sync_plan(plan, create_missing_dirs=True)
+    apply_home_sync_plan(plan, create_missing_dirs=True)
 
     copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
     copied_skill.write_text("# drifted content\n", encoding="utf-8")
@@ -292,7 +378,7 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
     plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex"),
+        targets=parse_targets("skills"),
         mode="apply",
         prune_managed=True,
     )
@@ -301,6 +387,23 @@ def test_stale_managed_content_drift_blocks_delete(tmp_path: Path) -> None:
 
 
 def test_doctor_checks_include_agent_roots(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    checks, blocked_codes = home_syncing.run_doctor(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+    )
+
+    skill_checks = [c for c in checks if c.get("name") == "target-root:skills"]
+    assert len(skill_checks) == 1
+    assert skill_checks[0]["path"].endswith(".agents/skills")
+    assert all(".codex/agents" not in c["path"] for c in checks)
+
+
+def test_doctor_checks_keep_agent_roots_for_runtime_targets(tmp_path: Path) -> None:
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
@@ -356,6 +459,85 @@ def test_triple_apply_skip_plan_sequence_is_convergent(tmp_path: Path) -> None:
     )
 
 
+def test_repo_to_home_bisync_refreshes_install_manifest(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    init_git_repo(source_root)
+    commit_all(source_root, "initial source bundle")
+
+    install_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    manifest_path = apply_home_sync_plan(install_plan, create_missing_dirs=True)
+
+    source_skill = source_root / ".github/skills/demo-skill"
+    home_skill = home_root / ".agents/skills/demo-skill"
+    write_file(source_skill / "SKILL.md", "# Source v2\n")
+    commit_all(source_root, "repo-to-home drift")
+    set_tree_mtime(home_skill, 100.0)
+    set_tree_mtime(source_skill, 200.0)
+
+    bisync_plan = build_bisync_plan(source_root, home_root, mode="plan")
+    assert any(drift.direction == "repo-to-home" for drift in bisync_plan.drifts)
+
+    bisync_result = apply_bisync_plan(source_root, home_root, bisync_plan)
+    assert bisync_result.blocked_codes == []
+    assert bisync_result.verification["status"] == "converged"
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    managed = manifest["managed_resources"][0]
+    assert managed["source_hash"] == home_syncing.hash_resource(source_skill)
+    assert managed["content_hash"] == home_syncing.hash_resource(home_skill)
+
+    post_bisync_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    blocked_codes = {
+        operation.code for operation in post_bisync_plan.operations if operation.code
+    }
+    assert "target-modified-managed" not in blocked_codes
+
+
+def test_direct_home_edit_still_blocks_target_modified_managed(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    init_git_repo(source_root)
+    commit_all(source_root, "initial source bundle")
+
+    install_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    apply_home_sync_plan(install_plan, create_missing_dirs=True)
+
+    copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
+    copied_skill.write_text("# locally edited\n", encoding="utf-8")
+
+    blocked_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    blocked_codes = {
+        operation.code for operation in blocked_plan.operations if operation.code
+    }
+
+    assert "target-modified-managed" in blocked_codes
+
+
 def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
     tmp_path: Path,
 ) -> None:
@@ -405,11 +587,190 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
     resource_ids = {
         op.resource_id for op in plan.operations if hasattr(op, "resource_id")
     }
-    planned_paths = {op.path for op in plan.operations if hasattr(op, "path")}
-
     assert "internal-graphify" in resource_ids or any(
         ".agents/skills/internal-graphify" in str(op.path) for op in plan.operations
     )
+
+
+def test_removed_source_bundle_becomes_stale_managed_instead_of_source_missing(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    apply_home_sync_plan(plan, create_missing_dirs=True)
+
+    skill_dir = source_root / ".github/skills/demo-skill"
+    for path in sorted(skill_dir.rglob("*"), reverse=True):
+        if path.is_file():
+            path.unlink()
+        elif path.is_dir():
+            path.rmdir()
+    skill_dir.rmdir()
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+        prune_managed=True,
+    )
+    codes = {op.code for op in plan.operations if op.code}
+    delete_paths = {op.path for op in plan.operations if op.action == "delete"}
+
+    assert "source-missing" not in codes
+    assert str(home_root / ".agents/skills/demo-skill") in delete_paths
+
+
+def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        home_syncing,
+        "translate_agent_for_target",
+        lambda source_path, target, config_path=None: f"# translated for {target}\n",
+    )
+
+    support_matrix_path = (
+        source_root
+        / ".github/skills/local-agent-sync-install-ai-resources/references/runtime-support-matrix.yaml"
+    )
+    support_matrix_path.write_text(
+        "version: 1\n"
+        "rows:\n"
+        "  - target: codex\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Codex direct-copy skill support.\n"
+        "  - target: copilot\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Copilot direct-copy skill support.\n"
+        "  - target: claude\n"
+        "    resource_family: skills\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.agents/skills/<skill>/\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Claude direct-copy skill support.\n"
+        "  - target: codex\n"
+        "    resource_family: agents\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.codex/agents/<agent>.md\n"
+        "    direct_copy_possible: false\n"
+        "    translation_required: true\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Codex agent translation support.\n"
+        "  - target: copilot\n"
+        "    resource_family: agents\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.copilot/agents/<agent>.md\n"
+        "    direct_copy_possible: true\n"
+        "    translation_required: false\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Copilot agent direct-copy support.\n"
+        "  - target: claude\n"
+        "    resource_family: agents\n"
+        "    support_level: Documented\n"
+        "    home_path: ~/.claude/agents/<agent>.md\n"
+        "    direct_copy_possible: false\n"
+        "    translation_required: true\n"
+        "    include_in_v1: true\n"
+        "    evidence: []\n"
+        "    notes: Claude agent translation support.\n",
+        encoding="utf-8",
+    )
+    catalog_path = (
+        source_root
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
+    )
+    catalog_path.write_text(
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: false\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: false\n"
+        "resources:\n"
+        "  - resource_id: demo-skill\n"
+        "    source_family: skills\n"
+        "    source_path: .github/skills/demo-skill\n"
+        "    include_targets:\n"
+        "      - codex\n"
+        "      - copilot\n"
+        "      - claude\n"
+        "    target_support: Documented\n"
+        "    notes: Demo bundle.\n",
+        encoding="utf-8",
+    )
+    agent_path = source_root / ".github/agents/demo.agent.md"
+    write_file(
+        agent_path,
+        "---\nname: demo\ndescription: Demo agent.\n---\n\n# Demo agent\n",
+    )
+    catalog_payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+    catalog_payload["resources"].append(
+        {
+            "resource_id": "demo",
+            "source_family": "agents",
+            "source_path": ".github/agents/demo.agent.md",
+            "include_targets": ["codex", "copilot", "claude"],
+            "target_support": "Documented",
+            "notes": "Demo agent.",
+        }
+    )
+    catalog_path.write_text(
+        yaml.safe_dump(catalog_payload, sort_keys=False), encoding="utf-8"
+    )
+
+    initial_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex,copilot,claude"),
+        mode="apply",
+    )
+    manifest_path = apply_home_sync_plan(initial_plan, create_missing_dirs=True)
+
+    retire_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("codex,copilot"),
+        retired_targets=parse_targets("claude"),
+        mode="apply",
+        prune_managed=True,
+    )
+    apply_home_sync_plan(retire_plan, prune_managed=True)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert manifest["targets"] == ["codex", "copilot"]
+    assert not (home_root / ".claude/agents/demo.md").exists()
+    assert (home_root / ".copilot/agents/demo.agent.md").is_file()
+    assert (home_root / ".agents/skills/demo-skill").is_dir()
+    assert all(entry["target"] != "claude" for entry in manifest["managed_resources"])
 
 
 def test_home_sync_catalog_contains_internal_graphify_in_real_repo() -> None:

@@ -2,6 +2,8 @@
 
 Use these stable error identifiers for planner, doctor, audit, and apply output.
 
+When rendering a user-visible report, convert each active code into a plain-language `why blocked` or `why skipped` explanation by combining the `Meaning` and `Rationale` columns. Do not surface a bare code without the policy reason behind it.
+
 | Code | Meaning | Default route | Rationale |
 | --- | --- | --- | --- |
 | `unknown-target` | The selected runtime target is not supported by the parser. | Stop and correct the target selection. | Prevents misconfigured or typoed targets from being silently ignored. |
@@ -15,7 +17,7 @@ Use these stable error identifiers for planner, doctor, audit, and apply output.
 | `manifest-missing` | A manifest-backed mode needs state that does not exist yet. | Fall back to first-run planning or doctor guidance. | Without a manifest, the tool cannot distinguish managed from unmanaged targets and must default to cautious first-run behavior. |
 | `manifest-corrupt` | The manifest exists but cannot be parsed or trusted. | Block apply and require remediation. | A corrupt manifest could hide stale entries or misrepresent ownership; applying against it risks data loss. |
 | `target-exists-unmanaged` | A target path already exists but is not manifest-managed. | Block overwrite. | Protects user-created or locally-installed files from being silently overwritten by repository-managed copies. |
-| `target-modified-managed` | A manifest-managed target diverged from the last recorded content hash. | Block overwrite until reviewed. | Prevents losing local edits or runtime-generated changes that occurred after the last sync. |
+| `target-modified-managed` | A manifest-managed target diverged from the last recorded content hash. | Block overwrite until reviewed. Re-run install plan after verified bisync reconciliation; if the blocker persists, treat it as real local divergence. | Prevents losing local edits or runtime-generated changes that occurred after the last sync. |
 | `source-missing` | A catalog entry points to a source path that no longer exists. | Block that resource and flag catalog drift. | Materializing a missing source would create a stale or incomplete runtime copy; instead, surface catalog inconsistency. |
 | `source-invalid-skill` | A source skill bundle is incomplete for direct-copy sync. | Block that resource and fix the bundle. | A valid skill bundle must contain `SKILL.md`; copying an incomplete bundle would produce an unusable runtime skill. |
 | `stale-managed` | A previously managed target is no longer planned. | Mark for prune, but do not delete automatically. | Removal is opt-in (`--prune-managed`) to prevent accidental deletion of files that were previously managed. |
@@ -23,6 +25,7 @@ Use these stable error identifiers for planner, doctor, audit, and apply output.
 | `stale-content-drifted` | A stale managed file was modified since its last manifest entry. | Block delete until reviewed. | Even when pruning is approved, a locally modified stale file may contain valuable changes that must be preserved. |
 | `stale-path-unresolvable` | A stale managed path from the manifest cannot be resolved safely. | Block delete and surface the path. | Prevents deleting files at paths that may have been moved, symlinked, or otherwise made unsafe since the last sync. |
 | `reverse-sync-blocked` | Source root is under the home sync state directory (`~/.sync/...`), indicating attempted reverse sync. | Block immediately. Sync must be repo → home only. | Unidirectional sync preserves the repository as the single source of truth and prevents home state from polluting the repo. |
+| `retire-target-overlap` | The same runtime target was requested as both active and retired. | Stop and correct the target selection. | Target retirement must be explicit and unambiguous, otherwise the tool cannot derive the final managed target set safely. |
 | `bisync-source-missing` | The source `.github/skills/` directory does not exist or is not readable. | Block bisync plan and apply. | Bisync requires both source and home skill roots to exist for meaningful comparison. |
 | `bisync-home-missing` | The home `~/.agents/skills/` directory does not exist or is not readable. | Block bisync plan and apply. | A missing home root prevents meaningful comparison and safe bidirectional reconciliation. |
 | `bisync-repo-dirty` | The source repository has uncommitted or untracked changes detected by `git status --porcelain --untracked-files=all`. | Block bisync apply. | Writing to a dirty repository risks overwriting uncommitted work and makes post-apply verification unreliable. |
@@ -31,4 +34,5 @@ Use these stable error identifiers for planner, doctor, audit, and apply output.
 | `bisync-only-home` | A skill bundle exists in the home directory but not in the source repo. | Block bisync apply; require manual resolution. | Automatic resolution would mean deleting the home copy or creating a new repo copy without user intent. |
 | `bisync-equal-mtime` | Hashes differ between repo and home, but mtime is equal for both sides. | Block bisync apply; require manual resolution. | When mtime is equal, the tool cannot determine which side is newer; the user must decide the direction. |
 | `bisync-verify-failed` | Post-copy hash verification failed for a specific skill. | Block bisync apply; report the failing skill. | A hash mismatch after copy indicates a copy error, filesystem issue, or concurrent modification during apply. |
+| `bisync-manifest-reconcile-failed` | Bisync copied a repo-wins bundle, but the install manifest entry could not be safely refreshed to match it. | Block bisync apply and keep the reconciliation failure visible. | A verified copy must not be treated as converged unless the matching manifest row can be updated safely and revalidated. |
 | `bisync-residual-drift` | A post-apply verification plan still found drift entries. | Block bisync apply and inspect the residual plan. | Apply is not complete until a second plan reports zero drift and zero blockers. |

@@ -10,8 +10,8 @@ description: Use when editing Python files that need lightweight runtime, typing
 Treat the referenced skills below as on-demand owners. Do not preload them for
 every Python edit; load them only when the task proves script or project depth.
 
-- `internal-script-python`: standalone Python scripts, CLIs, and operator-facing toolkits when dependency bootstrap, launcher behavior, or direct execution becomes the main concern.
-- `internal-project-python`: Python packages, application code, service boundaries, and framework-owned flows when importable behavior or service structure becomes the main concern.
+- `internal-python-script`: standalone Python scripts, CLIs, and operator-facing toolkits when dependency bootstrap, launcher behavior, or direct execution becomes the main concern.
+- `internal-python-project`: Python packages, application code, service boundaries, and framework-owned flows when importable behavior or service structure becomes the main concern.
 
 ## When to use
 
@@ -21,8 +21,8 @@ every Python edit; load them only when the task proves script or project depth.
 
 ## When not to use
 
-- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-script-python`.
-- Package, application, service, or framework-owned behavior; use `internal-project-python`.
+- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-python-script`.
+- Package, application, service, or framework-owned behavior; use `internal-python-project`.
 - Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
 
 ## Baseline
@@ -38,9 +38,9 @@ every Python edit; load them only when the task proves script or project depth.
 
 ## Dependency And Runtime Depth
 
-Use `internal-script-python` when dependency bootstrap, launcher behavior, local virtual environments, or direct operator execution is the main concern.
+Use `internal-python-script` when dependency bootstrap, launcher behavior, local virtual environments, or direct operator execution is the main concern.
 
-Use `internal-project-python` when importable behavior, service boundaries, application tests, or framework flows are the main concern.
+Use `internal-python-project` when importable behavior, service boundaries, application tests, or framework flows are the main concern.
 
 ## Validation
 

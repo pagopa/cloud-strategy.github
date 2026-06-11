@@ -23,7 +23,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 - Use this agent for consumer-repository baseline propagation, drift assessment, `plan`, `audit`, and explicit `apply` runs.
 - Use this agent when the target repository must inherit the bridge model around `AGENTS.md`, `.github/copilot-instructions.md`, `.github/copilot-instructions.override.md`, `.github/INVENTORY.md`, repository-root `LESSONS_LEARNED.md`, and explicitly shared hygiene files.
 - Select `apply` only on explicit request, after the current evidence shows a conflict-safe plan and no unmanaged target-local cleanup is being implied.
-- Do not use this agent for source-side catalog governance, external-resource refreshes, or managed-scope redesign in this repository; recommend `local-sync-external-resources` or `internal-gateway-operational-flow` as appropriate.
+- Do not use this agent for source-side catalog governance, external-resource refreshes, or managed-scope redesign in this repository; recommend `local-sync-external-resources` or `internal-gateway-idea-brainstorming` as appropriate.
 - Do not use this agent for one-resource agent or skill authoring; recommend `internal-agent-creator` or `internal-skill-creator` as appropriate.
 - When current platform behavior decides sync policy, validate it through `internal-copilot-docs-research` before changing the contract.
 

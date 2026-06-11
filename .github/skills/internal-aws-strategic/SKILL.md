@@ -139,7 +139,7 @@ Include:
   Use when the next need is IAM model, SCP design, trust boundaries, federation, or guardrail definition.
 - `internal-aws-operations`
   Use when the next need is monitoring, backup, recovery validation, reporting, audit evidence, preflight, or post-rollout checks.
-- `internal-terraform`, `internal-script-python`, `internal-script-bash`
+- `internal-terraform`, `internal-python-script`, `internal-bash-script`
   Use when the decision is settled and implementation begins.
 
 ## Common mistakes

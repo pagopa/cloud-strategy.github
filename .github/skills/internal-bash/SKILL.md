@@ -11,7 +11,7 @@ Treat the referenced skill below as an on-demand owner. Do not preload it just
 because the file is Bash; load it only when the task shifts from embedded shell
 safety to standalone script behavior.
 
-- `internal-script-bash`: standalone Bash scripts, shell utilities, wrappers, launchers, and operator-facing behavior.
+- `internal-bash-script`: standalone Bash scripts, shell utilities, wrappers, launchers, and operator-facing behavior.
 
 ## When to use
 
@@ -21,7 +21,7 @@ safety to standalone script behavior.
 
 ## When not to use
 
-- Standalone script design, launcher behavior, operator UX, or script templates; use `internal-script-bash`.
+- Standalone script design, launcher behavior, operator UX, or script templates; use `internal-bash-script`.
 - Bash embedded in GitHub composite actions; use `internal-github-action-composite`.
 - GitHub workflow-level behavior; use `internal-github-actions`.
 

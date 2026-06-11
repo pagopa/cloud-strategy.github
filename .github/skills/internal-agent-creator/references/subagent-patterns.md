@@ -73,10 +73,10 @@ Focused instructions for domain A work.
 ### Router with explicit dispatch targets
 
 ```yaml
-agents: ['internal-gateway-operational-flow', 'internal-gateway-critical-master', 'internal-gateway-simple-task']
+agents: ['internal-gateway-idea-brainstorming', 'internal-gateway-review', 'internal-gateway-critical-master', 'internal-gateway-simple-task']
 ```
 
-Only these three agents can be invoked as subagents. The platform enforces this.
+Only these four agents can be invoked as subagents. The platform enforces this.
 
 ### Non-router agents that must not dispatch
 
@@ -117,7 +117,7 @@ Handoffs create guided sequential workflows with user-visible buttons between ag
 ```yaml
 handoffs:
   - label: Start Implementation
-    agent: internal-gateway-operational-flow
+    agent: internal-gateway-review
     prompt: Implement the plan outlined above.
     send: false
 ```
@@ -148,7 +148,7 @@ Avoid nested subagents unless the task genuinely benefits from recursive delegat
 ## Anti-Patterns
 
 - Coordinator that performs worker-level work instead of delegating.
-- `agents: *` on a router when only three canonical targets exist.
+- `agents: *` on a router when only four canonical targets exist.
 - Worker agents with `user-invocable: true` that clutter the dropdown.
 - Using `handoffs` for autonomous delegation that should be a subagent call.
 - Nested subagents enabled globally when only one agent needs recursion.

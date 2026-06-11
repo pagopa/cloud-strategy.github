@@ -8,7 +8,7 @@ clarification before a quick lane can continue.
 Simple mode allows at most one focused `grill-me` block. If the missing answer
 would decide ownership, rollout, governance, tradeoffs, validation strategy, or
 whether the work needs a plan, stop simple mode and escalate to
-`internal-gateway-operational-flow`.
+`internal-gateway-idea-brainstorming` or `internal-gateway-review`.
 
 ## Exit Check
 
@@ -49,7 +49,7 @@ the blocker still cannot be resolved inside the same focused block, escalate.
 
 ## Escalation Triggers
 
-Escalate to `internal-gateway-operational-flow` when:
+Escalate to `internal-gateway-idea-brainstorming` or `internal-gateway-review` when:
 
 - the exit check fails
 - the clarification limit is exceeded

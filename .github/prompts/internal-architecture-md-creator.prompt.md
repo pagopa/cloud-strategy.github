@@ -1,6 +1,6 @@
 ---
 name: "internal-architecture-md-creator"
-agent: "internal-gateway-operational-flow"
+agent: "internal-gateway-simple-task"
 description: "Generate or refresh a repository `docs/01-architecture.md` contract from repository evidence."
 argument-hint: "Optional target repository path plus optional focus, constraints, or chat-language preference"
 ---
@@ -24,8 +24,8 @@ Use these sources first:
 - [AGENTS.md](../../AGENTS.md)
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
-- [.github/agents/internal-gateway-operational-flow.agent.md](../agents/internal-gateway-operational-flow.agent.md)
-- [.github/skills/internal-gateway-operational-flow/SKILL.md](../skills/internal-gateway-operational-flow/SKILL.md)
+- [.github/agents/internal-gateway-simple-task.agent.md](../agents/internal-gateway-simple-task.agent.md)
+- [.github/skills/internal-gateway-simple-task/SKILL.md](../skills/internal-gateway-simple-task/SKILL.md)
 
 Execution contract:
 

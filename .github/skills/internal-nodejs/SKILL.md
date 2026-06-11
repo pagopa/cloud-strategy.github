@@ -11,7 +11,7 @@ Treat the referenced skill below as an on-demand owner. Do not preload it for
 every Node.js or TypeScript edit; load it only when application structure,
 package architecture, or deterministic test design becomes the real issue.
 
-- `internal-project-nodejs`: Node.js or TypeScript services, APIs, middleware, modules, and deterministic tests when project-level architecture becomes the main concern.
+- `internal-nodejs-project`: Node.js or TypeScript services, APIs, middleware, modules, and deterministic tests when project-level architecture becomes the main concern.
 
 ## When to use
 
@@ -21,7 +21,7 @@ package architecture, or deterministic test design becomes the real issue.
 
 ## When not to use
 
-- Service, API, middleware, package architecture, or test design is the main concern; use `internal-project-nodejs`.
+- Service, API, middleware, package architecture, or test design is the main concern; use `internal-nodejs-project`.
 - Generic JSON formatting is the only concern and the file is not Node.js project metadata.
 - Frontend design or browser UI behavior is the dominant task.
 

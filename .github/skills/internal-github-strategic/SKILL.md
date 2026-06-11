@@ -138,7 +138,7 @@ Include:
   Use when the next need is rulesets, permissions, OIDC, secret posture, environments, or Copilot guardrail definition.
 - `internal-github-operations`
   Use when the next need is Actions health, runner validation, audit evidence, reporting, drift checks, or post-rollout checks.
-- `internal-github-actions`, `internal-script-python`, `internal-script-bash`
+- `internal-github-actions`, `internal-python-script`, `internal-bash-script`
   Use when the decision is settled and implementation begins.
 
 ## Common mistakes

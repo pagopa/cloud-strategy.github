@@ -42,11 +42,36 @@ def test_makefile_exposes_explicit_graphify_update_entrypoint() -> None:
     makefile_text = read_text("Makefile")
 
     assert (
-        ".PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update"
+        ".PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update graphify-check graphify-prepare"
         in makefile_text
     )
     assert "graphify-update:" in makefile_text
     assert "$(SCRIPTS_RUNNER) graphify_update --root ." in makefile_text
+    assert "graphify-check:" in makefile_text
+    assert "$(SCRIPTS_RUNNER) graphify_update --root . --check" in makefile_text
+    assert "graphify-prepare:" in makefile_text
+    assert (
+        "$(SCRIPTS_RUNNER) graphify_update --root . --prepare-structural-use"
+        in makefile_text
+    )
+
+
+def test_internal_graphify_requires_prepare_before_structural_use() -> None:
+    skill_text = read_text(".github/skills/internal-graphify/SKILL.md")
+    agent_text = read_text(".github/skills/internal-graphify/agents/openai.yaml")
+
+    assert (
+        "Canonical structural-use preparation command: `make graphify-prepare`"
+        in skill_text
+    )
+    assert (
+        "Before every structural Graphify command, run `make graphify-prepare`"
+        in skill_text
+    )
+    assert "--resolve-node" in skill_text
+    assert "Do not pass wrapper-resolved node ids to `graphify path`" in skill_text
+    assert "make graphify-prepare" in agent_text
+    assert "Treat `graphify path` as best-effort label search only" in agent_text
 
 
 def test_docs_lint_target_does_not_require_npm_network_outside_ci() -> None:

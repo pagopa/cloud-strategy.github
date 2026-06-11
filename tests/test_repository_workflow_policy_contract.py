@@ -120,7 +120,7 @@ def test_lightweight_skill_references_stay_on_demand() -> None:
 
 def test_lightweight_workflow_and_review_skills_keep_references_on_demand() -> None:
     skill_paths = (
-        ".github/skills/internal-idea-define-advisor/SKILL.md",
+        ".github/skills/internal-gateway-idea-brainstorming/SKILL.md",
         ".github/skills/internal-debugging/SKILL.md",
         ".github/skills/internal-high-level-review/SKILL.md",
         ".github/skills/internal-github-pr/SKILL.md",

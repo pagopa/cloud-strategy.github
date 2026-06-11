@@ -27,8 +27,9 @@ Optional debug logs may live under `logs/` when the implementation needs durable
 - Copy files and directories. Do not create symlinks in v1.
 - Preserve unmanaged target-local files.
 - Record one manifest row per managed target resource.
-- Prune only resources that were previously manifest-managed and are now absent from the new plan.
+- Prune only resources that were previously manifest-managed and are now absent from the new plan, including resources whose source bundle disappeared from the repo after an earlier sync.
 - Require explicit prune approval before deleting stale managed resources.
+- Treat `--retire-targets` as the explicit declaration that a previously active runtime should leave the managed target set on the next plan or apply.
 - Exclude runtime-generated bundle artifacts from hashes and copies: `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, and `.pyo`.
 
 ## Manifest Fields
@@ -80,6 +81,67 @@ Text and JSON reporting should expose at least:
 - `next_step`
 - `next_action` (structured object with `action`, `allowed`, `requires_explicit_approval`, `command`, `reason`)
 
+Text reports must use a table-first layout rather than a raw field dump.
+
+### Shared Header
+
+Always start with a short status line that includes:
+
+- mode
+- selected targets
+- overall result or status
+- blocker count
+- `next_action.action`
+
+### Doctor And Readiness Report
+
+After the shared header, include a short readiness summary and a single table with this shape:
+
+| Check or path | Status | Why it matters | What blocks next | Recommended action |
+| --- | --- | --- | --- | --- |
+
+Use this table for missing roots, documentation gaps, manifest problems, permission failures, and unsafe paths.
+
+### Plan, Audit, And Bisync Plan Report
+
+After the shared header, show one change-oriented table and one blocker table when they are non-empty.
+
+Planned changes table:
+
+| Resource or path | Lane | Planned action | Why this will change | Evidence or winner |
+| --- | --- | --- | --- | --- |
+
+Typical reasons include repo bundle newer than home, home bundle newer than repo, first-run install into a missing directory, stale managed resource marked for optional prune, or unmanaged content preserved by policy.
+
+Blockers and skips table:
+
+| Code or status | Resource or path | Why blocked or skipped | Required user action |
+| --- | --- | --- | --- |
+
+Populate `Why blocked or skipped` from the error-code meaning plus rationale, not from the code alone.
+
+### Apply And Bisync Apply Completion Report
+
+After the shared header, show one completed-actions table and one residual-issues table when needed.
+
+Completed actions table:
+
+| Resource or path | Action performed | Why it was done | Result | Verification |
+| --- | --- | --- | --- | --- |
+
+Allowed action labels include `copied`, `updated`, `pruned`, `preserved`, `skipped`, and `no-op`.
+
+Residual issues table:
+
+| Resource or path | Residual issue | Why it remains | Required follow-up |
+| --- | --- | --- | --- |
+
+`Verification` should state the strongest evidence available, for example hash match, manifest updated, post-apply plan clean, or explicit validation gap.
+
+### No-Op Reporting
+
+When no changes are proposed or applied, report `no-op` explicitly with the reason and still surface validation and `next_action`.
+
 ### Next Action Schema
 
 ```json
@@ -122,6 +184,7 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 - Block `apply` when `blocked_codes` are present.
 - Block `apply` when runtime targets are undocumented and `--experimental-targets` is not set.
 - Block `apply` on unmanaged overwrite, modified managed files, and stale-content drift.
+- Block planning and apply when a target appears in both `--targets` and `--retire-targets`.
 - Block `apply` when source root falls under home sync state directory.
 - Block `apply` when manifest is corrupt.
 
@@ -129,6 +192,9 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 
 - Verify every copied resource by hash comparison.
 - Write updated manifest with content hashes.
+- When `bisync apply` copies a repo-wins bundle into home and the install manifest tracks that target, refresh the matching manifest entry so the next install plan does not report a stale `target-modified-managed` blocker for the verified copy.
+- If reconciliation cannot be proven safe after a bisync copy, return `bisync-manifest-reconcile-failed` and keep the blocker visible instead of claiming convergence.
+- Rewrite the manifest target set to the requested active targets only; retired targets are removed from manifest state after a successful apply.
 - Report residual drift entries.
 
 ## Bisync Contract

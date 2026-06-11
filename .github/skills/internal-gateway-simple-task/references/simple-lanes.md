@@ -44,3 +44,22 @@ and any follow-up owner.
 
 For `escalate`, return the boundary break, next owner, scope, action, validation
 path, and risk.
+
+## Diagnose Deterministic Failure Procedure
+
+When a failure report already contains exact test names, file paths, symbols, or
+expected strings, use this ordered procedure before broader evidence gathering:
+
+1. Extract exact anchors from the failure output.
+2. Search those exact anchors in the repository.
+3. Read only nearby controlling context around the matches.
+4. State one falsifiable hypothesis and the cheapest check that can disprove it.
+5. Verify the exact context of every hunk you intend to edit.
+6. Apply the smallest grounded edit.
+7. Immediately run focused validation.
+8. Expand evidence only when the check falsifies the hypothesis or leaves material
+   ambiguity.
+
+References and neighboring owners load only when exact evidence is insufficient.
+Redundant or speculative edits must not appear in the first patch. The original
+failure loop remains required before any fixed or resolved claim.

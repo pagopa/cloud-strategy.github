@@ -4,7 +4,7 @@
 Usage examples:
   python3 ./.github/scripts/validate_internal_skills.py
   python3 ./.github/scripts/validate_internal_skills.py --strict --format json
-  python3 ./.github/scripts/validate_internal_skills.py --skill internal-script-python --skill internal-terraform
+  python3 ./.github/scripts/validate_internal_skills.py --skill internal-python-script --skill internal-terraform
 """
 
 from __future__ import annotations

@@ -8,6 +8,16 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-06-02
+
+- Added `internal-gateway-idea-brainstorming` as a visible fourth gateway skill and thin Copilot wrapper agent, owning substantive idea definition, guided decision interview, convergence, Definition Brief, mandatory critical pass, and validated handoff before operational planning.
+- Absorbed and retired `internal-idea-define-advisor`, moving its useful owner-map and question-bank concepts into the new gateway bundle without a compatibility stub or alias.
+- Narrowed `internal-gateway-operational-flow` to delegate unresolved idea work visibly to the new gateway and consume validated Definition Brief handoffs for `plan` without repeating ideation or its critical pass.
+- Added guided decision interview semantics: evidence-first discovery, iterative numbered question blocks through `grill-me`, visible defaults, compact decision ledger, proportional depth, and checkpoint states.
+- Retired the standalone `idea-refine` skill immediately after extracting its useful shaping frameworks and evaluation criteria into `internal-gateway-idea-brainstorming` references, preserving its upstream license and removing the competing runtime entrypoint.
+- Updated adjacent routing owners (`internal-agent-support-next-step`, `internal-agent-support-lane-change-engine`, `internal-gateway-simple-task`, `internal-gateway-critical-master`) to recognize the new gateway in handoffs and lane-change recommendations.
+- Updated `.github/agents/README.md`, `.github/README.md`, `INTERNAL_CONTRACT.md`, `docs`, wrapper-alignment, mode-contracts, subagent-patterns, home-sync catalog, token benchmarks, and regression tests for the four-gateway model.
+
 ## 2026-05-19
 
 - Migrated the repository to the skill-first Copilot model under the approved architecture-migration exception: replacement owners, routing, references, and validators moved first, `.github/instructions/` was removed afterward, `internal-aws-serverless` was replaced by `internal-aws-lambda`, and no standards release was published as part of the repository edit.
@@ -70,12 +80,12 @@ Use this format for new updates:
 
 ## 2026-04-11
 
-- Tightened the Python skill split instead of collapsing it: clarified the shared baseline in `.github/instructions/internal-python.instructions.md`, sharpened `internal-project-python` around structured package and application boundaries, and expanded `internal-script-python` plus its layout reference to cover the repository-aligned toolkit pattern used under `.github/scripts/` with shared `lib/`, hash-locked `requirements.txt`, shared `run.sh`, root-level tests, and thin wrapper entrypoints.
+- Tightened the Python skill split instead of collapsing it: clarified the shared baseline in `.github/instructions/internal-python.instructions.md`, sharpened `internal-python-project` around structured package and application boundaries, and expanded `internal-python-script` plus its layout reference to cover the repository-aligned toolkit pattern used under `.github/scripts/` with shared `lib/`, hash-locked `requirements.txt`, shared `run.sh`, root-level tests, and thin wrapper entrypoints.
 - Renamed the sync engine skill from `.github/skills/internal-sync-global-copilot-configs-into-repo/` to `.github/skills/internal-agent-sync-global-copilot-configs-into-repo/`, then realigned the paired agent contract and skill invocation metadata to the new canonical skill name.
 - Updated `.github/scripts/lib/internal_skills.py` so documented workflow outputs under `tmp/` are treated as virtual paths during internal-skill validation, then refreshed `.github/README.md` to match the live tracked agent catalog and current source-side script entrypoints.
 - Consolidated the imported `.github/skills/antigravity-domain-driven-design/` guidance into the repository-owned `.github/skills/internal-ddd/` skill, then removed the imported DDD skill and the obsolete `.github/skills/internal-data-registry/` bundle from the live catalog while realigning source-catalog docs and audit notes.
 - Replaced the imported `awesome-copilot-instructions.instructions.md` authoring guide with the repository-owned skill `.github/skills/internal-copilot-instructions-creator/`, then removed the imported instruction from the live catalog and realigned inventory, source-catalog summaries, and sync-managed imported-instruction references.
-- Replaced the imported `awesome-copilot-oop-design-patterns` and `awesome-copilot-springboot` instructions with the repository-owned skills `.github/skills/internal-oop-design-patterns/` and `.github/skills/internal-spring-boot-development/`, slimmed `internal-project-java` to point Spring-specific work at the new skill, and realigned inventory and source-catalog docs so the removed `awesome-*` instruction files are no longer part of the live catalog.
+- Replaced the imported `awesome-copilot-oop-design-patterns` and `awesome-copilot-springboot` instructions with the repository-owned skills `.github/skills/internal-oop-design-patterns/` and `.github/skills/internal-java-spring-boot-development/`, slimmed `internal-java-project` to point Spring-specific work at the new skill, and realigned inventory and source-catalog docs so the removed `awesome-*` instruction files are no longer part of the live catalog.
 - Strengthened `internal-critical-challenger` so the challenge lane now distinguishes hard constraints from assumed ones, applies a compact lateral-thinking challenge lens, and reports non-obvious reframes alongside failure modes; aligned the router, routing engine, operating-model engine, and agent selection guide so the expanded challenge contract is discoverable and routable.
 - Closed the remaining behavior gap between `internal-critical-challenger` and the imported `awesome-copilot-critical-thinking` / `awesome-copilot-devils-advocate` agents by making non-assumption about user expertise explicit, enforcing one narrow objection or probing move per turn, and allowing the user to end the challenge flow directly into synthesis.
 - Expanded `internal-critical-challenger` so it may persist its analysis when asked, defaulting retained challenge artifacts to `tmp/superpowers/` unless the user requests another path, and so implementation requests now explicitly redirect back to `internal-router` after first asking whether the current analysis should be saved.
@@ -121,7 +131,7 @@ Use this format for new updates:
 - Extended `INTERNAL_CONTRACT.md`, `tests/test_contract_runner.py`, `tests/test_validate_copilot_customizations.py`, and `.github/scripts/validate-copilot-customizations.py` so the completion-report contract is now source-governed and strict-validator enforced.
 - Updated `internal-sync-external-resources`, `internal-sync-global-copilot-configs-into-repo`, and the sync skill workflow so completed sync runs must also end with the same completion-report categories and explicit unused-category explanations.
 - Updated sync governance and `.github/scripts/internal-sync-copilot-configs.py` so retained sync plans now live under repository-root `tmp/` instead of `.github/`, and the tracking-plan flow creates `tmp/` automatically when it is missing.
-- Updated `.github/copilot-instructions.md`, `.github/instructions/internal-python.instructions.md`, and `.github/skills/internal-script-python/SKILL.md` so new Python scripts must make an explicit stdlib-vs-library decision, prefer mature third-party packages when they clearly simplify the final code, and record that choice in a short dependency decision note before implementation.
+- Updated `.github/copilot-instructions.md`, `.github/instructions/internal-python.instructions.md`, and `.github/skills/internal-python-script/SKILL.md` so new Python scripts must make an explicit stdlib-vs-library decision, prefer mature third-party packages when they clearly simplify the final code, and record that choice in a short dependency decision note before implementation.
 
 ## 2026-03-19
 

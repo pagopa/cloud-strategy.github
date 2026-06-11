@@ -75,11 +75,19 @@ def test_repo_only_sync_agents_keep_boundary_and_tool_contracts() -> None:
         assert isinstance(frontmatter.get("description"), str)
         assert frontmatter.get("tools")
         assert "agent" not in frontmatter.get("tools", [])
+        if agent_name == "local-sync-install-ai-resources":
+            assert "web" not in frontmatter.get("tools", [])
         assert frontmatter.get("disable-model-invocation") is True
         assert frontmatter.get("agents") in (None, [])
         assert "## Core Skill" in body
-        assert "## Boundary Definition" in body
-        assert "## Output Expectations" in body
+        if agent_name == "local-sync-install-ai-resources":
+            assert "## Routing Rules" not in body
+            assert "## Boundary Definition" not in body
+            assert "## Mode Selection" not in body
+            assert "## Output Expectations" not in body
+        else:
+            assert "## Boundary Definition" in body
+            assert "## Output Expectations" in body
         for heading in LEGACY_AGENT_HEADINGS:
             assert heading not in body
         assert core_skill(body) == EXPECTED_CORE_SKILLS[agent_name]
@@ -119,8 +127,9 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
     upstream_ids = {item["upstream_id"] for item in items}
 
     assert payload["version"] == 1
-    assert len(items) == 10
+    assert len(items) == 11
     assert {item["source_family"] for item in items} == {
+        "addyosmani/agent-skills",
         "github/awesome-copilot",
         "mattpocock/skills",
     }
@@ -128,6 +137,7 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
     assert {
         "azure-devops-pipelines.instructions.md",
         "go.instructions.md",
+        "idea-refine",
         "zoom-out",
     } <= upstream_ids
     assert {
@@ -138,7 +148,8 @@ def test_external_watchlist_is_alert_only_and_internal_owner_mapped() -> None:
         "internal-debugging",
         "internal-tdd",
         "internal-high-level-review",
-        "internal-writing-plans",
+        "internal-gateway-idea-brainstorming",
+        "internal-gateway-writing-plans",
         "local-agent-sync-external-resources",
     } <= owners
 

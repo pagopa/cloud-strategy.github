@@ -11,10 +11,10 @@ CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update graphify-check test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation graphify-update graphify-check graphify-prepare test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation graphify-update test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
+	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation graphify-update graphify-check graphify-prepare test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -52,6 +52,9 @@ graphify-update:
 graphify-check:
 	@$(SCRIPTS_RUNNER) graphify_update --root . --check
 
+graphify-prepare:
+	@$(SCRIPTS_RUNNER) graphify_update --root . --prepare-structural-use
+
 test: scripts-bootstrap
 	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q
 
@@ -88,8 +91,15 @@ docs-lint:
 PLAN_FOLDER ?=
 PLAN_STAGE ?= handoff
 
-retained-plan-check: scripts-bootstrap
+PLAN_AUTHORING_CLI := .github/skills/internal-gateway-writing-plans/scripts/plan_authoring.py
+PLAN_EXECUTING_CLI := .github/skills/internal-gateway-execute-plans/scripts/plan_execution.py
+
+retained-plan-check: python-version-check
 	@if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required (e.g. make retained-plan-check PLAN_FOLDER=tmp/superpowers/my-plan)' >&2; exit 1; fi
-	@$(SCRIPTS_RUNNER) validate_retained_plans --plan-folder "$(PLAN_FOLDER)" --stage "$(PLAN_STAGE)"
+	@case "$(PLAN_STAGE)" in \
+		handoff) $(PYTHON) $(PLAN_AUTHORING_CLI) handoff-check "$(PLAN_FOLDER)" ;; \
+		completion) $(PYTHON) $(PLAN_EXECUTING_CLI) completion-check "$(PLAN_FOLDER)" ;; \
+		*) printf '%s\n' 'PLAN_STAGE must be handoff or completion.' >&2; exit 1 ;; \
+	esac
 
 all: lint test catalog-check

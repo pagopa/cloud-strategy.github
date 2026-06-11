@@ -17,14 +17,14 @@ ESTIMATED_TOKEN_BYTES = 4
 
 SCENARIOS = [
     ("Python generic", "tools/check.py", "internal-python"),
-    ("Python script", ".github/scripts/tool.py", "internal-script-python"),
-    ("Python project", "src/app.py", "internal-project-python"),
+    ("Python script", ".github/scripts/tool.py", "internal-python-script"),
+    ("Python project", "src/app.py", "internal-python-project"),
     ("Bash generic", "bin/check.sh", "internal-bash"),
-    ("Bash script", "scripts/demo.sh", "internal-script-bash"),
+    ("Bash script", "scripts/demo.sh", "internal-bash-script"),
     ("Node metadata", "package.json", "internal-nodejs"),
-    ("Node project", "src/index.ts", "internal-project-nodejs"),
+    ("Node project", "src/index.ts", "internal-nodejs-project"),
     ("Java metadata", "pom.xml", "internal-java"),
-    ("Java project", "src/main/java/App.java", "internal-project-java"),
+    ("Java project", "src/main/java/App.java", "internal-java-project"),
     ("YAML generic", "config/app.yaml", "internal-yaml"),
     ("Terraform", "infra/main.tf", "internal-terraform"),
 ]
@@ -106,21 +106,32 @@ def build_scenario_report(root: Path) -> list[dict[str, Any]]:
     return reports
 
 
-GATEWAY_SKILL = "internal-gateway-operational-flow"
+GATEWAY_SKILL = "internal-gateway-idea-brainstorming"
 
 GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
     "Direct execute": [GATEWAY_SKILL],
-    "Define Gate 0": [GATEWAY_SKILL, "grill-me", "internal-gateway-operational-flow"],
-    "Define advisory and critical": [
-        GATEWAY_SKILL, "grill-me", "internal-idea-define-advisor",
+    "Define Gate 0": [GATEWAY_SKILL, "grill-me"],
+    "Define idea and critical": [
+        GATEWAY_SKILL, "grill-me", "internal-gateway-idea-brainstorming",
         "internal-gateway-critical-master",
     ],
-    "Plan handoff": [GATEWAY_SKILL, "internal-writing-plans", "internal-agent-support-next-step"],
-    "Approved apply-plan": [GATEWAY_SKILL, "internal-executing-plans"],
+    "Plan handoff": [GATEWAY_SKILL, "internal-gateway-writing-plans", "internal-agent-support-next-step"],
+    "Approved apply-plan": [GATEWAY_SKILL, "internal-gateway-execute-plans"],
     "Review verdict": [
         GATEWAY_SKILL, "internal-code-review", "internal-high-level-review",
         "internal-gateway-critical-master",
     ],
+}
+
+IDEA_GATEWAY_SKILL = "internal-gateway-idea-brainstorming"
+
+IDEA_GATEWAY_SCENARIOS: dict[str, list[str]] = {
+    "Idea core entry": [IDEA_GATEWAY_SKILL],
+    "Interview support": [IDEA_GATEWAY_SKILL, "grill-me"],
+    "Mandatory critical pass": [
+        IDEA_GATEWAY_SKILL, "internal-gateway-critical-master",
+    ],
+    "Visible handoff": [IDEA_GATEWAY_SKILL, "internal-agent-support-next-step"],
 }
 
 GATEWAY_OUTPUT_FIELD_SCENARIOS: dict[str, list[str]] = {
@@ -142,13 +153,14 @@ def build_gateway_report(root: Path) -> dict[str, Any]:
     context_scenarios: list[dict[str, Any]] = []
     for name, skills in GATEWAY_REQUIRED_CONTEXT_SCENARIOS.items():
         total_bytes = 0
-        for skill_name in skills:
+        deduped = list(dict.fromkeys(skills))
+        for skill_name in deduped:
             skill_path = root / ".github" / "skills" / skill_name / "SKILL.md"
             if skill_path.exists():
                 total_bytes += len(skill_path.read_bytes())
         context_scenarios.append({
             "scenario": name,
-            "required_skills": skills,
+            "required_skills": deduped,
             "bytes": total_bytes,
             "estimated_tokens": (total_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
         })
@@ -170,6 +182,38 @@ def build_gateway_report(root: Path) -> dict[str, Any]:
         "bundle_estimated_tokens": (bundle_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
         "required_context_scenarios": context_scenarios,
         "output_field_scenarios": output_scenarios,
+    }
+
+
+def build_idea_gateway_report(root: Path) -> dict[str, Any]:
+    core_path = root / ".github" / "skills" / IDEA_GATEWAY_SKILL / "SKILL.md"
+    core_bytes = len(core_path.read_bytes()) if core_path.exists() else 0
+    bundle_dir = root / ".github" / "skills" / IDEA_GATEWAY_SKILL
+    bundle_bytes = sum(
+        len(p.read_bytes()) for p in bundle_dir.rglob("*") if p.is_file()
+    ) if bundle_dir.exists() else 0
+
+    context_scenarios: list[dict[str, Any]] = []
+    for name, skills in IDEA_GATEWAY_SCENARIOS.items():
+        total_bytes = 0
+        deduped = list(dict.fromkeys(skills))
+        for skill_name in deduped:
+            skill_path = root / ".github" / "skills" / skill_name / "SKILL.md"
+            if skill_path.exists():
+                total_bytes += len(skill_path.read_bytes())
+        context_scenarios.append({
+            "scenario": name,
+            "required_skills": deduped,
+            "bytes": total_bytes,
+            "estimated_tokens": (total_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        })
+
+    return {
+        "core_bytes": core_bytes,
+        "core_estimated_tokens": (core_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "bundle_bytes": bundle_bytes,
+        "bundle_estimated_tokens": (bundle_bytes + ESTIMATED_TOKEN_BYTES - 1) // ESTIMATED_TOKEN_BYTES,
+        "context_scenarios": context_scenarios,
     }
 
 
@@ -211,6 +255,7 @@ def main() -> int:
     scenario_reports = build_scenario_report(root)
     description_reports = build_description_report(root)
     gateway_report = build_gateway_report(root)
+    idea_gateway_report = build_idea_gateway_report(root)
 
     description_reports.sort(key=lambda r: r["description_tokens"], reverse=True)
 
@@ -218,6 +263,7 @@ def main() -> int:
         "scenarios": scenario_reports,
         "descriptions": description_reports,
         "gateway": gateway_report,
+        "idea_gateway": idea_gateway_report,
         "summary": {
             "total_scenarios": len(scenario_reports),
             "total_skills_measured": len(description_reports),

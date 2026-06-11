@@ -29,11 +29,11 @@ persona agents. The wrapper stays thin; each lens maps to an existing skill.
 
 | Trigger | Owner skill |
 | --- | --- |
-| `**/*.py` under reusable package or app code | `internal-project-python` |
-| Standalone Python scripts, CLIs, or operator tools | `internal-script-python` |
-| `**/*.js`, `**/*.cjs`, `**/*.mjs`, `**/*.ts`, `**/*.tsx`, `package.json`, or `tsconfig.json` | `internal-project-nodejs` |
-| `**/*.java`, `pom.xml`, `build.gradle`, or `build.gradle.kts` | `internal-project-java` |
-| `**/*.sh` standalone scripts | `internal-script-bash` |
+| `**/*.py` under reusable package or app code | `internal-python-project` |
+| Standalone Python scripts, CLIs, or operator tools | `internal-python-script` |
+| `**/*.js`, `**/*.cjs`, `**/*.mjs`, `**/*.ts`, `**/*.tsx`, `package.json`, or `tsconfig.json` | `internal-nodejs-project` |
+| `**/*.java`, `pom.xml`, `build.gradle`, or `build.gradle.kts` | `internal-java-project` |
+| `**/*.sh` standalone scripts | `internal-bash-script` |
 | `**/*.tf` | `internal-terraform` |
 | Dockerfiles, Compose files, or `.dockerignore` | `internal-docker` |
 | Kubernetes manifests, Helm templates, or deployment YAML under Kubernetes paths | `internal-kubernetes` or `internal-kubernetes-deployment` |

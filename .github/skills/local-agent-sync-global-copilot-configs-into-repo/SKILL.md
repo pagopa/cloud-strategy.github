@@ -31,7 +31,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - When consumer-local creator bundles depend on shared runtime-critical rules, mirror those rules inside each creator bundle as source-managed files and keep the mirror paths registered in the source inventory and target manifest; do not rely on cross-bundle references or unsynced local-only resources for creator runtime behavior.
 - When the source baseline includes an approved imported-asset override registry plus replay patches, mirror that governance bundle as source-managed state instead of recreating target-local hidden forks on imported assets.
 - Exclude source resources named `internal-sync-*` from consumer mirroring and remove any target copies of those resources during `apply`.
-- Exclude the exact source-only bundle `.github/skills/internal-graphify` from consumer mirroring; it is a repository-local support layer tied to this repository's activation gate and upstream contract.
+- Include `.github/skills/internal-graphify` in consumer mirroring as the shared Graphify wrapper; it is no longer a repository-local-only support layer.
 - Materialize the source template `.github/templates/copilot-instructions.override.md.template` into the consumer target as the consumer-local copilot instructions override file when that target file is missing, then preserve target-authored changes there on later sync runs.
 - Create consumer-local `docs/01-architecture.md` and `docs/02-repository-context.md` from `.github/templates/` only when missing, then preserve target-authored content on later sync runs.
 - Delete retired standalone runtime operating model documents from consumers; runtime workflow guidance now travels through root guidance and skills.
