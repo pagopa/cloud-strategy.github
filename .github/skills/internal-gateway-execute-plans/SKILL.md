@@ -31,15 +31,23 @@ consumes approved `extended` plans.
 1. Read `01-change-summary.md`, `02-source-item-ledger.md`, and `04-implementation-contract.md`.
 2. Verify `Plan profile: extended` and `Recommended consumer: internal-gateway-execute-plans`.
 3. Run the ledger evidence pass.
-4. Process numbered executable files in order.
-5. Track progress through the live ledger.
-6. Package closeout only for `SHIPPED`.
+4. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
+5. Process numbered executable files in order.
+6. Run an item-level compliance audit before closing each executable item.
+7. Track progress through the live ledger.
+8. Aggregate unresolved mandatory applicable requirements before closeout.
+9. Package closeout only for `SHIPPED`.
 
 ## Execution Contract
 
 - Reject unsupported profiles immediately.
 - Reject any folder whose recommended consumer is not `internal-gateway-execute-plans`.
 - Ignore `questions.md` during execution.
+- Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
+- Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.
+- Block item closure and block `SHIPPED` whenever mandatory applicable requirements remain unverified.
+- Escalate architecture ownership conflicts, cross-owner skill conflicts, and undefined validation strategy.
+- Pressure-test boundary: a Lambda-owned hashed requirements file does not grant a separate stdlib-only CLI launcher permission to install that dependency set.
 - Only `SHIPPED` creates `done-*` markers or removes numbered plan files.
 - Non-`SHIPPED` exits keep the live ledger and numbered files in place.
 
@@ -48,4 +56,13 @@ consumes approved `extended` plans.
 - Summary, ledger, and implementation contract are read first.
 - `Plan profile` is `extended`.
 - `Recommended consumer` equals `internal-gateway-execute-plans`.
+- Mandatory applicable requirements are checked at item close and before `SHIPPED`.
+- Missing mandatory applicable evidence maps to a non-`SHIPPED` state.
 - `done-*` markers appear only during close packaging.
+
+## Common failure modes
+
+- Closing an item because edits exist while mandatory applicable evidence is still open.
+- Treating every loaded specialist rule as mandatory without applicability proof.
+- Hiding ownership conflicts instead of escalating a next owner and validation path.
+- Packaging `SHIPPED` while evidence gaps still require `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED`.

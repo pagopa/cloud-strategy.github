@@ -39,6 +39,9 @@ completion report should include `Plan profile: compact` or
 `SHIPPED` requires passed validators, a completed report, no numbered plan files,
 and no open source-item ledger rows. Non-trivial retained plans also require an
 evidence envelope or equivalent item-level evidence for every requested or source item.
+`SHIPPED` also requires that mandatory applicable skill requirements are verified;
+if mandatory applicable evidence is missing, use `APPLIED_UNVERIFIED`, `PARTIAL`,
+or `BLOCKED` and report the exact gap.
 If validators or evidence coverage cannot run, or any row remains `PENDING`,
 `PARTIAL`, `NOT_DONE`, `UNVERIFIABLE`, or `BLOCKED`, use
 `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED` with the explicit gap.
