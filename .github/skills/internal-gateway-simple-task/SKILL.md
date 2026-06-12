@@ -40,13 +40,13 @@ retained-plan execution.
 3. Confirm the task still fits one quick lane.
 4. Select only directly applicable skill owners and required references from prompt, target path, runtime, ownership, and validation path.
 5. Identify mandatory applicable requirements internally before execution; do not emit a default user checklist.
-4. For approved `compact` plans, read `01-change-summary.md` and `02-source-item-ledger.md` first, verify the consumer contract, and confirm the folder uses the `mini-plan-*` prefix.
-5. Execute the one concrete lane.
-6. Run focused validation or name the explicit gap.
-7. Run a pre-close compliance audit over mandatory applicable requirements only. Delegate fresh-evidence mechanics to `superpowers-verification-before-completion`.
-8. Block completion claims when mandatory applicable requirements remain unverified.
-9. If architecture ownership, owner conflicts, or validation strategy are ambiguous, escalate instead of assuming a universal rule.
-7. If the task stops being simple, stop and issue an escalation alert.
+6. For approved `compact` plans, read `01-change-summary.md` and `02-source-item-ledger.md` first, verify the consumer contract, and confirm the folder uses the `mini-plan-*` prefix.
+7. Execute the one concrete lane.
+8. Run focused validation or name the explicit gap.
+9. Run a pre-close compliance audit over mandatory applicable requirements only. Delegate fresh-evidence mechanics to `superpowers-verification-before-completion`.
+10. Block completion claims when mandatory applicable requirements remain unverified.
+11. If architecture ownership, owner conflicts, or validation strategy are ambiguous, escalate instead of assuming a universal rule.
+12. If the task stops being simple, stop and issue an escalation alert.
 
 ## Validation
 

@@ -1,0 +1,30 @@
+# Technology
+
+## Purpose
+
+Describe observed runtimes, tooling, and technical constraints for this
+repository.
+
+## Languages And Runtimes
+
+| Area | Technology |
+| --- | --- |
+| `<area>` | `<technology>` |
+
+## Tooling
+
+| Category | Observed tooling |
+| --- | --- |
+| `<category>` | `<tooling>` |
+
+## Validation Surface
+
+- `<test or validation command family>`
+
+## Technical Constraints
+
+- `<constraint>`
+
+## Unknown / To Verify
+
+- `<unsupported claim or missing evidence>`

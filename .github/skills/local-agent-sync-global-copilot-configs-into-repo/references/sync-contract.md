@@ -30,9 +30,9 @@ When a consumer-local creator depends on shared runtime-critical rules, keep a s
 
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
 - Materialize `.github/templates/copilot-instructions.override.md.template` from the standards repository into the consumer-local copilot instructions override file when that target file is missing, then preserve the target file as a consumer-owned local exception layer and surface it in the plan or final report when present.
-- Create `docs/01-architecture.md` from `.github/templates/01-architecture.md.template` only when the target has neither `docs/01-architecture.md` nor legacy `docs/architecture.md`, then preserve it as consumer-local content.
-- Create `docs/02-repository-context.md` from `.github/templates/02-repository-context.md.template` only when missing, then preserve it as consumer-local content.
-- If a target has legacy `docs/architecture.md` and lacks `docs/01-architecture.md`, rename the legacy file to the new path. If both paths exist, block apply and require manual reconciliation.
+- Create `docs/README.md`, `docs/repository-context.md`, `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md` from `.github/templates/` only when missing, then preserve them as consumer-local content.
+- If a target has legacy `docs/01-local-architecture.md` or `docs/01-architecture.md` and lacks `docs/architecture.md`, rename the legacy file to the canonical path. If canonical and legacy paths coexist, block apply and require manual reconciliation.
+- If a target has legacy `docs/02-local-repository-context.md` or `docs/02-repository-context.md` and lacks `docs/repository-context.md`, rename the legacy file to the canonical path. If canonical and legacy paths coexist, block apply and require manual reconciliation.
 - Delete legacy `docs/runtime-fit.md` and retired standalone runtime operating model documents. Runtime workflow guidance now lives in root guidance and skills.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
@@ -46,8 +46,11 @@ When root guidance is in scope, keep the target files in these roles:
 
 - `AGENTS.md`: strategic bridge, precedence anchor, naming contract, and cross-surface routing guidance
 - `LESSONS_LEARNED.md`: retained-learning ledger template aligned from source structure while preserving target-authored pending lessons; it remains non-canonical and repo-local in content
-- `docs/01-architecture.md`: consumer-local architecture contract scaffolded only when missing and then preserved
-- `docs/02-repository-context.md`: consumer-local descriptive context scaffolded only when missing and then preserved; it does not override policy
+- `docs/README.md`: consumer-local routing guide for knowledge documents scaffolded only when missing and then preserved
+- `docs/repository-context.md`: consumer-local descriptive context scaffolded only when missing and then preserved; it does not override policy
+- `docs/architecture.md`: consumer-local architecture contract scaffolded only when missing and then preserved
+- `docs/tech.md`: consumer-local technology contract scaffolded only when missing and then preserved
+- `docs/structure.md`: consumer-local structure contract scaffolded only when missing and then preserved
 - `.github/copilot-instructions.md`: repo-wide GitHub Copilot projection
 - the consumer-local GitHub instructions overrides file: consumer-local exception layer authorized by `AGENTS.md`; it may override synced defaults only when conflict, scope, reason, and disclosure are explicit
 - `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
@@ -98,7 +101,7 @@ Completed runs should make these facts visible:
 
 - target analysis and selected mode
 - root-guidance alignment strategy and `LESSONS_LEARNED.md` status
-- architecture, repository context, and retired runtime document cleanup status
+- knowledge-document scaffold, preservation, legacy migration, and retired runtime document cleanup status
 - preserved `local-*` assets and consumer-local GitHub instructions overrides status
 - target-only cleanup decisions
 - plan-file status and lifecycle

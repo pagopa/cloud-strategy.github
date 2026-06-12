@@ -1,0 +1,25 @@
+# Repository Knowledge Documents
+
+This directory stores consumer-local knowledge documents for this repository.
+These documents are descriptive. They must not override canonical policy owners
+such as `AGENTS.md`, `.github/copilot-instructions.md`, skills, validators, or
+owned files.
+
+## Required Documents
+
+| File | Purpose |
+| --- | --- |
+| `docs/repository-context.md` | Repository role, responsibilities, goals, and vocabulary. |
+| `docs/architecture.md` | Current boundaries, components, interfaces, and key flows. |
+| `docs/tech.md` | Technologies, tooling, validation surface, and constraints. |
+| `docs/structure.md` | Top-level layout, path responsibilities, and placement boundaries. |
+
+## Diagram Standard
+
+Use Mermaid for embedded diagrams when a diagram improves clarity.
+
+## Maintenance
+
+- Keep claims evidence-based.
+- Keep unknown facts explicit as `Unknown / To verify`.
+- Update the smallest valid owner when repository evidence changes.
