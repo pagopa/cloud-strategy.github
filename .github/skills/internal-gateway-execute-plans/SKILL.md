@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-execute-plans
-description: Use when executing an approved extended repository-owned plan from tmp/superpowers/<clear-action-or-task-name>/ and the done-* loop, numbered file order, and blocker handling must stay explicit.
+description: Use when executing an approved compact or extended repository-owned plan from tmp/superpowers/<clear-action-or-task-name>/ and the numbered-file order, done-* loop, and blocker handling must stay explicit.
 ---
 
 # Internal Gateway Execute Plans
@@ -12,36 +12,39 @@ description: Use when executing an approved extended repository-owned plan from 
 - `superpowers-subagent-driven-development`: imported worker-isolation engine when same-session subagents are available.
 - `superpowers-verification-before-completion`: evidence gate before item completion and final retained-plan completion claims.
 
-Repository-owned wrapper for applying retained numbered plans. This owner only
-consumes approved `extended` plans.
+Repository-owned wrapper for applying retained numbered plans. This owner
+consumes approved `compact` and `extended` retained plans.
 
 ## When to use
 
+- Executing approved `compact` retained plans from `tmp/superpowers/mini-plan-*`.
 - Executing approved `extended` retained plans from `tmp/superpowers/<action>/`.
-- Applying an `extended` plan authored with `internal-gateway-writing-plans`.
+- Applying a `compact` or `extended` plan authored with `internal-gateway-writing-plans`.
 
 ## When not to use
 
 - Reviewing or challenging a plan; use `internal-gateway-review` or `internal-gateway-critical-master`.
-- Executing `compact` plans; use `internal-gateway-simple-task`.
 - Treating `questions.md` as an executable file.
 
 ## Core Algorithm
 
-1. Read `01-change-summary.md`, `02-source-item-ledger.md`, and `04-implementation-contract.md`.
-2. Verify `Plan profile: extended` and `Recommended consumer: internal-gateway-execute-plans`.
+1. Read `01-change-summary.md` and `02-source-item-ledger.md`.
+2. Verify `Plan profile: compact` or `Plan profile: extended` and `Recommended consumer: internal-gateway-execute-plans`.
 3. Run the ledger evidence pass.
 4. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
-5. Process numbered executable files in order.
-6. Run an item-level compliance audit before closing each executable item.
-7. Track progress through the live ledger.
-8. Aggregate unresolved mandatory applicable requirements before closeout.
-9. Package closeout only for `SHIPPED`.
+5. For `compact`, confirm the folder uses `mini-plan-*`, `questions.md` is `- none`, and `03-execution.md` is the only executable file.
+6. For `extended`, read `04-implementation-contract.md` before executable files.
+7. Process numbered executable files in order.
+8. Run an item-level compliance audit before closing each executable item.
+9. Track progress through the live ledger.
+10. Aggregate unresolved mandatory applicable requirements before closeout.
+11. Package closeout only for `SHIPPED`.
 
 ## Execution Contract
 
 - Reject unsupported profiles immediately.
 - Reject any folder whose recommended consumer is not `internal-gateway-execute-plans`.
+- Reject `compact` folders outside the `mini-plan-*` convention.
 - Ignore `questions.md` during execution.
 - Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
 - Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.
@@ -53,9 +56,11 @@ consumes approved `extended` plans.
 
 ## Validation
 
-- Summary, ledger, and implementation contract are read first.
-- `Plan profile` is `extended`.
+- Summary and ledger are read first.
+- `Plan profile` is `compact` or `extended`.
 - `Recommended consumer` equals `internal-gateway-execute-plans`.
+- `compact` retained plans use `tmp/superpowers/mini-plan-*` and `03-execution.md` as the only executable file.
+- `extended` retained plans include `04-implementation-contract.md` before executable work.
 - Mandatory applicable requirements are checked at item close and before `SHIPPED`.
 - Missing mandatory applicable evidence maps to a non-`SHIPPED` state.
 - `done-*` markers appear only during close packaging.

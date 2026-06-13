@@ -29,13 +29,15 @@ def test_writing_plans_declares_profile_consumer_contract() -> None:
     assert "Esecuzione prevista" in compact_reference
 
 
-def test_executing_plans_accepts_only_extended_consumers() -> None:
+def test_executing_plans_accepts_compact_and_extended_consumers() -> None:
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
+    assert "approved `compact`" in executing_text
     assert "approved `extended`" in executing_text
     assert (
         "Reject any folder whose recommended consumer is not `internal-gateway-execute-plans`"
         in executing_text
     )
+    assert "Reject `compact` folders outside the `mini-plan-*` convention" in executing_text
     assert "mandatory requirements that are applicable" in executing_text
     assert "Block item closure and block `SHIPPED`" in executing_text
 
@@ -63,9 +65,8 @@ def test_wrapper_prompts_respect_compact_and_extended_consumers() -> None:
     execute_wrapper = read_text(
         ".github/skills/internal-gateway-execute-plans/agents/openai.yaml"
     )
-    assert "route compact plans to internal-gateway-simple-task" in writing_wrapper
-    assert "extended plans to internal-gateway-execute-plans" in writing_wrapper
-    assert "Approved compact retained plans are supported" in simple_wrapper
+    assert "route compact and extended plans to internal-gateway-execute-plans" in writing_wrapper
+    assert "Route approved retained-plan execution to internal-gateway-execute-plans" in simple_wrapper
     assert (
-        "Compact execution belongs to internal-gateway-simple-task" in execute_wrapper
+        "approved compact mini-plan-* plans and approved extended plans" in execute_wrapper
     )

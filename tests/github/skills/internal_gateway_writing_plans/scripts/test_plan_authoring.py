@@ -26,13 +26,13 @@ def _write_compact_plan(plan_folder: Path) -> None:
         "## Risorse coinvolte\n| Risorsa | Azione | Scopo |\n| --- | --- | --- |\n| Skill | update | Tighten handoff |\n"
         "## Comportamento scelto\nControlli semantici minimi e deterministici.\n"
         "## Validazione prevista\nPytest focalizzato e handoff-check.\n"
-        "## Esecuzione prevista\nProfilo: compact. Consumer: internal-gateway-simple-task. Prefisso cartella: mini-plan-*. File esecutivo: 03-execution.md.\n"
+        "## Esecuzione prevista\nProfilo: compact. Consumer: internal-gateway-execute-plans. Prefisso cartella: mini-plan-*. File esecutivo: 03-execution.md.\n"
         "## Decisione richiesta\nApprovare l'esecuzione del piano.\n",
         encoding="utf-8",
     )
     (plan_folder / "02-source-item-ledger.md").write_text(
         "## Recommended use\nexecute after explicit approval\n\n"
-        "## Recommended consumer\ninternal-gateway-simple-task\n\n"
+        "## Recommended consumer\ninternal-gateway-execute-plans\n\n"
         "## Plan profile\ncompact\n\n"
         "## File map and role\n| File | Role |\n| --- | --- |\n| `03-execution.md` | executable |\n\n"
         "## Clarification gate\nclarification satisfied\n\n"
@@ -68,14 +68,14 @@ def _write_extended_plan(plan_folder: Path) -> None:
     ledger_text = (plan_folder / "02-source-item-ledger.md").read_text(encoding="utf-8")
     (plan_folder / "02-source-item-ledger.md").write_text(
         ledger_text.replace(
-            "internal-gateway-simple-task", "internal-gateway-execute-plans"
-        ).replace("compact", "extended"),
+            "compact", "extended"
+        ),
         encoding="utf-8",
     )
     summary_path = plan_folder / "01-change-summary.md"
     summary_path.write_text(
         summary_path.read_text(encoding="utf-8").replace(
-            "Profilo: compact. Consumer: internal-gateway-simple-task. Prefisso cartella: mini-plan-*. File esecutivo: 03-execution.md.",
+            "Profilo: compact. Consumer: internal-gateway-execute-plans. Prefisso cartella: mini-plan-*. File esecutivo: 03-execution.md.",
             "Profilo: extended. Consumer: internal-gateway-execute-plans. File esecutivo: 03-execution.md. Contratto: 04-implementation-contract.md.",
         ),
         encoding="utf-8",
@@ -96,7 +96,7 @@ def test_init_creates_compact_scaffold(tmp_path: Path) -> None:
     result = run_cli("init", plan_folder)
     assert result.returncode == 0
     ledger = (plan_folder / "02-source-item-ledger.md").read_text(encoding="utf-8")
-    assert "internal-gateway-simple-task" in ledger
+    assert "internal-gateway-execute-plans" in ledger
     summary = (plan_folder / "01-change-summary.md").read_text(encoding="utf-8")
     assert "Esecuzione prevista" in summary
 
@@ -134,7 +134,7 @@ def test_audit_rejects_profile_consumer_mismatch(tmp_path: Path) -> None:
     ledger_path = plan_folder / "02-source-item-ledger.md"
     ledger_path.write_text(
         ledger_path.read_text(encoding="utf-8").replace(
-            "internal-gateway-simple-task", "internal-gateway-execute-plans"
+            "internal-gateway-execute-plans", "internal-gateway-simple-task"
         ),
         encoding="utf-8",
     )

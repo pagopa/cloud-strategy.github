@@ -28,7 +28,7 @@ through retained-plan creation. It stops before execution.
 
 - The target state and validation path are already concrete; use `internal-gateway-simple-task`.
 - The primary request is defect-first review; use `internal-gateway-review`.
-- A retained plan folder is already approved for execution; route to `internal-gateway-simple-task` for `compact` or `internal-gateway-execute-plans` for `extended`.
+- A retained plan folder is already approved for execution; route to `internal-gateway-execute-plans` for `compact` or `extended`.
 
 ## Core Invariants
 

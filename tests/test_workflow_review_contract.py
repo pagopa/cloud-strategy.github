@@ -59,7 +59,7 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
     assert "route or next owner" in review_gate_lower
 
 
-def test_compact_and_extended_execution_owners_are_split() -> None:
+def test_compact_and_extended_execution_owner_is_unified() -> None:
     writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
     simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
     critical_text = read_text(
@@ -67,15 +67,16 @@ def test_compact_and_extended_execution_owners_are_split() -> None:
     )
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
     assert "Recommended consumer" in writing_text
-    assert "internal-gateway-simple-task" in writing_text
     assert "internal-gateway-execute-plans" in writing_text
-    assert "mini-plan-*" in simple_text
-    assert "`compact`" in simple_text
-    assert "retained-plan execution" in simple_text
+    assert "internal-gateway-simple-task" in writing_text
+    assert "mini-plan-*" in executing_text
+    assert "`compact`" in executing_text
+    assert "retained plans" in executing_text
     assert "internal-gateway-execute-plans" in simple_text
     assert "internal-executing-plans" not in simple_text
     assert "internal-gateway-execute-plans" in critical_text
     assert "internal-executing-plans" not in critical_text
+    assert "approved `compact`" in executing_text
     assert "approved `extended`" in executing_text
     assert "internal-gateway-execute-plans" in executing_text
 
@@ -95,7 +96,7 @@ def test_gateway_compliance_audit_contract_is_explicit() -> None:
     assert "stdlib-only CLI launcher" in executing_text
 
 
-def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
+def test_gateway_wrappers_route_compact_and_extended_to_execute_plans() -> None:
     simple_wrapper = read_text(
         ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
     )
@@ -105,12 +106,12 @@ def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
     completion_reference = read_text(
         ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
     )
-    assert "Approved compact retained plans are supported" in simple_wrapper
+    assert "Route approved retained-plan execution to internal-gateway-execute-plans" in simple_wrapper
     assert (
-        "Compact execution belongs to internal-gateway-simple-task" in execute_wrapper
+        "approved compact mini-plan-* plans and approved extended plans" in execute_wrapper
     )
     assert (
-        "`compact` execution remains owned by `internal-gateway-simple-task`"
+        "`compact` and `extended` execution both use `internal-gateway-execute-plans`"
         in completion_reference.lower()
     )
 

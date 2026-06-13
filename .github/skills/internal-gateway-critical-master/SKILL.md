@@ -19,7 +19,7 @@ Use this skill as the portable core for critical challenge work.
 
 - Use `internal-gateway-idea-brainstorming` when the main job is reformulating the plan.
 - Use `internal-gateway-simple-task` when the critique leaves a concrete local task.
-- Use `internal-gateway-execute-plans` for approved `extended` retained-plan execution.
+- Use `internal-gateway-execute-plans` for approved `compact` and `extended` retained-plan execution.
 - Use `internal-gateway-review` when the next step is evidence-based validation of a concrete change.
 
 ## Outcome Routing

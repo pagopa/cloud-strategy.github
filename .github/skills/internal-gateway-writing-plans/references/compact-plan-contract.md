@@ -47,6 +47,7 @@ Excluded reads:
 - `done-*`, `evidence-envelope.md`, and `completion-report.md` during authoring.
 
 `compact` is ready for a small/fast executor only after `handoff-check` is ready.
+The approved retained-plan executor is `internal-gateway-execute-plans`.
 
 ## Escalation To Extended
 
