@@ -34,6 +34,8 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 - Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
 - Reach for `pathlib`, context managers, and small helper functions before adding framework-like structure to a script.
 - Add machine-readable output such as `--format json` only when the tool has a real automation consumer. Keep text output as the default operator path.
+- When machine-readable output can become large and the script is agent-facing, add a bounded mode such as `--format compact` that preserves status, blocker or finding counts, key path evidence, and next action without dumping full detail.
+- Keep full `--format json` available for durable audit/debug use; do not replace it with compact mode.
 
 ## Compact Python baseline
 

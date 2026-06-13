@@ -55,6 +55,15 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - `apply`: explicit only, after reviewing a conflict-safe plan and current source findings.
 - `audit`: use when source or target drift needs diagnosis before deciding whether to plan or apply; prefer `.github/scripts/audit_copilot_catalog.sh` plus the sync planner evidence instead of inventing a third sync mode.
 
+## Agent-facing output modes
+
+- For model-facing runs, prefer bounded output over full detail when the script supports it.
+- Use `python3 ./.github/scripts/sync_copilot_catalog.py --mode plan --format text` for current planner runs, and summarize only status, blockers, warnings, managed mutation counts, and next action in agent responses.
+- Use `python3 ./.github/scripts/sync_copilot_catalog.py --mode apply --format text` only after explicit approval, and keep apply reporting bounded to blockers, warnings, changed path evidence, validation status, and next action.
+- When compact support is introduced in the script, prefer `--format compact` for model-facing runs.
+- Reserve full `--format json` output for durable artifacts, audits, debugging, or explicit user request.
+- For validator and consistency commands that do not support compact, keep output bounded by using the narrowest target scope and report concise summaries instead of raw log dumps.
+
 ## Evidence Budget
 
 Collect the minimum evidence set before moving past analysis or approving `apply`:
