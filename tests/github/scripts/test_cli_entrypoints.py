@@ -171,6 +171,8 @@ def test_github_catalog_validation_main_honors_token_risks_only(
 
     assert exit_code == 0
     assert called_targets == ["token-risks"]
+
+
 def test_build_inventory_main_check_detects_inventory_drift(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:

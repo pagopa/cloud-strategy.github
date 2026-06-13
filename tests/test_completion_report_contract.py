@@ -42,5 +42,7 @@ def test_completion_report_requires_mandatory_applicable_evidence_for_shipped() 
         ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
     )
 
-    assert "mandatory applicable skill requirements are verified" in completion_reference
+    assert (
+        "mandatory applicable skill requirements are verified" in completion_reference
+    )
     assert "if mandatory applicable evidence is missing" in completion_reference

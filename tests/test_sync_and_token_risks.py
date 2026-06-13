@@ -226,7 +226,9 @@ def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n")
+    write_file(
+        source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n"
+    )
     write_file(
         source_root / ".github/templates/repository-context.md.template",
         "# Context scaffold\n",
@@ -267,7 +269,9 @@ def test_apply_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n")
+    write_file(
+        source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n"
+    )
     write_file(
         source_root / ".github/templates/repository-context.md.template",
         "# Context scaffold\n",
@@ -287,14 +291,18 @@ def test_apply_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
     plan = build_sync_plan(source_root, target_root)
     apply_sync_plan(plan)
 
-    assert (target_root / "docs/README.md").read_text(encoding="utf-8") == "# Docs scaffold\n"
+    assert (target_root / "docs/README.md").read_text(
+        encoding="utf-8"
+    ) == "# Docs scaffold\n"
     assert (target_root / "docs/repository-context.md").read_text(
         encoding="utf-8"
     ) == "# Context scaffold\n"
     assert (target_root / "docs/architecture.md").read_text(
         encoding="utf-8"
     ) == "# Architecture scaffold\n"
-    assert (target_root / "docs/tech.md").read_text(encoding="utf-8") == "# Tech scaffold\n"
+    assert (target_root / "docs/tech.md").read_text(
+        encoding="utf-8"
+    ) == "# Tech scaffold\n"
     assert (target_root / "docs/structure.md").read_text(
         encoding="utf-8"
     ) == "# Structure scaffold\n"
@@ -308,7 +316,9 @@ def test_build_sync_plan_preserves_existing_consumer_local_knowledge_docs(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n")
+    write_file(
+        source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n"
+    )
     write_file(
         source_root / ".github/templates/repository-context.md.template",
         "# Context scaffold\n",
@@ -359,9 +369,7 @@ def test_build_sync_plan_renames_legacy_architecture_when_new_path_is_missing(
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
-    write_file(
-        target_root / "docs/01-local-architecture.md", "# Legacy architecture\n"
-    )
+    write_file(target_root / "docs/01-local-architecture.md", "# Legacy architecture\n")
 
     plan = build_sync_plan(source_root, target_root)
 
@@ -424,9 +432,7 @@ def test_apply_sync_plan_blocks_when_legacy_and_new_architecture_coexist(
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
     write_file(target_root / "docs/architecture.md", "# Canonical architecture\n")
-    write_file(
-        target_root / "docs/01-local-architecture.md", "# Legacy architecture\n"
-    )
+    write_file(target_root / "docs/01-local-architecture.md", "# Legacy architecture\n")
 
     plan = build_sync_plan(source_root, target_root)
 
