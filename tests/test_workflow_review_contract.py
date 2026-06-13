@@ -113,3 +113,18 @@ def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
         "`compact` execution remains owned by `internal-gateway-simple-task`"
         in completion_reference.lower()
     )
+
+
+def test_simple_gateway_readiness_brief_and_approval_gate_contract() -> None:
+    simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    clarification_text = read_text(
+        ".github/skills/internal-gateway-simple-task/references/clarification-gate.md"
+    )
+
+    assert "Readiness Brief" in simple_text
+    assert "explicit user approval" in simple_text
+    assert "before operational" in simple_text
+
+    assert "compact focused `grill-me` block" in clarification_text
+    assert "internal-gateway-critical-master" in clarification_text
+    assert "material risk" in clarification_text

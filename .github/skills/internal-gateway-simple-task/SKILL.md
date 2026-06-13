@@ -17,6 +17,9 @@ Use this skill as the skill-first fast path for concrete repository-owned work.
 It is single-lane and single-phase by design. It also owns approved `compact`
 retained-plan execution.
 
+Before any operational step, produce a compact Readiness Brief and stop for
+explicit user approval.
+
 `references/support-routing.md` remains the single source of truth for claim-gate owners in simple mode.
 
 ## When to use
@@ -39,18 +42,21 @@ retained-plan execution.
 2. Use at most one focused clarification block.
 3. Confirm the task still fits one quick lane.
 4. Select only directly applicable skill owners and required references from prompt, target path, runtime, ownership, and validation path.
-5. Identify mandatory applicable requirements internally before execution; do not emit a default user checklist.
-6. For approved `compact` plans, read `01-change-summary.md` and `02-source-item-ledger.md` first, verify the consumer contract, and confirm the folder uses the `mini-plan-*` prefix.
-7. Execute the one concrete lane.
-8. Run focused validation or name the explicit gap.
-9. Run a pre-close compliance audit over mandatory applicable requirements only. Delegate fresh-evidence mechanics to `superpowers-verification-before-completion`.
-10. Block completion claims when mandatory applicable requirements remain unverified.
-11. If architecture ownership, owner conflicts, or validation strategy are ambiguous, escalate instead of assuming a universal rule.
-12. If the task stops being simple, stop and issue an escalation alert.
+5. Build a Readiness Brief before operational work: task, owner, assumptions, risk signal, focused validation path, gate outcome, recommendation, and explicit confirmation prompt.
+6. Stop and wait for explicit user approval before executing the lane.
+7. Identify mandatory applicable requirements internally before execution; do not emit a default user checklist.
+8. For approved `compact` plans, read `01-change-summary.md` and `02-source-item-ledger.md` first, verify the consumer contract, and confirm the folder uses the `mini-plan-*` prefix.
+9. Execute the one concrete lane.
+10. Run focused validation or name the explicit gap.
+11. Run a pre-close compliance audit over mandatory applicable requirements only. Delegate fresh-evidence mechanics to `superpowers-verification-before-completion`.
+12. Block completion claims when mandatory applicable requirements remain unverified.
+13. If architecture ownership, owner conflicts, or validation strategy are ambiguous, escalate instead of assuming a universal rule.
+14. If the task stops being simple, stop and issue an escalation alert.
 
 ## Validation
 
 - Work stayed single-lane and single-phase, or escalation was explicit.
+- Readiness Brief was produced before operational steps and included an explicit approval checkpoint.
 - Approved `compact` retained-plan execution stayed lightweight, used the `mini-plan-*` folder convention, and did not copy the extended `done-*` packaging loop.
 - `compact` closeout still uses the shared completion contract: `State: SHIPPED` is the only state that permits `done-*` markers and numbered-file removal.
 - Focused validation ran before completion claims, or the exact validation gap was reported.
@@ -60,6 +66,7 @@ retained-plan execution.
 ## Common failure modes
 
 - Treating loaded skills as automatically mandatory instead of checking applicability.
+- Skipping the Readiness Brief or proceeding without explicit user approval.
 - Declaring completion after code edits while mandatory applicable evidence is still missing.
 - Promoting specialist requirements to universal policy without target/runtime ownership proof.
 - Continuing without escalation when ownership conflicts or validation strategy remain undefined.
