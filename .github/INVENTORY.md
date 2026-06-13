@@ -8,6 +8,11 @@ No instruction files currently ship in the live catalog.
 
 ## Skills
 
+- `.github/skills/agent-os-discover-standards/SKILL.md`
+- `.github/skills/agent-os-index-standards/SKILL.md`
+- `.github/skills/agent-os-inject-standards/SKILL.md`
+- `.github/skills/agent-os-plan-product/SKILL.md`
+- `.github/skills/agent-os-shape-spec/SKILL.md`
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
