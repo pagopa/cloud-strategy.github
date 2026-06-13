@@ -90,3 +90,29 @@ def test_graphify_wrapper_shortcut_is_removed_from_validation_wrappers() -> None
     assert "--graphify" not in root_wrapper
     assert "--graphify" not in scripts_wrapper
     assert "graphify_update" not in runner_text
+
+
+def test_runner_dispatch_includes_diagnostic_cli_aliases() -> None:
+    runner_text = read_text(".github/scripts/run.sh")
+
+    assert "analyze_copilot_prompt_exports|analyze_copilot_prompt_exports.py" in runner_text
+    assert "analyze_copilot_debug_logs|analyze_copilot_debug_logs.py" in runner_text
+    assert "benchmark_skill_tokens|benchmark_skill_tokens.py" in runner_text
+
+
+def test_code_analysis_workflow_smoke_tests_documented_sync_wrappers() -> None:
+    workflow_text = read_text(".github/workflows/_code-analysis.yml")
+
+    assert "bash -n .github/scripts/sync_home_ai_resources.sh" in workflow_text
+    assert (
+        "bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
+        in workflow_text
+    )
+
+
+def test_code_analysis_workflow_smoke_tests_runner_diagnostic_clis() -> None:
+    workflow_text = read_text(".github/workflows/_code-analysis.yml")
+
+    assert "./.github/scripts/run.sh analyze_copilot_prompt_exports --help" in workflow_text
+    assert "./.github/scripts/run.sh analyze_copilot_debug_logs --help" in workflow_text
+    assert "./.github/scripts/run.sh benchmark_skill_tokens --help" in workflow_text

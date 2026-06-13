@@ -33,6 +33,9 @@ Usage:
 
 Tools:
     github_catalog_validation
+    analyze_copilot_prompt_exports
+    analyze_copilot_debug_logs
+    benchmark_skill_tokens
   build_inventory
   check_catalog_consistency
   audit_copilot_catalog
@@ -115,6 +118,15 @@ resolve_script() {
     case "$tool_name" in
         github_catalog_validation|github_catalog_validation.py)
             printf '%s\n' "$SCRIPT_DIR/github_catalog_validation.py"
+            ;;
+        analyze_copilot_prompt_exports|analyze_copilot_prompt_exports.py)
+            printf '%s\n' "$SCRIPT_DIR/analyze_copilot_prompt_exports.py"
+            ;;
+        analyze_copilot_debug_logs|analyze_copilot_debug_logs.py)
+            printf '%s\n' "$SCRIPT_DIR/analyze_copilot_debug_logs.py"
+            ;;
+        benchmark_skill_tokens|benchmark_skill_tokens.py)
+            printf '%s\n' "$SCRIPT_DIR/benchmark_skill_tokens.py"
             ;;
         build_inventory|build_inventory.py)
             printf '%s\n' "$SCRIPT_DIR/build_inventory.py"
