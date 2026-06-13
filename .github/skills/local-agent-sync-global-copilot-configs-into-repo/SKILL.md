@@ -58,9 +58,8 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 ## Agent-facing output modes
 
 - For model-facing runs, prefer bounded output over full detail when the script supports it.
-- Use `python3 ./.github/scripts/sync_copilot_catalog.py --mode plan --format text` for current planner runs, and summarize only status, blockers, warnings, managed mutation counts, and next action in agent responses.
-- Use `python3 ./.github/scripts/sync_copilot_catalog.py --mode apply --format text` only after explicit approval, and keep apply reporting bounded to blockers, warnings, changed path evidence, validation status, and next action.
-- When compact support is introduced in the script, prefer `--format compact` for model-facing runs.
+- Use `python3 ./.github/scripts/sync_copilot_catalog.py plan --target-repo <repo> --format compact` for planner runs, and summarize only status, blockers, warnings, managed mutation counts, and next action in agent responses.
+- Use `python3 ./.github/scripts/sync_copilot_catalog.py apply --target-repo <repo> --format compact` only after explicit approval, and keep apply reporting bounded to blockers, warnings, changed path evidence, validation status, and next action.
 - Reserve full `--format json` output for durable artifacts, audits, debugging, or explicit user request.
 - For validator and consistency commands that do not support compact, keep output bounded by using the narrowest target scope and report concise summaries instead of raw log dumps.
 

@@ -218,6 +218,30 @@ def test_check_catalog_consistency_main_emits_json_and_fails_on_blocking_finding
     assert "internal-agent-missing-tools" in finding_codes
 
 
+def test_check_catalog_consistency_main_emits_compact_summary(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    monkeypatch.setattr(
+        check_catalog_consistency,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            include_token_risks=False,
+            strict=False,
+            format="compact",
+        ),
+    )
+
+    exit_code = check_catalog_consistency.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert payload["status"] == "failed"
+    assert payload["finding_counts"]["blocking"] >= 1
+    assert "next_action" in payload
+
+
 def test_detect_token_risks_main_respects_strict_mode(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
@@ -295,6 +319,30 @@ def test_validate_internal_skills_main_honors_skill_selection(
     assert "validation passed with no findings" in capsys.readouterr().out
 
 
+def test_validate_internal_skills_main_emits_compact_summary(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+    monkeypatch.setattr(
+        validate_internal_skills,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            skill=[],
+            strict=False,
+            format="compact",
+        ),
+    )
+
+    exit_code = validate_internal_skills.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["status"] == "ok"
+    assert payload["finding_counts"]["blocking"] == 0
+    assert "next_action" in payload
+
+
 def test_sync_copilot_catalog_plan_mode_outputs_json_and_creates_plan(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
@@ -326,6 +374,72 @@ def test_sync_copilot_catalog_plan_mode_outputs_json_and_creates_plan(
     assert payload["mode"] == "plan"
     assert payload["plan_path"].endswith("tmp/copilot-sync.plan.md")
     assert (target_root / "tmp/copilot-sync.plan.md").exists()
+
+
+def test_sync_copilot_catalog_plan_mode_outputs_compact(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+    initialize_governance_repo(source_root)
+    initialize_governance_repo(target_root, with_inventory=False)
+    sync_inventory(source_root)
+    monkeypatch.setattr(
+        sync_copilot_catalog,
+        "parse_args",
+        lambda: argparse.Namespace(
+            command="plan",
+            source_root=str(source_root),
+            target_repo=str(target_root),
+            allow_dirty_target=False,
+            format="compact",
+        ),
+    )
+
+    exit_code = sync_copilot_catalog.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["mode"] == "plan"
+    assert payload["status"] == "ok"
+    assert "operation_counts" in payload
+    assert "next_action" in payload
+
+
+def test_github_catalog_validation_compact_outputs_bounded_summary(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    initialize_governance_repo(tmp_path, with_inventory=False)
+
+    def fake_run(command: list[str], cwd: Path, check: bool, **kwargs) -> SimpleNamespace:
+        assert check is False
+        assert Path(cwd) == tmp_path
+        assert command[0] == "make"
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    log_file = tmp_path / "tmp/validation.log"
+    monkeypatch.setattr(
+        github_catalog_validation,
+        "parse_args",
+        lambda: argparse.Namespace(
+            root=str(tmp_path),
+            skip_token_risks=False,
+            token_risks_only=True,
+            format="compact",
+            log_file=str(log_file),
+        ),
+    )
+    monkeypatch.setattr(github_catalog_validation.subprocess, "run", fake_run)
+
+    exit_code = github_catalog_validation.main()
+    output = capsys.readouterr().out
+    payload = json.loads(output[output.index("{") :])
+
+    assert exit_code == 0
+    assert payload["status"] == "ok"
+    assert payload["targets_run"] == 1
+    assert payload["failed_required"] == []
+    assert payload["full_output_log"].endswith("validation.log")
 
 
 def test_sync_copilot_catalog_apply_aborts_when_source_has_blocking_findings(

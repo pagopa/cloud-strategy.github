@@ -13,6 +13,7 @@ Generated files:
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from pathlib import Path
 
 from lib.catalog_checks import run_consistency_checks
@@ -27,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source-root", default=".", help="Source standards repository root.")
     parser.add_argument("--target-repo", required=True, help="Target repository root.")
     parser.add_argument("--allow-dirty-target", action="store_true", help="Allow apply against a dirty target worktree.")
-    parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
+    parser.add_argument("--format", choices=["text", "json", "compact"], default="text", help="Output format.")
     return parser.parse_args()
 
 
@@ -42,6 +43,19 @@ def main() -> int:
     plan_path = write_sync_plan(plan)
 
     if args.command == "apply" and blocking_source_findings:
+        if args.format == "compact":
+            print(
+                render_json(
+                    build_compact_payload(
+                        mode="apply",
+                        plan=plan,
+                        plan_path=plan_path,
+                        source_findings=source_findings,
+                        manifest_path=None,
+                        status="blocked",
+                    )
+                )
+            )
         render_source_findings(blocking_source_findings)
         log_error("Source repository has blocking governance findings; sync apply aborted.")
         return 1
@@ -65,6 +79,19 @@ def main() -> int:
                     }
                 )
             )
+        elif args.format == "compact":
+            print(
+                render_json(
+                    build_compact_payload(
+                        mode="apply",
+                        plan=plan,
+                        plan_path=plan_path,
+                        source_findings=source_findings,
+                        manifest_path=manifest_path,
+                        status="ok",
+                    )
+                )
+            )
         else:
             render_text("apply", plan, plan_path, manifest_path)
         log_success("Sync apply completed.")
@@ -83,10 +110,89 @@ def main() -> int:
                 }
             )
         )
+    elif args.format == "compact":
+        status = "blocked" if blocking_source_findings else "ok"
+        print(
+            render_json(
+                build_compact_payload(
+                    mode="plan",
+                    plan=plan,
+                    plan_path=plan_path,
+                    source_findings=source_findings,
+                    manifest_path=None,
+                    status=status,
+                )
+            )
+        )
     else:
         render_text("plan", plan, plan_path)
         render_source_findings(source_findings)
     return 0 if not blocking_source_findings else 1
+
+
+def build_compact_payload(
+    *,
+    mode: str,
+    plan,
+    plan_path: Path,
+    source_findings: list[Finding],
+    manifest_path: Path | None,
+    status: str,
+) -> dict[str, object]:
+    operation_counts = Counter(operation.action for operation in plan.operations)
+    severity_counts = Counter(finding.severity for finding in source_findings)
+    operation_sample = [
+        {
+            "action": operation.action,
+            "path": operation.path,
+            "reason": operation.reason,
+        }
+        for operation in plan.operations[:10]
+    ]
+
+    if mode == "plan":
+        next_action = {
+            "action": "apply",
+            "allowed": status == "ok",
+            "requires_explicit_approval": True,
+            "reason": (
+                "Blocking source findings must be resolved before apply."
+                if status != "ok"
+                else "Plan is ready for explicit apply approval."
+            ),
+        }
+    else:
+        next_action = {
+            "action": "done",
+            "allowed": status == "ok",
+            "requires_explicit_approval": False,
+            "reason": (
+                "Apply aborted due to blocking source findings."
+                if status != "ok"
+                else "Apply completed successfully."
+            ),
+        }
+
+    payload: dict[str, object] = {
+        "mode": mode,
+        "status": status,
+        "target_repo": plan.target_root.as_posix(),
+        "plan_path": plan_path.as_posix(),
+        "operation_counts": {
+            "total": len(plan.operations),
+            "by_action": dict(sorted(operation_counts.items())),
+        },
+        "operation_sample": operation_sample,
+        "source_findings": {
+            "total": len(source_findings),
+            "blocking": severity_counts.get("blocking", 0),
+            "notice": severity_counts.get("notice", 0),
+        },
+        "next_action": next_action,
+    }
+    if manifest_path is not None:
+        payload["manifest_path"] = manifest_path.as_posix()
+    return payload
 
 
 def render_text(mode: str, plan, plan_path: Path, manifest_path: Path | None = None) -> None:

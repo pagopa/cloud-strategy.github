@@ -10,6 +10,7 @@ Usage examples:
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from pathlib import Path
 
 from lib.internal_skills import detect_internal_skill_findings
@@ -26,7 +27,7 @@ def parse_args() -> argparse.Namespace:
         help="Validate only the selected internal skill folder name. Repeatable.",
     )
     parser.add_argument("--strict", action="store_true", help="Return a non-zero exit code when any finding is reported.")
-    parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
+    parser.add_argument("--format", choices=["text", "json", "compact"], default="text", help="Output format.")
     return parser.parse_args()
 
 
@@ -38,6 +39,8 @@ def main() -> int:
 
     if args.format == "json":
         print(render_json([finding.to_dict() for finding in findings]))
+    elif args.format == "compact":
+        print(render_json(build_compact_payload(findings)))
     else:
         render_text(findings)
 
@@ -55,6 +58,32 @@ def render_text(findings: list[Finding]) -> None:
     for finding in findings:
         log_warn(f"{finding.path} :: {finding.code} :: {finding.message}")
         print(f"   Suggestion: {finding.suggestion}")
+
+
+def build_compact_payload(findings: list[Finding]) -> dict[str, object]:
+    severity_counts = Counter(finding.severity for finding in findings)
+    return {
+        "status": "failed" if severity_counts.get("blocking", 0) else "ok",
+        "finding_counts": {
+            "total": len(findings),
+            "blocking": severity_counts.get("blocking", 0),
+            "notice": severity_counts.get("notice", 0),
+        },
+        "finding_sample": [
+            {
+                "severity": finding.severity,
+                "code": finding.code,
+                "path": finding.path,
+                "message": finding.message,
+            }
+            for finding in findings[:10]
+        ],
+        "next_action": (
+            "Resolve blocking findings in selected internal skills."
+            if severity_counts.get("blocking", 0)
+            else "Validation passed without blocking findings."
+        ),
+    }
 
 
 if __name__ == "__main__":
