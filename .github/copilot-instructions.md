@@ -95,7 +95,7 @@ exists. Use `graphify path "<A>" "<B>"` for relationship questions and `graphify
 for focused-concept questions. These return a scoped subgraph, usually much smaller than the full
 report or raw grep output.
 
-Triggers: "how do I…", "where is…", "what does … do", "add/modify a <component>",
+Triggers: "how do I…", "where is…", "what does … do", "add/modify a &lt;component&gt;",
 "explain the architecture", or anything that depends on how files or classes relate.
 
 If `graphify-out/wiki/index.md` exists, use it for broad navigation. Read `graphify-out/GRAPH_REPORT.md`
