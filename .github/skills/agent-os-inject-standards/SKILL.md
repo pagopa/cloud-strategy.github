@@ -27,7 +27,7 @@ description: Portable workflow for selecting and injecting relevant standards fr
 3. In explicit mode, resolve folder/file targets directly, treating `root` as the reserved key for files directly in `agent-os/standards/`.
 4. In explicit mode, if a target is missing, list available standards in that folder and ask for the intended one instead of injecting.
 5. Confirm what to include, then inject either file references or full content.
-6. In the conversation scenario, surface related `.claude/skills/` entries for awareness without invoking them.
+6. In the conversation scenario, surface related repository skills by name for awareness without invoking them.
 7. If index is missing or empty, stop and request indexing via `agent-os-index-standards`.
 
 ## Boundaries
