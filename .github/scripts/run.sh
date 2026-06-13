@@ -33,7 +33,6 @@ Usage:
 
 Tools:
     github_catalog_validation
-    graphify_update
   build_inventory
   check_catalog_consistency
   audit_copilot_catalog
@@ -116,9 +115,6 @@ resolve_script() {
     case "$tool_name" in
         github_catalog_validation|github_catalog_validation.py)
             printf '%s\n' "$SCRIPT_DIR/github_catalog_validation.py"
-            ;;
-        graphify_update|graphify_update.py)
-            printf '%s\n' "$SCRIPT_DIR/graphify_update.py"
             ;;
         build_inventory|build_inventory.py)
             printf '%s\n' "$SCRIPT_DIR/build_inventory.py"

@@ -4,20 +4,21 @@ Use this reference when `internal-gateway-idea-brainstorming` needs the exact pa
 
 ## Pacing Rules
 
+1. If the request is already concrete (file edit, command run, validator run, or direct implementation), emit `Specialization Checkpoint: waiting`, ask whether the user is sure to keep this owner, explain why a specialized owner is safer, and recommend the next owner before continuing.
 1. Inspect repository evidence before asking the user. Use files, paths, commands, and existing repository decisions first.
-2. Maintain a compact decision ledger ordered by dependency. Resolve prerequisite branches before dependent branches.
-3. Load `grill-me`, then immediately ask one mandatory Idea Gate 0 numbered question block. Order unresolved decisions by dependency, and include at least one human confirmation question when repository evidence appears complete.
-4. For each numbered question, include a recommendation, rationale, and explicit default when useful.
-5. Treat visible recommendations as accepted unless the user overrides them by question number or gives different direction.
-6. Record accepted defaults and overrides in the decision ledger before advancing.
-7. After the user's bulk response, declare Idea Gate 0 as `grill-me required` or `grill-me satisfied`. Ask another numbered question block only for unresolved ambiguity, dependent follow-up decisions, or reopened branches.
-8. Do not treat branch confirmations as phase-transition checkpoints.
-9. After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, summarize the compact decision ledger and declare `Interview Gate 1: ready-for-critical` only when assumptions/defaults are accepted, no ledger contradictions remain, and the validation path is identified.
-10. At `Interview Gate 1: ready-for-critical`, ask whether to continue to critical before loading `internal-gateway-critical-master`.
-11. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview Gate 1: reopen`.
-12. After `Critical Gate 2: confident`, declare `Plan Approval Gate 3: waiting` and ask for explicit `go`/`ok`/`procedi` or equivalent approval before loading `internal-gateway-writing-plans`.
-13. Only after explicit approval, declare `Plan Approval Gate 3: approved`, create the retained plan, then declare `Handoff Gate 4: plan-created`.
-14. Treat `Continuation: waiting` as a handoff lock after `Handoff Gate 4: plan-created`; proposals, alternatives, or wording preferences do not clear the lock without explicit owner/action/scope approval.
+1. Maintain a compact decision ledger ordered by dependency. Resolve prerequisite branches before dependent branches.
+1. Load `grill-me`, then immediately ask one mandatory Idea Gate 0 numbered question block. Order unresolved decisions by dependency, and include at least one human confirmation question when repository evidence appears complete.
+1. For each numbered question, include a recommendation, rationale, and explicit default when useful.
+1. Treat visible recommendations as accepted unless the user overrides them by question number or gives different direction.
+1. Record accepted defaults and overrides in the decision ledger before advancing.
+1. After the user's bulk response, declare Idea Gate 0 as `grill-me required` or `grill-me satisfied`. Ask another numbered question block only for unresolved ambiguity, dependent follow-up decisions, or reopened branches.
+1. Do not treat branch confirmations as phase-transition checkpoints.
+1. After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, summarize the compact decision ledger and declare `Interview Gate 1: ready-for-critical` only when assumptions/defaults are accepted, no ledger contradictions remain, and the validation path is identified.
+1. At `Interview Gate 1: ready-for-critical`, ask whether to continue to critical before loading `internal-gateway-critical-master`.
+1. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview Gate 1: reopen`.
+1. After `Critical Gate 2: confident`, declare `Plan Approval Gate 3: waiting` and ask for explicit `go`/`ok`/`procedi` or equivalent approval before loading `internal-gateway-writing-plans`.
+1. Only after explicit approval, declare `Plan Approval Gate 3: approved`, create the retained plan, then declare `Handoff Gate 4: plan-created`.
+1. Treat `Continuation: waiting` as a handoff lock after `Handoff Gate 4: plan-created`; proposals, alternatives, or wording preferences do not clear the lock without explicit owner/action/scope approval.
 
 ## Decision Ledger Fields
 
@@ -37,6 +38,7 @@ Each row in the decision ledger:
 
 | State | Meaning | When to declare |
 | --- | --- | --- |
+| `Specialization Checkpoint: waiting` | The incoming ask is concrete and must confirm this non-specialized owner before proceeding. | Before Idea Gate 0 when the user asks for direct execution-oriented work. |
 | `Idea Gate 0: grill-me required` | Mandatory human confirmation loop is open. | After the evidence pass and before convergence, simple-task recommendation, planning recommendation, or handoff. |
 | `Idea Gate 0: grill-me satisfied` | User answered or explicitly accepted defaults for the current request, scope, context, and evidence. | Before convergence or any simple-task/planning recommendation. |
 | `Interview Gate 1: ready-for-critical` | All material branches resolved; waiting for critical challenge. | After decision-ledger summary and before loading `internal-gateway-critical-master`. |
@@ -55,6 +57,7 @@ Each row in the decision ledger:
 
 ## Proportional Depth
 
+- Concrete direct asks must pass `Specialization Checkpoint: waiting` first unless the user explicitly confirms they still want this owner.
 - Simple recoverable cases may close after a small number of questions, but they still require Idea Gate 0.
 - Unresolved dependent branches continue in focused numbered follow-up blocks.
 - Ask the initial numbered question block immediately after the evidence pass.

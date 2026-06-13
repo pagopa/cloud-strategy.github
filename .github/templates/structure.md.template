@@ -1,0 +1,29 @@
+# Structure
+
+## Purpose
+
+Describe repository layout and placement boundaries.
+
+## Top-Level Layout
+
+| Path | Responsibility |
+| --- | --- |
+| `<path>` | `<responsibility>` |
+
+## Ownership Boundaries
+
+- `<what belongs where>`
+
+## Generated vs Authored
+
+| Type | Paths | Handling expectation |
+| --- | --- | --- |
+| `<type>` | `<paths>` | `<handling>` |
+
+## Placement Conventions
+
+- `<convention>`
+
+## Unknown / To Verify
+
+- `<unsupported claim or missing evidence>`

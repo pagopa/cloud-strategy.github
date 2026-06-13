@@ -8,6 +8,11 @@ No instruction files currently ship in the live catalog.
 
 ## Skills
 
+- `.github/skills/agent-os-discover-standards/SKILL.md`
+- `.github/skills/agent-os-index-standards/SKILL.md`
+- `.github/skills/agent-os-inject-standards/SKILL.md`
+- `.github/skills/agent-os-plan-product/SKILL.md`
+- `.github/skills/agent-os-shape-spec/SKILL.md`
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
@@ -70,7 +75,6 @@ No instruction files currently ship in the live catalog.
 - `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
-- `.github/skills/internal-graphify/SKILL.md`
 - `.github/skills/internal-high-level-review/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`

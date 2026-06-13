@@ -5,7 +5,6 @@
 #   bash ./github_catalog_validation.sh
 #   bash ./github_catalog_validation.sh --skip-token-risks
 #   bash ./github_catalog_validation.sh --token-risks-only
-#   bash ./github_catalog_validation.sh --graphify
 
 set -Eeuo pipefail
 

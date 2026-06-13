@@ -1,0 +1,43 @@
+# Repository Context
+
+## Purpose
+
+Describe stable local context for this repository.
+
+## Scope
+
+This file is descriptive. It must not override canonical policy owners.
+
+## Repository Role
+
+Describe the repository's role in one short paragraph.
+
+## Responsibilities
+
+- `<responsibility>`
+
+## Capabilities
+
+- `<capability>`
+
+## Consumers And Stakeholders
+
+- `<consumer or stakeholder>`
+
+## Goals
+
+- `<goal>`
+
+## Non-Goals
+
+- `<non-goal>`
+
+## Domain Vocabulary
+
+| Term | Meaning |
+| --- | --- |
+| `<term>` | `<meaning>` |
+
+## Unknown / To Verify
+
+- `<unsupported claim or missing evidence>`

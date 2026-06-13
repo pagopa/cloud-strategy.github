@@ -29,7 +29,7 @@ repository projects AI configuration into other repositories.
 - `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
 - Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
 - `.github/skills/` owns repository-owned reusable guidance. Umbrella skills own lightweight technical-domain baselines; specialist skills and bundle references own deeper procedures.
-- Use `docs/01-local-architecture.md` for repository architecture and `docs/02-local-repository-context.md` for non-policy local context.
+- Use `docs/architecture.md` for repository architecture and `docs/repository-context.md` for non-policy local context.
 - Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
 - Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
 
@@ -103,7 +103,7 @@ as consumer-repository defaults without an explicit sync contract change.
 ## Standards Repository Role
 
 - This repository owns the shared Copilot customization baseline, governance contracts, catalog automation, and source-side sync tooling.
-- Source-managed AI assets live mainly under `.github/`; local architecture and context live in `docs/01-local-architecture.md` and `docs/02-local-repository-context.md`.
+- Source-managed AI assets live mainly under `.github/`; local knowledge documents live in `docs/README.md`, `docs/repository-context.md`, `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md`.
 - Source-side sync command centers and sync support skills own propagation behavior. Keep their procedures in the owning sync assets, not in this bridge.
 - Keep consumer-facing defaults target-agnostic. Do not encode this repository's local paths, validators, or workflow checkpoints into shared guidance unless the sync contract deliberately makes them shared.
 

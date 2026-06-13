@@ -166,7 +166,7 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
     ) in actions
 
 
-def test_build_sync_plan_includes_internal_graphify_in_consumer_sync(
+def test_build_sync_plan_includes_graphify_skill_in_consumer_sync(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -175,25 +175,21 @@ def test_build_sync_plan_includes_internal_graphify_in_consumer_sync(
     write_file(source_root / "AGENTS.md", "# AGENTS\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
-        source_root / ".github/skills/internal-graphify/SKILL.md",
-        "---\nname: internal-graphify\n---\n\n# Internal Graphify\n",
-    )
-    write_file(
-        source_root / ".github/skills/internal-graphify/agents/openai.yaml",
-        "interface:\n  display_name: Internal Graphify\n",
+        source_root / ".github/skills/graphify/SKILL.md",
+        "---\nname: graphify\n---\n\n# Graphify\n",
     )
 
     write_file(target_root / "AGENTS.md", "# AGENTS\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
-        target_root / ".github/skills/internal-graphify/SKILL.md",
-        "---\nname: internal-graphify\n---\n\n# Old\n",
+        target_root / ".github/skills/graphify/SKILL.md",
+        "---\nname: graphify\n---\n\n# Old\n",
     )
 
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("update", ".github/skills/internal-graphify/SKILL.md") in actions
+    assert ("update", ".github/skills/graphify/SKILL.md") in actions
 
 
 def test_build_sync_plan_creates_target_local_override_from_template_when_missing(
@@ -231,12 +227,20 @@ def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/templates/01-architecture.md.template",
-        "# Architecture scaffold\n",
+        source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n"
     )
     write_file(
-        source_root / ".github/templates/02-repository-context.md.template",
+        source_root / ".github/templates/repository-context.md.template",
         "# Context scaffold\n",
+    )
+    write_file(
+        source_root / ".github/templates/architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(source_root / ".github/templates/tech.md.template", "# Tech scaffold\n")
+    write_file(
+        source_root / ".github/templates/structure.md.template",
+        "# Structure scaffold\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
@@ -245,10 +249,16 @@ def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
     actions = {(operation.action, operation.path) for operation in plan.operations}
     planned_paths = {operation.path for operation in plan.operations}
 
-    assert ("create", "docs/01-local-architecture.md") in actions
-    assert ("create", "docs/02-local-repository-context.md") in actions
-    assert ".github/templates/01-architecture.md.template" not in planned_paths
-    assert ".github/templates/02-repository-context.md.template" not in planned_paths
+    assert ("create", "docs/README.md") in actions
+    assert ("create", "docs/repository-context.md") in actions
+    assert ("create", "docs/architecture.md") in actions
+    assert ("create", "docs/tech.md") in actions
+    assert ("create", "docs/structure.md") in actions
+    assert ".github/templates/docs-README.md.template" not in planned_paths
+    assert ".github/templates/repository-context.md.template" not in planned_paths
+    assert ".github/templates/architecture.md.template" not in planned_paths
+    assert ".github/templates/tech.md.template" not in planned_paths
+    assert ".github/templates/structure.md.template" not in planned_paths
 
 
 def test_apply_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
@@ -260,12 +270,20 @@ def test_apply_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/templates/01-architecture.md.template",
-        "# Architecture scaffold\n",
+        source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n"
     )
     write_file(
-        source_root / ".github/templates/02-repository-context.md.template",
+        source_root / ".github/templates/repository-context.md.template",
         "# Context scaffold\n",
+    )
+    write_file(
+        source_root / ".github/templates/architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(source_root / ".github/templates/tech.md.template", "# Tech scaffold\n")
+    write_file(
+        source_root / ".github/templates/structure.md.template",
+        "# Structure scaffold\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
@@ -273,12 +291,21 @@ def test_apply_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
     plan = build_sync_plan(source_root, target_root)
     apply_sync_plan(plan)
 
-    assert (target_root / "docs/01-local-architecture.md").read_text(
+    assert (target_root / "docs/README.md").read_text(
         encoding="utf-8"
-    ) == "# Architecture scaffold\n"
-    assert (target_root / "docs/02-local-repository-context.md").read_text(
+    ) == "# Docs scaffold\n"
+    assert (target_root / "docs/repository-context.md").read_text(
         encoding="utf-8"
     ) == "# Context scaffold\n"
+    assert (target_root / "docs/architecture.md").read_text(
+        encoding="utf-8"
+    ) == "# Architecture scaffold\n"
+    assert (target_root / "docs/tech.md").read_text(
+        encoding="utf-8"
+    ) == "# Tech scaffold\n"
+    assert (target_root / "docs/structure.md").read_text(
+        encoding="utf-8"
+    ) == "# Structure scaffold\n"
 
 
 def test_build_sync_plan_preserves_existing_consumer_local_knowledge_docs(
@@ -290,27 +317,42 @@ def test_build_sync_plan_preserves_existing_consumer_local_knowledge_docs(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/templates/01-architecture.md.template",
-        "# Architecture scaffold\n",
+        source_root / ".github/templates/docs-README.md.template", "# Docs scaffold\n"
     )
     write_file(
-        source_root / ".github/templates/02-repository-context.md.template",
+        source_root / ".github/templates/repository-context.md.template",
         "# Context scaffold\n",
+    )
+    write_file(
+        source_root / ".github/templates/architecture.md.template",
+        "# Architecture scaffold\n",
+    )
+    write_file(source_root / ".github/templates/tech.md.template", "# Tech scaffold\n")
+    write_file(
+        source_root / ".github/templates/structure.md.template",
+        "# Structure scaffold\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
-    write_file(target_root / "docs/01-local-architecture.md", "# Target architecture\n")
-    write_file(
-        target_root / "docs/02-local-repository-context.md", "# Target context\n"
-    )
+    write_file(target_root / "docs/README.md", "# Target docs\n")
+    write_file(target_root / "docs/repository-context.md", "# Target context\n")
+    write_file(target_root / "docs/architecture.md", "# Target architecture\n")
+    write_file(target_root / "docs/tech.md", "# Target tech\n")
+    write_file(target_root / "docs/structure.md", "# Target structure\n")
 
     plan = build_sync_plan(source_root, target_root)
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
-    assert ("preserve", "docs/01-local-architecture.md") in actions
-    assert ("preserve", "docs/02-local-repository-context.md") in actions
-    assert "docs/01-local-architecture.md" in plan.local_assets
-    assert "docs/02-local-repository-context.md" in plan.local_assets
+    assert ("preserve", "docs/README.md") in actions
+    assert ("preserve", "docs/repository-context.md") in actions
+    assert ("preserve", "docs/architecture.md") in actions
+    assert ("preserve", "docs/tech.md") in actions
+    assert ("preserve", "docs/structure.md") in actions
+    assert "docs/README.md" in plan.local_assets
+    assert "docs/repository-context.md" in plan.local_assets
+    assert "docs/architecture.md" in plan.local_assets
+    assert "docs/tech.md" in plan.local_assets
+    assert "docs/structure.md" in plan.local_assets
 
 
 def test_build_sync_plan_renames_legacy_architecture_when_new_path_is_missing(
@@ -322,25 +364,57 @@ def test_build_sync_plan_renames_legacy_architecture_when_new_path_is_missing(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/templates/01-architecture.md.template",
+        source_root / ".github/templates/architecture.md.template",
         "# Architecture scaffold\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
-    write_file(target_root / "docs/architecture.md", "# Legacy architecture\n")
+    write_file(target_root / "docs/01-local-architecture.md", "# Legacy architecture\n")
 
     plan = build_sync_plan(source_root, target_root)
 
-    assert ("rename", "docs/01-local-architecture.md") in {
+    assert ("rename", "docs/architecture.md") in {
         (operation.action, operation.path) for operation in plan.operations
     }
 
     apply_sync_plan(plan)
 
-    assert not (target_root / "docs/architecture.md").exists()
-    assert (target_root / "docs/01-local-architecture.md").read_text(
+    assert not (target_root / "docs/01-local-architecture.md").exists()
+    assert (target_root / "docs/architecture.md").read_text(
         encoding="utf-8"
     ) == "# Legacy architecture\n"
+
+
+def test_build_sync_plan_renames_legacy_repository_context_when_new_path_is_missing(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/templates/repository-context.md.template",
+        "# Context scaffold\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / "docs/02-local-repository-context.md", "# Legacy context\n"
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("rename", "docs/repository-context.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+    apply_sync_plan(plan)
+
+    assert not (target_root / "docs/02-local-repository-context.md").exists()
+    assert (target_root / "docs/repository-context.md").read_text(
+        encoding="utf-8"
+    ) == "# Legacy context\n"
 
 
 def test_apply_sync_plan_blocks_when_legacy_and_new_architecture_coexist(
@@ -352,17 +426,45 @@ def test_apply_sync_plan_blocks_when_legacy_and_new_architecture_coexist(
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/templates/01-architecture.md.template",
+        source_root / ".github/templates/architecture.md.template",
         "# Architecture scaffold\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
-    write_file(target_root / "docs/architecture.md", "# Legacy architecture\n")
-    write_file(target_root / "docs/01-local-architecture.md", "# New architecture\n")
+    write_file(target_root / "docs/architecture.md", "# Canonical architecture\n")
+    write_file(target_root / "docs/01-local-architecture.md", "# Legacy architecture\n")
 
     plan = build_sync_plan(source_root, target_root)
 
-    assert ("manual", "docs/01-local-architecture.md") in {
+    assert ("manual", "docs/architecture.md") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+    with pytest.raises(RuntimeError, match="manual reconciliation"):
+        apply_sync_plan(plan)
+
+
+def test_apply_sync_plan_blocks_when_legacy_and_new_repository_context_coexist(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(
+        source_root / ".github/templates/repository-context.md.template",
+        "# Context scaffold\n",
+    )
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(target_root / "docs/repository-context.md", "# Canonical context\n")
+    write_file(
+        target_root / "docs/02-local-repository-context.md", "# Legacy context\n"
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("manual", "docs/repository-context.md") in {
         (operation.action, operation.path) for operation in plan.operations
     }
     with pytest.raises(RuntimeError, match="manual reconciliation"):

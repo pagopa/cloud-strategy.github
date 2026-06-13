@@ -1,0 +1,49 @@
+# Architecture
+
+## Purpose
+
+Describe the current architecture of this repository using observed evidence.
+
+## Scope Boundary
+
+In scope:
+
+- `<add in-scope architecture areas>`
+
+Out of scope:
+
+- `<add out-of-scope areas>`
+
+## External Interfaces
+
+- `<add external systems, contracts, or repositories that this repo interacts with>`
+
+## Logical Components
+
+| Component | Path | Responsibility |
+| --- | --- | --- |
+| `<component>` | `<path>` | `<responsibility>` |
+
+## Key Flow
+
+Use Mermaid when a diagram improves understanding.
+
+```mermaid
+flowchart LR
+    A[Source] --> B[Process]
+    B --> C[Output]
+```
+
+## Quality Attributes
+
+- `<add safety, reliability, maintainability, or performance notes>`
+
+## Risks And Open Questions
+
+| Risk | Current evidence | Recommended handling |
+| --- | --- | --- |
+| `<risk>` | `<evidence>` | `<handling>` |
+
+## Unknown / To Verify
+
+- `<unsupported claim or missing evidence>`

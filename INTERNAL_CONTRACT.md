@@ -92,18 +92,25 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Scope:
   - `AGENTS.md`
   - `.github/copilot-instructions.md`
-  - `docs/01-local-architecture.md`
-  - `docs/02-local-repository-context.md`
-  - `.github/templates/01-architecture.md.template`
-  - `.github/templates/02-repository-context.md.template`
+  - `docs/README.md`
+  - `docs/repository-context.md`
+  - `docs/architecture.md`
+  - `docs/tech.md`
+  - `docs/structure.md`
+  - `.github/templates/docs-README.md.template`
+  - `.github/templates/repository-context.md.template`
+  - `.github/templates/architecture.md.template`
+  - `.github/templates/tech.md.template`
+  - `.github/templates/structure.md.template`
   - `.github/skills/internal-gateway-review/**`
   - sync automation and sync-contract tests
 - Expected behavior:
-  - `docs/01-local-architecture.md` is the repository-specific architecture contract and is scaffolded into consumers only when missing
-  - `docs/02-local-repository-context.md` is descriptive local context and cannot override binding policy
+  - `docs/repository-context.md`, `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md` are mandatory consumer-local knowledge documents scaffolded only when missing and preserved after creation
+  - `docs/README.md` explains knowledge-document roles and routing without becoming a policy owner
+  - each knowledge document remains descriptive and cannot override binding policy
   - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-idea-brainstorming`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-execute-plans`
   - the retired `docs/03-local-ai-runtime-operating-model.md` file is not recreated or synchronized into consumers
-  - sync automation preserves existing consumer-local architecture and context documents after initial scaffold creation
+  - sync automation preserves existing consumer-local knowledge documents after initial scaffold creation and blocks ambiguous legacy coexistence
   - `.github/templates/` remains source-side scaffold material and is not mirrored as a target catalog family
 
 ### Language Policy

@@ -538,19 +538,15 @@ def test_direct_home_edit_still_blocks_target_modified_managed(
     assert "target-modified-managed" in blocked_codes
 
 
-def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
+def test_home_sync_plan_includes_graphify_when_present_in_catalog(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"
     initialize_source_repo(source_root)
     write_file(
-        source_root / ".github/skills/internal-graphify/SKILL.md",
-        "---\nname: internal-graphify\n---\n\n# Internal Graphify\n",
-    )
-    write_file(
-        source_root / ".github/skills/internal-graphify/agents/openai.yaml",
-        "interface:\n  display_name: Internal Graphify\n",
+        source_root / ".github/skills/graphify/SKILL.md",
+        "---\nname: graphify\n---\n\n# Graphify\n",
     )
 
     catalog_path = (
@@ -569,9 +565,9 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
         "    source_path: .github/skills/demo-skill\n"
         "    include_targets:\n"
         "      - codex\n"
-        "  - resource_id: internal-graphify\n"
+        "  - resource_id: graphify\n"
         "    source_family: skills\n"
-        "    source_path: .github/skills/internal-graphify\n"
+        "    source_path: .github/skills/graphify\n"
         "    include_targets:\n"
         "      - codex\n",
         encoding="utf-8",
@@ -587,8 +583,8 @@ def test_home_sync_plan_includes_internal_graphify_when_present_in_source(
     resource_ids = {
         op.resource_id for op in plan.operations if hasattr(op, "resource_id")
     }
-    assert "internal-graphify" in resource_ids or any(
-        ".agents/skills/internal-graphify" in str(op.path) for op in plan.operations
+    assert "graphify" in resource_ids or any(
+        ".agents/skills/graphify" in str(op.path) for op in plan.operations
     )
 
 
@@ -773,14 +769,14 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
     assert all(entry["target"] != "claude" for entry in manifest["managed_resources"])
 
 
-def test_home_sync_catalog_contains_internal_graphify_in_real_repo() -> None:
+def test_home_sync_catalog_does_not_contain_internal_graphify_in_real_repo() -> None:
     catalog_path = (
         REPO_ROOT
         / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
     )
     catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
     resource_ids = {r["resource_id"] for r in catalog.get("resources", [])}
-    assert "internal-graphify" in resource_ids
+    assert "internal-graphify" not in resource_ids
 
 
 def test_home_sync_catalog_contains_internal_ai_resource_review_in_real_repo() -> None:

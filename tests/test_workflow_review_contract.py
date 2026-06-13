@@ -80,6 +80,21 @@ def test_compact_and_extended_execution_owners_are_split() -> None:
     assert "internal-gateway-execute-plans" in executing_text
 
 
+def test_gateway_compliance_audit_contract_is_explicit() -> None:
+    simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
+
+    assert "mandatory applicable requirements" in simple_text
+    assert "pre-close compliance audit" in simple_text
+    assert "Block completion claims" in simple_text
+    assert "single-lane and single-phase" in simple_text
+
+    assert "item-level compliance audit" in executing_text
+    assert "block `SHIPPED`" in executing_text
+    assert "undefined validation strategy" in executing_text
+    assert "stdlib-only CLI launcher" in executing_text
+
+
 def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
     simple_wrapper = read_text(
         ".github/skills/internal-gateway-simple-task/agents/openai.yaml"

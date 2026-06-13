@@ -15,14 +15,20 @@ from .shared import (
     CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES,
     COPILOT_INSTRUCTIONS_OVERRIDE_PATH,
     COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH,
+    DOCS_README_PATH,
     INVENTORY_PATH,
     LEGACY_ARCHITECTURE_PATH,
+    LEGACY_LOCAL_ARCHITECTURE_PATH,
+    LEGACY_LOCAL_REPOSITORY_CONTEXT_PATH,
+    LEGACY_REPOSITORY_CONTEXT_PATH,
     LEGACY_RUNTIME_FIT_PATH,
     LESSONS_PATH,
     MANAGED_ROOT_FILES,
     MANAGED_WORKFLOW_FILES,
     REPOSITORY_CONTEXT_PATH,
     RETIRED_RUNTIME_OPERATING_MODEL_PATH,
+    STRUCTURE_PATH,
+    TECH_PATH,
     SyncOperation,
     SyncPlan,
     action_sort_key,
@@ -53,6 +59,15 @@ NO_PENDING_LESSONS_MARKERS = {
     "No pending lessons currently.",
     DEFAULT_NO_PENDING_LESSONS_MARKER,
 }
+
+ARCHITECTURE_LEGACY_PATHS = (
+    LEGACY_LOCAL_ARCHITECTURE_PATH,
+    LEGACY_ARCHITECTURE_PATH,
+)
+REPOSITORY_CONTEXT_LEGACY_PATHS = (
+    LEGACY_LOCAL_REPOSITORY_CONTEXT_PATH,
+    LEGACY_REPOSITORY_CONTEXT_PATH,
+)
 
 
 @dataclass(frozen=True)
@@ -379,10 +394,49 @@ def append_consumer_local_knowledge_operations(
     operations: list[SyncOperation],
     local_assets: list[str],
 ) -> None:
+    append_docs_readme_operations(source_root, target_root, operations, local_assets)
     append_architecture_operations(source_root, target_root, operations, local_assets)
     append_repository_context_operations(
         source_root, target_root, operations, local_assets
     )
+    append_tech_operations(source_root, target_root, operations, local_assets)
+    append_structure_operations(source_root, target_root, operations, local_assets)
+
+
+def append_docs_readme_operations(
+    source_root: Path,
+    target_root: Path,
+    operations: list[SyncOperation],
+    local_assets: list[str],
+) -> None:
+    template_path = source_root / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[DOCS_README_PATH]
+    target_path = target_root / DOCS_README_PATH
+
+    if target_path.exists():
+        local_assets.append(DOCS_README_PATH)
+        operations.append(
+            SyncOperation(
+                action="preserve",
+                path=DOCS_README_PATH,
+                reason="Preserved consumer-local docs guide after scaffold materialization.",
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_path),
+            )
+        )
+        return
+
+    if template_path.exists():
+        operations.append(
+            SyncOperation(
+                action="create",
+                path=DOCS_README_PATH,
+                reason="Consumer-local docs guide missing; create scaffold from the source template.",
+                source_hash=sha256_file(template_path),
+                target_hash=None,
+            )
+        )
 
 
 def append_architecture_operations(
@@ -393,15 +447,21 @@ def append_architecture_operations(
 ) -> None:
     template_path = source_root / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[ARCHITECTURE_PATH]
     target_path = target_root / ARCHITECTURE_PATH
-    legacy_path = target_root / LEGACY_ARCHITECTURE_PATH
+    legacy_paths = [
+        legacy_path
+        for legacy_path in ARCHITECTURE_LEGACY_PATHS
+        if (target_root / legacy_path).exists()
+    ]
 
-    if target_path.exists() and legacy_path.exists():
+    if target_path.exists() and legacy_paths:
         local_assets.append(ARCHITECTURE_PATH)
         operations.append(
             SyncOperation(
                 action="manual",
                 path=ARCHITECTURE_PATH,
-                reason="Both legacy docs/architecture.md and docs/01-architecture.md exist; reconcile manually before apply.",
+                reason=(
+                    f"Both canonical {ARCHITECTURE_PATH} and legacy {', '.join(legacy_paths)} exist; reconcile manually before apply."
+                ),
                 source_hash=(
                     sha256_file(template_path) if template_path.exists() else None
                 ),
@@ -425,14 +485,31 @@ def append_architecture_operations(
         )
         return
 
-    if legacy_path.exists():
+    if len(legacy_paths) > 1:
+        operations.append(
+            SyncOperation(
+                action="manual",
+                path=ARCHITECTURE_PATH,
+                reason=(
+                    f"Multiple legacy paths for {ARCHITECTURE_PATH} exist ({', '.join(legacy_paths)}); reconcile manually before apply."
+                ),
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_root / legacy_paths[0]),
+            )
+        )
+        return
+
+    if legacy_paths:
+        legacy_path = legacy_paths[0]
         operations.append(
             SyncOperation(
                 action="rename",
                 path=ARCHITECTURE_PATH,
-                reason="Legacy docs/architecture.md should move to consumer-local docs/01-architecture.md.",
+                reason=f"Legacy {legacy_path} should move to consumer-local {ARCHITECTURE_PATH}.",
                 source_hash=None,
-                target_hash=sha256_file(legacy_path),
+                target_hash=sha256_file(target_root / legacy_path),
             )
         )
         return
@@ -459,6 +536,28 @@ def append_repository_context_operations(
         source_root / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[REPOSITORY_CONTEXT_PATH]
     )
     target_path = target_root / REPOSITORY_CONTEXT_PATH
+    legacy_paths = [
+        legacy_path
+        for legacy_path in REPOSITORY_CONTEXT_LEGACY_PATHS
+        if (target_root / legacy_path).exists()
+    ]
+
+    if target_path.exists() and legacy_paths:
+        local_assets.append(REPOSITORY_CONTEXT_PATH)
+        operations.append(
+            SyncOperation(
+                action="manual",
+                path=REPOSITORY_CONTEXT_PATH,
+                reason=(
+                    f"Both canonical {REPOSITORY_CONTEXT_PATH} and legacy {', '.join(legacy_paths)} exist; reconcile manually before apply."
+                ),
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_path),
+            )
+        )
+        return
 
     if target_path.exists():
         local_assets.append(REPOSITORY_CONTEXT_PATH)
@@ -475,12 +574,113 @@ def append_repository_context_operations(
         )
         return
 
+    if len(legacy_paths) > 1:
+        operations.append(
+            SyncOperation(
+                action="manual",
+                path=REPOSITORY_CONTEXT_PATH,
+                reason=(
+                    f"Multiple legacy paths for {REPOSITORY_CONTEXT_PATH} exist ({', '.join(legacy_paths)}); reconcile manually before apply."
+                ),
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_root / legacy_paths[0]),
+            )
+        )
+        return
+
+    if legacy_paths:
+        legacy_path = legacy_paths[0]
+        operations.append(
+            SyncOperation(
+                action="rename",
+                path=REPOSITORY_CONTEXT_PATH,
+                reason=f"Legacy {legacy_path} should move to consumer-local {REPOSITORY_CONTEXT_PATH}.",
+                source_hash=None,
+                target_hash=sha256_file(target_root / legacy_path),
+            )
+        )
+        return
+
     if template_path.exists():
         operations.append(
             SyncOperation(
                 action="create",
                 path=REPOSITORY_CONTEXT_PATH,
                 reason="Consumer-local repository context missing; create scaffold from the source template.",
+                source_hash=sha256_file(template_path),
+                target_hash=None,
+            )
+        )
+
+
+def append_tech_operations(
+    source_root: Path,
+    target_root: Path,
+    operations: list[SyncOperation],
+    local_assets: list[str],
+) -> None:
+    template_path = source_root / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[TECH_PATH]
+    target_path = target_root / TECH_PATH
+
+    if target_path.exists():
+        local_assets.append(TECH_PATH)
+        operations.append(
+            SyncOperation(
+                action="preserve",
+                path=TECH_PATH,
+                reason="Preserved consumer-local technology document after scaffold materialization.",
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_path),
+            )
+        )
+        return
+
+    if template_path.exists():
+        operations.append(
+            SyncOperation(
+                action="create",
+                path=TECH_PATH,
+                reason="Consumer-local technology document missing; create scaffold from the source template.",
+                source_hash=sha256_file(template_path),
+                target_hash=None,
+            )
+        )
+
+
+def append_structure_operations(
+    source_root: Path,
+    target_root: Path,
+    operations: list[SyncOperation],
+    local_assets: list[str],
+) -> None:
+    template_path = source_root / CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES[STRUCTURE_PATH]
+    target_path = target_root / STRUCTURE_PATH
+
+    if target_path.exists():
+        local_assets.append(STRUCTURE_PATH)
+        operations.append(
+            SyncOperation(
+                action="preserve",
+                path=STRUCTURE_PATH,
+                reason="Preserved consumer-local structure document after scaffold materialization.",
+                source_hash=(
+                    sha256_file(template_path) if template_path.exists() else None
+                ),
+                target_hash=sha256_file(target_path),
+            )
+        )
+        return
+
+    if template_path.exists():
+        operations.append(
+            SyncOperation(
+                action="create",
+                path=STRUCTURE_PATH,
+                reason="Consumer-local structure document missing; create scaffold from the source template.",
                 source_hash=sha256_file(template_path),
                 target_hash=None,
             )
@@ -894,12 +1094,31 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
             else:
                 source_path = plan.source_root / operation.path
                 copy2(source_path, target_path)
-        elif operation.action == "rename" and operation.path == ARCHITECTURE_PATH:
-            legacy_path = plan.target_root / LEGACY_ARCHITECTURE_PATH
-            if legacy_path.exists() and not target_path.exists():
-                target_path.parent.mkdir(parents=True, exist_ok=True)
-                legacy_path.rename(target_path)
-                cleanup_empty_parents(legacy_path, plan.target_root)
+        elif operation.action == "rename" and operation.path in {
+            ARCHITECTURE_PATH,
+            REPOSITORY_CONTEXT_PATH,
+        }:
+            legacy_candidates = {
+                ARCHITECTURE_PATH: ARCHITECTURE_LEGACY_PATHS,
+                REPOSITORY_CONTEXT_PATH: REPOSITORY_CONTEXT_LEGACY_PATHS,
+            }[operation.path]
+            existing_legacy_paths = [
+                plan.target_root / legacy_path
+                for legacy_path in legacy_candidates
+                if (plan.target_root / legacy_path).exists()
+            ]
+            if len(existing_legacy_paths) != 1:
+                raise RuntimeError(
+                    f"Sync plan requested rename for {operation.path}, but no unique legacy source path is available."
+                )
+            if target_path.exists():
+                raise RuntimeError(
+                    f"Sync plan requested rename for {operation.path}, but the canonical target path already exists."
+                )
+            legacy_path = existing_legacy_paths[0]
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            legacy_path.rename(target_path)
+            cleanup_empty_parents(legacy_path, plan.target_root)
         elif operation.action == "delete":
             if target_path.exists():
                 target_path.unlink()

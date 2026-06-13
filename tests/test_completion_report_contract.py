@@ -35,3 +35,14 @@ def test_completion_report_docs_match_optional_detail_contract() -> None:
 
     assert "offer it as optional follow-up detail" in sync_contract_text
     assert "accepts number-only replies" in sync_contract_text
+
+
+def test_completion_report_requires_mandatory_applicable_evidence_for_shipped() -> None:
+    completion_reference = read_text(
+        ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
+    )
+
+    assert (
+        "mandatory applicable skill requirements are verified" in completion_reference
+    )
+    assert "if mandatory applicable evidence is missing" in completion_reference

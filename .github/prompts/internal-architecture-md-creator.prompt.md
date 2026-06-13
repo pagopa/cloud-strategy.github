@@ -1,7 +1,7 @@
 ---
 name: "internal-architecture-md-creator"
 agent: "internal-gateway-simple-task"
-description: "Generate or refresh a repository `docs/01-architecture.md` contract from repository evidence."
+description: "Generate or refresh a repository `docs/architecture.md` contract from repository evidence."
 argument-hint: "Optional target repository path plus optional focus, constraints, or chat-language preference"
 ---
 
@@ -33,11 +33,11 @@ Execution contract:
    still unresolved after obvious path checks.
 2. Inspect the repository before writing. Prefer evidence from source code,
    config, workflows, tests, IaC, and existing docs.
-3. Create or update only `docs/01-architecture.md`.
+3. Create or update only `docs/architecture.md`.
 4. Keep retained artifact content, headings, tables, and filenames in English.
    The chat summary may follow the requested chat language.
 5. Do not invent architecture. Mark unsupported claims as `Unknown / To verify`.
-6. If `docs/01-architecture.md` already exists, refresh it in place and remove
+6. If `docs/architecture.md` already exists, refresh it in place and remove
    claims that current evidence no longer supports.
 7. If the request conflicts with the observed architecture, explain the conflict
    before editing.

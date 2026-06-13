@@ -1,11 +1,3 @@
-/*
-!/.github/
-!/docs/
-!/AGENTS.md
-!/INTERNAL_CONTRACT.md
-!/LESSONS_LEARNED.md
-!/Makefile
-!/.pre-commit-config.yaml
 /graphify-out/
 /.graphify_*
 __pycache__/

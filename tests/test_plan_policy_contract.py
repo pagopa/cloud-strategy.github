@@ -36,6 +36,8 @@ def test_executing_plans_accepts_only_extended_consumers() -> None:
         "Reject any folder whose recommended consumer is not `internal-gateway-execute-plans`"
         in executing_text
     )
+    assert "mandatory requirements that are applicable" in executing_text
+    assert "Block item closure and block `SHIPPED`" in executing_text
 
 
 def test_gateway_handoff_references_use_canonical_execution_owner() -> None:
