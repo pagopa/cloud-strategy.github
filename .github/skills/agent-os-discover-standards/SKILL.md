@@ -27,8 +27,9 @@ description: Portable workflow for discovering concise project standards and wri
 2. Review representative files and extract only non-obvious, repeated, opinionated patterns.
 3. For each candidate standard, ask 1-2 short why/exceptions questions before drafting.
 4. Draft one concise standard at a time and request explicit approval before writing.
-5. Write approved files to `agent-os/standards/<folder>/<name>.md`.
-6. Refresh the index with `agent-os-index-standards` when file changes are complete.
+5. Write approved files to `agent-os/standards/<folder>/<name>.md`; append to a related existing file instead of creating a duplicate.
+6. After finishing one area, offer to discover standards in another area or stop.
+7. Refresh the index with `agent-os-index-standards` when file changes are complete.
 
 ## Boundaries
 

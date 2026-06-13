@@ -24,15 +24,18 @@ description: Portable workflow for selecting and injecting relevant standards fr
 
 1. Determine scenario: conversation, skill authoring, or planning.
 2. In auto mode, read `agent-os/standards/index.yml` and propose 2-5 relevant standards.
-3. In explicit mode, resolve folder/file targets directly.
-4. Confirm what to include, then inject either file references or full content.
-5. If index is missing or empty, stop and request indexing via `agent-os-index-standards`.
+3. In explicit mode, resolve folder/file targets directly, treating `root` as the reserved key for files directly in `agent-os/standards/`.
+4. In explicit mode, if a target is missing, list available standards in that folder and ask for the intended one instead of injecting.
+5. Confirm what to include, then inject either file references or full content.
+6. In the conversation scenario, surface related `.claude/skills/` entries for awareness without invoking them.
+7. If index is missing or empty, stop and request indexing via `agent-os-index-standards`.
 
 ## Boundaries
 
 - Do not auto-load unrelated standards.
 - Ask for confirmation when scenario is ambiguous.
 - Keep output focused and lightweight.
+- Surface related skills only; never invoke them automatically.
 
 ## Validation
 

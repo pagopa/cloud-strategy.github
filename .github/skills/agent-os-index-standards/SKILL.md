@@ -24,9 +24,10 @@ description: Portable workflow for rebuilding agent-os/standards/index.yml from 
 1. Scan `agent-os/standards/` recursively for `.md` files.
 2. Interpret files in `agent-os/standards/` root as the reserved folder key `root`.
 3. Load the current `agent-os/standards/index.yml` when present.
-4. Add entries for new files with one short description each.
-5. Remove stale index entries for deleted files.
+4. For each new file, propose a one-sentence description and confirm it before writing.
+5. Remove stale index entries for deleted files automatically.
 6. Write YAML sorted by folder name and then file name.
+7. Report what changed: entries added, removed, and unchanged.
 
 ## Boundaries
 
