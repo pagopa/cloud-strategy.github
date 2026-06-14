@@ -10,8 +10,6 @@ surface, validation signal, or repository evidence.
 
 Load task-specific skills or references only when workflow depth is needed.
 
-Treat `.github/INVENTORY.md` as generated state, not policy.
-
 Do not edit imported upstream assets in place unless the need is strong,
 explicit, and registered.
 
