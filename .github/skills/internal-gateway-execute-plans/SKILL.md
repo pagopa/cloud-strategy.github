@@ -38,7 +38,7 @@ consumes approved `compact` and `extended` retained plans.
 8. Run an item-level compliance audit before closing each executable item.
 9. Track progress through the live ledger.
 10. Aggregate unresolved mandatory applicable requirements before closeout.
-11. Package closeout only for `SHIPPED`.
+11. Package closeout only for `DONE`.
 
 ## Execution Contract
 
@@ -48,11 +48,11 @@ consumes approved `compact` and `extended` retained plans.
 - Infer the execution strategy from `Plan profile`, folder shape, `04-implementation-contract.md` presence when applicable, and the validation path. Do not require a separate retained-plan consumer field.
 - Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
 - Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.
-- Block item closure and block `SHIPPED` whenever mandatory applicable requirements remain unverified.
+- Block item closure and block `DONE` whenever mandatory applicable requirements remain unverified.
 - Escalate architecture ownership conflicts, cross-owner skill conflicts, and undefined validation strategy.
 - Pressure-test boundary: a Lambda-owned hashed requirements file does not grant a separate stdlib-only CLI launcher permission to install that dependency set.
-- Only `SHIPPED` may create `done-*` markers or remove numbered plan files, or publish a lightweight `plan-state.md` marker with `State: SHIPPED` and `Continuation: none`.
-- Non-`SHIPPED` exits keep the live ledger and numbered files in place.
+- Only `DONE` may create `done-*` markers or remove numbered plan files, or publish a lightweight `DONE-plan-state.md` marker (`<STATE>-plan-state.md` convention) with `State: DONE` and `Continuation: none`.
+- Non-`DONE` exits keep the live ledger and numbered files in place.
 
 ## Validation
 
@@ -61,13 +61,13 @@ consumes approved `compact` and `extended` retained plans.
 - Execution strategy is inferred from profile, folder shape, and validation path.
 - `compact` retained plans use `tmp/superpowers/mini-plan-*` and `03-execution.md` as the only executable file.
 - `extended` retained plans include `04-implementation-contract.md` before executable work.
-- Mandatory applicable requirements are checked at item close and before `SHIPPED`.
-- Missing mandatory applicable evidence maps to a non-`SHIPPED` state.
-- `done-*` markers appear only during full close packaging; lightweight closeout uses `plan-state.md` and may retain numbered files.
+- Mandatory applicable requirements are checked at item close and before `DONE`.
+- Missing mandatory applicable evidence maps to a non-`DONE` state.
+- `done-*` markers appear only during full close packaging; lightweight closeout uses `<STATE>-plan-state.md` (for closed plans: `DONE-plan-state.md`) and may retain numbered files.
 
 ## Common failure modes
 
 - Closing an item because edits exist while mandatory applicable evidence is still open.
 - Treating every loaded specialist rule as mandatory without applicability proof.
 - Hiding ownership conflicts instead of escalating a next owner and validation path.
-- Packaging `SHIPPED` while evidence gaps still require `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED`.
+- Packaging `DONE` while evidence gaps still require `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED`.

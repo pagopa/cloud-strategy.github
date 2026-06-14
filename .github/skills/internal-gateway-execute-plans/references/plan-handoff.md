@@ -26,7 +26,7 @@ before the `done-*` loop starts.
 - Numbered executable plan files after the summary and ledger control files.
 - `questions.md` with accepted user-only decisions or `- none`.
 - A plan for closing the summary and ledger files through matching `done-*`
-  markers when the folder completes as `SHIPPED`.
+  markers when the folder completes as `DONE`.
 - Confirmed target state and anti-scope.
 - Selected owner and known lane-change owner.
 - Validation path or explicit validation gap.
