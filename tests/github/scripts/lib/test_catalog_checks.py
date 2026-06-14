@@ -38,7 +38,7 @@ def test_run_consistency_checks_flags_active_residual_instruction_reference(
         "# Internal Demo\n\n"
         "## When to use\n\n"
         "Use this skill for tests.\n\n"
-        f"See `{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md`.\n",
+        "See `.github/copilot-code-review-instructions.md`.\n",
     )
     write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
 
@@ -51,7 +51,7 @@ def test_run_consistency_checks_flags_active_residual_instruction_reference(
     ) in findings_by_path
 
 
-def test_run_consistency_checks_ignores_legacy_instruction_sources_until_removed(
+def test_run_consistency_checks_allows_active_instruction_family_references(
     tmp_path: Path,
 ) -> None:
     write_bridge_files(tmp_path)
@@ -62,6 +62,17 @@ def test_run_consistency_checks_ignores_legacy_instruction_sources_until_removed
         f"{LEGACY_APPLY_TO_KEY}: '**/*.py'\n"
         "---\n\n"
         "# Python Instructions\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
+
+    write_file(
+        tmp_path / ".github/skills/internal-demo/SKILL.md",
+        "---\n"
+        "name: internal-demo\n"
+        "description: Use when demo validation needs a fixture.\n"
+        "---\n\n"
+        "# Internal Demo\n\n"
+        "See `.github/instructions/internal-python.instructions.md`.\n",
     )
     write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
 
@@ -77,7 +88,7 @@ def test_run_consistency_checks_ignores_historical_deprecation_entries(
     write_bridge_files(tmp_path)
     write_file(
         tmp_path / ".github/DEPRECATION.md",
-        f"# Deprecation\n\n- `{LEGACY_INSTRUCTION_DIR}/`: removed under migration exception.\n",
+        "# Deprecation\n\n- `.github/copilot-code-review-instructions.md`: retired under migration exception.\n",
     )
     write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
 

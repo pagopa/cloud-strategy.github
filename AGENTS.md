@@ -25,13 +25,13 @@ repository projects AI configuration into other repositories.
 ## Role And Precedence
 
 - `AGENTS.md` owns repository-wide defaults, precedence, rule placement, and cross-surface bridge behavior.
-- `.github/copilot-instructions.md` is the repo-wide Copilot projection; keep it aligned when repository-wide defaults change.
+- `.github/copilot-instructions.md` is the compact repo-wide Copilot bridge; keep it aligned as a routing layer rather than a policy duplicate.
 - `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
 - Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
 - `.github/skills/` owns repository-owned reusable guidance. Umbrella skills own lightweight technical-domain baselines; specialist skills and bundle references own deeper procedures.
 - Use `docs/architecture.md` for repository architecture and `docs/repository-context.md` for non-policy local context.
 - Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
-- Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
+- Consumer repositories should express local exceptions with preserved `.github/instructions/local-*.instructions.md` files.
 
 ## Context And Scope
 
@@ -77,7 +77,8 @@ repository projects AI configuration into other repositories.
 
 ## Token And Drift Control
 
-- The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md`; its soft target is 4,000 estimated tokens measured as `ceil(UTF-8 bytes / 4)` by the validator.
+- `AGENTS.md` is the canonical always-on policy surface; keep it near a 4,000 estimated-token soft target measured as `ceil(UTF-8 bytes / 4)` by the validator.
+- Keep `.github/copilot-instructions.md` compact as a bridge and keep global review behavior in `.github/instructions/copilot-code-review.instructions.md`.
 - Keep duplication deliberate. Duplicate only rules that must remain visible in a specific surface and are compact enough to validate.
 
 `</shared-baseline>`

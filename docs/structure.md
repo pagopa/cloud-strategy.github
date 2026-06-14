@@ -19,7 +19,9 @@ authored, generated, temporary, or consumer-facing.
 ## Ownership Boundaries
 
 - Policy ownership remains in canonical owners such as `AGENTS.md`,
-  `.github/copilot-instructions.md`, skills, validators, and owned files.
+  `.github/copilot-instructions.md`,
+  `.github/instructions/copilot-code-review.instructions.md`, skills,
+  validators, and owned files.
 - `docs/` is descriptive and must not become a policy owner.
 - `.github/templates/` is source-side scaffold material and is not mirrored as
   an operational catalog family.

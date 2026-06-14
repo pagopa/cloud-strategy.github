@@ -4,6 +4,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 ## Instructions
 
+- `.github/instructions/copilot-code-review.instructions.md`
 - `.github/instructions/internal-azure-devops-pipelines.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
 - `.github/instructions/internal-cloudformation.instructions.md`

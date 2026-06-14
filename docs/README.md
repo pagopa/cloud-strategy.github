@@ -2,7 +2,8 @@
 
 This directory holds consumer-local repository knowledge for humans and AI
 agents. The files are descriptive and evidence-based. They do not override
-binding policy in `AGENTS.md`, `.github/copilot-instructions.md`, skills,
+binding policy in `AGENTS.md`, `.github/copilot-instructions.md`,
+`.github/instructions/copilot-code-review.instructions.md`, skills,
 agents, validators, or owned files.
 
 ## Required Documents

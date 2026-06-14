@@ -447,7 +447,7 @@ def test_run_consistency_checks_flags_active_residual_instruction_reference(
         "# Internal Demo\n\n"
         "## When to use\n\n"
         "Use this skill for tests.\n\n"
-        f"See `{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md`.\n",
+        "See `.github/copilot-code-review-instructions.md`.\n",
     )
     write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
 

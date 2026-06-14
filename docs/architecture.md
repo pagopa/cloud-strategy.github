@@ -33,7 +33,8 @@ Out of scope:
 | Component | Path | Responsibility |
 | --- | --- | --- |
 | Strategic bridge | `AGENTS.md` | Stable precedence, ownership, and tactical defaults. |
-| Copilot projection | `.github/copilot-instructions.md` | Repo-wide Copilot-native projection of canonical rules. |
+| Copilot bridge | `.github/copilot-instructions.md` | Compact repo-wide Copilot routing bridge to canonical policy. |
+| Global review baseline | `.github/instructions/copilot-code-review.instructions.md` | Source-managed defect-first review behavior for all paths. |
 | Knowledge docs | `docs/` | Descriptive repository context, architecture, tech, and structure. |
 | Skills and agents | `.github/skills/`, `.github/agents/` | Reusable guidance plus route wrappers and command centers. |
 | Prompts and templates | `.github/prompts/`, `.github/templates/` | Targeted creators and consumer scaffold sources. |

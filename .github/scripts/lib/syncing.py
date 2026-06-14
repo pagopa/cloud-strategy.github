@@ -13,8 +13,6 @@ from .fingerprinting import HASH_ALGO, NORMALIZATION_VERSION, build_fingerprint
 from .shared import (
     ARCHITECTURE_PATH,
     CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES,
-    COPILOT_INSTRUCTIONS_OVERRIDE_PATH,
-    COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH,
     DOCS_README_PATH,
     INVENTORY_PATH,
     LEGACY_ARCHITECTURE_PATH,
@@ -90,33 +88,6 @@ def build_sync_plan(source_root: Path, target_root: Path) -> SyncPlan:
     operations: list[SyncOperation] = []
     local_assets: list[str] = []
     generated_lessons: str | None = None
-
-    local_override_template_path = (
-        source_root / COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH
-    )
-    local_override_target_path = target_root / COPILOT_INSTRUCTIONS_OVERRIDE_PATH
-    if local_override_template_path.exists():
-        if not local_override_target_path.exists():
-            operations.append(
-                SyncOperation(
-                    action="create",
-                    path=COPILOT_INSTRUCTIONS_OVERRIDE_PATH,
-                    reason="Source-managed local override template missing from target; create the consumer-local override scaffold.",
-                    source_hash=sha256_file(local_override_template_path),
-                    target_hash=None,
-                )
-            )
-        else:
-            local_assets.append(COPILOT_INSTRUCTIONS_OVERRIDE_PATH)
-            operations.append(
-                SyncOperation(
-                    action="preserve",
-                    path=COPILOT_INSTRUCTIONS_OVERRIDE_PATH,
-                    reason="Preserved consumer-owned local override layer after template materialization.",
-                    source_hash=sha256_file(local_override_template_path),
-                    target_hash=sha256_file(local_override_target_path),
-                )
-            )
 
     append_consumer_local_knowledge_operations(
         source_root=source_root,
@@ -839,7 +810,6 @@ def discover_source_sync_files(root: Path) -> set[str]:
     files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
-    files.discard(COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH)
     for template_path in CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES.values():
         files.discard(template_path)
     return {
@@ -1082,11 +1052,6 @@ def apply_sync_plan(plan: SyncPlan, allow_dirty_target: bool = False) -> Path:
                         "Generated LESSONS_LEARNED.md content missing from sync plan."
                     )
                 write_text(target_path, plan.generated_lessons)
-            elif operation.path == COPILOT_INSTRUCTIONS_OVERRIDE_PATH:
-                source_path = (
-                    plan.source_root / COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH
-                )
-                copy2(source_path, target_path)
             elif operation.path in CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES:
                 source_path = (
                     plan.source_root

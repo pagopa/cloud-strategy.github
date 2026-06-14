@@ -42,10 +42,6 @@ ARCHITECTURE_TEMPLATE_PATH = ".github/templates/architecture.md.template"
 REPOSITORY_CONTEXT_TEMPLATE_PATH = ".github/templates/repository-context.md.template"
 TECH_TEMPLATE_PATH = ".github/templates/tech.md.template"
 STRUCTURE_TEMPLATE_PATH = ".github/templates/structure.md.template"
-COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH = (
-    ".github/templates/copilot-instructions.override.md.template"
-)
-COPILOT_INSTRUCTIONS_OVERRIDE_PATH = ".github/copilot-instructions.override.md"
 CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES = {
     DOCS_README_PATH: DOCS_README_TEMPLATE_PATH,
     ARCHITECTURE_PATH: ARCHITECTURE_TEMPLATE_PATH,
@@ -59,7 +55,6 @@ MANAGED_ROOT_FILES = (
     ".editorconfig",
     ".pre-commit-config.yaml",
     ".github/copilot-instructions.md",
-    ".github/copilot-code-review-instructions.md",
     ".github/copilot-commit-message-instructions.md",
     ".github/security-baseline.md",
     ".github/DEPRECATION.md",

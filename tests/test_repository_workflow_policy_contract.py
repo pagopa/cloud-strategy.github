@@ -65,10 +65,8 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     assert "Co-load specialist skills or bundle references only when" in agents_text
     assert "Use the smallest valid owner to resolve conflicts" in agents_text
 
-    assert (
-        "Select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence"
-        in copilot_text
-    )
+    assert "Select the smallest relevant skill from the prompt" in copilot_text
+    assert "validation signal, or repository evidence" in copilot_text
     assert (
         "Load task-specific skills or references only when workflow depth"
         in copilot_text
