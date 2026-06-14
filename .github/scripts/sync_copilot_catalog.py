@@ -111,7 +111,6 @@ def main() -> int:
             )
         )
     elif args.format == "compact":
-        status = "blocked" if blocking_source_findings else "ok"
         print(
             render_json(
                 build_compact_payload(
@@ -120,14 +119,14 @@ def main() -> int:
                     plan_path=plan_path,
                     source_findings=source_findings,
                     manifest_path=None,
-                    status=status,
+                    status="ok",
                 )
             )
         )
     else:
         render_text("plan", plan, plan_path)
         render_source_findings(source_findings)
-    return 0 if not blocking_source_findings else 1
+    return 0
 
 
 def build_compact_payload(

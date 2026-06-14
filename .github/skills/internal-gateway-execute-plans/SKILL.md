@@ -48,7 +48,7 @@ consumes approved `compact` and `extended` retained plans.
 - Infer the execution strategy from `Plan profile`, folder shape, `04-implementation-contract.md` presence when applicable, and the validation path. Do not require a separate retained-plan consumer field.
 - Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
 - Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.
-- Block item closure and block `DONE` whenever mandatory applicable requirements remain unverified.
+- Block item closure and block `SHIPPED` whenever mandatory applicable requirements remain unverified.
 - Escalate architecture ownership conflicts, cross-owner skill conflicts, and undefined validation strategy.
 - Pressure-test boundary: a Lambda-owned hashed requirements file does not grant a separate stdlib-only CLI launcher permission to install that dependency set.
 - Only `DONE` may create `done-*` markers or remove numbered plan files, or publish a lightweight `DONE-plan-state.md` marker (`<STATE>-plan-state.md` convention) with `State: DONE` and `Continuation: none`.

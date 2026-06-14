@@ -21,5 +21,11 @@ checks.
 Report completed work with outcome, changed files, validation results, and
 remaining gaps.
 
+Treat retained plans and `LESSONS_LEARNED.md` as non-canonical.
+
+Keep retained-plan workflow details in dedicated retained-plan skills and lesson-codification owners.
+
+Keep ledger row rules in their owned retained-learning files and skills.
+
 Include detailed resource sections only when the user asks or a narrower
 contract requires them.
