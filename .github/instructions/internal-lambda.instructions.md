@@ -1,6 +1,6 @@
 ---
 description: Lambda implementation rules for explicit handlers, input validation, and reusable business logic.
-applyTo: "**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts"
+applyTo: "**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts,**/lambdas/**/*.tf,**/lambdas/**/*.py,**/lambdas/**/*.js,**/lambdas/**/*.ts,**/functions/**/*.tf,**/functions/**/*.py,**/functions/**/*.js,**/functions/**/*.ts"
 excludeAgent: "cloud-agent"
 ---
 

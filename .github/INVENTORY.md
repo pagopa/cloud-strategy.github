@@ -6,13 +6,17 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 - `.github/instructions/internal-azure-devops-pipelines.instructions.md`
 - `.github/instructions/internal-bash.instructions.md`
+- `.github/instructions/internal-cloudformation.instructions.md`
 - `.github/instructions/internal-codeowners.instructions.md`
+- `.github/instructions/internal-codeql.instructions.md`
 - `.github/instructions/internal-copilot-agent-authoring.instructions.md`
 - `.github/instructions/internal-copilot-skill-reference-authoring.instructions.md`
+- `.github/instructions/internal-dependabot.instructions.md`
 - `.github/instructions/internal-docker.instructions.md`
 - `.github/instructions/internal-github-action-composite.instructions.md`
 - `.github/instructions/internal-github-actions.instructions.md`
 - `.github/instructions/internal-go.instructions.md`
+- `.github/instructions/internal-helm.instructions.md`
 - `.github/instructions/internal-java.instructions.md`
 - `.github/instructions/internal-json.instructions.md`
 - `.github/instructions/internal-kubernetes-manifests.instructions.md`

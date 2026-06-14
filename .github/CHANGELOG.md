@@ -13,6 +13,10 @@ Use this format for new updates:
 - Reintroduced the source-managed `.github/instructions/*.instructions.md` family as governed review-only projections, preserving existing `applyTo` scopes while removing procedural depth and retaining only evidenced, review-critical checks.
 - Added `excludeAgent: "cloud-agent"` across the entire reintroduced instruction family and standardized the required review-only opening sentence immediately after frontmatter.
 - Updated deprecation policy language in `.github/DEPRECATION.md` to keep the historical note about retiring the broad old instruction model while reflecting the controlled reintroduction of the review-only family.
+- Backfilled high-signal review checks in `.github/instructions/internal-terraform.instructions.md`, `.github/instructions/internal-github-actions.instructions.md`, and `.github/instructions/internal-python.instructions.md` without reintroducing workflow depth.
+- Fixed `.github/instructions/internal-azure-devops-pipelines.instructions.md` `applyTo` glob spacing and normalized family frontmatter style in the remaining outlier instruction files.
+- Added governed review-only instruction coverage for CloudFormation/SAM, Helm, Dependabot, and CodeQL via `.github/instructions/internal-cloudformation.instructions.md`, `.github/instructions/internal-helm.instructions.md`, `.github/instructions/internal-dependabot.instructions.md`, and `.github/instructions/internal-codeql.instructions.md`.
+- Widened `.github/instructions/internal-lambda.instructions.md` `applyTo` to include common `lambdas/` and `functions/` directory layouts in addition to filename-based matches.
 
 ## 2026-06-02
 

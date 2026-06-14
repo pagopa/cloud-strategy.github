@@ -11,6 +11,9 @@ This file is optimized for Copilot code review and should produce only evidenced
 - Flag action and container references that are not pinned to immutable SHAs or digests.
 - Verify `permissions` are least privilege at workflow and job scope.
 - Check secret usage to ensure no hardcoded sensitive values in workflows.
+- Flag long-lived cloud credentials in secrets where OIDC should be used.
+- Flag production deploy jobs without protected `environment` reviewers.
+- Flag `workflow_dispatch` inputs consumed by shell or deploy steps without validation.
 - Report unsafe event triggers or trust-boundary violations for untrusted code.
 - Verify concurrency, timeout, and cancellation controls for long-running jobs.
 - Check cache and artifact keys for deterministic behavior and retention clarity.
