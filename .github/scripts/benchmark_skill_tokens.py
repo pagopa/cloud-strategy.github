@@ -7,6 +7,7 @@ Does not claim exact GitHub runtime loading or billed savings.
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
@@ -247,10 +248,22 @@ def build_description_report(root: Path) -> list[dict[str, Any]]:
     return reports
 
 
-def main() -> int:
-    root = Path.cwd()
-    if len(sys.argv) > 1:
-        root = Path(sys.argv[1])
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Deterministic static benchmark for skill routing scenario proxies.",
+    )
+    parser.add_argument(
+        "root",
+        nargs="?",
+        default=".",
+        help="Repository root path (defaults to current directory).",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    root = Path(args.root)
 
     scenario_reports = build_scenario_report(root)
     description_reports = build_description_report(root)
@@ -279,4 +292,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))
