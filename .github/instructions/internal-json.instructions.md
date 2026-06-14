@@ -1,29 +1,17 @@
 ---
 description: JSON formatting and consistency standards for registry and configuration data files.
 applyTo: "**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json,**/data/**/*.json"
+excludeAgent: "cloud-agent"
 ---
 
-# JSON Instructions
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-## Scope boundary
+# JSON Review Checks
 
-- This instruction intentionally applies only to registry-like JSON paths declared in `applyTo`.
-- Root-level or ecosystem-managed JSON files (for example `package.json`, lock files) are out of scope unless they match the configured paths.
-
-## Formatting
-
-- Use 2-space indentation.
-- Keep keys in alphabetical order when applicable.
-- Do not use trailing commas.
-- For machine-managed files (for example `package.json`, lock files), preserve ecosystem conventions.
-
-## Authorization registries
-
-- Validate schema before commit.
-- Keep consistency with existing patterns in the file.
-- Use lowercase identifiers.
-- Avoid unnecessary structural changes.
-
-## Language of content
-
-- Use technical English in descriptive/documentation fields intended for operational output.
+- Verify JSON is valid and structurally consistent with adjacent files in the same family.
+- Flag key renames or type changes that break existing consumers.
+- Check required fields are present and optional fields are used consistently.
+- Report duplicate keys, ambiguous defaults, or contradictory values.
+- Verify identifiers, enums, and policy values match repository conventions.
+- Flag ordering or formatting drift only when it harms diff readability or tooling.
+- Check for embedded secrets or sensitive values that must not be committed.

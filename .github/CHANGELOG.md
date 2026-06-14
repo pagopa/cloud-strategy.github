@@ -8,6 +8,12 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-06-14
+
+- Reintroduced the source-managed `.github/instructions/*.instructions.md` family as governed review-only projections, preserving existing `applyTo` scopes while removing procedural depth and retaining only evidenced, review-critical checks.
+- Added `excludeAgent: "cloud-agent"` across the entire reintroduced instruction family and standardized the required review-only opening sentence immediately after frontmatter.
+- Updated deprecation policy language in `.github/DEPRECATION.md` to keep the historical note about retiring the broad old instruction model while reflecting the controlled reintroduction of the review-only family.
+
 ## 2026-06-02
 
 - Added `internal-gateway-idea-brainstorming` as a visible fourth gateway skill and thin Copilot wrapper agent, owning substantive idea definition, guided decision interview, convergence, Definition Brief, mandatory critical pass, and validated handoff before operational planning.

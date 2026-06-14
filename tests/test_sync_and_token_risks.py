@@ -111,7 +111,7 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
 
 
-def test_build_sync_plan_does_not_ship_source_instruction_family(
+def test_build_sync_plan_ships_source_instruction_family(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -121,7 +121,7 @@ def test_build_sync_plan_does_not_ship_source_instruction_family(
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
         source_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
-        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\n---\n",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
@@ -130,11 +130,11 @@ def test_build_sync_plan_does_not_ship_source_instruction_family(
     planned_paths = {operation.path for operation in plan.operations}
 
     assert (
-        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" in planned_paths
     )
 
 
-def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
+def test_build_sync_plan_updates_target_instructions_and_preserves_local(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -142,11 +142,15 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        source_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
+    )
     write_file(target_root / "AGENTS.md", "# AGENTS\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
         target_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
-        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\n---\n",
+        f"---\ndescription: Old Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
     )
     write_file(
         target_root / LEGACY_INSTRUCTION_DIR / "local-team.instructions.md",
@@ -157,7 +161,44 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert (
-        "delete",
+        "update",
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
+    ) in actions
+    assert (
+        "preserve",
+        f"{LEGACY_INSTRUCTION_DIR}/local-team.instructions.md",
+    ) in actions
+
+
+def test_build_sync_plan_ships_source_managed_instructions_and_preserves_local(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        source_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
+    )
+
+    write_file(target_root / "AGENTS.md", "# AGENTS\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        target_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Old Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
+    )
+    write_file(
+        target_root / LEGACY_INSTRUCTION_DIR / "local-team.instructions.md",
+        f"---\ndescription: Local team\n{LEGACY_APPLY_TO_KEY}: '**/*.md'\nexcludeAgent: cloud-agent\n---\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert (
+        "update",
         f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
     ) in actions
     assert (

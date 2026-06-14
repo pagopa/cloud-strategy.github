@@ -1,25 +1,17 @@
 ---
 description: Use when authoring or revising repository-owned Copilot agents; owns boundary clarity, paired-asset coherence, and minimal duplication.
 applyTo: ".github/agents/internal-*.agent.md,.github/agents/local-*.agent.md"
+excludeAgent: "cloud-agent"
 ---
 
-# Copilot Agent Authoring Instructions
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-## Workflow
+# Agent Authoring Review Checks
 
-- Load `internal-agent-creator` before planning or editing a repository-owned agent, or before redefining the boundary between an agent, skill, prompt, and instruction.
-- When the agent depends on a paired skill or local references, inspect those assets before finalizing and fix only the necessary drift in the same change.
-
-## Cohesion
-
-- Keep route, boundary, tool contract, and output expectations in the agent.
-- Keep reusable procedure in paired skills and deep reusable detail in references.
-- If a paired skill or reference owns the detailed contract, keep the agent summary-level and remove re-listed subtopics.
-- Use `## Mandatory Engine Skills` only for required engines and `## Optional Support Skills` only for conditional helpers.
-- Use `## Skill Usage Contract` only when declared support skills are genuinely conditional.
-- Treat `## Preferred/Optional Skills` as legacy and do not introduce it in repository-owned agents.
-
-## Validation
-
-- Re-check frontmatter alignment, declared skills, and paired-bundle drift before finishing.
-- Run the closest existing catalog validation that covers the touched agent.
+- Verify agent intent, scope, and boundaries are explicit and non-overlapping.
+- Flag routing or escalation language that conflicts with canonical owner contracts.
+- Check for duplicated procedural depth that should live in a paired skill or reference.
+- Verify referenced prompts and skills exist and names match exactly.
+- Report stale capability claims that are not supported by repository assets.
+- Check for ambiguous handoff wording that can cause lane confusion.
+- Verify constraints and safety language are clear, testable, and evidence-based.

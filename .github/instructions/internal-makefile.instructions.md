@@ -1,35 +1,17 @@
 ---
 description: Makefile conventions for deterministic targets, readable recipes, and explicit phony declarations.
 applyTo: "**/Makefile,**/*.mk"
+excludeAgent: "cloud-agent"
 ---
 
-# Makefile Instructions
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-## Conventions
+# Makefile Review Checks
 
-- Use lowercase, hyphenated target names.
-- Mark non-file targets with `.PHONY`.
-- Keep commands deterministic and readable.
-
-## Recommended patterns
-
-- Provide a `help` target.
-- Centralize common variables near the top.
-- Avoid hidden side effects in default targets.
-
-## Minimal example
-
-```make
-.PHONY: help test
-
-help:
- @echo "Available targets: test"
-
-test:
- @echo "Run test suite"
-```
-
-## Output
-
-- Keep runtime output in English.
-- Use clear success/error messages.
+- Verify target names and dependencies reflect deterministic build order.
+- Flag missing `.PHONY` declarations for non-file targets.
+- Check recipe commands for shell safety and clear failure behavior.
+- Report hidden environment coupling that breaks reproducible runs.
+- Verify variable defaults and overrides are explicit and non-ambiguous.
+- Check parallelism-sensitive targets for race-prone shared artifacts.
+- Flag undocumented side effects in commonly used targets.

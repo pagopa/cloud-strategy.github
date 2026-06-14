@@ -1,34 +1,17 @@
 ---
 description: Node.js project standards with DDD-oriented layering, early returns, and deterministic test practices.
 applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx,**/package.json,**/tsconfig.json"
+excludeAgent: "cloud-agent"
 ---
 
-# Node.js Instructions
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-## Mandatory rules
+# Node.js and TypeScript Review Checks
 
-- Treat work as project-oriented (modules/services/handlers), not script-oriented.
-- Keep business logic in focused modules, separate from transport adapters and infrastructure wiring.
-- Use clear, domain-relevant naming for core modules and errors.
-- Add a concise purpose comment for new/changed core modules when intent is not obvious.
-- Use emoji logs for key runtime states when logging is touched.
-- Prefer early return and guard clauses.
-- Keep code readable with straightforward control flow.
-- Add unit tests for testable logic.
-
-## Testing defaults
-
-- Use built-in `node:test` + `node:assert/strict`.
-- Prefer BDD-like structure (`describe`/`it` where available).
-- Keep tests deterministic and isolated.
-- For modify tasks with existing tests: change implementation first, run existing tests, and update tests only for intentional behavior changes.
-
-## Reference implementation
-
-- For module and test examples, use `.github/skills/internal-project-nodejs/SKILL.md`.
-
-## Project config files
-
-- For `package.json`, keep scripts, engines, and dependency intent explicit; avoid redundant tooling drift or placeholder metadata.
-- For `tsconfig.json`, prefer strict compiler options unless the repository has a documented compatibility reason not to.
-- Keep project config guidance scoped to Node.js or TypeScript project ownership; do not restate generic JSON formatting rules here.
+- Verify domain and adapter boundaries remain explicit and not cross-coupled.
+- Flag unhandled async errors, floating promises, or unsafe process exits.
+- Check API and type contract changes for compatibility impact.
+- Verify tests cover changed logic and avoid nondeterministic timing.
+- Report dependency additions or version drift with unnecessary blast radius.
+- Check `package.json` and `tsconfig.json` changes for build/runtime contract drift.
+- Flag complex branching where guard clauses would reduce risk.

@@ -88,3 +88,25 @@ def test_run_consistency_checks_ignores_historical_deprecation_entries(
         ".github/DEPRECATION.md",
         "residual-instruction-reference",
     ) not in findings_by_path
+
+
+def test_run_consistency_checks_enforces_source_instruction_review_contract(
+    tmp_path: Path,
+) -> None:
+    write_bridge_files(tmp_path)
+    write_file(
+        tmp_path / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        "---\n"
+        "description: Python checks\n"
+        f"{LEGACY_APPLY_TO_KEY}: '**/*.py'\n"
+        "---\n\n"
+        "# Python checks\n\n"
+        "- Verify input validation.\n",
+    )
+    write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
+
+    findings = run_consistency_checks(tmp_path)
+    finding_codes = {finding.code for finding in findings}
+
+    assert "source-instruction-missing-exclude-agent" in finding_codes
+    assert "source-instruction-missing-review-statement" in finding_codes
