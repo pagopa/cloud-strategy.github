@@ -22,6 +22,13 @@ Use this skill as the portable core for critical challenge work.
 - Use `internal-gateway-execute-plans` for approved `compact` and `extended` retained-plan execution.
 - Use `internal-gateway-review` when the next step is evidence-based validation of a concrete change.
 
+## Claim Discipline
+
+- Classify material claims as `confirmed`, `inference`, or `estimate`.
+- Do not present unsupported numeric precision as measured fact.
+- Preserve traceability between original intent and emerged requirements; do not rewrite emerged constraints as original intent.
+- Keep claim labeling lightweight and focused on material decisions, critiques, and risk framing.
+
 ## Outcome Routing
 
 | Outcome | Use when | Recommended next owner |

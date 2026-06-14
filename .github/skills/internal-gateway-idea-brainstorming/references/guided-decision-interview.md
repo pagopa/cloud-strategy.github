@@ -5,12 +5,15 @@ Use this reference when `internal-gateway-idea-brainstorming` needs the exact pa
 ## Pacing Rules
 
 1. If the request is already concrete (file edit, command run, validator run, or direct implementation), emit `Specialization Checkpoint: waiting`, ask whether the user is sure to keep this owner, explain why a specialized owner is safer, and recommend the next owner before continuing.
-1. Inspect repository evidence before asking the user. Use files, paths, commands, and existing repository decisions first.
+1. Run a bounded evidence pass before asking the user. Use the smallest risk-ordered repository evidence first (files, paths, commands, and existing decisions).
+1. When authoritative platform semantics control the decision, verify them early inside the bounded evidence pass.
 1. Maintain a compact decision ledger ordered by dependency. Resolve prerequisite branches before dependent branches.
+1. Before the first numbered block, emit a compact facts/options summary grounded in the bounded evidence pass.
 1. Load `grill-me`, then immediately ask one mandatory Idea Gate 0 numbered question block. Order unresolved decisions by dependency, and include at least one human confirmation question when repository evidence appears complete.
 1. For each numbered question, include a recommendation, rationale, and explicit default when useful.
 1. Treat visible recommendations as accepted unless the user overrides them by question number or gives different direction.
 1. Record accepted defaults and overrides in the decision ledger before advancing.
+1. Preserve intent traceability in the ledger by keeping original intent and emerged requirements separate; do not restate emerged constraints as original intent.
 1. After the user's bulk response, declare Idea Gate 0 as `grill-me required` or `grill-me satisfied`. Ask another numbered question block only for unresolved ambiguity, dependent follow-up decisions, or reopened branches.
 1. Do not treat branch confirmations as phase-transition checkpoints.
 1. After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, summarize the compact decision ledger and declare `Interview Gate 1: ready-for-critical` only when assumptions/defaults are accepted, no ledger contradictions remain, and the validation path is identified.

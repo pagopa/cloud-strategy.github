@@ -18,6 +18,16 @@ def main() -> int:
         "critical": "internal-gateway-critical-master" in skill_text,
         "planning": "internal-gateway-writing-plans" in skill_text,
         "stop_before_execution": "stop before execution" in skill_text,
+        "bounded_evidence_pass": "bounded evidence pass" in skill_text
+        and "bounded evidence pass" in reference_text
+        and "bounded evidence pass" in runtime_text,
+        "facts_options_summary": "facts/options summary" in skill_text
+        and "facts/options summary" in reference_text
+        and "facts/options" in runtime_text
+        and "summary grounded in evidence" in runtime_text,
+        "intent_traceability": "original intent and emerged requirements" in skill_text
+        and "original intent and emerged requirements" in reference_text
+        and "original intent and emerged requirements" in runtime_text,
         "plan_approval_gate": "Plan Approval Gate 3" in skill_text
         and "Plan Approval Gate 3" in reference_text,
         "handoff_gate_4": "Handoff Gate 4" in skill_text and "Handoff Gate 4" in reference_text,

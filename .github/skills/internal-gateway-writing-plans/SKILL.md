@@ -71,16 +71,18 @@ can provide.
 ## Workflow
 
 1. Decide: retained plan or chat.
-2. Choose folder name and write `01-change-summary.md` in Italian.
-3. Write `02-source-item-ledger.md` with profile, recommended consumer, and
+2. For new plans, run bundle-local `init` first to create the scaffold.
+3. Choose folder name and write `01-change-summary.md` in Italian.
+4. Write `02-source-item-ledger.md` with profile, recommended consumer, and
    source-item coverage.
-4. Run the clarification gate when user decisions remain.
-5. Choose profile and consumer together.
-6. For `extended`, write `04-implementation-contract.md`.
-7. Write executable numbered files in order.
-8. Create `questions.md` with `- none` or open user-only decisions.
-9. Run scope challenge and plan review gate for non-trivial plans.
-10. Run `handoff-check`; execute only when ready.
+5. Run the clarification gate when user decisions remain.
+6. Choose profile and consumer together.
+7. For `extended`, write `04-implementation-contract.md`.
+8. Write executable numbered files in order.
+9. Create `questions.md` with `- none` or open user-only decisions.
+10. Run scope challenge and plan review gate for non-trivial plans.
+11. Run `audit` first, then run `handoff-check`; execute only when ready.
+12. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
 
 ## Validation
 

@@ -96,6 +96,20 @@ def test_gateway_compliance_audit_contract_is_explicit() -> None:
     assert "stdlib-only CLI launcher" in executing_text
 
 
+def test_critical_master_claim_discipline_contract() -> None:
+    critical_text = read_text(
+        ".github/skills/internal-gateway-critical-master/SKILL.md"
+    )
+
+    assert "Claim Discipline" in critical_text
+    assert "confirmed" in critical_text
+    assert "inference" in critical_text
+    assert "estimate" in critical_text
+    assert "unsupported numeric precision" in critical_text
+    assert "original intent" in critical_text
+    assert "emerged requirements" in critical_text
+
+
 def test_gateway_wrappers_route_compact_and_extended_to_execute_plans() -> None:
     simple_wrapper = read_text(
         ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
@@ -129,3 +143,18 @@ def test_simple_gateway_readiness_brief_and_approval_gate_contract() -> None:
     assert "compact focused `grill-me` block" in clarification_text
     assert "internal-gateway-critical-master" in clarification_text
     assert "material risk" in clarification_text
+
+
+def test_writing_plans_scaffold_first_and_audit_early_contract() -> None:
+    writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
+    runtime_text = read_text(
+        ".github/skills/internal-gateway-writing-plans/agents/openai.yaml"
+    )
+
+    assert "run bundle-local `init` first" in writing_text
+    assert "Run `audit` first, then run `handoff-check`" in writing_text
+    assert "token warnings as review inputs" in writing_text
+    assert "init scaffold first" in runtime_text
+    assert "audit first" in runtime_text
+    assert "handoff-check" in runtime_text
+    assert "second" in runtime_text
