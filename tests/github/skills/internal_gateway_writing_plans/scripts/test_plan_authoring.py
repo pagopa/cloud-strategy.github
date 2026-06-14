@@ -66,9 +66,7 @@ def _write_extended_plan(plan_folder: Path) -> None:
     _write_compact_plan(plan_folder)
     ledger_text = (plan_folder / "02-source-item-ledger.md").read_text(encoding="utf-8")
     (plan_folder / "02-source-item-ledger.md").write_text(
-        ledger_text.replace(
-            "compact", "extended"
-        ),
+        ledger_text.replace("compact", "extended"),
         encoding="utf-8",
     )
     summary_path = plan_folder / "01-change-summary.md"

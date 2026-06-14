@@ -411,7 +411,9 @@ def test_github_catalog_validation_compact_outputs_bounded_summary(
 ) -> None:
     initialize_governance_repo(tmp_path, with_inventory=False)
 
-    def fake_run(command: list[str], cwd: Path, check: bool, **kwargs) -> SimpleNamespace:
+    def fake_run(
+        command: list[str], cwd: Path, check: bool, **kwargs
+    ) -> SimpleNamespace:
         assert check is False
         assert Path(cwd) == tmp_path
         assert command[0] == "make"

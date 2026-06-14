@@ -61,9 +61,13 @@ def done_files(plan_folder: Path) -> list[Path]:
     return sorted(plan_folder.glob("done-*.md"))
 
 
-def resolve_plan_state_marker(plan_folder: Path) -> tuple[Path | None, str | None, list[str]]:
+def resolve_plan_state_marker(
+    plan_folder: Path,
+) -> tuple[Path | None, str | None, list[str]]:
     violations: list[str] = []
-    named_markers = sorted(path for path in plan_folder.glob("*-plan-state.md") if path.is_file())
+    named_markers = sorted(
+        path for path in plan_folder.glob("*-plan-state.md") if path.is_file()
+    )
 
     if len(named_markers) > 1:
         violations.append(f"{plan_folder} has multiple <STATE>-plan-state.md markers")
@@ -88,7 +92,9 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
 
     for folder in sorted(path for path in root.iterdir() if path.is_dir()):
         folder_done_files = done_files(folder)
-        plan_state_path, marker_state, marker_violations = resolve_plan_state_marker(folder)
+        plan_state_path, marker_state, marker_violations = resolve_plan_state_marker(
+            folder
+        )
         violations.extend(marker_violations)
 
         if not folder_done_files and plan_state_path is None:
@@ -104,16 +110,18 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
             if state_match is None:
                 violations.append(f"{plan_state_path} is missing State")
             elif state_match.group(1).strip() != "DONE":
-                violations.append(
-                    f"{plan_state_path} must declare State: DONE"
-                )
+                violations.append(f"{plan_state_path} must declare State: DONE")
 
             if marker_state and marker_state != "DONE":
                 violations.append(
                     f"{plan_state_path} must encode DONE state in filename"
                 )
 
-            if marker_state and state_match and state_match.group(1).strip().upper() != marker_state:
+            if (
+                marker_state
+                and state_match
+                and state_match.group(1).strip().upper() != marker_state
+            ):
                 violations.append(
                     f"{plan_state_path} filename state does not match declared State"
                 )
@@ -121,9 +129,7 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
             if continuation_match is None:
                 violations.append(f"{plan_state_path} is missing Continuation")
             elif continuation_match.group(1).strip() != "none":
-                violations.append(
-                    f"{plan_state_path} must declare Continuation: none"
-                )
+                violations.append(f"{plan_state_path} must declare Continuation: none")
             continue
 
         active_files = numbered_plan_files(folder)

@@ -120,9 +120,7 @@ def test_build_sync_plan_ships_source_instruction_family(
     plan = build_sync_plan(source_root, target_root)
     planned_paths = {operation.path for operation in plan.operations}
 
-    assert (
-        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" in planned_paths
-    )
+    assert f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" in planned_paths
 
 
 def test_build_sync_plan_updates_target_instructions_and_preserves_local(
@@ -978,7 +976,7 @@ def test_apply_sync_plan_merges_vscode_settings_in_jsonc_file(tmp_path: Path) ->
         '  "python.testing.pytestEnabled": true,\n'
         '  "github.copilot.chat.codeGeneration.useInstructionFiles": true,\n'
         '  "chat.instructionsFilesLocations": {\n'
-        '    // local override\n'
+        "    // local override\n"
         '    ".github/instructions": true,\n'
         '    "./team": true,\n'
         "  },\n"

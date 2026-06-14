@@ -34,7 +34,10 @@ def test_executing_plans_accepts_compact_and_extended_consumers() -> None:
     assert "approved `compact`" in executing_text
     assert "approved `extended`" in executing_text
     assert "infer the execution strategy" in executing_text
-    assert "Reject `compact` folders outside the `mini-plan-*` convention" in executing_text
+    assert (
+        "Reject `compact` folders outside the `mini-plan-*` convention"
+        in executing_text
+    )
     assert "mandatory requirements that are applicable" in executing_text
     assert "Block item closure and block `SHIPPED`" in executing_text
 
@@ -66,7 +69,11 @@ def test_wrapper_prompts_respect_compact_and_extended_consumers() -> None:
     assert "Do not" in writing_wrapper
     assert "best execution path" in writing_wrapper
     assert "validation path" in writing_wrapper
-    assert "Route approved retained-plan execution to internal-gateway-execute-plans" in simple_wrapper
     assert (
-        "approved compact mini-plan-* plans and approved extended plans" in execute_wrapper
+        "Route approved retained-plan execution to internal-gateway-execute-plans"
+        in simple_wrapper
+    )
+    assert (
+        "approved compact mini-plan-* plans and approved extended plans"
+        in execute_wrapper
     )

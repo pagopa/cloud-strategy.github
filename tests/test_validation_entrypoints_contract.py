@@ -95,7 +95,10 @@ def test_graphify_wrapper_shortcut_is_removed_from_validation_wrappers() -> None
 def test_runner_dispatch_includes_diagnostic_cli_aliases() -> None:
     runner_text = read_text(".github/scripts/run.sh")
 
-    assert "analyze_copilot_prompt_exports|analyze_copilot_prompt_exports.py" in runner_text
+    assert (
+        "analyze_copilot_prompt_exports|analyze_copilot_prompt_exports.py"
+        in runner_text
+    )
     assert "analyze_copilot_debug_logs|analyze_copilot_debug_logs.py" in runner_text
     assert "benchmark_skill_tokens|benchmark_skill_tokens.py" in runner_text
 
@@ -113,6 +116,9 @@ def test_code_analysis_workflow_smoke_tests_documented_sync_wrappers() -> None:
 def test_code_analysis_workflow_smoke_tests_runner_diagnostic_clis() -> None:
     workflow_text = read_text(".github/workflows/_code-analysis.yml")
 
-    assert "./.github/scripts/run.sh analyze_copilot_prompt_exports --help" in workflow_text
+    assert (
+        "./.github/scripts/run.sh analyze_copilot_prompt_exports --help"
+        in workflow_text
+    )
     assert "./.github/scripts/run.sh analyze_copilot_debug_logs --help" in workflow_text
     assert "./.github/scripts/run.sh benchmark_skill_tokens --help" in workflow_text

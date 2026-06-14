@@ -19,7 +19,9 @@ def run_script(*args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_snapshot_writes_manifest_and_uses_relative_resource_ids(tmp_path: Path) -> None:
+def test_snapshot_writes_manifest_and_uses_relative_resource_ids(
+    tmp_path: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     input_file = repo / "sample.txt"

@@ -100,9 +100,7 @@ def _write_lightweight_plan_state(
 ) -> None:
     marker_name = f"{state}-plan-state.md"
     (plan_folder / marker_name).write_text(
-        "Plan State\n"
-        f"State: {state}\n"
-        f"Continuation: {continuation}\n",
+        f"Plan State\nState: {state}\nContinuation: {continuation}\n",
         encoding="utf-8",
     )
 
@@ -289,7 +287,9 @@ def test_completion_rejects_open_statuses(tmp_path: Path) -> None:
 def test_completion_lightweight_rejects_not_shipped_state(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_compact_plan(plan_folder)
-    _write_lightweight_plan_state(plan_folder, state="PARTIAL", continuation="continuing")
+    _write_lightweight_plan_state(
+        plan_folder, state="PARTIAL", continuation="continuing"
+    )
 
     result = run_cli("completion-check", plan_folder)
 
@@ -297,7 +297,9 @@ def test_completion_lightweight_rejects_not_shipped_state(tmp_path: Path) -> Non
     assert "not-done-state" in result.stdout
 
 
-def test_completion_lightweight_rejects_nonterminal_continuation(tmp_path: Path) -> None:
+def test_completion_lightweight_rejects_nonterminal_continuation(
+    tmp_path: Path,
+) -> None:
     plan_folder = tmp_path / "plan"
     _write_compact_plan(plan_folder)
     _write_lightweight_plan_state(plan_folder, continuation="waiting")

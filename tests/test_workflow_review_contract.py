@@ -120,10 +120,11 @@ def test_gateway_wrappers_route_compact_and_extended_to_execute_plans() -> None:
     completion_reference = read_text(
         ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
     )
-    assert "Route approved retained-plan execution to internal-gateway-execute-plans" in simple_wrapper
     assert (
-        "infer the best execution strategy from plan profile" in execute_wrapper
+        "Route approved retained-plan execution to internal-gateway-execute-plans"
+        in simple_wrapper
     )
+    assert "infer the best execution strategy from plan profile" in execute_wrapper
     assert (
         "`compact` and `extended` execution both use `internal-gateway-execute-plans`"
         in completion_reference.lower()
