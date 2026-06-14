@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from home_syncing import reconcile_manifest_entry_after_bisync_copy
-from sync_output import build_compact_bisync_output
+from sync_output import build_compact_bisync_output, render_bisync_report
 
 IGNORED_SYNC_PARTS: tuple[str, ...] = (".venv", "__pycache__", ".pytest_cache")
 IGNORED_SYNC_SUFFIXES: tuple[str, ...] = (".pyc", ".pyo")
@@ -265,9 +265,10 @@ def build_bisync_plan(
                 BisyncDriftEntry(
                     skill_name=skill_name,
                     drift_type="only-repo",
+                    direction="repo-to-home",
                     repo_path=repo_path.as_posix(),
                     home_path=home_path.as_posix(),
-                    blocked_codes=["bisync-only-repo"],
+                    repo_hash=hash_bundle(repo_path),
                 )
             )
             continue
@@ -391,7 +392,11 @@ def apply_bisync_plan(
         }
         return plan
 
-    drifts_to_resolve = [d for d in plan.drifts if d.drift_type == "drift"]
+    drifts_to_resolve = [
+        d
+        for d in plan.drifts
+        if d.drift_type == "drift" or (d.drift_type == "only-repo" and d.direction == "repo-to-home")
+    ]
     for drift in drifts_to_resolve:
         if drift.direction == "repo-to-home":
             src = Path(drift.repo_path)
@@ -549,6 +554,9 @@ def _emit_bisync_output(plan: BisyncPlan, format_name: str) -> None:
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
+    if format_name == "report":
+        print(render_bisync_report(payload), end="")
+        return
 
     if not plan.drifts:
         print("\u2705 No drift detected. Source and home are in sync.")
@@ -601,7 +609,7 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     )
     plan_parser.add_argument(
         "--format",
-        choices=["text", "json", "compact"],
+        choices=["text", "json", "compact", "report"],
         default="text",
         help="Output format.",
     )
@@ -614,7 +622,7 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     )
     apply_parser.add_argument(
         "--format",
-        choices=["text", "json", "compact"],
+        choices=["text", "json", "compact", "report"],
         default="text",
         help="Output format.",
     )

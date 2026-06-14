@@ -459,6 +459,31 @@ def test_triple_apply_skip_plan_sequence_is_convergent(tmp_path: Path) -> None:
     )
 
 
+def test_bisync_apply_creates_home_bundle_for_only_repo_skill(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    (home_root / ".agents/skills").mkdir(parents=True, exist_ok=True)
+    init_git_repo(source_root)
+    commit_all(source_root, "initial source bundle")
+
+    plan = build_bisync_plan(source_root, home_root, mode="plan")
+    repo_only = next((d for d in plan.drifts if d.skill_name == "demo-skill"), None)
+
+    assert repo_only is not None
+    assert repo_only.drift_type == "only-repo"
+    assert repo_only.direction == "repo-to-home"
+    assert repo_only.blocked_codes == []
+
+    result = apply_bisync_plan(source_root, home_root, plan)
+    assert result.blocked_codes == []
+    assert result.verification["status"] == "converged"
+    assert (home_root / ".agents/skills/demo-skill/SKILL.md").is_file()
+
+    post_plan = build_bisync_plan(source_root, home_root, mode="plan")
+    assert post_plan.drifts == []
+
+
 def test_repo_to_home_bisync_refreshes_install_manifest(tmp_path: Path) -> None:
     source_root = tmp_path / "source"
     home_root = tmp_path / "home"

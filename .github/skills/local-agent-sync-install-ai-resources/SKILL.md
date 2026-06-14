@@ -10,9 +10,9 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 - None.
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
-Canonical command examples use `python3 ./.github/scripts/sync_home_ai_resources.py --format compact`.
+Canonical command examples use `python3 ./.github/scripts/sync_home_ai_resources.py --format report`.
 
-The paired agent is a thin UX wrapper; this skill owns all business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. The user-visible report must stay table-first: blockers explain why the run stopped, plan output explains what will change and why, and apply output explains exactly what changed and how it was verified. Keep detailed tables and checklists in `references/`. Keep deterministic execution helpers in `scripts/` so the skill remains portable as a direct-copy bundle.
+The paired agent is a thin UX wrapper; this skill owns business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. Keep user-visible output deterministic and table-first, with fixed sections for `Current State`, `Differences Or Planned Work`, `Actions Completed`, `Blockers And Skips`, `Validation`, `Remaining Work`, and `Next Action`. Keep detailed checklists in `references/` and deterministic rendering logic in `scripts/`.
 
 ## When to use
 
@@ -38,14 +38,14 @@ Every mode has exactly one command. Do not infer the mode, do not skip blockers,
 | User request | Lane | Command |
 | --- | --- | --- |
 | Generic `sync` without a mode | Run install `plan` for `skills` first, then run `bisync plan` | See `Default Sync Sequence` below |
-| `bisync plan` | Bidirectional drift detection (read-only) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync plan --home-root ~ --format compact` |
-| `bisync apply` | Bidirectional drift resolution (writes to both sides) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync apply --home-root ~ --format compact` |
-| `plan` | Install lane dry run | `python3 ./.github/scripts/sync_home_ai_resources.py plan --targets <targets> --home-root ~ --format compact` |
-| `audit` | Compare source, manifest, and target paths | `python3 ./.github/scripts/sync_home_ai_resources.py audit --targets <targets> --home-root ~ --format compact` |
-| `doctor` | Readiness checks for runtime roots and support matrix | `python3 ./.github/scripts/sync_home_ai_resources.py doctor --targets <targets> --home-root ~ --format compact` |
-| `apply` | Install lane materialization | `python3 ./.github/scripts/sync_home_ai_resources.py apply --targets <targets> --home-root ~ --format compact` |
+| `bisync plan` | Bidirectional drift detection (read-only) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync plan --home-root ~ --format report` |
+| `bisync apply` | Bidirectional drift resolution (writes to both sides) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync apply --home-root ~ --format report` |
+| `plan` | Install lane dry run | `python3 ./.github/scripts/sync_home_ai_resources.py plan --targets <targets> --home-root ~ --format report` |
+| `audit` | Compare source, manifest, and target paths | `python3 ./.github/scripts/sync_home_ai_resources.py audit --targets <targets> --home-root ~ --format report` |
+| `doctor` | Readiness checks for runtime roots and support matrix | `python3 ./.github/scripts/sync_home_ai_resources.py doctor --targets <targets> --home-root ~ --format report` |
+| `apply` | Install lane materialization | `python3 ./.github/scripts/sync_home_ai_resources.py apply --targets <targets> --home-root ~ --format report` |
 
-For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh`, keep `--format compact` on model-facing runs, and omit `--home-root` (defaults to `$HOME`).
+For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh`, keep `--format report` on model-facing runs, and omit `--home-root` (defaults to `$HOME`).
 When the desired active runtimes change, pair `--retire-targets <targets>` with `--prune-managed` to remove runtime-specific managed copies and drop those targets from the manifest while keeping the remaining targets active.
 
 ### Default Sync Sequence
@@ -76,10 +76,10 @@ Stop and report when any of these occur:
 
 ### Output
 
-Machine-readable output is available as `--format compact` or `--format json`. Prefer `--format compact` for model-facing runs so the result stays bounded while preserving blockers, validation, `next_step`, `next_action`, and changed-resource evidence. Reserve `--format json` for explicit audit, durable file output, or debugging. The payload always includes:
+Deterministic report output is available as `--format report` and should be the default for user-facing runs. Machine-readable output remains available as `--format compact` or `--format json` for automation and debugging. The payload always includes:
 
 - `next_step`: human-readable next instruction (backward compatible).
-- `next_action`: structured object with `action`, `allowed`, `requires_explicit_approval`, `command`, and `reason`.
+Canonical command examples use `python3 ./.github/scripts/sync_home_ai_resources.py --format report`.
 
 Report `next_action` to the user. Do not execute `command` from `next_action` unless the user explicitly asks.
 
@@ -103,19 +103,20 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 ### Commands
 
 - `bisync plan`: detect drift (read-only). Reports `repo-to-home`, `home-to-repo`, `only-repo`, `only-home`, and `equal-mtime` entries, with explicit winner and blocker context.
-- `bisync apply`: resolve drift by copying the winner bundle to the loser side. Applies only `repo-to-home` and `home-to-repo` entries. Blocks on all other cases.
+- `bisync apply`: resolve drift by copying the winner bundle to the loser side. Applies `repo-to-home`, `home-to-repo`, and valid `only-repo` creation entries. Blocks on `only-home` and `equal-mtime`.
 
 ### Safety Gates
 
 - Blocks `apply` when the source repository has uncommitted or untracked changes.
-- Blocks `apply` when any `only-repo`, `only-home`, or `equal-mtime` entry exists.
+- Blocks `apply` when any `only-home` or `equal-mtime` entry exists.
 - Blocks `apply` when post-copy hash verification fails.
 - Blocks `apply` when post-apply plan still shows residual drift.
 - Excludes `local-agent-sync-*` bundles and runtime artifacts (`.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`) from scanning and copying.
 
 ### Conflict Resolution
-
-- `only-repo` and `only-home`: manual intervention required. Decide which side to keep or remove.
+For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh`, keep `--format report` on model-facing runs, and omit `--home-root` (defaults to `$HOME`).
+- `only-repo`: when not excluded, `bisync apply` can create the bundle in home from the repository side.
+- `only-home`: manual intervention required. Decide whether to keep it only in home, remove it, or add it to the repository.
 - `equal-mtime`: hashes differ but mtime is equal. Manual decision required because the winner cannot be determined from timestamps alone.
 
 ## Reporting Contract
@@ -180,7 +181,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 ## Bundled Automation
 
-- Prefer `python3 ./.github/scripts/sync_home_ai_resources.py` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior, and keep `--format compact` on model-facing runs.
+- Prefer `python3 ./.github/scripts/sync_home_ai_resources.py` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior, and keep `--format report` on model-facing runs.
 - Use `scripts/run.sh` when a portable skill-local environment is needed; it installs the locked `PyYAML` dependency from `scripts/requirements.txt`.
 - Keep library behavior inside `scripts/home_syncing.py`, bisync logic inside `scripts/bisync_skills.py`, and reference loading inside `scripts/home_sync_contract.py`.
 
@@ -190,7 +191,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 - Block managed overwrite when the target content diverged from the last recorded manifest.
 - Block stale managed delete when the manifest entry is invalid, escapes the expected runtime root, or the file content drifted from the recorded hash.
 - Block unsafe home paths, unsupported symlink hops, missing target roots without explicit create approval, and undocumented runtime claims.
-- Block `bisync apply` on dirty repository, `only-repo`, `only-home`, `equal-mtime`, and post-apply verification failure.
+- Block `bisync apply` on dirty repository, `only-home`, `equal-mtime`, and post-apply verification failure.
 - Keep the canonical error taxonomy in `references/error-codes.md`.
 - Keep the doctor checklist in `references/doctor-checks.md`.
 
@@ -206,7 +207,7 @@ When plan or audit reports blocked paths, resolve them before apply:
 
 When `bisync plan` reports blocker entries, resolve them before `bisync apply`:
 
-- `bisync-only-repo`: the skill exists only in the source repo. Copy it into home manually (preferred when the skill is newer in repo) or decide the repo-only status is intentional and skip it.
+- `only-repo`: this is actionable during explicit `bisync apply` and creates the missing home bundle from the repository side when the bundle is valid and not excluded.
 - `bisync-only-home`: the skill exists only in the home directory. Remove from home manually or decide to add to repo.
 - `bisync-equal-mtime`: hashes differ but mtime is equal for both sides. Decide which side wins and touch the winner to advance mtime.
 - `bisync-repo-dirty`: repository has uncommitted or untracked changes. Commit or stash, or run `bisync apply` from a clean detached worktree by setting `--source-root` to that clean checkout.

@@ -28,7 +28,7 @@ from home_syncing import (
     write_doctor_snapshot,
     write_plan_snapshot,
 )
-from sync_output import build_compact_install_output
+from sync_output import build_compact_install_output, render_install_report
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -74,7 +74,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         )
         cmd_parser.add_argument(
             "--format",
-            choices=["text", "json", "compact"],
+            choices=["text", "json", "compact", "report"],
             default="text",
             help="Output format.",
         )
@@ -100,7 +100,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     bisync_plan.add_argument(
         "--format",
-        choices=["text", "json", "compact"],
+        choices=["text", "json", "compact", "report"],
         default="text",
         help="Output format.",
     )
@@ -113,7 +113,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     bisync_apply.add_argument(
         "--format",
-        choices=["text", "json", "compact"],
+        choices=["text", "json", "compact", "report"],
         default="text",
         help="Output format.",
     )
@@ -253,6 +253,10 @@ def emit_output(
 
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
+        return
+
+    if format_name == "report":
+        print(render_install_report(payload), end="")
         return
 
     mode = payload.get("mode", "plan")

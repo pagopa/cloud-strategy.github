@@ -325,7 +325,7 @@ def test_bisync_plan_emits_compact_projection(
     assert payload["mode"] == "plan"
     assert "status" in payload
     assert payload["drift_total"] == 2
-    assert payload["direction_counts"] == {"repo_to_home": 0, "home_to_repo": 0}
+    assert payload["direction_counts"] == {"repo_to_home": 1, "home_to_repo": 0}
     assert payload["bucket_counts"] == {
         "only_repo": 1,
         "only_home": 1,
@@ -338,7 +338,7 @@ def test_bisync_plan_emits_compact_projection(
             "type": "only-home",
         },
         {
-            "blocked_codes": ["bisync-only-repo"],
+            "direction": "repo-to-home",
             "skill": "repo-only",
             "type": "only-repo",
         },
@@ -485,7 +485,7 @@ def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
     assert "Install sync is unidirectional: repo -> home only." in content
     assert "default `skills` target" in content
     assert "python3 ./.github/scripts/sync_home_ai_resources.py" in content
-    assert "--format compact" in content
+    assert "--format report" in content
     assert (
         "The `bisync` lane provides explicit bidirectional synchronization" in content
     )
@@ -600,3 +600,75 @@ def test_main_plan_compact_output_preserves_changed_resource_evidence(
     assert exit_code == 0
     assert payload["changed_resources"]
     assert any(item["action"] == "mkdir" for item in payload["changed_resources"])
+
+
+def test_main_plan_report_output_has_fixed_sections(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            retire_targets="",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="report",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "## Current State" in output
+    assert "## Differences Or Planned Work" in output
+    assert "## Actions Completed" in output
+    assert "## Blockers And Skips" in output
+    assert "## Validation" in output
+    assert "## Remaining Work" in output
+    assert "## Next Action" in output
+
+
+def test_bisync_plan_report_output_has_fixed_sections(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    source_root.mkdir()
+    home_root.mkdir()
+    write_file(source_root / ".github/skills/repo-only/SKILL.md", "# Repo only\n")
+    write_file(home_root / ".agents/skills/home-only/SKILL.md", "# Home only\n")
+
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="bisync",
+            bisync_command="plan",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            format="report",
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "## Current State" in output
+    assert "## Differences Or Planned Work" in output
+    assert "## Actions Completed" in output
+    assert "## Blockers And Skips" in output
+    assert "## Validation" in output
+    assert "## Remaining Work" in output
+    assert "## Next Action" in output

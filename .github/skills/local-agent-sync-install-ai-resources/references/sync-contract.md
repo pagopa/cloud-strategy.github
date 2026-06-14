@@ -65,7 +65,7 @@ Each `managed_resources[]` item should capture:
 
 ## Reporting Contract
 
-Text and JSON reporting should expose at least:
+Deterministic report output (`--format report`) and JSON reporting should expose at least:
 
 - `selected_targets`
 - `mode`
@@ -217,7 +217,9 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
      - `repo_mtime > home_mtime` -> `repo-to-home`
      - `home_mtime > repo_mtime` -> `home-to-repo`
      - `repo_mtime == home_mtime` -> `equal-mtime` blocker
-4. For skills only on one side, report `only-repo` or `only-home` blocker.
+4. For skills only on one side:
+  - report `only-repo` as an actionable repo-to-home creation candidate;
+  - report `only-home` as a blocker that requires manual review.
 
 ### Preflight
 
@@ -225,11 +227,11 @@ Before any write in `bisync apply`:
 
 1. Verify `git status --porcelain --untracked-files=all` on the source repository.
 2. Block `apply` if the repository is not clean.
-3. Block `apply` if any `only-repo`, `only-home`, or `equal-mtime` entry exists in the current plan.
+3. Block `apply` if any `only-home` or `equal-mtime` entry exists in the current plan.
 
 ### Apply
 
-- Process only `repo-to-home` and `home-to-repo` drift entries.
+- Process `repo-to-home`, `home-to-repo`, and actionable `only-repo` drift entries.
 - Copy the winner bundle (with runtime artifact exclusions) to the loser path.
 - Remove the loser directory before copying to ensure a clean replacement.
 - Verify the target hash matches the winner hash after copy.
