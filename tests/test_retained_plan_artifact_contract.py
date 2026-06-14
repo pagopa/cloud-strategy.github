@@ -64,7 +64,30 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
 
     for folder in sorted(path for path in root.iterdir() if path.is_dir()):
         folder_done_files = done_files(folder)
-        if not folder_done_files:
+        plan_state_path = folder / "plan-state.md"
+        if not folder_done_files and not plan_state_path.is_file():
+            continue
+
+        if plan_state_path.is_file() and not folder_done_files:
+            plan_state_text = plan_state_path.read_text(encoding="utf-8")
+            state_match = re.search(r"^State:\s*(.+)$", plan_state_text, re.MULTILINE)
+            continuation_match = re.search(
+                r"^Continuation:\s*(.+)$", plan_state_text, re.MULTILINE
+            )
+
+            if state_match is None:
+                violations.append(f"{plan_state_path} is missing State")
+            elif state_match.group(1).strip() != "SHIPPED":
+                violations.append(
+                    f"{plan_state_path} must declare State: SHIPPED"
+                )
+
+            if continuation_match is None:
+                violations.append(f"{plan_state_path} is missing Continuation")
+            elif continuation_match.group(1).strip() != "none":
+                violations.append(
+                    f"{plan_state_path} must declare Continuation: none"
+                )
             continue
 
         active_files = numbered_plan_files(folder)
@@ -138,10 +161,40 @@ def write_completed_plan_folder(root: Path) -> Path:
     return plan_folder
 
 
+def write_lightweight_completed_plan_folder(root: Path) -> Path:
+    plan_folder = root / "sample-plan"
+    plan_folder.mkdir()
+    (plan_folder / "01-change-summary.md").write_text(
+        "# Summary\n",
+        encoding="utf-8",
+    )
+    (plan_folder / "02-source-item-ledger.md").write_text(
+        "## Plan profile\ncompact\n",
+        encoding="utf-8",
+    )
+    (plan_folder / "03-execution.md").write_text(
+        "# Execution\n",
+        encoding="utf-8",
+    )
+    (plan_folder / "plan-state.md").write_text(
+        "Plan State\nState: SHIPPED\nContinuation: none\n",
+        encoding="utf-8",
+    )
+    return plan_folder
+
+
 def test_completed_retained_plan_validation_accepts_well_formed_folder(
     tmp_path: Path,
 ) -> None:
     write_completed_plan_folder(tmp_path)
+
+    assert completed_retained_plan_violations(tmp_path) == []
+
+
+def test_completed_retained_plan_validation_accepts_lightweight_folder(
+    tmp_path: Path,
+) -> None:
+    write_lightweight_completed_plan_folder(tmp_path)
 
     assert completed_retained_plan_violations(tmp_path) == []
 
@@ -171,6 +224,21 @@ def test_completed_retained_plan_validation_rejects_open_statuses(
 
     assert completed_retained_plan_violations(tmp_path) == [
         f"{plan_folder / 'evidence-envelope.md'} contains open completion status PENDING"
+    ]
+
+
+def test_completed_retained_plan_validation_rejects_lightweight_non_shipped(
+    tmp_path: Path,
+) -> None:
+    plan_folder = write_lightweight_completed_plan_folder(tmp_path)
+    (plan_folder / "plan-state.md").write_text(
+        "Plan State\nState: PARTIAL\nContinuation: continuing\n",
+        encoding="utf-8",
+    )
+
+    assert completed_retained_plan_violations(tmp_path) == [
+        f"{plan_folder / 'plan-state.md'} must declare State: SHIPPED",
+        f"{plan_folder / 'plan-state.md'} must declare Continuation: none",
     ]
 
 

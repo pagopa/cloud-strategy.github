@@ -29,16 +29,18 @@ completion report should include `Plan profile: compact` or
 
 | State | Criteria | Folder behavior | Continuation |
 | --- | --- | --- | --- |
-| `SHIPPED` | All in-scope ledger items are implemented or intentionally closed, validators passed, required evidence envelope coverage exists, no numbered plan files remain, and the completion report is filled. | Create matching `done-*` markers and remove numbered plan files only after the evidence envelope and report are stable. | `none` |
+| `SHIPPED` | All in-scope ledger items are implemented or intentionally closed, validators passed, and mandatory applicable evidence is verified. Closeout may use either full packaging (`done-*` + `evidence-envelope.md` + `completion-report.md`) or a lightweight marker (`plan-state.md` with `State: SHIPPED` and `Continuation: none`). | Full packaging removes numbered files only after evidence is stable. Lightweight marker keeps numbered plan files in place while recording an explicit closed state. | `none` |
 | `APPLIED_UNVERIFIED` | Edits were applied, but required validator, review, or evidence coverage is missing. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. | `continuing` or `waiting` |
 | `PARTIAL` | Some in-scope items remain incomplete or intentionally deferred. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. | `continuing` or `waiting` |
 | `BLOCKED` | A real blocker prevents correct continuation. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. Record the blocker and next-step package. | `waiting` |
 | `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. | Keep numbered plan files and the live ledger in place unless a later `SHIPPED` package supersedes the folder. Do not create new `done-*` markers for the rolled-back state. | `waiting` or `none` |
 | `CANCELLED` | Explicitly evidenced as `INTENTIONAL_NON_ACTION` with documented reason. Not a substitute for missing evidence. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. Record the cancellation rationale in the completion report. | `none` |
 
-`SHIPPED` requires passed validators, a completed report, no numbered plan files,
-and no open source-item ledger rows. Non-trivial retained plans also require an
-evidence envelope or equivalent item-level evidence for every requested or source item.
+`SHIPPED` requires passed validators and no open source-item ledger rows.
+Full-package `SHIPPED` requires a completed report, no numbered plan files, and
+an evidence envelope or equivalent item-level evidence for every requested or source item.
+Lightweight `SHIPPED` requires `plan-state.md` with explicit `State: SHIPPED`
+and `Continuation: none` and may keep numbered plan files in place.
 `SHIPPED` also requires that mandatory applicable skill requirements are verified;
 if mandatory applicable evidence is missing, use `APPLIED_UNVERIFIED`, `PARTIAL`,
 or `BLOCKED` and report the exact gap.

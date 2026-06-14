@@ -51,7 +51,7 @@ consumes approved `compact` and `extended` retained plans.
 - Block item closure and block `SHIPPED` whenever mandatory applicable requirements remain unverified.
 - Escalate architecture ownership conflicts, cross-owner skill conflicts, and undefined validation strategy.
 - Pressure-test boundary: a Lambda-owned hashed requirements file does not grant a separate stdlib-only CLI launcher permission to install that dependency set.
-- Only `SHIPPED` creates `done-*` markers or removes numbered plan files.
+- Only `SHIPPED` may create `done-*` markers or remove numbered plan files, or publish a lightweight `plan-state.md` marker with `State: SHIPPED` and `Continuation: none`.
 - Non-`SHIPPED` exits keep the live ledger and numbered files in place.
 
 ## Validation
@@ -63,7 +63,7 @@ consumes approved `compact` and `extended` retained plans.
 - `extended` retained plans include `04-implementation-contract.md` before executable work.
 - Mandatory applicable requirements are checked at item close and before `SHIPPED`.
 - Missing mandatory applicable evidence maps to a non-`SHIPPED` state.
-- `done-*` markers appear only during close packaging.
+- `done-*` markers appear only during full close packaging; lightweight closeout uses `plan-state.md` and may retain numbered files.
 
 ## Common failure modes
 

@@ -95,6 +95,17 @@ def _write_completed_plan(plan_folder: Path) -> None:
     )
 
 
+def _write_lightweight_plan_state(
+    plan_folder: Path, state: str = "SHIPPED", continuation: str = "none"
+) -> None:
+    (plan_folder / "plan-state.md").write_text(
+        "Plan State\n"
+        f"State: {state}\n"
+        f"Continuation: {continuation}\n",
+        encoding="utf-8",
+    )
+
+
 # inspect
 
 
@@ -195,9 +206,31 @@ def test_completion_check_shipped_ready(tmp_path: Path) -> None:
     assert result.returncode == 0
 
 
+def test_completion_check_lightweight_shipped_ready(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(plan_folder)
+
+    result = run_cli("completion-check", plan_folder)
+
+    assert result.returncode == 0
+
+
 def test_completion_check_shipped_json(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_completed_plan(plan_folder)
+    result = run_cli("completion-check", plan_folder, "--format", "json")
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["ready"] is True
+
+
+def test_completion_check_lightweight_json(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(plan_folder)
+
     result = run_cli("completion-check", plan_folder, "--format", "json")
 
     assert result.returncode == 0
@@ -250,6 +283,28 @@ def test_completion_rejects_open_statuses(tmp_path: Path) -> None:
     result = run_cli("completion-check", plan_folder)
     assert result.returncode != 0
     assert "open-status" in result.stdout
+
+
+def test_completion_lightweight_rejects_not_shipped_state(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(plan_folder, state="PARTIAL", continuation="continuing")
+
+    result = run_cli("completion-check", plan_folder)
+
+    assert result.returncode != 0
+    assert "not-shipped-state" in result.stdout
+
+
+def test_completion_lightweight_rejects_nonterminal_continuation(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(plan_folder, continuation="waiting")
+
+    result = run_cli("completion-check", plan_folder)
+
+    assert result.returncode != 0
+    assert "nonterminal-continuation" in result.stdout
 
 
 def test_completion_rejects_not_shipped_state(tmp_path: Path) -> None:

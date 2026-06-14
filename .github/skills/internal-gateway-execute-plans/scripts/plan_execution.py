@@ -35,6 +35,11 @@ COMPLETION_REPORT_FIELDS = (
     "Follow-up suggestions:",
 )
 
+PLAN_STATE_REQUIRED_FIELDS = (
+    "State:",
+    "Continuation:",
+)
+
 OPEN_STATUSES = frozenset({"PENDING", "PARTIAL", "NOT_DONE", "UNVERIFIABLE", "BLOCKED"})
 
 LEDGER_REQUIRED_FIELDS = (
@@ -238,6 +243,46 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
         _emit_findings(profile_findings, format)
         return 1
 
+    plan_state_path = plan_folder / "plan-state.md"
+    envelope_path = plan_folder / "evidence-envelope.md"
+    report_path = plan_folder / "completion-report.md"
+
+    # Lightweight closeout path: explicit state marker without done-* packaging.
+    if plan_state_path.is_file() and not dones and not envelope_path.is_file() and not report_path.is_file():
+        plan_state_text = plan_state_path.read_text(encoding="utf-8")
+        for field in PLAN_STATE_REQUIRED_FIELDS:
+            if field not in plan_state_text:
+                findings.append(
+                    Finding(
+                        code="missing-plan-state-field",
+                        message=f"plan-state.md is missing {field}",
+                    )
+                )
+
+        state_match = re.search(r"^State:\s*(.+)$", plan_state_text, re.MULTILINE)
+        continuation_match = re.search(
+            r"^Continuation:\s*(.+)$", plan_state_text, re.MULTILINE
+        )
+
+        if state_match and state_match.group(1).strip() != "SHIPPED":
+            findings.append(
+                Finding(
+                    code="not-shipped-state",
+                    message="plan-state.md does not declare State: SHIPPED",
+                )
+            )
+
+        if continuation_match and continuation_match.group(1).strip() != "none":
+            findings.append(
+                Finding(
+                    code="nonterminal-continuation",
+                    message="plan-state.md must declare Continuation: none for SHIPPED readiness",
+                )
+            )
+
+        _emit_findings(findings, format)
+        return 0 if not any(f.severity == "ERROR" for f in findings) else 1
+
     # Active numbered files must be gone for SHIPPED
     if active:
         findings.append(
@@ -258,7 +303,6 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
         )
 
     # Evidence envelope
-    envelope_path = plan_folder / "evidence-envelope.md"
     if not envelope_path.is_file():
         findings.append(
             Finding(code="missing-evidence-envelope", message="evidence-envelope.md is missing")
@@ -286,7 +330,6 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
                 )
 
     # Completion report
-    report_path = plan_folder / "completion-report.md"
     if not report_path.is_file():
         findings.append(
             Finding(code="missing-completion-report", message="completion-report.md is missing")
