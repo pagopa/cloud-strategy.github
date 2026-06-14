@@ -3,5 +3,13 @@
     "tests"
   ],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  // Local-only VS Code overrides (not propagated to consumers via sync).
+  // Disable .github/copilot-instructions.md in VS Code chat. GitHub.com is unaffected.
+  "github.copilot.chat.codeGeneration.useInstructionFiles": false,
+  // Disable the .github/instructions folder in VS Code (includes the code-review baseline).
+  // On GitHub.com, Copilot code review still uses copilot-code-review.instructions.md.
+  "chat.instructionsFilesLocations": {
+    ".github/instructions": false
+  }
 }
