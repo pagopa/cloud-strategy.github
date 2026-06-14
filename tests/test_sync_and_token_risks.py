@@ -947,6 +947,172 @@ def test_apply_sync_plan_mirrors_shared_repo_hygiene_files(
     ) == "name: pre-commit\n"
 
 
+def test_build_sync_plan_ensures_vscode_settings_when_missing(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("ensure", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_apply_sync_plan_merges_vscode_settings_in_jsonc_file(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        "  // keep local test settings\n"
+        '  "python.testing.pytestEnabled": true,\n'
+        '  "github.copilot.chat.codeGeneration.useInstructionFiles": true,\n'
+        '  "chat.instructionsFilesLocations": {\n'
+        '    // local override\n'
+        '    ".github/instructions": true,\n'
+        '    "./team": true,\n'
+        "  },\n"
+        "}\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("ensure", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+    apply_sync_plan(plan)
+    merged = (target_root / ".vscode/settings.json").read_text(encoding="utf-8")
+
+    assert '"python.testing.pytestEnabled": true' in merged
+    assert '"github.copilot.chat.codeGeneration.useInstructionFiles": false' in merged
+    assert '".github/instructions": false' in merged
+    assert '"./team": true' in merged
+    assert "// keep local test settings" in merged
+    assert "// local override" in merged
+
+
+def test_build_sync_plan_marks_vscode_settings_unchanged_when_aligned(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        '  "github.copilot.chat.codeGeneration.useInstructionFiles": false,\n'
+        '  "chat.instructionsFilesLocations": {\n'
+        '    ".github/instructions": false\n'
+        "  },\n"
+        "}\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("unchanged", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_build_sync_plan_blocks_vscode_settings_on_malformed_jsonc(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        '  "github.copilot.chat.codeGeneration.useInstructionFiles": true,\n'
+        '  "chat.instructionsFilesLocations": {\n'
+        '    ".github/instructions": true,\n'
+        "\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("manual", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_build_sync_plan_blocks_vscode_settings_on_duplicate_relevant_keys(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        '  "chat.instructionsFilesLocations": {\n'
+        '    ".github/instructions": true,\n'
+        '    ".github/instructions": false\n'
+        "  }\n"
+        "}\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("manual", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_apply_sync_manifest_tracks_vscode_settings_without_file_hash(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / "VERSION", "9.9.9\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    manifest_path = apply_sync_plan(plan)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert ".vscode/settings.json" not in manifest["managed_hashes"]
+    assert (
+        manifest["managed_settings"][
+            "github.copilot.chat.codeGeneration.useInstructionFiles"
+        ]
+        is False
+    )
+    assert (
+        manifest["managed_settings"][
+            "chat.instructionsFilesLocations/.github/instructions"
+        ]
+        is False
+    )
+
+
 def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     repeated_lines = "\n".join(
         [

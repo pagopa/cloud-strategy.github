@@ -10,6 +10,7 @@ Use this format for new updates:
 
 ## 2026-06-14
 
+- Added field-level consumer sync for `.vscode/settings.json` so only `github.copilot.chat.codeGeneration.useInstructionFiles=false` and `chat.instructionsFilesLocations[".github/instructions"]=false` are enforced with JSONC-aware merge semantics, explicit malformed/duplicate-key blockers, and manifest tracking that stays settings-scoped instead of whole-file ownership.
 - Reintroduced the source-managed `.github/instructions/*.instructions.md` family as governed review-only projections, preserving existing `applyTo` scopes while removing procedural depth and retaining only evidenced, review-critical checks.
 - Added `excludeAgent: "cloud-agent"` across the entire reintroduced instruction family and standardized the required review-only opening sentence immediately after frontmatter.
 - Updated deprecation policy language in `.github/DEPRECATION.md` to keep the historical note about retiring the broad old instruction model while reflecting the controlled reintroduction of the review-only family.

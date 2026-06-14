@@ -20,6 +20,11 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 - `.github/agents/**`
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
 
+Apply field-level management to `.vscode/settings.json` only for these keys:
+
+- `github.copilot.chat.codeGeneration.useInstructionFiles: false`
+- `chat.instructionsFilesLocations[".github/instructions"]: false`
+
 Do not sync `README.md`, changelogs, other workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
 Use `.github/templates/` only as standards-repository scaffold source material; do not mirror it into consumer repositories as an operational catalog family.
 Do not sync consumer-facing resources whose file or directory name starts with `internal-sync-`; those remain source-only operational controls for the standards repository.
@@ -38,6 +43,7 @@ When a consumer-local creator depends on shared runtime-critical rules, keep a s
 - Ensure target root `LESSONS_LEARNED.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
 - Ensure the target root `.gitignore` contains an ignore entry for `tmp/superpowers/`.
 - Treat the `.gitignore` update as target-local hygiene: ensure the required ignore entry exists without mirroring the source repository `.gitignore`.
+- Keep `.vscode/settings.json` consumer-owned as a file: merge only the two managed Copilot keys, preserve unrelated settings/comments, and block apply with `manual` when malformed JSONC or duplicate relevant keys prevent a safe merge.
 
 ## Root Guidance Ownership
 
