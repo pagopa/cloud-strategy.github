@@ -4,9 +4,9 @@ applyTo: "**/Makefile,**/*.mk"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Makefile Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify target names and dependencies reflect deterministic build order.
 - Flag missing `.PHONY` declarations for non-file targets.

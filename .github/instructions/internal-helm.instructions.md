@@ -4,9 +4,9 @@ applyTo: "**/Chart.yaml,**/values.yaml,**/values*.yaml"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Helm Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag chart and dependency versions that are missing, floating, or not reproducible.
 - Flag image tags that are mutable or not pinned to deterministic versions.

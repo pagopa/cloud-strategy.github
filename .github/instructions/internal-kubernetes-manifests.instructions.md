@@ -4,9 +4,9 @@ applyTo: "k8s/**/*.yaml,k8s/**/*.yml,manifests/**/*.yaml,manifests/**/*.yml,depl
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Kubernetes Manifest Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify labels and selectors are consistent to prevent broken workload routing.
 - Flag missing or unsafe `securityContext` settings on pods and containers.

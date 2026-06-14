@@ -4,9 +4,9 @@ applyTo: "**/workflows/**,**/actions/**/action.y*ml"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # GitHub Actions Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag action and container references that are not pinned to immutable SHAs or digests.
 - Verify `permissions` are least privilege at workflow and job scope.

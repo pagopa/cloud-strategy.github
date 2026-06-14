@@ -4,9 +4,9 @@ applyTo: "**/*.template.yaml,**/*.template.yml,**/template.yaml,**/template.yml,
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # CloudFormation Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag IAM policies and roles that exceed least-privilege intent.
 - Flag hardcoded secrets, account IDs, or static ARNs that should be parameterized.

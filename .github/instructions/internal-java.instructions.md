@@ -4,9 +4,9 @@ applyTo: "**/*.java,**/pom.xml,**/build.gradle,**/build.gradle.kts"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Java Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify domain boundaries remain clear and business logic is not leaked into adapters.
 - Flag null-safety and exception-handling gaps that can cause runtime faults.

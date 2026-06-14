@@ -4,9 +4,9 @@ applyTo: "**/azure-pipelines.yml,**/azure-pipelines*.yml,**/*.pipeline.yml"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Azure Pipelines Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify trigger, path, and branch filters match intended CI and deployment scope.
 - Flag unpinned tasks, mutable image references, or agent pools that reduce determinism.

@@ -4,9 +4,9 @@ applyTo: "**/*lambda*.tf,**/*lambda*.py,**/*lambda*.js,**/*lambda*.ts,**/lambdas
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Lambda Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify handler signatures and entrypoints are explicit and runtime-correct.
 - Flag missing input validation on event payloads and external parameters.

@@ -4,9 +4,9 @@ applyTo: "**/*.py"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Python Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify guard clauses and error handling make failure modes explicit.
 - Flag unsafe input handling, shell invocation, or filesystem side effects.

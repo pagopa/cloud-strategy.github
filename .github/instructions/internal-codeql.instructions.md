@@ -4,9 +4,9 @@ applyTo: "**/.github/codeql/**/*.yml,**/.github/codeql/**/*.yaml,**/.github/work
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # CodeQL Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag language matrices or workflow coverage that omit active repository languages.
 - Flag query suite configuration that weakens expected security coverage.

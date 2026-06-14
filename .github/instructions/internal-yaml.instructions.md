@@ -4,9 +4,9 @@ applyTo: "**/*.yml,**/*.yaml"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # YAML Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify YAML is syntactically valid with stable indentation and scalar usage.
 - Flag duplicate keys, ambiguous merges, or anchor misuse.

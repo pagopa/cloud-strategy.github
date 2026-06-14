@@ -4,9 +4,9 @@ applyTo: "LESSONS_LEARNED.md"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Lessons Learned Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify entries describe retained lessons, not canonical policy definitions.
 - Flag rows missing owner pointers for codification follow-up.

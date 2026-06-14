@@ -4,9 +4,9 @@ applyTo: "**/*.go,**/go.mod,**/go.sum"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Go Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify error handling is explicit and no critical errors are silently ignored.
 - Flag context misuse in I/O or network paths that can leak goroutines.

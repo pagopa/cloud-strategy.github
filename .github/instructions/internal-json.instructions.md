@@ -4,9 +4,9 @@ applyTo: "**/authorizations/**/*.json,**/organization/**/*.json,**/src/**/*.json
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # JSON Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify JSON is valid and structurally consistent with adjacent files in the same family.
 - Flag key renames or type changes that break existing consumers.

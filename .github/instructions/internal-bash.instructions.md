@@ -4,9 +4,9 @@ applyTo: "**/*.sh"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Bash Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag missing strict-mode safety where script behavior depends on unchecked failures.
 - Verify variable expansion, quoting, and glob usage are safe for spaces and special chars.

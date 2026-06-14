@@ -4,9 +4,9 @@ applyTo: "**/*.md"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Markdown Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify content is concise, technically accurate, and free of contradictory guidance.
 - Flag stale paths, commands, or references that do not match repository reality.

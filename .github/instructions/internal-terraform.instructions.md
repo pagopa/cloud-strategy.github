@@ -4,9 +4,9 @@ applyTo: "**/*.tf"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Terraform Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag variables or outputs missing a `description`.
 - Flag variables missing an explicit `type`.

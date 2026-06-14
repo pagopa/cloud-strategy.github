@@ -4,9 +4,9 @@ applyTo: "**/actions/**/action.y*ml"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Composite Action Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify all required inputs are validated before use in shell or tooling steps.
 - Flag unsafe interpolation, unquoted expansions, or command injection opportunities.

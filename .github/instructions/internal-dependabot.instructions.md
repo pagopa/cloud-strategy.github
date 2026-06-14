@@ -4,9 +4,9 @@ applyTo: "**/.github/dependabot.yml,**/.github/dependabot.yaml"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Dependabot Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag missing package ecosystems or directories that leave active manifests uncovered.
 - Flag schedules that are too aggressive or too sparse for the repository risk profile.

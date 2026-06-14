@@ -4,9 +4,9 @@ applyTo: "**/*.js,**/*.cjs,**/*.mjs,**/*.ts,**/*.tsx,**/package.json,**/tsconfig
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Node.js and TypeScript Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify domain and adapter boundaries remain explicit and not cross-coupled.
 - Flag unhandled async errors, floating promises, or unsafe process exits.

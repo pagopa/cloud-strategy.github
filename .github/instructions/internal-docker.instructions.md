@@ -4,9 +4,9 @@ applyTo: "**/Dockerfile,**/Dockerfile.*,**/*.dockerfile,**/.dockerignore,**/dock
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Docker Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Flag unpinned base images or mutable tags where digest pinning is expected.
 - Verify container runtime user, file permissions, and privilege posture are safe.

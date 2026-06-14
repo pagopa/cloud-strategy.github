@@ -4,9 +4,9 @@ applyTo: "**/CODEOWNERS"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # CODEOWNERS Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify entries use valid owner handles and no unresolved template placeholders remain.
 - Check rule ordering so specific paths appear before broad catch-all patterns.

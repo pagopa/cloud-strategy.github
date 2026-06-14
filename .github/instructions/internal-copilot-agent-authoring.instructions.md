@@ -4,9 +4,9 @@ applyTo: ".github/agents/internal-*.agent.md,.github/agents/local-*.agent.md"
 excludeAgent: "cloud-agent"
 ---
 
-This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
-
 # Agent Authoring Review Checks
+
+This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
 - Verify agent intent, scope, and boundaries are explicit and non-overlapping.
 - Flag routing or escalation language that conflicts with canonical owner contracts.
