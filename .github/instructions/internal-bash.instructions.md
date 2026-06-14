@@ -3,15 +3,46 @@ description: Bash scripting standards for safe execution, guard clauses, and con
 applyTo: "**/*.sh"
 ---
 
-<!-- Core Knowledge Source: awesome-copilot-shell.instructions.md -->
-<!-- This internal instruction extends the external with governance-specific rules. -->
-<!-- Do not duplicate content from the core source; reference it instead. -->
-
 # Bash Instructions
 
-Assume `.github/instructions/awesome-copilot-shell.instructions.md` covers the baseline shell rules for quoting, failure handling, temp resources, cleanup traps, parser choice, and general structure. This internal instruction keeps only the repository-specific Bash delta.
+Use this file as the single source of shell guidance for scripts matching `**/*.sh`.
 
-The two instruction files intentionally co-load for `**/*.sh`: the imported file remains the generic shell baseline, while this file owns the repository-specific Bash defaults, operator-facing emoji logs, wrapper conventions, and Python-launcher rules.
+## General principles
+
+- Generate code that is clean, simple, and concise.
+- Ensure scripts are easy to read and understand.
+- Add comments only where they help explain non-obvious logic.
+- Keep runtime output concise and useful.
+- Use `shellcheck` for static analysis when available.
+- Prefer safe expansions: quote variable references (`"$var"`), use `${var}` for clarity, and avoid `eval`.
+- Use modern Bash features (`[[ ]]`, `local`, arrays) when portability requirements allow.
+- Choose reliable parsers for structured data instead of ad-hoc text processing.
+
+## Error handling and safety
+
+- Always enable `set -euo pipefail`.
+- Validate required parameters before execution.
+- Provide clear error messages with context.
+- Use `trap` to clean up temporary resources.
+- Declare immutable values with `readonly` (or `declare -r`) when appropriate.
+- Use `mktemp` for temporary files/directories and clean them in the exit handler.
+
+## Script structure
+
+- Use the Bash shebang: `#!/usr/bin/env bash`.
+- Include a short header comment with purpose and usage examples.
+- Define defaults near the top of the script.
+- Prefer small reusable functions over repeated blocks.
+- Keep the main execution flow clean and readable.
+
+## JSON and YAML handling
+
+- Prefer dedicated parsers: `jq` for JSON and `yq` for YAML.
+- If those tools are unavailable, choose the next most reliable parser and document it.
+- Validate required fields and handle missing paths explicitly.
+- Quote parser filters and use raw output mode where needed.
+- Treat parser errors as fatal.
+- Document parser dependencies and fail fast if missing.
 
 ## Repository-specific rules
 
@@ -22,6 +53,66 @@ The two instruction files intentionally co-load for `**/*.sh`: the imported file
 - Wrapper-style Bash entry points must run successfully with no parameters by keeping the common-path defaults inside the script.
 - Optional flags or environment variables may override those defaults; do not require positional arguments for the standard invocation path.
 - Apply these rules for both create and modify operations.
+
+## Baseline example
+
+```bash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cleanup() {
+  if [[ -n "${TEMP_DIR:-}" && -d "$TEMP_DIR" ]]; then
+    rm -rf "$TEMP_DIR"
+  fi
+}
+
+trap cleanup EXIT
+
+readonly SCRIPT_NAME="$(basename "$0")"
+RESOURCE_GROUP=""
+OPTIONAL_PARAM="default-value"
+TEMP_DIR=""
+
+usage() {
+  echo "Usage: ${SCRIPT_NAME} [OPTIONS]"
+  echo "  -g, --resource-group   Resource group (required)"
+  echo "  -h, --help             Show this help"
+  exit 0
+}
+
+validate_requirements() {
+  if [[ -z "${RESOURCE_GROUP}" ]]; then
+    echo "Error: resource group is required" >&2
+    exit 1
+  fi
+}
+
+main() {
+  validate_requirements
+  TEMP_DIR="$(mktemp -d)"
+  echo "ℹ️ Starting script execution"
+  echo "✅ Completed successfully"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -g|--resource-group)
+      RESOURCE_GROUP="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+main "$@"
+```
 
 ## Minimal delta example
 
