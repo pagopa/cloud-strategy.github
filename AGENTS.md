@@ -54,23 +54,9 @@ repository projects AI configuration into other repositories.
 
 ## Operational Ownership
 
-- `internal-gateway-idea-brainstorming` owns same-conversation `idea -> critical -> retained plan` workflows.
-- `internal-gateway-review` owns same-conversation `review -> critical -> remediation plan` workflows.
-- `internal-gateway-writing-plans` owns retained-plan profile selection and recommended-consumer declaration.
-- `internal-gateway-simple-task` owns direct execution and approved `compact` retained-plan consumption.
-- `internal-gateway-execute-plans` owns approved `extended` retained-plan execution and final packaging.
-- `internal-gateway-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
-- Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; support-skill loading inside one conversation is not a lane change.
-- Use direct owner selection or user-selected gateway skills with visible phases. Do not add a repository-owned hidden front-door router or hidden peer dispatch.
 - Light emoji markers may appear in user-facing macro-category headings when the owning skill defines them; do not use them in paths, commands, identifiers, schema fields, or copied technical values.
 
 ## Tactical Defaults
-
-- Use `plan` mode for non-trivial repository-owned work when ambiguity, ownership, rollout, validation, or multiple credible paths remain.
-- Use `execute` mode only when the target state and validation path are concrete.
-- When the selected owner no longer fits, stop and make the better owner visible before continuing.
-- Do not report work as complete from intent alone; cite validation evidence or name the explicit validation gap.
-- Prefer root-cause fixes over symptom workarounds unless a temporary mitigation is explicitly scoped.
 
 ## Delivery And Validation
 
@@ -128,7 +114,6 @@ This project has a knowledge graph at graphify-out/ with god nodes, community st
 When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"` before doing anything else.
 
 - Rules:
-
 - For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
 - Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
