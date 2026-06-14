@@ -20,6 +20,9 @@ before the `done-*` loop starts.
   `Initial evidence pass`, `Reading budget`, and source-item coverage.
 - `04-implementation-contract.md` for `extended` profiles. `compact` profiles do
   not require an implementation contract.
+- Execution strategy is inferred by `internal-gateway-execute-plans` from the
+  declared profile, folder shape, and validation path; do not require a
+  separate consumer field in the retained plan.
 - Numbered executable plan files after the summary and ledger control files.
 - `questions.md` with accepted user-only decisions or `- none`.
 - A plan for closing the summary and ledger files through matching `done-*`

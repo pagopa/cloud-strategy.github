@@ -29,7 +29,7 @@ consumes approved `compact` and `extended` retained plans.
 ## Core Algorithm
 
 1. Read `01-change-summary.md` and `02-source-item-ledger.md`.
-2. Verify `Plan profile: compact` or `Plan profile: extended` and `Recommended consumer: internal-gateway-execute-plans`.
+2. Verify `Plan profile: compact` or `Plan profile: extended`, then infer the execution strategy from profile, folder shape, and validation path.
 3. Run the ledger evidence pass.
 4. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
 5. For `compact`, confirm the folder uses `mini-plan-*`, `questions.md` is `- none`, and `03-execution.md` is the only executable file.
@@ -43,9 +43,9 @@ consumes approved `compact` and `extended` retained plans.
 ## Execution Contract
 
 - Reject unsupported profiles immediately.
-- Reject any folder whose recommended consumer is not `internal-gateway-execute-plans`.
 - Reject `compact` folders outside the `mini-plan-*` convention.
 - Ignore `questions.md` during execution.
+- Infer the execution strategy from `Plan profile`, folder shape, `04-implementation-contract.md` presence when applicable, and the validation path. Do not require a separate retained-plan consumer field.
 - Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
 - Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.
 - Block item closure and block `SHIPPED` whenever mandatory applicable requirements remain unverified.
@@ -58,7 +58,7 @@ consumes approved `compact` and `extended` retained plans.
 
 - Summary and ledger are read first.
 - `Plan profile` is `compact` or `extended`.
-- `Recommended consumer` equals `internal-gateway-execute-plans`.
+- Execution strategy is inferred from profile, folder shape, and validation path.
 - `compact` retained plans use `tmp/superpowers/mini-plan-*` and `03-execution.md` as the only executable file.
 - `extended` retained plans include `04-implementation-contract.md` before executable work.
 - Mandatory applicable requirements are checked at item close and before `SHIPPED`.

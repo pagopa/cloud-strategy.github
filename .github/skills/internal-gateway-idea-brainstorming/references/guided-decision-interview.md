@@ -54,8 +54,9 @@ Each row in the decision ledger:
 
 ## Plan Alias Mapping
 
-- `mini-plan` maps to canonical `compact` and recommended consumer `internal-gateway-simple-task`.
-- `plan` maps to canonical `extended` and recommended consumer `internal-gateway-execute-plans`.
+- `mini-plan` maps to canonical `compact`.
+- `plan` maps to canonical `extended`.
+- Retained-plan execution strategy is inferred later by `internal-gateway-execute-plans` from profile, folder shape, and validation path.
 - Alias labels are conversational only; canonical profile terms remain `compact` and `extended`.
 
 ## Proportional Depth

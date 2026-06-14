@@ -17,8 +17,7 @@ Before any completion-phase validation, verify the `Plan profile` is `compact`
 or `extended`. Unsupported or missing profiles return `unsupported-plan-contract`
 and the completion attempt stops.
 
-`compact` and `extended` execution both use `internal-gateway-execute-plans`
-when the retained plan declares `Recommended consumer: internal-gateway-execute-plans`.
+`compact` and `extended` execution both use `internal-gateway-execute-plans`.
 `compact` closeout still stays lightweight and must not require an
 `04-implementation-contract.md`.
 

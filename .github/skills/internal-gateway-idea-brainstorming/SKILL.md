@@ -65,7 +65,7 @@ State rules:
 - At `Interview Gate 1: ready-for-critical`, ask whether to continue before loading `internal-gateway-critical-master`.
 - `Critical Gate 2` outcomes are: targeted reopen of affected branches, continue-critical, or confident completion.
 - At `Critical Gate 2: confident`, ask for explicit plan approval before loading `internal-gateway-writing-plans`.
-- Alias mapping is fixed: `mini-plan` means `compact` with `internal-gateway-simple-task`; `plan` means `extended` with `internal-gateway-execute-plans`.
+- Alias mapping is fixed: `mini-plan` means `compact` and `plan` means `extended`; retained-plan execution strategy is inferred by `internal-gateway-execute-plans`.
 - At `Handoff Gate 4: plan-created`, set `Continuation: waiting` and do not execute.
 
 ## Flow

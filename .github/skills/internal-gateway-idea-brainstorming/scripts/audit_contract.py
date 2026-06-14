@@ -40,7 +40,8 @@ def main() -> int:
         "alias_mapping": "mini-plan" in skill_text
         and "mini-plan" in reference_text
         and "mini-plan" in runtime_text
-        and "internal-gateway-simple-task" in runtime_text
+        and "internal-gateway-execute-plans" in skill_text
+        and "internal-gateway-execute-plans" in reference_text
         and "internal-gateway-execute-plans" in runtime_text,
     }
     print(json.dumps({"strict_ok": all(markers.values()), "markers": markers}, indent=2))

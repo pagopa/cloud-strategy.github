@@ -8,11 +8,12 @@ description: Use when repository-owned work needs a retained numbered plan under
 ## Referenced skills
 
 - `internal-gateway-simple-task`: concrete single-lane execution owner when no retained plan is needed.
-- `internal-gateway-execute-plans`: approved `compact` and `extended` plan consumer.
+- `internal-gateway-execute-plans`: retained-plan execution owner that infers execution strategy from profile, folder shape, and validation path.
 
 Repository-owned wrapper for retained plan authoring. This skill owns retained
 plan creation, profile selection, where the plan lives, file names, content
-language, and the authoring-to-execution handoff contract.
+language, and the authoring-to-execution handoff contract. It does not select a
+separate execution consumer field inside the retained plan.
 
 ## When to use
 
@@ -20,7 +21,7 @@ language, and the authoring-to-execution handoff contract.
   stop before execution.
 - Converting a monolithic or overgrown plan into the local numbered-plan
   structure.
-- Preparing a retained plan for `internal-gateway-execute-plans`.
+- Preparing a retained plan for execution handoff.
 
 ## When not to use
 
@@ -58,10 +59,9 @@ can provide.
   (`Risorsa | Azione | Scopo`), `Comportamento scelto`, `Validazione prevista`,
   `Esecuzione prevista`, and `Decisione richiesta`.
 - `02-source-item-ledger.md`: control file with `Recommended use`,
-  `Plan profile`, `Recommended consumer`, `File map and role`, clarification
+  `Plan profile`, `File map and role`, clarification
   gate status, `Initial evidence pass`, `Reading budget`, target, anti-scope,
   owner, validator, stop conditions, and `Source item ledger`.
-- `Recommended consumer`: `internal-gateway-execute-plans` for `compact` and `extended`.
 - `03-execution.md`: first executable file.
 - `questions.md`: user-only decisions only. Write `- none` when nothing remains.
 - `04-implementation-contract.md` is required for every `extended` plan.
@@ -73,30 +73,25 @@ can provide.
 1. Decide: retained plan or chat.
 2. For new plans, run bundle-local `init` first to create the scaffold.
 3. Choose folder name and write `01-change-summary.md` in Italian.
-4. Write `02-source-item-ledger.md` with profile, recommended consumer, and
-   source-item coverage.
+4. Write `02-source-item-ledger.md` with profile and source-item coverage.
 5. Run the clarification gate when user decisions remain.
-6. Choose profile and consumer together.
-7. For `extended`, write `04-implementation-contract.md`.
-8. Write executable numbered files in order.
-9. Create `questions.md` with `- none` or open user-only decisions.
-10. Run scope challenge and plan review gate for non-trivial plans.
-11. Run `audit` first, then run `handoff-check`; execute only when ready.
-12. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
+6. For `extended`, write `04-implementation-contract.md`.
+7. Write executable numbered files in order.
+8. Create `questions.md` with `- none` or open user-only decisions.
+9. Run scope challenge and plan review gate for non-trivial plans.
+10. Run `audit` first, then run `handoff-check`; execute only when ready.
+11. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
 
 ## Validation
 
 - Plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
 - `01-change-summary.md` is Italian; other plan files are English.
-- `02-source-item-ledger.md` exists with profile, recommended consumer, and
-  source-item coverage.
-- `Recommended consumer` matches the declared profile.
+- `02-source-item-ledger.md` exists with profile and source-item coverage.
 - `04-implementation-contract.md` exists for every `extended` plan.
 - `questions.md` exists and stays separate from executable files.
 
 ## Common mistakes
 
 - Retaining a plan for work that should stay in chat.
-- Omitting the recommended consumer.
 - Using `compact` when execution actually needs an implementation contract.
 - Creating `done-*` markers during authoring.

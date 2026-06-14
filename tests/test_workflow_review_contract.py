@@ -66,7 +66,7 @@ def test_compact_and_extended_execution_owner_is_unified() -> None:
         ".github/skills/internal-gateway-critical-master/SKILL.md"
     )
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
-    assert "Recommended consumer" in writing_text
+    assert "Recommended consumer" not in writing_text
     assert "internal-gateway-execute-plans" in writing_text
     assert "internal-gateway-simple-task" in writing_text
     assert "mini-plan-*" in executing_text
@@ -122,7 +122,7 @@ def test_gateway_wrappers_route_compact_and_extended_to_execute_plans() -> None:
     )
     assert "Route approved retained-plan execution to internal-gateway-execute-plans" in simple_wrapper
     assert (
-        "approved compact mini-plan-* plans and approved extended plans" in execute_wrapper
+        "infer the best execution strategy from plan profile" in execute_wrapper
     )
     assert (
         "`compact` and `extended` execution both use `internal-gateway-execute-plans`"

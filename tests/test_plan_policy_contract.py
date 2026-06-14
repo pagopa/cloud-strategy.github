@@ -17,12 +17,12 @@ def test_root_policy_files_keep_retained_plan_defaults_outside_always_on_detail(
     assert "tmp/superpowers/" not in copilot_text
 
 
-def test_writing_plans_declares_profile_consumer_contract() -> None:
+def test_writing_plans_declares_profile_only_handoff_contract() -> None:
     writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
     compact_reference = read_text(
         ".github/skills/internal-gateway-writing-plans/references/compact-plan-contract.md"
     )
-    assert "Recommended consumer" in writing_text
+    assert "Recommended consumer" not in writing_text
     assert "internal-gateway-simple-task" in writing_text
     assert "internal-gateway-execute-plans" in writing_text
     assert "mini-plan-*" in compact_reference
@@ -33,10 +33,7 @@ def test_executing_plans_accepts_compact_and_extended_consumers() -> None:
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
     assert "approved `compact`" in executing_text
     assert "approved `extended`" in executing_text
-    assert (
-        "Reject any folder whose recommended consumer is not `internal-gateway-execute-plans`"
-        in executing_text
-    )
+    assert "infer the execution strategy" in executing_text
     assert "Reject `compact` folders outside the `mini-plan-*` convention" in executing_text
     assert "mandatory requirements that are applicable" in executing_text
     assert "Block item closure and block `SHIPPED`" in executing_text
@@ -65,7 +62,10 @@ def test_wrapper_prompts_respect_compact_and_extended_consumers() -> None:
     execute_wrapper = read_text(
         ".github/skills/internal-gateway-execute-plans/agents/openai.yaml"
     )
-    assert "route compact and extended plans to internal-gateway-execute-plans" in writing_wrapper
+    assert "Recommended consumer field" in writing_wrapper
+    assert "Do not" in writing_wrapper
+    assert "best execution path" in writing_wrapper
+    assert "validation path" in writing_wrapper
     assert "Route approved retained-plan execution to internal-gateway-execute-plans" in simple_wrapper
     assert (
         "approved compact mini-plan-* plans and approved extended plans" in execute_wrapper

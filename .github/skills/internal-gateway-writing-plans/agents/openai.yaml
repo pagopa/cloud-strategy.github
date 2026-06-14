@@ -11,6 +11,8 @@ interface:
     Esecuzione prevista route notes. All other files in English. Reject
     unsupported profiles. Run bundle-local CLI audit first and handoff-check
     second for deterministic readiness. Treat token warnings as review inputs
-    for compression or split decisions, not as measured-savings proof. Route
-    compact and extended plans to internal-gateway-execute-plans. Emit a
+    for compression or split decisions, not as measured-savings proof. Do not
+    write a Recommended consumer field into the retained plan. Leave execution
+    strategy selection to $internal-gateway-execute-plans, which will infer the
+    best execution path from profile, folder shape, and validation path. Emit a
     Decision Brief before handoff.

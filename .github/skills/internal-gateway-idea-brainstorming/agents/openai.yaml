@@ -36,8 +36,8 @@ interface:
     confident, emit Plan Approval Gate 3: waiting and ask for explicit
     go/ok/procedi or equivalent approval before loading
     $internal-gateway-writing-plans. Alias mapping is fixed: mini-plan means
-    compact with internal-gateway-simple-task, and plan means extended with
-    internal-gateway-execute-plans. After plan creation, emit Handoff Gate 4:
+    compact and plan means extended; retained-plan execution strategy is
+    inferred later by internal-gateway-execute-plans. After plan creation, emit Handoff Gate 4:
     plan-created with Continuation: waiting and stop before execution.
 name: internal-gateway-idea-brainstorming
 description: Use when a repository-owned request starts with a vague idea, unclear goal, unresolved option set, or needs substantive definition, convergence, or validated handoff before operational planning or simple execution.
