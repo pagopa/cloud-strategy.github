@@ -59,23 +59,24 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
     assert "route or next owner" in review_gate_lower
 
 
-def test_compact_and_extended_execution_owners_are_split() -> None:
+def test_compact_and_extended_execution_owner_is_unified() -> None:
     writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
     simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
     critical_text = read_text(
         ".github/skills/internal-gateway-critical-master/SKILL.md"
     )
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
-    assert "Recommended consumer" in writing_text
-    assert "internal-gateway-simple-task" in writing_text
+    assert "Recommended consumer" not in writing_text
     assert "internal-gateway-execute-plans" in writing_text
-    assert "mini-plan-*" in simple_text
-    assert "`compact`" in simple_text
-    assert "retained-plan execution" in simple_text
+    assert "internal-gateway-simple-task" in writing_text
+    assert "mini-plan-*" in executing_text
+    assert "`compact`" in executing_text
+    assert "retained plans" in executing_text
     assert "internal-gateway-execute-plans" in simple_text
     assert "internal-executing-plans" not in simple_text
     assert "internal-gateway-execute-plans" in critical_text
     assert "internal-executing-plans" not in critical_text
+    assert "approved `compact`" in executing_text
     assert "approved `extended`" in executing_text
     assert "internal-gateway-execute-plans" in executing_text
 
@@ -95,7 +96,21 @@ def test_gateway_compliance_audit_contract_is_explicit() -> None:
     assert "stdlib-only CLI launcher" in executing_text
 
 
-def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
+def test_critical_master_claim_discipline_contract() -> None:
+    critical_text = read_text(
+        ".github/skills/internal-gateway-critical-master/SKILL.md"
+    )
+
+    assert "Claim Discipline" in critical_text
+    assert "confirmed" in critical_text
+    assert "inference" in critical_text
+    assert "estimate" in critical_text
+    assert "unsupported numeric precision" in critical_text
+    assert "original intent" in critical_text
+    assert "emerged requirements" in critical_text
+
+
+def test_gateway_wrappers_route_compact_and_extended_to_execute_plans() -> None:
     simple_wrapper = read_text(
         ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
     )
@@ -105,11 +120,42 @@ def test_gateway_wrappers_keep_compact_execution_and_closeout_split() -> None:
     completion_reference = read_text(
         ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
     )
-    assert "Approved compact retained plans are supported" in simple_wrapper
     assert (
-        "Compact execution belongs to internal-gateway-simple-task" in execute_wrapper
+        "Route approved retained-plan execution to internal-gateway-execute-plans"
+        in simple_wrapper
     )
+    assert "infer the best execution strategy from plan profile" in execute_wrapper
     assert (
-        "`compact` execution remains owned by `internal-gateway-simple-task`"
+        "`compact` and `extended` execution both use `internal-gateway-execute-plans`"
         in completion_reference.lower()
     )
+
+
+def test_simple_gateway_readiness_brief_and_approval_gate_contract() -> None:
+    simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    clarification_text = read_text(
+        ".github/skills/internal-gateway-simple-task/references/clarification-gate.md"
+    )
+
+    assert "Readiness Brief" in simple_text
+    assert "explicit user approval" in simple_text
+    assert "before operational" in simple_text
+
+    assert "compact focused `grill-me` block" in clarification_text
+    assert "internal-gateway-critical-master" in clarification_text
+    assert "material risk" in clarification_text
+
+
+def test_writing_plans_scaffold_first_and_audit_early_contract() -> None:
+    writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
+    runtime_text = read_text(
+        ".github/skills/internal-gateway-writing-plans/agents/openai.yaml"
+    )
+
+    assert "run bundle-local `init` first" in writing_text
+    assert "Run `audit` first, then run `handoff-check`" in writing_text
+    assert "token warnings as review inputs" in writing_text
+    assert "init scaffold first" in runtime_text
+    assert "audit first" in runtime_text
+    assert "handoff-check" in runtime_text
+    assert "second" in runtime_text

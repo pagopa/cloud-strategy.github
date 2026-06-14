@@ -56,8 +56,9 @@ Immediate removal is allowed only for security or compliance issues. The removal
   `.github/skills/internal-terraform/SKILL.md`.
 - `.github/skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into
   `.github/skills/internal-terraform/SKILL.md`.
-- `.github/instructions/`: **Removed under architecture-migration exception**. Replaced by skill-first domain
-  owners under `.github/skills/` after routing, references, and focused coverage migrated.
+- `.github/instructions/`: **Historical retirement under architecture-migration exception**. The broad,
+  workflow-heavy instruction model was retired; a governed review-only instruction family was later
+  reintroduced with focused checks and explicit `excludeAgent: "cloud-agent"` scoping.
 - `.github/skills/internal-aws-serverless/SKILL.md`: **Removed under architecture-migration exception**. Replaced
   by `.github/skills/internal-aws-lambda/SKILL.md`.
 - `.github/skills/internal-copilot-instructions-creator/SKILL.md`: **Removed under architecture-migration

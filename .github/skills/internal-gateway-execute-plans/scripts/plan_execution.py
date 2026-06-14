@@ -35,6 +35,13 @@ COMPLETION_REPORT_FIELDS = (
     "Follow-up suggestions:",
 )
 
+PLAN_STATE_REQUIRED_FIELDS = (
+    "State:",
+    "Continuation:",
+)
+
+PLAN_STATE_FILE_RE = re.compile(r"^([A-Z0-9_-]+)-plan-state\.md$")
+
 OPEN_STATUSES = frozenset({"PENDING", "PARTIAL", "NOT_DONE", "UNVERIFIABLE", "BLOCKED"})
 
 LEDGER_REQUIRED_FIELDS = (
@@ -90,6 +97,37 @@ def done_files(plan_folder: Path) -> list[str]:
     return sorted(
         p.name for p in plan_folder.glob("done-*.md")
     )
+
+
+def resolve_plan_state_marker(plan_folder: Path) -> tuple[Path | None, str | None, list[Finding]]:
+    """Resolve lightweight plan-state marker path and state-from-filename if present."""
+    findings: list[Finding] = []
+    named_paths = sorted(path for path in plan_folder.glob("*-plan-state.md") if path.is_file())
+
+    if len(named_paths) > 1:
+        findings.append(
+            Finding(
+                code="multiple-plan-state-markers",
+                message="Multiple <STATE>-plan-state.md markers found; keep exactly one",
+            )
+        )
+        return None, None, findings
+
+    if named_paths:
+        marker_path = named_paths[0]
+        match = PLAN_STATE_FILE_RE.match(marker_path.name)
+        if match is None:
+            findings.append(
+                Finding(
+                    code="invalid-plan-state-marker",
+                    message="Plan state marker must match <STATE>-plan-state.md using uppercase state",
+                )
+            )
+            return None, None, findings
+        marker_state = match.group(1).upper()
+        return marker_path, marker_state, findings
+
+    return None, None, findings
 
 
 def _check_unsupported(plan_folder: Path) -> tuple[str | None, list[Finding]]:
@@ -226,7 +264,7 @@ def cmd_checkpoint(plan_folder: Path, format: str = "text") -> int:
 
 
 def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
-    """Validate completion packaging for SHIPPED readiness."""
+    """Validate completion packaging for DONE readiness."""
     active = numbered_files(plan_folder)
     dones = done_files(plan_folder)
     findings: list[Finding] = []
@@ -238,7 +276,73 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
         _emit_findings(profile_findings, format)
         return 1
 
-    # Active numbered files must be gone for SHIPPED
+    plan_state_path, state_from_filename, marker_findings = resolve_plan_state_marker(plan_folder)
+    findings.extend(marker_findings)
+    envelope_path = plan_folder / "evidence-envelope.md"
+    report_path = plan_folder / "completion-report.md"
+
+    if marker_findings:
+        _emit_findings(findings, format)
+        return 1
+
+    # Lightweight closeout path: explicit state marker without done-* packaging.
+    if plan_state_path and not dones and not envelope_path.is_file() and not report_path.is_file():
+        plan_state_text = plan_state_path.read_text(encoding="utf-8")
+        for field in PLAN_STATE_REQUIRED_FIELDS:
+            if field not in plan_state_text:
+                findings.append(
+                    Finding(
+                        code="missing-plan-state-field",
+                        message=f"{plan_state_path.name} is missing {field}",
+                    )
+                )
+
+        state_match = re.search(r"^State:\s*(.+)$", plan_state_text, re.MULTILINE)
+        continuation_match = re.search(
+            r"^Continuation:\s*(.+)$", plan_state_text, re.MULTILINE
+        )
+
+        if state_from_filename and state_from_filename != "DONE":
+            findings.append(
+                Finding(
+                    code="not-done-state",
+                    message=f"{plan_state_path.name} does not encode DONE state",
+                )
+            )
+
+        if state_match and state_match.group(1).strip() != "DONE":
+            findings.append(
+                Finding(
+                    code="not-done-state",
+                    message=f"{plan_state_path.name} does not declare State: DONE",
+                )
+            )
+
+        if state_from_filename and state_match:
+            declared_state = state_match.group(1).strip().upper()
+            if declared_state != state_from_filename:
+                findings.append(
+                    Finding(
+                        code="plan-state-name-mismatch",
+                        message=(
+                            f"{plan_state_path.name} encodes state {state_from_filename} "
+                            f"but content declares State: {declared_state}"
+                        ),
+                    )
+                )
+
+        if continuation_match and continuation_match.group(1).strip() != "none":
+            findings.append(
+                Finding(
+                    code="nonterminal-continuation",
+                    message=f"{plan_state_path.name} must declare Continuation: none for DONE readiness",
+                )
+            )
+
+        _emit_findings(findings, format)
+        return 0 if not any(f.severity == "ERROR" for f in findings) else 1
+
+    # Active numbered files must be gone for DONE
     if active:
         findings.append(
             Finding(
@@ -252,13 +356,12 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
         findings.append(
             Finding(
                 code="missing-done-files",
-                message="No done-* files found; SHIPPED requires done markers",
+                message="No done-* files found; DONE requires done markers",
                 severity="WARNING",
             )
         )
 
     # Evidence envelope
-    envelope_path = plan_folder / "evidence-envelope.md"
     if not envelope_path.is_file():
         findings.append(
             Finding(code="missing-evidence-envelope", message="evidence-envelope.md is missing")
@@ -286,7 +389,6 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
                 )
 
     # Completion report
-    report_path = plan_folder / "completion-report.md"
     if not report_path.is_file():
         findings.append(
             Finding(code="missing-completion-report", message="completion-report.md is missing")
@@ -298,12 +400,12 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
                 findings.append(
                     Finding(code="missing-report-field", message=f"Completion report missing: {field}")
                 )
-        # SHIPPED requires explicit State: SHIPPED
-        if "State: SHIPPED" not in report_text:
+        # DONE requires explicit State: DONE
+        if "State: DONE" not in report_text:
             findings.append(
                 Finding(
-                    code="not-shipped-state",
-                    message="Completion report does not declare State: SHIPPED",
+                    code="not-done-state",
+                    message="Completion report does not declare State: DONE",
                 )
             )
 
@@ -341,7 +443,7 @@ def parse_args() -> argparse.Namespace:
     checkpoint_p.add_argument("plan_folder", type=Path, help="Path to plan folder")
     checkpoint_p.add_argument("--format", choices=("text", "json"), default="text")
 
-    cc_p = sub.add_parser("completion-check", help="Validate SHIPPED readiness")
+    cc_p = sub.add_parser("completion-check", help="Validate DONE readiness")
     cc_p.add_argument("plan_folder", type=Path, help="Path to plan folder")
     cc_p.add_argument("--format", choices=("text", "json"), default="text")
 

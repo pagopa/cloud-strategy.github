@@ -6,8 +6,8 @@ disable-model-invocation: true
 agents: []
 handoffs:
   - label: "Next step: Execute compact plan"
-    agent: "internal-gateway-simple-task"
-    prompt: "Execute only the approved compact retained plan left by the idea definition above. Verify the plan declares `Recommended consumer: internal-gateway-simple-task`."
+    agent: "internal-gateway-execute-plans"
+    prompt: "Execute only the approved compact retained plan left by the idea definition above. Verify the plan declares `Recommended consumer: internal-gateway-execute-plans`."
     send: false
   - label: "Next step: Pressure-test decision"
     agent: "internal-gateway-critical-master"

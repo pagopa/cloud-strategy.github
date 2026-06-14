@@ -11,7 +11,7 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 - `.editorconfig`
 - `.pre-commit-config.yaml`
 - `.github/copilot-instructions.md`
-- `.github/copilot-code-review-instructions.md`
+- `.github/instructions/copilot-code-review.instructions.md`
 - `.github/copilot-commit-message-instructions.md`
 - `.github/security-baseline.md`
 - `.github/DEPRECATION.md`
@@ -19,6 +19,11 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 - `.github/workflows/_pre-commit.yml`
 - `.github/agents/**`
 - `.github/skills/**`, including bundled `references/`, `assets/`, `scripts/`, `agents/`, and licenses
+
+Apply field-level management to `.vscode/settings.json` only for these keys:
+
+- `github.copilot.chat.codeGeneration.useInstructionFiles: false`
+- `chat.instructionsFilesLocations[".github/instructions"]: false`
 
 Do not sync `README.md`, changelogs, other workflows, templates, or bootstrap helpers unless the user explicitly expands scope.
 Use `.github/templates/` only as standards-repository scaffold source material; do not mirror it into consumer repositories as an operational catalog family.
@@ -29,7 +34,6 @@ When a consumer-local creator depends on shared runtime-critical rules, keep a s
 ## Target Rules
 
 - Preserve target `local-*` assets under mirrored categories and surface them in the plan or final report.
-- Materialize `.github/templates/copilot-instructions.override.md.template` from the standards repository into the consumer-local copilot instructions override file when that target file is missing, then preserve the target file as a consumer-owned local exception layer and surface it in the plan or final report when present.
 - Create `docs/README.md`, `docs/repository-context.md`, `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md` from `.github/templates/` only when missing, then preserve them as consumer-local content.
 - If a target has legacy `docs/01-local-architecture.md` or `docs/01-architecture.md` and lacks `docs/architecture.md`, rename the legacy file to the canonical path. If canonical and legacy paths coexist, block apply and require manual reconciliation.
 - If a target has legacy `docs/02-local-repository-context.md` or `docs/02-repository-context.md` and lacks `docs/repository-context.md`, rename the legacy file to the canonical path. If canonical and legacy paths coexist, block apply and require manual reconciliation.
@@ -39,6 +43,7 @@ When a consumer-local creator depends on shared runtime-critical rules, keep a s
 - Ensure target root `LESSONS_LEARNED.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
 - Ensure the target root `.gitignore` contains an ignore entry for `tmp/superpowers/`.
 - Treat the `.gitignore` update as target-local hygiene: ensure the required ignore entry exists without mirroring the source repository `.gitignore`.
+- Keep `.vscode/settings.json` consumer-owned as a file: merge only the two managed Copilot keys, preserve unrelated settings/comments, and block apply with `manual` when malformed JSONC or duplicate relevant keys prevent a safe merge.
 
 ## Root Guidance Ownership
 
@@ -51,11 +56,11 @@ When root guidance is in scope, keep the target files in these roles:
 - `docs/architecture.md`: consumer-local architecture contract scaffolded only when missing and then preserved
 - `docs/tech.md`: consumer-local technology contract scaffolded only when missing and then preserved
 - `docs/structure.md`: consumer-local structure contract scaffolded only when missing and then preserved
-- `.github/copilot-instructions.md`: repo-wide GitHub Copilot projection
-- the consumer-local GitHub instructions overrides file: consumer-local exception layer authorized by `AGENTS.md`; it may override synced defaults only when conflict, scope, reason, and disclosure are explicit
+- `.github/copilot-instructions.md`: compact repo-wide GitHub Copilot routing bridge
+- `.github/instructions/copilot-code-review.instructions.md`: source-managed global code review baseline
 - `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
 
-Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`. Do not let the consumer-local GitHub instructions overrides file replace the bridge or catalog roles.
+Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`.
 
 ## Tracking Plan Lifecycle
 
@@ -102,7 +107,7 @@ Completed runs should make these facts visible:
 - target analysis and selected mode
 - root-guidance alignment strategy and `LESSONS_LEARNED.md` status
 - knowledge-document scaffold, preservation, legacy migration, and retired runtime document cleanup status
-- preserved `local-*` assets and consumer-local GitHub instructions overrides status
+- preserved `local-*` assets status
 - target-only cleanup decisions
 - plan-file status and lifecycle
 - validation results and remaining blockers

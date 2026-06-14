@@ -78,7 +78,7 @@ def _write_completed_plan(plan_folder: Path) -> None:
         "Completion Report\n"
         "Plan profile: compact\n"
         "Active phase and owner: execute\n"
-        "State: SHIPPED\n"
+        "State: DONE\n"
         "Continuation: none\n"
         "User action required: none\n"
         "Files changed: test\n"
@@ -91,6 +91,16 @@ def _write_completed_plan(plan_folder: Path) -> None:
         "Residual risks: none\n"
         "Next-step package: none\n"
         "Follow-up suggestions: none\n",
+        encoding="utf-8",
+    )
+
+
+def _write_lightweight_plan_state(
+    plan_folder: Path, state: str = "DONE", continuation: str = "none"
+) -> None:
+    marker_name = f"{state}-plan-state.md"
+    (plan_folder / marker_name).write_text(
+        f"Plan State\nState: {state}\nContinuation: {continuation}\n",
         encoding="utf-8",
     )
 
@@ -195,9 +205,31 @@ def test_completion_check_shipped_ready(tmp_path: Path) -> None:
     assert result.returncode == 0
 
 
+def test_completion_check_lightweight_shipped_ready(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(plan_folder)
+
+    result = run_cli("completion-check", plan_folder)
+
+    assert result.returncode == 0
+
+
 def test_completion_check_shipped_json(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_completed_plan(plan_folder)
+    result = run_cli("completion-check", plan_folder, "--format", "json")
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["ready"] is True
+
+
+def test_completion_check_lightweight_json(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(plan_folder)
+
     result = run_cli("completion-check", plan_folder, "--format", "json")
 
     assert result.returncode == 0
@@ -239,7 +271,7 @@ def test_completion_rejects_open_statuses(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nPlan profile: compact\nState: SHIPPED\n"
+        "Completion Report\nPlan profile: compact\nState: DONE\n"
         "Continuation: none\nUser action required: none\nFiles changed: test\n"
         "Completed items: all\nIntentional non-actions: none\nValidators: pytest\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: all closed\n"
@@ -250,6 +282,47 @@ def test_completion_rejects_open_statuses(tmp_path: Path) -> None:
     result = run_cli("completion-check", plan_folder)
     assert result.returncode != 0
     assert "open-status" in result.stdout
+
+
+def test_completion_lightweight_rejects_not_shipped_state(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(
+        plan_folder, state="PARTIAL", continuation="continuing"
+    )
+
+    result = run_cli("completion-check", plan_folder)
+
+    assert result.returncode != 0
+    assert "not-done-state" in result.stdout
+
+
+def test_completion_lightweight_rejects_nonterminal_continuation(
+    tmp_path: Path,
+) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    _write_lightweight_plan_state(plan_folder, continuation="waiting")
+
+    result = run_cli("completion-check", plan_folder)
+
+    assert result.returncode != 0
+    assert "nonterminal-continuation" in result.stdout
+
+
+def test_completion_lightweight_rejects_filename_state_mismatch(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "plan"
+    _write_compact_plan(plan_folder)
+    (plan_folder / "DONE-plan-state.md").write_text(
+        "Plan State\nState: PARTIAL\nContinuation: none\n",
+        encoding="utf-8",
+    )
+
+    result = run_cli("completion-check", plan_folder)
+
+    assert result.returncode != 0
+    assert "not-done-state" in result.stdout
+    assert "plan-state-name-mismatch" in result.stdout
 
 
 def test_completion_rejects_not_shipped_state(tmp_path: Path) -> None:
@@ -266,14 +339,14 @@ def test_completion_rejects_not_shipped_state(tmp_path: Path) -> None:
     )
     result = run_cli("completion-check", plan_folder)
     assert result.returncode != 0
-    assert "not-shipped-state" in result.stdout
+    assert "not-done-state" in result.stdout
 
 
 def test_completion_missing_envelope(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     plan_folder.mkdir()
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nPlan profile: compact\nState: SHIPPED\n"
+        "Completion Report\nPlan profile: compact\nState: DONE\n"
         "Continuation: none\nUser action required: none\nFiles changed: test\n"
         "Completed items: all\nIntentional non-actions: none\nValidators: pytest\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: all closed\n"
@@ -299,7 +372,7 @@ def test_completion_missing_done_reference(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (plan_folder / "completion-report.md").write_text(
-        "Completion Report\nPlan profile: compact\nState: SHIPPED\n"
+        "Completion Report\nPlan profile: compact\nState: DONE\n"
         "Continuation: none\nUser action required: none\nFiles changed: test\n"
         "Completed items: all\nIntentional non-actions: none\nValidators: pytest\n"
         "Evidence envelope: evidence-envelope.md\nSource-item ledger: all closed\n"
@@ -312,8 +385,8 @@ def test_completion_missing_done_reference(tmp_path: Path) -> None:
     assert "missing-done-reference" in result.stdout
 
 
-def test_completion_cancelled_not_equivalent_to_shipped(tmp_path: Path) -> None:
-    """CANCELLED is not a SHIPPED substitute."""
+def test_completion_cancelled_not_equivalent_to_done(tmp_path: Path) -> None:
+    """CANCELLED is not a DONE substitute."""
     plan_folder = tmp_path / "plan"
     _write_completed_plan(plan_folder)
     (plan_folder / "completion-report.md").write_text(
@@ -327,7 +400,7 @@ def test_completion_cancelled_not_equivalent_to_shipped(tmp_path: Path) -> None:
     )
     result = run_cli("completion-check", plan_folder)
     assert result.returncode != 0
-    assert "not-shipped-state" in result.stdout
+    assert "not-done-state" in result.stdout
 
 
 def test_completion_unsupported_rejected(tmp_path: Path) -> None:
@@ -346,7 +419,7 @@ def test_completion_rejects_missing_profile_when_packaged(tmp_path: Path) -> Non
     (plan_folder / "completion-report.md").write_text(
         "Completion Report\n"
         "Active phase and owner: execute\n"
-        "State: SHIPPED\n"
+        "State: DONE\n"
         "Continuation: none\n"
         "User action required: none\n"
         "Files changed: test\n"

@@ -65,6 +65,9 @@ jobs:
 
       - name: 🔥 Smoke test Python entry points
         run: |
+          ./.github/scripts/run.sh analyze_copilot_prompt_exports --help
+          ./.github/scripts/run.sh analyze_copilot_debug_logs --help
+          ./.github/scripts/run.sh benchmark_skill_tokens --help
           "${TEST_VENV}/bin/python" ".github/scripts/build_inventory.py" --help
           "${TEST_VENV}/bin/python" ".github/scripts/check_catalog_consistency.py" --help
           "${TEST_VENV}/bin/python" ".github/scripts/audit_copilot_catalog.py" --help
@@ -82,7 +85,9 @@ jobs:
           bash -n .github/scripts/audit_copilot_catalog.sh
           bash -n .github/scripts/detect_token_risks.sh
           bash -n .github/scripts/sync_copilot_catalog.sh
+          bash -n .github/scripts/sync_home_ai_resources.sh
           bash -n .github/scripts/github_catalog_validation.sh
+          bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh
 
       - name: ✅ Run pytest
         run: |

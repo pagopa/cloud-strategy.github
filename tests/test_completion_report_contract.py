@@ -11,7 +11,8 @@ def test_repo_projection_keeps_completion_report_compact() -> None:
     copilot_text = read_text(".github/copilot-instructions.md")
 
     assert "Report completed work with outcome, changed files" in copilot_text
-    assert "validation results, and remaining gaps" in copilot_text
+    assert "validation results" in copilot_text
+    assert "remaining gaps" in copilot_text
     assert "Include detailed resource sections only when the user asks" in copilot_text
     assert "`✅ Outcome`" not in copilot_text
     assert "`1 = resources used`" not in copilot_text

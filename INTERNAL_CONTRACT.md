@@ -6,7 +6,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 ## Principles
 
 - Validate rules, not file size or historical implementation details.
-- Treat rules as canonical and files as projections for specific consumer surfaces.
+- Treat rules as canonical and files as bridge or owner-specific surfaces.
 - Keep stable policy separate from volatile inventory.
 - Let the smallest valid owner hold each rule.
 - Keep reusable technical guidance in skills, with deeper detail in skill references only when it is still valuable.
@@ -25,7 +25,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `.github/INVENTORY.md`
 - Expected behavior:
   - root `AGENTS.md` defines the strategic role of the AI configuration system, precedence model, tactical operating defaults, and default language rule
-  - root `AGENTS.md` points to `.github/copilot-instructions.md` as the repo-wide Copilot projection and to `.github/INVENTORY.md` as the exact live catalog
+  - root `AGENTS.md` points to `.github/INVENTORY.md` as the exact live catalog
   - root `AGENTS.md` defines rule placement early so operational procedures do not drift into the always-on bridge
   - root `AGENTS.md` may carry compact tactical defaults for mode selection, owner visibility, validation evidence, and root-cause preference
   - root `AGENTS.md` does not carry volatile inventory, file-shape recipes, command playbooks, domain checklists, or long surface-specific procedures
@@ -41,14 +41,14 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - policy files may point to the inventory but do not duplicate it
   - generated inventory reflects current skills, agents, prompts, workflows, and other managed AI assets without becoming policy
 
-#### `skill-first-copilot-projection-stays-meaningful`
+#### `skill-first-copilot-bridge-stays-meaningful`
 
-- Goal: keep `.github/copilot-instructions.md` operationally significant for native Copilot surfaces.
+- Goal: keep `.github/copilot-instructions.md` operationally significant as a compact routing bridge for native Copilot surfaces.
 - Scope:
   - `.github/copilot-instructions.md`
 - Expected behavior:
   - the file stays compact, high-signal, and aligned with `AGENTS.md`
-  - the file projects repo-wide behavior needed by Copilot-native flows
+  - the file routes to canonical owners and does not duplicate full policy blocks
   - the file is not reduced to an empty shell or replaced by inventory text
 
 #### `skill-first-domain-skills-are-canonical`
@@ -65,7 +65,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - specialist skills own detailed workflows, framework behavior, validation shape, and domain-specific edge cases
   - large checklists, templates, and examples live in skill references only when they remain useful and are not copied into always-on files
   - `agents/openai.yaml` metadata stays aligned with each repository-owned skill bundle when present
-  - Codex and OpenCode portability depends on skills and home-skill sync, not on a path-specific projection family
+  - Codex and OpenCode portability depends on skills and home-skill sync, not on oversized bridge content
 
 #### `skill-first-routing-is-evidence-based`
 
@@ -167,7 +167,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - thin wrappers and convenience entry points to canonical implementations remain allowed when they improve operator ergonomics and do not fork the underlying logic
   - destructive deduplication requires evidence of duplicated behavior, not just matching names
 
-#### `duplication-useful-projections-are-allowed`
+#### `duplication-useful-restatements-are-allowed`
 
 - Goal: preserve local self-containment when it materially helps the consumer.
 - Scope:
@@ -175,7 +175,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - governance agents and prompts
   - skills and skill references
 - Expected behavior:
-  - compact repo-wide projections remain allowed
+  - compact repo-wide bridge restatements remain allowed
   - local restatements remain allowed when they improve behavior for the target surface and stay aligned with the canonical rule
   - duplication must be deliberate and low-drift
 
@@ -245,7 +245,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 #### `resource-governance-canonical-operational-model-stays-explicit`
 
-- Goal: keep the canonical repository-owned operating model clear across projections.
+- Goal: keep the canonical repository-owned operating model clear across bridge and owner-specific surfaces.
 - Scope:
   - `.github/copilot-instructions.md`
   - canonical operational wrapper agents
@@ -267,7 +267,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 #### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-owned`
 
-- Goal: keep repo-wide GitHub PR operating reminders visible without expanding the Copilot projection.
+- Goal: keep repo-wide GitHub PR operating reminders visible without expanding the Copilot bridge.
 - Scope:
   - `.github/skills/internal-github-pr/SKILL.md`
   - `CODEOWNERS`
@@ -280,11 +280,11 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - organization-wide `gh search prs` results are treated as potentially stale immediately after merge
   - repository-scoped `gh pr view --json state,mergedAt` is used to confirm terminal PR state before treating a just-merged PR as still open
   - `CODEOWNERS` placeholder-owner rules stay in the owned file and GitHub governance owner instead of always-on guidance
-  - the Copilot projection does not repeat the full workflow reminder text
+  - the Copilot bridge does not repeat the full workflow reminder text
 
 ### Reporting
 
-#### `reporting-completion-report-projection-stays-visible`
+#### `reporting-completion-report-bridge-stays-visible`
 
 - Goal: keep the completion report contract visible on the surfaces that need it while keeping Copilot always-on guidance short.
 - Scope:
@@ -296,8 +296,8 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - maintainer-facing docs and sync contracts may define detailed report labels such as `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`
   - supporting sections such as `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources` are optional detail by default
   - when detail is available but omitted for token discipline, the response offers a compact follow-up and accepts number-only replies
-  - the Copilot projection keeps only a compact reporting reminder unless a narrower contract requires more detail
-  - root `AGENTS.md` may point to the repo-wide projection but does not need to carry the full formatting contract
+  - the Copilot bridge keeps only a compact reporting reminder unless a narrower contract requires more detail
+  - root `AGENTS.md` does not need to carry the full formatting contract
 
 #### `reporting-retained-learning-ledger-stays-governed`
 
@@ -314,7 +314,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - root `AGENTS.md` keeps only retained-artifact boundaries and points detailed procedures to retained-plan and lesson-codification owners
   - the lesson codification skill owns the workflow that routes candidate lessons to the smallest valid canonical owner before ledger fallback
   - detailed ledger row preservation rules live in `LESSONS_LEARNED.md` entry rules
-  - the Copilot projection keeps only the retained-artifact principle and owner-routing reminder
+  - the Copilot bridge keeps only the retained-artifact principle and owner-routing reminder
   - no ledger update is required when no stable new lesson emerged
   - once a lesson is codified elsewhere, it is removed from `LESSONS_LEARNED.md` instead of being retained as a codified duplicate
 
@@ -327,18 +327,18 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - future validator, sync, and test implementations
 - Expected behavior:
   - automation reads `AGENTS.md` for cross-surface defaults and precedence
-  - automation reads `.github/copilot-instructions.md` for repo-wide Copilot projection behavior
+  - automation reads `.github/copilot-instructions.md` for repo-wide Copilot bridge behavior
   - automation reads `.github/INVENTORY.md` for the live catalog
   - automation reads skill bundles for domain baselines, reusable procedures, references, and metadata
   - automation treats routing helpers as advisory evidence, not hidden dispatch authority
 
 #### `future-automation-preserves-local-exceptions`
 
-- Goal: keep future automation compatible with local projections and explicit exceptions.
+- Goal: keep future automation compatible with local instruction exceptions and explicit overrides owned by narrower files.
 - Scope:
   - future validator, sync, and test implementations
 - Expected behavior:
-  - useful local projections are not rejected just because the same rule exists canonically elsewhere
+  - useful local instruction exceptions are not rejected just because the same rule exists canonically elsewhere
   - explicit local exceptions are allowed when they remain local and unambiguous
   - retained tracking plans or similar follow-up artifacts live under repository-root `tmp/`
 

@@ -38,18 +38,39 @@ def test_build_inventory_markdown_lists_catalog_sections(tmp_path: Path) -> None
     assert "- `.github/prompts/internal-agent-plan-next-step.prompt.md`" in inventory
 
 
-def test_build_inventory_markdown_keeps_retired_instruction_section_empty(
+def test_build_inventory_markdown_lists_source_instruction_entries(
     tmp_path: Path,
 ) -> None:
     write_file(
         tmp_path / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
-        "---\ndescription: Python\n---\n",
+        "---\ndescription: Python\napplyTo: '**/*.py'\nexcludeAgent: cloud-agent\n---\n\n"
+        "This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.\n",
     )
 
     inventory = build_inventory_markdown(tmp_path)
 
-    assert "No instruction files currently ship in the live catalog." in inventory
-    assert "internal-python.instructions.md" not in inventory
+    assert "No instruction files currently ship in the live catalog." not in inventory
+    assert "- `.github/instructions/internal-python.instructions.md`" in inventory
+
+
+def test_build_inventory_markdown_lists_source_managed_instructions(
+    tmp_path: Path,
+) -> None:
+    write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
+    write_file(
+        tmp_path / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        "---\n"
+        "description: Python review checks\n"
+        "applyTo: '**/*.py'\n"
+        "excludeAgent: cloud-agent\n"
+        "---\n\n"
+        "This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.\n",
+    )
+
+    inventory = build_inventory_markdown(tmp_path)
+
+    assert "No instruction files currently ship in the live catalog." not in inventory
+    assert "- `.github/instructions/internal-python.instructions.md`" in inventory
 
 
 def test_run_consistency_checks_flags_prompt_inventory_drift(tmp_path: Path) -> None:
@@ -426,7 +447,7 @@ def test_run_consistency_checks_flags_active_residual_instruction_reference(
         "# Internal Demo\n\n"
         "## When to use\n\n"
         "Use this skill for tests.\n\n"
-        f"See `{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md`.\n",
+        "See `.github/copilot-code-review-instructions.md`.\n",
     )
     write_file(tmp_path / ".github/INVENTORY.md", build_inventory_markdown(tmp_path))
 

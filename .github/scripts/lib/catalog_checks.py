@@ -25,9 +25,21 @@ from .shared import (
 )
 
 RESIDUAL_INSTRUCTION_REFERENCE_PATTERNS = (
-    (re.compile(r"\.github/instructions"), "source instruction directory"),
-    (re.compile(r"instructions/[^`\s)]+\.instructions\.md"), "instruction file path"),
-    (re.compile(r"\bapplyTo\b"), "instruction frontmatter key"),
+    (
+        re.compile(r"\.github/copilot-code-review-instructions\.md"),
+        "retired legacy review instruction path",
+    ),
+    (
+        re.compile(r"\.github/copilot-instructions\.override\.md"),
+        "retired override path",
+    ),
+    (
+        re.compile(r"\.github/templates/copilot-instructions\.override\.md\.template"),
+        "retired override template path",
+    ),
+)
+SOURCE_INSTRUCTION_REVIEW_MARKER = (
+    "optimized for Copilot code review and should produce only evidenced findings"
 )
 
 
@@ -40,6 +52,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_repo_owned_agent_sections(root))
     findings.extend(check_duplicate_frontmatter_names(root))
     findings.extend(check_prompt_contracts(root))
+    findings.extend(check_source_instruction_contracts(root))
     findings.extend(check_residual_instruction_family_references(root))
     findings.extend(check_imported_asset_overrides(root))
     findings.extend(check_superpowers_import_naming(root))
@@ -51,9 +64,87 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     return sorted(findings, key=finding_sort_key)
 
 
+def check_source_instruction_contracts(root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    instructions_root = root / ".github/instructions"
+    if not instructions_root.exists():
+        return findings
+
+    for path in sorted(instructions_root.rglob("*.instructions.md")):
+        relative_path = path.relative_to(root).as_posix()
+        frontmatter = load_frontmatter(path)
+        description = frontmatter.get("description")
+        apply_to = frontmatter.get("applyTo")
+        exclude_agent = frontmatter.get("excludeAgent")
+        body = read_text(path)
+
+        if not isinstance(description, str) or not description.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="source-instruction-missing-description",
+                    path=relative_path,
+                    message="Source-managed instructions must declare a non-empty `description:` frontmatter value.",
+                    suggestion="Add a short description that frames review checks for the matching paths.",
+                )
+            )
+
+        if not isinstance(apply_to, str) or not apply_to.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="source-instruction-missing-apply-to",
+                    path=relative_path,
+                    message="Source-managed instructions must declare a non-empty `applyTo:` frontmatter value.",
+                    suggestion="Set `applyTo:` to the narrowest glob that matches the intended review scope.",
+                )
+            )
+
+        if exclude_agent != "cloud-agent":
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="source-instruction-missing-exclude-agent",
+                    path=relative_path,
+                    message="Source-managed instructions must set `excludeAgent: cloud-agent`.",
+                    suggestion="Set `excludeAgent: cloud-agent` so this instruction remains review-oriented.",
+                )
+            )
+
+        if SOURCE_INSTRUCTION_REVIEW_MARKER not in body:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="source-instruction-missing-review-statement",
+                    path=relative_path,
+                    message="Source-managed instructions must include the review-purpose opening statement.",
+                    suggestion="Add the common opening statement that this file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.",
+                )
+            )
+
+        line_count = len(body.splitlines())
+        if line_count > 220:
+            findings.append(
+                Finding(
+                    severity="non-blocking",
+                    code="source-instruction-overgrown",
+                    path=relative_path,
+                    message=f"Source-managed instruction is overgrown ({line_count} lines) and may behave like a shadow skill.",
+                    suggestion="Keep only review-critical checks here and move procedural depth to the matching skill owner.",
+                )
+            )
+
+    return findings
+
+
 def check_required_bridge_files(root: Path) -> list[Finding]:
     findings: list[Finding] = []
-    required_files = ["AGENTS.md", ".github/copilot-instructions.md", INVENTORY_PATH]
+    required_files = [
+        "AGENTS.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/copilot-code-review.instructions.md",
+        INVENTORY_PATH,
+    ]
     for relative_path in required_files:
         if (root / relative_path).exists():
             continue
@@ -111,16 +202,6 @@ def check_bridge_references(root: Path) -> list[Finding]:
     copilot_path = root / ".github/copilot-instructions.md"
     if agents_path.exists():
         agents_text = read_text(agents_path)
-        if ".github/copilot-instructions.md" not in agents_text:
-            findings.append(
-                Finding(
-                    severity="blocking",
-                    code="agents-missing-copilot-reference",
-                    path="AGENTS.md",
-                    message="AGENTS.md no longer points to .github/copilot-instructions.md as the repo-wide Copilot projection.",
-                    suggestion="Restore the reference so the bridge contract remains explicit.",
-                )
-            )
         if ".github/INVENTORY.md" not in agents_text:
             findings.append(
                 Finding(
@@ -390,8 +471,8 @@ def check_residual_instruction_family_references(root: Path) -> list[Finding]:
                     severity="blocking",
                     code="residual-instruction-reference",
                     path=relative_path,
-                    message=f"Active Markdown still references the retired instruction family via {label}.",
-                    suggestion="Route the rule to the smallest valid skill, agent, prompt, validator, or owned file before removing the legacy family.",
+                    message=f"Active Markdown still references a retired instruction asset via {label}.",
+                    suggestion="Route the rule to the smallest valid owner and remove legacy-path references from active contracts.",
                 )
             )
             break

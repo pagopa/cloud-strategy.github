@@ -8,6 +8,17 @@ Use this format for new updates:
 - One bullet per meaningful change.
 - Include file/path scope when useful.
 
+## 2026-06-14
+
+- Added field-level consumer sync for `.vscode/settings.json` so only `github.copilot.chat.codeGeneration.useInstructionFiles=false` and `chat.instructionsFilesLocations[".github/instructions"]=false` are enforced with JSONC-aware merge semantics, explicit malformed/duplicate-key blockers, and manifest tracking that stays settings-scoped instead of whole-file ownership.
+- Reintroduced the source-managed `.github/instructions/*.instructions.md` family as governed review-only projections, preserving existing `applyTo` scopes while removing procedural depth and retaining only evidenced, review-critical checks.
+- Added `excludeAgent: "cloud-agent"` across the entire reintroduced instruction family and standardized the required review-only opening sentence immediately after frontmatter.
+- Updated deprecation policy language in `.github/DEPRECATION.md` to keep the historical note about retiring the broad old instruction model while reflecting the controlled reintroduction of the review-only family.
+- Backfilled high-signal review checks in `.github/instructions/internal-terraform.instructions.md`, `.github/instructions/internal-github-actions.instructions.md`, and `.github/instructions/internal-python.instructions.md` without reintroducing workflow depth.
+- Fixed `.github/instructions/internal-azure-devops-pipelines.instructions.md` `applyTo` glob spacing and normalized family frontmatter style in the remaining outlier instruction files.
+- Added governed review-only instruction coverage for CloudFormation/SAM, Helm, Dependabot, and CodeQL via `.github/instructions/internal-cloudformation.instructions.md`, `.github/instructions/internal-helm.instructions.md`, `.github/instructions/internal-dependabot.instructions.md`, and `.github/instructions/internal-codeql.instructions.md`.
+- Widened `.github/instructions/internal-lambda.instructions.md` `applyTo` to include common `lambdas/` and `functions/` directory layouts in addition to filename-based matches.
+
 ## 2026-06-02
 
 - Added `internal-gateway-idea-brainstorming` as a visible fourth gateway skill and thin Copilot wrapper agent, owning substantive idea definition, guided decision interview, convergence, Definition Brief, mandatory critical pass, and validated handoff before operational planning.

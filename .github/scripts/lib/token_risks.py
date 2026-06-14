@@ -23,15 +23,18 @@ IMPORTED_SKILL_DESCRIPTION_LIMIT = 500
 ESTIMATED_TOKEN_BYTES = 4
 DELEGATED_REVIEW_PROMPT_PATH = ".github/prompts/internal-review-ai-resources.prompt.md"
 DELEGATED_REVIEW_PROMPT_TOKEN_TARGET = 1100
-ROOT_ALWAYS_ON_PATHS = ("AGENTS.md", ".github/copilot-instructions.md")
+ROOT_ALWAYS_ON_PATHS = ("AGENTS.md",)
 ROOT_ALWAYS_ON_TOKEN_TARGET = 4000
-COPILOT_CODE_REVIEW_CHAR_LIMIT = 4000
-COPILOT_REVIEW_WINDOW_REQUIRED_MARKERS = (
-    "first 4,000 characters",
-    "least privilege",
+COPILOT_BRIDGE_PATH = ".github/copilot-instructions.md"
+COPILOT_BRIDGE_TOKEN_TARGET = 600
+REVIEW_BASELINE_PATH = ".github/instructions/copilot-code-review.instructions.md"
+REVIEW_BASELINE_CHAR_LIMIT = 4000
+REVIEW_BASELINE_REQUIRED_MARKERS = (
+    "Critical",
+    "Major",
+    "Least privilege",
     "no hardcoded secrets",
-    "Select the smallest relevant skill",
-    "Run the applicable validation",
+    "evidenced findings",
 )
 AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
     "## Retained Plans",
@@ -60,8 +63,9 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_bridge_overlap(root))
     findings.extend(check_agents_operational_procedure_markers(root))
     findings.extend(check_root_always_on_budget(root))
+    findings.extend(check_copilot_bridge_budget(root))
     findings.extend(check_delegated_review_prompt_budget(root))
-    findings.extend(check_copilot_review_window(root))
+    findings.extend(check_review_baseline_window(root))
     findings.extend(check_inventory_dumps(root))
     findings.extend(check_duplicate_markdown_bodies(root))
     findings.extend(check_imported_skill_description_budget(root))
@@ -93,12 +97,36 @@ def check_root_always_on_budget(root: Path) -> list[Finding]:
             code="root-always-on-budget",
             path="AGENTS.md",
             message=(
-                "AGENTS.md and .github/copilot-instructions.md exceed the critical always-on "
+                "AGENTS.md exceeds the canonical always-on "
                 f"soft target ({estimated_tokens} estimated tokens, target {ROOT_ALWAYS_ON_TOKEN_TARGET})."
             ),
             suggestion=(
-                "Classify each global section as required always-on, Copilot-native projection, "
-                "skill, context, inventory, or removal before trimming."
+                "Keep AGENTS.md policy-only and move procedural depth to skill owners and references."
+            ),
+        )
+    ]
+
+
+def check_copilot_bridge_budget(root: Path) -> list[Finding]:
+    path = root / COPILOT_BRIDGE_PATH
+    if not path.exists():
+        return []
+
+    estimated_tokens = estimate_tokens(path)
+    if estimated_tokens <= COPILOT_BRIDGE_TOKEN_TARGET:
+        return []
+
+    return [
+        Finding(
+            severity="non-blocking",
+            code="copilot-bridge-over-budget",
+            path=COPILOT_BRIDGE_PATH,
+            message=(
+                "The Copilot bridge exceeds its compact-routing budget "
+                f"({estimated_tokens} estimated tokens, target {COPILOT_BRIDGE_TOKEN_TARGET})."
+            ),
+            suggestion=(
+                "Keep this file as a routing bridge to AGENTS.md and move policy/detail into owned instructions and skills."
             ),
         )
     ]
@@ -159,16 +187,16 @@ def check_agents_operational_procedure_markers(root: Path) -> list[Finding]:
     ]
 
 
-def check_copilot_review_window(root: Path) -> list[Finding]:
-    path = root / ".github/copilot-instructions.md"
+def check_review_baseline_window(root: Path) -> list[Finding]:
+    path = root / REVIEW_BASELINE_PATH
     if not path.exists():
         return []
 
-    window = read_text(path)[:COPILOT_CODE_REVIEW_CHAR_LIMIT]
+    window = read_text(path)[:REVIEW_BASELINE_CHAR_LIMIT]
     normalized_window = window.lower()
     missing_markers = [
         marker
-        for marker in COPILOT_REVIEW_WINDOW_REQUIRED_MARKERS
+        for marker in REVIEW_BASELINE_REQUIRED_MARKERS
         if marker.lower() not in normalized_window
     ]
     if not missing_markers:
@@ -177,15 +205,14 @@ def check_copilot_review_window(root: Path) -> list[Finding]:
     return [
         Finding(
             severity="non-blocking",
-            code="copilot-review-window-missing-core-rules",
-            path=".github/copilot-instructions.md",
+            code="review-baseline-window-missing-core-rules",
+            path=REVIEW_BASELINE_PATH,
             message=(
-                "The first 4,000 characters of .github/copilot-instructions.md do not carry "
+                "The first 4,000 characters of the global review baseline do not carry "
                 f"all review-critical anchors: {', '.join(missing_markers)}."
             ),
             suggestion=(
-                "Keep the bridge reference, security guardrails, relevant-skill rule, and validation rule "
-                "inside the first 4,000 characters before deeper governance detail."
+                "Keep severity buckets, security anchors, and evidenced-findings framing inside the first 4,000 characters."
             ),
         )
     ]

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -Eeuo pipefail
-
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-
-"$REPO_ROOT/.github/scripts/graphify-file-change-hook.sh" post-commit "$@" >/dev/null 2>&1 &
-
-exit 0

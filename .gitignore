@@ -19,3 +19,8 @@ env/
 # Graphify official upstream output and temporary root artifacts
 /graphify-out/
 /.graphify_*
+.codex/hooks.json
+.opencode/opencode.json
+.opencode/plugins/graphify.js
+.github/scripts/lib/graphify-out/*
+.github/scripts/graphify-out/*

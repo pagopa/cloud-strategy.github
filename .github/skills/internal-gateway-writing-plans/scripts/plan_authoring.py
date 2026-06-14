@@ -22,7 +22,6 @@ SUPPORTED_PROFILES = frozenset({"compact", "extended"})
 COMPACT_FOLDER_PREFIX = "mini-plan-"
 LEDGER_REQUIRED_FIELDS = (
     "Recommended use",
-    "Recommended consumer",
     "File map and role",
     "Clarification gate",
     "Initial evidence pass",
@@ -74,15 +73,6 @@ def classify_profile(plan_folder: Path) -> str:
     return "unsupported"
 
 
-def expected_consumer(profile: str) -> str:
-    return "internal-gateway-simple-task" if profile == "compact" else "internal-gateway-execute-plans"
-
-
-def extract_recommended_consumer(ledger_text: str) -> str | None:
-    match = re.search(r"Recommended consumer[:\s]+([A-Za-z0-9._-]+)", ledger_text)
-    return match.group(1) if match else None
-
-
 def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
     if plan_folder.exists():
         print(f"ERROR: {plan_folder} already exists", file=sys.stderr)
@@ -132,7 +122,6 @@ def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
         ),
         encoding="utf-8",
     )
-    ledger_consumer = expected_consumer(profile)
     (plan_folder / "02-source-item-ledger.md").write_text(
         textwrap.dedent(
             f"""\
@@ -141,10 +130,6 @@ def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
             ## Recommended use
 
             execute after explicit approval
-
-            ## Recommended consumer
-
-            {ledger_consumer}
 
             ## Plan profile
 
@@ -368,17 +353,6 @@ def _validate_ledger(plan_folder: Path, profile: str) -> list[Finding]:
     for field in LEDGER_REQUIRED_FIELDS:
         if field not in ledger_text:
             findings.append(Finding("missing-ledger-fields", f"Missing ledger field: {field}"))
-    consumer = extract_recommended_consumer(ledger_text)
-    if consumer is None:
-        findings.append(Finding("missing-recommended-consumer", "Ledger missing Recommended consumer"))
-    elif consumer != expected_consumer(profile):
-        findings.append(
-            Finding(
-                "profile-consumer-mismatch",
-                f"Profile {profile} requires Recommended consumer: {expected_consumer(profile)}",
-            )
-        )
-
     for heading in (
         "Initial evidence pass",
         "Reading budget",

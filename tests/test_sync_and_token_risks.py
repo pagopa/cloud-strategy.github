@@ -66,10 +66,6 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     write_file(source_root / "AGENTS.md", "# AGENTS\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
-        source_root / ".github/templates/copilot-instructions.override.md.template",
-        "# Copilot Instructions Override\n\n- No active overrides in this repository.\n",
-    )
-    write_file(
         source_root / ".github/agents/internal-fast.agent.md",
         "---\nname: internal-fast\ntools: [read]\n---\n",
     )
@@ -93,10 +89,6 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
         "---\nname: local-special\ntools: [read]\n---\n",
     )
     write_file(
-        target_root / ".github/copilot-instructions.override.md",
-        "# Copilot Instructions Override\n\n- Override: Keep repo-local behavior explicit.\n",
-    )
-    write_file(
         target_root / ".github/agents/custom.agent.md",
         "---\nname: custom\ntools: [read]\n---\n",
     )
@@ -105,13 +97,12 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert ("preserve", ".github/agents/local-special.agent.md") in actions
-    assert ("preserve", ".github/copilot-instructions.override.md") in actions
     assert ("delete", ".github/agents/custom.agent.md") in actions
     assert ("update", ".github/agents/internal-fast.agent.md") in actions
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
 
 
-def test_build_sync_plan_does_not_ship_source_instruction_family(
+def test_build_sync_plan_ships_source_instruction_family(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -121,7 +112,7 @@ def test_build_sync_plan_does_not_ship_source_instruction_family(
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
         source_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
-        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\n---\n",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
     )
     write_file(target_root / "AGENTS.md", "# AGENTS\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
@@ -129,12 +120,10 @@ def test_build_sync_plan_does_not_ship_source_instruction_family(
     plan = build_sync_plan(source_root, target_root)
     planned_paths = {operation.path for operation in plan.operations}
 
-    assert (
-        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
-    )
+    assert f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" in planned_paths
 
 
-def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
+def test_build_sync_plan_updates_target_instructions_and_preserves_local(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -142,11 +131,15 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
 
     write_file(source_root / "AGENTS.md", "# AGENTS\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        source_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
+    )
     write_file(target_root / "AGENTS.md", "# AGENTS\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(
         target_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
-        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\n---\n",
+        f"---\ndescription: Old Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
     )
     write_file(
         target_root / LEGACY_INSTRUCTION_DIR / "local-team.instructions.md",
@@ -157,7 +150,44 @@ def test_build_sync_plan_prunes_target_legacy_instructions_but_preserves_local(
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert (
-        "delete",
+        "update",
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
+    ) in actions
+    assert (
+        "preserve",
+        f"{LEGACY_INSTRUCTION_DIR}/local-team.instructions.md",
+    ) in actions
+
+
+def test_build_sync_plan_ships_source_managed_instructions_and_preserves_local(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        source_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
+    )
+
+    write_file(target_root / "AGENTS.md", "# AGENTS\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\n")
+    write_file(
+        target_root / LEGACY_INSTRUCTION_DIR / "internal-python.instructions.md",
+        f"---\ndescription: Old Python\n{LEGACY_APPLY_TO_KEY}: '**/*.py'\nexcludeAgent: cloud-agent\n---\n",
+    )
+    write_file(
+        target_root / LEGACY_INSTRUCTION_DIR / "local-team.instructions.md",
+        f"---\ndescription: Local team\n{LEGACY_APPLY_TO_KEY}: '**/*.md'\nexcludeAgent: cloud-agent\n---\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+    actions = {(operation.action, operation.path) for operation in plan.operations}
+
+    assert (
+        "update",
         f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
     ) in actions
     assert (
@@ -192,7 +222,7 @@ def test_build_sync_plan_includes_graphify_skill_in_consumer_sync(
     assert ("update", ".github/skills/graphify/SKILL.md") in actions
 
 
-def test_build_sync_plan_creates_target_local_override_from_template_when_missing(
+def test_build_sync_plan_does_not_create_legacy_override_when_missing(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -200,22 +230,14 @@ def test_build_sync_plan_creates_target_local_override_from_template_when_missin
 
     write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
-    write_file(
-        source_root / ".github/templates/copilot-instructions.override.md.template",
-        "# Copilot Instructions Override\n\n- No active overrides in this repository.\n",
-    )
     write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
     write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
 
     plan = build_sync_plan(source_root, target_root)
 
-    assert ("create", ".github/copilot-instructions.override.md") in {
-        (operation.action, operation.path) for operation in plan.operations
+    assert ".github/copilot-instructions.override.md" not in {
+        operation.path for operation in plan.operations
     }
-    assert all(
-        operation.path != ".github/templates/copilot-instructions.override.md.template"
-        for operation in plan.operations
-    )
 
 
 def test_build_sync_plan_creates_consumer_local_knowledge_docs_from_templates(
@@ -546,10 +568,6 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     write_file(source_root / "VERSION", "1.2.3\n")
     write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
     write_file(
-        source_root / ".github/templates/copilot-instructions.override.md.template",
-        "# Copilot Instructions Override\n\n- No active overrides in this repository.\n",
-    )
-    write_file(
         source_root / ".github/agents/internal-fast.agent.md",
         "---\nname: internal-fast\ntools: [read]\n---\n\n# Source\n",
     )
@@ -578,12 +596,6 @@ def test_apply_sync_plan_clears_plan_file_and_writes_manifest(tmp_path: Path) ->
     assert not (
         target_root / ".github/internal-sync-copilot-configs.manifest.json"
     ).exists()
-    assert (target_root / ".github/copilot-instructions.override.md").exists()
-    assert (target_root / ".github/copilot-instructions.override.md").read_text(
-        encoding="utf-8"
-    ) == (
-        "# Copilot Instructions Override\n\n- No active overrides in this repository.\n"
-    )
     assert "AGENTS.md" in manifest["managed_hashes"]
     assert manifest["managed_hashes"][".github/agents/internal-fast.agent.md"]
     assert manifest["source_version"] == "1.2.3"
@@ -933,6 +945,172 @@ def test_apply_sync_plan_mirrors_shared_repo_hygiene_files(
     ) == "name: pre-commit\n"
 
 
+def test_build_sync_plan_ensures_vscode_settings_when_missing(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("ensure", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_apply_sync_plan_merges_vscode_settings_in_jsonc_file(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        "  // keep local test settings\n"
+        '  "python.testing.pytestEnabled": true,\n'
+        '  "github.copilot.chat.codeGeneration.useInstructionFiles": true,\n'
+        '  "chat.instructionsFilesLocations": {\n'
+        "    // local override\n"
+        '    ".github/instructions": true,\n'
+        '    "./team": true,\n'
+        "  },\n"
+        "}\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("ensure", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+    apply_sync_plan(plan)
+    merged = (target_root / ".vscode/settings.json").read_text(encoding="utf-8")
+
+    assert '"python.testing.pytestEnabled": true' in merged
+    assert '"github.copilot.chat.codeGeneration.useInstructionFiles": false' in merged
+    assert '".github/instructions": false' in merged
+    assert '"./team": true' in merged
+    assert "// keep local test settings" in merged
+    assert "// local override" in merged
+
+
+def test_build_sync_plan_marks_vscode_settings_unchanged_when_aligned(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        '  "github.copilot.chat.codeGeneration.useInstructionFiles": false,\n'
+        '  "chat.instructionsFilesLocations": {\n'
+        '    ".github/instructions": false\n'
+        "  },\n"
+        "}\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("unchanged", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_build_sync_plan_blocks_vscode_settings_on_malformed_jsonc(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        '  "github.copilot.chat.codeGeneration.useInstructionFiles": true,\n'
+        '  "chat.instructionsFilesLocations": {\n'
+        '    ".github/instructions": true,\n'
+        "\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("manual", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_build_sync_plan_blocks_vscode_settings_on_duplicate_relevant_keys(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+    write_file(
+        target_root / ".vscode/settings.json",
+        "{\n"
+        '  "chat.instructionsFilesLocations": {\n'
+        '    ".github/instructions": true,\n'
+        '    ".github/instructions": false\n'
+        "  }\n"
+        "}\n",
+    )
+
+    plan = build_sync_plan(source_root, target_root)
+
+    assert ("manual", ".vscode/settings.json") in {
+        (operation.action, operation.path) for operation in plan.operations
+    }
+
+
+def test_apply_sync_manifest_tracks_vscode_settings_without_file_hash(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    target_root = tmp_path / "target"
+
+    write_file(source_root / "AGENTS.md", "# AGENTS\nsource\n")
+    write_file(source_root / "VERSION", "9.9.9\n")
+    write_file(source_root / ".github/copilot-instructions.md", "# Copilot\nsource\n")
+    write_file(target_root / "AGENTS.md", "# AGENTS\ntarget\n")
+    write_file(target_root / ".github/copilot-instructions.md", "# Copilot\ntarget\n")
+
+    plan = build_sync_plan(source_root, target_root)
+    manifest_path = apply_sync_plan(plan)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert ".vscode/settings.json" not in manifest["managed_hashes"]
+    assert (
+        manifest["managed_settings"][
+            "github.copilot.chat.codeGeneration.useInstructionFiles"
+        ]
+        is False
+    )
+    assert (
+        manifest["managed_settings"][
+            "chat.instructionsFilesLocations/.github/instructions"
+        ]
+        is False
+    )
+
+
 def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     repeated_lines = "\n".join(
         [
@@ -1032,20 +1210,24 @@ def test_detect_token_risks_reports_agents_operational_procedure_markers(
     assert "agents-operational-procedure-marker" in finding_codes
 
 
-def test_detect_token_risks_reports_copilot_review_window_missing_core_rules(
+def test_detect_token_risks_reports_review_baseline_window_missing_core_rules(
     tmp_path: Path,
 ) -> None:
     write_file(tmp_path / "AGENTS.md", "# AGENTS\n")
     write_file(
         tmp_path / ".github/copilot-instructions.md",
-        "# Copilot\n\n" + ("Repository background before critical rules.\n" * 150),
+        "# Copilot\n",
+    )
+    write_file(
+        tmp_path / ".github/instructions/copilot-code-review.instructions.md",
+        "# Review\n\n" + ("Repository background before critical rules.\n" * 150),
     )
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
 
     findings = detect_token_risks(tmp_path)
     finding_codes = {finding.code for finding in findings}
 
-    assert "copilot-review-window-missing-core-rules" in finding_codes
+    assert "review-baseline-window-missing-core-rules" in finding_codes
 
 
 def test_detect_token_risks_ignores_structural_bridge_references(
@@ -1054,11 +1236,11 @@ def test_detect_token_risks_ignores_structural_bridge_references(
     write_file(
         tmp_path / "AGENTS.md",
         "# AGENTS\n\n"
-        "- Use `.github/copilot-instructions.md` as the repo-wide projection.\n"
+        "- Use `.github/copilot-instructions.md` as the compact repo-wide bridge.\n"
         "- Use `.github/INVENTORY.md` as the live catalog.\n"
         "- Use `.github/skills/` when a reusable workflow or technical baseline is relevant.\n"
         "- Use `.github/agents/` when a stable owner is relevant.\n"
-        "- Keep `.github/copilot-instructions.override.md` local to consumer repositories.\n",
+        "- Keep local exceptions in `.github/instructions/local-*.instructions.md`.\n",
     )
     write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
@@ -1293,17 +1475,15 @@ def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() ->
 
 def test_root_always_on_token_budget_contract_uses_validator_constants() -> None:
     agents_text = Path("AGENTS.md").read_text(encoding="utf-8")
-    target_text = f"{ROOT_ALWAYS_ON_TOKEN_TARGET:,} estimated tokens"
+    target_text = f"{ROOT_ALWAYS_ON_TOKEN_TARGET:,}"
     calculated_estimates = {
         file_path: estimate_tokens(Path(file_path))
         for file_path in ROOT_ALWAYS_ON_PATHS
     }
 
     assert "## Estimated Fixed-Load Token Budget" not in agents_text
-    assert (
-        "The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md`"
-        in agents_text
-    )
+    assert "`AGENTS.md` is the canonical always-on policy surface" in agents_text
     assert target_text in agents_text
+    assert "soft target" in agents_text
     assert "`make token-risks`" in agents_text
     assert set(calculated_estimates) == set(ROOT_ALWAYS_ON_PATHS)

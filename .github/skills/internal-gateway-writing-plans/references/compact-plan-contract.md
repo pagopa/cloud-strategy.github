@@ -46,7 +46,9 @@ Excluded reads:
 
 - `done-*`, `evidence-envelope.md`, and `completion-report.md` during authoring.
 
-`compact` is ready for a small/fast executor only after `handoff-check` is ready.
+`compact` is ready for retained-plan execution only after `handoff-check` is ready.
+`internal-gateway-execute-plans` infers the concrete execution strategy from the
+profile, folder shape, and validation path.
 
 ## Escalation To Extended
 
@@ -84,8 +86,8 @@ Required sections in Italian:
   for non-trivial plans. Each row names the resource, the action, and its purpose.
 - `Comportamento scelto` — chosen behavior and boundary rules.
 - `Validazione prevista` — validation path.
-- `Esecuzione prevista` — route visibility, including profile, consumer, folder
-  prefix, and execution file.
+- `Esecuzione prevista` — route visibility, including profile, folder prefix,
+  execution file, and any execution-strategy hints the executor should infer.
 - `Decisione richiesta` — decision request.
 
 ## Template: 03-execution.md

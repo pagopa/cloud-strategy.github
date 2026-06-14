@@ -23,8 +23,8 @@ and source-side sync tooling.
 - Provide source-side automation to plan and apply baseline sync into consumer
   repositories.
 - Keep catalog inventory and consistency checks aligned with filesystem state.
-- Preserve consumer-local assets during sync, including local overrides and
-  consumer-local knowledge documents.
+- Preserve consumer-local assets during sync, including `local-*.instructions.md`
+  and consumer-local knowledge documents.
 
 ## Capabilities
 
@@ -42,7 +42,8 @@ and source-side sync tooling.
 
 ## Goals
 
-- Keep policy, projection, inventory, context, and workflows clearly separated.
+- Keep policy, bridge, review baseline, inventory, context, and workflows
+  clearly separated.
 - Keep sync behavior safe for target-owned local knowledge and local overrides.
 - Keep validations close to contract changes.
 
@@ -60,7 +61,7 @@ and source-side sync tooling.
 | Consumer repository | A target repository receiving the baseline while preserving local assets. |
 | Source-managed | Content mirrored from this repository into consumers. |
 | Consumer-local | Content owned by the target and preserved across sync runs. |
-| Projection | Surface-specific expression of canonical rules, such as `.github/copilot-instructions.md`. |
+| Bridge | Compact routing layer for Copilot surfaces, such as `.github/copilot-instructions.md`. |
 | Scaffold | Initial target file materialized from a source template only when missing. |
 
 ## Unknown / To Verify

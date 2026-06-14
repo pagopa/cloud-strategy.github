@@ -18,12 +18,15 @@ before the `done-*` loop starts.
   a `Risorsa | Azione | Scopo` table for non-trivial plans. Non-executable.
 - `02-source-item-ledger.md` with `Recommended use`, `File map and role`,
   `Initial evidence pass`, `Reading budget`, and source-item coverage.
-- `04-implementation-contract.md` for `extended` profiles, or an explicit
-  `Implementation contract: not applicable` statement for `compact`.
+- `04-implementation-contract.md` for `extended` profiles. `compact` profiles do
+  not require an implementation contract.
+- Execution strategy is inferred by `internal-gateway-execute-plans` from the
+  declared profile, folder shape, and validation path; do not require a
+  separate consumer field in the retained plan.
 - Numbered executable plan files after the summary and ledger control files.
 - `questions.md` with accepted user-only decisions or `- none`.
 - A plan for closing the summary and ledger files through matching `done-*`
-  markers when the folder completes as `SHIPPED`.
+  markers when the folder completes as `DONE`.
 - Confirmed target state and anti-scope.
 - Selected owner and known lane-change owner.
 - Validation path or explicit validation gap.
@@ -40,7 +43,9 @@ before the `done-*` loop starts.
 2. Run the declared `Initial evidence pass` before broad reading. Use `rg --no-ignore` for retained artifacts under `tmp/` when checking plan claims.
 3. Read `questions.md` for accepted decisions, then exclude it from the
    executable loop.
-4. Read `04-implementation-contract.md` after the summary and ledger when present or required, then read numbered executable plan files in order.
+4. For `compact`, read `03-execution.md` as the only executable file after the
+  summary and ledger. For `extended`, read `04-implementation-contract.md`
+  after the summary and ledger, then read numbered executable plan files in order.
 5. Check whether a Decision Brief exists in chat, a prompt, or a retained plan
    artifact.
 6. If a required input is missing, inspect repository evidence before asking.
@@ -51,6 +56,9 @@ before the `done-*` loop starts.
 
 - `Plan profile` is missing, unsupported, or cannot be classified as `compact`
   or `extended`. Return `unsupported-plan-contract`.
+- `compact` plans do not use the `tmp/superpowers/mini-plan-*` folder convention.
+- `compact` plans include additional executable numbered files beyond
+  `03-execution.md` without escalating to `extended`.
 - Scope moves outside the declared files, owners, or asset family.
 - `01-change-summary.md` is missing, overloaded with control details, written in
   English, or missing the `Risorsa | Azione | Scopo` table for non-trivial plans.

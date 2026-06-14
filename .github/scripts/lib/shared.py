@@ -42,10 +42,6 @@ ARCHITECTURE_TEMPLATE_PATH = ".github/templates/architecture.md.template"
 REPOSITORY_CONTEXT_TEMPLATE_PATH = ".github/templates/repository-context.md.template"
 TECH_TEMPLATE_PATH = ".github/templates/tech.md.template"
 STRUCTURE_TEMPLATE_PATH = ".github/templates/structure.md.template"
-COPILOT_INSTRUCTIONS_OVERRIDE_TEMPLATE_PATH = (
-    ".github/templates/copilot-instructions.override.md.template"
-)
-COPILOT_INSTRUCTIONS_OVERRIDE_PATH = ".github/copilot-instructions.override.md"
 CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES = {
     DOCS_README_PATH: DOCS_README_TEMPLATE_PATH,
     ARCHITECTURE_PATH: ARCHITECTURE_TEMPLATE_PATH,
@@ -59,13 +55,23 @@ MANAGED_ROOT_FILES = (
     ".editorconfig",
     ".pre-commit-config.yaml",
     ".github/copilot-instructions.md",
-    ".github/copilot-code-review-instructions.md",
     ".github/copilot-commit-message-instructions.md",
     ".github/security-baseline.md",
     ".github/DEPRECATION.md",
     ".github/repo-profiles.yml",
 )
 MANAGED_WORKFLOW_FILES = (".github/workflows/_pre-commit.yml",)
+VSCODE_SETTINGS_PATH = ".vscode/settings.json"
+VSCODE_COPILOT_SETTINGS = (
+    (
+        ("github.copilot.chat.codeGeneration.useInstructionFiles",),
+        False,
+    ),
+    (
+        ("chat.instructionsFilesLocations", ".github/instructions"),
+        False,
+    ),
+)
 INVENTORY_PATH = ".github/INVENTORY.md"
 IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
 SUPERPOWERS_NORMALIZATION_PATH = ".github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml"

@@ -25,17 +25,18 @@ repository projects AI configuration into other repositories.
 ## Role And Precedence
 
 - `AGENTS.md` owns repository-wide defaults, precedence, rule placement, and cross-surface bridge behavior.
-- `.github/copilot-instructions.md` is the repo-wide Copilot projection; keep it aligned when repository-wide defaults change.
+- `.github/copilot-instructions.md` is the compact repo-wide Copilot bridge; keep it aligned as a routing layer rather than a policy duplicate.
 - `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
 - Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
 - `.github/skills/` owns repository-owned reusable guidance. Umbrella skills own lightweight technical-domain baselines; specialist skills and bundle references own deeper procedures.
 - Use `docs/architecture.md` for repository architecture and `docs/repository-context.md` for non-policy local context.
 - Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
-- Consumer repositories may keep `.github/copilot-instructions.override.md` as the local exception layer; active exceptions must state scope, reason, conflict, and required disclosure.
+- Consumer repositories should express local exceptions with preserved `.github/instructions/local-*.instructions.md` files.
 
 ## Context And Scope
 
 - For runtimes without native skill loading, select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence, then read that `SKILL.md` as manual context.
+- Conversational gateway defaults remain explicit: `internal-gateway-idea-brainstorming` for ideation, `internal-gateway-review` for defect-first review routing, and `internal-gateway-writing-plans` for retained plans under `tmp/superpowers/`.
 - Load umbrella domain skills before specialist depth when the domain is clear but the workflow depth is not yet proven.
 - Co-load specialist skills or bundle references only when the task needs workflow, decision trees, domain depth, or reusable procedures.
 - Use the smallest valid owner to resolve conflicts; file-owned rules and narrower skill contracts win over broad defaults inside their own scope.
@@ -54,23 +55,9 @@ repository projects AI configuration into other repositories.
 
 ## Operational Ownership
 
-- `internal-gateway-idea-brainstorming` owns same-conversation `idea -> critical -> retained plan` workflows.
-- `internal-gateway-review` owns same-conversation `review -> critical -> remediation plan` workflows.
-- `internal-gateway-writing-plans` owns retained-plan profile selection and recommended-consumer declaration.
-- `internal-gateway-simple-task` owns direct execution and approved `compact` retained-plan consumption.
-- `internal-gateway-execute-plans` owns approved `extended` retained-plan execution and final packaging.
-- `internal-gateway-critical-master` owns critical challenge, pre-mortem, hidden-assumption, and failure-mode workflows.
-- Copilot wrapper agents own VS Code route selection, tool scope, and manual handoff UX; support-skill loading inside one conversation is not a lane change.
-- Use direct owner selection or user-selected gateway skills with visible phases. Do not add a repository-owned hidden front-door router or hidden peer dispatch.
 - Light emoji markers may appear in user-facing macro-category headings when the owning skill defines them; do not use them in paths, commands, identifiers, schema fields, or copied technical values.
 
 ## Tactical Defaults
-
-- Use `plan` mode for non-trivial repository-owned work when ambiguity, ownership, rollout, validation, or multiple credible paths remain.
-- Use `execute` mode only when the target state and validation path are concrete.
-- When the selected owner no longer fits, stop and make the better owner visible before continuing.
-- Do not report work as complete from intent alone; cite validation evidence or name the explicit validation gap.
-- Prefer root-cause fixes over symptom workarounds unless a temporary mitigation is explicitly scoped.
 
 ## Delivery And Validation
 
@@ -90,7 +77,8 @@ repository projects AI configuration into other repositories.
 
 ## Token And Drift Control
 
-- The critical always-on pair is `AGENTS.md` plus `.github/copilot-instructions.md`; its soft target is 4,000 estimated tokens measured as `ceil(UTF-8 bytes / 4)` by the validator.
+- `AGENTS.md` is the canonical always-on policy surface; keep it near a 4,000 estimated-token soft target measured as `ceil(UTF-8 bytes / 4)` by the validator.
+- Keep `.github/copilot-instructions.md` compact as a bridge and keep global review behavior in `.github/instructions/copilot-code-review.instructions.md`.
 - Keep duplication deliberate. Duplicate only rules that must remain visible in a specific surface and are compact enough to validate.
 
 `</shared-baseline>`
@@ -120,3 +108,16 @@ as consumer-repository defaults without an explicit sync contract change.
 - Treat this block as source-local policy until sync automation or the sync contract gains explicit support for excluding or transforming it.
 
 `</standards-repository-local-rules>`
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"` before doing anything else.
+
+- Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

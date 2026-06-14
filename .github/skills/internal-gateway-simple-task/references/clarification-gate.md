@@ -5,10 +5,13 @@ clarification before a quick lane can continue.
 
 ## Core Rule
 
-Simple mode allows at most one focused `grill-me` block. If the missing answer
-would decide ownership, rollout, governance, tradeoffs, validation strategy, or
-whether the work needs a plan, stop simple mode and escalate to
+Simple mode allows at most one compact focused `grill-me` block. If the missing
+answer would decide ownership, rollout, governance, tradeoffs, validation
+strategy, or whether the work needs a plan, stop simple mode and escalate to
 `internal-gateway-idea-brainstorming` or `internal-gateway-review`.
+
+If the clarification reveals material risk, hidden assumptions, or dominant
+failure-mode pressure, escalate to `internal-gateway-critical-master`.
 
 ## Exit Check
 
@@ -49,9 +52,11 @@ the blocker still cannot be resolved inside the same focused block, escalate.
 
 ## Escalation Triggers
 
-Escalate to `internal-gateway-idea-brainstorming` or `internal-gateway-review` when:
+Escalate to `internal-gateway-idea-brainstorming`,
+`internal-gateway-review`, or `internal-gateway-critical-master` when:
 
 - the exit check fails
 - the clarification limit is exceeded
 - the answer would change simple-mode ownership or anti-scope
 - the task now needs retained-plan, review, or critical-challenge handling
+- material risk or failure-mode pressure dominates

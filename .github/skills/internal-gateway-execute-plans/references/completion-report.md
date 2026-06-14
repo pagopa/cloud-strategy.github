@@ -17,9 +17,9 @@ Before any completion-phase validation, verify the `Plan profile` is `compact`
 or `extended`. Unsupported or missing profiles return `unsupported-plan-contract`
 and the completion attempt stops.
 
-`compact` execution remains owned by `internal-gateway-simple-task`. Shared
-closeout validation uses this completion contract and does not imply compact
-execution ownership transfer.
+`compact` and `extended` execution both use `internal-gateway-execute-plans`.
+`compact` closeout still stays lightweight and must not require an
+`04-implementation-contract.md`.
 
 When packaged folders no longer include `02-source-item-ledger.md`, the
 completion report should include `Plan profile: compact` or
@@ -29,23 +29,25 @@ completion report should include `Plan profile: compact` or
 
 | State | Criteria | Folder behavior | Continuation |
 | --- | --- | --- | --- |
-| `SHIPPED` | All in-scope ledger items are implemented or intentionally closed, validators passed, required evidence envelope coverage exists, no numbered plan files remain, and the completion report is filled. | Create matching `done-*` markers and remove numbered plan files only after the evidence envelope and report are stable. | `none` |
+| `DONE` | All in-scope ledger items are implemented or intentionally closed, validators passed, and mandatory applicable evidence is verified. Closeout may use either full packaging (`done-*` + `evidence-envelope.md` + `completion-report.md`) or a lightweight marker (`DONE-plan-state.md`, using `<STATE>-plan-state.md`) with `State: DONE` and `Continuation: none`. | Full packaging removes numbered files only after evidence is stable. Lightweight marker keeps numbered plan files in place while recording an explicit closed state. | `none` |
 | `APPLIED_UNVERIFIED` | Edits were applied, but required validator, review, or evidence coverage is missing. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. | `continuing` or `waiting` |
 | `PARTIAL` | Some in-scope items remain incomplete or intentionally deferred. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. | `continuing` or `waiting` |
 | `BLOCKED` | A real blocker prevents correct continuation. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. Record the blocker and next-step package. | `waiting` |
-| `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. | Keep numbered plan files and the live ledger in place unless a later `SHIPPED` package supersedes the folder. Do not create new `done-*` markers for the rolled-back state. | `waiting` or `none` |
+| `ROLLED_BACK` | Applied work was reverted or superseded by a different safe state. | Keep numbered plan files and the live ledger in place unless a later `DONE` package supersedes the folder. Do not create new `done-*` markers for the rolled-back state. | `waiting` or `none` |
 | `CANCELLED` | Explicitly evidenced as `INTENTIONAL_NON_ACTION` with documented reason. Not a substitute for missing evidence. | Keep numbered plan files and the live ledger in place. Do not create new `done-*` markers. Record the cancellation rationale in the completion report. | `none` |
 
-`SHIPPED` requires passed validators, a completed report, no numbered plan files,
-and no open source-item ledger rows. Non-trivial retained plans also require an
-evidence envelope or equivalent item-level evidence for every requested or source item.
-`SHIPPED` also requires that mandatory applicable skill requirements are verified;
+`DONE` requires passed validators and no open source-item ledger rows.
+Full-package `DONE` requires a completed report, no numbered plan files, and
+an evidence envelope or equivalent item-level evidence for every requested or source item.
+Lightweight `DONE` requires `DONE-plan-state.md` with explicit `State: DONE`
+and `Continuation: none` and may keep numbered plan files in place.
+`DONE` also requires that mandatory applicable skill requirements are verified;
 if mandatory applicable evidence is missing, use `APPLIED_UNVERIFIED`, `PARTIAL`,
 or `BLOCKED` and report the exact gap.
 If validators or evidence coverage cannot run, or any row remains `PENDING`,
 `PARTIAL`, `NOT_DONE`, `UNVERIFIABLE`, or `BLOCKED`, use
 `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED` with the explicit gap.
-Only `SHIPPED` is a close-package state. Every other state is a live-folder
+Only `DONE` is a close-package state. Every other state is a live-folder
 state and must preserve the retained plan for resume or manual continuation.
 
 `CANCELLED` is accepted only when the plan was explicitly abandoned by user
@@ -53,7 +55,7 @@ decision and the cancellation is recorded as `INTENTIONAL_NON_ACTION` with a
 documented reason in the ledger. Otherwise the ledger row remains open and
 the state is `PARTIAL` or `BLOCKED`.
 
-When the state is not `SHIPPED`, the report must also declare:
+When the state is not `DONE`, the report must also declare:
 
 - `Continuation`: `continuing` or `waiting`.
 - `User action required`: mandatory when `Continuation` is `waiting`.
@@ -84,7 +86,7 @@ For non-trivial retained plans, include or link an evidence envelope. The
 envelope must map each `02-source-item-ledger.md` row, retained-plan item, or
 reconstructed `done-*` item to a status, evidence path or command, and route.
 
-Before assigning `SHIPPED`, compare promised work with observed delivery. Use the source-item ledger, current diff, touched files, validators, and explicit non-actions. When `04-implementation-contract.md` is required, compare it with the touched files, validators, blocker handling, and any required external pin or fallback. Report any gap under `Evidence gaps` or `Residual risks`. A summary that says an item was done is not evidence.
+Before assigning `DONE`, compare promised work with observed delivery. Use the source-item ledger, current diff, touched files, validators, and explicit non-actions. When `04-implementation-contract.md` is required, compare it with the touched files, validators, blocker handling, and any required external pin or fallback. Report any gap under `Evidence gaps` or `Residual risks`. A summary that says an item was done is not evidence.
 
 Do not churn the evidence envelope after every local slice when the validator output is still moving. Refresh it when the retained-plan state is coherent enough to support the reported completion state.
 
@@ -101,11 +103,11 @@ Minimum fields:
 
 If a `done-*` marker lacks enough item-level evidence and no independent file,
 diff, or validator evidence exists, mark the item `UNVERIFIABLE` instead of
-claiming `SHIPPED`.
+claiming `DONE`.
 
 If the ledger is absent or stale and cannot be reconstructed from source plan
 files, `done-*` files, and reachable artifacts, mark the completion state
-`PARTIAL` or `APPLIED_UNVERIFIED`; do not claim `SHIPPED`.
+`PARTIAL` or `APPLIED_UNVERIFIED`; do not claim `DONE`.
 
 If the completion state is `APPLIED_UNVERIFIED`, `PARTIAL`, `BLOCKED`,
 `ROLLED_BACK`, or `CANCELLED`, do not use the report as permission to remove numbered plan files
@@ -125,7 +127,7 @@ physical close package.
 ```text
 Completion Report
 Active phase and owner: <phase, owner>
-State: SHIPPED | APPLIED_UNVERIFIED | PARTIAL | BLOCKED | ROLLED_BACK | CANCELLED
+State: DONE | APPLIED_UNVERIFIED | PARTIAL | BLOCKED | ROLLED_BACK | CANCELLED
 Continuation: none | continuing | waiting
 User action required: <exact required user/external action, or none>
 Files changed: <paths>
