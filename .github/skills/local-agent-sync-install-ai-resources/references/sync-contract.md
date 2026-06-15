@@ -88,6 +88,7 @@ Text reports must use a table-first layout rather than a raw field dump.
 Always start with a short status line that includes:
 
 - mode
+- human-friendly lane label, such as `repo-to-home install` for install or `repo-home drift` for bisync
 - selected targets
 - overall result or status
 - blocker count
