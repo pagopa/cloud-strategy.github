@@ -73,6 +73,24 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     )
 
 
+def test_agents_external_tool_routing_block_is_legitimized_and_source_local() -> None:
+    agents_text = read_text("AGENTS.md")
+
+    assert (
+        "An external tool that reads this file may require a clearly delimited, "
+        "trailing routing block carrying the minimal commands it needs to consume "
+        "the repository; keep any such block source-local, outside the governed "
+        "policy blocks, and limited to that tool's required invocation anchors."
+        in agents_text
+    )
+
+    assert "## graphify" in agents_text
+
+    local_rules_close_index = agents_text.index("`</standards-repository-local-rules>`")
+    graphify_index = agents_text.index("## graphify")
+    assert graphify_index > local_rules_close_index
+
+
 def test_agents_tactical_defaults_include_compact_context_discipline() -> None:
     agents_text = read_text("AGENTS.md")
 

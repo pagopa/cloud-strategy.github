@@ -14,6 +14,7 @@ repository projects AI configuration into other repositories.
 - `AGENTS.md` must define stable repository-wide policy, precedence, tactical operating defaults, ownership boundaries, and routing anchors only.
 - Do not put operational procedures, checklists, file-shape recipes, command playbooks, or tool-specific workflows here.
 - Put each rule in the smallest valid owner: skills for technical baselines and workflows, agents for route UX, docs for context, validators for enforceable checks, sync owners for propagation, and owned files for their local editing rules.
+- An external tool that reads this file may require a clearly delimited, trailing routing block carrying the minimal commands it needs to consume the repository; keep any such block source-local, outside the governed policy blocks, and limited to that tool's required invocation anchors.
 
 ## Writing Style
 
