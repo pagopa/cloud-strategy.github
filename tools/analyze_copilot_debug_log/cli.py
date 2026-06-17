@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 
-from tools.analyze_copilot_debug_log import debug_logs, prompt_exports
+from . import debug_logs, prompt_exports
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

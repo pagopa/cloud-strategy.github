@@ -181,7 +181,7 @@ def test_handoff_check_rejects_impossible_execution_order(tmp_path: Path) -> Non
         "   Fallback: stop if the file does not exist.\n"
         "   Consumes: `tmp/analyzer-summary.json`\n\n"
         "2. Create analyzer output.\n"
-        "   Target: `.github/scripts/analyze_copilot_debug_logs.py`\n"
+        "   Target: `tools/analyze_copilot_debug_log/run.sh`\n"
         "   Acceptance: summary file can be emitted.\n"
         "   Validation: pytest.\n"
         "   Fallback: stop if schema is unknown.\n"

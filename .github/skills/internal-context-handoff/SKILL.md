@@ -25,11 +25,22 @@ Produce a token-efficient, paste-ready Markdown handoff that another agent can u
 
 ## Workflow
 
-1. Choose the compression level: `compact` by default. Escalate to `standard` when multi-step or technical continuation needs more detail, or `deep` when complex, high-risk, or contradictory state must be preserved. Use `references/handoff-template.md` for the exact Markdown shape and field-selection rules for each level.
+1. Choose the compression level: `compact` by default. Escalate to `standard`
+   when multi-step, technical, or long polluted continuation needs more detail,
+   or `deep` when complex, high-risk, or contradictory state must be preserved.
+   Use `references/handoff-template.md` for the exact Markdown shape and
+   field-selection rules for each level.
 
-2. Gather only continuation-critical information. Include only fields that apply to the current discussion. The template defines the available fields; do not force every field into every handoff.
+2. Gather only continuation-critical information. Include only fields that
+   apply to the current discussion. The template defines the available fields;
+   do not force every field into every handoff. When source priority cannot be
+   inferred from evidence and omission would misroute the next agent, ask one
+   optional source-priority question before finalizing.
 
-3. For technical tasks, inspect accessible machine evidence: relevant files, Git status, validation results, active processes. Declare evidence gaps when inspection is impossible.
+3. For technical tasks, inspect accessible machine evidence: relevant files,
+   Git status, validation results, active processes. Record checked sources,
+   material deltas, and the next recommended check when they reduce restart
+   cost. Declare evidence gaps when inspection is impossible.
 
 4. Exclude transcript narrative, superseded attempts, and easily recoverable details unless they explain an active risk. Redact secrets, credentials, tokens, and sensitive values with `[REDACTED]`. Preserve unresolved contradictions under `Open uncertainties` instead of choosing silently.
 
@@ -45,6 +56,8 @@ The handoff is a portable reconstruction package. `internal-agent-support-next-s
 
 - Handoff is self-contained and paste-ready as a first message in a new chat.
 - Default `compact` level is used unless omission would make continuation unreliable.
+- Checked sources, meaningful deltas, and the next check appear when context
+  pollution or contradiction would otherwise raise restart cost.
 - Secrets and sensitive values are redacted.
 - File persistence only when explicitly requested.
 - `internal-agent-support-next-step` boundary is preserved.

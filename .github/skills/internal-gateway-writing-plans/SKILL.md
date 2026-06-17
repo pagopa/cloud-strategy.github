@@ -54,6 +54,10 @@ can provide.
 - Create the plan under `tmp/superpowers/<clear-action-or-task-name>/`.
 - Use English file names. `01-change-summary.md` is written in Italian; all
   other plan files use English.
+- For debugging, drift, or data-mismatch work, produce a compact diagnosis
+  capsule before the retained plan: symptom, target artifact, compared
+  sources or layers, cheapest falsifier, and stop rule. Keep it in chat or the
+  request context; do not create another retained file for it.
 - `01-change-summary.md`: Italian human-readable decision summary with
   `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte` table
   (`Risorsa | Azione | Scopo`), `Comportamento scelto`, `Validazione prevista`,
@@ -71,27 +75,33 @@ can provide.
 ## Workflow
 
 1. Decide: retained plan or chat.
-2. For new plans, run bundle-local `init` first to create the scaffold.
-3. Choose folder name and write `01-change-summary.md` in Italian.
-4. Write `02-source-item-ledger.md` with profile and source-item coverage.
-5. Run the clarification gate when user decisions remain.
-6. For `extended`, write `04-implementation-contract.md`.
-7. Write executable numbered files in order.
-8. Create `questions.md` with `- none` or open user-only decisions.
-9. Run scope challenge and plan review gate for non-trivial plans.
-10. Run `audit` first, then run `handoff-check`; execute only when ready.
-11. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
+2. For debugging, drift, or data-mismatch work, write the diagnosis capsule
+   before `01-change-summary.md`.
+3. For new plans, run bundle-local `init` first to create the scaffold.
+4. Choose folder name and write `01-change-summary.md` in Italian.
+5. Write `02-source-item-ledger.md` with profile and source-item coverage.
+6. Run the clarification gate when user decisions remain.
+7. For `extended`, write `04-implementation-contract.md`.
+8. Write executable numbered files in order.
+9. Create `questions.md` with `- none` or open user-only decisions.
+10. Run scope challenge and plan review gate for non-trivial plans.
+11. Run `audit` first, then run `handoff-check`; execute only when ready.
+12. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
 
 ## Validation
 
 - Plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
 - `01-change-summary.md` is Italian; other plan files are English.
 - `02-source-item-ledger.md` exists with profile and source-item coverage.
+- The diagnosis capsule exists before authoring when debugging, drift, or
+  data-mismatch work is being retained.
 - `04-implementation-contract.md` exists for every `extended` plan.
 - `questions.md` exists and stays separate from executable files.
 
 ## Common mistakes
 
 - Retaining a plan for work that should stay in chat.
+- Skipping the diagnosis capsule and turning an unproven mismatch into a
+  retained plan.
 - Using `compact` when execution actually needs an implementation contract.
 - Creating `done-*` markers during authoring.

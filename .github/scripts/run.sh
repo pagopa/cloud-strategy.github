@@ -33,8 +33,7 @@ Usage:
 
 Tools:
     github_catalog_validation
-    analyze_copilot_prompt_exports
-    analyze_copilot_debug_logs
+    analyze_copilot_debug_log
     benchmark_skill_tokens
   build_inventory
   check_catalog_consistency
@@ -119,11 +118,8 @@ resolve_script() {
         github_catalog_validation|github_catalog_validation.py)
             printf '%s\n' "$SCRIPT_DIR/github_catalog_validation.py"
             ;;
-        analyze_copilot_prompt_exports|analyze_copilot_prompt_exports.py)
-            printf '%s\n' "$SCRIPT_DIR/analyze_copilot_prompt_exports.py"
-            ;;
-        analyze_copilot_debug_logs|analyze_copilot_debug_logs.py)
-            printf '%s\n' "$SCRIPT_DIR/analyze_copilot_debug_logs.py"
+        analyze_copilot_debug_log|analyze_copilot_debug_log.sh)
+            printf '%s\n' "$REPO_ROOT/tools/analyze_copilot_debug_log/run.sh"
             ;;
         benchmark_skill_tokens|benchmark_skill_tokens.py)
             printf '%s\n' "$SCRIPT_DIR/benchmark_skill_tokens.py"
@@ -192,6 +188,11 @@ main() {
     if [[ -z "$tool_name" ]]; then
         usage
         exit 1
+    fi
+
+    if [[ "$tool_name" == "analyze_copilot_debug_log" || "$tool_name" == "analyze_copilot_debug_log.sh" ]]; then
+        shift
+        exec bash "$REPO_ROOT/tools/analyze_copilot_debug_log/run.sh" "$@"
     fi
 
     script_path="$(resolve_script "$tool_name")" || {

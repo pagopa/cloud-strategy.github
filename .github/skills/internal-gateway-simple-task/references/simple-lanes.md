@@ -45,6 +45,22 @@ and any follow-up owner.
 For `escalate`, return the boundary break, next owner, scope, action, validation
 path, and risk.
 
+## Multi-Source Mismatch Procedure
+
+When the same symptom may come from multiple sources or transformation layers,
+use this lightweight procedure before patching:
+
+1. Name the target artifact or observed mismatch.
+2. List the candidate sources of truth and mark one authoritative only when
+   evidence already proves it.
+3. Map the transformation layers between source and target.
+4. Choose the cheapest check that can falsify one source or layer at a time.
+5. Stop expanding once one layer is proven wrong or source authority remains
+   unproven and needs escalation.
+
+Patch only the proven failing layer. Do not convert this generic procedure into
+domain-specific incident language.
+
 ## Diagnose Deterministic Failure Procedure
 
 When a failure report already contains exact test names, file paths, symbols, or
