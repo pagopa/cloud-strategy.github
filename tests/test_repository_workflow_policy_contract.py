@@ -226,3 +226,58 @@ def test_recent_lessons_are_codified_in_skill_owners() -> None:
         in github_actions_skill_text
     )
     assert "even on `--dry-run` paths" in github_actions_skill_text
+
+
+def test_technology_skill_modularity_contract_is_owned_and_searchable() -> None:
+    python_skill_text = read_text(".github/skills/internal-python/SKILL.md").lower()
+    python_script_skill_text = read_text(
+        ".github/skills/internal-python-script/SKILL.md"
+    ).lower()
+    python_project_skill_text = read_text(
+        ".github/skills/internal-python-project/SKILL.md"
+    ).lower()
+    bash_skill_text = read_text(".github/skills/internal-bash/SKILL.md").lower()
+    bash_script_skill_text = read_text(
+        ".github/skills/internal-bash-script/SKILL.md"
+    ).lower()
+    node_skill_text = read_text(".github/skills/internal-nodejs/SKILL.md").lower()
+    node_project_skill_text = read_text(
+        ".github/skills/internal-nodejs-project/SKILL.md"
+    ).lower()
+    java_skill_text = read_text(".github/skills/internal-java/SKILL.md").lower()
+    java_project_skill_text = read_text(
+        ".github/skills/internal-java-project/SKILL.md"
+    ).lower()
+
+    base_skill_texts = (
+        python_skill_text,
+        bash_skill_text,
+        node_skill_text,
+        java_skill_text,
+    )
+
+    for body in base_skill_texts:
+        assert "300" in body
+        assert "400" in body
+        assert "split-or-justify" in body
+        assert "dry" in body
+
+    assert "entrypoint" in python_script_skill_text
+    assert "utils/" in python_script_skill_text
+    assert "single-file" in python_script_skill_text
+    assert "toolkit" in python_script_skill_text
+    assert "project" in python_script_skill_text
+    assert "generated" in python_script_skill_text
+    assert "fixture" in python_script_skill_text
+
+    assert "entrypoint" in bash_script_skill_text
+    assert "sourced helper" in bash_script_skill_text
+
+    assert "thin" in node_project_skill_text
+    assert "async boundaries" in node_project_skill_text
+
+    assert "thin" in java_project_skill_text
+    assert "god class" in java_project_skill_text
+    assert "dto" in java_project_skill_text
+
+    assert "domain/service/adapter" in python_project_skill_text

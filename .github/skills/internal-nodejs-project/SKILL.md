@@ -29,6 +29,7 @@ description: Use when creating or modifying Node.js or TypeScript project code s
 - Follow the existing module system and runtime constraints before introducing ESM/CJS or build-tool changes.
 - Validate inputs at API or function boundaries and keep async error handling explicit.
 - Keep framework wiring thin and move request-shaping logic out of transport handlers when reuse or testing would improve.
+- Keep async boundaries explicit between transport handlers, domain modules, and infrastructure adapters.
 
 Load `references/examples.md` when you need a minimal module or test example.
 

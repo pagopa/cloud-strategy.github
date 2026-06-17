@@ -29,6 +29,9 @@ every Java edit; load them only when the task proves which owner is needed.
 
 - Keep business logic separate from I/O, persistence, SDK calls, and transport adapters.
 - Prefer clear domain names, guard clauses, and readable control flow.
+- Treat 300 lines as a review threshold for cohesive Java classes and related files.
+- Treat 400 lines as a split-or-justify threshold and extract focused collaborators before classes become large coordinators.
+- Apply pragmatic DRY: factor repeated decision logic into focused methods or collaborators, not abstract hierarchies by default.
 - Add concise JavaDoc only when a new or changed core type has non-obvious intent.
 - Use JUnit 5 for unit tests unless the repository has another established test stack.
 - Keep dependency, plugin, runtime, and test intent explicit in Maven or Gradle files.

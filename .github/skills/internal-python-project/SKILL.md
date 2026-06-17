@@ -37,6 +37,7 @@ description: Use when creating or modifying Python package or application code w
 - Use type hints on public APIs and keep data contracts explicit.
 - Choose async only when the workload is I/O-bound and the surrounding stack supports it cleanly.
 - Keep request or transport models, domain logic, and persistence concerns in separate modules.
+- Prefer a domain/service/adapter decomposition before adding generic catch-all modules.
 - Keep reusable module and service logs neutral or structured; reserve emoji log formatting for outer operator-facing entrypoints.
 
 Load `references/examples.md` when you need a minimal module or test example.

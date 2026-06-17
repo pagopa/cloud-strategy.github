@@ -27,6 +27,10 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 
 - Standalone tools should default to a dedicated folder or toolkit root, not a loose top-level `.py` file.
 - Keep entrypoints thin: parse arguments, resolve paths, orchestrate helpers, and return an exit code through `main() -> int` plus `raise SystemExit(main())`.
+- Keep single-file scripts under 400 lines when possible. At 300 lines, review whether orchestration and helper boundaries stay clear; at 400 lines, split-or-justify is required.
+- Place shared helper logic in local helper modules, preferably under `utils/` when the toolkit structure supports that layout.
+- For operator-facing script work, crossing the 400-line threshold should move toward a toolkit or project structure according to the primary contract, not an ever-growing single entrypoint.
+- Keep policy checks focused on maintained source; generated outputs and large fixture data are excluded unless directly edited.
 - Prefer `argparse`, `pathlib.Path`, and small helper functions for operator-facing tools.
 - Keep emoji logs at operator-facing boundaries such as start, success, warning, and failure states; keep reusable helpers free of decorative log formatting.
 - When a tool can be called from subdirectories, resolve the repository root explicitly instead of assuming the current working directory.
