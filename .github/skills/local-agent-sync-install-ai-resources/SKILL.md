@@ -114,7 +114,9 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 - Excludes `local-agent-sync-*` bundles and runtime artifacts (`.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`) from scanning and copying.
 
 ### Conflict Resolution
+
 For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh`, keep `--format report` on model-facing runs, and omit `--home-root` (defaults to `$HOME`).
+
 - `only-repo`: when not excluded, `bisync apply` can create the bundle in home from the repository side.
 - `only-home`: manual intervention required. Decide whether to keep it only in home, remove it, or add it to the repository.
 - `equal-mtime`: hashes differ but mtime is equal. Manual decision required because the winner cannot be determined from timestamps alone.
@@ -128,6 +130,7 @@ Then follow the exact text layout in `references/sync-contract.md`:
 - `doctor`: readiness summary plus a blocker table that answers what failed, why it matters, and what the user must do next.
 - `plan`, `audit`, and `bisync plan`: a planned-changes table plus a blockers-and-skips table. For every proposed modification, explain the decision cause, for example repo copy is newer, home copy is newer, a managed resource is stale, or runtime support is not documented enough for apply.
 - `apply` and `bisync apply`: an actions-performed table plus a residual-issues table when needed. List each copied, updated, pruned, preserved, skipped, or unchanged resource and state why it was handled that way and how it was verified.
+- Include a human-friendly lane label in the status line for install and bisync reports, such as `repo-to-home install` and `repo-home drift`, so the mode is easier to read at a glance.
 
 Never report blocker codes alone. Translate each code into a plain-language reason and the required follow-up. Never say a resource will change without stating what evidence selected the winner or triggered the recommendation. When nothing changes, say so explicitly and still report validation and `next_action`.
 

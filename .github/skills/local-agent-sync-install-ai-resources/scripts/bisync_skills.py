@@ -337,13 +337,15 @@ def build_bisync_plan(
                 )
             )
 
-    all_blocked = sorted(
-        set(
-            code
-            for d in drifts
-            for code in d.blocked_codes
-        )
-    )
+    all_blocked_set = {
+        code
+        for d in drifts
+        for code in d.blocked_codes
+    }
+    for drift in drifts:
+        if drift.drift_type == "only-repo":
+            all_blocked_set.add("bisync-only-repo")
+    all_blocked = sorted(all_blocked_set)
 
     plan = BisyncPlan(
         source_root=source_root,
@@ -371,7 +373,13 @@ def apply_bisync_plan(
     plan: BisyncPlan,
 ) -> BisyncPlan:
     if plan.blocked_codes:
-        return plan
+        resolvable_during_apply = {"bisync-only-repo"}
+        remaining_blockers = [
+            code for code in plan.blocked_codes if code not in resolvable_during_apply
+        ]
+        if remaining_blockers:
+            return plan
+        plan.blocked_codes = []
 
     clean, blocked_code, reason = is_repo_clean(source_root)
     if not clean:
@@ -570,7 +578,12 @@ def _emit_bisync_output(plan: BisyncPlan, format_name: str) -> None:
             label = "only in repo" if dtype == "only-repo" else "only in home"
             path = drift.repo_path if dtype == "only-repo" else drift.home_path
             print(f"  {skill}: {label} ({path})")
-            print(f"    blocker: {', '.join(drift.blocked_codes)}")
+            blocker_codes = list(drift.blocked_codes)
+            if dtype == "only-repo" and not blocker_codes:
+                blocker_codes = ["bisync-only-repo"]
+            elif dtype == "only-home" and not blocker_codes:
+                blocker_codes = ["bisync-only-home"]
+            print(f"    blocker: {', '.join(blocker_codes)}")
         elif dtype == "equal-mtime":
             print(f"  {skill}: equal mtime (hashes differ)")
             print(f"    blocker: {', '.join(drift.blocked_codes)}")

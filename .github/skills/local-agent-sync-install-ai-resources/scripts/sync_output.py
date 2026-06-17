@@ -36,6 +36,14 @@ BLOCKER_REASON_MAP: dict[str, str] = {
 }
 
 
+def _install_lane_label() -> str:
+    return "repo-to-home install"
+
+
+def _bisync_lane_label() -> str:
+    return "repo-home drift"
+
+
 def build_compact_install_output(payload: dict[str, object]) -> dict[str, object]:
     compact: dict[str, object] = {
         "mode": payload.get("mode"),
@@ -214,10 +222,11 @@ def render_install_report(payload: dict[str, object]) -> str:
     targets = _as_string_list(payload.get("selected_targets"))
     blocked_codes = _as_string_list(payload.get("blocked_codes"))
     status = str(payload.get("validation") or payload.get("status") or "unknown")
+    lane_label = _install_lane_label()
 
     lines: list[str] = []
     lines.append(
-        f"Status: mode={mode}; targets={_join_or_none(targets)}; status={status}; blockers={len(blocked_codes)}"
+        f"Status: mode={mode}; label={lane_label}; targets={_join_or_none(targets)}; status={status}; blockers={len(blocked_codes)}"
     )
     lines.append("")
 
@@ -227,6 +236,7 @@ def render_install_report(payload: dict[str, object]) -> str:
             ["Field", "Value"],
             [
                 ["Mode", mode],
+                ["Lane label", lane_label],
                 ["Selected targets", _join_or_none(targets)],
                 ["Retired targets", _join_or_none(_as_string_list(payload.get("retired_targets")))],
                 ["Source resources considered", str(payload.get("source_resources_considered") or 0)],
@@ -305,10 +315,11 @@ def render_bisync_report(payload: dict[str, object]) -> str:
     status = "unknown"
     if isinstance(verification, dict):
         status = str(verification.get("status") or status)
+    lane_label = _bisync_lane_label()
 
     lines: list[str] = []
     lines.append(
-        f"Status: mode={mode}; lane=bisync; status={status}; drift_total={drift_total}; blockers={len(blocked_codes)}"
+        f"Status: mode={mode}; label={lane_label}; lane=bisync; status={status}; drift_total={drift_total}; blockers={len(blocked_codes)}"
     )
     lines.append("")
 
@@ -318,6 +329,7 @@ def render_bisync_report(payload: dict[str, object]) -> str:
             ["Field", "Value"],
             [
                 ["Mode", mode],
+                ["Lane label", lane_label],
                 ["Drift total", str(drift_total)],
                 ["Blocked code count", str(len(blocked_codes))],
                 ["Verification status", status],

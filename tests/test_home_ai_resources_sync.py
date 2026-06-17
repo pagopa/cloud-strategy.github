@@ -631,6 +631,7 @@ def test_main_plan_report_output_has_fixed_sections(
 
     assert exit_code == 0
     assert "## Current State" in output
+    assert "repo-to-home install" in output
     assert "## Differences Or Planned Work" in output
     assert "## Actions Completed" in output
     assert "## Blockers And Skips" in output
@@ -666,6 +667,7 @@ def test_bisync_plan_report_output_has_fixed_sections(
 
     assert exit_code == 1
     assert "## Current State" in output
+    assert "repo-home drift" in output
     assert "## Differences Or Planned Work" in output
     assert "## Actions Completed" in output
     assert "## Blockers And Skips" in output

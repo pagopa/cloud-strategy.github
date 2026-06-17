@@ -88,6 +88,7 @@ Text reports must use a table-first layout rather than a raw field dump.
 Always start with a short status line that includes:
 
 - mode
+- human-friendly lane label, such as `repo-to-home install` for install or `repo-home drift` for bisync
 - selected targets
 - overall result or status
 - blocker count
@@ -218,8 +219,9 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
      - `home_mtime > repo_mtime` -> `home-to-repo`
      - `repo_mtime == home_mtime` -> `equal-mtime` blocker
 4. For skills only on one side:
-  - report `only-repo` as an actionable repo-to-home creation candidate;
-  - report `only-home` as a blocker that requires manual review.
+
+- report `only-repo` as an actionable repo-to-home creation candidate;
+- report `only-home` as a blocker that requires manual review.
 
 ### Preflight
 
