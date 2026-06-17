@@ -140,10 +140,17 @@ def test_simple_gateway_readiness_brief_and_approval_gate_contract() -> None:
     assert "Readiness Brief" in simple_text
     assert "explicit user approval" in simple_text
     assert "before operational" in simple_text
+    assert "Simple Gate Policy" in simple_text
+    assert "`full`, `idea`, and `complete`" in simple_text
+    assert "Trivial-skip proof" in simple_text
+    assert "Run `grill-me` first" in simple_text
+    assert "critical gate" in simple_text
 
     assert "compact focused `grill-me` block" in clarification_text
     assert "internal-gateway-critical-master" in clarification_text
     assert "material risk" in clarification_text
+    assert "Depth Keyword Override" in clarification_text
+    assert "Do not use `trivial-skip`" in clarification_text
 
 
 def test_writing_plans_scaffold_first_and_audit_early_contract() -> None:
