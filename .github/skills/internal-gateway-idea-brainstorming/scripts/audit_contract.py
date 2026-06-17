@@ -18,6 +18,9 @@ def main() -> int:
         "critical": "internal-gateway-critical-master" in skill_text,
         "planning": "internal-gateway-writing-plans" in skill_text,
         "stop_before_execution": "stop before execution" in skill_text,
+        "specialization_gated": "Specialization Checkpoint: gated" in skill_text
+        and "Specialization Checkpoint: gated" in reference_text
+        and "Specialization Checkpoint: gated" in runtime_text,
         "bounded_evidence_pass": "bounded evidence pass" in skill_text
         and "bounded evidence pass" in reference_text
         and "bounded evidence pass" in runtime_text,
@@ -34,6 +37,9 @@ def main() -> int:
         "ask_before_critical": "ask whether to continue" in skill_text
         and "ask whether to continue" in reference_text
         and "ask whether to continue" in runtime_text,
+        "ownership_after_critical": "ask whether the user wants this owner to keep the task" in skill_text
+        and "ask whether the user wants this owner to keep the task" in reference_text
+        and "ask whether the user wants this owner to keep the task" in runtime_text,
         "explicit_plan_approval": "go`/`ok`/`procedi" in skill_text
         and "go`/`ok`/`procedi" in reference_text
         and "go/ok/procedi" in runtime_text,
