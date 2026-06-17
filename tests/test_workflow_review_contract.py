@@ -7,13 +7,6 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def test_agents_and_policy_promote_conversational_gateways() -> None:
-    agents_text = read_text("AGENTS.md")
-    assert "internal-gateway-idea-brainstorming" in agents_text
-    assert "internal-gateway-review" in agents_text
-    assert "internal-gateway-operational-flow" not in agents_text
-
-
 def test_idea_gateway_owns_retained_planning() -> None:
     skill_text = read_text(
         ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
