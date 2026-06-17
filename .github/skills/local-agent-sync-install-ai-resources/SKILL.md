@@ -12,7 +12,7 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 Canonical command examples use `python3 ./.github/scripts/sync_home_ai_resources.py --format report`.
 
-The paired agent is a thin UX wrapper; this skill owns business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. Keep user-visible output deterministic and table-first, with fixed sections for `Current State`, `Differences Or Planned Work`, `Actions Completed`, `Blockers And Skips`, `Validation`, `Remaining Work`, and `Next Action`. Keep detailed checklists in `references/` and deterministic rendering logic in `scripts/`.
+The paired agent is a thin UX wrapper; this skill owns business logic, sequencing, approval posture, safety gates, and reporting for repo to home sync and bisync. Keep user-visible output deterministic and summary-first: status line, `Summary`, `Changes`, `Attention`, `Validation`, optional `Remaining Work`, and `Next`. Use tables only for change lists, blockers, and action details that benefit from columns. Keep detailed checklists in `references/` and deterministic rendering logic in `scripts/`.
 
 ## When to use
 
@@ -31,13 +31,13 @@ The paired agent is a thin UX wrapper; this skill owns business logic, sequencin
 
 ## Deterministic Operator Protocol
 
-Every mode has exactly one command. Do not infer the mode, do not skip blockers, and do not treat `next_action` as user approval for `apply`. Each `apply` requires an explicit user request.
+Every mode has exactly one command. Do not infer the mode, do not skip blockers, and do not treat `next_action` as user approval for `apply`. Plain `apply` and `bisync apply` still require an explicit user request. The `sync` command is the only auto-execute exception, and it may write only through the install lane after a zero-blocker, no-drift preflight.
 
 ### Lane Selection
 
 | User request | Lane | Command |
 | --- | --- | --- |
-| Generic `sync` without a mode | Run install `plan` for `skills` first, then run `bisync plan` | See `Default Sync Sequence` below |
+| Generic `sync` without a mode | Auto-run safe repo-to-home install for `skills`, then run `bisync plan` as a review gate | `python3 ./.github/scripts/sync_home_ai_resources.py sync --targets skills --home-root ~ --format report` |
 | `bisync plan` | Bidirectional drift detection (read-only) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync plan --home-root ~ --format report` |
 | `bisync apply` | Bidirectional drift resolution (writes to both sides) | `python3 ./.github/scripts/sync_home_ai_resources.py bisync apply --home-root ~ --format report` |
 | `plan` | Install lane dry run | `python3 ./.github/scripts/sync_home_ai_resources.py plan --targets <targets> --home-root ~ --format report` |
@@ -52,23 +52,25 @@ When the desired active runtimes change, pair `--retire-targets <targets>` with 
 
 When the user says "sync" without a mode:
 
-1. Run install `plan` for the default `skills` target. Stop on blockers.
-2. Resolve any install-lane blockers before proceeding.
-3. Run `bisync plan`. Stop on blockers. The text output groups repo-only, home-only, repo-to-home, home-to-repo, and equal-mtime buckets so repo/home differences are obvious in one scan.
-4. Report both results. Do not apply automatically.
-5. Wait for explicit user request to apply either lane.
+1. Run `sync` for the default `skills` target.
+2. The command builds an install-lane `apply` plan and stops before writing when blockers, residual drift, missing directory creation, stale managed resources, destructive cleanup, or other manual gates are present.
+3. If the install lane is clean, the command applies repo-to-home materialization and reports copied, skipped, validation, state, and manifest evidence.
+4. After install, the command runs `bisync plan` as a review gate. Stop and ask for user direction when bisync reports any drift or blocker, including repo-to-home, home-to-repo, only-home, only-repo, or equal-mtime entries.
+5. If bisync reports zero drift and zero blockers, report `done`. Do not run `bisync apply` automatically.
 
 Install must run before bisync because bisync modifies `~/.agents/skills/` directories that the install manifest tracks. Running install first copies fresh content from the repo with matching manifest hashes; bisync then finds both sides already aligned, avoiding spurious `target-modified-managed` blockers.
 
-When applying, run install `apply` first, then `bisync apply`. Both lanes must be explicitly requested.
+When the user explicitly asks for manual apply, run install `apply` first, then `bisync apply` only when the bisync plan has been reviewed and approved. Both plain apply lanes remain explicit.
 
 ### Stop Conditions
 
 Stop and report when any of these occur:
 
 - A blocker code is present in the output.
-- `next_action.allowed` is `false`.
-- `next_action.requires_explicit_approval` is `true` and the user has not explicitly approved.
+- `next_action.allowed` is `false`, except for `sync` reports that have already completed their safe install-lane work and are reporting `done`.
+- `next_action.requires_explicit_approval` is `true` and the user has not explicitly approved, except for the `sync` command's built-in install-lane auto-execute path.
+- `sync` reports install-lane residual drift, missing directory creation without `--create-missing-dirs`, stale managed resources, or any install blocker.
+- `sync` reports any bisync drift or blocker after install. Treat this as a review state, not an apply failure.
 - `bisync apply` was requested without a prior `bisync plan`.
 - The source repository has uncommitted or untracked changes during `bisync apply`.
 - After `bisync apply` modifies `~/.agents/skills/` files that the install lane also manages, re-run install `plan`. Verified repo-to-home bisync copies refresh the manifest state; if `target-modified-managed` still appears, treat it as a real local divergence and review the path instead of deleting it as a routine recovery step.
@@ -81,13 +83,13 @@ Deterministic report output is available as `--format report` and should be the 
 - `next_step`: human-readable next instruction (backward compatible).
 Canonical command examples use `python3 ./.github/scripts/sync_home_ai_resources.py --format report`.
 
-Report `next_action` to the user. Do not execute `command` from `next_action` unless the user explicitly asks.
+Report `next_action` to the user. Do not execute `command` from `next_action` unless the user explicitly asks. The only exception is the top-level `sync` command, which owns its own bounded install-lane apply decision and still stops before bisync apply.
 
 ## Core Operating Contract
 
 - For the install lane, treat this repository as the source of truth for allowlisted home-sync resources.
 - Install sync is unidirectional: repo -> home only. Block any attempt to sync from home to repo.
-- Default to `plan` and keep `apply` explicit.
+- Default generic sync requests to `sync`; keep plain `apply`, prune, directory creation, and all `bisync apply` writes explicit unless the user provided the matching flags or request.
 - Limit v1 default materialization to documented direct-copy skill families and allowlisted agent translations for Codex, Claude, and OpenCode.
 - Preserve unmanaged target-local files and directories.
 - Prune only stale managed assets, including manifest-managed resources whose source bundle was removed from the repo, and only when explicit approval is present and the manifest entry passes schema validation, path confinement, and content-hash drift checks.
@@ -123,13 +125,13 @@ For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` wi
 
 ## Reporting Contract
 
-Use a table-first report for every mode. Do not dump raw JSON unless the user explicitly asks for it. Lead with one short status line that states mode, targets, result, blocker count, and `next_action.action`.
+Use a summary-first report for every mode. Do not dump raw JSON unless the user explicitly asks for it. Lead with one short status line that states lane, mode, result, blocker count, and relevant drift or target counts.
 
 Then follow the exact text layout in `references/sync-contract.md`:
 
 - `doctor`: readiness summary plus a blocker table that answers what failed, why it matters, and what the user must do next.
-- `plan`, `audit`, and `bisync plan`: a planned-changes table plus a blockers-and-skips table. For every proposed modification, explain the decision cause, for example repo copy is newer, home copy is newer, a managed resource is stale, or runtime support is not documented enough for apply.
-- `apply` and `bisync apply`: an actions-performed table plus a residual-issues table when needed. List each copied, updated, pruned, preserved, skipped, or unchanged resource and state why it was handled that way and how it was verified.
+- `sync`, `plan`, `audit`, and `bisync plan`: a compact summary, a change table when there are changes, and an attention table when there are blockers or drift decisions. For every proposed modification, explain the decision cause, for example repo copy is newer, home copy is newer, a managed resource is stale, or runtime support is not documented enough for apply.
+- `apply` and `bisync apply`: a compact summary, an actions-performed table for writes, and a residual-issues table when needed. List copied, updated, pruned, or created resources and state why they were handled that way and how they were verified. Summarize unchanged managed resources by count instead of listing every skip.
 - Include a human-friendly lane label in the status line for install and bisync reports, such as `repo-to-home install` and `repo-home drift`, so the mode is easier to read at a glance.
 
 Never report blocker codes alone. Translate each code into a plain-language reason and the required follow-up. Never say a resource will change without stating what evidence selected the winner or triggered the recommendation. When nothing changes, say so explicitly and still report validation and `next_action`.
@@ -139,9 +141,9 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 - One-line status header with mode, selected targets, overall status, blocker count, and `next_action.action`.
 - Selected mode, selected targets, and why that mode is valid.
 - Source resources considered and the runtime support evidence used.
-- A mode-appropriate table layout from `references/sync-contract.md`:
+- A mode-appropriate summary-first layout from `references/sync-contract.md`:
   - readiness and blocker table for `doctor`
-  - planned changes plus blockers-and-skips tables for `plan`, `audit`, and `bisync plan`
+  - planned changes plus attention tables for `sync`, `plan`, `audit`, and `bisync plan`
   - completed actions plus residual issues tables for `apply` and `bisync apply`
 - Missing directories, conflicts, or documentation gates that block `apply`.
 - For every blocked path, conflict, stale-managed entry, or non-ok doctor check, include a human-readable motivation that explains the policy or safety reason behind the recommendation.
@@ -153,6 +155,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 ## Mode Selection
 
+- `sync`: default safe automation for shared skills. Auto-apply only clean install-lane repo-to-home work, then stop on any bisync drift or blocker.
 - `plan`: produce a readable dry run and machine-readable state.
 - `audit`: compare source, manifest, and managed target paths without writing runtime files.
 - `doctor`: verify runtime roots, permissions, symlink posture, manifest health, and support-matrix readiness.

@@ -81,7 +81,7 @@ Deterministic report output (`--format report`) and JSON reporting should expose
 - `next_step`
 - `next_action` (structured object with `action`, `allowed`, `requires_explicit_approval`, `command`, `reason`)
 
-Text reports must use a table-first layout rather than a raw field dump.
+Text reports must use a summary-first layout rather than a raw field dump. Use tables where columns clarify changes, blockers, or completed actions; use short bullets for counts and state summaries.
 
 ### Shared Header
 
@@ -94,6 +94,19 @@ Always start with a short status line that includes:
 - blocker count
 - `next_action.action`
 
+### Summary-First Layout
+
+Use these stable sections when rendering model-facing reports:
+
+- `Summary`: target, resource, drift, blocked, and already-aligned counts.
+- `Changes`: proposed or completed writes, with one row per changed resource.
+- `Attention`: blockers, ambiguous drift, or decisions that need a user.
+- `Validation`: strongest available evidence such as hash match, manifest path, state path, or post-apply clean plan.
+- `Remaining Work`: include only when something remains.
+- `Next`: structured next action and reason.
+
+Do not list every unchanged managed resource in model-facing reports. Summarize skipped or already-aligned resources by count unless the user asks for full audit detail or selects JSON output.
+
 ### Doctor And Readiness Report
 
 After the shared header, include a short readiness summary and a single table with this shape:
@@ -103,9 +116,9 @@ After the shared header, include a short readiness summary and a single table wi
 
 Use this table for missing roots, documentation gaps, manifest problems, permission failures, and unsafe paths.
 
-### Plan, Audit, And Bisync Plan Report
+### Sync, Plan, Audit, And Bisync Plan Report
 
-After the shared header, show one change-oriented table and one blocker table when they are non-empty.
+After the shared header and summary, show one change-oriented table and one attention table when they are useful.
 
 Planned changes table:
 
@@ -114,12 +127,12 @@ Planned changes table:
 
 Typical reasons include repo bundle newer than home, home bundle newer than repo, first-run install into a missing directory, stale managed resource marked for optional prune, or unmanaged content preserved by policy.
 
-Blockers and skips table:
+Attention table:
 
-| Code or status | Resource or path | Why blocked or skipped | Required user action |
+| Code or status | Resource or path | Why it needs attention | Required user action |
 | --- | --- | --- | --- |
 
-Populate `Why blocked or skipped` from the error-code meaning plus rationale, not from the code alone.
+Populate `Why it needs attention` from the error-code meaning plus rationale, not from the code alone. Include skips only when they are exceptional; routine unchanged resources belong in the summary count.
 
 ### Apply And Bisync Apply Completion Report
 
@@ -138,6 +151,24 @@ Residual issues table:
 | --- | --- | --- | --- |
 
 `Verification` should state the strongest evidence available, for example hash match, manifest updated, post-apply plan clean, or explicit validation gap.
+
+### Top-Level Sync Mode
+
+The `sync` command is the only auto-execute mode.
+
+Behavior:
+
+1. Build an install-lane `apply` plan for the selected targets, defaulting to `skills`.
+2. Stop before writing when install blockers, residual drift, stale managed resources, missing directory creation without `--create-missing-dirs`, or destructive cleanup gates are present.
+3. If the install lane is clean, apply repo-to-home materialization and verify hashes plus manifest state.
+4. For the default `skills` target, run `bisync plan` after install.
+5. Stop and report `needs_review` when bisync reports any drift or blocker. Do not run `bisync apply` automatically.
+6. Report `done` only when install succeeded or had no work and bisync has zero drift and zero blockers.
+
+Exit behavior:
+
+- Return `0` when `sync` reaches `done`.
+- Return non-zero when `sync` stops for blocker, missing approval, or bisync review.
 
 ### No-Op Reporting
 
@@ -174,6 +205,7 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 
 ### Install Modes
 
+- `sync`: safe top-level automation that may apply only clean repo-to-home install work before running the bisync review gate.
 - `plan`: dry run that produces a readable diff and machine-readable state. Read-only.
 - `audit`: compare source, manifest, and managed target paths. Read-only.
 - `doctor`: verify runtime roots, permissions, symlink posture, and manifest health. Read-only.

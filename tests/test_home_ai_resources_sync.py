@@ -441,6 +441,76 @@ def test_main_plan_blocks_overlap_between_active_and_retired_targets(
     assert payload["retired_targets"] == ["claude"]
 
 
+def test_sync_auto_applies_clean_repo_to_home_install(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="sync",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            retire_targets="",
+            create_missing_dirs=True,
+            prune_managed=False,
+            experimental_targets=False,
+            format="json",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["mode"] == "sync"
+    assert payload["status"] == "done"
+    assert payload["install"]["manifest_path"]
+    assert payload["bisync"]["drifts"] == []
+    assert (home_root / ".agents/skills/demo-skill/SKILL.md").is_file()
+
+
+def test_sync_stops_for_bisync_drift_after_clean_install(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    write_file(home_root / ".agents/skills/home-only/SKILL.md", "# Home only\n")
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="sync",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            retire_targets="",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="json",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert payload["mode"] == "sync"
+    assert payload["status"] == "needs_review"
+    assert payload["bisync"]["blocked_codes"] == ["bisync-only-home"]
+    assert payload["bisync"]["drifts"][0]["skill"] == "home-only"
+
+
 def test_skill_bundle_default_targets_focus_on_shared_skills(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
@@ -492,9 +562,9 @@ def test_skill_runbook_distinguishes_install_and_bisync_lanes() -> None:
     assert "Do not infer the mode, do not skip blockers" in content
     assert "next_action` as user approval for `apply`" in content
     assert "## Reporting Contract" in content
-    assert "table-first report" in content
-    assert "planned-changes table" in content
-    assert "actions-performed table" in content
+    assert "summary-first" in content
+    assert "Auto-run safe repo-to-home install" in content
+    assert "Do not run `bisync apply` automatically" in content
     assert "remove it manually so sync can restore the source-of-truth version" not in (
         content.lower()
     )
@@ -516,8 +586,9 @@ def test_sync_contract_documents_verified_bisync_reconciliation() -> None:
 
     assert "stale `target-modified-managed` blocker" in contract_content
     assert "bisync-manifest-reconcile-failed" in contract_content
-    assert "Text reports must use a table-first layout" in contract_content
-    assert "### Plan, Audit, And Bisync Plan Report" in contract_content
+    assert "Text reports must use a summary-first layout" in contract_content
+    assert "### Sync, Plan, Audit, And Bisync Plan Report" in contract_content
+    assert "The `sync` command is the only auto-execute mode." in contract_content
     assert (
         "| Resource or path | Lane | Planned action | Why this will change | Evidence or winner |"
         in contract_content
@@ -533,7 +604,7 @@ def test_sync_contract_documents_verified_bisync_reconciliation() -> None:
     )
 
 
-def test_agent_and_skill_align_on_table_first_reporting() -> None:
+def test_agent_and_skill_align_on_summary_first_reporting() -> None:
     agent_path = (
         Path(__file__).resolve().parent
         / "../.github/agents/local-sync-install-ai-resources.agent.md"
@@ -547,7 +618,7 @@ def test_agent_and_skill_align_on_table_first_reporting() -> None:
 
     assert "table-first report layout" not in agent_content
     assert "why each blocker matters" not in agent_content
-    assert "table-first report" in skill_content
+    assert "summary-first" in skill_content
 
 
 def test_agent_and_skill_align_on_default_sync_sequence() -> None:
@@ -564,10 +635,7 @@ def test_agent_and_skill_align_on_default_sync_sequence() -> None:
 
     expected = "run install `plan` first for the default `skills` target"
     assert expected not in agent_content
-    assert (
-        "Run install `plan` for the default `skills` target. Stop on blockers."
-        in skill_content
-    )
+    assert "Run `sync` for the default `skills` target." in skill_content
 
 
 def test_main_plan_compact_output_preserves_changed_resource_evidence(
@@ -602,7 +670,7 @@ def test_main_plan_compact_output_preserves_changed_resource_evidence(
     assert any(item["action"] == "mkdir" for item in payload["changed_resources"])
 
 
-def test_main_plan_report_output_has_fixed_sections(
+def test_main_plan_report_output_has_stable_summary_sections(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
     source_root = tmp_path / "source"
@@ -630,17 +698,16 @@ def test_main_plan_report_output_has_fixed_sections(
     output = capsys.readouterr().out
 
     assert exit_code == 0
-    assert "## Current State" in output
+    assert "## Summary" in output
     assert "repo-to-home install" in output
-    assert "## Differences Or Planned Work" in output
-    assert "## Actions Completed" in output
-    assert "## Blockers And Skips" in output
+    assert "## Changes" in output
+    assert "## Attention" in output
     assert "## Validation" in output
-    assert "## Remaining Work" in output
-    assert "## Next Action" in output
+    assert "## Next" in output
+    assert "## Current State" not in output
 
 
-def test_bisync_plan_report_output_has_fixed_sections(
+def test_bisync_plan_report_output_has_stable_summary_sections(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
     source_root = tmp_path / "source"
@@ -666,11 +733,11 @@ def test_bisync_plan_report_output_has_fixed_sections(
     output = capsys.readouterr().out
 
     assert exit_code == 1
-    assert "## Current State" in output
+    assert "## Summary" in output
     assert "repo-home drift" in output
-    assert "## Differences Or Planned Work" in output
-    assert "## Actions Completed" in output
-    assert "## Blockers And Skips" in output
+    assert "## Changes" in output
+    assert "## Attention" in output
     assert "## Validation" in output
     assert "## Remaining Work" in output
-    assert "## Next Action" in output
+    assert "## Next" in output
+    assert "## Current State" not in output
