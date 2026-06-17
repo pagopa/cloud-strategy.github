@@ -27,6 +27,7 @@ See `references/review-gate.md` for the review output contract and gate states.
 ## Validation
 
 - Findings stay defect-first.
+- Review flow preserves compact context: prioritize diff and failing evidence first, then expand only when an evidence gap remains.
 - Review output carries findings, severity, confidence, evidence gap, route or next owner, and a Review Gate outcome before the final verdict.
 - Retained remediation plans are authored by `internal-gateway-writing-plans`.
 - The gateway stops before fixes.

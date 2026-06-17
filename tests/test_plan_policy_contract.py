@@ -40,6 +40,8 @@ def test_executing_plans_accepts_compact_and_extended_consumers() -> None:
     )
     assert "mandatory requirements that are applicable" in executing_text
     assert "Block item closure and block `SHIPPED`" in executing_text
+    assert "Establish execution state" in executing_text
+    assert "Avoid repeated full rereads" in executing_text
 
 
 def test_gateway_handoff_references_use_canonical_execution_owner() -> None:
@@ -77,3 +79,13 @@ def test_wrapper_prompts_respect_compact_and_extended_consumers() -> None:
         "approved compact mini-plan-* plans and approved extended plans"
         in execute_wrapper
     )
+
+
+def test_gateway_skills_preserve_compact_context_discipline() -> None:
+    simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
+
+    assert "Preserve compact working state" in simple_text
+    assert "Escalation trigger" in simple_text
+    assert "Preserve known-context handoff quality" in writing_text
+    assert "run targeted rereads" in writing_text

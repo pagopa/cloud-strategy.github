@@ -30,21 +30,24 @@ consumes approved `compact` and `extended` retained plans.
 
 1. Read `01-change-summary.md` and `02-source-item-ledger.md`.
 2. Verify `Plan profile: compact` or `Plan profile: extended`, then infer the execution strategy from profile, folder shape, and validation path.
-3. Run the ledger evidence pass.
-4. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
-5. For `compact`, confirm the folder uses `mini-plan-*`, `questions.md` is `- none`, and `03-execution.md` is the only executable file.
-6. For `extended`, read `04-implementation-contract.md` before executable files.
-7. Process numbered executable files in order.
-8. Run an item-level compliance audit before closing each executable item.
-9. Track progress through the live ledger.
-10. Aggregate unresolved mandatory applicable requirements before closeout.
-11. Package closeout only for `DONE`.
+3. Establish execution state from summary, ledger, and active validator outcomes; keep it compact and update it as items close.
+4. Avoid repeated full rereads: inspect changed sections, active executable item context, and failing-validator evidence first.
+5. Run the ledger evidence pass.
+6. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
+7. For `compact`, confirm the folder uses `mini-plan-*`, `questions.md` is `- none`, and `03-execution.md` is the only executable file.
+8. For `extended`, read `04-implementation-contract.md` before executable files.
+9. Process numbered executable files in order.
+10. Run an item-level compliance audit before closing each executable item.
+11. Track progress through the live ledger.
+12. Aggregate unresolved mandatory applicable requirements before closeout.
+13. Package closeout only for `DONE`.
 
 ## Execution Contract
 
 - Reject unsupported profiles immediately.
 - Reject `compact` folders outside the `mini-plan-*` convention.
 - Ignore `questions.md` during execution.
+- Maintain a compact execution state and prefer targeted rereads over full file re-ingestion unless new evidence invalidates current state.
 - Infer the execution strategy from `Plan profile`, folder shape, `04-implementation-contract.md` presence when applicable, and the validation path. Do not require a separate retained-plan consumer field.
 - Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
 - Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.

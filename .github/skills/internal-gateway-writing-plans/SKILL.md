@@ -66,6 +66,7 @@ can provide.
   `Plan profile`, `File map and role`, clarification
   gate status, `Initial evidence pass`, `Reading budget`, target, anti-scope,
   owner, validator, stop conditions, and `Source item ledger`.
+- Preserve known-context handoff quality in `Initial evidence pass` and `Reading budget` so executors can avoid repeated broad rereads.
 - `03-execution.md`: first executable file.
 - `questions.md`: user-only decisions only. Write `- none` when nothing remains.
 - `04-implementation-contract.md` is required for every `extended` plan.
@@ -83,10 +84,11 @@ can provide.
 6. Run the clarification gate when user decisions remain.
 7. For `extended`, write `04-implementation-contract.md`.
 8. Write executable numbered files in order.
-9. Create `questions.md` with `- none` or open user-only decisions.
-10. Run scope challenge and plan review gate for non-trivial plans.
-11. Run `audit` first, then run `handoff-check`; execute only when ready.
-12. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
+9. Keep each executable file scoped to its slice and validation path so executors can run targeted rereads.
+10. Create `questions.md` with `- none` or open user-only decisions.
+11. Run scope challenge and plan review gate for non-trivial plans.
+12. Run `audit` first, then run `handoff-check`; execute only when ready.
+13. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
 
 ## Validation
 

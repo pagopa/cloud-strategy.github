@@ -102,6 +102,14 @@ def first_int(mapping: dict[str, object], *keys: str) -> int | None:
     return None
 
 
+def first_float(mapping: dict[str, object], *keys: str) -> float | None:
+    for key in keys:
+        value = mapping.get(key)
+        if isinstance(value, (int, float)):
+            return float(value)
+    return None
+
+
 def first_str(mapping: dict[str, object], *keys: str) -> str:
     for key in keys:
         value = mapping.get(key)
@@ -315,6 +323,10 @@ def summarize_prompt_composition(logs: list[dict[str, object]]) -> dict[str, obj
 def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
     metadata = read_dict(log.get("metadata"))
     usage = read_dict(metadata.get("usage") or log.get("usage") or log.get("tokenUsage"))
+    copilot_usage = read_dict(usage.get("copilot_usage") or usage.get("copilotUsage"))
+
+    usage_aiu_total = first_float(copilot_usage, "total_nano_aiu", "totalNanoAiu")
+    metadata_aiu_total = first_float(metadata, "copilotUsageAic", "copilot_usage_aic")
 
     prompt_tokens = first_int(usage, "prompt_tokens", "promptTokens", "input_tokens", "inputTokens")
     if prompt_tokens is None:
@@ -351,6 +363,7 @@ def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
         "tool_call": is_tool,
         "tool_payload_bytes": payload_bytes,
         "retry_hint": "retry" in tool_kind or "retry" in kind,
+        "aiu_total": usage_aiu_total if usage_aiu_total is not None else metadata_aiu_total,
         "usage_signature": stable_identity(
             {
                 "prompt_tokens": prompt_tokens,
@@ -358,6 +371,7 @@ def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
                 "completion_tokens": completion_tokens,
                 "reasoning_tokens": reasoning_tokens,
                 "tool_payload_bytes": payload_bytes,
+                "aiu_total": usage_aiu_total if usage_aiu_total is not None else metadata_aiu_total,
             }
         ),
     }
@@ -384,6 +398,7 @@ def summarize_prompt_export(prompt_export: dict[str, object], *, source_name: st
         non_cached_input_tokens = 0
         completion_tokens_total = 0
         reasoning_tokens_total = 0
+        aiu_total = 0.0
         tool_payload_bytes_total = 0
         tool_calls = 0
 
@@ -393,6 +408,8 @@ def summarize_prompt_export(prompt_export: dict[str, object], *, source_name: st
             non_cached_input_tokens += as_int(summary["non_cached_input_tokens"])
             completion_tokens_total += as_int(summary["completion_tokens"])
             reasoning_tokens_total += as_int(summary["reasoning_tokens"])
+            if summary.get("aiu_total") is not None:
+                aiu_total += as_float(summary.get("aiu_total"))
             tool_payload_bytes_total += as_int(summary["tool_payload_bytes"])
 
             tool_name = str(summary["tool_name"])
@@ -453,6 +470,7 @@ def summarize_prompt_export(prompt_export: dict[str, object], *, source_name: st
                 "non_cached_input_tokens": non_cached_input_tokens,
                 "completion_tokens": completion_tokens_total,
                 "reasoning_tokens": reasoning_tokens_total,
+                "aiu_total": round(aiu_total, 6),
                 "max_prompt_tokens": max(prompt_series) if prompt_series else 0,
                 "first_context_tokens": prompt_series[0] if prompt_series else 0,
                 "last_context_tokens": prompt_series[-1] if prompt_series else 0,
@@ -538,6 +556,7 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
     ]
     prompt_tokens = sum(as_int(summary.get("prompt_tokens")) for summary in summaries)
     cache_read_tokens = sum(as_int(summary.get("cache_read_tokens")) for summary in summaries)
+    aiu_total = round(sum(as_float(summary.get("aiu_total")) for summary in summaries if summary.get("aiu_total") is not None), 6)
     repeated_system_message_hashes = [
         {"hash": digest, "occurrences": count, "bytes": system_hash_bytes.get(digest, 0)}
         for digest, count in sorted(system_hash_counts.items(), key=lambda item: (-item[1], item[0]))
@@ -553,6 +572,7 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
         "non_cached_input_tokens": sum(as_int(summary.get("non_cached_input_tokens")) for summary in summaries),
         "completion_tokens": sum(as_int(summary.get("completion_tokens")) for summary in summaries),
         "reasoning_tokens": sum(as_int(summary.get("reasoning_tokens")) for summary in summaries),
+        "aiu_total": aiu_total,
         "max_prompt_tokens": max_prompt_tokens,
         "first_context_tokens": first_context_tokens,
         "last_context_tokens": last_context_tokens,
@@ -632,6 +652,7 @@ def format_markdown(report: dict[str, object]) -> str:
     lines.append(f"- Non-cached input tokens: {aggregate.get('non_cached_input_tokens', 0)}")
     lines.append(f"- Completion tokens: {aggregate.get('completion_tokens', 0)}")
     lines.append(f"- Reasoning tokens: {aggregate.get('reasoning_tokens', 0)}")
+    lines.append(f"- AIU total: {aggregate.get('aiu_total', 0.0)}")
     lines.append(f"- Max prompt tokens: {aggregate.get('max_prompt_tokens', 0)}")
     lines.append(f"- Retry-like duplicate records: {aggregate.get('retry_like_duplicate_count', 0)}")
     lines.append("")

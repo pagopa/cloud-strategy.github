@@ -57,6 +57,7 @@ PRIVATE SYSTEM BODY
                         "name": "model_request",
                         "kind": "request",
                         "metadata": {
+                            "copilotUsageAic": 1.25,
                             "usage": {
                                 "prompt_tokens": 100,
                                 "prompt_tokens_details": {"cached_tokens": 70},
@@ -92,6 +93,7 @@ PRIVATE SYSTEM BODY
                             "usage": {
                                 "prompt_tokens": 40,
                                 "completion_tokens": 2,
+                                "copilot_usage": {"total_nano_aiu": 12.5},
                             }
                         },
                         "requestMessages": {
@@ -122,6 +124,7 @@ PRIVATE SYSTEM BODY
                             "usage": {
                                 "prompt_tokens": 40,
                                 "completion_tokens": 2,
+                                "copilot_usage": {"total_nano_aiu": 12.5},
                             }
                         },
                     },
@@ -150,6 +153,7 @@ PRIVATE SYSTEM BODY
     assert payload["aggregate"]["non_cached_input_tokens"] == 110
     assert payload["aggregate"]["completion_tokens"] == 16
     assert payload["aggregate"]["reasoning_tokens"] == 3
+    assert payload["aggregate"]["aiu_total"] == 26.25
     assert payload["aggregate"]["max_prompt_tokens"] == 100
     assert payload["aggregate"]["cache_read_ratio"] == 0.3889
     assert payload["aggregate"]["tool_calls"] == 2
@@ -281,6 +285,10 @@ def test_debug_logs_subcommand_summarizes_otlp_and_dedupes_prompt_exports(
     prompt_b = tmp_path / "prompt-b.json"
     prompt_payload = {
         "exportedAt": "2026-06-10T08:33:51Z",
+        "copilotChat": {
+            "sessionId": "lane-session-1",
+            "sessionTitle": "Internal Gateway Execute Plans",
+        },
         "prompts": [
             {
                 "promptId": "prompt-1",
@@ -323,6 +331,13 @@ def test_debug_logs_subcommand_summarizes_otlp_and_dedupes_prompt_exports(
     assert payload["aggregate"]["cache_read_tokens"] == 150
     assert payload["aggregate"]["non_cached_input_tokens"] == 50
     assert payload["aggregate"]["aiu_total"] == 12.5
+    lane_sessions = [
+        session
+        for session in payload["sessions"]
+        if session.get("session_id") == "lane-session-1"
+    ]
+    assert lane_sessions
+    assert lane_sessions[0]["title"] == "Internal Gateway Execute Plans"
     assert all(
         "cccccc" not in json.dumps(session).lower() for session in payload["sessions"]
     )
@@ -351,6 +366,38 @@ def test_debug_logs_subcommand_can_render_markdown(tmp_path: Path) -> None:
 
     assert "# Debug Log Summary" in result.stdout
     assert "Sync reporting" in result.stdout
+
+
+def test_prompt_exports_subcommand_markdown_includes_aiu_total(tmp_path: Path) -> None:
+    prompt_path = tmp_path / "prompt.json"
+    prompt_path.write_text(
+        json.dumps(
+            {
+                "prompts": [
+                    {
+                        "promptId": "prompt-aiu",
+                        "logs": [
+                            {
+                                "metadata": {
+                                    "usage": {
+                                        "prompt_tokens": 50,
+                                        "completion_tokens": 5,
+                                        "copilot_usage": {"total_nano_aiu": 3.5},
+                                    }
+                                }
+                            }
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_tool("prompt-exports", str(prompt_path), "--format", "markdown")
+
+    assert "# Prompt Export Summary" in result.stdout
+    assert "- AIU total: 3.5" in result.stdout
 
 
 def test_tool_package_exports_main_and_parsers() -> None:

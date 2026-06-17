@@ -73,6 +73,16 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     )
 
 
+def test_agents_tactical_defaults_include_compact_context_discipline() -> None:
+    agents_text = read_text("AGENTS.md")
+
+    assert "## Tactical Defaults" in agents_text
+    assert "Preserve compact working state across turns" in agents_text
+    assert "Keep one active primary owner per execution lane" in agents_text
+    assert "Use bounded evidence" in agents_text
+    assert "Name the validation path early" in agents_text
+
+
 def test_lightweight_skill_references_stay_on_demand() -> None:
     checklist_text = read_text(
         ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"

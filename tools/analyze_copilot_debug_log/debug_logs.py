@@ -163,6 +163,14 @@ def get_first_float(mapping: dict[str, object], *keys: str) -> float | None:
     return None
 
 
+def get_first_str(mapping: dict[str, object], *keys: str) -> str:
+    for key in keys:
+        value = mapping.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return ""
+
+
 def normalize_log_records(value: object) -> list[dict[str, object]]:
     records: list[dict[str, object]] = []
     for item in iter_dicts(value):
@@ -265,12 +273,23 @@ def summarize_otlp_export(resource_spans: list[dict[str, object]], *, source_nam
 
         context_series = [as_int(item["input_tokens"]) for item in request_spans if item.get("input_tokens") is not None]
         context_growth_tokens = max(context_series[-1] - context_series[0], 0) if len(context_series) > 1 else 0
-        session_id = resource_attrs.get("session.id") or resource_attrs.get("session_id") or source_name or "unknown-session"
-        title = resource_attrs.get("service.name") or resource_attrs.get("session.title") or session_id
+        session_id = (
+            resource_attrs.get("copilotChat.sessionId")
+            or resource_attrs.get("session.id")
+            or resource_attrs.get("session_id")
+            or source_name
+            or "unknown-session"
+        )
+        title = (
+            resource_attrs.get("copilotChat.sessionTitle")
+            or resource_attrs.get("session.title")
+            or resource_attrs.get("service.name")
+            or session_id
+        )
         summaries.append(
             {
-                "session_id": session_id,
-                "title": title,
+                "session_id": str(session_id),
+                "title": str(title),
                 "model_request_count": model_request_count,
                 "tool_call_count": tool_call_count,
                 "request_count": model_request_count + tool_call_count,
@@ -343,9 +362,36 @@ def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
 
 def summarize_prompt_export(prompt_export: dict[str, object]) -> list[dict[str, object]]:
     summaries: list[dict[str, object]] = []
+    export_copilot_chat = (
+        cast(dict[str, object], prompt_export.get("copilotChat"))
+        if isinstance(prompt_export.get("copilotChat"), dict)
+        else {}
+    )
     prompts = normalize_log_records(prompt_export.get("prompts"))
     for index, prompt in enumerate(prompts, start=1):
         logs = normalize_log_records(prompt.get("logs"))
+        prompt_copilot_chat = cast(dict[str, object], prompt.get("copilotChat")) if isinstance(prompt.get("copilotChat"), dict) else {}
+        log_copilot_chat: dict[str, object] = {}
+        for log in logs:
+            if isinstance(log.get("copilotChat"), dict):
+                log_copilot_chat = cast(dict[str, object], log.get("copilotChat"))
+                break
+            metadata = cast(dict[str, object], log.get("metadata")) if isinstance(log.get("metadata"), dict) else {}
+            if isinstance(metadata.get("copilotChat"), dict):
+                log_copilot_chat = cast(dict[str, object], metadata.get("copilotChat"))
+                break
+
+        copilot_session_id = (
+            get_first_str(prompt_copilot_chat, "sessionId", "session_id", "id")
+            or get_first_str(log_copilot_chat, "sessionId", "session_id", "id")
+            or get_first_str(export_copilot_chat, "sessionId", "session_id", "id")
+        )
+        copilot_session_title = (
+            get_first_str(prompt_copilot_chat, "sessionTitle", "session_title", "title")
+            or get_first_str(log_copilot_chat, "sessionTitle", "session_title", "title")
+            or get_first_str(export_copilot_chat, "sessionTitle", "session_title", "title")
+        )
+
         log_summaries = [summarize_prompt_log(log) for log in logs]
         context_series: list[int] = [as_int(summary["input_tokens"]) for summary in log_summaries if summary["input_tokens"] is not None]
         cache_read_total = sum(as_int(summary["cache_read_tokens"]) for summary in log_summaries)
@@ -353,10 +399,12 @@ def summarize_prompt_export(prompt_export: dict[str, object]) -> list[dict[str, 
         aiu_total = round(sum(as_float(summary["aiu_total"]) for summary in log_summaries), 6)
         tool_schema_counts: list[int] = [as_int(summary["tool_schema_count"]) for summary in log_summaries if summary["tool_schema_count"] is not None]
         prompt_id = prompt.get("promptId") or prompt.get("prompt_id") or f"prompt-{index}"
+        session_id = copilot_session_id or str(prompt_id)
+        title = copilot_session_title or str(prompt.get("title") or prompt.get("name") or session_id)
         summaries.append(
             {
-                "session_id": prompt_id,
-                "title": str(prompt_id),
+                "session_id": session_id,
+                "title": title,
                 "request_count": len(log_summaries),
                 "input_tokens": sum(as_int(summary["input_tokens"]) for summary in log_summaries),
                 "output_tokens": sum(as_int(summary["output_tokens"]) for summary in log_summaries),

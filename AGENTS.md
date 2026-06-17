@@ -36,7 +36,6 @@ repository projects AI configuration into other repositories.
 ## Context And Scope
 
 - For runtimes without native skill loading, select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence, then read that `SKILL.md` as manual context.
-- Conversational gateway defaults remain explicit: `internal-gateway-idea-brainstorming` for ideation, `internal-gateway-review` for defect-first review routing, and `internal-gateway-writing-plans` for retained plans under `tmp/superpowers/`.
 - Load umbrella domain skills before specialist depth when the domain is clear but the workflow depth is not yet proven.
 - Co-load specialist skills or bundle references only when the task needs workflow, decision trees, domain depth, or reusable procedures.
 - Use the smallest valid owner to resolve conflicts; file-owned rules and narrower skill contracts win over broad defaults inside their own scope.
@@ -58,6 +57,11 @@ repository projects AI configuration into other repositories.
 - Light emoji markers may appear in user-facing macro-category headings when the owning skill defines them; do not use them in paths, commands, identifiers, schema fields, or copied technical values.
 
 ## Tactical Defaults
+
+- Preserve compact working state across turns; avoid rebuilding full context unless new evidence invalidates the current state.
+- Keep one active primary owner per execution lane. Load referenced skills on demand based on target, runtime, ownership, and validation path.
+- Use bounded evidence: inspect changed sections and failing-validator context first, then expand only when gaps remain.
+- Name the validation path early and treat missing validator evidence as a non-`DONE` state until the gap is explicitly resolved.
 
 ## Delivery And Validation
 

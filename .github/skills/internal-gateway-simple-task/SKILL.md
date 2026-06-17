@@ -36,18 +36,21 @@ explicit user approval.
 ## Simple Flow
 
 1. Inspect local files first.
-2. Use at most one focused clarification block.
-3. Confirm the task still fits one quick lane.
-4. Select only directly applicable skill owners and required references from prompt, target path, runtime, ownership, and validation path.
-5. Build a Readiness Brief before operational work: task, lane-owner, primary assumption or risk, focused validation path, gate outcome, and explicit confirmation prompt.
-6. Stop and wait for explicit user approval before executing the lane.
-7. Identify mandatory applicable requirements internally before execution; do not emit a default user checklist.
-8. Execute the one concrete lane.
-9. Run focused validation or name the explicit gap.
-10. Run a pre-close compliance audit over mandatory applicable requirements only. Delegate fresh-evidence mechanics to `superpowers-verification-before-completion`.
-11. Block completion claims when mandatory applicable requirements remain unverified.
-12. If architecture ownership, owner conflicts, or validation strategy are ambiguous, escalate instead of assuming a universal rule.
-13. If the task stops being simple, stop and issue an escalation alert.
+2. Preserve compact working state: avoid full-context rereads unless new evidence invalidates the active lane assumptions.
+3. Use at most one focused clarification block.
+4. Confirm the task still fits one quick lane.
+5. Select only directly applicable skill owners and required references from prompt, target path, runtime, ownership, and validation path.
+6. Build a Readiness Brief before operational work: task, lane-owner, primary assumption or risk, focused validation path, gate outcome, and explicit confirmation prompt.
+7. Stop and wait for explicit user approval before executing the lane.
+8. Identify mandatory applicable requirements internally before execution; do not emit a default user checklist.
+9. Execute the one concrete lane.
+10. Run focused validation or name the explicit gap.
+11. Run a pre-close compliance audit over mandatory applicable requirements only. Delegate fresh-evidence mechanics to `superpowers-verification-before-completion`.
+12. Block completion claims when mandatory applicable requirements remain unverified.
+13. If architecture ownership, owner conflicts, or validation strategy are ambiguous, escalate instead of assuming a universal rule.
+14. If the task stops being simple, stop and issue an escalation alert.
+
+Escalation trigger: if evidence collection, ownership checks, or validation needs spill into multi-phase execution, route to the narrow next owner instead of expanding the fast path.
 
 ## Validation
 
