@@ -219,8 +219,9 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
      - `home_mtime > repo_mtime` -> `home-to-repo`
      - `repo_mtime == home_mtime` -> `equal-mtime` blocker
 4. For skills only on one side:
-  - report `only-repo` as an actionable repo-to-home creation candidate;
-  - report `only-home` as a blocker that requires manual review.
+
+- report `only-repo` as an actionable repo-to-home creation candidate;
+- report `only-home` as a blocker that requires manual review.
 
 ### Preflight
 

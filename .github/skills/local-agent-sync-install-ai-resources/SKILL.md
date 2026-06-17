@@ -114,7 +114,9 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 - Excludes `local-agent-sync-*` bundles and runtime artifacts (`.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`) from scanning and copying.
 
 ### Conflict Resolution
+
 For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh`, keep `--format report` on model-facing runs, and omit `--home-root` (defaults to `$HOME`).
+
 - `only-repo`: when not excluded, `bisync apply` can create the bundle in home from the repository side.
 - `only-home`: manual intervention required. Decide whether to keep it only in home, remove it, or add it to the repository.
 - `equal-mtime`: hashes differ but mtime is equal. Manual decision required because the winner cannot be determined from timestamps alone.
