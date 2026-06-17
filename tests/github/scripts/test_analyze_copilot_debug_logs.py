@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tools.analyze_copilot_debug_log import debug_logs
+
 SCRIPT = Path(".github/scripts/analyze_copilot_debug_logs.py").resolve()
 
 
@@ -200,3 +202,7 @@ def test_analyzer_can_render_markdown(tmp_path: Path) -> None:
 
     assert "# Debug Log Summary" in result.stdout
     assert "Sync reporting" in result.stdout
+
+
+def test_debug_log_tool_package_is_importable() -> None:
+    assert debug_logs.parse_args(["input.json", "--format", "markdown"]).format == "markdown"

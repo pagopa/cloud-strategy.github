@@ -103,6 +103,17 @@ def test_runner_dispatch_includes_diagnostic_cli_aliases() -> None:
     assert "benchmark_skill_tokens|benchmark_skill_tokens.py" in runner_text
 
 
+def test_copilot_analyzer_entrypoints_delegate_to_root_tool() -> None:
+    prompt_wrapper = read_text(".github/scripts/analyze_copilot_prompt_exports.py")
+    debug_wrapper = read_text(".github/scripts/analyze_copilot_debug_logs.py")
+
+    assert "tools.analyze_copilot_debug_log.prompt_exports import main" in prompt_wrapper
+    assert "tools.analyze_copilot_debug_log.debug_logs import main" in debug_wrapper
+    assert Path("tools/analyze_copilot_debug_log/prompt_exports.py").exists()
+    assert Path("tools/analyze_copilot_debug_log/debug_logs.py").exists()
+    assert Path("tools/analyze_copilot_debug_log/cli.py").exists()
+
+
 def test_code_analysis_workflow_smoke_tests_documented_sync_wrappers() -> None:
     workflow_text = read_text(".github/workflows/_code-analysis.yml")
 

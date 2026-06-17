@@ -26,11 +26,11 @@ VOLATILE_KEYS = frozenset(
 MEMORY_PATH_SENTINEL = "/memories/repo/"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Summarize Copilot debug logs and snapshot exports.")
     parser.add_argument("inputs", nargs="+", help="JSON debug-log or snapshot-export files.")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def stable_identity(value: object) -> str:
@@ -594,8 +594,8 @@ def render_markdown(report: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main() -> int:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     paths = [Path(item) for item in args.inputs]
     report = build_report(paths)
     if args.format == "markdown":

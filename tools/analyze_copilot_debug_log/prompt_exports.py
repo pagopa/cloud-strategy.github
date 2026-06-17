@@ -6,10 +6,39 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
+from collections import Counter
 from collections import defaultdict
 from pathlib import Path
 
+
+SKILL_BLOCK_RE = re.compile(r"<skill>\s*(.*?)</skill>", re.DOTALL)
+SKILL_NAME_TAG_RE = re.compile(r"<name>\s*([^<]+?)\s*</name>")
+SKILL_PATH_TAG_RE = re.compile(r"<path>\s*([^<]+?)\s*</path>")
+SKILL_FRONTMATTER_NAME_RE = re.compile(r"^name:\s*(.+)$", re.MULTILINE)
+SKILL_FRONTMATTER_DESCRIPTION_RE = re.compile(r"^description:\s*(.+)$", re.MULTILINE)
+SKILL_INVENTORY_RE = re.compile(
+    r"^- `?([^`:]+(?::[^`]+)?)`?:\s*(.*?)\s+\(file:\s*([^)]+)\)",
+    re.MULTILINE,
+)
+PATH_IN_TEXT_RE = re.compile(
+    r"(?:(?:file|path|uri|resourcePath|filePath|fileUri)[\"']?\s*[:=]\s*[\"'])([^\"']+)"
+)
+PATH_KEYS = frozenset(
+    {
+        "file",
+        "filePath",
+        "file_path",
+        "fileUri",
+        "file_uri",
+        "path",
+        "resourcePath",
+        "resource_path",
+        "uri",
+    }
+)
+SYSTEM_ROLES = frozenset({"0", "system", "developer"})
 
 VOLATILE_KEYS = frozenset(
     {
@@ -81,6 +110,10 @@ def first_str(mapping: dict[str, object], *keys: str) -> str:
     return ""
 
 
+def short_hash(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()[:16]
+
+
 def tool_name_from_log(log: dict[str, object]) -> str:
     tool_value = log.get("tool")
     if isinstance(tool_value, str) and tool_value:
@@ -108,6 +141,175 @@ def measure_payload_bytes(value: object) -> int:
 
 def normalized_kind(value: object) -> str:
     return str(value or "").replace("_", "").replace("-", "").lower()
+
+
+def read_request_messages(log: dict[str, object]) -> list[dict[str, object]]:
+    metadata = read_dict(log.get("metadata"))
+    request_messages = (
+        log.get("requestMessages")
+        or log.get("request_messages")
+        or metadata.get("requestMessages")
+        or metadata.get("request_messages")
+    )
+    if isinstance(request_messages, dict):
+        return [item for item in read_list(request_messages.get("messages")) if isinstance(item, dict)]
+    if isinstance(request_messages, list):
+        return [item for item in request_messages if isinstance(item, dict)]
+    return []
+
+
+def message_text(message: dict[str, object]) -> str:
+    content = message.get("content")
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return ""
+
+    parts: list[str] = []
+    for item in content:
+        if isinstance(item, str):
+            parts.append(item)
+            continue
+        if isinstance(item, dict) and isinstance(item.get("text"), str):
+            parts.append(str(item["text"]))
+    return "\n".join(parts)
+
+
+def is_system_message(message: dict[str, object]) -> bool:
+    return str(message.get("role", "")).lower() in SYSTEM_ROLES
+
+
+def extract_skill_metadata(text: str) -> list[dict[str, object]]:
+    blocks: list[dict[str, object]] = []
+    for match in SKILL_BLOCK_RE.finditer(text):
+        block = match.group(1)
+        name_match = SKILL_NAME_TAG_RE.search(block) or SKILL_FRONTMATTER_NAME_RE.search(block)
+        description_match = SKILL_FRONTMATTER_DESCRIPTION_RE.search(block)
+        path_match = SKILL_PATH_TAG_RE.search(block)
+        skill_id = name_match.group(1).strip() if name_match else ""
+        path = path_match.group(1).strip() if path_match else ""
+        description = description_match.group(1).strip() if description_match else ""
+        blocks.append(
+            {
+                "skill_id": skill_id,
+                "path": path,
+                "block_bytes": len(match.group(0).encode("utf-8")),
+                "description_bytes": len(description.encode("utf-8")),
+            }
+        )
+
+    for skill_id, description, path in SKILL_INVENTORY_RE.findall(text):
+        blocks.append(
+            {
+                "skill_id": skill_id.strip(),
+                "path": path.strip(),
+                "block_bytes": len(description.encode("utf-8")),
+                "description_bytes": len(description.strip().encode("utf-8")),
+            }
+        )
+    return blocks
+
+
+def looks_like_path(value: str) -> bool:
+    if not value or len(value) > 500:
+        return False
+    return (
+        value.startswith(("/", "./", "../", "file://"))
+        or ".github/" in value
+        or "tmp/" in value
+        or "/" in value
+    )
+
+
+def collect_path_values(value: object) -> list[str]:
+    paths: list[str] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key in PATH_KEYS and isinstance(item, str) and looks_like_path(item):
+                paths.append(item)
+            paths.extend(collect_path_values(item))
+        return paths
+    if isinstance(value, list):
+        for item in value:
+            paths.extend(collect_path_values(item))
+        return paths
+    if isinstance(value, str):
+        for match in PATH_IN_TEXT_RE.findall(value):
+            if looks_like_path(match):
+                paths.append(match)
+    return paths
+
+
+def summarize_prompt_composition(logs: list[dict[str, object]]) -> dict[str, object]:
+    system_hash_counts: Counter[str] = Counter()
+    system_hash_bytes: dict[str, int] = {}
+    skill_metadata_blocks: list[dict[str, object]] = []
+    skill_descriptions_by_key: dict[tuple[str, str], dict[str, object]] = {}
+    attachment_counts: Counter[str] = Counter()
+    gateway_message_count = 0
+    superpowers_message_count = 0
+    gateway_superpowers_co_present_count = 0
+
+    for log in logs:
+        for message in read_request_messages(log):
+            text = message_text(message)
+            if is_system_message(message):
+                message_bytes = len(text.encode("utf-8"))
+                digest = short_hash(text)
+                system_hash_counts[digest] += 1
+                system_hash_bytes[digest] = message_bytes
+
+            if text:
+                has_gateway = "internal-gateway-" in text
+                has_superpowers = "superpowers-" in text
+                gateway_message_count += 1 if has_gateway else 0
+                superpowers_message_count += 1 if has_superpowers else 0
+                gateway_superpowers_co_present_count += 1 if has_gateway and has_superpowers else 0
+
+                for block in extract_skill_metadata(text):
+                    skill_metadata_blocks.append(block)
+                    key = (str(block.get("skill_id") or ""), str(block.get("path") or ""))
+                    current = skill_descriptions_by_key.get(key)
+                    if current is None or as_int(block.get("description_bytes")) > as_int(current.get("description_bytes")):
+                        skill_descriptions_by_key[key] = {
+                            "skill_id": key[0],
+                            "path": key[1],
+                            "description_bytes": as_int(block.get("description_bytes")),
+                        }
+
+            attachment_counts.update(collect_path_values(message))
+
+    repeated_hashes = [
+        {
+            "hash": digest,
+            "occurrences": count,
+            "bytes": system_hash_bytes.get(digest, 0),
+        }
+        for digest, count in sorted(system_hash_counts.items(), key=lambda item: (-item[1], item[0]))
+        if count > 1
+    ]
+    largest_skill_descriptions = sorted(
+        skill_descriptions_by_key.values(),
+        key=lambda item: (-as_int(item.get("description_bytes")), str(item.get("skill_id")), str(item.get("path"))),
+    )[:10]
+    duplicate_attachment_paths = [
+        {"path": path, "occurrences": count}
+        for path, count in sorted(attachment_counts.items(), key=lambda item: (-item[1], item[0]))
+        if count > 1
+    ][:25]
+
+    return {
+        "system_message_count": sum(system_hash_counts.values()),
+        "system_message_total_bytes": sum(system_hash_bytes[digest] * count for digest, count in system_hash_counts.items()),
+        "repeated_system_message_hashes": repeated_hashes,
+        "skill_metadata_block_count": len(skill_metadata_blocks),
+        "skill_metadata_total_bytes": sum(as_int(block.get("block_bytes")) for block in skill_metadata_blocks),
+        "largest_skill_descriptions": largest_skill_descriptions,
+        "gateway_message_count": gateway_message_count,
+        "superpowers_message_count": superpowers_message_count,
+        "gateway_superpowers_co_present_count": gateway_superpowers_co_present_count,
+        "duplicate_attachment_paths": duplicate_attachment_paths,
+    }
 
 
 def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
@@ -238,6 +440,7 @@ def summarize_prompt_export(prompt_export: dict[str, object], *, source_name: st
             )
             if as_int(record["occurrences"]) > 1 and bool(record["retry_hint"])
         ]
+        composition = summarize_prompt_composition(logs)
 
         summaries.append(
             {
@@ -259,6 +462,7 @@ def summarize_prompt_export(prompt_export: dict[str, object], *, source_name: st
                 "tool_counts_by_name": dict(sorted(tool_counts_by_name.items())),
                 "top_tool_payloads": top_tool_payloads,
                 "retry_like_duplicate_records": retry_like_duplicate_records,
+                "composition": composition,
             }
         )
 
@@ -276,6 +480,10 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
     tool_counts_by_name: dict[str, int] = defaultdict(int)
     tool_payload_bytes_by_name: dict[str, int] = defaultdict(int)
     retry_like_duplicate_records: list[dict[str, object]] = []
+    system_hash_counts: Counter[str] = Counter()
+    system_hash_bytes: dict[str, int] = {}
+    skill_descriptions_by_key: dict[tuple[str, str], dict[str, object]] = {}
+    duplicate_attachment_counts: Counter[str] = Counter()
     max_prompt_tokens = 0
     first_context_tokens = 0
     last_context_tokens = 0
@@ -297,6 +505,25 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
         for record in read_list(summary.get("retry_like_duplicate_records")):
             if isinstance(record, dict):
                 retry_like_duplicate_records.append(record)
+        composition = read_dict(summary.get("composition"))
+        for item in read_list(composition.get("repeated_system_message_hashes")):
+            if isinstance(item, dict):
+                digest = str(item.get("hash") or "")
+                system_hash_counts[digest] += as_int(item.get("occurrences"))
+                system_hash_bytes[digest] = as_int(item.get("bytes"))
+        for item in read_list(composition.get("largest_skill_descriptions")):
+            if isinstance(item, dict):
+                key = (str(item.get("skill_id") or ""), str(item.get("path") or ""))
+                current = skill_descriptions_by_key.get(key)
+                if current is None or as_int(item.get("description_bytes")) > as_int(current.get("description_bytes")):
+                    skill_descriptions_by_key[key] = {
+                        "skill_id": key[0],
+                        "path": key[1],
+                        "description_bytes": as_int(item.get("description_bytes")),
+                    }
+        for item in read_list(composition.get("duplicate_attachment_paths")):
+            if isinstance(item, dict):
+                duplicate_attachment_counts[str(item.get("path") or "")] += as_int(item.get("occurrences"))
 
     top_tool_payloads = [
         {
@@ -309,12 +536,20 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
             key=lambda item: (-item[1], -tool_counts_by_name[item[0]], item[0]),
         )
     ]
+    prompt_tokens = sum(as_int(summary.get("prompt_tokens")) for summary in summaries)
+    cache_read_tokens = sum(as_int(summary.get("cache_read_tokens")) for summary in summaries)
+    repeated_system_message_hashes = [
+        {"hash": digest, "occurrences": count, "bytes": system_hash_bytes.get(digest, 0)}
+        for digest, count in sorted(system_hash_counts.items(), key=lambda item: (-item[1], item[0]))
+        if count > 1
+    ]
 
     return {
         "prompt_count": len(summaries),
         "request_count": sum(as_int(summary.get("request_count")) for summary in summaries),
-        "prompt_tokens": sum(as_int(summary.get("prompt_tokens")) for summary in summaries),
-        "cache_read_tokens": sum(as_int(summary.get("cache_read_tokens")) for summary in summaries),
+        "prompt_tokens": prompt_tokens,
+        "cache_read_tokens": cache_read_tokens,
+        "cache_read_ratio": round(cache_read_tokens / prompt_tokens, 4) if prompt_tokens else 0.0,
         "non_cached_input_tokens": sum(as_int(summary.get("non_cached_input_tokens")) for summary in summaries),
         "completion_tokens": sum(as_int(summary.get("completion_tokens")) for summary in summaries),
         "reasoning_tokens": sum(as_int(summary.get("reasoning_tokens")) for summary in summaries),
@@ -328,6 +563,27 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
         "top_tool_payloads": top_tool_payloads,
         "retry_like_duplicate_count": len(retry_like_duplicate_records),
         "retry_like_duplicate_records": retry_like_duplicate_records,
+        "composition": {
+            "system_message_count": sum(as_int(read_dict(summary.get("composition")).get("system_message_count")) for summary in summaries),
+            "system_message_total_bytes": sum(as_int(read_dict(summary.get("composition")).get("system_message_total_bytes")) for summary in summaries),
+            "repeated_system_message_hashes": repeated_system_message_hashes,
+            "skill_metadata_block_count": sum(as_int(read_dict(summary.get("composition")).get("skill_metadata_block_count")) for summary in summaries),
+            "skill_metadata_total_bytes": sum(as_int(read_dict(summary.get("composition")).get("skill_metadata_total_bytes")) for summary in summaries),
+            "largest_skill_descriptions": sorted(
+                skill_descriptions_by_key.values(),
+                key=lambda item: (-as_int(item.get("description_bytes")), str(item.get("skill_id")), str(item.get("path"))),
+            )[:10],
+            "gateway_message_count": sum(as_int(read_dict(summary.get("composition")).get("gateway_message_count")) for summary in summaries),
+            "superpowers_message_count": sum(as_int(read_dict(summary.get("composition")).get("superpowers_message_count")) for summary in summaries),
+            "gateway_superpowers_co_present_count": sum(
+                as_int(read_dict(summary.get("composition")).get("gateway_superpowers_co_present_count")) for summary in summaries
+            ),
+            "duplicate_attachment_paths": [
+                {"path": path, "occurrences": count}
+                for path, count in sorted(duplicate_attachment_counts.items(), key=lambda item: (-item[1], item[0]))
+                if path and count > 1
+            ][:25],
+        },
     }
 
 
@@ -363,6 +619,7 @@ def build_report(paths: list[Path]) -> dict[str, object]:
 
 def format_markdown(report: dict[str, object]) -> str:
     aggregate = read_dict(report.get("aggregate"))
+    composition = read_dict(aggregate.get("composition"))
     lines = ["# Prompt Export Summary", ""]
     lines.append(
         f"- Prompt exports: {report.get('deduped_prompt_export_count', 0)} deduped from {report.get('prompt_export_count', 0)} inputs"
@@ -371,6 +628,7 @@ def format_markdown(report: dict[str, object]) -> str:
     lines.append(f"- Requests: {aggregate.get('request_count', 0)}")
     lines.append(f"- Prompt tokens: {aggregate.get('prompt_tokens', 0)}")
     lines.append(f"- Cache read tokens: {aggregate.get('cache_read_tokens', 0)}")
+    lines.append(f"- Cache read ratio: {aggregate.get('cache_read_ratio', 0.0)}")
     lines.append(f"- Non-cached input tokens: {aggregate.get('non_cached_input_tokens', 0)}")
     lines.append(f"- Completion tokens: {aggregate.get('completion_tokens', 0)}")
     lines.append(f"- Reasoning tokens: {aggregate.get('reasoning_tokens', 0)}")
@@ -387,6 +645,17 @@ def format_markdown(report: dict[str, object]) -> str:
                 lines.append(
                     f"- {item.get('tool_name', '')}: {item.get('payload_bytes', 0)} bytes across {item.get('call_count', 0)} calls"
                 )
+    lines.append("")
+    lines.append("## Prompt Composition")
+    lines.append(f"- System messages: {composition.get('system_message_count', 0)}")
+    lines.append(f"- System message bytes: {composition.get('system_message_total_bytes', 0)}")
+    lines.append(f"- Skill metadata blocks: {composition.get('skill_metadata_block_count', 0)}")
+    lines.append(f"- Skill metadata bytes: {composition.get('skill_metadata_total_bytes', 0)}")
+    lines.append(f"- Gateway messages: {composition.get('gateway_message_count', 0)}")
+    lines.append(f"- Superpowers messages: {composition.get('superpowers_message_count', 0)}")
+    lines.append(f"- Gateway/superpowers co-present messages: {composition.get('gateway_superpowers_co_present_count', 0)}")
+    duplicate_attachment_paths = read_list(composition.get("duplicate_attachment_paths"))
+    lines.append(f"- Duplicate attachment paths: {len(duplicate_attachment_paths)}")
     return "\n".join(lines)
 
 

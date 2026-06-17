@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tools.analyze_copilot_debug_log import prompt_exports
+
 SCRIPT = Path(".github/scripts/analyze_copilot_prompt_exports.py").resolve()
 
 
@@ -26,6 +28,25 @@ def run_script(*paths: Path, format: str = "json") -> subprocess.CompletedProces
 def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(
     tmp_path: Path,
 ) -> None:
+    system_text = """
+<skill>
+<name>internal-gateway-execute-plans</name>
+<path>/Users/example/.agents/skills/internal-gateway-execute-plans/SKILL.md</path>
+---
+name: internal-gateway-execute-plans
+description: Execute approved retained plans with validation evidence.
+---
+</skill>
+<skill>
+<name>superpowers-executing-plans</name>
+<path>/Users/example/.agents/skills/superpowers-executing-plans/SKILL.md</path>
+---
+name: superpowers-executing-plans
+description: Execute written implementation plans step by step.
+---
+</skill>
+PRIVATE SYSTEM BODY
+"""
     prompt_export = {
         "exportedAt": "2026-06-10T08:33:51Z",
         "prompts": [
@@ -44,6 +65,24 @@ def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(
                                 "reasoning_tokens": 3,
                             }
                         },
+                        "requestMessages": {
+                            "messages": [
+                                {
+                                    "role": 0,
+                                    "content": [{"type": 1, "text": system_text}],
+                                },
+                                {
+                                    "role": 1,
+                                    "content": [
+                                        {
+                                            "type": 1,
+                                            "text": "PRIVATE USER BODY",
+                                            "path": "docs/repeated.md",
+                                        }
+                                    ],
+                                },
+                            ]
+                        },
                     },
                     {
                         "kind": "toolCall",
@@ -55,6 +94,24 @@ def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(
                                 "prompt_tokens": 40,
                                 "completion_tokens": 2,
                             }
+                        },
+                        "requestMessages": {
+                            "messages": [
+                                {
+                                    "role": 0,
+                                    "content": [{"type": 1, "text": system_text}],
+                                },
+                                {
+                                    "role": 1,
+                                    "content": [
+                                        {
+                                            "type": 1,
+                                            "text": "PRIVATE USER BODY",
+                                            "path": "docs/repeated.md",
+                                        }
+                                    ],
+                                },
+                            ]
                         },
                     },
                     {
@@ -95,6 +152,7 @@ def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(
     assert payload["aggregate"]["completion_tokens"] == 16
     assert payload["aggregate"]["reasoning_tokens"] == 3
     assert payload["aggregate"]["max_prompt_tokens"] == 100
+    assert payload["aggregate"]["cache_read_ratio"] == 0.3889
     assert payload["aggregate"]["tool_calls"] == 2
     assert payload["aggregate"]["tool_counts_by_name"] == {
         "retry_tool_search": 1,
@@ -111,6 +169,20 @@ def test_analyzer_summarizes_prompt_exports_and_dedupes_duplicates(
     assert payload["aggregate"]["retry_like_duplicate_count"] == 1
     assert payload["aggregate"]["retry_like_duplicate_records"][0]["occurrences"] == 2
     assert payload["prompts"][0]["context_growth_tokens"] == 0
+    composition = payload["aggregate"]["composition"]
+    assert composition["system_message_count"] == 2
+    assert composition["repeated_system_message_hashes"][0]["occurrences"] == 2
+    assert composition["skill_metadata_block_count"] == 4
+    assert composition["gateway_superpowers_co_present_count"] == 2
+    assert composition["duplicate_attachment_paths"] == [
+        {"path": "docs/repeated.md", "occurrences": 2}
+    ]
+    assert composition["largest_skill_descriptions"][0]["skill_id"] in {
+        "internal-gateway-execute-plans",
+        "superpowers-executing-plans",
+    }
+    assert "PRIVATE SYSTEM BODY" not in result.stdout
+    assert "PRIVATE USER BODY" not in result.stdout
 
 
 def test_analyzer_defaults_missing_usage_and_reports_unsupported_schema(
@@ -184,3 +256,9 @@ def test_analyzer_can_render_markdown(tmp_path: Path) -> None:
 
     assert "# Prompt Export Summary" in result.stdout
     assert "Markdown prompt" not in result.stdout
+    assert "Cache read ratio:" in result.stdout
+    assert "## Prompt Composition" in result.stdout
+
+
+def test_prompt_export_tool_package_is_importable() -> None:
+    assert prompt_exports.parse_args(["input.json", "--format", "markdown"]).format == "markdown"
