@@ -56,23 +56,29 @@ can provide.
 - Use English file names. `01-change-summary.md` is written in Italian; all
   other plan files use English.
 - For debugging, drift, or data-mismatch work, produce a compact diagnosis
-  capsule before the retained plan: symptom, target artifact, compared
-  sources or layers, cheapest falsifier, and stop rule. Keep it in chat or the
-  request context; do not create another retained file for it.
+  capsule before retained-plan authoring starts: symptom, target artifact,
+  compared sources or layers, cheapest falsifier, and stop rule. Keep it only
+  in chat or request context; do not create another retained file for it.
 - `01-change-summary.md`: Italian human-readable decision summary with
   `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte` table
   (`Risorsa | Azione | Scopo`), `Comportamento scelto`, `Validazione prevista`,
   `Esecuzione prevista`, and `Decisione richiesta`.
-- `02-execution.md` for `compact`: merged control and execution file with
-  `Plan profile`, target, anti-scope, owner, validator, stop conditions,
-  executable steps, and item coverage.
+- `02-execution.md` for `compact` must include these exact headings:
+  `Plan profile`, `Target and anti-scope` (with `### Target` and
+  `### Anti-scope`), `Owner and validator`, `Stop conditions`, `Objective`,
+  `Chosen logic`, `Key assumptions`, `Executable steps`, `Validation`, and
+  `Source item coverage`.
+- `02-execution.md` executable steps use numbered items with explicit labels:
+  `Target:`, `Acceptance:`, `Validation:`, and `Fallback:`.
 - `02-control.md` for `extended`: control file with `Recommended use`,
   `Plan profile`, `File map and role`, clarification gate status,
   `Initial evidence pass`, `Reading budget`, target, anti-scope, owner,
   validator, stop conditions, and `Source item ledger`.
 - Preserve known-context handoff quality in `Initial evidence pass` and `Reading budget` so executors can avoid repeated broad rereads.
 - `03-execution.md`: first executable file for `extended`.
-- Standalone implementation-contract files are merged into `02-control.md` for `extended` plans.
+- For `extended`, implementation-contract sections are merged into `02-control.md`
+  with these exact headings: `Sources`, `Candidate targets`,
+  `Validation commands`, `Blockers and fallback rules`, and `External pins`.
 - Apply a say-once rule: each control fact (target, owner, validator, blockers,
   pins, and source-item coverage) is written once in the owning file, and step
   files do not restate target/owner/validator.
@@ -108,10 +114,11 @@ can provide.
 - Plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
 - `01-change-summary.md` is Italian; other plan files are English.
 - `compact` uses `01-change-summary.md` + `02-execution.md` only.
+- `compact` `02-execution.md` uses the exact validator headings and step labels.
 - `extended` uses `01-change-summary.md`, `02-control.md`, and
   `03-execution.md` plus optional higher-numbered slices.
 - The diagnosis capsule exists before authoring when debugging, drift, or
-  data-mismatch work is being retained.
+  data-mismatch work is being retained, and it stays in chat/request context.
 - `extended` includes merged contract sections in `02-control.md`.
 - Step files do not restate target, owner, or validator.
 
