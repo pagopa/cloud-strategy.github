@@ -7,6 +7,9 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 ## Referenced skills
 
+Load these skills by name only when the active lane proves the narrower owner.
+Treat this list as an on-demand index, not a preload bundle.
+
 - `grill-me`: mandatory pre-action interview for non-trivial simple work and one focused clarification block for simple blockers.
 - `internal-gateway-idea-brainstorming`: planning owner when simple work no longer fits.
 - `internal-gateway-review`: review owner when defect-first analysis becomes dominant.
@@ -22,6 +25,11 @@ a deterministic auto-execute lane with its own zero-blocker, no-drift, and
 post-run reporting gates.
 
 `references/support-routing.md` remains the single source of truth for claim-gate owners in simple mode.
+
+Use `scripts/resolve_simple_task.py` when the task facts are already known and
+the bundle only needs a deterministic gate or claim-gate answer. Use
+`scripts/suggest_support_skills.py` only when paths or symptoms are known and
+support selection is still noisy.
 
 ## When to use
 
@@ -40,53 +48,66 @@ post-run reporting gates.
 Classify every simple task before operational work as `full-gate`,
 `trivial-skip`, or `escalate`.
 
-Use `full-gate` by default for concrete simple tasks unless the task is proven
-trivial and venial. Run `grill-me` first with one compact numbered block, then
-run `internal-gateway-critical-master` after the user's interview response.
-Before editing, executing, or finalizing, ask the user to respond first to the
-`grill-me` block and then to the critical outcome.
+- Use `full-gate` by default unless the task is proven trivial and venial.
+- Run `grill-me` first with one compact numbered block, then the critical gate.
+- Before editing, executing, or finalizing, ask the user to respond first to
+  the `grill-me` block and then to the critical outcome.
+- Treat `full`, `idea`, and `complete` as depth keywords. A depth keyword
+  forbids `trivial-skip`. Run `grill-me` first, then the critical gate.
+- Use `trivial-skip` only for a local answer, tiny edit, focused read, or
+  validator run with no material ambiguity or material risk and with obvious
+  validation or a named validation gap.
+- When using `trivial-skip`, emit a short Trivial-skip proof before operational
+  work.
+- If planning, review, critical pressure, or multi-phase validation becomes the
+  real job, `escalate`.
 
-Treat `full`, `idea`, and `complete` as depth keywords when the user applies
-them to a simple task. A depth keyword forbids `trivial-skip`: run `grill-me`
-first, then the critical gate. If the keyword reveals planning, review, or
-pressure-testing ownership instead of simple execution, escalate to the narrow
-owner named by that evidence.
-
-Use `trivial-skip` only when all of these are true:
-
-- the request is a local answer, tiny edit, focused read, or validator run with
-  an obvious target and no material ambiguity;
-- no depth keyword is present;
-- no contract, routing, security, secret, tenant, governance, rollout,
-  architecture, cross-file, or user-visible behavior risk is material;
-- validation is obvious, local, and cheap, or the exact validation gap can be
-  named before work starts.
-
-When using `trivial-skip`, emit a short Trivial-skip proof before operational
-work. The proof must name the local evidence checked, why the task is trivial
-and venial, and the focused validation path or gap.
-
-## Simple Flow
+## Simple Procedure
 
 1. Inspect local files first.
 2. Preserve compact working state: avoid full-context rereads unless new evidence invalidates the active lane assumptions.
 3. Detect depth keywords: `full`, `idea`, or `complete`.
 4. Classify the gate outcome as `full-gate`, `trivial-skip`, or `escalate`.
-5. For `full-gate`, load `grill-me` and ask one compact numbered block before operational work; after the user's response, load `internal-gateway-critical-master` and ask the user to respond to the critical outcome before operational work continues.
+5. For `full-gate`, load `grill-me`, ask one compact numbered block, then load
+   `internal-gateway-critical-master` after the user's response.
 6. For `trivial-skip`, emit the Trivial-skip proof before operational work.
-7. Confirm the task still fits one quick lane.
-8. Select only directly applicable skill owners and required references from prompt, target path, runtime, ownership, and validation path.
-9. Build a Readiness Brief before operational work: task, lane-owner, primary assumption or risk, focused validation path, gate outcome, and explicit confirmation prompt or named auto-execute exception.
-10. Stop and wait for explicit user approval before executing the lane unless the selected narrower owner declares a deterministic auto-execute lane and its preflight has zero blockers, zero ambiguous drift, and no destructive or reverse-direction action.
-11. Identify mandatory applicable requirements internally before execution; do not emit a default user checklist.
-12. Execute the one concrete lane.
-13. Run focused validation or name the explicit gap.
-14. Run a pre-close compliance audit over mandatory applicable requirements only. Delegate fresh-evidence mechanics to `superpowers-verification-before-completion`.
-15. Block completion claims when mandatory applicable requirements remain unverified.
-16. If architecture ownership, owner conflicts, or validation strategy are ambiguous, escalate instead of assuming a universal rule.
-17. If the task stops being simple, stop and issue an escalation alert.
+7. Confirm the task still fits one quick lane and choose that lane from
+   `references/simple-lanes.md`.
+8. Select only directly applicable skill owners and required references from
+   prompt, target path, runtime, ownership, and validation path.
+9. Build a Readiness Brief before operational work: task, lane-owner, primary
+   assumption or risk, focused validation path, gate outcome, and explicit
+   confirmation prompt or named auto-execute exception.
+10. Use `scripts/resolve_simple_task.py gate` when the facts are already known
+    and the bundle only needs a deterministic gate and readiness summary.
+11. Stop and wait for explicit user approval before executing the lane unless
+    the selected narrower owner declares a deterministic auto-execute lane with
+    its own zero-blocker, zero ambiguous drift, and no destructive or
+    reverse-direction action.
+12. Identify mandatory applicable requirements internally before execution; do
+    not emit a default user checklist.
+13. Execute the one concrete lane.
+14. Run focused validation or name the explicit gap.
+15. Run a pre-close compliance audit over mandatory applicable requirements
+    only. Delegate fresh-evidence mechanics to
+    `superpowers-verification-before-completion`.
+16. Block completion claims when mandatory applicable requirements remain
+    unverified.
+17. If architecture ownership, owner conflicts, or validation strategy are
+    ambiguous, escalate instead of assuming a universal rule.
+18. If the task stops being simple, stop and issue an escalation alert.
 
 Escalation trigger: if evidence collection, ownership checks, or validation needs spill into multi-phase execution, route to the narrow next owner instead of expanding the fast path.
+
+## Deterministic Helpers
+
+- `scripts/resolve_simple_task.py gate`: returns `full-gate`,
+  `trivial-skip`, or `escalate` plus a lean Readiness Brief from normalized
+  task facts.
+- `scripts/resolve_simple_task.py claim`: maps status claims to the required
+  owners and evidence gates before the final answer.
+- `scripts/suggest_support_skills.py`: returns path and symptom-based support
+  hints. It is advisory and does not override repository evidence.
 
 ## Validation
 
@@ -106,8 +127,7 @@ Escalation trigger: if evidence collection, ownership checks, or validation need
 - Treating loaded skills as automatically mandatory instead of checking applicability.
 - Skipping `grill-me` and the critical gate without a Trivial-skip proof.
 - Treating `full`, `idea`, or `complete` as advisory when the user meant to force the full gate.
-- Expanding the Readiness Brief into a long checklist or proceeding without
-  explicit user approval when no narrower auto-execute exception applies.
+- Expanding the Readiness Brief into a long checklist or proceeding without explicit user approval when no narrower auto-execute exception applies.
 - Treating a generic `next_action.allowed=true` value as enough for auto-execution without checking the narrower skill's stop conditions.
 - Declaring completion after code edits while mandatory applicable evidence is still missing.
 - Promoting specialist requirements to universal policy without target/runtime ownership proof.
