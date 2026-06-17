@@ -63,13 +63,17 @@ class Finding:
 
 def classify_profile(plan_folder: Path) -> str:
     """Classify plan profile. Returns profile name or 'unsupported'."""
-    ledger_path = plan_folder / "02-source-item-ledger.md"
-    if ledger_path.is_file():
-        text = ledger_path.read_text(encoding="utf-8")
-        if re.search(r"Plan profile[:\s]+extended", text):
-            return "extended"
+    compact_path = plan_folder / "02-execution.md"
+    if compact_path.is_file():
+        text = compact_path.read_text(encoding="utf-8")
         if re.search(r"Plan profile[:\s]+compact", text):
             return "compact"
+
+    control_path = plan_folder / "02-control.md"
+    if control_path.is_file():
+        text = control_path.read_text(encoding="utf-8")
+        if re.search(r"Plan profile[:\s]+extended", text):
+            return "extended"
 
     # Packaged folders may no longer include numbered source files.
     report_path = plan_folder / "completion-report.md"

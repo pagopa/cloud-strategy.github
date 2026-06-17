@@ -28,19 +28,20 @@ consumes approved `compact` and `extended` retained plans.
 
 ## Core Algorithm
 
-1. Read `01-change-summary.md` and `02-source-item-ledger.md`.
-2. Verify `Plan profile: compact` or `Plan profile: extended`, then infer the execution strategy from profile, folder shape, and validation path.
-3. Establish execution state from summary, ledger, and active validator outcomes; keep it compact and update it as items close.
-4. Avoid repeated full rereads: inspect changed sections, active executable item context, and failing-validator evidence first.
-5. Run the ledger evidence pass.
-6. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
-7. For `compact`, confirm the folder uses `mini-plan-*`, `questions.md` is `- none`, and `03-execution.md` is the only executable file.
-8. For `extended`, read `04-implementation-contract.md` before executable files.
-9. Process numbered executable files in order.
-10. Run an item-level compliance audit before closing each executable item.
-11. Track progress through the live ledger.
-12. Aggregate unresolved mandatory applicable requirements before closeout.
-13. Package closeout only for `DONE`.
+1. Read `01-change-summary.md` first.
+2. For `compact`, read `02-execution.md`; for `extended`, read `02-control.md`.
+3. Verify `Plan profile: compact` or `Plan profile: extended`, then infer the execution strategy from profile, folder shape, and validation path.
+4. Establish execution state from summary, control file, and active validator outcomes; keep it compact and update it as items close.
+5. Avoid repeated full rereads: inspect changed sections, active executable item context, and failing-validator evidence first.
+6. Run the ledger evidence pass.
+7. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
+8. For `compact`, confirm the folder uses `mini-plan-*` and `02-execution.md` is the only executable file.
+9. For `extended`, read numbered executable files after `02-control.md` in order starting at `03-execution.md`.
+10. Process numbered executable files in order.
+11. Run an item-level compliance audit before closing each executable item.
+12. Track progress through the live ledger.
+13. Aggregate unresolved mandatory applicable requirements before closeout.
+14. Package closeout only for `DONE`.
 
 ## Execution Contract
 
@@ -48,7 +49,7 @@ consumes approved `compact` and `extended` retained plans.
 - Reject `compact` folders outside the `mini-plan-*` convention.
 - Ignore `questions.md` during execution.
 - Maintain a compact execution state and prefer targeted rereads over full file re-ingestion unless new evidence invalidates current state.
-- Infer the execution strategy from `Plan profile`, folder shape, `04-implementation-contract.md` presence when applicable, and the validation path. Do not require a separate retained-plan consumer field.
+- Infer the execution strategy from `Plan profile`, folder shape, merged control-contract sections in `02-control.md` when applicable, and the validation path. Do not require a separate retained-plan consumer field.
 - Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
 - Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.
 - Block item closure and block `SHIPPED` whenever mandatory applicable requirements remain unverified.
@@ -59,11 +60,11 @@ consumes approved `compact` and `extended` retained plans.
 
 ## Validation
 
-- Summary and ledger are read first.
+- Summary and profile-control files are read first.
 - `Plan profile` is `compact` or `extended`.
 - Execution strategy is inferred from profile, folder shape, and validation path.
-- `compact` retained plans use `tmp/superpowers/mini-plan-*` and `03-execution.md` as the only executable file.
-- `extended` retained plans include `04-implementation-contract.md` before executable work.
+- `compact` retained plans use `tmp/superpowers/mini-plan-*` and `02-execution.md` as the only executable file.
+- `extended` retained plans include `02-control.md` before executable work.
 - Mandatory applicable requirements are checked at item close and before `DONE`.
 - Missing mandatory applicable evidence maps to a non-`DONE` state.
 - `done-*` markers appear only during full close packaging; lightweight closeout uses `<STATE>-plan-state.md` (for closed plans: `DONE-plan-state.md`) and may retain numbered files.

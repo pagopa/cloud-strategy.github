@@ -33,20 +33,21 @@ separate execution consumer field inside the retained plan.
 ## Profile Selection
 
 Choose the smallest profile that safely fits the work. Declare the profile in
-`02-source-item-ledger.md` under `Plan profile`.
+`02-execution.md` for `compact` and `02-control.md` for `extended` under
+`Plan profile`.
 
 `init` creates a scaffold only. A retained plan is execution-ready only after
-`handoff-check` returns ready and `questions.md` is `- none`.
+`handoff-check` returns ready.
 
 New `compact` plans should use `tmp/superpowers/mini-plan-*`.
 
 | Profile | When | Required files |
 | --- | --- | --- |
-| `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. Best fit for small/fast executors after positive handoff validation. | `01-change-summary.md`, `02-source-item-ledger.md`, `03-execution.md`, `questions.md` |
-| `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Thinking-first profile with explicit control files and deterministic read order. | Compact files plus `04-implementation-contract.md`, additional numbered files by category (`05-...`). |
+| `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. Best fit for small/fast executors after positive handoff validation. | `01-change-summary.md`, `02-execution.md` |
+| `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Thinking-first profile with explicit control files and deterministic read order. | `01-change-summary.md`, `02-control.md`, `03-execution.md`, additional numbered files by category (`04-...`). |
 
 Do not use `compact` when the executor needs exact sources, target files,
-validators, blockers, or external pins that only `04-implementation-contract.md`
+validators, blockers, or external pins that only `02-control.md`
 can provide.
 
 ## Core Contract
@@ -62,14 +63,22 @@ can provide.
   `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte` table
   (`Risorsa | Azione | Scopo`), `Comportamento scelto`, `Validazione prevista`,
   `Esecuzione prevista`, and `Decisione richiesta`.
-- `02-source-item-ledger.md`: control file with `Recommended use`,
-  `Plan profile`, `File map and role`, clarification
-  gate status, `Initial evidence pass`, `Reading budget`, target, anti-scope,
-  owner, validator, stop conditions, and `Source item ledger`.
+- `02-execution.md` for `compact`: merged control and execution file with
+  `Plan profile`, target, anti-scope, owner, validator, stop conditions,
+  executable steps, and item coverage.
+- `02-control.md` for `extended`: control file with `Recommended use`,
+  `Plan profile`, `File map and role`, clarification gate status,
+  `Initial evidence pass`, `Reading budget`, target, anti-scope, owner,
+  validator, stop conditions, and `Source item ledger`.
 - Preserve known-context handoff quality in `Initial evidence pass` and `Reading budget` so executors can avoid repeated broad rereads.
-- `03-execution.md`: first executable file.
-- `questions.md`: user-only decisions only. Write `- none` when nothing remains.
-- `04-implementation-contract.md` is required for every `extended` plan.
+- `03-execution.md`: first executable file for `extended`.
+- Standalone implementation-contract files are merged into `02-control.md` for `extended` plans.
+- Apply a say-once rule: each control fact (target, owner, validator, blockers,
+  pins, and source-item coverage) is written once in the owning file, and step
+  files do not restate target/owner/validator.
+- Keep profile token weight explicit: `compact` stays small/fast with two files;
+  `extended` keeps control weight in `02-control.md` and execution weight in
+  numbered step files.
 - `done-*`, `evidence-envelope.md`, and `completion-report.md` are packaging
   artifacts only. Do not create them during authoring.
 
@@ -80,12 +89,16 @@ can provide.
    before `01-change-summary.md`.
 3. For new plans, run bundle-local `init` first to create the scaffold.
 4. Choose folder name and write `01-change-summary.md` in Italian.
-5. Write `02-source-item-ledger.md` with profile and source-item coverage.
-6. Run the clarification gate when user decisions remain.
-7. For `extended`, write `04-implementation-contract.md`.
-8. Write executable numbered files in order.
+5. For `compact`, write `02-execution.md` with profile, control header, steps,
+  and source-item coverage.
+6. For `extended`, write `02-control.md` with profile, control facts, merged
+  implementation-contract sections, and source-item coverage.
+7. Run the clarification gate when user decisions remain.
+8. For `extended`, write executable numbered files in order starting with
+  `03-execution.md`.
 9. Keep each executable file scoped to its slice and validation path so executors can run targeted rereads.
-10. Create `questions.md` with `- none` or open user-only decisions.
+10. Fold open-user decisions into one summary line instead of a separate
+  `questions.md` file for `compact`.
 11. Run scope challenge and plan review gate for non-trivial plans.
 12. Run `audit` first, then run `handoff-check`; execute only when ready.
 13. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
@@ -94,11 +107,13 @@ can provide.
 
 - Plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
 - `01-change-summary.md` is Italian; other plan files are English.
-- `02-source-item-ledger.md` exists with profile and source-item coverage.
+- `compact` uses `01-change-summary.md` + `02-execution.md` only.
+- `extended` uses `01-change-summary.md`, `02-control.md`, and
+  `03-execution.md` plus optional higher-numbered slices.
 - The diagnosis capsule exists before authoring when debugging, drift, or
   data-mismatch work is being retained.
-- `04-implementation-contract.md` exists for every `extended` plan.
-- `questions.md` exists and stays separate from executable files.
+- `extended` includes merged contract sections in `02-control.md`.
+- Step files do not restate target, owner, or validator.
 
 ## Common mistakes
 

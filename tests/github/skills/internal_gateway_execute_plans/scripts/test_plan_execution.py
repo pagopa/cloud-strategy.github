@@ -24,19 +24,51 @@ def run_cli(*args: str | Path) -> subprocess.CompletedProcess[str]:
 
 
 def _write_profile_ledger(plan_folder: Path, profile: str = "compact") -> None:
-    (plan_folder / "02-source-item-ledger.md").write_text(
-        "# Ledger\n\n"
+    if profile == "compact":
+        (plan_folder / "02-execution.md").write_text(
+            "# Execution\n\n"
+            "## Plan profile\ncompact\n\n"
+            "## Target and anti-scope\n### Target\nTarget.\n### Anti-scope\nNone.\n\n"
+            "## Owner and validator\nOwner.\n\n"
+            "## Stop conditions\nNone.\n\n"
+            "## Objective\nTest.\n\n"
+            "## Chosen logic\nTest.\n\n"
+            "## Key assumptions\nNone.\n\n"
+            "## Executable steps\n"
+            "1. Do it.\n"
+            "   Target: file\n"
+            "   Acceptance: done\n"
+            "   Validation: pytest\n"
+            "   Fallback: stop\n\n"
+            "## Validation\nTest.\n\n"
+            "## Source item coverage\n"
+            "| ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |\n"
+            "| --- | --- | --- | --- | --- | --- | --- |\n"
+            "| X-01 | Test | diff | diff | pytest | DONE | `none` |\n",
+            encoding="utf-8",
+        )
+        return
+
+    (plan_folder / "02-control.md").write_text(
+        "# Control\n\n"
         "## Recommended use\napply-plan\n\n"
-        f"## Plan profile\n{profile}\n\n"
-        "## File map and role\n| File | Role |\n| --- | --- |\n| 01 | summary |\n\n"
+        "## Plan profile\nextended\n\n"
+        "## File map and role\n| File | Role |\n| --- | --- |\n| `03-execution.md` | execution |\n\n"
         "## Clarification gate\nclarification satisfied\n\n"
-        "## Target and anti-scope\nTarget.\n\n"
+        "## Initial evidence pass\n1. quick pass\n\n"
+        "## Reading budget\n- compact\n\n"
+        "## Target and anti-scope\n### Target\nTarget.\n### Anti-scope\nNone.\n\n"
         "## Owner and validator\nOwner.\n\n"
         "## Stop conditions\nNone.\n\n"
+        "## Sources\n- source\n\n"
+        "## Candidate targets\n- target\n\n"
+        "## Validation commands\nRun in this order:\n1. pytest\n\n"
+        "## Blockers and fallback rules\n- none\n\n"
+        "## External pins\nno external evidence\n\n"
         "## Source item ledger\n"
         "| ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |\n"
         "| --- | --- | --- | --- | --- | --- | --- |\n"
-        "| X-01 | Test | diff | diff | pytest | DONE | done-01 |\n",
+        "| X-01 | Test | diff | diff | pytest | DONE | `03-execution.md` |\n",
         encoding="utf-8",
     )
 
@@ -53,14 +85,6 @@ def _write_compact_plan(plan_folder: Path) -> None:
         encoding="utf-8",
     )
     _write_profile_ledger(plan_folder, profile="compact")
-    (plan_folder / "03-execution.md").write_text(
-        "# Execution\n\n## Objective\nTest.\n\n## Chosen logic\nTest.\n\n"
-        "## Key assumptions\nNone.\n\n## Executable steps\n1. Do it.\n\n## Validation\nTest.\n",
-        encoding="utf-8",
-    )
-    (plan_folder / "questions.md").write_text(
-        "# Questions\n\n- none\n", encoding="utf-8"
-    )
 
 
 def _write_completed_plan(plan_folder: Path) -> None:
@@ -115,7 +139,7 @@ def test_inspect_compact_ready(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert "compact" in result.stdout
-    assert "03-execution.md" in result.stdout or "03" in result.stdout
+    assert "02-execution.md" in result.stdout or "02" in result.stdout
 
 
 def test_inspect_compact_json(tmp_path: Path) -> None:
@@ -240,16 +264,9 @@ def test_completion_check_lightweight_json(tmp_path: Path) -> None:
 def test_completion_rejects_active_numbered_files(tmp_path: Path) -> None:
     plan_folder = tmp_path / "plan"
     _write_completed_plan(plan_folder)
-    # Add a ledger so the profile gate passes
-    (plan_folder / "02-source-item-ledger.md").write_text(
-        "# Ledger\n\n## Plan profile\ncompact\n\n"
-        "## Recommended use\napply-plan\n\n"
-        "## File map and role\n| File | Role |\n| --- | --- |\n"
-        "## Clarification gate\nclarification satisfied\n\n"
-        "## Target and anti-scope\nT.\n\n## Owner and validator\nT.\n\n"
-        "## Stop conditions\nT.\n\n"
-        "## Source item ledger\n"
-        "| ID | Source item | Acceptance | Evidence | Status | Route |\n",
+    # Add a profile file so the profile gate passes
+    (plan_folder / "02-execution.md").write_text(
+        "## Plan profile\ncompact\n",
         encoding="utf-8",
     )
     (plan_folder / "03-still-active.md").write_text("# Active\n", encoding="utf-8")
