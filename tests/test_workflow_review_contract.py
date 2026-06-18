@@ -57,6 +57,8 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
     assert "severity" in review_gate_lower
     assert "confidence" in review_gate_lower
     assert "evidence gap" in review_gate_lower
+    assert "counter-validation" in skill_text
+    assert "counter-validation" in review_gate_lower
     assert "route or next owner" in review_gate_lower
 
 
