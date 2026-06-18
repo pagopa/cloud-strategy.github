@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -8,6 +9,12 @@ from types import ModuleType
 SCRIPT_PATH = Path(
     ".github/skills/internal-gateway-simple-task/scripts/resolve_simple_task.py"
 )
+SKILL_PATH = Path(".github/skills/internal-gateway-simple-task/SKILL.md")
+LANES_REFERENCE_PATH = Path(
+    ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
+)
+INTERNAL_ONLY_LANES = ("unspecified",)
+OUTCOME_ONLY_LANES = ("escalate",)
 
 
 def load_script_module() -> ModuleType:
@@ -116,3 +123,52 @@ def test_claim_resolution_deduplicates_verification_owner() -> None:
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
         },
     ]
+
+
+def lanes_from_simple_lanes_reference(reference_text: str) -> set[str]:
+    table_start = reference_text.index("## Lane Selection")
+    table_end = reference_text.index("\n## ", table_start + 1)
+    table_body = reference_text[table_start:table_end]
+    return {
+        match.group(1)
+        for match in re.finditer(r"^\| `([a-z-]+)` \|", table_body, flags=re.MULTILINE)
+    }
+
+
+def lanes_from_skill_when_to_use(skill_text: str) -> set[str]:
+    section_start = skill_text.index("## When to use")
+    section_end = skill_text.index("\n## ", section_start + 1)
+    section_body = skill_text[section_start:section_end]
+    for line in section_body.splitlines():
+        if "quick lane can finish" not in line:
+            continue
+        return set(re.findall(r"`([a-z-]+)`", line))
+    return set()
+
+
+def test_helper_lanes_match_canonical_simple_lanes_reference() -> None:
+    module = load_script_module()
+    documented_lanes = lanes_from_simple_lanes_reference(
+        LANES_REFERENCE_PATH.read_text(encoding="utf-8")
+    )
+    user_choosable_lanes = set(module.LANES) - set(INTERNAL_ONLY_LANES)
+    documented_choosable_lanes = documented_lanes - set(OUTCOME_ONLY_LANES)
+
+    assert user_choosable_lanes == documented_choosable_lanes
+
+
+def test_skill_when_to_use_lane_list_matches_helper_lanes() -> None:
+    module = load_script_module()
+    skill_text = SKILL_PATH.read_text(encoding="utf-8")
+    listed_lanes = lanes_from_skill_when_to_use(skill_text)
+    user_choosable_lanes = set(module.LANES) - set(INTERNAL_ONLY_LANES)
+
+    assert listed_lanes == user_choosable_lanes
+
+
+def test_execute_lane_is_not_exposed_by_helper_or_skill_summary() -> None:
+    module = load_script_module()
+    skill_text = SKILL_PATH.read_text(encoding="utf-8")
+
+    assert "execute" not in module.LANES
+    assert "execute" not in lanes_from_skill_when_to_use(skill_text)

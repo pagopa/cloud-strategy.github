@@ -17,7 +17,7 @@ import re
 
 DEPTH_KEYWORDS = ("full", "idea", "complete")
 TRIVIAL_KINDS = ("local-answer", "tiny-edit", "focused-read", "validator-run")
-LANES = ("answer", "edit", "diagnose", "validate", "execute", "plan", "unspecified")
+LANES = ("answer", "edit", "diagnose", "validate", "plan", "unspecified")
 MATERIAL_RISKS = (
     "contract",
     "routing",

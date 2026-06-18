@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-simple-task
-description: "Use this agent when a concrete low-to-medium-risk repository-owned task can be answered, edited, diagnosed, validated quickly, executed, or switched to plan mode to produce a retained plan instead of same-chat execution."
+description: "Use this agent when a concrete low-to-medium-risk repository-owned task can be answered, edited, diagnosed, validated, or planned quickly, or switched to plan mode to produce a retained plan instead of same-chat execution."
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
 agents: []

@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-simple-task
-description: Use when a concrete low-to-medium-risk repository-owned coding or non-coding task can be answered, edited, diagnosed, validated, or executed quickly through one lane.
+description: Use when a concrete low-to-medium-risk repository-owned coding or non-coding task can be answered, edited, diagnosed, validated, or planned quickly through one lane.
 ---
 
 # Internal Gateway Simple Task
@@ -28,6 +28,8 @@ a deterministic auto-execute lane with its own zero-blocker, no-drift, and
 post-run reporting gates.
 
 `references/support-routing.md` remains the single source of truth for claim-gate owners in simple mode.
+`references/simple-lanes.md` remains the single source of truth for lane definitions, support posture, and validation per lane.
+`references/plan-mode.md` remains the single source of truth for plan-mode activation, profile selection, and procedure.
 
 Use `scripts/resolve_simple_task.py` when the task facts are already known and
 the bundle only needs a deterministic gate or claim-gate answer. Use
@@ -37,7 +39,7 @@ support selection is still noisy.
 ## When to use
 
 - The outcome, target, command, or validation path is already concrete.
-- One quick lane can finish: `answer`, `edit`, `diagnose`, `validate`, `execute`, or `plan`.
+- One quick lane can finish: `answer`, `edit`, `diagnose`, `validate`, or `plan`.
 - The user explicitly asks for a plan, or cost signals show that a retained plan is cheaper than same-chat execution.
 
 ## When not to use
