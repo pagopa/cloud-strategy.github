@@ -64,9 +64,7 @@ def test_gate_depth_keyword_forbids_trivial_skip() -> None:
     assert "depth-keyword:full" in decision["reason_codes"]
 
 
-def test_gate_escalates_to_brainstorming_when_plan_or_ownership_is_unsettled() -> (
-    None
-):
+def test_gate_escalates_to_brainstorming_when_plan_or_ownership_is_unsettled() -> None:
     module = load_script_module()
     decision = module.build_gate_decision(
         task="redesign the simple-task bundle",

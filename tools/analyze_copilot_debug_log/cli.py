@@ -9,21 +9,27 @@ from . import debug_logs, prompt_exports
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Analyze Copilot debug-log and prompt-export files.")
+    parser = argparse.ArgumentParser(
+        description="Analyze Copilot debug-log and prompt-export files."
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     prompt_parser = subparsers.add_parser(
         "prompt-exports",
         help="Summarize Copilot prompt export JSON files.",
     )
-    prompt_parser.add_argument("inputs", nargs="+", help="One or more Copilot prompt export JSON files.")
+    prompt_parser.add_argument(
+        "inputs", nargs="+", help="One or more Copilot prompt export JSON files."
+    )
     prompt_parser.add_argument("--format", choices=("json", "markdown"), default="json")
 
     debug_parser = subparsers.add_parser(
         "debug-logs",
         help="Summarize Copilot debug-log or snapshot-export JSON files.",
     )
-    debug_parser.add_argument("inputs", nargs="+", help="JSON debug-log or snapshot-export files.")
+    debug_parser.add_argument(
+        "inputs", nargs="+", help="JSON debug-log or snapshot-export files."
+    )
     debug_parser.add_argument("--format", choices=("json", "markdown"), default="json")
 
     return parser.parse_args(argv)

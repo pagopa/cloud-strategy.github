@@ -24,7 +24,9 @@ def test_idea_gateway_owns_retained_planning() -> None:
     assert "Handoff Gate 4" in skill_text
     assert "ask whether to continue" in skill_text
     assert "Specialization Checkpoint: gated" in skill_text
-    assert "User insistence does not bypass Idea Gate 0 or Critical Gate 2" in skill_text
+    assert (
+        "User insistence does not bypass Idea Gate 0 or Critical Gate 2" in skill_text
+    )
     assert "go`/`ok`/`procedi" in skill_text
     assert "Plan Approval Gate 3: waiting" in reference_text
     assert "Handoff Gate 4: plan-created" in reference_text

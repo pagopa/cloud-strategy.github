@@ -124,7 +124,9 @@ def test_init_creates_extended_scaffold(tmp_path: Path) -> None:
 
 
 def test_audit_compact_ready(tmp_path: Path) -> None:
-    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-improve-handoff-contract"
+    plan_folder = (
+        tmp_path / "tmp" / "superpowers" / "mini-plan-improve-handoff-contract"
+    )
     _write_compact_plan(plan_folder)
     result = run_cli("audit", plan_folder, "--format", "json")
     payload = json.loads(result.stdout)
@@ -245,7 +247,4 @@ def test_handoff_check_rejects_extended_control_without_ordered_validation(
     result = run_cli("handoff-check", plan_folder, "--format", "json")
     payload = json.loads(result.stdout)
     assert result.returncode == 1
-    assert any(
-        f["code"] == "control-validation-order"
-        for f in payload["findings"]
-    )
+    assert any(f["code"] == "control-validation-order" for f in payload["findings"])

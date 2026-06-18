@@ -32,9 +32,7 @@ def test_count_words_handles_empty_string() -> None:
 
 
 def test_parse_markdown_sections_returns_only_h2_headings() -> None:
-    text = (
-        "## Summary\nbody 1\n## Findings\n### 1. x\nbody 2\n## Outcome\nbody 3"
-    )
+    text = "## Summary\nbody 1\n## Findings\n### 1. x\nbody 2\n## Outcome\nbody 3"
     sections = parse_markdown_sections(text)
     assert list(sections.keys()) == ["Summary", "Findings", "Outcome"]
     assert "### 1. x" in sections["Findings"]
@@ -49,7 +47,10 @@ def test_validate_outcome_value_accepts_only_allowed_set() -> None:
 
 def test_extract_outcome_value_picks_backtick_value() -> None:
     assert extract_outcome_value("`accept-with-risk`") == "accept-with-risk"
-    assert extract_outcome_value("`continue-critical` is the result.") == "continue-critical"
+    assert (
+        extract_outcome_value("`continue-critical` is the result.")
+        == "continue-critical"
+    )
     assert extract_outcome_value("no backticks here") is None
 
 
@@ -77,9 +78,7 @@ def test_parse_findings_extracts_claim_class_per_finding() -> None:
     assert parsed[1].evidence_class == "estimate"
 
 
-def test_validate_critical_output_main_passes_good_fixture(
-    monkeypatch, capsys
-) -> None:
+def test_validate_critical_output_main_passes_good_fixture(monkeypatch, capsys) -> None:
     monkeypatch.setattr(
         validate_critical_output,
         "parse_args",

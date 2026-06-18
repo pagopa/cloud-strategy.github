@@ -8,4 +8,5 @@ def main(argv: list[str] | None = None) -> int:
 
     return cli_main(argv)
 
+
 __all__ = ["main"]

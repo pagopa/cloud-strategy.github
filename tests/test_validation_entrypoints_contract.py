@@ -128,8 +128,7 @@ def test_code_analysis_workflow_smoke_tests_runner_diagnostic_clis() -> None:
         in workflow_text
     )
     assert (
-        "bash tools/analyze_copilot_debug_log/run.sh debug-logs --help"
-        in workflow_text
+        "bash tools/analyze_copilot_debug_log/run.sh debug-logs --help" in workflow_text
     )
     assert "./.github/scripts/run.sh analyze_copilot_debug_log --help" in workflow_text
     assert "./.github/scripts/run.sh benchmark_skill_tokens --help" in workflow_text

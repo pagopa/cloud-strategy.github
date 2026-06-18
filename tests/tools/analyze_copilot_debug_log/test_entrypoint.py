@@ -6,8 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from tools.analyze_copilot_debug_log import debug_logs, main, prompt_exports
-from tools.analyze_copilot_debug_log import cli
+from tools.analyze_copilot_debug_log import cli, debug_logs, main, prompt_exports
 
 SCRIPT = Path("tools/analyze_copilot_debug_log/run.sh").resolve()
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -63,7 +62,7 @@ PRIVATE SYSTEM BODY
                                 "prompt_tokens_details": {"cached_tokens": 70},
                                 "completion_tokens": 12,
                                 "reasoning_tokens": 3,
-                            }
+                            },
                         },
                         "requestMessages": {
                             "messages": [
