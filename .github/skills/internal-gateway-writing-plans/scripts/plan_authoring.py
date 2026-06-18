@@ -20,6 +20,7 @@ EXTENDED_REQUIRED_FILES = frozenset(
 )
 SUPPORTED_PROFILES = frozenset({"compact", "extended"})
 COMPACT_FOLDER_PREFIX = "mini-plan-"
+COMPACT_EXECUTION_TOKEN_TARGET = 900
 CONTROL_REQUIRED_FIELDS = (
     "Recommended use",
     "File map and role",
@@ -700,7 +701,7 @@ def _token_warnings(plan_folder: Path, profile: str | None = None) -> list[str]:
         execution_tokens = token_map.get("02-execution.md", 0)
         if total_tokens > 1600:
             warnings.append("Compact plan estimated token weight is high; escalate to extended or trim slices.")
-        if execution_tokens > 600:
+        if execution_tokens > COMPACT_EXECUTION_TOKEN_TARGET:
             warnings.append("Compact execution file is oversized; keep 02-execution.md concise or escalate to extended.")
     else:
         control_names = {"01-change-summary.md", "02-control.md"}
