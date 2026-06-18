@@ -1,6 +1,6 @@
 """Bundle-local CLI for retained-plan execution.
 
-Commands: inspect resume checkpoint completion-check
+Commands: inspect resume checkpoint state-check completion-check
 
 Stdlib-only. Read-only. Does not import sibling bundles or .github/scripts/lib.
 """
@@ -42,6 +42,10 @@ PLAN_STATE_REQUIRED_FIELDS = (
 
 PLAN_STATE_FILE_RE = re.compile(r"^([A-Z0-9_-]+)-plan-state\.md$")
 
+VALID_PLAN_STATES = frozenset(
+    {"DONE", "APPLIED_UNVERIFIED", "PARTIAL", "BLOCKED", "ROLLED_BACK", "CANCELLED"}
+)
+NON_DONE_STATES = frozenset({"APPLIED_UNVERIFIED", "PARTIAL", "BLOCKED", "ROLLED_BACK", "CANCELLED"})
 OPEN_STATUSES = frozenset({"PENDING", "PARTIAL", "NOT_DONE", "UNVERIFIABLE", "BLOCKED"})
 
 LEDGER_REQUIRED_FIELDS = (
@@ -101,6 +105,26 @@ def done_files(plan_folder: Path) -> list[str]:
     return sorted(
         p.name for p in plan_folder.glob("done-*.md")
     )
+
+
+def executable_numbered_files(plan_folder: Path, profile: str) -> list[str]:
+    """Return sorted executable numbered plan files for the given profile.
+
+    For compact plans, only 02-execution.md is executable. For extended plans,
+    executable files start at 03-execution.md; 02-control.md is control and
+    01-change-summary.md is the decision record.
+    """
+    all_numbered = numbered_files(plan_folder)
+    if profile == "compact":
+        return [name for name in all_numbered if name == "02-execution.md"]
+    if profile == "extended":
+        executable: list[str] = []
+        for name in all_numbered:
+            match = re.match(r"^(\d{2})-.+\.md$", name)
+            if match and int(match.group(1)) >= 3:
+                executable.append(name)
+        return executable
+    return all_numbered
 
 
 def resolve_plan_state_marker(plan_folder: Path) -> tuple[Path | None, str | None, list[Finding]]:
@@ -267,10 +291,163 @@ def cmd_checkpoint(plan_folder: Path, format: str = "text") -> int:
     return 0
 
 
+def _validate_plan_state_content(
+    marker_path: Path,
+    state_from_filename: str,
+    plan_state_text: str,
+    require_non_done_fields: bool = False,
+) -> list[Finding]:
+    """Validate the content of a plan-state marker."""
+    findings: list[Finding] = []
+
+    if state_from_filename not in VALID_PLAN_STATES:
+        findings.append(
+            Finding(
+                code="invalid-plan-state",
+                message=(
+                    f"{marker_path.name} encodes unknown state {state_from_filename}; "
+                    f"valid states are {', '.join(sorted(VALID_PLAN_STATES))}"
+                ),
+            )
+        )
+
+    for field in PLAN_STATE_REQUIRED_FIELDS:
+        if field not in plan_state_text:
+            findings.append(
+                Finding(
+                    code="missing-plan-state-field",
+                    message=f"{marker_path.name} is missing {field}",
+                )
+            )
+
+    state_match = re.search(r"^State:\s*(.+)$", plan_state_text, re.MULTILINE)
+    continuation_match = re.search(
+        r"^Continuation:\s*(.+)$", plan_state_text, re.MULTILINE
+    )
+
+    if state_match:
+        declared_state = state_match.group(1).strip().upper()
+        if declared_state != state_from_filename:
+            findings.append(
+                Finding(
+                    code="plan-state-name-mismatch",
+                    message=(
+                        f"{marker_path.name} encodes state {state_from_filename} "
+                        f"but content declares State: {declared_state}"
+                    ),
+                )
+            )
+        if declared_state not in VALID_PLAN_STATES:
+            findings.append(
+                Finding(
+                    code="invalid-declared-state",
+                    message=(
+                        f"{marker_path.name} declares unknown state {declared_state}"
+                    ),
+                )
+            )
+
+    if continuation_match:
+        declared_continuation = continuation_match.group(1).strip().lower()
+        is_done_state = state_from_filename == "DONE"
+        if is_done_state and declared_continuation != "none":
+            findings.append(
+                Finding(
+                    code="nonterminal-continuation",
+                    message=f"{marker_path.name} must declare Continuation: none for DONE",
+                )
+            )
+        elif not is_done_state and declared_continuation not in ("continuing", "waiting"):
+            findings.append(
+                Finding(
+                    code="invalid-continuation",
+                    message=(
+                        f"{marker_path.name} Continuation must be 'continuing' or 'waiting' "
+                        f"for state {state_from_filename}"
+                    ),
+                )
+            )
+
+    if require_non_done_fields and state_from_filename in NON_DONE_STATES:
+        if continuation_match:
+            declared_continuation = continuation_match.group(1).strip().lower()
+            if (
+                declared_continuation == "waiting"
+                and "User action required:" not in plan_state_text
+            ):
+                findings.append(
+                    Finding(
+                        code="missing-user-action",
+                        message=(
+                            f"{marker_path.name} must declare User action required "
+                            f"when Continuation is waiting"
+                        ),
+                    )
+                )
+        if "Next-step package:" not in plan_state_text:
+            findings.append(
+                Finding(
+                    code="missing-next-step-package",
+                    message=f"{marker_path.name} must declare Next-step package for non-DONE state",
+                )
+            )
+        if "Evidence gaps:" not in plan_state_text:
+            findings.append(
+                Finding(
+                    code="missing-evidence-gaps",
+                    message=f"{marker_path.name} should declare Evidence gaps for non-DONE state",
+                    severity="WARNING",
+                )
+            )
+
+    return findings
+
+
+def cmd_state_check(plan_folder: Path, format: str = "text") -> int:
+    """Validate any <STATE>-plan-state.md marker in the plan folder."""
+    findings: list[Finding] = []
+
+    _profile, profile_findings = _check_unsupported(plan_folder)
+    if _profile is None:
+        findings.extend(profile_findings)
+        _emit_findings(findings, format)
+        return 1
+
+    marker_path, state_from_filename, marker_findings = resolve_plan_state_marker(plan_folder)
+    findings.extend(marker_findings)
+
+    report: dict = {
+        "plan_folder": str(plan_folder),
+        "profile": _profile,
+        "marker_present": marker_path is not None,
+        "marker_state": state_from_filename,
+    }
+
+    if marker_path is None:
+        findings.append(
+            Finding(
+                code="missing-plan-state-marker",
+                message="No <STATE>-plan-state.md marker found",
+            )
+        )
+        _emit_findings(findings, format, report)
+        return 1
+
+    plan_state_text = marker_path.read_text(encoding="utf-8")
+    content_findings = _validate_plan_state_content(
+        marker_path,
+        state_from_filename,
+        plan_state_text,
+        require_non_done_fields=True,
+    )
+    findings.extend(content_findings)
+
+    _emit_findings(findings, format, report)
+    return 0 if not any(f.severity == "ERROR" for f in findings) else 1
+
+
 def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
     """Validate completion packaging for DONE readiness."""
-    active = numbered_files(plan_folder)
-    dones = done_files(plan_folder)
     findings: list[Finding] = []
 
     # Profile gate is always required during completion checks, including
@@ -279,6 +456,9 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
     if _profile is None:
         _emit_findings(profile_findings, format)
         return 1
+
+    active = executable_numbered_files(plan_folder, _profile)
+    dones = done_files(plan_folder)
 
     plan_state_path, state_from_filename, marker_findings = resolve_plan_state_marker(plan_folder)
     findings.extend(marker_findings)
@@ -289,59 +469,34 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
         _emit_findings(findings, format)
         return 1
 
-    # Lightweight closeout path: explicit state marker without done-* packaging.
-    if plan_state_path and not dones and not envelope_path.is_file() and not report_path.is_file():
+    # Lightweight or live-folder state marker path.
+    if plan_state_path:
         plan_state_text = plan_state_path.read_text(encoding="utf-8")
-        for field in PLAN_STATE_REQUIRED_FIELDS:
-            if field not in plan_state_text:
-                findings.append(
-                    Finding(
-                        code="missing-plan-state-field",
-                        message=f"{plan_state_path.name} is missing {field}",
-                    )
-                )
-
-        state_match = re.search(r"^State:\s*(.+)$", plan_state_text, re.MULTILINE)
-        continuation_match = re.search(
-            r"^Continuation:\s*(.+)$", plan_state_text, re.MULTILINE
+        content_findings = _validate_plan_state_content(
+            plan_state_path,
+            state_from_filename,
+            plan_state_text,
+            require_non_done_fields=True,
         )
+        findings.extend(content_findings)
 
-        if state_from_filename and state_from_filename != "DONE":
-            findings.append(
-                Finding(
-                    code="not-done-state",
-                    message=f"{plan_state_path.name} does not encode DONE state",
-                )
-            )
-
-        if state_match and state_match.group(1).strip() != "DONE":
-            findings.append(
-                Finding(
-                    code="not-done-state",
-                    message=f"{plan_state_path.name} does not declare State: DONE",
-                )
-            )
-
-        if state_from_filename and state_match:
-            declared_state = state_match.group(1).strip().upper()
-            if declared_state != state_from_filename:
+        if state_from_filename == "DONE":
+            if dones or envelope_path.is_file() or report_path.is_file():
                 findings.append(
                     Finding(
-                        code="plan-state-name-mismatch",
-                        message=(
-                            f"{plan_state_path.name} encodes state {state_from_filename} "
-                            f"but content declares State: {declared_state}"
-                        ),
+                        code="mixed-closeout-style",
+                        message="DONE state marker exists alongside full-packaging artifacts; prefer one closeout style",
+                        severity="WARNING",
                     )
                 )
-
-        if continuation_match and continuation_match.group(1).strip() != "none":
-            findings.append(
-                Finding(
-                    code="nonterminal-continuation",
-                    message=f"{plan_state_path.name} must declare Continuation: none for DONE readiness",
+        else:
+            if dones:
+                findings.append(
+                    Finding(
+                        code="invalid-done-for-non-done-state",
+                        message=f"State {state_from_filename} must not have done-* markers",
+                    )
                 )
-            )
 
         _emit_findings(findings, format)
         return 0 if not any(f.severity == "ERROR" for f in findings) else 1
@@ -360,8 +515,7 @@ def cmd_completion_check(plan_folder: Path, format: str = "text") -> int:
         findings.append(
             Finding(
                 code="missing-done-files",
-                message="No done-* files found; DONE requires done markers",
-                severity="WARNING",
+                message="No done-* files found; full DONE packaging requires done markers",
             )
         )
 
@@ -447,6 +601,10 @@ def parse_args() -> argparse.Namespace:
     checkpoint_p.add_argument("plan_folder", type=Path, help="Path to plan folder")
     checkpoint_p.add_argument("--format", choices=("text", "json"), default="text")
 
+    state_p = sub.add_parser("state-check", help="Validate <STATE>-plan-state.md marker")
+    state_p.add_argument("plan_folder", type=Path, help="Path to plan folder")
+    state_p.add_argument("--format", choices=("text", "json"), default="text")
+
     cc_p = sub.add_parser("completion-check", help="Validate DONE readiness")
     cc_p.add_argument("plan_folder", type=Path, help="Path to plan folder")
     cc_p.add_argument("--format", choices=("text", "json"), default="text")
@@ -468,6 +626,8 @@ def main() -> int:
         return cmd_resume(plan_folder, args.format)
     if args.command == "checkpoint":
         return cmd_checkpoint(plan_folder, args.format)
+    if args.command == "state-check":
+        return cmd_state_check(plan_folder, args.format)
     if args.command == "completion-check":
         return cmd_completion_check(plan_folder, args.format)
     print(f"Unknown command: {args.command}", file=sys.stderr)
