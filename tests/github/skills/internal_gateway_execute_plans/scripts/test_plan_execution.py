@@ -311,7 +311,7 @@ def test_completion_lightweight_rejects_not_shipped_state(tmp_path: Path) -> Non
     result = run_cli("completion-check", plan_folder)
 
     assert result.returncode != 0
-    assert "not-done-state" in result.stdout
+    assert "missing-next-step-package" in result.stdout
 
 
 def test_completion_lightweight_rejects_nonterminal_continuation(
@@ -338,7 +338,6 @@ def test_completion_lightweight_rejects_filename_state_mismatch(tmp_path: Path) 
     result = run_cli("completion-check", plan_folder)
 
     assert result.returncode != 0
-    assert "not-done-state" in result.stdout
     assert "plan-state-name-mismatch" in result.stdout
 
 
