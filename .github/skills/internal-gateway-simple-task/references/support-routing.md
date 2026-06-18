@@ -79,7 +79,15 @@ activate only when called or proven by context.
 
 ## Advisory Helper
 
-Run `scripts/suggest_support_skills.py` only when paths or symptoms are known and
-support selection is noisy. Treat its output as hints. The agent still must
+Run `scripts/resolve_simple_task.py gate` when the task facts are already
+normalized and the bundle only needs a deterministic gate outcome plus a lean
+Readiness Brief.
+
+Run `scripts/resolve_simple_task.py claim` before `fixed`, `covered`,
+`validator passes`, `ready`, `no-findings`, or similar status claims when the
+claim-gate owner is the noisy part.
+
+Run `scripts/suggest_support_skills.py` only when paths or symptoms are known
+and support selection is noisy. Treat its output as hints. The agent still must
 inspect local files and relevant domain skills before editing or claiming
 policy.

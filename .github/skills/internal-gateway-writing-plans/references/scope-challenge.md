@@ -24,32 +24,36 @@ Every retained plan must be able to answer these questions:
    validation failure must stop execution?
 6. `reading budget`: What is the smallest first read and evidence pass that can classify the folder without broad context loading?
 7. `observable acceptance`: Which diff, file state, validator assertion, manual check, or explicit non-action will prove each executable item?
-8. `implementation contract`: For `extended` profiles, does `04-implementation-contract.md` list the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, the implementation contract is not required.
+8. `implementation contract`: For `extended` profiles, does `02-control.md` list the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, a separate implementation contract is not required.
 9. `profile`: Is `Plan profile` declared as `compact` or `extended`? Currently, no other profiles are supported. Missing or unrecognized profiles return `unsupported-plan-contract`.
-10. `summary language`: Is `01-change-summary.md` written in Italian with clear subsections and a `Risorsa | Azione | Scopo` table for non-trivial plans?
+10. `summary language`: Is `01-change-summary.md` written in Italian as a compressed decision capsule with required sections and a `Risorsa | Azione | Scopo` table for non-trivial plans?
 11. `summary clarity`: Are changed resources and intended actions obvious in the summary without reading deeper files?
 12. `route map`: Do `Source item ledger` routes point to existing numbered files or explicit non-action routes?
 13. `questions state`: Is `questions.md` either `- none` (ready) or explicitly blocking execution handoff?
-14. `token budget`: Is token weight proportional to profile so first reads stay within a practical budget?
+14. `token budget`: For `compact`, is total plan Markdown within 2,000 estimated tokens, with `01-change-summary.md` under 300 and `02-execution.md` under 1,500?
 
 For non-trivial retained plans and strategic-to-operational or
 monolithic-to-executable conversions, also answer this:
 
-1. `coverage`: How does `02-source-item-ledger.md` preserve every requested or
-   source item before execution or before the source artifact is retired?
+1. `coverage`: How does `02-execution.md` (`compact`) or `02-control.md`
+   (`extended`) preserve every requested or source item before execution or
+   before the source artifact is retired?
+
+For `compact`, answer how `02-execution.md` preserves coverage with inline item
+rows.
 
 For retained plans with numbered files, confirm that `01-change-summary.md` is a
-brief decision summary only (Italian, non-executable), and that
-`02-source-item-ledger.md` exposes the same target, anti-scope, owner, validator,
-and stop conditions, plus `Recommended use`, `Plan profile`, `File map and role`,
-`Initial evidence pass`, `Reading budget`, and source-item coverage. Confirm that
-`04-implementation-contract.md` is present for `extended` profiles, and that
-`questions.md` remains separate from executable files.
+brief compressed decision summary only (Italian, non-executable), and that
+`02-execution.md` (`compact`) or `02-control.md` (`extended`) exposes the same
+target, anti-scope, owner, validator, and stop conditions. For `extended`,
+confirm `02-control.md` also carries `Recommended use`, `Plan profile`,
+`File map and role`, `Initial evidence pass`, `Reading budget`, source-item
+coverage, and merged implementation-contract sections.
 
 For retained plans that rewrite an existing strategic or review-only artifact,
-confirm that the folder contains `02-source-item-ledger.md` or an equivalently
-clear traceability owner before the source artifact is deleted, replaced, or
-compressed.
+confirm that the folder contains `02-execution.md` (`compact`) or
+`02-control.md` (`extended`) as a clear traceability owner before the source
+artifact is deleted, replaced, or compressed.
 
 ## Gate Result
 
@@ -60,8 +64,8 @@ Use one of these outcomes:
 - `BLOCKED`: a required decision, permission, or evidence source is missing.
 
 For non-trivial retained plans, `READY` also requires explicit source-item
-coverage in the ledger and, for `extended` profiles, a complete
-`04-implementation-contract.md`.
+coverage and, for `extended` profiles, complete merged implementation-contract
+sections in `02-control.md`.
 
 ## Output Template
 

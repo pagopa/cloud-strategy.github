@@ -30,6 +30,8 @@ description: Use when creating or modifying standalone Bash scripts or shell uti
 - Prefer `printf` for formatted output and arrays for dynamic commands.
 - Destructive or repeatable scripts should be idempotent and expose `--dry-run` when operator risk is non-trivial.
 - Validate required external commands with `command -v` before first use.
+- Keep operator entrypoints thin and extract repeated branches into sourced helper files only when reuse is real.
+- Treat 300 lines as a review threshold and 400 lines as a split-or-justify gate for standalone scripts.
 - When script output can grow and the script is agent-facing, prefer bounded summaries by default and add an explicit compact or quiet mode that still preserves blockers, failures, and required next actions.
 - Keep full-detail output reachable through an explicit flag or durable artifact path when operators need full diagnostics.
 - Do not add unit tests unless explicitly requested.

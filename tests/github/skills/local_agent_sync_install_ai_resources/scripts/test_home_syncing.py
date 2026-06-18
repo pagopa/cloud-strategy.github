@@ -205,7 +205,7 @@ def initialize_source_repo(root: Path) -> None:
 def test_parse_targets_normalizes_known_values_and_rejects_unknowns() -> None:
     assert parse_targets(" opencode, codex , codex ") == ("codex", "opencode")
     assert parse_targets("skills") == ("skills",)
-    assert parse_targets("all") == ("skills", "codex", "copilot", "claude", "opencode")
+    assert parse_targets("all") == ("skills", "codex", "copilot", "opencode")
 
     with pytest.raises(ValueError, match="unknown-target"):
         parse_targets("codex,unknown")
@@ -688,7 +688,7 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
         "    include_in_v1: true\n"
         "    evidence: []\n"
         "    notes: Copilot direct-copy skill support.\n"
-        "  - target: claude\n"
+        "  - target: opencode\n"
         "    resource_family: skills\n"
         "    support_level: Documented\n"
         "    home_path: ~/.agents/skills/<skill>/\n"
@@ -696,7 +696,7 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
         "    translation_required: false\n"
         "    include_in_v1: true\n"
         "    evidence: []\n"
-        "    notes: Claude direct-copy skill support.\n"
+        "    notes: OpenCode direct-copy skill support.\n"
         "  - target: codex\n"
         "    resource_family: agents\n"
         "    support_level: Documented\n"
@@ -715,15 +715,15 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
         "    include_in_v1: true\n"
         "    evidence: []\n"
         "    notes: Copilot agent direct-copy support.\n"
-        "  - target: claude\n"
+        "  - target: opencode\n"
         "    resource_family: agents\n"
         "    support_level: Documented\n"
-        "    home_path: ~/.claude/agents/<agent>.md\n"
+        "    home_path: ~/.config/opencode/agents/<agent>.md\n"
         "    direct_copy_possible: false\n"
         "    translation_required: true\n"
         "    include_in_v1: true\n"
         "    evidence: []\n"
-        "    notes: Claude agent translation support.\n",
+        "    notes: OpenCode agent translation support.\n",
         encoding="utf-8",
     )
     catalog_path = (
@@ -743,7 +743,6 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
         "    include_targets:\n"
         "      - codex\n"
         "      - copilot\n"
-        "      - claude\n"
         "    target_support: Documented\n"
         "    notes: Demo bundle.\n",
         encoding="utf-8",
@@ -759,7 +758,7 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
             "resource_id": "demo",
             "source_family": "agents",
             "source_path": ".github/agents/demo.agent.md",
-            "include_targets": ["codex", "copilot", "claude"],
+            "include_targets": ["codex", "copilot", "opencode"],
             "target_support": "Documented",
             "notes": "Demo agent.",
         }
@@ -771,7 +770,7 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
     initial_plan = build_home_sync_plan(
         source_root=source_root,
         home_root=home_root,
-        targets=parse_targets("codex,copilot,claude"),
+        targets=parse_targets("codex,copilot,opencode"),
         mode="apply",
     )
     manifest_path = apply_home_sync_plan(initial_plan, create_missing_dirs=True)
@@ -780,7 +779,7 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
         source_root=source_root,
         home_root=home_root,
         targets=parse_targets("codex,copilot"),
-        retired_targets=parse_targets("claude"),
+        retired_targets=parse_targets("opencode"),
         mode="apply",
         prune_managed=True,
     )
@@ -788,10 +787,10 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
     assert manifest["targets"] == ["codex", "copilot"]
-    assert not (home_root / ".claude/agents/demo.md").exists()
+    assert not (home_root / ".config/opencode/agents/demo.md").exists()
     assert (home_root / ".copilot/agents/demo.agent.md").is_file()
     assert (home_root / ".agents/skills/demo-skill").is_dir()
-    assert all(entry["target"] != "claude" for entry in manifest["managed_resources"])
+    assert all(entry["target"] != "opencode" for entry in manifest["managed_resources"])
 
 
 def test_home_sync_catalog_does_not_contain_internal_graphify_in_real_repo() -> None:

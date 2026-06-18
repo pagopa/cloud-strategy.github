@@ -4,7 +4,7 @@
 Usage examples:
     python3 scripts/sync_home_ai_resources.py plan --targets skills
     python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs
-    python3 scripts/sync_home_ai_resources.py apply --targets skills,codex --retire-targets claude --prune-managed
+    python3 scripts/sync_home_ai_resources.py apply --targets skills,codex --retire-targets opencode --prune-managed
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ from home_syncing import (
     write_plan_snapshot,
 )
 from sync_output import build_compact_install_output, render_install_report
+from sync_output import build_compact_bisync_output, render_bisync_report
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -38,7 +39,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=False)
     subparsers.required = True
 
-    for cmd in ("plan", "apply", "audit", "doctor", "dry-run"):
+    for cmd in ("sync", "plan", "apply", "audit", "doctor", "dry-run"):
         cmd_parser = subparsers.add_parser(cmd, help=f"Run {cmd} sync operation.")
         cmd_parser.add_argument("--source-root", default=".", help="Source repository root.")
         cmd_parser.add_argument(
@@ -49,13 +50,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         cmd_parser.add_argument(
             "--targets",
             default="skills",
-            help="Target runtimes: skills, codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
+            help="Target runtimes: skills, codex, copilot, opencode, comma-separated combinations, or cross/all/tutto.",
         )
         if cmd != "doctor":
             cmd_parser.add_argument(
                 "--retire-targets",
                 default="",
-                help="Previously synced runtimes to retire from the manifest and prune when combined with --prune-managed. Example: claude",
+                help="Previously synced runtimes to retire from the manifest and prune when combined with --prune-managed. Example: opencode",
             )
         cmd_parser.add_argument(
             "--create-missing-dirs",
@@ -166,6 +167,9 @@ def run(args: argparse.Namespace) -> int:
         return 1
 
     command = normalize_mode(args.command)
+    if command == "sync":
+        return run_sync(source_root, home_root, targets, retire_targets, args)
+
     if command == "doctor":
         checks, blocked_codes = run_doctor(
             source_root,
@@ -210,6 +214,145 @@ def run(args: argparse.Namespace) -> int:
     payload["state_path"] = snapshot_path.as_posix()
     emit_output(payload, format_name=args.format)
     return 0
+
+
+def run_sync(
+    source_root: Path,
+    home_root: Path,
+    targets: tuple[str, ...],
+    retire_targets: tuple[str, ...],
+    args: argparse.Namespace,
+) -> int:
+    install_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=targets,
+        retired_targets=retire_targets,
+        mode="apply",
+        experimental_targets=args.experimental_targets,
+        prune_managed=args.prune_managed,
+        fast=args.fast,
+        changed_only=args.changed_only,
+    )
+    install_payload = install_plan.to_dict()
+    auto_blockers = install_auto_apply_blockers(install_plan, args)
+    if auto_blockers:
+        install_payload["state_path"] = write_plan_snapshot(install_plan).as_posix()
+        install_payload["auto_sync_blockers"] = auto_blockers
+        emit_sync_output(
+            {
+                "mode": "sync",
+                "status": "needs_review",
+                "reason": "Install lane needs review before writing home resources.",
+                "install": install_payload,
+                "bisync": None,
+            },
+            format_name=args.format,
+        )
+        return 1
+
+    install_changed = any(
+        operation.action in {"copy", "delete", "mkdir"}
+        for operation in install_plan.operations
+    )
+    if install_changed:
+        try:
+            manifest_path = apply_home_sync_plan(
+                install_plan,
+                create_missing_dirs=args.create_missing_dirs,
+                prune_managed=args.prune_managed,
+            )
+        except RuntimeError as error:
+            install_payload["state_path"] = write_plan_snapshot(install_plan).as_posix()
+            install_payload["error"] = str(error)
+            emit_sync_output(
+                {
+                    "mode": "sync",
+                    "status": "blocked",
+                    "reason": str(error),
+                    "install": install_payload,
+                    "bisync": None,
+                },
+                format_name=args.format,
+            )
+            return 1
+        install_payload["manifest_path"] = manifest_path.as_posix()
+    install_payload["state_path"] = write_plan_snapshot(install_plan).as_posix()
+
+    bisync_payload: dict[str, object] | None = None
+    if targets == ("skills",) and not retire_targets:
+        bisync_plan = build_bisync_plan(source_root, home_root, mode="plan")
+        bisync_payload = bisync_plan.to_dict()
+        if bisync_plan.blocked_codes or bisync_plan.drifts:
+            emit_sync_output(
+                {
+                    "mode": "sync",
+                    "status": "needs_review",
+                    "reason": "Bisync drift or blockers need a human direction decision before writes.",
+                    "install": install_payload,
+                    "bisync": bisync_payload,
+                },
+                format_name=args.format,
+            )
+            return 1
+
+    emit_sync_output(
+        {
+            "mode": "sync",
+            "status": "done",
+            "reason": "Repo-to-home install completed and no bisync drift needs review.",
+            "install": install_payload,
+            "bisync": bisync_payload,
+        },
+        format_name=args.format,
+    )
+    return 0
+
+
+def install_auto_apply_blockers(
+    plan,
+    args: argparse.Namespace,
+) -> list[str]:
+    blockers = list(plan.blocked_codes())
+    if plan.residual_drift:
+        blockers.append("install-residual-drift")
+    if any(operation.action == "mkdir" for operation in plan.operations) and not args.create_missing_dirs:
+        blockers.append("needs-directory-create")
+    if any(operation.action == "stale-managed" for operation in plan.operations):
+        blockers.append("stale-managed")
+    return sorted(set(blockers))
+
+
+def emit_sync_output(payload: dict[str, object], *, format_name: str) -> None:
+    install_payload = payload.get("install")
+    bisync_payload = payload.get("bisync")
+    if format_name == "json":
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return
+    if format_name == "compact":
+        compact: dict[str, object] = {
+            "mode": payload.get("mode"),
+            "status": payload.get("status"),
+            "reason": payload.get("reason"),
+        }
+        if isinstance(install_payload, dict):
+            compact["install"] = build_compact_install_output(install_payload)
+        if isinstance(bisync_payload, dict):
+            compact["bisync"] = build_compact_bisync_output(bisync_payload)
+        print(json.dumps(compact, indent=2, sort_keys=True))
+        return
+
+    status = str(payload.get("status") or "unknown")
+    reason = str(payload.get("reason") or "")
+    print(f"Status: mode=sync; status={status}; reason={reason}")
+    print("")
+    if isinstance(install_payload, dict):
+        print("# Install Lane")
+        print(render_install_report(install_payload), end="")
+    if isinstance(bisync_payload, dict):
+        print("")
+        print("# Bisync Lane")
+        print(render_bisync_report(bisync_payload), end="")
 
 
 def run_apply(plan, args: argparse.Namespace) -> int:

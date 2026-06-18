@@ -29,6 +29,9 @@ package architecture, or deterministic test design becomes the real issue.
 
 - Keep business logic in focused modules, separate from transport adapters and infrastructure wiring.
 - Prefer early returns, clear domain names, and straightforward control flow.
+- Treat 300 lines as a review threshold for cohesive JavaScript and TypeScript files.
+- Treat 400 lines as a split-or-justify threshold and move repeated decision logic into focused modules.
+- Apply pragmatic DRY: extract repeated decision paths and shared adapters, but avoid speculative abstractions.
 - Use `node:test` and `node:assert/strict` unless the repository already standardizes on another test framework.
 - Keep `package.json` scripts, engines, and dependency intent explicit.
 - Prefer strict `tsconfig.json` settings unless a documented compatibility reason exists.

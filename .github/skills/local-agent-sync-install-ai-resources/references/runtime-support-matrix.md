@@ -8,11 +8,9 @@ Use this reference when the selected runtime or resource family decides whether 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `codex` | Skills | Documented | `~/.agents/skills/<skill>/` | Yes | No | Yes | Direct-copy bundles with `SKILL.md`, `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`. |
 | `copilot` | Skills | Documented | `~/.agents/skills/<skill>/` | Yes | No | Yes | GitHub Copilot supports Agent Skills standard via `~/.agents/skills/`. |
-| `claude` | Skills | Documented | `~/.agents/skills/<skill>/` | Yes | No | Yes | Claude Code supports Agent Skills standard via `~/.agents/skills/` (compatibility path). |
 | `opencode` | Skills | Documented | `~/.agents/skills/<skill>/` | Yes | No | Yes | OpenCode supports Agent Skills standard via `~/.agents/skills/`. |
 | `codex` | Agents | Documented | `~/.codex/agents/` | No | Yes | Yes | Requires MD to TOML translation. |
 | `copilot` | Agents | Documented | `~/.copilot/agents/` | Yes | No | Yes | Direct copy of `.agent.md` files. |
-| `claude` | Agents | Documented | `~/.claude/agents/` | No | Yes | Yes | Requires frontmatter translation (tools CSV, handoffs to body). |
 | `opencode` | Agents | Documented | `~/.config/opencode/agents/` | No | Yes | Yes | Requires frontmatter translation (permission object, handoffs to body). |
 
 ## Default v1 Policy

@@ -60,8 +60,9 @@ available, mark it `UNVERIFIABLE` instead of guessing.
 
 ## Procedure
 
-1. Extract every executable item from the plan. Use `02-source-item-ledger.md`
-   when present, and ignore `questions.md`.
+1. Extract every executable item from the plan. Use `02-control.md`
+  (`extended`) or `02-execution.md` (`compact`) when present, and ignore
+  `questions.md`.
 2. If numbered plan files are absent because the `done-*` loop removed them,
   use the evidence envelope or reconstruct items from `done-*` files and the
   source-item ledger.

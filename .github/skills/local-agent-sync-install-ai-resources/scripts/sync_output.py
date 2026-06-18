@@ -223,31 +223,35 @@ def render_install_report(payload: dict[str, object]) -> str:
     blocked_codes = _as_string_list(payload.get("blocked_codes"))
     status = str(payload.get("validation") or payload.get("status") or "unknown")
     lane_label = _install_lane_label()
+    operations = payload.get("operations")
+    copied_count = _count_operations(operations, {"copy"})
+    skipped_count = _count_operations(operations, {"skip"})
+    blocked_count = _count_operations(operations, {"blocked"})
+    planned_count = _count_operations(operations, {"copy", "mkdir", "delete", "stale-managed"})
 
     lines: list[str] = []
     lines.append(
-        f"Status: mode={mode}; label={lane_label}; targets={_join_or_none(targets)}; status={status}; blockers={len(blocked_codes)}"
+        f"Status: {lane_label} | mode={mode} | status={status} | blockers={len(blocked_codes)}"
     )
     lines.append("")
 
-    lines.extend(_report_section("Current State"))
+    lines.extend(_report_section("Summary"))
     lines.extend(
-        _table_lines(
-            ["Field", "Value"],
+        _bullet_lines(
             [
-                ["Mode", mode],
-                ["Lane label", lane_label],
-                ["Selected targets", _join_or_none(targets)],
-                ["Retired targets", _join_or_none(_as_string_list(payload.get("retired_targets")))],
-                ["Source resources considered", str(payload.get("source_resources_considered") or 0)],
-                ["Blocked code count", str(len(blocked_codes))],
-            ],
+                f"Targets: {_join_or_none(targets)}",
+                f"Retired targets: {_join_or_none(_as_string_list(payload.get('retired_targets')))}",
+                f"Source resources considered: {payload.get('source_resources_considered') or 0}",
+                f"Planned or applied changes: {planned_count}",
+                f"Already aligned resources: {skipped_count}",
+                f"Blocked resources: {blocked_count}",
+            ]
         )
     )
     lines.append("")
 
     planned_rows = _install_planned_rows(payload)
-    lines.extend(_report_section("Differences Or Planned Work"))
+    lines.extend(_report_section("Changes"))
     lines.extend(
         _table_lines(
             ["Resource or path", "Lane", "Planned action", "Why this will change", "Evidence or winner"],
@@ -258,23 +262,24 @@ def render_install_report(payload: dict[str, object]) -> str:
     lines.append("")
 
     completed_rows = _install_completed_rows(payload)
-    lines.extend(_report_section("Actions Completed"))
-    lines.extend(
-        _table_lines(
-            ["Resource or path", "Action performed", "Why it was done", "Result", "Verification"],
-            completed_rows,
-            none_row=["none", "no-op", "No actions completed.", "none", "none"],
+    if completed_rows:
+        lines.append("")
+        lines.extend(_report_section("Completed"))
+        lines.extend(
+            _table_lines(
+                ["Resource or path", "Action performed", "Why it was done", "Result", "Verification"],
+                completed_rows,
+            )
         )
-    )
     lines.append("")
 
     blocker_rows = _install_blocker_rows(payload)
-    lines.extend(_report_section("Blockers And Skips"))
+    lines.extend(_report_section("Attention"))
     lines.extend(
         _table_lines(
-            ["Code or status", "Resource or path", "Why blocked or skipped", "Required user action"],
+            ["Code or status", "Resource or path", "Why it needs attention", "Required user action"],
             blocker_rows,
-            none_row=["none", "none", "No blockers or skips.", "none"],
+            none_row=["none", "none", "No blockers need attention.", "none"],
         )
     )
     lines.append("")
@@ -290,18 +295,18 @@ def render_install_report(payload: dict[str, object]) -> str:
     lines.extend(_table_lines(["Check", "Result"], validation_rows))
     lines.append("")
 
-    lines.extend(_report_section("Remaining Work"))
     remaining_rows = _remaining_work_rows(payload)
-    lines.extend(
-        _table_lines(
-            ["Item", "Why it remains", "Required follow-up"],
-            remaining_rows,
-            none_row=["none", "No remaining work.", "none"],
+    if remaining_rows:
+        lines.extend(_report_section("Remaining Work"))
+        lines.extend(
+            _table_lines(
+                ["Item", "Why it remains", "Required follow-up"],
+                remaining_rows,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
 
-    lines.extend(_report_section("Next Action"))
+    lines.extend(_report_section("Next"))
     lines.extend(_next_action_table(payload.get("next_action"), payload.get("next_step")))
     return "\n".join(lines).strip() + "\n"
 
@@ -319,26 +324,27 @@ def render_bisync_report(payload: dict[str, object]) -> str:
 
     lines: list[str] = []
     lines.append(
-        f"Status: mode={mode}; label={lane_label}; lane=bisync; status={status}; drift_total={drift_total}; blockers={len(blocked_codes)}"
+        f"Status: {lane_label} | mode={mode} | status={status} | drift_total={drift_total} | blockers={len(blocked_codes)}"
     )
     lines.append("")
 
-    lines.extend(_report_section("Current State"))
+    lines.extend(_report_section("Summary"))
+    direction_counts = _direction_counts(drifts)
+    bucket_counts = _bucket_counts(drifts)
     lines.extend(
-        _table_lines(
-            ["Field", "Value"],
+        _bullet_lines(
             [
-                ["Mode", mode],
-                ["Lane label", lane_label],
-                ["Drift total", str(drift_total)],
-                ["Blocked code count", str(len(blocked_codes))],
-                ["Verification status", status],
-            ],
+                f"Repo-to-home drift: {direction_counts['repo_to_home']}",
+                f"Home-to-repo drift: {direction_counts['home_to_repo']}",
+                f"Repo-only bundles: {bucket_counts['only_repo']}",
+                f"Home-only bundles: {bucket_counts['only_home']}",
+                f"Equal-mtime conflicts: {bucket_counts['equal_mtime']}",
+            ]
         )
     )
     lines.append("")
 
-    lines.extend(_report_section("Differences Or Planned Work"))
+    lines.extend(_report_section("Changes"))
     lines.extend(
         _table_lines(
             ["Resource or path", "Lane", "Planned action", "Why this will change", "Evidence or winner"],
@@ -346,24 +352,25 @@ def render_bisync_report(payload: dict[str, object]) -> str:
             none_row=["none", "bisync", "no-op", "No drift detected.", "none"],
         )
     )
-    lines.append("")
 
-    lines.extend(_report_section("Actions Completed"))
-    lines.extend(
-        _table_lines(
-            ["Resource or path", "Action performed", "Why it was done", "Result", "Verification"],
-            _bisync_completed_rows(payload),
-            none_row=["none", "no-op", "No actions completed.", "none", "none"],
+    completed_rows = _bisync_completed_rows(payload)
+    if completed_rows:
+        lines.append("")
+        lines.extend(_report_section("Completed"))
+        lines.extend(
+            _table_lines(
+                ["Resource or path", "Action performed", "Why it was done", "Result", "Verification"],
+                completed_rows,
+            )
         )
-    )
     lines.append("")
 
-    lines.extend(_report_section("Blockers And Skips"))
+    lines.extend(_report_section("Attention"))
     lines.extend(
         _table_lines(
-            ["Code or status", "Resource or path", "Why blocked or skipped", "Required user action"],
+            ["Code or status", "Resource or path", "Why it needs attention", "Required user action"],
             _bisync_blocker_rows(payload),
-            none_row=["none", "none", "No blockers or skips.", "none"],
+            none_row=["none", "none", "No blockers need attention.", "none"],
         )
     )
     lines.append("")
@@ -380,23 +387,39 @@ def render_bisync_report(payload: dict[str, object]) -> str:
     lines.extend(_table_lines(["Check", "Result"], verification_rows))
     lines.append("")
 
-    lines.extend(_report_section("Remaining Work"))
-    lines.extend(
-        _table_lines(
-            ["Item", "Why it remains", "Required follow-up"],
-            _remaining_work_rows(payload),
-            none_row=["none", "No remaining work.", "none"],
+    remaining_rows = _remaining_work_rows(payload)
+    if remaining_rows:
+        lines.append("")
+        lines.extend(_report_section("Remaining Work"))
+        lines.extend(
+            _table_lines(
+                ["Item", "Why it remains", "Required follow-up"],
+                remaining_rows,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
 
-    lines.extend(_report_section("Next Action"))
+    lines.extend(_report_section("Next"))
     lines.extend(_next_action_table(payload.get("next_action"), payload.get("next_step")))
     return "\n".join(lines).strip() + "\n"
 
 
 def _report_section(name: str) -> list[str]:
     return [f"## {name}"]
+
+
+def _bullet_lines(items: list[str]) -> list[str]:
+    return [f"- {item}" for item in items]
+
+
+def _count_operations(operations: object, actions: set[str]) -> int:
+    if not isinstance(operations, list):
+        return 0
+    return sum(
+        1
+        for operation in operations
+        if isinstance(operation, dict) and str(operation.get("action") or "") in actions
+    )
 
 
 def _table_lines(
@@ -456,7 +479,7 @@ def _install_completed_rows(payload: dict[str, object]) -> list[list[str]]:
         if not isinstance(operation, dict):
             continue
         action = str(operation.get("action") or "")
-        if action not in {"copy", "delete", "skip", "mkdir"}:
+        if action not in {"copy", "delete", "mkdir"}:
             continue
         path = str(operation.get("path") or operation.get("resource_id") or "unknown")
         reason = str(operation.get("reason") or "applied by plan")
@@ -474,13 +497,12 @@ def _install_blocker_rows(payload: dict[str, object]) -> list[list[str]]:
             if not isinstance(operation, dict):
                 continue
             action = str(operation.get("action") or "")
-            if action not in {"blocked", "skip"}:
+            if action != "blocked":
                 continue
-            code = str(operation.get("code") or ("skipped" if action == "skip" else "unknown"))
+            code = str(operation.get("code") or "unknown")
             path = str(operation.get("path") or operation.get("resource_id") or "unknown")
             reason = str(operation.get("reason") or _reason_for_code(code))
-            follow_up = "Resolve blocker and rerun plan." if action == "blocked" else "Review skip reason."
-            rows.append([code, path, reason, follow_up])
+            rows.append([code, path, reason, "Resolve blocker and rerun plan."])
     for code in _as_string_list(payload.get("blocked_codes")):
         if any(existing[0] == code for existing in rows):
             continue

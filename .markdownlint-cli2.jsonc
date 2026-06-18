@@ -7,6 +7,12 @@
     "tmp/**",
     // Ignore the local script venv because it is generated tooling state, not repo-owned content.
     ".github/scripts/.venv/**",
+    // Ignore local tool virtualenv artifacts generated during development.
+    "tools/analyze_copilot_debug_log/.venv/**",
+    // Test fixtures are intentionally non-document-shaped markdown inputs.
+    "tests/fixtures/critical_output_*.md",
+    // Ignore local OpenCode runtime artifacts.
+    ".opencode/**",
     // Preserve imported support skill families verbatim by default; lint only repo-owned Markdown.
     ".github/skills/antigravity-*/**",
     ".github/skills/awesome-copilot-*/**",

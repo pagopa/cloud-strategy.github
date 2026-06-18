@@ -27,6 +27,7 @@ description: Use when creating or modifying Java project code and the main conce
 
 - Prefer constructor injection and immutable dependencies in Spring components.
 - Keep controllers thin, services stateless, and API DTOs separate from persistence entities.
+- Split-or-justify any class or service that trends toward a god class role with mixed responsibilities.
 - Use Java 21 features only when the project already targets them or the runtime requirement is explicit.
 
 Load `references/examples.md` when you need a minimal class or test example.

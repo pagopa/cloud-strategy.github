@@ -25,8 +25,7 @@ def test_runner_rejects_unknown_tool_with_usage() -> None:
 
 def test_runner_resolves_diagnostic_cli_aliases_through_venv() -> None:
     commands = (
-        ("analyze_copilot_prompt_exports", "--help"),
-        ("analyze_copilot_debug_logs", "--help"),
+        ("analyze_copilot_debug_log", "--help"),
         ("benchmark_skill_tokens",),
     )
 
@@ -36,8 +35,8 @@ def test_runner_resolves_diagnostic_cli_aliases_through_venv() -> None:
         assert result.stdout.strip() or result.stderr.strip()
 
 
-def test_runner_supports_python_suffix_alias_for_diagnostic_cli() -> None:
-    result = run_runner("analyze_copilot_prompt_exports.py", "--help")
+def test_runner_supports_shell_suffix_alias_for_diagnostic_cli() -> None:
+    result = run_runner("analyze_copilot_debug_log.sh", "--help")
 
     assert result.returncode == 0, result.stderr
-    assert "Summarize Copilot prompt export JSON files" in result.stdout
+    assert "prompt-exports|debug-logs" in result.stdout

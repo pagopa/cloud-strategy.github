@@ -33,65 +33,121 @@ separate execution consumer field inside the retained plan.
 ## Profile Selection
 
 Choose the smallest profile that safely fits the work. Declare the profile in
-`02-source-item-ledger.md` under `Plan profile`.
+`02-execution.md` for `compact` and `02-control.md` for `extended` under
+`Plan profile`.
 
 `init` creates a scaffold only. A retained plan is execution-ready only after
-`handoff-check` returns ready and `questions.md` is `- none`.
+`handoff-check` returns ready.
 
 New `compact` plans should use `tmp/superpowers/mini-plan-*`.
 
 | Profile | When | Required files |
 | --- | --- | --- |
-| `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. Best fit for small/fast executors after positive handoff validation. | `01-change-summary.md`, `02-source-item-ledger.md`, `03-execution.md`, `questions.md` |
-| `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Thinking-first profile with explicit control files and deterministic read order. | Compact files plus `04-implementation-contract.md`, additional numbered files by category (`05-...`). |
+| `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. Best fit for small/fast executors after positive handoff validation. | `01-change-summary.md`, `02-execution.md` |
+| `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Thinking-first profile with explicit control files and deterministic read order. | `01-change-summary.md`, `02-control.md`, `03-execution.md`, additional numbered files by category (`04-...`). |
 
 Do not use `compact` when the executor needs exact sources, target files,
-validators, blockers, or external pins that only `04-implementation-contract.md`
+validators, blockers, or external pins that only `02-control.md`
 can provide.
+
+## Explicit Constraints
+
+- Create retained plans under `tmp/superpowers/<clear-action-or-task-name>/`.
+- New `compact` folders must use `tmp/superpowers/mini-plan-*`.
+- Use English file names. Write `01-change-summary.md` in Italian. Write all
+  other plan files in English.
+- Keep `01-change-summary.md` as a compressed, non-executable decision capsule.
+  Target at most 300 estimated tokens. Use only these required sections:
+  `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte`,
+  `Decisione richiesta`, and `Decisioni aperte`.
+- `Risorse coinvolte` keeps the `Risorsa | Azione | Scopo` table. Use one row
+  per materially changed resource group, not one row per file when that would
+  duplicate `02-execution.md` or `02-control.md`.
+- Do not put chosen logic, validation detail, execution route notes, source-item
+  coverage, blockers, or implementation-contract detail in `01-change-summary.md`.
+  Put those facts in `02-execution.md` for `compact` or `02-control.md` for
+  `extended`.
+- Compact plans have a 2,000 estimated-token total budget measured as
+  `ceil(UTF-8 bytes / 4)` across plan Markdown files. Keep `02-execution.md`
+  under 1,500 estimated tokens. Treat warnings as required review inputs.
+- `compact` uses exactly `01-change-summary.md` and `02-execution.md` during
+  authoring. `extended` uses `01-change-summary.md`, `02-control.md`,
+  `03-execution.md`, and optional higher numbered files.
 
 ## Core Contract
 
-- Create the plan under `tmp/superpowers/<clear-action-or-task-name>/`.
-- Use English file names. `01-change-summary.md` is written in Italian; all
-  other plan files use English.
-- `01-change-summary.md`: Italian human-readable decision summary with
-  `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte` table
-  (`Risorsa | Azione | Scopo`), `Comportamento scelto`, `Validazione prevista`,
-  `Esecuzione prevista`, and `Decisione richiesta`.
-- `02-source-item-ledger.md`: control file with `Recommended use`,
-  `Plan profile`, `File map and role`, clarification
-  gate status, `Initial evidence pass`, `Reading budget`, target, anti-scope,
-  owner, validator, stop conditions, and `Source item ledger`.
-- `03-execution.md`: first executable file.
-- `questions.md`: user-only decisions only. Write `- none` when nothing remains.
-- `04-implementation-contract.md` is required for every `extended` plan.
+- For debugging, drift, or data-mismatch work, produce a compact diagnosis
+  capsule before retained-plan authoring starts: symptom, target artifact,
+  compared sources or layers, cheapest falsifier, and stop rule. Keep it only
+  in chat or request context; do not create another retained file for it.
+- `01-change-summary.md`: compressed Italian decision capsule following
+  `Explicit Constraints`.
+- `02-execution.md` for `compact` must include these exact headings:
+  `Plan profile`, `Target and anti-scope` (with `### Target` and
+  `### Anti-scope`), `Owner and validator`, `Stop conditions`, `Objective`,
+  `Chosen logic`, `Key assumptions`, `Executable steps`, `Validation`, and
+  `Source item coverage`.
+- `02-execution.md` executable steps use numbered items with explicit labels:
+  `Target:`, `Acceptance:`, `Validation:`, and `Fallback:`.
+- `02-control.md` for `extended`: control file with `Recommended use`,
+  `Plan profile`, `File map and role`, clarification gate status,
+  `Initial evidence pass`, `Reading budget`, target, anti-scope, owner,
+  validator, stop conditions, and `Source item ledger`.
+- Preserve known-context handoff quality in `Initial evidence pass` and `Reading budget` so executors can avoid repeated broad rereads.
+- `03-execution.md`: first executable file for `extended`.
+- For `extended`, implementation-contract sections are merged into `02-control.md`
+  with these exact headings: `Sources`, `Candidate targets`,
+  `Validation commands`, `Blockers and fallback rules`, and `External pins`.
+- Apply a say-once rule: each control fact (target, owner, validator, blockers,
+  pins, and source-item coverage) is written once in the owning file, and step
+  files do not restate target/owner/validator.
+- Keep profile token weight explicit: `compact` stays within the 2,000-token
+  total budget with a compressed `01`; `extended` keeps control weight in
+  `02-control.md` and execution weight in numbered step files.
 - `done-*`, `evidence-envelope.md`, and `completion-report.md` are packaging
   artifacts only. Do not create them during authoring.
 
 ## Workflow
 
 1. Decide: retained plan or chat.
-2. For new plans, run bundle-local `init` first to create the scaffold.
-3. Choose folder name and write `01-change-summary.md` in Italian.
-4. Write `02-source-item-ledger.md` with profile and source-item coverage.
-5. Run the clarification gate when user decisions remain.
-6. For `extended`, write `04-implementation-contract.md`.
-7. Write executable numbered files in order.
-8. Create `questions.md` with `- none` or open user-only decisions.
-9. Run scope challenge and plan review gate for non-trivial plans.
-10. Run `audit` first, then run `handoff-check`; execute only when ready.
-11. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
+2. For debugging, drift, or data-mismatch work, write the diagnosis capsule
+   before `01-change-summary.md`.
+3. For new plans, run bundle-local `init` first to create the scaffold.
+4. Choose folder name and write the compressed `01-change-summary.md` in Italian.
+5. For `compact`, write `02-execution.md` with profile, control header, steps,
+  and source-item coverage.
+6. For `extended`, write `02-control.md` with profile, control facts, merged
+  implementation-contract sections, and source-item coverage.
+7. Run the clarification gate when user decisions remain.
+8. For `extended`, write executable numbered files in order starting with
+  `03-execution.md`.
+9. Keep each executable file scoped to its slice and validation path so executors can run targeted rereads.
+10. Fold open-user decisions into one summary line instead of a separate
+  `questions.md` file for `compact`.
+11. Run scope challenge and plan review gate for non-trivial plans.
+12. Run `audit` first, then run `handoff-check`; execute only when ready.
+13. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
 
 ## Validation
 
 - Plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
-- `01-change-summary.md` is Italian; other plan files are English.
-- `02-source-item-ledger.md` exists with profile and source-item coverage.
-- `04-implementation-contract.md` exists for every `extended` plan.
-- `questions.md` exists and stays separate from executable files.
+- `01-change-summary.md` is Italian, compressed, and contains only the required
+  decision-capsule sections.
+- `compact` uses `01-change-summary.md` + `02-execution.md` only.
+- `compact` stays under the 2,000 estimated-token total budget, or the warning
+  was resolved by compression or escalation.
+- `compact` `02-execution.md` uses the exact validator headings and step labels.
+- `extended` uses `01-change-summary.md`, `02-control.md`, and
+  `03-execution.md` plus optional higher-numbered slices.
+- The diagnosis capsule exists before authoring when debugging, drift, or
+  data-mismatch work is being retained, and it stays in chat/request context.
+- `extended` includes merged contract sections in `02-control.md`.
+- Step files do not restate target, owner, or validator.
 
 ## Common mistakes
 
 - Retaining a plan for work that should stay in chat.
+- Skipping the diagnosis capsule and turning an unproven mismatch into a
+  retained plan.
 - Using `compact` when execution actually needs an implementation contract.
 - Creating `done-*` markers during authoring.

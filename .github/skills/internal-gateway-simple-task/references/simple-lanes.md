@@ -11,6 +11,7 @@ lane or output shape still needs a quick decision.
 | `edit` | The target file and desired outcome are clear. | Load the smallest file-type, runtime, authoring, or domain owner proved by evidence. | Run the closest validator, test, lint, syntax check, or focused manual check. |
 | `diagnose` | A failure, bug, drift, or unexpected behavior is present. | Reproduce the loop first, then add runtime or domain support only if needed. | The original loop must pass after the fix, or the blocker must be explicit. |
 | `validate` | The main job is checking an existing artifact, command, or result. | Load the owner for the validation surface only when needed. | Report the exact check, result, and remaining gap. |
+| `plan` | The task is concrete but the user asks for a plan, or cost signals show that same-chat execution is less economical than a retained plan. | Load `internal-gateway-writing-plans` after `grill-me` and `internal-gateway-critical-master`. | The plan is written, validated against the writing contract, and the folder is ready for `internal-gateway-execute-plans`. |
 | `escalate` | The task becomes staged, review-owned, retained-plan-owned, critical-challenge owned, or exceeds `references/clarification-gate.md`. | Stop and name the next owner. | Provide boundary break, owner, scope, action, validation path, and risk. |
 
 ## Examples
@@ -26,6 +27,9 @@ lane or output shape still needs a quick decision.
   what was not validated if no command was run.
 - Ownership ambiguity: stop at `escalate` instead of converting uncertainty into
   hidden planning.
+- Plan mode: concrete task that is too large for same-chat execution or
+  explicitly requested as a plan; classify `plan-mode`, author a `compact` or
+  `extended` retained plan, and stop before execution.
 - Clarification overflow: use `escalate` when the simple clarification gate
   would need more than one focused `grill-me` block.
 
@@ -44,6 +48,22 @@ and any follow-up owner.
 
 For `escalate`, return the boundary break, next owner, scope, action, validation
 path, and risk.
+
+## Multi-Source Mismatch Procedure
+
+When the same symptom may come from multiple sources or transformation layers,
+use this lightweight procedure before patching:
+
+1. Name the target artifact or observed mismatch.
+2. List the candidate sources of truth and mark one authoritative only when
+   evidence already proves it.
+3. Map the transformation layers between source and target.
+4. Choose the cheapest check that can falsify one source or layer at a time.
+5. Stop expanding once one layer is proven wrong or source authority remains
+   unproven and needs escalation.
+
+Patch only the proven failing layer. Do not convert this generic procedure into
+domain-specific incident language.
 
 ## Diagnose Deterministic Failure Procedure
 

@@ -18,36 +18,36 @@ resume attempt stops.
 ## Verify-first Sequence
 
 1. Read `01-change-summary.md` first when present, then
-   `02-source-item-ledger.md`, and recover the intended folder purpose, `Recommended
-   use`, `File map and role`, `Initial evidence pass`, `Reading
-   budget`, source-item coverage, and whether `04-implementation-contract.md`
-   should exist.
+  `02-execution.md` (`compact`) or `02-control.md` (`extended`), and recover
+  the intended folder purpose, `Recommended use`, `File map and role`,
+  `Initial evidence pass`, `Reading budget`, source-item coverage, and whether
+  merged implementation-contract sections should exist.
 2. Run the shortest safe evidence pass before reading broadly: target existence, riskiest claim, and nearest validator or explicit gap.
 3. Use `rg --no-ignore` or equivalent ignored-file-aware search for retained artifacts under `tmp/`.
 4. List every `done-*` file in the retained plan folder.
 5. List every remaining executable numbered plan file, ignore `questions.md` as an
-   executable file, and treat `04-implementation-contract.md` as a support/control
-   file.
+  executable file, and treat `02-control.md` as a support/control
+  file for `extended` plans.
 6. Check whether each `done-*` file preserves the completed item and evidence,
    or points to an evidence envelope.
 7. Check whether the source-item ledger exists and whether every row has a
    credible status, evidence, and route.
-8. Read `04-implementation-contract.md` when present or required and compare it
-   with touched files, validators, blockers, and any external pins or fallback.
-9. Read `questions.md` only for accepted decisions that affect execution.
-10. Check `git status` and `git diff` for uncommitted evidence of completed work.
-11. Re-run the validators declared by the plan, or name the closest available
+8. Read merged implementation-contract sections in `02-control.md` when present
+  or required and compare them with touched files, validators, blockers, and
+  any external pins or fallback.
+9. Check `git status` and `git diff` for uncommitted evidence of completed work.
+10. Re-run the validators declared by the plan, or name the closest available
     validator and the gap.
-12. If `completion-report.md` exists, read its `State`, `Continuation`, and
+11. If `completion-report.md` exists, read its `State`, `Continuation`, and
     `User action required` fields before assuming the folder is closed or ready
     to continue.
-13. Produce a status report before editing canonical files.
+12. Produce a status report before editing canonical files.
 
 ## Status Report Template
 
 ```text
 Resume status
-Summary control file: <present and usable, missing, or stale>
+Summary control file: <02-execution.md or 02-control.md present and usable, missing, or stale>
 Source-item ledger: <complete, incomplete, missing, or stale>
 Evidence pass: <declared pass, fallback pass, or gap>
 Completion state: <state from completion-report.md, or not yet reported>
@@ -63,10 +63,14 @@ Next action: <lowest-numbered safe step>
 
 - If a `done-*` file exists but the target diff, file, or validator evidence is
   absent, mark the item `UNVERIFIABLE` and reopen the evidence question.
-- If `01-change-summary.md` or `02-source-item-ledger.md` is missing or stale
-  enough that file roles and source coverage cannot be inferred safely, stop and
-  reopen the plan-handoff gap before execution resumes.
-- If `04-implementation-contract.md` is required but missing or too weak to recover exact sources, target files, validators, blockers, or required external pins, stop and reopen the plan-handoff gap before execution resumes.
+- If `01-change-summary.md` or required control files (`02-execution.md` for
+  `compact`, `02-control.md` for `extended`) are missing or stale enough that
+  file roles and source coverage cannot be inferred safely, stop and reopen the
+  plan-handoff gap before execution resumes.
+- If merged implementation-contract sections are required but missing or too
+  weak to recover exact sources, target files, validators, blockers, or
+  required external pins, stop and reopen the plan-handoff gap before execution
+  resumes.
 - If `Initial evidence pass`, `Reading budget`, or source-item coverage is
   missing, reconstruct the minimum pass from reachable evidence before broad
   reading, or mark the resume state `UNVERIFIABLE`.

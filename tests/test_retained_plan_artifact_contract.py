@@ -210,12 +210,12 @@ def write_lightweight_completed_plan_folder(root: Path) -> Path:
         "# Summary\n",
         encoding="utf-8",
     )
-    (plan_folder / "02-source-item-ledger.md").write_text(
-        "## Plan profile\ncompact\n",
-        encoding="utf-8",
-    )
-    (plan_folder / "03-execution.md").write_text(
-        "# Execution\n",
+    (plan_folder / "02-execution.md").write_text(
+        "## Plan profile\ncompact\n\n"
+        "## Source item coverage\n"
+        "| ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| PLAN-01 | Lightweight completion marker | DONE marker present | file | DONE-plan-state.md | DONE | `none` |\n",
         encoding="utf-8",
     )
     (plan_folder / "DONE-plan-state.md").write_text(

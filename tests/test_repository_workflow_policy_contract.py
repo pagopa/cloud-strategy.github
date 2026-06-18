@@ -73,6 +73,34 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     )
 
 
+def test_agents_external_tool_routing_block_is_legitimized_and_source_local() -> None:
+    agents_text = read_text("AGENTS.md")
+
+    assert (
+        "An external tool that reads this file may require a clearly delimited, "
+        "trailing routing block carrying the minimal commands it needs to consume "
+        "the repository; keep any such block source-local, outside the governed "
+        "policy blocks, and limited to that tool's required invocation anchors."
+        in agents_text
+    )
+
+    assert "## graphify" in agents_text
+
+    local_rules_close_index = agents_text.index("`</standards-repository-local-rules>`")
+    graphify_index = agents_text.index("## graphify")
+    assert graphify_index > local_rules_close_index
+
+
+def test_agents_tactical_defaults_include_compact_context_discipline() -> None:
+    agents_text = read_text("AGENTS.md")
+
+    assert "## Tactical Defaults" in agents_text
+    assert "Preserve compact working state across turns" in agents_text
+    assert "Keep one active primary owner per execution lane" in agents_text
+    assert "Use bounded evidence" in agents_text
+    assert "Name the validation path early" in agents_text
+
+
 def test_lightweight_skill_references_stay_on_demand() -> None:
     checklist_text = read_text(
         ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
@@ -198,3 +226,58 @@ def test_recent_lessons_are_codified_in_skill_owners() -> None:
         in github_actions_skill_text
     )
     assert "even on `--dry-run` paths" in github_actions_skill_text
+
+
+def test_technology_skill_modularity_contract_is_owned_and_searchable() -> None:
+    python_skill_text = read_text(".github/skills/internal-python/SKILL.md").lower()
+    python_script_skill_text = read_text(
+        ".github/skills/internal-python-script/SKILL.md"
+    ).lower()
+    python_project_skill_text = read_text(
+        ".github/skills/internal-python-project/SKILL.md"
+    ).lower()
+    bash_skill_text = read_text(".github/skills/internal-bash/SKILL.md").lower()
+    bash_script_skill_text = read_text(
+        ".github/skills/internal-bash-script/SKILL.md"
+    ).lower()
+    node_skill_text = read_text(".github/skills/internal-nodejs/SKILL.md").lower()
+    node_project_skill_text = read_text(
+        ".github/skills/internal-nodejs-project/SKILL.md"
+    ).lower()
+    java_skill_text = read_text(".github/skills/internal-java/SKILL.md").lower()
+    java_project_skill_text = read_text(
+        ".github/skills/internal-java-project/SKILL.md"
+    ).lower()
+
+    base_skill_texts = (
+        python_skill_text,
+        bash_skill_text,
+        node_skill_text,
+        java_skill_text,
+    )
+
+    for body in base_skill_texts:
+        assert "300" in body
+        assert "400" in body
+        assert "split-or-justify" in body
+        assert "dry" in body
+
+    assert "entrypoint" in python_script_skill_text
+    assert "utils/" in python_script_skill_text
+    assert "single-file" in python_script_skill_text
+    assert "toolkit" in python_script_skill_text
+    assert "project" in python_script_skill_text
+    assert "generated" in python_script_skill_text
+    assert "fixture" in python_script_skill_text
+
+    assert "entrypoint" in bash_script_skill_text
+    assert "sourced helper" in bash_script_skill_text
+
+    assert "thin" in node_project_skill_text
+    assert "async boundaries" in node_project_skill_text
+
+    assert "thin" in java_project_skill_text
+    assert "god class" in java_project_skill_text
+    assert "dto" in java_project_skill_text
+
+    assert "domain/service/adapter" in python_project_skill_text

@@ -30,16 +30,6 @@ rows:
     evidence:
       - https://code.visualstudio.com/docs/copilot/customization/agent-skills
     notes: GitHub Copilot supports Agent Skills standard via ~/.agents/skills/.
-  - target: claude
-    resource_family: skills
-    support_level: Documented
-    home_path: ~/.agents/skills/<skill>/
-    direct_copy_possible: true
-    translation_required: false
-    include_in_v1: true
-    evidence:
-      - https://docs.anthropic.com/en/docs/claude-code/skills
-    notes: Claude Code supports Agent Skills standard via ~/.agents/skills/ (compatibility path).
   - target: opencode
     resource_family: skills
     support_level: Documented
@@ -70,16 +60,6 @@ rows:
     evidence:
       - https://code.visualstudio.com/docs/copilot/customization/custom-agents
     notes: Direct copy of .agent.md files.
-  - target: claude
-    resource_family: agents
-    support_level: Documented
-    home_path: ~/.claude/agents/
-    direct_copy_possible: false
-    translation_required: true
-    include_in_v1: true
-    evidence:
-      - https://docs.anthropic.com/en/docs/claude-code/sub-agents
-    notes: Requires frontmatter translation (tools CSV, handoffs to body).
   - target: opencode
     resource_family: agents
     support_level: Documented

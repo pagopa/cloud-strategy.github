@@ -9,6 +9,8 @@ Load this reference when the skill body directs field-selection rules or adaptiv
 - Redact secrets, credentials, tokens, keys, and sensitive values with `[REDACTED]`.
 - Cite file paths, command output, or validation evidence when available.
 - Declare evidence gaps explicitly instead of guessing.
+- For long, polluted, or contradictory context, prefer checked sources and
+  state deltas over transcript recap.
 
 ## Compact (default)
 
@@ -29,18 +31,25 @@ Use for single-step discussions, simple questions, or when the next agent needs 
 
 Use for multi-step technical work, repository tasks, or when evidence gaps matter.
 
-Add these fields after `Key decisions` and before `Anti-scope`:
+Add these fields after `Key decisions` and before `Anti-scope` when they
+materially reduce restart cost:
 
 ```markdown
+**Primary source to trust first:** [authoritative artifact, file, command, or "Not established."]
+**Checked sources:** [files, commands, branches, logs, or "None inspected."]
+**Delta since last stable state:** [what changed since the last reliable checkpoint, or "None."]
 **Evidence:**
   - [validations run, command output, or "None available."]
   - Git: [branch, status summary, or "Not inspected."]
 **Unfinished work:** [bulleted list or "None."]
 **Validation path:** [remaining checks, commands, or "Not yet defined."]
+**Next check:** [first file, command, or question the next agent should use]
 **Risks:** [active risks or "None identified."]
 ```
 
-`Compact` fields remain. `Evidence`, `Unfinished work`, `Validation path`, and `Risks` are additions.
+`Compact` fields remain. `Primary source to trust first`, `Checked sources`,
+`Delta since last stable state`, `Evidence`, `Unfinished work`,
+`Validation path`, `Next check`, and `Risks` are additions.
 
 ## Deep
 

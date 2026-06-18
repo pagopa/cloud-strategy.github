@@ -19,9 +19,9 @@ and the completion attempt stops.
 
 `compact` and `extended` execution both use `internal-gateway-execute-plans`.
 `compact` closeout still stays lightweight and must not require an
-`04-implementation-contract.md`.
+standalone implementation-contract file.
 
-When packaged folders no longer include `02-source-item-ledger.md`, the
+When packaged folders no longer include `02-control.md`, the
 completion report should include `Plan profile: compact` or
 `Plan profile: extended` so profile validation remains deterministic.
 
@@ -83,10 +83,11 @@ When the state is not `DONE`, the report must also declare:
 ## Evidence Envelope
 
 For non-trivial retained plans, include or link an evidence envelope. The
-envelope must map each `02-source-item-ledger.md` row, retained-plan item, or
+envelope must map each `02-control.md` row (or `02-execution.md` row for
+`compact`), retained-plan item, or
 reconstructed `done-*` item to a status, evidence path or command, and route.
 
-Before assigning `DONE`, compare promised work with observed delivery. Use the source-item ledger, current diff, touched files, validators, and explicit non-actions. When `04-implementation-contract.md` is required, compare it with the touched files, validators, blocker handling, and any required external pin or fallback. Report any gap under `Evidence gaps` or `Residual risks`. A summary that says an item was done is not evidence.
+Before assigning `DONE`, compare promised work with observed delivery. Use the source-item ledger, current diff, touched files, validators, and explicit non-actions. When merged implementation-contract sections in `02-control.md` are required, compare them with the touched files, validators, blocker handling, and any required external pin or fallback. Report any gap under `Evidence gaps` or `Residual risks`. A summary that says an item was done is not evidence.
 
 Do not churn the evidence envelope after every local slice when the validator output is still moving. Refresh it when the retained-plan state is coherent enough to support the reported completion state.
 

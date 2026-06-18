@@ -11,10 +11,10 @@ CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*" "\#.claude/commands/agent-os/**"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint critical-validate all
 
 help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
+	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint critical-validate all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -63,6 +63,9 @@ token-risks: scripts-bootstrap
 
 skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
+
+critical-validate: scripts-bootstrap
+	@$(SCRIPTS_RUNNER) validate_critical_output --file tests/fixtures/critical_output_good.md
 
 docs-lint:
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \

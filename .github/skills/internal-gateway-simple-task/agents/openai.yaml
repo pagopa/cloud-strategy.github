@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Gateway Simple Task"
   short_description: "Fast path for concrete repository tasks"
-  default_prompt: "Use $internal-gateway-simple-task for a concrete coding or non-coding task that needs quick support-skill selection, execution, diagnosis, or validation. Route approved retained-plan execution to internal-gateway-execute-plans."
+  default_prompt: "Use $internal-gateway-simple-task for a concrete coding or non-coding task that needs quick support-skill selection, execution, diagnosis, validation, or plan authoring. Switch to plan mode when the user asks for a plan or when same-chat execution would be less economical than a retained plan, producing a compact or extended retained plan instead of executing. Route approved retained-plan execution to internal-gateway-execute-plans."

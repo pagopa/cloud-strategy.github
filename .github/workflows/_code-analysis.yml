@@ -49,6 +49,7 @@ jobs:
           cache-dependency-path: |
             .python-version
             .github/scripts/requirements.txt
+            tools/analyze_copilot_debug_log/requirements.txt
 
       - name: 🔎 Show Python version
         run: |
@@ -65,8 +66,9 @@ jobs:
 
       - name: 🔥 Smoke test Python entry points
         run: |
-          ./.github/scripts/run.sh analyze_copilot_prompt_exports --help
-          ./.github/scripts/run.sh analyze_copilot_debug_logs --help
+          bash tools/analyze_copilot_debug_log/run.sh prompt-exports --help
+          bash tools/analyze_copilot_debug_log/run.sh debug-logs --help
+          ./.github/scripts/run.sh analyze_copilot_debug_log --help
           ./.github/scripts/run.sh benchmark_skill_tokens --help
           "${TEST_VENV}/bin/python" ".github/scripts/build_inventory.py" --help
           "${TEST_VENV}/bin/python" ".github/scripts/check_catalog_consistency.py" --help
@@ -80,6 +82,7 @@ jobs:
         run: |
           ./.github/scripts/run.sh --help || true
           bash -n .github/scripts/run.sh
+          bash -n tools/analyze_copilot_debug_log/run.sh
           bash -n .github/scripts/build_inventory.sh
           bash -n .github/scripts/check_catalog_consistency.sh
           bash -n .github/scripts/audit_copilot_catalog.sh

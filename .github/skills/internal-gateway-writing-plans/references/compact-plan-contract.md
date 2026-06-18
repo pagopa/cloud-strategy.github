@@ -10,7 +10,7 @@ contract. All other plan content uses English.
 
 ## Profile Declaration
 
-Declare the profile in `02-source-item-ledger.md`:
+Declare the profile in `02-execution.md`:
 
 ```text
 Plan profile: compact
@@ -24,10 +24,8 @@ content. Folders without a declared `Plan profile` return
 
 | File | Role | Mandatory |
 | --- | --- | --- |
-| `01-change-summary.md` | Italian human-readable decision summary. Non-executable. | Yes |
-| `02-source-item-ledger.md` | Control file with `Recommended use`, `Plan profile`, `File map and role`, clarification gate, evidence pass, budget, target, anti-scope, owner, validator, stop conditions, source-item ledger table. | Yes |
-| `03-execution.md` | First and only executable file. Uses the executable numbered-file shape: `Objective`, `Chosen logic`, `Key assumptions`, `Executable steps`, `Validation`. | Yes |
-| `questions.md` | User-only decisions. Write `- none` when nothing remains. | Yes |
+| `01-change-summary.md` | Compressed Italian decision capsule. Non-executable. | Yes |
+| `02-execution.md` | Merged control and execution file. Must contain profile and control header, executable numbered steps, and inline source-item coverage. | Yes |
 | `done-*`, `evidence-envelope.md`, `completion-report.md` | Final packaging artifacts created after execution, not during authoring. | No (authoring) |
 
 ## Compact Read Order
@@ -35,12 +33,7 @@ content. Folders without a declared `Plan profile` return
 Mandatory first reads:
 
 1. `01-change-summary.md`
-2. `02-source-item-ledger.md`
-3. `03-execution.md`
-
-Optional reads:
-
-- `questions.md` only to confirm `- none` before execution handoff.
+2. `02-execution.md`
 
 Excluded reads:
 
@@ -56,25 +49,30 @@ Escalate from `compact` to `extended` when any of these is true:
 
 - The plan spans multiple owners or skill families.
 - The executor is low-context and needs exact sources, target files, validators,
-  blockers, or external pins that only `04-implementation-contract.md` can provide.
+  blockers, or external pins that only `02-control.md` can provide.
 - The validation path includes cross-family checks, external pins, or fallback rules.
 - Hidden assumptions about file shape, naming, or repository conventions would
   force the executor to rediscover them.
 
-When escalating, add `04-implementation-contract.md` and additional numbered files
-by category (`05-...`). Update `Plan profile` to `extended`.
+When escalating, add `02-control.md` and additional numbered files
+starting at `03-execution.md`. Update `Plan profile` to `extended`.
 
 ## Lifecycle States
 
 - `scaffold`: created by `init`; not ready for execution.
-- `ready`: `handoff-check` ready and `questions.md` is `- none`.
+- `ready`: `handoff-check` ready.
 - `closed`: execution and packaging handled by the approved consumer.
 
 ## Compact Token Expectations
 
-- Keep total estimated tokens small enough for a small/fast executor handoff.
-- Keep `03-execution.md` concise and concrete; long procedural detail is an
-  escalation signal to `extended`.
+- Keep total plan Markdown under 2,000 estimated tokens, measured as
+  `ceil(UTF-8 bytes / 4)`.
+- Keep `01-change-summary.md` under 300 estimated tokens.
+- Keep `02-execution.md` under 1,500 estimated tokens.
+- Warnings from the bundle-local CLI are review inputs that require compression
+  or escalation before handoff.
+- Long procedural detail in `01-change-summary.md` is a defect. Long procedural
+  detail in `02-execution.md` is an escalation signal to `extended`.
 
 ## Template: 01-change-summary.md (Italian)
 
@@ -83,30 +81,29 @@ Required sections in Italian:
 - `Problema da risolvere` — concrete problem statement.
 - `Risultato atteso` — expected outcome, short bullet list.
 - `Risorse coinvolte` — table with columns `Risorsa | Azione | Scopo`. Required
-  for non-trivial plans. Each row names the resource, the action, and its purpose.
-- `Comportamento scelto` — chosen behavior and boundary rules.
-- `Validazione prevista` — validation path.
-- `Esecuzione prevista` — route visibility, including profile, folder prefix,
-  execution file, and any execution-strategy hints the executor should infer.
+  for non-trivial plans. Use one row per materially changed resource group, not
+  one row per file when that would duplicate the control file.
 - `Decisione richiesta` — decision request.
+- `Decisioni aperte` — one line (`none` when there are no blockers).
 
-## Template: 03-execution.md
+Do not put chosen logic, validation detail, execution route notes, source-item
+coverage, blockers, or implementation-contract detail in `01-change-summary.md`.
+Those facts belong in `02-execution.md`.
+
+## Template: 02-execution.md
 
 Required sections:
 
+- `Plan profile` — `compact`.
+- `Target and anti-scope` — smallest target and explicit exclusions.
+- `Owner and validator` — primary owner, lane-change owner, and validation path.
+- `Stop conditions` — blockers that must stop execution.
 - `Objective` — concrete goal.
 - `Chosen logic` — why this approach.
 - `Key assumptions` — key assumptions.
 - `Executable steps` — numbered steps with observable acceptance per step.
 - `Validation` — validation commands or checks.
-
-## Template: questions.md
-
-```text
-# Questions
-
-- none
-```
+- `Source item coverage` — compact table with item id, acceptance, evidence, and status.
 
 ## Ledger Row Template
 

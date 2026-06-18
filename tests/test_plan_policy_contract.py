@@ -13,7 +13,7 @@ def test_root_policy_files_keep_retained_plan_defaults_outside_always_on_detail(
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
     assert "tmp/superpowers/" in agents_text
-    assert "internal-gateway-writing-plans" in agents_text
+    assert "retained-plan" in agents_text
     assert "tmp/superpowers/" not in copilot_text
 
 
@@ -26,7 +26,8 @@ def test_writing_plans_declares_profile_only_handoff_contract() -> None:
     assert "internal-gateway-simple-task" in writing_text
     assert "internal-gateway-execute-plans" in writing_text
     assert "mini-plan-*" in compact_reference
-    assert "Esecuzione prevista" in compact_reference
+    assert "Decisioni aperte" in compact_reference
+    assert "2,000 estimated tokens" in compact_reference
 
 
 def test_executing_plans_accepts_compact_and_extended_consumers() -> None:
@@ -40,6 +41,8 @@ def test_executing_plans_accepts_compact_and_extended_consumers() -> None:
     )
     assert "mandatory requirements that are applicable" in executing_text
     assert "Block item closure and block `SHIPPED`" in executing_text
+    assert "Establish execution state" in executing_text
+    assert "Avoid repeated full rereads" in executing_text
 
 
 def test_gateway_handoff_references_use_canonical_execution_owner() -> None:
@@ -77,3 +80,27 @@ def test_wrapper_prompts_respect_compact_and_extended_consumers() -> None:
         "approved compact mini-plan-* plans and approved extended plans"
         in execute_wrapper
     )
+
+
+def test_new_retained_plan_file_model_is_declared() -> None:
+    writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
+    compact_reference = read_text(
+        ".github/skills/internal-gateway-writing-plans/references/compact-plan-contract.md"
+    )
+    execute_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
+
+    assert "02-execution.md" in writing_text
+    assert "02-control.md" in writing_text
+    assert "merged into `02-control.md`" in writing_text
+    assert "02-execution.md" in compact_reference
+    assert "02-control.md" in execute_text
+
+
+def test_gateway_skills_preserve_compact_context_discipline() -> None:
+    simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
+
+    assert "Preserve compact working state" in simple_text
+    assert "Escalation trigger" in simple_text
+    assert "Preserve known-context handoff quality" in writing_text
+    assert "run targeted rereads" in writing_text

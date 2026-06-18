@@ -29,6 +29,9 @@ safety to standalone script behavior.
 
 - Prefer `#!/usr/bin/env bash` for repository-owned Bash scripts.
 - Use `set -euo pipefail` unless the script has a documented compatibility reason.
+- Treat 300 lines as a review threshold for cohesive shell files.
+- Treat 400 lines as a split-or-justify threshold and extract sourced helpers when repeated decisions or branches degrade readability.
+- Apply pragmatic DRY: de-duplicate repeated decision paths, but keep one-off logic local when extraction harms auditability.
 - Quote variable expansions and use arrays for dynamic commands.
 - Prefer `[[ ]]`, `local`, and readable guard clauses when Bash is available.
 - Use `mktemp` plus cleanup traps for temporary state.

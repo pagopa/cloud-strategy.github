@@ -4,7 +4,7 @@ Use this reference when `internal-gateway-idea-brainstorming` needs the exact pa
 
 ## Pacing Rules
 
-1. If the request is already concrete (file edit, command run, validator run, or direct implementation), emit `Specialization Checkpoint: waiting`, ask whether the user is sure to keep this owner, explain why a specialized owner is safer, and recommend the next owner before continuing.
+1. If the request is already concrete (file edit, command run, validator run, or direct implementation), emit `Specialization Checkpoint: gated`, explain that this owner cannot decide task ownership or execute yet, name the recommended specialized owner for later, and continue with the bounded evidence pass plus mandatory Idea Gate 0.
 1. Run a bounded evidence pass before asking the user. Use the smallest risk-ordered repository evidence first (files, paths, commands, and existing decisions).
 1. When authoritative platform semantics control the decision, verify them early inside the bounded evidence pass.
 1. Maintain a compact decision ledger ordered by dependency. Resolve prerequisite branches before dependent branches.
@@ -19,7 +19,7 @@ Use this reference when `internal-gateway-idea-brainstorming` needs the exact pa
 1. After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, summarize the compact decision ledger and declare `Interview Gate 1: ready-for-critical` only when assumptions/defaults are accepted, no ledger contradictions remain, and the validation path is identified.
 1. At `Interview Gate 1: ready-for-critical`, ask whether to continue to critical before loading `internal-gateway-critical-master`.
 1. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview Gate 1: reopen`.
-1. After `Critical Gate 2: confident`, declare `Plan Approval Gate 3: waiting` and ask for explicit `go`/`ok`/`procedi` or equivalent approval before loading `internal-gateway-writing-plans`.
+1. After `Critical Gate 2: confident`, ask whether the user wants this owner to keep the task. Only if the user says yes, declare `Plan Approval Gate 3: waiting` and ask for explicit `go`/`ok`/`procedi` or equivalent approval before loading `internal-gateway-writing-plans`.
 1. Only after explicit approval, declare `Plan Approval Gate 3: approved`, create the retained plan, then declare `Handoff Gate 4: plan-created`.
 1. Treat `Continuation: waiting` as a handoff lock after `Handoff Gate 4: plan-created`; proposals, alternatives, or wording preferences do not clear the lock without explicit owner/action/scope approval.
 
@@ -41,14 +41,14 @@ Each row in the decision ledger:
 
 | State | Meaning | When to declare |
 | --- | --- | --- |
-| `Specialization Checkpoint: waiting` | The incoming ask is concrete and must confirm this non-specialized owner before proceeding. | Before Idea Gate 0 when the user asks for direct execution-oriented work. |
+| `Specialization Checkpoint: gated` | The incoming ask is concrete, but this owner may not decide ownership or execute until `grill-me` and critical both pass. | Before Idea Gate 0 when the user asks for direct execution-oriented work. |
 | `Idea Gate 0: grill-me required` | Mandatory human confirmation loop is open. | After the evidence pass and before convergence, simple-task recommendation, planning recommendation, or handoff. |
 | `Idea Gate 0: grill-me satisfied` | User answered or explicitly accepted defaults for the current request, scope, context, and evidence. | Before convergence or any simple-task/planning recommendation. |
 | `Interview Gate 1: ready-for-critical` | All material branches resolved; waiting for critical challenge. | After decision-ledger summary and before loading `internal-gateway-critical-master`. |
 | `Interview Gate 1: reopen` | Critical pass or realignment reopened one or more branches. | When resuming affected branches after `reopen`. |
-| `Critical Gate 2: confident` | Critical challenge found the Definition Brief fit for handoff. | Before recommending the next owner. |
+| `Critical Gate 2: confident` | Critical challenge found the Definition Brief fit for handoff and unlocked the owner-choice question. | Before asking whether this owner should keep the task. |
 | `Critical Gate 2: reopen` | Critical challenge found material issues. | Before returning to affected branches in `discover`. |
-| `Plan Approval Gate 3: waiting` | Critical is confident but planning approval is pending. | Immediately after `Critical Gate 2: confident` and before loading `internal-gateway-writing-plans`. |
+| `Plan Approval Gate 3: waiting` | Critical is confident, the user kept this owner, and planning approval is pending. | Immediately after `Critical Gate 2: confident` and after the user keeps this owner. |
 | `Plan Approval Gate 3: approved` | Explicit plan approval was received. | After explicit `go`/`ok`/`procedi` or equivalent approval. |
 | `Handoff Gate 4: plan-created` | Retained plan was created and execution is blocked. | After plan creation with `Continuation: waiting` and stop-before-execution behavior. |
 
@@ -61,7 +61,7 @@ Each row in the decision ledger:
 
 ## Proportional Depth
 
-- Concrete direct asks must pass `Specialization Checkpoint: waiting` first unless the user explicitly confirms they still want this owner.
+- Concrete direct asks must pass `Specialization Checkpoint: gated` first. User insistence does not bypass Idea Gate 0 or Critical Gate 2.
 - Simple recoverable cases may close after a small number of questions, but they still require Idea Gate 0.
 - Unresolved dependent branches continue in focused numbered follow-up blocks.
 - Ask the initial numbered question block immediately after the evidence pass.
@@ -74,4 +74,5 @@ Each row in the decision ledger:
 - Inherit `grill-me`'s numbered initial question block and default-acceptance behavior.
 - Declare the caller-owned override for iterative numbered follow-up blocks when using `grill-me` for branch discovery.
 - Keep the interview iterative by asking focused follow-up blocks when later branches remain.
+- Do not let a concrete-task request or owner preference bypass the `grill-me` boundary.
 - Do not skip `grill-me` just because files, docs, or local evidence appear sufficient. Use evidence to reduce the questions, then ask the human to confirm the recovered direction.

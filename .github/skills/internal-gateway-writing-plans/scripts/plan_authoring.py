@@ -14,13 +14,16 @@ import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 
-COMPACT_REQUIRED_FILES = frozenset(
-    {"01-change-summary.md", "02-source-item-ledger.md", "03-execution.md", "questions.md"}
+COMPACT_REQUIRED_FILES = frozenset({"01-change-summary.md", "02-execution.md"})
+EXTENDED_REQUIRED_FILES = frozenset(
+    {"01-change-summary.md", "02-control.md", "03-execution.md"}
 )
-EXTENDED_REQUIRED_FILES = COMPACT_REQUIRED_FILES | {"04-implementation-contract.md"}
 SUPPORTED_PROFILES = frozenset({"compact", "extended"})
 COMPACT_FOLDER_PREFIX = "mini-plan-"
-LEDGER_REQUIRED_FIELDS = (
+COMPACT_TOTAL_TOKEN_TARGET = 2000
+COMPACT_SUMMARY_TOKEN_TARGET = 300
+COMPACT_EXECUTION_TOKEN_TARGET = 1500
+CONTROL_REQUIRED_FIELDS = (
     "Recommended use",
     "File map and role",
     "Clarification gate",
@@ -35,17 +38,14 @@ ITALIAN_SUMMARY_SECTIONS = (
     "Problema da risolvere",
     "Risultato atteso",
     "Risorse coinvolte",
-    "Comportamento scelto",
-    "Validazione prevista",
-    "Esecuzione prevista",
     "Decisione richiesta",
+    "Decisioni aperte",
 )
 RESOURCE_TABLE_HEADER_RE = re.compile(r"\|?\s*Risorsa\s*\|\s*Azione\s*\|\s*Scopo\s*\|?")
 PLACEHOLDER_RE = re.compile(r"\b(?:x|tbd|todo|placeholder)\b", re.IGNORECASE)
-HEADING_RE = re.compile(r"^(#{2,3})\s+(.+?)\s*$", re.MULTILINE)
 EXECUTABLE_STEP_RE = re.compile(r"^\d+\.\s+(.+)$", re.MULTILINE)
 GENERIC_TMP_NAMES = frozenset({"plan", "tmp", "test", "misc", "notes", "draft", "new-plan"})
-EXTENDED_CONTRACT_SECTIONS = (
+MERGED_CONTRACT_SECTIONS = (
     "Sources",
     "Candidate targets",
     "Validation commands",
@@ -63,196 +63,31 @@ class Finding:
 
 
 def classify_profile(plan_folder: Path) -> str:
-    ledger_path = plan_folder / "02-source-item-ledger.md"
-    if not ledger_path.is_file():
-        return "unsupported"
-    text = ledger_path.read_text(encoding="utf-8")
-    for profile in SUPPORTED_PROFILES:
-        if re.search(rf"Plan profile[:\s]+{profile}", text):
-            return profile
+    compact_path = plan_folder / "02-execution.md"
+    control_path = plan_folder / "02-control.md"
+
+    if compact_path.is_file():
+        text = compact_path.read_text(encoding="utf-8")
+        if re.search(r"Plan profile[:\s]+compact", text):
+            return "compact"
+
+    if control_path.is_file():
+        text = control_path.read_text(encoding="utf-8")
+        if re.search(r"Plan profile[:\s]+extended", text):
+            return "extended"
+
     return "unsupported"
-
-
-def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
-    if plan_folder.exists():
-        print(f"ERROR: {plan_folder} already exists", file=sys.stderr)
-        return 1
-
-    folder_findings = _validate_folder_name(plan_folder, profile)
-    if folder_findings:
-        print(f"ERROR: {folder_findings[0].message}", file=sys.stderr)
-        return 1
-
-    plan_folder.mkdir(parents=True)
-    (plan_folder / "01-change-summary.md").write_text(
-        textwrap.dedent(
-            """\
-            # Sintesi delle modifiche
-
-            ## Problema da risolvere
-
-            TODO
-
-            ## Risultato atteso
-
-            TODO
-
-            ## Risorse coinvolte
-
-            | Risorsa | Azione | Scopo |
-            | --- | --- | --- |
-            | TBD | TBD | TBD |
-
-            ## Comportamento scelto
-
-            TODO
-
-            ## Validazione prevista
-
-            TODO
-
-            ## Esecuzione prevista
-
-            TODO
-
-            ## Decisione richiesta
-
-            TODO
-            """
-        ),
-        encoding="utf-8",
-    )
-    (plan_folder / "02-source-item-ledger.md").write_text(
-        textwrap.dedent(
-            f"""\
-            # Source Item Ledger
-
-            ## Recommended use
-
-            execute after explicit approval
-
-            ## Plan profile
-
-            {profile}
-
-            ## File map and role
-
-            | File | Role |
-            | --- | --- |
-            | `01-change-summary.md` | Italian decision summary; non-executable |
-            | `02-source-item-ledger.md` | Authoritative coverage, route, evidence, and stop-condition control |
-            | `03-execution.md` | Executable steps |
-            | `questions.md` | User-only decisions; excluded from execution |
-
-            ## Clarification gate
-
-            clarification required
-
-            ## Initial evidence pass
-
-            TODO
-
-            ## Reading budget
-
-            TODO
-
-            ## Target and anti-scope
-
-            ### Target
-
-            TODO
-
-            ### Anti-scope
-
-            TODO
-
-            ## Owner and validator
-
-            TODO
-
-            ## Stop conditions
-
-            TODO
-
-            ## Source item ledger
-
-            | ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |
-            | --- | --- | --- | --- | --- | --- | --- |
-            | TBD-01 | TODO | TODO | repository | TODO | PENDING | `03-execution.md` |
-            """
-        ),
-        encoding="utf-8",
-    )
-    (plan_folder / "03-execution.md").write_text(
-        textwrap.dedent(
-            """\
-            # Execution
-
-            ## Objective
-
-            TODO
-
-            ## Chosen logic
-
-            TODO
-
-            ## Key assumptions
-
-            TODO
-
-            ## Executable steps
-
-            1. Define the first executable step.
-               Target: TODO
-               Acceptance: TODO
-               Validation: TODO
-               Fallback: TODO
-
-            ## Validation
-
-            TODO
-            """
-        ),
-        encoding="utf-8",
-    )
-    if profile == "extended":
-        (plan_folder / "04-implementation-contract.md").write_text(
-            textwrap.dedent(
-                """\
-                # Implementation Contract
-
-                ## Sources
-
-                TODO
-
-                ## Candidate targets
-
-                TODO
-
-                ## Validation commands
-
-                TODO
-
-                ## Blockers and fallback rules
-
-                TODO
-
-                ## External pins
-
-                no external evidence
-                """
-            ),
-            encoding="utf-8",
-        )
-    (plan_folder / "questions.md").write_text("# Questions\n\n- none\n", encoding="utf-8")
-    print(f"Created plan folder: {plan_folder}")
-    return 0
 
 
 def _check_unsupported(plan_folder: Path) -> tuple[str | None, list[Finding]]:
     profile = classify_profile(plan_folder)
     if profile == "unsupported":
-        return None, [Finding("unsupported-plan-contract", f"Plan folder {plan_folder} has no supported Plan profile (compact or extended)")]
+        return None, [
+            Finding(
+                "unsupported-plan-contract",
+                f"Plan folder {plan_folder} has no supported Plan profile (compact or extended)",
+            )
+        ]
     return profile, []
 
 
@@ -264,7 +99,6 @@ def _normalize_text(text: str) -> str:
 
 
 def _split_ledger_row(row: str) -> list[str]:
-    # Split only on markdown cell delimiters (space-pipe-space), not inline pipes.
     stripped = row.strip().strip("|").strip()
     return [cell.strip() for cell in re.split(r"\s+\|\s+", stripped)]
 
@@ -284,15 +118,6 @@ def _is_placeholder(text: str) -> bool:
 def _section_body(text: str, heading: str) -> str:
     pattern = re.compile(
         rf"^##\s+{re.escape(heading)}\s*$([\s\S]*?)(?=^##\s+|\Z)",
-        re.MULTILINE,
-    )
-    match = pattern.search(text)
-    return match.group(1).strip() if match else ""
-
-
-def _subsection_body(text: str, heading: str) -> str:
-    pattern = re.compile(
-        rf"^###\s+{re.escape(heading)}\s*$([\s\S]*?)(?=^###\s+|^##\s+|\Z)",
         re.MULTILINE,
     )
     match = pattern.search(text)
@@ -323,10 +148,20 @@ def _validate_folder_name(plan_folder: Path, profile: str) -> list[Finding]:
             )
         ]
     if folder_name in GENERIC_TMP_NAMES:
-            cells = _split_ledger_row(row)
+        return [
+            Finding(
+                "unclear-temp-directory-name",
+                f"Temporary plan folder name must communicate action or context: {plan_folder.name}",
+            )
+        ]
     tokens = [token for token in re.split(r"[-_]+", folder_name) if token]
     if len(tokens) < 2:
-        return [Finding("unclear-temp-directory-name", f"Temporary plan folder name must communicate action or context: {plan_folder.name}")]
+        return [
+            Finding(
+                "unclear-temp-directory-name",
+                f"Temporary plan folder name must communicate action or context: {plan_folder.name}",
+            )
+        ]
     return []
 
 
@@ -337,86 +172,17 @@ def _validate_summary(summary_text: str) -> list[Finding]:
         if not body:
             findings.append(Finding("missing-summary-section", f"Summary missing Italian section: {section}", "WARNING"))
             continue
+        if section == "Decisioni aperte" and _normalize_text(body).lower() in {
+            "none",
+            "- none",
+            "nessuna",
+            "nessuno",
+        }:
+            continue
         if _is_placeholder(body):
             findings.append(Finding("placeholder-summary-section", f"Summary section contains placeholder-only content: {section}"))
     if not RESOURCE_TABLE_HEADER_RE.search(summary_text):
         findings.append(Finding("missing-resource-table", "Summary missing Risorsa | Azione | Scopo table header", "WARNING"))
-    return findings
-
-
-def _validate_ledger(plan_folder: Path, profile: str) -> list[Finding]:
-    findings: list[Finding] = []
-    ledger_path = plan_folder / "02-source-item-ledger.md"
-    if not ledger_path.is_file():
-        return [Finding("missing-ledger", "02-source-item-ledger.md is missing")]
-    ledger_text = ledger_path.read_text(encoding="utf-8")
-    for field in LEDGER_REQUIRED_FIELDS:
-        if field not in ledger_text:
-            findings.append(Finding("missing-ledger-fields", f"Missing ledger field: {field}"))
-    for heading in (
-        "Initial evidence pass",
-        "Reading budget",
-        "Owner and validator",
-        "Stop conditions",
-        "Source item ledger",
-    ):
-        _check_required_section_content(findings, ledger_text, heading, code_prefix="ledger")
-
-    target_body = _section_body(ledger_text, "Target and anti-scope")
-    if not target_body:
-        findings.append(Finding("ledger-missing-section", "Missing section content for: Target and anti-scope"))
-    else:
-        for subheading in ("Target", "Anti-scope"):
-            pattern = re.compile(
-                rf"^###\s+{re.escape(subheading)}\s*$([\s\S]*?)(?=^###\s+|^##\s+|\Z)",
-                re.MULTILINE,
-            )
-            match = pattern.search(target_body)
-            body = match.group(1).strip() if match else ""
-            if not body:
-                findings.append(Finding("ledger-missing-subsection", f"Missing subsection content for: {subheading}"))
-            elif _is_placeholder(body):
-                findings.append(Finding("ledger-placeholder", f"Subsection contains placeholder-only content: {subheading}"))
-
-    source_item_ledger_body = _section_body(ledger_text, "Source item ledger")
-    ledger_rows = [
-        line
-        for line in source_item_ledger_body.splitlines()
-        if line.strip().startswith("|")
-        and "Source item" not in line
-        and "---" not in line
-    ]
-    if not ledger_rows:
-        findings.append(Finding("missing-source-item-coverage", "Source item ledger has no executable coverage rows"))
-    else:
-        for row in ledger_rows:
-            cells = _split_ledger_row(row)
-            if len(cells) < 7 or any(_is_placeholder(cell) for cell in cells[:6]):
-                findings.append(Finding("placeholder-ledger-row", f"Ledger row is incomplete or placeholder-only: {row}"))
-                break
-            route_cell = _normalize_route_cell(cells[6])
-            if not route_cell:
-                findings.append(Finding("missing-ledger-route", f"Ledger row route is empty: {row}"))
-                continue
-            if route_cell.lower() in NON_ACTION_ROUTES:
-                continue
-            referenced_files = _extract_route_files(route_cell)
-            if not referenced_files:
-                findings.append(
-                    Finding(
-                        "invalid-ledger-route",
-                        f"Ledger row route must reference numbered files or explicit non-action routes: {cells[6]}",
-                    )
-                )
-                continue
-            missing = [file_name for file_name in referenced_files if not (plan_folder / file_name).is_file()]
-            if missing:
-                findings.append(
-                    Finding(
-                        "missing-route-target",
-                        f"Ledger route references missing numbered files: {', '.join(missing)}",
-                    )
-                )
     return findings
 
 
@@ -428,6 +194,118 @@ def _normalize_route_cell(route_cell: str) -> str:
 
 def _extract_route_files(route_cell: str) -> list[str]:
     return re.findall(r"\b\d{2}-[A-Za-z0-9._-]+\.md\b", route_cell)
+
+
+def _validate_coverage_rows(
+    findings: list[Finding],
+    rows_section: str,
+    *,
+    plan_folder: Path,
+    code_prefix: str,
+) -> None:
+    rows = [
+        line
+        for line in rows_section.splitlines()
+        if line.strip().startswith("|") and "Source item" not in line and "---" not in line
+    ]
+    if not rows:
+        findings.append(Finding("missing-source-item-coverage", "Source item coverage has no executable rows"))
+        return
+
+    for row in rows:
+        cells = _split_ledger_row(row)
+        if len(cells) < 7 or any(_is_placeholder(cell) for cell in cells[:6]):
+            findings.append(Finding(f"{code_prefix}-placeholder-row", f"Coverage row is incomplete or placeholder-only: {row}"))
+            break
+        route_cell = _normalize_route_cell(cells[6])
+        if not route_cell:
+            findings.append(Finding("missing-ledger-route", f"Coverage row route is empty: {row}"))
+            continue
+        if route_cell.lower() in NON_ACTION_ROUTES:
+            continue
+        referenced_files = _extract_route_files(route_cell)
+        if not referenced_files:
+            findings.append(
+                Finding(
+                    "invalid-ledger-route",
+                    f"Coverage row route must reference numbered files or explicit non-action routes: {cells[6]}",
+                )
+            )
+            continue
+        missing = [file_name for file_name in referenced_files if not (plan_folder / file_name).is_file()]
+        if missing:
+            findings.append(
+                Finding(
+                    "missing-route-target",
+                    f"Coverage route references missing numbered files: {', '.join(missing)}",
+                )
+            )
+
+
+def _validate_control_file(plan_folder: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    control_path = plan_folder / "02-control.md"
+    if not control_path.is_file():
+        return [Finding("missing-control", "02-control.md is missing")]
+
+    control_text = control_path.read_text(encoding="utf-8")
+    for field in CONTROL_REQUIRED_FIELDS:
+        if field not in control_text:
+            findings.append(Finding("missing-control-fields", f"Missing control field: {field}"))
+
+    for heading in (
+        "Initial evidence pass",
+        "Reading budget",
+        "Owner and validator",
+        "Stop conditions",
+        "Source item ledger",
+    ):
+        _check_required_section_content(findings, control_text, heading, code_prefix="control")
+
+    target_body = _section_body(control_text, "Target and anti-scope")
+    if not target_body:
+        findings.append(Finding("control-missing-section", "Missing section content for: Target and anti-scope"))
+    else:
+        for subheading in ("Target", "Anti-scope"):
+            pattern = re.compile(
+                rf"^###\s+{re.escape(subheading)}\s*$([\s\S]*?)(?=^###\s+|^##\s+|\Z)",
+                re.MULTILINE,
+            )
+            match = pattern.search(target_body)
+            body = match.group(1).strip() if match else ""
+            if not body:
+                findings.append(Finding("control-missing-subsection", f"Missing subsection content for: {subheading}"))
+            elif _is_placeholder(body):
+                findings.append(Finding("control-placeholder", f"Subsection contains placeholder-only content: {subheading}"))
+
+    source_item_ledger_body = _section_body(control_text, "Source item ledger")
+    _validate_coverage_rows(findings, source_item_ledger_body, plan_folder=plan_folder, code_prefix="control")
+
+    for heading in MERGED_CONTRACT_SECTIONS:
+        _check_required_section_content(findings, control_text, heading, code_prefix="control-contract")
+
+    validation_commands = _section_body(control_text, "Validation commands")
+    has_order_signal = bool(re.search(r"run in this order", validation_commands, re.IGNORECASE)) or bool(
+        re.search(r"^\s*\d+\.\s+", validation_commands, re.MULTILINE)
+    )
+    if validation_commands and not has_order_signal:
+        findings.append(
+            Finding(
+                "control-validation-order",
+                "Extended validation commands must include execution order (numbered list or 'Run in this order').",
+            )
+        )
+
+    external_pins = _section_body(control_text, "External pins")
+    if external_pins and _is_placeholder(external_pins):
+        findings.append(
+            Finding(
+                "missing-external-evidence-pin",
+                "Extended control contract must name an external pin, explicit no-external-evidence statement, or fallback",
+            )
+        )
+
+    return findings
 
 
 def _extract_step_blocks(execution_text: str) -> list[tuple[str, str]]:
@@ -443,18 +321,25 @@ def _extract_step_blocks(execution_text: str) -> list[tuple[str, str]]:
     return blocks
 
 
-def _validate_execution(plan_folder: Path) -> list[Finding]:
+def _validate_execution_file(
+    path: Path,
+    *,
+    code_prefix: str,
+    require_coverage: bool,
+    plan_folder: Path,
+) -> list[Finding]:
     findings: list[Finding] = []
-    execution_path = plan_folder / "03-execution.md"
-    if not execution_path.is_file():
-        return [Finding("missing-execution", "03-execution.md is missing")]
-    execution_text = execution_path.read_text(encoding="utf-8")
-    for heading in ("Objective", "Chosen logic", "Key assumptions", "Executable steps", "Validation"):
-        _check_required_section_content(findings, execution_text, heading, code_prefix="execution")
+    if not path.is_file():
+        return [Finding(f"missing-{code_prefix}", f"{path.name} is missing")]
 
-    step_blocks = _extract_step_blocks(execution_text)
+    text = path.read_text(encoding="utf-8")
+
+    for heading in ("Objective", "Chosen logic", "Key assumptions", "Executable steps", "Validation"):
+        _check_required_section_content(findings, text, heading, code_prefix=code_prefix)
+
+    step_blocks = _extract_step_blocks(text)
     if not step_blocks:
-        findings.append(Finding("missing-executable-steps", "Execution file has no numbered executable steps"))
+        findings.append(Finding("missing-executable-steps", f"{path.name} has no numbered executable steps"))
         return findings
 
     created_artifacts: dict[str, int] = {}
@@ -478,56 +363,74 @@ def _validate_execution(plan_folder: Path) -> list[Finding]:
             created_at = created_artifacts.get(artifact)
             if created_at is None:
                 consumed_before_create.append(artifact)
+
     for artifact in consumed_before_create:
         findings.append(Finding("impossible-execution-order", f"Execution consumes artifact before any step creates it: {artifact}"))
+
+    if require_coverage:
+        _check_required_section_content(findings, text, "Source item coverage", code_prefix=code_prefix)
+        source_item_coverage = _section_body(text, "Source item coverage")
+        _validate_coverage_rows(findings, source_item_coverage, plan_folder=plan_folder, code_prefix=code_prefix)
+
     return findings
 
 
-def _validate_extended_contract(plan_folder: Path) -> list[Finding]:
-    findings: list[Finding] = []
-    contract_path = plan_folder / "04-implementation-contract.md"
-    if not contract_path.is_file():
-        return [Finding("missing-implementation-contract", "Extended profile requires 04-implementation-contract.md")]
-    contract_text = contract_path.read_text(encoding="utf-8")
-    for heading in EXTENDED_CONTRACT_SECTIONS:
-        _check_required_section_content(findings, contract_text, heading, code_prefix="implementation-contract")
-
-    validation_commands = _section_body(contract_text, "Validation commands")
-    has_order_signal = bool(re.search(r"run in this order", validation_commands, re.IGNORECASE)) or bool(
-        re.search(r"^\s*\d+\.\s+", validation_commands, re.MULTILINE)
+def _validate_compact_execution(plan_folder: Path) -> list[Finding]:
+    path = plan_folder / "02-execution.md"
+    findings = _validate_execution_file(
+        path,
+        code_prefix="execution",
+        require_coverage=True,
+        plan_folder=plan_folder,
     )
-    if validation_commands and not has_order_signal:
-        findings.append(
-            Finding(
-                "implementation-contract-validation-order",
-                "Extended validation commands must include execution order (numbered list or 'Run in this order').",
-            )
-        )
 
-    external_pins = _section_body(contract_text, "External pins")
-    if external_pins and _is_placeholder(external_pins):
-        findings.append(Finding("missing-external-evidence-pin", "Extended implementation contract must name an external pin, explicit no-external-evidence statement, or fallback"))
+    if not path.is_file():
+        return findings
+
+    text = path.read_text(encoding="utf-8")
+    for heading in ("Plan profile", "Target and anti-scope", "Owner and validator", "Stop conditions"):
+        _check_required_section_content(findings, text, heading, code_prefix="execution")
+
+    if "Plan profile" in text and not re.search(r"Plan profile[:\s]+compact", text):
+        findings.append(Finding("profile-mismatch", "02-execution.md must declare Plan profile: compact"))
+
     return findings
+
+
+def _validate_extended_execution(plan_folder: Path) -> list[Finding]:
+    return _validate_execution_file(
+        plan_folder / "03-execution.md",
+        code_prefix="execution",
+        require_coverage=False,
+        plan_folder=plan_folder,
+    )
 
 
 def _validate_lower_context_compatibility(plan_folder: Path, profile: str) -> list[Finding]:
     findings: list[Finding] = []
-    ledger_text = (plan_folder / "02-source-item-ledger.md").read_text(encoding="utf-8")
-    execution_text = (plan_folder / "03-execution.md").read_text(encoding="utf-8")
     summary_text = (plan_folder / "01-change-summary.md").read_text(encoding="utf-8")
 
     if _is_placeholder(_section_body(summary_text, "Risultato atteso")):
         findings.append(Finding("lower-context-compatible", "Expected outcome is not concrete enough for a lower-context executor"))
-    if _is_placeholder(_section_body(ledger_text, "Stop conditions")):
-        findings.append(Finding("lower-context-compatible", "Stop conditions are not concrete enough for a lower-context executor"))
-    if not _extract_step_blocks(execution_text):
-        findings.append(Finding("lower-context-compatible", "Execution file does not show where to start"))
-    if profile == "extended":
-        contract_text = (plan_folder / "04-implementation-contract.md").read_text(encoding="utf-8")
-        if _is_placeholder(_section_body(contract_text, "Candidate targets")):
+
+    if profile == "compact":
+        execution_text = (plan_folder / "02-execution.md").read_text(encoding="utf-8")
+        if _is_placeholder(_section_body(execution_text, "Stop conditions")):
+            findings.append(Finding("lower-context-compatible", "Stop conditions are not concrete enough for a lower-context executor"))
+        if not _extract_step_blocks(execution_text):
+            findings.append(Finding("lower-context-compatible", "Execution file does not show where to start"))
+    else:
+        control_text = (plan_folder / "02-control.md").read_text(encoding="utf-8")
+        execution_text = (plan_folder / "03-execution.md").read_text(encoding="utf-8")
+        if _is_placeholder(_section_body(control_text, "Stop conditions")):
+            findings.append(Finding("lower-context-compatible", "Stop conditions are not concrete enough for a lower-context executor"))
+        if not _extract_step_blocks(execution_text):
+            findings.append(Finding("lower-context-compatible", "Execution file does not show where to start"))
+        if _is_placeholder(_section_body(control_text, "Candidate targets")):
             findings.append(Finding("lower-context-compatible", "Extended plan does not name concrete candidate targets"))
-        if _is_placeholder(_section_body(contract_text, "Validation commands")):
+        if _is_placeholder(_section_body(control_text, "Validation commands")):
             findings.append(Finding("lower-context-compatible", "Extended plan does not name completion evidence or validation commands"))
+
     return findings
 
 
@@ -546,54 +449,236 @@ def _validate(plan_folder: Path, profile: str) -> list[Finding]:
     else:
         findings.append(Finding("missing-summary", "01-change-summary.md is missing"))
 
-    findings.extend(_validate_ledger(plan_folder, profile))
-    findings.extend(_validate_execution(plan_folder))
-    if profile == "extended":
-        findings.extend(_validate_extended_contract(plan_folder))
+    if profile == "compact":
+        findings.extend(_validate_compact_execution(plan_folder))
+    else:
+        findings.extend(_validate_control_file(plan_folder))
+        findings.extend(_validate_extended_execution(plan_folder))
+
     return findings
 
 
-def cmd_audit(plan_folder: Path, format: str = "text") -> int:
-    profile, findings = _check_unsupported(plan_folder)
-    if profile is None:
-        _emit_findings(findings, format, warnings=[])
+def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
+    if plan_folder.exists():
+        print(f"ERROR: {plan_folder} already exists", file=sys.stderr)
         return 1
-    findings.extend(_validate(plan_folder, profile))
-    _emit_findings(findings, format, warnings=_token_warnings(plan_folder))
-    return 0 if not any(f.severity == "ERROR" for f in findings) else 1
 
-
-def cmd_handoff_check(plan_folder: Path, format: str = "text") -> int:
-    profile, findings = _check_unsupported(plan_folder)
-    if profile is None:
-        _emit_findings(findings, format, warnings=[])
+    folder_findings = _validate_folder_name(plan_folder, profile)
+    if folder_findings:
+        print(f"ERROR: {folder_findings[0].message}", file=sys.stderr)
         return 1
-    findings.extend(_validate(plan_folder, profile))
-    ledger_path = plan_folder / "02-source-item-ledger.md"
-    if ledger_path.is_file():
-        ledger_text = ledger_path.read_text(encoding="utf-8")
-        if "clarification required" in ledger_text:
-            findings.append(Finding("clarification-required", "Clarification gate is still required"))
-    if not (plan_folder / "questions.md").is_file():
-        findings.append(Finding("missing-questions", "questions.md is missing", "WARNING"))
+
+    plan_folder.mkdir(parents=True)
+
+    (plan_folder / "01-change-summary.md").write_text(
+        textwrap.dedent(
+            """\
+            # Sintesi delle modifiche
+
+            ## Problema da risolvere
+
+            TODO
+
+            ## Risultato atteso
+
+            TODO
+
+            ## Risorse coinvolte
+
+            | Risorsa | Azione | Scopo |
+            | --- | --- | --- |
+            | TBD | TBD | TBD |
+
+            ## Decisione richiesta
+
+            TODO
+
+            ## Decisioni aperte
+
+            none
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    if profile == "compact":
+        (plan_folder / "02-execution.md").write_text(
+            textwrap.dedent(
+                """\
+                # Execution
+
+                ## Plan profile
+
+                compact
+
+                ## Target and anti-scope
+
+                ### Target
+
+                TODO
+
+                ### Anti-scope
+
+                TODO
+
+                ## Owner and validator
+
+                TODO
+
+                ## Stop conditions
+
+                TODO
+
+                ## Objective
+
+                TODO
+
+                ## Chosen logic
+
+                TODO
+
+                ## Key assumptions
+
+                TODO
+
+                ## Executable steps
+
+                1. Define the first executable step.
+                   Target: TODO
+                   Acceptance: TODO
+                   Validation: TODO
+                   Fallback: TODO
+
+                ## Validation
+
+                TODO
+
+                ## Source item coverage
+
+                | ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |
+                | --- | --- | --- | --- | --- | --- | --- |
+                | TBD-01 | TODO | TODO | repository | TODO | PENDING | `02-execution.md` |
+                """
+            ),
+            encoding="utf-8",
+        )
     else:
-        questions_text = (plan_folder / "questions.md").read_text(encoding="utf-8")
-        if _questions_blocking(questions_text):
-            findings.append(Finding("open-questions-blocking", "questions.md must be '- none' before execution handoff"))
-    findings.extend(_validate_lower_context_compatibility(plan_folder, profile))
-    _emit_findings(findings, format, warnings=_token_warnings(plan_folder, profile))
-    return 0 if not any(f.severity == "ERROR" for f in findings) else 1
+        (plan_folder / "02-control.md").write_text(
+            textwrap.dedent(
+                """\
+                # Control
 
+                ## Recommended use
 
-def _questions_blocking(questions_text: str) -> bool:
-    bullets = []
-    for line in questions_text.splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        if stripped.startswith("-") or stripped.startswith("*"):
-            bullets.append(stripped.lstrip("-* ").strip().lower())
-    return bullets != ["none"]
+                execute after explicit approval
+
+                ## Plan profile
+
+                extended
+
+                ## File map and role
+
+                | File | Role |
+                | --- | --- |
+                | `01-change-summary.md` | Italian decision summary; non-executable |
+                | `02-control.md` | Authoritative control, merged contract, and source-item coverage |
+                | `03-execution.md` | Executable steps |
+
+                ## Clarification gate
+
+                clarification required
+
+                ## Initial evidence pass
+
+                TODO
+
+                ## Reading budget
+
+                TODO
+
+                ## Target and anti-scope
+
+                ### Target
+
+                TODO
+
+                ### Anti-scope
+
+                TODO
+
+                ## Owner and validator
+
+                TODO
+
+                ## Stop conditions
+
+                TODO
+
+                ## Sources
+
+                TODO
+
+                ## Candidate targets
+
+                TODO
+
+                ## Validation commands
+
+                Run in this order:
+                1. TODO
+
+                ## Blockers and fallback rules
+
+                TODO
+
+                ## External pins
+
+                no external evidence
+
+                ## Source item ledger
+
+                | ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |
+                | --- | --- | --- | --- | --- | --- | --- |
+                | TBD-01 | TODO | TODO | repository | TODO | PENDING | `03-execution.md` |
+                """
+            ),
+            encoding="utf-8",
+        )
+        (plan_folder / "03-execution.md").write_text(
+            textwrap.dedent(
+                """\
+                # Execution
+
+                ## Objective
+
+                TODO
+
+                ## Chosen logic
+
+                TODO
+
+                ## Key assumptions
+
+                TODO
+
+                ## Executable steps
+
+                1. Define the first executable step.
+                   Target: TODO
+                   Acceptance: TODO
+                   Validation: TODO
+                   Fallback: TODO
+
+                ## Validation
+
+                TODO
+                """
+            ),
+            encoding="utf-8",
+        )
+
+    print(f"Created plan folder: {plan_folder}")
+    return 0
 
 
 def _token_warnings(plan_folder: Path, profile: str | None = None) -> list[str]:
@@ -603,29 +688,77 @@ def _token_warnings(plan_folder: Path, profile: str | None = None) -> list[str]:
         tokens = math.ceil(md_path.stat().st_size / 4)
         file_tokens.append((md_path.name, tokens))
         total_tokens += tokens
+
     warnings: list[str] = []
     if profile is None:
         detected = classify_profile(plan_folder)
         profile = detected if detected in SUPPORTED_PROFILES else None
 
     token_map = {name: tokens for name, tokens in file_tokens}
-    execution_tokens = token_map.get("03-execution.md", 0)
 
     if profile == "compact":
-        if total_tokens > 1600:
-            warnings.append("Compact plan estimated token weight is high; escalate to extended or trim slices.")
-        if execution_tokens > 600:
-            warnings.append("Compact execution file is oversized; keep 03-execution.md concise or escalate to extended.")
-
-    control_names = {"01-change-summary.md", "02-source-item-ledger.md", "04-implementation-contract.md"}
-    control_tokens = sum(tokens for name, tokens in file_tokens if name in control_names)
-    if profile != "compact" and total_tokens and control_tokens / total_tokens > 0.7:
-        warnings.append("Initial control read is disproportionately large; compress or split the control files.")
+        summary_tokens = token_map.get("01-change-summary.md", 0)
+        execution_tokens = token_map.get("02-execution.md", 0)
+        if total_tokens > COMPACT_TOTAL_TOKEN_TARGET:
+            warnings.append("Compact plan exceeds the 2,000 estimated-token budget; compress or escalate to extended.")
+        if summary_tokens > COMPACT_SUMMARY_TOKEN_TARGET:
+            warnings.append("Compact 01-change-summary.md is oversized; keep it to the Italian decision capsule only.")
+        if execution_tokens > COMPACT_EXECUTION_TOKEN_TARGET:
+            warnings.append("Compact execution file is oversized; keep 02-execution.md under the compact slice cap or escalate to extended.")
+    else:
+        control_names = {"01-change-summary.md", "02-control.md"}
+        control_tokens = sum(tokens for name, tokens in file_tokens if name in control_names)
+        if total_tokens and control_tokens / total_tokens > 0.7:
+            warnings.append("Initial control read is disproportionately large; compress or split the control files.")
 
     for name, tokens in file_tokens:
         if tokens > 1200:
             warnings.append(f"Estimated token weight is high for {name}; split or compress by delivery slice.")
+
     return warnings
+
+
+def _questions_blocking(summary_text: str) -> bool:
+    section = _section_body(summary_text, "Decisioni aperte")
+    if not section:
+        return False
+    normalized = _normalize_text(section).lower()
+    return normalized not in {"none", "- none", "nessuna", "nessuno"}
+
+
+def cmd_audit(plan_folder: Path, format: str = "text") -> int:
+    profile, findings = _check_unsupported(plan_folder)
+    if profile is None:
+        _emit_findings(findings, format, warnings=[])
+        return 1
+
+    findings.extend(_validate(plan_folder, profile))
+    _emit_findings(findings, format, warnings=_token_warnings(plan_folder, profile))
+    return 0 if not any(f.severity == "ERROR" for f in findings) else 1
+
+
+def cmd_handoff_check(plan_folder: Path, format: str = "text") -> int:
+    profile, findings = _check_unsupported(plan_folder)
+    if profile is None:
+        _emit_findings(findings, format, warnings=[])
+        return 1
+
+    findings.extend(_validate(plan_folder, profile))
+
+    if profile == "extended":
+        control_path = plan_folder / "02-control.md"
+        if control_path.is_file():
+            control_text = control_path.read_text(encoding="utf-8")
+            if "clarification required" in control_text:
+                findings.append(Finding("clarification-required", "Clarification gate is still required"))
+
+    summary_path = plan_folder / "01-change-summary.md"
+    if summary_path.is_file() and _questions_blocking(summary_path.read_text(encoding="utf-8")):
+        findings.append(Finding("open-questions-blocking", "Decisioni aperte must be 'none' before execution handoff"))
+
+    findings.extend(_validate_lower_context_compatibility(plan_folder, profile))
+    _emit_findings(findings, format, warnings=_token_warnings(plan_folder, profile))
+    return 0 if not any(f.severity == "ERROR" for f in findings) else 1
 
 
 def cmd_tokens(plan_folder: Path, format: str = "text") -> int:

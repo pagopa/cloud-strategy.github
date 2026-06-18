@@ -7,13 +7,6 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def test_agents_and_policy_promote_conversational_gateways() -> None:
-    agents_text = read_text("AGENTS.md")
-    assert "internal-gateway-idea-brainstorming" in agents_text
-    assert "internal-gateway-review" in agents_text
-    assert "internal-gateway-operational-flow" not in agents_text
-
-
 def test_idea_gateway_owns_retained_planning() -> None:
     skill_text = read_text(
         ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
@@ -30,11 +23,19 @@ def test_idea_gateway_owns_retained_planning() -> None:
     assert "Plan Approval Gate 3" in skill_text
     assert "Handoff Gate 4" in skill_text
     assert "ask whether to continue" in skill_text
+    assert "Specialization Checkpoint: gated" in skill_text
+    assert (
+        "User insistence does not bypass Idea Gate 0 or Critical Gate 2" in skill_text
+    )
     assert "go`/`ok`/`procedi" in skill_text
     assert "Plan Approval Gate 3: waiting" in reference_text
     assert "Handoff Gate 4: plan-created" in reference_text
+    assert "Specialization Checkpoint: gated" in reference_text
+    assert "ask whether the user wants this owner to keep the task" in reference_text
     assert "mini-plan" in reference_text
     assert "go/ok/procedi" in runtime_text
+    assert "Specialization Checkpoint: gated" in runtime_text
+    assert "ask whether the user wants this owner to keep the task" in runtime_text
     assert (
         "At Interview Gate 1: ready-for-critical, ask whether to continue"
         in runtime_text
@@ -140,10 +141,17 @@ def test_simple_gateway_readiness_brief_and_approval_gate_contract() -> None:
     assert "Readiness Brief" in simple_text
     assert "explicit user approval" in simple_text
     assert "before operational" in simple_text
+    assert "Simple Gate Policy" in simple_text
+    assert "`full`, `idea`, and `complete`" in simple_text
+    assert "Trivial-skip proof" in simple_text
+    assert "Run `grill-me` first" in simple_text
+    assert "critical gate" in simple_text
 
     assert "compact focused `grill-me` block" in clarification_text
     assert "internal-gateway-critical-master" in clarification_text
     assert "material risk" in clarification_text
+    assert "Depth Keyword Override" in clarification_text
+    assert "Do not use `trivial-skip`" in clarification_text
 
 
 def test_writing_plans_scaffold_first_and_audit_early_contract() -> None:
