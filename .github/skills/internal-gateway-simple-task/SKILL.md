@@ -11,13 +11,16 @@ Load these skills by name only when the active lane proves the narrower owner.
 Treat this list as an on-demand index, not a preload bundle.
 
 - `grill-me`: mandatory pre-action interview for non-trivial simple work and one focused clarification block for simple blockers.
-- `internal-gateway-idea-brainstorming`: planning owner when simple work no longer fits.
+- `internal-gateway-idea-brainstorming`: planning owner when simple work no longer fits or needs substantive ideation.
+- `internal-gateway-writing-plans`: retained-plan authoring owner when simple task switches to plan mode.
 - `internal-gateway-review`: review owner when defect-first analysis becomes dominant.
 - `internal-gateway-critical-master`: mandatory post-interview critical gate for non-trivial simple work and critical owner when assumptions or failure modes dominate.
 - `superpowers-verification-before-completion`: final evidence gate.
 
 Use this skill as the skill-first fast path for concrete repository-owned work.
-It is single-lane and single-phase by design.
+It is single-lane and single-phase by design, but it can switch to **plan mode**
+to produce a retained plan instead of executing when the user asks for a plan or
+when same-chat execution would be less economical than a retained plan.
 
 Before operational work, produce a lean Readiness Brief and name the gate
 outcome. Stop for explicit user approval unless a narrower loaded skill defines
@@ -34,7 +37,8 @@ support selection is still noisy.
 ## When to use
 
 - The outcome, target, command, or validation path is already concrete.
-- One quick lane can finish: `answer`, `edit`, `diagnose`, `validate`, or `execute`.
+- One quick lane can finish: `answer`, `edit`, `diagnose`, `validate`, `execute`, or `plan`.
+- The user explicitly asks for a plan, or cost signals show that a retained plan is cheaper than same-chat execution.
 
 ## When not to use
 
@@ -46,7 +50,7 @@ support selection is still noisy.
 ## Simple Gate Policy
 
 Classify every simple task before operational work as `full-gate`,
-`trivial-skip`, or `escalate`.
+`trivial-skip`, `escalate`, or `plan-mode`.
 
 - Use `full-gate` by default unless the task is proven trivial and venial.
 - Run `grill-me` first with one compact numbered block, then the critical gate.
@@ -59,6 +63,8 @@ Classify every simple task before operational work as `full-gate`,
   validation or a named validation gap.
 - When using `trivial-skip`, emit a short Trivial-skip proof before operational
   work.
+- Use `plan-mode` when the user explicitly asks for a plan or when cost signals
+  show that same-chat execution is less economical than a retained plan.
 - If planning, review, critical pressure, or multi-phase validation becomes the
   real job, `escalate`.
 
@@ -67,43 +73,90 @@ Classify every simple task before operational work as `full-gate`,
 1. Inspect local files first.
 2. Preserve compact working state: avoid full-context rereads unless new evidence invalidates the active lane assumptions.
 3. Detect depth keywords: `full`, `idea`, or `complete`.
-4. Classify the gate outcome as `full-gate`, `trivial-skip`, or `escalate`.
+4. Classify the gate outcome as `full-gate`, `trivial-skip`, `escalate`, or
+   `plan-mode`.
 5. For `full-gate`, load `grill-me`, ask one compact numbered block, then load
    `internal-gateway-critical-master` after the user's response.
 6. For `trivial-skip`, emit the Trivial-skip proof before operational work.
-7. Confirm the task still fits one quick lane and choose that lane from
+7. For `plan-mode`, run `grill-me` and `internal-gateway-critical-master` as for
+   `full-gate`, then load `internal-gateway-writing-plans` and write the retained
+   plan. Stop before execution.
+8. Confirm the task still fits one quick lane and choose that lane from
    `references/simple-lanes.md`.
-8. Select only directly applicable skill owners and required references from
+9. Select only directly applicable skill owners and required references from
    prompt, target path, runtime, ownership, and validation path.
-9. Build a Readiness Brief before operational work: task, lane-owner, primary
-   assumption or risk, focused validation path, gate outcome, and explicit
-   confirmation prompt or named auto-execute exception.
-10. Use `scripts/resolve_simple_task.py gate` when the facts are already known
+10. Build a Readiness Brief before operational work: task, lane-owner, primary
+    assumption or risk, focused validation path, gate outcome, and explicit
+    confirmation prompt or named auto-execute exception.
+11. Use `scripts/resolve_simple_task.py gate` when the facts are already known
     and the bundle only needs a deterministic gate and readiness summary.
-11. Stop and wait for explicit user approval before executing the lane unless
+12. Stop and wait for explicit user approval before executing the lane unless
     the selected narrower owner declares a deterministic auto-execute lane with
     its own zero-blocker, zero ambiguous drift, and no destructive or
     reverse-direction action.
-12. Identify mandatory applicable requirements internally before execution; do
+13. Identify mandatory applicable requirements internally before execution; do
     not emit a default user checklist.
-13. Execute the one concrete lane.
-14. Run focused validation or name the explicit gap.
-15. Run a pre-close compliance audit over mandatory applicable requirements
+14. Execute the one concrete lane, or, in `plan-mode`, write the retained plan
+    and stop before execution.
+15. Run focused validation or name the explicit gap.
+16. Run a pre-close compliance audit over mandatory applicable requirements
     only. Delegate fresh-evidence mechanics to
     `superpowers-verification-before-completion`.
-16. Block completion claims when mandatory applicable requirements remain
+17. Block completion claims when mandatory applicable requirements remain
     unverified.
-17. If architecture ownership, owner conflicts, or validation strategy are
+18. If architecture ownership, owner conflicts, or validation strategy are
     ambiguous, escalate instead of assuming a universal rule.
-18. If the task stops being simple, stop and issue an escalation alert.
+19. If the task stops being simple, stop and issue an escalation alert.
 
 Escalation trigger: if evidence collection, ownership checks, or validation needs spill into multi-phase execution, route to the narrow next owner instead of expanding the fast path.
+
+## Plan Mode
+
+Plan mode lets a concrete simple task produce a retained plan instead of
+executing in the same chat. The task stays single-lane and single-phase; only
+the output shape changes.
+
+### Activation
+
+- **Mandatory explicit**: if the user asks for a plan with keywords such as
+  `plan`, `piano`, `modalità plan`, `retained plan`, `scrivi il piano`,
+  `non eseguire ancora`, or similar, switch to plan mode and honor the request.
+- **Implicit cost signal**: if the user says nothing about a plan, but cost
+  signals show that same-chat execution would be less economical than a retained
+  plan, declare `plan-mode` and ask the user to confirm before writing the plan.
+  See `references/plan-mode.md` for the exact cost-signal checklist.
+
+### Profile
+
+- Default to `compact` (`tmp/superpowers/mini-plan-*`) with
+  `01-change-summary.md` and `02-execution.md`.
+- Use `extended` only when the task needs multi-slice execution, multiple
+  independent validators, an articulated anti-scope, or external pins.
+
+### Procedure
+
+1. Classify the gate as `plan-mode`.
+2. Run `grill-me` and `internal-gateway-critical-master` exactly as for
+   `full-gate`.
+3. Load `internal-gateway-writing-plans` and author the retained plan using its
+   local contract.
+4. Stop before execution. Report the plan folder and next owner
+   (`internal-gateway-execute-plans`).
+
+### Boundaries
+
+- Do not use plan mode to avoid a hard ownership decision. If the target,
+  anti-scope, or validation strategy is ambiguous, `escalate` instead.
+- Do not use plan mode for vague ideas or substantive tradeoffs; use
+  `internal-gateway-idea-brainstorming`.
+- Do not execute the plan inside simple task. Execution belongs to
+  `internal-gateway-execute-plans`.
 
 ## Deterministic Helpers
 
 - `scripts/resolve_simple_task.py gate`: returns `full-gate`,
-  `trivial-skip`, or `escalate` plus a lean Readiness Brief from normalized
-  task facts.
+  `trivial-skip`, `escalate`, or `plan-mode` plus a lean Readiness Brief from
+  normalized task facts.
 - `scripts/resolve_simple_task.py claim`: maps status claims to the required
   owners and evidence gates before the final answer.
 - `scripts/suggest_support_skills.py`: returns path and symptom-based support
@@ -112,7 +165,7 @@ Escalation trigger: if evidence collection, ownership checks, or validation need
 ## Validation
 
 - Work stayed single-lane and single-phase, or escalation was explicit.
-- `full-gate`, `trivial-skip`, or `escalate` was named before operational work.
+- `full-gate`, `trivial-skip`, `escalate`, or `plan-mode` was named before operational work.
 - Non-trivial simple work used `grill-me` before `internal-gateway-critical-master`, and depth keywords prevented `trivial-skip`.
 - `trivial-skip` included evidence that the task was trivial and venial.
 - Readiness Brief stayed lean, named the lane-owner and validation path, and
@@ -127,6 +180,8 @@ Escalation trigger: if evidence collection, ownership checks, or validation need
 - Treating loaded skills as automatically mandatory instead of checking applicability.
 - Skipping `grill-me` and the critical gate without a Trivial-skip proof.
 - Treating `full`, `idea`, or `complete` as advisory when the user meant to force the full gate.
+- Switching to plan mode without declaring it or without user confirmation on implicit cost signals.
+- Executing the plan inside simple task instead of handing off to `internal-gateway-execute-plans`.
 - Expanding the Readiness Brief into a long checklist or proceeding without explicit user approval when no narrower auto-execute exception applies.
 - Treating a generic `next_action.allowed=true` value as enough for auto-execution without checking the narrower skill's stop conditions.
 - Declaring completion after code edits while mandatory applicable evidence is still missing.

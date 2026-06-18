@@ -40,9 +40,13 @@ Run this check before skipping or calling `grill-me`:
 4. Would the missing answer change the owner, target state, anti-scope,
     validation path, or rollout posture?
 5. Would more than one dependent clarification block be needed?
+6. Did the user explicitly ask for a plan, or do cost signals show that
+    same-chat execution is less economical than a retained plan?
 
-If answer 1 or 2 is yes and answers 3-5 are no, use the full gate. If any of
-answers 3-5 is yes, do not continue in simple mode.
+If answer 1 or 2 is yes and answers 3-5 are no, use the full gate. If answer 6
+is yes and the task is still concrete, classify `plan-mode` and ask for
+confirmation when the trigger is implicit. If any of answers 3-5 is yes and the
+task is not a concrete plan-mode candidate, do not continue in simple mode.
 
 ## Single Clarification Limit
 

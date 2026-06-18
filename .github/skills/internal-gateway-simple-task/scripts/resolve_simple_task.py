@@ -17,7 +17,7 @@ import re
 
 DEPTH_KEYWORDS = ("full", "idea", "complete")
 TRIVIAL_KINDS = ("local-answer", "tiny-edit", "focused-read", "validator-run")
-LANES = ("answer", "edit", "diagnose", "validate", "execute", "unspecified")
+LANES = ("answer", "edit", "diagnose", "validate", "execute", "plan", "unspecified")
 MATERIAL_RISKS = (
     "contract",
     "routing",
@@ -165,6 +165,11 @@ def parse_args() -> argparse.Namespace:
     gate_parser.add_argument("--needs-review", action="store_true")
     gate_parser.add_argument("--needs-critical", action="store_true")
     gate_parser.add_argument("--needs-retained-plan", action="store_true")
+    gate_parser.add_argument(
+        "--plan-mode",
+        choices=("explicit", "implicit"),
+        help="Plan mode trigger type. Explicit is mandatory from the user; implicit is a cost-signal proposal.",
+    )
     gate_parser.add_argument("--owner-ambiguous", action="store_true")
     gate_parser.add_argument("--clarification-overflow", action="store_true")
     gate_parser.add_argument("--validation-obvious", action="store_true")
@@ -226,6 +231,7 @@ def determine_next_owner(
     needs_review: bool,
     needs_critical: bool,
     needs_retained_plan: bool,
+    plan_mode: str | None,
     owner_ambiguous: bool,
     clarification_overflow: bool,
 ) -> str:
@@ -233,6 +239,8 @@ def determine_next_owner(
         return "internal-gateway-review"
     if needs_critical:
         return "internal-gateway-critical-master"
+    if plan_mode:
+        return "internal-gateway-simple-task"
     if (
         needs_plan
         or needs_retained_plan
@@ -255,6 +263,7 @@ def build_gate_decision(
     needs_review: bool = False,
     needs_critical: bool = False,
     needs_retained_plan: bool = False,
+    plan_mode: str | None = None,
     owner_ambiguous: bool = False,
     clarification_overflow: bool = False,
     validation_obvious: bool = False,
@@ -269,6 +278,7 @@ def build_gate_decision(
         needs_review=needs_review,
         needs_critical=needs_critical,
         needs_retained_plan=needs_retained_plan,
+        plan_mode=plan_mode,
         owner_ambiguous=owner_ambiguous,
         clarification_overflow=clarification_overflow,
     )
@@ -282,6 +292,8 @@ def build_gate_decision(
         reasons.append("needs-plan")
     if needs_retained_plan:
         reasons.append("needs-retained-plan")
+    if plan_mode:
+        reasons.append(f"plan-mode:{plan_mode}")
     if owner_ambiguous:
         reasons.append("owner-ambiguous")
     if clarification_overflow:
@@ -293,6 +305,8 @@ def build_gate_decision(
 
     if next_owner != "internal-gateway-simple-task":
         gate_outcome = "escalate"
+    elif plan_mode:
+        gate_outcome = "plan-mode"
     elif (
         trivial_kind in TRIVIAL_KINDS
         and not resolved_depth_keywords
@@ -328,13 +342,25 @@ def build_gate_decision(
             "Task still fits one quick lane but needs the full gate before action."
         )
 
+    if plan_mode == "implicit":
+        approval_checkpoint = (
+            "explicit user approval before writing the retained plan "
+            "(implicit cost-signal proposal)"
+        )
+    elif plan_mode == "explicit":
+        approval_checkpoint = (
+            "plan mode requested by user; confirm profile and proceed to retained-plan authoring"
+        )
+    else:
+        approval_checkpoint = "explicit user approval before operational work"
+
     readiness_brief = {
         "task": task,
         "lane_owner": next_owner,
         "primary_assumption_or_risk": primary_assumption_or_risk,
         "focused_validation_path": focused_validation_path,
         "gate_outcome": gate_outcome,
-        "approval_checkpoint": "explicit user approval before operational work",
+        "approval_checkpoint": approval_checkpoint,
     }
 
     return {
@@ -410,6 +436,7 @@ def main() -> int:
             needs_review=args.needs_review,
             needs_critical=args.needs_critical,
             needs_retained_plan=args.needs_retained_plan,
+            plan_mode=args.plan_mode,
             owner_ambiguous=args.owner_ambiguous,
             clarification_overflow=args.clarification_overflow,
             validation_obvious=args.validation_obvious,
