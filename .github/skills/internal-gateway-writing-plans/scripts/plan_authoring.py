@@ -709,11 +709,16 @@ def _token_warnings(plan_folder: Path, profile: str | None = None) -> list[str]:
         control_names = {"01-change-summary.md", "02-control.md"}
         control_tokens = sum(tokens for name, tokens in file_tokens if name in control_names)
         if total_tokens and control_tokens / total_tokens > 0.7:
-            warnings.append("Initial control read is disproportionately large; compress or split the control files.")
+            warnings.append("Initial control read is disproportionately large; prefer splitting control facts into numbered files by delivery slice.")
 
     for name, tokens in file_tokens:
         if tokens > 1200:
-            warnings.append(f"Estimated token weight is high for {name}; split or compress by delivery slice.")
+            if profile == "extended":
+                warnings.append(
+                    f"Informational: estimated token weight is high for {name}; prefer splitting into numbered files by delivery slice."
+                )
+            else:
+                warnings.append(f"Estimated token weight is high for {name}; split or compress by delivery slice.")
 
     return warnings
 

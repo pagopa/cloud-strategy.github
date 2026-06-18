@@ -33,7 +33,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Open questions | Is `questions.md` present and set to `- none` for execution handoff, or explicitly blocking handoff? |
 | Lifecycle status | Is plan state explicit (`scaffold`, `ready`, or `closed`) so an executor does not infer readiness? |
 | Token discipline | Does the ledger define `Initial evidence pass` and `Reading budget` so the executor can classify the folder with the fewest safe reads? |
-| Profile token budget | Is `compact` within the 2,000 estimated-token total budget, with `01-change-summary.md` under 300 and `02-execution.md` under 1,500, or escalated to `extended`? |
+| Profile token budget | Is `compact` within the 2,000 estimated-token total budget, with `01-change-summary.md` under 300 and `02-execution.md` under 1,500, or escalated to `extended`? For `extended`, are soft limits reviewed with completeness over compression and split-by-slice decisions when files grow large? |
 
 ## Outcomes
 
