@@ -98,8 +98,8 @@ Classify every simple task before operational work as `full-gate`,
     reverse-direction action.
 13. Identify mandatory applicable requirements internally before execution; do
     not emit a default user checklist.
-14. Execute the one concrete lane, or, in `plan-mode`, write the retained plan
-    and stop before execution.
+14. Execute the one concrete lane with the Agentic Execution Loop, or, in
+    `plan-mode`, write the retained plan and stop before execution.
 15. Run focused validation or name the explicit gap.
 16. Run a pre-close compliance audit over mandatory applicable requirements
     only. Delegate fresh-evidence mechanics to
@@ -111,6 +111,22 @@ Classify every simple task before operational work as `full-gate`,
 19. If the task stops being simple, stop and issue an escalation alert.
 
 Escalation trigger: if evidence collection, ownership checks, or validation needs spill into multi-phase execution, route to the narrow next owner instead of expanding the fast path.
+
+## Agentic Execution Loop
+
+When execution is already authorized, stay inside the active owner, target
+scope, anti-scope, and validation path, then iterate:
+
+1. Confirm the current goal and nearest evidence.
+2. Apply the smallest in-scope action.
+3. Run the focused validation or evidence check.
+4. If validation fails for an in-scope, repairable reason, fix once and re-run.
+5. Continue only while evidence improves and no stop condition fires.
+6. Stop with `DONE`, a blocker, or an explicit evidence gap.
+
+Stop on scope drift, destructive action, owner conflict, missing validation
+path, human approval need, secret exposure risk, or repeated non-improving
+failures.
 
 ## Plan Mode
 
@@ -173,6 +189,8 @@ the output shape changes.
 - Readiness Brief stayed lean, named the lane-owner and validation path, and
   included an explicit approval checkpoint or named the narrower auto-execute exception.
 - Focused validation ran before completion claims, or the exact validation gap was reported.
+- The Agentic Execution Loop stayed inside the authorized owner, scope, and
+  validation path.
 - Auto-execute exceptions stopped on blockers, ambiguous drift, destructive actions, reverse-direction writes, or missing validation evidence.
 - Completion claims were blocked when mandatory applicable requirements were still unverified.
 - Output stayed concise unless a gap, exception, or escalation had to be reported.
@@ -186,6 +204,8 @@ the output shape changes.
 - Executing the plan inside simple task instead of handing off to `internal-gateway-execute-plans`.
 - Expanding the Readiness Brief into a long checklist or proceeding without explicit user approval when no narrower auto-execute exception applies.
 - Treating a generic `next_action.allowed=true` value as enough for auto-execution without checking the narrower skill's stop conditions.
+- Continuing the Agentic Execution Loop after evidence stops improving or a
+  stop condition fires.
 - Declaring completion after code edits while mandatory applicable evidence is still missing.
 - Promoting specialist requirements to universal policy without target/runtime ownership proof.
 - Continuing without escalation when ownership conflicts or validation strategy remain undefined.

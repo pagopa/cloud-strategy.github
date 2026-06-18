@@ -37,7 +37,7 @@ consumes approved `compact` and `extended` retained plans.
 7. Identify mandatory applicable requirements from selected skills using target, runtime, ownership, and validation path.
 8. For `compact`, confirm the folder uses `mini-plan-*` and `02-execution.md` is the only executable file.
 9. For `extended`, read numbered executable files after `02-control.md` in order starting at `03-execution.md`.
-10. Process numbered executable files in order.
+10. Process numbered executable files in order with the Agentic Execution Loop.
 11. Run an item-level compliance audit before closing each executable item.
 12. Track progress through the live ledger.
 13. Aggregate unresolved mandatory applicable requirements before closeout.
@@ -58,6 +58,22 @@ consumes approved `compact` and `extended` retained plans.
 - Pressure-test boundary: a Lambda-owned hashed requirements file does not grant a separate stdlib-only CLI launcher permission to install that dependency set.
 - Only `DONE` may create `done-*` markers or remove numbered plan files, or publish a lightweight `DONE-plan-state.md` marker (`<STATE>-plan-state.md` convention) with `State: DONE` and `Continuation: none`.
 - Non-`DONE` exits keep the live ledger and numbered files in place.
+
+## Agentic Execution Loop
+
+When execution is already authorized, stay inside the active owner, target
+scope, anti-scope, and validation path, then iterate:
+
+1. Confirm the current goal and nearest evidence.
+2. Apply the smallest in-scope action.
+3. Run the focused validation or evidence check.
+4. If validation fails for an in-scope, repairable reason, fix once and re-run.
+5. Continue only while evidence improves and no stop condition fires.
+6. Stop with `DONE`, a blocker, or an explicit evidence gap.
+
+Stop on scope drift, destructive action, owner conflict, missing validation
+path, human approval need, secret exposure risk, or repeated non-improving
+failures.
 
 ## Closing Procedure
 
@@ -163,6 +179,8 @@ Before declaring any closeout step complete:
 - `compact` retained plans use `tmp/superpowers/mini-plan-*` and `02-execution.md` as the only executable file.
 - `extended` retained plans include `02-control.md` before executable work.
 - Mandatory applicable requirements are checked at item close and before `DONE`.
+- The Agentic Execution Loop stayed inside the authorized owner, scope, and
+  validation path.
 - Missing mandatory applicable evidence maps to a non-`DONE` state.
 - `done-*` markers appear only during full close packaging; lightweight closeout uses `<STATE>-plan-state.md` (for closed plans: `DONE-plan-state.md`) and may retain numbered files.
 - Non-`DONE` states keep numbered plan files and the live ledger in place.
@@ -175,6 +193,8 @@ Before declaring any closeout step complete:
 - Closing an item because edits exist while mandatory applicable evidence is still open.
 - Treating every loaded specialist rule as mandatory without applicability proof.
 - Hiding ownership conflicts instead of escalating a next owner and validation path.
+- Continuing the Agentic Execution Loop after evidence stops improving or a
+  stop condition fires.
 - Packaging `DONE` while evidence gaps still require `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED`.
 - Declaring a non-`DONE` state without writing or updating the `<STATE>-plan-state.md` marker.
 - Leaving stale `<STATE>-plan-state.md` markers behind after a state transition.
