@@ -44,8 +44,8 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 ### Phase 2: Challenge
 
 - Select **2-3 lenses** from `references/challenge-lenses.md` based on the highest-risk gaps in the summary.
+- The **third lens must be lateral**: `analogy` or `reverse assumption`.
 - Apply one optional pre-mortem pass from `references/pre-mortem.md` if failure modes are material and not covered by the selected lenses.
-- Apply **at least one lateral lens**: analogy or reverse assumption.
 - Ask probing questions only when the answer changes the critique.
 - Output: 1-3 raw findings, each with a claim class and a note on evidence quality.
 

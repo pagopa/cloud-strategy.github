@@ -9,9 +9,9 @@ Select **2-3 lenses** from the table below. Prioritize by risk, not by completen
 1. Read the Phase 1 summary from `SKILL.md`.
 2. Pick the lens whose question most directly exposes a material failure mode or hidden assumption.
 3. Add a second lens that attacks a different dimension (evidence, constraints, stakeholders, time).
-4. Add the lateral lens `analogy` or `reverse assumption` if it is not already covered by step 2 or 3.
+4. Add the lateral lens `analogy` or `reverse assumption` as the third lens.
 
-Stop at 3 lenses unless the proposal has multiple independent material risks.
+Stop at 3 lenses unless the proposal has multiple independent material risks. The third lens must always be lateral.
 
 ## Lenses
 
@@ -27,6 +27,20 @@ Stop at 3 lenses unless the proposal has multiple independent material risks.
 | Opportunity cost | What useful path is the plan excluding? | The design is safe but may be too narrow. |
 | Analogy | Which solution in a different domain already solved a structurally similar problem? | The team is stuck in familiar patterns. |
 | Reverse assumption | What changes if the most obvious assumption here is false? | A key claim has not been tested recently. |
+
+## Lateral lens examples
+
+Use these examples to keep the lateral lens concrete, not vague.
+
+### Analogy
+
+- Good: "Package registries like npm handle version conflicts by isolating dependency trees; what would a similar isolation pattern look like for our service contracts?"
+- Weak: "This is similar to other refactoring work."
+
+### Reverse assumption
+
+- Good: "The plan assumes users will read the new error messages. What changes if they ignore them completely?"
+- Weak: "Are we sure this assumption is true?"
 
 ## Engagement Rules
 

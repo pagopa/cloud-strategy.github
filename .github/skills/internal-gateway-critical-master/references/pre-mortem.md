@@ -4,8 +4,12 @@ Use this reference when a plan or decision has material execution risk and the s
 
 ## When to use
 
+Trigger the pre-mortem when at least one of these is true:
+
 - The proposal depends on coordination across teams, systems, or sync cycles.
 - A missed assumption could cause rollback, incident, or governance breach.
+- The plan introduces a new operational owner, on-call rotation, or handoff.
+- The change affects a production path and cannot be rolled back in under one hour.
 - The user asks for a pre-mortem, failure-mode analysis, or "what could go wrong" check.
 
 ## Four-step procedure
