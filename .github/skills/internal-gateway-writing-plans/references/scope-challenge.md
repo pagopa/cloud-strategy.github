@@ -26,11 +26,11 @@ Every retained plan must be able to answer these questions:
 7. `observable acceptance`: Which diff, file state, validator assertion, manual check, or explicit non-action will prove each executable item?
 8. `implementation contract`: For `extended` profiles, does `02-control.md` list the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, a separate implementation contract is not required.
 9. `profile`: Is `Plan profile` declared as `compact` or `extended`? Currently, no other profiles are supported. Missing or unrecognized profiles return `unsupported-plan-contract`.
-10. `summary language`: Is `01-change-summary.md` written in Italian with clear subsections and a `Risorsa | Azione | Scopo` table for non-trivial plans?
+10. `summary language`: Is `01-change-summary.md` written in Italian as a compressed decision capsule with required sections and a `Risorsa | Azione | Scopo` table for non-trivial plans?
 11. `summary clarity`: Are changed resources and intended actions obvious in the summary without reading deeper files?
 12. `route map`: Do `Source item ledger` routes point to existing numbered files or explicit non-action routes?
 13. `questions state`: Is `questions.md` either `- none` (ready) or explicitly blocking execution handoff?
-14. `token budget`: Is token weight proportional to profile so first reads stay within a practical budget?
+14. `token budget`: For `compact`, is total plan Markdown within 2,000 estimated tokens, with `01-change-summary.md` under 300 and `02-execution.md` under 1,500?
 
 For non-trivial retained plans and strategic-to-operational or
 monolithic-to-executable conversions, also answer this:
@@ -43,7 +43,7 @@ For `compact`, answer how `02-execution.md` preserves coverage with inline item
 rows.
 
 For retained plans with numbered files, confirm that `01-change-summary.md` is a
-brief decision summary only (Italian, non-executable), and that
+brief compressed decision summary only (Italian, non-executable), and that
 `02-execution.md` (`compact`) or `02-control.md` (`extended`) exposes the same
 target, anti-scope, owner, validator, and stop conditions. For `extended`,
 confirm `02-control.md` also carries `Recommended use`, `Plan profile`,

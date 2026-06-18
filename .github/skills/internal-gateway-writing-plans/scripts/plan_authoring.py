@@ -20,7 +20,9 @@ EXTENDED_REQUIRED_FILES = frozenset(
 )
 SUPPORTED_PROFILES = frozenset({"compact", "extended"})
 COMPACT_FOLDER_PREFIX = "mini-plan-"
-COMPACT_EXECUTION_TOKEN_TARGET = 900
+COMPACT_TOTAL_TOKEN_TARGET = 2000
+COMPACT_SUMMARY_TOKEN_TARGET = 300
+COMPACT_EXECUTION_TOKEN_TARGET = 1500
 CONTROL_REQUIRED_FIELDS = (
     "Recommended use",
     "File map and role",
@@ -36,10 +38,8 @@ ITALIAN_SUMMARY_SECTIONS = (
     "Problema da risolvere",
     "Risultato atteso",
     "Risorse coinvolte",
-    "Comportamento scelto",
-    "Validazione prevista",
-    "Esecuzione prevista",
     "Decisione richiesta",
+    "Decisioni aperte",
 )
 RESOURCE_TABLE_HEADER_RE = re.compile(r"\|?\s*Risorsa\s*\|\s*Azione\s*\|\s*Scopo\s*\|?")
 PLACEHOLDER_RE = re.compile(r"\b(?:x|tbd|todo|placeholder)\b", re.IGNORECASE)
@@ -171,6 +171,13 @@ def _validate_summary(summary_text: str) -> list[Finding]:
         body = _section_body(summary_text, section)
         if not body:
             findings.append(Finding("missing-summary-section", f"Summary missing Italian section: {section}", "WARNING"))
+            continue
+        if section == "Decisioni aperte" and _normalize_text(body).lower() in {
+            "none",
+            "- none",
+            "nessuna",
+            "nessuno",
+        }:
             continue
         if _is_placeholder(body):
             findings.append(Finding("placeholder-summary-section", f"Summary section contains placeholder-only content: {section}"))
@@ -482,21 +489,13 @@ def cmd_init(plan_folder: Path, profile: str = "compact") -> int:
             | --- | --- | --- |
             | TBD | TBD | TBD |
 
-            ## Comportamento scelto
-
-            TODO
-
-            ## Validazione prevista
-
-            TODO
-
-            ## Esecuzione prevista
-
-            TODO
-
             ## Decisione richiesta
 
             TODO
+
+            ## Decisioni aperte
+
+            none
             """
         ),
         encoding="utf-8",
@@ -698,11 +697,14 @@ def _token_warnings(plan_folder: Path, profile: str | None = None) -> list[str]:
     token_map = {name: tokens for name, tokens in file_tokens}
 
     if profile == "compact":
+        summary_tokens = token_map.get("01-change-summary.md", 0)
         execution_tokens = token_map.get("02-execution.md", 0)
-        if total_tokens > 1600:
-            warnings.append("Compact plan estimated token weight is high; escalate to extended or trim slices.")
+        if total_tokens > COMPACT_TOTAL_TOKEN_TARGET:
+            warnings.append("Compact plan exceeds the 2,000 estimated-token budget; compress or escalate to extended.")
+        if summary_tokens > COMPACT_SUMMARY_TOKEN_TARGET:
+            warnings.append("Compact 01-change-summary.md is oversized; keep it to the Italian decision capsule only.")
         if execution_tokens > COMPACT_EXECUTION_TOKEN_TARGET:
-            warnings.append("Compact execution file is oversized; keep 02-execution.md concise or escalate to extended.")
+            warnings.append("Compact execution file is oversized; keep 02-execution.md under the compact slice cap or escalate to extended.")
     else:
         control_names = {"01-change-summary.md", "02-control.md"}
         control_tokens = sum(tokens for name, tokens in file_tokens if name in control_names)

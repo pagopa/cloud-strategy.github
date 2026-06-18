@@ -10,6 +10,7 @@ TEST_OWNERS = {
         ".github/scripts/check_catalog_consistency.py",
         ".github/scripts/detect_token_risks.py",
         ".github/scripts/sync_copilot_catalog.py",
+        ".github/scripts/validate_critical_output.py",
         ".github/scripts/validate_internal_skills.py",
     },
     "tests/github/scripts/lib/test_fingerprinting.py": {
@@ -20,6 +21,10 @@ TEST_OWNERS = {
     },
     "tests/github/scripts/lib/test_shared.py": {
         ".github/scripts/lib/shared.py",
+    },
+    "tests/test_critical_master_scripts.py": {
+        ".github/scripts/lib/critical_master.py",
+        ".github/scripts/validate_critical_output.py",
     },
     "tests/test_inventory_and_consistency.py": {
         ".github/scripts/lib/catalog_checks.py",

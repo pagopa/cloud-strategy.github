@@ -8,13 +8,15 @@ interface:
     execution/control) or extended (summary + control + numbered execution
     files).
     New compact plans should use mini-plan-* folders. Write
-    01-change-summary.md in Italian with Risorsa|Azione|Scopo table and
-    Esecuzione prevista route notes. All other files in English. Reject
-    unsupported profiles. Run bundle-local CLI audit first and handoff-check
-    second for deterministic readiness. Treat token warnings as review inputs
-    for compression or split decisions, not as measured-savings proof. Do not
-    write a Recommended consumer field into the retained plan. Leave execution
-    strategy selection to $internal-gateway-execute-plans, which will infer the
-    best execution path from profile, folder shape, and validation path. Keep
-    implementation-contract content merged in 02-control.md for extended and
-    avoid cross-file fact duplication. Emit a Decision Brief before handoff.
+    01-change-summary.md in Italian as a compressed decision capsule with
+    Risorsa|Azione|Scopo table and Decisioni aperte; keep logic, validation,
+    route notes, and source-item coverage in the control/execution file. All
+    other files are English. Reject unsupported profiles. Keep compact plans
+    under 2,000 estimated tokens total, with 01 under 300 and 02 under 1,500.
+    Run bundle-local CLI audit first and handoff-check second for deterministic
+    readiness. Treat token warnings as review inputs for compression or split
+    decisions, not as measured-savings proof. Do not write a Recommended consumer field into the retained plan. Leave execution strategy selection to
+    $internal-gateway-execute-plans, which will infer the best execution path from
+    profile, folder shape, and validation path. Keep implementation-contract
+    content merged in 02-control.md for extended and avoid cross-file fact
+    duplication. Emit a Decision Brief before handoff.

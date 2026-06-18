@@ -26,7 +26,8 @@ def test_writing_plans_declares_profile_only_handoff_contract() -> None:
     assert "internal-gateway-simple-task" in writing_text
     assert "internal-gateway-execute-plans" in writing_text
     assert "mini-plan-*" in compact_reference
-    assert "Esecuzione prevista" in compact_reference
+    assert "Decisioni aperte" in compact_reference
+    assert "2,000 estimated tokens" in compact_reference
 
 
 def test_executing_plans_accepts_compact_and_extended_consumers() -> None:

@@ -24,9 +24,6 @@ def _write_compact_plan(plan_folder: Path) -> None:
         "## Problema da risolvere\nRidurre l'ambiguita di handoff.\n"
         "## Risultato atteso\nUn executor puo partire senza riletture larghe.\n"
         "## Risorse coinvolte\n| Risorsa | Azione | Scopo |\n| --- | --- | --- |\n| Skill | update | Tighten handoff |\n"
-        "## Comportamento scelto\nControlli semantici minimi e deterministici.\n"
-        "## Validazione prevista\nPytest focalizzato e handoff-check.\n"
-        "## Esecuzione prevista\nProfilo: compact. Prefisso cartella: mini-plan-*. File esecutivo: 02-execution.md. Strategia esecuzione: inferita da internal-gateway-execute-plans.\n"
         "## Decisione richiesta\nApprovare l'esecuzione del piano.\n"
         "## Decisioni aperte\nnone\n",
         encoding="utf-8",
@@ -104,6 +101,11 @@ def test_init_creates_compact_scaffold(tmp_path: Path) -> None:
     assert result.returncode == 0
     assert (plan_folder / "02-execution.md").is_file()
     assert not (plan_folder / "questions.md").exists()
+    summary_text = (plan_folder / "01-change-summary.md").read_text(encoding="utf-8")
+    assert "## Decisioni aperte" in summary_text
+    assert "## Comportamento scelto" not in summary_text
+    assert "## Validazione prevista" not in summary_text
+    assert "## Esecuzione prevista" not in summary_text
 
 
 def test_init_rejects_non_prefixed_compact_folder(tmp_path: Path) -> None:
@@ -174,7 +176,7 @@ def test_handoff_check_rejects_missing_route_targets(tmp_path: Path) -> None:
 def test_handoff_check_warns_on_oversized_compact_execution(tmp_path: Path) -> None:
     plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-heavy-execution"
     _write_compact_plan(plan_folder)
-    heavy_block = "A" * 2800
+    heavy_block = "A" * 6200
     (plan_folder / "02-execution.md").write_text(
         "# Execution\n\n"
         "## Plan profile\ncompact\n\n"
@@ -202,6 +204,27 @@ def test_handoff_check_warns_on_oversized_compact_execution(tmp_path: Path) -> N
     assert result.returncode == 0
     assert any(
         "Compact execution file is oversized" in warning
+        for warning in payload["warnings"]
+    )
+
+
+def test_handoff_check_warns_on_oversized_compact_summary(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-heavy-summary"
+    _write_compact_plan(plan_folder)
+    heavy_summary = "A" * 1400
+    summary_path = plan_folder / "01-change-summary.md"
+    summary_path.write_text(
+        summary_path.read_text(encoding="utf-8").replace(
+            "Ridurre l'ambiguita di handoff.",
+            f"Ridurre l'ambiguita di handoff. {heavy_summary}",
+        ),
+        encoding="utf-8",
+    )
+    result = run_cli("handoff-check", plan_folder, "--format", "json")
+    payload = json.loads(result.stdout)
+    assert result.returncode == 0
+    assert any(
+        "Compact 01-change-summary.md is oversized" in warning
         for warning in payload["warnings"]
     )
 

@@ -24,7 +24,7 @@ content. Folders without a declared `Plan profile` return
 
 | File | Role | Mandatory |
 | --- | --- | --- |
-| `01-change-summary.md` | Italian human-readable decision summary. Non-executable. | Yes |
+| `01-change-summary.md` | Compressed Italian decision capsule. Non-executable. | Yes |
 | `02-execution.md` | Merged control and execution file. Must contain profile and control header, executable numbered steps, and inline source-item coverage. | Yes |
 | `done-*`, `evidence-envelope.md`, `completion-report.md` | Final packaging artifacts created after execution, not during authoring. | No (authoring) |
 
@@ -65,9 +65,14 @@ starting at `03-execution.md`. Update `Plan profile` to `extended`.
 
 ## Compact Token Expectations
 
-- Keep total estimated tokens small enough for a small/fast executor handoff.
-- Keep `02-execution.md` concise and concrete; long procedural detail is an
-  escalation signal to `extended`.
+- Keep total plan Markdown under 2,000 estimated tokens, measured as
+  `ceil(UTF-8 bytes / 4)`.
+- Keep `01-change-summary.md` under 300 estimated tokens.
+- Keep `02-execution.md` under 1,500 estimated tokens.
+- Warnings from the bundle-local CLI are review inputs that require compression
+  or escalation before handoff.
+- Long procedural detail in `01-change-summary.md` is a defect. Long procedural
+  detail in `02-execution.md` is an escalation signal to `extended`.
 
 ## Template: 01-change-summary.md (Italian)
 
@@ -76,13 +81,14 @@ Required sections in Italian:
 - `Problema da risolvere` — concrete problem statement.
 - `Risultato atteso` — expected outcome, short bullet list.
 - `Risorse coinvolte` — table with columns `Risorsa | Azione | Scopo`. Required
-  for non-trivial plans. Each row names the resource, the action, and its purpose.
-- `Comportamento scelto` — chosen behavior and boundary rules.
-- `Validazione prevista` — validation path.
-- `Esecuzione prevista` — route visibility, including profile, folder prefix,
-  execution file, and any execution-strategy hints the executor should infer.
+  for non-trivial plans. Use one row per materially changed resource group, not
+  one row per file when that would duplicate the control file.
 - `Decisione richiesta` — decision request.
 - `Decisioni aperte` — one line (`none` when there are no blockers).
+
+Do not put chosen logic, validation detail, execution route notes, source-item
+coverage, blockers, or implementation-contract detail in `01-change-summary.md`.
+Those facts belong in `02-execution.md`.
 
 ## Template: 02-execution.md
 

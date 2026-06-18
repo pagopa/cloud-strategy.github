@@ -50,19 +50,38 @@ Do not use `compact` when the executor needs exact sources, target files,
 validators, blockers, or external pins that only `02-control.md`
 can provide.
 
+## Explicit Constraints
+
+- Create retained plans under `tmp/superpowers/<clear-action-or-task-name>/`.
+- New `compact` folders must use `tmp/superpowers/mini-plan-*`.
+- Use English file names. Write `01-change-summary.md` in Italian. Write all
+  other plan files in English.
+- Keep `01-change-summary.md` as a compressed, non-executable decision capsule.
+  Target at most 300 estimated tokens. Use only these required sections:
+  `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte`,
+  `Decisione richiesta`, and `Decisioni aperte`.
+- `Risorse coinvolte` keeps the `Risorsa | Azione | Scopo` table. Use one row
+  per materially changed resource group, not one row per file when that would
+  duplicate `02-execution.md` or `02-control.md`.
+- Do not put chosen logic, validation detail, execution route notes, source-item
+  coverage, blockers, or implementation-contract detail in `01-change-summary.md`.
+  Put those facts in `02-execution.md` for `compact` or `02-control.md` for
+  `extended`.
+- Compact plans have a 2,000 estimated-token total budget measured as
+  `ceil(UTF-8 bytes / 4)` across plan Markdown files. Keep `02-execution.md`
+  under 1,500 estimated tokens. Treat warnings as required review inputs.
+- `compact` uses exactly `01-change-summary.md` and `02-execution.md` during
+  authoring. `extended` uses `01-change-summary.md`, `02-control.md`,
+  `03-execution.md`, and optional higher numbered files.
+
 ## Core Contract
 
-- Create the plan under `tmp/superpowers/<clear-action-or-task-name>/`.
-- Use English file names. `01-change-summary.md` is written in Italian; all
-  other plan files use English.
 - For debugging, drift, or data-mismatch work, produce a compact diagnosis
   capsule before retained-plan authoring starts: symptom, target artifact,
   compared sources or layers, cheapest falsifier, and stop rule. Keep it only
   in chat or request context; do not create another retained file for it.
-- `01-change-summary.md`: Italian human-readable decision summary with
-  `Problema da risolvere`, `Risultato atteso`, `Risorse coinvolte` table
-  (`Risorsa | Azione | Scopo`), `Comportamento scelto`, `Validazione prevista`,
-  `Esecuzione prevista`, and `Decisione richiesta`.
+- `01-change-summary.md`: compressed Italian decision capsule following
+  `Explicit Constraints`.
 - `02-execution.md` for `compact` must include these exact headings:
   `Plan profile`, `Target and anti-scope` (with `### Target` and
   `### Anti-scope`), `Owner and validator`, `Stop conditions`, `Objective`,
@@ -82,9 +101,9 @@ can provide.
 - Apply a say-once rule: each control fact (target, owner, validator, blockers,
   pins, and source-item coverage) is written once in the owning file, and step
   files do not restate target/owner/validator.
-- Keep profile token weight explicit: `compact` stays small/fast with two files;
-  `extended` keeps control weight in `02-control.md` and execution weight in
-  numbered step files.
+- Keep profile token weight explicit: `compact` stays within the 2,000-token
+  total budget with a compressed `01`; `extended` keeps control weight in
+  `02-control.md` and execution weight in numbered step files.
 - `done-*`, `evidence-envelope.md`, and `completion-report.md` are packaging
   artifacts only. Do not create them during authoring.
 
@@ -94,7 +113,7 @@ can provide.
 2. For debugging, drift, or data-mismatch work, write the diagnosis capsule
    before `01-change-summary.md`.
 3. For new plans, run bundle-local `init` first to create the scaffold.
-4. Choose folder name and write `01-change-summary.md` in Italian.
+4. Choose folder name and write the compressed `01-change-summary.md` in Italian.
 5. For `compact`, write `02-execution.md` with profile, control header, steps,
   and source-item coverage.
 6. For `extended`, write `02-control.md` with profile, control facts, merged
@@ -112,8 +131,11 @@ can provide.
 ## Validation
 
 - Plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
-- `01-change-summary.md` is Italian; other plan files are English.
+- `01-change-summary.md` is Italian, compressed, and contains only the required
+  decision-capsule sections.
 - `compact` uses `01-change-summary.md` + `02-execution.md` only.
+- `compact` stays under the 2,000 estimated-token total budget, or the warning
+  was resolved by compression or escalation.
 - `compact` `02-execution.md` uses the exact validator headings and step labels.
 - `extended` uses `01-change-summary.md`, `02-control.md`, and
   `03-execution.md` plus optional higher-numbered slices.

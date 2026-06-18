@@ -21,7 +21,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Observable acceptance | Does each executable verb name the expected diff, file state, assertion, or explicit non-action that will prove it was done? |
 | Evidence | Are external claims, provenance paths, or comparative patterns cited where needed? |
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
-| Summary focus | Does `01-change-summary.md` contain only the Italian decision summary with required sections and a `Risorsa \| Azione \| Scopo` table for non-trivial plans? |
+| Summary focus | Does `01-change-summary.md` contain only the compressed Italian decision capsule with required sections and a `Risorsa \| Azione \| Scopo` table for non-trivial plans? |
 | Summary clarity | Are changed resources and intended actions obvious in the summary? |
 | Semantic coverage | For `compact`, does `02-execution.md` preserve each requested or source item with stable item id, observable acceptance, evidence class, status, and route? For `extended`, does `02-control.md` preserve the same coverage? |
 | Implementation contract | For `extended` profiles, does `02-control.md` include the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, a separate implementation contract is not required. |
@@ -33,7 +33,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Open questions | Is `questions.md` present and set to `- none` for execution handoff, or explicitly blocking handoff? |
 | Lifecycle status | Is plan state explicit (`scaffold`, `ready`, or `closed`) so an executor does not infer readiness? |
 | Token discipline | Does the ledger define `Initial evidence pass` and `Reading budget` so the executor can classify the folder with the fewest safe reads? |
-| Profile token budget | Are token expectations proportional to profile (`compact` small/fast, `extended` thinking-first) and enforced without vendor model names? |
+| Profile token budget | Is `compact` within the 2,000 estimated-token total budget, with `01-change-summary.md` under 300 and `02-execution.md` under 1,500, or escalated to `extended`? |
 
 ## Outcomes
 
@@ -57,7 +57,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 - Treat missing merged-contract sections in `02-control.md` as a plan-quality defect for `extended` profiles. For `compact` profiles, a separate implementation contract is not required unless the plan changes always-on guidance, validators, or cross-family contracts.
 - For `compact`, treat missing `Plan profile` and control header in `02-execution.md` as a plan-quality defect.
 - When external evidence is needed, require an exact pin or explicit fallback in `02-control.md` before approving execution.
-- Treat a long or overloaded `01-change-summary.md` as a plan-quality defect, not as a documentation nit.
+- Treat a long or overloaded `01-change-summary.md` as a plan-quality defect, not as a documentation nit. It should be a compressed decision capsule, not a control file.
 - Treat an English `01-change-summary.md` as a plan-quality defect per the current retained-plan contract (Italian only).
 - Treat an unclear resource table or missing resource-action-purpose columns in `01-change-summary.md` as a plan-quality defect.
 - Treat a missing or weak source-item ledger as a plan-quality defect, not as a documentation nit.

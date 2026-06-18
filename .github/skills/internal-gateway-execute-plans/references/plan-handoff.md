@@ -15,8 +15,9 @@ before the `done-*` loop starts.
 - `Plan profile` declared as `compact` or `extended` in `02-execution.md`
   (`compact`) or `02-control.md` (`extended`).
   Unsupported or missing profiles return `unsupported-plan-contract`.
-- `01-change-summary.md`: Italian decision summary with required sections and
-  a `Risorsa | Azione | Scopo` table for non-trivial plans. Non-executable.
+- `01-change-summary.md`: compressed Italian decision capsule with required
+  sections and a `Risorsa | Azione | Scopo` table for non-trivial plans.
+  Non-executable.
 - `02-execution.md` (`compact`) with merged control header and executable steps.
 - `02-control.md` (`extended`) with `Recommended use`, `File map and role`,
   `Initial evidence pass`, `Reading budget`, source-item coverage, and merged
@@ -60,7 +61,8 @@ before the `done-*` loop starts.
   `02-execution.md` without escalating to `extended`.
 - Scope moves outside the declared files, owners, or asset family.
 - `01-change-summary.md` is missing, overloaded with control details, written in
-  English, or missing the `Risorsa | Azione | Scopo` table for non-trivial plans.
+  English, or missing the required decision-capsule sections or
+  `Risorsa | Azione | Scopo` table for non-trivial plans.
 - `02-control.md`, `Recommended use`, or `File map and role` is missing from an
   `extended` retained plan.
 - `Initial evidence pass`, `Reading budget`, or source-item coverage is missing
