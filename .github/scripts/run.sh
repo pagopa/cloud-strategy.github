@@ -41,6 +41,7 @@ Tools:
   detect_token_risks
     sync_home_ai_resources
   sync_copilot_catalog
+  validate_critical_output
     validate_internal_skills
 EOF
 }
@@ -141,6 +142,9 @@ resolve_script() {
             ;;
         sync_copilot_catalog|sync_copilot_catalog.py)
             printf '%s\n' "$SCRIPT_DIR/sync_copilot_catalog.py"
+            ;;
+        validate_critical_output|validate_critical_output.py)
+            printf '%s\n' "$SCRIPT_DIR/validate_critical_output.py"
             ;;
         validate_internal_skills|validate_internal_skills.py)
             printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"
