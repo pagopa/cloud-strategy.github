@@ -4,7 +4,7 @@
 Usage examples:
     python3 scripts/sync_home_ai_resources.py plan --targets skills
     python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs
-    python3 scripts/sync_home_ai_resources.py apply --targets skills,codex --retire-targets claude --prune-managed
+    python3 scripts/sync_home_ai_resources.py apply --targets skills,codex --retire-targets opencode --prune-managed
 """
 
 from __future__ import annotations
@@ -50,13 +50,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         cmd_parser.add_argument(
             "--targets",
             default="skills",
-            help="Target runtimes: skills, codex, copilot, claude, opencode, comma-separated combinations, or cross/all/tutto.",
+            help="Target runtimes: skills, codex, copilot, opencode, comma-separated combinations, or cross/all/tutto.",
         )
         if cmd != "doctor":
             cmd_parser.add_argument(
                 "--retire-targets",
                 default="",
-                help="Previously synced runtimes to retire from the manifest and prune when combined with --prune-managed. Example: claude",
+                help="Previously synced runtimes to retire from the manifest and prune when combined with --prune-managed. Example: opencode",
             )
         cmd_parser.add_argument(
             "--create-missing-dirs",

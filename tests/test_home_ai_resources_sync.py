@@ -422,8 +422,8 @@ def test_main_plan_blocks_overlap_between_active_and_retired_targets(
             command="plan",
             source_root=str(source_root),
             home_root=str(home_root),
-            targets="codex,claude",
-            retire_targets="claude",
+            targets="codex,opencode",
+            retire_targets="opencode",
             create_missing_dirs=False,
             prune_managed=False,
             experimental_targets=False,
@@ -438,7 +438,7 @@ def test_main_plan_blocks_overlap_between_active_and_retired_targets(
 
     assert exit_code == 1
     assert payload["blocked_codes"] == ["retire-target-overlap"]
-    assert payload["retired_targets"] == ["claude"]
+    assert payload["retired_targets"] == ["opencode"]
 
 
 def test_sync_auto_applies_clean_repo_to_home_install(

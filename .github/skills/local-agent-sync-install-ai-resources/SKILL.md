@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-install-ai-resources
-description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, Copilot, Claude Code, or OpenCode targets.
+description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, Copilot, or OpenCode targets.
 ---
 
 # Local Agent Sync Home AI Resources
@@ -27,7 +27,7 @@ The paired agent is a thin UX wrapper; this skill owns business logic, sequencin
 - Source-side catalog governance in this repository; use `local-sync-external-resources` instead.
 - Consumer-repository baseline sync; use `local-sync-global-copilot-configs-into-repo` instead.
 - Personal configuration merge, runtime adapter generation, or general dotfiles management.
-- Undocumented runtime families outside the allowlisted direct-copy skills and translated agents for Claude, OpenCode, and Codex.
+- Undocumented runtime families outside the allowlisted direct-copy skills and translated agents for OpenCode and Codex.
 
 ## Deterministic Operator Protocol
 
@@ -90,13 +90,13 @@ Report `next_action` to the user. Do not execute `command` from `next_action` un
 - For the install lane, treat this repository as the source of truth for allowlisted home-sync resources.
 - Install sync is unidirectional: repo -> home only. Block any attempt to sync from home to repo.
 - Default generic sync requests to `sync`; keep plain `apply`, prune, directory creation, and all `bisync apply` writes explicit unless the user provided the matching flags or request.
-- Limit v1 default materialization to documented direct-copy skill families and allowlisted agent translations for Codex, Claude, and OpenCode.
+- Limit v1 default materialization to documented direct-copy skill families and allowlisted agent translations for Codex and OpenCode.
 - Preserve unmanaged target-local files and directories.
 - Prune only stale managed assets, including manifest-managed resources whose source bundle was removed from the repo, and only when explicit approval is present and the manifest entry passes schema validation, path confinement, and content-hash drift checks.
 - Keep local sync state under `~/.sync/cloud-strategy-governance/home-ai-resources/`.
 - Block `apply` when runtime support is undocumented, target paths are unsafe, or ownership evidence is missing.
 - Keep runtime support evidence explicit through the paired references instead of inferring undocumented home paths.
-- Use `--retire-targets` when the managed target set should shrink, for example removing `claude` while keeping `codex` and `copilot`.
+- Use `--retire-targets` when the managed target set should shrink, for example removing `opencode` while keeping `codex` and `copilot`.
 
 ## Bisync Lane
 
@@ -166,7 +166,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 ## Target Selection
 
-- Accept `codex`, `copilot`, `claude`, `opencode`, comma-separated combinations, `cross`, `all`, or `tutto`.
+- Accept `codex`, `copilot`, `opencode`, comma-separated combinations, `cross`, `all`, or `tutto`.
 - Normalize whitespace, deduplicate, and order targets deterministically.
 - Resolve skill roots as `~/.agents/skills` for all targets (scenario B: unification).
 - When multiple targets resolve to the same physical path, perform the copy operation only once (physical deduplication).
@@ -179,7 +179,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 - Read the source allowlist from `references/home-sync-catalog.yaml`.
 - Include only allowlisted `skills` and `agents` in v1.
 - Copy managed resources instead of creating symlinks.
-- Translate allowlisted `.agent.md` sources deterministically for Codex, Claude, and OpenCode targets.
+- Translate allowlisted `.agent.md` sources deterministically for Codex and OpenCode targets.
 - Preserve target-local content that is outside the manifest.
 - Record source hashes, expected content hashes, and managed target paths in the local manifest.
 - Keep the manifest target set aligned with the requested active targets; retired targets leave the manifest only through an explicit run that names them in `--retire-targets`.

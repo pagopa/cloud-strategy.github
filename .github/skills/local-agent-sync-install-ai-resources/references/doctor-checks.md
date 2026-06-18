@@ -32,14 +32,6 @@ For every check that is not `ok`, include a short **motivation** that explains w
 - Confirm allowlisted agent source files are valid `.agent.md` files.
 - Confirm bundle-relative paths stay self-contained.
 
-## Claude Checks
-
-- Confirm `~/.agents/skills` exists or can be created safely.
-- Confirm `~/.claude/agents` exists or can be created safely.
-- Confirm allowlisted skill bundles contain `SKILL.md`.
-- Confirm allowlisted agent source files are valid `.agent.md` files.
-- Confirm bundle-relative paths stay self-contained.
-
 ## OpenCode Checks
 
 - Confirm `~/.agents/skills` exists or can be created safely.

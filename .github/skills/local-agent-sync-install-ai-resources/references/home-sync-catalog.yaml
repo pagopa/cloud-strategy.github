@@ -10,7 +10,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Portable reference skill with direct-copy bundle shape.
@@ -20,7 +19,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Portable evaluation workflow skill with repository-contained references.
@@ -30,7 +28,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Portable authoring skill that already ships deterministic helper scripts.
@@ -40,7 +37,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -50,7 +46,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -60,7 +55,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -70,7 +64,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -80,7 +73,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -90,7 +82,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -100,7 +91,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -110,7 +100,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -120,7 +109,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -130,7 +118,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -140,7 +127,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -150,7 +136,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -160,7 +145,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -170,7 +154,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -180,7 +163,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -190,7 +172,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -200,7 +181,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -210,7 +190,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -220,7 +199,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -230,7 +208,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -240,7 +217,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -250,7 +226,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -260,7 +235,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -270,7 +244,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -280,7 +253,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -290,7 +262,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -300,7 +271,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -310,7 +280,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -320,7 +289,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -330,7 +298,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -340,7 +307,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -350,7 +316,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -360,7 +325,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -370,7 +334,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -380,7 +343,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -390,7 +352,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -400,7 +361,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -410,7 +370,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -420,7 +379,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -430,7 +388,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -440,7 +397,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -450,7 +406,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -460,7 +415,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -470,7 +424,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -480,7 +433,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -490,7 +442,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -500,7 +451,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -510,7 +460,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -520,7 +469,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -530,7 +478,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -540,7 +487,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -550,7 +496,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -560,7 +505,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -570,7 +514,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -580,7 +523,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -590,7 +532,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -600,7 +541,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -610,7 +550,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -620,7 +559,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -630,7 +568,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -640,7 +577,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -650,7 +586,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -660,7 +595,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -670,7 +604,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -680,7 +613,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -690,7 +622,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -700,7 +631,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -710,7 +640,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -720,7 +649,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -730,7 +658,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -740,7 +667,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -750,7 +676,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -760,7 +685,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -770,7 +694,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -780,7 +703,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -790,7 +712,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -800,7 +721,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -810,7 +730,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -820,7 +739,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -830,7 +748,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -840,7 +757,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -850,7 +766,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -860,7 +775,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -870,7 +784,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -880,7 +793,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -890,7 +802,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -900,7 +811,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -910,7 +820,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -920,7 +829,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -930,7 +838,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -940,7 +847,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -950,7 +856,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -960,7 +865,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -970,7 +874,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -980,7 +883,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -990,7 +892,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -1000,7 +901,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -1010,7 +910,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -1020,7 +919,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Auto-included skill bundle.
@@ -1030,7 +928,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Gateway agent for substantive idea definition and brainstorming.
@@ -1040,7 +937,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Gateway agent for staged workflow orchestration.
@@ -1050,7 +946,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Gateway agent for critical challenge and pressure testing.
@@ -1060,7 +955,6 @@ resources:
   include_targets:
   - codex
   - copilot
-  - claude
   - opencode
   target_support: See runtime support matrix
   notes: Gateway agent for simple fast-path tasks.
