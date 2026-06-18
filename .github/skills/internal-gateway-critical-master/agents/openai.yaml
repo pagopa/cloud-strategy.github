@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Gateway Critical Master"
   short_description: "Critical challenge with outcome routing"
-  default_prompt: "Use $internal-gateway-critical-master to pressure-test this plan or decision and close with an explicit routing outcome."
+  default_prompt: "Use $internal-gateway-critical-master to pressure-test this plan or decision. Follow the three-phase procedure in SKILL.md, select 2-3 lenses from references/challenge-lenses.md, apply at least one lateral lens (analogy or reverse assumption), and close with the structured output contract in references/output-contract.md. Keep the total response under 600 words."

@@ -2,6 +2,17 @@
 
 Use this reference when a pressure test needs more structure than the main skill body should carry.
 
+## Lens selection criteria
+
+Select **2-3 lenses** from the table below. Prioritize by risk, not by completeness.
+
+1. Read the Phase 1 summary from `SKILL.md`.
+2. Pick the lens whose question most directly exposes a material failure mode or hidden assumption.
+3. Add a second lens that attacks a different dimension (evidence, constraints, stakeholders, time).
+4. Add the lateral lens `analogy` or `reverse assumption` if it is not already covered by step 2 or 3.
+
+Stop at 3 lenses unless the proposal has multiple independent material risks.
+
 ## Lenses
 
 | Lens | Question | Use when |
@@ -14,6 +25,8 @@ Use this reference when a pressure test needs more structure than the main skill
 | Time shift | What breaks after one month, one sync cycle, or one consumer rollout? | The immediate change looks correct but may age badly. |
 | Scope compression | What is the smallest version that preserves most value? | The plan may be overengineered. |
 | Opportunity cost | What useful path is the plan excluding? | The design is safe but may be too narrow. |
+| Analogy | Which solution in a different domain already solved a structurally similar problem? | The team is stuck in familiar patterns. |
+| Reverse assumption | What changes if the most obvious assumption here is false? | A key claim has not been tested recently. |
 
 ## Engagement Rules
 
@@ -22,6 +35,7 @@ Use this reference when a pressure test needs more structure than the main skill
 - Update the critique when repository evidence contradicts it.
 - Stop adding new objections once the closing synthesis is ready.
 - If the user wants implementation or plan rewriting, recommend the next owner instead of doing off-lane work.
+- Respect the token budget in `SKILL.md`: max 3 findings, max 150 words per finding, max 300 words synthesis.
 
 ## Final Consistency Gate
 
@@ -39,11 +53,16 @@ Then reconcile the answer:
 
 ## Output Pattern
 
+For each finding, produce:
+
 - Strongest objection or assumption gap.
 - Why it matters now.
 - Evidence or uncertainty.
 - Mitigation or condition required before planning or delivery resumes.
-- One reframing move.
-- Closing synthesis after the final consistency gate.
+- Optional lateral reframe.
+
+Then close with:
+
+- Synthesis after the Final Consistency Gate.
 - Explicit outcome: `reformulate-plan`, `de-escalate-to-simple`, `execute-clear-next-step`, `review-evidence`, `continue-critical`, or `accept-with-risk`.
 - Recommended owner and next-step package when another lane should act.
