@@ -35,13 +35,13 @@ resume attempt stops.
 8. Read merged implementation-contract sections in `02-control.md` when present
   or required and compare them with touched files, validators, blockers, and
   any external pins or fallback.
-10. Check `git status` and `git diff` for uncommitted evidence of completed work.
-11. Re-run the validators declared by the plan, or name the closest available
+9. Check `git status` and `git diff` for uncommitted evidence of completed work.
+10. Re-run the validators declared by the plan, or name the closest available
     validator and the gap.
-12. If `completion-report.md` exists, read its `State`, `Continuation`, and
+11. If `completion-report.md` exists, read its `State`, `Continuation`, and
     `User action required` fields before assuming the folder is closed or ready
     to continue.
-13. Produce a status report before editing canonical files.
+12. Produce a status report before editing canonical files.
 
 ## Status Report Template
 

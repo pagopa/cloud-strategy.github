@@ -46,10 +46,10 @@ before the `done-*` loop starts.
 3. For `compact`, `02-execution.md` is the only executable file after the
   summary. For `extended`, read numbered executable plan files in order after
   `02-control.md`.
-5. Check whether a Decision Brief exists in chat, a prompt, or a retained plan
+4. Check whether a Decision Brief exists in chat, a prompt, or a retained plan
    artifact.
-6. If a required input is missing, inspect repository evidence before asking.
-7. If the missing input cannot be recovered, stop with a visible gap instead of
+5. If a required input is missing, inspect repository evidence before asking.
+6. If the missing input cannot be recovered, stop with a visible gap instead of
    guessing.
 
 ## Standard Stop Conditions

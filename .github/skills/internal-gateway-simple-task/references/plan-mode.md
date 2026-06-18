@@ -27,7 +27,7 @@ If the user does not mention a plan, but the following signals show that
 same-chat execution would be less economical than a retained plan, declare the
 signal and ask for explicit confirmation before switching to plan mode.
 
-**Cost-signal checklist**
+### Cost-signal checklist
 
 - The user hints at continuation across chats, e.g. *"continuiamo dopo"*,
   *"in un'altra chat"*, *"domani"*, *"salva per dopo"*, *"persistilo"*.
