@@ -32,6 +32,9 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 
 - Standalone tools should default to a dedicated folder or toolkit root, not a loose top-level `.py` file.
 - Keep entrypoints thin: parse arguments, resolve paths, orchestrate helpers, and return an exit code through `main() -> int` plus `raise SystemExit(main())`.
+- Keep script-owned configuration visible at the entrypoint boundary. In single-file scripts, place a clearly named `Configuration` section near the end of the file, after helper definitions and before `main()` or `raise SystemExit(main())`.
+- Name configuration values by purpose, not by type: paths, file names, field lists, thresholds, defaults, mappings, filters, and output modes should explain what behavior they control.
+- Do not hide script-specific configuration inside helper modules or libraries. Helpers should accept explicit parameters or a small typed settings object when several values travel together.
 - Keep single-file scripts under 400 lines when possible. At 300 lines, review whether orchestration and helper boundaries stay clear; at 400 lines, split-or-justify is required.
 - Place shared helper logic in local helper modules, preferably under `utils/` when the toolkit structure supports that layout.
 - For operator-facing script work, crossing the 400-line threshold should move toward a toolkit or project structure according to the primary contract, not an ever-growing single entrypoint.
@@ -52,6 +55,7 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 ## Compact Python baseline
 
 - Prefer early returns, guard clauses, clear names, and readable control flow.
+- Keep script-owned configuration at the entrypoint boundary with simple descriptive names.
 - Add type hints on public or non-trivial function signatures.
 - Keep comments, docstrings, logs, exceptions, and CLI output in English.
 - Use the repository-declared runtime before falling back to ambient `python3`.
@@ -95,6 +99,7 @@ Keep these rules visible while drafting:
 - Use coverage reports to inspect missing behavior on touched code, not to force blanket 100% coverage.
 - For bugfixes, features, and intentional behavior changes, start test-first through the public CLI or stable helper seam: add or update the failing test, confirm it fails for the intended reason, then implement the smallest fix.
 - For refactors, prose-only updates, generated fixtures, or mechanical formatting with no executable behavior change, run the existing focused tests plus `py_compile` or `compileall` instead of manufacturing speculative tests.
+- When Ruff is configured, run `ruff format` for formatting-only Python edits and `ruff check` for lint feedback before wider test runs.
 - Prefer existing repository commands such as `make lint`, `make test`, or a shared script runner before inventing a one-off validation path.
 
 ## Runtime guidance

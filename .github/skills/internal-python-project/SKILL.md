@@ -31,9 +31,13 @@ description: Use when creating or modifying Python package or application code w
 ## Compact Python baseline
 
 - Prefer early returns, guard clauses, clear names, and readable control flow.
+- Keep functions small enough to read without tracing hidden state. Prefer explicit inputs over module-level lookups inside reusable logic.
 - Add type hints on public or non-trivial function signatures.
 - Keep comments, docstrings, logs, exceptions, and CLI output in English.
 - Use the repository-declared runtime before falling back to ambient `python3`.
+- Centralize behavioral configuration instead of scattering magic values through services, adapters, or library modules. Put environment-specific and operator-tuned values in a settings module, application factory, CLI adapter, framework configuration, or composition root.
+- Pass configuration into reusable project code through typed settings, constructor arguments, or function parameters. Domain and service code should not read environment variables, files, or deployment defaults directly unless that boundary is its explicit responsibility.
+- Do not confuse domain invariants with configuration. Stable rules that belong to the domain may stay near the domain code; deployment-specific paths, endpoints, thresholds, defaults, and feature switches should live at the configuration boundary.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
 - If external packages are introduced, keep exact pins and hashes in the owning requirements file.
 
@@ -66,6 +70,7 @@ Load `references/logging-and-reporting.md` when project code needs a professiona
 - Follow the repository's existing framework before introducing FastAPI, Flask, Django, or a new dependency stack.
 - Use dataclasses or typed DTOs for internal contracts, and boundary-validation models where the framework already expects them.
 - Keep async flows end-to-end; do not mix blocking libraries into async request paths without an explicit bridge.
+- When Ruff is configured for the project, let `ruff format` own formatting and use `ruff check` before broader test runs. Avoid hand-formatting that creates churn against the configured formatter.
 
 ## Test-shape guidance
 

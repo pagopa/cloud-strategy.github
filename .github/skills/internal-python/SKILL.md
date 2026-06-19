@@ -30,12 +30,16 @@ every Python edit; load them only when the task proves script or project depth.
 - Classify Python work by primary contract before choosing structure: direct operator execution belongs to `internal-python-script`; importable package, application, service, or framework behavior belongs to `internal-python-project`.
 - Do not classify by file count alone. A multi-module toolkit can remain script-owned when its main contract is CLI execution.
 - Prefer early returns, guard clauses, clear names, and readable control flow.
+- Keep functions small enough to read without tracing hidden state. Prefer explicit inputs over module-level lookups inside reusable logic.
 - Add type hints on public or non-trivial function signatures.
 - Treat 300 lines as a review threshold for cohesive Python files.
 - Treat 400 lines as a split-or-justify threshold: split repeated decisions into focused modules or document why a single file remains clearer.
 - Apply pragmatic DRY: extract repeated decision logic, but do not force abstractions for one-off control flow.
+- Centralize behavioral configuration instead of scattering magic values through implementation code. Use clear names for paths, field lists, thresholds, defaults, mappings, feature switches, and external endpoint values.
+- Do not confuse domain invariants with configuration. Stable rules that belong to the domain may stay near the domain code; environment-specific or operator-tuned values belong at an entrypoint, settings module, adapter, or composition boundary.
 - Keep comments, docstrings, logs, exceptions, and CLI output in English.
 - Use the repository-declared runtime before falling back to ambient `python3`.
+- When Ruff is configured for the target repository, let `ruff format` own formatting and use Ruff diagnostics for import order and simple style cleanup. Do not create manual formatting churn that fights the configured formatter.
 - When a test must modify `sys.path` before importing a standalone script, keep the affected import after that setup and mark only that import with `# noqa: E402`; remove truly unused imports or variables instead of suppressing them.
 - Add or update tests for testable logic.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
