@@ -27,6 +27,8 @@ every Python edit; load them only when the task proves script or project depth.
 
 ## Baseline
 
+- Classify Python work by primary contract before choosing structure: direct operator execution belongs to `internal-python-script`; importable package, application, service, or framework behavior belongs to `internal-python-project`.
+- Do not classify by file count alone. A multi-module toolkit can remain script-owned when its main contract is CLI execution.
 - Prefer early returns, guard clauses, clear names, and readable control flow.
 - Add type hints on public or non-trivial function signatures.
 - Treat 300 lines as a review threshold for cohesive Python files.
@@ -38,6 +40,7 @@ every Python edit; load them only when the task proves script or project depth.
 - Add or update tests for testable logic.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
 - If external packages are introduced, keep exact pins and hashes in the owning requirements file.
+- Keep human-facing console reporting separate from reusable Python logging and machine-readable output. Script or CLI adapter boundaries may use `rich`; project/package internals and JSON-style output paths should stay neutral, structured, or plain data.
 
 ## Dependency And Runtime Depth
 

@@ -5,6 +5,11 @@ description: Use when creating or modifying Python package or application code w
 
 # Python Project Skill
 
+## Referenced skills
+
+- `internal-python-script`: route CLI adapters, direct operator execution, and rich console reporting boundaries.
+- `internal-tdd`: load for bugfixes, features, or project behavior changes with a meaningful public or service seam.
+
 ## When to use
 
 - Services, use cases, adapters, packages, and modules in Python applications.
@@ -38,9 +43,14 @@ description: Use when creating or modifying Python package or application code w
 - Choose async only when the workload is I/O-bound and the surrounding stack supports it cleanly.
 - Keep request or transport models, domain logic, and persistence concerns in separate modules.
 - Prefer a domain/service/adapter decomposition before adding generic catch-all modules.
-- Keep reusable module and service logs neutral or structured; reserve emoji log formatting for outer operator-facing entrypoints.
+- Keep reusable module and service logs neutral, structured, or framework-native. Log events should be parsable, searchable, and useful in production.
+- Design professional reporting as a boundary concern: core project code returns typed results, events, or DTOs; adapters decide whether to render JSON, HTTP responses, framework logs, metrics, or human-facing CLI reports.
+- No emoji or `rich` rendering inside importable domain, service, persistence, framework modules, or machine-readable output paths such as JSON. Use `rich` only in human-facing CLI adapter reporting.
+- If a project exposes a CLI adapter, keep the CLI adapter thin and route its operator-facing reporting to the script boundary. A CLI adapter may use an `ExecutionReporter`; the core project code should not know that reporter exists.
 
 Load `references/examples.md` when you need a minimal module or test example.
+
+Load `references/logging-and-reporting.md` when project code needs a professional logging/reporting layout, structured log context, result DTOs, adapter-owned rendering, or JSON versus human-output boundaries.
 
 ## Testing
 
@@ -48,7 +58,8 @@ Load `references/examples.md` when you need a minimal module or test example.
 - BDD-like names: `given_when_then` style.
 - Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
 - Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.
-- For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
+- For bugfixes, features, and intentional behavior changes, start test-first through the public API, service boundary, adapter contract, or framework-owned seam: add or update the failing test, confirm it fails for the intended reason, then implement the smallest fix.
+- For refactors, prose-only updates, generated fixtures, or mechanical formatting with no executable behavior change, run existing focused tests and syntax validation instead of manufacturing speculative tests.
 
 ## Architecture and framework guidance
 
@@ -70,5 +81,6 @@ Load `references/common-mistakes.md` for the full mistake table.
 ## Validation
 
 - `python -m compileall <paths>` (syntax check)
+- `pip install --require-hashes -r requirements.txt` (dependency integrity check, only when requirements change)
 - `pytest tests/` (run tests)
 - Lint with project's configured linter.

@@ -37,7 +37,6 @@ repo-root/
 
 - Keep each entrypoint thin and import reusable helpers from the local `lib/` package.
 - Keep the dependency decision note and pinned hashes in the shared `requirements.txt`.
-- Use one shared `run.sh` to create or reuse `.venv`, install locked requirements, and dispatch to the selected Python entrypoint.
 
 ## Minimal Python Entry Point
 
@@ -52,31 +51,46 @@ import argparse
 import sys
 
 
-def log_info(msg: str) -> None:
-    print(f"ℹ️  {msg}")
+class ExecutionReporter:
+    def __init__(self, *, verbose: bool = False) -> None:
+        self.verbose = verbose
+
+    def _emit(self, message: str, *, error: bool = False) -> None:
+        stream = sys.stderr if error else sys.stdout
+        print(message, file=stream)
+
+    def detail(self, message: str) -> None:
+        if self.verbose:
+            self._emit(f"ℹ️  {message}")
+
+    def error(self, message: str) -> None:
+        self._emit(f"❌ {message}", error=True)
+
+    def step(self, message: str) -> None:
+        self._emit(f"• {message}")
+
+    def success(self, message: str) -> None:
+        self._emit(f"✅ {message}")
 
 
-def log_error(msg: str) -> None:
-    print(f"❌ {msg}", file=sys.stderr)
-
-
-def log_success(msg: str) -> None:
-    print(f"✅ {msg}")
-
-
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True, help="Target to process")
+    parser.add_argument("--verbose", action="store_true", help="Show technical details.")
     args = parser.parse_args()
 
-    log_info(f"Processing {args.target}")
+    reporter = ExecutionReporter(verbose=args.verbose)
+    reporter.step(f"Processing {args.target}")
     # ... logic ...
-    log_success("Done")
+    reporter.success("Done")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
 ```
+
+For richer operator-facing output, use `references/reporting.md` and replace this stdlib reporter with a `rich`-backed `ExecutionReporter` after recording the dependency decision.
 
 ## Repo-Aligned Toolkit Entry Point
 
@@ -96,7 +110,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from lib.shared import find_repo_root, log_info, render_json
+from lib.reporting import ExecutionReporter
+from lib.shared import find_repo_root, render_json
 
 
 def parse_args() -> argparse.Namespace:
@@ -108,12 +123,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+  reporter = ExecutionReporter()
     root = find_repo_root(Path(args.root))
     payload = {"root": root.as_posix()}
     if args.format == "json":
         print(render_json(payload))
     else:
-        log_info(f"Resolved repository root: {root.as_posix()}")
+    reporter.detail(f"Resolved repository root: {root.as_posix()}")
     return 0
 
 

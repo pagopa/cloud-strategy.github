@@ -269,6 +269,13 @@ def test_technology_skill_modularity_contract_is_owned_and_searchable() -> None:
     assert "project" in python_script_skill_text
     assert "generated" in python_script_skill_text
     assert "fixture" in python_script_skill_text
+    assert "## referenced skills" in python_script_skill_text
+    assert "internal-tdd" in python_script_skill_text
+    assert "references/reporting.md" in python_script_skill_text
+    assert "executionreporter" in python_script_skill_text
+    assert "rich" in python_script_skill_text
+    assert "test-first" in python_script_skill_text
+    assert "pip install --require-hashes" in python_script_skill_text
 
     assert "entrypoint" in bash_script_skill_text
     assert "sourced helper" in bash_script_skill_text
@@ -281,3 +288,12 @@ def test_technology_skill_modularity_contract_is_owned_and_searchable() -> None:
     assert "dto" in java_project_skill_text
 
     assert "domain/service/adapter" in python_project_skill_text
+    assert "## referenced skills" in python_project_skill_text
+    assert "internal-tdd" in python_project_skill_text
+    assert "structured" in python_project_skill_text
+    assert "rich" in python_project_skill_text
+    assert "cli adapter" in python_project_skill_text
+    assert "no emoji" in python_project_skill_text
+    assert "references/logging-and-reporting.md" in python_project_skill_text
+    assert "typed results" in python_project_skill_text
+    assert "machine-readable" in python_project_skill_text
