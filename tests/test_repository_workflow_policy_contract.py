@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import yaml
@@ -12,6 +13,10 @@ def read_text(relative_path: str) -> str:
 def section_between(body: str, heading: str) -> str:
     section = body.split(heading, 1)[1]
     return section.split("\n## ", 1)[0]
+
+
+def python_fenced_blocks(body: str) -> list[str]:
+    return re.findall(r"```python\n(.*?)\n```", body, flags=re.DOTALL)
 
 
 def test_github_pr_skill_owns_pr_merge_and_terminal_state_guardrails() -> None:
@@ -297,3 +302,18 @@ def test_technology_skill_modularity_contract_is_owned_and_searchable() -> None:
     assert "references/logging-and-reporting.md" in python_project_skill_text
     assert "typed results" in python_project_skill_text
     assert "machine-readable" in python_project_skill_text
+
+
+def test_python_skill_template_snippets_are_copyable_python() -> None:
+    template_paths = (
+        ".github/skills/internal-python-project/references/logging-and-reporting.md",
+        ".github/skills/internal-python-script/references/layout-and-templates.md",
+        ".github/skills/internal-python-script/references/reporting.md",
+    )
+
+    for relative_path in template_paths:
+        blocks = python_fenced_blocks(read_text(relative_path))
+        assert blocks, f"{relative_path} should contain Python fenced snippets"
+
+        for index, block in enumerate(blocks, start=1):
+            compile(block, f"{relative_path}:python-block-{index}", "exec")

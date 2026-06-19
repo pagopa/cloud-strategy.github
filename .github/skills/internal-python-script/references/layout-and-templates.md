@@ -123,13 +123,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-  reporter = ExecutionReporter()
+    reporter = ExecutionReporter()
     root = find_repo_root(Path(args.root))
     payload = {"root": root.as_posix()}
     if args.format == "json":
         print(render_json(payload))
     else:
-    reporter.detail(f"Resolved repository root: {root.as_posix()}")
+        reporter.detail(f"Resolved repository root: {root.as_posix()}")
     return 0
 
 

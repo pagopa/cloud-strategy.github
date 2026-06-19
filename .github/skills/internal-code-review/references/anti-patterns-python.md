@@ -62,7 +62,7 @@ except:
 try:
     result = fetch_data()
 except requests.RequestException as exc:
-    logger.warning("⚠️ Fetch failed: %s", exc)
+    logger.warning("Fetch failed: %s", exc)
     raise
 ```
 
