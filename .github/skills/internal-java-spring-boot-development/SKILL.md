@@ -36,7 +36,7 @@ affect the design, wiring, testing, or configuration.
 - Keep controllers thin: validate input, map transport types, delegate once, and return response DTOs.
 - Keep services stateless and focused on business behavior; avoid mutable singleton state.
 - Bind structured settings with `@ConfigurationProperties` instead of scattering `@Value` keys.
-- Validate request DTOs with Bean Validation and `@Valid`.
+- Validate transport DTOs and persistence-boundary commands with Bean Validation and `@Valid` before service execution.
 - Centralize API error mapping with `@ControllerAdvice` or the project's existing equivalent.
 - Keep transaction boundaries in the service layer and scope them only around the behavior that needs atomicity.
 - Do not leak JPA entities directly through HTTP contracts unless the project already made that tradeoff intentionally.

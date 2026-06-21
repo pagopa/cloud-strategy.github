@@ -35,6 +35,11 @@ every Java edit; load them only when the task proves which owner is needed.
 - Add concise JavaDoc only when a new or changed core type has non-obvious intent.
 - Use JUnit 5 for unit tests unless the repository has another established test stack.
 - Keep dependency, plugin, runtime, and test intent explicit in Maven or Gradle files.
+- Keep dependency delivery reproducible: no vendored jars or shaded copies, and pin versions with explicit properties or a BOM.
+- Keep comments, JavaDoc, logs, exceptions, and operator-facing output in English.
+- Centralize runtime configuration and keep domain invariants in code rather than environment toggles.
+- Avoid mutable static state in application code.
+- Validate boundary input fail-fast and reject invalid state early.
 
 ## Validation
 

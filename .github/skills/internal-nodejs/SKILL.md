@@ -34,7 +34,10 @@ package architecture, or deterministic test design becomes the real issue.
 - Apply pragmatic DRY: extract repeated decision paths and shared adapters, but avoid speculative abstractions.
 - Use `node:test` and `node:assert/strict` unless the repository already standardizes on another test framework.
 - Keep `package.json` scripts, engines, and dependency intent explicit.
-- Prefer strict `tsconfig.json` settings unless a documented compatibility reason exists.
+- Keep dependency delivery reproducible: no vendored packages, commit the lockfile, and use `npm ci` for deterministic installs.
+- Keep comments, JSDoc, logs, thrown errors, and operator-facing output in English.
+- Centralize runtime configuration and keep domain invariants in code rather than environment toggles.
+- Keep strict `tsconfig.json` settings enabled, avoid drift toward `any`, and type external boundaries explicitly.
 - Preserve the existing module system and package conventions unless the task explicitly changes them.
 
 ## Validation
