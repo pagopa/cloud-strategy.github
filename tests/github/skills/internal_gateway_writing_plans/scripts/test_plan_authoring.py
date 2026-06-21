@@ -234,7 +234,9 @@ def test_handoff_check_warns_on_oversized_compact_summary(tmp_path: Path) -> Non
 def test_audit_warns_when_summary_hides_counter_validation_facts(
     tmp_path: Path,
 ) -> None:
-    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-counter-validation-warning"
+    plan_folder = (
+        tmp_path / "tmp" / "superpowers" / "mini-plan-counter-validation-warning"
+    )
     _write_compact_plan(plan_folder)
     (plan_folder / "01-change-summary.md").write_text(
         "## Problema da risolvere\n"

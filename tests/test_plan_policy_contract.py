@@ -124,5 +124,10 @@ def test_writing_plans_counter_validation_contract_is_explicit() -> None:
 
     assert "counter-validation-critical facts" in writing_text
     assert "counter-validation-critical facts" in compact_reference
-    assert "counter-validate coverage without reading `02-execution.md` or `02-control.md`" in review_gate
-    assert "counter-validate the plan without reading the control file" in scope_challenge
+    assert (
+        "counter-validate coverage without reading `02-execution.md` or `02-control.md`"
+        in review_gate
+    )
+    assert (
+        "counter-validate the plan without reading the control file" in scope_challenge
+    )
