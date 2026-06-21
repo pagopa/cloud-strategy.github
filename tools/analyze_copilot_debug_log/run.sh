@@ -60,8 +60,10 @@ load_required_python_version() {
 
 select_python_bin() {
     if [[ -n "$PYTHON_BIN" ]]; then
+        PYTHON_BIN_EXPLICIT=1
         return
     fi
+    PYTHON_BIN_EXPLICIT=0
     PYTHON_BIN="python$REQUIRED_PYTHON_MAJOR_MINOR"
 }
 
@@ -70,6 +72,12 @@ verify_python_bin_version() {
     actual_version="$("$PYTHON_BIN" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
 
     if [[ "$actual_version" == "$REQUIRED_PYTHON_MAJOR_MINOR" ]]; then
+        EXPECTED_PYTHON_MAJOR_MINOR="$REQUIRED_PYTHON_MAJOR_MINOR"
+        return
+    fi
+
+    if [[ "$PYTHON_BIN_EXPLICIT" -eq 1 ]]; then
+        EXPECTED_PYTHON_MAJOR_MINOR="$actual_version"
         return
     fi
 
@@ -82,27 +90,30 @@ verify_venv_version() {
     local venv_version
 
     if [[ ! -x "$venv_python" ]]; then
-        log_error "virtual environment is missing its Python interpreter: $venv_python"
-        exit 1
+        return 1
     fi
 
     venv_version="$("$venv_python" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
-    if [[ "$venv_version" == "$REQUIRED_PYTHON_MAJOR_MINOR" ]]; then
-        return
+    if [[ "$venv_version" == "$EXPECTED_PYTHON_MAJOR_MINOR" ]]; then
+        return 0
     fi
 
-    log_error "existing virtual environment uses Python $venv_version, but .python-version requires $REQUIRED_PYTHON_VERSION. Remove $VENV_DIR and rerun."
-    exit 1
+    return 1
 }
 
 ensure_venv() {
     if [[ -d "$VENV_DIR" ]]; then
-        verify_venv_version
-        return
+        if verify_venv_version; then
+            return
+        fi
+        rm -rf "$VENV_DIR"
     fi
 
     "$PYTHON_BIN" -m venv "$VENV_DIR"
-    verify_venv_version
+    if ! verify_venv_version; then
+        log_error "virtual environment uses an unexpected Python version after creation: $VENV_DIR"
+        exit 1
+    fi
 }
 
 install_dependencies() {
@@ -151,6 +162,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 VENV_DIR="$SCRIPT_DIR/.venv"
 PYTHON_BIN="${PYTHON_BIN:-}"
+PYTHON_BIN_EXPLICIT=0
+EXPECTED_PYTHON_MAJOR_MINOR=""
 PYTHON_VERSION_FILE="$REPO_ROOT/.python-version"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 REQUIREMENTS_HASH_FILE="$VENV_DIR/.requirements.sha256"

@@ -50,6 +50,7 @@ consumes approved `compact` and `extended` retained plans.
 - Reject `compact` folders outside the `mini-plan-*` convention.
 - Ignore `questions.md` during execution.
 - Maintain a compact execution state and prefer targeted rereads over full file re-ingestion unless new evidence invalidates current state.
+- Use `Compact Evidence Reporting` for large validator output: read enough output to decide the state honestly, then retain command, exit code, material counts, header or schema checks, changed files, and exact gaps instead of pasting raw logs.
 - Infer the execution strategy from `Plan profile`, folder shape, merged control-contract sections in `02-control.md` when applicable, and the validation path. Do not require a separate retained-plan consumer field.
 - Audit only mandatory requirements that are applicable; do not convert specialist rules into universal policy.
 - Use `superpowers-verification-before-completion` as the fresh-evidence owner; do not duplicate its mechanics.
@@ -70,6 +71,10 @@ scope, anti-scope, and validation path, then iterate:
 4. If validation fails for an in-scope, repairable reason, fix once and re-run.
 5. Continue only while evidence improves and no stop condition fires.
 6. Stop with `DONE`, a blocker, or an explicit evidence gap.
+
+Apply `Compact Evidence Reporting` after each focused validation: preserve the
+exact gap and proof path, but keep large outputs summarized unless the raw
+output is itself the missing evidence.
 
 Stop on scope drift, destructive action, owner conflict, missing validation
 path, human approval need, secret exposure risk, or repeated non-improving
@@ -195,6 +200,7 @@ Before declaring any closeout step complete:
 - Hiding ownership conflicts instead of escalating a next owner and validation path.
 - Continuing the Agentic Execution Loop after evidence stops improving or a
   stop condition fires.
+- Pasting raw large validator output when compact evidence would preserve the same proof.
 - Packaging `DONE` while evidence gaps still require `APPLIED_UNVERIFIED`, `PARTIAL`, or `BLOCKED`.
 - Declaring a non-`DONE` state without writing or updating the `<STATE>-plan-state.md` marker.
 - Leaving stale `<STATE>-plan-state.md` markers behind after a state transition.

@@ -23,6 +23,7 @@ Baseline owner: `internal-python`
 | PY-M07 | `print()` instead of `logging` in application/library code | No log level control in production |
 | PY-M08 | Missing unit tests for new public functions | Violates test coverage mandate |
 | PY-M09 | Python tests outside repository-root `tests/` or without mirrored source paths | Breaks repository test discoverability and ownership mapping |
+| PY-M10 | `rich`, emoji, tables, or panels outside human-facing CLI/reporting boundaries | Mixes terminal UI with importable logic or machine-readable output such as JSON |
 
 ## Minor
 
@@ -61,7 +62,7 @@ except:
 try:
     result = fetch_data()
 except requests.RequestException as exc:
-    logger.warning("⚠️ Fetch failed: %s", exc)
+    logger.warning("Fetch failed: %s", exc)
     raise
 ```
 
@@ -89,5 +90,5 @@ import logging
 logger = logging.getLogger(__name__)
 
 def process(data: list[dict]) -> None:
-    logger.info("ℹ️ Processing %d items", len(data))
+    logger.info("Processing %d items", len(data))
 ```

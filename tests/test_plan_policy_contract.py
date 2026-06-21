@@ -28,6 +28,10 @@ def test_writing_plans_declares_profile_only_handoff_contract() -> None:
     assert "mini-plan-*" in compact_reference
     assert "Decisioni aperte" in compact_reference
     assert "2,000 estimated tokens" in compact_reference
+    assert "completeness over compression" in writing_text
+    assert "Escalate to `extended`" in writing_text
+    assert "prefer splitting into numbered files over compression" in writing_text
+    assert "data-contract.md" in writing_text
 
 
 def test_executing_plans_accepts_compact_and_extended_consumers() -> None:

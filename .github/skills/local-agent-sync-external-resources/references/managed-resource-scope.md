@@ -76,6 +76,14 @@ Managed skills:
   `superpowers-verification-before-completion`; `writing-plans` ->
   `superpowers-writing-plans`.
 
+Approved in-place overrides:
+
+- `superpowers-verification-before-completion`: replay
+  `superpowers-verification-before-completion-compact-evidence-reporting`
+  after each refresh so long verification output is summarized by command,
+  exit code, counts, schema checks, changed files, and exact gaps without
+  weakening the upstream evidence-before-claims rule.
+
 ### `hashicorp/agent-skills`
 
 Source:
@@ -144,6 +152,13 @@ Retained support-only office skills:
 
 - `doc` -> `openai-docx`; `spreadsheet` -> `openai-spreadsheet`; `slides` ->
   `openai-slides`.
+
+Approved in-place overrides:
+
+- `openai-spreadsheet`: replay
+  `openai-spreadsheet-structured-data-evidence-budget` after each refresh so
+  large spreadsheet and tabular workflows keep the repository-specific
+  structured-data evidence budget while preserving full-file correctness checks.
 
 ### `sickn33/antigravity-awesome-skills`
 

@@ -39,31 +39,55 @@ signal and ask for explicit confirmation before switching to plan mode.
   provisioning).
 - There is material risk that context pressure or chat limits will interrupt
   the work before it can be validated.
+- The task centers on large `.csv`, `.tsv`, `.xlsx`, JSON log exports,
+  repeated tool output, or broad file changes that would bloat chat context.
 - The user is asking for a large refactor, migration, or cross-file mechanical
   change that is safer as a tracked plan.
 
 Do not switch to plan mode implicitly without declaring the detected signals
 and asking for user confirmation.
 
+### Token Budget Gate
+
+When the cost signals come mainly from context pressure instead of task count,
+prefer a compact evidence posture rather than a raw-output posture. Keep same-chat
+execution only for tiny local work; otherwise switch to `plan-mode` and let the
+profile guard choose whether `compact` is still safe.
+
+A cost checkpoint pauses before a new expensive tool burst, broad reread, or
+multi-step execution loop. It does not interrupt ordinary conversation,
+grill-me analysis, or collaborative study when no expensive tool action is
+starting.
+
+When the user explicitly asks for broader output, deeper analysis, or continued
+execution, name the likely token or context impact first and then either
+continue with the smallest bounded next slice or ask for confirmation before
+the new expensive burst.
+
 ## Profile selection
 
-- **Default `compact`**: use for a single owner, concrete target, one primary
-  validation path, and one execution lane. Folder name follows
-  `tmp/superpowers/mini-plan-*` and contains `01-change-summary.md` and
-  `02-execution.md`.
-- **Use `extended` only when**: the task needs multi-slice execution, several
-  independent validators, an articulated anti-scope, or external pins that must
-  be tracked in a control file.
+- **Default `compact`**: use only when the task stays within a single owner,
+  concrete target, one primary validation path, one execution lane, and low
+  completeness risk. Folder name follows `tmp/superpowers/mini-plan-*` and
+  contains `01-change-summary.md` and `02-execution.md`.
+- **Plan Profile Selection Guard**: escalate to `extended` when context or
+  completeness risk is material, especially for cross-skill token-discipline
+  work, validator-impacting changes, exports or generated reports, datasets
+  that need non-trivial reconciliation, several independent validators, an
+  articulated anti-scope, or external pins that must be tracked in a control
+  file.
 
-When in doubt, prefer `compact`. A simple task that needs a plan usually does
-not need the overhead of an extended plan.
+When profile safety is in doubt, prefer `extended` and state why. Prefer
+`compact` only when the plan can record the contrary evidence that keeps
+lower-context execution safe.
 
 ## Confirmation rule for implicit triggers
 
 For implicit cost-signal triggers, emit a short statement that:
 
 1. Names the detected cost signals.
-2. Proposes `plan-mode` with a default `compact` profile.
+2. Proposes `plan-mode` with the safest profile suggested by the signals,
+   defaulting to `compact` only when the profile guard stays clear.
 3. Asks the user to confirm, decline, or choose `extended`.
 
 Do not write the retained plan until the user confirms.

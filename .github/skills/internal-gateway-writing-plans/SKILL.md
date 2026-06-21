@@ -44,11 +44,24 @@ New `compact` plans should use `tmp/superpowers/mini-plan-*`.
 | Profile | When | Required files |
 | --- | --- | --- |
 | `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. Best fit for small/fast executors after positive handoff validation. | `01-change-summary.md`, `02-execution.md` |
-| `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Thinking-first profile with explicit control files and deterministic read order. | `01-change-summary.md`, `02-control.md`, `03-execution.md`, additional numbered files by category (`04-...`). |
+| `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Soft-limit profile: use judgment-based size review with completeness over compression, explicit control files, and deterministic read order. | `01-change-summary.md`, `02-control.md`, `03-execution.md`, additional numbered files by category (`04-...`). |
+
+### Plan Profile Selection Guard
+
+Escalate to `extended` when completeness or context-discipline risk is material:
+cross-skill token-discipline changes; exports, generated reports, or datasets
+with non-trivial reconciliation; validator-impacting contract changes;
+external API contracts (credentials, pagination, retries, schema pinning);
+executive-facing output; multiple validators; or synced always-on guidance
+edits.
 
 Do not use `compact` when the executor needs exact sources, target files,
 validators, blockers, or external pins that only `02-control.md`
 can provide.
+
+If `compact` is still chosen near one of those edges, the plan must record the
+contrary evidence that keeps one owner, one execution lane, and one validation
+path sufficient despite lower-context execution.
 
 ## Explicit Constraints
 
@@ -70,6 +83,8 @@ can provide.
 - Compact plans have a 2,000 estimated-token total budget measured as
   `ceil(UTF-8 bytes / 4)` across plan Markdown files. Keep `02-execution.md`
   under 1,500 estimated tokens. Treat warnings as required review inputs.
+- For `extended`, treat token warnings as review inputs for completeness and
+  slicing. Prefer splitting into numbered files over compression.
 - `compact` uses exactly `01-change-summary.md` and `02-execution.md` during
   authoring. `extended` uses `01-change-summary.md`, `02-control.md`,
   `03-execution.md`, and optional higher numbered files.
@@ -98,6 +113,11 @@ can provide.
 - For `extended`, implementation-contract sections are merged into `02-control.md`
   with these exact headings: `Sources`, `Candidate targets`,
   `Validation commands`, `Blockers and fallback rules`, and `External pins`.
+- For `extended`, recommend adding deep companion files only when justified by
+  triggers, and keep them as recommendations (not ERROR-level required files):
+  `data-contract.md` for reconciled datasets and schema mappings,
+  `validation-runbook.md` for multi-validator troubleshooting or rollback paths,
+  and API/schema pin notes when external dependencies or credentials drive risk.
 - Apply a say-once rule: each control fact (target, owner, validator, blockers,
   pins, and source-item coverage) is written once in the owning file, and step
   files do not restate target/owner/validator.
@@ -126,7 +146,10 @@ can provide.
   `questions.md` file for `compact`.
 11. Run scope challenge and plan review gate for non-trivial plans.
 12. Run `audit` first, then run `handoff-check`; execute only when ready.
-13. Treat token warnings as review inputs for compression or split decisions, not as proof of measured savings.
+13. Treat token warnings as review inputs, not as proof of measured savings. For
+  `extended`, prefer splitting into numbered files over compression, and never
+  compress away source pins, schema contracts, validation rules, stop
+  conditions, or failure-investigation steps.
 
 ## Validation
 

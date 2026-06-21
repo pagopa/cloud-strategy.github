@@ -132,3 +132,20 @@ def test_code_analysis_workflow_smoke_tests_runner_diagnostic_clis() -> None:
     )
     assert "./.github/scripts/run.sh analyze_copilot_debug_log --help" in workflow_text
     assert "./.github/scripts/run.sh benchmark_skill_tokens --help" in workflow_text
+
+
+def test_local_copilot_log_analyzer_skill_routes_canonical_wrapper() -> None:
+    skill_text = read_text(".github/skills/local-copilot-log-analyzer/SKILL.md")
+    agent_text = read_text(
+        ".github/skills/local-copilot-log-analyzer/agents/openai.yaml"
+    )
+    inventory_text = read_text(".github/INVENTORY.md")
+
+    assert "## Referenced skills" in skill_text
+    assert "- None." in skill_text
+    assert "tools/analyze_copilot_debug_log/run.sh" in skill_text
+    assert "./.github/scripts/run.sh analyze_copilot_debug_log --help" in skill_text
+    assert "aggregate-first" in skill_text
+    assert "avoid full json dumps" in skill_text.lower()
+    assert "$local-copilot-log-analyzer" in agent_text
+    assert ".github/skills/local-copilot-log-analyzer/SKILL.md" in inventory_text
