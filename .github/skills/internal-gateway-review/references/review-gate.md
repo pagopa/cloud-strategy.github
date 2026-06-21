@@ -21,5 +21,6 @@ Use this reference when `internal-gateway-review` needs to package findings befo
 
 - Keep the gate visible before any fixes.
 - Run counter-validation before the final user-visible verdict; challenge each finding for evidence, severity, route, and contrary proof.
+- For large diffs, generated files, logs, or tabular exports, keep evidence compact: cite the smallest excerpt or path that proves the finding and summarize omitted raw volume.
 - Report only material self-critique results: corrections, confidence changes, evidence gaps, or confirmation that no material issue was found.
 - Use the gate to route each actionable finding to the smallest next owner.

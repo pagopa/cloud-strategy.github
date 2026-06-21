@@ -70,6 +70,21 @@ Classify every simple task before operational work as `full-gate`,
 - If planning, review, critical pressure, or multi-phase validation becomes the
   real job, `escalate`.
 
+### Token Budget Gate
+
+- Run a `Token Budget Gate` before choosing `trivial-skip` or `plan-mode` when
+  the user asks for low-token execution or the task centers on large tabular
+  files, log exports, repeated tool output, or broad file changes.
+- For Copilot or debug log analysis, start with file size, model-call counts,
+  prompt or token aggregates, tool-span counts, result-size summaries, and
+  targeted slices; avoid full JSON dumps or prompt bodies unless they are the
+  missing evidence.
+- Keep `trivial-skip` only for truly tiny local work with obvious validation
+  and no material completeness risk.
+- If context pressure could hide required validation, data integrity, or route
+  ownership, prefer `plan-mode` and apply the `Plan Profile Selection Guard`
+  before proposing `compact`.
+
 ## Simple Procedure
 
 1. Inspect local files first.
@@ -147,9 +162,15 @@ the output shape changes.
 ### Profile
 
 - Default to `compact` (`tmp/superpowers/mini-plan-*`) with
-  `01-change-summary.md` and `02-execution.md`.
-- Use `extended` only when the task needs multi-slice execution, multiple
-  independent validators, an articulated anti-scope, or external pins.
+  `01-change-summary.md` and `02-execution.md` only when the task stays within
+  one owner, one execution lane, one primary validation path, and low
+  completeness risk.
+- Apply the `Plan Profile Selection Guard` before proposing `compact`.
+- Use `extended` when the task needs multi-slice execution, multiple
+  independent validators, an articulated anti-scope, external pins,
+  cross-skill token-discipline work, validator-impacting changes, or
+  exports, generated reports, and datasets that need non-trivial
+  reconciliation.
 
 ### Procedure
 

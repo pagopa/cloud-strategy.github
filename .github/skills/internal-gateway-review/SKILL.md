@@ -17,8 +17,7 @@ Treat this section as an audit and routing index, not a preload bundle. Load a
 referenced skill only when the domain, finding, blocker, or phase requires it.
 
 Portable review orchestrator. Owns review scope, lens selection, findings
-consolidation, critical support, and remediation-plan transition. It does not
-apply fixes.
+consolidation, critical support, and remediation-plan transition. It does not apply fixes.
 
 Before any user-visible verdict, run a lightweight internal check for evidence,
 severity, false positives, contrary evidence, and scope narrowing. Load
@@ -33,6 +32,11 @@ Inspect diff and failing evidence first; avoid broad repository scans unless an
 evidence gap requires one; never preload referenced skills; show at most 5
 material findings unless exhaustive review is requested; summarize omitted
 low-risk observations separately, not as findings.
+
+Use `Compact Evidence Reporting` for large diffs, generated files, tabular
+exports, and logs: keep findings defect-first, cite the smallest excerpt or
+file point that proves impact, and avoid dumping large raw blocks when a
+targeted excerpt plus evidence path preserves the same proof.
 
 ## Review To Plan Transition
 
@@ -56,6 +60,7 @@ gateway does not choose the execution owner.
 
 - Findings stay defect-first.
 - Review flow preserves compact context: prioritize diff and failing evidence first, then expand only when an evidence gap remains.
+- Large evidence may be reported compactly, but each material finding still keeps severity, confidence, evidence gap, counter-validation result, and route or next owner.
 - Review output carries findings, severity, confidence, evidence gap, counter-validation result, route or next owner, and a Review Gate outcome before the final verdict.
 - The review cannot present analysis to the user until counter-validation confirms it or reopens material gaps.
 - Remediation-plan transitions preserve a 100% material-finding coverage map or explicitly declare a `partial remediation plan`.

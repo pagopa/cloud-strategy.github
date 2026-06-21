@@ -35,6 +35,7 @@ through retained-plan creation. It stops before execution.
 - Same-conversation support-skill loading is not a lane change.
 - Idea Gate 0 remains mandatory.
 - Start with a bounded evidence pass ordered by risk. Read only the smallest local owner evidence needed to classify the request before asking questions.
+- For large tabular files, generated reports, or long log exports, keep the bounded evidence pass aggregate-first: collect file sizes, schema or headers, counts, anomalies, and targeted slices before any deeper read.
 - When authoritative platform semantics control feasibility or ownership, verify them early in the bounded evidence pass.
 - This gateway is not a specialized execution owner. A concrete task may not be accepted for execution here until Idea Gate 0 is `grill-me satisfied` and `Critical Gate 2` is `confident`.
 - For a direct concrete operation, emit `Specialization Checkpoint: gated`, explain that this owner cannot decide task ownership or execute yet, and continue with the bounded evidence pass plus mandatory `grill-me`.
@@ -59,6 +60,7 @@ State rules:
 - If the incoming request is already concrete (file edit, command execution, validator run, or implementation step), start with `Specialization Checkpoint: gated` before Idea Gate 0.
 - At `Specialization Checkpoint: gated`, name the recommended specialized owner (`internal-gateway-simple-task` by default, `internal-gateway-review` for defect-first review, `internal-gateway-critical-master` for pressure testing), but do not ask the user to keep this owner yet.
 - Continue through the bounded evidence pass, mandatory `grill-me`, and critical gate before asking whether this owner should stay in charge of the task.
+- Before the initial numbered block, keep large-file and large-log evidence compact: summarize counts, headers, anomalies, routes, and open gaps unless raw content is itself the missing evidence.
 - After the evidence pass, load `grill-me` and ask one mandatory numbered bulk question block with recommendations and defaults.
 - Before the initial numbered block, emit a compact facts/options summary derived from the bounded evidence pass.
 - Ask further focused numbered bulk blocks only for unresolved, dependent, or reopened branches.

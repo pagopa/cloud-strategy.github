@@ -1,0 +1,23 @@
+diff --git a/.github/skills/openai-spreadsheet/SKILL.md b/.github/skills/openai-spreadsheet/SKILL.md
+--- a/.github/skills/openai-spreadsheet/SKILL.md
++++ b/.github/skills/openai-spreadsheet/SKILL.md
+@@ -33,6 +33,19 @@ IMPORTANT: System and user instructions always take precedence.
+ - Use `openpyxl.chart` for native Excel charts when needed.
+ - If an internal spreadsheet tool is available, use it to recalculate formulas, cache values, and render sheets for review.
+
++## Structured Data Evidence Budget
++- For large `.xlsx`, `.csv`, and `.tsv` work, keep user-facing evidence compact:
++  report schema or headers, row counts, column counts, targeted anomalies,
++  checksums or hashes when useful, sampled examples, and validation gaps.
++- Start discovery with headers plus a small sample, then move to deterministic
++  full-file checks when correctness depends on the whole dataset.
++- Sampling does not replace full-file validation for transforms, merges,
++  source-link checks, empty-row checks, column moves, stable ID generation,
++  duplicate ID detection, or reconciliation.
++- Preserve source links, formulas, formatting where applicable, empty-row
++  anomalies, duplicate IDs, stable generated IDs, and missing column data as
++  material integrity checks.
++
+ ## Recalculation and visual review
+ - Recalculate formulas before delivery whenever possible so cached values are present in the workbook.
+ - Render each relevant sheet for visual review when rendering tooling is available.

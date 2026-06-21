@@ -46,14 +46,22 @@ New `compact` plans should use `tmp/superpowers/mini-plan-*`.
 | `compact` | Single owner, concrete target, one validation path, low-to-medium risk, and one execution lane. Best fit for small/fast executors after positive handoff validation. | `01-change-summary.md`, `02-execution.md` |
 | `extended` | Cross-family changes, higher risk, lower-context execution, multiple validators, or multi-slice execution state. Soft-limit profile: use judgment-based size review with completeness over compression, explicit control files, and deterministic read order. | `01-change-summary.md`, `02-control.md`, `03-execution.md`, additional numbered files by category (`04-...`). |
 
-Escalate to `extended` when completeness risk is material: exports, reports, or
-datasets with non-trivial reconciliation; external API contracts
-(credentials, pagination, retries, schema pinning); executive-facing output;
-multiple validators; or synced always-on guidance edits.
+### Plan Profile Selection Guard
+
+Escalate to `extended` when completeness or context-discipline risk is material:
+cross-skill token-discipline changes; exports, generated reports, or datasets
+with non-trivial reconciliation; validator-impacting contract changes;
+external API contracts (credentials, pagination, retries, schema pinning);
+executive-facing output; multiple validators; or synced always-on guidance
+edits.
 
 Do not use `compact` when the executor needs exact sources, target files,
 validators, blockers, or external pins that only `02-control.md`
 can provide.
+
+If `compact` is still chosen near one of those edges, the plan must record the
+contrary evidence that keeps one owner, one execution lane, and one validation
+path sufficient despite lower-context execution.
 
 ## Explicit Constraints
 
