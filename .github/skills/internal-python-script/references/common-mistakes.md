@@ -3,6 +3,7 @@
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
 | Missing `if __name__ == "__main__":` guard | Script runs on import, breaks testing and reuse | Always guard the entry point |
+| Using a hyphenated or file-only entrypoint that cannot be imported cleanly | Breaks `python -m`, packaging, and test reuse | Expose an importable `cli.py`, package `__main__.py`, or `console_scripts` entrypoint |
 | Using `print()` for errors | Errors go to stdout, mixed with normal output | Use `print(..., file=sys.stderr)` or `logging` |
 | Bare `except:` or `except Exception:` at top level | Swallows all errors including KeyboardInterrupt | Catch specific exceptions; let unexpected ones propagate |
 | Hardcoded file paths | Non-portable across machines | Use `argparse`, `pathlib`, or environment variables |

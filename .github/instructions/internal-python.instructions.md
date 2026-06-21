@@ -15,8 +15,10 @@ This file is optimized for Copilot code review and should produce only evidenced
 - Do not flag stable domain invariants merely because they are constants near domain code.
 - Verify type hints and public interfaces stay consistent with call sites.
 - Flag manual formatting churn that fights the repository formatter; when Ruff is configured, prefer `ruff format` and Ruff diagnostics over subjective style edits.
-- Report dependency usage that is unpinned or unnecessary for the change.
+- Report dependency usage that is unpinned, unnecessary for the change, or unjustified for the data volume and import or install cost.
 - Flag vendored libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
 - Flag new external dependencies that are missing hash-locked pins in the owning requirements file.
+- When behavior changes, verify docs and output contracts stay aligned: filenames, produced artifacts, columns, and other user-visible output details must match reality.
 - Check tests for deterministic coverage of changed behavior.
-- Flag logging or exception messages that may leak sensitive values.
+- Flag test setup that bypasses the repository's shared runner, pytest rootdir or testpaths contract, or declared interpreter or virtualenv setup without a reproducibility reason.
+- Flag logging or exception messages that may leak sensitive values, raw request or response bodies, or secrets.
