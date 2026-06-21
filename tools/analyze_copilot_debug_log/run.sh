@@ -93,7 +93,7 @@ verify_venv_version() {
         return 1
     fi
 
-    venv_version="$($venv_python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+    venv_version="$("$venv_python" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
     if [[ "$venv_version" == "$EXPECTED_PYTHON_MAJOR_MINOR" ]]; then
         return 0
     fi
