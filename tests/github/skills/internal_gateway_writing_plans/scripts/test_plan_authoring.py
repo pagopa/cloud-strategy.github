@@ -231,6 +231,87 @@ def test_handoff_check_warns_on_oversized_compact_summary(tmp_path: Path) -> Non
     )
 
 
+def test_audit_warns_when_summary_hides_counter_validation_facts(
+    tmp_path: Path,
+) -> None:
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-counter-validation-warning"
+    _write_compact_plan(plan_folder)
+    (plan_folder / "01-change-summary.md").write_text(
+        "## Problema da risolvere\n"
+        "Allineare il piano a un nuovo contratto dati per output generati.\n"
+        "## Risultato atteso\n"
+        "- Gli output rigenerati rispettano il nuovo schema e correggono i dati.\n"
+        "## Risorse coinvolte\n"
+        "| Risorsa | Azione | Scopo |\n"
+        "| --- | --- | --- |\n"
+        "| Aggregate + slide outputs | update | Allineare gli output |\n"
+        "## Decisione richiesta\n"
+        "Approvare il piano.\n"
+        "## Decisioni aperte\n"
+        "none\n",
+        encoding="utf-8",
+    )
+    execution_path = plan_folder / "02-execution.md"
+    execution_path.write_text(
+        execution_path.read_text(encoding="utf-8").replace(
+            "| PLAN-01 | Empty-section detection | `handoff-check` rejects empty sections | repository | failing then passing test | PENDING | `02-execution.md` |",
+            "| PLAN-01 | Aggregate and slide data contract | `impacted_platforms` and `impacted_subscriptions` become the first aggregate columns; `technology_or_service` stays before `retiring_feature`; `source_links` never stays empty and missing values trigger a blocking diagnostic; rows 27-33 are restored with no row-count loss | repository | audit plus focused file diff | PENDING | `02-execution.md` |",
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_cli("audit", plan_folder, "--format", "json")
+    payload = json.loads(result.stdout)
+
+    assert result.returncode == 0
+    assert payload["ready"] is True
+    assert any(
+        f["code"] == "summary-missing-counter-validation-facts"
+        and f["severity"] == "WARNING"
+        for f in payload["findings"]
+    )
+
+
+def test_audit_accepts_summary_with_counter_validation_facts(tmp_path: Path) -> None:
+    plan_folder = tmp_path / "tmp" / "superpowers" / "mini-plan-counter-validation-ok"
+    _write_compact_plan(plan_folder)
+    (plan_folder / "01-change-summary.md").write_text(
+        "## Problema da risolvere\n"
+        "Allineare il piano a un nuovo contratto dati per output generati.\n"
+        "## Risultato atteso\n"
+        "- Aggregate TSV con `impacted_platforms` e `impacted_subscriptions` come prime colonne.\n"
+        "- `technology_or_service` resta prima di `retiring_feature`; `source_links` e sempre valorizzato oppure scatta una diagnostica bloccante.\n"
+        "- Le righe 27-33 vengono ripristinate senza perdita di righe.\n"
+        "## Risorse coinvolte\n"
+        "| Risorsa | Azione | Scopo |\n"
+        "| --- | --- | --- |\n"
+        "| Aggregate + slide outputs | update | Preservare ordine colonne, campi obbligatori e integrita dati |\n"
+        "## Decisione richiesta\n"
+        "Approvare il piano.\n"
+        "## Decisioni aperte\n"
+        "none\n",
+        encoding="utf-8",
+    )
+    execution_path = plan_folder / "02-execution.md"
+    execution_path.write_text(
+        execution_path.read_text(encoding="utf-8").replace(
+            "| PLAN-01 | Empty-section detection | `handoff-check` rejects empty sections | repository | failing then passing test | PENDING | `02-execution.md` |",
+            "| PLAN-01 | Aggregate and slide data contract | `impacted_platforms` and `impacted_subscriptions` become the first aggregate columns; `technology_or_service` stays before `retiring_feature`; `source_links` never stays empty and missing values trigger a blocking diagnostic; rows 27-33 are restored with no row-count loss | repository | audit plus focused file diff | PENDING | `02-execution.md` |",
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_cli("audit", plan_folder, "--format", "json")
+    payload = json.loads(result.stdout)
+
+    assert result.returncode == 0
+    assert payload["ready"] is True
+    assert not any(
+        f["code"] == "summary-missing-counter-validation-facts"
+        for f in payload["findings"]
+    )
+
+
 def test_handoff_check_rejects_extended_control_without_ordered_validation(
     tmp_path: Path,
 ) -> None:

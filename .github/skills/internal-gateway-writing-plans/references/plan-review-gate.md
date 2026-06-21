@@ -23,6 +23,7 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 | Scope | Are anti-scope and stop conditions explicit enough to prevent drift? |
 | Summary focus | Does `01-change-summary.md` contain only the compressed Italian decision capsule with required sections and a `Risorsa \| Azione \| Scopo` table for non-trivial plans? |
 | Summary clarity | Are changed resources and intended actions obvious in the summary? |
+| Summary counter-validation | Does `01-change-summary.md` preserve enough observable result criteria for the user to counter-validate coverage without reading `02-execution.md` or `02-control.md`? |
 | Semantic coverage | For `compact`, does `02-execution.md` preserve each requested or source item with stable item id, observable acceptance, evidence class, status, and route? For `extended`, does `02-control.md` preserve the same coverage? |
 | Implementation contract | For `extended` profiles, does `02-control.md` include the exact sources, target files, validation order, blockers, and any external pin or fallback? For `compact` profiles, a separate implementation contract is not required. |
 | Profile | Is `Plan profile` declared as `compact` or `extended`? Missing or unsupported profiles return `unsupported-plan-contract`. |
@@ -60,6 +61,10 @@ or handoff. It checks clarity and validity without creating reviewer personas.
 - Treat a long or overloaded `01-change-summary.md` as a plan-quality defect, not as a documentation nit. It should be a compressed decision capsule, not a control file.
 - Treat an English `01-change-summary.md` as a plan-quality defect per the current retained-plan contract (Italian only).
 - Treat an unclear resource table or missing resource-action-purpose columns in `01-change-summary.md` as a plan-quality defect.
+- Treat a summary as a plan-quality defect when output, schema, or data-contract
+  changes are compressed into generic formulas without concrete observable
+  examples. Keep those user-visible facts in `Risultato atteso` or
+  `Risorse coinvolte`, not in execution detail.
 - Treat a missing or weak source-item ledger as a plan-quality defect, not as a documentation nit.
 - Treat a missing evidence pass or reading budget as a token-waste defect for non-trivial retained plans.
 - Treat missing source-item coverage for requested work as a plan-quality defect, not as an editorial preference.

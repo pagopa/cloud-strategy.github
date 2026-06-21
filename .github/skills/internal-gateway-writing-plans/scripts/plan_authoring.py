@@ -53,6 +53,35 @@ MERGED_CONTRACT_SECTIONS = (
     "External pins",
 )
 NON_ACTION_ROUTES = frozenset({"closed", "manual", "gap", "not applicable", "n/a", "none"})
+GENERIC_SUMMARY_PATTERNS = (
+    re.compile(r"\brispett\w+\s+(?:il|lo|la)?\s*nuov\w+\s+schema\b", re.IGNORECASE),
+    re.compile(r"\baggiorn\w+\s+gli?\s+output\b", re.IGNORECASE),
+    re.compile(r"\bcorregg\w+\s+i\s+dati\b", re.IGNORECASE),
+    re.compile(r"\balline\w+\s+(?:gli?\s+output|lo\s+schema|i\s+dati)\b", re.IGNORECASE),
+    re.compile(r"\badatt\w+\s+(?:gli?\s+output|lo\s+schema|i\s+dati)\b", re.IGNORECASE),
+)
+OBSERVABLE_CONTRACT_PATTERNS = {
+    "column-order": re.compile(
+        r"\b(column|columns|colonn\w*|order|ordine|first|before|prime?\s+colonne|prima\s+di)\b",
+        re.IGNORECASE,
+    ),
+    "required-field": re.compile(
+        r"\b(required|mandatory|obbligator\w*|must\s+never\s+be\s+empty|never\s+be\s+empty|sempre\s+valorizzat\w*|mai\s+vuot\w*|non\s+vuot\w*|always\s+populated)\b",
+        re.IGNORECASE,
+    ),
+    "diagnostic": re.compile(
+        r"\b(diagnostic\w*|bloccant\w*|blocking|must\s+fail|fails?\b|errore|errori|error)\b",
+        re.IGNORECASE,
+    ),
+    "data-integrity": re.compile(
+        r"\b(gap|missing|rows?\b|righe\b|row[- ]count|data[- ]loss|perdita\s+dati|nessuna\s+perdita|buco\s+dati)\b",
+        re.IGNORECASE,
+    ),
+    "contract-output": re.compile(r"\b(schema|output|contract|generated|field|fields|colum\w*)\b", re.IGNORECASE),
+}
+IDENTIFIER_SIGNAL_RE = re.compile(r"\b[a-z][a-z0-9]*_[a-z0-9_]+\b")
+NUMERIC_RANGE_RE = re.compile(r"\b\d+\s*-\s*\d+\b")
+NUMERIC_SIGNAL_RE = re.compile(r"\b\d+\b")
 
 
 @dataclass
@@ -184,6 +213,98 @@ def _validate_summary(summary_text: str) -> list[Finding]:
     if not RESOURCE_TABLE_HEADER_RE.search(summary_text):
         findings.append(Finding("missing-resource-table", "Summary missing Risorsa | Azione | Scopo table header", "WARNING"))
     return findings
+
+
+def _summary_focus_text(summary_text: str) -> str:
+    parts = [
+        _section_body(summary_text, "Risultato atteso"),
+        _section_body(summary_text, "Risorse coinvolte"),
+    ]
+    return "\n".join(part for part in parts if part).strip()
+
+
+def _identifier_signals(text: str) -> set[str]:
+    return {match.lower() for match in IDENTIFIER_SIGNAL_RE.findall(text)}
+
+
+def _observable_contract_categories(text: str) -> set[str]:
+    return {
+        name
+        for name, pattern in OBSERVABLE_CONTRACT_PATTERNS.items()
+        if pattern.search(text)
+    }
+
+
+def _coverage_text(plan_folder: Path, profile: str) -> str:
+    if profile == "compact":
+        path = plan_folder / "02-execution.md"
+        heading = "Source item coverage"
+    else:
+        path = plan_folder / "02-control.md"
+        heading = "Source item ledger"
+    if not path.is_file():
+        return ""
+    return _section_body(path.read_text(encoding="utf-8"), heading)
+
+
+def _has_observable_contract_requirements(coverage_text: str) -> bool:
+    if not coverage_text:
+        return False
+    categories = _observable_contract_categories(coverage_text)
+    specific_categories = categories - {"contract-output"}
+    if _identifier_signals(coverage_text):
+        return True
+    if len(specific_categories) >= 2:
+        return True
+    return bool(specific_categories and "contract-output" in categories)
+
+
+def _has_concrete_counter_validation_examples(summary_focus: str, coverage_text: str) -> bool:
+    coverage_identifiers = _identifier_signals(coverage_text)
+    summary_identifiers = _identifier_signals(summary_focus)
+    if coverage_identifiers & summary_identifiers:
+        return True
+
+    summary_categories = _observable_contract_categories(summary_focus) - {"contract-output"}
+    if len(summary_categories) >= 2:
+        return True
+    if summary_categories and NUMERIC_RANGE_RE.search(summary_focus):
+        return True
+    if summary_categories and NUMERIC_SIGNAL_RE.search(summary_focus):
+        return True
+    return False
+
+
+def _validate_counter_validation_summary(plan_folder: Path, profile: str) -> list[Finding]:
+    summary_path = plan_folder / "01-change-summary.md"
+    if not summary_path.is_file():
+        return []
+
+    summary_text = summary_path.read_text(encoding="utf-8")
+    summary_focus = _summary_focus_text(summary_text)
+    if not summary_focus:
+        return []
+
+    coverage_text = _coverage_text(plan_folder, profile)
+    if not _has_observable_contract_requirements(coverage_text):
+        return []
+
+    if not any(pattern.search(summary_focus) for pattern in GENERIC_SUMMARY_PATTERNS):
+        return []
+
+    if _has_concrete_counter_validation_examples(summary_focus, coverage_text):
+        return []
+
+    examples = sorted(_identifier_signals(coverage_text))[:3]
+    example_suffix = f" Example signals: {', '.join(examples)}." if examples else ""
+    return [
+        Finding(
+            "summary-missing-counter-validation-facts",
+            "Summary uses generic schema/output/data wording while the source-item coverage contains observable contract requirements. Keep the critical user-visible result criteria in Risultato atteso or Risorse coinvolte instead of only generic summary formulas."
+            + example_suffix,
+            "WARNING",
+        )
+    ]
 
 
 def _normalize_route_cell(route_cell: str) -> str:
@@ -454,6 +575,8 @@ def _validate(plan_folder: Path, profile: str) -> list[Finding]:
     else:
         findings.extend(_validate_control_file(plan_folder))
         findings.extend(_validate_extended_execution(plan_folder))
+
+    findings.extend(_validate_counter_validation_summary(plan_folder, profile))
 
     return findings
 

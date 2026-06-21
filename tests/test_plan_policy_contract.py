@@ -108,3 +108,21 @@ def test_gateway_skills_preserve_compact_context_discipline() -> None:
     assert "Escalation trigger" in simple_text
     assert "Preserve known-context handoff quality" in writing_text
     assert "run targeted rereads" in writing_text
+
+
+def test_writing_plans_counter_validation_contract_is_explicit() -> None:
+    writing_text = read_text(".github/skills/internal-gateway-writing-plans/SKILL.md")
+    compact_reference = read_text(
+        ".github/skills/internal-gateway-writing-plans/references/compact-plan-contract.md"
+    )
+    review_gate = read_text(
+        ".github/skills/internal-gateway-writing-plans/references/plan-review-gate.md"
+    )
+    scope_challenge = read_text(
+        ".github/skills/internal-gateway-writing-plans/references/scope-challenge.md"
+    )
+
+    assert "counter-validation-critical facts" in writing_text
+    assert "counter-validation-critical facts" in compact_reference
+    assert "counter-validate coverage without reading `02-execution.md` or `02-control.md`" in review_gate
+    assert "counter-validate the plan without reading the control file" in scope_challenge
