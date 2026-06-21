@@ -9,6 +9,8 @@ description: Use when repository-owned work needs same-conversation defect-first
 
 - `internal-code-review`
 - `internal-high-level-review`
+- `internal-ai-resource-review`
+- `internal-copilot-audit`
 - `internal-gateway-critical-master`
 - `internal-gateway-writing-plans`
 - `internal-agent-support-next-step`
@@ -25,6 +27,25 @@ severity, false positives, contrary evidence, and scope narrowing. Load
 reopen when the check exposes a material gap.
 
 See `references/review-gate.md` for the review output contract and gate states.
+
+## Lens selection
+
+Select the review lens from the changed-path families, not from a single default.
+A diff may activate more than one lens; load each only when its evidence appears.
+
+- Code lens (`internal-code-review`): Python, Bash, Terraform, Java, or
+  Node.js/TypeScript source changes.
+- Systems lens (`internal-high-level-review`): architecture, workflow, or
+  cross-cutting impact beyond line-level defects.
+- AI-resource lens (`internal-ai-resource-review`, with `internal-copilot-audit`
+  as the drift sub-lens): repository-owned AI customization assets, including
+  `.github/skills/**`, `.github/agents/*.agent.md`, `.github/prompts/*.prompt.md`,
+  `.github/instructions/**`, `AGENTS.md`, `.github/copilot-instructions.md`,
+  `.github/INVENTORY.md`, and `**/agents/openai.yaml`.
+
+When the diff is mainly AI customization assets, the AI-resource lens is
+mandatory and the code lens stays scoped to any embedded scripts only. Do not
+let the code lens silently skip `.md` skill, agent, or instruction files.
 
 ## Token Discipline
 
@@ -59,6 +80,7 @@ gateway does not choose the execution owner.
 ## Validation
 
 - Findings stay defect-first.
+- Lens selection matches the changed-path families; AI customization assets route to `internal-ai-resource-review` (drift via `internal-copilot-audit`) instead of being skipped by the code lens.
 - Review flow preserves compact context: prioritize diff and failing evidence first, then expand only when an evidence gap remains.
 - Large evidence may be reported compactly, but each material finding still keeps severity, confidence, evidence gap, counter-validation result, and route or next owner.
 - Review output carries findings, severity, confidence, evidence gap, counter-validation result, route or next owner, and a Review Gate outcome before the final verdict.

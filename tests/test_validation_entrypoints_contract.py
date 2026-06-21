@@ -134,10 +134,10 @@ def test_code_analysis_workflow_smoke_tests_runner_diagnostic_clis() -> None:
     assert "./.github/scripts/run.sh benchmark_skill_tokens --help" in workflow_text
 
 
-def test_local_copilot_log_analizer_skill_routes_canonical_wrapper() -> None:
-    skill_text = read_text(".github/skills/local-copilot-log-analizer/SKILL.md")
+def test_local_copilot_log_analyzer_skill_routes_canonical_wrapper() -> None:
+    skill_text = read_text(".github/skills/local-copilot-log-analyzer/SKILL.md")
     agent_text = read_text(
-        ".github/skills/local-copilot-log-analizer/agents/openai.yaml"
+        ".github/skills/local-copilot-log-analyzer/agents/openai.yaml"
     )
     inventory_text = read_text(".github/INVENTORY.md")
 
@@ -147,5 +147,5 @@ def test_local_copilot_log_analizer_skill_routes_canonical_wrapper() -> None:
     assert "./.github/scripts/run.sh analyze_copilot_debug_log --help" in skill_text
     assert "aggregate-first" in skill_text
     assert "avoid full json dumps" in skill_text.lower()
-    assert "$local-copilot-log-analizer" in agent_text
-    assert ".github/skills/local-copilot-log-analizer/SKILL.md" in inventory_text
+    assert "$local-copilot-log-analyzer" in agent_text
+    assert ".github/skills/local-copilot-log-analyzer/SKILL.md" in inventory_text

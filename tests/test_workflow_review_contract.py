@@ -52,6 +52,10 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
     assert "defect-first review" in skill_text
     assert "does not apply fixes" in skill_text
     assert "internal-gateway-writing-plans" in skill_text
+    assert "internal-ai-resource-review" in skill_text
+    assert "internal-copilot-audit" in skill_text
+    assert "Lens selection" in skill_text
+    assert ".github/skills/**" in skill_text
     assert "internal-gateway-simple-task" in agent_text
     assert "Review Gate" in review_gate_text
     assert "severity" in review_gate_lower

@@ -1,9 +1,9 @@
 ---
-name: local-copilot-log-analizer
+name: local-copilot-log-analyzer
 description: Use when analyzing GitHub Copilot Chat debug logs or prompt exports in this repository, especially for low-token diagnosis of token usage, model calls, tool spans, or oversized results.
 ---
 
-# Local Copilot Log Analizer
+# Local Copilot Log Analyzer
 
 ## Referenced skills
 
