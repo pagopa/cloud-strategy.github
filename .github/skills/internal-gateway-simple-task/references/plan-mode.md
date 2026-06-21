@@ -54,6 +54,16 @@ prefer a compact evidence posture rather than a raw-output posture. Keep same-ch
 execution only for tiny local work; otherwise switch to `plan-mode` and let the
 profile guard choose whether `compact` is still safe.
 
+A cost checkpoint pauses before a new expensive tool burst, broad reread, or
+multi-step execution loop. It does not interrupt ordinary conversation,
+grill-me analysis, or collaborative study when no expensive tool action is
+starting.
+
+When the user explicitly asks for broader output, deeper analysis, or continued
+execution, name the likely token or context impact first and then either
+continue with the smallest bounded next slice or ask for confirmation before
+the new expensive burst.
+
 ## Profile selection
 
 - **Default `compact`**: use only when the task stays within a single owner,

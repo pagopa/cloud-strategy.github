@@ -30,6 +30,19 @@ def test_token_budget_guardrails_are_distributed_by_owner() -> None:
     assert "Structured Data Evidence Budget" in spreadsheet_text
 
 
+def test_token_budget_gate_stays_runner_agnostic_and_non_disruptive() -> None:
+    simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    plan_mode_text = read_text(
+        ".github/skills/internal-gateway-simple-task/references/plan-mode.md"
+    )
+
+    assert "do not require `jq`, `awk`" in simple_text
+    assert "does not interrupt ordinary conversation" in simple_text
+    assert "token or context impact" in simple_text
+    assert "does not interrupt ordinary conversation" in plan_mode_text
+    assert "token or context impact" in plan_mode_text
+
+
 def test_structured_data_guardrails_preserve_full_file_correctness() -> None:
     spreadsheet_text = read_text(".github/skills/openai-spreadsheet/SKILL.md")
     lowered = spreadsheet_text.lower()

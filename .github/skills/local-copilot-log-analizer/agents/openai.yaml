@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Copilot Log Analizer"
+  short_description: "Analyze Copilot debug logs and prompt exports with bounded, aggregate-first output"
+  default_prompt: "Use $local-copilot-log-analizer to analyze GitHub Copilot Chat debug logs or prompt exports in this repository. Route to the canonical tools/analyze_copilot_debug_log wrapper, start aggregate-first, prefer bounded markdown or json output, and avoid full dumps unless they are the missing evidence."
