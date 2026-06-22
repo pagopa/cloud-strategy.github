@@ -65,7 +65,7 @@ repos:
 
   # Python linting and formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 22f0422809455ec89ffdcf5a00170ba816e42ddb # ruff-pre-commit v0.15.11; source https://github.com/astral-sh/ruff-pre-commit/releases/tag/v0.15.11
+    rev: 77039ccbba72c8aede339c5f8ae29b42aced0a2e # ruff-pre-commit v0.15.11; source https://github.com/astral-sh/ruff-pre-commit/releases/tag/v0.15.11
     hooks:
       - id: ruff-check # Auto-sort Python imports with Ruff, replacing isort.
         name: ruff-check-imports
