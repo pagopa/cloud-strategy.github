@@ -538,7 +538,11 @@ def run_bisync_apply(args: argparse.Namespace) -> int:
     source_root = _resolve_source_root(args)
     home_root = Path(args.home_root).expanduser().resolve()
     plan = build_bisync_plan(source_root, home_root, mode="plan")
-    if plan.blocked_codes:
+    resolvable_during_apply = {"bisync-only-repo"}
+    remaining_blockers = [
+        code for code in plan.blocked_codes if code not in resolvable_during_apply
+    ]
+    if remaining_blockers:
         _emit_bisync_output(plan, args.format)
         return 1
 

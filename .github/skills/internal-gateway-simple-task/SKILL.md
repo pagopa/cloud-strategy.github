@@ -35,6 +35,9 @@ Use `scripts/resolve_simple_task.py` when the task facts are already known and
 the bundle only needs a deterministic gate or claim-gate answer. Use
 `scripts/suggest_support_skills.py` only when paths or symptoms are known and
 support selection is still noisy.
+Do not preload adjacent skill bodies speculatively. Load only the active lane
+owner, mandatory gate owners, and the smallest support owner proven by the
+evidence.
 
 ## When to use
 
@@ -55,6 +58,9 @@ Classify every simple task before operational work as `full-gate`,
 `trivial-skip`, `escalate`, or `plan-mode`.
 
 - Use `full-gate` by default unless the task is proven trivial and venial.
+- For concrete low-to-medium-risk non-trivial work, the required `full-gate`
+  posture is `compact full-gate`: one compact `grill-me` block, one critical
+  outcome, one lean Readiness Brief, then explicit user approval.
 - Run `grill-me` first with one compact numbered block, then the critical gate.
 - Before editing, executing, or finalizing, ask the user to respond first to
   the `grill-me` block and then to the critical outcome.
@@ -75,6 +81,9 @@ Classify every simple task before operational work as `full-gate`,
 - Run a `Token Budget Gate` before choosing `trivial-skip` or `plan-mode` when
   the user asks for low-token execution or the task centers on large tabular
   files, log exports, repeated tool output, or broad file changes.
+- Before that gate, do not launch broad scans, repo-wide discovery, full log
+  reads, wide dependency walks, or wide workbook and export inspection when the
+  task touches workbooks, exports, logs, dependency trees, or tabular data.
 - For Copilot or debug log analysis, start with file size, model-call counts,
   prompt or token aggregates, tool-span counts, result-size summaries, and
   targeted slices; avoid full JSON dumps or prompt bodies unless they are the
@@ -113,7 +122,8 @@ Classify every simple task before operational work as `full-gate`,
 8. Confirm the task still fits one quick lane and choose that lane from
    `references/simple-lanes.md`.
 9. Select only directly applicable skill owners and required references from
-   prompt, target path, runtime, ownership, and validation path.
+   prompt, target path, runtime, ownership, and validation path. Do not
+   preload full adjacent skills without evidence.
 10. Build a Readiness Brief before operational work: task, lane-owner, primary
     assumption or risk, focused validation path, gate outcome, and explicit
     confirmation prompt or named auto-execute exception.
@@ -123,19 +133,21 @@ Classify every simple task before operational work as `full-gate`,
     the selected narrower owner declares a deterministic auto-execute lane with
     its own zero-blocker, zero ambiguous drift, and no destructive or
     reverse-direction action.
-13. Identify mandatory applicable requirements internally before execution; do
+13. After approval, move directly into the edit or validation loop. Keep
+    intermediary prose to blockers, risk changes, and evidence.
+14. Identify mandatory applicable requirements internally before execution; do
     not emit a default user checklist.
-14. Execute the one concrete lane with the Agentic Execution Loop, or, in
+15. Execute the one concrete lane with the Agentic Execution Loop, or, in
     `plan-mode`, write the retained plan and stop before execution.
-15. Run focused validation or name the explicit gap.
-16. Run a pre-close compliance audit over mandatory applicable requirements
+16. Run focused validation or name the explicit gap.
+17. Run a pre-close compliance audit over mandatory applicable requirements
     only. Delegate fresh-evidence mechanics to
     `superpowers-verification-before-completion`.
-17. Block completion claims when mandatory applicable requirements remain
+18. Block completion claims when mandatory applicable requirements remain
     unverified.
-18. If architecture ownership, owner conflicts, or validation strategy are
+19. If architecture ownership, owner conflicts, or validation strategy are
     ambiguous, escalate instead of assuming a universal rule.
-19. If the task stops being simple, stop and issue an escalation alert.
+20. If the task stops being simple, stop and issue an escalation alert.
 
 Escalation trigger: if evidence collection, ownership checks, or validation needs spill into multi-phase execution, route to the narrow next owner instead of expanding the fast path.
 
@@ -221,6 +233,8 @@ the output shape changes.
 - `trivial-skip` included evidence that the task was trivial and venial.
 - Readiness Brief stayed lean, named the lane-owner and validation path, and
   included an explicit approval checkpoint or named the narrower auto-execute exception.
+- After approval, execution moved quickly from the chosen edit or validation
+  lane to focused verification without extra prose bursts.
 - Focused validation ran before completion claims, or the exact validation gap was reported.
 - The Agentic Execution Loop stayed inside the authorized owner, scope, and
   validation path.
@@ -236,6 +250,7 @@ the output shape changes.
 - Switching to plan mode without declaring it or without user confirmation on implicit cost signals.
 - Executing the plan inside simple task instead of handing off to `internal-gateway-execute-plans`.
 - Expanding the Readiness Brief into a long checklist or proceeding without explicit user approval when no narrower auto-execute exception applies.
+- Running broad scans before the token budget gate on workbook, export, log, dependency, or tabular tasks.
 - Treating a generic `next_action.allowed=true` value as enough for auto-execution without checking the narrower skill's stop conditions.
 - Continuing the Agentic Execution Loop after evidence stops improving or a
   stop condition fires.

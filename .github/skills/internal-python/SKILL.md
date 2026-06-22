@@ -39,6 +39,10 @@ every Python edit; load them only when the task proves script or project depth.
 - Do not confuse domain invariants with configuration. Stable rules that belong to the domain may stay near the domain code; environment-specific or operator-tuned values belong at an entrypoint, settings module, adapter, or composition boundary.
 - Keep comments, docstrings, logs, exceptions, and CLI output in English.
 - Use the repository-declared runtime before falling back to ambient `python3`.
+- If a local `.venv` or declared runtime exists, use it first for
+  `py_compile`, `pytest`, and validator runs instead of ambient Python.
+- Before opening large modules, use `rg` to find owner functions, classes,
+  entrypoints, tests, and runtime selectors, then read only the needed blocks.
 - When Ruff is configured for the target repository, let `ruff format` own formatting and use Ruff diagnostics for import order and simple style cleanup. Do not create manual formatting churn that fights the configured formatter.
 - When a test must modify `sys.path` before importing a standalone script, keep the affected import after that setup and mark only that import with `# noqa: E402`; remove truly unused imports or variables instead of suppressing them.
 - Add or update tests for testable logic.
@@ -55,5 +59,8 @@ Use `internal-python-project` when importable behavior, service boundaries, appl
 ## Validation
 
 - Run the nearest focused `pytest` command when behavior changes.
-- Run `python -m py_compile <file>` or `python -m compileall <path>` for syntax-only changes.
+- Run the nearest runtime-owned `py_compile` or `compileall` command for
+  syntax-only changes.
+- Keep compile and test scope narrow. Exclude `.venv`, `__pycache__`, exports,
+  generated outputs, and dependency trees from broad sweeps.
 - Use the repository wrapper or runtime selector when one exists.

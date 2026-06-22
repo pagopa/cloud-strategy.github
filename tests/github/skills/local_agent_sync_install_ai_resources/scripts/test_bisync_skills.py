@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import json
 import os
@@ -268,6 +269,50 @@ def test_apply_blocks_dirty_repository_without_writes(tmp_path: Path) -> None:
     assert result.blocked_codes == ["bisync-repo-dirty"]
     assert result.verification["code"] == "bisync-repo-dirty"
     assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Home\n"
+
+
+def test_run_bisync_apply_allows_only_repo_blocker(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    make_skill(source / ".github" / "skills", "repo-only", "# Repo only\n")
+    (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
+    commit_all(source, "add repo-only")
+
+    args = argparse.Namespace(
+        source_root=source.as_posix(),
+        home_root=home.as_posix(),
+        format="json",
+    )
+
+    exit_code = bisync_skills.run_bisync_apply(args)
+
+    assert exit_code == 0
+    assert (
+        home / ".agents" / "skills" / "repo-only" / "SKILL.md"
+    ).read_text(encoding="utf-8") == "# Repo only\n"
+    verify_plan = build_bisync_plan(source, home, mode="plan")
+    assert verify_plan.drifts == []
+
+
+def test_run_bisync_apply_blocks_non_resolvable_codes(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    make_skill(source / ".github" / "skills", "repo-only", "# Repo only\n")
+    make_skill(home / ".agents" / "skills", "home-only", "# Home only\n")
+    commit_all(source, "add repo-only")
+
+    args = argparse.Namespace(
+        source_root=source.as_posix(),
+        home_root=home.as_posix(),
+        format="json",
+    )
+
+    exit_code = bisync_skills.run_bisync_apply(args)
+
+    assert exit_code == 1
+    assert not (home / ".agents" / "skills" / "repo-only").exists()
 
 
 def test_apply_repo_to_home_converges_without_manifest_entry(

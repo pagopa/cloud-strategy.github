@@ -7,17 +7,19 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 
 ## Referenced skills
 
-- `openai-spreadsheet`: on-demand support owner when formulas, workbook layout, charts, rendering, or formatting preservation matter.
+- `openai-spreadsheet`: on-demand support owner when rendered fidelity, cached recalculation, charts, or polished workbook presentation are the primary requirement.
 
 ## When to use
 
 - CSV, TSV, or `.xlsx` tasks centered on tabular data quality, profiling, schema choices, normalization, joins, dedupe, reconciliation, conversion, or large-file processing.
 - Requests where the main decision is tool selection for scale, memory use, or integrity tradeoffs across local data files.
-- Workbook extraction or value-level updates where presentation fidelity is not the primary requirement.
+- Workbook extraction, contract inspection, writer parity checks, or value-level updates where rendered presentation fidelity is not the primary requirement.
+- Requests to copy a workbook tab contract into generated tabs: column order, widths, header or body style, money style, alert or error row style, and formula columns.
+- Requests where derived workbook columns must stay as Excel formulas and raw source fields remain atomic input values.
 
 ## When not to use
 
-- Spreadsheet layout, formulas, charts, styling, rendered review, or preserving workbook presentation as a first-class requirement; use `openai-spreadsheet`.
+- Charts, rendered review, cached recalculation, or polished workbook presentation as a first-class delivery requirement; use `openai-spreadsheet`.
 - Single-language implementation work after the tabular-data approach is already chosen; use the narrower file or runtime owner for that code.
 - Database or warehouse design work that is not primarily about local CSV, TSV, or Excel artifacts.
 
@@ -25,12 +27,43 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 
 - This skill owns data integrity first: headers, types, nulls, duplicates, joins, reconciliation, stable IDs, delimiter detection, encoding, locale-sensitive numeric fields, and row-count preservation.
 - Keep evidence compact for large files: report headers, counts, targeted anomalies, transformation rules, exact validation gaps, and any locale or coercion assumptions that change numeric meaning.
-- Treat `.xlsx` as a workbook container. Stay here when the job is tabular extraction or safe value-level transformation. Route to `openai-spreadsheet` when workbook behavior matters.
+- Treat `.xlsx` as a workbook container first. Stay here for tabular extraction, safe value-level transformation, workbook contract inspection, writer parity checks, and formula-column decisions. Route to `openai-spreadsheet` only when rendered fidelity, cached recalculation, charts, or presentation-preserving delivery is the main job.
 - Preserve identifier fidelity before coercion: keep leading zeros, long numeric IDs, and day-first date text exact until an explicit schema rule says otherwise.
 - Flag spreadsheet-bound text that could execute as a formula and minimize sensitive-column exposure in samples or logs.
 - Read `references/tool-selection.md` when choosing between Python `csv`, `pandas`, `openpyxl`, PyArrow, Polars, or DuckDB, or when scale, memory use, file format, or workbook fidelity makes the engine choice non-obvious.
 - Read `references/data-integrity-and-safety.md` when delimiter or encoding detection, locale coercion, operation-specific proof, formula injection, or sensitive data exposure are material.
 - Read `references/large-file-token-discipline.md` when file size, broad profiling, repeated output, sampling strategy, or context pressure could make the tabular workflow expensive.
+
+## Noise Exclusions
+
+- In discovery commands, exclude `.venv`, `__pycache__`, `.pytest_cache`, dependency directories, generated outputs, and binary exports that are not the active evidence target.
+- Ignore workbook lock files such as `~$*` and `.~lock.*`.
+- Prefer targeted `rg` queries on source files, writer modules, and the named workbook path. Do not start with broad repo scans when the target file or owner path is already known.
+
+## Workbook Token Gate
+
+- Before broad `.xlsx` reads, collect only bounded metadata: file size, sheet names, target-sheet dimensions, target headers, essential row counts, formula count, and style or style-id counts.
+- Do not dump workbook XML, full worksheets, broad profiler output, or whole tables into chat unless they are the missing evidence.
+- Read only the target sheets, columns, ranges, or writer blocks needed for the active question.
+- Before opening large code modules, use `rg` to find owner functions, workbook writers, style builders, and formula helpers, then read only the needed blocks.
+
+## Workbook Contracts
+
+- When a sample workbook or sample tab defines the expected layout, treat that tab as a contract: column order, widths, header style, body style, money style, alert or error row style, and formula columns.
+- Verify that every tab produced by the same writer receives the same contract where applicable, not just the sampled tab.
+- When the user asks for verifiable formulas, keep derived columns as Excel formulas and keep source columns as atomic input values instead of precomputed results.
+- If workbook behavior stays contract-level and formula-level, keep the guidance here. Route to `openai-spreadsheet` only when visual polish, charts, or recalculated delivery artifacts become primary.
+
+## Binary Artifacts
+
+- Do not modify sample workbooks, generated exports, or other binary artifacts unless the user explicitly asks for that edit.
+- If output validation needs a generated workbook, write it to `tmp/` or another declared controlled path and report that path.
+- Do not include Excel or LibreOffice lock files in discovery, validation, diffs, or deliverables.
+
+## Runtime And Validation
+
+- If the local toolchain or bundle exposes a `.venv` or declared runtime, use that runtime for `py_compile`, tests, or `pytest` instead of ambient Python.
+- Run the smallest deterministic validation that proves the workbook or tabular change; keep output bounded and artifact-oriented.
 
 ## Token Discipline
 
@@ -38,7 +71,7 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 - Do not paste full tables, raw workbook XML, full profiling JSON, or broad command output into chat by default. Report bounded summaries, counts, schema, anomalies, transformation rules, artifact paths, and validation gaps.
 - Treat row samples as discovery only. Keep samples small and redacted, then prove transformations with full-file aggregate checks such as counts, key scans, coercion failures, or reconciliation queries.
 - Prefer streaming reads, column projection, chunked scans, DuckDB, Polars, or PyArrow for large files. Use full `pandas` loads or full workbook traversal only after size and scope show that the token and memory cost is justified.
-- For `.xlsx`, inspect workbook metadata first and read only the target sheets or ranges when possible. Route to `openai-spreadsheet` before spending tokens on layout, formulas, charts, or rendered fidelity.
+- For `.xlsx`, inspect workbook metadata first and read only the target sheets or ranges when possible. Do not escalate to broad workbook traversal unless the metadata gate shows it is necessary.
 - Pause before expensive expansions such as dumping more rows, profiling every sheet, loading all columns, or running repeated wide joins. If the user explicitly asks for full output, state the context impact and provide the smallest bounded next slice or a local artifact path.
 
 ## Workflow
@@ -46,9 +79,10 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 1. Confirm the artifact type, row scale, token budget risk, whether workbook fidelity matters, and whether locale-specific numeric conventions or spreadsheet reopening are in play.
 2. Pick the narrowest tool that preserves the needed integrity and performance.
 3. Inspect headers, sample rows, counts, null patterns, key columns, and locale-sensitive numeric fields before broad transforms.
-4. Apply deterministic transformations with explicit schema rules for IDs, dates, currency, and decimal text, and keep a reconciliation path for row counts, keys, duplicates, and dropped records.
-5. Re-run focused integrity and safety checks after each material transform.
-6. Hand workbook UX, formulas, formatting, charts, or rendering follow-up to `openai-spreadsheet`.
+4. For `.xlsx`, inspect metadata and the active workbook contract before broad reads: sheet names, target dimensions, headers, formula counts, style counts, and the relevant writer blocks.
+5. Apply deterministic transformations with explicit schema rules for IDs, dates, currency, and decimal text, and keep a reconciliation path for row counts, keys, duplicates, dropped records, and formula-column intent.
+6. Re-run focused integrity and safety checks after each material transform or workbook-writer change.
+7. Hand off only when rendered workbook polish, charts, cached recalculation, or presentation-preserving delivery becomes the main requirement.
 
 ## Validation
 
