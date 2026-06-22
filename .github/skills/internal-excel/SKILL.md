@@ -23,22 +23,25 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 
 ## Boundary
 
-- This skill owns data integrity first: headers, types, nulls, duplicates, joins, reconciliation, stable IDs, delimiter detection, encoding, and row-count preservation.
-- Keep evidence compact for large files: report headers, counts, targeted anomalies, transformation rules, and exact validation gaps.
+- This skill owns data integrity first: headers, types, nulls, duplicates, joins, reconciliation, stable IDs, delimiter detection, encoding, locale-sensitive numeric fields, and row-count preservation.
+- Keep evidence compact for large files: report headers, counts, targeted anomalies, transformation rules, exact validation gaps, and any locale or coercion assumptions that change numeric meaning.
 - Treat `.xlsx` as a workbook container. Stay here when the job is tabular extraction or safe value-level transformation. Route to `openai-spreadsheet` when workbook behavior matters.
-- Read `references/tool-selection.md` when choosing between Python `csv`, `pandas`, `openpyxl`, PyArrow, Polars, or DuckDB.
+- Preserve identifier fidelity before coercion: keep leading zeros, long numeric IDs, and day-first date text exact until an explicit schema rule says otherwise.
+- Flag spreadsheet-bound text that could execute as a formula and minimize sensitive-column exposure in samples or logs.
+- Read `references/tool-selection.md` when choosing between Python `csv`, `pandas`, `openpyxl`, PyArrow, Polars, or DuckDB, or when locale, encoding, or spreadsheet-safety tradeoffs are non-obvious.
 
 ## Workflow
 
-1. Confirm the artifact type, row scale, and whether workbook fidelity matters.
+1. Confirm the artifact type, row scale, whether workbook fidelity matters, and whether locale-specific numeric conventions or spreadsheet reopening are in play.
 2. Pick the narrowest tool that preserves the needed integrity and performance.
-3. Inspect headers, sample rows, counts, null patterns, and key columns before broad transforms.
-4. Apply deterministic transformations and keep a reconciliation path for row counts, keys, duplicates, and dropped records.
-5. Re-run focused integrity checks after each material transform.
+3. Inspect headers, sample rows, counts, null patterns, key columns, and locale-sensitive numeric fields before broad transforms.
+4. Apply deterministic transformations with explicit schema rules for IDs, dates, currency, and decimal text, and keep a reconciliation path for row counts, keys, duplicates, and dropped records.
+5. Re-run focused integrity and safety checks after each material transform.
 6. Hand workbook UX, formulas, formatting, charts, or rendering follow-up to `openai-spreadsheet`.
 
 ## Validation
 
-- Run the smallest deterministic check that proves the transform: row counts, schema diff, duplicate-key scan, delimiter or encoding confirmation, join cardinality, or a reconciliation sample.
+- Run the smallest deterministic check that proves the transform: row counts, schema diff, duplicate-key scan, delimiter or encoding confirmation, locale-sensitive numeric confirmation, join cardinality, or a reconciliation sample.
+- When data may return to spreadsheet tools, verify formula-injection handling and avoid exposing raw sensitive values in samples or validation output.
 - Run `python3 ./.github/scripts/validate_internal_skills.py --skill internal-excel --strict` after editing this skill bundle.
 - Run the closest inventory consistency check when registering or renaming the skill.
