@@ -81,7 +81,7 @@ repos:
 
   # Terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: d61ded22bf9aa0f757303ebcbb0d6d71c4b54015 # pre-commit-terraform v1.105.0; source https://github.com/antonbabenko/pre-commit-terraform/releases/tag/v1.105.0
+    rev: 05fd71a57a467ccf5598f7e836d3af4cf9225abb # pre-commit-terraform v1.105.0; source https://github.com/antonbabenko/pre-commit-terraform/releases/tag/v1.105.0
     hooks:
       - id: terraform_fmt # Enforce canonical Terraform formatting.
       - id: terraform_docs # Keep Terraform module documentation aligned with code.
