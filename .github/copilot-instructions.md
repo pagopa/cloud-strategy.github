@@ -1,31 +1,62 @@
-# Copilot Bridge
+# GitHub.com Copilot Code Review
 
-Use `AGENTS.md` as the canonical repository bridge for policy, precedence,
-ownership boundaries, and routing.
+This file is only for GitHub.com Copilot code review.
 
-Apply only matching instruction files from `.github/instructions/`.
+It is not a general task-execution guide, repository routing guide, planning
+workflow, or local agent runtime contract.
 
-Select the smallest relevant skill from the prompt, target path, command
-surface, validation signal, or repository evidence.
+## Review Objective
 
-Load task-specific skills or references only when workflow depth is needed.
+Review changed files for defects that matter before merge.
 
-Do not edit imported upstream assets in place unless the need is strong,
-explicit, and registered.
+- Prioritize correctness, security, regressions, missing validation, and
+  maintainability.
+- Prefer actionable findings over broad advice.
+- Tie each finding to concrete changed-file evidence.
+- Do not restate repository policy unless the diff creates a specific risk.
 
-Do not hardcode secrets. Use least privilege and evidence-first validation.
+## Finding Priority
 
-When editing contracts, update validators/tests and run the closest available
-checks.
+Use these buckets when reporting issues:
 
-Report completed work with outcome, changed files, validation results, and
-remaining gaps.
+- `Critical`: data loss, credential exposure, remote code execution, production
+  outage, or a merge-blocking contract break.
+- `Major`: correctness bugs, security weaknesses, broken validators, missing
+  required tests, or behavior regressions.
+- `Minor`: maintainability, edge-case, resilience, or observability issues that
+  should be fixed before merge when practical.
+- `Nit`: small clarity or style issues that are safe to ignore.
+- `Notes`: useful context that is not a defect.
 
-Treat retained plans and `LESSONS_LEARNED.md` as non-canonical.
+## Required Checks
 
-Keep retained-plan workflow details in dedicated retained-plan skills and lesson-codification owners.
+- Check for hardcoded secrets, credentials, keys, tokens, and tenant-sensitive
+  values.
+- Check least privilege, destructive behavior controls, unsafe execution paths,
+  and missing input validation.
+- Check whether changed behavior has appropriate tests, fixtures, docs, or
+  validators.
+- Check contract alignment for changed schemas, generated assets, sync behavior,
+  prompts, instructions, skills, scripts, and CI workflows.
+- Check that fixes are scoped to the requested behavior and do not rewrite large
+  unaffected areas.
 
-Keep ledger row rules in their owned retained-learning files and skills.
+## Review Discipline
 
-Include detailed resource sections only when the user asks or a narrower
-contract requires them.
+- Report findings first, ordered by severity.
+- For each finding, include the file or changed area, impact, and a concrete fix
+  direction.
+- Avoid speculative findings when the diff does not provide enough evidence.
+- Avoid praise, summaries, or style-only comments unless they reveal a real
+  maintenance risk.
+- Escalate repeated instances of the same defect pattern when the repetition
+  increases risk.
+
+## Non-Scope
+
+- Do not provide implementation plans unless the review finding needs fix
+  guidance.
+- Do not ask the author to follow local runtime workflows that GitHub.com cannot
+  execute.
+- Do not treat this file as instructions for coding agents, local CLIs, or
+  non-review Copilot chat behavior.

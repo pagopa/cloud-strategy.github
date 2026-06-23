@@ -1,50 +1,63 @@
-# AGENTS.md - Skill-First AI Configuration Bridge
+# AGENTS.md - Repository Operating Core
 
-This file is the repository strategic operating bridge for AI configuration.
-Keep it compact, stable, and free of volatile inventory or surface-specific
-playbooks.
+AGENTS.md is the canonical entrypoint for repository policy, operating
+defaults, ownership boundaries, and validation expectations.
+
+Keep it compact, stable, and free of volatile inventory, surface-specific
+playbooks, and runtime-specific bridges.
 
 `<shared-baseline>`
 
 This block defines guidance intended to travel as the shared baseline when this
 repository projects AI configuration into other repositories.
 
-## Rule Placement
+## Operating Principles
 
-- `AGENTS.md` must define stable repository-wide policy, precedence, tactical operating defaults, ownership boundaries, and routing anchors only.
-- Do not put operational procedures, checklists, file-shape recipes, command playbooks, or tool-specific workflows here.
-- Put each rule in the smallest valid owner: skills for technical baselines and workflows, agents for route UX, docs for context, validators for enforceable checks, sync owners for propagation, and owned files for their local editing rules.
-- An external tool that reads this file may require a clearly delimited, trailing routing block carrying the minimal commands it needs to consume the repository; keep any such block source-local, outside the governed policy blocks, and limited to that tool's required invocation anchors.
+- Think before acting. Identify the target, owner, evidence, and validation path
+  before changing files or running broad commands.
+- Prefer the smallest valid owner. Keep broad policy here, reusable depth in
+  local guidance, context in docs, enforceable checks in validators, propagation
+  rules in sync owners, and local editing rules in the owned files.
+- Make surgical changes. Preserve user work, avoid unrelated refactors, and
+  keep each edit tied to the requested outcome.
+- Work toward verified outcomes. Name the expected check early, run the closest
+  available validation, and report explicit gaps.
 
-## Writing Style
+## Scope And Placement
 
-- Use Plain Technical English for repository-owned prose.
-- Prefer short sentences, stable terms, active voice, and explicit `must`, `should`, and `may` wording.
-- Keep required technical names unchanged, including paths, commands, schema fields, product names, asset names, and established repository terms.
-- Do not rewrite imported upstream text that must remain verbatim.
+- `AGENTS.md` owns stable repository-wide policy, precedence, tactical defaults,
+  ownership boundaries, and routing anchors.
+- Do not put operational procedures, checklists, file-shape recipes, command
+  playbooks, or tool-specific workflows here.
+- Keep volatile inventory out of this file. `.github/INVENTORY.md` owns the
+  exact live catalog of managed AI assets.
+- Keep repository architecture in `docs/architecture.md` and non-policy local
+  context in `docs/repository-context.md`.
+- Consumer repositories should express local exceptions with preserved
+  `.github/instructions/local-*.instructions.md` files.
 
-## Role And Precedence
+## Context Routing
 
-- `AGENTS.md` owns repository-wide defaults, precedence, rule placement, and cross-surface bridge behavior.
-- `.github/copilot-instructions.md` is the compact repo-wide Copilot bridge; keep it aligned as a routing layer rather than a policy duplicate.
-- `.github/INVENTORY.md` owns the exact live catalog of managed AI assets; do not replace it with `AGENTS.md`.
-- Sync agents own catalog prefix rules, imported-resource posture, and consumer propagation boundaries.
-- `.github/skills/` owns repository-owned reusable guidance. Umbrella skills own lightweight technical-domain baselines; specialist skills and bundle references own deeper procedures.
-- Use `docs/architecture.md` for repository architecture and `docs/repository-context.md` for non-policy local context.
-- Use relevant skills for workflow depth, runtime consumption behavior, and reusable operating procedures.
-- Consumer repositories should express local exceptions with preserved `.github/instructions/local-*.instructions.md` files.
-
-## Context And Scope
-
-- For runtimes without native skill loading, select the smallest relevant skill from the prompt, target path, command surface, validation signal, or repository evidence, then read that `SKILL.md` as manual context.
-- Load umbrella domain skills before specialist depth when the domain is clear but the workflow depth is not yet proven.
-- Co-load specialist skills or bundle references only when the task needs workflow, decision trees, domain depth, or reusable procedures.
-- Use the smallest valid owner to resolve conflicts; file-owned rules and narrower skill contracts win over broad defaults inside their own scope.
-- Treat `.github/agents/*.agent.md` as surface-specific wrapper projections; reusable behavior stays in skills when a runtime lacks wrapper UI.
-- If no target path is known, infer obvious domains only, such as Python, GitHub Actions, Kubernetes, Docker, Markdown, or Terraform; otherwise ask for the target path before making path-scoped claims.
+- Select the smallest relevant local guidance from the prompt, target path,
+  command surface, validation signal, and repository evidence.
+- Load broad domain guidance before specialist depth when the domain is clear but
+  the workflow depth is not proven.
+- Add specialist guidance only when the task needs workflow detail, decision
+  trees, domain depth, or reusable procedures.
+- Resolve conflicts with the smallest valid owner. File-owned rules and narrower
+  local contracts win inside their own scope.
+- If no target path is known, infer obvious domains only, such as Python, GitHub
+  Actions, Kubernetes, Docker, Markdown, or Terraform. Otherwise ask for the
+  target path before making path-scoped claims.
 
 ## Authoring Defaults
 
+- Use Plain Technical English for repository-owned prose.
+- Prefer short sentences, stable terms, active voice, and explicit `must`,
+  `should`, and `may` wording.
+- Keep required technical names unchanged, including paths, commands, schema
+  fields, product names, asset names, and established repository terms.
+- Do not rewrite imported upstream text that must remain verbatim.
 - The default authoring language for repository artifacts is English unless a narrower owned file, skill, or local exception explicitly overrides it.
 - User chat may be Italian; repository-owned retained plans may use Italian when the retained-plan policy applies.
 - Keep repository-owned AI configuration files as Markdown. Use XML only as runtime prompt-assembly delimiters, never as source format.
@@ -60,7 +73,8 @@ repository projects AI configuration into other repositories.
 ## Tactical Defaults
 
 - Preserve compact working state across turns; avoid rebuilding full context unless new evidence invalidates the current state.
-- Keep one active primary owner per execution lane. Load referenced skills on demand based on target, runtime, ownership, and validation path.
+- Keep one active primary owner per execution lane. Load referenced guidance on
+  demand based on target, runtime, ownership, and validation path.
 - Use bounded evidence: inspect changed sections and failing-validator context first, then expand only when gaps remain.
 - Name the validation path early and treat missing validator evidence as a non-`DONE` state until the gap is explicitly resolved.
 
@@ -83,7 +97,6 @@ repository projects AI configuration into other repositories.
 ## Token And Drift Control
 
 - `AGENTS.md` is the canonical always-on policy surface; keep it near a 4,000 estimated-token soft target measured as `ceil(UTF-8 bytes / 4)` by the validator.
-- Keep `.github/copilot-instructions.md` compact as a bridge and keep global review behavior in `.github/instructions/copilot-code-review.instructions.md`.
 - Keep duplication deliberate. Duplicate only rules that must remain visible in a specific surface and are compact enough to validate.
 
 `</shared-baseline>`
