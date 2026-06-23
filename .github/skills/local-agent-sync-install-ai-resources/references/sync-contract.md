@@ -118,6 +118,8 @@ Use this table for missing roots, documentation gaps, manifest problems, permiss
 
 ### Sync, Plan, Audit, And Bisync Plan Report
 
+For top-level `sync`, use this compact chat order: `Status`, `Summary`, `Auto-applied`, `Stopped on`, `Validation`, and `Next`.
+
 After the shared header and summary, show one change-oriented table and one attention table when they are useful.
 
 Planned changes table:
@@ -242,7 +244,7 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
 ### Logic
 
 1. Scan both directories and collect all skill names (union).
-2. Exclude bundles whose name starts with `local-agent-sync-`.
+2. Exclude bundles whose name starts with `local-`.
 3. For each skill present in both sides:
    - Compute content hash (excluding `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`).
    - If hashes match, the skill is `in-sync` (not reported).
@@ -279,7 +281,7 @@ Before any write in `bisync apply`:
 ### Exclusions
 
 - Runtime artifacts: `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`.
-- Bundle prefix: `local-agent-sync-*` bundles are excluded from bisync scanning and copying.
+- Bundle prefix: `local-*` bundles are excluded from bisync scanning and copying.
 
 ### Output
 

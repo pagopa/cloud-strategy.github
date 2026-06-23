@@ -95,6 +95,79 @@ def build_compact_bisync_output(payload: dict[str, object]) -> dict[str, object]
     return compact
 
 
+def render_sync_report(payload: dict[str, object]) -> str:
+    status = str(payload.get("status") or "unknown")
+    reason = str(payload.get("reason") or "")
+    install_payload = payload.get("install") if isinstance(payload.get("install"), dict) else {}
+    bisync_payload = payload.get("bisync") if isinstance(payload.get("bisync"), dict) else {}
+
+    install_operations = install_payload.get("operations") if isinstance(install_payload, dict) else None
+    direction_counts = _direction_counts(bisync_payload.get("drifts")) if isinstance(bisync_payload, dict) else _direction_counts(())
+    bucket_counts = _bucket_counts(bisync_payload.get("drifts")) if isinstance(bisync_payload, dict) else _bucket_counts(())
+
+    lines: list[str] = []
+    lines.append(f"Status: sync | status={status} | reason={reason}")
+    lines.append("")
+
+    lines.extend(_report_section("Summary"))
+    lines.extend(
+        _bullet_lines(
+            [
+                f"Install copied: {_count_operations(install_operations, {'copy'})}",
+                f"Install skipped: {_count_operations(install_operations, {'skip'})}",
+                f"Install warnings: {_count_operations(install_operations, {'warning'})}",
+                f"Install blockers: {_count_operations(install_operations, {'blocked', 'stale-managed'})}",
+                f"Bisync repo-to-home: {direction_counts['repo_to_home']}",
+                f"Bisync home-to-repo: {direction_counts['home_to_repo']}",
+                f"Bisync only-repo: {bucket_counts['only_repo']}",
+                f"Bisync only-home: {bucket_counts['only_home']}",
+                f"Bisync equal-mtime: {bucket_counts['equal_mtime']}",
+            ]
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Auto-applied"))
+    lines.extend(
+        _table_lines(
+            ["Skill or path", "Why copied", "Verification"],
+            _sync_auto_applied_rows(install_payload if isinstance(install_payload, dict) else {}),
+            none_row=["none", "No safe repo-to-home copy was applied.", "none"],
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Stopped on"))
+    lines.extend(
+        _table_lines(
+            ["Skill or path", "Direction", "Differences or reason"],
+            _sync_stopped_rows(
+                install_payload if isinstance(install_payload, dict) else {},
+                bisync_payload if isinstance(bisync_payload, dict) else {},
+            ),
+            none_row=["none", "none", "No home-owned or ambiguous drift stopped sync."],
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Validation"))
+    lines.extend(
+        _table_lines(
+            ["Check", "Result"],
+            _sync_validation_rows(
+                status,
+                install_payload if isinstance(install_payload, dict) else {},
+                bisync_payload if isinstance(bisync_payload, dict) else {},
+            ),
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Next"))
+    lines.extend(_table_lines(["Field", "Value"], _sync_next_rows(payload)))
+    return "\n".join(lines).strip() + "\n"
+
+
 def _copy_if_present(
     target: dict[str, object],
     source: dict[str, object],
@@ -215,6 +288,122 @@ def _bisync_change_evidence(drifts: object, limit: int = 8) -> list[dict[str, ob
         if len(evidence) >= limit:
             break
     return evidence
+
+
+def _sync_auto_applied_rows(install_payload: dict[str, object]) -> list[list[str]]:
+    rows: list[list[str]] = []
+    operations = install_payload.get("operations")
+    if not isinstance(operations, list):
+        return rows
+    manifest_path = install_payload.get("manifest_path")
+    verification = "manifest hash recorded" if isinstance(manifest_path, str) and manifest_path else "planned only"
+    for operation in operations:
+        if not isinstance(operation, dict):
+            continue
+        if str(operation.get("action") or "") != "copy":
+            continue
+        item = str(operation.get("resource_id") or operation.get("path") or "unknown")
+        reason = str(operation.get("reason") or "Repo-to-home copy applied.")
+        rows.append([item, reason, verification])
+    return rows
+
+
+def _sync_stopped_rows(
+    install_payload: dict[str, object],
+    bisync_payload: dict[str, object],
+) -> list[list[str]]:
+    rows: list[list[str]] = []
+
+    operations = install_payload.get("operations")
+    if isinstance(operations, list):
+        for operation in operations:
+            if not isinstance(operation, dict):
+                continue
+            action = str(operation.get("action") or "")
+            code = str(operation.get("code") or "")
+            if action not in {"blocked", "stale-managed"} and not (
+                action == "warning" and code == "target-modified-managed"
+            ):
+                continue
+            path = str(operation.get("resource_id") or operation.get("path") or "unknown")
+            direction = "install review"
+            if code == "target-modified-managed":
+                direction = "home-to-repo review"
+            reason = str(operation.get("reason") or _reason_for_code(code or action))
+            rows.append([path, direction, reason])
+
+    drifts = bisync_payload.get("drifts")
+    if isinstance(drifts, list):
+        for drift in drifts:
+            if not isinstance(drift, dict):
+                continue
+            drift_type = str(drift.get("type") or "drift")
+            direction = str(drift.get("direction") or drift_type)
+            if drift_type == "only-repo":
+                continue
+            if drift_type == "drift" and direction == "repo-to-home":
+                continue
+            skill = str(drift.get("skill") or "unknown")
+            rows.append([skill, direction, _sync_drift_summary(drift)])
+    return rows
+
+
+def _sync_validation_rows(
+    status: str,
+    install_payload: dict[str, object],
+    bisync_payload: dict[str, object],
+) -> list[list[str]]:
+    rows = [["Overall sync", status]]
+    install_status = str(install_payload.get("validation") or install_payload.get("status") or "not-run")
+    rows.append(["Install lane", install_status])
+
+    bisync_status = "not-run"
+    verification = bisync_payload.get("verification")
+    if isinstance(verification, dict):
+        bisync_status = str(verification.get("status") or bisync_status)
+    elif bisync_payload:
+        bisync_status = "reviewed"
+    rows.append(["Bisync lane", bisync_status])
+
+    state_path = install_payload.get("state_path")
+    if isinstance(state_path, str) and state_path:
+        rows.append(["State path", state_path])
+    manifest_path = install_payload.get("manifest_path")
+    if isinstance(manifest_path, str) and manifest_path:
+        rows.append(["Manifest path", manifest_path])
+    return rows
+
+
+def _sync_next_rows(payload: dict[str, object]) -> list[list[str]]:
+    status = str(payload.get("status") or "unknown")
+    reason = str(payload.get("reason") or "Review the latest sync report.")
+    bisync_payload = payload.get("bisync") if isinstance(payload.get("bisync"), dict) else {}
+
+    if status == "done":
+        return [["Action", "none"], ["Reason", reason]]
+
+    if isinstance(bisync_payload, dict) and _sync_stopped_rows({}, bisync_payload):
+        return [
+            ["Action", "review_bisync"],
+            ["Reason", "Review home-owned or ambiguous drift, then run explicit `bisync plan` or `bisync apply` if needed."],
+        ]
+
+    return [
+        ["Action", "review_install"],
+        ["Reason", "Resolve install blockers or warnings, then rerun `sync`."],
+    ]
+
+
+def _sync_drift_summary(drift: dict[str, object]) -> str:
+    drift_type = str(drift.get("type") or "drift")
+    direction = str(drift.get("direction") or drift_type)
+    if drift_type == "only-home":
+        return "Only present in home. Manual review decides whether to keep, remove, or add it to the repo."
+    if drift_type == "equal-mtime":
+        return "Repo and home hashes differ, but timestamps are equal, so the winner is ambiguous."
+    if direction == "home-to-repo":
+        return "Home copy is newer than repo copy and needs an explicit home-to-repo decision."
+    return _bisync_reason(drift_type, direction)
 
 
 def render_install_report(payload: dict[str, object]) -> str:

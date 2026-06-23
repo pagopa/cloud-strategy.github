@@ -193,6 +193,26 @@ def test_build_plan_detects_home_to_repo_direction(tmp_path: Path) -> None:
     assert drift.direction == "home-to-repo"
 
 
+def test_build_plan_treats_hash_equal_different_mtime_as_in_sync(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    source_skill = make_skill(
+        source / ".github" / "skills", "same-hash-skill", "# Same content\n"
+    )
+    home_skill = make_skill(
+        home / ".agents" / "skills", "same-hash-skill", "# Same content\n"
+    )
+    set_tree_mtime(source_skill, 200.0)
+    set_tree_mtime(home_skill, 100.0)
+
+    plan = build_bisync_plan(source, home, mode="plan")
+
+    assert plan.drifts == []
+    assert plan.blocked_codes == []
+    assert plan.verification["status"] == "ok"
+
+
 def test_build_plan_blocks_equal_mtime(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
@@ -229,7 +249,7 @@ def test_build_plan_blocks_only_repo_and_only_home(tmp_path: Path) -> None:
     assert plan.blocked_codes == ["bisync-only-home", "bisync-only-repo"]
 
 
-def test_excludes_local_agent_sync_bundles_from_scan(tmp_path: Path) -> None:
+def test_excludes_local_prefixed_bundles_from_scan(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
@@ -243,6 +263,8 @@ def test_excludes_local_agent_sync_bundles_from_scan(tmp_path: Path) -> None:
         "local-agent-sync-install-ai-resources",
         "# Diverged sync bundle\n",
     )
+    make_skill(source / ".github" / "skills", "local-custom", "# Local source\n")
+    make_skill(home / ".agents" / "skills", "local-custom", "# Local home\n")
     make_skill(source / ".github" / "skills", "normal-skill", "# Normal\n")
     make_skill(home / ".agents" / "skills", "normal-skill", "# Normal\n")
 

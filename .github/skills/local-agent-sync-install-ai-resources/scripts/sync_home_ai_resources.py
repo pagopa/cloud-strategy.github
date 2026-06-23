@@ -28,7 +28,7 @@ from home_syncing import (
     write_doctor_snapshot,
     write_plan_snapshot,
 )
-from sync_output import build_compact_install_output, render_install_report
+from sync_output import build_compact_install_output, render_install_report, render_sync_report
 from sync_output import build_compact_bisync_output, render_bisync_report
 
 
@@ -283,12 +283,12 @@ def run_sync(
     if targets == ("skills",) and not retire_targets:
         bisync_plan = build_bisync_plan(source_root, home_root, mode="plan")
         bisync_payload = bisync_plan.to_dict()
-        if bisync_plan.blocked_codes or bisync_plan.drifts:
+        if bisync_requires_review(bisync_plan):
             emit_sync_output(
                 {
                     "mode": "sync",
                     "status": "needs_review",
-                    "reason": "Bisync drift or blockers need a human direction decision before writes.",
+                    "reason": "Bisync detected home-owned or ambiguous drift that needs human review before sync can finish.",
                     "install": install_payload,
                     "bisync": bisync_payload,
                 },
@@ -300,7 +300,7 @@ def run_sync(
         {
             "mode": "sync",
             "status": "done",
-            "reason": "Repo-to-home install completed and no bisync drift needs review.",
+            "reason": "Repo-to-home install completed and no home-owned bisync drift needs review.",
             "install": install_payload,
             "bisync": bisync_payload,
         },
@@ -309,12 +309,34 @@ def run_sync(
     return 0
 
 
+def bisync_requires_review(plan) -> bool:
+    safe_blocked_codes = {"bisync-only-repo"}
+    if any(code not in safe_blocked_codes for code in plan.blocked_codes):
+        return True
+
+    for drift in plan.drifts:
+        if drift.drift_type == "only-repo":
+            continue
+        if drift.drift_type == "drift" and drift.direction == "repo-to-home":
+            continue
+        return True
+
+    return False
+
+
 def install_auto_apply_blockers(
     plan,
     args: argparse.Namespace,
 ) -> list[str]:
     blockers = list(plan.blocked_codes())
-    if plan.residual_drift:
+    if any(
+        operation.action in {"blocked", "stale-managed"}
+        or (
+            operation.action == "warning"
+            and operation.code != "target-modified-managed"
+        )
+        for operation in plan.operations
+    ):
         blockers.append("install-residual-drift")
     if any(operation.action == "mkdir" for operation in plan.operations) and not args.create_missing_dirs:
         blockers.append("needs-directory-create")
@@ -342,17 +364,7 @@ def emit_sync_output(payload: dict[str, object], *, format_name: str) -> None:
         print(json.dumps(compact, indent=2, sort_keys=True))
         return
 
-    status = str(payload.get("status") or "unknown")
-    reason = str(payload.get("reason") or "")
-    print(f"Status: mode=sync; status={status}; reason={reason}")
-    print("")
-    if isinstance(install_payload, dict):
-        print("# Install Lane")
-        print(render_install_report(install_payload), end="")
-    if isinstance(bisync_payload, dict):
-        print("")
-        print("# Bisync Lane")
-        print(render_bisync_report(bisync_payload), end="")
+    print(render_sync_report(payload), end="")
 
 
 def run_apply(plan, args: argparse.Namespace) -> int:

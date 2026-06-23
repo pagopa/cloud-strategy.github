@@ -530,7 +530,7 @@ def test_repo_to_home_bisync_refreshes_install_manifest(tmp_path: Path) -> None:
     assert "target-modified-managed" not in blocked_codes
 
 
-def test_direct_home_edit_still_blocks_target_modified_managed(
+def test_home_newer_managed_drift_becomes_warning_until_bisync_review(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -547,8 +547,55 @@ def test_direct_home_edit_still_blocks_target_modified_managed(
     )
     apply_home_sync_plan(install_plan, create_missing_dirs=True)
 
-    copied_skill = home_root / ".agents/skills/demo-skill/SKILL.md"
-    copied_skill.write_text("# locally edited\n", encoding="utf-8")
+    source_skill = source_root / ".github/skills/demo-skill"
+    copied_skill = home_root / ".agents/skills/demo-skill"
+    write_file(copied_skill / "SKILL.md", "# locally edited\n")
+    set_tree_mtime(source_skill, 100.0)
+    set_tree_mtime(copied_skill, 200.0)
+
+    review_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    blocked_codes = {
+        operation.code
+        for operation in review_plan.operations
+        if operation.action == "blocked" and operation.code
+    }
+    warning_codes = {
+        operation.code
+        for operation in review_plan.operations
+        if operation.action == "warning" and operation.code
+    }
+
+    assert "target-modified-managed" not in blocked_codes
+    assert "target-modified-managed" in warning_codes
+
+
+def test_ambiguous_managed_drift_still_blocks_target_modified_managed(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    init_git_repo(source_root)
+    commit_all(source_root, "initial source bundle")
+
+    install_plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    apply_home_sync_plan(install_plan, create_missing_dirs=True)
+
+    source_skill = source_root / ".github/skills/demo-skill"
+    copied_skill = home_root / ".agents/skills/demo-skill"
+    write_file(copied_skill / "SKILL.md", "# locally edited\n")
+    set_tree_mtime(source_skill, 100.0)
+    set_tree_mtime(copied_skill, 100.0)
 
     blocked_plan = build_home_sync_plan(
         source_root=source_root,

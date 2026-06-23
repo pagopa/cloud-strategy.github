@@ -259,6 +259,7 @@ def build_home_sync_plan(
                 operations,
                 target,
                 target_path,
+                source_path,
                 resource,
                 source_hash,
                 manifest_index,
@@ -638,6 +639,7 @@ def add_materialization_operation(
     operations: list[HomeSyncOperation],
     target: str,
     target_path: Path,
+    source_path: Path,
     resource: CatalogResource,
     source_hash: str,
     manifest_index: dict[str, dict[str, object]],
@@ -657,6 +659,19 @@ def add_materialization_operation(
             )
             return
         if current_hash != manifest_entry.get("content_hash"):
+            if resource_mtime(target_path) > resource_mtime(source_path):
+                operations.append(
+                    HomeSyncOperation(
+                        target=target,
+                        action="warning",
+                        path=target_path.as_posix(),
+                        reason="Managed target diverged from the last recorded manifest hash and the home copy is newer than the repo source. Install skips this resource so an explicit home-to-repo review can decide whether to keep or copy back the newer home state.",
+                        code="target-modified-managed",
+                        source_path=resource.source_path,
+                        resource_id=resource.resource_id,
+                    )
+                )
+                return
             add_blocked_operation(
                 operations,
                 target=target,
@@ -1217,6 +1232,17 @@ def should_ignore_sync_path(path: Path) -> bool:
     if any(part in IGNORED_SYNC_PARTS for part in path.parts):
         return True
     return path.suffix in IGNORED_SYNC_SUFFIXES
+
+
+def resource_mtime(path: Path) -> float:
+    if path.is_file():
+        return path.stat().st_mtime
+
+    max_time = path.stat().st_mtime if path.exists() else 0.0
+    for candidate in path.rglob("*"):
+        if candidate.is_file() and not should_ignore_sync_path(candidate):
+            max_time = max(max_time, candidate.stat().st_mtime)
+    return max_time
 
 
 def is_relative_to(path: Path, other: Path) -> bool:

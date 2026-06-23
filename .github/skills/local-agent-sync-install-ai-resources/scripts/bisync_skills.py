@@ -24,7 +24,7 @@ from sync_output import build_compact_bisync_output, render_bisync_report
 
 IGNORED_SYNC_PARTS: tuple[str, ...] = (".venv", "__pycache__", ".pytest_cache")
 IGNORED_SYNC_SUFFIXES: tuple[str, ...] = (".pyc", ".pyo")
-EXCLUDED_BUNDLE_PREFIX: str = "local-agent-sync-"
+EXCLUDED_BUNDLE_PREFIX: str = "local-"
 
 
 def should_ignore(path: Path) -> bool:
