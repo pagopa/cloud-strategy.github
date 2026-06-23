@@ -7,5 +7,6 @@
   "github.copilot.chat.codeGeneration.useInstructionFiles": false,
   "chat.instructionsFilesLocations": {
     ".github/instructions": false
-  }
+  },
+  "python-envs.defaultEnvManager": "ms-python.python:pyenv"
 }
