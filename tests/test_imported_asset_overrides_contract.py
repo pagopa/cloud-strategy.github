@@ -73,10 +73,15 @@ def test_imported_asset_override_policy_is_visible_in_canonical_and_sync_assets(
         ".github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md"
     ).read_text(encoding="utf-8")
 
-    assert "Sync agents own catalog prefix rules" in agents_text
+    assert (
+        "Source-side sync command centers and sync support skills own propagation behavior."
+        in agents_text
+    )
+    assert "Keep consumer-facing defaults target-agnostic." in agents_text
+    assert "Do not treat this file as instructions for coding agents" in copilot_text
     assert (
         "Do not edit imported upstream assets in place unless the need is strong"
-        in copilot_text
+        not in copilot_text
     )
     assert "Every approved imported in-place override must be mapped" in sync_agent_text
     assert (

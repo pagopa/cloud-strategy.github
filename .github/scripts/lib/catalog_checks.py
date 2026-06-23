@@ -214,14 +214,28 @@ def check_bridge_references(root: Path) -> list[Finding]:
             )
     if copilot_path.exists():
         copilot_text = read_text(copilot_path)
-        if "AGENTS.md" not in copilot_text:
+        if "This file is only for GitHub.com Copilot code review." not in copilot_text:
             findings.append(
                 Finding(
                     severity="blocking",
-                    code="copilot-instructions-missing-agents-reference",
+                    code="copilot-instructions-missing-review-scope",
                     path=".github/copilot-instructions.md",
-                    message=".github/copilot-instructions.md no longer references AGENTS.md as the strategic bridge.",
-                    suggestion="Restore the AGENTS.md reference to keep cross-surface precedence explicit.",
+                    message=".github/copilot-instructions.md must explicitly declare GitHub.com code-review-only scope.",
+                    suggestion="Restore the review-only scope line in .github/copilot-instructions.md.",
+                )
+            )
+
+        if (
+            "Do not treat this file as instructions for coding agents, local CLIs, or"
+            not in copilot_text
+        ):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="copilot-instructions-missing-runtime-boundary",
+                    path=".github/copilot-instructions.md",
+                    message=".github/copilot-instructions.md must keep the non-runtime boundary explicit.",
+                    suggestion="Restore the non-runtime boundary line under the non-scope section.",
                 )
             )
     return findings

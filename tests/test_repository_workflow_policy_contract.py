@@ -59,21 +59,24 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
 
-    assert "## Rule Placement" in agents_text
+    assert "## Operating Principles" in agents_text
+    assert "Prefer the smallest valid owner" in agents_text
+
+    assert "## Scope And Placement" in agents_text
     assert "operational procedures, checklists, file-shape recipes" in agents_text
-    assert "smallest valid owner" in agents_text
 
-    assert "## Context And Scope" in agents_text
-    assert "select the smallest relevant skill" in agents_text
-    assert "then read that `SKILL.md` as manual context" in agents_text
-    assert "Load umbrella domain skills before specialist depth" in agents_text
-    assert "Co-load specialist skills or bundle references only when" in agents_text
-    assert "Use the smallest valid owner to resolve conflicts" in agents_text
+    assert "## Context Routing" in agents_text
+    assert "Select the smallest relevant local guidance" in agents_text
+    assert "Load broad domain guidance before specialist depth" in agents_text
+    assert "Add specialist guidance only when the task needs workflow detail" in agents_text
+    assert "Resolve conflicts with the smallest valid owner" in agents_text
 
-    assert "Select the smallest relevant skill from the prompt" in copilot_text
-    assert "validation signal, or repository evidence" in copilot_text
+    assert "It is not a general task-execution guide" in copilot_text
+    assert "Do not ask the author to follow local runtime workflows" in copilot_text
+    assert "that GitHub.com cannot" in copilot_text
+    assert "execute." in copilot_text
     assert (
-        "Load task-specific skills or references only when workflow depth"
+        "Do not treat this file as instructions for coding agents, local CLIs, or"
         in copilot_text
     )
 
@@ -81,15 +84,9 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
 def test_agents_external_tool_routing_block_is_legitimized_and_source_local() -> None:
     agents_text = read_text("AGENTS.md")
 
-    assert (
-        "An external tool that reads this file may require a clearly delimited, "
-        "trailing routing block carrying the minimal commands it needs to consume "
-        "the repository; keep any such block source-local, outside the governed "
-        "policy blocks, and limited to that tool's required invocation anchors."
-        in agents_text
-    )
-
     assert "## graphify" in agents_text
+    assert "When the user types `/graphify`" in agents_text
+    assert "trailing routing block carrying the minimal commands it needs to consume" not in agents_text
 
     local_rules_close_index = agents_text.index("`</standards-repository-local-rules>`")
     graphify_index = agents_text.index("## graphify")

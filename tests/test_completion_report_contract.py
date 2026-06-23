@@ -10,10 +10,15 @@ def read_text(relative_path: str) -> str:
 def test_repo_projection_keeps_completion_report_compact() -> None:
     copilot_text = read_text(".github/copilot-instructions.md")
 
-    assert "Report completed work with outcome, changed files" in copilot_text
-    assert "validation results" in copilot_text
-    assert "remaining gaps" in copilot_text
-    assert "Include detailed resource sections only when the user asks" in copilot_text
+    assert "This file is only for GitHub.com Copilot code review." in copilot_text
+    assert "It is not a general task-execution guide" in copilot_text
+    assert "Review changed files for defects that matter before merge." in copilot_text
+    assert "Report findings first, ordered by severity." in copilot_text
+    assert (
+        "Do not treat this file as instructions for coding agents, local CLIs, or"
+        in copilot_text
+    )
+    assert "Report completed work with outcome, changed files" not in copilot_text
     assert "`✅ Outcome`" not in copilot_text
     assert "`1 = resources used`" not in copilot_text
 
