@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import re
+from collections import defaultdict
 from pathlib import Path
 
 import yaml
 
 from .inventory import collect_inventory_sections, parse_inventory_markdown
 from .shared import (
-    INVENTORY_PATH,
+    IGNORED_SYNC_FILENAMES,
+    IGNORED_SYNC_PARTS,
     IMPORTED_ASSET_OVERRIDES_PATH,
+    INVENTORY_PATH,
     LEGACY_AGENT_TOOL_IDS,
     SUPERPOWERS_NORMALIZATION_PATH,
     Finding,
     finding_sort_key,
-    IGNORED_SYNC_FILENAMES,
-    IGNORED_SYNC_PARTS,
     is_imported_asset,
     iter_markdown_assets,
     load_frontmatter,

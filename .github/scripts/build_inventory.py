@@ -12,7 +12,14 @@ import argparse
 from pathlib import Path
 
 from lib.inventory import build_inventory_markdown, write_inventory
-from lib.shared import INVENTORY_PATH, find_repo_root, log_error, log_info, log_success, read_text
+from lib.shared import (
+    INVENTORY_PATH,
+    find_repo_root,
+    log_error,
+    log_info,
+    log_success,
+    read_text,
+)
 
 
 def parse_args() -> argparse.Namespace:

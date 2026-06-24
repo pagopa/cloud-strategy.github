@@ -13,8 +13,9 @@ import argparse
 from collections import Counter
 from pathlib import Path
 
+from lib.cli_runner import run_finding_cli, should_fail
 from lib.internal_skills import detect_internal_skill_findings
-from lib.shared import Finding, find_repo_root, log_success, log_warn, render_json
+from lib.shared import Finding, find_repo_root, log_success, log_warn
 
 
 def parse_args() -> argparse.Namespace:
@@ -35,19 +36,15 @@ def main() -> int:
     args = parse_args()
     root = find_repo_root(Path(args.root))
     selected_skills = set(args.skill) or None
-    findings = detect_internal_skill_findings(root, selected_skills=selected_skills)
-
-    if args.format == "json":
-        print(render_json([finding.to_dict() for finding in findings]))
-    elif args.format == "compact":
-        print(render_json(build_compact_payload(findings)))
-    else:
-        render_text(findings)
-
-    has_blocking = any(finding.severity == "blocking" for finding in findings)
-    if has_blocking:
-        return 1
-    return 1 if args.strict and findings else 0
+    findings = run_finding_cli(
+        detect_fn=lambda: detect_internal_skill_findings(
+            root, selected_skills=selected_skills
+        ),
+        format_name=args.format,
+        render_text=render_text,
+        compact_builder=build_compact_payload,
+    )
+    return 1 if should_fail(findings, strict=args.strict) else 0
 
 
 def render_text(findings: list[Finding]) -> None:

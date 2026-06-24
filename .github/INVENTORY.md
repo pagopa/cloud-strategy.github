@@ -169,10 +169,12 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/graphify-file-change-hook.sh`
 - `.github/scripts/install-graphify-hooks.sh`
 - `.github/scripts/lib/catalog_checks.py`
+- `.github/scripts/lib/cli_runner.py`
 - `.github/scripts/lib/critical_master.py`
 - `.github/scripts/lib/fingerprinting.py`
 - `.github/scripts/lib/internal_skills.py`
 - `.github/scripts/lib/inventory.py`
+- `.github/scripts/lib/jsonc.py`
 - `.github/scripts/lib/shared.py`
 - `.github/scripts/lib/syncing.py`
 - `.github/scripts/lib/token_risks.py`
@@ -184,6 +186,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/validate_critical_output.py`
 - `.github/scripts/validate_critical_output.sh`
 - `.github/scripts/validate_internal_skills.py`
+- `.github/scripts/validate_internal_skills.sh`
 
 ## Agents
 

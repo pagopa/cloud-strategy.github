@@ -13,7 +13,14 @@ from collections import Counter
 from pathlib import Path
 
 from lib.catalog_checks import run_consistency_checks
-from lib.shared import Finding, find_repo_root, log_error, log_success, log_warn, render_json
+from lib.cli_runner import run_finding_cli, should_fail
+from lib.shared import (
+    Finding,
+    find_repo_root,
+    log_error,
+    log_success,
+    log_warn,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,16 +35,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     root = find_repo_root(Path(args.root))
-    findings = run_consistency_checks(root, include_token_risks=args.include_token_risks)
-    if args.format == "json":
-        print(render_json([finding.to_dict() for finding in findings]))
-    elif args.format == "compact":
-        print(render_json(build_compact_payload(findings)))
-    else:
-        render_text(findings)
+    findings = run_finding_cli(
+        detect_fn=lambda: run_consistency_checks(
+            root, include_token_risks=args.include_token_risks
+        ),
+        format_name=args.format,
+        render_text=render_text,
+        compact_builder=build_compact_payload,
+    )
 
-    has_blocking = any(finding.severity == "blocking" for finding in findings)
-    if has_blocking or (args.strict and findings):
+    if should_fail(findings, strict=args.strict):
         return 1
     if not findings:
         log_success("No consistency findings detected.")

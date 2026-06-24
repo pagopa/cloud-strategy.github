@@ -11,7 +11,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from lib.shared import Finding, find_repo_root, log_warn, render_json
+from lib.cli_runner import run_finding_cli, should_fail
+from lib.shared import Finding, find_repo_root, log_warn
 from lib.token_risks import detect_token_risks
 
 
@@ -26,12 +27,12 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     root = find_repo_root(Path(args.root))
-    findings = detect_token_risks(root)
-    if args.format == "json":
-        print(render_json([finding.to_dict() for finding in findings]))
-    else:
-        render_text(findings)
-    return 1 if args.strict and findings else 0
+    findings = run_finding_cli(
+        detect_fn=lambda: detect_token_risks(root),
+        format_name=args.format,
+        render_text=render_text,
+    )
+    return 1 if should_fail(findings, strict=args.strict, blocking_severity=None) else 0
 
 
 def render_text(findings: list[Finding]) -> None:

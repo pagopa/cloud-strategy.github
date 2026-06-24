@@ -27,10 +27,12 @@ lint: python-version-check docs-lint
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
 	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
+	ruff check .github/scripts tools tests
 
 catalog-lint: python-version-check
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
+	ruff check .github/scripts tools tests
 
 catalog-fast-check: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) build_inventory --root . --check
