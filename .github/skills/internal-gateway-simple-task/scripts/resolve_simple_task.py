@@ -42,12 +42,21 @@ CLAIMS = (
     "validator-passes",
 )
 
+DIRECT_COMPLETION_REQUIREMENT = {
+    "owner": "internal-gateway-simple-task",
+    "evidence_gate": (
+        "Run Direct Completion Control over every in-scope source item and "
+        "mandatory applicable requirement before the claim."
+    ),
+}
+
 CLAIM_REQUIREMENTS = {
     "fixed": [
         {
             "owner": "internal-debugging",
             "evidence_gate": "Re-run the original loop, or state the blocker.",
         },
+        DIRECT_COMPLETION_REQUIREMENT,
         {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
@@ -58,6 +67,7 @@ CLAIM_REQUIREMENTS = {
             "owner": "internal-tdd",
             "evidence_gate": "Show the failing-then-passing seam, or state why it could not be run.",
         },
+        DIRECT_COMPLETION_REQUIREMENT,
         {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
@@ -68,6 +78,7 @@ CLAIM_REQUIREMENTS = {
             "owner": "internal-performance-optimization",
             "evidence_gate": "Compare baseline and after evidence from the same measurement class.",
         },
+        DIRECT_COMPLETION_REQUIREMENT,
         {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
@@ -78,6 +89,7 @@ CLAIM_REQUIREMENTS = {
             "owner": "internal-github-pr",
             "evidence_gate": "Check PR lifecycle evidence before the claim.",
         },
+        DIRECT_COMPLETION_REQUIREMENT,
         {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
@@ -104,18 +116,21 @@ CLAIM_REQUIREMENTS = {
         },
     ],
     "completion": [
+        DIRECT_COMPLETION_REQUIREMENT,
         {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
         }
     ],
     "readiness": [
+        DIRECT_COMPLETION_REQUIREMENT,
         {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
         }
     ],
     "validator-passes": [
+        DIRECT_COMPLETION_REQUIREMENT,
         {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Re-run the validator and read fresh output before the claim.",

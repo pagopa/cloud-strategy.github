@@ -22,6 +22,11 @@ It is single-lane and single-phase by design, but it can switch to **plan mode**
 to produce a retained plan instead of executing when the user asks for a plan or
 when same-chat execution would be less economical than a retained plan.
 
+When execution stays in the same chat, this skill owns end-to-end direct
+completion control. It must keep the original request, emerged requirements,
+mandatory applicable requirements, validation path, and evidence status aligned
+until everything in scope is closed or a blocker is explicit.
+
 Before operational work, produce a lean Readiness Brief and name the gate
 outcome. Stop for explicit user approval unless a narrower loaded skill defines
 a deterministic auto-execute lane with its own zero-blocker, no-drift, and
@@ -135,19 +140,22 @@ Classify every simple task before operational work as `full-gate`,
     reverse-direction action.
 13. After approval, move directly into the edit or validation loop. Keep
     intermediary prose to blockers, risk changes, and evidence.
-14. Identify mandatory applicable requirements internally before execution; do
-    not emit a default user checklist.
-15. Execute the one concrete lane with the Agentic Execution Loop, or, in
+14. Identify mandatory applicable requirements and direct source items
+    internally before execution; do not emit a default user checklist.
+15. Maintain `Direct Execution Control` for non-plan execution.
+16. Execute the one concrete lane with the Agentic Execution Loop, or, in
     `plan-mode`, write the retained plan and stop before execution.
-16. Run focused validation or name the explicit gap.
-17. Run a pre-close compliance audit over mandatory applicable requirements
+17. Run focused validation or name the explicit gap.
+18. Run a pre-close compliance audit over mandatory applicable requirements
     only. Delegate fresh-evidence mechanics to
     `superpowers-verification-before-completion`.
-18. Block completion claims when mandatory applicable requirements remain
+19. Run `Direct Completion Control` before any `DONE`, readiness, fixed, or
+    complete claim.
+20. Block completion claims when mandatory applicable requirements remain
     unverified.
-19. If architecture ownership, owner conflicts, or validation strategy are
+21. If architecture ownership, owner conflicts, or validation strategy are
     ambiguous, escalate instead of assuming a universal rule.
-20. If the task stops being simple, stop and issue an escalation alert.
+22. If the task stops being simple, stop and issue an escalation alert.
 
 Escalation trigger: if evidence collection, ownership checks, or validation needs spill into multi-phase execution, route to the narrow next owner instead of expanding the fast path.
 
@@ -156,16 +164,56 @@ Escalation trigger: if evidence collection, ownership checks, or validation need
 When execution is already authorized, stay inside the active owner, target
 scope, anti-scope, and validation path, then iterate:
 
-1. Confirm the current goal and nearest evidence.
+1. Confirm the current goal, nearest evidence, and the open direct-control item.
 2. Apply the smallest in-scope action.
 3. Run the focused validation or evidence check.
 4. If validation fails for an in-scope, repairable reason, fix once and re-run.
 5. Continue only while evidence improves and no stop condition fires.
-6. Stop with `DONE`, a blocker, or an explicit evidence gap.
+6. Stop with `DONE` only when direct-control coverage is closed, or stop with a
+  blocker or an explicit evidence gap.
 
 Stop on scope drift, destructive action, owner conflict, missing validation
 path, human approval need, secret exposure risk, or repeated non-improving
 failures.
+
+## Direct Execution Control
+
+Use this mode when the task executes directly in the same chat instead of
+creating a retained plan. Keep the control state compact and internal unless a
+gap, blocker, or user-facing status update needs to expose it.
+
+Track these fields for non-trivial direct execution:
+
+- original intent, separated from emerged requirements
+- target, anti-scope, owner, lane-change owner, and validation path
+- direct source items with observable acceptance, evidence class, status, and
+  route through the active lane or explicit non-action
+- mandatory applicable requirements from selected skills and local evidence
+- stop conditions, blockers, and validation gaps
+
+During execution, update direct-control status after every edit, command,
+validator, or explicit non-action. If new in-scope work is discovered, add it
+before continuing. If new work changes owner, scope, or validation strategy,
+stop and escalate instead of silently shrinking the task.
+
+### Direct Completion Control
+
+Before any `DONE`, fixed, complete, ready, validator-passes, or no-gap claim:
+
+1. Compare the original intent, emerged requirements, direct source items,
+  current diff or file state, validation output, and explicit non-actions.
+2. Confirm every in-scope source item is closed with observable evidence or a
+  named explicit non-action.
+3. Confirm mandatory applicable requirements are verified with fresh evidence,
+  or the exact evidence gap is named.
+4. Confirm no stop condition remains open and no sensitive value was hardcoded
+  when the touched surface could expose secrets or tenant data.
+5. Continue the Agentic Execution Loop when safe work remains; otherwise stop
+  with a blocker or explicit evidence gap.
+
+One successful validator, one patched file, or one satisfied subtask is not
+enough for completion unless direct-control coverage shows that all in-scope
+items are closed.
 
 ## Plan Mode
 
@@ -236,10 +284,14 @@ the output shape changes.
 - After approval, execution moved quickly from the chosen edit or validation
   lane to focused verification without extra prose bursts.
 - Focused validation ran before completion claims, or the exact validation gap was reported.
+- Direct non-plan execution used `Direct Execution Control` for non-trivial
+  work and `Direct Completion Control` before completion claims.
 - The Agentic Execution Loop stayed inside the authorized owner, scope, and
   validation path.
 - Auto-execute exceptions stopped on blockers, ambiguous drift, destructive actions, reverse-direction writes, or missing validation evidence.
 - Completion claims were blocked when mandatory applicable requirements were still unverified.
+- Completion claims were blocked when any in-scope direct source item remained
+  open, unverified, or silently dropped.
 - Output stayed concise unless a gap, exception, or escalation had to be reported.
 
 ## Common failure modes
@@ -255,5 +307,10 @@ the output shape changes.
 - Continuing the Agentic Execution Loop after evidence stops improving or a
   stop condition fires.
 - Declaring completion after code edits while mandatory applicable evidence is still missing.
+- Declaring completion after one successful check while direct source items or
+  emerged requirements remain open.
+- Dropping emerged in-scope requirements because they were not in the initial
+  prompt instead of tracking, closing, or explicitly rejecting them as out of
+  scope.
 - Promoting specialist requirements to universal policy without target/runtime ownership proof.
 - Continuing without escalation when ownership conflicts or validation strategy remain undefined.
