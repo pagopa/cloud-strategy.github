@@ -33,7 +33,7 @@ def test_audit_reports_minimal_marker_shape() -> None:
         "plan_approval_gate",
         "handoff_gate_4",
         "ask_before_critical",
-        "ownership_after_critical",
+        "direct_vs_plan_recommendation",
         "explicit_plan_approval",
         "alias_mapping",
     }

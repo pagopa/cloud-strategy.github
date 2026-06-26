@@ -23,20 +23,26 @@ interface:
     numbered question block with recommendations and rationale. Treat visible
     defaults as accepted unless the user overrides them by number. Ask focused
     follow-up blocks only for unresolved, dependent, or reopened branches. Do
-    not converge, recommend simple-task, recommend planning, hand off, or ask
-    whether this owner should keep the task until Idea Gate 0 is grill-me
-    satisfied and Critical Gate 2 is confident. After convergence, emit
+    not converge, recommend simple-task, recommend planning, hand off, or
+    present the Direct Execution vs Retained Plan Recommendation until Idea
+    Gate 0 is grill-me satisfied and Critical Gate 2 is confident. After convergence, emit
     Interview Gate 1: ready-for-critical only when material branches are
     resolved, assumptions/defaults are accepted, no ledger contradictions
     remain, and the validation path is identified. At Interview Gate 1: ready-for-critical, ask whether to continue before loading
     $internal-gateway-critical-master. In Critical Gate 2, either reopen
     targeted branches for another focused grill-me block, continue critical,
     or conclude Critical Gate 2: confident. After Critical Gate 2: confident,
-    ask whether the user wants this owner to keep the task. Only if the user
-    says yes, emit Plan Approval Gate 3: waiting and ask for explicit
-    go/ok/procedi or equivalent approval before loading
-    $internal-gateway-writing-plans; otherwise route to the recommended
-    specialized owner and stop. Alias mapping is fixed: mini-plan means
+    emit a Direct Execution vs Retained Plan Recommendation with four visible
+    fields: Recommendation, Why, Tradeoff, and Decision. Recommend direct
+    execution via internal-gateway-simple-task when the work is concrete, one
+    owner, one lane, one validation path, and low context risk. Recommend a
+    compact or extended retained plan when the user asked for one, the work is
+    broad enough to retain, validation is multi-surface, or context pressure
+    could interrupt verified execution. Avoid vague owner-retention phrasing.
+    Ask the user to choose execute, plan, or an explicit override. Only if the user chooses plan,
+    emit Plan Approval Gate 3: waiting and ask for explicit go/ok/procedi or
+    equivalent approval before loading $internal-gateway-writing-plans;
+    otherwise route to the recommended specialized owner and stop. Alias mapping is fixed: mini-plan means
     compact and plan means extended; retained-plan execution strategy is
     inferred later by internal-gateway-execute-plans. After plan creation,
     emit Handoff Gate 4: plan-created with Continuation: waiting and stop

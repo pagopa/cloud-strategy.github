@@ -37,9 +37,12 @@ def main() -> int:
         "ask_before_critical": "ask whether to continue" in skill_text
         and "ask whether to continue" in reference_text
         and "ask whether to continue" in runtime_text,
-        "ownership_after_critical": "ask whether the user wants this owner to keep the task" in skill_text
-        and "ask whether the user wants this owner to keep the task" in reference_text
-        and "ask whether the user wants this owner to keep the task" in runtime_text,
+        "direct_vs_plan_recommendation": "Direct Execution vs Retained Plan Recommendation" in skill_text
+        and "Direct Execution vs Retained Plan Recommendation" in reference_text
+        and "Direct Execution vs Retained Plan Recommendation" in runtime_text
+        and "choose `execute`, `plan`, or an explicit" in skill_text
+        and "chooses `execute`" in reference_text
+        and "choose execute, plan, or an explicit override" in runtime_text,
         "explicit_plan_approval": "go`/`ok`/`procedi" in skill_text
         and "go`/`ok`/`procedi" in reference_text
         and "go/ok/procedi" in runtime_text,
