@@ -37,6 +37,9 @@ PATH_KEYS = frozenset(
     }
 )
 SYSTEM_ROLES = frozenset({"0", "system", "developer"})
+SEQUENCE_DIAGNOSTIC_LIMIT = 10
+CACHE_DROP_EVENT_THRESHOLD_TOKENS = 8_000
+PAYLOAD_TO_NONCACHE_TOOL_BYTES_THRESHOLD = 10_000
 
 VOLATILE_KEYS = frozenset(
     {
@@ -413,6 +416,8 @@ def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
         )
 
     return {
+        "log_id": first_str(log, "id", "spanId", "span_id", "name"),
+        "model": first_str(metadata, "model"),
         "prompt_tokens": prompt_tokens,
         "cached_tokens": cached_tokens,
         "non_cached_input_tokens": max(prompt_tokens - cached_tokens, 0),
@@ -436,6 +441,119 @@ def summarize_prompt_log(log: dict[str, object]) -> dict[str, object]:
                 if usage_aiu_total is not None
                 else metadata_aiu_total,
             }
+        ),
+    }
+
+
+def is_token_request_summary(summary: dict[str, object]) -> bool:
+    return not bool(summary.get("tool_call")) and any(
+        as_int(summary.get(key))
+        for key in (
+            "prompt_tokens",
+            "cached_tokens",
+            "completion_tokens",
+            "reasoning_tokens",
+        )
+    )
+
+
+def sequence_diagnostic_record(
+    *,
+    prompt_id: str,
+    current: dict[str, object],
+    previous: dict[str, object],
+    previous_tool_payload_bytes: int,
+    previous_tool_names: list[str],
+) -> dict[str, object]:
+    cached_tokens = as_int(current.get("cached_tokens"))
+    previous_cached_tokens = as_int(previous.get("cached_tokens"))
+    prompt_tokens = as_int(current.get("prompt_tokens"))
+    previous_prompt_tokens = as_int(previous.get("prompt_tokens"))
+    return {
+        "prompt_id": prompt_id,
+        "request_id": str(current.get("log_id") or ""),
+        "model": str(current.get("model") or ""),
+        "prompt_tokens": prompt_tokens,
+        "cached_tokens": cached_tokens,
+        "non_cached_input_tokens": as_int(current.get("non_cached_input_tokens")),
+        "previous_cached_tokens": previous_cached_tokens,
+        "cache_delta_tokens": cached_tokens - previous_cached_tokens,
+        "prompt_delta_tokens": prompt_tokens - previous_prompt_tokens,
+        "previous_tool_payload_bytes": previous_tool_payload_bytes,
+        "previous_tool_names": previous_tool_names,
+    }
+
+
+def top_sequence_records(
+    records: list[dict[str, object]], key: str, *, reverse: bool = True
+) -> list[dict[str, object]]:
+    return sorted(
+        records,
+        key=lambda item: (
+            as_int(item.get(key)),
+            as_int(item.get("previous_tool_payload_bytes")),
+            str(item.get("request_id") or ""),
+        ),
+        reverse=reverse,
+    )[:SEQUENCE_DIAGNOSTIC_LIMIT]
+
+
+def summarize_sequence_diagnostics(
+    log_summaries: list[dict[str, object]], *, prompt_id: str
+) -> dict[str, object]:
+    records: list[dict[str, object]] = []
+    previous_request: dict[str, object] | None = None
+    previous_tool_payload_bytes = 0
+    previous_tool_names: list[str] = []
+
+    for summary in log_summaries:
+        if summary.get("tool_call"):
+            previous_tool_payload_bytes += as_int(summary.get("tool_payload_bytes"))
+            tool_name = str(summary.get("tool_name") or "")
+            if tool_name:
+                previous_tool_names.append(tool_name)
+            continue
+
+        if not is_token_request_summary(summary):
+            continue
+
+        if previous_request is not None:
+            records.append(
+                sequence_diagnostic_record(
+                    prompt_id=prompt_id,
+                    current=summary,
+                    previous=previous_request,
+                    previous_tool_payload_bytes=previous_tool_payload_bytes,
+                    previous_tool_names=previous_tool_names,
+                )
+            )
+
+        previous_request = summary
+        previous_tool_payload_bytes = 0
+        previous_tool_names = []
+
+    return {
+        "top_non_cached_spikes": top_sequence_records(
+            records, "non_cached_input_tokens"
+        ),
+        "cache_drop_events": top_sequence_records(
+            [
+                record
+                for record in records
+                if as_int(record.get("cache_delta_tokens"))
+                <= -CACHE_DROP_EVENT_THRESHOLD_TOKENS
+            ],
+            "cache_delta_tokens",
+            reverse=False,
+        ),
+        "payload_to_noncache_candidates": top_sequence_records(
+            [
+                record
+                for record in records
+                if as_int(record.get("previous_tool_payload_bytes"))
+                >= PAYLOAD_TO_NONCACHE_TOOL_BYTES_THRESHOLD
+            ],
+            "previous_tool_payload_bytes",
         ),
     }
 
@@ -544,12 +662,18 @@ def summarize_prompt_export(
             if as_int(record["occurrences"]) > 1 and bool(record["retry_hint"])
         ]
         composition = summarize_prompt_composition(logs)
+        prompt_id = (
+            first_str(prompt, "promptId", "prompt_id", "id", "title")
+            or f"prompt-{index}"
+        )
+        sequence_diagnostics = summarize_sequence_diagnostics(
+            log_summaries, prompt_id=prompt_id
+        )
 
         summaries.append(
             {
                 "source_name": source_name,
-                "prompt_id": first_str(prompt, "promptId", "prompt_id", "id", "title")
-                or f"prompt-{index}",
+                "prompt_id": prompt_id,
                 "title": first_str(prompt, "title", "name") or f"prompt-{index}",
                 "request_count": len(logs),
                 "prompt_tokens": prompt_tokens_total,
@@ -572,6 +696,7 @@ def summarize_prompt_export(
                 "tool_counts_by_name": dict(sorted(tool_counts_by_name.items())),
                 "top_tool_payloads": top_tool_payloads,
                 "retry_like_duplicate_records": retry_like_duplicate_records,
+                **sequence_diagnostics,
                 "composition": composition,
             }
         )
@@ -594,6 +719,9 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
     system_hash_bytes: dict[str, int] = {}
     skill_descriptions_by_key: dict[tuple[str, str], dict[str, object]] = {}
     duplicate_attachment_counts: Counter[str] = Counter()
+    top_non_cached_spikes: list[dict[str, object]] = []
+    cache_drop_events: list[dict[str, object]] = []
+    payload_to_noncache_candidates: list[dict[str, object]] = []
     max_prompt_tokens = 0
     first_context_tokens = 0
     last_context_tokens = 0
@@ -619,6 +747,15 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
         for record in read_list(summary.get("retry_like_duplicate_records")):
             if isinstance(record, dict):
                 retry_like_duplicate_records.append(record)
+        for record in read_list(summary.get("top_non_cached_spikes")):
+            if isinstance(record, dict):
+                top_non_cached_spikes.append(record)
+        for record in read_list(summary.get("cache_drop_events")):
+            if isinstance(record, dict):
+                cache_drop_events.append(record)
+        for record in read_list(summary.get("payload_to_noncache_candidates")):
+            if isinstance(record, dict):
+                payload_to_noncache_candidates.append(record)
         composition = read_dict(summary.get("composition"))
         for item in read_list(composition.get("repeated_system_message_hashes")):
             if isinstance(item, dict):
@@ -708,6 +845,15 @@ def aggregate_summaries(summaries: list[dict[str, object]]) -> dict[str, object]
         ),
         "tool_counts_by_name": dict(sorted(tool_counts_by_name.items())),
         "top_tool_payloads": top_tool_payloads,
+        "top_non_cached_spikes": top_sequence_records(
+            top_non_cached_spikes, "non_cached_input_tokens"
+        ),
+        "cache_drop_events": top_sequence_records(
+            cache_drop_events, "cache_delta_tokens", reverse=False
+        ),
+        "payload_to_noncache_candidates": top_sequence_records(
+            payload_to_noncache_candidates, "previous_tool_payload_bytes"
+        ),
         "retry_like_duplicate_count": len(retry_like_duplicate_records),
         "retry_like_duplicate_records": retry_like_duplicate_records,
         "composition": {
@@ -814,6 +960,30 @@ def build_report(paths: list[Path]) -> dict[str, object]:
     }
 
 
+def format_sequence_diagnostic_item(item: dict[str, object]) -> str:
+    tool_names = read_list(item.get("previous_tool_names"))
+    tools = ", ".join(str(tool_name) for tool_name in tool_names) or "none"
+    return (
+        f"{item.get('prompt_id', '')}/{item.get('request_id', '')}: "
+        f"non-cache {item.get('non_cached_input_tokens', 0)} tokens; "
+        f"cache delta {item.get('cache_delta_tokens', 0)}; "
+        f"previous tools {tools}; "
+        f"previous tool payload {item.get('previous_tool_payload_bytes', 0)} bytes"
+    )
+
+
+def append_sequence_diagnostic_section(
+    lines: list[str], title: str, records: list[object]
+) -> None:
+    lines.append(f"### {title}")
+    if not records:
+        lines.append("- None")
+        return
+    for item in records[:5]:
+        if isinstance(item, dict):
+            lines.append(f"- {format_sequence_diagnostic_item(item)}")
+
+
 def format_markdown(report: dict[str, object]) -> str:
     aggregate = read_dict(report.get("aggregate"))
     composition = read_dict(aggregate.get("composition"))
@@ -847,6 +1017,23 @@ def format_markdown(report: dict[str, object]) -> str:
                 lines.append(
                     f"- {item.get('tool_name', '')}: {item.get('payload_bytes', 0)} bytes across {item.get('call_count', 0)} calls"
                 )
+    lines.append("")
+    lines.append("## Sequence Diagnostics")
+    append_sequence_diagnostic_section(
+        lines,
+        "Top Non-Cached Spikes",
+        read_list(aggregate.get("top_non_cached_spikes")),
+    )
+    append_sequence_diagnostic_section(
+        lines,
+        "Cache Drop Events",
+        read_list(aggregate.get("cache_drop_events")),
+    )
+    append_sequence_diagnostic_section(
+        lines,
+        "Payload To Non-Cache Candidates",
+        read_list(aggregate.get("payload_to_noncache_candidates")),
+    )
     lines.append("")
     lines.append("## Prompt Composition")
     lines.append(f"- System messages: {composition.get('system_message_count', 0)}")
