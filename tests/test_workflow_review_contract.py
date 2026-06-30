@@ -70,6 +70,38 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
     assert "counter-validation" in skill_text
     assert "counter-validation" in review_gate_lower
     assert "route or next owner" in review_gate_lower
+    assert "decision-usefulness" in review_gate_lower
+    assert "accept, patch, investigate, plan" in review_gate_lower
+
+
+def test_review_usefulness_contract_is_explicit() -> None:
+    gateway_text = read_text(".github/skills/internal-gateway-review/SKILL.md")
+    ai_review_text = read_text(".github/skills/internal-ai-resource-review/SKILL.md")
+    report_text = read_text(
+        ".github/skills/internal-ai-resource-review/references/report-contract.md"
+    )
+    profile_text = read_text(
+        ".github/skills/internal-ai-resource-review/references/review-profiles.md"
+    )
+    replay_text = read_text(
+        ".github/skills/internal-ai-resource-review/references/review-usefulness-replay-fixture.md"
+    )
+
+    assert "decision-usefulness" in gateway_text
+    assert "clear next decision" in gateway_text
+    assert "Bundle coverage rules" in ai_review_text
+    assert "live prompt pack, generated artifact, retained report, or fixture" in ai_review_text
+    assert "evidence digest or decision trace" in ai_review_text
+    assert "Adaptive layout patterns" in report_text
+    assert "Evidence compression" in report_text
+    assert "Missing proof handling" in report_text
+    assert "test-gap" in report_text
+    assert "runtime-artifact" in report_text
+    assert "No-finding and low-finding reviews" in report_text
+    assert "Report coverage separately from findings" in profile_text
+    assert "coach-personale" in replay_text
+    assert "Focused pytest execution was unavailable" in replay_text
+    assert "Does not invent additional findings" in replay_text
 
 
 def test_compact_and_extended_execution_owner_is_unified() -> None:

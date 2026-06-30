@@ -22,9 +22,10 @@ Portable review orchestrator. Owns review scope, lens selection, findings
 consolidation, critical support, and remediation-plan transition. It does not apply fixes.
 
 Before any user-visible verdict, run a lightweight internal check for evidence,
-severity, false positives, contrary evidence, and scope narrowing. Load
-`internal-gateway-critical-master` only for a material challenge. Revise or
-reopen when the check exposes a material gap.
+severity, false positives, contrary evidence, scope narrowing, and decision
+usefulness. Load `internal-gateway-critical-master` only for a material
+challenge. Revise or reopen when the check exposes a material gap or when the
+visible review would not support a clear next decision.
 
 See `references/review-gate.md` for the review output contract and gate states.
 
@@ -83,7 +84,8 @@ gateway does not choose the execution owner.
 - Lens selection matches the changed-path families; AI customization assets route to `internal-ai-resource-review` (drift via `internal-copilot-audit`) instead of being skipped by the code lens.
 - Review flow preserves compact context: prioritize diff and failing evidence first, then expand only when an evidence gap remains.
 - Large evidence may be reported compactly, but each material finding still keeps severity, confidence, evidence gap, counter-validation result, and route or next owner.
-- Review output carries findings, severity, confidence, evidence gap, counter-validation result, route or next owner, and a Review Gate outcome before the final verdict.
+- Review output carries findings, severity, confidence, evidence gap, counter-validation result, route or next owner, decision-usefulness result, and a Review Gate outcome before the final verdict.
+- Low-finding and no-finding reviews include enough evidence digest, decision trace, next action, and residual-risk context for the reader to decide whether to accept, patch, investigate, plan, or accept with named risk.
 - The review cannot present analysis to the user until counter-validation confirms it or reopens material gaps.
 - Remediation-plan transitions preserve a 100% material-finding coverage map or explicitly declare a `partial remediation plan`.
 - Retained remediation plans are authored by `internal-gateway-writing-plans` and preserve the coverage map.
