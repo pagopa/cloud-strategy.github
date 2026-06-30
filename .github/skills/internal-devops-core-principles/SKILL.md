@@ -5,6 +5,10 @@ description: Use when the task is about delivery-system strategy, release safety
 
 # Internal DevOps Core Principles
 
+## Referenced skills
+
+- None.
+
 Use this skill for end-to-end delivery-system thinking, not for one-off YAML syntax questions or provider-specific command lookup.
 
 ## When to use

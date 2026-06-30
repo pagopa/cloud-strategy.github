@@ -5,6 +5,14 @@ description: Use when the user needs high-level GitHub platform or operating-mod
 
 # Internal GitHub Strategic
 
+## Referenced skills
+
+- `internal-github-governance`: route when rulesets, permissions, OIDC, secrets, environments, or guardrails become the decision.
+- `internal-github-operations`: route when Actions health, runner operations, audit logs, drift, or evidence becomes the decision.
+- `internal-github-actions`: route GitHub Actions workflow implementation.
+- `internal-python-script`: route implementation work in standalone Python automation.
+- `internal-bash-script`: route implementation work in standalone Bash automation.
+
 Use this skill when the main need is to reason about a GitHub platform decision before implementation.
 
 This is a strategic support skill. It helps frame the decision, compare realistic options, expose tradeoffs, and recommend a direction. It does not implement the change and it does not choose Terraform, Python, or Bash on behalf of the user.

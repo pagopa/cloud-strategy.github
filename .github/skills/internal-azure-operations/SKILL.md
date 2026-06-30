@@ -5,6 +5,13 @@ description: Use when the user needs Azure operational guidance for monitoring, 
 
 # Internal Azure Operations
 
+## Referenced skills
+
+- `internal-azure-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-azure-organization-structure`: route when tenant, management-group, subscription, or landing-zone layout is the main decision.
+- `internal-azure-governance`: route when RBAC, managed identity, PIM, Policy, or guardrail design is the main decision.
+- `awesome-copilot-azure-resource-health-diagnose`: Azure resource-health diagnosis depth.
+
 Use this skill when the next need is to validate, observe, or operationalize an Azure platform decision.
 
 This skill owns the operational side of the platform: monitoring, evidence, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.

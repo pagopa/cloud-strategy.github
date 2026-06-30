@@ -5,6 +5,11 @@ description: Use when creating or modifying standalone Bash scripts or shell uti
 
 # Bash Script Skill
 
+## Referenced skills
+
+- `internal-github-action-composite`: route Bash embedded in GitHub composite actions.
+- `internal-github-actions`: route GitHub workflow-level behavior.
+
 ## When to use
 
 - New Bash scripts.

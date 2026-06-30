@@ -5,6 +5,13 @@ description: Use when the user needs AWS control-plane or multi-account structur
 
 # Internal AWS Organization Structure
 
+## Referenced skills
+
+- `internal-aws-strategic`: route back when the platform direction or tradeoff frame is still unsettled.
+- `internal-aws-governance`: route guardrail, IAM, SCP, trust, or federation design.
+- `internal-aws-operations`: route monitoring, validation, backup, reporting, or post-rollout evidence.
+- `internal-aws-mcp-research`: load when current AWS service support or delegated-admin behavior can change the structure answer.
+
 Use this skill when the next need is to design or review how AWS is structured at organization and platform level.
 
 This skill owns AWS layout decisions, not generic strategy and not detailed IAM or monitoring implementation. It helps translate a platform goal into account, OU, delegated admin, network, and rollout structure.

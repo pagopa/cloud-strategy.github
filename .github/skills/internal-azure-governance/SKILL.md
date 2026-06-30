@@ -5,6 +5,13 @@ description: Use when the user needs Azure governance guidance for RBAC operatin
 
 # Internal Azure Governance
 
+## Referenced skills
+
+- `internal-azure-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-azure-organization-structure`: route when tenant, management-group, subscription, or landing-zone layout is the main decision.
+- `internal-azure-operations`: route when rollout validation, monitoring, backup, or evidence is the main need.
+- `awesome-copilot-azure-role-selector`: least-privilege RBAC role selection depth.
+
 Use this skill when the next need is to define or review Azure identity, access, and guardrail decisions.
 
 This skill owns governance logic after the broad structure is known. It helps separate tenant or management-group guardrails from subscription or workload grants and keeps permission decisions auditable.

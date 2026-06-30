@@ -719,7 +719,6 @@ def discover_source_sync_files(root: Path) -> set[str]:
         if (root / relative_path).exists()
     )
     files.update(all_files_under(root, ".github/agents"))
-    files.update(all_files_under(root, ".github/instructions"))
     files.update(all_files_under(root, ".github/prompts"))
     files.update(all_files_under(root, MANAGED_SKILL_DIR))
     for template_path in CONSUMER_LOCAL_KNOWLEDGE_TEMPLATES.values():

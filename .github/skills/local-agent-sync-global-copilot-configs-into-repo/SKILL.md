@@ -5,6 +5,10 @@ description: Use when aligning a consumer repository to this repository's manage
 
 # Internal Agent Sync Global Copilot Configs Into Repo
 
+## Referenced skills
+
+- `mattpocock-caveman`: optional compression support after target-drift or sync gates are clear.
+
 Use this skill as the mandatory operating engine for `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`.
 
 This skill owns the reusable sync procedure. Keep the paired agent short; do not duplicate the analyze, plan, apply, reporting, or automation rules there.
@@ -16,7 +20,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 ## When to use
 
 - Align a consumer repository with the managed GitHub Copilot baseline from this repository.
-- Refresh target `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` to the current bridge model after mirroring.
+- Refresh target `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` to the current root-policy and review-only model after mirroring.
 - Refresh shared repository-hygiene files that are part of the managed sync baseline, currently `.editorconfig`, `.pre-commit-config.yaml`, and `.github/workflows/_pre-commit.yml`.
 - Refresh repository-root `LESSONS_LEARNED.md` from the source structure while preserving and, when needed, migrating target-authored pending lesson rows.
 - Run or interpret `.github/scripts/sync_copilot_catalog.sh` or `.github/scripts/sync_copilot_catalog.py`.
@@ -32,11 +36,11 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Exclude source resources named `internal-sync-*` from consumer mirroring and remove any target copies of those resources during `apply`.
 - Create consumer-local `docs/README.md`, `docs/repository-context.md`, `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md` from `.github/templates/` only when missing, then preserve target-authored content on later sync runs.
 - Delete retired standalone runtime operating model documents from consumers; runtime workflow guidance now travels through root guidance and skills.
-- Keep root guidance layered: `AGENTS.md` is the bridge, `.github/copilot-instructions.md` is the compact Copilot routing bridge, `.github/instructions/copilot-code-review.instructions.md` owns global review behavior, and `.github/INVENTORY.md` is the live catalog.
+- Keep root guidance layered: `AGENTS.md` is the agent policy entrypoint, `.github/copilot-instructions.md` is review-only for GitHub.com Copilot code review, and `.github/INVENTORY.md` is the live catalog.
 - Treat `LESSONS_LEARNED.md` as a source-managed retained-learning template: create it when missing, keep its structure aligned with the source contract, and preserve target-authored pending lessons instead of overwriting them with source rows.
 - Mirror only the explicitly shared repository-hygiene files declared in `references/sync-contract.md`; do not widen workflow or root-file mirroring implicitly.
 - Ensure the target repository `.gitignore` contains an ignore rule for `tmp/superpowers/`.
-- Treat `.vscode/settings.json` as consumer-owned JSONC and manage only two Copilot keys field-by-field: `github.copilot.chat.codeGeneration.useInstructionFiles=false` and `chat.instructionsFilesLocations[".github/instructions"]=false`.
+- Treat `.vscode/settings.json` as consumer-owned JSONC and manage only the Copilot settings required to disable instruction-file loading.
 - When moving from `plan` to `apply` against the same target, pass `--allow-dirty-target` only when the generated `tmp/copilot-sync.plan.md` is the sole target diff left by the planning run.
 - Prefer the bundled sync automation when it matches the requested mode instead of re-deriving the workflow manually.
 - Keep detailed operating rules in `references/sync-contract.md` instead of re-expanding them in the agent body.

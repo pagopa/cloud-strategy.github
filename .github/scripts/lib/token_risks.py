@@ -25,8 +25,8 @@ DELEGATED_REVIEW_PROMPT_PATH = ".github/prompts/internal-review-ai-resources.pro
 DELEGATED_REVIEW_PROMPT_TOKEN_TARGET = 1100
 ROOT_ALWAYS_ON_PATHS = ("AGENTS.md",)
 ROOT_ALWAYS_ON_TOKEN_TARGET = 4000
-COPILOT_BRIDGE_PATH = ".github/copilot-instructions.md"
-COPILOT_BRIDGE_TOKEN_TARGET = 600
+COPILOT_REVIEW_PATH = ".github/copilot-instructions.md"
+COPILOT_REVIEW_TOKEN_TARGET = 600
 REVIEW_BASELINE_PATH = ".github/instructions/copilot-code-review.instructions.md"
 REVIEW_BASELINE_CHAR_LIMIT = 4000
 REVIEW_BASELINE_REQUIRED_MARKERS = (
@@ -61,10 +61,10 @@ GATEWAY_UNIVERSAL_PRELOAD_MARKERS = (
 
 def detect_token_risks(root: Path) -> list[Finding]:
     findings: list[Finding] = []
-    findings.extend(check_bridge_overlap(root))
+    findings.extend(check_root_policy_overlap(root))
     findings.extend(check_agents_operational_procedure_markers(root))
     findings.extend(check_root_always_on_budget(root))
-    findings.extend(check_copilot_bridge_budget(root))
+    findings.extend(check_copilot_review_budget(root))
     findings.extend(check_delegated_review_prompt_budget(root))
     findings.extend(check_review_baseline_window(root))
     findings.extend(check_inventory_dumps(root))
@@ -108,26 +108,26 @@ def check_root_always_on_budget(root: Path) -> list[Finding]:
     ]
 
 
-def check_copilot_bridge_budget(root: Path) -> list[Finding]:
-    path = root / COPILOT_BRIDGE_PATH
+def check_copilot_review_budget(root: Path) -> list[Finding]:
+    path = root / COPILOT_REVIEW_PATH
     if not path.exists():
         return []
 
     estimated_tokens = estimate_tokens(path)
-    if estimated_tokens <= COPILOT_BRIDGE_TOKEN_TARGET:
+    if estimated_tokens <= COPILOT_REVIEW_TOKEN_TARGET:
         return []
 
     return [
         Finding(
             severity="non-blocking",
-            code="copilot-bridge-over-budget",
-            path=COPILOT_BRIDGE_PATH,
+            code="copilot-review-over-budget",
+            path=COPILOT_REVIEW_PATH,
             message=(
-                "The Copilot bridge exceeds its compact-routing budget "
-                f"({estimated_tokens} estimated tokens, target {COPILOT_BRIDGE_TOKEN_TARGET})."
+                "The Copilot review instructions exceed their compact review budget "
+                f"({estimated_tokens} estimated tokens, target {COPILOT_REVIEW_TOKEN_TARGET})."
             ),
             suggestion=(
-                "Keep this file as a routing bridge to AGENTS.md and move policy/detail into owned instructions and skills."
+                "Keep this file review-only and move general policy or procedural detail into AGENTS.md, skills, or owned assets."
             ),
         )
     ]
@@ -239,7 +239,7 @@ def iter_skill_paths(root: Path) -> list[Path]:
     return sorted(path for path in skills_root.glob("**/SKILL.md") if path.is_file())
 
 
-def check_bridge_overlap(root: Path) -> list[Finding]:
+def check_root_policy_overlap(root: Path) -> list[Finding]:
     agents_path = root / "AGENTS.md"
     copilot_path = root / ".github/copilot-instructions.md"
     if not agents_path.exists() or not copilot_path.exists():
@@ -252,13 +252,13 @@ def check_bridge_overlap(root: Path) -> list[Finding]:
     return [
         Finding(
             severity="non-blocking",
-            code="bridge-overlap",
+            code="root-policy-overlap",
             path="AGENTS.md",
             message=(
                 "AGENTS.md and .github/copilot-instructions.md share too many significant lines, "
                 f"which increases duplicated context ({len(shared_lines)} overlapping lines)."
             ),
-            suggestion="Keep strategic bridge rules in AGENTS.md and move repo-wide Copilot behavior to .github/copilot-instructions.md.",
+            suggestion="Keep repository-wide agent policy in AGENTS.md and keep .github/copilot-instructions.md review-only.",
         )
     ]
 
@@ -279,10 +279,10 @@ def check_inventory_dumps(root: Path) -> list[Finding]:
         findings.append(
             Finding(
                 severity="non-blocking",
-                code="inventory-dump-in-bridge",
+                code="inventory-dump-in-root-policy",
                 path=relative_path,
                 message="The file contains inventory-like path dumps that add noise and token cost.",
-                suggestion="Keep exact catalog paths in .github/INVENTORY.md instead of repeating them in bridge files.",
+                suggestion="Keep exact catalog paths in .github/INVENTORY.md instead of repeating them in always-on policy files.",
             )
         )
     return findings
@@ -498,7 +498,7 @@ def check_internal_root_policy_overlap(root: Path) -> list[Finding]:
                     "The internal asset repeats too much root-governance language while also citing root policy files, "
                     f"which risks turning it into a second policy center ({len(overlap)} overlapping lines)."
                 ),
-                suggestion="Keep repository-wide bridge policy in AGENTS.md plus .github/copilot-instructions.md and reduce the lower-layer asset to local scope.",
+                suggestion="Keep repository-wide agent policy in AGENTS.md and reduce the lower-layer asset to local scope.",
             )
         )
     return findings

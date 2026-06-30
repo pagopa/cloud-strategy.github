@@ -5,6 +5,16 @@ description: Use when the user needs high-level Azure platform decision support 
 
 # Internal Azure Strategic
 
+## Referenced skills
+
+- `awesome-copilot-azure-pricing`: pricing depth when Azure cost data can change the decision.
+- `internal-azure-organization-structure`: route when tenant, management-group, subscription, or landing-zone layout becomes the decision.
+- `internal-azure-governance`: route when RBAC, identity, Policy, tagging, or guardrail design becomes the decision.
+- `internal-azure-operations`: route when validation, monitoring, backup, or audit evidence becomes the decision.
+- `internal-terraform`: route implementation work in Terraform or OpenTofu.
+- `internal-python-script`: route implementation work in standalone Python automation.
+- `internal-bash-script`: route implementation work in standalone Bash automation.
+
 Use this skill when the main need is to reason about an Azure decision before implementation.
 
 This is a strategic support skill. It helps frame the decision, compare realistic options, expose tradeoffs, and recommend a direction. It does not implement the change and it does not choose Terraform, Python, or Bash on behalf of the user.

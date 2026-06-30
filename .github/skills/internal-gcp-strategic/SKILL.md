@@ -5,6 +5,15 @@ description: Use when the user needs high-level Google Cloud platform decision s
 
 # Internal GCP Strategic
 
+## Referenced skills
+
+- `internal-gcp-organization-structure`: route when org, folder, project, Shared VPC, or topology layout becomes the decision.
+- `internal-gcp-governance`: route when IAM, workload identity, service account, or Org Policy design becomes the decision.
+- `internal-gcp-operations`: route when monitoring, backup, reporting, inventory, or post-rollout validation becomes the decision.
+- `internal-terraform`: route implementation work in Terraform or OpenTofu.
+- `internal-python-script`: route implementation work in standalone Python automation.
+- `internal-bash-script`: route implementation work in standalone Bash automation.
+
 Use this skill when the main need is to reason about a GCP decision before implementation.
 
 This is a strategic support skill. It helps frame the decision, compare realistic options, expose tradeoffs, and recommend a direction. It does not implement the change and it does not choose Terraform, Python, or Bash on behalf of the user.

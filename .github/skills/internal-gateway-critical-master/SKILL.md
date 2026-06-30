@@ -5,6 +5,13 @@ description: Use when a repository-owned plan, proposal, or decision needs a cri
 
 # Internal Gateway Critical Master
 
+## Referenced skills
+
+- `internal-gateway-idea-brainstorming`: route when critique shows the plan must be reformulated.
+- `internal-gateway-simple-task`: route when critique leaves a concrete local task.
+- `internal-gateway-execute-plans`: route approved retained-plan execution.
+- `internal-gateway-review`: route when the next risk is correctness evidence.
+
 Use this skill as the portable core for critical challenge work. The calling
 gateway decides when to invoke it; this skill challenges only.
 

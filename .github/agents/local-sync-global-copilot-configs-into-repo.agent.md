@@ -21,7 +21,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 ## Routing Rules
 
 - Use this agent for consumer-repository baseline propagation, drift assessment, `plan`, `audit`, and explicit `apply` runs.
-- Use this agent when the target repository must inherit the bridge model around `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/copilot-code-review.instructions.md`, `.github/INVENTORY.md`, repository-root `LESSONS_LEARNED.md`, and explicitly shared hygiene files.
+- Use this agent when the target repository must inherit the root `AGENTS.md` policy model, review-only Copilot configuration, `.github/INVENTORY.md`, repository-root `LESSONS_LEARNED.md`, and explicitly shared hygiene files.
 - Select `apply` only on explicit request, after the current evidence shows a conflict-safe plan and no unmanaged target-local cleanup is being implied.
 - Do not use this agent for source-side catalog governance, external-resource refreshes, or managed-scope redesign in this repository; recommend `local-sync-external-resources` or `internal-gateway-idea-brainstorming` as appropriate.
 - Do not use this agent for one-resource agent or skill authoring; recommend `internal-agent-creator` or `internal-skill-creator` as appropriate.
@@ -38,7 +38,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 ## Core Rules
 
 - Treat this repository as the source of truth for the managed sync baseline.
-- Keep root guidance layered: `AGENTS.md` is the bridge, `.github/copilot-instructions.md` is the compact Copilot routing bridge, `.github/instructions/copilot-code-review.instructions.md` owns global review behavior, and `.github/INVENTORY.md` is the live catalog.
+- Keep root guidance layered: `AGENTS.md` is the agent policy entrypoint, `.github/copilot-instructions.md` is review-only for GitHub.com Copilot code review, and `.github/INVENTORY.md` is the live catalog.
 - Keep target assumptions narrow and let the core skill own mirrored categories, exclusions, automation entrypoints, plan-file lifecycle, and validation sequence.
 - When repository-root `LESSONS_LEARNED.md` is in scope, preserve or migrate target-authored lesson rows through the core skill workflow.
 - When the source baseline includes approved imported-asset override registries or replay patches, mirror them as source-managed governance assets rather than creating target-local hidden forks.

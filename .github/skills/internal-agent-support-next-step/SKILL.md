@@ -5,6 +5,14 @@ description: Use when a repository-owned agent or prompt needs to package an alr
 
 # Internal Agent Support Next Step
 
+## Referenced skills
+
+- `internal-gateway-idea-brainstorming`: source lane that may need a visible next-step transition.
+- `internal-gateway-review`: source lane that may need a visible next-step transition.
+- `internal-gateway-simple-task`: source lane that may need a visible next-step transition.
+- `internal-gateway-execute-plans`: source lane that may need a visible next-step transition.
+- `internal-gateway-critical-master`: source lane that may need a visible next-step transition.
+
 Use this skill to format the next step after the next owner has already been
 chosen or confirmed.
 

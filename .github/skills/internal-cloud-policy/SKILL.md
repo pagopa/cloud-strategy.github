@@ -5,6 +5,10 @@ description: Use when authoring, comparing, or reviewing concrete cloud policy d
 
 # Cloud Policy Skill
 
+## Referenced skills
+
+- None.
+
 ## When to use
 
 - Create or modify governance policy definitions (AWS SCP, Azure Policy, GCP Org Policy).

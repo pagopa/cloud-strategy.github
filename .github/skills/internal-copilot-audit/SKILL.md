@@ -5,6 +5,10 @@ description: Use when auditing repository-owned GitHub Copilot assets for overla
 
 # Internal Copilot Audit
 
+## Referenced skills
+
+- None.
+
 Use this skill when auditing the health of the Copilot customization catalog.
 
 This skill is often invoked by planning or sync lanes, but it can also be used directly for a focused repository audit when the user explicitly wants overlap, stale-reference, or governance-drift findings.

@@ -5,6 +5,10 @@ description: Use when creating or improving changelog generation, release-note w
 
 # Internal Changelog Automation
 
+## Referenced skills
+
+- None.
+
 Use this skill when the repository needs deterministic release notes instead of ad hoc summaries.
 
 This skill is guidance for designing or improving changelog automation. It does not imply that the current repository already has an active changelog generator wired into CI.

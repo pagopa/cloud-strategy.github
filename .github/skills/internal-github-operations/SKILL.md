@@ -5,6 +5,11 @@ description: Use when the user needs GitHub operational guidance for Actions hea
 
 # Internal GitHub Operations
 
+## Referenced skills
+
+- `internal-github-strategic`: route back when enterprise, org, repo, or operating-model direction is still unsettled.
+- `internal-github-governance`: route rulesets, permissions, Actions permissions, OIDC, secrets, environments, or guardrail design.
+
 Use this skill when the next need is to validate, observe, or operationalize a GitHub platform decision.
 
 This skill owns the operational side of the platform: workflow health, runner evidence, preflight, and post-rollout verification. It does not replace strategic framing or governance design.

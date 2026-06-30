@@ -5,6 +5,13 @@ description: Use when maintaining the sync-managed `.github/` catalog behind `lo
 
 # Internal Agent Sync External Resources
 
+## Referenced skills
+
+- `internal-skill-creator`: route repository-owned skill creation, replacement, or material rewriting.
+- `openai-skill-creator`: use only for remaining bundle anatomy after local skill boundaries are settled.
+- `internal-agent-creator`: route external-resources agent changes or agent/skill boundary rewrites.
+- `mattpocock-caveman`: optional compression support after sync gates and evidence are clear.
+
 Use this skill as the default operating engine for `.github/agents/local-sync-external-resources.agent.md`.
 
 This skill owns the reusable catalog-governance procedure behind that agent. Keep the agent focused on routing, managed scope, approval posture, and output contract. Keep the reusable sync workflow, decision rules, and anti-drift checks here.

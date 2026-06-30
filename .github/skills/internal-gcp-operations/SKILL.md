@@ -5,6 +5,12 @@ description: Use when the user needs Google Cloud operational guidance for monit
 
 # Internal GCP Operations
 
+## Referenced skills
+
+- `internal-gcp-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-gcp-organization-structure`: route when org, folder, project, Shared VPC, or topology layout is the main decision.
+- `internal-gcp-governance`: route when IAM, workload identity, service account, or Org Policy design is the main decision.
+
 Use this skill when the next need is to validate, observe, or operationalize a GCP platform decision.
 
 This skill owns the operational side of the platform: monitoring, evidence, inventory, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.

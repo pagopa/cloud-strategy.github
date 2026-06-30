@@ -3,9 +3,8 @@
 This directory is the source-side catalog for reusable GitHub Copilot
 customization assets maintained in `cloud-strategy.github`.
 
-- Root [`AGENTS.md`](../AGENTS.md) is the strategic entrypoint.
-- `.github/copilot-instructions.md` is the compact repo-wide Copilot routing bridge.
-- `.github/instructions/copilot-code-review.instructions.md` owns the global review baseline.
+- Root [`AGENTS.md`](../AGENTS.md) is the strategic agent-policy entrypoint.
+- `.github/copilot-instructions.md` is review-only for GitHub.com Copilot code review.
 - [`INVENTORY.md`](INVENTORY.md) is the exact path inventory for the live catalog.
 
 ## Agents

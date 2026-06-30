@@ -64,6 +64,8 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
 
     assert "## Scope And Placement" in agents_text
     assert "operational procedures, checklists, file-shape recipes" in agents_text
+    assert ".github/instructions" not in agents_text
+    assert "bridge" not in agents_text.lower()
 
     assert "## Context Routing" in agents_text
     assert "Select the smallest relevant local guidance" in agents_text
