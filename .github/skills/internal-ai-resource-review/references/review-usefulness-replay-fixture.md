@@ -5,7 +5,7 @@ without becoming long reports.
 
 ## Input
 
-- Target: `.github/skills/local-ai-chatgpt-prompt-creator`.
+- Target: the `local-ai-chatgpt-prompt-creator` skill bundle behavior.
 - Branch diff tightens only the `coach-personale` validator profile.
 - Live `coach-personale` prompt pack passes the validator with the required
   support pack.

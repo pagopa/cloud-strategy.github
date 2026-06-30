@@ -78,6 +78,7 @@ Classify every simple task before operational work as `full-gate`,
   work.
 - Use `plan-mode` when the user explicitly asks for a plan or when cost signals
   show that same-chat execution is less economical than a retained plan.
+  See `references/plan-mode.md` for the exact cost-signal checklist.
 - If planning, review, critical pressure, or multi-phase validation becomes the
   real job, `escalate`.
 
@@ -217,51 +218,12 @@ items are closed.
 
 ## Plan Mode
 
-Plan mode lets a concrete simple task produce a retained plan instead of
-executing in the same chat. The task stays single-lane and single-phase; only
-the output shape changes.
-
-### Activation
-
-- **Mandatory explicit**: if the user asks for a plan with keywords such as
-  `plan`, `piano`, `modalità plan`, `retained plan`, `scrivi il piano`,
-  `non eseguire ancora`, or similar, switch to plan mode and honor the request.
-- **Implicit cost signal**: if the user says nothing about a plan, but cost
-  signals show that same-chat execution would be less economical than a retained
-  plan, declare `plan-mode` and ask the user to confirm before writing the plan.
-  See `references/plan-mode.md` for the exact cost-signal checklist.
-
-### Profile
-
-- Default to `compact` (`tmp/superpowers/mini-plan-*`) with
-  `01-change-summary.md` and `02-execution.md` only when the task stays within
-  one owner, one execution lane, one primary validation path, and low
-  completeness risk.
-- Apply the `Plan Profile Selection Guard` before proposing `compact`.
-- Use `extended` when the task needs multi-slice execution, multiple
-  independent validators, an articulated anti-scope, external pins,
-  cross-skill token-discipline work, validator-impacting changes, or
-  exports, generated reports, and datasets that need non-trivial
-  reconciliation.
-
-### Procedure
-
-1. Classify the gate as `plan-mode`.
-2. Run `grill-me` and `internal-gateway-critical-master` exactly as for
-   `full-gate`.
-3. Load `internal-gateway-writing-plans` and author the retained plan using its
-   local contract.
-4. Stop before execution. Report the plan folder and next owner
-   (`internal-gateway-execute-plans`).
-
-### Boundaries
-
-- Do not use plan mode to avoid a hard ownership decision. If the target,
-  anti-scope, or validation strategy is ambiguous, `escalate` instead.
-- Do not use plan mode for vague ideas or substantive tradeoffs; use
-  `internal-gateway-idea-brainstorming`.
-- Do not execute the plan inside simple task. Execution belongs to
-  `internal-gateway-execute-plans`.
+Plan mode keeps a concrete simple task single-lane and single-phase while
+writing a retained plan instead of executing. `references/plan-mode.md` owns the
+detailed activation, Token Budget Gate, profile, confirmation, procedure,
+boundary, and example rules. After `grill-me` and critical review, load
+`internal-gateway-writing-plans` and hand off execution to
+`internal-gateway-execute-plans`.
 
 ## Deterministic Helpers
 
@@ -296,21 +258,8 @@ the output shape changes.
 
 ## Common failure modes
 
-- Treating loaded skills as automatically mandatory instead of checking applicability.
-- Skipping `grill-me` and the critical gate without a Trivial-skip proof.
-- Treating `full`, `idea`, or `complete` as advisory when the user meant to force the full gate.
-- Switching to plan mode without declaring it or without user confirmation on implicit cost signals.
-- Executing the plan inside simple task instead of handing off to `internal-gateway-execute-plans`.
-- Expanding the Readiness Brief into a long checklist or proceeding without explicit user approval when no narrower auto-execute exception applies.
-- Running broad scans before the token budget gate on workbook, export, log, dependency, or tabular tasks.
-- Treating a generic `next_action.allowed=true` value as enough for auto-execution without checking the narrower skill's stop conditions.
-- Continuing the Agentic Execution Loop after evidence stops improving or a
-  stop condition fires.
-- Declaring completion after code edits while mandatory applicable evidence is still missing.
-- Declaring completion after one successful check while direct source items or
-  emerged requirements remain open.
-- Dropping emerged in-scope requirements because they were not in the initial
-  prompt instead of tracking, closing, or explicitly rejecting them as out of
-  scope.
-- Promoting specialist requirements to universal policy without target/runtime ownership proof.
-- Continuing without escalation when ownership conflicts or validation strategy remain undefined.
+- Treating loaded skills as automatically mandatory.
+- Skipping `grill-me`, the critical gate, a Trivial-skip proof, or approval.
+- Treating depth keywords, implicit `plan-mode`, broad scans, or
+  `next_action.allowed=true` as harmless.
+- Declaring completion while mandatory evidence, direct source items, emerged in-scope requirements, or ownership proof remain open.

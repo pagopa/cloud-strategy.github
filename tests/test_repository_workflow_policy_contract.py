@@ -81,16 +81,14 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     )
 
 
-def test_agents_external_tool_routing_block_is_legitimized_and_source_local() -> None:
+def test_agents_keeps_tool_specific_workflows_out_of_root_policy() -> None:
     agents_text = read_text("AGENTS.md")
 
-    assert "## graphify" in agents_text
-    assert "When the user types `/graphify`" in agents_text
-    assert "trailing routing block carrying the minimal commands it needs to consume" not in agents_text
-
-    local_rules_close_index = agents_text.index("`</standards-repository-local-rules>`")
-    graphify_index = agents_text.index("## graphify")
-    assert graphify_index > local_rules_close_index
+    assert "tool-specific workflows here" in agents_text
+    assert "Do not duplicate skill-owned paths" in agents_text
+    assert "## graphify" not in agents_text
+    assert "When the user types `/graphify`" not in agents_text
+    assert "graphify query" not in agents_text
 
 
 def test_agents_tactical_defaults_include_compact_context_discipline() -> None:

@@ -645,7 +645,7 @@ def test_skill_bundle_default_targets_focus_on_shared_skills(
             create_missing_dirs=False,
             prune_managed=False,
             experimental_targets=False,
-            format="text",
+            format="report",
             fast=False,
             changed_only=False,
         ),
@@ -753,6 +753,8 @@ def test_sync_report_output_has_compact_chat_sections(
 
     assert exit_code == 1
     assert "Status: sync | status=needs_review" in output
+    assert "targets=skills" in output
+    assert "next_action=review_bisync" in output
     assert "## Summary" in output
     assert "## Auto-applied" in output
     assert "## Stopped on" in output
@@ -858,6 +860,8 @@ def test_main_plan_report_output_has_stable_summary_sections(
     assert exit_code == 0
     assert "## Summary" in output
     assert "repo-to-home install" in output
+    assert "targets=skills" in output
+    assert "next_action=apply" in output
     assert "## Changes" in output
     assert "## Attention" in output
     assert "## Validation" in output
@@ -893,9 +897,139 @@ def test_bisync_plan_report_output_has_stable_summary_sections(
     assert exit_code == 1
     assert "## Summary" in output
     assert "repo-home drift" in output
+    assert "next_action=resolve_blockers" in output
     assert "## Changes" in output
     assert "## Attention" in output
     assert "## Validation" in output
     assert "## Remaining Work" in output
     assert "## Next" in output
     assert "## Current State" not in output
+
+
+def test_install_report_bounds_large_change_tables() -> None:
+    cli = sync_cli_module()
+    operations = [
+        {
+            "action": "copy",
+            "resource_id": f"skill-{index:02d}",
+            "path": f"/tmp/home/.agents/skills/skill-{index:02d}",
+            "reason": "Repository copy is newer than home copy.",
+            "target": "skills",
+        }
+        for index in range(25)
+    ]
+    payload = {
+        "mode": "plan",
+        "selected_targets": ["skills"],
+        "retired_targets": [],
+        "source_resources_considered": 25,
+        "operations": operations,
+        "blocked_codes": [],
+        "validation": "ready",
+        "next_action": {
+            "action": "apply",
+            "allowed": True,
+            "requires_explicit_approval": True,
+            "command": "apply --targets skills",
+            "reason": "Plan is ready.",
+        },
+        "next_step": "Run apply when ready.",
+    }
+
+    output = cli.render_install_report(payload)
+
+    assert "skill-00" in output
+    assert "skill-19" in output
+    assert "skill-20" not in output
+    assert "5 additional change rows omitted; use --format json for full detail." in output
+
+
+def test_doctor_report_output_has_readiness_sections(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="doctor",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            create_missing_dirs=False,
+            prune_managed=False,
+            experimental_targets=False,
+            format="report",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Status: repo-to-home install | mode=doctor | targets=skills" in output
+    assert "next_action=resolve_blockers" in output
+    assert "## Readiness" in output
+    assert "target-root:skills" in output
+    assert "needs-directory-create" in output
+    assert "## Next" in output
+
+
+def test_report_tables_escape_pipe_and_newline_cells() -> None:
+    cli = sync_cli_module()
+    payload = {
+        "mode": "plan",
+        "selected_targets": ["skills"],
+        "retired_targets": [],
+        "source_resources_considered": 1,
+        "operations": [
+            {
+                "action": "blocked",
+                "resource_id": "broken|skill",
+                "path": "/tmp/home/.agents/skills/broken|skill",
+                "reason": "First line\nSecond | part",
+                "code": "target-exists-unmanaged",
+                "target": "skills",
+            }
+        ],
+        "blocked_codes": ["target-exists-unmanaged"],
+        "validation": "blocked",
+        "next_action": {
+            "action": "resolve_blockers",
+            "allowed": False,
+            "requires_explicit_approval": True,
+            "command": "none",
+            "reason": "Resolve blockers.",
+        },
+        "next_step": "Resolve blockers.",
+    }
+
+    output = cli.render_install_report(payload)
+
+    assert "broken\\|skill" in output
+    assert "First line Second \\| part" in output
+
+
+def test_cli_defaults_to_report_output_for_user_facing_modes() -> None:
+    cli = sync_cli_module()
+
+    assert cli.parse_args(["plan"]).format == "report"
+    assert cli.parse_args(["doctor"]).format == "report"
+    assert cli.parse_args(["bisync", "plan"]).format == "report"
+
+
+def test_invalid_target_report_has_clear_blocked_next_action(capsys) -> None:
+    cli = sync_cli_module()
+    args = cli.parse_args(["plan", "--targets", "nope"])
+
+    exit_code = cli.run(args)
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "Status: repo-to-home install | mode=plan | targets=none | status=blocked" in output
+    assert "next_action=resolve_blockers" in output
+    assert "unknown-target" in output
