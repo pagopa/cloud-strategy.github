@@ -90,6 +90,7 @@ def test_review_usefulness_contract_is_explicit() -> None:
     assert "decision-usefulness" in gateway_text
     assert "clear next decision" in gateway_text
     assert "Bundle coverage rules" in ai_review_text
+    assert "review-usefulness-replay-fixture.md" in ai_review_text
     assert "live prompt pack, generated artifact, retained report, or fixture" in ai_review_text
     assert "evidence digest or decision trace" in ai_review_text
     assert "Adaptive layout patterns" in report_text

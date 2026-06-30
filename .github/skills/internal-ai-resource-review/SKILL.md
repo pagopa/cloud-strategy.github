@@ -82,6 +82,8 @@ one file.
 6. Load `references/report-contract.md` before writing the final review so
    evidence labels, decision vocabulary, and completeness checks stay
    proportional to the profile.
+7. Use `references/review-usefulness-replay-fixture.md` as the acceptance
+  fixture when changing the decision-usefulness behavior of AI-resource reviews.
 
 ## Core review rules
 
@@ -148,3 +150,5 @@ output should always be decision-useful and include:
   are needed, not copied inline.
 - The final output follows `references/report-contract.md` and stays
   proportional to the chosen profile.
+- Decision-usefulness contract changes preserve the behavior captured in
+  `references/review-usefulness-replay-fixture.md`.
