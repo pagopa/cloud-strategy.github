@@ -9,11 +9,12 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from agent_translation import target_extension, translate_agent_for_target
 from home_sync_contract import (
+    TARGET_ORDER,
     CatalogResource,
     RuntimeSupportRow,
     has_agent_root,
-    TARGET_ORDER,
     load_home_sync_catalog,
     load_runtime_support_matrix,
     resolve_support_row,
@@ -21,8 +22,6 @@ from home_sync_contract import (
     runtime_skill_root,
     state_root_for_home,
 )
-
-from agent_translation import target_extension, translate_agent_for_target
 
 MANIFEST_PATH = "manifest.json"
 LAST_PLAN_PATH = "last-plan.json"
@@ -1304,7 +1303,7 @@ def next_action_for_plan(
             "allowed": False,
             "requires_explicit_approval": True,
             "command": "",
-            "reason": f"Blocked codes prevent apply. Resolve each blocker manually.",
+            "reason": "Blocked codes prevent apply. Resolve each blocker manually.",
         }
     if missing_dirs and mode != "apply":
         return {

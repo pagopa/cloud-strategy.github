@@ -70,13 +70,31 @@ def load_runtime_support_matrix(source_root: Path) -> list[RuntimeSupportRow]:
 def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
     catalog_path = resolve_skill_reference(source_root, HOME_SYNC_CATALOG_PATH)
     payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8")) or {}
-    resources = payload.get("resources", [])
     defaults = payload.get("defaults", {})
     include_local = bool(defaults.get("include_local_skills", False))
+    include_internal = bool(defaults.get("include_internal_skills", False))
+    include_unlisted = bool(defaults.get("include_unlisted_skills", False))
+    skill_targets = tuple(defaults.get("skill_targets", ("codex", "copilot", "opencode")))
+    resources = list(payload.get("resources", []))
+
+    if include_unlisted:
+        explicit_ids = {
+            resource.get("resource_id", "")
+            for resource in resources
+            if isinstance(resource, dict)
+        }
+        resources.extend(
+            resource
+            for resource in discover_skill_resources(source_root, include_local, include_internal, skill_targets)
+            if resource["resource_id"] not in explicit_ids
+        )
+
     filtered = []
     for resource in resources:
         rid = resource.get("resource_id", "")
         if not include_local and rid.startswith("local-"):
+            continue
+        if not include_internal and rid.startswith("internal-"):
             continue
         filtered.append(resource)
     return [
@@ -90,6 +108,38 @@ def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
         )
         for resource in filtered
     ]
+
+
+def discover_skill_resources(
+    source_root: Path,
+    include_local: bool,
+    include_internal: bool,
+    skill_targets: tuple[str, ...],
+) -> list[dict[str, object]]:
+    skills_root = source_root / ".github" / "skills"
+    if not skills_root.is_dir():
+        return []
+
+    resources: list[dict[str, object]] = []
+    for skill_dir in sorted(path for path in skills_root.iterdir() if path.is_dir()):
+        resource_id = skill_dir.name
+        if not include_local and resource_id.startswith("local-"):
+            continue
+        if not include_internal and resource_id.startswith("internal-"):
+            continue
+        if not (skill_dir / "SKILL.md").is_file():
+            continue
+        resources.append(
+            {
+                "resource_id": resource_id,
+                "source_family": "skills",
+                "source_path": skill_dir.relative_to(source_root).as_posix(),
+                "include_targets": list(skill_targets),
+                "target_support": "See runtime support matrix",
+                "notes": "Auto-discovered skill bundle.",
+            }
+        )
+    return resources
 
 
 def resolve_skill_reference(source_root: Path, relative_path: Path) -> Path:

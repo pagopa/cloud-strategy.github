@@ -553,7 +553,7 @@ def test_plan_json_output_contains_structured_next_action(tmp_path: Path) -> Non
     assert payload["next_action"]["requires_explicit_approval"] is True
 
 
-def test_emit_text_output_groups_repo_home_buckets(
+def test_emit_report_output_groups_repo_home_buckets(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     source = tmp_path / "source"
@@ -569,15 +569,14 @@ def test_emit_text_output_groups_repo_home_buckets(
     set_tree_mtime(source_skill, 200.0)
 
     plan = build_bisync_plan(source, home, mode="plan")
-    bisync_skills._emit_bisync_output(plan, "text")
+    bisync_skills._emit_bisync_output(plan, "report")
     output = capsys.readouterr().out
 
     assert "repo-only" in output
     assert "home-only" in output
     assert "repo-to-home" in output
-    assert "winner: repo" in output
-    assert "loser: home" in output
-    assert "blocker: bisync-only-repo" in output
+    assert "Repository bundle timestamp is newer than home bundle." in output
+    assert "bisync-only-repo" in output
 
 
 def test_source_root_missing_skills_dir_returns_blocker(tmp_path: Path) -> None:

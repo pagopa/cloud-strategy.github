@@ -39,12 +39,10 @@ def should_ignore_copytree(directory: str, names: list[str]) -> set[str]:
     ignored: set[str] = set()
     for name in names:
         candidate = base / name
-        if candidate.is_dir():
-            if name in IGNORED_SYNC_PARTS:
-                ignored.add(name)
-        elif candidate.is_file():
-            if Path(name).suffix in IGNORED_SYNC_SUFFIXES:
-                ignored.add(name)
+        if candidate.is_dir() and name in IGNORED_SYNC_PARTS:
+            ignored.add(name)
+        elif candidate.is_file() and candidate.suffix in IGNORED_SYNC_SUFFIXES:
+            ignored.add(name)
     return ignored
 
 
@@ -566,50 +564,7 @@ def _emit_bisync_output(plan: BisyncPlan, format_name: str) -> None:
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
-    if format_name == "report":
-        print(render_bisync_report(payload), end="")
-        return
-
-    if not plan.drifts:
-        print("\u2705 No drift detected. Source and home are in sync.")
-        return
-
-    print(f"\u2139\ufe0f  Detected {len(plan.drifts)} drift(s):\n")
-    for drift in plan.drifts:
-        skill = drift.skill_name
-        dtype = drift.drift_type
-        if dtype in ("only-repo", "only-home"):
-            label = "only in repo" if dtype == "only-repo" else "only in home"
-            path = drift.repo_path if dtype == "only-repo" else drift.home_path
-            print(f"  {skill}: {label} ({path})")
-            blocker_codes = list(drift.blocked_codes)
-            if dtype == "only-repo" and not blocker_codes:
-                blocker_codes = ["bisync-only-repo"]
-            elif dtype == "only-home" and not blocker_codes:
-                blocker_codes = ["bisync-only-home"]
-            print(f"    blocker: {', '.join(blocker_codes)}")
-        elif dtype == "equal-mtime":
-            print(f"  {skill}: equal mtime (hashes differ)")
-            print(f"    blocker: {', '.join(drift.blocked_codes)}")
-        else:
-            print(f"  {skill}: {drift.direction}")
-            if drift.direction == "repo-to-home":
-                winner, loser = "repo", "home"
-            else:
-                winner, loser = "home", "repo"
-            print(f"    winner: {winner}")
-            print(f"    loser: {loser}")
-
-    if plan.blocked_codes:
-        print(f"\n\u26a0\ufe0f  Blocked: {', '.join(plan.blocked_codes)}")
-
-    next_step = plan.next_step
-    if next_step:
-        print(f"\n\u2139\ufe0f  Next: {next_step}")
-
-    next_action = plan.next_action
-    if next_action and next_action.get("action") != "done":
-        print(f"  Action: {next_action.get('reason', '')}")
+    print(render_bisync_report(payload), end="")
 
 
 def build_bisync_parser() -> argparse.ArgumentParser:
@@ -627,7 +582,7 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     plan_parser.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="text",
+        default="report",
         help="Output format.",
     )
     apply_parser = subparsers.add_parser("apply", help="Apply bisync resolution")
@@ -640,7 +595,7 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     apply_parser.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="text",
+        default="report",
         help="Output format.",
     )
     return parser

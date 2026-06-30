@@ -841,20 +841,12 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
 
 
 def test_home_sync_catalog_does_not_contain_internal_graphify_in_real_repo() -> None:
-    catalog_path = (
-        REPO_ROOT
-        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
-    )
-    catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
-    resource_ids = {r["resource_id"] for r in catalog.get("resources", [])}
+    catalog = home_syncing.load_home_sync_catalog(REPO_ROOT)
+    resource_ids = {resource.resource_id for resource in catalog}
     assert "internal-graphify" not in resource_ids
 
 
 def test_home_sync_catalog_contains_internal_ai_resource_review_in_real_repo() -> None:
-    catalog_path = (
-        REPO_ROOT
-        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
-    )
-    catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
-    resource_ids = {r["resource_id"] for r in catalog.get("resources", [])}
+    catalog = home_syncing.load_home_sync_catalog(REPO_ROOT)
+    resource_ids = {resource.resource_id for resource in catalog}
     assert "internal-ai-resource-review" in resource_ids
