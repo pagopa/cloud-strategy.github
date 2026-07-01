@@ -59,19 +59,20 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
 
-    assert "## Operating Principles" in agents_text
-    assert "Prefer the smallest valid owner" in agents_text
+    assert "## First Move" in agents_text
+    assert "## Precedence" in agents_text
+    assert "Resolve conflicts with the smallest valid owner." in agents_text
+    assert "fallback policy, not permission to override narrower contracts." in agents_text
 
     assert "## Scope And Placement" in agents_text
     assert "operational procedures, checklists, file-shape recipes" in agents_text
     assert ".github/instructions" not in agents_text
     assert "bridge" not in agents_text.lower()
 
-    assert "## Context Routing" in agents_text
-    assert "Select the smallest relevant local guidance" in agents_text
-    assert "Load broad domain guidance before specialist depth" in agents_text
-    assert "Add specialist guidance only when the task needs workflow detail" in agents_text
-    assert "Resolve conflicts with the smallest valid owner" in agents_text
+    assert "`<shared-baseline>`" in agents_text
+    assert "This block is the portable baseline" in agents_text
+    assert "`<standards-repository-local-rules>`" in agents_text
+    assert "This block applies only to this standards repository." in agents_text
 
     assert "It is not a general task-execution guide" in copilot_text
     assert "Do not ask the author to follow local runtime workflows" in copilot_text
@@ -83,14 +84,18 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     )
 
 
-def test_agents_keeps_tool_specific_workflows_out_of_root_policy() -> None:
+def test_agents_keeps_only_intentional_root_level_workflows() -> None:
     agents_text = read_text("AGENTS.md")
 
     assert "tool-specific workflows here" in agents_text
     assert "Do not duplicate skill-owned paths" in agents_text
-    assert "## graphify" not in agents_text
-    assert "When the user types `/graphify`" not in agents_text
-    assert "graphify query" not in agents_text
+    assert "## graphify" in agents_text
+    assert "When the user types `/graphify`" in agents_text
+    assert 'graphify query "<question>"' in agents_text
+    assert (
+        "Only skip graphify if the task is about stale or incorrect graph output"
+        in agents_text
+    )
 
 
 def test_agents_tactical_defaults_include_compact_context_discipline() -> None:
