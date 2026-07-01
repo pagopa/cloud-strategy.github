@@ -29,6 +29,19 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - root `AGENTS.md` may carry compact tactical defaults for mode selection, owner visibility, validation evidence, and root-cause preference
   - root `AGENTS.md` does not carry volatile inventory, file-shape recipes, command playbooks, domain checklists, or long surface-specific procedures
 
+#### `skill-first-root-agents-projects-current-baseline-shape`
+
+- Goal: preserve the current root-policy shape without restoring the retired bridge or context-routing model.
+- Scope:
+  - root `AGENTS.md`
+  - `INTERNAL_CONTRACT.md`
+  - source-side contract tests
+- Expected behavior:
+  - root `AGENTS.md` may carry a portable `<shared-baseline>` block when the source repository intentionally projects shared policy into consumer repositories
+  - root `AGENTS.md` may carry a source-local `<standards-repository-local-rules>` block that is explicitly non-portable by default
+  - root `AGENTS.md` may keep compact graph orientation rules when those rules are deliberately part of the declared shared baseline
+  - tests and validators must align to the current on-disk root-policy shape instead of assuming a separate `## Context Routing` section or the absence of root-level graph guidance
+
 #### `skill-first-inventory-is-externalized`
 
 - Goal: keep policy and live catalog inventory decoupled.

@@ -98,6 +98,18 @@ def test_agents_keeps_only_intentional_root_level_workflows() -> None:
     )
 
 
+def test_internal_contract_tracks_current_root_policy_shape() -> None:
+    internal_contract_text = read_text("INTERNAL_CONTRACT.md")
+
+    assert "portable `<shared-baseline>` block" in internal_contract_text
+    assert "`<standards-repository-local-rules>` block" in internal_contract_text
+    assert "compact graph orientation rules" in internal_contract_text
+    assert (
+        "instead of assuming a separate `## Context Routing` section"
+        in internal_contract_text
+    )
+
+
 def test_agents_tactical_defaults_include_compact_context_discipline() -> None:
     agents_text = read_text("AGENTS.md")
 
