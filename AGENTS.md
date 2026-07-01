@@ -22,15 +22,11 @@ configuration into consumer repositories.
   owns the exact live catalog of managed AI assets.
 - Keep architecture and local context in `docs/architecture.md` and
   `docs/repository-context.md`.
-- Keep procedures, examples, and deep domain guidance in the smallest valid
-  skill, prompt, agent, validator, script, or owned file.
 
 ## Precedence
 
 - Direct user instructions win for the current task unless they require unsafe,
   destructive, or impossible behavior.
-- The closest or most specific owner wins inside its scope: nested `AGENTS.md`,
-  skill, prompt, agent, validator, script, or file-owned entry rules.
 - Resolve conflicts with the smallest valid owner. Treat broader files as
   fallback policy, not permission to override narrower contracts.
 - Do not infer active policy from removed files, generated output, historical
@@ -41,8 +37,6 @@ configuration into consumer repositories.
 
 - Think before acting. Confirm target, nearest owner, bounded evidence, and
   validation path before broad commands.
-- Prefer the smallest valid owner. Keep broad policy here, reusable depth in
-  local guidance, and enforceable checks in validators.
 - Make surgical changes. Preserve user work, avoid unrelated refactors, and tie
   each edit to the requested outcome.
 - Work toward verified outcomes. Run the closest available validation and report
@@ -60,18 +54,6 @@ configuration into consumer repositories.
   instead of copying catalog entries.
 - Target repositories should express local exceptions in their own nearest valid
   owner files.
-
-## Context Routing
-
-- Select the smallest relevant local guidance from the prompt, target path,
-  command surface, validation signal, and repository evidence.
-- Load broad domain guidance before specialist depth when the domain is clear but
-  workflow depth is not yet proven.
-- Add specialist guidance only when the task needs workflow detail, decision
-  trees, domain depth, or reusable procedures.
-- If no target path is known, infer only obvious domains such as Python, GitHub
-  Actions, Kubernetes, Docker, Markdown, or Terraform; otherwise ask before
-  making path-scoped claims.
 
 ## Authoring Defaults
 
