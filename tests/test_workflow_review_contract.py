@@ -40,7 +40,9 @@ def test_idea_gateway_owns_retained_planning() -> None:
     assert "Direct Execution vs Retained Plan Recommendation" in runtime_text
     assert "choose execute, plan, or an explicit override" in runtime_text
     assert "ask whether the user wants this owner to keep the task" not in skill_text
-    assert "ask whether the user wants this owner to keep the task" not in reference_text
+    assert (
+        "ask whether the user wants this owner to keep the task" not in reference_text
+    )
     assert "ask whether the user wants this owner to keep the task" not in runtime_text
     assert (
         "At Interview Gate 1: ready-for-critical, ask whether to continue"
@@ -91,7 +93,10 @@ def test_review_usefulness_contract_is_explicit() -> None:
     assert "clear next decision" in gateway_text
     assert "Bundle coverage rules" in ai_review_text
     assert "review-usefulness-replay-fixture.md" in ai_review_text
-    assert "live prompt pack, generated artifact, retained report, or fixture" in ai_review_text
+    assert (
+        "live prompt pack, generated artifact, retained report, or fixture"
+        in ai_review_text
+    )
     assert "evidence digest or decision trace" in ai_review_text
     assert "Adaptive layout patterns" in report_text
     assert "Evidence compression" in report_text

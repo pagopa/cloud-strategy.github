@@ -7,9 +7,7 @@ def read_text(relative_path: str) -> str:
     return Path(relative_path).read_text(encoding="utf-8")
 
 
-def test_root_policy_files_keep_retained_plan_paths_outside_always_on_detail() -> (
-    None
-):
+def test_root_policy_files_keep_retained_plan_paths_outside_always_on_detail() -> None:
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
     assert "tmp/superpowers/" not in agents_text

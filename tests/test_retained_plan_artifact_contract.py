@@ -153,7 +153,9 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
                         )
 
                     if next_step_match is None:
-                        violations.append(f"{plan_state_path} is missing Next-step package")
+                        violations.append(
+                            f"{plan_state_path} is missing Next-step package"
+                        )
 
                     if evidence_gaps_match is None:
                         violations.append(f"{plan_state_path} is missing Evidence gaps")

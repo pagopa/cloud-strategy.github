@@ -193,7 +193,9 @@ def test_build_plan_detects_home_to_repo_direction(tmp_path: Path) -> None:
     assert drift.direction == "home-to-repo"
 
 
-def test_build_plan_treats_hash_equal_different_mtime_as_in_sync(tmp_path: Path) -> None:
+def test_build_plan_treats_hash_equal_different_mtime_as_in_sync(
+    tmp_path: Path,
+) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
@@ -310,9 +312,9 @@ def test_run_bisync_apply_allows_only_repo_blocker(tmp_path: Path) -> None:
     exit_code = bisync_skills.run_bisync_apply(args)
 
     assert exit_code == 0
-    assert (
-        home / ".agents" / "skills" / "repo-only" / "SKILL.md"
-    ).read_text(encoding="utf-8") == "# Repo only\n"
+    assert (home / ".agents" / "skills" / "repo-only" / "SKILL.md").read_text(
+        encoding="utf-8"
+    ) == "# Repo only\n"
     verify_plan = build_bisync_plan(source, home, mode="plan")
     assert verify_plan.drifts == []
 

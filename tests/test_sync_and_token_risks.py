@@ -120,7 +120,9 @@ def test_build_sync_plan_does_not_ship_source_instruction_family(
     plan = build_sync_plan(source_root, target_root)
     planned_paths = {operation.path for operation in plan.operations}
 
-    assert f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
+    assert (
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
+    )
 
 
 def test_build_sync_plan_deletes_target_non_local_instructions_and_preserves_local(
@@ -1243,7 +1245,7 @@ def test_detect_token_risks_ignores_structural_root_policy_references(
         "- Use `AGENTS.md` as the repository agent entrypoint.\n"
         "- Use `.github/INVENTORY.md` as the live catalog.\n"
         "- Use `.github/skills/` when a reusable workflow or technical baseline is relevant.\n"
-        "- Use `.github/agents/` when a stable owner is relevant.\n"
+        "- Use `.github/agents/` when a stable owner is relevant.\n",
     )
     write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")

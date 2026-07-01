@@ -620,8 +620,7 @@ def test_sync_stops_on_home_newer_managed_drift_via_bisync_review(
         for operation in payload["install"]["operations"]
     )
     assert any(
-        drift["direction"] == "home-to-repo"
-        and drift["skill"] == "demo-skill"
+        drift["direction"] == "home-to-repo" and drift["skill"] == "demo-skill"
         for drift in payload["bisync"]["drifts"]
     )
     assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Home edited\n"
@@ -941,7 +940,9 @@ def test_install_report_bounds_large_change_tables() -> None:
     assert "skill-00" in output
     assert "skill-19" in output
     assert "skill-20" not in output
-    assert "5 additional change rows omitted; use --format json for full detail." in output
+    assert (
+        "5 additional change rows omitted; use --format json for full detail." in output
+    )
 
 
 def test_doctor_report_output_has_readiness_sections(
@@ -1030,6 +1031,9 @@ def test_invalid_target_report_has_clear_blocked_next_action(capsys) -> None:
     output = capsys.readouterr().out
 
     assert exit_code == 1
-    assert "Status: repo-to-home install | mode=plan | targets=none | status=blocked" in output
+    assert (
+        "Status: repo-to-home install | mode=plan | targets=none | status=blocked"
+        in output
+    )
     assert "next_action=resolve_blockers" in output
     assert "unknown-target" in output

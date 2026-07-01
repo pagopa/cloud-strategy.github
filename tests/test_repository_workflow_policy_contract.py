@@ -62,7 +62,9 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     assert "## First Move" in agents_text
     assert "## Precedence" in agents_text
     assert "Resolve conflicts with the smallest valid owner." in agents_text
-    assert "fallback policy, not permission to override narrower contracts." in agents_text
+    assert (
+        "fallback policy, not permission to override narrower contracts." in agents_text
+    )
 
     assert "## Scope And Placement" in agents_text
     assert "operational procedures, checklists, file-shape recipes" in agents_text

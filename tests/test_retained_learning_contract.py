@@ -42,7 +42,10 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
 
     copilot_text = read_text(".github/copilot-instructions.md")
     assert "This file is only for GitHub.com Copilot code review." in copilot_text
-    assert "Do not treat this file as instructions for coding agents, local CLIs" in copilot_text
+    assert (
+        "Do not treat this file as instructions for coding agents, local CLIs"
+        in copilot_text
+    )
 
     agents_text = read_text("AGENTS.md")
     assert "LESSONS_LEARNED.md" not in agents_text
