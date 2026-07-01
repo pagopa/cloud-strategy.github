@@ -5,6 +5,17 @@ description: Use when the user needs high-level AWS platform decision support or
 
 # Internal AWS Strategic
 
+## Referenced skills
+
+- `antigravity-aws-cost-optimizer`: cost-analysis depth when AWS cost data or recommendations are primary.
+- `internal-aws-organization-structure`: route when account, OU, delegated admin, or topology structure becomes the decision.
+- `internal-aws-governance`: route when IAM, trust, SCP, or guardrail design becomes the decision.
+- `internal-aws-operations`: route when validation, monitoring, backup, or audit evidence becomes the decision.
+- `internal-aws-mcp-research`: load when current AWS documentation or service behavior can change the recommendation.
+- `internal-terraform`: route implementation work in Terraform or OpenTofu.
+- `internal-python-script`: route implementation work in standalone Python automation.
+- `internal-bash-script`: route implementation work in standalone Bash automation.
+
 Use this skill when the main need is to reason about an AWS decision before implementation.
 
 This is a strategic support skill. It helps frame the decision, compare realistic options, expose tradeoffs, and recommend a direction. It does not implement the change and it does not choose Terraform, Python, or Bash on behalf of the user.

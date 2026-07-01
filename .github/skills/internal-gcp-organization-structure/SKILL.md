@@ -5,6 +5,12 @@ description: Use when the user needs Google Cloud control-plane or platform-stru
 
 # Internal GCP Organization Structure
 
+## Referenced skills
+
+- `internal-gcp-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-gcp-governance`: route IAM, service account, workload identity, or Org Policy design.
+- `internal-gcp-operations`: route monitoring, backup, reporting, inventory, or post-rollout validation.
+
 Use this skill when the next need is to design or review how GCP is structured at org and platform level.
 
 This skill owns GCP layout decisions, not generic strategy and not detailed IAM or monitoring implementation. It helps translate a platform goal into org, folder, project, Shared VPC, topology, and rollout structure.

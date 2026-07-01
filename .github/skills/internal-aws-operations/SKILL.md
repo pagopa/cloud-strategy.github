@@ -5,6 +5,13 @@ description: Use when the user needs AWS operational guidance for monitoring, lo
 
 # Internal AWS Operations
 
+## Referenced skills
+
+- `internal-aws-strategic`: route back when the platform direction is still unsettled.
+- `internal-aws-organization-structure`: route when account, OU, delegated admin, or topology structure is the main decision.
+- `internal-aws-governance`: route when IAM, trust, SCP, or guardrail design is the main decision.
+- `internal-aws-mcp-research`: load when current AWS service behavior or IAM inspection can change the validation plan.
+
 Use this skill when the next need is to validate, observe, or operationalize an AWS platform decision.
 
 This skill owns the operational side of the platform: monitoring, evidence, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.

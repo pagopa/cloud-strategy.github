@@ -5,6 +5,10 @@ description: Use when refactoring object collaborations, replacing branching wit
 
 # Internal OOP Design Patterns
 
+## Referenced skills
+
+- None.
+
 Use this skill as a decision and refactoring workflow, not as a mandate to add pattern ceremony. Start from the actual change pressure in the code and prefer the smallest design that removes the current problem.
 
 ## When to use

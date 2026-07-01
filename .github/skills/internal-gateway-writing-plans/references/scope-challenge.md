@@ -28,9 +28,10 @@ Every retained plan must be able to answer these questions:
 9. `profile`: Is `Plan profile` declared as `compact` or `extended`? Currently, no other profiles are supported. Missing or unrecognized profiles return `unsupported-plan-contract`.
 10. `summary language`: Is `01-change-summary.md` written in Italian as a compressed decision capsule with required sections and a `Risorsa | Azione | Scopo` table for non-trivial plans?
 11. `summary clarity`: Are changed resources and intended actions obvious in the summary without reading deeper files?
-12. `route map`: Do `Source item ledger` routes point to existing numbered files or explicit non-action routes?
-13. `questions state`: Is `questions.md` either `- none` (ready) or explicitly blocking execution handoff?
-14. `token budget`: For `compact`, is total plan Markdown within 2,000 estimated tokens, with `01-change-summary.md` under 300 and `02-execution.md` under 1,500?
+12. `summary counter-validation`: Does the summary contain enough observable criteria to let the user counter-validate the plan without reading the control file?
+13. `route map`: Do `Source item ledger` routes point to existing numbered files or explicit non-action routes?
+14. `questions state`: Is `questions.md` either `- none` (ready) or explicitly blocking execution handoff?
+15. `token budget`: For `compact`, is total plan Markdown within 2,000 estimated tokens, with `01-change-summary.md` under 300 and `02-execution.md` under 1,500?
 
 For non-trivial retained plans and strategic-to-operational or
 monolithic-to-executable conversions, also answer this:
@@ -79,6 +80,7 @@ Stop conditions: <what stops execution>
 Profile: <compact or extended>
 Summary language: <Italian with required sections and resource table, or missing>
 Summary clarity: <resources and actions obvious, or unclear>
+Summary counter-validation: <enough observable criteria for user counter-validation, or too generic>
 Source-item ledger: <complete, incomplete, stale, or missing>
 Reading budget: <first files or checks before broader reading>
 Observable acceptance: <diff, file, validator, manual, explicit non-action, or blocker>

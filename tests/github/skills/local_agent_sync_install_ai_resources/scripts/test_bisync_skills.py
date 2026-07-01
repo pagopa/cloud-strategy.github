@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import json
 import os
@@ -192,6 +193,28 @@ def test_build_plan_detects_home_to_repo_direction(tmp_path: Path) -> None:
     assert drift.direction == "home-to-repo"
 
 
+def test_build_plan_treats_hash_equal_different_mtime_as_in_sync(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    source_skill = make_skill(
+        source / ".github" / "skills", "same-hash-skill", "# Same content\n"
+    )
+    home_skill = make_skill(
+        home / ".agents" / "skills", "same-hash-skill", "# Same content\n"
+    )
+    set_tree_mtime(source_skill, 200.0)
+    set_tree_mtime(home_skill, 100.0)
+
+    plan = build_bisync_plan(source, home, mode="plan")
+
+    assert plan.drifts == []
+    assert plan.blocked_codes == []
+    assert plan.verification["status"] == "ok"
+
+
 def test_build_plan_blocks_equal_mtime(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
@@ -228,7 +251,7 @@ def test_build_plan_blocks_only_repo_and_only_home(tmp_path: Path) -> None:
     assert plan.blocked_codes == ["bisync-only-home", "bisync-only-repo"]
 
 
-def test_excludes_local_agent_sync_bundles_from_scan(tmp_path: Path) -> None:
+def test_excludes_local_prefixed_bundles_from_scan(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"
     init_git_repo(source)
@@ -242,6 +265,8 @@ def test_excludes_local_agent_sync_bundles_from_scan(tmp_path: Path) -> None:
         "local-agent-sync-install-ai-resources",
         "# Diverged sync bundle\n",
     )
+    make_skill(source / ".github" / "skills", "local-custom", "# Local source\n")
+    make_skill(home / ".agents" / "skills", "local-custom", "# Local home\n")
     make_skill(source / ".github" / "skills", "normal-skill", "# Normal\n")
     make_skill(home / ".agents" / "skills", "normal-skill", "# Normal\n")
 
@@ -268,6 +293,50 @@ def test_apply_blocks_dirty_repository_without_writes(tmp_path: Path) -> None:
     assert result.blocked_codes == ["bisync-repo-dirty"]
     assert result.verification["code"] == "bisync-repo-dirty"
     assert (home_skill / "SKILL.md").read_text(encoding="utf-8") == "# Home\n"
+
+
+def test_run_bisync_apply_allows_only_repo_blocker(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    make_skill(source / ".github" / "skills", "repo-only", "# Repo only\n")
+    (home / ".agents" / "skills").mkdir(parents=True, exist_ok=True)
+    commit_all(source, "add repo-only")
+
+    args = argparse.Namespace(
+        source_root=source.as_posix(),
+        home_root=home.as_posix(),
+        format="json",
+    )
+
+    exit_code = bisync_skills.run_bisync_apply(args)
+
+    assert exit_code == 0
+    assert (home / ".agents" / "skills" / "repo-only" / "SKILL.md").read_text(
+        encoding="utf-8"
+    ) == "# Repo only\n"
+    verify_plan = build_bisync_plan(source, home, mode="plan")
+    assert verify_plan.drifts == []
+
+
+def test_run_bisync_apply_blocks_non_resolvable_codes(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    make_skill(source / ".github" / "skills", "repo-only", "# Repo only\n")
+    make_skill(home / ".agents" / "skills", "home-only", "# Home only\n")
+    commit_all(source, "add repo-only")
+
+    args = argparse.Namespace(
+        source_root=source.as_posix(),
+        home_root=home.as_posix(),
+        format="json",
+    )
+
+    exit_code = bisync_skills.run_bisync_apply(args)
+
+    assert exit_code == 1
+    assert not (home / ".agents" / "skills" / "repo-only").exists()
 
 
 def test_apply_repo_to_home_converges_without_manifest_entry(
@@ -486,7 +555,7 @@ def test_plan_json_output_contains_structured_next_action(tmp_path: Path) -> Non
     assert payload["next_action"]["requires_explicit_approval"] is True
 
 
-def test_emit_text_output_groups_repo_home_buckets(
+def test_emit_report_output_groups_repo_home_buckets(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     source = tmp_path / "source"
@@ -502,15 +571,14 @@ def test_emit_text_output_groups_repo_home_buckets(
     set_tree_mtime(source_skill, 200.0)
 
     plan = build_bisync_plan(source, home, mode="plan")
-    bisync_skills._emit_bisync_output(plan, "text")
+    bisync_skills._emit_bisync_output(plan, "report")
     output = capsys.readouterr().out
 
     assert "repo-only" in output
     assert "home-only" in output
     assert "repo-to-home" in output
-    assert "winner: repo" in output
-    assert "loser: home" in output
-    assert "blocker: bisync-only-repo" in output
+    assert "Repository bundle timestamp is newer than home bundle." in output
+    assert "bisync-only-repo" in output
 
 
 def test_source_root_missing_skills_dir_returns_blocker(tmp_path: Path) -> None:

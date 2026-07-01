@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import re
+from collections import defaultdict
 from pathlib import Path
 
 import yaml
 
 from .inventory import collect_inventory_sections, parse_inventory_markdown
 from .shared import (
-    INVENTORY_PATH,
+    IGNORED_SYNC_FILENAMES,
+    IGNORED_SYNC_PARTS,
     IMPORTED_ASSET_OVERRIDES_PATH,
+    INVENTORY_PATH,
     LEGACY_AGENT_TOOL_IDS,
     SUPERPOWERS_NORMALIZATION_PATH,
     Finding,
     finding_sort_key,
-    IGNORED_SYNC_FILENAMES,
-    IGNORED_SYNC_PARTS,
     is_imported_asset,
     iter_markdown_assets,
     load_frontmatter,
@@ -214,14 +214,28 @@ def check_bridge_references(root: Path) -> list[Finding]:
             )
     if copilot_path.exists():
         copilot_text = read_text(copilot_path)
-        if "AGENTS.md" not in copilot_text:
+        if "This file is only for GitHub.com Copilot code review." not in copilot_text:
             findings.append(
                 Finding(
                     severity="blocking",
-                    code="copilot-instructions-missing-agents-reference",
+                    code="copilot-instructions-missing-review-scope",
                     path=".github/copilot-instructions.md",
-                    message=".github/copilot-instructions.md no longer references AGENTS.md as the strategic bridge.",
-                    suggestion="Restore the AGENTS.md reference to keep cross-surface precedence explicit.",
+                    message=".github/copilot-instructions.md must explicitly declare GitHub.com code-review-only scope.",
+                    suggestion="Restore the review-only scope line in .github/copilot-instructions.md.",
+                )
+            )
+
+        if (
+            "Do not treat this file as instructions for coding agents, local CLIs, or"
+            not in copilot_text
+        ):
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="copilot-instructions-missing-runtime-boundary",
+                    path=".github/copilot-instructions.md",
+                    message=".github/copilot-instructions.md must keep the non-runtime boundary explicit.",
+                    suggestion="Restore the non-runtime boundary line under the non-scope section.",
                 )
             )
     return findings

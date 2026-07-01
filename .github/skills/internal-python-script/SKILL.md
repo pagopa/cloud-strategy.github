@@ -31,7 +31,7 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 ## Script-specific guidance
 
 - Standalone tools should default to a dedicated folder or toolkit root, not a loose top-level `.py` file.
-- Keep entrypoints thin: parse arguments, resolve paths, orchestrate helpers, and return an exit code through `main() -> int` plus `raise SystemExit(main())`.
+- Keep entrypoints thin and importable: prefer a package `__main__.py`, importable `cli.py`, or declared `console_scripts` entrypoint; parse arguments, resolve paths, orchestrate helpers, and return an exit code through `main() -> int` plus `raise SystemExit(main())`.
 - Keep script-owned configuration visible at the entrypoint boundary. In single-file scripts, place a clearly named `Configuration` section near the end of the file, after helper definitions and before `main()` or `raise SystemExit(main())`.
 - Name configuration values by purpose, not by type: paths, file names, field lists, thresholds, defaults, mappings, filters, and output modes should explain what behavior they control.
 - Do not hide script-specific configuration inside helper modules or libraries. Helpers should accept explicit parameters or a small typed settings object when several values travel together.
@@ -51,6 +51,7 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 - Add machine-readable output such as `--format json` only when the tool has a real automation consumer. Keep text output as the default operator path, and do not decorate machine-readable output with `rich`, emoji, color, or tables.
 - When machine-readable output can become large and the script is agent-facing, add a bounded mode such as `--format compact` that preserves status, blocker or finding counts, key path evidence, and next action without dumping full detail.
 - Keep full `--format json` available for durable audit/debug use; do not replace it with compact mode.
+- When a script surfaces reusable project payloads, keep default reports summarized and defer raw payload dump policy to the project reporting boundary instead of embedding full bodies in shareable output.
 
 ## Compact Python baseline
 
@@ -101,6 +102,7 @@ Keep these rules visible while drafting:
 - For refactors, prose-only updates, generated fixtures, or mechanical formatting with no executable behavior change, run the existing focused tests plus `py_compile` or `compileall` instead of manufacturing speculative tests.
 - When Ruff is configured, run `ruff format` for formatting-only Python edits and `ruff check` for lint feedback before wider test runs.
 - Prefer existing repository commands such as `make lint`, `make test`, or a shared script runner before inventing a one-off validation path.
+- Keep test execution reproducible: run through the declared interpreter or local virtualenv, reuse shared runners when they exist, and anchor pytest discovery with the repository rootdir or `testpaths` contract instead of ad-hoc shell state.
 
 ## Runtime guidance
 

@@ -80,6 +80,15 @@ path sufficient despite lower-context execution.
   coverage, blockers, or implementation-contract detail in `01-change-summary.md`.
   Put those facts in `02-execution.md` for `compact` or `02-control.md` for
   `extended`.
+- `01-change-summary.md` must still preserve `counter-validation-critical facts`:
+  observable result criteria without which the user cannot verify whether the
+  plan really covers the request. These are result facts, not execution detail.
+  Keep them in `Risultato atteso` or `Risorse coinvolte`.
+- Do not compress away concrete contract facts that materially define the
+  requested result, such as column order, new columns, required fields,
+  must-never-be-empty conditions, blocking diagnostics, repaired data gaps,
+  row-count or no-data-loss invariants, or user-visible output-contract
+  changes.
 - Compact plans have a 2,000 estimated-token total budget measured as
   `ceil(UTF-8 bytes / 4)` across plan Markdown files. Keep `02-execution.md`
   under 1,500 estimated tokens. Treat warnings as required review inputs.
@@ -97,6 +106,17 @@ path sufficient despite lower-context execution.
   in chat or request context; do not create another retained file for it.
 - `01-change-summary.md`: compressed Italian decision capsule following
   `Explicit Constraints`.
+- Distinguish execution detail from `counter-validation-critical facts`.
+  Execution detail covers route, commands, source-item ids, file-by-file steps,
+  fallback logic, and validator order; those stay out of `01-change-summary.md`.
+  `Counter-validation-critical facts` are the user-observable end-state facts
+  needed to verify coverage at a glance, and they stay in `Risultato atteso`
+  or `Risorse coinvolte`.
+- When the plan changes output, schema, or data behavior, do not collapse the
+  result into generic phrases such as `rispetta il nuovo schema`, `aggiorna gli
+  output`, or `corregge i dati` if the request depends on concrete facts like
+  first columns, field order, newly added columns, never-empty fields,
+  blocking diagnostics, repaired row ranges, or row-count invariants.
 - `02-execution.md` for `compact` must include these exact headings:
   `Plan profile`, `Target and anti-scope` (with `### Target` and
   `### Anti-scope`), `Owner and validator`, `Stop conditions`, `Objective`,
@@ -133,7 +153,9 @@ path sufficient despite lower-context execution.
 2. For debugging, drift, or data-mismatch work, write the diagnosis capsule
    before `01-change-summary.md`.
 3. For new plans, run bundle-local `init` first to create the scaffold.
-4. Choose folder name and write the compressed `01-change-summary.md` in Italian.
+4. Choose folder name and write the compressed `01-change-summary.md` in Italian,
+   preserving the user-visible `counter-validation-critical facts` needed to
+   verify coverage without reading the control file.
 5. For `compact`, write `02-execution.md` with profile, control header, steps,
   and source-item coverage.
 6. For `extended`, write `02-control.md` with profile, control facts, merged
@@ -156,6 +178,9 @@ path sufficient despite lower-context execution.
 - Plan lives under `tmp/superpowers/<clear-action-or-task-name>/`.
 - `01-change-summary.md` is Italian, compressed, and contains only the required
   decision-capsule sections.
+- `01-change-summary.md` preserves the most important
+  `counter-validation-critical facts` in `Risultato atteso` or
+  `Risorse coinvolte` when the plan changes output, schema, or data behavior.
 - `compact` uses `01-change-summary.md` + `02-execution.md` only.
 - `compact` stays under the 2,000 estimated-token total budget, or the warning
   was resolved by compression or escalation.
@@ -173,4 +198,7 @@ path sufficient despite lower-context execution.
 - Skipping the diagnosis capsule and turning an unproven mismatch into a
   retained plan.
 - Using `compact` when execution actually needs an implementation contract.
+- Compressing away user-visible contract facts from `01-change-summary.md` and
+  leaving only generic schema or output wording that prevents
+  counter-validation.
 - Creating `done-*` markers during authoring.

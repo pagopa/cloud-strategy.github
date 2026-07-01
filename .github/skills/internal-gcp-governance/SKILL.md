@@ -5,6 +5,12 @@ description: Use when the user needs Google Cloud governance guidance for IAM op
 
 # Internal GCP Governance
 
+## Referenced skills
+
+- `internal-gcp-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-gcp-organization-structure`: route when org, folder, project, Shared VPC, or topology layout is the main decision.
+- `internal-gcp-operations`: route when monitoring, reporting, backup, inventory, or post-rollout validation is the main need.
+
 Use this skill when the next need is to define or review Google Cloud identity, access, and guardrail decisions.
 
 This skill owns governance logic after the broad structure is known. It helps separate org or folder guardrails from project-level grants and keeps permission decisions auditable.

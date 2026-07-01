@@ -5,6 +5,11 @@ description: Use when the user needs GitHub governance guidance for rulesets, br
 
 # Internal GitHub Governance
 
+## Referenced skills
+
+- `internal-github-strategic`: route back when enterprise, org, repo, or operating-model direction is still unsettled.
+- `internal-github-operations`: route runner health, reporting, audit evidence, drift checks, or post-rollout validation.
+
 Use this skill when the next need is to define or review GitHub permissions, guardrails, and policy decisions.
 
 This skill owns governance logic after the broad operating model is known. It helps separate enterprise or org guardrails from repo or environment grants and keeps permission decisions auditable.

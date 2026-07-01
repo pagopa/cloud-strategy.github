@@ -6,6 +6,7 @@ SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
 PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests .github/skills
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
+RUFF := $(if $(wildcard $(SCRIPTS_VENV)/bin/ruff),$(SCRIPTS_VENV)/bin/ruff,ruff)
 CATALOG_FAST_TESTS := tests/test_inventory_and_consistency.py tests/test_validation_entrypoints_contract.py tests/test_retained_plan_artifact_contract.py tests/github/scripts/test_cli_entrypoints.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
@@ -27,10 +28,12 @@ lint: python-version-check docs-lint
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	@if command -v shellcheck >/dev/null 2>&1; then shellcheck -s bash $(SHELL_SCRIPTS); else printf '%s\n' 'shellcheck not installed; skipping.'; fi
 	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
+	$(RUFF) check .github/scripts tools tests
 
 catalog-lint: python-version-check
 	@if [ -n "$(SHELL_SCRIPTS)" ]; then bash -n $(SHELL_SCRIPTS); else printf '%s\n' 'No Bash scripts to lint.'; fi
 	$(PYTHON) -m compileall -q $(PYTHON_PATHS)
+	$(RUFF) check .github/scripts tools tests
 
 catalog-fast-check: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) build_inventory --root . --check

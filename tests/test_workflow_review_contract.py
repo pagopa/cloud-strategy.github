@@ -31,11 +31,19 @@ def test_idea_gateway_owns_retained_planning() -> None:
     assert "Plan Approval Gate 3: waiting" in reference_text
     assert "Handoff Gate 4: plan-created" in reference_text
     assert "Specialization Checkpoint: gated" in reference_text
-    assert "ask whether the user wants this owner to keep the task" in reference_text
+    assert "Direct Execution vs Retained Plan Recommendation" in skill_text
+    assert "direct execution via `internal-gateway-simple-task`" in skill_text
+    assert "Recommendation`, `Why`, `Tradeoff`, and `Decision`" in reference_text
     assert "mini-plan" in reference_text
     assert "go/ok/procedi" in runtime_text
     assert "Specialization Checkpoint: gated" in runtime_text
-    assert "ask whether the user wants this owner to keep the task" in runtime_text
+    assert "Direct Execution vs Retained Plan Recommendation" in runtime_text
+    assert "choose execute, plan, or an explicit override" in runtime_text
+    assert "ask whether the user wants this owner to keep the task" not in skill_text
+    assert (
+        "ask whether the user wants this owner to keep the task" not in reference_text
+    )
+    assert "ask whether the user wants this owner to keep the task" not in runtime_text
     assert (
         "At Interview Gate 1: ready-for-critical, ask whether to continue"
         in runtime_text
@@ -64,6 +72,42 @@ def test_review_gateway_exists_and_stops_before_fixes() -> None:
     assert "counter-validation" in skill_text
     assert "counter-validation" in review_gate_lower
     assert "route or next owner" in review_gate_lower
+    assert "decision-usefulness" in review_gate_lower
+    assert "accept, patch, investigate, plan" in review_gate_lower
+
+
+def test_review_usefulness_contract_is_explicit() -> None:
+    gateway_text = read_text(".github/skills/internal-gateway-review/SKILL.md")
+    ai_review_text = read_text(".github/skills/internal-ai-resource-review/SKILL.md")
+    report_text = read_text(
+        ".github/skills/internal-ai-resource-review/references/report-contract.md"
+    )
+    profile_text = read_text(
+        ".github/skills/internal-ai-resource-review/references/review-profiles.md"
+    )
+    replay_text = read_text(
+        ".github/skills/internal-ai-resource-review/references/review-usefulness-replay-fixture.md"
+    )
+
+    assert "decision-usefulness" in gateway_text
+    assert "clear next decision" in gateway_text
+    assert "Bundle coverage rules" in ai_review_text
+    assert "review-usefulness-replay-fixture.md" in ai_review_text
+    assert (
+        "live prompt pack, generated artifact, retained report, or fixture"
+        in ai_review_text
+    )
+    assert "evidence digest or decision trace" in ai_review_text
+    assert "Adaptive layout patterns" in report_text
+    assert "Evidence compression" in report_text
+    assert "Missing proof handling" in report_text
+    assert "test-gap" in report_text
+    assert "runtime-artifact" in report_text
+    assert "No-finding and low-finding reviews" in report_text
+    assert "Report coverage separately from findings" in profile_text
+    assert "coach-personale" in replay_text
+    assert "Focused pytest execution was unavailable" in replay_text
+    assert "Does not invent additional findings" in replay_text
 
 
 def test_compact_and_extended_execution_owner_is_unified() -> None:
@@ -101,6 +145,25 @@ def test_gateway_compliance_audit_contract_is_explicit() -> None:
     assert "block `SHIPPED`" in executing_text
     assert "undefined validation strategy" in executing_text
     assert "stdlib-only CLI launcher" in executing_text
+
+
+def test_simple_gateway_direct_execution_control_contract_is_explicit() -> None:
+    simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
+    lanes_text = read_text(
+        ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
+    )
+    runtime_text = read_text(
+        ".github/skills/internal-gateway-simple-task/agents/openai.yaml"
+    )
+
+    assert "Direct Execution Control" in simple_text
+    assert "Direct Completion Control" in simple_text
+    assert "original intent, separated from emerged requirements" in simple_text
+    assert "all in-scope source items" in runtime_text
+    assert "mandatory applicable requirements are closed" in runtime_text
+    assert "direct-control status" in lanes_text
+    assert "One successful validator" in simple_text
+    assert "emerged in-scope requirements" in simple_text
 
 
 def test_critical_master_claim_discipline_contract() -> None:

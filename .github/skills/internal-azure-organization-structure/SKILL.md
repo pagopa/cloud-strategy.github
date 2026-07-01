@@ -5,6 +5,12 @@ description: Use when the user needs Azure control-plane or platform-structure g
 
 # Internal Azure Organization Structure
 
+## Referenced skills
+
+- `internal-azure-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-azure-governance`: route RBAC, managed identity, PIM, Policy, tagging, or guardrail design.
+- `internal-azure-operations`: route monitoring, validation, backup, Site Recovery, reporting, or audit evidence.
+
 Use this skill when the next need is to design or review how Azure is structured at tenant and platform level.
 
 This skill owns Azure layout decisions, not generic strategy and not detailed RBAC or monitoring implementation. It helps translate a platform goal into management-group, subscription, landing-zone, topology, and rollout structure.

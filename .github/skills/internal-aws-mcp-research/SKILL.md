@@ -5,6 +5,13 @@ description: Use when the task needs current AWS documentation or safe IAM inspe
 
 # Internal AWS MCP Research
 
+## Referenced skills
+
+- `internal-aws-strategic`: route recommendations that affect platform direction or tradeoffs.
+- `internal-aws-organization-structure`: route recommendations that affect account, OU, delegated admin, or StackSets topology.
+- `internal-aws-governance`: route recommendations that affect SCPs, IAM, trust, or federation.
+- `internal-aws-operations`: route recommendations that affect validation, monitoring, backup, or rollout evidence.
+
 Use this skill when AWS decisions depend on up-to-date documentation or on safe inspection of real IAM state.
 
 ## When to use

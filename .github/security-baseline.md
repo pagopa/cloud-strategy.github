@@ -50,7 +50,7 @@ Provide a portable baseline that teams can apply before enabling repository-wide
 
 ## Change governance
 
-- Document breaking changes to skills, agents, prompts, validators, or bridge policy in `.github/CHANGELOG.md`.
+- Document breaking changes to skills, agents, prompts, validators, or root policy in `.github/CHANGELOG.md`.
 - Use a deprecation window before removing skills or agents in active use unless a documented exception applies.
 - Keep a rollback path for workflow and policy changes.
 

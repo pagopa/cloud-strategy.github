@@ -5,6 +5,13 @@ description: Use when the user needs AWS governance guidance for IAM operating m
 
 # Internal AWS Governance
 
+## Referenced skills
+
+- `internal-aws-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-aws-organization-structure`: route when account, OU, delegated admin, or topology structure is the main decision.
+- `internal-aws-operations`: route when rollout validation, monitoring, or evidence is the main need.
+- `internal-aws-mcp-research`: load when current AWS IAM or service documentation can change the answer.
+
 Use this skill when the next need is to define or review AWS identity, access, and guardrail decisions.
 
 This skill owns governance logic after the broad structure is known. It helps separate org-level guardrails from account-level access design and keeps permission decisions auditable.

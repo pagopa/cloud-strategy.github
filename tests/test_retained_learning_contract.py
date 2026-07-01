@@ -12,16 +12,6 @@ def read_text(relative_path: str) -> str:
 
 def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
     expected_contracts: dict[str, list[str]] = {
-        "AGENTS.md": [
-            "`tmp/superpowers/` and `LESSONS_LEARNED.md` may hold retained work",
-            "Treat retained plans and retained learning as non-canonical",
-            "Keep file shape, execution workflow, and ledger row rules in retained-plan skills or owned files",
-        ],
-        ".github/copilot-instructions.md": [
-            "Treat retained plans and `LESSONS_LEARNED.md` as non-canonical",
-            "dedicated retained-plan skills and lesson-codification owners",
-            "ledger row rules",
-        ],
         ".github/skills/internal-lesson-codification/SKILL.md": [
             "This skill owns the codification workflow.",
             "ledger row format, which stays in `LESSONS_LEARNED.md`",
@@ -49,6 +39,17 @@ def test_retained_learning_contract_preserves_on_disk_lessons_rows() -> None:
             assert snippet in text, (
                 f"{relative_path} is missing retained-learning guardrail text: {snippet}"
             )
+
+    copilot_text = read_text(".github/copilot-instructions.md")
+    assert "This file is only for GitHub.com Copilot code review." in copilot_text
+    assert (
+        "Do not treat this file as instructions for coding agents, local CLIs"
+        in copilot_text
+    )
+
+    agents_text = read_text("AGENTS.md")
+    assert "LESSONS_LEARNED.md" not in agents_text
+    assert "ledger row" not in agents_text
 
 
 def test_pending_lesson_rows_have_expected_shape_when_present() -> None:

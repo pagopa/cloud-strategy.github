@@ -6,7 +6,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 ## Principles
 
 - Validate rules, not file size or historical implementation details.
-- Treat rules as canonical and files as bridge or owner-specific surfaces.
+- Treat rules as canonical and files as entrypoint or owner-specific surfaces.
 - Keep stable policy separate from volatile inventory.
 - Let the smallest valid owner hold each rule.
 - Keep reusable technical guidance in skills, with deeper detail in skill references only when it is still valuable.
@@ -18,17 +18,29 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 #### `skill-first-root-agents-is-entrypoint`
 
-- Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface strategic operating bridge.
+- Goal: keep `AGENTS.md` as the stable repository entrypoint, orientation document, and cross-surface strategic policy surface.
 - Scope:
   - root `AGENTS.md`
-  - `.github/copilot-instructions.md`
   - `.github/INVENTORY.md`
 - Expected behavior:
   - root `AGENTS.md` defines the strategic role of the AI configuration system, precedence model, tactical operating defaults, and default language rule
   - root `AGENTS.md` points to `.github/INVENTORY.md` as the exact live catalog
-  - root `AGENTS.md` defines rule placement early so operational procedures do not drift into the always-on bridge
+  - root `AGENTS.md` defines rule placement early so operational procedures do not drift into the always-on entrypoint
   - root `AGENTS.md` may carry compact tactical defaults for mode selection, owner visibility, validation evidence, and root-cause preference
   - root `AGENTS.md` does not carry volatile inventory, file-shape recipes, command playbooks, domain checklists, or long surface-specific procedures
+
+#### `skill-first-root-agents-projects-current-baseline-shape`
+
+- Goal: preserve the current root-policy shape without restoring the retired bridge or context-routing model.
+- Scope:
+  - root `AGENTS.md`
+  - `INTERNAL_CONTRACT.md`
+  - source-side contract tests
+- Expected behavior:
+  - root `AGENTS.md` may carry a portable `<shared-baseline>` block when the source repository intentionally projects shared policy into consumer repositories
+  - root `AGENTS.md` may carry a source-local `<standards-repository-local-rules>` block that is explicitly non-portable by default
+  - root `AGENTS.md` may keep compact graph orientation rules when those rules are deliberately part of the declared shared baseline
+  - tests and validators must align to the current on-disk root-policy shape instead of assuming a separate `## Context Routing` section or the absence of root-level graph guidance
 
 #### `skill-first-inventory-is-externalized`
 
@@ -41,15 +53,15 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - policy files may point to the inventory but do not duplicate it
   - generated inventory reflects current skills, agents, prompts, workflows, and other managed AI assets without becoming policy
 
-#### `skill-first-copilot-bridge-stays-meaningful`
+#### `skill-first-copilot-review-stays-bounded`
 
-- Goal: keep `.github/copilot-instructions.md` operationally significant as a compact routing bridge for native Copilot surfaces.
+- Goal: keep `.github/copilot-instructions.md` limited to the review-only behavior that still needs that file.
 - Scope:
   - `.github/copilot-instructions.md`
 - Expected behavior:
-  - the file stays compact, high-signal, and aligned with `AGENTS.md`
-  - the file routes to canonical owners and does not duplicate full policy blocks
-  - the file is not reduced to an empty shell or replaced by inventory text
+  - the file stays compact, high-signal, and explicitly review-scoped
+  - the file does not duplicate `AGENTS.md` policy blocks or skill-owned procedures
+  - the file is not used as a general runtime contract for coding agents
 
 #### `skill-first-domain-skills-are-canonical`
 
@@ -59,20 +71,18 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `.github/skills/internal-*/references/**`
   - `.github/skills/internal-*/agents/openai.yaml`
   - `AGENTS.md`
-  - `.github/copilot-instructions.md`
 - Expected behavior:
   - umbrella skills own lightweight domain baselines and route to specialist depth only when needed
   - specialist skills own detailed workflows, framework behavior, validation shape, and domain-specific edge cases
   - large checklists, templates, and examples live in skill references only when they remain useful and are not copied into always-on files
   - `agents/openai.yaml` metadata stays aligned with each repository-owned skill bundle when present
-  - Codex and OpenCode portability depends on skills and home-skill sync, not on oversized bridge content
+  - Codex and OpenCode portability depends on skills and home-skill sync, not on oversized always-on content
 
 #### `skill-first-routing-is-evidence-based`
 
 - Goal: keep owner selection deterministic and visible without creating a hidden router.
 - Scope:
   - `AGENTS.md`
-  - `.github/copilot-instructions.md`
   - `.github/skills/internal-gateway-idea-brainstorming/**`
   - `.github/skills/internal-gateway-review/**`
   - `.github/skills/internal-gateway-simple-task/**`
@@ -91,7 +101,6 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Goal: keep repository knowledge documents ordered and owned by the right source.
 - Scope:
   - `AGENTS.md`
-  - `.github/copilot-instructions.md`
   - `docs/README.md`
   - `docs/repository-context.md`
   - `docs/architecture.md`
@@ -120,14 +129,12 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Goal: centralize the repository language default.
 - Scope:
   - root `AGENTS.md`
-  - `.github/copilot-instructions.md`
   - skills
   - agents
   - prompts
   - owned files with local entry rules
 - Expected behavior:
   - root `AGENTS.md` states that the default authoring language for repository artifacts is English unless a narrower owned file, skill, or local exception explicitly overrides it
-  - `.github/copilot-instructions.md` may project that rule in compact form for Copilot flows
   - local files do not restate the rule in broader or stricter terms than the canonical default without declaring an explicit reason
 
 #### `language-exceptions-are-explicit-and-local`
@@ -169,13 +176,11 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 #### `duplication-useful-restatements-are-allowed`
 
-- Goal: preserve local self-containment when it materially helps the consumer.
+- Goal: preserve local self-containment when it materially helps the owning surface.
 - Scope:
-  - `.github/copilot-instructions.md`
   - governance agents and prompts
   - skills and skill references
 - Expected behavior:
-  - compact repo-wide bridge restatements remain allowed
   - local restatements remain allowed when they improve behavior for the target surface and stay aligned with the canonical rule
   - duplication must be deliberate and low-drift
 
@@ -187,7 +192,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - contract files
   - governance assets
 - Expected behavior:
-  - removed validators, removed sync scripts, removed contract tests, and retired bridge-era assets are not described as active requirements
+  - removed validators, removed sync scripts, removed contract tests, and retired assets are not described as active requirements
   - when historical context is retained, it is clearly marked as historical rather than normative
   - future automation is rebuilt from the current contract, not from stale references
 
@@ -245,9 +250,8 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 #### `resource-governance-canonical-operational-model-stays-explicit`
 
-- Goal: keep the canonical repository-owned operating model clear across bridge and owner-specific surfaces.
+- Goal: keep the canonical repository-owned operating model clear across owner-specific surfaces.
 - Scope:
-  - `.github/copilot-instructions.md`
   - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
@@ -267,12 +271,11 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 #### `repository-workflow-github-pr-merge-and-terminal-state-reminders-stay-owned`
 
-- Goal: keep repo-wide GitHub PR operating reminders visible without expanding the Copilot bridge.
+- Goal: keep repo-wide GitHub PR operating reminders visible without expanding always-on guidance.
 - Scope:
   - `.github/skills/internal-github-pr/SKILL.md`
   - `CODEOWNERS`
   - `.github/skills/internal-github-governance/SKILL.md`
-  - `.github/copilot-instructions.md`
 - Expected behavior:
   - self-authored PRs under required reviews are not treated as mergeable from green checks alone
   - the GitHub PR skill tells operators to verify a qualifying non-author approval before merge
@@ -280,15 +283,14 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - organization-wide `gh search prs` results are treated as potentially stale immediately after merge
   - repository-scoped `gh pr view --json state,mergedAt` is used to confirm terminal PR state before treating a just-merged PR as still open
   - `CODEOWNERS` placeholder-owner rules stay in the owned file and GitHub governance owner instead of always-on guidance
-  - the Copilot bridge does not repeat the full workflow reminder text
+  - always-on guidance does not repeat the full workflow reminder text
 
 ### Reporting
 
-#### `reporting-completion-report-bridge-stays-visible`
+#### `reporting-completion-report-stays-owned`
 
 - Goal: keep the completion report contract visible on the surfaces that need it while keeping Copilot always-on guidance short.
 - Scope:
-  - `.github/copilot-instructions.md`
   - `.github/README.md`
   - relevant governance or sync agents
 - Expected behavior:
@@ -296,7 +298,6 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - maintainer-facing docs and sync contracts may define detailed report labels such as `✅ Outcome`, `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources`
   - supporting sections such as `🤖 Agents`, `📘 Instructions`, `🧩 Skills`, and `📦 Other Resources` are optional detail by default
   - when detail is available but omitted for token discipline, the response offers a compact follow-up and accepts number-only replies
-  - the Copilot bridge keeps only a compact reporting reminder unless a narrower contract requires more detail
   - root `AGENTS.md` does not need to carry the full formatting contract
 
 #### `reporting-retained-learning-ledger-stays-governed`
@@ -304,17 +305,15 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Goal: preserve retained learning without turning it into shadow policy.
 - Scope:
   - root `AGENTS.md`
-  - `.github/copilot-instructions.md`
   - `LESSONS_LEARNED.md`
   - `.github/skills/internal-lesson-codification/SKILL.md`
 - Expected behavior:
   - repository-root `LESSONS_LEARNED.md` exists as a non-canonical learning ledger
   - completed tasks add only durable, reusable lessons that were not already codified when discovered
   - durable corrections to repeated or consequential misapplication of existing repository rules may also be retained as lessons
-  - root `AGENTS.md` keeps only retained-artifact boundaries and points detailed procedures to retained-plan and lesson-codification owners
+  - root `AGENTS.md` stays free of retained-learning paths, retained-plan paths, and ledger mechanics; ownership is covered by the general smallest-owner policy
   - the lesson codification skill owns the workflow that routes candidate lessons to the smallest valid canonical owner before ledger fallback
   - detailed ledger row preservation rules live in `LESSONS_LEARNED.md` entry rules
-  - the Copilot bridge keeps only the retained-artifact principle and owner-routing reminder
   - no ledger update is required when no stable new lesson emerged
   - once a lesson is codified elsewhere, it is removed from `LESSONS_LEARNED.md` instead of being retained as a codified duplicate
 
@@ -327,7 +326,6 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - future validator, sync, and test implementations
 - Expected behavior:
   - automation reads `AGENTS.md` for cross-surface defaults and precedence
-  - automation reads `.github/copilot-instructions.md` for repo-wide Copilot bridge behavior
   - automation reads `.github/INVENTORY.md` for the live catalog
   - automation reads skill bundles for domain baselines, reusable procedures, references, and metadata
   - automation treats routing helpers as advisory evidence, not hidden dispatch authority

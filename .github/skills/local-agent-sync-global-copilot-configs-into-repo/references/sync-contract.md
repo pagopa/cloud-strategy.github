@@ -11,7 +11,6 @@ Mirror or structurally align these source-managed paths into the consumer reposi
 - `.editorconfig`
 - `.pre-commit-config.yaml`
 - `.github/copilot-instructions.md`
-- `.github/instructions/copilot-code-review.instructions.md`
 - `.github/copilot-commit-message-instructions.md`
 - `.github/security-baseline.md`
 - `.github/DEPRECATION.md`
@@ -38,6 +37,7 @@ When a consumer-local creator depends on shared runtime-critical rules, keep a s
 - If a target has legacy `docs/01-local-architecture.md` or `docs/01-architecture.md` and lacks `docs/architecture.md`, rename the legacy file to the canonical path. If canonical and legacy paths coexist, block apply and require manual reconciliation.
 - If a target has legacy `docs/02-local-repository-context.md` or `docs/02-repository-context.md` and lacks `docs/repository-context.md`, rename the legacy file to the canonical path. If canonical and legacy paths coexist, block apply and require manual reconciliation.
 - Delete legacy `docs/runtime-fit.md` and retired standalone runtime operating model documents. Runtime workflow guidance now lives in root guidance and skills.
+- Do not mirror source `.github/instructions/**` files. Delete target non-`local-*` instruction files and preserve target-owned `local-*` instruction files as local exceptions.
 - Delete target-owned non-`local-*` assets inside mirrored categories during `apply`.
 - Keep the target target-agnostic. The default assumptions are only `.github/` and root `AGENTS.md`.
 - Ensure target root `LESSONS_LEARNED.md` exists. If it already exists, align it to the current source structure and migrate preserved pending lesson rows when the source table shape changes.
@@ -49,18 +49,17 @@ When a consumer-local creator depends on shared runtime-critical rules, keep a s
 
 When root guidance is in scope, keep the target files in these roles:
 
-- `AGENTS.md`: strategic bridge, precedence anchor, naming contract, and cross-surface routing guidance
+- `AGENTS.md`: strategic entrypoint, precedence anchor, naming contract, and runtime agent policy
 - `LESSONS_LEARNED.md`: retained-learning ledger template aligned from source structure while preserving target-authored pending lessons; it remains non-canonical and repo-local in content
 - `docs/README.md`: consumer-local routing guide for knowledge documents scaffolded only when missing and then preserved
 - `docs/repository-context.md`: consumer-local descriptive context scaffolded only when missing and then preserved; it does not override policy
 - `docs/architecture.md`: consumer-local architecture contract scaffolded only when missing and then preserved
 - `docs/tech.md`: consumer-local technology contract scaffolded only when missing and then preserved
 - `docs/structure.md`: consumer-local structure contract scaffolded only when missing and then preserved
-- `.github/copilot-instructions.md`: compact repo-wide GitHub Copilot routing bridge
-- `.github/instructions/copilot-code-review.instructions.md`: source-managed global code review baseline
+- `.github/copilot-instructions.md`: review-only GitHub.com Copilot code review behavior
 - `.github/INVENTORY.md`: exact live catalog generated from target filesystem state
 
-Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of `.github/copilot-instructions.md`.
+Do not flatten these roles into one file. Do not let target `AGENTS.md` become an inventory dump or a second full copy of review-only Copilot assets.
 
 ## Tracking Plan Lifecycle
 

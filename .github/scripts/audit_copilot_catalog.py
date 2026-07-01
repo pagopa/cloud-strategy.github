@@ -13,7 +13,8 @@ from collections import Counter
 from pathlib import Path
 
 from lib.catalog_checks import run_consistency_checks
-from lib.shared import Finding, find_repo_root, log_info, render_json
+from lib.cli_runner import has_severity, run_finding_cli
+from lib.shared import Finding, find_repo_root, log_info
 
 
 def parse_args() -> argparse.Namespace:
@@ -26,14 +27,13 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     root = find_repo_root(Path(args.root))
-    findings = run_consistency_checks(root, include_token_risks=True)
-    if args.format == "json":
-        print(render_json([finding.to_dict() for finding in findings]))
-    elif args.format == "compact":
-        print(render_json(build_compact_payload(findings)))
-    else:
-        render_text(findings)
-    return 1 if any(finding.severity == "blocking" for finding in findings) else 0
+    findings = run_finding_cli(
+        detect_fn=lambda: run_consistency_checks(root, include_token_risks=True),
+        format_name=args.format,
+        render_text=render_text,
+        compact_builder=build_compact_payload,
+    )
+    return 1 if has_severity(findings, "blocking") else 0
 
 
 def render_text(findings: list[Finding]) -> None:

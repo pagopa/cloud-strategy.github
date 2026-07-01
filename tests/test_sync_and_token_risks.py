@@ -102,7 +102,7 @@ def test_build_sync_plan_preserves_local_assets_and_deletes_non_local_assets(
     assert ("delete", ".github/agents/internal-sync-legacy.agent.md") in actions
 
 
-def test_build_sync_plan_ships_source_instruction_family(
+def test_build_sync_plan_does_not_ship_source_instruction_family(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -120,10 +120,12 @@ def test_build_sync_plan_ships_source_instruction_family(
     plan = build_sync_plan(source_root, target_root)
     planned_paths = {operation.path for operation in plan.operations}
 
-    assert f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" in planned_paths
+    assert (
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md" not in planned_paths
+    )
 
 
-def test_build_sync_plan_updates_target_instructions_and_preserves_local(
+def test_build_sync_plan_deletes_target_non_local_instructions_and_preserves_local(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -150,7 +152,7 @@ def test_build_sync_plan_updates_target_instructions_and_preserves_local(
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert (
-        "update",
+        "delete",
         f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
     ) in actions
     assert (
@@ -159,7 +161,7 @@ def test_build_sync_plan_updates_target_instructions_and_preserves_local(
     ) in actions
 
 
-def test_build_sync_plan_ships_source_managed_instructions_and_preserves_local(
+def test_build_sync_plan_does_not_recreate_source_instructions_after_cleanup(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source"
@@ -187,9 +189,13 @@ def test_build_sync_plan_ships_source_managed_instructions_and_preserves_local(
     actions = {(operation.action, operation.path) for operation in plan.operations}
 
     assert (
-        "update",
+        "delete",
         f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
     ) in actions
+    assert (
+        "create",
+        f"{LEGACY_INSTRUCTION_DIR}/internal-python.instructions.md",
+    ) not in actions
     assert (
         "preserve",
         f"{LEGACY_INSTRUCTION_DIR}/local-team.instructions.md",
@@ -1111,12 +1117,12 @@ def test_apply_sync_manifest_tracks_vscode_settings_without_file_hash(
     )
 
 
-def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
+def test_detect_token_risks_reports_root_policy_overlap(tmp_path: Path) -> None:
     repeated_lines = "\n".join(
         [
             "- Keep policy separate from inventory.",
             "- Keep AGENTS.md strategic and stable.",
-            "- Keep .github/copilot-instructions.md as the projection layer.",
+            "- Keep .github/copilot-instructions.md review-only.",
             "- Keep .github/INVENTORY.md as the exact catalog.",
             "- Preserve explicit precedence rules.",
             "- Remove overlap instead of keeping compatibility copies.",
@@ -1133,7 +1139,7 @@ def test_detect_token_risks_reports_bridge_overlap(tmp_path: Path) -> None:
     findings = detect_token_risks(tmp_path)
     finding_codes = {finding.code for finding in findings}
 
-    assert "bridge-overlap" in finding_codes
+    assert "root-policy-overlap" in finding_codes
 
 
 def test_detect_token_risks_reports_root_always_on_budget(tmp_path: Path) -> None:
@@ -1230,17 +1236,16 @@ def test_detect_token_risks_reports_review_baseline_window_missing_core_rules(
     assert "review-baseline-window-missing-core-rules" in finding_codes
 
 
-def test_detect_token_risks_ignores_structural_bridge_references(
+def test_detect_token_risks_ignores_structural_root_policy_references(
     tmp_path: Path,
 ) -> None:
     write_file(
         tmp_path / "AGENTS.md",
         "# AGENTS\n\n"
-        "- Use `.github/copilot-instructions.md` as the compact repo-wide bridge.\n"
+        "- Use `AGENTS.md` as the repository agent entrypoint.\n"
         "- Use `.github/INVENTORY.md` as the live catalog.\n"
         "- Use `.github/skills/` when a reusable workflow or technical baseline is relevant.\n"
-        "- Use `.github/agents/` when a stable owner is relevant.\n"
-        "- Keep local exceptions in `.github/instructions/local-*.instructions.md`.\n",
+        "- Use `.github/agents/` when a stable owner is relevant.\n",
     )
     write_file(tmp_path / ".github/copilot-instructions.md", "# Copilot\n")
     write_file(tmp_path / ".github/INVENTORY.md", "# Inventory\n")
@@ -1248,7 +1253,7 @@ def test_detect_token_risks_ignores_structural_bridge_references(
     findings = detect_token_risks(tmp_path)
     finding_codes = {finding.code for finding in findings}
 
-    assert "inventory-dump-in-bridge" not in finding_codes
+    assert "inventory-dump-in-root-policy" not in finding_codes
 
 
 def test_detect_token_risks_reports_internal_root_policy_overlap(

@@ -10,7 +10,7 @@ description: Use first when creating, splitting, replacing, or materially revisi
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to. Keep it current before changing downstream wording. Self-references to `internal-skill-creator` identify this current skill and are not a dependency.
 
 - `openai-skill-creator`: generic bundle anatomy, reusable-resource layout, `agents/openai.yaml`, initialization workflow, and structural validation after the local boundary is clear.
-- `local-agent-sync-external-resources`: catalog-governance operating engine behind `local-sync-external-resources` when work becomes sync-managed catalog maintenance, external refresh, or inventory-wide keep/update/extract/retire decisions.
+- `local-agent-sync-external-resources`: catalog-governance operating engine behind the local sync command center when work becomes sync-managed catalog maintenance, external refresh, or inventory-wide keep/update/extract/retire decisions.
 - `internal-agent-creator`: repository-owned agent authoring and agent/skill boundary rewrites.
 
 Use this skill as the canonical repository-owned first entrypoint for skill authoring in this repository.

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-
 BLOCKER_REASON_MAP: dict[str, str] = {
     "unknown-target": "The selected target is not supported.",
     "unsupported-family": "The selected resource family is not supported for this target.",
@@ -34,6 +33,8 @@ BLOCKER_REASON_MAP: dict[str, str] = {
     "bisync-manifest-reconcile-failed": "Manifest reconciliation failed after a verified bisync copy.",
     "bisync-residual-drift": "Post-apply bisync still detected residual drift.",
 }
+
+REPORT_TABLE_ROW_LIMIT = 20
 
 
 def _install_lane_label() -> str:
@@ -93,6 +94,86 @@ def build_compact_bisync_output(payload: dict[str, object]) -> dict[str, object]
     if isinstance(verification, dict):
         _copy_if_present(compact, verification, "code")
     return compact
+
+
+def render_sync_report(payload: dict[str, object]) -> str:
+    status = str(payload.get("status") or "unknown")
+    reason = str(payload.get("reason") or "")
+    install_payload = payload.get("install") if isinstance(payload.get("install"), dict) else {}
+    bisync_payload = payload.get("bisync") if isinstance(payload.get("bisync"), dict) else {}
+    targets = _join_or_none(_as_string_list(install_payload.get("selected_targets")))
+    next_action = _sync_next_action(payload)
+
+    install_operations = install_payload.get("operations") if isinstance(install_payload, dict) else None
+    direction_counts = _direction_counts(bisync_payload.get("drifts")) if isinstance(bisync_payload, dict) else _direction_counts(())
+    bucket_counts = _bucket_counts(bisync_payload.get("drifts")) if isinstance(bisync_payload, dict) else _bucket_counts(())
+
+    lines: list[str] = []
+    lines.append(
+        f"Status: sync | status={status} | targets={targets} | next_action={next_action} | reason={reason}"
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Summary"))
+    lines.extend(
+        _bullet_lines(
+            [
+                f"Install copied: {_count_operations(install_operations, {'copy'})}",
+                f"Install skipped: {_count_operations(install_operations, {'skip'})}",
+                f"Install warnings: {_count_operations(install_operations, {'warning'})}",
+                f"Install blockers: {_count_operations(install_operations, {'blocked', 'stale-managed'})}",
+                f"Bisync repo-to-home: {direction_counts['repo_to_home']}",
+                f"Bisync home-to-repo: {direction_counts['home_to_repo']}",
+                f"Bisync only-repo: {bucket_counts['only_repo']}",
+                f"Bisync only-home: {bucket_counts['only_home']}",
+                f"Bisync equal-mtime: {bucket_counts['equal_mtime']}",
+            ]
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Auto-applied"))
+    lines.extend(
+        _table_lines(
+            ["Skill or path", "Why copied", "Verification"],
+            _bounded_rows(
+                _sync_auto_applied_rows(install_payload if isinstance(install_payload, dict) else {}),
+                "auto-applied",
+            ),
+            none_row=["none", "No safe repo-to-home copy was applied.", "none"],
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Stopped on"))
+    lines.extend(
+        _table_lines(
+            ["Skill or path", "Direction", "Differences or reason"],
+            _sync_stopped_rows(
+                install_payload if isinstance(install_payload, dict) else {},
+                bisync_payload if isinstance(bisync_payload, dict) else {},
+            ),
+            none_row=["none", "none", "No home-owned or ambiguous drift stopped sync."],
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Validation"))
+    lines.extend(
+        _table_lines(
+            ["Check", "Result"],
+            _sync_validation_rows(
+                status,
+                install_payload if isinstance(install_payload, dict) else {},
+                bisync_payload if isinstance(bisync_payload, dict) else {},
+            ),
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Next"))
+    lines.extend(_table_lines(["Field", "Value"], _sync_next_rows(payload)))
+    return "\n".join(lines).strip() + "\n"
 
 
 def _copy_if_present(
@@ -217,21 +298,148 @@ def _bisync_change_evidence(drifts: object, limit: int = 8) -> list[dict[str, ob
     return evidence
 
 
+def _sync_auto_applied_rows(install_payload: dict[str, object]) -> list[list[str]]:
+    rows: list[list[str]] = []
+    operations = install_payload.get("operations")
+    if not isinstance(operations, list):
+        return rows
+    manifest_path = install_payload.get("manifest_path")
+    verification = "manifest hash recorded" if isinstance(manifest_path, str) and manifest_path else "planned only"
+    for operation in operations:
+        if not isinstance(operation, dict):
+            continue
+        if str(operation.get("action") or "") != "copy":
+            continue
+        item = str(operation.get("resource_id") or operation.get("path") or "unknown")
+        reason = str(operation.get("reason") or "Repo-to-home copy applied.")
+        rows.append([item, reason, verification])
+    return rows
+
+
+def _sync_stopped_rows(
+    install_payload: dict[str, object],
+    bisync_payload: dict[str, object],
+) -> list[list[str]]:
+    rows: list[list[str]] = []
+
+    operations = install_payload.get("operations")
+    if isinstance(operations, list):
+        for operation in operations:
+            if not isinstance(operation, dict):
+                continue
+            action = str(operation.get("action") or "")
+            code = str(operation.get("code") or "")
+            if action not in {"blocked", "stale-managed"} and not (
+                action == "warning" and code == "target-modified-managed"
+            ):
+                continue
+            path = str(operation.get("resource_id") or operation.get("path") or "unknown")
+            direction = "install review"
+            if code == "target-modified-managed":
+                direction = "home-to-repo review"
+            reason = str(operation.get("reason") or _reason_for_code(code or action))
+            rows.append([path, direction, reason])
+
+    drifts = bisync_payload.get("drifts")
+    if isinstance(drifts, list):
+        for drift in drifts:
+            if not isinstance(drift, dict):
+                continue
+            drift_type = str(drift.get("type") or "drift")
+            direction = str(drift.get("direction") or drift_type)
+            if drift_type == "only-repo":
+                continue
+            if drift_type == "drift" and direction == "repo-to-home":
+                continue
+            skill = str(drift.get("skill") or "unknown")
+            rows.append([skill, direction, _sync_drift_summary(drift)])
+    return rows
+
+
+def _sync_validation_rows(
+    status: str,
+    install_payload: dict[str, object],
+    bisync_payload: dict[str, object],
+) -> list[list[str]]:
+    rows = [["Overall sync", status]]
+    install_status = str(install_payload.get("validation") or install_payload.get("status") or "not-run")
+    rows.append(["Install lane", install_status])
+
+    bisync_status = "not-run"
+    verification = bisync_payload.get("verification")
+    if isinstance(verification, dict):
+        bisync_status = str(verification.get("status") or bisync_status)
+    elif bisync_payload:
+        bisync_status = "reviewed"
+    rows.append(["Bisync lane", bisync_status])
+
+    state_path = install_payload.get("state_path")
+    if isinstance(state_path, str) and state_path:
+        rows.append(["State path", state_path])
+    manifest_path = install_payload.get("manifest_path")
+    if isinstance(manifest_path, str) and manifest_path:
+        rows.append(["Manifest path", manifest_path])
+    return rows
+
+
+def _sync_next_rows(payload: dict[str, object]) -> list[list[str]]:
+    action = _sync_next_action(payload)
+    status = str(payload.get("status") or "unknown")
+    reason = str(payload.get("reason") or "Review the latest sync report.")
+    bisync_payload = payload.get("bisync") if isinstance(payload.get("bisync"), dict) else {}
+
+    if status == "done":
+        return [["Action", action], ["Reason", reason]]
+
+    if isinstance(bisync_payload, dict) and _sync_stopped_rows({}, bisync_payload):
+        return [
+            ["Action", action],
+            ["Reason", "Review home-owned or ambiguous drift, then run explicit `bisync plan` or `bisync apply` if needed."],
+        ]
+
+    return [
+        ["Action", action],
+        ["Reason", "Resolve install blockers or warnings, then rerun `sync`."],
+    ]
+
+
+def _sync_next_action(payload: dict[str, object]) -> str:
+    status = str(payload.get("status") or "unknown")
+    bisync_payload = payload.get("bisync") if isinstance(payload.get("bisync"), dict) else {}
+    if status == "done":
+        return "done"
+    if isinstance(bisync_payload, dict) and _sync_stopped_rows({}, bisync_payload):
+        return "review_bisync"
+    return "review_install"
+
+
+def _sync_drift_summary(drift: dict[str, object]) -> str:
+    drift_type = str(drift.get("type") or "drift")
+    direction = str(drift.get("direction") or drift_type)
+    if drift_type == "only-home":
+        return "Only present in home. Manual review decides whether to keep, remove, or add it to the repo."
+    if drift_type == "equal-mtime":
+        return "Repo and home hashes differ, but timestamps are equal, so the winner is ambiguous."
+    if direction == "home-to-repo":
+        return "Home copy is newer than repo copy and needs an explicit home-to-repo decision."
+    return _bisync_reason(drift_type, direction)
+
+
 def render_install_report(payload: dict[str, object]) -> str:
     mode = str(payload.get("mode") or "plan")
     targets = _as_string_list(payload.get("selected_targets"))
     blocked_codes = _as_string_list(payload.get("blocked_codes"))
     status = str(payload.get("validation") or payload.get("status") or "unknown")
+    next_action = _next_action_name(payload.get("next_action"))
     lane_label = _install_lane_label()
     operations = payload.get("operations")
-    copied_count = _count_operations(operations, {"copy"})
     skipped_count = _count_operations(operations, {"skip"})
     blocked_count = _count_operations(operations, {"blocked"})
     planned_count = _count_operations(operations, {"copy", "mkdir", "delete", "stale-managed"})
 
     lines: list[str] = []
     lines.append(
-        f"Status: {lane_label} | mode={mode} | status={status} | blockers={len(blocked_codes)}"
+        f"Status: {lane_label} | mode={mode} | targets={_join_or_none(targets)} | status={status} | blockers={len(blocked_codes)} | next_action={next_action}"
     )
     lines.append("")
 
@@ -250,7 +458,7 @@ def render_install_report(payload: dict[str, object]) -> str:
     )
     lines.append("")
 
-    planned_rows = _install_planned_rows(payload)
+    planned_rows = _bounded_rows(_install_planned_rows(payload), "change")
     lines.extend(_report_section("Changes"))
     lines.extend(
         _table_lines(
@@ -261,7 +469,7 @@ def render_install_report(payload: dict[str, object]) -> str:
     )
     lines.append("")
 
-    completed_rows = _install_completed_rows(payload)
+    completed_rows = _bounded_rows(_install_completed_rows(payload), "completed action")
     if completed_rows:
         lines.append("")
         lines.extend(_report_section("Completed"))
@@ -311,6 +519,57 @@ def render_install_report(payload: dict[str, object]) -> str:
     return "\n".join(lines).strip() + "\n"
 
 
+def render_doctor_report(payload: dict[str, object]) -> str:
+    targets = _as_string_list(payload.get("selected_targets"))
+    blocked_codes = _as_string_list(payload.get("blocked_codes"))
+    status = str(payload.get("validation") or payload.get("status") or "unknown")
+    next_action = _next_action_name(payload.get("next_action"))
+    checks = payload.get("checks")
+    lane_label = _install_lane_label()
+
+    lines: list[str] = []
+    lines.append(
+        f"Status: {lane_label} | mode=doctor | targets={_join_or_none(targets)} | status={status} | blockers={len(blocked_codes)} | next_action={next_action}"
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Summary"))
+    lines.extend(
+        _bullet_lines(
+            [
+                f"Targets: {_join_or_none(targets)}",
+                f"Readiness checks: {_count_value(checks)}",
+                f"Ready checks: {_doctor_check_count(checks, 'ok')}",
+                f"Warnings: {_doctor_check_count(checks, 'warning')}",
+                f"Blocked checks: {_doctor_check_count(checks, 'blocked')}",
+            ]
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Readiness"))
+    lines.extend(
+        _table_lines(
+            ["Check or path", "Status", "Why it matters", "What blocks next", "Recommended action"],
+            _doctor_readiness_rows(payload),
+            none_row=["all checks", "ok", "No readiness blockers found.", "none", "Run plan or sync when ready."],
+        )
+    )
+    lines.append("")
+
+    lines.extend(_report_section("Validation"))
+    validation_rows = [["Validation status", status]]
+    state_path = payload.get("state_path")
+    if isinstance(state_path, str) and state_path:
+        validation_rows.append(["State path", state_path])
+    lines.extend(_table_lines(["Check", "Result"], validation_rows))
+    lines.append("")
+
+    lines.extend(_report_section("Next"))
+    lines.extend(_next_action_table(payload.get("next_action"), payload.get("next_step")))
+    return "\n".join(lines).strip() + "\n"
+
+
 def render_bisync_report(payload: dict[str, object]) -> str:
     mode = str(payload.get("mode") or "plan")
     blocked_codes = _as_string_list(payload.get("blocked_codes"))
@@ -320,11 +579,12 @@ def render_bisync_report(payload: dict[str, object]) -> str:
     status = "unknown"
     if isinstance(verification, dict):
         status = str(verification.get("status") or status)
+    next_action = _next_action_name(payload.get("next_action"))
     lane_label = _bisync_lane_label()
 
     lines: list[str] = []
     lines.append(
-        f"Status: {lane_label} | mode={mode} | status={status} | drift_total={drift_total} | blockers={len(blocked_codes)}"
+        f"Status: {lane_label} | mode={mode} | target=skills | status={status} | drift_total={drift_total} | blockers={len(blocked_codes)} | next_action={next_action}"
     )
     lines.append("")
 
@@ -348,12 +608,12 @@ def render_bisync_report(payload: dict[str, object]) -> str:
     lines.extend(
         _table_lines(
             ["Resource or path", "Lane", "Planned action", "Why this will change", "Evidence or winner"],
-            _bisync_planned_rows(payload),
+            _bounded_rows(_bisync_planned_rows(payload), "change"),
             none_row=["none", "bisync", "no-op", "No drift detected.", "none"],
         )
     )
 
-    completed_rows = _bisync_completed_rows(payload)
+    completed_rows = _bounded_rows(_bisync_completed_rows(payload), "completed action")
     if completed_rows:
         lines.append("")
         lines.extend(_report_section("Completed"))
@@ -428,13 +688,29 @@ def _table_lines(
     *,
     none_row: list[str] | None = None,
 ) -> list[str]:
-    output = ["| " + " | ".join(headers) + " |", "| " + " | ".join(["---"] * len(headers)) + " |"]
+    output = [
+        "| " + " | ".join(_table_cell(header) for header in headers) + " |",
+        "| " + " | ".join(["---"] * len(headers)) + " |",
+    ]
     if not rows and none_row is not None:
         rows = [none_row]
     for row in rows:
         padded = row + [""] * (len(headers) - len(row))
-        output.append("| " + " | ".join(padded[: len(headers)]) + " |")
+        output.append("| " + " | ".join(_table_cell(cell) for cell in padded[: len(headers)]) + " |")
     return output
+
+
+def _table_cell(value: object) -> str:
+    return " ".join(str(value).splitlines()).replace("|", r"\|")
+
+
+def _bounded_rows(rows: list[list[str]], label: str) -> list[list[str]]:
+    if len(rows) <= REPORT_TABLE_ROW_LIMIT:
+        return rows
+    omitted_count = len(rows) - REPORT_TABLE_ROW_LIMIT
+    return rows[:REPORT_TABLE_ROW_LIMIT] + [
+        [f"{omitted_count} additional {label} rows omitted; use --format json for full detail."]
+    ]
 
 
 def _join_or_none(values: list[str]) -> str:
@@ -552,6 +828,52 @@ def _bisync_completed_rows(payload: dict[str, object]) -> list[list[str]]:
     return rows
 
 
+def _doctor_check_count(checks: object, status: str) -> int:
+    if not isinstance(checks, list):
+        return 0
+    return sum(1 for check in checks if isinstance(check, dict) and check.get("status") == status)
+
+
+def _doctor_readiness_rows(payload: dict[str, object]) -> list[list[str]]:
+    checks = payload.get("checks")
+    if not isinstance(checks, list):
+        return []
+
+    rows: list[list[str]] = []
+    for check in checks:
+        if not isinstance(check, dict):
+            continue
+        status = str(check.get("status") or "unknown")
+        if status == "ok":
+            continue
+        code = str(check.get("code") or "none")
+        name = str(check.get("name") or check.get("path") or "unknown")
+        path = str(check.get("path") or "")
+        check_or_path = f"{name} ({path})" if path else name
+        reason = str(check.get("reason") or _reason_for_code(code))
+        blocking_reason = _reason_for_code(code) if code != "none" else "Manual review required."
+        rows.append([
+            check_or_path,
+            status,
+            reason,
+            f"{code}: {blocking_reason}",
+            _doctor_recommended_action(code),
+        ])
+    return rows
+
+
+def _doctor_recommended_action(code: str) -> str:
+    if code == "needs-directory-create":
+        return "Create the runtime root intentionally or rerun apply with --create-missing-dirs after review."
+    if code == "docs-unverified":
+        return "Verify runtime support, update the support matrix, or rerun with --experimental-targets only after review."
+    if code == "source-missing":
+        return "Fix the catalog entry or restore the missing source path, then rerun doctor."
+    if code == "unsupported-family":
+        return "Remove the target or add documented runtime support before apply."
+    return "Resolve the readiness issue, then rerun doctor."
+
+
 def _bisync_blocker_rows(payload: dict[str, object]) -> list[list[str]]:
     rows: list[list[str]] = []
     drifts = payload.get("drifts")
@@ -603,6 +925,14 @@ def _next_action_table(next_action: object, next_step: object) -> list[str]:
         ["Reason", str(next_action.get("reason") or next_step or "none")],
     ]
     return _table_lines(["Field", "Value"], rows)
+
+
+def _next_action_name(next_action: object) -> str:
+    if isinstance(next_action, dict):
+        action = next_action.get("action")
+        if isinstance(action, str) and action:
+            return action
+    return "unknown"
 
 
 def _reason_for_code(code: str) -> str:

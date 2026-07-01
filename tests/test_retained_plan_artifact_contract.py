@@ -106,16 +106,21 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
             continuation_match = re.search(
                 r"^Continuation:\s*(.+)$", plan_state_text, re.MULTILINE
             )
+            user_action_match = re.search(
+                r"^User action required:\s*(.+)$", plan_state_text, re.MULTILINE
+            )
+            next_step_match = re.search(
+                r"^Next-step package:\s*(.+)$", plan_state_text, re.MULTILINE
+            )
+            evidence_gaps_match = re.search(
+                r"^Evidence gaps:\s*(.+)$", plan_state_text, re.MULTILINE
+            )
+            declared_state: str | None = None
 
             if state_match is None:
                 violations.append(f"{plan_state_path} is missing State")
-            elif state_match.group(1).strip() != "DONE":
-                violations.append(f"{plan_state_path} must declare State: DONE")
-
-            if marker_state and marker_state != "DONE":
-                violations.append(
-                    f"{plan_state_path} must encode DONE state in filename"
-                )
+            else:
+                declared_state = state_match.group(1).strip().upper()
 
             if (
                 marker_state
@@ -128,8 +133,32 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
 
             if continuation_match is None:
                 violations.append(f"{plan_state_path} is missing Continuation")
-            elif continuation_match.group(1).strip() != "none":
-                violations.append(f"{plan_state_path} must declare Continuation: none")
+            elif declared_state is not None:
+                continuation = continuation_match.group(1).strip()
+
+                if declared_state == "DONE":
+                    if continuation != "none":
+                        violations.append(
+                            f"{plan_state_path} must declare Continuation: none"
+                        )
+                else:
+                    if continuation not in {"continuing", "waiting"}:
+                        violations.append(
+                            f"{plan_state_path} must declare Continuation: continuing or waiting"
+                        )
+
+                    if continuation == "waiting" and user_action_match is None:
+                        violations.append(
+                            f"{plan_state_path} is missing User action required"
+                        )
+
+                    if next_step_match is None:
+                        violations.append(
+                            f"{plan_state_path} is missing Next-step package"
+                        )
+
+                    if evidence_gaps_match is None:
+                        violations.append(f"{plan_state_path} is missing Evidence gaps")
             continue
 
         active_files = numbered_plan_files(folder)
@@ -225,6 +254,21 @@ def write_lightweight_completed_plan_folder(root: Path) -> Path:
     return plan_folder
 
 
+def write_blocked_plan_folder(root: Path) -> Path:
+    plan_folder = root / "sample-plan"
+    plan_folder.mkdir()
+    (plan_folder / "BLOCKED-plan-state.md").write_text(
+        "Plan State\n"
+        "State: BLOCKED\n"
+        "Continuation: waiting\n"
+        "User action required: approve next owner\n"
+        "Next-step package: Owner=internal-markdown; Scope=state marker refresh; Action=resume plan; Validation=pytest; Risk=stale evidence\n"
+        "Evidence gaps: validator remains red\n",
+        encoding="utf-8",
+    )
+    return plan_folder
+
+
 def test_completed_retained_plan_validation_accepts_well_formed_folder(
     tmp_path: Path,
 ) -> None:
@@ -237,6 +281,14 @@ def test_completed_retained_plan_validation_accepts_lightweight_folder(
     tmp_path: Path,
 ) -> None:
     write_lightweight_completed_plan_folder(tmp_path)
+
+    assert completed_retained_plan_violations(tmp_path) == []
+
+
+def test_completed_retained_plan_validation_accepts_active_blocked_marker(
+    tmp_path: Path,
+) -> None:
+    write_blocked_plan_folder(tmp_path)
 
     assert completed_retained_plan_violations(tmp_path) == []
 
@@ -279,9 +331,26 @@ def test_completed_retained_plan_validation_rejects_lightweight_non_shipped(
     )
 
     assert completed_retained_plan_violations(tmp_path) == [
-        f"{plan_folder / 'DONE-plan-state.md'} must declare State: DONE",
         f"{plan_folder / 'DONE-plan-state.md'} filename state does not match declared State",
-        f"{plan_folder / 'DONE-plan-state.md'} must declare Continuation: none",
+        f"{plan_folder / 'DONE-plan-state.md'} is missing Next-step package",
+        f"{plan_folder / 'DONE-plan-state.md'} is missing Evidence gaps",
+    ]
+
+
+def test_completed_retained_plan_validation_rejects_waiting_marker_missing_fields(
+    tmp_path: Path,
+) -> None:
+    plan_folder = tmp_path / "sample-plan"
+    plan_folder.mkdir()
+    (plan_folder / "BLOCKED-plan-state.md").write_text(
+        "Plan State\nState: BLOCKED\nContinuation: waiting\n",
+        encoding="utf-8",
+    )
+
+    assert completed_retained_plan_violations(tmp_path) == [
+        f"{plan_folder / 'BLOCKED-plan-state.md'} is missing User action required",
+        f"{plan_folder / 'BLOCKED-plan-state.md'} is missing Next-step package",
+        f"{plan_folder / 'BLOCKED-plan-state.md'} is missing Evidence gaps",
     ]
 
 

@@ -37,14 +37,14 @@ lane or output shape still needs a quick decision.
 
 For `answer`, return the answer, evidence, and uncertainty.
 
-For `edit`, return `lane`, `support-loaded`, `files-touched`, focused
-validation, and residual risk.
+For `edit`, return `lane`, `support-loaded`, `files-touched`, direct-control
+status, focused validation, and residual risk.
 
 For `diagnose`, return `lane`, `support-loaded`, the reproduced failure, root
-cause, fix or blocker, and evidence.
+cause, direct-control status, fix or blocker, and evidence.
 
 For `validate`, return `lane`, `support-loaded`, the command or check, result,
-and any follow-up owner.
+direct-control status, and any follow-up owner.
 
 For `escalate`, return the boundary break, next owner, scope, action, validation
 path, and risk.

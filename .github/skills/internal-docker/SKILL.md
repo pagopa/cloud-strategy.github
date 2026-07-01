@@ -5,6 +5,10 @@ description: Use when creating or modifying Dockerfiles, Compose assets, image b
 
 # Docker Skill
 
+## Referenced skills
+
+- None.
+
 ## When to use
 
 - Creating or updating `Dockerfile` assets.

@@ -101,6 +101,10 @@ def test_claim_resolution_for_fixed_requires_debugging_and_verification() -> Non
             "evidence_gate": "Re-run the original loop, or state the blocker.",
         },
         {
+            "owner": "internal-gateway-simple-task",
+            "evidence_gate": "Run Direct Completion Control over every in-scope source item and mandatory applicable requirement before the claim.",
+        },
+        {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
         },
@@ -117,10 +121,27 @@ def test_claim_resolution_deduplicates_verification_owner() -> None:
             "evidence_gate": "Check PR lifecycle evidence before the claim.",
         },
         {
+            "owner": "internal-gateway-simple-task",
+            "evidence_gate": "Run Direct Completion Control over every in-scope source item and mandatory applicable requirement before the claim.",
+        },
+        {
             "owner": "superpowers-verification-before-completion",
             "evidence_gate": "Fresh validation evidence, not intent or stale output.",
         },
     ]
+
+
+def test_direct_execution_claims_require_completion_control() -> None:
+    module = load_script_module()
+    requirements = module.resolve_claim_requirements(
+        ["completion", "readiness", "validator-passes"]
+    )
+
+    assert requirements[0] == {
+        "owner": "internal-gateway-simple-task",
+        "evidence_gate": "Run Direct Completion Control over every in-scope source item and mandatory applicable requirement before the claim.",
+    }
+    assert requirements[1]["owner"] == "superpowers-verification-before-completion"
 
 
 def lanes_from_simple_lanes_reference(reference_text: str) -> set[str]:

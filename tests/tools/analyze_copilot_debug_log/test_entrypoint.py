@@ -187,6 +187,107 @@ PRIVATE SYSTEM BODY
     assert "PRIVATE USER BODY" not in result.stdout
 
 
+def test_prompt_exports_reports_sequence_cost_diagnostics(tmp_path: Path) -> None:
+    prompt_export = {
+        "prompts": [
+            {
+                "promptId": "prompt-sequence",
+                "logs": [
+                    {
+                        "id": "request-start",
+                        "kind": "request",
+                        "metadata": {
+                            "model": "gpt-test",
+                            "usage": {
+                                "prompt_tokens": 100_000,
+                                "prompt_tokens_details": {"cached_tokens": 95_000},
+                                "completion_tokens": 100,
+                            },
+                        },
+                    },
+                    {
+                        "id": "patch-big",
+                        "kind": "toolCall",
+                        "tool": "apply_patch",
+                        "args": "A" * 12_000,
+                        "response": "patched",
+                    },
+                    {
+                        "id": "request-after-patch",
+                        "kind": "request",
+                        "metadata": {
+                            "model": "gpt-test",
+                            "usage": {
+                                "prompt_tokens": 114_000,
+                                "prompt_tokens_details": {"cached_tokens": 90_000},
+                                "completion_tokens": 50,
+                            },
+                        },
+                    },
+                    {
+                        "id": "tiny-tool",
+                        "kind": "toolCall",
+                        "tool": "manage_todo_list",
+                        "args": {"todoList": []},
+                        "response": "ok",
+                    },
+                    {
+                        "id": "request-cache-drop",
+                        "kind": "request",
+                        "metadata": {
+                            "model": "gpt-test",
+                            "usage": {
+                                "prompt_tokens": 114_500,
+                                "prompt_tokens_details": {"cached_tokens": 70_000},
+                                "completion_tokens": 25,
+                            },
+                        },
+                    },
+                ],
+            }
+        ]
+    }
+    prompt_path = tmp_path / "prompt-sequence.json"
+    prompt_path.write_text(json.dumps(prompt_export), encoding="utf-8")
+
+    result = run_tool("prompt-exports", str(prompt_path))
+    payload = json.loads(result.stdout)
+
+    prompt_summary = payload["prompts"][0]
+    top_spike = prompt_summary["top_non_cached_spikes"][0]
+    assert top_spike == {
+        "prompt_id": "prompt-sequence",
+        "request_id": "request-cache-drop",
+        "model": "gpt-test",
+        "prompt_tokens": 114_500,
+        "cached_tokens": 70_000,
+        "non_cached_input_tokens": 44_500,
+        "previous_cached_tokens": 90_000,
+        "cache_delta_tokens": -20_000,
+        "prompt_delta_tokens": 500,
+        "previous_tool_payload_bytes": 17,
+        "previous_tool_names": ["manage_todo_list"],
+    }
+    assert prompt_summary["cache_drop_events"] == [top_spike]
+
+    payload_candidate = prompt_summary["payload_to_noncache_candidates"][0]
+    assert payload_candidate["request_id"] == "request-after-patch"
+    assert payload_candidate["previous_tool_names"] == ["apply_patch"]
+    assert payload_candidate["previous_tool_payload_bytes"] >= 12_000
+
+    aggregate = payload["aggregate"]
+    assert aggregate["top_non_cached_spikes"][0] == top_spike
+    assert aggregate["cache_drop_events"][0] == top_spike
+    assert aggregate["payload_to_noncache_candidates"][0] == payload_candidate
+
+    markdown_result = run_tool(
+        "prompt-exports", str(prompt_path), "--format", "markdown"
+    )
+    assert "## Sequence Diagnostics" in markdown_result.stdout
+    assert "prompt-sequence/request-cache-drop" in markdown_result.stdout
+    assert "previous tools manage_todo_list" in markdown_result.stdout
+
+
 def test_debug_logs_subcommand_summarizes_otlp_and_dedupes_prompt_exports(
     tmp_path: Path,
 ) -> None:

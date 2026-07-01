@@ -54,7 +54,7 @@ The subagent returns only a report:
 
 - The subagent must not edit canonical files.
 - The subagent must not create or promote repository owners.
-- The subagent must not decide that `internal-security-review` exists.
+- The subagent must not decide that an unpromoted security owner exists.
 - The main assistant must spot-check at least one high or critical finding before
   using the report.
 - If all subagent output is speculative, treat it as evidence gaps rather than

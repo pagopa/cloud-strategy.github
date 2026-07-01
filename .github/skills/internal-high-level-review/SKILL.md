@@ -14,7 +14,6 @@ or final claim.
 
 - `internal-code-review`: line-level defect review owner.
 - `internal-gateway-critical-master`: pressure-test owner when the main need is challenge rather than review evidence.
-- `internal-security-review`: unavailable future security lens, used only after promotion creates the skill.
 - `superpowers-verification-before-completion`: evidence gate before claiming no systems findings or merge readiness.
 
 Use this skill as the systems-level owner for repository changes and unfamiliar
@@ -35,7 +34,8 @@ operational context.
 
 - Use `internal-code-review` for line-level defects, language anti-patterns, tests, and file-specific findings.
 - Use `internal-gateway-critical-master` for pre-mortems, hidden-assumption tests, and pressure testing.
-- Use a promoted `internal-security-review` only after that skill exists; until then, route security-specific gaps through the closest existing owner and state the gap.
+- Route security-specific gaps through the closest existing owner and state the
+  missing specialized-owner gap when no promoted security owner exists.
 - Do not turn advisory architecture notes into mandatory changes without evidence.
 - Do not introduce `CONTEXT.md`, ADR folders, or glossary maintenance as a side
   effect of review unless those structures already exist and the user asks to
@@ -47,7 +47,8 @@ operational context.
 - This skill: architecture, workflow, cross-cutting impact, operational fit,
   blind spots, and higher-level codebase orientation.
 - `internal-gateway-critical-master`: challenge work when the main need is pressure testing rather than review evidence.
-- Future `internal-security-review`: security, AI safety, trust boundaries, data, and secret exposure after promotion gates pass.
+- Security-specific review depth stays with the closest existing owner until a
+  specialized security owner is promoted.
 
 ## Analysis dimensions
 
@@ -201,6 +202,6 @@ Before presenting findings, verify:
 - Architecture recommendations must include impact and effort assessment.
 - Orientation maps must name the target area, domain vocabulary, module map,
   caller or entrypoint evidence, boundary notes, and uncertainty.
-- Security-specific gaps must not imply `internal-security-review` exists before promotion.
+- Security-specific gaps must not imply that an unpromoted security owner exists.
 - Use `superpowers-verification-before-completion` before claiming there are no
   systems findings, the review is complete, or the change is merge-ready.

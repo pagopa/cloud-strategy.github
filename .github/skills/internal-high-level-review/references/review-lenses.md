@@ -75,6 +75,6 @@ Causal layer: <why it happens>
 Route: <delivery, planning, critical, or defer with owner>
 ```
 
-Do not use `internal-security-review` as an active owner until promotion creates
-that skill. Route security-specific gaps through the closest existing owner and
-state the promotion gap.
+Do not use an unpromoted security review owner as active. Route
+security-specific gaps through the closest existing owner and state the promotion
+gap.

@@ -8,6 +8,7 @@ Use this reference when the paired agent or skill needs the exact sync rules rat
 - Target roots: runtime home resource directories for supported AI runtimes.
 - Managed families in v1: allowlisted `skills` and `agents`.
 - Excluded in v1: non-`skills` and non-`agents` runtime resources and undocumented families.
+- Skill resources are normally auto-discovered from `.github/skills/` according to `home-sync-catalog.yaml` defaults. The catalog should list policy defaults and explicit non-skill resources, not serialize every skill bundle.
 
 ## State Root
 
@@ -83,6 +84,8 @@ Deterministic report output (`--format report`) and JSON reporting should expose
 
 Text reports must use a summary-first layout rather than a raw field dump. Use tables where columns clarify changes, blockers, or completed actions; use short bullets for counts and state summaries.
 
+Model-facing report tables should stay bounded for routine change and completed-action rows. Keep all blocker, attention, and readiness-failure rows visible. When rows are omitted, add an explicit omitted-count row and point to `--format json` for full detail.
+
 ### Shared Header
 
 Always start with a short status line that includes:
@@ -99,6 +102,7 @@ Always start with a short status line that includes:
 Use these stable sections when rendering model-facing reports:
 
 - `Summary`: target, resource, drift, blocked, and already-aligned counts.
+- `Readiness`: doctor-only non-ok checks with why they matter, what blocks next, and the recommended action.
 - `Changes`: proposed or completed writes, with one row per changed resource.
 - `Attention`: blockers, ambiguous drift, or decisions that need a user.
 - `Validation`: strongest available evidence such as hash match, manifest path, state path, or post-apply clean plan.
@@ -117,6 +121,8 @@ After the shared header, include a short readiness summary and a single table wi
 Use this table for missing roots, documentation gaps, manifest problems, permission failures, and unsafe paths.
 
 ### Sync, Plan, Audit, And Bisync Plan Report
+
+For top-level `sync`, use this compact chat order: `Status`, `Summary`, `Auto-applied`, `Stopped on`, `Validation`, and `Next`.
 
 After the shared header and summary, show one change-oriented table and one attention table when they are useful.
 
@@ -162,8 +168,9 @@ Behavior:
 2. Stop before writing when install blockers, residual drift, stale managed resources, missing directory creation without `--create-missing-dirs`, or destructive cleanup gates are present.
 3. If the install lane is clean, apply repo-to-home materialization and verify hashes plus manifest state.
 4. For the default `skills` target, run `bisync plan` after install.
-5. Stop and report `needs_review` when bisync reports any drift or blocker. Do not run `bisync apply` automatically.
-6. Report `done` only when install succeeded or had no work and bisync has zero drift and zero blockers.
+5. Stop and report `needs_review` when bisync reports `home-to-repo`, `only-home`, `equal-mtime`, or another non-safe blocker. Do not run `bisync apply` automatically.
+6. Treat `repo-to-home` and `only-repo` bisync entries as safe informational leftovers for default `sync`; report them without stopping the sync run.
+7. Report `done` when install succeeded or had no work and bisync has no home-owned or ambiguous drift.
 
 Exit behavior:
 
@@ -242,7 +249,7 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
 ### Logic
 
 1. Scan both directories and collect all skill names (union).
-2. Exclude bundles whose name starts with `local-agent-sync-`.
+2. Exclude bundles whose name starts with `local-`.
 3. For each skill present in both sides:
    - Compute content hash (excluding `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`).
    - If hashes match, the skill is `in-sync` (not reported).
@@ -279,7 +286,7 @@ Before any write in `bisync apply`:
 ### Exclusions
 
 - Runtime artifacts: `.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`.
-- Bundle prefix: `local-agent-sync-*` bundles are excluded from bisync scanning and copying.
+- Bundle prefix: `local-*` bundles are excluded from bisync scanning and copying.
 
 ### Output
 

@@ -71,7 +71,7 @@ def write_valid_internal_skill(skill_dir: Path, skill_name: str) -> None:
         f"# {skill_name}\n\n"
         "## When to use\n"
         "- Use when validating repository-owned skill metadata safely.\n\n"
-        "Use `AGENTS.md` for bridge context.\n",
+        "Use `AGENTS.md` for root policy context.\n",
     )
     write_file(
         skill_dir / "agents/openai.yaml",
@@ -249,7 +249,7 @@ def test_detect_token_risks_main_respects_strict_mode(
         [
             "- Keep policy separate from inventory.",
             "- Keep AGENTS.md strategic and stable.",
-            "- Keep .github/copilot-instructions.md as the projection layer.",
+            "- Keep .github/copilot-instructions.md review-only.",
             "- Keep .github/INVENTORY.md as the exact catalog.",
             "- Preserve explicit precedence rules.",
             "- Remove overlap instead of keeping compatibility copies.",
@@ -273,7 +273,7 @@ def test_detect_token_risks_main_respects_strict_mode(
     finding_codes = {item["code"] for item in payload}
 
     assert exit_code == 1
-    assert "bridge-overlap" in finding_codes
+    assert "root-policy-overlap" in finding_codes
 
 
 def test_audit_copilot_catalog_main_groups_blocking_findings(

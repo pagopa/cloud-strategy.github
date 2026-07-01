@@ -82,6 +82,8 @@ one file.
 6. Load `references/report-contract.md` before writing the final review so
    evidence labels, decision vocabulary, and completeness checks stay
    proportional to the profile.
+7. Use `references/review-usefulness-replay-fixture.md` as the acceptance
+  fixture when changing the decision-usefulness behavior of AI-resource reviews.
 
 ## Core review rules
 
@@ -101,14 +103,34 @@ one file.
   inventory, sync, validator, and test surfaces in scope before finalizing the
   recommendation.
 
+## Bundle coverage rules
+
+For skill, agent, prompt, or bundle reviews, treat these as expected evidence
+surfaces unless intentionally out of scope:
+
+- bundle root owner, usually `SKILL.md` for skills;
+- existing siblings under `references/`, `scripts/`, `assets/`, and
+  `agents/openai.yaml`;
+- paired wrapper, agent, prompt, or owner that selects the bundle;
+- nearest deterministic validator, unit test, contract test, or fixture;
+- inventory, sync manifest, runtime matrix, or explicit allowlist when
+  propagation is relevant;
+- live prompt pack, generated artifact, retained report, or fixture when the
+  bundle governs materialized output.
+
+Checked surfaces with no defect belong in the evidence digest or decision
+trace, not as filler findings. Mention only the surfaces that materially support
+the verdict.
+
 ## Output
 
 Load `references/report-contract.md` for the exact report shape. The review
-output should always include:
+output should always be decision-useful and include:
 
 - selected profile and target
 - findings or explicit keep result
-- evidence labels
+- evidence labels, usually compressed into an evidence digest
+- decision trace for what was accepted, ruled out, or left uncertain
 - decision or recommended next action
 - validation path or evidence gap
 - residual risk
@@ -120,9 +142,13 @@ output should always include:
 - The review covers the relevant resource families for the chosen profile.
 - Bundle reviews include existing `references/`, `scripts/`, `assets/`, and
   `agents/openai.yaml`, or explicitly mark intentional non-action.
+- Bundle reviews distinguish coverage from findings and compress checked-clean
+  surfaces into evidence digest or decision trace.
 - Lifecycle, compatibility, propagation, periodic review, and retirement checks
   are available through `references/review-checklist.md`.
 - `internal-copilot-audit` is used as a named drift lens when those findings
   are needed, not copied inline.
 - The final output follows `references/report-contract.md` and stays
   proportional to the chosen profile.
+- Decision-usefulness contract changes preserve the behavior captured in
+  `references/review-usefulness-replay-fixture.md`.

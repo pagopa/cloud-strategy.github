@@ -2,9 +2,9 @@
 """Purpose: plan and apply local home-directory AI resource sync operations.
 
 Usage examples:
-    python3 scripts/sync_home_ai_resources.py plan --targets skills
-    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs
-    python3 scripts/sync_home_ai_resources.py apply --targets skills,codex --retire-targets opencode --prune-managed
+    python3 scripts/sync_home_ai_resources.py sync --targets skills --format report
+    python3 scripts/sync_home_ai_resources.py plan --targets skills --format report
+    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs --format report
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ import json
 from pathlib import Path
 
 from bisync_skills import (
-    apply_bisync_plan,
     build_bisync_plan,
     run_bisync_apply,
     run_bisync_plan,
@@ -28,8 +27,13 @@ from home_syncing import (
     write_doctor_snapshot,
     write_plan_snapshot,
 )
-from sync_output import build_compact_install_output, render_install_report
-from sync_output import build_compact_bisync_output, render_bisync_report
+from sync_output import (
+    build_compact_bisync_output,
+    build_compact_install_output,
+    render_doctor_report,
+    render_install_report,
+    render_sync_report,
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -76,7 +80,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         cmd_parser.add_argument(
             "--format",
             choices=["text", "json", "compact", "report"],
-            default="text",
+            default="report",
             help="Output format.",
         )
         cmd_parser.add_argument(
@@ -102,7 +106,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     bisync_plan.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="text",
+        default="report",
         help="Output format.",
     )
     bisync_apply = bisync_sub.add_parser("apply", help="Apply bisync resolution.")
@@ -115,7 +119,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     bisync_apply.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="text",
+        default="report",
         help="Output format.",
     )
 
@@ -146,6 +150,7 @@ def run(args: argparse.Namespace) -> int:
             "retired_targets": [],
             "blocked_codes": ["unknown-target"],
             "error": str(error),
+            **blocked_report_fields(str(error)),
         }
         emit_output(payload, format_name=args.format, failure_message=str(error))
         return 1
@@ -162,6 +167,7 @@ def run(args: argparse.Namespace) -> int:
             "retired_targets": list(retire_targets),
             "blocked_codes": ["retire-target-overlap"],
             "error": message,
+            **blocked_report_fields(message),
         }
         emit_output(payload, format_name=args.format, failure_message=message)
         return 1
@@ -189,6 +195,9 @@ def run(args: argparse.Namespace) -> int:
             "selected_targets": list(targets),
             "checks": checks,
             "blocked_codes": blocked_codes,
+            "validation": "blocked" if blocked_codes else "ready",
+            "next_step": next_step_for_doctor(blocked_codes),
+            "next_action": next_action_for_doctor(blocked_codes),
             "state_path": snapshot_path.as_posix(),
         }
         emit_output(payload, format_name=args.format)
@@ -283,12 +292,12 @@ def run_sync(
     if targets == ("skills",) and not retire_targets:
         bisync_plan = build_bisync_plan(source_root, home_root, mode="plan")
         bisync_payload = bisync_plan.to_dict()
-        if bisync_plan.blocked_codes or bisync_plan.drifts:
+        if bisync_requires_review(bisync_plan):
             emit_sync_output(
                 {
                     "mode": "sync",
                     "status": "needs_review",
-                    "reason": "Bisync drift or blockers need a human direction decision before writes.",
+                    "reason": "Bisync detected home-owned or ambiguous drift that needs human review before sync can finish.",
                     "install": install_payload,
                     "bisync": bisync_payload,
                 },
@@ -300,7 +309,7 @@ def run_sync(
         {
             "mode": "sync",
             "status": "done",
-            "reason": "Repo-to-home install completed and no bisync drift needs review.",
+            "reason": "Repo-to-home install completed and no home-owned bisync drift needs review.",
             "install": install_payload,
             "bisync": bisync_payload,
         },
@@ -309,12 +318,34 @@ def run_sync(
     return 0
 
 
+def bisync_requires_review(plan) -> bool:
+    safe_blocked_codes = {"bisync-only-repo"}
+    if any(code not in safe_blocked_codes for code in plan.blocked_codes):
+        return True
+
+    for drift in plan.drifts:
+        if drift.drift_type == "only-repo":
+            continue
+        if drift.drift_type == "drift" and drift.direction == "repo-to-home":
+            continue
+        return True
+
+    return False
+
+
 def install_auto_apply_blockers(
     plan,
     args: argparse.Namespace,
 ) -> list[str]:
     blockers = list(plan.blocked_codes())
-    if plan.residual_drift:
+    if any(
+        operation.action in {"blocked", "stale-managed"}
+        or (
+            operation.action == "warning"
+            and operation.code != "target-modified-managed"
+        )
+        for operation in plan.operations
+    ):
         blockers.append("install-residual-drift")
     if any(operation.action == "mkdir" for operation in plan.operations) and not args.create_missing_dirs:
         blockers.append("needs-directory-create")
@@ -342,17 +373,7 @@ def emit_sync_output(payload: dict[str, object], *, format_name: str) -> None:
         print(json.dumps(compact, indent=2, sort_keys=True))
         return
 
-    status = str(payload.get("status") or "unknown")
-    reason = str(payload.get("reason") or "")
-    print(f"Status: mode=sync; status={status}; reason={reason}")
-    print("")
-    if isinstance(install_payload, dict):
-        print("# Install Lane")
-        print(render_install_report(install_payload), end="")
-    if isinstance(bisync_payload, dict):
-        print("")
-        print("# Bisync Lane")
-        print(render_bisync_report(bisync_payload), end="")
+    print(render_sync_report(payload), end="")
 
 
 def run_apply(plan, args: argparse.Namespace) -> int:
@@ -373,8 +394,45 @@ def run_apply(plan, args: argparse.Namespace) -> int:
     payload["manifest_path"] = manifest_path.as_posix()
     payload["state_path"] = snapshot_path.as_posix()
     emit_output(payload, format_name=args.format)
-    log_success("Home AI resource apply completed.")
     return 0
+
+
+def next_step_for_doctor(blocked_codes: list[str]) -> str:
+    if blocked_codes:
+        return "Resolve the readiness blockers, then rerun doctor before applying home sync changes."
+    return "Readiness checks passed. Run plan or sync when ready."
+
+
+def next_action_for_doctor(blocked_codes: list[str]) -> dict[str, object]:
+    if blocked_codes:
+        return {
+            "action": "resolve_blockers",
+            "allowed": False,
+            "requires_explicit_approval": True,
+            "command": "none",
+            "reason": "Doctor found readiness blockers that must be resolved before apply.",
+        }
+    return {
+        "action": "plan",
+        "allowed": True,
+        "requires_explicit_approval": False,
+        "command": "plan --targets <targets> --format report",
+        "reason": "Doctor found no readiness blockers.",
+    }
+
+
+def blocked_report_fields(reason: str) -> dict[str, object]:
+    return {
+        "validation": "blocked",
+        "next_step": "Resolve the reported blocker, then rerun the same command.",
+        "next_action": {
+            "action": "resolve_blockers",
+            "allowed": False,
+            "requires_explicit_approval": True,
+            "command": "none",
+            "reason": reason,
+        },
+    }
 
 
 def normalize_mode(command: str) -> str:
@@ -398,103 +456,10 @@ def emit_output(
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
 
-    if format_name == "report":
-        print(render_install_report(payload), end="")
+    if payload.get("mode") == "doctor":
+        print(render_doctor_report(payload), end="")
         return
-
-    mode = payload.get("mode", "plan")
-    targets = ", ".join(payload.get("selected_targets", [])) or "none"
-    retired_targets = ", ".join(payload.get("retired_targets", []))
-    log_info(f"Mode: {mode}")
-    log_info(f"Targets: {targets}")
-    if retired_targets:
-        log_info(f"Retire targets: {retired_targets}")
-
-    operations = payload.get("operations", [])
-    copied_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "copy"]
-    skipped_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "skip"]
-    blocked_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "blocked"]
-    stale_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "stale-managed"]
-    mkdir_ops = [op for op in operations if isinstance(op, dict) and op.get("action") == "mkdir"]
-    source_resources = payload.get("source_resources_considered")
-
-    log_info(
-        f"Summary: {len(copied_ops)} to copy, {len(skipped_ops)} up-to-date, "
-        f"{len(blocked_ops)} blocked"
-        + (f", {len(stale_ops)} stale" if stale_ops else "")
-        + (f" ({source_resources} resources considered)" if isinstance(source_resources, int) else "")
-    )
-
-    if copied_ops:
-        copied_resources: dict[str, dict[str, list[str]]] = {}
-        for op in copied_ops:
-            rid = op.get("resource_id", "unknown")
-            target = op.get("target", "?")
-            path = op.get("path", "")
-            family = "agents" if "/agents/" in path else "skills"
-            if rid not in copied_resources:
-                copied_resources[rid] = {"skills": [], "agents": []}
-            copied_resources[rid][family].append(target)
-        for rid, families in sorted(copied_resources.items()):
-            parts = []
-            for family in ("skills", "agents"):
-                if families[family]:
-                    parts.append(f"{family}→{','.join(families[family])}")
-            log_info(f"  + {rid} ({'; '.join(parts)})")
-
-    blocked_codes = payload.get("blocked_codes", [])
-    if blocked_codes:
-        log_error(f"Blocked codes: {', '.join(blocked_codes)}")
-        blocked_by_code: dict[str, list[dict]] = {}
-        for op in blocked_ops:
-            code = op.get("code", "unknown")
-            blocked_by_code.setdefault(code, []).append(op)
-        for code, ops in sorted(blocked_by_code.items()):
-            log_error(f"  [{code}] {len(ops)} path(s)")
-            for op in ops:
-                path = op.get("path", "")
-                reason = op.get("reason", "")
-                if reason:
-                    log_error(f"    - {path}: {reason}")
-                else:
-                    log_error(f"    - {path}")
-
-    if stale_ops:
-        log_info(f"Stale managed resources: {len(stale_ops)}")
-        for op in stale_ops:
-            path = op.get("path", "")
-            reason = op.get("reason", "")
-            code = op.get("code", "")
-            if code:
-                log_info(f"  ~ {path} [{code}]: {reason}")
-            else:
-                log_info(f"  ~ {path}: {reason}")
-
-    for path in payload.get("missing_dirs", []):
-        log_info(f"Missing dir: {path}")
-
-    residual_drift = payload.get("residual_drift", [])
-    if residual_drift:
-        log_info(f"Residual drift: {len(residual_drift)} path(s)")
-
-    validation = payload.get("validation")
-    if isinstance(validation, str):
-        log_info(f"Validation: {validation}")
-
-    next_step = payload.get("next_step")
-    if isinstance(next_step, str) and next_step:
-        log_info(f"Next: {next_step}")
-
-    state_path = payload.get("state_path")
-    if isinstance(state_path, str):
-        log_info(f"State: {state_path}")
-
-    manifest_path = payload.get("manifest_path")
-    if isinstance(manifest_path, str):
-        log_info(f"Manifest: {manifest_path}")
-
-    if failure_message:
-        log_error(failure_message)
+    print(render_install_report(payload), end="")
 
 
 def find_repo_root(start: Path) -> Path:
@@ -503,18 +468,6 @@ def find_repo_root(start: Path) -> Path:
         if (current / ".github").is_dir() or (current / ".git").exists():
             return current
     raise FileNotFoundError(f"Unable to find repository root from {start}")
-
-
-def log_info(message: str) -> None:
-    print(f"ℹ️  {message}", flush=True)
-
-
-def log_success(message: str) -> None:
-    print(f"✅ {message}", flush=True)
-
-
-def log_error(message: str) -> None:
-    print(f"❌ {message}", flush=True)
 
 
 if __name__ == "__main__":

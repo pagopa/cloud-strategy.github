@@ -5,6 +5,10 @@ description: Use when a `.github/` customization change depends on current GitHu
 
 # Internal Copilot Docs Research
 
+## Referenced skills
+
+- None.
+
 Use this skill when a repository customization decision depends on current GitHub Copilot behavior rather than repo-local convention alone.
 
 ## When to use
@@ -67,7 +71,7 @@ Do not assume MCP is configured just because GitHub Copilot supports it.
 - Use skills for detailed, reusable task workflows that should load only when relevant.
 - Use agents for recurring orchestration roles with stable routing boundaries.
 - Use MCP for live tools, external context, or server-backed workflows only when the current session actually exposes the needed capability.
-- When researching custom agents, treat `tools:` as supported, not deprecated. GitHub Copilot allows omitted `tools:`, but this repository's internal-agent policy requires an explicit `tools:` contract for repository-owned internal agents.
+- When researching custom agents, treat `tools:` as supported, not deprecated. GitHub Copilot allows omitted `tools:`, but this repository's internal agent policy requires an explicit `tools:` contract for repository-owned internal agents.
 - Prefer canonical tool aliases such as `read`, `edit`, `search`, `execute`, `agent`, and `web` over legacy product-specific tool ids from older examples.
 - Treat `infer:` as retired. Use `disable-model-invocation` and `user-invocable` when selection behavior must be constrained.
 - Treat `mcp-servers:` as GitHub.com and Copilot CLI configuration, not as an IDE-wide guarantee.

@@ -19,7 +19,8 @@ Use this reference when `internal-gateway-idea-brainstorming` needs the exact pa
 1. After all material branches resolve and Idea Gate 0 is `grill-me satisfied`, summarize the compact decision ledger and declare `Interview Gate 1: ready-for-critical` only when assumptions/defaults are accepted, no ledger contradictions remain, and the validation path is identified.
 1. At `Interview Gate 1: ready-for-critical`, ask whether to continue to critical before loading `internal-gateway-critical-master`.
 1. When a reopen occurs, resume only the affected branches unless the impact is broad, and declare `Interview Gate 1: reopen`.
-1. After `Critical Gate 2: confident`, ask whether the user wants this owner to keep the task. Only if the user says yes, declare `Plan Approval Gate 3: waiting` and ask for explicit `go`/`ok`/`procedi` or equivalent approval before loading `internal-gateway-writing-plans`.
+1. After `Critical Gate 2: confident`, emit the `Direct Execution vs Retained Plan Recommendation`: `Recommendation`, `Why`, `Tradeoff`, and `Decision`. Recommend direct execution via `internal-gateway-simple-task` when the work is concrete, one owner, one lane, one validation path, and low context risk. Recommend a `compact` or `extended` retained plan when the user asked for one, the work is broad enough to retain, validation is multi-surface, or context pressure could interrupt verified execution.
+1. Avoid vague owner-retention phrasing. The user chooses `execute` for specialized direct execution, `plan` for retained-plan authoring, or an explicit override. Only if the user chooses `plan`, declare `Plan Approval Gate 3: waiting` and ask for explicit `go`/`ok`/`procedi` or equivalent approval before loading `internal-gateway-writing-plans`.
 1. Only after explicit approval, declare `Plan Approval Gate 3: approved`, create the retained plan, then declare `Handoff Gate 4: plan-created`.
 1. Treat `Continuation: waiting` as a handoff lock after `Handoff Gate 4: plan-created`; proposals, alternatives, or wording preferences do not clear the lock without explicit owner/action/scope approval.
 
@@ -46,9 +47,9 @@ Each row in the decision ledger:
 | `Idea Gate 0: grill-me satisfied` | User answered or explicitly accepted defaults for the current request, scope, context, and evidence. | Before convergence or any simple-task/planning recommendation. |
 | `Interview Gate 1: ready-for-critical` | All material branches resolved; waiting for critical challenge. | After decision-ledger summary and before loading `internal-gateway-critical-master`. |
 | `Interview Gate 1: reopen` | Critical pass or realignment reopened one or more branches. | When resuming affected branches after `reopen`. |
-| `Critical Gate 2: confident` | Critical challenge found the Definition Brief fit for handoff and unlocked the owner-choice question. | Before asking whether this owner should keep the task. |
+| `Critical Gate 2: confident` | Critical challenge found the Definition Brief fit for handoff and unlocked the direct execution vs retained plan recommendation. | Before asking the user to choose `execute`, `plan`, or an explicit override. |
 | `Critical Gate 2: reopen` | Critical challenge found material issues. | Before returning to affected branches in `discover`. |
-| `Plan Approval Gate 3: waiting` | Critical is confident, the user kept this owner, and planning approval is pending. | Immediately after `Critical Gate 2: confident` and after the user keeps this owner. |
+| `Plan Approval Gate 3: waiting` | Critical is confident, the user chose retained-plan authoring, and planning approval is pending. | Immediately after `Critical Gate 2: confident` and after the user chooses `plan`. |
 | `Plan Approval Gate 3: approved` | Explicit plan approval was received. | After explicit `go`/`ok`/`procedi` or equivalent approval. |
 | `Handoff Gate 4: plan-created` | Retained plan was created and execution is blocked. | After plan creation with `Continuation: waiting` and stop-before-execution behavior. |
 

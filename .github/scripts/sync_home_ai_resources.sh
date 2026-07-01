@@ -2,8 +2,8 @@
 #
 # Purpose: Run the local home AI resource sync planner and apply tool.
 # Usage examples:
-#   ./.github/scripts/sync_home_ai_resources.sh plan --targets codex,copilot,claude,opencode
-#   ./.github/scripts/sync_home_ai_resources.sh apply --targets codex --create-missing-dirs
+#   ./.github/scripts/sync_home_ai_resources.sh sync --targets skills --format report
+#   ./.github/scripts/sync_home_ai_resources.sh apply --targets codex --create-missing-dirs --format report
 
 set -Eeuo pipefail
 

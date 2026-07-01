@@ -6,9 +6,8 @@ This repository is the source baseline for reusable GitHub Copilot customization
 
 ## Skill-first architecture
 
-- `AGENTS.md` is the strategic entrypoint, precedence anchor, and cross-surface bridge.
-- `.github/copilot-instructions.md` is the compact repo-wide Copilot routing bridge.
-- `.github/instructions/copilot-code-review.instructions.md` is the global Copilot review baseline.
+- `AGENTS.md` is the strategic entrypoint, precedence anchor, and runtime agent policy surface.
+- `.github/copilot-instructions.md` is review-only for GitHub.com Copilot code review.
 - `.github/skills/` owns reusable technical baselines, workflow depth, and specialist procedures.
 - `.github/agents/` owns wrapper selection, tool scope, and user-visible handoff UX.
 - Prompts, validators, docs, and owned files carry their own local contracts when they are the smallest valid owner.

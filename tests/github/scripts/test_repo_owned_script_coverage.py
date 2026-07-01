@@ -9,6 +9,7 @@ TEST_OWNERS = {
         ".github/scripts/build_inventory.py",
         ".github/scripts/check_catalog_consistency.py",
         ".github/scripts/detect_token_risks.py",
+        ".github/scripts/lib/cli_runner.py",
         ".github/scripts/sync_copilot_catalog.py",
         ".github/scripts/validate_critical_output.py",
         ".github/scripts/validate_internal_skills.py",
@@ -36,6 +37,9 @@ TEST_OWNERS = {
     "tests/test_sync_and_token_risks.py": {
         ".github/scripts/lib/syncing.py",
         ".github/scripts/lib/token_risks.py",
+    },
+    "tests/github/scripts/lib/test_jsonc.py": {
+        ".github/scripts/lib/jsonc.py",
     },
     "tests/github/scripts/test_benchmark_skill_tokens.py": {
         ".github/scripts/benchmark_skill_tokens.py",

@@ -90,6 +90,24 @@ Do not put chosen logic, validation detail, execution route notes, source-item
 coverage, blockers, or implementation-contract detail in `01-change-summary.md`.
 Those facts belong in `02-execution.md`.
 
+`01-change-summary.md` must still preserve `counter-validation-critical facts`:
+observable result criteria without which the user cannot counter-validate
+whether the plan really covers the request. These facts are not execution
+detail. Keep them in `Risultato atteso` or `Risorse coinvolte`.
+
+Keep concrete examples when they materially define the requested result, such
+as column order, newly added columns, required fields, must-never-be-empty
+conditions, blocking diagnostics, repaired data gaps, row-count or no-data-loss
+invariants, or changed user-visible output contracts.
+
+Do not move execution detail into the summary: commands, file-by-file steps,
+validator order, source-item ids, fallback logic, and coverage mechanics stay
+in `02-execution.md`.
+
+A generic line like `rispetta il nuovo schema`, `aggiorna gli output`, or
+`corregge i dati` is insufficient when the source-item coverage tracks concrete
+schema, output, or data requirements that the user needs to verify at a glance.
+
 ## Template: 02-execution.md
 
 Required sections:

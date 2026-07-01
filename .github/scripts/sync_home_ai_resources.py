@@ -2,8 +2,8 @@
 """Purpose: repo-local wrapper for the bundled home AI resource sync skill script.
 
 Usage examples:
-  python3 ./.github/scripts/sync_home_ai_resources.py plan --targets codex,copilot,claude,opencode
-  python3 ./.github/scripts/sync_home_ai_resources.py apply --targets codex --create-missing-dirs
+    python3 ./.github/scripts/sync_home_ai_resources.py sync --targets skills --format report
+    python3 ./.github/scripts/sync_home_ai_resources.py apply --targets codex --create-missing-dirs --format report
 """
 
 from __future__ import annotations

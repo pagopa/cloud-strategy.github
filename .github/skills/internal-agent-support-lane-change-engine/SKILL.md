@@ -5,6 +5,14 @@ description: Use when a repository-owned internal agent needs a consistent user-
 
 # Internal Agent Support Lane Change Engine
 
+## Referenced skills
+
+- `internal-gateway-review`: source lane when review findings leave a local fix, planning gap, or assumption challenge.
+- `internal-gateway-simple-task`: source or target lane for concrete local follow-up work.
+- `internal-gateway-idea-brainstorming`: target lane when planning or scope definition is needed.
+- `internal-gateway-critical-master`: target lane when assumption pressure-testing dominates.
+- `internal-gateway-execute-plans`: target lane when approved retained-plan execution is the next step.
+
 Use this skill as the shared lane-mismatch engine for repository-owned internal
 agents.
 

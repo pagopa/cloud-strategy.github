@@ -5,6 +5,14 @@ description: Use when creating or modifying Java project code and the main conce
 
 # Java Project Skill
 
+## Referenced skills
+
+Treat the referenced skill below as an on-demand owner. Do not preload it for
+every Java project edit; load it only when Spring Boot framework behavior is
+the main constraint.
+
+- `internal-java-spring-boot-development`: Spring Boot controllers, configuration, repositories, scheduling, and Spring test-slice depth.
+
 ## When to use
 
 - Services, handlers, controllers, utilities, modules.
@@ -12,7 +20,7 @@ description: Use when creating or modifying Java project code and the main conce
 
 ## When not to use
 
-- Spring Boot framework behavior drives the work; use `internal-spring-boot-development`.
+- Spring Boot framework behavior drives the work; use `internal-java-spring-boot-development`.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
 ## Compact Java baseline
@@ -23,12 +31,22 @@ description: Use when creating or modifying Java project code and the main conce
 - Use JUnit 5 for unit tests unless the repository has another established test stack.
 - Keep dependency, plugin, runtime, and test intent explicit in Maven or Gradle files.
 
+## Boundary
+
+- Keep machine-readable output stable and undecorated at data boundaries, and keep human-friendly formatting at CLI or UI boundaries only.
+- Keep logs structured with contextual keys and avoid mixing log streams with program output consumed by tools.
+- Validate external input at transport and persistence boundaries before state changes.
+- Use `Optional` at boundaries where absence is expected and avoid `null` as hidden control flow.
+
 ## Project-specific guidance
 
 - Prefer constructor injection and immutable dependencies in Spring components.
 - Keep controllers thin, services stateless, and API DTOs separate from persistence entities.
 - Split-or-justify any class or service that trends toward a god class role with mixed responsibilities.
 - Use Java 21 features only when the project already targets them or the runtime requirement is explicit.
+- Prefer immutable domain types and final fields by default.
+- Prefer static factory methods when constructor intent is ambiguous.
+- Prefer composition over inheritance unless bounded polymorphism is a true domain constraint.
 
 Load `references/examples.md` when you need a minimal class or test example.
 
@@ -38,7 +56,10 @@ Load `references/examples.md` when you need a minimal class or test example.
 - Use `@ParameterizedTest`, `assertAll`, `@Nested`, and `@Tag` when they improve test clarity rather than just adding ceremony.
 - Use Spring test slices such as `@WebMvcTest` or `@DataJpaTest` before defaulting to full-context tests.
 - Use Testcontainers when integration tests need real databases or external dependencies.
-- For modify tasks: edit implementation first, run existing tests, then update tests only for intentional behavior changes.
+- For behavior changes or bug fixes, write or update the failing test first, then implement and re-run.
+- For pure refactors, keep behavior stable and run compile plus existing tests before and after.
+- Mock only external boundaries and keep internal collaborators real where practical.
+- Prefer targeted coverage for changed behavior and boundary failures over broad percentage goals.
 
 ## Spring coordination
 

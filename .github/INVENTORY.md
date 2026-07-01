@@ -82,6 +82,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-debugging/SKILL.md`
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
+- `.github/skills/internal-excel/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-execute-plans/SKILL.md`
 - `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
@@ -168,10 +169,12 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/graphify-file-change-hook.sh`
 - `.github/scripts/install-graphify-hooks.sh`
 - `.github/scripts/lib/catalog_checks.py`
+- `.github/scripts/lib/cli_runner.py`
 - `.github/scripts/lib/critical_master.py`
 - `.github/scripts/lib/fingerprinting.py`
 - `.github/scripts/lib/internal_skills.py`
 - `.github/scripts/lib/inventory.py`
+- `.github/scripts/lib/jsonc.py`
 - `.github/scripts/lib/shared.py`
 - `.github/scripts/lib/syncing.py`
 - `.github/scripts/lib/token_risks.py`
@@ -183,6 +186,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/validate_critical_output.py`
 - `.github/scripts/validate_critical_output.sh`
 - `.github/scripts/validate_internal_skills.py`
+- `.github/scripts/validate_internal_skills.sh`
 
 ## Agents
 

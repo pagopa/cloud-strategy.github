@@ -61,6 +61,12 @@ in-scope owner:
    bundle points to.
 4. Confirm propagation surfaces such as inventory, sync, runtime matrices, or
    explicit allowlists.
+5. Check live prompt packs, generated artifacts, retained reports, or fixtures
+   when the bundle governs materialized output.
+
+Report coverage separately from findings. Checked-clean siblings and propagation
+surfaces should support the verdict through an evidence digest or decision trace
+instead of appearing as artificial findings.
 
 ### `catalog`
 

@@ -10,7 +10,7 @@ by repository evidence.
 
 In scope:
 
-- Source policy bridge and Copilot projection.
+- Source agent-policy entrypoint and review-only Copilot configuration.
 - Repository-owned skills, agents, prompts, and templates.
 - Catalog build and consistency tooling.
 - Sync planning and apply automation.
@@ -32,9 +32,9 @@ Out of scope:
 
 | Component | Path | Responsibility |
 | --- | --- | --- |
-| Strategic bridge | `AGENTS.md` | Stable precedence, ownership, and tactical defaults. |
-| Copilot bridge | `.github/copilot-instructions.md` | Compact repo-wide Copilot routing bridge to canonical policy. |
-| Global review baseline | `.github/instructions/copilot-code-review.instructions.md` | Source-managed defect-first review behavior for all paths. |
+| Agent policy entrypoint | `AGENTS.md` | Stable precedence, ownership, and tactical defaults. |
+| Copilot review file | `.github/copilot-instructions.md` | Review-only behavior for GitHub.com Copilot code review. |
+| Review assets | `.github/` review-scoped assets | Source-managed defect-first review behavior kept outside runtime agent policy. |
 | Knowledge docs | `docs/` | Descriptive repository context, architecture, tech, and structure. |
 | Skills and agents | `.github/skills/`, `.github/agents/` | Reusable guidance plus route wrappers and command centers. |
 | Prompts and templates | `.github/prompts/`, `.github/templates/` | Targeted creators and consumer scaffold sources. |

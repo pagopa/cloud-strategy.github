@@ -59,41 +59,57 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
 
-    assert "## Rule Placement" in agents_text
-    assert "operational procedures, checklists, file-shape recipes" in agents_text
-    assert "smallest valid owner" in agents_text
-
-    assert "## Context And Scope" in agents_text
-    assert "select the smallest relevant skill" in agents_text
-    assert "then read that `SKILL.md` as manual context" in agents_text
-    assert "Load umbrella domain skills before specialist depth" in agents_text
-    assert "Co-load specialist skills or bundle references only when" in agents_text
-    assert "Use the smallest valid owner to resolve conflicts" in agents_text
-
-    assert "Select the smallest relevant skill from the prompt" in copilot_text
-    assert "validation signal, or repository evidence" in copilot_text
+    assert "## First Move" in agents_text
+    assert "## Precedence" in agents_text
+    assert "Resolve conflicts with the smallest valid owner." in agents_text
     assert (
-        "Load task-specific skills or references only when workflow depth"
+        "fallback policy, not permission to override narrower contracts." in agents_text
+    )
+
+    assert "## Scope And Placement" in agents_text
+    assert "operational procedures, checklists, file-shape recipes" in agents_text
+    assert ".github/instructions" not in agents_text
+    assert "bridge" not in agents_text.lower()
+
+    assert "`<shared-baseline>`" in agents_text
+    assert "This block is the portable baseline" in agents_text
+    assert "`<standards-repository-local-rules>`" in agents_text
+    assert "This block applies only to this standards repository." in agents_text
+
+    assert "It is not a general task-execution guide" in copilot_text
+    assert "Do not ask the author to follow local runtime workflows" in copilot_text
+    assert "that GitHub.com cannot" in copilot_text
+    assert "execute." in copilot_text
+    assert (
+        "Do not treat this file as instructions for coding agents, local CLIs, or"
         in copilot_text
     )
 
 
-def test_agents_external_tool_routing_block_is_legitimized_and_source_local() -> None:
+def test_agents_keeps_only_intentional_root_level_workflows() -> None:
     agents_text = read_text("AGENTS.md")
 
+    assert "tool-specific workflows here" in agents_text
+    assert "Do not duplicate skill-owned paths" in agents_text
+    assert "## graphify" in agents_text
+    assert "When the user types `/graphify`" in agents_text
+    assert 'graphify query "<question>"' in agents_text
     assert (
-        "An external tool that reads this file may require a clearly delimited, "
-        "trailing routing block carrying the minimal commands it needs to consume "
-        "the repository; keep any such block source-local, outside the governed "
-        "policy blocks, and limited to that tool's required invocation anchors."
+        "Only skip graphify if the task is about stale or incorrect graph output"
         in agents_text
     )
 
-    assert "## graphify" in agents_text
 
-    local_rules_close_index = agents_text.index("`</standards-repository-local-rules>`")
-    graphify_index = agents_text.index("## graphify")
-    assert graphify_index > local_rules_close_index
+def test_internal_contract_tracks_current_root_policy_shape() -> None:
+    internal_contract_text = read_text("INTERNAL_CONTRACT.md")
+
+    assert "portable `<shared-baseline>` block" in internal_contract_text
+    assert "`<standards-repository-local-rules>` block" in internal_contract_text
+    assert "compact graph orientation rules" in internal_contract_text
+    assert (
+        "instead of assuming a separate `## Context Routing` section"
+        in internal_contract_text
+    )
 
 
 def test_agents_tactical_defaults_include_compact_context_discipline() -> None:

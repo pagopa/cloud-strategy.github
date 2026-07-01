@@ -53,4 +53,4 @@ review, merge-readiness answer, or retained-plan completion report.
 - Do not hide reduced scope inside a success summary. Name the dropped item and
   why it was dropped.
 - Security-specific drift must be routed through the closest existing owner
-  until a promoted `internal-security-review` exists.
+  until a specialized security owner is promoted.
