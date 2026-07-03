@@ -78,7 +78,7 @@ For `local-sync-external-resources`, keep the split strict:
 - `openai-skill-creator` covers only the remaining bundle mechanics during that work; it should not replace the local decision gate or duplicate repository-owned routing logic.
 - `references/imported-asset-overrides.yaml` owns the approved imported in-place override registry for this repository.
 - `scripts/apply_imported_asset_overrides.py` owns patch replay after an upstream refresh; prefer a clean replay first, allow a registered `git apply --3way` fallback when upstream text drift is compatible, and stop for review instead of forcing a hidden fork.
-- `references/superpowers-normalization.yaml` owns the upstream-to-local map, blocked legacy ids, managed patch renames, and live scan scope for the `obra/superpowers` family.
+- `references/superpowers-normalization.yaml` owns the upstream-to-local map, blocked legacy ids, and live scan scope for the `obra/superpowers` family.
 - `scripts/normalize_superpowers_imports.py` owns local id normalization after upstream materialization and before imported override replay.
 
 Do not collapse these roles back into one file just because the current task touches all of them.

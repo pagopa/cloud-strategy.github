@@ -76,14 +76,6 @@ Managed skills:
   `superpowers-verification-before-completion`; `writing-plans` ->
   `superpowers-writing-plans`.
 
-Approved in-place overrides:
-
-- `superpowers-verification-before-completion`: replay
-  `superpowers-verification-before-completion-compact-evidence-reporting`
-  after each refresh so long verification output is summarized by command,
-  exit code, counts, schema checks, changed files, and exact gaps without
-  weakening the upstream evidence-before-claims rule.
-
 ### `hashicorp/agent-skills`
 
 Source:

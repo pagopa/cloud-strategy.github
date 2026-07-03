@@ -26,14 +26,8 @@ def test_imported_asset_override_registry_tracks_expected_imported_targets() -> 
 
     assert payload["policy"]["default_rule"] == "keep imported upstream assets verbatim"
     assert targets == {
-        ".github/skills/superpowers-brainstorming/SKILL.md",
-        ".github/skills/superpowers-writing-plans/SKILL.md",
-        ".github/skills/superpowers-test-driven-development/SKILL.md",
-        ".github/skills/superpowers-subagent-driven-development/SKILL.md",
-        ".github/skills/superpowers-requesting-code-review/SKILL.md",
         ".github/skills/grill-me/SKILL.md",
         ".github/skills/openai-spreadsheet/SKILL.md",
-        ".github/skills/superpowers-verification-before-completion/SKILL.md",
     }
     assert all(
         entry["approval"] == "explicit-user-counter-validated" for entry in overrides
