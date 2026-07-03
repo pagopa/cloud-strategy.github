@@ -20,8 +20,8 @@ overrides:
       Narrow brainstorming to creative or design-ambiguous work and align
       transient spec artifacts to tmp/superpowers.
     patch_path: patches/superpowers-brainstorming.patch
-    expected_content_hash: 8027ef6296dfb28100e0513aa01d2a7e2021f7764cd271d3b16aa934f9bfd3fd
-    baseline_repo_commit: "f2cbfbe"
+    expected_content_hash: 010e83409148e7b1dacd601eca0463259c75ddf625294303f447e97521beb574
+    baseline_repo_commit: "d884ae0"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
   - id: superpowers-writing-plans-workflow-review
@@ -34,8 +34,8 @@ overrides:
       Remove planning as the default gate for deterministic maintenance and
       align retained plan artifacts to tmp/superpowers.
     patch_path: patches/superpowers-writing-plans.patch
-    expected_content_hash: e0d2b95ba36622ba014ea382988407543a423fc26e382e11bde08a053c90cd86
-    baseline_repo_commit: "f2cbfbe"
+    expected_content_hash: 84931fc27e23dbd63599e7f5fb37be1172a177a27b3ee51c37b51a7a60534f41
+    baseline_repo_commit: "d884ae0"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
   - id: superpowers-test-driven-development-workflow-review
@@ -48,8 +48,8 @@ overrides:
       Keep TDD strong for executable behavior without making it a rigid default
       for textual governance authoring.
     patch_path: patches/superpowers-test-driven-development.patch
-    expected_content_hash: 24b6ca57b7a4596022d9d48217e019b1e8f92e407297aae835a2adb639225b48
-    baseline_repo_commit: "f2cbfbe"
+    expected_content_hash: 13f1879e977378c753ae649d49dd610d7b49be636a42d9d5ab97cce242d9ccc9
+    baseline_repo_commit: "d884ae0"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
   - id: superpowers-subagent-driven-development-workflow-review
@@ -62,8 +62,8 @@ overrides:
       Keep the example plan path aligned with tmp/superpowers so imported
       execution guidance does not reintroduce deprecated transient paths.
     patch_path: patches/superpowers-subagent-driven-development.patch
-    expected_content_hash: f85bd5cbe406718c6aca57408f8135e60a84ed4200c6233305b917a3ae41112d
-    baseline_repo_commit: "f2cbfbe"
+    expected_content_hash: 71c39204781e641675a26c98d7a7d19f699128cd83f0c45e626539b9b32bd123
+    baseline_repo_commit: "d884ae0"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
   - id: superpowers-requesting-code-review-workflow-review
@@ -76,8 +76,8 @@ overrides:
       Keep the reviewer handoff aligned with the canonical internal gateway
       review owner and with tmp/superpowers plan paths.
     patch_path: patches/superpowers-requesting-code-review.patch
-    expected_content_hash: 93330304c6c4a9b70cc94c03500e0d05845b64394afdd630a63abbc758098d58
-    baseline_repo_commit: "f2cbfbe"
+    expected_content_hash: 273866c5c82b0c9a45678979dead63abf0a57799c5116a262baa1d4d033a53cf
+    baseline_repo_commit: "d884ae0"
     local_change_commit: "c4b33b4"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
   - id: grill-me-bulk-recommended-questions
@@ -93,8 +93,8 @@ overrides:
       and unresolved decisions; keep operational gate semantics in
       internal-gateway-review.
     patch_path: patches/grill-me.patch
-    expected_content_hash: 32bb78a434c38bbc2af1eea970236ba989270eb1b631e8d4f2d8928a0a125d62
-    baseline_repo_commit: "e74f006"
+    expected_content_hash: 4965b2f80bed21a005e0baa241e8e9e0d502c276cdf83c394cb3feac1d4dc71b
+    baseline_repo_commit: "efa058a"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
   - id: openai-spreadsheet-structured-data-evidence-budget
     target_path: .github/skills/openai-spreadsheet/SKILL.md
@@ -122,5 +122,5 @@ overrides:
       evidence-before-claims contract.
     patch_path: patches/superpowers-verification-before-completion.patch
     expected_content_hash: 222675dbdc57434ae238b2301bdc2258eebe76f172ca3fbb3e3d97a2117bac79
-    baseline_repo_commit: "f2cbfbe"
+    baseline_repo_commit: "d884ae0"
     validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.

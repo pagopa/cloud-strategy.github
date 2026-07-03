@@ -1,6 +1,6 @@
 ---
 name: antigravity-golang-pro
-description: Modern Go development for services, CLIs, concurrency patterns, profiling, and production readiness. Use when building or reviewing Go code, Go architecture, goroutine coordination, or Go performance work.
+description: Master Go 1.21+ with modern patterns, advanced concurrency, performance optimization, and production-ready microservices.
 risk: unknown
 source: community
 date_added: '2026-02-27'

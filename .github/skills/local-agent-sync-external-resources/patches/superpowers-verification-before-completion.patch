@@ -1,10 +1,11 @@
 diff --git a/.github/skills/superpowers-verification-before-completion/SKILL.md b/.github/skills/superpowers-verification-before-completion/SKILL.md
+index b60f91d..035e583 100644
 --- a/.github/skills/superpowers-verification-before-completion/SKILL.md
 +++ b/.github/skills/superpowers-verification-before-completion/SKILL.md
 @@ -37,6 +37,13 @@ BEFORE claiming any status or expressing satisfaction:
  Skip any step = lying, not verifying
  ```
-
+ 
 +## Compact Evidence Reporting
 +
 +Read enough full output to judge the claim honestly. When the output is long,
@@ -13,5 +14,5 @@ diff --git a/.github/skills/superpowers-verification-before-completion/SKILL.md 
 +Keep raw output only when the raw text itself is the disputed evidence.
 +
  ## Common Failures
-
+ 
  | Claim | Requires | Not Sufficient |

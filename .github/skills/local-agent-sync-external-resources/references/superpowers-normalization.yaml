@@ -1,6 +1,6 @@
 version: 1
 source_family: obra/superpowers
-source_ref: f2cbfbefebbfef77321e4c9abc9e949826bea9d7
+source_ref: d884ae04edebef577e82ff7c4e143debd0bbec99
 local_prefix: superpowers-
 blocked_local_prefixes:
   - obra-

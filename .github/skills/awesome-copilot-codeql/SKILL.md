@@ -1,6 +1,6 @@
 ---
 name: awesome-copilot-codeql
-description: Configure and troubleshoot GitHub CodeQL scanning, query suites, SARIF uploads, workflow setup, and CodeQL CLI analysis. Use when working on code scanning workflows, GitHub Advanced Security analysis, CodeQL databases, or security query execution.
+description: Comprehensive guide for setting up and configuring CodeQL code scanning via GitHub Actions workflows and the CodeQL CLI. This skill should be used when users need help with code scanning configuration, CodeQL workflow files, CodeQL CLI commands, SARIF output, security analysis setup, or troubleshooting CodeQL analysis.
 ---
 
 # CodeQL Code Scanning
@@ -362,7 +362,6 @@ To enable detailed diagnostics:
 | SARIF results exceed limits | Split across multiple uploads with different `--sarif-category`; reduce query scope |
 | Two CodeQL workflows | Disable default setup if using advanced setup, or remove old workflow file |
 | Slow analysis | Enable dependency caching; use `--threads=0`; reduce query suite scope |
-| Green analysis job, failing aggregate check | A green CodeQL analysis job does not guarantee a green aggregate `CodeQL` PR check; when the top-level check fails, inspect the check-run annotations for new alerts in changed code before treating it as a workflow failure |
 
 > For comprehensive troubleshooting with detailed solutions, search `references/troubleshooting.md`.
 
