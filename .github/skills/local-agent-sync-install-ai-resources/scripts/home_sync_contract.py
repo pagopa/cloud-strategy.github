@@ -47,6 +47,16 @@ class CatalogResource:
     notes: str
 
 
+@dataclass(frozen=True)
+class HomeSyncPolicy:
+    include_local_skills: bool
+    include_internal_skills: bool
+    include_unlisted_skills: bool
+    skill_targets: tuple[str, ...]
+    excluded_skills: tuple[str, ...]
+    unmanaged_existing_skills_policy: str
+
+
 def load_runtime_support_matrix(source_root: Path) -> list[RuntimeSupportRow]:
     matrix_path = resolve_skill_reference(source_root, RUNTIME_SUPPORT_MATRIX_PATH)
     payload = yaml.safe_load(matrix_path.read_text(encoding="utf-8")) or {}
@@ -68,33 +78,37 @@ def load_runtime_support_matrix(source_root: Path) -> list[RuntimeSupportRow]:
 
 
 def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
-    catalog_path = resolve_skill_reference(source_root, HOME_SYNC_CATALOG_PATH)
-    payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8")) or {}
-    defaults = payload.get("defaults", {})
-    include_local = bool(defaults.get("include_local_skills", False))
-    include_internal = bool(defaults.get("include_internal_skills", False))
-    include_unlisted = bool(defaults.get("include_unlisted_skills", False))
-    skill_targets = tuple(defaults.get("skill_targets", ("codex", "copilot", "opencode")))
+    policy = load_home_sync_policy(source_root)
+    payload = _load_home_sync_catalog_payload(source_root)
     resources = list(payload.get("resources", []))
 
-    if include_unlisted:
+    if policy.include_unlisted_skills:
         explicit_ids = {
-            resource.get("resource_id", "")
+            (resource.get("resource_id", ""), resource.get("source_family", ""))
             for resource in resources
             if isinstance(resource, dict)
         }
         resources.extend(
             resource
-            for resource in discover_skill_resources(source_root, include_local, include_internal, skill_targets)
-            if resource["resource_id"] not in explicit_ids
+            for resource in discover_skill_resources(
+                source_root,
+                policy.include_local_skills,
+                policy.include_internal_skills,
+                policy.skill_targets,
+                policy.excluded_skills,
+            )
+            if (resource["resource_id"], resource["source_family"]) not in explicit_ids
         )
 
     filtered = []
     for resource in resources:
         rid = resource.get("resource_id", "")
-        if not include_local and rid.startswith("local-"):
+        source_family = resource.get("source_family", "")
+        if source_family == "skills" and rid in policy.excluded_skills:
             continue
-        if not include_internal and rid.startswith("internal-"):
+        if not policy.include_local_skills and rid.startswith("local-"):
+            continue
+        if not policy.include_internal_skills and rid.startswith("internal-"):
             continue
         filtered.append(resource)
     return [
@@ -110,11 +124,32 @@ def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
     ]
 
 
+def load_home_sync_policy(source_root: Path) -> HomeSyncPolicy:
+    payload = _load_home_sync_catalog_payload(source_root)
+    defaults = payload.get("defaults", {})
+    return HomeSyncPolicy(
+        include_local_skills=bool(defaults.get("include_local_skills", False)),
+        include_internal_skills=bool(defaults.get("include_internal_skills", False)),
+        include_unlisted_skills=bool(defaults.get("include_unlisted_skills", False)),
+        skill_targets=tuple(defaults.get("skill_targets", ("codex", "copilot", "opencode"))),
+        excluded_skills=tuple(sorted(str(skill) for skill in defaults.get("excluded_skills", []))),
+        unmanaged_existing_skills_policy=str(
+            defaults.get("unmanaged_existing_skills_policy", "block")
+        ),
+    )
+
+
+def _load_home_sync_catalog_payload(source_root: Path) -> dict[str, object]:
+    catalog_path = resolve_skill_reference(source_root, HOME_SYNC_CATALOG_PATH)
+    return yaml.safe_load(catalog_path.read_text(encoding="utf-8")) or {}
+
+
 def discover_skill_resources(
     source_root: Path,
     include_local: bool,
     include_internal: bool,
     skill_targets: tuple[str, ...],
+    excluded_skills: tuple[str, ...] = (),
 ) -> list[dict[str, object]]:
     skills_root = source_root / ".github" / "skills"
     if not skills_root.is_dir():
@@ -123,6 +158,8 @@ def discover_skill_resources(
     resources: list[dict[str, object]] = []
     for skill_dir in sorted(path for path in skills_root.iterdir() if path.is_dir()):
         resource_id = skill_dir.name
+        if resource_id in excluded_skills:
+            continue
         if not include_local and resource_id.startswith("local-"):
             continue
         if not include_internal and resource_id.startswith("internal-"):

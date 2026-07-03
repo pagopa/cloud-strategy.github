@@ -13,9 +13,11 @@ from agent_translation import target_extension, translate_agent_for_target
 from home_sync_contract import (
     TARGET_ORDER,
     CatalogResource,
+    HomeSyncPolicy,
     RuntimeSupportRow,
     has_agent_root,
     load_home_sync_catalog,
+    load_home_sync_policy,
     load_runtime_support_matrix,
     resolve_support_row,
     runtime_agent_root,
@@ -181,6 +183,7 @@ def build_home_sync_plan(
         raise RuntimeError("reverse-sync-blocked: source_root is under the home sync state, sync must be repo → home only")
     runtime_rows = load_runtime_support_matrix(source_root)
     catalog = load_home_sync_catalog(source_root)
+    policy = load_home_sync_policy(source_root)
     manifest_payload, manifest_error = load_manifest(state_root / MANIFEST_PATH)
     manifest_index = index_manifest(manifest_payload)
     manifest_target_paths = set(manifest_index)
@@ -263,6 +266,7 @@ def build_home_sync_plan(
                 source_hash,
                 manifest_index,
                 changed_only,
+                policy,
             )
 
     add_stale_managed_operations(
@@ -274,6 +278,7 @@ def build_home_sync_plan(
         mode,
         prune_managed,
         home_root,
+        policy,
     )
     return HomeSyncPlan(
         source_root=source_root,
@@ -643,11 +648,27 @@ def add_materialization_operation(
     source_hash: str,
     manifest_index: dict[str, dict[str, object]],
     changed_only: bool,
+    policy: HomeSyncPolicy,
 ) -> None:
     manifest_entry = manifest_index.get(target_path.as_posix())
     if target_path.exists():
         current_hash = hash_resource(target_path)
         if manifest_entry is None:
+            if (
+                resource.source_family == "skills"
+                and policy.unmanaged_existing_skills_policy == "repo-wins"
+            ):
+                operations.append(
+                    HomeSyncOperation(
+                        target=target,
+                        action="copy",
+                        path=target_path.as_posix(),
+                        reason="Target already exists in home but is not manifest-managed. Repo wins for unmanaged skills under the active catalog policy, so sync adopts the home path and overwrites it with the repository bundle.",
+                        source_path=resource.source_path,
+                        resource_id=resource.resource_id,
+                    )
+                )
+                return
             add_blocked_operation(
                 operations,
                 target=target,
@@ -726,6 +747,7 @@ def add_stale_managed_operations(
     mode: str,
     prune_managed: bool,
     home_root: Path,
+    policy: HomeSyncPolicy,
 ) -> None:
     desired_paths = {resource.target_path for resource in desired_resources}
     scoped_targets = set(targets) | set(retired_targets)
@@ -744,6 +766,11 @@ def add_stale_managed_operations(
 
     for item in managed_resources:
         if not isinstance(item, dict) or item.get("target") not in scoped_targets:
+            continue
+        if (
+            str(item.get("resource_family", "")) == "skills"
+            and str(item.get("resource_id", "")) in policy.excluded_skills
+        ):
             continue
         target_path = item.get("target_path")
         if not isinstance(target_path, str) or target_path in desired_paths:

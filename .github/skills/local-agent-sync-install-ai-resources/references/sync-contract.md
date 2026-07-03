@@ -8,7 +8,7 @@ Use this reference when the paired agent or skill needs the exact sync rules rat
 - Target roots: runtime home resource directories for supported AI runtimes.
 - Managed families in v1: allowlisted `skills` and `agents`.
 - Excluded in v1: non-`skills` and non-`agents` runtime resources and undocumented families.
-- Skill resources are normally auto-discovered from `.github/skills/` according to `home-sync-catalog.yaml` defaults. The catalog should list policy defaults and explicit non-skill resources, not serialize every skill bundle.
+- Skill resources are normally auto-discovered from `.github/skills/` according to `home-sync-catalog.yaml` defaults. The catalog should list policy defaults and explicit non-skill resources, not serialize every skill bundle. Defaults may also exclude specific home-kept skill IDs from install and bisync and may declare whether unmanaged home skill bundles stay blocked or are adopted with repo-wins behavior.
 
 ## State Root
 
@@ -26,7 +26,7 @@ Optional debug logs may live under `logs/` when the implementation needs durable
 ## Managed Resource Rules
 
 - Copy files and directories. Do not create symlinks in v1.
-- Preserve unmanaged target-local files.
+- Preserve unmanaged target-local files unless the active catalog policy explicitly adopts unmanaged skill bundles with repo-wins behavior.
 - Record one manifest row per managed target resource.
 - Prune only resources that were previously manifest-managed and are now absent from the new plan, including resources whose source bundle disappeared from the repo after an earlier sync.
 - Require explicit prune approval before deleting stale managed resources.

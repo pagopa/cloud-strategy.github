@@ -251,6 +251,31 @@ def test_build_plan_blocks_only_repo_and_only_home(tmp_path: Path) -> None:
     assert plan.blocked_codes == ["bisync-only-home", "bisync-only-repo"]
 
 
+def test_build_plan_ignores_catalog_excluded_skills(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    home = tmp_path / "home"
+    init_git_repo(source)
+    write_file(
+        source
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml",
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: true\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: true\n"
+        "  excluded_skills:\n"
+        "    - graphify\n"
+        "resources: []\n",
+    )
+    make_skill(source / ".github" / "skills", "graphify", "# Repo graphify\n")
+    make_skill(home / ".agents" / "skills", "graphify", "# Home graphify\n")
+
+    plan = build_bisync_plan(source, home, mode="plan")
+
+    assert plan.drifts == []
+    assert plan.blocked_codes == []
+
+
 def test_excludes_local_prefixed_bundles_from_scan(tmp_path: Path) -> None:
     source = tmp_path / "source"
     home = tmp_path / "home"

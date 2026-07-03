@@ -95,7 +95,7 @@ Stop and report when any of these occur:
 - Block writes when runtime support is undocumented, target paths are unsafe, ownership evidence is missing, the manifest is corrupt, or the source root sits under home sync state.
 - Use `--retire-targets` when the managed target set should shrink, for example removing `opencode` while keeping `codex` and `copilot`.
 - Accept `codex`, `copilot`, `opencode`, comma-separated combinations, `cross`, `all`, or `tutto`; normalize and order targets deterministically.
-- Keep `references/home-sync-catalog.yaml` as policy and explicit non-skill resources only; skill bundles are auto-discovered from `.github/skills/` when `include_unlisted_skills` is true.
+- Keep `references/home-sync-catalog.yaml` as policy and explicit non-skill resources only; skill bundles are auto-discovered from `.github/skills/` when `include_unlisted_skills` is true. Use catalog defaults to exclude home-kept skills from future install and bisync lanes and to declare whether unmanaged home skill bundles must block or be adopted with repo-wins behavior.
 
 ## Bisync Lane
 
@@ -135,7 +135,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 When plan, audit, or sync reports blocked paths, resolve them before apply:
 
-- `target-exists-unmanaged`: target content exists at home but is not manifest-managed. Review and move or remove it manually before rerunning plan.
+- `target-exists-unmanaged`: target content exists at home but is not manifest-managed. Review and move or remove it manually before rerunning plan unless the active catalog policy explicitly adopts unmanaged skills with repo-wins behavior.
 - `target-modified-managed`: manifest-managed content diverged from the recorded hash. If home is clearly newer, let bisync surface the explicit home-to-repo decision; if it persists after verified bisync reconciliation, treat it as real local divergence.
 - `stale-managed`: previously managed content is no longer planned. Re-run with `--prune-managed` only after review.
 - `retire-target-overlap`: the same target was requested as active and retired. Remove the overlap and rerun.
