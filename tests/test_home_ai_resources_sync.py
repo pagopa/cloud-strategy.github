@@ -706,6 +706,7 @@ def test_sync_contract_documents_verified_bisync_reconciliation() -> None:
     assert "Text reports must use a summary-first layout" in contract_content
     assert "### Sync, Plan, Audit, And Bisync Plan Report" in contract_content
     assert "Auto-applied" in contract_content
+    assert "Planned repo-to-home copies" in contract_content
     assert "The `sync` command is the only auto-execute mode." in contract_content
     assert (
         "| Resource or path | Lane | Planned action | Why this will change | Evidence or winner |"
@@ -761,6 +762,55 @@ def test_sync_report_output_has_compact_chat_sections(
     assert "## Next" in output
     assert "# Install Lane" not in output
     assert "# Bisync Lane" not in output
+
+
+def test_sync_report_uses_planned_heading_when_install_review_stops_before_writes(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    write_file(source_root / ".github/skills/extra-skill/SKILL.md", "# Extra\n")
+    write_file(
+        source_root
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml",
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: false\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: true\n"
+        "resources: []\n",
+    )
+    write_file(home_root / ".agents/skills/demo-skill/SKILL.md", "# Local unmanaged\n")
+    monkeypatch.setattr(
+        sync_home_ai_resources,
+        "parse_args",
+        lambda _=None: argparse.Namespace(
+            command="sync",
+            source_root=str(source_root),
+            home_root=str(home_root),
+            targets="skills",
+            retire_targets="",
+            create_missing_dirs=True,
+            prune_managed=False,
+            experimental_targets=False,
+            format="report",
+            fast=False,
+            changed_only=False,
+        ),
+    )
+
+    exit_code = sync_home_ai_resources.main()
+    output = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "Status: sync | status=needs_review" in output
+    assert "next_action=review_install" in output
+    assert "## Planned repo-to-home copies" in output
+    assert "## Auto-applied" not in output
+    assert "Why this is planned" in output
+    assert "extra-skill" in output
+    assert "demo-skill" in output
 
 
 def test_agent_and_skill_align_on_summary_first_reporting() -> None:

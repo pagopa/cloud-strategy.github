@@ -119,7 +119,7 @@ Every report must be summary-first and start with one status line that includes 
 Then follow the exact text layout in `references/sync-contract.md`:
 
 - `doctor`: `Status`, `Summary`, `Readiness`, `Validation`, and `Next`. Show non-ok readiness checks and tell the user what blocks the next write.
-- `sync`: `Status`, `Summary`, `Auto-applied`, `Stopped on`, `Validation`, and `Next`. Summarize counts first, then show only the copied resources and the exact drift or blockers that stopped completion.
+- `sync`: `Status`, `Summary`, `Auto-applied` or `Planned repo-to-home copies`, `Stopped on`, `Validation`, and `Next`. Summarize counts first, then show only the copied resources when writes occurred, or the planned copies when install review stopped the run before writing, plus the exact drift or blockers that stopped completion.
 - `plan`, `audit`, and `bisync plan`: a compact summary, a change table when there are changes, and an attention table when there are blockers or drift decisions. For every proposed modification, explain the decision cause, for example repo copy is newer, home copy is newer, a managed resource is stale, or runtime support is not documented enough for apply.
 - `apply` and `bisync apply`: a compact summary, an actions-performed table for writes, and a residual-issues table when needed. List copied, updated, pruned, or created resources and state why they were handled that way and how they were verified. Summarize unchanged managed resources by count instead of listing every skip.
 

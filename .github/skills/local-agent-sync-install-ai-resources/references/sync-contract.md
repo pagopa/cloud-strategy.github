@@ -122,7 +122,7 @@ Use this table for missing roots, documentation gaps, manifest problems, permiss
 
 ### Sync, Plan, Audit, And Bisync Plan Report
 
-For top-level `sync`, use this compact chat order: `Status`, `Summary`, `Auto-applied`, `Stopped on`, `Validation`, and `Next`.
+For top-level `sync`, use this compact chat order: `Status`, `Summary`, `Auto-applied` or `Planned repo-to-home copies`, `Stopped on`, `Validation`, and `Next`.
 
 After the shared header and summary, show one change-oriented table and one attention table when they are useful.
 
