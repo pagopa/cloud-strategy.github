@@ -34,6 +34,11 @@ When deterministic change detection matters, read `references/fingerprinting-con
 
 When an imported upstream asset has an exceptionally approved repo-local override, read `references/imported-asset-overrides.yaml` and use `scripts/apply_imported_asset_overrides.py` to replay the registered patch bundle after refreshing the upstream content.
 
+When upstream refresh execution may fetch, clone, unpack, or compare external
+repositories, read `references/refresh-execution-guardrails.md` first and run
+`scripts/check_external_refresh_workspace.py` before graphify or completion
+reporting.
+
 When refreshing the managed `obra/superpowers` family, read `references/superpowers-normalization.yaml` and use `scripts/normalize_superpowers_imports.py` so upstream skill names materialize as local `superpowers-*` ids before override replay, inventory rebuild, and validation.
 
 When checking upstream items that were deliberately extracted or retired from

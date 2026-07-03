@@ -99,3 +99,12 @@ In `Outcome`, include:
 - `Validation`: commands run and remaining gaps.
 - `Remaining blockers or drift`: unresolved issues that prevent or narrow
   `apply`.
+
+Add the following outcome details when refresh execution is involved:
+
+- `Workspace guard`: where upstream snapshots were staged and whether the
+  bundled workspace guard passed.
+- `Graphify guard`: whether graphify ran after repo-local refresh leftovers
+  were absent.
+- `Scoped validation`: whether whitespace and diff checks were scoped away from
+  verbatim upstream content, with any accepted upstream notices named.
