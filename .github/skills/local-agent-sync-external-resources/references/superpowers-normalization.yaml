@@ -45,6 +45,10 @@ managed_skills:
   - upstream: writing-plans
     legacy_local: obra-writing-plans
     local: superpowers-writing-plans
+managed_text_replacements:
+  - from: docs/superpowers
+    to: tmp/superpowers
+    reason: Keep retained plans and specs under the repository-local temporary workspace after every superpowers refresh.
 live_scan:
   include:
     - .github/agents

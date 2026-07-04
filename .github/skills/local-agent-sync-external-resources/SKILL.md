@@ -80,6 +80,7 @@ For `local-sync-external-resources`, keep the split strict:
 - `scripts/apply_imported_asset_overrides.py` owns patch replay after an upstream refresh; prefer a clean replay first, allow a registered `git apply --3way` fallback when upstream text drift is compatible, and stop for review instead of forcing a hidden fork.
 - `references/superpowers-normalization.yaml` owns the upstream-to-local map, blocked legacy ids, and live scan scope for the `obra/superpowers` family.
 - `scripts/normalize_superpowers_imports.py` owns local id normalization after upstream materialization and before imported override replay.
+- Repo-local path rewrites that must survive every `obra/superpowers` refresh belong in `references/superpowers-normalization.yaml` and are applied by `scripts/normalize_superpowers_imports.py`, not by ad hoc manual edits after import.
 
 Do not collapse these roles back into one file just because the current task touches all of them.
 
@@ -159,12 +160,14 @@ For the `obra/superpowers` family:
 1. Read `references/superpowers-normalization.yaml` before materializing files.
 2. Install or refresh only the managed upstream skills listed in that reference.
 3. Materialize local directories and frontmatter as `superpowers-*`, not `obra-*`.
-4. Run `scripts/normalize_superpowers_imports.py --check` before the rename to expose drift.
-5. Run `scripts/normalize_superpowers_imports.py --apply` after materialization or rename.
-6. Run `scripts/apply_imported_asset_overrides.py --dry-run` after normalization and before applying overrides.
-7. Rebuild `.github/INVENTORY.md` and run catalog validation.
+4. Keep repo-local workspace paths in that same reference. For retained-plan and retained-spec paths, rewrite the upstream `docs/` Superpowers workspace references to `tmp/superpowers` there so every refresh reapplies the local storage contract automatically.
+5. Run `scripts/normalize_superpowers_imports.py --check` before the rename to expose drift.
+6. Run `scripts/normalize_superpowers_imports.py --apply` after materialization or rename.
+7. Run `scripts/apply_imported_asset_overrides.py --dry-run` after normalization and before applying overrides.
+8. Rebuild `.github/INVENTORY.md` and run catalog validation.
 
 Treat residual managed `obra-*` ids or `superpowers:<managed-skill>` references in live catalog assets as blocking drift. Do not add a newly discovered upstream Superpowers skill unless the user explicitly expands the managed map.
+Treat residual upstream Superpowers `docs/` workspace references in the refreshed managed assets as blocking drift when the repo-local contract still requires `tmp/superpowers`.
 
 ### 5. Keep Sync Evidence Deterministic
 
