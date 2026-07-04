@@ -117,22 +117,18 @@ def test_compact_and_extended_execution_owner_is_unified() -> None:
         ".github/skills/internal-gateway-critical-master/SKILL.md"
     )
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
-    assert "Recommended consumer" not in writing_text
-    assert "internal-gateway-execute-plans" in writing_text
-    assert "internal-gateway-simple-task" in writing_text
-    assert "mini-plan-*" in executing_text
-    assert "`compact`" in executing_text
-    assert "retained plans" in executing_text
+    assert "superpowers-writing-plans" in writing_text
+    assert "delegate" in writing_text.lower()
     assert "internal-gateway-execute-plans" in simple_text
     assert "internal-executing-plans" not in simple_text
     assert "internal-gateway-execute-plans" in critical_text
     assert "internal-executing-plans" not in critical_text
-    assert "approved `compact`" in executing_text
-    assert "approved `extended`" in executing_text
+    assert "gateway-only wrapper" in executing_text
+    assert "approved retained plans" in executing_text
     assert "internal-gateway-execute-plans" in executing_text
 
 
-def test_gateway_compliance_audit_contract_is_explicit() -> None:
+def test_gateway_status_file_contract_is_explicit() -> None:
     simple_text = read_text(".github/skills/internal-gateway-simple-task/SKILL.md")
     executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
 
@@ -141,10 +137,10 @@ def test_gateway_compliance_audit_contract_is_explicit() -> None:
     assert "Block completion claims" in simple_text
     assert "single-lane and single-phase" in simple_text
 
-    assert "item-level compliance audit" in executing_text
-    assert "block `SHIPPED`" in executing_text
-    assert "undefined validation strategy" in executing_text
-    assert "stdlib-only CLI launcher" in executing_text
+    assert "gateway-only wrapper" in executing_text
+    assert "Compact Evidence Reporting" in executing_text
+    assert "<plan-basename>.<STATUS>.md" in executing_text
+    assert "No `DONE` claim" in executing_text
 
 
 def test_simple_gateway_direct_execution_control_contract_is_explicit() -> None:
@@ -187,18 +183,16 @@ def test_gateway_wrappers_route_compact_and_extended_to_execute_plans() -> None:
     execute_wrapper = read_text(
         ".github/skills/internal-gateway-execute-plans/agents/openai.yaml"
     )
-    completion_reference = read_text(
-        ".github/skills/internal-gateway-execute-plans/references/completion-report.md"
+    status_reference = read_text(
+        ".github/skills/internal-gateway-execute-plans/references/status-file.md"
     )
     assert (
         "Route approved retained-plan execution to internal-gateway-execute-plans"
         in simple_wrapper
     )
-    assert "infer the best execution strategy from plan profile" in execute_wrapper
-    assert (
-        "`compact` and `extended` execution both use `internal-gateway-execute-plans`"
-        in completion_reference.lower()
-    )
+    assert "superpowers-executing-plans" in execute_wrapper
+    assert "<plan-basename>.<STATUS>.md" in execute_wrapper
+    assert "## Resume Notes" in status_reference
 
 
 def test_simple_gateway_readiness_brief_and_approval_gate_contract() -> None:
@@ -229,10 +223,11 @@ def test_writing_plans_scaffold_first_and_audit_early_contract() -> None:
         ".github/skills/internal-gateway-writing-plans/agents/openai.yaml"
     )
 
-    assert "run bundle-local `init` first" in writing_text
-    assert "Run `audit` first, then run `handoff-check`" in writing_text
-    assert "token warnings as review inputs" in writing_text
-    assert "init scaffold first" in runtime_text
-    assert "audit first" in runtime_text
-    assert "handoff-check" in runtime_text
-    assert "second" in runtime_text
+    assert "short preflight" in writing_text
+    assert "Execution-readiness check" in writing_text
+    assert "tmp/superpowers/plans/YYYY-MM-DD-<feature-name>.md" in writing_text
+    assert "repository preflight wrapper" in runtime_text
+    assert "superpowers-writing-plans" in runtime_text
+    assert "delegate" in runtime_text.lower()
+    assert "Execution-readiness check" in runtime_text
+    assert "handoff readiness" in runtime_text

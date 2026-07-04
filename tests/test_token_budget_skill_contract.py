@@ -15,9 +15,6 @@ def test_token_budget_guardrails_are_distributed_by_owner() -> None:
     idea_text = read_text(".github/skills/internal-gateway-idea-brainstorming/SKILL.md")
     execute_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
     review_text = read_text(".github/skills/internal-gateway-review/SKILL.md")
-    verification_text = read_text(
-        ".github/skills/superpowers-verification-before-completion/SKILL.md"
-    )
     spreadsheet_text = read_text(".github/skills/openai-spreadsheet/SKILL.md")
 
     assert "Token Budget Gate" in simple_text
@@ -26,7 +23,6 @@ def test_token_budget_guardrails_are_distributed_by_owner() -> None:
     assert "aggregate-first" in idea_text
     assert "Compact Evidence Reporting" in execute_text
     assert "Compact Evidence Reporting" in review_text
-    assert "Compact Evidence Reporting" in verification_text
     assert "Structured Data Evidence Budget" in spreadsheet_text
 
 

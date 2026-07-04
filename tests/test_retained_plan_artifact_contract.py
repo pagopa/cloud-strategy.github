@@ -39,7 +39,16 @@ OPEN_COMPLETION_STATUSES = (
     "BLOCKED",
 )
 
-PLAN_STATE_MARKER_RE = re.compile(r"^([A-Z0-9_-]+)-plan-state\.md$")
+GATEWAY_STATUS_VALUES = ("DONE", "BLOCKED", "PARTIAL", "NEEDS_REVIEW")
+GATEWAY_STATUS_HEADINGS = (
+    "## Status",
+    "## Reason",
+    "## Completed",
+    "## Remaining",
+    "## Validation",
+    "## Next",
+    "## Resume Notes",
+)
 
 
 def retained_plan_folders() -> list[Path]:
@@ -61,30 +70,42 @@ def done_files(plan_folder: Path) -> list[Path]:
     return sorted(plan_folder.glob("done-*.md"))
 
 
-def resolve_plan_state_marker(
+def resolve_gateway_status_file(
     plan_folder: Path,
 ) -> tuple[Path | None, str | None, list[str]]:
     violations: list[str] = []
-    named_markers = sorted(
-        path for path in plan_folder.glob("*-plan-state.md") if path.is_file()
-    )
+    statuses = "|".join(GATEWAY_STATUS_VALUES)
+    status_re = re.compile(rf"^{re.escape(plan_folder.name)}\.({statuses})\.md$")
+    status_files: list[Path] = []
 
-    if len(named_markers) > 1:
-        violations.append(f"{plan_folder} has multiple <STATE>-plan-state.md markers")
+    for path in sorted(plan_folder.glob("*.md")):
+        if status_re.match(path.name):
+            status_files.append(path)
+        elif re.match(rf"^{re.escape(plan_folder.name)}\.[A-Z0-9_-]+\.md$", path.name):
+            violations.append(
+                f"{path} must use one of these statuses: {', '.join(GATEWAY_STATUS_VALUES)}"
+            )
+
+    legacy_markers = sorted(plan_folder.glob("*-plan-state.md"))
+    for marker in legacy_markers:
+        violations.append(
+            f"{marker} is a legacy gateway marker; use <plan-basename>.<STATUS>.md"
+        )
+
+    if len(status_files) > 1:
+        violations.append(f"{plan_folder} has multiple gateway status files")
         return None, None, violations
 
-    if named_markers:
-        marker = named_markers[0]
-        match = PLAN_STATE_MARKER_RE.match(marker.name)
-        if match is None:
-            violations.append(
-                f"{marker} must match <STATE>-plan-state.md with uppercase state"
-            )
-            return None, None, violations
-        marker_state = match.group(1).upper()
-        return marker, marker_state, violations
+    if not status_files:
+        return None, None, violations
 
-    return None, None, violations
+    marker = status_files[0]
+    match = status_re.match(marker.name)
+    if match is None:
+        violations.append(f"{marker} must match <plan-basename>.<STATUS>.md")
+        return None, None, violations
+
+    return marker, match.group(1), violations
 
 
 def completed_retained_plan_violations(root: Path) -> list[str]:
@@ -92,73 +113,29 @@ def completed_retained_plan_violations(root: Path) -> list[str]:
 
     for folder in sorted(path for path in root.iterdir() if path.is_dir()):
         folder_done_files = done_files(folder)
-        plan_state_path, marker_state, marker_violations = resolve_plan_state_marker(
-            folder
-        )
+        status_path, marker_state, marker_violations = resolve_gateway_status_file(folder)
         violations.extend(marker_violations)
 
-        if not folder_done_files and plan_state_path is None:
+        if not folder_done_files and status_path is None:
             continue
 
-        if plan_state_path is not None and not folder_done_files:
-            plan_state_text = plan_state_path.read_text(encoding="utf-8")
-            state_match = re.search(r"^State:\s*(.+)$", plan_state_text, re.MULTILINE)
-            continuation_match = re.search(
-                r"^Continuation:\s*(.+)$", plan_state_text, re.MULTILINE
-            )
-            user_action_match = re.search(
-                r"^User action required:\s*(.+)$", plan_state_text, re.MULTILINE
-            )
-            next_step_match = re.search(
-                r"^Next-step package:\s*(.+)$", plan_state_text, re.MULTILINE
-            )
-            evidence_gaps_match = re.search(
-                r"^Evidence gaps:\s*(.+)$", plan_state_text, re.MULTILINE
-            )
-            declared_state: str | None = None
+        if status_path is not None and not folder_done_files:
+            status_text = status_path.read_text(encoding="utf-8")
+            for heading in GATEWAY_STATUS_HEADINGS:
+                if heading not in status_text:
+                    violations.append(f"{status_path} is missing {heading}")
 
-            if state_match is None:
-                violations.append(f"{plan_state_path} is missing State")
-            else:
-                declared_state = state_match.group(1).strip().upper()
-
-            if (
-                marker_state
-                and state_match
-                and state_match.group(1).strip().upper() != marker_state
-            ):
+            status_match = re.search(
+                r"^## Status\s*\n+\s*([A-Z0-9_-]+)\s*$",
+                status_text,
+                re.MULTILINE,
+            )
+            if status_match is None:
+                violations.append(f"{status_path} must declare status under ## Status")
+            elif status_match.group(1) != marker_state:
                 violations.append(
-                    f"{plan_state_path} filename state does not match declared State"
+                    f"{status_path} filename status does not match declared status"
                 )
-
-            if continuation_match is None:
-                violations.append(f"{plan_state_path} is missing Continuation")
-            elif declared_state is not None:
-                continuation = continuation_match.group(1).strip()
-
-                if declared_state == "DONE":
-                    if continuation != "none":
-                        violations.append(
-                            f"{plan_state_path} must declare Continuation: none"
-                        )
-                else:
-                    if continuation not in {"continuing", "waiting"}:
-                        violations.append(
-                            f"{plan_state_path} must declare Continuation: continuing or waiting"
-                        )
-
-                    if continuation == "waiting" and user_action_match is None:
-                        violations.append(
-                            f"{plan_state_path} is missing User action required"
-                        )
-
-                    if next_step_match is None:
-                        violations.append(
-                            f"{plan_state_path} is missing Next-step package"
-                        )
-
-                    if evidence_gaps_match is None:
-                        violations.append(f"{plan_state_path} is missing Evidence gaps")
             continue
 
         active_files = numbered_plan_files(folder)
@@ -244,11 +221,25 @@ def write_lightweight_completed_plan_folder(root: Path) -> Path:
         "## Source item coverage\n"
         "| ID | Source item | Observable acceptance | Evidence class | Acceptance evidence | Status | Route |\n"
         "| --- | --- | --- | --- | --- | --- | --- |\n"
-        "| PLAN-01 | Lightweight completion marker | DONE marker present | file | DONE-plan-state.md | DONE | `none` |\n",
+        "| PLAN-01 | Lightweight completion marker | DONE status file present | file | sample-plan.DONE.md | DONE | `none` |\n",
         encoding="utf-8",
     )
-    (plan_folder / "DONE-plan-state.md").write_text(
-        "Plan State\nState: DONE\nContinuation: none\n",
+    (plan_folder / "sample-plan.DONE.md").write_text(
+        "# sample-plan Status\n\n"
+        "## Status\n\n"
+        "DONE\n\n"
+        "## Reason\n\n"
+        "Complete.\n\n"
+        "## Completed\n\n"
+        "- All items.\n\n"
+        "## Remaining\n\n"
+        "- None.\n\n"
+        "## Validation\n\n"
+        "- `pytest` passed.\n\n"
+        "## Next\n\n"
+        "- No action required.\n\n"
+        "## Resume Notes\n\n"
+        "- Re-run validation after new edits.\n",
         encoding="utf-8",
     )
     return plan_folder
@@ -257,13 +248,22 @@ def write_lightweight_completed_plan_folder(root: Path) -> Path:
 def write_blocked_plan_folder(root: Path) -> Path:
     plan_folder = root / "sample-plan"
     plan_folder.mkdir()
-    (plan_folder / "BLOCKED-plan-state.md").write_text(
-        "Plan State\n"
-        "State: BLOCKED\n"
-        "Continuation: waiting\n"
-        "User action required: approve next owner\n"
-        "Next-step package: Owner=internal-markdown; Scope=state marker refresh; Action=resume plan; Validation=pytest; Risk=stale evidence\n"
-        "Evidence gaps: validator remains red\n",
+    (plan_folder / "sample-plan.BLOCKED.md").write_text(
+        "# sample-plan Status\n\n"
+        "## Status\n\n"
+        "BLOCKED\n\n"
+        "## Reason\n\n"
+        "Blocked.\n\n"
+        "## Completed\n\n"
+        "- Partial work.\n\n"
+        "## Remaining\n\n"
+        "- Await approval.\n\n"
+        "## Validation\n\n"
+        "- Not run.\n\n"
+        "## Next\n\n"
+        "- Approve next owner.\n\n"
+        "## Resume Notes\n\n"
+        "- Resume after approval.\n",
         encoding="utf-8",
     )
     return plan_folder
@@ -325,15 +325,27 @@ def test_completed_retained_plan_validation_rejects_lightweight_non_shipped(
     tmp_path: Path,
 ) -> None:
     plan_folder = write_lightweight_completed_plan_folder(tmp_path)
-    (plan_folder / "DONE-plan-state.md").write_text(
-        "Plan State\nState: PARTIAL\nContinuation: continuing\n",
+    (plan_folder / "sample-plan.DONE.md").write_text(
+        "# sample-plan Status\n\n"
+        "## Status\n\n"
+        "PARTIAL\n\n"
+        "## Reason\n\n"
+        "Incomplete.\n\n"
+        "## Completed\n\n"
+        "- Some items.\n\n"
+        "## Remaining\n\n"
+        "- More items.\n\n"
+        "## Validation\n\n"
+        "- Pending.\n\n"
+        "## Next\n\n"
+        "- Continue.\n\n"
+        "## Resume Notes\n\n"
+        "- Resume later.\n",
         encoding="utf-8",
     )
 
     assert completed_retained_plan_violations(tmp_path) == [
-        f"{plan_folder / 'DONE-plan-state.md'} filename state does not match declared State",
-        f"{plan_folder / 'DONE-plan-state.md'} is missing Next-step package",
-        f"{plan_folder / 'DONE-plan-state.md'} is missing Evidence gaps",
+        f"{plan_folder / 'sample-plan.DONE.md'} filename status does not match declared status",
     ]
 
 
@@ -342,15 +354,25 @@ def test_completed_retained_plan_validation_rejects_waiting_marker_missing_field
 ) -> None:
     plan_folder = tmp_path / "sample-plan"
     plan_folder.mkdir()
-    (plan_folder / "BLOCKED-plan-state.md").write_text(
-        "Plan State\nState: BLOCKED\nContinuation: waiting\n",
+    (plan_folder / "sample-plan.BLOCKED.md").write_text(
+        "# sample-plan Status\n\n"
+        "## Status\n\n"
+        "BLOCKED\n\n"
+        "## Reason\n\n"
+        "Blocked.\n\n"
+        "## Completed\n\n"
+        "- Partial work.\n\n"
+        "## Remaining\n\n"
+        "- Await approval.\n\n"
+        "## Validation\n\n"
+        "- Not run.\n\n"
+        "## Next\n\n"
+        "- Approve next owner.\n\n"
         encoding="utf-8",
     )
 
     assert completed_retained_plan_violations(tmp_path) == [
-        f"{plan_folder / 'BLOCKED-plan-state.md'} is missing User action required",
-        f"{plan_folder / 'BLOCKED-plan-state.md'} is missing Next-step package",
-        f"{plan_folder / 'BLOCKED-plan-state.md'} is missing Evidence gaps",
+        f"{plan_folder / 'sample-plan.BLOCKED.md'} is missing ## Resume Notes",
     ]
 
 
