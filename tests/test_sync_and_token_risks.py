@@ -1480,6 +1480,12 @@ def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() ->
 
 def test_root_always_on_token_budget_contract_uses_validator_constants() -> None:
     agents_text = Path("AGENTS.md").read_text(encoding="utf-8")
+    shared_baseline = agents_text.split("`<shared-baseline>`", 1)[1].split(
+        "`</shared-baseline>`", 1
+    )[0]
+    local_rules = agents_text.split("`<standards-repository-local-rules>`", 1)[1].split(
+        "`</standards-repository-local-rules>`", 1
+    )[0]
     target_text = f"{ROOT_ALWAYS_ON_TOKEN_TARGET:,}"
     calculated_estimates = {
         file_path: estimate_tokens(Path(file_path))
@@ -1490,5 +1496,6 @@ def test_root_always_on_token_budget_contract_uses_validator_constants() -> None
     assert "`AGENTS.md` is the canonical always-on policy surface" in agents_text
     assert target_text in agents_text
     assert "soft target" in agents_text
-    assert "`make token-risks`" in agents_text
+    assert "`make token-risks`" not in shared_baseline
+    assert "`make token-risks`" in local_rules
     assert set(calculated_estimates) == set(ROOT_ALWAYS_ON_PATHS)

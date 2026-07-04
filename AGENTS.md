@@ -6,8 +6,8 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
 
 `<shared-baseline>`
 
-This block is the portable baseline used when this repository projects AI
-configuration into consumer repositories.
+This block is the portable source baseline used to generate
+`~/.agents/AGENTS.md` for cross-repository use.
 
 ## First Move
 
@@ -25,12 +25,27 @@ configuration into consumer repositories.
   aliases, or past automation unless it exists on disk and is deliberately
   reintroduced.
 
+## Progressive Disclosure
+
+- Load only the owner, skill, contract, or documentation surface required for
+  the current lane.
+- Expand context only after bounded evidence leaves a material gap.
+
+## User Alignment
+
+- For small, deterministic, low-risk tasks, proceed after confirming target,
+  owner, and validation path.
+- For non-trivial, ambiguous, architectural, policy, contract, or multi-step
+  work, align with the user before implementation.
+
 ## Operating Principles
 
 - Think before acting. Confirm target, nearest owner, bounded evidence, and
   validation path before broad commands.
 - Make surgical changes. Preserve user work, avoid unrelated refactors, and tie
   each edit to the requested outcome.
+- Fix the controlling root cause where practical instead of layering
+  workaround-only changes.
 - Work toward verified outcomes. Run the closest available validation and report
   explicit gaps.
 
@@ -59,8 +74,6 @@ configuration into consumer repositories.
 - Do not rewrite imported upstream text that must remain verbatim.
 - For vendor-owned or schema-driven surfaces, read primary documentation when
   correctness depends on platform semantics.
-- Update validators, tests, sync discovery, or non-README technical docs when a
-  contract, catalog family, or shared runtime behavior changes.
 
 ## Tactical Defaults
 
@@ -82,6 +95,12 @@ configuration into consumer repositories.
 - Run the applicable validation that exists for changed files. When no dedicated
   validator exists, report the gap and use the closest check.
 
+## Contract Discipline
+
+- When a contract, policy, or ownership rule changes, align the owning tests,
+  validators, and technical docs to the new behavior.
+- Do not let stale checks or historical wording force a reverted model.
+
 ## Token And Drift Control
 
 - `AGENTS.md` is the canonical always-on policy surface; keep it near a 4,000
@@ -90,16 +109,27 @@ configuration into consumer repositories.
 
 ## graphify
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+Use graphify first for codebase, project, architecture, file-relationship, or
+content-orientation questions when `graphify-out/graph.json` exists or graphify
+is available.
 
-When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"` before doing anything else.
+When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"`
+before doing anything else when the tool is available.
 
 - Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- Start with `graphify query "<question>"` when graphify state exists. Use
+  `graphify path "<A>" "<B>"` for relationships and
+  `graphify explain "<concept>"` for focused concepts.
+- Dirty `graphify-out/` files after incremental updates are not a reason to skip
+  graphify by default.
+- If `graphify-out/wiki/index.md` exists, use it for broad navigation before raw
+  source scanning.
+- Read `graphify-out/GRAPH_REPORT.md` only for broad architecture review or when
+  `query`, `path`, and `explain` do not provide enough context.
+- If graphify is unavailable or has no useful state, state the gap briefly and
+  use the best local fallback.
+- After modifying code, run `graphify update .` when graphify is available and
+  repository state exists.
 
 `</shared-baseline>`
 
@@ -126,7 +156,8 @@ as consumer-repository defaults without an explicit sync contract change.
 ## Standards Repository Role
 
 - This repository owns the shared Copilot customization baseline, governance
-  contracts, catalog automation, and source-side sync tooling.
+  contracts, catalog automation, source-side sync tooling, and the source
+  baseline content used to generate the global home AGENTS policy.
 - Source-managed AI assets live mainly under `.github/`; local knowledge
   documents live in `docs/README.md`, `docs/repository-context.md`,
   `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md`.
