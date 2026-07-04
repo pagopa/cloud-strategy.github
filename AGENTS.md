@@ -15,14 +15,6 @@ configuration into consumer repositories.
 - Read only the evidence needed to choose the smallest valid change and check.
 - Prefer the closest executable validation; report any validation gap explicitly.
 
-## Purpose
-
-- Orient coding agents before they read narrower files.
-- Keep stable policy separate from volatile inventory; `.github/INVENTORY.md`
-  owns the exact live catalog of managed AI assets.
-- Keep architecture and local context in `docs/architecture.md` and
-  `docs/repository-context.md`.
-
 ## Precedence
 
 - Direct user instructions win for the current task unless they require unsafe,
@@ -48,12 +40,6 @@ configuration into consumer repositories.
   ownership boundaries, and routing anchors.
 - Do not put operational procedures, checklists, file-shape recipes, command
   playbooks, or tool-specific workflows here.
-- Do not duplicate skill-owned paths, templates, workflow states, or command
-  examples in this file.
-- Keep volatile inventory out of this file; link to `.github/INVENTORY.md`
-  instead of copying catalog entries.
-- Target repositories should express local exceptions in their own nearest valid
-  owner files.
 
 ## Authoring Defaults
 
@@ -80,12 +66,8 @@ configuration into consumer repositories.
 
 - Preserve compact working state across turns; avoid rebuilding full context
   unless new evidence invalidates the current state.
-- Keep one active primary owner per execution lane. Load referenced guidance on
-  demand based on target, runtime, ownership, and validation path.
 - Use bounded evidence: inspect changed sections and failing-validator context
   first, then expand only when gaps remain.
-- Name the validation path early and treat missing validator evidence as a
-  non-`DONE` state until the gap is explicitly resolved.
 
 ## Delivery And Validation
 
@@ -105,10 +87,6 @@ configuration into consumer repositories.
 - `AGENTS.md` is the canonical always-on policy surface; keep it near a 4,000
   estimated-token soft target measured as `ceil(UTF-8 bytes / 4)` by the
   validator.
-- Keep duplication deliberate. Duplicate only rules that must remain visible in a
-  specific surface and are compact enough to validate.
-- When generic AGENTS.md guidance conflicts with this repository's skill-first
-  architecture, keep the generic idea only if it fits the ownership boundary.
 
 ## graphify
 
@@ -126,6 +104,21 @@ When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"
 `</shared-baseline>`
 
 `<standards-repository-local-rules>`
+
+- Do not duplicate skill-owned paths, templates, workflow states, or command
+  examples in this file.
+- Keep volatile inventory out of this file; link to `.github/INVENTORY.md`
+  instead of copying catalog entries.
+- Target repositories should express local exceptions in their own nearest valid
+  owner files.
+
+## Purpose
+
+- Orient coding agents before they read narrower files.
+- Keep stable policy separate from volatile inventory; `.github/INVENTORY.md`
+  owns the exact live catalog of managed AI assets.
+- Keep architecture and local context in `docs/architecture.md` and
+  `docs/repository-context.md`.
 
 This block applies only to this standards repository. Do not treat these rules
 as consumer-repository defaults without an explicit sync contract change.
