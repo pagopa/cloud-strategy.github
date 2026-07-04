@@ -1480,22 +1480,27 @@ def test_sync_contract_restricts_allow_dirty_target_to_overlap_checked_work() ->
 
 def test_root_always_on_token_budget_contract_uses_validator_constants() -> None:
     agents_text = Path("AGENTS.md").read_text(encoding="utf-8")
-    shared_baseline = agents_text.split("`<shared-baseline>`", 1)[1].split(
-        "`</shared-baseline>`", 1
-    )[0]
+    validator_text = Path(".github/scripts/lib/token_risks.py").read_text(
+        encoding="utf-8"
+    )
     local_rules = agents_text.split("`<standards-repository-local-rules>`", 1)[1].split(
         "`</standards-repository-local-rules>`", 1
     )[0]
-    target_text = f"{ROOT_ALWAYS_ON_TOKEN_TARGET:,}"
     calculated_estimates = {
         file_path: estimate_tokens(Path(file_path))
         for file_path in ROOT_ALWAYS_ON_PATHS
     }
 
     assert "## Estimated Fixed-Load Token Budget" not in agents_text
-    assert "`AGENTS.md` is the canonical always-on policy surface" in agents_text
-    assert target_text in agents_text
-    assert "soft target" in agents_text
-    assert "`make token-risks`" not in shared_baseline
+    assert "primary always-on repository policy entrypoint" in agents_text
+    assert "ROOT_ALWAYS_ON_PATHS = (\"AGENTS.md\",)" in validator_text
+    assert (
+        f"ROOT_ALWAYS_ON_TOKEN_TARGET = {ROOT_ALWAYS_ON_TOKEN_TARGET}"
+        in validator_text
+    )
+    assert "AGENTS.md exceeds the canonical always-on " in validator_text
+    assert "soft target" in validator_text
+    # `make token-risks` is repository-local validation guidance in AGENTS.md.
     assert "`make token-risks`" in local_rules
+    assert "`make token-risks`" in agents_text
     assert set(calculated_estimates) == set(ROOT_ALWAYS_ON_PATHS)

@@ -58,6 +58,7 @@ def test_github_pr_skill_owns_pr_merge_and_terminal_state_guardrails() -> None:
 def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> None:
     agents_text = read_text("AGENTS.md")
     copilot_text = read_text(".github/copilot-instructions.md")
+    internal_contract_text = read_text("INTERNAL_CONTRACT.md")
 
     assert "## First Move" in agents_text
     assert "## Precedence" in agents_text
@@ -74,8 +75,11 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     assert "`<shared-baseline>`" in agents_text
     assert "portable source baseline" in agents_text
     assert "`~/.agents/AGENTS.md`" in agents_text
+    assert (
+        "global `~/.agents/AGENTS.md` baseline" in internal_contract_text
+        or "global home agent baseline" in agents_text
+    )
     assert "`<standards-repository-local-rules>`" in agents_text
-    assert "This block applies only to this standards repository." in agents_text
 
     assert "It is not a general task-execution guide" in copilot_text
     assert "Do not ask the author to follow local runtime workflows" in copilot_text
@@ -92,11 +96,13 @@ def test_agents_keeps_only_intentional_root_level_workflows() -> None:
 
     assert "tool-specific workflows here" in agents_text
     assert "Do not duplicate skill-owned paths" in agents_text
-    assert "## graphify" in agents_text
-    assert "Use graphify first" in agents_text
-    assert "`graphify-out/graph.json` exists or graphify" in agents_text
-    assert 'graphify query "<question>"' in agents_text
+    assert (
+        "Use graphify first" in agents_text
+        or "use graphify as the first orientation tool" in agents_text
+    )
+    assert "graphify-out/graph.json" in agents_text
     assert "If graphify is unavailable or has no useful state" in agents_text
+    assert "best local fallback" in agents_text
 
 
 def test_internal_contract_tracks_current_root_policy_shape() -> None:
