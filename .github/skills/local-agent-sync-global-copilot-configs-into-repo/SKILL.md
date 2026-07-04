@@ -23,7 +23,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 - Refresh target `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` to the current root-policy and review-only model after mirroring.
 - Refresh shared repository-hygiene files that are part of the managed sync baseline, currently `.editorconfig`, `.pre-commit-config.yaml`, and `.github/workflows/_pre-commit.yml`.
 - Refresh repository-root `LESSONS_LEARNED.md` from the source structure while preserving and, when needed, migrating target-authored pending lesson rows.
-- Run or interpret `.github/scripts/sync_copilot_catalog.sh` or `.github/scripts/sync_copilot_catalog.py`.
+- Run or interpret `./.github/scripts/run.sh sync_copilot_catalog` or `.github/scripts/sync_copilot_catalog.py`.
 - Audit source-target drift before or after a sync.
 
 ## Core Operating Contract
@@ -56,7 +56,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 
 - `plan`: default mode and safest starting point.
 - `apply`: explicit only, after reviewing a conflict-safe plan and current source findings.
-- `audit`: use when source or target drift needs diagnosis before deciding whether to plan or apply; prefer `.github/scripts/audit_copilot_catalog.sh` plus the sync planner evidence instead of inventing a third sync mode.
+- `audit`: use when source or target drift needs diagnosis before deciding whether to plan or apply; prefer `./.github/scripts/run.sh audit_copilot_catalog` plus the sync planner evidence instead of inventing a third sync mode.
 
 ## Agent-facing output modes
 
@@ -90,7 +90,7 @@ If `dirty_managed_overlap` is empty, `--allow-dirty-target` can stay eligible wh
 
 ## Validation
 
-- For source-side baseline changes, prefer `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks`.
-- Rebuild `.github/INVENTORY.md` when touched catalog paths require it by using `./.github/scripts/build_inventory.sh --root .`.
+- For source-side baseline changes, prefer `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks`.
+- Rebuild `.github/INVENTORY.md` when touched catalog paths require it by using `./.github/scripts/run.sh build_inventory --root .`.
 - For sync automation changes, run `pytest tests/test_sync_and_token_risks.py`.
 - If a dedicated sync-contract test does not exist for the touched behavior, say so explicitly and use the closest existing verification.

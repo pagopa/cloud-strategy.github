@@ -83,13 +83,8 @@ jobs:
           ./.github/scripts/run.sh --help || true
           bash -n .github/scripts/run.sh
           bash -n tools/analyze_copilot_debug_log/run.sh
-          bash -n .github/scripts/build_inventory.sh
-          bash -n .github/scripts/check_catalog_consistency.sh
-          bash -n .github/scripts/audit_copilot_catalog.sh
-          bash -n .github/scripts/detect_token_risks.sh
-          bash -n .github/scripts/sync_copilot_catalog.sh
-          bash -n .github/scripts/sync_home_ai_resources.sh
-          bash -n .github/scripts/github_catalog_validation.sh
+          bash -n .github/scripts/install-graphify-hooks.sh
+          bash -n .github/scripts/graphify-file-change-hook.sh
           bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh
 
       - name: ✅ Run pytest
