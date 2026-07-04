@@ -23,7 +23,6 @@ from lib.critical_master import (
     FINDING_REFRAME_MAX_WORDS,
     MAX_FINDINGS,
     MIN_FINDINGS,
-    NEXT_OWNER_MAX_WORDS,
     REQUIRED_FINDING_FIELDS,
     REQUIRED_SECTIONS,
     SUMMARY_MAX_WORDS,
@@ -107,7 +106,6 @@ def validate_output(text: str, *, max_words: int = TOTAL_MAX_WORDS) -> list[Find
     synthesis_body = sections.get("Synthesis", "")
     findings_body = sections.get("Findings", "")
     outcome_body = sections.get("Outcome", "")
-    next_owner_body = sections.get("Next owner", "")
 
     summary_words = count_words(summary_body)
     if summary_body and summary_words > SUMMARY_MAX_WORDS:
@@ -185,22 +183,6 @@ def validate_output(text: str, *, max_words: int = TOTAL_MAX_WORDS) -> list[Find
                     f"Use one of: {', '.join(sorted(ALLOWED_OUTCOMES))}."
                 ),
                 extras={"allowed": sorted(ALLOWED_OUTCOMES)},
-            )
-        )
-
-    next_owner_words = count_words(next_owner_body)
-    if next_owner_body and next_owner_words > NEXT_OWNER_MAX_WORDS:
-        findings.append(
-            Finding(
-                severity="non-blocking",
-                code="next-owner-word-limit",
-                path="## Next owner",
-                message=(
-                    f"Next owner has {next_owner_words} words; "
-                    f"limit is {NEXT_OWNER_MAX_WORDS}."
-                ),
-                suggestion="Trim the next-owner package.",
-                extras={"words": next_owner_words, "limit": NEXT_OWNER_MAX_WORDS},
             )
         )
 

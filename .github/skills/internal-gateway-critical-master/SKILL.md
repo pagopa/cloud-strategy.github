@@ -5,13 +5,6 @@ description: Use when a repository-owned plan, proposal, or decision needs a cri
 
 # Internal Gateway Critical Master
 
-## Referenced skills
-
-- `internal-gateway-idea-brainstorming`: route when critique shows the plan must be reformulated.
-- `internal-gateway-simple-task`: route when critique leaves a concrete local task.
-- `internal-gateway-execute-plans`: route approved retained-plan execution.
-- `internal-gateway-review`: route when the next risk is correctness evidence.
-
 Use this skill as the portable core for critical challenge work. The calling
 gateway decides when to invoke it; this skill challenges only.
 
@@ -21,14 +14,10 @@ gateway decides when to invoke it; this skill challenges only.
 
 ## When not to use
 
-- The next step is retained planning, implementation, or evidence-first review; use `internal-gateway-idea-brainstorming`, `internal-gateway-simple-task`, `internal-gateway-execute-plans`, or `internal-gateway-review`.
+- The next step is retained planning, implementation, or evidence-first review.
 
 ## Boundaries
 
-- Use `internal-gateway-idea-brainstorming` when the main job is reformulating the plan.
-- Use `internal-gateway-simple-task` when the critique leaves a concrete local task.
-- Use `internal-gateway-execute-plans` for approved `compact` and `extended` retained-plan execution.
-- Use `internal-gateway-review` when the next step is evidence-based validation of a concrete change.
 - This skill challenges; it does not edit files, run commands, or author retained plans.
 
 ## Critical Procedure
@@ -75,7 +64,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 
 - Run the Final Consistency Gate: name the strongest supported objection, downgrade weak claims to hypotheses, and surface unresolved uncertainty.
 - Format the result using the contract in `references/output-contract.md`.
-- Recommend exactly one outcome from `## Outcome Routing`.
+- Recommend exactly one outcome from `## Outcome meanings`.
 
 ## Token Budget
 
@@ -83,7 +72,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 - Maximum findings: **3**.
 - Maximum per finding: **150 words**.
 - Maximum synthesis: **300 words**.
-- If the topic demands more depth, split the work and route to `continue-critical`.
+- If the topic demands more depth, split the work into another critical cycle.
 
 ## Claim Discipline
 
@@ -97,13 +86,13 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 - Optional: `validate_critical_output.py` checks a rendered output against the contract in `references/output-contract.md`.
 - Bundle-level budget is owned by the repo-wide token checks; routing into the skill is owned by the calling gateway.
 
-## Outcome Routing
+## Outcome meanings
 
-| Outcome | Use when | Recommended next owner |
-| --- | --- | --- |
-| `reformulate-plan` | Planning must be rewritten. | `internal-gateway-idea-brainstorming` |
-| `de-escalate-to-simple` | A concrete local task remains. | `internal-gateway-simple-task` |
-| `execute-clear-next-step` | Execution is approved and clear. | `internal-gateway-simple-task` or `internal-gateway-execute-plans` |
-| `review-evidence` | The next risk is correctness evidence. | `internal-gateway-review` |
-| `continue-critical` | Another pressure-test loop is needed. | `internal-gateway-critical-master` |
-| `accept-with-risk` | The user may proceed while accepting a named residual risk. | Current workflow with explicit risk note |
+| Outcome | Use when |
+| --- | --- |
+| `reformulate-plan` | Planning must be rewritten. |
+| `de-escalate-to-simple` | A concrete local task remains. |
+| `execute-clear-next-step` | Execution is approved and clear. |
+| `review-evidence` | The next risk is correctness evidence. |
+| `continue-critical` | Another pressure-test loop is needed. |
+| `accept-with-risk` | The user may proceed while accepting a named residual risk. |

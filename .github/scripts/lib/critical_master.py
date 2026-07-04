@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-# Allowed outcome values from SKILL.md Outcome Routing table.
+# Allowed outcome values from SKILL.md Outcome meanings table.
 ALLOWED_OUTCOMES: frozenset[str] = frozenset(
     {
         "reformulate-plan",
@@ -38,7 +38,6 @@ REQUIRED_SECTIONS: tuple[str, ...] = (
     "Findings",
     "Synthesis",
     "Outcome",
-    "Next owner",
 )
 
 # Required sub-fields inside each finding (Reframe is optional per the contract).
@@ -56,7 +55,6 @@ SYNTHESIS_MAX_WORDS = 100
 FINDING_OBJECTION_MAX_WORDS = 30
 FINDING_FIELD_MAX_WORDS = 30
 FINDING_REFRAME_MAX_WORDS = 25
-NEXT_OWNER_MAX_WORDS = 50
 TOTAL_MAX_WORDS = 600
 MIN_FINDINGS = 1
 MAX_FINDINGS = 3
