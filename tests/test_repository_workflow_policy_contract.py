@@ -15,6 +15,12 @@ def section_between(body: str, heading: str) -> str:
     return section.split("\n## ", 1)[0]
 
 
+def tagged_block(body: str, tag: str) -> str:
+    start = f"`<{tag}>`"
+    end = f"`</{tag}>`"
+    return body.split(start, 1)[1].split(end, 1)[0]
+
+
 def python_fenced_blocks(body: str) -> list[str]:
     return re.findall(r"```python\n(.*?)\n```", body, flags=re.DOTALL)
 
@@ -93,16 +99,21 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
 
 def test_agents_keeps_only_intentional_root_level_workflows() -> None:
     agents_text = read_text("AGENTS.md")
+    shared_baseline = tagged_block(agents_text, "shared-baseline")
+    local_rules = tagged_block(agents_text, "standards-repository-local-rules")
 
     assert "tool-specific workflows here" in agents_text
     assert "Do not duplicate skill-owned paths" in agents_text
     assert (
-        "Use graphify first" in agents_text
-        or "use graphify as the first orientation tool" in agents_text
+        "Use graphify first" in shared_baseline
+        or "use graphify as the first orientation tool" in shared_baseline
     )
-    assert "graphify-out/graph.json" in agents_text
-    assert "If graphify is unavailable or has no useful state" in agents_text
-    assert "best local fallback" in agents_text
+    assert "## graphify" in shared_baseline
+    assert "graphify-out/graph.json" in shared_baseline
+    assert "If graphify is unavailable or has no useful state" in shared_baseline
+    assert "best local fallback" in shared_baseline
+    assert "## graphify" not in local_rules
+    assert "graphify-out/graph.json" not in local_rules
 
 
 def test_internal_contract_tracks_current_root_policy_shape() -> None:

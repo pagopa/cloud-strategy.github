@@ -1483,6 +1483,9 @@ def test_root_always_on_token_budget_contract_uses_validator_constants() -> None
     validator_text = Path(".github/scripts/lib/token_risks.py").read_text(
         encoding="utf-8"
     )
+    shared_baseline = agents_text.split("`<shared-baseline>`", 1)[1].split(
+        "`</shared-baseline>`", 1
+    )[0]
     local_rules = agents_text.split("`<standards-repository-local-rules>`", 1)[1].split(
         "`</standards-repository-local-rules>`", 1
     )[0]
@@ -1500,7 +1503,10 @@ def test_root_always_on_token_budget_contract_uses_validator_constants() -> None
     )
     assert "AGENTS.md exceeds the canonical always-on " in validator_text
     assert "soft target" in validator_text
-    # `make token-risks` is repository-local validation guidance in AGENTS.md.
+    # Local validator commands stay in standards-repository-local-rules.
+    assert "`make token-risks`" not in shared_baseline
+    assert "`python3 ./.github/scripts/detect_token_risks.py --root .`" not in shared_baseline
     assert "`make token-risks`" in local_rules
+    assert "`python3 ./.github/scripts/detect_token_risks.py --root .`" in local_rules
     assert "`make token-risks`" in agents_text
     assert set(calculated_estimates) == set(ROOT_ALWAYS_ON_PATHS)
