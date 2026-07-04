@@ -36,6 +36,10 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Keep `SKILL.md` lean and move deeper material into `references/` or reusable tools only when justified.
 - If the skill sits behind a paired agent, keep route and boundary language out of `SKILL.md`.
 - Preserve a working `description:` during token cuts unless the baseline shows routing is wrong.
+- When touching a skill bundle, verify that the bundle stays self-contained by
+  default: required instructions, examples, fixtures, metadata, and
+  deterministic automation should live inside the bundle unless the contract
+  explicitly documents an exception.
 - For material skill-bundle revisions, measure the touched bundle or loaded files before and after the first material patch with the same token estimate; if no exact script exists, state the closest measurement.
 - Prefer focused references or reusable scripts over broad context dumps when a change needs supporting detail.
 - Cross-reference reusable material instead of restating it.
@@ -44,6 +48,9 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Prefer moving static lookup tables, starter templates, and detailed taxonomies into `references/`.
 - Prefer new `references/` over new `scripts/` unless the workflow is deterministic, repeated, and execution-heavy.
 - If the skill must stay direct-copy portable or runnable outside the source repository, keep the required deterministic automation, loaders, and dependency bootstrap inside the bundle; repository scripts may wrap that engine but should not be the only runnable owner.
+- Prefer bundle-relative self-references to files under `references/`,
+  `scripts/`, and `fixtures/` over repository-rooted paths to the same bundle
+  files.
 - Reference other skills by skill name and owner behavior, not by file paths inside their bundles.
 - Keep `## Referenced skills` as an audit index: one backticked skill name plus one short owner-behavior phrase per item, or `- None.` when no other skill is referenced.
 - Update the referenced-skill index whenever the body adds, removes, renames, routes to, delegates to, or compares against another skill.
