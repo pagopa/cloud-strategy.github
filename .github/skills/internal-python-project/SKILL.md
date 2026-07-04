@@ -8,7 +8,6 @@ description: Use when creating or modifying Python package or application code w
 ## Referenced skills
 
 - `internal-python-script`: route CLI adapters, direct operator execution, and rich console reporting boundaries.
-- `internal-tdd`: load for bugfixes, features, or project behavior changes with a meaningful public or service seam.
 
 ## When to use
 
@@ -62,7 +61,7 @@ Load `references/logging-and-reporting.md` when project code needs a professiona
 - BDD-like names: `given_when_then` style.
 - Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
 - Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.
-- For bugfixes, features, and intentional behavior changes, start test-first through the public API, service boundary, adapter contract, or framework-owned seam: add or update the failing test, confirm it fails for the intended reason, then implement the smallest fix.
+- For bugfixes, features, and intentional behavior changes, follow the repository test strategy for the task and keep the most meaningful public API, service boundary, adapter contract, or framework-owned seam under focused test coverage.
 - For refactors, prose-only updates, generated fixtures, or mechanical formatting with no executable behavior change, run existing focused tests and syntax validation instead of manufacturing speculative tests.
 
 ## Architecture and framework guidance
