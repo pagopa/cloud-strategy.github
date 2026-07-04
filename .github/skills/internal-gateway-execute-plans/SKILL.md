@@ -10,10 +10,7 @@ gateway-only wrapper for approved retained plans. This skill does not replace `s
 ## Referenced Skills
 
 - `superpowers-executing-plans`: required execution engine for the plan steps.
-- `superpowers-subagent-driven-development`: preferred when same-session subagents are available and the execution path supports them.
 - `superpowers-verification-before-completion`: evidence gate before completion claims when fresh validation is required.
-- `internal-gateway-writing-plans`: owner of retained-plan authoring contracts.
-- `internal-gateway-review`: owner when the next risk is correctness evidence.
 
 ## When To Use
 
@@ -23,10 +20,20 @@ gateway-only wrapper for approved retained plans. This skill does not replace `s
 
 ## When Not To Use
 
-- Writing or reformulating a plan; use `internal-gateway-writing-plans`.
-- Reviewing or challenging a plan; use `internal-gateway-review` or `internal-gateway-critical-master`.
+- Writing or reformulating a plan.
+- Reviewing or challenging a plan.
 - Executing `questions.md` or unapproved planning notes.
 - Changing `superpowers-executing-plans`; this wrapper must not patch imported Superpowers behavior.
+
+## Execution Discipline
+
+- Plan-bound execution: follow the approved retained plan and stop when the plan is no longer executable as written.
+- DRY: do not duplicate gateway workflow logic, status-file handling, validation reporting, or source logic when an existing owner already provides it.
+- YAGNI: do not add speculative helpers, abstractions, configuration, or future-proofing beyond the approved plan.
+- KISS: prefer the simplest coherent change that satisfies the plan and remains readable.
+- Separation of Concerns: keep execution, status files, validation evidence, planning, review, critique, and domain implementation responsibilities separate.
+- single responsibility: each new helper, script, section, or code path must have one clear reason tied to the active task.
+- Fail-fast on drift: stop and record the defect when the plan forces confusing code, duplicated logic, missing validation, owner conflict, or scope drift.
 
 ## Wrapper Contract
 

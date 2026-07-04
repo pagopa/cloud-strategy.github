@@ -84,6 +84,33 @@ def test_executing_plans_is_lightweight_superpowers_wrapper() -> None:
     assert "Legacy Contract Boundary" in executing_text
 
 
+def test_executing_plans_gateway_referenced_skills_are_narrow() -> None:
+    executing_text = read_text(".github/skills/internal-gateway-execute-plans/SKILL.md")
+
+    assert executing_text.index("# Internal Gateway Execute Plans") < executing_text.index(
+        "## Referenced Skills"
+    )
+    assert executing_text.index("## Referenced Skills") < executing_text.index(
+        "## When To Use"
+    )
+    assert "superpowers-executing-plans" in executing_text
+    assert "superpowers-verification-before-completion" in executing_text
+    assert "superpowers-subagent-driven-development" not in executing_text
+    assert "internal-gateway-writing-plans" not in executing_text
+    assert "internal-gateway-review" not in executing_text
+    assert "internal-gateway-critical-master" not in executing_text
+    assert "internal-tdd" not in executing_text
+    assert "superpowers-test-driven-development" not in executing_text
+    assert "## Execution Discipline" in executing_text
+    assert "Plan-bound execution" in executing_text
+    assert "DRY" in executing_text
+    assert "YAGNI" in executing_text
+    assert "KISS" in executing_text
+    assert "Separation of Concerns" in executing_text
+    assert "single responsibility" in executing_text
+    assert "Fail-fast on drift" in executing_text
+
+
 def test_gateway_handoff_references_use_canonical_execution_owner() -> None:
     compatibility_text = read_text(
         ".github/skills/internal-gateway-idea-brainstorming/references/compatibility-matrix.md"
