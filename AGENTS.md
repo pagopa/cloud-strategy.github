@@ -48,6 +48,8 @@ This block is the portable source baseline used to generate
   ownership boundaries, and routing anchors.
 - Do not put operational procedures, checklists, file-shape recipes, command
   playbooks, or tool-specific workflows here.
+- `tmp/` is temporary support only. Treat its contents as disposable working
+  artifacts and do not commit files from `tmp/`.
 
 ## Authoring Defaults
 
