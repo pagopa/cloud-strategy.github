@@ -133,5 +133,9 @@ as consumer-repository defaults without an explicit sync contract change.
   stay outside `docs/` unless a narrower owner explicitly says otherwise.
 - Consumer or target repositories own their local override layers after
   materialization.
+- Skill bundles under `.github/skills/**` must be self-contained. Keep
+  instructions, references, examples, fixtures, scripts, and `agents/openai.yaml`
+  resolvable from the bundle itself; do not require bundle users to load
+  guidance from outside the skill directory.
 
 `</standards-repository-local-rules>`
