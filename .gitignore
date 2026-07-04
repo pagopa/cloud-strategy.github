@@ -23,4 +23,4 @@ env/
 .opencode/*
 .github/scripts/lib/graphify-out/*
 .github/scripts/graphify-out/*
-tmp/
+tmp/*
