@@ -85,7 +85,9 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 
 - Optional: `scripts/validate_critical_output.py` checks a rendered output against the contract in `references/output-contract.md`.
 - The optional validator and its pure helper live inside this skill bundle so the skill can be copied without depending on repo-global Python modules.
-- Bundle-level budget is owned by the repo-wide token checks; routing into the skill is owned by the calling gateway.
+- Reuse `fixtures/critical_output_valid.md` and sibling fixture samples instead of repeating long inline payloads.
+- Follow `references/maintenance-guidance.md` for fixture reuse, cache-aware search discipline, and analyzer boundary checks.
+- Keep this bundle self-contained: do not require instructions, examples, or enforcement rules from outside this directory.
 
 ## Outcome meanings
 

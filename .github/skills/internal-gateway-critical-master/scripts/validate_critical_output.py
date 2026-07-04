@@ -2,9 +2,9 @@
 """Validate a critical-master output Markdown against the output contract.
 
 Usage examples:
-  python3 ./.github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py --file tests/fixtures/critical_output_good.md
-  python3 ./.github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py --file output.md --format json
-  python3 ./.github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py --file output.md --strict
+  python3 scripts/validate_critical_output.py --file fixtures/critical_output_valid.md
+  python3 scripts/validate_critical_output.py --file fixtures/critical_output_invalid_missing_section.md --format json
+  python3 scripts/validate_critical_output.py --file fixtures/critical_output_advisory.md --strict
 """
 
 from __future__ import annotations
@@ -385,7 +385,6 @@ def _compact_payload(findings: list[Finding]) -> dict[str, object]:
 
 def render_text(findings: list[Finding]) -> None:
     if not findings:
-        log_info("Output passes the contract.")
         return
     for finding in findings:
         marker = "BLOCKING" if finding.severity == "blocking" else "advisory"
