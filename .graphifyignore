@@ -1,4 +1,9 @@
 /graphify-out/
+/tmp/
+tmp/
+tmp/external-refresh/
+tmp/upstream-refresh/
+**/.git/
 /.graphify_*
 __pycache__/
 *.py[cod]
@@ -7,4 +12,3 @@ __pycache__/
 .ruff_cache/
 .venv/
 venv/
-

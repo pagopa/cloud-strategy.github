@@ -72,7 +72,8 @@ def test_root_files_define_scoped_instruction_loading_for_manual_runtimes() -> N
     assert "bridge" not in agents_text.lower()
 
     assert "`<shared-baseline>`" in agents_text
-    assert "This block is the portable baseline" in agents_text
+    assert "portable source baseline" in agents_text
+    assert "`~/.agents/AGENTS.md`" in agents_text
     assert "`<standards-repository-local-rules>`" in agents_text
     assert "This block applies only to this standards repository." in agents_text
 
@@ -92,18 +93,17 @@ def test_agents_keeps_only_intentional_root_level_workflows() -> None:
     assert "tool-specific workflows here" in agents_text
     assert "Do not duplicate skill-owned paths" in agents_text
     assert "## graphify" in agents_text
-    assert "When the user types `/graphify`" in agents_text
+    assert "Use graphify first" in agents_text
+    assert "`graphify-out/graph.json` exists or graphify" in agents_text
     assert 'graphify query "<question>"' in agents_text
-    assert (
-        "Only skip graphify if the task is about stale or incorrect graph output"
-        in agents_text
-    )
+    assert "If graphify is unavailable or has no useful state" in agents_text
 
 
 def test_internal_contract_tracks_current_root_policy_shape() -> None:
     internal_contract_text = read_text("INTERNAL_CONTRACT.md")
 
     assert "portable `<shared-baseline>` block" in internal_contract_text
+    assert "global `~/.agents/AGENTS.md` baseline" in internal_contract_text
     assert "`<standards-repository-local-rules>` block" in internal_contract_text
     assert "compact graph orientation rules" in internal_contract_text
     assert (
@@ -117,9 +117,12 @@ def test_agents_tactical_defaults_include_compact_context_discipline() -> None:
 
     assert "## Tactical Defaults" in agents_text
     assert "Preserve compact working state across turns" in agents_text
-    assert "Keep one active primary owner per execution lane" in agents_text
     assert "Use bounded evidence" in agents_text
-    assert "Name the validation path early" in agents_text
+    assert "For small, deterministic, low-risk tasks" in agents_text
+    assert (
+        "For non-trivial, ambiguous, architectural, policy, contract, or multi-step"
+        in agents_text
+    )
 
 
 def test_lightweight_skill_references_stay_on_demand() -> None:

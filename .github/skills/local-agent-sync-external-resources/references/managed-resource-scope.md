@@ -26,14 +26,14 @@ wrapper agent.
 Sources:
 
 - Agents:
-  `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/agents`
-  (commit date: 2026-05-15)
+  `https://github.com/github/awesome-copilot/tree/e986f49695491311df2774030ebe11efabd0fb77/agents`
+  (commit date: 2026-07-03)
 - Skills:
-  `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/skills`
-  (commit date: 2026-05-15)
+  `https://github.com/github/awesome-copilot/tree/e986f49695491311df2774030ebe11efabd0fb77/skills`
+  (commit date: 2026-07-03)
 - Retired instruction source:
-  `https://github.com/github/awesome-copilot/tree/4e4b34c48d3f50934a7a073aed0d05fd46e99b09/instructions`
-  (commit date: 2026-05-15; alert-only watchlist, not managed source scope)
+  `https://github.com/github/awesome-copilot/tree/e986f49695491311df2774030ebe11efabd0fb77/instructions`
+  (commit date: 2026-07-03; alert-only watchlist, not managed source scope)
 
 Managed assets:
 
@@ -54,8 +54,8 @@ their content has a repository-owned replacement owner.
 Source:
 
 - Skills:
-  `https://github.com/obra/superpowers/tree/f2cbfbefebbfef77321e4c9abc9e949826bea9d7/skills`
-  (release tag: v5.1.0)
+  `https://github.com/obra/superpowers/tree/d884ae04edebef577e82ff7c4e143debd0bbec99/skills`
+  (release tag: v6.1.1; commit date: 2026-07-02)
 
 Managed skills:
 
@@ -76,21 +76,13 @@ Managed skills:
   `superpowers-verification-before-completion`; `writing-plans` ->
   `superpowers-writing-plans`.
 
-Approved in-place overrides:
-
-- `superpowers-verification-before-completion`: replay
-  `superpowers-verification-before-completion-compact-evidence-reporting`
-  after each refresh so long verification output is summarized by command,
-  exit code, counts, schema checks, changed files, and exact gaps without
-  weakening the upstream evidence-before-claims rule.
-
 ### `hashicorp/agent-skills`
 
 Source:
 
 - Skills:
-  `https://github.com/hashicorp/agent-skills/tree/43ca9b0cde131e20a129c106bc9f6b6f9f1e5c9a/terraform/code-generation/skills`
-  (commit date: 2026-05-11)
+  `https://github.com/hashicorp/agent-skills/tree/339a113935812ad75c6ff90d418b739a021826d1/terraform/code-generation/skills`
+  (commit date: 2026-05-28)
 
 Managed skills:
 
@@ -102,15 +94,18 @@ Managed skills:
 Sources:
 
 - Engineering skills:
-  `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/engineering`
-  (commit date: 2026-05-13)
+  `https://github.com/mattpocock/skills/tree/efa058a349f5ce98b6115bf8b4e0d0ef9c310e0d/skills/engineering`
+  (commit date: 2026-07-03)
 - Productivity skills:
-  `https://github.com/mattpocock/skills/tree/e74f0061bb67222181640effa98c675bdb2fdaa7/skills/productivity`
-  (commit date: 2026-05-13)
+  `https://github.com/mattpocock/skills/tree/efa058a349f5ce98b6115bf8b4e0d0ef9c310e0d/skills/productivity`
+  (commit date: 2026-07-03)
 
 Managed skills:
 
-- `caveman` -> `mattpocock-caveman`; `grill-me` -> `grill-me`.
+- `grill-me` -> `grill-me`.
+- `caveman` -> `mattpocock-caveman` remains retained from the previous
+  managed snapshot because `caveman` is absent from the current
+  `mattpocock/skills` HEAD.
 
 Approved in-place overrides:
 
@@ -127,11 +122,11 @@ the alert-only watchlist owned by `local-agent-sync-external-resources`.
 Sources:
 
 - Curated skills:
-  `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.curated`
-  (commit date: 2026-05-12)
+  `https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated`
+  (commit date: 2026-06-23)
 - System skills:
-  `https://github.com/openai/skills/tree/c25113bf4c64c8dba6bfe61acf06051d79aa43f6/skills/.system`
-  (commit date: 2026-05-12)
+  `https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.system`
+  (commit date: 2026-06-23)
 - Retained document skill:
   `https://github.com/openai/skills/tree/45d05d75363abf13f99d09e899d61e07b8010685/skills/.curated/doc`
   (commit date: 2026-05-01; absent from current pinned upstream)
@@ -165,8 +160,8 @@ Approved in-place overrides:
 Source:
 
 - Skills:
-  `https://github.com/sickn33/antigravity-awesome-skills/tree/2e0c5a9cbf515a0611afcec73ef2a6644c4191e3/skills`
-  (release tag: v11.3.0)
+  `https://github.com/sickn33/antigravity-awesome-skills/tree/8946c6cdc8468183426d52f85054639b3e1844ae/skills`
+  (release tag: v13.9.0; commit date: 2026-07-03)
 
 Managed skills:
 

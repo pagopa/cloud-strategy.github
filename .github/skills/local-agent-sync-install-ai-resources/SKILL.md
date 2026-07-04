@@ -95,7 +95,7 @@ Stop and report when any of these occur:
 - Block writes when runtime support is undocumented, target paths are unsafe, ownership evidence is missing, the manifest is corrupt, or the source root sits under home sync state.
 - Use `--retire-targets` when the managed target set should shrink, for example removing `opencode` while keeping `codex` and `copilot`.
 - Accept `codex`, `copilot`, `opencode`, comma-separated combinations, `cross`, `all`, or `tutto`; normalize and order targets deterministically.
-- Keep `references/home-sync-catalog.yaml` as policy and explicit non-skill resources only; skill bundles are auto-discovered from `.github/skills/` when `include_unlisted_skills` is true.
+- Keep `references/home-sync-catalog.yaml` as policy and explicit non-skill resources only; skill bundles are auto-discovered from `.github/skills/` when `include_unlisted_skills` is true. Use catalog defaults to exclude home-kept skills from future install and bisync lanes and to declare whether unmanaged home skill bundles must block or be adopted with repo-wins behavior.
 
 ## Bisync Lane
 
@@ -119,7 +119,7 @@ Every report must be summary-first and start with one status line that includes 
 Then follow the exact text layout in `references/sync-contract.md`:
 
 - `doctor`: `Status`, `Summary`, `Readiness`, `Validation`, and `Next`. Show non-ok readiness checks and tell the user what blocks the next write.
-- `sync`: `Status`, `Summary`, `Auto-applied`, `Stopped on`, `Validation`, and `Next`. Summarize counts first, then show only the copied resources and the exact drift or blockers that stopped completion.
+- `sync`: `Status`, `Summary`, `Auto-applied` or `Planned repo-to-home copies`, `Stopped on`, `Validation`, and `Next`. Summarize counts first, then show only the copied resources when writes occurred, or the planned copies when install review stopped the run before writing, plus the exact drift or blockers that stopped completion.
 - `plan`, `audit`, and `bisync plan`: a compact summary, a change table when there are changes, and an attention table when there are blockers or drift decisions. For every proposed modification, explain the decision cause, for example repo copy is newer, home copy is newer, a managed resource is stale, or runtime support is not documented enough for apply.
 - `apply` and `bisync apply`: a compact summary, an actions-performed table for writes, and a residual-issues table when needed. List copied, updated, pruned, or created resources and state why they were handled that way and how they were verified. Summarize unchanged managed resources by count instead of listing every skip.
 
@@ -135,7 +135,7 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 When plan, audit, or sync reports blocked paths, resolve them before apply:
 
-- `target-exists-unmanaged`: target content exists at home but is not manifest-managed. Review and move or remove it manually before rerunning plan.
+- `target-exists-unmanaged`: target content exists at home but is not manifest-managed. Review and move or remove it manually before rerunning plan unless the active catalog policy explicitly adopts unmanaged skills with repo-wins behavior.
 - `target-modified-managed`: manifest-managed content diverged from the recorded hash. If home is clearly newer, let bisync surface the explicit home-to-repo decision; if it persists after verified bisync reconciliation, treat it as real local divergence.
 - `stale-managed`: previously managed content is no longer planned. Re-run with `--prune-managed` only after review.
 - `retire-target-overlap`: the same target was requested as active and retired. Remove the overlap and rerun.

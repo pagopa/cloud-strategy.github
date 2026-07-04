@@ -74,7 +74,10 @@ retire, and anti-drift procedure in the paired core skill.
   `.github/skills/local-agent-sync-external-resources/references/managed-resource-scope.md`
   for the exact upstream family map, retained support-only office posture, and
   approved imported-override context.
-- Active `mattpocock/skills` imports in scope remain `caveman` -> `mattpocock-caveman` and `grill-me` -> `grill-me`; keep retired Matt Pocock imports out of the live managed scope.
+- Active `mattpocock/skills` imports in scope are `grill-me` -> `grill-me`
+  plus retained `caveman` -> `mattpocock-caveman` from the previous managed
+  snapshot while `caveman` is absent from current upstream; keep retired Matt
+  Pocock imports out of the live managed scope.
 - Do not add new prefixes, external families, compatibility aliases, or hidden
   imported forks unless the user explicitly expands scope.
 - When catalog meaning changes, re-check root `AGENTS.md`,
@@ -96,3 +99,12 @@ In `Outcome`, include:
 - `Validation`: commands run and remaining gaps.
 - `Remaining blockers or drift`: unresolved issues that prevent or narrow
   `apply`.
+
+Add the following outcome details when refresh execution is involved:
+
+- `Workspace guard`: where upstream snapshots were staged and whether the
+  bundled workspace guard passed.
+- `Graphify guard`: whether graphify ran after repo-local refresh leftovers
+  were absent.
+- `Scoped validation`: whether whitespace and diff checks were scoped away from
+  verbatim upstream content, with any accepted upstream notices named.

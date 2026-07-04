@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: Interview the user relentlessly about a plan, design, or action context until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, confirm context before starting, or mentions "grill me".
+description: A relentless interview to sharpen a plan or design.
 ---
 
 # Grill Me

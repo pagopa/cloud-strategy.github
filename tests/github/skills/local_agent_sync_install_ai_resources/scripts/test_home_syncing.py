@@ -235,6 +235,57 @@ def test_build_home_sync_plan_blocks_unmanaged_targets_and_docs_unverified_apply
     assert "docs-unverified" not in operation_codes
 
 
+def test_build_home_sync_plan_adopts_unmanaged_skills_when_repo_wins_policy_is_enabled(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source"
+    home_root = tmp_path / "home"
+    initialize_source_repo(source_root)
+    catalog_path = (
+        source_root
+        / ".github/skills/local-agent-sync-install-ai-resources/references/home-sync-catalog.yaml"
+    )
+    catalog_path.write_text(
+        "version: 1\n"
+        "defaults:\n"
+        "  include_internal_skills: false\n"
+        "  include_local_skills: false\n"
+        "  include_unlisted_skills: false\n"
+        "  unmanaged_existing_skills_policy: repo-wins\n"
+        "resources:\n"
+        "  - resource_id: demo-skill\n"
+        "    source_family: skills\n"
+        "    source_path: .github/skills/demo-skill\n"
+        "    include_targets:\n"
+        "      - codex\n"
+        "      - opencode\n"
+        "    target_support: Documented\n"
+        "    notes: Demo bundle.\n",
+        encoding="utf-8",
+    )
+
+    unmanaged_target = home_root / ".agents/skills/demo-skill"
+    write_file(unmanaged_target / "SKILL.md", "# unmanaged\n")
+
+    plan = build_home_sync_plan(
+        source_root=source_root,
+        home_root=home_root,
+        targets=parse_targets("skills"),
+        mode="apply",
+    )
+    actions_by_resource = {
+        operation.resource_id: operation.action
+        for operation in plan.operations
+        if operation.resource_id
+    }
+    operation_codes = {
+        operation.code for operation in plan.operations if operation.code
+    }
+
+    assert actions_by_resource["demo-skill"] == "copy"
+    assert "target-exists-unmanaged" not in operation_codes
+
+
 def test_apply_home_sync_plan_creates_missing_dirs_with_flag_and_writes_manifest(
     tmp_path: Path,
 ) -> None:
@@ -843,6 +894,7 @@ def test_apply_can_retire_selected_targets_without_touching_remaining_targets(
 def test_home_sync_catalog_does_not_contain_internal_graphify_in_real_repo() -> None:
     catalog = home_syncing.load_home_sync_catalog(REPO_ROOT)
     resource_ids = {resource.resource_id for resource in catalog}
+    assert "graphify" not in resource_ids
     assert "internal-graphify" not in resource_ids
 
 
@@ -850,3 +902,16 @@ def test_home_sync_catalog_contains_internal_ai_resource_review_in_real_repo() -
     catalog = home_syncing.load_home_sync_catalog(REPO_ROOT)
     resource_ids = {resource.resource_id for resource in catalog}
     assert "internal-ai-resource-review" in resource_ids
+
+
+def test_home_sync_catalog_keeps_skill_and_agent_variants_for_gateway_ids_in_real_repo() -> (
+    None
+):
+    catalog = home_syncing.load_home_sync_catalog(REPO_ROOT)
+    resources = {
+        (resource.resource_id, resource.source_family): resource.source_path
+        for resource in catalog
+    }
+
+    assert ("internal-gateway-simple-task", "skills") in resources
+    assert ("internal-gateway-simple-task", "agents") in resources

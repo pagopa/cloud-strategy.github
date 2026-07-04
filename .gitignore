@@ -20,7 +20,7 @@ env/
 /graphify-out/
 /.graphify_*
 .codex/hooks.json
-.opencode/opencode.json
-.opencode/plugins/graphify.js
+.opencode/*
 .github/scripts/lib/graphify-out/*
 .github/scripts/graphify-out/*
+tmp/

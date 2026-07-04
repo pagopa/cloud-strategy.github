@@ -19,6 +19,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from home_sync_contract import load_home_sync_policy
 from home_syncing import reconcile_manifest_entry_after_bisync_copy
 from sync_output import build_compact_bisync_output, render_bisync_report
 
@@ -200,6 +201,7 @@ def build_bisync_plan(
     *,
     mode: str = "plan",
 ) -> BisyncPlan:
+    policy = load_home_sync_policy(source_root)
     source_skills = source_root / ".github" / "skills"
     home_skills = home_root / ".agents" / "skills"
 
@@ -243,12 +245,16 @@ def build_bisync_plan(
     repo_names = {
         p.name
         for p in source_skills.iterdir()
-        if p.is_dir() and not p.name.startswith(EXCLUDED_BUNDLE_PREFIX)
+        if p.is_dir()
+        and not p.name.startswith(EXCLUDED_BUNDLE_PREFIX)
+        and p.name not in policy.excluded_skills
     }
     home_names = {
         p.name
         for p in home_skills.iterdir()
-        if p.is_dir() and not p.name.startswith(EXCLUDED_BUNDLE_PREFIX)
+        if p.is_dir()
+        and not p.name.startswith(EXCLUDED_BUNDLE_PREFIX)
+        and p.name not in policy.excluded_skills
     }
     all_names = sorted(repo_names | home_names)
 

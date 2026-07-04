@@ -5,7 +5,7 @@ description: Use when completing tasks, implementing major features, or before m
 
 # Requesting Code Review
 
-Request `internal-gateway-review` to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation, never your session's history. This keeps the reviewer focused on the work product and preserves your own context for continued work.
+Request `internal-gateway-review` to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation and preserves your own context for continued work.
 
 **Core principle:** Review early, review often.
 
@@ -31,7 +31,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 **2. Prepare review-mode request:**
 
-Use a user-visible `internal-gateway-review` request and fill the template at `code-reviewer.md`
+Use a user-visible `internal-gateway-review` request, filling the template at [code-reviewer.md](code-reviewer.md)
 
 **Placeholders:**
 - `{DESCRIPTION}` - Brief summary of what you built
@@ -100,4 +100,4 @@ You: [Fix progress indicators]
 - Show code/tests that prove it works
 - Request clarification
 
-See template at: requesting-code-review/code-reviewer.md
+See template at: [code-reviewer.md](code-reviewer.md)

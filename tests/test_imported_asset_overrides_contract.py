@@ -26,14 +26,8 @@ def test_imported_asset_override_registry_tracks_expected_imported_targets() -> 
 
     assert payload["policy"]["default_rule"] == "keep imported upstream assets verbatim"
     assert targets == {
-        ".github/skills/superpowers-brainstorming/SKILL.md",
-        ".github/skills/superpowers-writing-plans/SKILL.md",
-        ".github/skills/superpowers-test-driven-development/SKILL.md",
-        ".github/skills/superpowers-subagent-driven-development/SKILL.md",
-        ".github/skills/superpowers-requesting-code-review/SKILL.md",
         ".github/skills/grill-me/SKILL.md",
         ".github/skills/openai-spreadsheet/SKILL.md",
-        ".github/skills/superpowers-verification-before-completion/SKILL.md",
     }
     assert all(
         entry["approval"] == "explicit-user-counter-validated" for entry in overrides
@@ -97,3 +91,22 @@ def test_imported_asset_override_policy_is_visible_in_canonical_and_sync_assets(
         "approved imported-asset override registry plus replay patches"
         in target_sync_skill_text
     )
+
+
+def test_external_refresh_skill_points_to_execution_guardrails() -> None:
+    skill = Path(
+        ".github/skills/local-agent-sync-external-resources/SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "references/refresh-execution-guardrails.md" in skill
+    assert "check_external_refresh_workspace.py" in skill
+
+
+def test_external_refresh_agent_reports_workspace_and_graphify_guard() -> None:
+    agent = Path(".github/agents/local-sync-external-resources.agent.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "Workspace guard" in agent
+    assert "Graphify guard" in agent
+    assert "Scoped validation" in agent

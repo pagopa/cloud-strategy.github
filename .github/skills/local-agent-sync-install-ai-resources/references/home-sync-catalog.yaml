@@ -3,6 +3,9 @@ defaults:
   include_internal_skills: true
   include_local_skills: false
   include_unlisted_skills: true
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills:
+    - graphify
   skill_targets:
     - codex
     - copilot

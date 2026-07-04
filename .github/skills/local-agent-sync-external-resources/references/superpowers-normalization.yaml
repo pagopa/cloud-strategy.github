@@ -1,6 +1,6 @@
 version: 1
 source_family: obra/superpowers
-source_ref: f2cbfbefebbfef77321e4c9abc9e949826bea9d7
+source_ref: d884ae04edebef577e82ff7c4e143debd0bbec99
 local_prefix: superpowers-
 blocked_local_prefixes:
   - obra-
@@ -45,17 +45,6 @@ managed_skills:
   - upstream: writing-plans
     legacy_local: obra-writing-plans
     local: superpowers-writing-plans
-managed_patches:
-  - legacy_path: patches/obra-brainstorming.patch
-    path: patches/superpowers-brainstorming.patch
-  - legacy_path: patches/obra-writing-plans.patch
-    path: patches/superpowers-writing-plans.patch
-  - legacy_path: patches/obra-test-driven-development.patch
-    path: patches/superpowers-test-driven-development.patch
-  - legacy_path: patches/obra-subagent-driven-development.patch
-    path: patches/superpowers-subagent-driven-development.patch
-  - legacy_path: patches/obra-requesting-code-review.patch
-    path: patches/superpowers-requesting-code-review.patch
 live_scan:
   include:
     - .github/agents

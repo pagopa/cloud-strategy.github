@@ -132,15 +132,23 @@ def render_sync_report(payload: dict[str, object]) -> str:
     )
     lines.append("")
 
-    lines.extend(_report_section("Auto-applied"))
+    (
+        auto_applied_section,
+        auto_applied_reason_column,
+        auto_applied_omitted_label,
+        auto_applied_none_reason,
+    ) = _sync_apply_section_labels(
+        install_payload if isinstance(install_payload, dict) else {}
+    )
+    lines.extend(_report_section(auto_applied_section))
     lines.extend(
         _table_lines(
-            ["Skill or path", "Why copied", "Verification"],
+            ["Skill or path", auto_applied_reason_column, "Verification"],
             _bounded_rows(
                 _sync_auto_applied_rows(install_payload if isinstance(install_payload, dict) else {}),
-                "auto-applied",
+                auto_applied_omitted_label,
             ),
-            none_row=["none", "No safe repo-to-home copy was applied.", "none"],
+            none_row=["none", auto_applied_none_reason, "none"],
         )
     )
     lines.append("")
@@ -314,6 +322,24 @@ def _sync_auto_applied_rows(install_payload: dict[str, object]) -> list[list[str
         reason = str(operation.get("reason") or "Repo-to-home copy applied.")
         rows.append([item, reason, verification])
     return rows
+
+
+def _sync_apply_section_labels(install_payload: dict[str, object]) -> tuple[str, str, str, str]:
+    operations = install_payload.get("operations")
+    manifest_path = install_payload.get("manifest_path")
+    if isinstance(manifest_path, str) and manifest_path:
+        return ("Auto-applied", "Why copied", "auto-applied", "No safe repo-to-home copy was applied.")
+    if isinstance(operations, list) and any(
+        isinstance(operation, dict) and str(operation.get("action") or "") == "copy"
+        for operation in operations
+    ):
+        return (
+            "Planned repo-to-home copies",
+            "Why this is planned",
+            "planned copy",
+            "No safe repo-to-home copy is planned.",
+        )
+    return ("Auto-applied", "Why copied", "auto-applied", "No safe repo-to-home copy was applied.")
 
 
 def _sync_stopped_rows(
