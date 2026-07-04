@@ -83,7 +83,8 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 
 ## Tooling
 
-- Optional: `validate_critical_output.py` checks a rendered output against the contract in `references/output-contract.md`.
+- Optional: `scripts/validate_critical_output.py` checks a rendered output against the contract in `references/output-contract.md`.
+- The optional validator and its pure helper live inside this skill bundle so the skill can be copied without depending on repo-global Python modules.
 - Bundle-level budget is owned by the repo-wide token checks; routing into the skill is owned by the calling gateway.
 
 ## Outcome meanings
