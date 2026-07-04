@@ -55,7 +55,7 @@ Load `references/examples.md` when you need a minimal module or test example.
 
 - Follow the repository test-stack defaults.
 - If the repository already uses Jest, stay with local Jest conventions instead of introducing mixed test stacks.
-- For behavior changes or bug fixes, write or update the failing test first, then implement and re-run.
+- For behavior changes or bug fixes, keep focused tests on observable module, API, adapter, or boundary behavior and rerun the smallest meaningful test set before widening scope.
 - For pure refactors, run existing tests before and after while keeping public behavior unchanged.
 - Prefer parameterized table-style tests when many input/output cases exercise one behavior.
 - Mock only external boundaries and keep internal modules real where practical.

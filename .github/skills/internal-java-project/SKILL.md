@@ -56,7 +56,7 @@ Load `references/examples.md` when you need a minimal class or test example.
 - Use `@ParameterizedTest`, `assertAll`, `@Nested`, and `@Tag` when they improve test clarity rather than just adding ceremony.
 - Use Spring test slices such as `@WebMvcTest` or `@DataJpaTest` before defaulting to full-context tests.
 - Use Testcontainers when integration tests need real databases or external dependencies.
-- For behavior changes or bug fixes, write or update the failing test first, then implement and re-run.
+- For behavior changes or bug fixes, keep focused tests on observable service, controller, module, or boundary behavior and rerun the narrowest meaningful test set before widening scope.
 - For pure refactors, keep behavior stable and run compile plus existing tests before and after.
 - Mock only external boundaries and keep internal collaborators real where practical.
 - Prefer targeted coverage for changed behavior and boundary failures over broad percentage goals.
