@@ -119,7 +119,10 @@ def test_agents_tactical_defaults_include_compact_context_discipline() -> None:
     assert "Preserve compact working state across turns" in agents_text
     assert "Use bounded evidence" in agents_text
     assert "For small, deterministic, low-risk tasks" in agents_text
-    assert "For non-trivial, ambiguous, architectural, policy, contract, or multi-step" in agents_text
+    assert (
+        "For non-trivial, ambiguous, architectural, policy, contract, or multi-step"
+        in agents_text
+    )
 
 
 def test_lightweight_skill_references_stay_on_demand() -> None:

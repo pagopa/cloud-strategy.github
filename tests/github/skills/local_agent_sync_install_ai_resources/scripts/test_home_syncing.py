@@ -274,7 +274,9 @@ def test_build_home_sync_plan_adopts_unmanaged_skills_when_repo_wins_policy_is_e
         mode="apply",
     )
     actions_by_resource = {
-        operation.resource_id: operation.action for operation in plan.operations if operation.resource_id
+        operation.resource_id: operation.action
+        for operation in plan.operations
+        if operation.resource_id
     }
     operation_codes = {
         operation.code for operation in plan.operations if operation.code
@@ -902,7 +904,9 @@ def test_home_sync_catalog_contains_internal_ai_resource_review_in_real_repo() -
     assert "internal-ai-resource-review" in resource_ids
 
 
-def test_home_sync_catalog_keeps_skill_and_agent_variants_for_gateway_ids_in_real_repo() -> None:
+def test_home_sync_catalog_keeps_skill_and_agent_variants_for_gateway_ids_in_real_repo() -> (
+    None
+):
     catalog = home_syncing.load_home_sync_catalog(REPO_ROOT)
     resources = {
         (resource.resource_id, resource.source_family): resource.source_path

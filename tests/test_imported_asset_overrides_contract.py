@@ -103,9 +103,9 @@ def test_external_refresh_skill_points_to_execution_guardrails() -> None:
 
 
 def test_external_refresh_agent_reports_workspace_and_graphify_guard() -> None:
-    agent = Path(
-        ".github/agents/local-sync-external-resources.agent.md"
-    ).read_text(encoding="utf-8")
+    agent = Path(".github/agents/local-sync-external-resources.agent.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "Workspace guard" in agent
     assert "Graphify guard" in agent
