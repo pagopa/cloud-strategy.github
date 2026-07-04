@@ -9,17 +9,13 @@ description: Use when implementing any feature or bugfix, before writing impleme
 
 Write the test first. Watch it fail. Write minimal code to pass.
 
-Use this workflow when the outcome is executable and a failing test can prove the contract.
-
-Do not treat this workflow as the default for prompt, skill, agent, instruction, or Markdown authoring when the change is textual or governance-only and no meaningful test-first loop exists.
-
 **Core principle:** If you didn't watch the test fail, you don't know if it tests the right thing.
 
 **Violating the letter of the rules is violating the spirit of the rules.**
 
 ## When to Use
 
-**Always for executable behavior:**
+**Always:**
 - New features
 - Bug fixes
 - Refactoring
@@ -29,7 +25,6 @@ Do not treat this workflow as the default for prompt, skill, agent, instruction,
 - Throwaway prototypes
 - Generated code
 - Configuration files
-- Textual or governance-only authoring with no meaningful executable contract
 
 Thinking "skip TDD just this once"? Stop. That's rationalization.
 

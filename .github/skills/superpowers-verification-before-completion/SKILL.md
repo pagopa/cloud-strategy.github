@@ -37,13 +37,6 @@ BEFORE claiming any status or expressing satisfaction:
 Skip any step = lying, not verifying
 ```
 
-## Compact Evidence Reporting
-
-Read enough full output to judge the claim honestly. When the output is long,
-report the command, exit code, material counts, failing checks, header or
-schema checks, changed files, and the exact gap instead of pasting raw logs.
-Keep raw output only when the raw text itself is the disputed evidence.
-
 ## Common Failures
 
 | Claim | Requires | Not Sufficient |
