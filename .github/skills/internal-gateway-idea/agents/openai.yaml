@@ -1,0 +1,11 @@
+interface:
+  display_name: "Internal Gateway Idea"
+  short_description: "Idea brainstorming with assumption challenge"
+  default_prompt: >-
+    Use $internal-gateway-idea when a repository-owned idea, proposed direction,
+    unclear goal, or option set needs brainstorming before planning. Load $superpowers-brainstorming as the core workflow. Add the local Assumption
+    Challenge Gate, Alternative discovery, Critical Challenge Gate, and visible
+    spec-vs-plan decision from SKILL.md. Do not load grill-me. Load $internal-gateway-writing-plans only after the user approves retained spec
+    or implementation-plan writing.
+name: internal-gateway-idea
+description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, and a spec-vs-plan recommendation before implementation planning.

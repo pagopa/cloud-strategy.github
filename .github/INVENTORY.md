@@ -85,6 +85,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-execute-plans/SKILL.md`
 - `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
+- `.github/skills/internal-gateway-idea/SKILL.md`
 - `.github/skills/internal-gateway-review/SKILL.md`
 - `.github/skills/internal-gateway-simple-task/SKILL.md`
 - `.github/skills/internal-gateway-writing-plans/SKILL.md`
