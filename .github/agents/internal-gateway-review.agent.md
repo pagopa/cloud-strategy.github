@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-review
-description: "Use this agent when repository-owned work needs defect-first review, findings consolidation, and optional remediation planning without applying fixes."
+description: "Use this agent when repository-owned work needs defect-first review, findings consolidation, and a counter-checked verdict before fixes."
 tools: ["read", "search", "execute", "web"]
 disable-model-invocation: true
 agents: []

@@ -108,6 +108,7 @@ def build_scenario_report(root: Path) -> list[dict[str, Any]]:
 
 
 GATEWAY_SKILL = "internal-gateway-idea-brainstorming"
+REVIEW_GATEWAY_SKILL = "internal-gateway-review"
 
 GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
     "Direct execute": [GATEWAY_SKILL],
@@ -119,8 +120,7 @@ GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
     "Plan handoff": [GATEWAY_SKILL, "internal-gateway-writing-plans", "internal-agent-support-next-step"],
     "Approved apply-plan": [GATEWAY_SKILL, "internal-gateway-execute-plans"],
     "Review verdict": [
-        GATEWAY_SKILL, "internal-code-review", "internal-high-level-review",
-        "internal-gateway-critical-master",
+        REVIEW_GATEWAY_SKILL, "internal-gateway-critical-master",
     ],
 }
 

@@ -18,7 +18,7 @@ repo-only sync workflows.
 | Wrapper | Core skill | Use when |
 | --- | --- | --- |
 | `internal-gateway-idea-brainstorming` | `internal-gateway-idea-brainstorming` | A vague idea or unresolved goal needs definition and retained planning. |
-| `internal-gateway-review` | `internal-gateway-review` | A concrete artifact needs defect-first review and maybe remediation planning. |
+| `internal-gateway-review` | `internal-gateway-review` | A concrete artifact needs defect-first review before fixes. |
 | `internal-gateway-critical-master` | `internal-gateway-critical-master` | A proposal or plan needs pressure before action. |
 | `internal-gateway-simple-task` | `internal-gateway-simple-task` | A concrete low-to-medium-risk task can finish through one focused lane. |
 
