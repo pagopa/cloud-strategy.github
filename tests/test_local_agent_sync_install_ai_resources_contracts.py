@@ -15,12 +15,19 @@ SCRIPT_DIR = Path(
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from agent_translation import target_extension, translate_agent_for_target  # noqa: E402
-from bisync_skills import build_bisync_plan, run_bisync_apply, run_bisync_plan  # noqa: E402
-from home_sync_contract import load_home_sync_catalog, load_home_sync_policy  # noqa: E402
+from bisync_skills import (  # noqa: E402
+    build_bisync_plan,
+    run_bisync_apply,
+    run_bisync_plan,
+)
+from home_sync_contract import (  # noqa: E402
+    load_home_sync_catalog,
+    load_home_sync_policy,
+)
 from home_syncing import (  # noqa: E402
     HomeSyncOperation,
-    build_manifest_payload,
     build_home_sync_plan,
+    build_manifest_payload,
     parse_targets,
     state_root_for_home,
 )
@@ -59,7 +66,9 @@ def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -
     assert "internal-code-review" in payload["developer_instructions"]
 
 
-def test_load_home_sync_catalog_autodiscovers_skills_and_honors_policy(tmp_path: Path) -> None:
+def test_load_home_sync_catalog_autodiscovers_skills_and_honors_policy(
+    tmp_path: Path,
+) -> None:
     refs_dir = (
         tmp_path
         / ".github"
@@ -165,7 +174,9 @@ def test_build_bisync_plan_filters_local_and_excluded_bundles(tmp_path: Path) ->
     }
     assert "bisync-only-home" in plan.blocked_codes
     assert "bisync-only-repo" in plan.blocked_codes
-    assert all(drift.skill_name not in {"local-helper", "graphify"} for drift in plan.drifts)
+    assert all(
+        drift.skill_name not in {"local-helper", "graphify"} for drift in plan.drifts
+    )
 
 
 def test_install_auto_apply_blockers_require_explicit_review() -> None:
@@ -310,8 +321,12 @@ def test_fast_mode_does_not_filter_apply_catalog(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    normal = build_home_sync_plan(tmp_path, home_root, ("skills",), mode="apply", fast=False)
-    fast = build_home_sync_plan(tmp_path, home_root, ("skills",), mode="apply", fast=True)
+    normal = build_home_sync_plan(
+        tmp_path, home_root, ("skills",), mode="apply", fast=False
+    )
+    fast = build_home_sync_plan(
+        tmp_path, home_root, ("skills",), mode="apply", fast=True
+    )
 
     assert fast.source_resources_considered == normal.source_resources_considered == 2
 
@@ -353,8 +368,12 @@ def test_bisync_apply_requires_reviewed_plan_snapshot(
     (home_root / ".agents" / "skills").mkdir(parents=True)
 
     subprocess.run(["git", "init", "-q"], cwd=repo_root, check=True)
-    subprocess.run(["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True)
-    subprocess.run(["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True
+    )
     subprocess.run(["git", "add", "."], cwd=repo_root, check=True)
     subprocess.run(["git", "commit", "-qm", "init"], cwd=repo_root, check=True)
 
@@ -407,8 +426,12 @@ def test_bisync_apply_uses_matching_reviewed_plan_snapshot(
     (home_root / ".agents" / "skills").mkdir(parents=True)
 
     subprocess.run(["git", "init", "-q"], cwd=repo_root, check=True)
-    subprocess.run(["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True)
-    subprocess.run(["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True
+    )
     subprocess.run(["git", "add", "."], cwd=repo_root, check=True)
     subprocess.run(["git", "commit", "-qm", "init"], cwd=repo_root, check=True)
 
@@ -512,12 +535,24 @@ def test_cross_target_skill_plan_deduplicates_shared_paths(
         mode="plan",
     )
 
-    copy_paths = [operation.path for operation in plan.operations if operation.action == "copy"]
-    assert copy_paths.count(str((tmp_path / "home" / ".agents" / "skills" / "demo-skill").resolve())) == 1
+    copy_paths = [
+        operation.path for operation in plan.operations if operation.action == "copy"
+    ]
+    assert (
+        copy_paths.count(
+            str((tmp_path / "home" / ".agents" / "skills" / "demo-skill").resolve())
+        )
+        == 1
+    )
 
     manifest_payload = build_manifest_payload(plan)
     desired_paths = [
         resource["target_path"] for resource in manifest_payload["managed_resources"]
     ]
-    assert desired_paths.count(str((tmp_path / "home" / ".agents" / "skills" / "demo-skill").resolve())) == 1
+    assert (
+        desired_paths.count(
+            str((tmp_path / "home" / ".agents" / "skills" / "demo-skill").resolve())
+        )
+        == 1
+    )
     assert plan.source_resources_considered == 1
