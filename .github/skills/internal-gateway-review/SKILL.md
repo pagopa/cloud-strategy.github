@@ -8,6 +8,9 @@ description: Use when repository-owned work needs defect-first review of a concr
 ## Referenced skills
 
 - `internal-gateway-critical-master`: final autonomous counter-check when findings, no-finding verdicts, or next-action choices need pressure before action.
+- `internal-code-review`: route hint only when code-surface evidence needs deeper line-level review.
+- `internal-high-level-review`: route hint only when system-surface evidence needs broader architecture, workflow, or merge-risk review.
+- `internal-ai-resource-review`: route hint only when AI-resource evidence needs deeper bundle, lifecycle, or catalog review.
 
 Portable review gateway. Owns review scope, evidence discipline, findings
 consolidation, decision-usefulness, and final counter-check. It does not apply
@@ -16,6 +19,10 @@ fixes, author retained plans, or preload specialist review skills.
 Use the target itself to choose review depth. Keep review thinking local unless
 the user directly selected a specialist owner or a separate prompt already
 selected one.
+
+The specialist entries above are route hints, not preload instructions. Name the
+surface and likely next owner when deeper review is needed, but do not load a
+specialist just because its surface appears.
 
 Before any user-visible verdict, counter-check the analysis for evidence,
 severity, false positives, contrary evidence, scope narrowing, and decision
@@ -32,19 +39,25 @@ flowchart TD
   C --> D{Clarifying question changes the review?}
   D -->|Yes| E[Ask focused question block]
   E --> C
-  D -->|No| F[Select review surfaces]
-  F --> G[Inspect target or diff first]
-  G --> H[Find material defects]
-  H --> I[Counter-validate each finding]
-  I --> J{Finding survives?}
-  J -->|No| H
-  J -->|Yes| K[Prepare defect-first verdict]
-  K --> L[Run critical counter-check]
-  L --> M{Critical check passes?}
-  M -->|No| N[Reopen evidence, scope, or questions]
-  N --> C
-  M -->|Yes| O[Emit review decision]
-  O --> P[Stop before fixes]
+  D -->|No| F[Classify review surfaces]
+  F --> G{Primary surface}
+  G -->|Code| H[Review code surface locally]
+  G -->|System| I[Review system surface locally]
+  G -->|AI resource| J[Review AI-resource surface locally]
+  G -->|Mixed| K[Review primary surface first, then secondary gaps]
+  H --> L[Name route hint only if deeper review is needed]
+  I --> L
+  J --> L
+  K --> L
+  L --> M[Counter-validate findings]
+  M --> N{Finding survives or no-finding claim is supported?}
+  N -->|No| O[Reopen evidence, scope, or questions]
+  O --> C
+  N -->|Yes| P[Run critical counter-check]
+  P --> Q{Critical check passes?}
+  Q -->|No| O
+  Q -->|Yes| R[Emit review gate and next decision]
+  R --> S[Stop before fixes]
 ```
 
 ## Review Surface Selection
@@ -65,6 +78,21 @@ first and treat embedded scripts as a secondary code surface. Do not let a
 language-oriented scan silently skip `.md` skill, agent, prompt, instruction, or
 inventory files.
 
+## Surface Routing Hints
+
+Use these labels to classify evidence and name a likely next owner when deeper
+review is needed. Route hints are not preload instructions.
+
+| Surface | Evidence signals | Local review focus | Route hint |
+| --- | --- | --- | --- |
+| Code surface | Source, scripts, tests, build files, dependencies, generated-code boundaries | Correctness, security, tests, runtime behavior, and validation fit | `internal-code-review` for deeper line-level review |
+| System surface | Architecture, workflow, ownership, rollout, cross-boundary impact, merge risk | Operational fit, coupling, scope drift, blind spots, and decision risk | `internal-high-level-review` for broader systems review |
+| AI-resource surface | Skills, agents, prompts, instructions, inventory, sync behavior, bundle siblings | Retrieval, bundle self-containment, lifecycle, propagation, and customization drift | `internal-ai-resource-review` for deeper bundle or catalog review |
+
+For mixed reviews, pick the dominant surface first, inspect only secondary
+surfaces that affect material findings or residual risk, and consolidate the
+verdict in this gateway.
+
 ## Review Procedure
 
 1. Resolve the concrete target: artifact, diff, PR, workflow, bundle, retained
@@ -73,17 +101,21 @@ inventory files.
    evidence gaps from the smallest useful local evidence.
 3. Ask a focused question before analysis only when the answer would change
    scope, severity, owner, or the review decision.
-4. Inspect the diff or target first, then read immediate owning context only
-   when a finding or uncertainty needs it.
-5. Check design fit, functionality, security, complexity, tests, naming,
+4. Classify the primary and secondary review surfaces, then inspect the diff or
+   target before reading immediate owning context.
+5. Read more context only when a finding, route hint, or residual-risk claim
+   needs it.
+6. Check design fit, functionality, security, complexity, tests, naming,
    comments, documentation, consistency, and changed-user impact when relevant.
-6. For each potential finding, test the contrary explanation before reporting
+7. For each potential finding, test the contrary explanation before reporting
    it: intended behavior, local convention, compatibility, generated output,
    explicit user scope, or validator coverage.
-7. Report at most 5 material findings unless exhaustive review is requested.
-8. For low-finding or no-finding reviews, include evidence coverage, residual
+8. Name a route hint only when deeper specialist review would change confidence,
+   severity, owner, validation, or the next decision.
+9. Report at most 5 material findings unless exhaustive review is requested.
+10. For low-finding or no-finding reviews, include evidence coverage, residual
    risk, and the next decision the reader can make.
-9. Run the final `internal-gateway-critical-master` counter-check before the
+11. Run the final `internal-gateway-critical-master` counter-check before the
    verdict and reopen the analysis if it changes severity, confidence, scope,
    or next action.
 
@@ -108,7 +140,7 @@ Findings must lead, ordered by severity. Each material finding carries:
 - smallest evidence point;
 - evidence gap, if any;
 - counter-validation result;
-- next owner or route;
+- route hint or next owner, when deeper review or follow-up is needed;
 - validation expected.
 
 End with one Review Gate outcome:
@@ -141,7 +173,8 @@ investigate, plan separately, or accept with a named residual risk.
 - Review flow preserves compact context: prioritize diff and failing evidence first, then expand only when an evidence gap remains.
 - Large evidence may be reported compactly, but each material finding still keeps severity, confidence, evidence gap, counter-validation result, and route or next owner.
 - Review output carries findings, severity, confidence, evidence gap, counter-validation result, route or next owner, decision-usefulness result, and a Review Gate outcome before the final verdict.
+- Route hints name likely specialist owners only when deeper review would change confidence, severity, owner, validation, or the next decision.
 - Low-finding and no-finding reviews include enough evidence digest, decision trace, next action, and residual-risk context for the reader to decide whether to accept, patch, investigate, plan, or accept with named risk.
 - The review cannot present analysis to the user until counter-validation confirms it or reopens material gaps.
-- The only referenced skill is `internal-gateway-critical-master`, and it is used for the final autonomous counter-check rather than as a preload.
+- `internal-gateway-critical-master` is the only referenced skill used by this gateway; specialist references are route hints and must not be preloaded.
 - The gateway stops before fixes.
