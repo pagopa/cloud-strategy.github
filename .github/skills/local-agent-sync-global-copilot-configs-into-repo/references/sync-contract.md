@@ -74,8 +74,8 @@ Do not flatten these roles into one file. Do not let target `AGENTS.md` become a
 
 ## Automation Entry Points
 
-- Preferred wrapper: `.github/scripts/sync_copilot_catalog.sh`
-- Audit wrapper: `.github/scripts/audit_copilot_catalog.sh`
+- Preferred entrypoint: `./.github/scripts/run.sh sync_copilot_catalog`
+- Audit entrypoint: `./.github/scripts/run.sh audit_copilot_catalog`
 - Python entry point: `.github/scripts/sync_copilot_catalog.py`
 - Audit entry point: `.github/scripts/audit_copilot_catalog.py`
 - Core implementation: `.github/scripts/lib/syncing.py`
@@ -87,10 +87,10 @@ Prefer the shipped scripts when the request matches `plan`, `apply`, or a script
 
 Use the closest existing checks for the touched behavior:
 
-1. `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks`
-2. `./.github/scripts/build_inventory.sh --root .`
-3. `./.github/scripts/sync_copilot_catalog.sh plan --target-repo <repo>`
-4. `./.github/scripts/audit_copilot_catalog.sh --root .` when the decision depends on governance drift or local override behavior
+1. `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks`
+2. `./.github/scripts/run.sh build_inventory --root .`
+3. `./.github/scripts/run.sh sync_copilot_catalog plan --target-repo <repo>`
+4. `./.github/scripts/run.sh audit_copilot_catalog --root .` when the decision depends on governance drift or local override behavior
 5. `pytest tests/test_sync_and_token_risks.py` when sync automation changes
 
 If a dedicated contract test is missing, call out the gap explicitly.

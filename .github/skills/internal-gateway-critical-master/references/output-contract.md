@@ -14,13 +14,12 @@ Use this reference to produce a compact, consistent critical challenge deliverab
 | `finding.mitigation` | Condition or action required before execution resumes. | 30 words |
 | `finding.reframe` | Optional lateral reframe. | 25 words |
 | `synthesis` | Result of the Final Consistency Gate. | 100 words |
-| `outcome` | Exactly one value from `## Outcome Routing` in `SKILL.md`. | 1 value |
-| `next_owner` | Recommended next owner and one-sentence next-step package. | 50 words |
+| `outcome` | Exactly one value from `## Outcome meanings` in `SKILL.md`. | 1 value |
 
 ## Budget
 
 - Total output target: **600 words or fewer**.
-- If the material demands more, split the work and route to `continue-critical`.
+- If the material demands more, split the work into another critical cycle.
 - Do not pad findings to reach 3; one strong finding is better than three weak ones.
 
 ## Output template
@@ -46,10 +45,6 @@ Use this reference to produce a compact, consistent critical challenge deliverab
 ## Outcome
 
 `<outcome>`
-
-## Next owner
-
-<next_owner>
 ```
 
 ## Example
@@ -75,14 +70,4 @@ The strongest risk is compliance visibility, not implementation effort. The prop
 ## Outcome
 
 `accept-with-risk`
-
-## Next owner
-
-Route to `internal-gateway-simple-task` to add attestation logging to the pre-commit wrapper.
 ```
-
-## Consumer gateway notes
-
-- `internal-gateway-idea-brainstorming` uses the `outcome` and `next_owner` fields to decide whether to reformulate the plan.
-- `internal-gateway-review` treats `findings` as inputs to a defect-first review.
-- `internal-gateway-simple-task` executes the `mitigation` or `next_owner` package.

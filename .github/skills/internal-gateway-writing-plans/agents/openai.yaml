@@ -1,22 +1,11 @@
 interface:
   display_name: "Internal Gateway Writing Plans"
-  short_description: "Repo wrapper for current-only numbered plan authoring"
+  short_description: "Repository preflight wrapper for superpowers-writing-plans"
   default_prompt: >-
-    Use $internal-gateway-writing-plans to author retained repository-owned
-    numbered plans under tmp/superpowers. For new plans, run the bundle-local
-    init scaffold first, then author content. Choose compact (summary + merged
-    execution/control) or extended (summary + control + numbered execution
-    files).
-    New compact plans should use mini-plan-* folders. Write
-    01-change-summary.md in Italian as a compressed decision capsule with
-    Risorsa|Azione|Scopo table and Decisioni aperte; keep logic, validation,
-    route notes, and source-item coverage in the control/execution file. All
-    other files are English. Reject unsupported profiles. Keep compact plans
-    under 2,000 estimated tokens total, with 01 under 300 and 02 under 1,500.
-    Run bundle-local CLI audit first and handoff-check second for deterministic
-    readiness. Treat token warnings as review inputs for compression or split
-    decisions, not as measured-savings proof. Do not write a Recommended consumer field into the retained plan. Leave execution strategy selection to
-    $internal-gateway-execute-plans, which will infer the best execution path from
-    profile, folder shape, and validation path. Keep implementation-contract
-    content merged in 02-control.md for extended and avoid cross-file fact
-    duplication. Emit a Decision Brief before handoff.
+    Use $internal-gateway-writing-plans to capture Target, Anti-scope,
+    Nearest owner, Validation path, Stop conditions, and Observable acceptance.
+    Then load $superpowers-writing-plans and delegate the writing outcome. If a
+    retained plan is created, check ordered tasks, concrete file targets, edit
+    intent, validation commands or explicit gaps, duplicate-owner or
+    speculative-scope drift, stop conditions, and handoff readiness. Stop after
+    the writing outcome.

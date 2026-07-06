@@ -201,6 +201,8 @@ def check_bridge_references(root: Path) -> list[Finding]:
     agents_path = root / "AGENTS.md"
     copilot_path = root / ".github/copilot-instructions.md"
     if agents_path.exists():
+        # Inventory anchoring is a repository-root AGENTS requirement, not a
+        # shared-baseline extraction requirement.
         agents_text = read_text(agents_path)
         if ".github/INVENTORY.md" not in agents_text:
             findings.append(

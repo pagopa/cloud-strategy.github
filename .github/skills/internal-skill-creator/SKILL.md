@@ -23,6 +23,11 @@ Keep the ownership model explicit:
 
 This means `internal-skill-creator` should trigger first for repository-owned skill work, establish the local boundary, and then deliberately hand only the remaining bundle mechanics to `openai-skill-creator` instead of competing with it or duplicating it.
 
+Treat skill self-containment as a default local quality gate: when creating or
+materially revising a skill, prefer a bundle that can be understood, copied,
+and validated from its own directory without depending on instructions,
+examples, or the only runnable automation living elsewhere in the repository.
+
 Use `local-agent-sync-external-resources` through `local-sync-external-resources` when the task is broader catalog governance, sync-managed external assets, or inventory-wide retirement and refresh work.
 
 Use `internal-agent-creator` when the primary output is an agent change or an agent/skill boundary rewrite.
@@ -35,6 +40,9 @@ Use `internal-agent-creator` when the primary output is an agent change or an ag
 - Load `references/writing-skills-checklist.md` when creating a new skill or materially revising an existing one.
 - Read `openai-skill-creator` only after the local boundary is clear and only for the remaining bundle work that this skill is not meant to repeat.
 - Confirm the target `SKILL.md` has an up-to-date `## Referenced skills` section immediately after the H1 before finalizing a new or materially revised skill.
+- Inventory the touched bundle itself before widening scope: `SKILL.md`,
+  `agents/openai.yaml`, existing `references/`, `scripts/`, `assets/`, and
+  `fixtures/` if present.
 
 ## When to use
 
@@ -59,6 +67,7 @@ This skill should do:
 - decide whether the task really belongs to a repository-owned skill in this repository
 - choose no-op, reuse, revise in place, split, replace, or retire
 - define the local ownership boundary and trigger wording
+- enforce bundle self-containment for created or materially revised skills
 - enforce the failing-baseline rule, token discipline, and skill-type testing expectations
 - re-check routing fallout in nearby repository-owned assets
 
@@ -103,6 +112,13 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - Preserve a working `description:` during token optimization unless the baseline shows the route itself is the problem.
 - Keep the body lean. Put only the local contract in `SKILL.md` and move optional depth into references or reusable tools when repeated need justifies it.
 - Every repository-owned `SKILL.md` this skill creates or materially revises must keep `## Referenced skills` immediately after the H1.
+- Treat self-containment as the default for repository-owned skill bundles. Keep
+  required instructions, references, examples, fixtures, scripts, metadata, and
+  deterministic automation inside the bundle unless the contract explicitly says
+  otherwise.
+- Do not leave a touched skill operationally dependent on guidance, examples,
+  or the only runnable engine outside its own directory when the same need can
+  be satisfied inside the bundle with a smaller, clearer contract.
 - In `## Referenced skills`, list every other skill the file asks the agent to load, route to, compare against, or delegate to; use `- None.` only when no other skill is referenced.
 - Each referenced-skill item must name the skill in backticks and state the load, route, delegation, or comparison condition in one short phrase.
 - Update `## Referenced skills` whenever adding, removing, renaming, or repairing a skill reference. Treat stale or missing skill names as validation failures.
@@ -111,6 +127,9 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - If a reference becomes the canonical detail owner, trim matching duplication from the paired `SKILL.md` or agent in the same change.
 - Prefer `references/` over new `scripts/` for static tables, starter templates, and audit taxonomies. Add scripts only when the workflow is deterministic, repeated, and execution-heavy.
 - When direct-copy portability or out-of-repo execution is part of the skill contract, keep the required deterministic automation inside the skill bundle and leave repository entrypoints as thin wrappers.
+- For touched skill bundles, prefer bundle-relative references to files under
+  `references/`, `scripts/`, or `fixtures/` over repository-rooted paths to the
+  same bundle files.
 - Keep cross-references explicit instead of duplicating large chunks of generic bundle guidance.
 - In `SKILL.md`, reference another skill by name and behavior only. Do not cite file paths inside another skill bundle; those files are private to the owning skill and may change.
 - In source-side skill Markdown, cite only paths that exist on disk in the source repository. When sync materializes a target-only file, prefer the source template path or descriptive prose over the consumer-only materialized path.
@@ -145,13 +164,16 @@ After the local decision gate is complete, hand off to `openai-skill-creator` on
    Decide what this skill owns locally and which adjacent owner should win when the task is really sync governance, agent authoring, or another domain.
 4. Isolate the remainder.
    Identify which parts of the job are still local policy work and which parts are now generic OpenAI bundle work.
-5. Hand off only the remainder that OpenAI already handles well.
+5. Enforce bundle locality before handoff.
+   Repair repo-rooted self-references, missing bundle-local examples, and any
+   external-only operating engine that would break a copied-out skill.
+6. Hand off only the remainder that OpenAI already handles well.
    Load `openai-skill-creator` for scaffolding, resource anatomy, `agents/openai.yaml`, or structural validation, but do not replay its full workflow in this skill.
-6. Resume local control for wrapper checks.
+7. Resume local control for wrapper checks.
    Use `references/writing-skills-checklist.md` to tighten trigger wording, token discipline, loophole closure, and test design.
-7. Validate the right thing.
+8. Validate the right thing.
    Ensure OpenAI-side structural checks ran if bundle mechanics changed, then check retrieval quality plus skill-type behavior before treating the skill as done.
-8. Re-check routing fallout.
+9. Re-check routing fallout.
    Update nearby references or paired agent text only when the visible local entrypoint or ownership meaning actually changed.
 
 Use `references/writing-skills-checklist.md` for the anti-rationalization rules, token-discipline reminders, and skill-type testing expectations that this wrapper should enforce.
@@ -174,6 +196,11 @@ Then confirm:
 - the edited skill does not repeat agent-owned routing or boundary language.
 - the edited skill points to reference-owned deep material instead of copying it back into `SKILL.md`.
 - the edited `SKILL.md` does not point at another skill's internal files.
+- the touched bundle is self-contained by default: required instructions,
+  examples, fixtures, metadata, and deterministic automation are bundle-local,
+  or any exception is explicit and justified by the contract.
+- self-references inside the touched bundle use bundle-relative paths unless a
+  different path shape is required by the contract.
 - any paired agent or local references still agree with the skill boundary when they exist.
 - when direct-copy portability or out-of-repo execution is part of the skill contract, the bundle still contains the required runnable automation and repository scripts do not become the only operating engine.
 - OpenAI-side scaffolding or validation was invoked only when the remaining work actually required it.

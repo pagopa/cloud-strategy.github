@@ -85,7 +85,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-execute-plans/SKILL.md`
 - `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
-- `.github/skills/internal-gateway-review/SKILL.md`
+- `.github/skills/internal-gateway-idea/SKILL.md`
 - `.github/skills/internal-gateway-simple-task/SKILL.md`
 - `.github/skills/internal-gateway-writing-plans/SKILL.md`
 - `.github/skills/internal-gcp-governance/SKILL.md`
@@ -155,21 +155,15 @@ These imported `openai-*` office skills remain support-only depth for repositori
 ## Scripts
 
 - `.github/scripts/audit_copilot_catalog.py`
-- `.github/scripts/audit_copilot_catalog.sh`
 - `.github/scripts/benchmark_skill_tokens.py`
 - `.github/scripts/build_inventory.py`
-- `.github/scripts/build_inventory.sh`
 - `.github/scripts/check_catalog_consistency.py`
-- `.github/scripts/check_catalog_consistency.sh`
 - `.github/scripts/detect_token_risks.py`
-- `.github/scripts/detect_token_risks.sh`
 - `.github/scripts/github_catalog_validation.py`
-- `.github/scripts/github_catalog_validation.sh`
 - `.github/scripts/graphify-file-change-hook.sh`
 - `.github/scripts/install-graphify-hooks.sh`
 - `.github/scripts/lib/catalog_checks.py`
 - `.github/scripts/lib/cli_runner.py`
-- `.github/scripts/lib/critical_master.py`
 - `.github/scripts/lib/fingerprinting.py`
 - `.github/scripts/lib/internal_skills.py`
 - `.github/scripts/lib/inventory.py`
@@ -179,16 +173,12 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
 - `.github/scripts/sync_copilot_catalog.py`
-- `.github/scripts/sync_copilot_catalog.sh`
 - `.github/scripts/sync_home_ai_resources.py`
-- `.github/scripts/sync_home_ai_resources.sh`
-- `.github/scripts/validate_critical_output.py`
-- `.github/scripts/validate_critical_output.sh`
 - `.github/scripts/validate_internal_skills.py`
-- `.github/scripts/validate_internal_skills.sh`
 
 ## Agents
 
+- `.github/agents/internal-code-review.agent.md`
 - `.github/agents/internal-gateway-critical-master.agent.md`
 - `.github/agents/internal-gateway-idea-brainstorming.agent.md`
 - `.github/agents/internal-gateway-review.agent.md`

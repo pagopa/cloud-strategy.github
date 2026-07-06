@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal TDD"
-  short_description: "Test-first delivery through public interfaces"
-  default_prompt: "Use $internal-tdd to deliver this executable behavior with a red-green-refactor loop."
+  short_description: "Risk-driven test-first guardrails for executable coding changes"
+  default_prompt: "Use $internal-tdd for coding changes with executable behavior and choose the lightest useful test-first guardrail before implementation."

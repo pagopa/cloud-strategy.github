@@ -154,8 +154,8 @@ After any manual cleanup, re-run `plan` or `bisync plan` and require zero blocke
 
 ## Validation
 
-- Rebuild `.github/INVENTORY.md` when the bundle or related scripts change by using `./.github/scripts/build_inventory.sh --root .`.
-- Run `./.github/scripts/check_catalog_consistency.sh --root . --include-token-risks` after bundle or automation changes.
-- Run `bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh .github/scripts/sync_home_ai_resources.sh` after shell wrapper changes.
+- Rebuild `.github/INVENTORY.md` when the bundle or related scripts change by using `./.github/scripts/run.sh build_inventory --root .`.
+- Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.
+- Run `bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
 - Run focused agent or skill contract tests for this bundle.
 - Run focused sync tests for report layout, target parsing, support-matrix policy, manifest handling, overwrite gates, bisync protocol, and missing-directory behavior when automation changes.

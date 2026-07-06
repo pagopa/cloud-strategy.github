@@ -34,7 +34,7 @@ post-run reporting gates.
 
 `references/support-routing.md` remains the single source of truth for claim-gate owners in simple mode.
 `references/simple-lanes.md` remains the single source of truth for lane definitions, support posture, and validation per lane.
-`references/plan-mode.md` remains the single source of truth for plan-mode activation, profile selection, and procedure.
+`references/plan-mode.md` remains the single source of truth for plan-mode activation, confirmation, and delegation to `internal-gateway-writing-plans`.
 
 Use `scripts/resolve_simple_task.py` when the task facts are already known and
 the bundle only needs a deterministic gate or claim-gate answer. Use
@@ -109,8 +109,8 @@ Classify every simple task before operational work as `full-gate`,
 - Keep `trivial-skip` only for truly tiny local work with obvious validation
   and no material completeness risk.
 - If context pressure could hide required validation, data integrity, or route
-  ownership, prefer `plan-mode` and apply the `Plan Profile Selection Guard`
-  before proposing `compact`.
+  ownership, prefer `plan-mode` and delegate retained writing instead of
+  stretching same-chat execution.
 
 ## Simple Procedure
 
@@ -123,8 +123,8 @@ Classify every simple task before operational work as `full-gate`,
    `internal-gateway-critical-master` after the user's response.
 6. For `trivial-skip`, emit the Trivial-skip proof before operational work.
 7. For `plan-mode`, run `grill-me` and `internal-gateway-critical-master` as for
-   `full-gate`, then load `internal-gateway-writing-plans` and write the retained
-   plan. Stop before execution.
+   `full-gate`, then load `internal-gateway-writing-plans` and delegate retained
+   writing. Stop before execution.
 8. Confirm the task still fits one quick lane and choose that lane from
    `references/simple-lanes.md`.
 9. Select only directly applicable skill owners and required references from
@@ -145,7 +145,7 @@ Classify every simple task before operational work as `full-gate`,
     internally before execution; do not emit a default user checklist.
 15. Maintain `Direct Execution Control` for non-plan execution.
 16. Execute the one concrete lane with the Agentic Execution Loop, or, in
-    `plan-mode`, write the retained plan and stop before execution.
+    `plan-mode`, delegate retained writing and stop before execution.
 17. Run focused validation or name the explicit gap.
 18. Run a pre-close compliance audit over mandatory applicable requirements
     only. Delegate fresh-evidence mechanics to
@@ -220,10 +220,10 @@ items are closed.
 
 Plan mode keeps a concrete simple task single-lane and single-phase while
 writing a retained plan instead of executing. `references/plan-mode.md` owns the
-detailed activation, Token Budget Gate, profile, confirmation, procedure,
-boundary, and example rules. After `grill-me` and critical review, load
-`internal-gateway-writing-plans` and hand off execution to
-`internal-gateway-execute-plans`.
+detailed activation, Token Budget Gate, confirmation, delegation, boundary,
+and example rules. After `grill-me` and critical review, load
+`internal-gateway-writing-plans` for retained writing and hand off future
+execution to `internal-gateway-execute-plans`.
 
 ## Deterministic Helpers
 

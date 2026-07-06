@@ -1,6 +1,6 @@
 ---
 name: superpowers-writing-plans
-description: Use when a multi-step implementation effort still needs an explicit plan before execution
+description: Use when you have a spec or requirements for a multi-step task, before touching code
 ---
 
 # Writing Plans
@@ -8,10 +8,6 @@ description: Use when a multi-step implementation effort still needs an explicit
 ## Overview
 
 Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
-
-Use this workflow when the steps, sequencing, or validation still need an explicit written plan before execution.
-
-Do not use this workflow as the default gate for deterministic repository-owned maintenance or realignment when the desired change is already clear and concretely verifiable.
 
 Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
 

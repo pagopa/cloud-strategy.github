@@ -1,0 +1,20 @@
+interface:
+  display_name: "Internal Gateway Idea"
+  short_description: "Idea brainstorming with assumption challenge"
+  default_prompt: >-
+    Use $internal-gateway-idea when a repository-owned idea, proposed direction,
+    unclear goal, or option set needs brainstorming before planning. Load
+    $superpowers-brainstorming as the core workflow, then read
+    references/workflow.md for the local state machine. If the incoming request
+    is execution-shaped, emit Specialization Checkpoint: gated and continue
+    through Idea Gate 0 before any recommendation. Add the local Assumption
+    Challenge Gate, Alternative discovery, Critical Challenge Gate, and visible
+    spec-vs-plan decision from SKILL.md. Treat procedi, ok, go, or similar
+    approval as advancing only the active visible gate; clarify ambiguous
+    approval before loading another owner. Load $internal-gateway-writing-plans
+    only after the user explicitly approves retained spec or implementation-plan
+    writing. Stop after the writing outcome; do not implement or invoke execution
+    owners from this skill. Do not retire or rewrite
+    internal-gateway-idea-brainstorming during coexistence.
+name: internal-gateway-idea
+description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, and a spec-vs-plan recommendation before implementation planning.

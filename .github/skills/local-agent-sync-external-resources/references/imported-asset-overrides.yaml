@@ -1,42 +1,68 @@
 version: 1
 policy:
   default_rule: keep imported upstream assets verbatim
-  exception_rule: >-
-    Allow a direct imported-asset override only for a strong repo-specific need
-    that the user explicitly counter-validates, then register the replay patch
+  exception_rule: Allow a direct imported-asset override only for a strong repo-specific
+    need that the user explicitly counter-validates, then register the replay patch
     in this bundle before treating the override as active.
-  replay_rule: >-
-    Prefer a clean patch replay first, then allow a registered `git apply
-    --3way` fallback when upstream text drift is compatible. Stop for review if
-    neither path applies cleanly.
+  replay_rule: Prefer a clean patch replay first, then allow a registered `git apply
+    --3way` fallback when upstream text drift is compatible. Stop for review if neither
+    path applies cleanly.
 overrides:
-  - id: grill-me-bulk-recommended-questions
-    target_path: .github/skills/grill-me/SKILL.md
-    source_family: mattpocock/skills
-    lifecycle_mode: post-refresh-patch
-    apply_strategy: git-apply-3way
-    approval: explicit-user-counter-validated
-    reason: >-
-      Default the initial grilling pass to a dependency-ordered numbered
-      question set with clear recommendations that the user can accept by
-      default, while preserving follow-up pressure on contradictions, risks,
-      and unresolved decisions; keep operational gate semantics in
-      internal-gateway-review.
-    patch_path: patches/grill-me.patch
-    expected_content_hash: 4965b2f80bed21a005e0baa241e8e9e0d502c276cdf83c394cb3feac1d4dc71b
-    baseline_repo_commit: "efa058a"
-    validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
-  - id: openai-spreadsheet-structured-data-evidence-budget
-    target_path: .github/skills/openai-spreadsheet/SKILL.md
-    source_family: openai/skills
-    lifecycle_mode: post-refresh-patch
-    apply_strategy: git-apply-3way
-    approval: explicit-user-counter-validated
-    reason: >-
-      Preserve the repository-specific structured-data evidence budget so CSV,
-      TSV, and XLSX work stays low-token without weakening full-file integrity
-      checks after an imported office-skill refresh.
-    patch_path: patches/openai-spreadsheet.patch
-    expected_content_hash: f42e8ea1128c448a7ccaa42b2ca39540c5b9109a7e6e6ee4abf4e3e5e4a80722
-    baseline_repo_commit: "e6afb0d"
-    validation_note: Stop the refresh if the patch does not apply cleanly; review whether an internal wrapper should replace the override.
+- id: grill-me-bulk-recommended-questions
+  target_path: .github/skills/grill-me/SKILL.md
+  source_family: mattpocock/skills
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply-3way
+  approval: explicit-user-counter-validated
+  reason: Default the initial grilling pass to a dependency-ordered numbered question
+    set with clear recommendations that the user can accept by default, while preserving
+    follow-up pressure on contradictions, risks, and unresolved decisions; keep operational
+    gate semantics in internal-gateway-review.
+  patch_path: patches/grill-me.patch
+  expected_content_hash: 4965b2f80bed21a005e0baa241e8e9e0d502c276cdf83c394cb3feac1d4dc71b
+  baseline_repo_commit: efa058a
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    an internal wrapper should replace the override.
+- id: openai-spreadsheet-structured-data-evidence-budget
+  target_path: .github/skills/openai-spreadsheet/SKILL.md
+  source_family: openai/skills
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply-3way
+  approval: explicit-user-counter-validated
+  reason: Preserve the repository-specific structured-data evidence budget so CSV,
+    TSV, and XLSX work stays low-token without weakening full-file integrity checks
+    after an imported office-skill refresh.
+  patch_path: patches/openai-spreadsheet.patch
+  expected_content_hash: f42e8ea1128c448a7ccaa42b2ca39540c5b9109a7e6e6ee4abf4e3e5e4a80722
+  baseline_repo_commit: e6afb0d
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    an internal wrapper should replace the override.
+- id: openai-docx-executable-renderer
+  target_path: .github/skills/openai-docx/scripts/render_docx.py
+  source_family: openai/skills
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply
+  approval: explicit-user-counter-validated
+  reason: Preserve a valid executable entrypoint for the bundled DOCX renderer
+    so repository pre-commit validation does not fail after a retained office-skill
+    refresh.
+  patch_path: patches/openai-docx-render-docx.patch
+  expected_content_hash: b6b1c18d5a46d81d161a57e84947ad7b2941f8095f1d52fbfe1a2c57585d7a3a
+  baseline_repo_commit: 45d05d7
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    the retained support-only skill should instead stop shipping an executable renderer.
+- id: superpowers-brainstorming-guided-plan-gate
+  target_path: .github/skills/superpowers-brainstorming/SKILL.md
+  source_family: obra/superpowers
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply-3way
+  approval: explicit-user-counter-validated
+  reason: Preserve the repository-specific brainstorming flow that asks guided numbered
+    bulk question blocks, keeps discovery open after accepted defaults when risks
+    or dependent decisions remain, and chooses between direct plan and spec first
+    based on the marginal value of a spec.
+  patch_path: patches/superpowers-brainstorming.patch
+  expected_content_hash: 4e44155f52c800784b3fb19be4c1e6fb8298cb49c20f611ead09b39f4998e6c7
+  baseline_repo_commit: local-plan-2026-07-05
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    an internal wrapper or upstream proposal should replace the override.

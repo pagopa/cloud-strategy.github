@@ -8,7 +8,6 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 ## Referenced skills
 
 - `internal-python-project`: route away when imported package, application, service, or framework behavior becomes the primary contract.
-- `internal-tdd`: load for bugfixes, features, or script behavior changes with a meaningful executable seam.
 
 ## When to use
 
@@ -98,7 +97,7 @@ Keep these rules visible while drafting:
 
 - Follow the repository pytest defaults.
 - Use coverage reports to inspect missing behavior on touched code, not to force blanket 100% coverage.
-- For bugfixes, features, and intentional behavior changes, start test-first through the public CLI or stable helper seam: add or update the failing test, confirm it fails for the intended reason, then implement the smallest fix.
+- For bugfixes, features, and intentional behavior changes, follow the repository test strategy for the task and keep the public CLI or stable helper seam covered by focused tests.
 - For refactors, prose-only updates, generated fixtures, or mechanical formatting with no executable behavior change, run the existing focused tests plus `py_compile` or `compileall` instead of manufacturing speculative tests.
 - When Ruff is configured, run `ruff format` for formatting-only Python edits and `ruff check` for lint feedback before wider test runs.
 - Prefer existing repository commands such as `make lint`, `make test`, or a shared script runner before inventing a one-off validation path.

@@ -12,6 +12,8 @@ customization assets maintained in `cloud-strategy.github`.
 - Canonical repository-owned gateway agents:
   `internal-gateway-idea-brainstorming`, `internal-gateway-review`,
   `internal-gateway-critical-master`, `internal-gateway-simple-task`
+- Specialist repository-owned review agents:
+  `internal-code-review` for code-focused review before merge or follow-up action.
 - Approved `extended` retained plans execute through
   `internal-gateway-execute-plans`.
 - When extra provenance helps, offer it as an optional follow-up detail and accept

@@ -1,6 +1,6 @@
 ---
 name: internal-code-review
-description: Use when a code review is requested, a PR needs reviewing, or the user wants defect-first checks or safe simplification guidance across functionality, security, performance, maintainability, and tests on Python, Bash, Terraform, Java, or Node.js/TypeScript.
+description: Use when review evidence needs line-level or language-specific defect checks for Python, Bash, Terraform, Java, or Node.js/TypeScript code, tests, or scripts.
 ---
 
 # Code Review Skill

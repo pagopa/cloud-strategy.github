@@ -38,10 +38,17 @@ class ManagedPatch:
 
 
 @dataclass(frozen=True)
+class ManagedTextReplacement:
+    old_text: str
+    new_text: str
+
+
+@dataclass(frozen=True)
 class NormalizationConfig:
     reference_path: Path
     managed_skills: tuple[ManagedSkill, ...]
     managed_patches: tuple[ManagedPatch, ...]
+    managed_text_replacements: tuple[ManagedTextReplacement, ...]
     scan_includes: tuple[str, ...]
     ignored_files: frozenset[str]
 
@@ -128,6 +135,7 @@ def load_config(reference_path: Path) -> NormalizationConfig:
 
     managed_skills = tuple(load_managed_skills(payload))
     managed_patches = tuple(load_managed_patches(payload))
+    managed_text_replacements = tuple(load_managed_text_replacements(payload))
     live_scan = payload.get("live_scan") if isinstance(payload.get("live_scan"), dict) else {}
     raw_includes = live_scan.get("include") if isinstance(live_scan, dict) else None
     scan_includes = tuple(item for item in raw_includes or () if isinstance(item, str) and item.strip())
@@ -140,6 +148,7 @@ def load_config(reference_path: Path) -> NormalizationConfig:
         reference_path=reference_path,
         managed_skills=managed_skills,
         managed_patches=managed_patches,
+        managed_text_replacements=managed_text_replacements,
         scan_includes=scan_includes,
         ignored_files=frozenset(ignored_files),
     )
@@ -174,6 +183,24 @@ def load_managed_patches(payload: dict[str, object]) -> list[ManagedPatch]:
         path = require_string(raw_entry, "path")
         managed_patches.append(ManagedPatch(legacy_path=legacy_path, path=path))
     return managed_patches
+
+
+def load_managed_text_replacements(payload: dict[str, object]) -> list[ManagedTextReplacement]:
+    raw_entries = payload.get("managed_text_replacements", [])
+    if not isinstance(raw_entries, list):
+        raise ValueError("managed_text_replacements must be a list when present.")
+
+    replacements: list[ManagedTextReplacement] = []
+    for raw_entry in raw_entries:
+        if not isinstance(raw_entry, dict):
+            raise ValueError("Each managed text replacement entry must be a mapping.")
+        replacements.append(
+            ManagedTextReplacement(
+                old_text=require_string(raw_entry, "from"),
+                new_text=require_string(raw_entry, "to"),
+            )
+        )
+    return replacements
 
 
 def require_string(raw_entry: dict[str, object], key: str) -> str:
@@ -255,6 +282,8 @@ def text_replacements(config: NormalizationConfig) -> list[tuple[str, str]]:
         replacements.append((f"superpowers:{entry.upstream}", entry.local))
     for entry in config.managed_patches:
         replacements.append((entry.legacy_path, entry.path))
+    for entry in config.managed_text_replacements:
+        replacements.append((entry.old_text, entry.new_text))
     return replacements
 
 

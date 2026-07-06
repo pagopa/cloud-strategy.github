@@ -1,4 +1,0 @@
-interface:
-  display_name: Internal Gateway Review
-  short_description: Defect-first review and remediation planning.
-  default_prompt: "Use $internal-gateway-review to inspect the concrete review target, consolidate findings, and stop before applying fixes."

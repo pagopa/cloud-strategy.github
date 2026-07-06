@@ -24,3 +24,5 @@ env/
 .github/scripts/lib/graphify-out/*
 .github/scripts/graphify-out/*
 tmp/
+tmp/superpowers/specs/
+.superpowers

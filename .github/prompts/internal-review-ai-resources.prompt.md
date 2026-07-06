@@ -35,7 +35,6 @@ Use these repository sources first:
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
 - [.github/agents/internal-gateway-review.agent.md](../agents/internal-gateway-review.agent.md)
-- [.github/skills/internal-gateway-review/SKILL.md](../skills/internal-gateway-review/SKILL.md)
 - [.github/skills/internal-ai-resource-review/SKILL.md](../skills/internal-ai-resource-review/SKILL.md)
 
 Then use `internal-ai-resource-review` as the reusable qualitative owner for

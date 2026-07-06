@@ -28,7 +28,16 @@ resources:
       - copilot
       - opencode
     target_support: See runtime support matrix
-    notes: Gateway agent for staged workflow orchestration.
+    notes: Gateway agent for non-code and mixed review targets.
+  - resource_id: internal-code-review
+    source_family: agents
+    source_path: .github/agents/internal-code-review.agent.md
+    include_targets:
+      - codex
+      - copilot
+      - opencode
+    target_support: See runtime support matrix
+    notes: Specialist agent for dedicated code review targets.
   - resource_id: internal-gateway-critical-master
     source_family: agents
     source_path: .github/agents/internal-gateway-critical-master.agent.md

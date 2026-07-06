@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import os
 import re
@@ -40,6 +41,7 @@ def calc_dpi_via_ooxml_docx(input_path: str, max_w_px: int, max_h_px: int) -> in
     root = ET.fromstring(xml)
     ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 
+    # Common placements: w:body/w:sectPr or w:body/w:p/w:pPr/w:sectPr
     sect_pr = root.find(".//w:sectPr", ns)
     if sect_pr is None:
         raise RuntimeError("Section properties not found in document.xml")
@@ -47,6 +49,7 @@ def calc_dpi_via_ooxml_docx(input_path: str, max_w_px: int, max_h_px: int) -> in
     if pg_sz is None:
         raise RuntimeError("Page size not found in section properties")
 
+    # Values are in twips
     w_twips_str = pg_sz.get(
         "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"
     ) or pg_sz.get("w")
@@ -111,6 +114,7 @@ def convert_to_pdf(
     convert_tmp_dir: str,
     stem: str,
 ) -> str:
+    # Try direct DOC(X) -> PDF
     cmd_pdf = [
         "soffice",
         "-env:UserInstallation=file://" + user_profile,
@@ -129,6 +133,7 @@ def convert_to_pdf(
     if exists(pdf_path):
         return pdf_path
 
+    # Fallback: DOCX -> ODT, then ODT -> PDF
     cmd_odt = [
         "soffice",
         "-env:UserInstallation=file://" + user_profile,
@@ -178,7 +183,9 @@ def rasterize(
     doc_path = abspath(doc_path)
     stem = splitext(basename(doc_path))[0]
 
+    # Use a unique user profile to avoid LibreOffice profile lock when running concurrently
     with tempfile.TemporaryDirectory(prefix="soffice_profile_") as user_profile:
+        # Write conversion outputs into a temp directory to avoid any IO oddities
         with tempfile.TemporaryDirectory(prefix="soffice_convert_") as convert_tmp_dir:
             pdf_path = convert_to_pdf(
                 doc_path,
@@ -204,6 +211,7 @@ def rasterize(
                 ),
             )
 
+    # Rename convert_from_path's output format f'page{thread_id:04d}-{page_num:02d}.<ext>' to 'page-<num>.<ext>'
     pages: list[tuple[int, str]] = []
     for src_path in paths_raw:
         base = splitext(basename(src_path))[0]

@@ -37,9 +37,9 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `INTERNAL_CONTRACT.md`
   - source-side contract tests
 - Expected behavior:
-  - root `AGENTS.md` may carry a portable `<shared-baseline>` block that is the source content for the global `~/.agents/AGENTS.md` baseline
-  - root `AGENTS.md` may carry a source-local `<standards-repository-local-rules>` block that remains explicitly non-portable by default
-  - root `AGENTS.md` may keep compact graph orientation rules when those rules are deliberately part of the declared shared baseline
+  - root `AGENTS.md` may carry a portable `<shared-baseline>` block that serves as source content for the generated global `~/.agents/AGENTS.md` baseline
+  - root `AGENTS.md` may carry a source-local `<standards-repository-local-rules>` block that remains non-portable by default
+  - root `AGENTS.md` may keep compact graph orientation rules in the shared baseline when those rules are globally safe and conditionally worded
   - tests and validators must align to the current on-disk root-policy shape instead of assuming a separate `## Context Routing` section or the absence of root-level graph guidance
 
 #### `skill-first-inventory-is-externalized`
@@ -83,7 +83,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Goal: keep owner selection deterministic and visible without creating a hidden router.
 - Scope:
   - `AGENTS.md`
-  - `.github/skills/internal-gateway-idea-brainstorming/**`
+  - `.github/skills/internal-gateway-idea/**`
   - `.github/skills/internal-gateway-review/**`
   - `.github/skills/internal-gateway-simple-task/**`
   - `.github/skills/internal-gateway-execute-plans/**`
@@ -117,7 +117,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `docs/repository-context.md`, `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md` are mandatory consumer-local knowledge documents scaffolded only when missing and preserved after creation
   - `docs/README.md` explains knowledge-document roles and routing without becoming a policy owner
   - each knowledge document remains descriptive and cannot override binding policy
-  - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-idea-brainstorming`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-execute-plans`
+  - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-execute-plans`
   - the retired `docs/03-local-ai-runtime-operating-model.md` file is not recreated or synchronized into consumers
   - sync automation preserves existing consumer-local knowledge documents after initial scaffold creation and blocks ambiguous legacy coexistence
   - `.github/templates/` remains source-side scaffold material and is not mirrored as a target catalog family
@@ -255,11 +255,11 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-gateway-idea-brainstorming`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
-  - `internal-gateway-idea-brainstorming`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
+  - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
+  - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
   - retained execution stays separate: `internal-gateway-simple-task` consumes approved `compact` plans and `internal-gateway-execute-plans` consumes approved `extended` plans
-  - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea-brainstorming`
+  - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
   - unclear target state and multiple credible paths are explicit planning triggers
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit

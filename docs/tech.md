@@ -18,9 +18,9 @@ repository.
 
 | Category | Observed tooling |
 | --- | --- |
-| Sync logic | `.github/scripts/sync_copilot_catalog.py`, `.github/scripts/lib/syncing.py` |
-| Catalog generation | `.github/scripts/build_inventory.sh`, inventory helpers in `.github/scripts/lib/` |
-| Contract checks | `pytest` tests under `tests/`, plus shell wrappers |
+| Sync logic | `.github/scripts/sync_copilot_catalog.py`, `.github/scripts/lib/syncing.py`, `./.github/scripts/run.sh <tool>` |
+| Catalog generation | `.github/scripts/build_inventory.py`, inventory helpers in `.github/scripts/lib/`, and `./.github/scripts/run.sh build_inventory` |
+| Contract checks | `pytest` tests under `tests/`, plus validator subcommands through `run.sh` |
 | Linting and policy checks | Make targets such as `docs-lint`, `token-risks`, and catalog checks |
 
 ## Validation Surface

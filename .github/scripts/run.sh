@@ -143,8 +143,8 @@ resolve_script() {
         sync_copilot_catalog|sync_copilot_catalog.py)
             printf '%s\n' "$SCRIPT_DIR/sync_copilot_catalog.py"
             ;;
-        validate_critical_output|validate_critical_output.py)
-            printf '%s\n' "$SCRIPT_DIR/validate_critical_output.py"
+        validate_critical_output)
+            printf '%s\n' "$REPO_ROOT/.github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py"
             ;;
         validate_internal_skills|validate_internal_skills.py)
             printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"
@@ -223,4 +223,6 @@ PYTHON_VERSION_FILE="$REPO_ROOT/.python-version"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 REQUIREMENTS_HASH_FILE="$VENV_DIR/.requirements.sha256"
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

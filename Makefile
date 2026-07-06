@@ -68,7 +68,7 @@ skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
 
 critical-validate: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_critical_output --file tests/fixtures/critical_output_good.md
+	@$(SCRIPTS_RUNNER) validate_critical_output --file .github/skills/internal-gateway-critical-master/fixtures/critical_output_valid.md
 
 docs-lint:
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
