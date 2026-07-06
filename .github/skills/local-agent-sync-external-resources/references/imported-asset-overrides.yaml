@@ -37,6 +37,20 @@ overrides:
   baseline_repo_commit: e6afb0d
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     an internal wrapper should replace the override.
+- id: openai-docx-executable-renderer
+  target_path: .github/skills/openai-docx/scripts/render_docx.py
+  source_family: openai/skills
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply
+  approval: explicit-user-counter-validated
+  reason: Preserve a valid executable entrypoint for the bundled DOCX renderer
+    so repository pre-commit validation does not fail after a retained office-skill
+    refresh.
+  patch_path: patches/openai-docx-render-docx.patch
+  expected_content_hash: b6b1c18d5a46d81d161a57e84947ad7b2941f8095f1d52fbfe1a2c57585d7a3a
+  baseline_repo_commit: 45d05d7
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    the retained support-only skill should instead stop shipping an executable renderer.
 - id: superpowers-brainstorming-guided-plan-gate
   target_path: .github/skills/superpowers-brainstorming/SKILL.md
   source_family: obra/superpowers

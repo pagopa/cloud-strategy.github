@@ -150,6 +150,9 @@ Retained support-only office skills:
 
 Approved in-place overrides:
 
+- `openai-docx`: replay `openai-docx-executable-renderer` after each refresh so
+  the bundled `scripts/render_docx.py` keeps a valid executable shebang and
+  does not trip repository pre-commit validation.
 - `openai-spreadsheet`: replay
   `openai-spreadsheet-structured-data-evidence-budget` after each refresh so
   large spreadsheet and tabular workflows keep the repository-specific
