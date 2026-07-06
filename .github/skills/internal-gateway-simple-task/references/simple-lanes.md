@@ -1,85 +1,56 @@
 # Simple Task Lanes
 
-Use this reference when `SKILL.md` confirms the task is simple, but the active
-lane or output shape still needs a quick decision.
+Use this reference when the task stays simple but the execution shape still needs a quick decision.
 
 ## Lane Selection
 
-| Lane | Use when | Support posture | Validation |
+| Lane | Use when | Method posture | Validation |
 | --- | --- | --- | --- |
-| `answer` | The user needs a direct explanation, decision, or repository-context answer. | Load only the relevant domain owner when facts depend on it. | Cite inspected files or state the evidence gap. |
-| `edit` | The target file and desired outcome are clear. | Load the smallest file-type, runtime, authoring, or domain owner proved by evidence. | Run the closest validator, test, lint, syntax check, or focused manual check. |
-| `diagnose` | A failure, bug, drift, or unexpected behavior is present. | Reproduce the loop first, then add runtime or domain support only if needed. | The original loop must pass after the fix, or the blocker must be explicit. |
-| `validate` | The main job is checking an existing artifact, command, or result. | Load the owner for the validation surface only when needed. | Report the exact check, result, and remaining gap. |
-| `plan` | The task is concrete but the user asks for a plan, or cost signals show that same-chat execution is less economical than a retained plan. | Load `internal-gateway-writing-plans` after `grill-me` and `internal-gateway-critical-master`. | The plan is written, validated against the writing contract, and the folder is ready for `internal-gateway-execute-plans`. |
-| `escalate` | The task becomes staged, review-owned, retained-plan-owned, critical-challenge owned, or exceeds `references/clarification-gate.md`. | Stop and name the next owner. | Provide boundary break, owner, scope, action, validation path, and risk. |
+| `answer` | The user needs a direct explanation, decision, or repository-context answer. | Inspect the nearest evidence and answer directly. | Cite the inspected evidence or state the gap. |
+| `edit` | The target file and desired outcome are clear. | Make the smallest coherent change. | Run the closest validator, test, syntax check, or bounded manual check. |
+| `diagnose` | A bug, failure, drift, or unexpected behavior is present. | Reproduce first, then test one falsifiable hypothesis at a time. | The original loop must pass after the fix, or the blocker must be explicit. |
+| `validate` | The main job is checking an existing artifact, command, or result. | Stay read-first and report exact outcomes. | Name the exact check, result, and remaining gap. |
 
-## Examples
-
-- Clear prose or skill wording fix: inspect the paired asset and relevant
-  domain owner, edit the smallest owner, then run the closest skill or Markdown
-  validation.
-- Small code or script change: inspect local patterns, load the matching runtime
-  support only if needed, edit, then run the focused executable check.
-- Known failure: reproduce the failing loop, fix the root cause, then rerun that
-  loop before claiming completion.
-- Advisory answer: inspect repository evidence first, answer in chat, and name
-  what was not validated if no command was run.
-- Ownership ambiguity: stop at `escalate` instead of converting uncertainty into
-  hidden planning.
-- Plan mode: concrete task that is too large for same-chat execution or
-  explicitly requested as a plan; classify `plan-mode`, delegate retained
-  writing to `internal-gateway-writing-plans`, and stop before execution.
-- Clarification overflow: use `escalate` when the simple clarification gate
-  would need more than one focused `grill-me` block.
+If cost or complexity exceeds same-run execution, stop and recommend a retained plan instead of stretching the lane. If the boundary break is broader than that, stop with reason.
 
 ## Output Shapes
 
 For `answer`, return the answer, evidence, and uncertainty.
 
-For `edit`, return `lane`, `support-loaded`, `files-touched`, direct-control
-status, focused validation, and residual risk.
+For `edit`, return `lane`, `files-touched`, validation, and residual risk.
 
-For `diagnose`, return `lane`, `support-loaded`, the reproduced failure, root
-cause, direct-control status, fix or blocker, and evidence.
+For `diagnose`, return `lane`, reproduced failure, root cause, fix or blocker, and evidence.
 
-For `validate`, return `lane`, `support-loaded`, the command or check, result,
-direct-control status, and any follow-up owner.
+For `validate`, return `lane`, check, result, and any follow-up gap.
 
-For `escalate`, return the boundary break, next owner, scope, action, validation
-path, and risk.
+For `stop-with-reason`, return:
+
+- `boundary break`
+- `why stopped`
+- `user decision needed`
+- `evidence required`
 
 ## Multi-Source Mismatch Procedure
 
-When the same symptom may come from multiple sources or transformation layers,
-use this lightweight procedure before patching:
+When the same symptom may come from multiple sources or transformation layers:
 
-1. Name the target artifact or observed mismatch.
-2. List the candidate sources of truth and mark one authoritative only when
-   evidence already proves it.
-3. Map the transformation layers between source and target.
-4. Choose the cheapest check that can falsify one source or layer at a time.
-5. Stop expanding once one layer is proven wrong or source authority remains
-   unproven and needs escalation.
+1. Name the target artifact or mismatch.
+2. List candidate sources of truth.
+3. Map the transformation layers.
+4. Choose the cheapest check that can falsify one layer at a time.
+5. Stop expanding once one failing layer is proven or source authority stays unclear.
 
-Patch only the proven failing layer. Do not convert this generic procedure into
-domain-specific incident language.
+Patch only the proven failing layer.
 
 ## Diagnose Deterministic Failure Procedure
 
-When a failure report already contains exact test names, file paths, symbols, or
-expected strings, use this ordered procedure before broader evidence gathering:
+When a failure report already contains exact test names, file paths, symbols, or expected strings:
 
-1. Extract exact anchors from the failure output.
-2. Search those exact anchors in the repository.
-3. Read only nearby controlling context around the matches.
-4. State one falsifiable hypothesis and the cheapest check that can disprove it.
-5. Verify the exact context of every hunk you intend to edit.
+1. Extract the exact anchors.
+2. Search those anchors.
+3. Read only nearby controlling context.
+4. State one falsifiable hypothesis and the cheapest check.
+5. Verify the exact context of each intended edit.
 6. Apply the smallest grounded edit.
 7. Immediately run focused validation.
-8. Expand evidence only when the check falsifies the hypothesis or leaves material
-   ambiguity.
-
-References and neighboring owners load only when exact evidence is insufficient.
-Redundant or speculative edits must not appear in the first patch. The original
-failure loop remains required before any fixed or resolved claim.
+8. Expand only if the check falsifies the hypothesis or leaves material ambiguity.

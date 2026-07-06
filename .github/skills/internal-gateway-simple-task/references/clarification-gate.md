@@ -1,86 +1,64 @@
 # Simple Task Clarification Gate
 
-Use this reference when simple mode must decide whether to run the full
-interview and critical gate, prove a trivial skip, or ask one focused blocker
-question before a quick lane can continue.
+Use this reference when the simple-task bundle must decide whether one focused clarification can keep the current lane moving.
 
 ## Core Rule
 
-Simple mode defaults to a full gate for non-trivial work: ask one compact focused `grill-me` block before operational work, then run
-`internal-gateway-critical-master` after the user's interview response. Ask the
-user to respond first to `grill-me` and then to the critical outcome.
+Default to the full gate for non-trivial work: bounded evidence, Initial Idea Ordering, one compact `grill-me` block when needed, critical challenge, then the local Readiness Brief.
 
-Skip both gates only with a Trivial-skip proof. The proof must show the task is
-trivial and venial, no depth keyword is present, and the focused validation path
-or gap is already clear.
+Skip the gate only with a Trivial-skip proof showing:
 
-If the missing answer would decide ownership, rollout, governance, tradeoffs,
-validation strategy, or whether the work needs a plan, stop simple mode and
-escalate to `internal-gateway-idea-brainstorming` or `internal-gateway-review`.
+- the task is tiny and local
+- no depth keyword is present
+- the validation path is obvious or the validation gap is explicit
 
-If the clarification or full gate reveals material risk, hidden assumptions, or
-dominant failure-mode pressure, escalate to `internal-gateway-critical-master`.
-
-## Depth Keyword Override
-
-Treat `full`, `idea`, and `complete` as user-forced full-gate keywords when the
-request still targets simple mode. Do not use `trivial-skip` after one of these
-keywords. Run `grill-me` first, then the critical gate, unless the keyword proves
-the task belongs to a narrower planning, review, or pressure-testing owner.
+If a missing answer would change scope, validation, cost, risk, or target state, stop with reason instead of continuing.
 
 ## Exit Check
 
-Run this check before skipping or calling `grill-me`:
+Run this check before asking a clarification:
 
-1. Did the user provide a depth keyword: `full`, `idea`, or `complete`?
-2. Is the task more than a local answer, tiny edit, focused read, or validator
-    run with obvious validation?
-3. Does the prompt actually need a plan, retained plan, plan rewrite, review,
-    or clarify-first workflow?
-4. Would the missing answer change the owner, target state, anti-scope,
-    validation path, or rollout posture?
-5. Would more than one dependent clarification block be needed?
-6. Did the user explicitly ask for a plan, or do cost signals show that
-    same-chat execution is less economical than a retained plan?
+1. Did the user force a deeper posture with `full`, `idea`, or `complete`?
+2. Is the task more than a local answer, tiny edit, focused read, or validator run?
+3. Would the missing answer change scope, anti-scope, validation path, or approval boundary?
+4. Would more than one dependent clarification block be needed?
+5. Would the answer turn the task into multi-phase, costly, or unsafe work?
 
-If answer 1 or 2 is yes and answers 3-5 are no, use the full gate. If answer 6
-is yes and the task is still concrete, classify `plan-mode` and ask for
-confirmation when the trigger is implicit. If any of answers 3-5 is yes and the
-task is not a concrete plan-mode candidate, do not continue in simple mode.
+If `1` or `2` is yes and `3-5` are no, use the full gate. If any of `3-5` is yes, stop with reason.
 
 ## Single Clarification Limit
 
-Use one compact `grill-me` block for the full gate or when missing user intent,
-target path, input data, local context, or a blocker prevents starting or
-continuing the active simple lane. Ask only for the minimum context needed to
-resume the current lane.
-
-If the first clarification answer creates another dependent question set, or if
-the blocker still cannot be resolved inside the same focused block, escalate.
-
-## grill-me Boundary
-
-`grill-me` in simple mode may recover:
+Ask at most one compact `grill-me` block for:
 
 - missing file, path, or artifact target
 - missing input data or reproduction step
 - missing local context needed to start the chosen lane
-- one blocker that prevents continuing an already valid simple lane
+- one blocker preventing an otherwise valid simple lane
 
-`grill-me` in simple mode must not decide:
+If that answer creates another dependent question set, stop with reason.
 
-- ownership, lane, or phase changes that need staged workflow
-- rollout posture, governance, or approval boundaries
-- design tradeoffs, architecture, or cross-boundary scope
-- validation strategy beyond the nearest focused check
+## `grill-me` Boundary
 
-## Escalation Triggers
+`grill-me` may recover:
 
-Escalate to `internal-gateway-idea-brainstorming`,
-`internal-gateway-review`, or `internal-gateway-critical-master` when:
+- a missing path or artifact
+- a missing reproduction step
+- one bounded blocker
+- one missing local fact needed to execute
+
+`grill-me` must not decide:
+
+- staged workflow changes
+- architecture or design tradeoffs
+- rollout posture
+- approval boundaries
+- broad validation strategy redesign
+
+## Stop Conditions
+
+Stop with reason when:
 
 - the exit check fails
 - the clarification limit is exceeded
-- the answer would change simple-mode ownership or anti-scope
-- the task now needs retained-plan, review, or critical-challenge handling
-- material risk or failure-mode pressure dominates
+- the answer would materially change scope or validation
+- the work becomes multi-phase, costly, ambiguous, or unsafe
