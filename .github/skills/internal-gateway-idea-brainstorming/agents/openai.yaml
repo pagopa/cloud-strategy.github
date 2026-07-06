@@ -35,16 +35,15 @@ interface:
     emit a Direct Execution vs Retained Plan Recommendation with four visible
     fields: Recommendation, Why, Tradeoff, and Decision. Recommend direct
     execution via internal-gateway-simple-task when the work is concrete, one
-    owner, one lane, one validation path, and low context risk. Recommend a
-    compact or extended retained plan when the user asked for one, the work is
-    broad enough to retain, validation is multi-surface, or context pressure
-    could interrupt verified execution. Avoid vague owner-retention phrasing.
+    owner, one lane, one validation path, and low context risk. Recommend
+    retained writing through $internal-gateway-writing-plans when the user
+    asked for one, the work is broad enough to retain, validation is
+    multi-surface, or context pressure could interrupt verified execution.
+    Avoid vague owner-retention phrasing.
     Ask the user to choose execute, plan, or an explicit override. Only if the user chooses plan,
     emit Plan Approval Gate 3: waiting and ask for explicit go/ok/procedi or
     equivalent approval before loading $internal-gateway-writing-plans;
-    otherwise route to the recommended specialized owner and stop. Alias mapping is fixed: mini-plan means
-    compact and plan means extended; retained-plan execution strategy is
-    inferred later by internal-gateway-execute-plans. After plan creation,
+    otherwise route to the recommended specialized owner and stop. After plan creation,
     emit Handoff Gate 4: plan-created with Continuation: waiting and stop
     before execution.
 name: internal-gateway-idea-brainstorming

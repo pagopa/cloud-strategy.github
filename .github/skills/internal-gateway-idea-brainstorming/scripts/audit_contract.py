@@ -46,12 +46,10 @@ def main() -> int:
         "explicit_plan_approval": "go`/`ok`/`procedi" in skill_text
         and "go`/`ok`/`procedi" in reference_text
         and "go/ok/procedi" in runtime_text,
-        "alias_mapping": "mini-plan" in skill_text
-        and "mini-plan" in reference_text
-        and "mini-plan" in runtime_text
-        and "internal-gateway-execute-plans" in skill_text
-        and "internal-gateway-execute-plans" in reference_text
-        and "internal-gateway-execute-plans" in runtime_text,
+        "delegated_writing": "internal-gateway-writing-plans" in skill_text
+        and "internal-gateway-writing-plans" in reference_text
+        and "internal-gateway-writing-plans" in runtime_text
+        and "mini-plan" not in runtime_text,
     }
     print(json.dumps({"strict_ok": all(markers.values()), "markers": markers}, indent=2))
     return 0 if all(markers.values()) else 1

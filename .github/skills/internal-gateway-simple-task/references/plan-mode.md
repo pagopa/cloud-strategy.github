@@ -51,8 +51,8 @@ and asking for user confirmation.
 
 When the cost signals come mainly from context pressure instead of task count,
 prefer a compact evidence posture rather than a raw-output posture. Keep same-chat
-execution only for tiny local work; otherwise switch to `plan-mode` and let the
-profile guard choose whether `compact` is still safe.
+execution only for tiny local work; otherwise switch to `plan-mode` and let
+`internal-gateway-writing-plans` handle retained-writing decisions.
 
 A cost checkpoint pauses before a new expensive tool burst, broad reread, or
 multi-step execution loop. It does not interrupt ordinary conversation,
@@ -64,31 +64,33 @@ execution, name the likely token or context impact first and then either
 continue with the smallest bounded next slice or ask for confirmation before
 the new expensive burst.
 
-## Profile selection
+## Delegated retained writing
 
-- **Default `compact`**: use only when the task stays within a single owner,
-  concrete target, one primary validation path, one execution lane, and low
-  completeness risk. Folder name follows `tmp/superpowers/mini-plan-*` and
-  contains `01-change-summary.md` and `02-execution.md`.
-- **Plan Profile Selection Guard**: escalate to `extended` when context or
-  completeness risk is material, especially for cross-skill token-discipline
-  work, validator-impacting changes, exports or generated reports, datasets
-  that need non-trivial reconciliation, several independent validators, an
-  articulated anti-scope, or external pins that must be tracked in a control
-  file.
+`internal-gateway-simple-task` does not choose retained-plan profile, folder
+shape, or artifact internals. It only decides that same-chat execution should
+stop and retained writing should begin.
 
-When profile safety is in doubt, prefer `extended` and state why. Prefer
-`compact` only when the plan can record the contrary evidence that keeps
-lower-context execution safe.
+When plan mode is confirmed, pass these facts to `internal-gateway-writing-plans`:
+
+- concrete target state
+- anti-scope
+- nearest owner
+- validation path or explicit validation gap
+- cost signals that made same-chat execution less economical
+- stop conditions
+- observable acceptance
+
+`internal-gateway-writing-plans` then delegates artifact decisions to
+`superpowers-writing-plans`.
 
 ## Confirmation rule for implicit triggers
 
 For implicit cost-signal triggers, emit a short statement that:
 
 1. Names the detected cost signals.
-2. Proposes `plan-mode` with the safest profile suggested by the signals,
-   defaulting to `compact` only when the profile guard stays clear.
-3. Asks the user to confirm, decline, or choose `extended`.
+2. Proposes `plan-mode` and names that retained writing will be delegated to
+   `internal-gateway-writing-plans`.
+3. Asks the user to confirm or decline the switch before writing anything.
 
 Do not write the retained plan until the user confirms.
 
@@ -98,8 +100,8 @@ Do not write the retained plan until the user confirms.
 2. Run `grill-me` with one compact numbered block.
 3. Load `internal-gateway-critical-master` after the user responds.
 4. If critical gate returns confident, load `internal-gateway-writing-plans`.
-5. Choose the profile and write the retained plan following the
-   `internal-gateway-writing-plans` contract.
+5. Pass the preflight facts to `internal-gateway-writing-plans` and let it
+   delegate the writing outcome.
 6. Stop before execution. Report the plan folder and hand off to
    `internal-gateway-execute-plans` for future execution.
 
@@ -119,7 +121,7 @@ Do not write the retained plan until the user confirms.
 
 - User: *"Aggiungi un nuovo campo al modello e al database"* with 8 files and
   a migration: classify `plan-mode` implicit, ask confirmation, then write a
-  `compact` plan.
+  retained plan through `internal-gateway-writing-plans`.
 - User: *"Modalità plan: riscrivi il parser dei skills"*: classify
   `plan-mode` explicit, run the full gate, write the plan, stop.
 - User: *"Cosa ne pensi di rifattorizzare tutto?"*: this is not concrete; do
@@ -129,7 +131,7 @@ Do not write the retained plan until the user confirms.
 
 - Treating an implicit cost signal as a decision to write a plan without
   confirming with the user.
-- Choosing `extended` for a task that only needs `compact`.
+- Reintroducing retained-plan profile decisions instead of delegating them.
 - Writing the plan but then executing it inside simple task.
 - Using plan mode as a way to avoid saying that the task is actually vague or
   ownership-ambiguous.

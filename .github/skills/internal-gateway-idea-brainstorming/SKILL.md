@@ -72,7 +72,7 @@ State rules:
 - At `Interview Gate 1: ready-for-critical`, ask whether to continue before loading `internal-gateway-critical-master`.
 - `Critical Gate 2` outcomes are: targeted reopen of affected branches, continue-critical, or confident completion.
 - At `Critical Gate 2: confident`, emit the `Direct Execution vs Retained Plan Recommendation` before any handoff or plan approval question.
-- Alias mapping is fixed: `mini-plan` means `compact` and `plan` means `extended`; retained-plan execution strategy is inferred by `internal-gateway-execute-plans`.
+- Retained-plan artifact decisions are delegated through `internal-gateway-writing-plans`; this gateway does not choose artifact shape.
 - At `Handoff Gate 4: plan-created`, set `Continuation: waiting` and do not execute.
 
 ## Direct Execution vs Retained Plan Recommendation
@@ -80,22 +80,21 @@ State rules:
 Use this recommendation only after `Critical Gate 2: confident`.
 
 Recommend direct execution via `internal-gateway-simple-task` when the scoped
-work is concrete, low-to-medium risk, one owner, one lane, one primary
-validation path, no cross-turn dependency, and no material context-pressure
-signal. Make clear that direct execution still belongs to the specialized
-owner; this gateway does not execute it.
+work is concrete, one owner, one lane, one primary validation path, no
+cross-turn dependency, and low context pressure. Direct execution still
+belongs to the specialized owner; this gateway does not execute it.
 
 Recommend a retained plan when the user explicitly asked for a plan, the work
 needs more than roughly 5-7 executable steps, touches more than roughly three
 unrelated path families, has multiple independent validators, depends on
 external approvals or pins, carries material context-pressure risk, or must stop
-before execution. Recommend `compact` only when one owner, one lane, and one
-validation path remain enough; otherwise recommend `extended`.
+before execution. Name the decisive signals, then recommend retained writing
+through `internal-gateway-writing-plans`.
 
 The user-facing message must use this shape:
 
-1. `Recommendation:` direct execution via `internal-gateway-simple-task`, or a
-   `compact`/`extended` retained plan.
+1. `Recommendation:` direct execution via `internal-gateway-simple-task`, or
+   retained writing via `internal-gateway-writing-plans`.
 2. `Why:` one evidence-based sentence naming the decisive signals.
 3. `Tradeoff:` direct execution means same-chat specialized work after approval;
    retained plan means a durable handoff under `tmp/superpowers/` and no
@@ -124,5 +123,5 @@ consequence: direct execution handoff or retained-plan authoring.
 - The gateway keeps `idea -> critical -> retained plan` in one conversation.
 - Concrete execution requests trigger the specialization checkpoint and do not execute, transfer ownership, or present the post-critical recommendation until `grill-me` and critical both pass.
 - User insistence does not bypass the `grill-me` or critical gates.
-- `internal-gateway-writing-plans` owns profile selection.
+- `internal-gateway-writing-plans` owns the repository preflight and delegates artifact decisions.
 - Execution stays a manual boundary after plan creation.

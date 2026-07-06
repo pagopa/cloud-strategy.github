@@ -28,8 +28,8 @@ lane or output shape still needs a quick decision.
 - Ownership ambiguity: stop at `escalate` instead of converting uncertainty into
   hidden planning.
 - Plan mode: concrete task that is too large for same-chat execution or
-  explicitly requested as a plan; classify `plan-mode`, author a `compact` or
-  `extended` retained plan, and stop before execution.
+  explicitly requested as a plan; classify `plan-mode`, delegate retained
+  writing to `internal-gateway-writing-plans`, and stop before execution.
 - Clarification overflow: use `escalate` when the simple clarification gate
   would need more than one focused `grill-me` block.
 
