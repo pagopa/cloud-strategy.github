@@ -2,16 +2,9 @@ interface:
   display_name: "Internal Gateway Writing Plans"
   short_description: "Repository preflight wrapper for superpowers-writing-plans"
   default_prompt: >-
-    Use $internal-gateway-writing-plans as a repository preflight wrapper.
-    Capture a short preflight with Target, Anti-scope, Nearest owner,
-    Validation path, Stop conditions, and Observable acceptance, then load
-    $superpowers-writing-plans and delegate the next action. Let
-    $superpowers-writing-plans decide whether to create a retained plan, ask a
-    blocking clarification, redirect to a better owner, or stop with a reason.
-    Save created retained plans to tmp/superpowers/plans/YYYY-MM-DD-<feature-name>.md.
-    If a retained plan is created, run an Execution-readiness check for ordered
-    tasks, concrete file targets, clear edit intent, validation commands or
-    explicit gaps, stop conditions, and handoff readiness for
-    $superpowers-executing-plans or $superpowers-subagent-driven-development.
-    Stop after the delegated writing outcome and wait for the user's next
-    choice.
+    Use $internal-gateway-writing-plans to capture Target, Anti-scope,
+    Nearest owner, Validation path, Stop conditions, and Observable acceptance.
+    Then load $superpowers-writing-plans and delegate the writing outcome. If a
+    retained plan is created, check ordered tasks, concrete file targets, edit
+    intent, validation or explicit gaps, stop conditions, and handoff readiness.
+    Stop after the writing outcome.
