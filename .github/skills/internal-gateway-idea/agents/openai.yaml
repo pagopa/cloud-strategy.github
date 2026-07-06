@@ -7,14 +7,18 @@ interface:
     $superpowers-brainstorming as the core workflow, then read
     references/workflow.md for the local state machine. If the incoming request
     is execution-shaped, emit Specialization Checkpoint: gated and continue
-    through Idea Gate 0 before any recommendation. Add the local Assumption
-    Challenge Gate, Alternative discovery, Critical Challenge Gate, and visible
-    spec-vs-plan decision from SKILL.md. Treat procedi, ok, go, or similar
+    through Idea Gate 0 before any recommendation. Run Idea Gate 0 as a visible
+    numbered question block; evidence cannot replace Idea Gate 0. Add the local
+    Assumption Challenge Gate, Alternative discovery, Critical Challenge Gate,
+    and visible spec-vs-plan decision from SKILL.md. Run Critical Challenge Gate
+    as its own visible gate after design-direction approval; an embedded critique
+    does not satisfy Critical Challenge Gate. Treat procedi, ok, go, or similar
     approval as advancing only the active visible gate; clarify ambiguous
-    approval before loading another owner. Load $internal-gateway-writing-plans
-    only after the user explicitly approves retained spec or implementation-plan
-    writing. Stop after the writing outcome; do not implement or invoke execution
-    owners from this skill. Do not retire or rewrite
+    approval before loading another owner. If a mandatory gate was skipped, stop
+    and resume at the first skipped mandatory gate. Load
+    $internal-gateway-writing-plans only after the user explicitly approves
+    retained spec or implementation-plan writing. Stop after the writing outcome;
+    do not implement or invoke execution owners from this skill. Do not retire or rewrite
     internal-gateway-idea-brainstorming during coexistence.
 name: internal-gateway-idea
 description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, and a spec-vs-plan recommendation before implementation planning.

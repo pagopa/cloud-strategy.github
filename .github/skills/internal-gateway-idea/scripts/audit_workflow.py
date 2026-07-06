@@ -20,9 +20,11 @@ def main() -> int:
     shared_markers = [
         "Specialization Checkpoint: gated",
         "Idea Gate 0",
+        "visible numbered question block",
         "Assumption Challenge Gate",
         "Alternative discovery",
         "Critical Challenge Gate",
+        "embedded critique does not satisfy Critical Challenge Gate",
         "Spec vs plan decision",
         "internal-gateway-writing-plans",
         "Stop before implementation execution",
@@ -59,6 +61,13 @@ def main() -> int:
         "approval_is_gate_local": "active visible gate" in skill_text
         and "active visible gate" in workflow_text
         and "active visible gate" in runtime_text,
+        "evidence_cannot_replace_questions": "evidence cannot replace Idea Gate 0"
+        in skill_text
+        and "evidence cannot replace Idea Gate 0" in workflow_text
+        and "evidence cannot replace Idea Gate 0" in runtime_text,
+        "skipped_gate_recovery": "first skipped mandatory gate" in skill_text
+        and "first skipped mandatory gate" in workflow_text
+        and "first skipped mandatory gate" in runtime_text,
         "stop_before_execution": "Stop before implementation execution" in workflow_text
         and "Stop after the delegated writing outcome" in skill_text
         and "Stop after the writing outcome" in runtime_text,
