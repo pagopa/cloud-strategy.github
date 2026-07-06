@@ -6,5 +6,6 @@ interface:
     Nearest owner, Validation path, Stop conditions, and Observable acceptance.
     Then load $superpowers-writing-plans and delegate the writing outcome. If a
     retained plan is created, check ordered tasks, concrete file targets, edit
-    intent, validation or explicit gaps, stop conditions, and handoff readiness.
-    Stop after the writing outcome.
+    intent, validation commands or explicit gaps, duplicate-owner or
+    speculative-scope drift, stop conditions, and handoff readiness. Stop after
+    the writing outcome.
