@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-review
-description: Use when repository-owned work needs defect-first review of a concrete artifact, diff, workflow, bundle, or review package before fixes.
+description: Use when repository-owned work needs defect-first review of a concrete non-code or mixed artifact, workflow, bundle, or review package before fixes.
 ---
 
 # Internal Gateway Review
@@ -8,13 +8,14 @@ description: Use when repository-owned work needs defect-first review of a concr
 ## Referenced skills
 
 - `internal-gateway-critical-master`: final autonomous counter-check when findings, no-finding verdicts, or next-action choices need pressure before action.
-- `internal-code-review`: route hint only when code-surface evidence needs deeper line-level review.
+- `internal-code-review`: route hint when code-only evidence needs dedicated line-level review.
 - `internal-high-level-review`: route hint only when system-surface evidence needs broader architecture, workflow, or merge-risk review.
 - `internal-ai-resource-review`: route hint only when AI-resource evidence needs deeper bundle, lifecycle, or catalog review.
 
 Portable review gateway. Owns review scope, evidence discipline, findings
-consolidation, decision-usefulness, and final counter-check. It does not apply
-fixes, author retained plans, or preload specialist review skills.
+consolidation, decision-usefulness, and final counter-check for non-code or
+mixed targets. It does not apply fixes, author retained plans, or preload
+specialist review skills.
 
 Use the target itself to choose review depth. Keep review thinking local unless
 the user directly selected a specialist owner or a separate prompt already
@@ -45,7 +46,7 @@ flowchart TD
   G -->|System| I[Review system surface locally]
   G -->|AI resource| J[Review AI-resource surface locally]
   G -->|Mixed| K[Review primary surface first, then secondary gaps]
-  H --> L[Name route hint only if deeper review is needed]
+   H --> L[Prefer internal-code-review when target is code-only]
   I --> L
   J --> L
   K --> L
@@ -66,6 +67,11 @@ Select review surfaces from the changed paths, stated goal, and evidence gaps;
 do not start from a single default lens. A diff may activate more than one
 surface. This gateway names surfaces, not specialist skill dependencies.
 
+When the target is purely code, prefer `internal-code-review` and stop before
+stretching this gateway into a code-only reviewer. Use this gateway for code
+only when the code is secondary evidence inside a broader artifact, workflow,
+AI-resource, policy, plan, or mixed review.
+
 - Code surface: changed source, scripts, tests, build files, dependency files,
   generated-code boundaries, and validation paths.
 - System surface: architecture, workflow, ownership, rollout, cross-boundary
@@ -85,7 +91,7 @@ review is needed. Route hints are not preload instructions.
 
 | Surface | Evidence signals | Local review focus | Route hint |
 | --- | --- | --- | --- |
-| Code surface | Source, scripts, tests, build files, dependencies, generated-code boundaries | Correctness, security, tests, runtime behavior, and validation fit | `internal-code-review` for deeper line-level review |
+| Code surface | Source, scripts, tests, build files, dependencies, generated-code boundaries | Decide whether the target is code-only; inspect embedded code only when it affects a mixed review | `internal-code-review` for dedicated line-level review |
 | System surface | Architecture, workflow, ownership, rollout, cross-boundary impact, merge risk | Operational fit, coupling, scope drift, blind spots, and decision risk | `internal-high-level-review` for broader systems review |
 | AI-resource surface | Skills, agents, prompts, instructions, inventory, sync behavior, bundle siblings | Retrieval, bundle self-containment, lifecycle, propagation, and customization drift | `internal-ai-resource-review` for deeper bundle or catalog review |
 
@@ -110,7 +116,7 @@ verdict in this gateway.
 7. For each potential finding, test the contrary explanation before reporting
    it: intended behavior, local convention, compatibility, generated output,
    explicit user scope, or validator coverage.
-8. Name a route hint only when deeper specialist review would change confidence,
+8. Prefer `internal-code-review` when the target is code-only; otherwise name a route hint only when deeper specialist review would change confidence,
    severity, owner, validation, or the next decision.
 9. Report at most 5 material findings unless exhaustive review is requested.
 10. For low-finding or no-finding reviews, include evidence coverage, residual
@@ -156,12 +162,15 @@ investigate, plan separately, or accept with a named residual risk.
 
 ## When to use
 
-- The user asks for review of a concrete artifact, diff, workflow, or bundle.
+- The user asks for review of a concrete non-code or mixed artifact, workflow,
+  AI resource, policy, plan, retained package, or bundle.
 - The primary job is defect-first findings, not fixes.
 
 ## When not to use
 
 - The user has already approved implementation or remediation work.
+- The target is a dedicated code review of source, tests, scripts, build files,
+  dependency files, or a code-focused diff; use `internal-code-review` instead.
 - The request is mainly planning, brainstorming, execution, or file editing.
 - The target is a specialist review where the user directly selected another
   owner.
