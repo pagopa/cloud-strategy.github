@@ -32,6 +32,17 @@ CLAIMS = (
     "readiness",
     "validator-passes",
 )
+GATE_ROWS = (
+    "bounded-evidence",
+    "complexity-cost",
+    "initial-idea-ordering",
+    "clarification",
+    "critical-challenge",
+    "readiness-brief",
+    "execution",
+    "validation",
+    "final-evidence",
+)
 
 CLAIM_REQUIREMENTS = {
     "fixed": [
@@ -186,6 +197,72 @@ def infer_lane(lane: str, trivial_kind: str | None) -> str:
     return mapping.get(trivial_kind or "", "unspecified")
 
 
+def build_gate_evidence(
+    *,
+    gate_outcome: str,
+    validation_path: str,
+    validation_gap: str,
+    clarification_required: bool,
+    stop_reasons: list[str],
+) -> list[dict[str, object]]:
+    validation_evidence = (
+        validation_path
+        or (f"State validation gap: {validation_gap}" if validation_gap else "Name the focused validation path.")
+    )
+    stop_reason_text = ", ".join(stop_reasons) if stop_reasons else "stop reason"
+
+    if gate_outcome == "trivial-skip":
+        required_rows = {"bounded-evidence", "validation", "final-evidence"}
+        expected_by_gate = {
+            "bounded-evidence": "Nearest local evidence proving the task stays tiny and local.",
+            "complexity-cost": "Not required for trivial-skip.",
+            "initial-idea-ordering": "Not required for trivial-skip.",
+            "clarification": "Not required for trivial-skip.",
+            "critical-challenge": "Not required for trivial-skip.",
+            "readiness-brief": "Not required for trivial-skip.",
+            "execution": "Not required for trivial-skip.",
+            "validation": validation_evidence,
+            "final-evidence": "Fresh evidence supporting the final claim or the exact remaining gap.",
+        }
+    elif gate_outcome == "stop-with-reason":
+        required_rows = {"bounded-evidence", "complexity-cost"}
+        expected_by_gate = {
+            "bounded-evidence": "Nearest local evidence showing why the task cannot stay simple.",
+            "complexity-cost": f"Blocked reason: {stop_reason_text}.",
+            "initial-idea-ordering": "Not required after stop-with-reason.",
+            "clarification": "Not required after stop-with-reason unless the stop reason is a missing answer.",
+            "critical-challenge": "Not required after stop-with-reason.",
+            "readiness-brief": "Not required after stop-with-reason.",
+            "execution": "Not claimable after stop-with-reason; record the blocker instead.",
+            "validation": validation_evidence,
+            "final-evidence": "Not claimable after stop-with-reason; record the blocker instead.",
+        }
+    else:
+        expected_by_gate = {
+            "bounded-evidence": "Nearest local evidence proving the target, scope, and owner.",
+            "complexity-cost": "Why the task still fits one bounded run.",
+            "initial-idea-ordering": "Completed local ordering from original request through stop signal.",
+            "clarification": "Explicit question and answer only if one bounded clarification was needed.",
+            "critical-challenge": "Fresh challenge outcome recorded before non-trivial action.",
+            "readiness-brief": "Concrete local readiness brief with scope, validation path, risk, and stop conditions.",
+            "execution": "Files touched or actions taken, tied to the active lane.",
+            "validation": validation_evidence,
+            "final-evidence": "Fresh evidence supporting completion, readiness, passing, fixed, or no-gap claims.",
+        }
+        required_rows = set(GATE_ROWS)
+        if not clarification_required:
+            required_rows.remove("clarification")
+
+    return [
+        {
+            "gate": gate,
+            "required": gate in required_rows,
+            "expected_evidence": expected_by_gate[gate],
+        }
+        for gate in GATE_ROWS
+    ]
+
+
 def build_gate_decision(
     *,
     task: str,
@@ -287,6 +364,13 @@ def build_gate_decision(
         "stop_conditions": "Stop for complexity, cost, ambiguity, safety, approval, or validation gaps.",
         "approval": approval,
     }
+    gate_evidence = build_gate_evidence(
+        gate_outcome=gate_outcome,
+        validation_path=validation_path,
+        validation_gap=validation_gap,
+        clarification_required=False,
+        stop_reasons=stop_reasons,
+    )
 
     return {
         "gate_outcome": gate_outcome,
@@ -295,6 +379,7 @@ def build_gate_decision(
         "reason_codes": stop_reasons,
         "needs_explicit_approval": gate_outcome != "trivial-skip",
         "readiness_brief": readiness_brief,
+        "gate_evidence": gate_evidence,
     }
 
 
@@ -332,6 +417,12 @@ def render_gate_text(decision: dict[str, object]) -> None:
     print(f"- Main risk: {brief['main_risk']}")
     print(f"- Stop conditions: {brief['stop_conditions']}")
     print(f"- Approval: {brief['approval']}")
+    print("Gate Evidence:")
+    for evidence in decision["gate_evidence"]:
+        print(
+            f"- {evidence['gate']}: required={str(evidence['required']).lower()}; "
+            f"expected={evidence['expected_evidence']}"
+        )
 
 
 def render_claim_text(claims: list[str], requirements: list[dict[str, str]]) -> None:

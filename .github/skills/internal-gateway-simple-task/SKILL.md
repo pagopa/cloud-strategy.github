@@ -101,17 +101,39 @@ Before operational work, produce a short local brief with no placeholders:
 
 This brief must stay shorter than a retained plan.
 
+## Gate Evidence Ledger
+
+For `full-gate` work, keep a compact ledger before final claims. Each row must be `done`, `skipped`, or `blocked` and must include evidence or a gap.
+
+Required rows:
+
+- `bounded-evidence`
+- `complexity-cost`
+- `initial-idea-ordering`
+- `clarification`
+- `critical-challenge`
+- `readiness-brief`
+- `execution`
+- `validation`
+- `final-evidence`
+
+Use `skipped` only when the gate policy allows it and the reason is explicit. Use `blocked` when the missing evidence prevents a completion, readiness, passing, fixed, or no-gap claim.
+
 ## Simple Procedure
 
 1. Inspect the nearest local evidence first.
 2. Decide whether the task is `trivial-skip`, `full-gate`, or `stop-with-reason`.
-3. For non-trivial work, complete Initial Idea Ordering before `grill-me`.
-4. Ask one compact `grill-me` block only when it is needed to continue the active lane.
-5. Run the critical challenge before non-trivial action.
-6. Build the Readiness Brief.
-7. Execute the smallest coherent in-scope move.
-8. Run focused validation or report the exact validation gap.
-9. Use the final evidence gate before positive claims.
+3. For `full-gate` work, keep the Gate Evidence Ledger current from the first non-trivial gate onward.
+4. For non-trivial work, complete Initial Idea Ordering before `grill-me`.
+5. Ask one compact `grill-me` block only when it is needed to continue the active lane.
+6. Run the critical challenge before non-trivial action.
+7. Build the Readiness Brief.
+8. Execute the smallest coherent in-scope move.
+9. Run focused validation or report the exact validation gap.
+10. Report the ledger summary before strong positive claims.
+11. Use the final evidence gate before positive claims.
+
+For `trivial-skip`, do not create a ledger. Name the validation path directly, or state the exact validation gap.
 
 ## Execution Loop
 
@@ -123,6 +145,16 @@ When execution is authorized, iterate with the smallest useful cycle:
 4. Repair once when the failure is still in scope and improving.
 5. Continue only while evidence improves.
 6. Stop with reason when risk, cost, ambiguity, or validation failure crosses the boundary.
+
+## Simple Code Discipline
+
+- Task-bound: complete only the concrete requested outcome; stop when target, scope, or validation changes.
+- KISS: choose the smallest readable change that solves the observed problem.
+- YAGNI: do not add helpers, abstractions, options, configuration, or future proofing without an active task need.
+- DRY locally: remove meaningful duplication touched by the task, but do not extract one-off logic.
+- Single responsibility: each changed section, helper, or code path must have one current reason to exist.
+- Behavior first: when executable behavior changes, name the observable behavior and validate it with the closest stable check.
+- Fail fast on drift: stop with reason when the task becomes ambiguous, multi-phase, owner-conflicted, or not locally verifiable.
 
 ## Generic Executable Behavior Rule
 
@@ -151,5 +183,9 @@ If no useful seam exists, state the seam gap explicitly.
 - The critical challenge runs before non-trivial action.
 - Concrete bounded work completes in the same run unless `stop-with-reason` is explicit.
 - Stop output explains the exact violated condition and required evidence.
+- Non-trivial work has a Gate Evidence Ledger entry for each required row, or an explicit blocker.
+- Skipped gates record the reason that made the skip valid.
+- Blocked gates prevent completion, readiness, passing, fixed, or no-gap claims.
+- Executable behavior changes satisfy the Simple Code Discipline.
 - Executable behavior changes follow the generic test-first loop when a useful seam exists.
 - Positive claims rely on fresh evidence before completion.

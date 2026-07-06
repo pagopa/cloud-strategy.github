@@ -14,6 +14,9 @@ Skip the gate only with a Trivial-skip proof showing:
 
 If a missing answer would change scope, validation, cost, risk, or target state, stop with reason instead of continuing.
 
+Treat `clarification` as `skipped` when local evidence already answers the question or the task is `trivial-skip`.
+Treat `clarification` as `blocked` when the missing answer would change scope, validation, cost, risk, or target state.
+
 ## Exit Check
 
 Run this check before asking a clarification:

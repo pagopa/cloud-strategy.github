@@ -37,11 +37,11 @@ Use these evidence gates before strong claims:
 
 | Claim | Evidence gate |
 | --- | --- |
-| `fixed` | Re-run the original failing loop or state the blocker. |
-| `covered` | Show the failing-then-passing seam, or state why it could not be run. |
+| `fixed` | Mark `validation` done by re-running the original failing loop, or state the blocker. |
+| `covered` | Mark `execution` and `validation` done against the failing-then-passing behavior seam, or state why it could not be run. |
 | `performance-improved` | Compare baseline and after evidence from the same measurement class. |
-| `validator-passes` | Re-run the validator and read fresh output before claiming success. |
-| `completion`, `readiness`, `no-gap` | Confirm all in-scope work is closed and run the final evidence gate. |
+| `validator-passes` | Mark `validation` done by re-running the validator and reading fresh output before claiming success. |
+| `completion`, `readiness`, `no-gap` | Mark `final-evidence` done only after all in-scope work is closed and the final evidence gate has fresh support. |
 
 If the evidence gate would require broader staged work, stop with reason instead of over-claiming.
 

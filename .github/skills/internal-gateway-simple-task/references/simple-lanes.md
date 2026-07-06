@@ -15,13 +15,13 @@ If cost or complexity exceeds same-run execution, stop and recommend a retained 
 
 ## Output Shapes
 
-For `answer`, return the answer, evidence, and uncertainty.
+For `answer`, return the answer, evidence, uncertainty, and any validation gap when applicable.
 
-For `edit`, return `lane`, `files-touched`, validation, and residual risk.
+For `edit`, return `lane`, `files-touched`, `gate-ledger`, validation, and residual risk.
 
-For `diagnose`, return `lane`, reproduced failure, root cause, fix or blocker, and evidence.
+For `diagnose`, return `lane`, reproduced failure, root cause, fix or blocker, `gate-ledger`, and evidence.
 
-For `validate`, return `lane`, check, result, and any follow-up gap.
+For `validate`, return `lane`, check, result, `gate-ledger`, and any follow-up gap.
 
 For `stop-with-reason`, return:
 
@@ -29,6 +29,13 @@ For `stop-with-reason`, return:
 - `why stopped`
 - `user decision needed`
 - `evidence required`
+
+## Gate Evidence By Lane
+
+- `edit`: files touched, behavior or prose contract changed, focused validation command or manual check
+- `diagnose`: reproduced failure, hypothesis, falsification check, fix or blocker
+- `validate`: command or artifact checked, result, fresh output summary, remaining gap
+- `answer`: inspected evidence or explicit uncertainty
 
 ## Multi-Source Mismatch Procedure
 
