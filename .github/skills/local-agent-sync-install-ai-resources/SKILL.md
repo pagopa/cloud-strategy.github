@@ -57,9 +57,10 @@ may be used for compatibility; it delegates to the bundled skill runner.
 - `doctor`: read-only readiness checks for runtime roots, support matrix, catalog paths, and sync state.
 - `plan` or `dry-run`: install-lane dry run.
 - `audit`: compare source, manifest, and managed target paths without writing runtime files.
+- `--fast`: read-only shortcut for `plan` and `audit` only. Write modes still evaluate the full source catalog.
 - `apply`: explicit install-lane materialization. Never run from `next_action` alone.
 - `bisync plan`: read-only drift detection between `.github/skills/` and `~/.agents/skills/`.
-- `bisync apply`: explicit bidirectional drift resolution after reviewed plan and clean repo preflight.
+- `bisync apply`: explicit bidirectional drift resolution after a reviewed matching `bisync plan` snapshot and clean repo preflight.
 
 ### Default Sync Sequence
 
@@ -82,7 +83,7 @@ Stop and report when any of these occur:
 - `next_action.requires_explicit_approval` is `true` and the user has not explicitly approved, except for the `sync` command's built-in install-lane auto-execute path.
 - `sync` reports install-lane residual drift, missing directory creation without `--create-missing-dirs`, stale managed resources, or any install blocker.
 - `sync` reports `home-to-repo`, `only-home`, `equal-mtime`, or another non-safe bisync blocker after install. Treat this as a review state, not an apply failure.
-- `bisync apply` was requested without a prior `bisync plan`.
+- `bisync apply` was requested without a prior matching reviewed `bisync plan` snapshot.
 - The source repository has uncommitted or untracked changes during `bisync apply`.
 - After `bisync apply` modifies `~/.agents/skills/` files that the install lane also manages, re-run install `plan`. Verified repo-to-home bisync copies refresh the manifest state; if `target-modified-managed` still appears, treat it as a real local divergence and review the path instead of deleting it as a routine recovery step.
 - If `bisync apply` is blocked by `bisync-repo-dirty` and the local workspace has unrelated uncommitted changes, run bisync from a clean detached worktree at the same commit and pass it through `--source-root`.

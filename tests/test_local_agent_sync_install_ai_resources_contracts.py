@@ -1,4 +1,5 @@
 import argparse
+import json
 import subprocess
 import sys
 import textwrap
@@ -14,9 +15,15 @@ SCRIPT_DIR = Path(
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from agent_translation import target_extension, translate_agent_for_target  # noqa: E402
-from bisync_skills import build_bisync_plan  # noqa: E402
+from bisync_skills import build_bisync_plan, run_bisync_apply, run_bisync_plan  # noqa: E402
 from home_sync_contract import load_home_sync_catalog, load_home_sync_policy  # noqa: E402
-from home_syncing import HomeSyncOperation, parse_targets  # noqa: E402
+from home_syncing import (  # noqa: E402
+    HomeSyncOperation,
+    build_manifest_payload,
+    build_home_sync_plan,
+    parse_targets,
+    state_root_for_home,
+)
 from sync_home_ai_resources import (  # noqa: E402
     bisync_requires_review,
     install_auto_apply_blockers,
@@ -232,3 +239,285 @@ def test_skill_run_sh_should_quiet_only_for_compact_modes() -> None:
 
     assert result.returncode == 0
     assert result.stdout.strip() == "0,1"
+
+
+def test_fast_mode_does_not_filter_apply_catalog(tmp_path: Path) -> None:
+    refs_dir = (
+        tmp_path
+        / ".github"
+        / "skills"
+        / "local-agent-sync-install-ai-resources"
+        / "references"
+    )
+    refs_dir.mkdir(parents=True)
+    (refs_dir / "home-sync-catalog.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            defaults:
+              include_internal_skills: true
+              include_local_skills: false
+              include_unlisted_skills: true
+              unmanaged_existing_skills_policy: repo-wins
+              excluded_skills: []
+              skill_targets:
+                - codex
+            resources: []
+            """
+        ),
+        encoding="utf-8",
+    )
+    (refs_dir / "runtime-support-matrix.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            rows:
+              - target: skills
+                resource_family: skills
+                support_level: Documented
+                home_path: ~/.agents/skills/<skill>/
+                direct_copy_possible: true
+                translation_required: false
+                include_in_v1: true
+                evidence: []
+                notes: Shared support
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    for skill_name in ("alpha-skill", "beta-skill"):
+        skill_dir = tmp_path / ".github" / "skills" / skill_name
+        skill_dir.mkdir(parents=True, exist_ok=True)
+        (skill_dir / "SKILL.md").write_text(f"# {skill_name}\n", encoding="utf-8")
+
+    home_root = tmp_path / "home"
+    state_root = state_root_for_home(home_root)
+    state_root.mkdir(parents=True)
+    (state_root / "manifest.json").write_text(
+        json.dumps(
+            {
+                "managed_resources": [
+                    {
+                        "target": "skills",
+                        "resource_family": "skills",
+                        "resource_id": "alpha-skill",
+                        "target_path": str(home_root / ".agents/skills/alpha-skill"),
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    normal = build_home_sync_plan(tmp_path, home_root, ("skills",), mode="apply", fast=False)
+    fast = build_home_sync_plan(tmp_path, home_root, ("skills",), mode="apply", fast=True)
+
+    assert fast.source_resources_considered == normal.source_resources_considered == 2
+
+
+def test_bisync_apply_requires_reviewed_plan_snapshot(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = tmp_path / "repo"
+    home_root = tmp_path / "home"
+    refs_dir = (
+        repo_root
+        / ".github"
+        / "skills"
+        / "local-agent-sync-install-ai-resources"
+        / "references"
+    )
+    refs_dir.mkdir(parents=True)
+    (refs_dir / "home-sync-catalog.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            defaults:
+              include_internal_skills: true
+              include_local_skills: false
+              include_unlisted_skills: false
+              unmanaged_existing_skills_policy: block
+              excluded_skills: []
+              skill_targets:
+                - codex
+            resources: []
+            """
+        ),
+        encoding="utf-8",
+    )
+    (repo_root / ".github" / "skills" / "demo-skill").mkdir(parents=True)
+    (repo_root / ".github" / "skills" / "demo-skill" / "SKILL.md").write_text(
+        "# demo\n", encoding="utf-8"
+    )
+    (home_root / ".agents" / "skills").mkdir(parents=True)
+
+    subprocess.run(["git", "init", "-q"], cwd=repo_root, check=True)
+    subprocess.run(["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True)
+    subprocess.run(["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo_root, check=True)
+    subprocess.run(["git", "commit", "-qm", "init"], cwd=repo_root, check=True)
+
+    args = argparse.Namespace(
+        source_root=repo_root.as_posix(),
+        home_root=home_root.as_posix(),
+        format="compact",
+        compact=True,
+    )
+
+    assert run_bisync_apply(args) == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert "bisync-plan-required" in payload["blockers"]
+
+
+def test_bisync_apply_uses_matching_reviewed_plan_snapshot(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = tmp_path / "repo"
+    home_root = tmp_path / "home"
+    refs_dir = (
+        repo_root
+        / ".github"
+        / "skills"
+        / "local-agent-sync-install-ai-resources"
+        / "references"
+    )
+    refs_dir.mkdir(parents=True)
+    (refs_dir / "home-sync-catalog.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            defaults:
+              include_internal_skills: true
+              include_local_skills: false
+              include_unlisted_skills: false
+              unmanaged_existing_skills_policy: block
+              excluded_skills: []
+              skill_targets:
+                - codex
+            resources: []
+            """
+        ),
+        encoding="utf-8",
+    )
+    (repo_root / ".github" / "skills" / "demo-skill").mkdir(parents=True)
+    (repo_root / ".github" / "skills" / "demo-skill" / "SKILL.md").write_text(
+        "# demo\n", encoding="utf-8"
+    )
+    (home_root / ".agents" / "skills").mkdir(parents=True)
+
+    subprocess.run(["git", "init", "-q"], cwd=repo_root, check=True)
+    subprocess.run(["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True)
+    subprocess.run(["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo_root, check=True)
+    subprocess.run(["git", "commit", "-qm", "init"], cwd=repo_root, check=True)
+
+    args = argparse.Namespace(
+        source_root=repo_root.as_posix(),
+        home_root=home_root.as_posix(),
+        format="compact",
+        compact=True,
+    )
+
+    assert run_bisync_plan(args) == 1
+    _ = capsys.readouterr()
+
+    assert run_bisync_apply(args) == 0
+    assert (home_root / ".agents" / "skills" / "demo-skill" / "SKILL.md").is_file()
+
+
+def test_cross_target_skill_plan_deduplicates_shared_paths(
+    tmp_path: Path,
+) -> None:
+    refs_dir = (
+        tmp_path
+        / ".github"
+        / "skills"
+        / "local-agent-sync-install-ai-resources"
+        / "references"
+    )
+    refs_dir.mkdir(parents=True)
+    (refs_dir / "home-sync-catalog.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            defaults:
+              include_internal_skills: true
+              include_local_skills: false
+              include_unlisted_skills: true
+              unmanaged_existing_skills_policy: repo-wins
+              excluded_skills: []
+              skill_targets:
+                - codex
+                - copilot
+                - opencode
+            resources: []
+            """
+        ),
+        encoding="utf-8",
+    )
+    (refs_dir / "runtime-support-matrix.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            rows:
+              - target: skills
+                resource_family: skills
+                support_level: Documented
+                home_path: ~/.agents/skills/<skill>/
+                direct_copy_possible: true
+                translation_required: false
+                include_in_v1: true
+                evidence: []
+                notes: Shared support
+              - target: codex
+                resource_family: skills
+                support_level: Documented
+                home_path: ~/.agents/skills/<skill>/
+                direct_copy_possible: true
+                translation_required: false
+                include_in_v1: true
+                evidence: []
+                notes: Shared support
+              - target: copilot
+                resource_family: skills
+                support_level: Documented
+                home_path: ~/.agents/skills/<skill>/
+                direct_copy_possible: true
+                translation_required: false
+                include_in_v1: true
+                evidence: []
+                notes: Shared support
+              - target: opencode
+                resource_family: skills
+                support_level: Documented
+                home_path: ~/.agents/skills/<skill>/
+                direct_copy_possible: true
+                translation_required: false
+                include_in_v1: true
+                evidence: []
+                notes: Shared support
+            """
+        ),
+        encoding="utf-8",
+    )
+    skill_dir = tmp_path / ".github" / "skills" / "demo-skill"
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    (skill_dir / "SKILL.md").write_text("# demo-skill\n", encoding="utf-8")
+
+    plan = build_home_sync_plan(
+        tmp_path,
+        tmp_path / "home",
+        ("skills", "codex", "copilot", "opencode"),
+        mode="plan",
+    )
+
+    copy_paths = [operation.path for operation in plan.operations if operation.action == "copy"]
+    assert copy_paths.count(str((tmp_path / "home" / ".agents" / "skills" / "demo-skill").resolve())) == 1
+
+    manifest_payload = build_manifest_payload(plan)
+    desired_paths = [
+        resource["target_path"] for resource in manifest_payload["managed_resources"]
+    ]
+    assert desired_paths.count(str((tmp_path / "home" / ".agents" / "skills" / "demo-skill").resolve())) == 1
+    assert plan.source_resources_considered == 1

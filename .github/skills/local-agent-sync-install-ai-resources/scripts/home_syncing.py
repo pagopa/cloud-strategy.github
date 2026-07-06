@@ -194,8 +194,15 @@ def build_home_sync_plan(
     unsupported_families_by_target: dict[str, set[str]] = {target: set() for target in targets}
 
     add_manifest_state_operation(operations, state_root, mode, manifest_error)
-    catalog_resources = filter_catalog_for_fast_mode(catalog, manifest_payload, targets, fast=fast)
+    catalog_resources = filter_catalog_for_fast_mode(
+        catalog,
+        manifest_payload,
+        targets,
+        mode=mode,
+        fast=fast,
+    )
     add_target_root_operations(operations, missing_dirs, home_root, targets, mode)
+    seen_target_paths: set[str] = set()
 
     for resource in catalog_resources:
         source_path = source_root / resource.source_path
@@ -256,6 +263,9 @@ def build_home_sync_plan(
                 content_hash=content_hash,
                 last_action="copy",
             )
+            if managed_resource.target_path in seen_target_paths:
+                continue
+            seen_target_paths.add(managed_resource.target_path)
             desired_resources.append(managed_resource)
             add_materialization_operation(
                 operations,
@@ -280,6 +290,8 @@ def build_home_sync_plan(
         home_root,
         policy,
     )
+    operations = list(dedupe_operations_by_identity(operations))
+    desired_resources = list(dedupe_resources_by_target_path(desired_resources))
     return HomeSyncPlan(
         source_root=source_root,
         home_root=home_root,
@@ -481,8 +493,11 @@ def filter_catalog_for_fast_mode(
     manifest_payload: dict[str, object],
     targets: tuple[str, ...],
     *,
+    mode: str,
     fast: bool,
 ) -> list[CatalogResource]:
+    if mode not in {"plan", "audit"}:
+        return catalog
     if not fast or not manifest_payload.get("managed_resources"):
         return catalog
     resource_ids = {
@@ -493,6 +508,30 @@ def filter_catalog_for_fast_mode(
     return [resource for resource in catalog if resource.resource_id in resource_ids]
 
 
+def dedupe_operations_by_identity(
+    operations: list[HomeSyncOperation],
+) -> tuple[HomeSyncOperation, ...]:
+    ordered: dict[tuple[str, str, str | None, str | None], HomeSyncOperation] = {}
+    for operation in operations:
+        key = (
+            operation.action,
+            operation.path,
+            operation.code,
+            operation.resource_id,
+        )
+        ordered.setdefault(key, operation)
+    return tuple(ordered.values())
+
+
+def dedupe_resources_by_target_path(
+    resources: list[ManagedResource],
+) -> tuple[ManagedResource, ...]:
+    ordered: dict[str, ManagedResource] = {}
+    for resource in resources:
+        ordered.setdefault(resource.target_path, resource)
+    return tuple(ordered.values())
+
+
 def add_target_root_operations(
     operations: list[HomeSyncOperation],
     missing_dirs: list[str],
@@ -500,12 +539,17 @@ def add_target_root_operations(
     targets: tuple[str, ...],
     mode: str,
 ) -> None:
+    seen_roots: set[str] = set()
     for target in targets:
         skill_root = runtime_skill_root(home_root, target)
-        _add_root_operation(operations, missing_dirs, home_root, target, skill_root, mode)
+        if skill_root.as_posix() not in seen_roots:
+            seen_roots.add(skill_root.as_posix())
+            _add_root_operation(operations, missing_dirs, home_root, target, skill_root, mode)
         if has_agent_root(target):
             agent_root = runtime_agent_root(home_root, target)
-            _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
+            if agent_root.as_posix() not in seen_roots:
+                seen_roots.add(agent_root.as_posix())
+                _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
 
 
 def _add_root_operation(
@@ -1168,9 +1212,13 @@ def build_manifest_payload(
 ) -> dict[str, object]:
     blocked_paths = {operation.path for operation in plan.operations if operation.action == "blocked"}
     managed_resources = []
+    seen_target_paths: set[str] = set()
     for resource in plan.desired_resources:
         if resource.target_path in blocked_paths:
             continue
+        if resource.target_path in seen_target_paths:
+            continue
+        seen_target_paths.add(resource.target_path)
         entry = resource.to_dict()
         if actual_content_hashes and resource.target_path in actual_content_hashes:
             entry["content_hash"] = actual_content_hashes[resource.target_path]

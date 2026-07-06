@@ -19,6 +19,7 @@ Expected state files:
 - `manifest.json`
 - `last-plan.json`
 - `last-audit.json`
+- `last-bisync-plan.json`
 - `locks/home-ai-resources.lock`
 
 Optional debug logs may live under `logs/` when the implementation needs durable operator evidence.
@@ -223,6 +224,7 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 - `sync`: safe top-level automation that may apply only clean repo-to-home install work before running the bisync review gate.
 - `plan`: dry run that produces a readable diff and machine-readable state. Read-only.
 - `audit`: compare source, manifest, and managed target paths. Read-only.
+- `--fast`: manifest-focused shortcut for `plan` and `audit` only. It must not change `apply` or `sync` source discovery.
 - `doctor`: verify runtime roots, permissions, symlink posture, and manifest health. Read-only.
 - `apply`: materialize approved operations. Writes to home only.
 - `dry-run`: alias of `plan`.
@@ -252,7 +254,7 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
 ### Bisync Modes
 
 - `bisync plan`: detect drift. Read-only. Produces a drift list with entries for `repo-to-home`, `home-to-repo`, `only-repo`, `only-home`, and `equal-mtime`.
-- `bisync apply`: resolve drift by copying winner to loser. Writes to both repo and home as needed.
+- `bisync apply`: resolve drift by copying winner to loser. Writes to both repo and home as needed, but only after a reviewed matching `bisync plan` snapshot exists for the same repo and home roots.
 
 ### Logic
 
@@ -274,9 +276,10 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
 
 Before any write in `bisync apply`:
 
-1. Verify `git status --porcelain --untracked-files=all` on the source repository.
-2. Block `apply` if the repository is not clean.
-3. Block `apply` if any `only-home` or `equal-mtime` entry exists in the current plan.
+1. Require a reviewed `last-bisync-plan.json` snapshot that matches the current drift plan for the same repo and home roots.
+2. Verify `git status --porcelain --untracked-files=all` on the source repository.
+3. Block `apply` if the repository is not clean.
+4. Block `apply` if any `only-home` or `equal-mtime` entry exists in the current plan.
 
 ### Apply
 
@@ -305,3 +308,4 @@ The `bisync` payload includes:
 - `next_step`: human-readable next instruction.
 - `next_action`: structured object with `action`, `allowed`, `requires_explicit_approval`, `command`, `reason`.
 - `verification`: post-apply status with `status` and optional `reason` or `residual_drifts`.
+- `bisync-plan-required`: emitted when `bisync apply` is requested without a matching reviewed snapshot.

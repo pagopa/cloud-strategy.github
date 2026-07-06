@@ -19,7 +19,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from home_sync_contract import load_home_sync_policy
+from home_sync_contract import load_home_sync_policy, state_root_for_home
 from home_syncing import reconcile_manifest_entry_after_bisync_copy
 from sync_output import (
     build_compact_bisync_output,
@@ -30,6 +30,7 @@ from sync_output import (
 IGNORED_SYNC_PARTS: tuple[str, ...] = (".venv", "__pycache__", ".pytest_cache")
 IGNORED_SYNC_SUFFIXES: tuple[str, ...] = (".pyc", ".pyo")
 EXCLUDED_BUNDLE_PREFIX: str = "local-"
+BISYNC_PLAN_PATH = "last-bisync-plan.json"
 
 
 def should_ignore(path: Path) -> bool:
@@ -505,6 +506,44 @@ def apply_bisync_plan(
     return plan
 
 
+def write_bisync_plan_snapshot(plan: BisyncPlan) -> Path:
+    state_root = state_root_for_home(plan.home_root)
+    state_root.mkdir(parents=True, exist_ok=True)
+    snapshot_path = state_root / BISYNC_PLAN_PATH
+    snapshot = {
+        "source_root": plan.source_root.as_posix(),
+        "home_root": plan.home_root.as_posix(),
+        "drifts": [drift.to_dict() for drift in plan.drifts],
+        "blocked_codes": plan.blocked_codes,
+    }
+    snapshot_path.write_text(json.dumps(snapshot, indent=2, sort_keys=True), encoding="utf-8")
+    return snapshot_path
+
+
+def load_bisync_plan_snapshot(source_root: Path, home_root: Path) -> dict[str, object] | None:
+    snapshot_path = state_root_for_home(home_root) / BISYNC_PLAN_PATH
+    if not snapshot_path.exists():
+        return None
+    try:
+        snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(snapshot, dict):
+        return None
+    if snapshot.get("source_root") != source_root.as_posix():
+        return None
+    if snapshot.get("home_root") != home_root.as_posix():
+        return None
+    return snapshot
+
+
+def reviewed_bisync_plan_matches(plan: BisyncPlan, snapshot: dict[str, object]) -> bool:
+    return (
+        snapshot.get("drifts") == [drift.to_dict() for drift in plan.drifts]
+        and snapshot.get("blocked_codes") == plan.blocked_codes
+    )
+
+
 def _next_step_for_bisync(plan: BisyncPlan) -> str:
     if plan.mode == "plan":
         if plan.blocked_codes:
@@ -538,6 +577,7 @@ def run_bisync_plan(args: argparse.Namespace) -> int:
     source_root = _resolve_source_root(args)
     home_root = Path(args.home_root).expanduser().resolve()
     plan = build_bisync_plan(source_root, home_root, mode="plan")
+    write_bisync_plan_snapshot(plan)
     _emit_bisync_output(plan, args.format)
     return 1 if plan.blocked_codes else 0
 
@@ -546,6 +586,25 @@ def run_bisync_apply(args: argparse.Namespace) -> int:
     source_root = _resolve_source_root(args)
     home_root = Path(args.home_root).expanduser().resolve()
     plan = build_bisync_plan(source_root, home_root, mode="plan")
+    snapshot = load_bisync_plan_snapshot(source_root, home_root)
+    if snapshot is None or not reviewed_bisync_plan_matches(plan, snapshot):
+        plan.mode = "apply"
+        plan.blocked_codes = sorted(set([*plan.blocked_codes, "bisync-plan-required"]))
+        plan.next_step = "Run bisync plan first, review that exact drift snapshot, then rerun bisync apply."
+        plan.next_action = {
+            "action": "review",
+            "allowed": False,
+            "requires_explicit_approval": True,
+            "command": f"bisync plan --source-root {source_root} --home-root {home_root}",
+            "reason": "Bisync apply requires a reviewed matching plan snapshot before any write.",
+        }
+        plan.verification = {
+            "status": "blocked",
+            "code": "bisync-plan-required",
+            "reason": "Bisync apply requires a reviewed matching plan snapshot.",
+        }
+        _emit_bisync_output(plan, args.format)
+        return 1
     resolvable_during_apply = {"bisync-only-repo"}
     remaining_blockers = [
         code for code in plan.blocked_codes if code not in resolvable_during_apply

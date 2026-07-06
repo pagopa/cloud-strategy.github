@@ -33,6 +33,7 @@ BLOCKER_REASON_MAP: dict[str, str] = {
     "bisync-verify-failed": "Post-copy hash verification failed.",
     "bisync-manifest-reconcile-failed": "Manifest reconciliation failed after a verified bisync copy.",
     "bisync-residual-drift": "Post-apply bisync still detected residual drift.",
+    "bisync-plan-required": "Bisync apply requires a reviewed plan snapshot that matches the current drift set.",
 }
 
 REPORT_TABLE_ROW_LIMIT = 8
