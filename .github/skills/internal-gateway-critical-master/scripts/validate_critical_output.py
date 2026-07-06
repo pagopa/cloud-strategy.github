@@ -21,6 +21,7 @@ from critical_master import (
     ALLOWED_OUTCOMES,
     FINDING_FIELD_MAX_WORDS,
     FINDING_OBJECTION_MAX_WORDS,
+    FINDING_QUESTION_MAX_WORDS,
     FINDING_REFRAME_MAX_WORDS,
     MAX_FINDINGS,
     MIN_FINDINGS,
@@ -351,6 +352,21 @@ def _check_finding(parsed, findings: list[Finding]) -> None:
                     ),
                     suggestion="Shorten the optional reframe.",
                     extras={"words": words, "limit": FINDING_REFRAME_MAX_WORDS},
+                )
+            )
+    if parsed.has_question:
+        words = _field_word_count(parsed.body, "Question")
+        if words > FINDING_QUESTION_MAX_WORDS:
+            findings.append(
+                Finding(
+                    severity="non-blocking",
+                    code="finding-question-word-limit",
+                    path=path,
+                    message=(
+                        f"Question has {words} words; limit is {FINDING_QUESTION_MAX_WORDS}."
+                    ),
+                    suggestion="Shorten the optional root question.",
+                    extras={"words": words, "limit": FINDING_QUESTION_MAX_WORDS},
                 )
             )
 

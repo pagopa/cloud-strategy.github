@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -8,6 +9,11 @@ VALIDATOR = (
     / ".github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py"
 )
 FIXTURES = REPO_ROOT / ".github/skills/internal-gateway-critical-master/fixtures"
+VALIDATOR_SPEC = spec_from_file_location("validate_critical_output", VALIDATOR)
+assert VALIDATOR_SPEC is not None and VALIDATOR_SPEC.loader is not None
+VALIDATOR_MODULE = module_from_spec(VALIDATOR_SPEC)
+sys.path.insert(0, str(VALIDATOR.parent))
+VALIDATOR_SPEC.loader.exec_module(VALIDATOR_MODULE)
 
 
 def run_validator(*args: str) -> subprocess.CompletedProcess[str]:
@@ -43,3 +49,32 @@ def test_strict_mode_fails_on_advisory_finding() -> None:
     )
     assert result.returncode != 0
     assert "summary-word-limit" in result.stdout or "total-word-limit" in result.stdout
+
+
+def test_question_word_limit_is_advisory() -> None:
+    text = """
+## Summary
+
+We are challenging whether local validation can replace CI validation.
+
+## Findings
+
+### 1. The audit trail weakens
+
+- **Impact:** Central CI logs become incomplete.
+- **Evidence:** `inference` - no replacement logging is described.
+- **Mitigation:** Define a durable audit record before replacing CI.
+- **Question:** Which durable centrally searchable independently retained signed audit record replaces the CI validation log for reviewers, compliance checks, later investigations, audit replay, governance reporting, incident review, and rollout approval?
+
+## Synthesis
+
+The strongest risk is compliance visibility.
+
+## Outcome
+
+`accept-with-risk`
+"""
+
+    findings = VALIDATOR_MODULE.validate_output(text)
+
+    assert any(finding.code == "finding-question-word-limit" for finding in findings)

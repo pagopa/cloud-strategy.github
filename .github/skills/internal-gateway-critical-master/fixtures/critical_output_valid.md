@@ -10,6 +10,7 @@ We are challenging a proposal to move validation logic from CI into a pre-commit
 - **Evidence:** `inference` - no replacement logging is described.
 - **Mitigation:** Add a signed attestation step before the hook is enabled.
 - **Reframe:** Treat local validation as an early filter, not a replacement for CI.
+- **Question:** Which central audit record replaces the CI validation log?
 
 ## Synthesis
 

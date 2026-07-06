@@ -13,7 +13,8 @@ Use this reference to produce a compact, consistent critical challenge deliverab
 | `finding.evidence` | Repository evidence, inference, or named uncertainty. | 30 words |
 | `finding.mitigation` | Condition or action required before execution resumes. | 30 words |
 | `finding.reframe` | Optional lateral reframe. | 25 words |
-| `synthesis` | Result of the Final Consistency Gate, including any strongest defense and remaining vulnerability when user defenses exist. | 100 words |
+| `finding.question` | Optional single root question when the answer would materially change the critique. | 25 words |
+| `synthesis` | Result of the Final Consistency Gate, including defense classification, strongest defense, and remaining vulnerability when user defenses exist. | 100 words |
 | `outcome` | Exactly one value from `## Outcome meanings` in `SKILL.md`. | 1 value |
 
 ## Budget
@@ -37,6 +38,7 @@ Use this reference to produce a compact, consistent critical challenge deliverab
 - **Evidence:** <evidence>
 - **Mitigation:** <mitigation>
 - **Reframe:** <reframe>
+- **Question:** <question>
 
 ## Synthesis
 
@@ -62,6 +64,7 @@ We are challenging a proposal to move validation logic from CI into a pre-commit
 - **Evidence:** `inference` — no replacement logging is described.
 - **Mitigation:** Add a signed attestation step before the hook is enabled.
 - **Reframe:** Treat local validation as an early filter, not a replacement for CI. (Analogy: like a spell-checker that does not replace a full code review.)
+- **Question:** Which central audit record replaces the CI validation log?
 
 ## Synthesis
 

@@ -40,7 +40,8 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 - The **third lens must be lateral**: `analogy` or `reverse assumption`.
 - Apply one optional pre-mortem pass if failure modes are material and not covered by the selected lenses.
 - Lead with the strongest supported objection first. Stop at one finding when that objection controls the decision; do not pad findings.
-- Ask exactly one concise root question only when the answer would materially change the critique.
+- Ask exactly one concise root question only when the answer would materially change the critique, and put it in `finding.question`.
+- Treat mitigations as conditions to continue, not as implementation designs that rescue the proposal.
 - Output: 1-3 raw findings, each with a claim class and a note on evidence quality.
 
 | Lens | Question | Use when |
@@ -68,7 +69,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 ### Phase 3: Synthesize
 
 - Run the Final Consistency Gate: name the strongest supported objection, downgrade weak claims to hypotheses, and surface unresolved uncertainty.
-- When the user has already defended the proposal, include the strongest defense and the remaining vulnerability inside the synthesis.
+- When the user has already defended the proposal, classify the defense as `resolves`, `narrows`, `accepts-risk`, or `unanswered`, then name the strongest defense and the remaining vulnerability inside the synthesis.
 - Format the result using the contract in `references/output-contract.md`.
 - Recommend exactly one outcome from `## Outcome meanings`.
 
