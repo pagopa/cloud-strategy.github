@@ -30,7 +30,7 @@ Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainsto
 - Load `superpowers-brainstorming` as the core workflow.
 - Keep the `superpowers-brainstorming` hard gate: no implementation action before the user approves the design or direct-plan recommendation.
 - Use this skill only to add repository-owned idea gates, not to fork the core brainstorming process.
-- Do not load or invoke `grill-me`; the core brainstorming workflow already owns the collaborative questioning behavior this wrapper needs.
+- Keep collaborative questioning inside the core brainstorming workflow.
 - Load `internal-gateway-writing-plans` only after the user approves retained spec or implementation-plan writing.
 
 ## Bounded context pass
@@ -89,7 +89,7 @@ Use this visible shape:
 2. `Resolution:` continue, reopen, or narrow.
 3. `Reason:` one evidence-based sentence.
 
-Do not call this `grill-me` and do not load `grill-me`.
+Keep this gate inside the local idea wrapper and the core brainstorming workflow.
 
 ## Spec vs plan decision
 
@@ -112,6 +112,6 @@ Always explain the choice:
 - The skill challenged the user's initial assumption, not only corrected the proposed solution.
 - The skill presented 2-3 approaches and explained why the recommendation beat the strongest rejected option.
 - The skill used `Critical Challenge Gate` before spec or plan writing.
-- The skill did not reference, load, or invoke `grill-me`.
+- The skill kept collaborative questioning inside the core brainstorming workflow.
 - The skill loaded `internal-gateway-writing-plans` only for retained spec or implementation-plan writing.
 - The old `internal-gateway-idea-brainstorming` bundle remained untouched.
