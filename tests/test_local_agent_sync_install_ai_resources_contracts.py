@@ -213,7 +213,8 @@ def test_skill_run_sh_should_quiet_only_for_compact_modes() -> None:
     )
     script = textwrap.dedent(
         f"""\
-        source <(sed '$d' "{run_sh}")
+        source "{run_sh}"
+        set +e
         should_quiet --format compact
         compact_status="$?"
         should_quiet --format text

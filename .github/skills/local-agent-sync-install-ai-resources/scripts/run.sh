@@ -119,4 +119,6 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 REQUIREMENTS_HASH_FILE="$VENV_DIR/.requirements.sha256"
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
