@@ -79,6 +79,21 @@ This block is the portable source baseline used to generate
 - When a contract or policy changes, align the owning tests, validators, or docs
   instead of letting stale checks restore the old behavior.
 
+## Code Changes
+
+- Executable or evaluable behavior changes must use a test-first
+  red-green-refactor loop: define the failing check, make the smallest
+  implementation edit, then rerun the focused check and closest validation.
+- The failing check must exist before the first implementation edit unless a
+  pre-code testability exception names the gap and alternate validation path.
+- Tests added after implementation are regression coverage only; they must not
+  be represented as test-first work.
+- Exceptions are limited to prose-only docs, generated inventory, mechanical
+  formatting, behavior-neutral renames, read-only validation, or explicit
+  pre-code testability exceptions.
+- If this gate is skipped, agents must stop, disclose the violation, establish
+  the recovery path, and must not claim retroactive red-green-refactor work.
+
 ## graphify
 
 For any question about this repo's architecture, structure, components, or how to add/modify/find
