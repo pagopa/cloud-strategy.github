@@ -3,23 +3,26 @@
 This folder contains Copilot wrapper agents for repository-owned operations plus
 repo-only sync workflows.
 
-## Skill-First Core
+## Agent-Owned Core
 
 - `internal-gateway-idea-brainstorming`: owns substantive idea definition,
   critical challenge, and retained planning before execution.
-- `internal-gateway-review`: owns defect-first review, findings consolidation,
-  and remediation planning.
+- `internal-gateway-review`: owns generic defect-first review for non-code and
+  mixed artifacts before fixes.
+- `internal-code-review`: owns dedicated code-focused review for source, tests,
+  scripts, build metadata, dependency metadata, and code diffs.
 - `internal-gateway-critical-master`: owns pressure testing.
 - `internal-gateway-simple-task`: owns concrete execution and approved compact
   retained-plan consumption.
 
-## Active Gateway Wrappers
+## Active Gateway Agents
 
-| Wrapper | Core skill | Use when |
-| --- | --- | --- |
-| `internal-gateway-idea-brainstorming` | `internal-gateway-idea-brainstorming` | A vague idea or unresolved goal needs definition and retained planning. |
-| `internal-gateway-review` | `internal-gateway-review` | A concrete artifact needs defect-first review before fixes. |
-| `internal-gateway-critical-master` | `internal-gateway-critical-master` | A proposal or plan needs pressure before action. |
-| `internal-gateway-simple-task` | `internal-gateway-simple-task` | A concrete low-to-medium-risk task can finish through one focused lane. |
+| Agent | Use when |
+| --- | --- |
+| `internal-gateway-idea-brainstorming` | A vague idea or unresolved goal needs definition and retained planning. |
+| `internal-gateway-review` | A concrete non-code or mixed artifact needs defect-first review before fixes. |
+| `internal-code-review` | A concrete code target needs dedicated code review before merge or follow-up action. |
+| `internal-gateway-critical-master` | A proposal or plan needs pressure before action. |
+| `internal-gateway-simple-task` | A concrete low-to-medium-risk task can finish through one focused lane. |
 
 Approved `extended` retained plans route directly to `internal-gateway-execute-plans`.
