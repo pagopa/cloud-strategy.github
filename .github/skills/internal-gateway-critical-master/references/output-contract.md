@@ -13,7 +13,7 @@ Use this reference to produce a compact, consistent critical challenge deliverab
 | `finding.evidence` | Repository evidence, inference, or named uncertainty. | 30 words |
 | `finding.mitigation` | Condition or action required before execution resumes. | 30 words |
 | `finding.reframe` | Optional lateral reframe. | 25 words |
-| `synthesis` | Result of the Final Consistency Gate. | 100 words |
+| `synthesis` | Result of the Final Consistency Gate, including any strongest defense and remaining vulnerability when user defenses exist. | 100 words |
 | `outcome` | Exactly one value from `## Outcome meanings` in `SKILL.md`. | 1 value |
 
 ## Budget
