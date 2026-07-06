@@ -24,11 +24,30 @@ stops after the delegated outcome.
 1. Capture the preflight: `Target`, `Anti-scope`, `Nearest owner`,
    `Validation path`, `Stop conditions`, and `Observable acceptance`.
 2. Load `superpowers-writing-plans` and let it create a plan, ask a blocking
-   clarification, redirect, or stop with a reason.
-3. If a retained plan is created, verify execution-readiness: ordered tasks,
-   concrete file targets, clear edit intent, validation commands or explicit
-   gaps, stop conditions, and handoff readiness.
+   clarification, redirect, or stop with a reason. Pass an explicit anti-scope
+   and the list of existing owners so the delegated plan avoids duplicate or
+   speculative tasks at the source.
+3. If a retained plan is created, verify execution-readiness and apply Plan
+   Authoring Discipline: ordered tasks, concrete file targets, clear edit
+   intent, validation commands or explicit gaps, stop conditions, and handoff
+   readiness. Reject the draft if any task duplicates an existing owner, adds
+   speculative scope, or lacks a validation path.
 4. Stop after the writing outcome and wait for the user's next choice.
 
 Preserve handoff quality with targeted rereads only when the delegation has a
 real evidence gap.
+
+## Plan Authoring Discipline
+
+- Owner-first: before the delegated plan adds a task, confirm no existing
+  owner, skill, or validator already covers that responsibility; prefer a
+  reference over a duplicate.
+- Single responsibility: each task must carry one clear deliverable tied to
+  the approved target; split or merge tasks that don't.
+- Fail-fast and redirect: if the delegated plan adds speculative scope,
+  duplicates an existing owner, or lacks a validation path, send it back for
+  revision instead of accepting it.
+
+DRY, YAGNI, and TDD stay owned by `superpowers-writing-plans`; this section
+adds only the owner-awareness and redirect gate that the delegated skill does
+not enforce.
