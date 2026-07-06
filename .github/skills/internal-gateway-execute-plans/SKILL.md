@@ -22,7 +22,6 @@ owns the execution loop.
 ## When not to use
 
 - Writing, reformulating, reviewing, or challenging a plan.
-- Executing `questions.md` or unapproved planning notes.
 - Running same-chat work that is not driven by an approved retained plan.
 - Changing `superpowers-executing-plans`; imported Superpowers behavior stays read-only unless the user explicitly changes scope.
 
@@ -39,12 +38,12 @@ owns the execution loop.
 ## Contract
 
 1. Confirm the retained plan folder, plan basename, and approval to execute.
-2. Read only target, anti-scope, validation path, stop conditions, and first executable task. Treat `questions.md` as non-executable.
+2. Read only target, anti-scope, validation path, stop conditions, and first executable task.
 3. On resume, verify any existing `<plan-basename>.<STATUS>.md`; do not resume from `DONE` unless fresh evidence invalidates it.
 4. Announce this gateway, then load `superpowers-executing-plans` for critical plan review, todos, task execution, and its stop rules.
 5. Preserve compact state with targeted rereads. Summarize large validator output by command, exit code, material counts, changed files, and exact gaps.
 6. Stop on scope drift, destructive action, owner conflict, missing validation path, human approval need, secret exposure risk, or repeated non-improving failures.
-7. Before final response or pause, write exactly one sibling status file named `<plan-basename>.<STATUS>.md`.
+7. Before final response or pause, replace any older sibling `<plan-basename>.*.md` status file for the same plan basename, then write exactly one sibling status file named `<plan-basename>.<STATUS>.md`.
 
 ## Status closeout
 
