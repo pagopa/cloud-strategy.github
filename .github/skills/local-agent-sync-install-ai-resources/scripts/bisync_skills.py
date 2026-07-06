@@ -21,7 +21,11 @@ from pathlib import Path
 
 from home_sync_contract import load_home_sync_policy
 from home_syncing import reconcile_manifest_entry_after_bisync_copy
-from sync_output import build_compact_bisync_output, render_bisync_report
+from sync_output import (
+    build_compact_bisync_output,
+    dump_compact_json,
+    render_bisync_report,
+)
 
 IGNORED_SYNC_PARTS: tuple[str, ...] = (".venv", "__pycache__", ".pytest_cache")
 IGNORED_SYNC_SUFFIXES: tuple[str, ...] = (".pyc", ".pyo")
@@ -565,7 +569,7 @@ def _resolve_source_root(args: argparse.Namespace) -> Path:
 def _emit_bisync_output(plan: BisyncPlan, format_name: str) -> None:
     payload = plan.to_dict()
     if format_name == "compact":
-        print(json.dumps(build_compact_bisync_output(payload), indent=2, sort_keys=True))
+        print(dump_compact_json(build_compact_bisync_output(payload)))
         return
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -588,8 +592,13 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     plan_parser.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
+    )
+    plan_parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
     )
     apply_parser = subparsers.add_parser("apply", help="Apply bisync resolution")
     apply_parser.add_argument("--source-root", default=".", help="Source repository root.")
@@ -601,8 +610,13 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     apply_parser.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
+    )
+    apply_parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
     )
     return parser
 
@@ -610,6 +624,8 @@ def build_bisync_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     parser = build_bisync_parser()
     args = parser.parse_args(argv)
+    if getattr(args, "compact", False):
+        args.format = "compact"
     if args.bisync_command == "plan":
         raise SystemExit(run_bisync_plan(args))
     elif args.bisync_command == "apply":

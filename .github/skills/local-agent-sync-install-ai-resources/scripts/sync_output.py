@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 
 BLOCKER_REASON_MAP: dict[str, str] = {
@@ -34,7 +35,11 @@ BLOCKER_REASON_MAP: dict[str, str] = {
     "bisync-residual-drift": "Post-apply bisync still detected residual drift.",
 }
 
-REPORT_TABLE_ROW_LIMIT = 20
+REPORT_TABLE_ROW_LIMIT = 8
+
+
+def dump_compact_json(payload: dict[str, object]) -> str:
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
 
 def _install_lane_label() -> str:
@@ -46,28 +51,30 @@ def _bisync_lane_label() -> str:
 
 
 def build_compact_install_output(payload: dict[str, object]) -> dict[str, object]:
+    next_action = payload.get("next_action")
     compact: dict[str, object] = {
         "mode": payload.get("mode"),
         "status": payload.get("validation", payload.get("status")),
-        "blocked_codes": list(_as_iterable(payload.get("blocked_codes"))),
-        "next_action": payload.get("next_action"),
-        "next_step": payload.get("next_step"),
-        "selected_targets_count": _count_value(payload.get("selected_targets")),
-        "retired_targets_count": _count_value(payload.get("retired_targets")),
-        "source_resources_considered": payload.get("source_resources_considered"),
-        "copied_count": _count_value(payload.get("copied")),
-        "skipped_count": _count_value(payload.get("skipped")),
-        "blocked_count": _count_value(payload.get("blocked")),
-        "conflict_count": _count_value(payload.get("conflicts")),
-        "missing_dirs_count": _count_value(payload.get("missing_dirs")),
-        "residual_drift_count": _count_value(payload.get("residual_drift")),
-        "unsupported_families_count": _count_unsupported_families(
-            payload.get("unsupported_families_by_target")
-        ),
-        "changed_resources": _install_change_evidence(payload),
+        "targets": _as_string_list(payload.get("selected_targets")),
+        "next": _next_action_name(next_action),
+        "approval": _next_action_requires_approval(next_action),
+        "counts": {
+            "source": payload.get("source_resources_considered") or 0,
+            "copy": _count_value(payload.get("copied")),
+            "skip": _count_value(payload.get("skipped")),
+            "blocked": _count_value(payload.get("blocked")),
+            "conflict": _count_value(payload.get("conflicts")),
+            "missing_dir": _count_value(payload.get("missing_dirs")),
+            "residual": _count_value(payload.get("residual_drift")),
+            "unsupported": _count_unsupported_families(payload.get("unsupported_families_by_target")),
+        },
     }
-    _copy_if_present(compact, payload, "state_path")
-    _copy_if_present(compact, payload, "manifest_path")
+    blockers = _as_string_list(payload.get("blocked_codes"))
+    if blockers:
+        compact["blockers"] = blockers
+    changes = _install_change_evidence(payload, limit=4)
+    if changes:
+        compact["changes"] = changes
     _copy_if_present(compact, payload, "error")
     return compact
 
@@ -77,19 +84,24 @@ def build_compact_bisync_output(payload: dict[str, object]) -> dict[str, object]
     status = None
     if isinstance(verification, dict):
         status = verification.get("status")
+    next_action = payload.get("next_action")
     compact: dict[str, object] = {
         "mode": payload.get("mode"),
         "status": status if status is not None else payload.get("status"),
-        "blocked_codes": list(_as_iterable(payload.get("blocked_codes"))),
-        "next_action": payload.get("next_action"),
-        "next_step": payload.get("next_step"),
-        "drift_total": _count_value(payload.get("drifts")),
-        "direction_counts": _direction_counts(payload.get("drifts")),
-        "bucket_counts": _bucket_counts(payload.get("drifts")),
-        "changed_resources": _bisync_change_evidence(payload.get("drifts")),
+        "next": _next_action_name(next_action),
+        "approval": _next_action_requires_approval(next_action),
+        "counts": {
+            "drift": _count_value(payload.get("drifts")),
+            **_direction_counts(payload.get("drifts")),
+            **_bucket_counts(payload.get("drifts")),
+        },
     }
-    _copy_if_present(compact, payload, "state_path")
-    _copy_if_present(compact, payload, "manifest_path")
+    blockers = _as_string_list(payload.get("blocked_codes"))
+    if blockers:
+        compact["blockers"] = blockers
+    changes = _bisync_change_evidence(payload.get("drifts"), limit=4)
+    if changes:
+        compact["changes"] = changes
     _copy_if_present(compact, payload, "error")
     if isinstance(verification, dict):
         _copy_if_present(compact, verification, "code")
@@ -266,14 +278,16 @@ def _install_change_evidence(payload: dict[str, object], limit: int = 8) -> list
         if action not in interesting_actions:
             continue
         path = operation.get("path")
+        resource_id = operation.get("resource_id")
         if not isinstance(path, str) or not path:
             continue
-        key = (str(action), path)
+        resource = resource_id if isinstance(resource_id, str) and resource_id else _compact_path(path)
+        key = (str(action), str(resource))
         if key in seen:
             continue
         seen.add(key)
-        item: dict[str, object] = {"action": action, "path": path}
-        for field in ("resource_id", "code", "reason"):
+        item: dict[str, object] = {"action": action, "resource": resource}
+        for field in ("code",):
             value = operation.get(field)
             if isinstance(value, str) and value:
                 item[field] = value
@@ -292,7 +306,7 @@ def _bisync_change_evidence(drifts: object, limit: int = 8) -> list[dict[str, ob
         if not isinstance(drift, dict):
             continue
         item: dict[str, object] = {}
-        for field in ("skill", "direction", "type", "winner", "reason"):
+        for field in ("skill", "direction", "type"):
             value = drift.get(field)
             if isinstance(value, str) and value:
                 item[field] = value
@@ -308,6 +322,7 @@ def _bisync_change_evidence(drifts: object, limit: int = 8) -> list[dict[str, ob
 
 def _sync_auto_applied_rows(install_payload: dict[str, object]) -> list[list[str]]:
     rows: list[list[str]] = []
+    grouped: dict[tuple[str, str, str], int] = {}
     operations = install_payload.get("operations")
     if not isinstance(operations, list):
         return rows
@@ -320,7 +335,10 @@ def _sync_auto_applied_rows(install_payload: dict[str, object]) -> list[list[str
             continue
         item = str(operation.get("resource_id") or operation.get("path") or "unknown")
         reason = str(operation.get("reason") or "Repo-to-home copy applied.")
-        rows.append([item, reason, verification])
+        grouped[(item, reason, verification)] = grouped.get((item, reason, verification), 0) + 1
+    for (item, reason, verification), count in grouped.items():
+        label = f"{item} ({count} targets)" if count > 1 else item
+        rows.append([label, reason, verification])
     return rows
 
 
@@ -753,6 +771,7 @@ def _as_string_list(value: object) -> list[str]:
 
 def _install_planned_rows(payload: dict[str, object]) -> list[list[str]]:
     rows: list[list[str]] = []
+    grouped: dict[tuple[str, str, str, str], int] = {}
     operations = payload.get("operations")
     if not isinstance(operations, list):
         return rows
@@ -762,16 +781,20 @@ def _install_planned_rows(payload: dict[str, object]) -> list[list[str]]:
         action = str(operation.get("action") or "")
         if action not in {"copy", "mkdir", "delete", "stale-managed"}:
             continue
-        path = str(operation.get("path") or operation.get("resource_id") or "unknown")
+        path = str(operation.get("resource_id") or operation.get("path") or "unknown")
         reason = str(operation.get("reason") or "policy decision")
         winner = str(operation.get("code") or operation.get("target") or "n/a")
         planned = "copy" if action == "copy" else action
-        rows.append([path, "install", planned, reason, winner])
+        grouped[(path, planned, reason, winner)] = grouped.get((path, planned, reason, winner), 0) + 1
+    for (path, planned, reason, winner), count in grouped.items():
+        label = f"{path} ({count} targets)" if count > 1 else path
+        rows.append([label, "install", planned, reason, winner])
     return rows
 
 
 def _install_completed_rows(payload: dict[str, object]) -> list[list[str]]:
     rows: list[list[str]] = []
+    grouped: dict[tuple[str, str, str, str, str], int] = {}
     if str(payload.get("mode") or "") != "apply":
         return rows
     operations = payload.get("operations")
@@ -783,16 +806,20 @@ def _install_completed_rows(payload: dict[str, object]) -> list[list[str]]:
         action = str(operation.get("action") or "")
         if action not in {"copy", "delete", "mkdir"}:
             continue
-        path = str(operation.get("path") or operation.get("resource_id") or "unknown")
+        path = str(operation.get("resource_id") or operation.get("path") or "unknown")
         reason = str(operation.get("reason") or "applied by plan")
         result = "ok" if action != "skip" else "skipped"
         verification = "hash-match" if action in {"copy", "delete"} else "n/a"
-        rows.append([path, action, reason, result, verification])
+        grouped[(path, action, reason, result, verification)] = grouped.get((path, action, reason, result, verification), 0) + 1
+    for (path, action, reason, result, verification), count in grouped.items():
+        label = f"{path} ({count} targets)" if count > 1 else path
+        rows.append([label, action, reason, result, verification])
     return rows
 
 
 def _install_blocker_rows(payload: dict[str, object]) -> list[list[str]]:
     rows: list[list[str]] = []
+    seen: set[tuple[str, str, str]] = set()
     operations = payload.get("operations")
     if isinstance(operations, list):
         for operation in operations:
@@ -802,8 +829,12 @@ def _install_blocker_rows(payload: dict[str, object]) -> list[list[str]]:
             if action != "blocked":
                 continue
             code = str(operation.get("code") or "unknown")
-            path = str(operation.get("path") or operation.get("resource_id") or "unknown")
+            path = str(operation.get("resource_id") or operation.get("path") or "unknown")
             reason = str(operation.get("reason") or _reason_for_code(code))
+            key = (code, path, reason)
+            if key in seen:
+                continue
+            seen.add(key)
             rows.append([code, path, reason, "Resolve blocker and rerun plan."])
     for code in _as_string_list(payload.get("blocked_codes")):
         if any(existing[0] == code for existing in rows):
@@ -959,6 +990,19 @@ def _next_action_name(next_action: object) -> str:
         if isinstance(action, str) and action:
             return action
     return "unknown"
+
+
+def _next_action_requires_approval(next_action: object) -> bool:
+    if isinstance(next_action, dict):
+        return bool(next_action.get("requires_explicit_approval", False))
+    return False
+
+
+def _compact_path(path: str) -> str:
+    parts = [part for part in path.split("/") if part]
+    if len(parts) >= 2:
+        return "/".join(parts[-2:])
+    return path
 
 
 def _reason_for_code(code: str) -> str:

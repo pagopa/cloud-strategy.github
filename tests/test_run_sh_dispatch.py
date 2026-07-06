@@ -18,7 +18,8 @@ def test_resolve_script_handles_validator_and_debug_log_tools() -> None:
     result = run_shell(
         "source ./.github/scripts/run.sh; "
         "printf '%s\\n' \"$(resolve_script validate_critical_output)\"; "
-        "printf '%s\\n' \"$(resolve_script analyze_copilot_debug_log)\""
+        "printf '%s\\n' \"$(resolve_script analyze_copilot_debug_log)\"; "
+        "printf '%s\\n' \"$(resolve_script sync_home_ai_resources)\""
     )
     assert result.returncode == 0
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
@@ -26,3 +27,6 @@ def test_resolve_script_handles_validator_and_debug_log_tools() -> None:
         ".github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py"
     )
     assert lines[1].endswith("tools/analyze_copilot_debug_log/run.sh")
+    assert lines[2].endswith(
+        ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
+    )

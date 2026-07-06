@@ -66,6 +66,13 @@ Each `managed_resources[]` item should capture:
 
 ## Reporting Contract
 
+`--format compact` is the default and the preferred format for AI/tool
+iteration. It emits a single-line JSON object with status, counts, blockers,
+next action, and a small bounded evidence sample. Use `--format report` only
+when a human-readable command report is explicitly needed. In chat, agents
+should translate compact output into concise Markdown instead of asking the CLI
+to spend tokens on tables.
+
 Deterministic report output (`--format report`) and JSON reporting should expose at least:
 
 - `selected_targets`
@@ -84,7 +91,7 @@ Deterministic report output (`--format report`) and JSON reporting should expose
 
 Text reports must use a summary-first layout rather than a raw field dump. Use tables where columns clarify changes, blockers, or completed actions; use short bullets for counts and state summaries.
 
-Model-facing report tables should stay bounded for routine change and completed-action rows. Keep all blocker, attention, and readiness-failure rows visible. When rows are omitted, add an explicit omitted-count row and point to `--format json` for full detail.
+Human-readable report tables should stay bounded for routine change and completed-action rows. Keep all blocker, attention, and readiness-failure rows visible. When rows are omitted, add an explicit omitted-count row and point to `--format json` for full detail.
 
 ### Shared Header
 
@@ -195,16 +202,17 @@ When no changes are proposed or applied, report `no-op` explicitly with the reas
 
 ## Automation Entry Points
 
-- Bundled CLI: `scripts/sync_home_ai_resources.py`
-- Bundled dependency bootstrap: `scripts/run.sh`
+- Bundled dependency bootstrap and canonical CLI: `scripts/run.sh`
+- Bundled Python CLI: `scripts/sync_home_ai_resources.py`
 - Bundled implementation: `scripts/home_syncing.py`
 - Bundled bisync engine: `scripts/bisync_skills.py`
 - Bundled reference loader: `scripts/home_sync_contract.py`
 - Bundled dependency lock: `scripts/requirements.txt`
-- Repository wrapper: `.github/scripts/sync_home_ai_resources.py`
-- Repository Bash wrapper: `.github/scripts/sync_home_ai_resources.sh`
+- Repository dispatcher compatibility path: `.github/scripts/run.sh sync_home_ai_resources ...`
 
-Prefer the bundled scripts when the skill is direct-copied into a home runtime. Prefer the repository wrappers when running from this source repository because they reuse the repository maintenance-tool environment.
+Prefer the bundled runner in this repository and after direct-copy into a home
+runtime. The repository dispatcher exists only as a compatibility path and must
+delegate to the bundled runner instead of carrying duplicate sync logic.
 
 ## Install Sync Contract
 

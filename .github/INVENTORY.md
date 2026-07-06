@@ -84,7 +84,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-excel/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-execute-plans/SKILL.md`
-- `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
 - `.github/skills/internal-gateway-idea/SKILL.md`
 - `.github/skills/internal-gateway-simple-task/SKILL.md`
 - `.github/skills/internal-gateway-writing-plans/SKILL.md`
@@ -173,7 +172,6 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
 - `.github/scripts/sync_copilot_catalog.py`
-- `.github/scripts/sync_home_ai_resources.py`
 - `.github/scripts/validate_internal_skills.py`
 
 ## Agents

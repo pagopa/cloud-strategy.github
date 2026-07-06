@@ -138,7 +138,7 @@ resolve_script() {
             printf '%s\n' "$SCRIPT_DIR/detect_token_risks.py"
             ;;
         sync_home_ai_resources|sync_home_ai_resources.py)
-            printf '%s\n' "$SCRIPT_DIR/sync_home_ai_resources.py"
+            printf '%s\n' "$REPO_ROOT/.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
             ;;
         sync_copilot_catalog|sync_copilot_catalog.py)
             printf '%s\n' "$SCRIPT_DIR/sync_copilot_catalog.py"
@@ -205,6 +205,10 @@ main() {
         exit 1
     }
     shift
+
+    if [[ "$script_path" == *.sh ]]; then
+        exec bash "$script_path" "$@"
+    fi
 
     load_required_python_version
     select_python_bin

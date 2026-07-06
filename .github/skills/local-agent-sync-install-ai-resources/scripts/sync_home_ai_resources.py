@@ -2,9 +2,9 @@
 """Purpose: plan and apply local home-directory AI resource sync operations.
 
 Usage examples:
-    python3 scripts/sync_home_ai_resources.py sync --targets skills --format report
-    python3 scripts/sync_home_ai_resources.py plan --targets skills --format report
-    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs --format report
+    python3 scripts/sync_home_ai_resources.py sync --targets skills
+    python3 scripts/sync_home_ai_resources.py plan --targets skills --compact
+    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs
 """
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ from home_syncing import (
 from sync_output import (
     build_compact_bisync_output,
     build_compact_install_output,
+    dump_compact_json,
     render_doctor_report,
     render_install_report,
     render_sync_report,
@@ -80,8 +81,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         cmd_parser.add_argument(
             "--format",
             choices=["text", "json", "compact", "report"],
-            default="report",
+            default="compact",
             help="Output format.",
+        )
+        cmd_parser.add_argument(
+            "--compact",
+            action="store_true",
+            help="Alias for --format compact; optimized for AI/tool iteration.",
         )
         cmd_parser.add_argument(
             "--fast",
@@ -106,8 +112,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     bisync_plan.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
+    )
+    bisync_plan.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
     )
     bisync_apply = bisync_sub.add_parser("apply", help="Apply bisync resolution.")
     bisync_apply.add_argument("--source-root", default=".", help="Source repository root.")
@@ -119,11 +130,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     bisync_apply.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
     )
+    bisync_apply.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
+    )
 
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if getattr(args, "compact", False):
+        args.format = "compact"
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -370,7 +389,7 @@ def emit_sync_output(payload: dict[str, object], *, format_name: str) -> None:
             compact["install"] = build_compact_install_output(install_payload)
         if isinstance(bisync_payload, dict):
             compact["bisync"] = build_compact_bisync_output(bisync_payload)
-        print(json.dumps(compact, indent=2, sort_keys=True))
+        print(dump_compact_json(compact))
         return
 
     print(render_sync_report(payload), end="")
@@ -416,7 +435,7 @@ def next_action_for_doctor(blocked_codes: list[str]) -> dict[str, object]:
         "action": "plan",
         "allowed": True,
         "requires_explicit_approval": False,
-        "command": "plan --targets <targets> --format report",
+        "command": "plan --targets <targets>",
         "reason": "Doctor found no readiness blockers.",
     }
 
@@ -449,7 +468,7 @@ def emit_output(
         compact_payload = build_compact_install_output(payload)
         if failure_message and "error" not in compact_payload:
             compact_payload["error"] = failure_message
-        print(json.dumps(compact_payload, indent=2, sort_keys=True))
+        print(dump_compact_json(compact_payload))
         return
 
     if format_name == "json":

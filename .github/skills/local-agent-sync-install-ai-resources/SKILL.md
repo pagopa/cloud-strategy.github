@@ -14,7 +14,10 @@ The paired agent is only a thin UX wrapper; this skill owns mode selection,
 approval posture, safety gates, and report interpretation for repo-to-home sync
 and bisync. Keep user-visible output deterministic, bounded, and summary-first.
 
-Canonical command examples use `python3 ./.github/scripts/sync_home_ai_resources.py --format report`.
+Canonical command examples use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
+The CLI defaults to `--format compact` for AI/tool iteration. Use
+`--format report` only when a human-readable command report is explicitly
+needed; in chat, summarize compact output as concise Markdown for the user.
 
 ## When to use
 
@@ -39,13 +42,14 @@ Every mode has exactly one command. Do not infer the mode, do not skip blockers,
 
 | User request | Lane | Command |
 | --- | --- | --- |
-| Generic `sync`, `repo→home`, or `repo wins` | Auto-run safe repo-to-home install for `skills`, then review only home-owned or ambiguous bisync drift | `python3 ./.github/scripts/sync_home_ai_resources.py sync --targets skills --home-root ~ --format report` |
-| Explicit `home→repo` | Review home-newer drift, then use explicit bisync commands with a git-clean repo | `python3 ./.github/scripts/sync_home_ai_resources.py bisync plan --home-root ~ --format report` then `python3 ./.github/scripts/sync_home_ai_resources.py bisync apply --home-root ~ --format report` |
-| Readiness check | Verify roots, support matrix, catalog, and state root without writes | `python3 ./.github/scripts/sync_home_ai_resources.py doctor --targets skills --home-root ~ --format report` |
-| Dry install review | Show repo-to-home changes without writes | `python3 ./.github/scripts/sync_home_ai_resources.py plan --targets skills --home-root ~ --format report` |
-| Explicit install write | Materialize a reviewed install plan | `python3 ./.github/scripts/sync_home_ai_resources.py apply --targets skills --home-root ~ --format report` |
+| Generic `sync`, `repo→home`, or `repo wins` | Auto-run safe repo-to-home install for `skills`, then review only home-owned or ambiguous bisync drift | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh sync --targets skills` |
+| Explicit `home→repo` | Review home-newer drift, then use explicit bisync commands with a git-clean repo | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh bisync plan` then `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh bisync apply` |
+| Readiness check | Verify roots, support matrix, catalog, and state root without writes | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh doctor --targets skills` |
+| Dry install review | Show repo-to-home changes without writes | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh plan --targets skills` |
+| Explicit install write | Materialize a reviewed install plan | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh apply --targets skills` |
 
-For bundle direct-copy, replace `./.github/scripts/sync_home_ai_resources.py` with `./scripts/run.sh`, keep `--format report` on model-facing runs, and omit `--home-root` because it defaults to `$HOME`.
+The repository dispatcher `./.github/scripts/run.sh sync_home_ai_resources ...`
+may be used for compatibility; it delegates to the bundled skill runner.
 
 ### Mode Selection
 
@@ -112,7 +116,10 @@ The `bisync` lane provides explicit bidirectional synchronization between `.gith
 
 ## Reporting Contract
 
-Use `--format report` for model-facing runs. Do not dump raw JSON unless the user explicitly asks for it. Machine-readable output remains available as `--format compact` or `--format json` for automation and debugging.
+Use compact output for model-facing runs. Do not dump raw JSON unless the user
+explicitly asks for it. Machine-readable output is available as `--format compact`
+or `--compact` by default; full raw state remains available as `--format json`
+for debugging. Use `--format report` only for a human-readable command report.
 
 Every report must be summary-first and start with one status line that includes mode or lane, selected targets, overall status, blocker count, and `next_action.action`.
 
@@ -127,8 +134,9 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 ## Bundled Automation
 
-- Prefer `python3 ./.github/scripts/sync_home_ai_resources.py` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior, and keep `--format report` on model-facing runs.
-- Use `scripts/run.sh` when a portable skill-local environment is needed; it installs the locked `PyYAML` dependency from `scripts/requirements.txt`.
+- Prefer `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior.
+- Use compact output for automation and AI loops. Convert compact results into concise Markdown in chat when the user needs to decide what to do.
+- The bundled runner installs locked dependencies from `scripts/requirements.txt` and suppresses bootstrap noise when compact output is selected.
 - Keep orchestration inside `scripts/sync_home_ai_resources.py`, install behavior inside `scripts/home_syncing.py`, bisync behavior inside `scripts/bisync_skills.py`, report rendering inside `scripts/sync_output.py`, and reference loading inside `scripts/home_sync_contract.py`.
 
 ## Conflict Resolution
@@ -157,5 +165,6 @@ After any manual cleanup, re-run `plan` or `bisync plan` and require zero blocke
 - Rebuild `.github/INVENTORY.md` when the bundle or related scripts change by using `./.github/scripts/run.sh build_inventory --root .`.
 - Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.
 - Run `bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
+- Run `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh plan --targets skills,copilot,codex --compact` after output or CLI changes to confirm low-token output remains valid.
 - Run focused agent or skill contract tests for this bundle.
 - Run focused sync tests for report layout, target parsing, support-matrix policy, manifest handling, overwrite gates, bisync protocol, and missing-directory behavior when automation changes.
