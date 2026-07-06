@@ -9,13 +9,12 @@ description: Use when coding changes have executable behavior, including feature
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `internal-debugging`: root-cause diagnosis before regression tests when the failure is not yet understood.
-- `superpowers-test-driven-development`: strict red-green-refactor execution when an executable test-first slice is selected.
+- `superpowers-test-driven-development`: core red-green-refactor execution after this wrapper selects a mandatory test-first slice.
 - `superpowers-verification-before-completion`: evidence gate before claiming coverage, fix completion, or red-green-refactor success.
 
 Use this skill as the repository-owned owner for coding changes with executable
-behavior. Keep the test strategy risk-driven, keep the loop focused on
-observable behavior, and make any no-test path explicit before implementation.
+behavior. Keep the test strategy risk-driven, focus the loop on observable
+behavior, and make any no-test path explicit before implementation.
 
 ## When to use
 
@@ -24,7 +23,8 @@ observable behavior, and make any no-test path explicit before implementation.
   CLIs, parsers, sync automation, generators, reports, or structured outputs
   whose behavior can be checked through a stable boundary.
 - Prompt, agent, or LLM-output drift when the change has an executable or evaluable contract with concrete failure examples.
-- Any coding change where the main failure mode should be identified before implementation and guarded with the lightest useful test-first slice.
+- Any coding change that needs the lightest useful test-first guardrail before
+  implementation.
 
 ## When not to use
 
@@ -36,7 +36,7 @@ observable behavior, and make any no-test path explicit before implementation.
 
 | Level | Use when | Required posture |
 | --- | --- | --- |
-| Mandatory | The change adds or changes executable behavior, or the user explicitly asks for TDD. | Identify the main failure mode, choose the lightest useful guardrail, and write or update the focused failing test before the first implementation edit unless a pre-code exception is recorded. |
+| Mandatory | The change adds or changes executable behavior, or the user explicitly asks for TDD. | Name the observable behavior or risk, choose the lightest useful guardrail, and write or update the focused failing test before the first implementation edit unless a pre-code exception is recorded. |
 | Recommended | The change touches public boundaries, adapters, modules, structured outputs, or evaluable prompt behavior with meaningful risk. | Prefer contract tests at public boundaries and keep the slice small and reviewable. |
 | Not suitable | The change is prose-only, prompt-only, skill-only, inventory-only, generated-only, formatting-only, or governance-only with no executable or evaluable contract. | Do not manufacture tests; explain briefly why no new test is useful and use the closest validator or review gate instead. |
 
@@ -56,15 +56,16 @@ observable behavior, and make any no-test path explicit before implementation.
 
 ## Workflow
 
-1. Identify the main failure mode before implementation.
-2. Choose the lightest useful guardrail for the active risk.
-3. Write or update a focused failing test or check before the first
-   implementation edit for new or changed behavior.
-4. Add the regression test before the bug fix when the task is a bugfix.
-5. Prefer contract tests at public boundaries over tests of private implementation details.
-6. Use small, reviewable golden or snapshot tests only when they are the clearest guardrail.
-7. For prompt, agent, or LLM-output drift, define concrete eval examples or failure cases before changing the implementation.
-8. Finish with the closest broader validation and do not weaken, delete, skip, or rewrite tests just to pass.
+1. Classify the change as `mandatory`, `recommended`, or `not suitable`.
+2. Choose the lightest useful guardrail at the public or stable boundary.
+3. If no practical seam exists, record the pre-code TDD exception note before
+   implementation.
+4. When a mandatory test-first slice exists, load
+   `superpowers-test-driven-development` for the red-green-refactor loop.
+5. For prompt, agent, or LLM-output drift, define concrete eval examples or
+   failure cases before changing the implementation.
+6. Finish with the closest broader validation and do not weaken, delete, skip,
+   or rewrite tests just to pass.
 
 ## Test Shape Rules
 
@@ -84,12 +85,6 @@ observable behavior, and make any no-test path explicit before implementation.
 - `regression-only`: tests or checks were added after implementation. Report
   this honestly and do not claim test-first work.
 
-## Support Skills
-
-- `superpowers-test-driven-development`: core red-green-refactor execution when an executable test-first slice is selected.
-- `internal-debugging`: root-cause diagnosis before the regression test when the failure is not yet understood.
-- `superpowers-verification-before-completion`: evidence gate before claiming coverage, fix completion, or red-green-refactor success.
-
 ## Validation
 
 - The failing test or check failed before the implementation edit, or the
@@ -100,4 +95,4 @@ observable behavior, and make any no-test path explicit before implementation.
 - No speculative tests or features were added beyond the requested behavior.
 - Completion declares whether the cycle was `red-green-refactor`,
   `exception-based`, or `regression-only`.
-- Use `superpowers-verification-before-completion` before claiming red-green-refactor completion or that a regression is covered.
+- Final claims passed through `superpowers-verification-before-completion`.
