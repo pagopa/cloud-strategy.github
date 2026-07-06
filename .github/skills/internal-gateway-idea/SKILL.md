@@ -10,6 +10,11 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 - `superpowers-brainstorming`: core idea-to-design workflow.
 - `internal-gateway-writing-plans`: retained spec or implementation-plan writing after the user approves the direction.
 
+## Local references
+
+- `references/workflow.md`: authoritative state machine, Mermaid workflow,
+  approval rules, and coexistence boundaries for this bundle.
+
 Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainstorming` as the core workflow and add the local gates below. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
 
 ## When to use
@@ -28,10 +33,15 @@ Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainsto
 ## Core contract
 
 - Load `superpowers-brainstorming` as the core workflow.
+- Read `references/workflow.md` before presenting the final design direction.
 - Keep the `superpowers-brainstorming` hard gate: no implementation action before the user approves the design or direct-plan recommendation.
+- Treat approval as gate-local. `procedi`, `ok`, `go`, or similar approval advances only the active visible gate.
+- If approval wording is ambiguous, ask whether it means critical review, retained spec or plan writing, or implementation execution.
 - Use this skill only to add repository-owned idea gates, not to fork the core brainstorming process.
 - Keep collaborative questioning inside the core brainstorming workflow.
 - Load `internal-gateway-writing-plans` only after the user approves retained spec or implementation-plan writing.
+- Stop after the delegated writing outcome. Do not implement, invoke execution owners, or run execution commands from this skill.
+- Keep `internal-gateway-idea-brainstorming` untouched during coexistence.
 
 ## Bounded context pass
 
@@ -41,6 +51,26 @@ Before asking the first question block:
 - For large files, generated output, logs, or tabular artifacts, inspect aggregate facts first: path, size, headers, counts, anomalies, and targeted slices.
 - If platform semantics control feasibility or ownership, verify those semantics before converging.
 - Separate original user intent from emerged requirements. Do not rewrite later constraints as the original request.
+
+## State machine
+
+Follow `references/workflow.md` in this order:
+
+1. `Bounded evidence pass`
+2. `Specialization Checkpoint: gated` when the incoming ask is execution-shaped.
+3. `Idea Gate 0`
+4. `Assumption Challenge Gate`
+5. `Alternative discovery`
+6. `Present design direction`
+7. `Critical Challenge Gate`
+8. `Spec vs plan decision`
+9. `Approved writing handoff`
+10. `Stop before implementation execution`
+
+Do not skip from evidence, design approval, or `Decision: direct plan` to
+implementation. The only post-brainstorming owner this skill may load is
+`internal-gateway-writing-plans`, and only after explicit approval for the
+selected writing path.
 
 ## Assumption Challenge Gate
 
@@ -105,13 +135,22 @@ Always explain the choice:
 - `Why:` one evidence-based sentence.
 - `Rejected option:` the other path and why it is weaker.
 - `Next owner:` `internal-gateway-writing-plans` after user approval.
+- `Approval request:` ask the user to approve the selected writing path before loading the next owner.
+
+Approval of `Decision: direct plan` skips a retained spec only. It does not
+authorize implementation execution.
 
 ## Validation
 
+- The skill read `references/workflow.md` before finalizing the design direction.
+- The skill used `Specialization Checkpoint: gated` for execution-shaped requests.
 - The skill loaded `superpowers-brainstorming` as core instead of copying its workflow.
 - The skill challenged the user's initial assumption, not only corrected the proposed solution.
 - The skill presented 2-3 approaches and explained why the recommendation beat the strongest rejected option.
 - The skill used `Critical Challenge Gate` before spec or plan writing.
+- The skill treated ambiguous approval words as gate-local and clarified the active gate when needed.
 - The skill kept collaborative questioning inside the core brainstorming workflow.
 - The skill loaded `internal-gateway-writing-plans` only for retained spec or implementation-plan writing.
+- The skill stopped after `internal-gateway-writing-plans` produced a writing outcome.
+- The Mermaid workflow and runtime prompt contain the same mandatory gate names.
 - The old `internal-gateway-idea-brainstorming` bundle remained untouched.
