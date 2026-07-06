@@ -42,9 +42,4 @@ def test_strict_mode_fails_on_advisory_finding() -> None:
         "--strict",
     )
     assert result.returncode != 0
-    assert (
-        "summary-word-limit" in result.stdout
-        or "total-word-limit" in result.stdout
-    )
-
-
+    assert "summary-word-limit" in result.stdout or "total-word-limit" in result.stdout
