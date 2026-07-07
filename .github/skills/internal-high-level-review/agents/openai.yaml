@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal High-Level Review"
-  short_description: "Help with internal high-level review tasks"
-  default_prompt: "Use $internal-high-level-review for this task and follow the repository-owned workflow in the skill."

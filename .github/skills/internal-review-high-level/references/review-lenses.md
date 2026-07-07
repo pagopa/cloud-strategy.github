@@ -14,8 +14,8 @@ persona agents. The wrapper stays thin; each lens maps to an existing skill.
 
 | Lens | Trigger | Owner skill | Output |
 | --- | --- | --- | --- |
-| Code defects | Any code, script, config, test, or policy diff under review. | `internal-code-review` | Defect-first findings with file evidence and fix route. |
-| Systems fit | Any review that needs workflow, ownership, architecture, or blind-spot evidence. | `internal-high-level-review` | Systems findings, evidence gaps, scope drift, and residual risk. |
+| Code defects | Any code, script, config, test, or policy diff under review. | `internal-review-code` | Defect-first findings with file evidence and fix route. |
+| Systems fit | Any review that needs workflow, ownership, architecture, or blind-spot evidence. | `internal-review-high-level` | Systems findings, evidence gaps, scope drift, and residual risk. |
 
 ## Cross-cutting Lenses
 

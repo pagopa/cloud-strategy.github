@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Review Code"
+  short_description: "Help with Internal Review Code tasks"
+  default_prompt: "Use $internal-review-code for this task and follow the repository-owned workflow in the skill."

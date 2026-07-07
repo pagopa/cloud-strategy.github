@@ -1,9 +1,9 @@
 ---
-name: internal-high-level-review
+name: internal-review-high-level
 description: Use when a task needs systems-level evidence about architecture, workflow, cross-cutting impact, blind spots, merge risk, or an orientation map of unfamiliar code.
 ---
 
-# Internal High-Level Review
+# Internal Review High Level
 
 ## Referenced skills
 
@@ -12,7 +12,7 @@ Treat the referenced skills below as on-demand supports. Do not preload them
 for every review; load only the owner proved by the active lens, review scope,
 or final claim.
 
-- `internal-code-review`: line-level defect review owner.
+- `internal-review-code`: line-level defect review owner.
 - `internal-gateway-critical-master`: pressure-test owner when the main need is challenge rather than review evidence.
 - `superpowers-verification-before-completion`: evidence gate before claiming no systems findings or merge readiness.
 
@@ -26,13 +26,13 @@ operational context.
 - Analyze a branch diff, PR, retained plan, or file list for systems-level risk.
 - Evaluate architectural implications, workflow impact, and unconsidered effects.
 - Review cross-cutting concerns before merge when line-level findings are not enough.
-- Complement `internal-code-review` with broader evidence about coupling, ownership, and operational fit.
+- Complement `internal-review-code` with broader evidence about coupling, ownership, and operational fit.
 - Build a higher-level orientation map for unfamiliar code, including relevant
   modules, callers, boundaries, and repository domain vocabulary.
 
 ## When not to use
 
-- Use `internal-code-review` for line-level defects, language anti-patterns, tests, and file-specific findings.
+- Use `internal-review-code` for line-level defects, language anti-patterns, tests, and file-specific findings.
 - Use `internal-gateway-critical-master` for pre-mortems, hidden-assumption tests, and pressure testing.
 - Route security-specific gaps through the closest existing owner and state the
   missing specialized-owner gap when no promoted security owner exists.
@@ -43,7 +43,7 @@ operational context.
 
 ## Relationship to other skills
 
-- `internal-code-review`: code defects, regressions, tests, language anti-patterns, and file/line findings.
+- `internal-review-code`: code defects, regressions, tests, language anti-patterns, and file/line findings.
 - This skill: architecture, workflow, cross-cutting impact, operational fit,
   blind spots, and higher-level codebase orientation.
 - `internal-gateway-critical-master`: challenge work when the main need is pressure testing rather than review evidence.
@@ -164,7 +164,7 @@ Do not include empty review sections in an orientation-only answer.
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Flagging code style as a systems issue | Inflates findings and dilutes trust | Use `internal-code-review` for nit-level checks |
+| Flagging code style as a systems issue | Inflates findings and dilutes trust | Use `internal-review-code` for nit-level checks |
 | Making ungrounded findings ("this might break X") | Speculation ≠ evidence | Every finding must cite a concrete file and line from the diff |
 | Scope creep — analyzing the entire codebase | The user asked about a specific change | Analyze only changed files and their immediate dependencies |
 | Reporting without effort estimation | Leaves the author without prioritization signal | Always include Low/Medium/High effort per finding |
@@ -190,7 +190,7 @@ Before presenting findings, verify:
    is explanatory rather than review-owned. Load
    `references/analysis-dimensions.md` for detailed checklists.
 5. For review-owned work, self-question each finding before including it.
-6. Route code defects back to `internal-code-review` when they are not systems-level issues.
+6. Route code defects back to `internal-review-code` when they are not systems-level issues.
 7. Present review findings or an orientation map using the matching output
    structure above.
 

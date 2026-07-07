@@ -1,5 +1,5 @@
 ---
-name: internal-code-review
+name: internal-review-code
 description: "Senior repository code reviewer for source code, tests, scripts, build files, dependency files, and code-focused diffs before merge or follow-up action."
 tools: ["read", "search", "execute"]
 disable-model-invocation: true

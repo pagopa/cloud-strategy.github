@@ -1,9 +1,9 @@
 ---
-name: internal-code-review
+name: internal-review-code
 description: Use when review evidence needs line-level or language-specific defect checks for Python, Bash, Terraform, Java, or Node.js/TypeScript code, tests, or scripts.
 ---
 
-# Code Review Skill
+# Internal Review Code
 
 ## Referenced skills
 
@@ -12,7 +12,7 @@ This index lists every other skill that this file asks the agent to load, route 
 - `antigravity-golang-pro`: Go concurrency, service design, or performance specialist when Go dominates the review.
 - `awesome-copilot-codeql`: CodeQL workflow and SARIF specialist when CodeQL setup dominates the review.
 - `awesome-copilot-secret-scanning`: GitHub secret scanning specialist when secret scanning workflow dominates the review.
-- `internal-high-level-review`: systems-level review beyond line-level defects.
+- `internal-review-high-level`: systems-level review beyond line-level defects.
 - `internal-terraform`: Terraform specialist when HCL modeling or drift-safe Terraform dominates the review.
 - `superpowers-verification-before-completion`: evidence gate before claiming no findings or merge readiness.
 
@@ -135,8 +135,8 @@ Only elevate simplification suggestions when they materially improve maintainabi
 
 ## Cross-references
 
-- **internal-high-level-review**: for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
-- Use both together: this skill for nit-level anti-patterns first, then `internal-high-level-review` for the bigger picture.
+- **internal-review-high-level**: for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
+- Use both together: this skill for nit-level anti-patterns first, then `internal-review-high-level` for the bigger picture.
 - **superpowers-verification-before-completion**: for evidence before claiming no
   findings, review completion, or merge readiness.
 
@@ -144,7 +144,7 @@ Only elevate simplification suggestions when they materially improve maintainabi
 
 Use this skill as the default review owner, then add a narrower specialist only when the evidence demands it.
 
-- Stay with `internal-code-review` when the main need is defect-first review across mixed Python, Bash, Terraform, Java, or Node.js changes.
+- Stay with `internal-review-code` when the main need is defect-first review across mixed Python, Bash, Terraform, Java, or Node.js changes.
 - Add `internal-terraform` when the review is primarily about Terraform resource modeling, module interfaces, or drift-safe HCL changes.
 - Add `antigravity-golang-pro` when the review is primarily about Go concurrency, service design, or Go performance behavior.
 - Add `awesome-copilot-codeql` when the review is primarily about CodeQL workflow setup, SARIF handling, or query-suite coverage rather than the diff itself.

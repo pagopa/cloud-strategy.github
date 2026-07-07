@@ -73,7 +73,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-bash/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
-- `.github/skills/internal-code-review/SKILL.md`
+- `.github/skills/internal-review-code/SKILL.md`
 - `.github/skills/internal-context-handoff/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-copilot-docs-research/SKILL.md`
@@ -98,7 +98,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
-- `.github/skills/internal-high-level-review/SKILL.md`
+- `.github/skills/internal-review-high-level/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`
 - `.github/skills/internal-java/SKILL.md`
@@ -176,7 +176,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 
 ## Agents
 
-- `.github/agents/internal-code-review.agent.md`
+- `.github/agents/internal-review-code.agent.md`
 - `.github/agents/internal-gateway-critical-master.agent.md`
 - `.github/agents/internal-gateway-idea-brainstorming.agent.md`
 - `.github/agents/internal-gateway-review.agent.md`
