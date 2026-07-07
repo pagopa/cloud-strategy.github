@@ -16,7 +16,7 @@ SYMPTOM_METHODS = {
     "validator-drift": ("diagnose", "Validator drift needs a reproducible loop."),
     "unexpected": ("diagnose", "Unexpected output needs diagnosis before patching."),
     "missing-context": ("clarify", "Missing context prevents starting the current lane."),
-    "tdd": ("test-first", "Executable behavior should be delivered through the smallest useful seam."),
+    "tdd": ("load-internal-tdd", "Executable behavior should route through internal-tdd before implementation."),
     "performance": ("measure-performance", "Performance is the primary measured concern."),
     "pr-readiness": ("lifecycle-check", "Readiness claims need lifecycle evidence before the final answer."),
     "code-review": ("review-shape-stop", "The work is becoming findings-first rather than execution-first."),
@@ -66,7 +66,6 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
 
     if normalized.startswith(".github/skills/internal-") or normalized.startswith(".github/agents/internal-"):
         add(suggestions, "bundle-contract-check", "Repository-owned bundle paths need contract and local-validator attention.")
-        return
     if name == "codeowners":
         add(suggestions, "governance-check", "Ownership files need governance-aware validation.")
         return
@@ -77,6 +76,7 @@ def suggest_for_path(path_text: str, suggestions: dict[str, set[str]]) -> None:
         add(suggestions, "automation-check", "Automation files need focused workflow validation.")
         return
     if suffix in {".py", ".sh", ".go", ".js", ".cjs", ".mjs", ".ts", ".tsx", ".java"}:
+        add(suggestions, "load-internal-tdd", "Executable source files should route through internal-tdd before implementation.")
         add(suggestions, "runtime-check", "Executable source files need the closest runnable or syntax validation.")
         return
     if suffix in {".yml", ".yaml", ".json", ".tf"}:

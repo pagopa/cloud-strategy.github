@@ -61,8 +61,8 @@ CLAIM_REQUIREMENTS = {
     ],
     "covered": [
         {
-            "method": "test-first",
-            "evidence": "Show the failing-then-passing seam, or state why it could not be run.",
+            "method": "internal-tdd",
+            "evidence": "Use internal-tdd to show the failing-then-passing seam, or state why it could not be run.",
         },
         {
             "method": "scope-check",
@@ -358,7 +358,7 @@ def build_gate_decision(
         "anti_scope": "No staged workflow expansion, no hidden delegation, no speculative side work.",
         "files_expected": "Name only the files proven by local evidence.",
         "approach": "Use the smallest coherent move that preserves validation coverage.",
-        "executable_behavior": "Use the generic test-first loop when behavior changes and a useful seam exists.",
+        "executable_behavior": "Load internal-tdd before implementation when executable or evaluable behavior changes and a useful seam exists.",
         "validation_path": focused_validation_path,
         "main_risk": main_risk,
         "stop_conditions": "Stop for complexity, cost, ambiguity, safety, approval, or validation gaps.",

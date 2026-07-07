@@ -9,6 +9,7 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 - `grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
 - `internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
+- `internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
 - `superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
 
 Do not name other skills, agents, or workflow owners from this bundle; when stopping, explain the violated condition and let the user choose the next path.
@@ -128,10 +129,12 @@ Use `skipped` only when the gate policy allows it and the reason is explicit. Us
 5. Ask one compact `grill-me` block only when it is needed to continue the active lane.
 6. Run the critical challenge before non-trivial action.
 7. Build the Readiness Brief.
-8. Execute the smallest coherent in-scope move.
-9. Run focused validation or report the exact validation gap.
-10. Report the ledger summary before strong positive claims.
-11. Use the final evidence gate before positive claims.
+8. When the task changes executable or evaluable behavior, load `internal-tdd`
+   before implementation and follow its routing outcome.
+9. Execute the smallest coherent in-scope move.
+10. Run focused validation or report the exact validation gap.
+11. Report the ledger summary before strong positive claims.
+12. Use the final evidence gate before positive claims.
 
 For `trivial-skip`, do not create a ledger. Name the validation path directly, or state the exact validation gap.
 
@@ -154,21 +157,22 @@ When execution is authorized, iterate with the smallest useful cycle:
 - DRY locally: remove meaningful duplication touched by the task, but do not extract one-off logic.
 - Single responsibility: each changed section, helper, or code path must have one current reason to exist.
 - Behavior first: when executable behavior changes, name the observable behavior and validate it with the closest stable check.
+- Use `internal-tdd` before implementation when the task changes executable or evaluable behavior and a meaningful seam exists.
 - Fail fast on drift: stop with reason when the task becomes ambiguous, multi-phase, owner-conflicted, or not locally verifiable.
 
 ## Generic Executable Behavior Rule
 
-When executable behavior changes, use a generic test-first loop:
+When executable or evaluable behavior changes, route through `internal-tdd`
+before implementation:
 
-1. Identify the observable behavior.
-2. Choose the smallest useful stable check.
-3. Make it fail first when practical.
-4. Implement the minimum change.
-5. Re-run the focused check.
-6. Refactor only after passing.
-7. Finish with the closest broader validation.
+1. Identify the observable behavior or evaluable contract.
+2. Load `internal-tdd` before implementation.
+3. Let `internal-tdd` choose `mandatory`, `recommended`, or `not suitable`.
+4. Follow the routed check posture and keep the slice small.
+5. Finish with the focused check and the closest broader validation.
 
-If no useful seam exists, state the seam gap explicitly.
+If `internal-tdd` determines the work is `not suitable`, state the seam gap and
+alternate validation path explicitly.
 
 ## Deterministic Helpers
 
@@ -178,7 +182,7 @@ If no useful seam exists, state the seam gap explicitly.
 
 ## Validation
 
-- Only the three retained skill names appear in this bundle.
+- Only the four retained skill names appear in this bundle.
 - Initial Idea Ordering is completed before `grill-me` for non-trivial work.
 - The critical challenge runs before non-trivial action.
 - Concrete bounded work completes in the same run unless `stop-with-reason` is explicit.
@@ -187,5 +191,5 @@ If no useful seam exists, state the seam gap explicitly.
 - Skipped gates record the reason that made the skip valid.
 - Blocked gates prevent completion, readiness, passing, fixed, or no-gap claims.
 - Executable behavior changes satisfy the Simple Code Discipline.
-- Executable behavior changes follow the generic test-first loop when a useful seam exists.
+- Executable or evaluable behavior changes load `internal-tdd` before implementation when a meaningful seam exists.
 - Positive claims rely on fresh evidence before completion.
