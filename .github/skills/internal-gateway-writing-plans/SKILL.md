@@ -26,7 +26,12 @@ stops after the delegated outcome.
 2. Load `superpowers-writing-plans` and let it create a plan, ask a blocking
    clarification, redirect, or stop with a reason. Pass an explicit anti-scope
     and the relevant owners already identified in the preflight so the delegated
-    plan avoids duplicate or speculative tasks at the source.
+    plan avoids duplicate or speculative tasks at the source. If the delegated
+    writing outcome persists a retained artifact, require timestamped local
+    naming with four-digit 24-hour time: plans use
+    `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md` and specs use
+    `tmp/superpowers/specs/YYYY-MM-DD-HHMM-<topic>-design.md` such as
+    `2026-07-03-1143-<name>`.
 3. If a retained plan is created, verify execution-readiness and apply Plan
    Authoring Discipline: ordered tasks, concrete file targets, clear edit
    intent, validation commands or explicit gaps, stop conditions, and handoff
