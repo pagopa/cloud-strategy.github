@@ -6,7 +6,7 @@
 /** Purpose: Build a user profile response. */
 function buildUserProfile(input) {
   if (!input?.id) {
-    throw new Error("❌ id is required");
+    throw new Error("id is required");
   }
   return { id: input.id, name: input.name ?? "unknown" };
 }
@@ -15,8 +15,8 @@ function buildUserProfile(input) {
 ## Minimal Test Example
 
 ```javascript
-const test = require("node:test");
-const assert = require("node:assert/strict");
+import { test } from "node:test";
+import assert from "node:assert/strict";
 
 test("given missing id when building profile then throws", () => {
   assert.throws(() => buildUserProfile({}), /id is required/);

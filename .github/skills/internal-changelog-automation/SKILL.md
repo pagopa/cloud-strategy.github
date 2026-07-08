@@ -52,6 +52,14 @@ Use Keep a Changelog headings where possible:
 4. Remove noise such as merge-only or maintenance-only entries that do not matter to readers.
 5. Produce release notes and update the changelog consistently.
 
+## Validation
+
+- Run a dry-run or preview over the target release range before writing the changelog. Confirm the commit range, PR set, and version boundary match expectations.
+- After generation, verify that each user-facing change appears exactly once under the correct Keep a Changelog heading.
+- Confirm no raw merge commits, dependency bumps, or internal-only entries leak into the user-facing output.
+- When the repository has no active changelog generator wired into CI, state the activation gap explicitly and recommend the minimum viable check (for example, a manual review step or a CI lint rule).
+- If validation fails, report the specific entries that diverged and do not overwrite the changelog until the input source or filter is corrected.
+
 ## Semver Guidance
 
 - Major: breaking changes or removals

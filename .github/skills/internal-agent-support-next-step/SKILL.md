@@ -8,7 +8,6 @@ description: Use when a repository-owned agent or prompt needs to package an alr
 ## Referenced skills
 
 - `internal-gateway-idea`: source lane that may need a visible next-step transition.
-- `internal-gateway-review`: source lane that may need a visible next-step transition.
 - `internal-gateway-simple-task`: source lane that may need a visible next-step transition.
 - `internal-gateway-execute-plans`: source lane that may need a visible next-step transition.
 - `internal-gateway-critical-master`: source lane that may need a visible next-step transition.
@@ -18,9 +17,9 @@ chosen or confirmed.
 
 ## When to use
 
-- `internal-gateway-idea`, `internal-gateway-review`,
-  `internal-gateway-simple-task`, `internal-gateway-execute-plans`, or
-  `internal-gateway-critical-master` stop with a visible transition.
+- `internal-gateway-idea`, `internal-gateway-simple-task`,
+  `internal-gateway-execute-plans`, or `internal-gateway-critical-master`
+  stop with a visible transition.
 
 ## Package Contract
 

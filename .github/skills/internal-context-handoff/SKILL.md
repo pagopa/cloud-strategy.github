@@ -20,7 +20,7 @@ Produce a token-efficient, paste-ready Markdown handoff that another agent can u
 ## When not to use
 
 - The user needs a compact transition between already-selected owners. Use `internal-agent-support-next-step` instead.
-- The user needs a Decision Brief for retained planning. Use `internal-agent-support-next-step` references/decision-brief.md.
+- The user needs a Decision Brief for retained planning. Use `internal-agent-support-next-step` for the Decision Brief contract.
 - The task is a gateway phase change or non-terminal exit. Use the owning gateway skill.
 
 ## Workflow

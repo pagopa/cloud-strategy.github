@@ -7,7 +7,7 @@
 public final class UserService {
     public String resolveUserId(String userId) {
         if (userId == null || userId.isBlank()) {
-            throw new IllegalArgumentException("❌ userId is required");
+            throw new IllegalArgumentException("userId is required");
         }
         return userId.trim();
     }
