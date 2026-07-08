@@ -13,6 +13,10 @@ safety to standalone script behavior.
 
 - `internal-bash-script`: standalone Bash scripts, shell utilities, wrappers, launchers, and operator-facing behavior.
 
+## Referenced files
+
+- `references/review-anti-patterns.md`: Bash review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Bash-specific defect depth.
+
 ## When to use
 
 - `.sh` files and Bash snippets where the main need is a shared safety baseline.

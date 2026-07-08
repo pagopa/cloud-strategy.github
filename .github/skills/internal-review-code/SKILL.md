@@ -7,20 +7,30 @@ description: Use when review evidence needs line-level or language-specific defe
 
 ## Referenced skills
 
-This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
-
-- `antigravity-golang-pro`: Go concurrency, service design, or performance specialist when Go dominates the review.
-- `awesome-copilot-codeql`: CodeQL workflow and SARIF specialist when CodeQL setup dominates the review.
-- `awesome-copilot-secret-scanning`: GitHub secret scanning specialist when secret scanning workflow dominates the review.
+- `mattpocock-code-review`: imported two-axis review core (Standards + Spec) for diff-based parallel sub-agent review.
 - `internal-review-high-level`: systems-level review beyond line-level defects.
-- `internal-terraform`: Terraform specialist when HCL modeling or drift-safe Terraform dominates the review.
+- `internal-python`: Python anti-pattern depth (load the review anti-patterns reference from that skill).
+- `internal-bash`: Bash anti-pattern depth (load the review anti-patterns reference from that skill).
+- `internal-terraform`: Terraform anti-pattern depth (load the review anti-patterns reference from that skill).
+- `internal-java`: Java anti-pattern depth (load the review anti-patterns reference from that skill).
+- `internal-nodejs`: Node.js anti-pattern depth (load the review anti-patterns reference from that skill).
 - `superpowers-verification-before-completion`: evidence gate before claiming no findings or merge readiness.
 
 ## When to use
 
-- Perform an exhaustive, nit-level code review on Python, Bash, Terraform, Java, or Node.js/TypeScript files.
+- Perform a line-level code review on Python, Bash, Terraform, Java, or Node.js/TypeScript files.
 - Provide structured findings with per-language anti-pattern detection.
-- Complement specialist reviewer agents with deep language-specific checks.
+- The diff or code change is the primary review surface.
+
+## When not to use
+
+- The primary target is an AI resource, workflow, policy, plan, or documentation package; use `internal-gateway-review` instead.
+- The review needs systems-level architectural analysis; use `internal-review-high-level` instead.
+- The user asks for a two-axis Standards + Spec parallel review; consult `mattpocock-code-review` as the imported core.
+
+## Role
+
+`internal-review-code` is the only repo-owned line-level review contract. It owns trigger, boundary, severity, output shape, and validation discipline. Language-specific anti-pattern depth lives in the nearest language owner, not in this wrapper.
 
 ## Standalone quick start
 
@@ -57,25 +67,11 @@ Establish these review inputs before grading the diff:
 
 ## Escalation rules
 
-- Any single anti-pattern repeated three or more times in the same diff escalates one severity level (e.g., `Nit` → `Minor`, `Minor` → `Major`).
-- Any deviation from the matching language or domain skill baseline is at minimum a `Nit`.
+- Any single anti-pattern repeated three or more times in the same diff escalates one severity level.
+- Any deviation from the matching language skill baseline is at minimum a `Nit`.
 - Any violation of `security-baseline.md` is at minimum a `Major`.
 
-## Anti-pattern catalogs
-
-Per-language catalogs with ID-tagged patterns, severity, rationale, and good/bad examples are in `references/`:
-
-- `references/anti-patterns-python.md` — PY-C01..PY-N06
-- `references/anti-patterns-bash.md` — SH-C01..SH-N05
-- `references/anti-patterns-terraform.md` — TF-C01..TF-N05
-- `references/anti-patterns-java.md` — JV-C01..JV-N04
-- `references/anti-patterns-nodejs.md` — ND-C01..ND-N04
-
-Load the relevant catalog(s) based on file extensions detected in the diff.
-
 ## Cross-language checks
-
-These apply regardless of language:
 
 | Severity | Check |
 | --- | --- |
@@ -88,7 +84,7 @@ These apply regardless of language:
 
 ## Review lenses
 
-Always cover these dimensions, even when the language-specific catalog is the primary tool:
+Always cover these dimensions:
 
 - Functionality: correctness, edge cases, failure handling, and requirement fit
 - Security: input validation, secret handling, privilege boundaries, unsafe interpolation, and dependency risk
@@ -105,57 +101,37 @@ When the review also asks whether the change can be simplified safely, use this 
 - Efficiency: flag repeated work, duplicate reads, unnecessary recomputation, and overly broad scans that add cost without benefit.
 - Clarity: flag deep nesting, weak naming, dead code, redundant comments, and indirection that no longer earns its keep.
 
-Only elevate simplification suggestions when they materially improve maintainability, correctness, or cost. Do not churn code for aesthetic reasons alone.
+Only elevate simplification suggestions when they materially improve maintainability, correctness, or cost.
 
 ## Review workflow
 
-1. **Identify languages and changed surfaces** in the diff (auto-detect from file extensions and changed paths).
-2. **Read enough nearby context** to understand intent, requirements, and test strategy before judging style or structure.
-3. **Load applicable anti-pattern catalogs** from `references/`.
-4. **Scan each changed file** against the relevant catalog.
+1. **Identify languages and changed surfaces** in the diff.
+2. **Read enough nearby context** to understand intent, requirements, and test strategy.
+3. **Load applicable anti-pattern references** from the nearest language owner.
+4. **Scan each changed file** against the relevant anti-pattern reference.
 5. **Cross-check the review lenses** for functionality, security, performance, tests, and maintainability.
-6. **Self-question each finding**: Is this really wrong, or am I misunderstanding the context? Could the author have a valid reason?
+6. **Self-question each finding**: Is this really wrong, or am I misunderstanding the context?
 7. **Apply escalation rules** for repeated violations.
-8. **Group findings** by severity: `Critical` → `Major` → `Minor` → `Nit` → `Notes`.
+8. **Group findings** by severity: `Critical` -> `Major` -> `Minor` -> `Nit` -> `Notes`.
 9. **Include file path and line reference** for every finding.
-10. **Suggest a concrete fix** or reference the "good" example for each finding.
+10. **Suggest a concrete fix** for each finding.
 11. **Summarize** total finding count per severity at the end.
-
-## Common mistakes
-
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Flagging style issues as Major | Dilutes urgency of real problems | Use severity mappings strictly |
-| Reviewing only the diff without reading surrounding context | Missing that the "bad" pattern is intentional for backward compat | Read 20-30 lines before/after each change |
-| Skipping the requirements or test strategy first | You can flag a deliberate tradeoff as a defect | Establish the context checklist before scoring findings |
-| Applying Python rules to Bash or vice versa | Different idioms, different expectations | Always check the file extension first |
-| Reporting "missing tests" without checking if tests exist elsewhere | False findings erode trust | Search for test files before flagging |
-| Skipping cross-language checks | Secrets and validation gaps cross all languages | Always run the cross-language table |
-| Generic "this could be improved" without concrete fix | Not actionable | Every finding must include a fix suggestion |
-
-## Cross-references
-
-- **internal-review-high-level**: for systems-level impact analysis, architectural evaluation, workflow impact, and blind-spot detection beyond line-level review.
-- Use both together: this skill for nit-level anti-patterns first, then `internal-review-high-level` for the bigger picture.
-- **superpowers-verification-before-completion**: for evidence before claiming no
-  findings, review completion, or merge readiness.
 
 ## Delegation
 
-Use this skill as the default review owner, then add a narrower specialist only when the evidence demands it.
+Stay with `internal-review-code` when the main need is defect-first review across mixed Python, Bash, Terraform, Java, or Node.js changes.
 
-- Stay with `internal-review-code` when the main need is defect-first review across mixed Python, Bash, Terraform, Java, or Node.js changes.
+- Add `mattpocock-code-review` when the user explicitly asks for a two-axis Standards + Spec parallel review.
 - Add `internal-terraform` when the review is primarily about Terraform resource modeling, module interfaces, or drift-safe HCL changes.
 - Add `antigravity-golang-pro` when the review is primarily about Go concurrency, service design, or Go performance behavior.
-- Add `awesome-copilot-codeql` when the review is primarily about CodeQL workflow setup, SARIF handling, or query-suite coverage rather than the diff itself.
-- Add `awesome-copilot-secret-scanning` when the review is primarily about GitHub-native secret scanning, push protection, alert handling, or blocked-push remediation.
-- Add language or domain specialists only when they materially improve the finding quality; do not fan out by default.
+- Add `awesome-copilot-codeql` when the review is primarily about CodeQL workflow setup or SARIF handling.
+- Add `awesome-copilot-secret-scanning` when the review is primarily about GitHub-native secret scanning or push protection.
+- Add language or domain specialists only when they materially improve the finding quality.
 
 ## Validation
 
 - Verify every finding references a real file path and line from the diff.
-- Verify severity assignments match the anti-pattern catalog rules.
-- Verify escalation rules are applied for repeated violations (3+ of the same kind).
+- Verify severity assignments match the anti-pattern reference rules.
+- Verify escalation rules are applied for repeated violations.
 - Verify cross-language checks are applied regardless of primary language.
-- Use `superpowers-verification-before-completion` before claiming there are no
-  findings, the review is complete, or the change is merge-ready.
+- Use `superpowers-verification-before-completion` before claiming there are no findings, the review is complete, or the change is merge-ready.

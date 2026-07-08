@@ -102,7 +102,7 @@ Sources:
 
 Managed skills:
 
-- `grill-me` -> `grill-me`.
+- `code-review` -> `mattpocock-code-review`; `grill-me` -> `grill-me`.
 - `caveman` -> `mattpocock-caveman` remains retained from the previous
   managed snapshot because `caveman` is absent from the current
   `mattpocock/skills` HEAD.

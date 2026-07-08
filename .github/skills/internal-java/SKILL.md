@@ -13,6 +13,10 @@ every Java edit; load them only when the task proves which owner is needed.
 - `internal-java-project`: Java package, module, service, library, and deterministic test design when application or library structure becomes the main concern.
 - `internal-java-spring-boot-development`: Spring Boot controllers, configuration, repositories, scheduled jobs, and framework tests when framework behavior becomes the main concern.
 
+## Referenced files
+
+- `references/review-anti-patterns.md`: Java review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Java-specific defect depth.
+
 ## When to use
 
 - `.java`, `pom.xml`, `build.gradle`, or `build.gradle.kts` changes.

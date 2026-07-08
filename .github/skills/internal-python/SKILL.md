@@ -13,6 +13,10 @@ every Python edit; load them only when the task proves script or project depth.
 - `internal-python-script`: standalone Python scripts, CLIs, and operator-facing toolkits when dependency bootstrap, launcher behavior, or direct execution becomes the main concern.
 - `internal-python-project`: Python packages, application code, service boundaries, and framework-owned flows when importable behavior or service structure becomes the main concern.
 
+## Referenced files
+
+- `references/review-anti-patterns.md`: Python review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Python-specific defect depth.
+
 ## When to use
 
 - `.py` changes where the first need is the shared Python baseline.

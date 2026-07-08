@@ -12,7 +12,7 @@ AGENTS = REPO_ROOT / "AGENTS.md"
 INTERNAL_TDD = REPO_ROOT / ".github/skills/internal-tdd/SKILL.md"
 INTERNAL_CONTRACT = REPO_ROOT / "INTERNAL_CONTRACT.md"
 ANTI_PATTERNS = (
-    REPO_ROOT / ".github/skills/internal-review-code/references/anti-patterns-python.md"
+    REPO_ROOT / ".github/skills/internal-python/references/review-anti-patterns.md"
 )
 SKILL_PATH_PATTERN = re.compile(r"\.github/skills/([^/]+)/")
 

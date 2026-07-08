@@ -14,6 +14,10 @@ Terraform-native test behavior becomes part of the task.
 - `terraform-terraform-search-import`: unmanaged-resource discovery and Terraform import workflows when existing resources must enter Terraform state.
 - `terraform-terraform-test`: `.tftest.hcl` coverage, mocks, and Terraform test execution when Terraform-native testing is part of the job.
 
+## Referenced files
+
+- `references/review-anti-patterns.md`: Terraform review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Terraform-specific defect depth.
+
 ## When to use
 
 - Add or modify resources, variables, outputs, data sources in existing configurations.
