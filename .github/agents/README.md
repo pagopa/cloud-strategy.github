@@ -5,7 +5,7 @@ repo-only sync workflows.
 
 ## Agent-Owned Core
 
-- `internal-gateway-idea-brainstorming`: owns substantive idea definition,
+- `internal-gateway-idea`: owns substantive idea definition,
   critical challenge, and retained planning before execution.
 - `internal-gateway-review`: owns generic defect-first review for non-code and
   mixed artifacts before fixes.
@@ -19,7 +19,7 @@ repo-only sync workflows.
 
 | Agent | Use when |
 | --- | --- |
-| `internal-gateway-idea-brainstorming` | A vague idea or unresolved goal needs definition and retained planning. |
+| `internal-gateway-idea` | A vague idea or unresolved goal needs definition and retained planning. |
 | `internal-gateway-review` | A concrete non-code or mixed artifact needs defect-first review before fixes. |
 | `internal-review-code` | A concrete code target needs dedicated code review before merge or follow-up action. |
 | `internal-gateway-critical-master` | A proposal or plan needs pressure before action. |

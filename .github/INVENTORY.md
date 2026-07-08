@@ -178,7 +178,7 @@ These imported `openai-*` office skills remain support-only depth for repositori
 
 - `.github/agents/internal-review-code.agent.md`
 - `.github/agents/internal-gateway-critical-master.agent.md`
-- `.github/agents/internal-gateway-idea-brainstorming.agent.md`
+- `.github/agents/internal-gateway-idea.agent.md`
 - `.github/agents/internal-gateway-review.agent.md`
 - `.github/agents/internal-gateway-simple-task.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`

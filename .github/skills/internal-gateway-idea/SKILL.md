@@ -13,7 +13,7 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 ## Local references
 
 - `references/workflow.md`: authoritative state machine, Mermaid workflow,
-  approval rules, and coexistence boundaries for this bundle.
+  approval rules, and routing stability for this bundle.
 
 Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainstorming` as the core workflow and add the local gates below. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
 
@@ -45,7 +45,7 @@ Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainsto
 - Keep collaborative questioning inside the core brainstorming workflow.
 - Load `internal-gateway-writing-plans` only after the user approves retained spec or implementation-plan writing.
 - Stop after the delegated writing outcome. Do not implement, invoke execution owners, or run execution commands from this skill.
-- Keep `internal-gateway-idea-brainstorming` untouched during coexistence.
+- Keep the agent filename, frontmatter name, and workflow aligned.
 
 ## Bounded context pass
 
@@ -178,4 +178,4 @@ authorize implementation execution.
 - The skill loaded `internal-gateway-writing-plans` only for retained spec or implementation-plan writing.
 - The skill stopped after `internal-gateway-writing-plans` produced a writing outcome.
 - The Mermaid workflow and runtime prompt contain the same mandatory gate names.
-- The old `internal-gateway-idea-brainstorming` bundle remained untouched.
+- The phrase `agent filename, frontmatter name, and workflow aligned` appears in the skill, workflow, and runtime prompt.

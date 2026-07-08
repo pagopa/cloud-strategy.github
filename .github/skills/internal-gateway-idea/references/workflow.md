@@ -1,8 +1,6 @@
 # Internal Gateway Idea Workflow
 
-This workflow applies only to `internal-gateway-idea` while it coexists with
-`internal-gateway-idea-brainstorming`. It strengthens the future replacement
-bundle without changing the current canonical gateway catalog.
+This workflow defines the canonical contract for `internal-gateway-idea`.
 
 ## State Machine
 
@@ -63,10 +61,6 @@ flowchart TD
 - Approval of `Decision: direct plan` skips a retained spec, not the user
   approval gate and not the stop-before-execution boundary.
 
-## Coexistence Rule
+## Routing Stability Rule
 
-This bundle is the future replacement direction, but this workflow does not
-retire, rename, or rewrite `internal-gateway-idea-brainstorming`. Global
-canonical routing stays unchanged until a separate cleanup request updates the
-old bundle, wrapper agents, inventory, sync surfaces, and repository contracts
-together.
+Keep the agent filename, frontmatter name, and workflow aligned.

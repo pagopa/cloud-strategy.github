@@ -18,7 +18,7 @@ interface:
     and resume at the first skipped mandatory gate. Load
     $internal-gateway-writing-plans only after the user explicitly approves
     retained spec or implementation-plan writing. Stop after the writing outcome;
-    do not implement or invoke execution owners from this skill. Do not retire or rewrite
-    internal-gateway-idea-brainstorming during coexistence.
+    do not implement or invoke execution owners from this skill. Keep the agent
+    filename, frontmatter name, and workflow aligned.
 name: internal-gateway-idea
 description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, and a spec-vs-plan recommendation before implementation planning.

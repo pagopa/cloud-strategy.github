@@ -1,5 +1,5 @@
 ---
-name: internal-gateway-idea-brainstorming
+name: internal-gateway-idea
 description: "Use this agent when a repository-owned request starts with a vague idea, unclear goal, unresolved option set, or needs substantive definition, convergence, critical challenge, and retained planning before execution."
 tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
@@ -19,8 +19,8 @@ handoffs:
     send: false
 ---
 
-# Internal Gateway Idea Brainstorming
+# Internal Gateway Idea
 
 ## Core Skill
 
-- `internal-gateway-idea-brainstorming`
+- `internal-gateway-idea`

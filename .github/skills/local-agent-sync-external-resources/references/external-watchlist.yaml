@@ -52,6 +52,6 @@ items:
     action: alert-only
   - source_family: addyosmani/agent-skills
     upstream_id: idea-refine
-    local_owner: internal-gateway-idea-brainstorming
+    local_owner: internal-gateway-idea
     reason: Useful shaping frameworks and evaluation criteria were extracted into the repository-owned idea gateway; the competing autonomous workflow was retired.
     action: alert-only

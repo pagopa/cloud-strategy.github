@@ -32,13 +32,14 @@ def main() -> int:
     workflow_only_markers = [
         "flowchart TD",
         "Approval Rules",
-        "Coexistence Rule",
+        "Routing Stability Rule",
     ]
     runtime_only_markers = [
         "$internal-gateway-idea",
         "$superpowers-brainstorming",
         "$internal-gateway-writing-plans",
         "do not implement",
+        "agent filename, frontmatter name, and workflow aligned",
     ]
 
     markers = {
@@ -55,9 +56,9 @@ def main() -> int:
             ],
         ),
         "workflow_mermaid_and_rules": contains_all(workflow_text, workflow_only_markers),
-        "coexistence_boundary": "internal-gateway-idea-brainstorming" in skill_text
-        and "internal-gateway-idea-brainstorming" in workflow_text
-        and "internal-gateway-idea-brainstorming" in runtime_text,
+        "canonical_alignment": "agent filename, frontmatter name, and workflow aligned" in skill_text
+        and "agent filename, frontmatter name, and workflow aligned" in workflow_text
+        and "agent filename, frontmatter name, and workflow aligned" in runtime_text,
         "approval_is_gate_local": "active visible gate" in skill_text
         and "active visible gate" in workflow_text
         and "active visible gate" in runtime_text,

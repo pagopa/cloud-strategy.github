@@ -11,9 +11,9 @@ defaults:
     - copilot
     - opencode
 resources:
-  - resource_id: internal-gateway-idea-brainstorming
+  - resource_id: internal-gateway-idea
     source_family: agents
-    source_path: .github/agents/internal-gateway-idea-brainstorming.agent.md
+    source_path: .github/agents/internal-gateway-idea.agent.md
     include_targets:
       - codex
       - copilot
