@@ -111,6 +111,7 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - Make descriptions searchable with concrete terms people would actually type: skill, trigger, `.github/skills/`, `SKILL.md`, create, replace, revise, update, reuse, validation.
 - Preserve a working `description:` during token optimization unless the baseline shows the route itself is the problem.
 - Keep the body lean. Put only the local contract in `SKILL.md` and move optional depth into references or reusable tools when repeated need justifies it.
+- Treat generic skill shape as conditional, not a rigid section template: keep `## Referenced skills` as an audit index, not a preload list; remove duplicated responsibility instead of useful trigger reinforcement; preserve a working `description:` unless routing is the observed failure.
 - Every repository-owned `SKILL.md` this skill creates or materially revises must keep `## Referenced skills` immediately after the H1.
 - Treat self-containment as the default for repository-owned skill bundles. Keep
   required instructions, references, examples, fixtures, scripts, metadata, and

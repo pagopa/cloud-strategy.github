@@ -15,6 +15,15 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Compare the target skill against the closest neighboring owners before deciding the fix. Route quality is a lane-level property.
 - Keep `## Referenced skills` immediately after the H1 for any created or materially revised `SKILL.md`.
 
+## Generic skill shape
+
+- Required sections are conditional on behavior, not a rigid template. Frontmatter, H1, trigger-focused `description:`, a clear operating contract, and validation guidance are the stable minimum for material repository-owned skills.
+- Conditional sections such as `## Referenced skills`, `## When to use`, `## When not to use`, local references, scripts, examples, and fixtures should appear only when they improve routing, boundary clarity, portability, or maintenance.
+- Do not require every section for every skill. A small single-owner skill should stay small when extra sections would only repeat the trigger or body.
+- Treat `## Referenced skills` as an audit index, not a preload list. Do not load referenced skills from this section alone; load another skill only when the active task, file, framework, runtime, blocker, validation path, or explicit user request proves that owner is needed.
+- Remove duplicated responsibility, not useful trigger reinforcement. Keep short repeated safety or retrieval language when it protects activation, stop conditions, or claim discipline.
+- Preserve a working `description:` during cleanup unless the observed baseline failure is routing itself.
+
 ## Discovery and retrieval
 
 - Keep `description:` focused on when the skill should load.
