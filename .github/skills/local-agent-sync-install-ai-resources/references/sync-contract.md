@@ -94,6 +94,48 @@ Text reports must use a summary-first layout rather than a raw field dump. Use t
 
 Human-readable report tables should stay bounded for routine change and completed-action rows. Keep all blocker, attention, and readiness-failure rows visible. When rows are omitted, add an explicit omitted-count row and point to `--format json` for full detail.
 
+## Canonical Chat Template
+
+Use this template when you need to answer the user directly in chat. Keep the wording plain and convert the labels into the conversation language when appropriate.
+
+### Problem Report
+
+Use this structure when the sync is not yet finished or when the user needs to choose a direction:
+
+1. `Status`
+  - One short line with the overall result.
+2. `What is happening`
+  - One short paragraph that explains the current state in plain language.
+3. `Differences`
+  - List only the actionable changes.
+  - Number the items when the user may need to choose between them.
+  - Summarize unchanged or skipped resources by count unless the user asked for the full list.
+4. `Why it stops`
+  - Explain the smallest real blocker, not the internal code name.
+  - Include only the drift or policy item that prevents the next step.
+5. `Choices`
+  - Present only the actions the user can actually take now.
+  - Use numbered options.
+  - Put the recommended choice first.
+  - Keep each option to one line when possible.
+
+### Completion Report
+
+Use this structure when the work is finished:
+
+1. `Result`
+  - Say whether the run completed, applied changes, or ended as no-op.
+2. `What changed`
+  - One short paragraph with the concrete outcome.
+3. `Final verification`
+  - State the strongest evidence available, such as a clean plan, hash match, or zero residual drift.
+4. `Residuals`
+  - Include only if something still needs attention.
+  - If nothing remains, say `none`.
+5. `Next step`
+  - If the run is done, say there is nothing else to do.
+  - If the run is blocked, name the single next action.
+
 ### Shared Header
 
 Always start with a short status line that includes:

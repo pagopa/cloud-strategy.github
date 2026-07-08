@@ -133,6 +133,45 @@ Then follow the exact text layout in `references/sync-contract.md`:
 
 Never report blocker codes alone. Translate each code into a plain-language reason and required follow-up. Never say a resource will change without stating what evidence selected the winner or triggered the recommendation. Bounded chat reports may omit excess change rows, but they must keep all blocker and attention rows visible and point to `--format json` for full detail.
 
+### Canonical Chat Report Template
+
+When answering the user in chat, use this structure so the report stays easy to scan and easy to answer:
+
+1. `Status`
+	- One short line with the overall result.
+	- Prefer `completata`, `in corso`, `bloccata`, or `no-op`.
+2. `What is happening`
+	- One short paragraph that explains the current state in plain language.
+3. `Differences`
+	- List only the actionable changes.
+	- Number the items when the user may need to choose between them.
+	- Summarize unchanged or skipped resources by count unless the user asked for the full list.
+4. `Why it stops`
+	- Explain the smallest real blocker, not the internal code name.
+	- Include only the drift or policy item that prevents the next step.
+5. `Choices`
+	- Present only the actions the user can actually take now.
+	- Use numbered options.
+	- Put the recommended choice first.
+	- Keep each option to one line when possible.
+
+### Canonical Completion Template
+
+When the work is finished, close with this structure instead of repeating the full diff:
+
+1. `Result`
+	- Say whether the run completed, applied changes, or ended as no-op.
+2. `What changed`
+	- One short paragraph with the concrete outcome.
+3. `Final verification`
+	- State the strongest evidence available, such as a clean plan, hash match, or zero residual drift.
+4. `Residuals`
+	- Include only if something still needs attention.
+	- If nothing remains, say `none`.
+5. `Next step`
+	- If the run is done, say there is nothing else to do.
+	- If the run is blocked, name the single next action.
+
 ## Bundled Automation
 
 - Prefer `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior.
