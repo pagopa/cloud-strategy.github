@@ -1,7 +1,11 @@
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
 SKILL_PATH = REPO_ROOT / ".github/skills/internal-gateway-writing-plans/SKILL.md"
 AGENT_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-writing-plans/agents/openai.yaml"

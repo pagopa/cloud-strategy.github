@@ -9,9 +9,14 @@ from types import SimpleNamespace
 
 import pytest
 
-SCRIPT_DIR = Path(
-    ".github/skills/local-agent-sync-install-ai-resources/scripts"
-).resolve()
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
+SCRIPT_DIR = (
+    REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
+)
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from agent_translation import target_extension, translate_agent_for_target  # noqa: E402
@@ -225,10 +230,9 @@ def test_bisync_requires_review_only_for_non_safe_drift() -> None:
 
 def test_skill_run_sh_should_quiet_only_for_compact_modes() -> None:
     run_sh = (
-        Path(".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh")
-        .resolve()
-        .as_posix()
-    )
+        REPO_ROOT
+        / ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
+    ).resolve().as_posix()
     script = textwrap.dedent(
         f"""\
         source "{run_sh}"

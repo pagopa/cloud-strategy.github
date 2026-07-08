@@ -1,7 +1,11 @@
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
 SKILL_PATH = REPO_ROOT / ".github/skills/internal-skill-creator/SKILL.md"
 CHECKLIST_PATH = (
     REPO_ROOT

@@ -1,7 +1,11 @@
 import subprocess
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
 
 
 def run_shell(command: str) -> subprocess.CompletedProcess[str]:

@@ -2,9 +2,14 @@ import json
 import sys
 from pathlib import Path
 
-SCRIPT_DIR = Path(
-    ".github/skills/local-agent-sync-install-ai-resources/scripts"
-).resolve()
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
+SCRIPT_DIR = (
+    REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
+)
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_output import build_compact_install_output, dump_compact_json  # noqa: E402

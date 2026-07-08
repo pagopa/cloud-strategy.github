@@ -3,7 +3,11 @@ import sys
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
 VALIDATOR = (
     REPO_ROOT
     / ".github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py"

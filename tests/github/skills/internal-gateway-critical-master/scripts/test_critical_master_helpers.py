@@ -2,9 +2,14 @@ import sys
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
-MODULE_PATH = Path(
-    ".github/skills/internal-gateway-critical-master/scripts/critical_master.py"
-).resolve()
+REPO_ROOT = next(
+    parent
+    for parent in Path(__file__).resolve().parents
+    if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
+)
+MODULE_PATH = (
+    REPO_ROOT / ".github/skills/internal-gateway-critical-master/scripts/critical_master.py"
+)
 SPEC = spec_from_file_location("critical_master", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 critical_master = module_from_spec(SPEC)
