@@ -41,8 +41,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Plan, audit, doctor, or apply allowlisted home AI resource sync operations."
     )
-    subparsers = parser.add_subparsers(dest="command", required=False)
-    subparsers.required = True
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     for cmd in ("sync", "plan", "apply", "audit", "doctor", "dry-run"):
         cmd_parser = subparsers.add_parser(cmd, help=f"Run {cmd} sync operation.")
@@ -222,17 +221,30 @@ def run(args: argparse.Namespace) -> int:
         emit_output(payload, format_name=args.format)
         return 0
 
-    plan = build_home_sync_plan(
-        source_root=source_root,
-        home_root=home_root,
-        targets=targets,
-        retired_targets=retire_targets,
-        mode=command,
-        experimental_targets=args.experimental_targets,
-        prune_managed=args.prune_managed,
-        fast=args.fast,
-        changed_only=args.changed_only,
-    )
+    try:
+        plan = build_home_sync_plan(
+            source_root=source_root,
+            home_root=home_root,
+            targets=targets,
+            retired_targets=retire_targets,
+            mode=command,
+            experimental_targets=args.experimental_targets,
+            prune_managed=args.prune_managed,
+            fast=args.fast,
+            changed_only=args.changed_only,
+        )
+    except (RuntimeError, ValueError, FileNotFoundError, KeyError) as exc:
+        code = _extract_blocked_code(exc)
+        payload = {
+            "mode": command,
+            "selected_targets": list(targets),
+            "retired_targets": list(retire_targets),
+            "blocked_codes": [code],
+            "error": str(exc),
+            **blocked_report_fields(str(exc)),
+        }
+        emit_output(payload, format_name=args.format, failure_message=str(exc))
+        return 1
 
     if command == "apply":
         return run_apply(plan, args)
@@ -251,17 +263,30 @@ def run_sync(
     retire_targets: tuple[str, ...],
     args: argparse.Namespace,
 ) -> int:
-    install_plan = build_home_sync_plan(
-        source_root=source_root,
-        home_root=home_root,
-        targets=targets,
-        retired_targets=retire_targets,
-        mode="apply",
-        experimental_targets=args.experimental_targets,
-        prune_managed=args.prune_managed,
-        fast=args.fast,
-        changed_only=args.changed_only,
-    )
+    try:
+        install_plan = build_home_sync_plan(
+            source_root=source_root,
+            home_root=home_root,
+            targets=targets,
+            retired_targets=retire_targets,
+            mode="apply",
+            experimental_targets=args.experimental_targets,
+            prune_managed=args.prune_managed,
+            fast=args.fast,
+            changed_only=args.changed_only,
+        )
+    except (RuntimeError, ValueError, FileNotFoundError, KeyError) as exc:
+        code = _extract_blocked_code(exc)
+        payload = {
+            "mode": "sync",
+            "status": "blocked",
+            "blocked_codes": [code],
+            "reason": str(exc),
+            "install": {"error": str(exc)},
+            "bisync": None,
+        }
+        emit_sync_output(payload, format_name=args.format)
+        return 1
     install_payload = install_plan.to_dict()
     auto_blockers = install_auto_apply_blockers(install_plan, args)
     if auto_blockers:
@@ -452,6 +477,13 @@ def blocked_report_fields(reason: str) -> dict[str, object]:
             "reason": reason,
         },
     }
+
+
+def _extract_blocked_code(exc: BaseException) -> str:
+    message = str(exc)
+    if ":" in message:
+        return message.split(":", 1)[0].strip()
+    return type(exc).__name__
 
 
 def normalize_mode(command: str) -> str:

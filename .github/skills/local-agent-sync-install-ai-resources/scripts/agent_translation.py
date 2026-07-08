@@ -1,6 +1,6 @@
 """Agent translation module for converting .agent.md to target-specific formats.
 
-Translates Copilot-native .agent.md files into Claude, OpenCode, and Codex
+Translates Copilot-native .agent.md files into OpenCode and Codex
 agent definitions while preserving the original body content and translating
 frontmatter fields appropriately.
 """
@@ -11,14 +11,6 @@ import re
 from pathlib import Path
 
 import yaml
-
-_TOOL_MAP_CLAUDE = {
-    "read": "Read",
-    "edit": "Edit",
-    "search": "Glob, Grep",
-    "execute": "Bash",
-    "web": "WebSearch, WebFetch",
-}
 
 _PERMISSION_MAP_OPENCODE = {
     "read": "read",
@@ -71,8 +63,6 @@ def translate_agent_for_target(
 
     if target == "copilot":
         return _translate_for_copilot(frontmatter, body)
-    elif target == "claude":
-        return _translate_for_claude(frontmatter, body)
     elif target == "opencode":
         return _translate_for_opencode(frontmatter, body)
     elif target == "codex":
@@ -90,47 +80,6 @@ def target_extension(target: str) -> str:
 
 def _translate_for_copilot(frontmatter: dict, body: str) -> str:
     return render_frontmatter_md(frontmatter) + body
-
-
-def _translate_for_claude(frontmatter: dict, body: str) -> str:
-    claude_fm: dict[str, object] = {}
-    if "name" in frontmatter:
-        claude_fm["name"] = frontmatter["name"]
-    if "description" in frontmatter:
-        claude_fm["description"] = frontmatter["description"]
-
-    tools_list = _build_claude_tools(frontmatter)
-    if tools_list:
-        claude_fm["tools"] = tools_list
-
-    output = render_frontmatter_md(claude_fm)
-    output += body.rstrip() + "\n"
-
-    handoffs_body = _render_handoffs_body(frontmatter)
-    if handoffs_body:
-        output += "\n" + handoffs_body + "\n"
-
-    return output
-
-
-def _build_claude_tools(frontmatter: dict) -> str:
-    parts: list[str] = []
-
-    agents = frontmatter.get("agents") or []
-    if isinstance(agents, list) and agents:
-        agent_names = ", ".join(agents)
-        parts.append(f"Agent({agent_names})")
-
-    tools = frontmatter.get("tools") or []
-    if isinstance(tools, list):
-        for tool in tools:
-            mapped = _TOOL_MAP_CLAUDE.get(tool)
-            if mapped:
-                for t in mapped.split(", "):
-                    if t not in parts:
-                        parts.append(t)
-
-    return ", ".join(parts)
 
 
 def _render_handoffs_body(frontmatter: dict) -> str:

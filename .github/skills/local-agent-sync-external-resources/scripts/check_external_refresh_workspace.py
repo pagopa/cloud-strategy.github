@@ -62,7 +62,17 @@ def validate_workspace(root: Path, workspace: Path | None) -> list[str]:
 
 
 def find_repo_local_refresh_dirs(root: Path) -> list[str]:
-    return [relative for relative in REPO_LOCAL_REFRESH_DIRS if (root / relative).exists()]
+    found: list[str] = []
+    tmp_dir = root / "tmp"
+    if tmp_dir.is_dir():
+        for child in tmp_dir.iterdir():
+            if child.is_dir() and (child / ".git").exists():
+                found.append(child.relative_to(root).as_posix())
+    for relative in REPO_LOCAL_REFRESH_DIRS:
+        path = root / relative
+        if path.exists() and path.as_posix() not in {f for f in found}:
+            found.append(relative)
+    return found
 
 
 def collect_findings(

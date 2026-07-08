@@ -8,7 +8,13 @@ import json
 from pathlib import Path
 import sys
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+_SCRIPTS_LIB = Path(__file__).resolve().parents[3] / "scripts" / "lib"
+if _SCRIPTS_LIB.parent.as_posix() not in sys.path:
+    sys.path.insert(0, _SCRIPTS_LIB.parent.as_posix())
+
+from lib.repo_paths import find_repo_root
+
+REPO_ROOT = find_repo_root(Path(__file__).resolve())
 SCRIPTS_ROOT = REPO_ROOT / ".github/scripts"
 DEFAULT_SNAPSHOT_OUTPUT = REPO_ROOT / "tmp/superpowers/internal-agent-sync-control-center.manifest.json"
 if SCRIPTS_ROOT.as_posix() not in sys.path:
@@ -47,26 +53,40 @@ def main() -> int:
 
 
 def run_snapshot(args: argparse.Namespace) -> int:
-    root = Path(args.root).resolve()
-    files = collect_files(root, [Path(path) for path in args.paths])
-    manifest = build_manifest(root, files, source_ref_base=args.source_ref_base)
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(output_path.as_posix())
-    return 0
+    try:
+        root = Path(args.root).resolve()
+        files = collect_files(root, [Path(path) for path in args.paths])
+        manifest = build_manifest(root, files, source_ref_base=args.source_ref_base)
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(output_path.as_posix())
+        return 0
+    except FileNotFoundError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 1
+    except json.JSONDecodeError as exc:
+        print(f"[error] manifest parse error: {exc}", file=sys.stderr)
+        return 1
 
 
 def run_diff(args: argparse.Namespace) -> int:
-    old_manifest = load_manifest(Path(args.old))
-    new_manifest = load_manifest(Path(args.new))
-    result = diff_manifests(old_manifest, new_manifest)
-    if args.format == "json":
-        print(json.dumps(result, indent=2, sort_keys=True))
-        return 0
+    try:
+        old_manifest = load_manifest(Path(args.old))
+        new_manifest = load_manifest(Path(args.new))
+        result = diff_manifests(old_manifest, new_manifest)
+        if args.format == "json":
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
 
-    print(render_diff_text(result))
-    return 0
+        print(render_diff_text(result))
+        return 0
+    except FileNotFoundError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 1
+    except json.JSONDecodeError as exc:
+        print(f"[error] manifest parse error: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

@@ -16,40 +16,33 @@ import hashlib
 import json
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+_SCRIPTS_LIB = Path(__file__).resolve().parents[3] / "scripts" / "lib"
+if _SCRIPTS_LIB.parent.as_posix() not in sys.path:
+    sys.path.insert(0, _SCRIPTS_LIB.parent.as_posix())
+
 from home_sync_contract import load_home_sync_policy, state_root_for_home
 from home_syncing import reconcile_manifest_entry_after_bisync_copy
+from lib.sync_exclusions import should_ignore_sync_path, sync_copytree_ignore
 from sync_output import (
     build_compact_bisync_output,
     dump_compact_json,
     render_bisync_report,
 )
 
-IGNORED_SYNC_PARTS: tuple[str, ...] = (".venv", "__pycache__", ".pytest_cache")
-IGNORED_SYNC_SUFFIXES: tuple[str, ...] = (".pyc", ".pyo")
 EXCLUDED_BUNDLE_PREFIX: str = "local-"
 BISYNC_PLAN_PATH = "last-bisync-plan.json"
 
 
 def should_ignore(path: Path) -> bool:
-    return (
-        any(part in IGNORED_SYNC_PARTS for part in path.parts)
-        or path.suffix in IGNORED_SYNC_SUFFIXES
-    )
+    return should_ignore_sync_path(path)
 
 
 def should_ignore_copytree(directory: str, names: list[str]) -> set[str]:
-    base = Path(directory)
-    ignored: set[str] = set()
-    for name in names:
-        candidate = base / name
-        if candidate.is_dir() and name in IGNORED_SYNC_PARTS:
-            ignored.add(name)
-        elif candidate.is_file() and candidate.suffix in IGNORED_SYNC_SUFFIXES:
-            ignored.add(name)
-    return ignored
+    return sync_copytree_ignore(directory, names)
 
 
 def get_max_mtime(directory: Path) -> float:
@@ -71,13 +64,17 @@ def hash_bundle(directory: Path) -> str:
 
 
 def is_repo_clean(source_root: Path) -> tuple[bool, str, str]:
-    result = subprocess.run(
-        ["git", "status", "--porcelain", "--untracked-files=all"],
-        cwd=source_root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=source_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except subprocess.TimeoutExpired:
+        return False, "bisync-repo-git-failed", "git status timed out"
     if result.returncode != 0:
         return False, "bisync-repo-git-failed", "Unable to run git status before bisync apply."
     if result.stdout.strip():
@@ -145,7 +142,7 @@ def compute_next_action(
     }
 
 
-@dataclass
+@dataclass(frozen=True)
 class BisyncDriftEntry:
     skill_name: str
     drift_type: str
@@ -156,7 +153,7 @@ class BisyncDriftEntry:
     home_hash: str = ""
     repo_mtime: float = 0.0
     home_mtime: float = 0.0
-    blocked_codes: list[str] = field(default_factory=list)
+    blocked_codes: tuple[str, ...] = ()
 
     def to_dict(self) -> dict:
         result: dict = {
@@ -423,6 +420,18 @@ def apply_bisync_plan(
             dst = Path(drift.repo_path)
         else:
             continue
+
+        for check_path in (src, dst):
+            resolved = check_path.resolve()
+            if check_path.is_symlink() or any(p.is_symlink() for p in check_path.parents):
+                plan.blocked_codes.append("symlink-not-allowed")
+                plan.blocked_codes = sorted(set(plan.blocked_codes))
+                plan.verification = {"status": "blocked", "code": "symlink-not-allowed", "path": str(check_path)}
+                plan.next_step = _next_step_for_bisync(plan)
+                plan.next_action = compute_next_action(
+                    plan.blocked_codes, bool(plan.drifts), "apply", source_root, home_root
+                )
+                return plan
 
         if dst.exists():
             shutil.rmtree(dst)

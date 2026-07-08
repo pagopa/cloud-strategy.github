@@ -17,6 +17,12 @@ from pathlib import Path
 
 import yaml
 
+_SCRIPTS_LIB = Path(__file__).resolve().parents[3] / "scripts" / "lib"
+if _SCRIPTS_LIB.parent.as_posix() not in sys.path:
+    sys.path.insert(0, _SCRIPTS_LIB.parent.as_posix())
+
+from lib.repo_paths import find_repo_root
+
 
 DEFAULT_REFERENCE = (
     ".github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml"
@@ -51,6 +57,8 @@ class NormalizationConfig:
     managed_text_replacements: tuple[ManagedTextReplacement, ...]
     scan_includes: tuple[str, ...]
     ignored_files: frozenset[str]
+    blocked_local_prefixes: tuple[str, ...] = ()
+    blocked_managed_reference_prefixes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -114,14 +122,6 @@ def main() -> int:
     return 0
 
 
-def find_repo_root(start: Path) -> Path:
-    candidate = start.resolve()
-    for current in (candidate, *candidate.parents):
-        if (current / ".github").is_dir():
-            return current
-    raise FileNotFoundError(f"Unable to find repository root from {start}")
-
-
 def resolve_reference_path(repo_root: Path, raw_reference_path: Path) -> Path:
     if raw_reference_path.is_absolute():
         return raw_reference_path
@@ -144,6 +144,11 @@ def load_config(reference_path: Path) -> NormalizationConfig:
     if isinstance(raw_ignored_files, list):
         ignored_files.update(item for item in raw_ignored_files if isinstance(item, str) and item.strip())
 
+    raw_blocked_local = payload.get("blocked_local_prefixes", [])
+    blocked_local_prefixes = tuple(item for item in raw_blocked_local if isinstance(item, str) and item.strip()) if isinstance(raw_blocked_local, list) else ()
+    raw_blocked_managed = payload.get("blocked_managed_reference_prefix", [])
+    blocked_managed_reference_prefixes = tuple(item for item in raw_blocked_managed if isinstance(item, str) and item.strip()) if isinstance(raw_blocked_managed, list) else ()
+
     return NormalizationConfig(
         reference_path=reference_path,
         managed_skills=managed_skills,
@@ -151,6 +156,8 @@ def load_config(reference_path: Path) -> NormalizationConfig:
         managed_text_replacements=managed_text_replacements,
         scan_includes=scan_includes,
         ignored_files=frozenset(ignored_files),
+        blocked_local_prefixes=blocked_local_prefixes,
+        blocked_managed_reference_prefixes=blocked_managed_reference_prefixes,
     )
 
 
@@ -228,6 +235,14 @@ def detect_drift(repo_root: Path, config: NormalizationConfig) -> list[Normaliza
     return changes
 
 
+def _safe_replace(text: str, old: str, new: str) -> str:
+    import re
+    if old.startswith("superpowers:") or old.startswith("obra-"):
+        pattern = re.compile(r'(?<!\w)' + re.escape(old) + r'(?!\w)')
+        return pattern.sub(new, text)
+    return text.replace(old, new)
+
+
 def apply_normalization(repo_root: Path, config: NormalizationConfig) -> list[NormalizationChange]:
     changes: list[NormalizationChange] = []
     for old_relative_path, new_relative_path in path_renames(config):
@@ -251,7 +266,7 @@ def apply_normalization(repo_root: Path, config: NormalizationConfig) -> list[No
         for old_text, new_text in replacements:
             if old_text not in updated_text:
                 continue
-            updated_text = updated_text.replace(old_text, new_text)
+            updated_text = _safe_replace(updated_text, old_text, new_text)
             applied_replacements.append(f"{old_text} -> {new_text}")
         if updated_text == original_text:
             continue

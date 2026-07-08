@@ -10,6 +10,12 @@ from pathlib import Path
 
 import yaml
 
+_SCRIPTS_LIB = Path(__file__).resolve().parents[3] / "scripts" / "lib"
+if _SCRIPTS_LIB.parent.as_posix() not in sys.path:
+    sys.path.insert(0, _SCRIPTS_LIB.parent.as_posix())
+
+from lib.repo_paths import find_repo_root
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -66,7 +72,13 @@ def main() -> int:
     for override in selected:
         override_id = override["id"]
         patch_path = (skill_root / override["patch_path"]).resolve()
-        target_path = repo_root / override["target_path"]
+        target_path = (repo_root / override["target_path"]).resolve()
+        if not patch_path.is_relative_to(skill_root / "patches"):
+            print(f"[error] patch path escapes patches/ for {override_id}: {patch_path}", file=sys.stderr)
+            return 1
+        if not target_path.is_relative_to(repo_root):
+            print(f"[error] target path escapes repo for {override_id}: {target_path}", file=sys.stderr)
+            return 1
         if not patch_path.is_file():
             print(f"[error] missing patch file for {override_id}: {patch_path}", file=sys.stderr)
             return 1
@@ -75,6 +87,11 @@ def main() -> int:
             return 1
 
         apply_strategy = override.get("apply_strategy", "git-apply")
+        VALID_STRATEGIES = {"git-apply", "git-apply-3way"}
+        if apply_strategy not in VALID_STRATEGIES:
+            print(f"[error] unknown apply_strategy for {override_id}: {apply_strategy}", file=sys.stderr)
+            return 1
+
         patch_status = detect_patch_status(repo_root, patch_path, apply_strategy=apply_strategy)
         if patch_status == "conflict":
             print(
@@ -122,23 +139,19 @@ def main() -> int:
     return 0
 
 
-def find_repo_root(start: Path) -> Path:
-    candidate = start.resolve()
-    for current in (candidate, *candidate.parents):
-        if (current / ".github").is_dir():
-            return current
-    raise FileNotFoundError(f"Unable to find repository root from {start}")
-
-
 def load_registry(path: Path) -> list[dict[str, str]]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     overrides = payload.get("overrides")
     if not isinstance(overrides, list):
         raise ValueError("Registry must define an overrides list.")
+    REQUIRED_FIELDS = {"id", "patch_path", "target_path", "apply_strategy", "expected_content_hash"}
     normalized: list[dict[str, str]] = []
     for item in overrides:
         if not isinstance(item, dict):
             raise ValueError("Each override entry must be a mapping.")
+        missing = REQUIRED_FIELDS - set(item.keys())
+        if missing:
+            raise ValueError(f"Override entry missing required fields: {missing}")
         normalized.append({key: str(value) for key, value in item.items()})
     return normalized
 
@@ -153,13 +166,17 @@ def select_overrides(
 
 
 def run_git(command: list[str], repo_root: Path, quiet: bool = False) -> int:
-    completed = subprocess.run(
-        command,
-        cwd=repo_root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        return -1
     if not quiet and completed.stdout.strip():
         print(completed.stdout.strip())
     if not quiet and completed.stderr.strip():

@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-global-copilot-configs-into-repo
-description: Use when aligning a consumer repository to this repository's managed GitHub Copilot baseline plus the explicitly shared repository-hygiene files and retained-learning ledger template, including mirror planning, apply runs, drift checks, and preservation of target `local-*` assets.
+description: Use when aligning a consumer repository to this repository's managed GitHub Copilot baseline, shared repository-hygiene files, and retained-learning ledger template.
 ---
 
 # Internal Agent Sync Global Copilot Configs Into Repo
@@ -21,7 +21,7 @@ The paired agent should not restate default mode handling, preserved `local-*` b
 
 - Align a consumer repository with the managed GitHub Copilot baseline from this repository.
 - Refresh target `AGENTS.md`, `.github/copilot-instructions.md`, and `.github/INVENTORY.md` to the current root-policy and review-only model after mirroring.
-- Refresh shared repository-hygiene files that are part of the managed sync baseline, currently `.editorconfig`, `.pre-commit-config.yaml`, and `.github/workflows/_pre-commit.yml`.
+- Refresh shared repository-hygiene files that are part of the managed sync baseline, currently `.editorconfig`, `.pre-commit-config.yaml`, `.github/workflows/_pre-commit.yml`, `.github/copilot-commit-message-instructions.md`, `.github/security-baseline.md`, `.github/DEPRECATION.md`, and `.github/repo-profiles.yml`.
 - Refresh repository-root `LESSONS_LEARNED.md` from the source structure while preserving and, when needed, migrating target-authored pending lesson rows.
 - Run or interpret `./.github/scripts/run.sh sync_copilot_catalog` or `.github/scripts/sync_copilot_catalog.py`.
 - Audit source-target drift before or after a sync.
