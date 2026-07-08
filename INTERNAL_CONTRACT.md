@@ -206,10 +206,10 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - Python tests that target nested repository-owned source paths
 - Expected behavior:
   - Python tests remain under repository-root `tests/`
-  - when a test targets a nested source path, the test path under `tests/` mirrors the owned source directory closely enough that the tested folder is obvious
-  - when the tested source path starts with a hidden repository segment such as `.github/`, the mirrored test path uses a discoverable directory such as `tests/github/...` instead of a hidden path that pytest may skip
-  - flat root-level files such as `tests/test_*.py` are reserved for root-owned contracts or sources that also live at the repository root
-  - tests must not hide skill-owned or script-owned coverage behind unrelated flat filenames when a mirrored path would make the owner clear
+  - test paths under `tests/` should make the covered owner or checked behavior obvious
+  - when a test targets a nested source path, prefer a directory layout that stays discoverable to the active test runner and preserves owner clarity
+  - flat root-level files such as `tests/test_*.py` are best reserved for root-owned contracts or sources that also live at the repository root
+  - deeper layout conventions may be defined by a nearer language or tool owner when the repository-wide rule is not enough
 
 ### Naming And Operating Model
 

@@ -58,6 +58,9 @@ mechanics. Those belong to the core skill.
 - For `mandatory`, load the core skill before changing behavior.
 - For `recommended`, keep the check at the most meaningful public or stable
   boundary.
+- When adding tests, keep them under repository-root `tests/` and choose paths
+  that make the covered owner or checked behavior obvious. Use the nearest
+  owner for deeper layout conventions.
 - For `not suitable`, name the seam gap and the alternate validation path before
   implementation.
 - Tests or checks added after implementation are regression coverage only. Do

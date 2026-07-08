@@ -46,8 +46,10 @@ This block is the portable source baseline used to generate
 
 - `AGENTS.md` owns stable repository-wide policy, precedence, tactical defaults,
   ownership boundaries, and routing anchors.
-- Do not put operational procedures, checklists, file-shape recipes, command
-  playbooks, or tool-specific workflows here.
+- Do not put long operational procedures, detailed checklists, detailed
+  file-shape recipes, command playbooks, or tool-specific workflows here.
+- Short, globally safe best-practice defaults may live here when they improve
+  baseline behavior without turning this file into a procedure manual.
 - `tmp/` is temporary support only. Treat its contents as disposable working
   artifacts and do not commit files from `tmp/`.
 
@@ -84,6 +86,9 @@ This block is the portable source baseline used to generate
 - Executable or evaluable behavior changes must use a test-first
   red-green-refactor loop: define the failing check, make the smallest
   implementation edit, then rerun the focused check and closest validation.
+- Place tests under repository-root `tests/` using paths that make the owning
+  source or checked behavior obvious. Keep deeper layout conventions in the
+  nearest owner.
 - The failing check must exist before the first implementation edit unless a
   pre-code testability exception names the gap and alternate validation path.
 - Tests added after implementation are regression coverage only; they must not
