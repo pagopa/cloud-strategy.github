@@ -73,7 +73,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-bash/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
-- `.github/skills/internal-review-code/SKILL.md`
 - `.github/skills/internal-context-handoff/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-copilot-docs-research/SKILL.md`
@@ -98,7 +97,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
-- `.github/skills/internal-review-high-level/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`
 - `.github/skills/internal-java/SKILL.md`
@@ -115,6 +113,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-python-project/SKILL.md`
 - `.github/skills/internal-python-script/SKILL.md`
 - `.github/skills/internal-python/SKILL.md`
+- `.github/skills/internal-review-code/SKILL.md`
+- `.github/skills/internal-review-high-level/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-tdd/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
@@ -167,7 +167,9 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/lib/internal_skills.py`
 - `.github/scripts/lib/inventory.py`
 - `.github/scripts/lib/jsonc.py`
+- `.github/scripts/lib/repo_paths.py`
 - `.github/scripts/lib/shared.py`
+- `.github/scripts/lib/sync_exclusions.py`
 - `.github/scripts/lib/syncing.py`
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
@@ -176,11 +178,11 @@ These imported `openai-*` office skills remain support-only depth for repositori
 
 ## Agents
 
-- `.github/agents/internal-review-code.agent.md`
 - `.github/agents/internal-gateway-critical-master.agent.md`
 - `.github/agents/internal-gateway-idea.agent.md`
 - `.github/agents/internal-gateway-review.agent.md`
 - `.github/agents/internal-gateway-simple-task.agent.md`
+- `.github/agents/internal-review-code.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
