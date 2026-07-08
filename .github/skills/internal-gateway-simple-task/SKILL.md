@@ -12,18 +12,20 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 - `internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
 - `superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
 
-Do not name other skills, agents, or workflow owners from this bundle; when stopping, explain the violated condition and let the user choose the next path.
+Do not introduce other skills, agents, or workflow owners from this bundle. When stopping, explain the violated condition and let the user choose the next path.
 
-Use this skill as the fast path for concrete bounded work that should finish in the current run. It should answer, edit, diagnose, or validate end-to-end by default when the target, anti-scope, and validation path are concrete enough to execute safely.
+## Core Contract
 
-Stop only when the work becomes materially complex, too costly for the current run, ambiguous, unsafe, multi-phase, approval-bound, or not locally verifiable. When stopping, report the exact boundary break instead of delegating by name.
+Use this skill as the fast path for concrete bounded work that should finish in the current run. It owns the decision to continue or stop, then answers, edits, diagnoses, or validates end-to-end when the target, anti-scope, and validation path are concrete enough to execute safely.
 
-Use local references and scripts only to keep the decision process compact and deterministic. Keep the working state small, prefer bounded evidence, and preserve direct completion ownership inside this bundle.
+Stop only when the work becomes materially complex, too costly for the current run, ambiguous, unsafe, multi-phase, approval-bound, or not locally verifiable. Stop output must explain the boundary break instead of delegating by name.
+
+Use local references and scripts only to keep the decision process compact and deterministic. Keep working state small, inspect bounded evidence first, and preserve direct completion ownership inside this bundle.
 
 ## When to use
 
 - The task is concrete and repository-owned.
-- The target path, requested outcome, or validation path is already known or can be recovered with one focused clarification.
+- The target path, requested outcome, or validation path is known or can be recovered with one focused clarification.
 - One bounded run can answer, edit, diagnose, or validate the work without staged workflow changes.
 
 ## When not to use
@@ -33,22 +35,40 @@ Use local references and scripts only to keep the decision process compact and d
 - The task needs a retained plan, a multi-phase rollout, or separate execution approval.
 - The task cannot be validated locally or safely with bounded evidence.
 
-## Autonomous Completion Rule
+## Gate Decision
 
-Complete the task in the current run when it is concrete, bounded, and locally validatable. Do not stop merely because a supporting method exists.
+Classify the task before operational work as `trivial-skip`, `full-gate`, or `stop-with-reason`.
 
-When the task cannot safely continue, stop with these fields:
+- Use `trivial-skip` only for a local answer, tiny edit, focused read, or validator run with no material ambiguity, no material risk, and an obvious validation path or explicit validation gap.
+- Use `full-gate` for every other same-run task.
+- Use `stop-with-reason` when risk, cost, ambiguity, approval, validation, or phase count breaks same-run completion.
+- Depth keywords such as `full`, `idea`, and `complete` forbid `trivial-skip`.
+
+For `stop-with-reason`, report:
 
 - `why stopped`
 - `violated condition`
 - `user decision needed`
 - `evidence required before continuing`
 
-Stop output must not name another skill, agent, or owner.
+## Execution Contract
 
-## Initial Idea Ordering
+For `trivial-skip`, do not create a ledger. Name the validation path directly, or state the exact validation gap.
 
-Complete this local ordering before `grill-me` for any non-trivial task:
+For `full-gate`, complete the gates in this order:
+
+1. Inspect the nearest local evidence.
+2. Confirm the task still fits one bounded run.
+3. Complete Initial Idea Ordering.
+4. Ask one compact `grill-me` block only when a missing bounded fact blocks the active lane.
+5. Run the critical challenge before non-trivial action.
+6. Write a short Readiness Brief.
+7. If executable or evaluable behavior changes, load `internal-tdd` before implementation and follow its routed posture.
+8. Execute the smallest coherent in-scope move.
+9. Run focused validation or report the exact validation gap.
+10. Use the final evidence gate before positive claims.
+
+Initial Idea Ordering is local to this skill and must cover:
 
 - `original request`
 - `emerged requirements`
@@ -60,33 +80,7 @@ Complete this local ordering before `grill-me` for any non-trivial task:
 - `validation signal`
 - `stop signal`
 
-This ordering is local to this skill. Do not import it from any other bundle.
-
-## Gate Policy
-
-Classify the task before operational work as `trivial-skip`, `full-gate`, or `stop-with-reason`.
-
-- Use `trivial-skip` only for a local answer, tiny edit, focused read, or validator run with no material ambiguity, no material risk, and an obvious validation path or explicit validation gap.
-- Use `full-gate` for everything else that still fits same-run completion.
-- Use `stop-with-reason` when the work becomes too complex, too costly, ambiguous, unsafe, approval-bound, multi-phase, or likely incomplete in the current run.
-
-Gate order:
-
-1. Bounded evidence.
-2. Complexity and cost gate.
-3. Initial Idea Ordering.
-4. `grill-me` when needed.
-5. Critical challenge.
-6. Readiness Brief.
-7. Execution.
-8. Validation.
-9. Final evidence gate.
-
-Depth keywords such as `full`, `idea`, and `complete` forbid `trivial-skip`.
-
-## Readiness Brief
-
-Before operational work, produce a short local brief with no placeholders:
+The Readiness Brief must stay shorter than a retained plan and include:
 
 - `Task`
 - `Goal`
@@ -99,8 +93,6 @@ Before operational work, produce a short local brief with no placeholders:
 - `Main risk`
 - `Stop conditions`
 - `Approval`
-
-This brief must stay shorter than a retained plan.
 
 ## Gate Evidence Ledger
 
@@ -120,59 +112,24 @@ Required rows:
 
 Use `skipped` only when the gate policy allows it and the reason is explicit. Use `blocked` when the missing evidence prevents a completion, readiness, passing, fixed, or no-gap claim.
 
-## Simple Procedure
-
-1. Inspect the nearest local evidence first.
-2. Decide whether the task is `trivial-skip`, `full-gate`, or `stop-with-reason`.
-3. For `full-gate` work, keep the Gate Evidence Ledger current from the first non-trivial gate onward.
-4. For non-trivial work, complete Initial Idea Ordering before `grill-me`.
-5. Ask one compact `grill-me` block only when it is needed to continue the active lane.
-6. Run the critical challenge before non-trivial action.
-7. Build the Readiness Brief.
-8. When the task changes executable or evaluable behavior, load `internal-tdd`
-   before implementation and follow its routing outcome.
-9. Execute the smallest coherent in-scope move.
-10. Run focused validation or report the exact validation gap.
-11. Report the ledger summary before strong positive claims.
-12. Use the final evidence gate before positive claims.
-
-For `trivial-skip`, do not create a ledger. Name the validation path directly, or state the exact validation gap.
-
 ## Execution Loop
 
 When execution is authorized, iterate with the smallest useful cycle:
 
 1. Confirm the current goal, scope boundary, and next check.
-2. Apply the smallest in-scope action.
+2. Apply the smallest readable in-scope action.
 3. Run the focused validation or evidence check.
 4. Repair once when the failure is still in scope and improving.
 5. Continue only while evidence improves.
 6. Stop with reason when risk, cost, ambiguity, or validation failure crosses the boundary.
 
-## Simple Code Discipline
+Keep the implementation posture simple:
 
-- Task-bound: complete only the concrete requested outcome; stop when target, scope, or validation changes.
-- KISS: choose the smallest readable change that solves the observed problem.
-- YAGNI: do not add helpers, abstractions, options, configuration, or future proofing without an active task need.
-- DRY locally: remove meaningful duplication touched by the task, but do not extract one-off logic.
-- Single responsibility: each changed section, helper, or code path must have one current reason to exist.
-- Behavior first: when executable behavior changes, name the observable behavior and validate it with the closest stable check.
-- Use `internal-tdd` before implementation when the task changes executable or evaluable behavior and a meaningful seam exists.
-- Fail fast on drift: stop with reason when the task becomes ambiguous, multi-phase, owner-conflicted, or not locally verifiable.
-
-## Generic Executable Behavior Rule
-
-When executable or evaluable behavior changes, route through `internal-tdd`
-before implementation:
-
-1. Identify the observable behavior or evaluable contract.
-2. Load `internal-tdd` before implementation.
-3. Let `internal-tdd` choose `mandatory`, `recommended`, or `not suitable`.
-4. Follow the routed check posture and keep the slice small.
-5. Finish with the focused check and the closest broader validation.
-
-If `internal-tdd` determines the work is `not suitable`, state the seam gap and
-alternate validation path explicitly.
+- Complete only the concrete requested outcome.
+- Do not add helpers, abstractions, options, configuration, or future-proofing without an active task need.
+- Remove meaningful duplication touched by the task, but do not extract one-off logic.
+- Give each changed section, helper, or code path one current reason to exist.
+- When behavior changes, name the observable contract and validate it with the closest stable check.
 
 ## Deterministic Helpers
 
@@ -182,14 +139,14 @@ alternate validation path explicitly.
 
 ## Validation
 
-- Only the four retained skill names appear in this bundle.
-- Initial Idea Ordering is completed before `grill-me` for non-trivial work.
-- The critical challenge runs before non-trivial action.
+- Only the four referenced skill names appear in this bundle.
 - Concrete bounded work completes in the same run unless `stop-with-reason` is explicit.
 - Stop output explains the exact violated condition and required evidence.
+- `trivial-skip` names the validation path directly or states the exact validation gap.
+- Non-trivial work completes Initial Idea Ordering before `grill-me`.
+- The critical challenge runs before non-trivial action.
 - Non-trivial work has a Gate Evidence Ledger entry for each required row, or an explicit blocker.
 - Skipped gates record the reason that made the skip valid.
 - Blocked gates prevent completion, readiness, passing, fixed, or no-gap claims.
-- Executable behavior changes satisfy the Simple Code Discipline.
 - Executable or evaluable behavior changes load `internal-tdd` before implementation when a meaningful seam exists.
 - Positive claims rely on fresh evidence before completion.

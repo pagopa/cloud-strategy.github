@@ -44,6 +44,16 @@ def test_simple_task_bundle_routes_code_changes_to_internal_tdd() -> None:
     assert "Load `internal-tdd`" in support_routing_text
 
 
+def test_simple_task_skill_has_one_compact_execution_contract() -> None:
+    skill_text = SKILL_PATH.read_text()
+
+    assert "## Execution Contract" in skill_text
+    assert "## Execution Loop" in skill_text
+    assert "## Simple Code Discipline" not in skill_text
+    assert "## Generic Executable Behavior Rule" not in skill_text
+    assert "## Simple Procedure" not in skill_text
+
+
 def test_gate_helper_mentions_internal_tdd_for_executable_behavior() -> None:
     decision = resolve_simple_task.build_gate_decision(
         task="Update a validator script",
