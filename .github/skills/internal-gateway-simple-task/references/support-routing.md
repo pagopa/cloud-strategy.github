@@ -52,3 +52,5 @@ Run `scripts/resolve_simple_task.py gate` when the task facts are already normal
 Run `scripts/resolve_simple_task.py claim` before strong status claims when the evidence requirements are the noisy part.
 
 Run `scripts/suggest_support_skills.py` only when path or symptom signals exist and the next method still needs a deterministic hint.
+
+`suggest_support_skills.py` emits machine-readable method labels (e.g. `governance-check`, `automation-check`, `config-check`) as shorthand for the row postures above; labels resolve to the nearest row by topic, not by exact wording.

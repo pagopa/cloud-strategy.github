@@ -91,3 +91,95 @@ def test_support_skill_helper_suggests_internal_tdd_for_code_paths_and_symptom()
     assert "bundle-contract-check" in suggestions
     assert "load-internal-tdd" in suggestions
     assert "runtime-check" in suggestions
+
+
+def test_trivial_skip_does_not_emit_gate_evidence_ledger() -> None:
+    decision = resolve_simple_task.build_gate_decision(
+        task="fix typo",
+        lane="edit",
+        trivial_kind="tiny-edit",
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=False,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=False,
+        validation_obvious=False,
+        validation_path="make lint",
+        validation_gap="",
+    )
+    assert decision["gate_outcome"] == "trivial-skip"
+    gate_evidence = decision.get("gate_evidence")
+    assert gate_evidence is None or (
+        isinstance(gate_evidence, dict)
+        and set(gate_evidence.keys()) <= {"validation", "final_evidence"}
+    ), f"trivial-skip must not emit a 9-row ledger; got {gate_evidence!r}"
+
+
+def test_full_gate_can_require_clarification() -> None:
+    decision = resolve_simple_task.build_gate_decision(
+        task="task that needs one bounded clarification",
+        lane="unspecified",
+        trivial_kind=None,
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=False,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=False,
+        needs_clarification=True,
+        validation_obvious=False,
+        validation_path="make lint",
+        validation_gap="",
+    )
+    assert decision["gate_outcome"] == "full-gate"
+    clarification_row = next(
+        row for row in decision["gate_evidence"] if row["gate"] == "clarification"
+    )
+    assert clarification_row["required"] is True
+
+
+def test_clarification_overflow_alone_stops() -> None:
+    decision = resolve_simple_task.build_gate_decision(
+        task="task with too many clarifications",
+        lane="unspecified",
+        trivial_kind=None,
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=False,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=True,
+        validation_obvious=False,
+        validation_path="make lint",
+        validation_gap="",
+    )
+    assert decision["gate_outcome"] == "stop-with-reason"
+
+
+def test_claim_requirements_return_documented_methods() -> None:
+    requirements = resolve_simple_task.resolve_claim_requirements(["fixed"])
+    methods = [r["method"] for r in requirements]
+    assert "reproduce-loop" in methods
+    assert "scope-check" in methods
+    assert "superpowers-verification-before-completion" in methods
+
+
+def test_suggest_does_not_emit_worktree_mapping() -> None:
+    import subprocess
+    result = subprocess.run(
+        [sys.executable, str(SUGGEST_SCRIPT_PATH), "--symptom", "bug", "--symptom", "tdd", "src/app.py"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert "diagnose" in result.stdout
+    assert "load-internal-tdd" in result.stdout
+    assert "isolate-workspace-needed" not in result.stdout

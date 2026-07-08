@@ -59,9 +59,4 @@ If that answer creates another dependent question set, stop with reason.
 
 ## Stop Conditions
 
-Stop with reason when:
-
-- the exit check fails
-- the clarification limit is exceeded
-- the answer would materially change scope or validation
-- the work becomes multi-phase, costly, ambiguous, or unsafe
+Stop conditions are owned by `references/support-routing.md`; this gate adds only the per-question stop rules listed in Stop rules above.

@@ -82,3 +82,38 @@ The strongest risk is compliance visibility.
     findings = VALIDATOR_MODULE.validate_output(text)
 
     assert any(finding.code == "finding-question-word-limit" for finding in findings)
+
+
+def test_objection_word_limit_is_advisory() -> None:
+    long_objection = " ".join(
+        [
+            "This", "objection", "heading", "intentionally", "exceeds", "the",
+            "thirty", "word", "limit", "by", "repeating", "core", "concerns",
+            "about", "the", "proposal", "without", "adding", "any", "new", "signal",
+            "for", "the", "reader", "and", "must", "be", "shortened", "now",
+            "again", "finally",
+        ]
+    )
+    text = f"""
+## Summary
+
+We are testing the objection word-limit enforcement.
+
+## Findings
+
+### 1. {long_objection}
+
+- **Impact:** Scope ambiguity risks rejection.
+- **Evidence:** `inference` — no attachment to contract.
+- **Mitigation:** Tighten scope before approval.
+
+## Outcome
+
+`accept-with-risk`
+
+## Synthesis
+
+The challenge surfaces one open question.
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    assert any(finding.code == "finding-objection-word-limit" for finding in findings)

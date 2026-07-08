@@ -158,6 +158,7 @@ def parse_args() -> argparse.Namespace:
     gate_parser.add_argument("--needs-critical", action="store_true")
     gate_parser.add_argument("--owner-ambiguous", action="store_true")
     gate_parser.add_argument("--clarification-overflow", action="store_true")
+    gate_parser.add_argument("--needs-clarification", action="store_true")
     gate_parser.add_argument("--validation-obvious", action="store_true")
     gate_parser.add_argument("--validation-path", default="")
     gate_parser.add_argument("--validation-gap", default="")
@@ -276,6 +277,7 @@ def build_gate_decision(
     needs_critical: bool,
     owner_ambiguous: bool,
     clarification_overflow: bool,
+    needs_clarification: bool = False,
     validation_obvious: bool,
     validation_path: str,
     validation_gap: str,
@@ -364,13 +366,19 @@ def build_gate_decision(
         "stop_conditions": "Stop for complexity, cost, ambiguity, safety, approval, or validation gaps.",
         "approval": approval,
     }
-    gate_evidence = build_gate_evidence(
-        gate_outcome=gate_outcome,
-        validation_path=validation_path,
-        validation_gap=validation_gap,
-        clarification_required=False,
-        stop_reasons=stop_reasons,
-    )
+    if gate_outcome == "trivial-skip":
+        gate_evidence = {
+            "validation": focused_validation_path,
+            "final_evidence": "Fresh evidence supporting the trivial claim.",
+        }
+    else:
+        gate_evidence = build_gate_evidence(
+            gate_outcome=gate_outcome,
+            validation_path=validation_path,
+            validation_gap=validation_gap,
+            clarification_required=needs_clarification,
+            stop_reasons=stop_reasons,
+        )
 
     return {
         "gate_outcome": gate_outcome,
@@ -418,11 +426,16 @@ def render_gate_text(decision: dict[str, object]) -> None:
     print(f"- Stop conditions: {brief['stop_conditions']}")
     print(f"- Approval: {brief['approval']}")
     print("Gate Evidence:")
-    for evidence in decision["gate_evidence"]:
-        print(
-            f"- {evidence['gate']}: required={str(evidence['required']).lower()}; "
-            f"expected={evidence['expected_evidence']}"
-        )
+    gate_evidence = decision["gate_evidence"]
+    if isinstance(gate_evidence, dict):
+        for key, value in gate_evidence.items():
+            print(f"- {key}: {value}")
+    else:
+        for evidence in gate_evidence:
+            print(
+                f"- {evidence['gate']}: required={str(evidence['required']).lower()}; "
+                f"expected={evidence['expected_evidence']}"
+            )
 
 
 def render_claim_text(claims: list[str], requirements: list[dict[str, str]]) -> None:
@@ -446,6 +459,7 @@ def main() -> int:
             needs_critical=args.needs_critical,
             owner_ambiguous=args.owner_ambiguous,
             clarification_overflow=args.clarification_overflow,
+            needs_clarification=args.needs_clarification,
             validation_obvious=args.validation_obvious,
             validation_path=args.validation_path,
             validation_gap=args.validation_gap,

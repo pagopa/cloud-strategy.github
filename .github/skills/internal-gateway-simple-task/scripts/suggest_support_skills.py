@@ -23,7 +23,6 @@ SYMPTOM_METHODS = {
     "systems-review": ("review-shape-stop", "Cross-boundary analysis is dominating the task."),
     "completion-claim": ("verify-claim", "Completion or readiness claims need fresh validation evidence."),
     "no-findings": ("review-shape-stop", "No-findings claims need findings-first evidence."),
-    "worktree": ("isolate-workspace-needed", "The task may need isolated workspace protection."),
 }
 
 

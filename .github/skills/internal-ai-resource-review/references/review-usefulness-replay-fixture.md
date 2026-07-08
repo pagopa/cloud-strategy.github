@@ -1,6 +1,6 @@
 # Review Usefulness Replay Fixture
 
-Use this fixture when validating that AI-resource reviews are decision-useful
+Use this illustrative output shape when validating that AI-resource reviews are decision-useful
 without becoming long reports.
 
 ## Input

@@ -305,7 +305,8 @@ def _check_finding(parsed, findings: list[Finding]) -> None:
                 ),
             )
         )
-    objection_words = _field_word_count(parsed.body, "Objection")
+    objection_text = re.sub(r"^\d+\.\s+", "", parsed.heading)
+    objection_words = count_words(objection_text)
     if objection_words > FINDING_OBJECTION_MAX_WORDS:
         findings.append(
             Finding(

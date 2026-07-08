@@ -2,14 +2,13 @@
 
 Load this reference when creating a new repository-owned skill or materially revising an existing one.
 
-This is a local distilled checklist informed by `writing-skills`. It exists to keep the wrapper self-contained without cloning the upstream bundle.
+This is a local distilled checklist informed by external skill-authoring guidance. It exists to keep the wrapper self-contained without cloning the upstream bundle.
 
 ## Core posture
 
 - Treat a skill as a reusable guide for future agents, not as a narrative about one past task.
 - Prefer executable process over prose: steps, evidence, and exit criteria must change what a future agent does.
-- Iron law: do not create or materially revise a skill without first seeing the failure it must fix.
-- Do not create or materially revise a skill without first observing the failure, miss, or ambiguity it must fix.
+- Iron law: do not create or materially revise a skill without first observing the failure, miss, or ambiguity it must fix.
 - Use the same proof standard for edits as for new skills.
 - Check frontmatter validity before reviewing route quality or body wording. Structural breakage outranks content cleanup.
 - Compare the target skill against the closest neighboring owners before deciding the fix. Route quality is a lane-level property.

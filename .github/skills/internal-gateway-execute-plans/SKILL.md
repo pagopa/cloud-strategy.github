@@ -51,6 +51,8 @@ Supported statuses are `DONE`, `BLOCKED`, `PARTIAL`, and `NEEDS_REVIEW`.
 Required headings are `## Status`, `## Reason`, `## Completed`,
 `## Remaining`, `## Validation`, `## Next`, and `## Resume Notes`.
 
+Before claiming `DONE`, load `superpowers-verification-before-completion` and present fresh passing evidence.
+
 Use `DONE` only when all in-scope work is complete and required validation has fresh passing evidence. For any gap, use the status that best explains the remaining action and record the exact evidence needed to resume or finish.
 
 Do not create `done-*`, `completion-report.md`, `evidence-envelope.md`, or `<STATE>-plan-state.md` as new closeout artifacts.

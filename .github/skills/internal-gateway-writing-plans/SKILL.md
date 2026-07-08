@@ -16,6 +16,9 @@ stops after the delegated outcome.
 ## When to use
 
 - Use after the user approves retained spec or implementation-plan writing.
+
+## When not to use
+
 - Do not use for quick same-chat tasks, substantive ideation, execution, or
   imported `superpowers-*` edits.
 
@@ -57,3 +60,9 @@ real evidence gap.
 DRY, YAGNI, and TDD stay owned by `superpowers-writing-plans`; this section
 adds only the owner-awareness and redirect gate that the delegated skill does
 not enforce.
+
+## Validation
+
+- `python3 ./.github/scripts/validate_internal_skills.py --skill internal-gateway-writing-plans --strict`
+- Confirm the delegated plan carries ordered tasks, concrete file targets, clear edit intent, validation commands or explicit gaps, and no duplicate-owner or speculative-scope drift.
+- `git diff --check`

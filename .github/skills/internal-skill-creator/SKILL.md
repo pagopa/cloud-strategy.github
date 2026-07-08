@@ -102,41 +102,19 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - Do not create a new skill until you can state the concrete failure, ambiguity, or repeated authoring miss it must prevent.
 - Require a baseline failure before a new or materially revised skill is accepted. If the undesired behavior has not been observed, the case is not ready.
 - Check frontmatter integrity before debating trigger wording. Broken frontmatter is a structural failure, not a content-polish issue.
-- Treat skills as reusable reference guides, not narratives about how one task was solved once.
 - Review the nearest competing skills before editing. Retrieval quality is judged against neighboring owners, not in isolation.
 - Prefer the smallest change that fixes the local problem.
-- Keep `description:` trigger-only. It should say when the skill applies, not summarize the workflow.
-- Prefer tightening a description or adding one boundary note over a broad rewrite when that fixes the observed miss.
-- Use active, searchable naming when creating a new skill. Prefer direct verbs or action-shaped names over abstract labels when that improves retrieval.
 - Make descriptions searchable with concrete terms people would actually type: skill, trigger, `.github/skills/`, `SKILL.md`, create, replace, revise, update, reuse, validation.
-- Preserve a working `description:` during token optimization unless the baseline shows the route itself is the problem.
-- Keep the body lean. Put only the local contract in `SKILL.md` and move optional depth into references or reusable tools when repeated need justifies it.
-- Treat generic skill shape as conditional, not a rigid section template: keep `## Referenced skills` as an audit index, not a preload list; remove duplicated responsibility instead of useful trigger reinforcement; preserve a working `description:` unless routing is the observed failure.
-- Every repository-owned `SKILL.md` this skill creates or materially revises must keep `## Referenced skills` immediately after the H1.
-- Treat self-containment as the default for repository-owned skill bundles. Keep
-  required instructions, references, examples, fixtures, scripts, metadata, and
-  deterministic automation inside the bundle unless the contract explicitly says
-  otherwise.
-- Do not leave a touched skill operationally dependent on guidance, examples,
-  or the only runnable engine outside its own directory when the same need can
-  be satisfied inside the bundle with a smaller, clearer contract.
+- Use active, searchable naming when creating a new skill. Prefer direct verbs or action-shaped names over abstract labels when that improves retrieval.
+- A good outcome may be reuse, narrowing, deletion, or replacement. Do not let the workflow bias toward creating another skill.
+- Every repository-owned `SKILL.md` this skill creates or materially revises must keep `## Referenced skills` immediately after the H1 as an audit index, not a preload list.
 - In `## Referenced skills`, list every other skill the file asks the agent to load, route to, compare against, or delegate to; use `- None.` only when no other skill is referenced.
-- Each referenced-skill item must name the skill in backticks and state the load, route, delegation, or comparison condition in one short phrase.
 - Update `## Referenced skills` whenever adding, removing, renaming, or repairing a skill reference. Treat stale or missing skill names as validation failures.
-- When a skill sits behind a paired agent or local references, keep one owner per detail layer: route and boundary in the agent, reusable workflow in `SKILL.md`, and deep detail in `references/`.
-- When editing internal or local skill references, keep deep reusable tables, templates, and detailed checklists in `references/`; do not copy the same material back into `SKILL.md` or a paired agent.
-- If a reference becomes the canonical detail owner, trim matching duplication from the paired `SKILL.md` or agent in the same change.
-- Prefer `references/` over new `scripts/` for static tables, starter templates, and audit taxonomies. Add scripts only when the workflow is deterministic, repeated, and execution-heavy.
-- When direct-copy portability or out-of-repo execution is part of the skill contract, keep the required deterministic automation inside the skill bundle and leave repository entrypoints as thin wrappers.
-- For touched skill bundles, prefer bundle-relative references to files under
-  `references/`, `scripts/`, or `fixtures/` over repository-rooted paths to the
-  same bundle files.
-- Keep cross-references explicit instead of duplicating large chunks of generic bundle guidance.
 - In `SKILL.md`, reference another skill by name and behavior only. Do not cite file paths inside another skill bundle; those files are private to the owning skill and may change.
 - In source-side skill Markdown, cite only paths that exist on disk in the source repository. When sync materializes a target-only file, prefer the source template path or descriptive prose over the consumer-only materialized path.
-- Do not mirror the full OpenAI bundle workflow in this skill. Point to it when the remaining task is already covered there.
 - When creating or materially revising a skill that introduces scripts, CLIs, or deterministic automation, require an explicit output-contract decision: operator default output, model-facing bounded or compact output, and when full JSON is required for audits.
-- A good outcome may be reuse, narrowing, deletion, or replacement. Do not let the workflow bias toward creating another skill.
+
+For trigger-wording, token-discipline, loophole, and skill-type test detail, enforce `references/writing-skills-checklist.md`.
 
 ## OpenAI handoff points
 
@@ -152,8 +130,6 @@ After the local decision gate is complete, hand off to `openai-skill-creator` on
 - Iron law: no new skill and no material skill edit without a failing baseline first.
 - Accept concrete local evidence such as a failed retrieval, repeated review feedback, trigger overlap, weak discovery wording, stale validation expectations, or a documented miss in `tmp/superpowers/`.
 - Reject vague justification such as "this feels reusable", "the repo might need it later", or "the text looks light".
-- Treat "it's only wording" as insufficient unless the wording change clearly alters retrieval, boundary, or validation behavior.
-- Apply the same standard to edits as to new skills. A major edit without a failing baseline is still missing proof.
 
 ## Workflow
 
@@ -180,6 +156,8 @@ After the local decision gate is complete, hand off to `openai-skill-creator` on
 Use `references/writing-skills-checklist.md` for the anti-rationalization rules, token-discipline reminders, and skill-type testing expectations that this wrapper should enforce.
 
 ## Validation
+
+- Automated: `python3 ./.github/scripts/validate_internal_skills.py --skill <name>` (covers name match, description trigger-first, openai.yaml shape, local-reference existence, cross-skill-file-reference absence, body line count, inline-template density). Remaining checks below are manual.
 
 Then confirm:
 
@@ -223,4 +201,4 @@ Then confirm:
 - Using a long description that tells the agent what to do instead of when to load the skill.
 - Skipping `agents/openai.yaml` even though the repository expects it for internal skills.
 - Skipping the baseline and rationalizing the change as "small enough".
-- Copying OpenAI bundle anatomy or OBRA process weight wholesale into the local wrapper instead of selecting only what improves the repository-owned owner.
+- Copying OpenAI bundle anatomy or bundle-process weight wholesale into the local wrapper instead of selecting only what improves the repository-owned owner.

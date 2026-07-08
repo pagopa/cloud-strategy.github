@@ -1,6 +1,6 @@
 ---
 name: internal-ai-resource-review
-description: Use when reviewing repository-owned AI resources, bundle siblings, catalog workflows, or retained AI review packages before deciding keep, revise, split, compress, or retire actions.
+description: Use when reviewing repository-owned AI resources, bundle siblings, catalog workflows, or retained AI review packages before deciding keep, patch, split, compress, or retire actions.
 ---
 
 # Internal AI Resource Review
@@ -21,7 +21,7 @@ here.
 
 - Review one AI asset, a bundle root, several catalog folders, or a retained
   review package under `tmp/`.
-- Decide whether to keep, wrap, revise, split, merge, move, retire, compress,
+- Decide whether to keep, wrap, patch, split, merge, move, retire, compress,
   automate, or review later.
 - Check how AI resources are consumed across prompts, agents, skills,
   validators, tests, inventory, and sync helpers.
@@ -41,17 +41,7 @@ here.
 
 ## Reviewable families
 
-- bridge and catalog files: `AGENTS.md`, `.github/copilot-instructions.md`,
-  `.github/INVENTORY.md`
-- wrappers and entrypoints: `.github/agents/*.agent.md`,
-  `.github/prompts/*.prompt.md`
-- reusable owners: `.github/skills/**/SKILL.md` plus bundle siblings under
-  `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
-- supporting automation: AI-catalog validators, inventory builders, sync
-  helpers, runtime matrices, and home-sync allowlists under `.github/scripts/`
-  and `.github/skills/**/references/`
-- evidence surfaces: contract tests, fixtures, retained reports under `tmp/`,
-  and explicitly referenced local docs or manifests
+Reviewable families: see `references/review-profiles.md` 'Family coverage baseline'.
 
 ## Review profiles
 
@@ -82,11 +72,12 @@ one file.
 6. Load `references/report-contract.md` before writing the final review so
    evidence labels, decision vocabulary, and completeness checks stay
    proportional to the profile.
-7. Use `references/review-usefulness-replay-fixture.md` as the acceptance
-  fixture when changing the decision-usefulness behavior of AI-resource reviews.
+7. Use `references/review-usefulness-replay-fixture.md` as the illustrative
+   output shape when changing the decision-usefulness behavior of AI-resource reviews.
 
 ## Core review rules
 
+- When this skill reviews itself, name the rationalization risk explicitly and prefer evidence from external consumers over self-cited compliance.
 - Stay analysis-only unless the user explicitly changes lanes into delivery.
 - Keep one generic review lane across prompts, skills, agents, catalog
   helpers, and retained packages; do not split the owner by resource family
@@ -105,35 +96,13 @@ one file.
 
 ## Bundle coverage rules
 
-For skill, agent, prompt, or bundle reviews, treat these as expected evidence
-surfaces unless intentionally out of scope:
-
-- bundle root owner, usually `SKILL.md` for skills;
-- existing siblings under `references/`, `scripts/`, `assets/`, and
-  `agents/openai.yaml`;
-- paired wrapper, agent, prompt, or owner that selects the bundle;
-- nearest deterministic validator, unit test, contract test, or fixture;
-- inventory, sync manifest, runtime matrix, or explicit allowlist when
-  propagation is relevant;
-- live prompt pack, generated artifact, retained report, or fixture when the
-  bundle governs materialized output.
-
-Checked surfaces with no defect belong in the evidence digest or decision
-trace, not as filler findings. Mention only the surfaces that materially support
-the verdict.
+Bundle coverage rules: see `references/review-profiles.md` 'bundle minimum evidence pass'. Checked surfaces with no defect belong in the evidence digest or decision trace, not as findings.
 
 ## Output
 
-Load `references/report-contract.md` for the exact report shape. The review
-output should always be decision-useful and include:
-
-- selected profile and target
-- findings or explicit keep result
-- evidence labels, usually compressed into an evidence digest
-- decision trace for what was accepted, ruled out, or left uncertain
-- decision or recommended next action
-- validation path or evidence gap
-- residual risk
+Required sections: see `references/report-contract.md` 'Required sections'. The review
+output should always be decision-useful and include an explicit no-findings result
+when no material findings exist.
 
 ## Validation
 
@@ -151,4 +120,4 @@ output should always be decision-useful and include:
 - The final output follows `references/report-contract.md` and stays
   proportional to the chosen profile.
 - Decision-usefulness contract changes preserve the behavior captured in
-  `references/review-usefulness-replay-fixture.md`.
+  `references/review-usefulness-replay-fixture.md` illustrative output shape.

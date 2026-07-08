@@ -77,8 +77,8 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 
 - Target output: **600 words or fewer** per challenge cycle.
 - Maximum findings: **3**.
-- Maximum per finding: **150 words**.
-- Maximum synthesis: **300 words**.
+- Per-field limits are authoritative; see `references/output-contract.md`.
+- Maximum synthesis: **100 words**.
 - If the topic demands more depth, split the work into another critical cycle.
 
 ## Claim Discipline
@@ -93,7 +93,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 - Optional: `scripts/validate_critical_output.py` checks a rendered output against the contract in `references/output-contract.md`.
 - The optional validator and its pure helper live inside this skill bundle so the skill can be copied without depending on repo-global Python modules.
 - Reuse `fixtures/critical_output_valid.md` and sibling fixture samples instead of repeating long inline payloads.
-- Follow `references/maintenance-guidance.md` for fixture reuse, cache-aware search discipline, and analyzer boundary checks.
+- Follow `references/maintenance-guidance.md` for fixture reuse and cache-aware search discipline.
 - Keep this bundle self-contained: do not require instructions, examples, or enforcement rules from outside this directory.
 
 ## Outcome meanings

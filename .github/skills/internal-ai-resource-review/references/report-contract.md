@@ -102,9 +102,13 @@ Every final review should include:
 1. selected profile and target
 2. findings first, or an explicit no-findings result
 3. evidence labels for each material claim
-4. decision or recommended next action
-5. validation path or explicit evidence gap
-6. residual risk
+4. evidence digest
+5. decision trace
+6. decision or recommended next action
+7. validation path or explicit evidence gap
+8. residual risk
+
+Decision trace and evidence digest are expected for normal reviews; see Adaptive layout patterns.
 
 Small reviews may merge sections only when the verdict, evidence digest,
 decision trace, next action, and residual risk remain understandable.

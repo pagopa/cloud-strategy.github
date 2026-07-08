@@ -14,8 +14,9 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 
 - `references/workflow.md`: authoritative state machine, Mermaid workflow,
   approval rules, and routing stability for this bundle.
+- `scripts/audit_workflow.py`: marker-consistency validator; run via `python3 scripts/audit_workflow.py`.
 
-Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainstorming` as the core workflow and add the local gates below. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
+Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainstorming` as the core workflow and add the local gates below. Loading `superpowers-brainstorming` is an intentional, globally-resolvable exception to the bundle self-containment rule. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
 
 ## When to use
 

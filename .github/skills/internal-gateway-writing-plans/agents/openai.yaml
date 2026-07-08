@@ -9,8 +9,7 @@ interface:
     `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md` for plans and
     `tmp/superpowers/specs/YYYY-MM-DD-HHMM-<topic>-design.md` for specs, for
     example `2026-07-03-1143-<name>`.
-    If a
-    retained plan is created, check ordered tasks, concrete file targets, edit
+    If a retained plan is created, check ordered tasks, concrete file targets, edit
     intent, validation commands or explicit gaps, duplicate-owner or
     speculative-scope drift, stop conditions, and handoff readiness. Stop after
     the writing outcome.
