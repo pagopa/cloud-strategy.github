@@ -36,6 +36,11 @@ from home_syncing import (  # noqa: E402
     parse_targets,
     state_root_for_home,
 )
+from sync_output import (  # noqa: E402
+    render_doctor_report,
+    render_install_report,
+    render_sync_report,
+)
 from sync_home_ai_resources import (  # noqa: E402
     bisync_requires_review,
     install_auto_apply_blockers,
@@ -126,6 +131,103 @@ def test_parse_targets_orders_cross_aliases_and_rejects_unknown() -> None:
 
     with pytest.raises(ValueError, match="unknown-target: invalid"):
         parse_targets("skills,invalid")
+
+
+def test_render_install_report_omits_empty_sections_and_uses_emoji_headings() -> None:
+    report = render_install_report(
+        {
+            "mode": "plan",
+            "selected_targets": ["skills"],
+            "status": "ok",
+            "validation": "ok",
+            "blocked_codes": [],
+            "operations": [],
+            "source_resources_considered": 0,
+            "state_path": "/tmp/state",
+            "next_action": {
+                "action": "done",
+                "allowed": True,
+                "requires_explicit_approval": False,
+                "command": "",
+                "reason": "No work.",
+            },
+        }
+    )
+
+    assert "🚦 Status:" in report
+    assert "## 🧭 Summary" in report
+    assert "## 🛠️ Changes" not in report
+    assert "## ✅ Completed" not in report
+    assert "## ⚠️ Attention" not in report
+    assert "## 🔎 Validation" in report
+    assert "## ➡️ Next" in report
+
+
+def test_render_doctor_report_omits_readiness_when_everything_is_ok() -> None:
+    report = render_doctor_report(
+        {
+            "selected_targets": ["skills"],
+            "status": "ok",
+            "validation": "ok",
+            "checks": [
+                {
+                    "name": "runtime root",
+                    "path": "/tmp/home/.agents/skills",
+                    "status": "ok",
+                }
+            ],
+            "state_path": "/tmp/state",
+            "next_action": {
+                "action": "done",
+                "allowed": True,
+                "requires_explicit_approval": False,
+                "command": "",
+                "reason": "No work.",
+            },
+        }
+    )
+
+    assert "🚦 Status:" in report
+    assert "## 🧭 Summary" in report
+    assert "## 🩺 Readiness" not in report
+    assert "## 🔎 Validation" in report
+    assert "## ➡️ Next" in report
+
+
+def test_render_sync_report_omits_empty_action_sections() -> None:
+    report = render_sync_report(
+        {
+            "status": "done",
+            "reason": "No work.",
+            "install": {
+                "selected_targets": ["skills"],
+                "operations": [],
+                "validation": "ok",
+                "state_path": "/tmp/state",
+                "manifest_path": "/tmp/manifest",
+            },
+            "bisync": {
+                "mode": "plan",
+                "drifts": [],
+                "verification": {"status": "ok"},
+            },
+            "next_action": {
+                "action": "done",
+                "allowed": True,
+                "requires_explicit_approval": False,
+                "command": "",
+                "reason": "No work.",
+            },
+        }
+    )
+
+    assert "🚦 Status:" in report
+    assert "## 🧭 Summary" in report
+    assert "## 🚀 Auto-applied" not in report
+    assert "## 📋 Planned repo-to-home copies" not in report
+    assert "## ⛔ Stopped on" not in report
+    assert "## 🔎 Validation" in report
+    assert "## ➡️ Next" in report
 
 
 def test_build_bisync_plan_filters_local_and_excluded_bundles(tmp_path: Path) -> None:

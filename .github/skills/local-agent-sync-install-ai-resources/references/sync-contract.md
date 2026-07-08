@@ -100,20 +100,21 @@ Use this template when you need to answer the user directly in chat. Keep the wo
 
 ### Problem Report
 
-Use this structure when the sync is not yet finished or when the user needs to choose a direction:
+Use this structure when the sync is not yet finished or when the user needs to choose a direction. Skip any section that would be empty instead of rendering a heading with no content:
 
-1. `Status`
+1. `🚦 Status`
   - One short line with the overall result.
-2. `What is happening`
+2. `📌 What is happening`
   - One short paragraph that explains the current state in plain language.
-3. `Differences`
+3. `🔁 Differences`
   - List only the actionable changes.
+  - Omit the section entirely when there is nothing actionable to show.
   - Number the items when the user may need to choose between them.
   - Summarize unchanged or skipped resources by count unless the user asked for the full list.
-4. `Why it stops`
+4. `⛔ Why it stops`
   - Explain the smallest real blocker, not the internal code name.
   - Include only the drift or policy item that prevents the next step.
-5. `Choices`
+5. `🎯 Choices`
   - Present only the actions the user can actually take now.
   - Use numbered options.
   - Put the recommended choice first.
@@ -121,24 +122,25 @@ Use this structure when the sync is not yet finished or when the user needs to c
 
 ### Completion Report
 
-Use this structure when the work is finished:
+Use this structure when the work is finished. Skip any section that would be empty instead of rendering a heading with no content:
 
-1. `Result`
+1. `✅ Result`
   - Say whether the run completed, applied changes, or ended as no-op.
-2. `What changed`
+2. `🛠️ What changed`
   - One short paragraph with the concrete outcome.
-3. `Final verification`
+  - Omit the section entirely when nothing changed.
+3. `🔎 Final verification`
   - State the strongest evidence available, such as a clean plan, hash match, or zero residual drift.
-4. `Residuals`
+4. `🧾 Residuals`
   - Include only if something still needs attention.
   - If nothing remains, say `none`.
-5. `Next step`
+5. `➡️ Next step`
   - If the run is done, say there is nothing else to do.
   - If the run is blocked, name the single next action.
 
 ### Shared Header
 
-Always start with a short status line that includes:
+Always start with a short `🚦 Status` line that includes:
 
 - mode
 - human-friendly lane label, such as `repo-to-home install` for install or `repo-home drift` for bisync
@@ -151,13 +153,13 @@ Always start with a short status line that includes:
 
 Use these stable sections when rendering model-facing reports:
 
-- `Summary`: target, resource, drift, blocked, and already-aligned counts.
-- `Readiness`: doctor-only non-ok checks with why they matter, what blocks next, and the recommended action.
-- `Changes`: proposed or completed writes, with one row per changed resource.
-- `Attention`: blockers, ambiguous drift, or decisions that need a user.
-- `Validation`: strongest available evidence such as hash match, manifest path, state path, or post-apply clean plan.
-- `Remaining Work`: include only when something remains.
-- `Next`: structured next action and reason.
+- `🧭 Summary`: target, resource, drift, blocked, and already-aligned counts.
+- `🩺 Readiness`: doctor-only non-ok checks with why they matter, what blocks next, and the recommended action.
+- `🛠️ Changes`: proposed or completed writes, with one row per changed resource.
+- `⚠️ Attention`: blockers, ambiguous drift, or decisions that need a user.
+- `🔎 Validation`: strongest available evidence such as hash match, manifest path, state path, or post-apply clean plan.
+- `🧾 Remaining Work`: include only when something remains.
+- `➡️ Next`: structured next action and reason.
 
 Do not list every unchanged managed resource in model-facing reports. Summarize skipped or already-aligned resources by count unless the user asks for full audit detail or selects JSON output.
 
@@ -172,7 +174,7 @@ Use this table for missing roots, documentation gaps, manifest problems, permiss
 
 ### Sync, Plan, Audit, And Bisync Plan Report
 
-For top-level `sync`, use this compact chat order: `Status`, `Summary`, `Auto-applied` or `Planned repo-to-home copies`, `Stopped on`, `Validation`, and `Next`.
+For top-level `sync`, use this compact chat order: `🚦 Status`, `🧭 Summary`, `🚀 Auto-applied` or `📋 Planned repo-to-home copies`, `⛔ Stopped on`, `🔎 Validation`, and `➡️ Next`.
 
 After the shared header and summary, show one change-oriented table and one attention table when they are useful.
 

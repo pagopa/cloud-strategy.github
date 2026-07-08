@@ -37,6 +37,19 @@ BLOCKER_REASON_MAP: dict[str, str] = {
 }
 
 REPORT_TABLE_ROW_LIMIT = 8
+REPORT_SECTION_EMOJIS: dict[str, str] = {
+    "Summary": "🧭",
+    "Auto-applied": "🚀",
+    "Planned repo-to-home copies": "📋",
+    "Stopped on": "⛔",
+    "Changes": "🛠️",
+    "Completed": "✅",
+    "Attention": "⚠️",
+    "Validation": "🔎",
+    "Readiness": "🩺",
+    "Remaining Work": "🧾",
+    "Next": "➡️",
+}
 
 
 def dump_compact_json(payload: dict[str, object]) -> str:
@@ -123,7 +136,7 @@ def render_sync_report(payload: dict[str, object]) -> str:
 
     lines: list[str] = []
     lines.append(
-        f"Status: sync | status={status} | targets={targets} | next_action={next_action} | reason={reason}"
+        f"🚦 Status: sync | status={status} | targets={targets} | next_action={next_action} | reason={reason}"
     )
     lines.append("")
 
@@ -149,35 +162,37 @@ def render_sync_report(payload: dict[str, object]) -> str:
         auto_applied_section,
         auto_applied_reason_column,
         auto_applied_omitted_label,
-        auto_applied_none_reason,
+        _auto_applied_none_reason,
     ) = _sync_apply_section_labels(
         install_payload if isinstance(install_payload, dict) else {}
     )
-    lines.extend(_report_section(auto_applied_section))
-    lines.extend(
-        _table_lines(
-            ["Skill or path", auto_applied_reason_column, "Verification"],
-            _bounded_rows(
-                _sync_auto_applied_rows(install_payload if isinstance(install_payload, dict) else {}),
-                auto_applied_omitted_label,
-            ),
-            none_row=["none", auto_applied_none_reason, "none"],
-        )
+    auto_applied_rows = _bounded_rows(
+        _sync_auto_applied_rows(install_payload if isinstance(install_payload, dict) else {}),
+        auto_applied_omitted_label,
     )
-    lines.append("")
+    if auto_applied_rows:
+        lines.extend(_report_section(auto_applied_section))
+        lines.extend(
+            _table_lines(
+                ["Skill or path", auto_applied_reason_column, "Verification"],
+                auto_applied_rows,
+            )
+        )
+        lines.append("")
 
-    lines.extend(_report_section("Stopped on"))
-    lines.extend(
-        _table_lines(
-            ["Skill or path", "Direction", "Differences or reason"],
-            _sync_stopped_rows(
-                install_payload if isinstance(install_payload, dict) else {},
-                bisync_payload if isinstance(bisync_payload, dict) else {},
-            ),
-            none_row=["none", "none", "No home-owned or ambiguous drift stopped sync."],
-        )
+    stopped_rows = _sync_stopped_rows(
+        install_payload if isinstance(install_payload, dict) else {},
+        bisync_payload if isinstance(bisync_payload, dict) else {},
     )
-    lines.append("")
+    if stopped_rows:
+        lines.extend(_report_section("Stopped on"))
+        lines.extend(
+            _table_lines(
+                ["Skill or path", "Direction", "Differences or reason"],
+                stopped_rows,
+            )
+        )
+        lines.append("")
 
     lines.extend(_report_section("Validation"))
     lines.extend(
@@ -484,7 +499,7 @@ def render_install_report(payload: dict[str, object]) -> str:
 
     lines: list[str] = []
     lines.append(
-        f"Status: {lane_label} | mode={mode} | targets={_join_or_none(targets)} | status={status} | blockers={len(blocked_codes)} | next_action={next_action}"
+        f"🚦 Status: {lane_label} | mode={mode} | targets={_join_or_none(targets)} | status={status} | blockers={len(blocked_codes)} | next_action={next_action}"
     )
     lines.append("")
 
@@ -504,19 +519,18 @@ def render_install_report(payload: dict[str, object]) -> str:
     lines.append("")
 
     planned_rows = _bounded_rows(_install_planned_rows(payload), "change")
-    lines.extend(_report_section("Changes"))
-    lines.extend(
-        _table_lines(
-            ["Resource or path", "Lane", "Planned action", "Why this will change", "Evidence or winner"],
-            planned_rows,
-            none_row=["none", "install", "no-op", "No planned changes.", "none"],
+    if planned_rows:
+        lines.extend(_report_section("Changes"))
+        lines.extend(
+            _table_lines(
+                ["Resource or path", "Lane", "Planned action", "Why this will change", "Evidence or winner"],
+                planned_rows,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
 
     completed_rows = _bounded_rows(_install_completed_rows(payload), "completed action")
     if completed_rows:
-        lines.append("")
         lines.extend(_report_section("Completed"))
         lines.extend(
             _table_lines(
@@ -524,18 +538,18 @@ def render_install_report(payload: dict[str, object]) -> str:
                 completed_rows,
             )
         )
-    lines.append("")
+        lines.append("")
 
     blocker_rows = _install_blocker_rows(payload)
-    lines.extend(_report_section("Attention"))
-    lines.extend(
-        _table_lines(
-            ["Code or status", "Resource or path", "Why it needs attention", "Required user action"],
-            blocker_rows,
-            none_row=["none", "none", "No blockers need attention.", "none"],
+    if blocker_rows:
+        lines.extend(_report_section("Attention"))
+        lines.extend(
+            _table_lines(
+                ["Code or status", "Resource or path", "Why it needs attention", "Required user action"],
+                blocker_rows,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
 
     lines.extend(_report_section("Validation"))
     validation_rows = [["Validation status", status]]
@@ -574,7 +588,7 @@ def render_doctor_report(payload: dict[str, object]) -> str:
 
     lines: list[str] = []
     lines.append(
-        f"Status: {lane_label} | mode=doctor | targets={_join_or_none(targets)} | status={status} | blockers={len(blocked_codes)} | next_action={next_action}"
+        f"🚦 Status: {lane_label} | mode=doctor | targets={_join_or_none(targets)} | status={status} | blockers={len(blocked_codes)} | next_action={next_action}"
     )
     lines.append("")
 
@@ -592,15 +606,16 @@ def render_doctor_report(payload: dict[str, object]) -> str:
     )
     lines.append("")
 
-    lines.extend(_report_section("Readiness"))
-    lines.extend(
-        _table_lines(
-            ["Check or path", "Status", "Why it matters", "What blocks next", "Recommended action"],
-            _doctor_readiness_rows(payload),
-            none_row=["all checks", "ok", "No readiness blockers found.", "none", "Run plan or sync when ready."],
+    readiness_rows = _doctor_readiness_rows(payload)
+    if readiness_rows:
+        lines.extend(_report_section("Readiness"))
+        lines.extend(
+            _table_lines(
+                ["Check or path", "Status", "Why it matters", "What blocks next", "Recommended action"],
+                readiness_rows,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
 
     lines.extend(_report_section("Validation"))
     validation_rows = [["Validation status", status]]
@@ -629,7 +644,7 @@ def render_bisync_report(payload: dict[str, object]) -> str:
 
     lines: list[str] = []
     lines.append(
-        f"Status: {lane_label} | mode={mode} | target=skills | status={status} | drift_total={drift_total} | blockers={len(blocked_codes)} | next_action={next_action}"
+        f"🚦 Status: {lane_label} | mode={mode} | target=skills | status={status} | drift_total={drift_total} | blockers={len(blocked_codes)} | next_action={next_action}"
     )
     lines.append("")
 
@@ -649,18 +664,18 @@ def render_bisync_report(payload: dict[str, object]) -> str:
     )
     lines.append("")
 
-    lines.extend(_report_section("Changes"))
-    lines.extend(
-        _table_lines(
-            ["Resource or path", "Lane", "Planned action", "Why this will change", "Evidence or winner"],
-            _bounded_rows(_bisync_planned_rows(payload), "change"),
-            none_row=["none", "bisync", "no-op", "No drift detected.", "none"],
+    planned_rows = _bounded_rows(_bisync_planned_rows(payload), "change")
+    if planned_rows:
+        lines.extend(_report_section("Changes"))
+        lines.extend(
+            _table_lines(
+                ["Resource or path", "Lane", "Planned action", "Why this will change", "Evidence or winner"],
+                planned_rows,
+            )
         )
-    )
 
     completed_rows = _bounded_rows(_bisync_completed_rows(payload), "completed action")
     if completed_rows:
-        lines.append("")
         lines.extend(_report_section("Completed"))
         lines.extend(
             _table_lines(
@@ -668,17 +683,18 @@ def render_bisync_report(payload: dict[str, object]) -> str:
                 completed_rows,
             )
         )
-    lines.append("")
+        lines.append("")
 
-    lines.extend(_report_section("Attention"))
-    lines.extend(
-        _table_lines(
-            ["Code or status", "Resource or path", "Why it needs attention", "Required user action"],
-            _bisync_blocker_rows(payload),
-            none_row=["none", "none", "No blockers need attention.", "none"],
+    blocker_rows = _bisync_blocker_rows(payload)
+    if blocker_rows:
+        lines.extend(_report_section("Attention"))
+        lines.extend(
+            _table_lines(
+                ["Code or status", "Resource or path", "Why it needs attention", "Required user action"],
+                blocker_rows,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
 
     lines.extend(_report_section("Validation"))
     verification_rows = [["Verification status", status]]
@@ -694,7 +710,6 @@ def render_bisync_report(payload: dict[str, object]) -> str:
 
     remaining_rows = _remaining_work_rows(payload)
     if remaining_rows:
-        lines.append("")
         lines.extend(_report_section("Remaining Work"))
         lines.extend(
             _table_lines(
@@ -710,7 +725,9 @@ def render_bisync_report(payload: dict[str, object]) -> str:
 
 
 def _report_section(name: str) -> list[str]:
-    return [f"## {name}"]
+    emoji = REPORT_SECTION_EMOJIS.get(name)
+    label = f"{emoji} {name}" if emoji else name
+    return [f"## {label}"]
 
 
 def _bullet_lines(items: list[str]) -> list[str]:
