@@ -12,7 +12,8 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 The paired agent is only a thin UX wrapper; this skill owns mode selection,
 approval posture, safety gates, and report interpretation for repo-to-home sync
-and bisync. Keep user-visible output deterministic, bounded, and summary-first.
+and bisync. Keep user-visible output deterministic, bounded, summary-first,
+and emoji-led in chat.
 
 Canonical command examples use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
 The CLI defaults to `--format compact` for AI/tool iteration. Use
@@ -135,21 +136,21 @@ Never report blocker codes alone. Translate each code into a plain-language reas
 
 ### Canonical Chat Report Template
 
-When answering the user in chat, use this structure so the report stays easy to scan and easy to answer:
+When answering the user in chat, use this structure so the report stays easy to scan and easy to answer. Use emoji-led headings in chat:
 
-1. `Status`
+1. `🚦 Status`
 	- One short line with the overall result.
 	- Prefer `completata`, `in corso`, `bloccata`, or `no-op`.
-2. `What is happening`
+2. `📌 What is happening`
 	- One short paragraph that explains the current state in plain language.
-3. `Differences`
+3. `🔁 Differences`
 	- List only the actionable changes.
 	- Number the items when the user may need to choose between them.
 	- Summarize unchanged or skipped resources by count unless the user asked for the full list.
-4. `Why it stops`
+4. `⛔ Why it stops`
 	- Explain the smallest real blocker, not the internal code name.
 	- Include only the drift or policy item that prevents the next step.
-5. `Choices`
+5. `🎯 Choices`
 	- Present only the actions the user can actually take now.
 	- Use numbered options.
 	- Put the recommended choice first.
@@ -157,18 +158,18 @@ When answering the user in chat, use this structure so the report stays easy to 
 
 ### Canonical Completion Template
 
-When the work is finished, close with this structure instead of repeating the full diff:
+When the work is finished, close with this structure instead of repeating the full diff. Use emoji-led headings in chat:
 
-1. `Result`
+1. `✅ Result`
 	- Say whether the run completed, applied changes, or ended as no-op.
-2. `What changed`
+2. `🛠️ What changed`
 	- One short paragraph with the concrete outcome.
-3. `Final verification`
+3. `🔎 Final verification`
 	- State the strongest evidence available, such as a clean plan, hash match, or zero residual drift.
-4. `Residuals`
+4. `🧾 Residuals`
 	- Include only if something still needs attention.
 	- If nothing remains, say `none`.
-5. `Next step`
+5. `➡️ Next step`
 	- If the run is done, say there is nothing else to do.
 	- If the run is blocked, name the single next action.
 
