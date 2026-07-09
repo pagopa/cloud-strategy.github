@@ -1,55 +1,60 @@
 ---
 name: internal-review-code
-description: Use when reviewing a branch, pull request, work-in-progress diff, or code changes since a fixed point against repository standards and an originating spec.
+description: Use when reviewing a branch, pull request, work-in-progress diff, or code-focused change before merge or follow-up action.
 ---
 
 # Internal Review Code
 
 ## Referenced skills
 
-- `addyosmani-code-review-and-quality`: operating core for the fixed-point Standards and Spec review.
+- `addyosmani-code-review-and-quality`: complete five-axis review core, approval standard, and finding categories.
+- `awesome-copilot-security-review`: security-specialist depth only when the user explicitly asks for it.
 
 ## When to use
 
-Use for a branch, pull request, work-in-progress diff, or code change that must
-be reviewed against repository standards and its originating spec.
+Use for a branch, pull request, work-in-progress diff, or code-focused change
+that needs defect-first review before merge or before a follow-up patch
+decision.
 
 ## Core contract
 
-Use `addyosmani-code-review-and-quality` as the complete review engine and follow its
-process end to end. This wrapper provides the stable repository-owned entrypoint
-and the local context below; it does not redefine the core's axes, process, or
-output.
-
-## Repository context
-
-- Treat `AGENTS.md` and any narrower owner instructions that govern the changed
-  files as Standards sources.
-- Apply repository precedence when standards conflict: direct user instructions,
-  then the nearest owner, then broader repository policy.
-- If `docs/agents/issue-tracker.md` is absent, do not assume an issue-tracker
-  integration. Continue through the core's other Spec sources, then use its
-  no-spec path when none is available.
-- Keep Standards and Spec findings separate as required by the core.
+Use `addyosmani-code-review-and-quality` as the complete review engine and
+follow its process end to end. This wrapper provides the stable
+repository-owned entrypoint and the local boundaries below. It must not
+redefine the core's five axes, review order, approval standard, finding
+categories, structural remedies, or verification posture.
 
 ## Boundaries
 
-- Review the diff; do not apply fixes unless the user asks in a separate step.
+- Review only the requested code surface and the supporting tests, spec, task,
+  or validation evidence needed to judge it.
+- Review tests before implementation when tests are present because that order
+  belongs to the core contract.
+- Do not apply fixes unless the user asks in a separate step.
 - Do not load implementation-language skills or systems-level review skills
-  merely because their file types or topics appear in the diff.
+  merely because their file types or topics appear in the diff. Load a narrower
+  owner only when the file type, runtime, or defect pattern would materially
+  change the review.
+- Do not load `awesome-copilot-security-review` automatically. Use it only when
+  the user explicitly asks for security-specialist depth.
 - Do not add another severity model, review lens set, workflow, or output
   template around the core.
-- If the fixed point is missing, invalid, or produces an empty diff, stop at the
-  core preflight.
-- If no spec exists, follow the core's no-spec path and state the evidence gap.
+- If the requested fixed point, diff, or code target is missing, invalid, or
+  empty, stop at the core preflight and state the evidence gap.
+- If no spec or task context exists, follow the core no-spec path and state the
+  evidence gap.
 
 ## Validation
 
 Before reporting the review, confirm that:
 
-- the fixed point resolved and the reviewed diff is the intended non-empty diff;
-- each Standards finding cites the governing repository rule or is labelled as
-  a judgement-call smell;
-- each Spec finding cites its source, or the report states that no spec was
-  available;
-- the two core axes remain separate in the final report.
+- the reviewed surface resolved to the intended non-empty diff or explicit
+  read-only code target;
+- tests were reviewed before implementation when tests were present;
+- findings use the core finding categories consistently and do not add a second
+  local severity scale;
+- correctness and security issues lead the report before lower-leverage
+  comments;
+- any spec, task, or repository-standard claim cites its source, or the report
+  states the evidence gap;
+- security-specialist escalation was used only on explicit user request.
