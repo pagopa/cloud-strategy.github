@@ -39,6 +39,16 @@ This is a local distilled checklist informed by external skill-authoring guidanc
 - Do not rewrite a long body just because it is long. Rewrite only when it duplicates the route, duplicates another owner, or keeps reference material inline.
 - A clean "tighten" outcome is often better than expanding the skill.
 
+## Core-backed wrappers
+
+- Compare the wrapper against its core before editing. Inventory which responsibilities the core already owns and remove local restatements instead of polishing them.
+- Keep the wrapper limited to its retrieval trigger, repository-local policy, and proven environment fallbacks that the core cannot know.
+- Do not restate the core's workflow, decision logic, output contract, or validation procedure. Reference the core by skill name and owner behavior.
+- Check the wrapper `SKILL.md`, `agents/openai.yaml`, paired agent, focused tests, and nearby routing text for conflicting or stale contracts.
+- Verify external assumptions such as required paths, setup commands, integrations, and runtime capabilities against the current repository before adding a local fallback.
+- Structural validation is not semantic alignment. Compare the final wrapper and core responsibilities explicitly, then search for removed owners, stale workflow terms, and conflicting output rules.
+- Measure token change with the same method before and after cleanup, but preserve a working trigger and required local safeguards even when they cost a small number of tokens.
+
 ## Token discipline
 
 - Keep `SKILL.md` lean and move deeper material into `references/` or reusable tools only when justified.

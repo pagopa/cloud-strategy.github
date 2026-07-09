@@ -61,6 +61,7 @@ def test_skill_md_does_not_restate_checklist() -> None:
         "reference other skills by skill name and behavior only",
         "prefer bundle-relative references to files under",
         "do not copy the same material back into `skill.md`",
+        "compare the wrapper against its core before editing",
     ]
 
     duplicates = [
@@ -71,3 +72,24 @@ def test_skill_md_does_not_restate_checklist() -> None:
     assert not duplicates, (
         f"SKILL.md restates {len(duplicates)} phrases also in checklist: {duplicates[:3]}"
     )
+
+
+def test_core_backed_wrapper_guidance_is_generic_and_reference_owned() -> None:
+    skill_text = SKILL_PATH.read_text()
+    checklist_text = CHECKLIST_PATH.read_text()
+
+    required_guidance = (
+        "## Core-backed wrappers",
+        "Compare the wrapper against its core before editing",
+        "trigger, repository-local policy, and proven environment fallbacks",
+        "Do not restate the core's workflow, decision logic, output contract, or validation procedure",
+        "Structural validation is not semantic alignment",
+        "paired agent",
+    )
+
+    for phrase in required_guidance:
+        assert phrase in checklist_text
+
+    assert "Compare the wrapper against its core before editing" not in skill_text
+    assert "internal-review-code" not in checklist_text
+    assert "mattpocock-code-review" not in checklist_text

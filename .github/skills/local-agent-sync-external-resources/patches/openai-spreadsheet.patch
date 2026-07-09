@@ -1,10 +1,18 @@
 diff --git a/.github/skills/openai-spreadsheet/SKILL.md b/.github/skills/openai-spreadsheet/SKILL.md
+index 4f41e8d..2236908 100644
 --- a/.github/skills/openai-spreadsheet/SKILL.md
 +++ b/.github/skills/openai-spreadsheet/SKILL.md
+@@ -1,5 +1,5 @@
+ ---
+-name: openai-spreadsheet
++name: "openai-spreadsheet"
+ description: "Use when tasks involve creating, editing, analyzing, or formatting spreadsheets (`.xlsx`, `.csv`, `.tsv`) with formula-aware workflows, cached recalculation, and visual review."
+ ---
+ 
 @@ -33,6 +33,19 @@ IMPORTANT: System and user instructions always take precedence.
  - Use `openpyxl.chart` for native Excel charts when needed.
  - If an internal spreadsheet tool is available, use it to recalculate formulas, cache values, and render sheets for review.
-
+ 
 +## Structured Data Evidence Budget
 +- For large `.xlsx`, `.csv`, and `.tsv` work, keep user-facing evidence compact:
 +  report schema or headers, row counts, column counts, targeted anomalies,

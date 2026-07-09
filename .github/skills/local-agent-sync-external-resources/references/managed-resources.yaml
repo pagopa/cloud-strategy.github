@@ -91,7 +91,7 @@ sources:
       - upstream: skills/engineering/code-review
         local: .github/skills/mattpocock-code-review
         canonical_name: mattpocock-code-review
-      - upstream: skills/engineering/grill-me
+      - upstream: skills/engineering/grill-with-docs
         local: .github/skills/grill-me
         canonical_name: grill-me
       - upstream: skills/engineering/research
@@ -117,7 +117,7 @@ sources:
       - upstream: skills/.curated/gh-fix-ci
         local: .github/skills/openai-gh-fix-ci
         canonical_name: openai-gh-fix-ci
-      - upstream: skills/.curated/skill-creator
+      - upstream: skills/.system/skill-creator
         local: .github/skills/openai-skill-creator
         canonical_name: openai-skill-creator
       - upstream: skills/.curated/pdf

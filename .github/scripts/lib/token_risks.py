@@ -153,7 +153,7 @@ def check_delegated_review_prompt_budget(root: Path) -> list[Finding]:
             ),
             suggestion=(
                 "Keep user inputs and the analysis-only boundary in the prompt, but move reusable workflow "
-                "detail into .github/skills/internal-ai-resource-review/."
+                "detail into .github/skills/internal-review-ai-resources/."
             ),
         )
     ]
