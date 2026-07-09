@@ -74,7 +74,7 @@ VSCODE_COPILOT_SETTINGS = (
 )
 INVENTORY_PATH = ".github/INVENTORY.md"
 IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
-SUPERPOWERS_NORMALIZATION_PATH = ".github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml"
+MANAGED_EXTERNAL_RESOURCES_PATH = ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
 
 
 @dataclass(frozen=True)
