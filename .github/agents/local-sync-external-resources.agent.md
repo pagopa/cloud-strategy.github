@@ -28,7 +28,7 @@ operations through the single canonical CLI.
 
 ## Safety
 
-- Workspace must be outside the repository.
+- Workspace must live under `tmp/sync-externals-skills/`.
 - Dirty managed targets block `apply` unless `--allow-dirty` is supplied.
 - Override replay is atomic: if any override fails, no candidate changes reach the repository.
 

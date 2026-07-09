@@ -21,6 +21,13 @@ declared external resource refreshes safely. The single public entrypoint is
   generate one patch, run `git apply --check`, apply once, rebuild inventory,
   and rerun scoped validation.
 
+## Workspace Convention
+
+- Use a repo-local external workspace under `tmp/sync-externals-skills/`.
+- Keep prepared source checkouts under the workspace `sources/` directory,
+  unless an explicit `--source-root` is supplied.
+- Do not use `/private/tmp` in the canonical examples or guidance.
+
 ## Safety
 
 - Workspace must be outside the repository.
@@ -38,14 +45,19 @@ declared external resource refreshes safely. The single public entrypoint is
 4. Review the changed-path summary and override replay results.
 5. Run `apply` only after `plan` succeeds; `apply` does not fetch sources implicitly.
 
-If `plan` or `apply` reports `Missing upstream paths`, the message will name the expected root such as `/private/tmp/.../sources`. Populate that root first or pass an explicit `--source-root`.
+If `plan` or `apply` reports `Missing upstream paths`, the message will name the
+expected root such as `tmp/sync-externals-skills/<workspace>/sources`.
+Populate that root first or pass an explicit `--source-root`.
+
+Prefer reusing an existing prepared workspace under `tmp/sync-externals-skills/`
+before creating a new one.
 
 ## Canonical Commands
 
 ```bash
 python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py audit
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py plan --workspace /private/tmp/cloud-strategy-github-external-refresh
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py apply --workspace /private/tmp/cloud-strategy-github-external-refresh
+python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py plan --workspace tmp/sync-externals-skills/cloud-strategy-github-external-refresh --source-root tmp/sync-externals-skills/cloud-strategy-github-external-refresh/sources
+python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py apply --workspace tmp/sync-externals-skills/cloud-strategy-github-external-refresh --source-root tmp/sync-externals-skills/cloud-strategy-github-external-refresh/sources
 ```
 
 ## Override Rules
@@ -67,8 +79,8 @@ python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external
 
 ## Output
 
-Report: mode, workspace, managed count, changed paths, override results,
-validation, and blockers.
+Report: mode, workspace, source root when used, managed count, changed paths,
+override results, validation, and blockers.
 
 ## Anti-Scope
 
