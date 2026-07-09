@@ -33,6 +33,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 ## Skills
 
 - `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
+- `.github/skills/addyosmani-code-simplification/SKILL.md`
 - `.github/skills/agent-os-discover-standards/SKILL.md`
 - `.github/skills/agent-os-index-standards/SKILL.md`
 - `.github/skills/agent-os-inject-standards/SKILL.md`
