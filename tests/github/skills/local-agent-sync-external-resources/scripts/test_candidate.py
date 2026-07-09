@@ -1,3 +1,4 @@
+import hashlib
 import shutil
 import subprocess
 import sys
@@ -15,14 +16,19 @@ SCRIPT_DIR = (
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_external_resources_core import (  # noqa: E402
+    ImportedOverride,
     ManagedAsset,
     ManagedResources,
     ManagedSource,
     TextReplacement,
     find_dirty_targets,
+    load_overrides,
     materialize_candidate,
     normalize_candidate,
+    replay_overrides,
+    select_overrides,
     validate_external_workspace,
+    verify_override_hash,
 )
 
 
@@ -180,3 +186,128 @@ def test_materialize_candidate_copies_upstream_to_local(
     target = candidate / ".github/skills/example/SKILL.md"
     assert target.exists()
     assert "upstream-name" in target.read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def candidate_repo(tmp_path: Path) -> Path:
+    repo = tmp_path / "candidate"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+    (repo / "README.md").write_text("init\n", encoding="utf-8")
+    _commit_all(repo)
+    return repo
+
+
+def _sha256(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def _make_override(
+    candidate_repo: Path,
+    override_id: str = "test-override",
+    target_rel: str = ".github/skills/test/SKILL.md",
+    original_content: str = "---\nname: test\n---\nOriginal content.\n",
+    patched_content: str = "---\nname: test\n---\nPatched content.\n",
+) -> tuple[ImportedOverride, Path, Path]:
+    target = candidate_repo / target_rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(original_content, encoding="utf-8")
+    _commit_all(candidate_repo)
+
+    patch_dir = candidate_repo / "patches"
+    patch_dir.mkdir(exist_ok=True)
+    patch_path = patch_dir / f"{override_id}.patch"
+
+    target.write_text(patched_content, encoding="utf-8")
+    result = subprocess.run(
+        ["git", "diff", "--", target_rel],
+        cwd=candidate_repo,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    patch_path.write_text(result.stdout, encoding="utf-8")
+    target.write_text(original_content, encoding="utf-8")
+
+    override = ImportedOverride(
+        override_id=override_id,
+        target_path=target_rel,
+        patch_path=patch_path.relative_to(candidate_repo).as_posix(),
+        apply_strategy="git-apply",
+        expected_content_hash=_sha256(patched_content),
+    )
+    return override, target, patch_path
+
+
+def test_override_applies_cleanly(candidate_repo: Path) -> None:
+    override, target, _ = _make_override(candidate_repo)
+
+    results = replay_overrides(candidate_repo, (override,))
+
+    assert len(results) == 1
+    assert results[0].override_id == "test-override"
+    assert results[0].status == "applied"
+    assert "Patched content." in target.read_text(encoding="utf-8")
+
+
+def test_conflicting_second_override_leaves_candidate_unchanged(
+    candidate_repo: Path,
+) -> None:
+    first, target, _ = _make_override(
+        candidate_repo,
+        override_id="first",
+        patched_content="---\nname: test\n---\nFirst patch.\n",
+    )
+    second = ImportedOverride(
+        override_id="second",
+        target_path=first.target_path,
+        patch_path=first.patch_path,
+        apply_strategy="git-apply",
+        expected_content_hash="x" * 64,
+    )
+    before_content = target.read_text(encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        replay_overrides(candidate_repo, (first, second))
+
+    after_content = target.read_text(encoding="utf-8")
+    assert before_content == after_content
+
+
+def test_unknown_requested_override_id_is_rejected() -> None:
+    overrides = (
+        ImportedOverride(
+            override_id="known",
+            target_path=".github/skills/test/SKILL.md",
+            patch_path="patches/test.patch",
+            apply_strategy="git-apply",
+            expected_content_hash="a" * 64,
+        ),
+    )
+
+    with pytest.raises(ValueError, match="unknown override id: missing"):
+        select_overrides(overrides, ("missing",))
+
+
+def test_load_overrides_from_yaml(tmp_path: Path) -> None:
+    registry = tmp_path / "overrides.yaml"
+    registry.write_text(
+        """\
+version: 1
+overrides:
+  - id: test-override
+    target_path: .github/skills/test/SKILL.md
+    patch_path: patches/test.patch
+    apply_strategy: git-apply
+    expected_content_hash: abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+""",
+        encoding="utf-8",
+    )
+
+    overrides = load_overrides(registry)
+
+    assert len(overrides) == 1
+    assert overrides[0].override_id == "test-override"
+    assert overrides[0].expected_content_hash == "abcdef0123456789" * 4

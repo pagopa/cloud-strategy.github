@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import re
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 import yaml
 
@@ -311,3 +314,190 @@ def normalize_candidate(
                 changed.append(file_path.relative_to(candidate).as_posix())
 
     return tuple(sorted(changed))
+
+
+@dataclass(frozen=True)
+class ImportedOverride:
+    override_id: str
+    target_path: str
+    patch_path: str
+    apply_strategy: str
+    expected_content_hash: str
+
+
+@dataclass(frozen=True)
+class OverrideResult:
+    override_id: str
+    status: Literal["applied", "already-applied"]
+    target_path: str
+
+
+def load_overrides(path: Path) -> tuple[ImportedOverride, ...]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict) or payload.get("version") != 1:
+        raise ValueError("Override registry must be a version 1 YAML mapping.")
+
+    raw_overrides = payload.get("overrides")
+    if not isinstance(raw_overrides, list):
+        raise ValueError("Override registry must declare an overrides list.")
+
+    overrides: list[ImportedOverride] = []
+    for entry in raw_overrides:
+        if not isinstance(entry, dict):
+            raise ValueError("Each override entry must be a mapping.")
+        overrides.append(
+            ImportedOverride(
+                override_id=_require_non_empty_string(
+                    entry.get("id"), "override id"
+                ),
+                target_path=_require_non_empty_string(
+                    entry.get("target_path"), "override target_path"
+                ),
+                patch_path=_require_non_empty_string(
+                    entry.get("patch_path"), "override patch_path"
+                ),
+                apply_strategy=_require_non_empty_string(
+                    entry.get("apply_strategy"), "override apply_strategy"
+                ),
+                expected_content_hash=_require_non_empty_string(
+                    entry.get("expected_content_hash"),
+                    "override expected_content_hash",
+                ),
+            )
+        )
+    return tuple(overrides)
+
+
+def select_overrides(
+    overrides: tuple[ImportedOverride, ...],
+    requested_ids: tuple[str, ...],
+) -> tuple[ImportedOverride, ...]:
+    by_id = {o.override_id: o for o in overrides}
+    selected: list[ImportedOverride] = []
+    for rid in requested_ids:
+        if rid not in by_id:
+            raise ValueError(f"unknown override id: {rid}")
+        selected.append(by_id[rid])
+    return tuple(selected)
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def verify_override_hash(
+    candidate_repo: Path, override: ImportedOverride
+) -> None:
+    target = candidate_repo / override.target_path
+    if not target.exists():
+        raise ValueError(
+            f"Override target missing on disk: {override.target_path}"
+        )
+    actual = _sha256_file(target)
+    if actual != override.expected_content_hash:
+        raise ValueError(
+            f"content hash mismatch for {override.target_path}: "
+            f"expected {override.expected_content_hash}, got {actual}"
+        )
+
+
+def _replay_one_override(
+    trial_repo: Path,
+    override: ImportedOverride,
+    patches_root: Path,
+) -> OverrideResult:
+    patch_file = patches_root / override.patch_path
+    if not patch_file.exists():
+        raise ValueError(f"Override patch missing: {override.patch_path}")
+
+    patch_text = patch_file.read_text(encoding="utf-8")
+    target = trial_repo / override.target_path
+    before_content = target.read_text(encoding="utf-8") if target.exists() else ""
+
+    check_result = subprocess.run(
+        ["git", "apply", "--check", "--", str(patch_file)],
+        cwd=trial_repo,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    if check_result.returncode == 0:
+        _run_command(["git", "apply", "--", str(patch_file)], cwd=trial_repo)
+        after_content = target.read_text(encoding="utf-8")
+        if after_content == before_content:
+            return OverrideResult(
+                override_id=override.override_id,
+                status="already-applied",
+                target_path=override.target_path,
+            )
+        return OverrideResult(
+            override_id=override.override_id,
+            status="applied",
+            target_path=override.target_path,
+        )
+
+    if override.apply_strategy == "git-apply-3way":
+        check_3way = subprocess.run(
+            ["git", "apply", "--3way", "--check", "--", str(patch_file)],
+            cwd=trial_repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if check_3way.returncode == 0:
+            _run_command(
+                ["git", "apply", "--3way", "--", str(patch_file)],
+                cwd=trial_repo,
+            )
+            return OverrideResult(
+                override_id=override.override_id,
+                status="applied",
+                target_path=override.target_path,
+            )
+
+    raise ValueError(
+        f"Override {override.override_id} patch does not apply cleanly"
+    )
+
+
+def _replace_tree_contents(dest: Path, source: Path) -> None:
+    for item in dest.iterdir():
+        if item.name == ".git":
+            continue
+        if item.is_dir():
+            shutil.rmtree(item)
+        else:
+            item.unlink()
+    for item in source.iterdir():
+        if item.name == ".git":
+            continue
+        target = dest / item.name
+        if item.is_dir():
+            shutil.copytree(item, target)
+        else:
+            shutil.copy2(item, target)
+
+
+def replay_overrides(
+    candidate_repo: Path,
+    overrides: tuple[ImportedOverride, ...],
+    patches_root: Path | None = None,
+) -> tuple[OverrideResult, ...]:
+    if patches_root is None:
+        patches_root = candidate_repo
+    with tempfile.TemporaryDirectory(prefix="external-override-") as raw_trial:
+        trial = Path(raw_trial) / "candidate"
+        shutil.copytree(candidate_repo, trial)
+        results: list[OverrideResult] = []
+        for item in overrides:
+            result = _replay_one_override(trial, item, patches_root)
+            results.append(result)
+        for item in overrides:
+            verify_override_hash(trial, item)
+        _replace_tree_contents(candidate_repo, trial)
+        return tuple(results)
