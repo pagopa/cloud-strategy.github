@@ -285,6 +285,7 @@ def materialize_candidate(
 
 
 _FRONTMATTER_NAME_RE = re.compile(r"^(name\s*:\s*).*$", re.MULTILINE)
+_SUPERPOWERS_SKILL_REF_RE = re.compile(r"\bsuperpowers:([a-z0-9][a-z0-9-]*)")
 
 
 def normalize_candidate(
@@ -313,6 +314,10 @@ def normalize_candidate(
                 content = _FRONTMATTER_NAME_RE.sub(
                     rf"\g<1>{asset.canonical_name}", content, count=1
                 )
+                if asset.source == "obra-superpowers":
+                    content = _SUPERPOWERS_SKILL_REF_RE.sub(
+                        r"superpowers-\1", content
+                    )
 
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)

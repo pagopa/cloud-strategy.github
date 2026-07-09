@@ -144,7 +144,10 @@ def test_normalization_updates_name_and_declared_text_only(
     skill = candidate / ".github/skills/superpowers-brainstorming/SKILL.md"
     skill.parent.mkdir(parents=True)
     skill.write_text(
-        "---\nname: brainstorming\n---\nWrite to docs/superpowers.\n",
+        "---\nname: brainstorming\n---\n"
+        "Write to docs/superpowers.\n"
+        "Use `superpowers:test-driven-development` first.\n"
+        "Then use superpowers:verification-before-completion.\n",
         encoding="utf-8",
     )
 
@@ -154,6 +157,8 @@ def test_normalization_updates_name_and_declared_text_only(
     content = skill.read_text(encoding="utf-8")
     assert "name: superpowers-brainstorming" in content
     assert "tmp/superpowers" in content
+    assert "`superpowers-test-driven-development`" in content
+    assert "superpowers-verification-before-completion" in content
 
 
 def test_materialize_candidate_copies_upstream_to_local(
