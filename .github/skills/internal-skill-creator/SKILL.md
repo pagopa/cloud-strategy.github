@@ -110,6 +110,7 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - Every repository-owned `SKILL.md` this skill creates or materially revises must keep `## Referenced skills` immediately after the H1 as an audit index, not a preload list.
 - In `## Referenced skills`, list every other skill the file asks the agent to load, route to, compare against, or delegate to; use `- None.` only when no other skill is referenced.
 - Update `## Referenced skills` whenever adding, removing, renaming, or repairing a skill reference. Treat stale or missing skill names as validation failures.
+- When a referenced-skill rule changes, verify the touched skill against nearby skills that cite it or that it cites, so the index remains a lazy routing contract instead of drifting into preload wording.
 - In `SKILL.md`, reference another skill by name and behavior only. Do not cite file paths inside another skill bundle; those files are private to the owning skill and may change.
 - In source-side skill Markdown, cite only paths that exist on disk in the source repository. When sync materializes a target-only file, prefer the source template path or descriptive prose over the consumer-only materialized path.
 - When creating or materially revising a skill that introduces scripts, CLIs, or deterministic automation, require an explicit output-contract decision: operator default output, model-facing bounded or compact output, and when full JSON is required for audits.
@@ -167,6 +168,7 @@ Then confirm:
 - the top-level `## Referenced skills` section exists immediately after the H1 for any created or materially revised `SKILL.md`.
 - every non-`None` referenced-skill entry maps to a real repository skill or an explicitly justified external/on-demand skill.
 - the referenced-skill index matches all skill names used later for loading, routing, comparison, or delegation.
+- referenced-skill wording agrees with nearby skills that cite or are cited by the touched skill, and no entry implies eager loading unless the active contract explicitly requires it.
 - the description matches the real trigger without describing the workflow.
 - the description is strong enough that repository-owned skill requests should retrieve this skill before the generic OpenAI one.
 - the result makes rejection, reuse, and in-place tightening as natural as creation or replacement.

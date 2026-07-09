@@ -72,6 +72,7 @@ This is a local distilled checklist informed by external skill-authoring guidanc
 - Reference other skills by skill name and owner behavior, not by file paths inside their bundles.
 - Keep `## Referenced skills` as an audit index: one backticked skill name plus one short owner-behavior phrase per item, or `- None.` when no other skill is referenced.
 - Update the referenced-skill index whenever the body adds, removes, renames, routes to, delegates to, or compares against another skill.
+- When a referenced-skill rule changes, compare the touched skill with nearby skills that cite it or that it cites. Keep optional owners lazy and on-demand unless the active contract explicitly requires loading.
 - Prefer one strong example over several repetitive ones.
 
 ## Test posture
@@ -83,6 +84,7 @@ This is a local distilled checklist informed by external skill-authoring guidanc
 - Make every verification item evidence-shaped: command output, diff evidence, rendered artifact, or an explicit validation gap.
 - When the bundle owns runnable automation, validate the bundled entrypoint directly and validate any repository wrapper separately.
 - Verify that every listed referenced skill exists or is explicitly marked as external/on-demand, and that no later skill reference is missing from the index.
+- Verify that related skills use compatible referenced-skill wording and do not turn optional owners into preload instructions.
 
 ## Skill-type checks
 
