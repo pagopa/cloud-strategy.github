@@ -7,7 +7,7 @@ description: Use when reviewing a branch, pull request, work-in-progress diff, o
 
 ## Referenced skills
 
-- `mattpocock-code-review`: operating core for the fixed-point Standards and Spec review.
+- `addyosmani-code-review-and-quality`: operating core for the fixed-point Standards and Spec review.
 
 ## When to use
 
@@ -16,7 +16,7 @@ be reviewed against repository standards and its originating spec.
 
 ## Core contract
 
-Use `mattpocock-code-review` as the complete review engine and follow its
+Use `addyosmani-code-review-and-quality` as the complete review engine and follow its
 process end to end. This wrapper provides the stable repository-owned entrypoint
 and the local context below; it does not redefine the core's axes, process, or
 output.

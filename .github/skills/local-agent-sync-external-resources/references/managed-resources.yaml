@@ -31,6 +31,9 @@ sources:
       - upstream: skills/secret-scanning
         local: .github/skills/awesome-copilot-secret-scanning
         canonical_name: awesome-copilot-secret-scanning
+      - upstream: skills/security-review
+        local: .github/skills/awesome-copilot-security-review
+        canonical_name: awesome-copilot-security-review
   obra-superpowers:
     repository: https://github.com/obra/superpowers.git
     ref: d884ae04edebef577e82ff7c4e143debd0bbec99
@@ -88,9 +91,6 @@ sources:
     repository: https://github.com/mattpocock/skills.git
     ref: efa058a349f5ce98b6115bf8b4e0d0ef9c310e0d
     assets:
-      - upstream: skills/engineering/code-review
-        local: .github/skills/mattpocock-code-review
-        canonical_name: mattpocock-code-review
       - upstream: skills/engineering/grill-with-docs
         local: .github/skills/grill-me
         canonical_name: grill-me
@@ -165,6 +165,13 @@ sources:
       - upstream: skills/network-engineer
         local: .github/skills/antigravity-network-engineer
         canonical_name: antigravity-network-engineer
+  addyosmani-agent-skills:
+    repository: https://github.com/addyosmani/agent-skills.git
+    ref: 0e63d8ea962ecac51637421d8fff63702fac766b
+    assets:
+      - upstream: skills/code-review-and-quality
+        local: .github/skills/addyosmani-code-review-and-quality
+        canonical_name: addyosmani-code-review-and-quality
 normalizations:
   - source: obra-superpowers
     from: docs/superpowers
@@ -214,6 +221,10 @@ watchlist:
     upstream_id: caveman
     local_owner: retired
     reason: The previously retained caveman import was retired from the managed catalog by explicit user scope reduction. Do not reimport unless the user re-approves the retained import.
+  - source_family: mattpocock/skills
+    upstream_id: code-review
+    local_owner: retired
+    reason: The mattpocock-code-review import was replaced by addyosmani-code-review-and-quality from addyosmani/agent-skills. Do not reimport unless the user re-approves the retained import.
   - source_family: addyosmani/agent-skills
     upstream_id: idea-refine
     local_owner: internal-gateway-idea

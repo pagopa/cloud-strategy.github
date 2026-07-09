@@ -28,8 +28,8 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 43
-    assert len(manifest.watchlist) == 12
+    assert len(manifest.assets) == 44
+    assert len(manifest.watchlist) == 13
     assert {
         item.local for item in manifest.assets if item.source == "obra-superpowers"
     } == {

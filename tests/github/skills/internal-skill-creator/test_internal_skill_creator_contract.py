@@ -92,4 +92,4 @@ def test_core_backed_wrapper_guidance_is_generic_and_reference_owned() -> None:
 
     assert "Compare the wrapper against its core before editing" not in skill_text
     assert "internal-review-code" not in checklist_text
-    assert "mattpocock-code-review" not in checklist_text
+    assert "addyosmani-code-review-and-quality" not in checklist_text
