@@ -183,3 +183,21 @@ def test_suggest_does_not_emit_worktree_mapping() -> None:
     assert "diagnose" in result.stdout
     assert "load-internal-tdd" in result.stdout
     assert "isolate-workspace-needed" not in result.stdout
+
+
+def test_code_simplification_requires_explicit_authorization() -> None:
+    skill_text = SKILL_PATH.read_text()
+
+    assert (
+        "`addyosmani-code-simplification`: on-demand method owner"
+        in skill_text
+    )
+    assert "explicit code-simplification request" in skill_text
+    assert "already-approved simplification remediation" in skill_text
+    assert "establish a passing behavior baseline" in skill_text
+    assert (
+        "do not create a simplification pass after unrelated implementation"
+        in skill_text
+    )
+    assert "Only the five referenced skill names appear in this bundle." in skill_text
+    assert "addyosmani-code-simplification" not in AGENT_PATH.read_text()

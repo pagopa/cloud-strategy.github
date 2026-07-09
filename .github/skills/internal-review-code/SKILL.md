@@ -9,6 +9,7 @@ description: Use when reviewing a branch, pull request, work-in-progress diff, o
 
 - `addyosmani-code-review-and-quality`: complete five-axis review core, approval standard, and finding categories.
 - `awesome-copilot-security-review`: security-specialist depth only when the user explicitly asks for it.
+- `addyosmani-code-simplification`: on-demand remediation owner for an explicitly approved, behavior-preserving simplification follow-up; never part of the review pass.
 
 ## When to use
 
@@ -43,6 +44,8 @@ categories, structural remedies, or verification posture.
   empty, stop at the core preflight and state the evidence gap.
 - If no spec or task context exists, follow the core no-spec path and state the
   evidence gap.
+- When a concrete readability or complexity finding is best addressed by behavior-preserving refactoring, name `addyosmani-code-simplification` only as a separate simplification follow-up for the user to approve.
+- Do not load or execute `addyosmani-code-simplification` during the review pass.
 
 ## Validation
 
@@ -57,4 +60,6 @@ Before reporting the review, confirm that:
   comments;
 - any spec, task, or repository-standard claim cites its source, or the report
   states the evidence gap;
-- security-specialist escalation was used only on explicit user request.
+- security-specialist escalation was used only on explicit user request;
+- simplification is surfaced only as a separate follow-up backed by a concrete readability or complexity finding;
+- `addyosmani-code-simplification` was not loaded or executed during review.

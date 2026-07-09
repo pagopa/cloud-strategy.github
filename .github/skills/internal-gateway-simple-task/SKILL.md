@@ -11,6 +11,7 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 - `internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
 - `internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
 - `superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
+- `addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
 
 Do not introduce other skills, agents, or workflow owners from this bundle. When stopping, explain the violated condition and let the user choose the next path.
 
@@ -64,9 +65,10 @@ For `full-gate`, complete the gates in this order:
 5. Run the critical challenge before non-trivial action.
 6. Write a short Readiness Brief.
 7. If executable or evaluable behavior changes, load `internal-tdd` before implementation and follow its routed posture.
-8. Execute the smallest coherent in-scope move.
-9. Run focused validation or report the exact validation gap.
-10. Use the final evidence gate before positive claims.
+8. For an explicit code-simplification request or already-approved simplification remediation, establish a passing behavior baseline, then load `addyosmani-code-simplification`; do not create a simplification pass after unrelated implementation.
+9. Execute the smallest coherent in-scope move.
+10. Run focused validation or report the exact validation gap.
+11. Use the final evidence gate before positive claims.
 
 Initial Idea Ordering is local to this skill and must cover:
 
@@ -139,7 +141,7 @@ Keep the implementation posture simple:
 
 ## Validation
 
-- Only the four referenced skill names appear in this bundle.
+- Only the five referenced skill names appear in this bundle.
 - Concrete bounded work completes in the same run unless `stop-with-reason` is explicit.
 - Stop output explains the exact violated condition and required evidence.
 - `trivial-skip` names the validation path directly or states the exact validation gap.
@@ -149,4 +151,5 @@ Keep the implementation posture simple:
 - Skipped gates record the reason that made the skip valid.
 - Blocked gates prevent completion, readiness, passing, fixed, or no-gap claims.
 - Executable or evaluable behavior changes load `internal-tdd` before implementation when a meaningful seam exists.
+- `addyosmani-code-simplification` loads only for an explicit simplification request or already-approved remediation after a passing behavior baseline exists.
 - Positive claims rely on fresh evidence before completion.
