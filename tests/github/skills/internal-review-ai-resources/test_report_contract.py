@@ -6,14 +6,14 @@ REPO_ROOT = next(
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SKILL_PATH = REPO_ROOT / ".github/skills/internal-ai-resource-review/SKILL.md"
+SKILL_PATH = REPO_ROOT / ".github/skills/internal-review-ai-resources/SKILL.md"
 REPORT_CONTRACT_PATH = (
     REPO_ROOT
-    / ".github/skills/internal-ai-resource-review/references/report-contract.md"
+    / ".github/skills/internal-review-ai-resources/references/report-contract.md"
 )
 REVIEW_PROFILES_PATH = (
     REPO_ROOT
-    / ".github/skills/internal-ai-resource-review/references/review-profiles.md"
+    / ".github/skills/internal-review-ai-resources/references/review-profiles.md"
 )
 
 

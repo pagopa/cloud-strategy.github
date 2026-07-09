@@ -1,9 +1,9 @@
 ---
-name: internal-ai-resource-review
+name: internal-review-ai-resources
 description: Use when reviewing repository-owned AI resources, bundle siblings, catalog workflows, or retained AI review packages before deciding keep, patch, split, compress, or retire actions.
 ---
 
-# Internal AI Resource Review
+# Internal Review AI Resources
 
 ## Referenced skills
 
@@ -11,11 +11,11 @@ This index lists every other skill that this file asks the agent to load, route 
 
 - `internal-copilot-audit`: on-demand drift lens for overlap, hollow references, stale contracts, naming drift, and governance drift.
 
-Use this skill as the qualitative review owner for repository-owned AI resources
-and retained AI review packages. It owns profile selection, evidence-first
-qualitative review, lifecycle checks, and proportional reporting. Keep
-`internal-copilot-audit` as the drift lens instead of copying its audit order
-here.
+Use this skill as the qualitative review owner for repository-owned AI
+resources and retained AI review packages. It owns profile selection,
+evidence-first qualitative review, lifecycle checks, and proportional
+reporting. Keep `internal-copilot-audit` as the drift lens instead of copying
+its audit order here.
 
 ## When to use
 
