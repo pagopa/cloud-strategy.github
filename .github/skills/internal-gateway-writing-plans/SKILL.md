@@ -67,6 +67,5 @@ not enforce.
 
 ## Validation
 
-- `python3 ./.github/scripts/validate_internal_skills.py --skill internal-gateway-writing-plans --strict`
 - Confirm the delegated plan carries ordered tasks, concrete file targets, clear edit intent, validation commands or explicit gaps, no duplicate-owner or speculative-scope drift, and no direct commit instructions unless the user explicitly asked for commit help.
 - `git diff --check`

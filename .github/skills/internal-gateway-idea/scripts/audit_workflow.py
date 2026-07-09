@@ -84,8 +84,8 @@ def main() -> int:
         "skill_gate_sequence": contains_in_order(skill_text, MANDATORY_SEQUENCE),
         "workflow_gate_sequence": contains_in_order(workflow_text, MANDATORY_SEQUENCE),
         "runtime_gate_sequence": contains_in_order(runtime_text, RUNTIME_SEQUENCE),
-        "local_fast_lane_documented": "make internal-gateway-idea-fast-check" in skill_text
-        and "make internal-gateway-idea-fast-check" in workflow_text,
+        "local_fast_lane_documented": "scripts/audit_workflow.py" in skill_text
+        and "scripts/audit_workflow.py" in workflow_text,
         "workflow_mermaid_and_rules": contains_all(workflow_text, workflow_only_markers),
         "canonical_alignment": "agent filename, frontmatter name, and workflow aligned" in skill_text
         and "agent filename, frontmatter name, and workflow aligned" in workflow_text

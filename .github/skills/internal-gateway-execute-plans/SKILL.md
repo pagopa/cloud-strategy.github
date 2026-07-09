@@ -68,7 +68,6 @@ Do not create `done-*`, `completion-report.md`, `evidence-envelope.md`, or `<STA
 
 ## Validation
 
-- `./.github/scripts/.venv/bin/python ./.github/scripts/validate_internal_skills.py --skill internal-gateway-execute-plans --strict`
 - Pressure-check that a task cannot become complete without fresh focused evidence and that an interface change requires dependency consistency.
 - Confirm no live repository references point to removed bundle files.
 - `git diff --check`
