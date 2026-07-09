@@ -32,6 +32,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 ## Skills
 
+- `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
 - `.github/skills/agent-os-discover-standards/SKILL.md`
 - `.github/skills/agent-os-index-standards/SKILL.md`
 - `.github/skills/agent-os-inject-standards/SKILL.md`
@@ -53,6 +54,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
+- `.github/skills/awesome-copilot-security-review/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
@@ -123,6 +125,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
+- `.github/skills/mattpocock-handoff/SKILL.md`
+- `.github/skills/mattpocock-research/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
@@ -145,6 +149,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/superpowers-writing-plans/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
+- `.github/skills/vercel-find-skills/SKILL.md`
 
 ### Support-only imported office skills
 

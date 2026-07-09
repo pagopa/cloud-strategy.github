@@ -128,6 +128,7 @@ def _build_candidate_patch(
                 "git",
                 "diff",
                 "--no-index",
+                "--binary",
                 "--",
                 str(snapshot),
                 str(candidate),
@@ -145,23 +146,60 @@ def _build_candidate_patch(
 def _rewrite_patch_paths(
     patch_text: str, snapshot_prefix: str, candidate_prefix: str
 ) -> str:
+    prefixes = (
+        "a" + snapshot_prefix,
+        "b" + snapshot_prefix,
+        "a" + candidate_prefix,
+        "b" + candidate_prefix,
+        snapshot_prefix,
+        candidate_prefix,
+    )
+
+    def _to_relative(path: str) -> str:
+        if path == "/dev/null":
+            return path
+        value = path.strip().strip('"')
+        for prefix in prefixes:
+            if value.startswith(prefix):
+                return value[len(prefix) :].lstrip("/")
+        if value.startswith("a/") or value.startswith("b/"):
+            return value[2:].lstrip("/")
+        return value.lstrip("/")
+
     lines = patch_text.splitlines(keepends=True)
     result: list[str] = []
     for line in lines:
-        if line.startswith("--- "):
+        if line.startswith("diff --git "):
+            parts = line.strip().split()
+            if len(parts) >= 4:
+                old_path = _to_relative(parts[2])
+                new_path = _to_relative(parts[3])
+                line = f"diff --git a/{old_path} b/{new_path}\n"
+            result.append(line)
+        elif line.startswith("--- "):
             path = line[4:].strip()
-            if path.startswith("a" + snapshot_prefix):
-                relative = path[len("a" + snapshot_prefix) :].lstrip("/")
-                result.append(f"--- a/{relative}\n")
+            relative = _to_relative(path)
+            if relative == "/dev/null":
+                result.append("--- /dev/null\n")
             else:
-                result.append(line)
+                result.append(f"--- a/{relative}\n")
         elif line.startswith("+++ "):
             path = line[4:].strip()
-            if path.startswith("b" + candidate_prefix):
-                relative = path[len("b" + candidate_prefix) :].lstrip("/")
-                result.append(f"+++ b/{relative}\n")
+            relative = _to_relative(path)
+            if relative == "/dev/null":
+                result.append("+++ /dev/null\n")
             else:
-                result.append(line)
+                result.append(f"+++ b/{relative}\n")
+        elif line.startswith("Binary files ") and " and " in line and " differ" in line:
+            payload = line[len("Binary files ") :].rstrip("\n")
+            left, right = payload.removesuffix(" differ").split(" and ", 1)
+            left_rel = _to_relative(left)
+            right_rel = _to_relative(right)
+            if left_rel != "/dev/null":
+                left_rel = f"a/{left_rel}"
+            if right_rel != "/dev/null":
+                right_rel = f"b/{right_rel}"
+            result.append(f"Binary files {left_rel} and {right_rel} differ\n")
         else:
             result.append(line)
     return "".join(result)
