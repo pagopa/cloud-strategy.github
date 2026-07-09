@@ -374,6 +374,119 @@ def test_bundle_exposes_one_public_cli(repo_root: Path) -> None:
     assert public_scripts == ["sync_external_resources.py"]
 
 
+def test_audit_reports_dirty_targets_but_stays_zero_exit(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: abc123
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\n", encoding="utf-8")
+    _commit_all(repo)
+    target.write_text("---\nname: locally-edited\n---\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "audit",
+            "--repo-root",
+            str(repo),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["blockers"] == ["dirty managed targets: .github/skills/example/SKILL.md"]
+
+
+def test_plan_missing_sources_names_explicit_source_root(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: abc123
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    source_root = tmp_path / "prepared-sources"
+    source_root.mkdir()
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "plan",
+            "--repo-root",
+            str(repo),
+            "--workspace",
+            str(workspace),
+            "--source-root",
+            str(source_root),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert str(source_root) in result.stderr + result.stdout
+
+
 def test_agent_and_skill_do_not_route_to_unneeded_skills(repo_root: Path) -> None:
     paths = (
         repo_root / ".github/agents/local-sync-external-resources.agent.md",

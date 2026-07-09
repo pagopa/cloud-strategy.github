@@ -32,11 +32,13 @@ declared external resource refreshes safely. The single public entrypoint is
 
 ## Workflow
 
-1. Run `audit` to confirm the manifest and overrides parse cleanly.
-2. Run `plan` with an external workspace to build the candidate without
-   repository writes.
-3. Review the changed-path summary and override results.
-4. Run `apply` to stage, validate, and commit the patch in one operation.
+1. Run `audit` to validate the manifest, overrides, and local dirty-state without blocking on a dirty managed target.
+2. Prepare source checkouts explicitly under the chosen source root.
+3. Run `plan` with `--workspace` and, when needed, `--source-root` to confirm the candidate can be built.
+4. Review the changed-path summary and override replay results.
+5. Run `apply` only after `plan` succeeds; `apply` does not fetch sources implicitly.
+
+If `plan` or `apply` reports `Missing upstream paths`, the message will name the expected root such as `/private/tmp/.../sources`. Populate that root first or pass an explicit `--source-root`.
 
 ## Canonical Commands
 

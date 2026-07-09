@@ -443,6 +443,8 @@ def run(argv: Sequence[str] | None = None) -> int:
     else:
         print(_format_text(outcome))
 
+    if args.mode == "audit":
+        return 0
     if outcome.blockers:
         return 2
     return 0

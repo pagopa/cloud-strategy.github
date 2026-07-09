@@ -251,6 +251,20 @@ def find_dirty_targets(
     )
 
 
+def collect_missing_upstream_paths(
+    resources: ManagedResources,
+    sources_root: Path,
+) -> tuple[str, ...]:
+    missing: list[str] = []
+    for source in resources.sources:
+        source_dir = sources_root / source.source_id
+        for asset in source.assets:
+            upstream_path = source_dir / asset.upstream
+            if not upstream_path.exists():
+                missing.append(f"{source.source_id}:{asset.upstream}")
+    return tuple(missing)
+
+
 def materialize_candidate(
     resources: ManagedResources,
     workspace: Path,
@@ -264,24 +278,25 @@ def materialize_candidate(
     if sources_root is None:
         sources_root = workspace / "sources"
 
-    missing: list[tuple[str, str]] = []
+    missing = collect_missing_upstream_paths(resources, sources_root)
+    if missing:
+        details = "; ".join(missing)
+        raise ValueError(
+            "Missing upstream paths: "
+            f"{details}. Expected prepared sources under {sources_root.as_posix()}. "
+            "Prepare the missing source checkout under that root or pass --source-root."
+        )
+
     for source in resources.sources:
         source_dir = sources_root / source.source_id
         for asset in source.assets:
             upstream_path = source_dir / asset.upstream
-            if not upstream_path.exists():
-                missing.append((source.source_id, asset.upstream))
-                continue
             target_path = candidate / asset.local
             target_path.parent.mkdir(parents=True, exist_ok=True)
             if upstream_path.is_dir():
                 shutil.copytree(upstream_path, target_path)
             else:
                 shutil.copy2(upstream_path, target_path)
-
-    if missing:
-        details = "; ".join(f"{sid}:{path}" for sid, path in missing)
-        raise ValueError(f"Missing upstream paths: {details}")
 
 
 _FRONTMATTER_NAME_RE = re.compile(r"^(name\s*:\s*).*$", re.MULTILINE)

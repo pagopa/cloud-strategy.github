@@ -23,6 +23,7 @@ from sync_external_resources_core import (  # noqa: E402
     ManagedSource,
     TextReplacement,
     find_dirty_targets,
+    load_managed_resources,
     load_overrides,
     materialize_candidate,
     normalize_candidate,
@@ -447,6 +448,24 @@ def test_materialize_candidate_reports_all_missing_upstreams(
     message = str(exc_info.value)
     assert "src-a" in message
     assert "src-b" in message
+
+
+def test_materialize_candidate_reports_expected_source_root(tmp_path: Path) -> None:
+    resources = load_managed_resources(
+        REPO_ROOT
+        / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
+    )
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    candidate = tmp_path / "candidate"
+
+    with pytest.raises(ValueError) as excinfo:
+        materialize_candidate(resources, workspace, candidate)
+
+    message = str(excinfo.value)
+    assert "Missing upstream paths:" in message
+    assert (workspace / "sources").as_posix() in message
+    assert "Prepare the missing source checkout under that root or pass --source-root." in message
 
 
 def test_load_overrides_rejects_missing_patch_file(tmp_path: Path) -> None:

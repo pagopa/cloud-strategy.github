@@ -66,3 +66,42 @@ overrides:
   baseline_repo_commit: local-plan-2026-07-05
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     an internal wrapper or upstream proposal should replace the override.
+- id: awesome-copilot-dependabot-description-budget
+  target_path: .github/skills/awesome-copilot-dependabot/SKILL.md
+  source_family: github/awesome-copilot
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply-3way
+  approval: explicit-user-counter-validated
+  reason: Keep the imported skill count unchanged while reducing frontmatter description
+    payload and retrieval ambiguity.
+  patch_path: patches/awesome-copilot-dependabot-description.patch
+  expected_content_hash: 2fc84c2da7129d3782ce56eecb91134879a10db444a664d3328a6440f6818571
+  baseline_repo_commit: e986f49
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    an internal wrapper should replace the override.
+- id: awesome-copilot-secret-scanning-description-budget
+  target_path: .github/skills/awesome-copilot-secret-scanning/SKILL.md
+  source_family: github/awesome-copilot
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply-3way
+  approval: explicit-user-counter-validated
+  reason: Keep the imported skill count unchanged while reducing frontmatter description
+    payload and retrieval ambiguity.
+  patch_path: patches/awesome-copilot-secret-scanning-description.patch
+  expected_content_hash: a8d503a6197b0f92f3968b986a74b7b52235e33097732828e247d7b8b9d7bf99
+  baseline_repo_commit: e986f49
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    an internal wrapper should replace the override.
+- id: awesome-copilot-security-review-description-budget
+  target_path: .github/skills/awesome-copilot-security-review/SKILL.md
+  source_family: github/awesome-copilot
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply-3way
+  approval: explicit-user-counter-validated
+  reason: Keep the imported skill count unchanged while reducing frontmatter description
+    payload and retrieval ambiguity.
+  patch_path: patches/awesome-copilot-security-review-description.patch
+  expected_content_hash: 459d9535516a82befeff0574d8aad721da6393b21af1efba6d05366a531ab786
+  baseline_repo_commit: e986f49
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    an internal wrapper should replace the override.
