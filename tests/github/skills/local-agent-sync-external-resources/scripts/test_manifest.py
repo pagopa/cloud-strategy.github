@@ -30,7 +30,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 44
+    assert len(manifest.assets) == 45
     assert len(manifest.watchlist) == 13
     assert {
         item.local for item in manifest.assets if item.source == "obra-superpowers"
@@ -48,6 +48,12 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         ".github/skills/superpowers-using-superpowers",
         ".github/skills/superpowers-verification-before-completion",
         ".github/skills/superpowers-writing-plans",
+    }
+    assert {
+        item.local for item in manifest.assets if item.source == "addyosmani-agent-skills"
+    } == {
+        ".github/skills/addyosmani-code-review-and-quality",
+        ".github/skills/addyosmani-code-simplification",
     }
 
 
