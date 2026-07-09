@@ -14,7 +14,6 @@ SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scr
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 
-
 def _run_git(cwd: Path, args: list[str]) -> None:
     subprocess.run(
         ["git", *args],

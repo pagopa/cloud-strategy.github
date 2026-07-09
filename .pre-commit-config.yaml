@@ -47,6 +47,7 @@ repos:
         args:
           - --allow-missing-credentials
       - id: detect-private-key # Prevent committing private keys.
+        exclude: '^\.github/skills/awesome-copilot-security-review/references/'
 
   # GitHub Actions
   - repo: https://github.com/rhysd/actionlint
