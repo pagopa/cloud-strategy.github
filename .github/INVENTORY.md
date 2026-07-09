@@ -123,7 +123,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
-- `.github/skills/mattpocock-caveman/SKILL.md`
 - `.github/skills/mattpocock-code-review/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`

@@ -50,6 +50,13 @@ items:
     local_owner: local-agent-sync-external-resources
     reason: Setup conventions are not part of the managed source catalog.
     action: alert-only
+  - source_family: mattpocock/skills
+    upstream_id: caveman
+    local_owner: retired
+    reason: The previously retained `caveman` -> `mattpocock-caveman` import
+      was retired from the managed catalog by explicit user scope reduction.
+      Do not reimport unless the user re-approves the retained import.
+    action: alert-only
   - source_family: addyosmani/agent-skills
     upstream_id: idea-refine
     local_owner: internal-gateway-idea

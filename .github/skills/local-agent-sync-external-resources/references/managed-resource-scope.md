@@ -102,10 +102,15 @@ Sources:
 
 Managed skills:
 
-- `code-review` -> `mattpocock-code-review`; `grill-me` -> `grill-me`.
-- `caveman` -> `mattpocock-caveman` remains retained from the previous
-  managed snapshot because `caveman` is absent from the current
-  `mattpocock/skills` HEAD.
+- `code-review` -> `mattpocock-code-review`; `grill-me` -> `grill-me`;
+  `handoff` -> `mattpocock-handoff` (productivity, compact conversation
+  handoff for a fresh agent); `research` ->
+  `mattpocock-research` (engineering, background-agent primary-source
+  investigation).
+- `caveman` -> `mattpocock-caveman` was retired from the managed catalog
+  by explicit user scope reduction; see `references/external-watchlist.yaml`
+  for the alert-only retired entry. Do not reimport `caveman` unless the
+  user re-approves the retained import.
 
 Approved in-place overrides:
 
@@ -116,6 +121,21 @@ Approved in-place overrides:
 
 Retired upstream items that were extracted into internal owners are tracked in
 the alert-only watchlist owned by `local-agent-sync-external-resources`.
+
+### `vercel-labs/skills`
+
+Source:
+
+- Skills:
+  `https://github.com/vercel-labs/skills/tree/4ce6d48ac44c8b637db87b2102fea3baca719df1/skills`
+  (commit date: 2026-07-06)
+
+Managed skills:
+
+- `find-skills` -> `vercel-find-skills` (helps users discover and install
+  agent skills from the open agent skills ecosystem). The local prefix is
+  `vercel`; keep this prefix narrow to the `vercel-labs/skills` family and
+  do not reuse it for other imported families.
 
 ### `openai/skills`
 

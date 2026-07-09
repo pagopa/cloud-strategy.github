@@ -10,7 +10,6 @@ description: Use when maintaining the sync-managed `.github/` catalog behind `lo
 - `internal-skill-creator`: route repository-owned skill creation, replacement, or material rewriting.
 - `openai-skill-creator`: use only for remaining bundle anatomy after local skill boundaries are settled.
 - `internal-agent-creator`: route external-resources agent changes or agent/skill boundary rewrites.
-- `mattpocock-caveman`: optional compression support after sync gates and evidence are clear.
 
 Use this skill as the default operating engine for `.github/agents/local-sync-external-resources.agent.md`.
 
@@ -27,8 +26,6 @@ Use `internal-skill-creator` first when a sync decision requires creating, repla
 Use `openai-skill-creator` only for the remaining bundle anatomy, helper scripts, progressive disclosure, `agents/openai.yaml`, or structural validation work after `internal-skill-creator` has established the repository-owned skill boundary and decided the local ownership outcome.
 
 Use `internal-agent-creator` when the sync changes this external-resources agent, rewrites agent routing boundaries, or changes how the agent/skill split is structured.
-
-Use `mattpocock-caveman` only as optional compression support for long sync summaries after blockers, warnings, approvals, validation evidence, and destructive-operation gates are already clear.
 
 When deterministic change detection matters, read `references/fingerprinting-contract.md`, use the canonical repository implementation in `.github/scripts/lib/fingerprinting.py`, and use `scripts/sync_resource_fingerprint.py` from this skill only as a thin workflow wrapper.
 
@@ -202,7 +199,6 @@ After catalog changes:
 - Re-check `.github/INVENTORY.md` for exact path accuracy.
 - Re-check nearby agents and skills for stale references, decorative declarations, or broken ownership assumptions.
 - Re-check `LESSONS_LEARNED.md` and ask whether any pending lesson was just codified or disproven so the ledger does not retain a duplicate.
-- Use compression support only after safety-critical sync details remain explicit.
 - Use the external watchlist only to notice upstream changes that might deserve
   a future human review; do not treat watchlist entries as managed scope.
 

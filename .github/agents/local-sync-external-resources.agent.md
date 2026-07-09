@@ -75,10 +75,14 @@ retire, and anti-drift procedure in the paired core skill.
   for the exact upstream family map, retained support-only office posture, and
   approved imported-override context.
 - Active `mattpocock/skills` imports in scope are `code-review` ->
-  `mattpocock-code-review`, `grill-me` -> `grill-me`, plus retained `caveman`
-  -> `mattpocock-caveman` from the previous managed snapshot while `caveman`
-  is absent from current upstream; keep retired Matt Pocock imports out of the
-  live managed scope.
+  `mattpocock-code-review`, `grill-me` -> `grill-me`,
+  `handoff` -> `mattpocock-handoff` (productivity), and `research` ->
+  `mattpocock-research` (engineering); keep retired Matt Pocock imports
+  (including the previously retained `caveman` -> `mattpocock-caveman`)
+  out of the live managed scope and tracked only in the alert-only watchlist.
+- Active `vercel-labs/skills` imports in scope are `find-skills` ->
+  `vercel-find-skills`; the `vercel` prefix is narrow to this family and must
+  not be reused for other imported families.
 - Do not add new prefixes, external families, compatibility aliases, or hidden
   imported forks unless the user explicitly expands scope.
 - When catalog meaning changes, re-check root `AGENTS.md`,
