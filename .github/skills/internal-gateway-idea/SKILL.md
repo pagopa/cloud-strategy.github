@@ -13,8 +13,9 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 ## Local references
 
 - `references/workflow.md`: authoritative state machine, Mermaid workflow,
-  approval rules, and routing stability for this bundle.
+  approval rules, routing stability, and scoped local validation lane for this bundle.
 - `scripts/audit_workflow.py`: marker-consistency validator; run via `python3 scripts/audit_workflow.py`.
+- `make internal-gateway-idea-fast-check`: scoped local validation entrypoint for this bundle.
 
 Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainstorming` as the core workflow and add the local gates below. Loading `superpowers-brainstorming` is an intentional, globally-resolvable exception to the bundle self-containment rule. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
 
@@ -33,6 +34,7 @@ Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainsto
 
 ## Core contract
 
+- Follow the mandatory gate sequence: `Specialization Checkpoint: gated`, `Idea Gate 0`, `Assumption Challenge Gate`, `Alternative discovery`, `Critical Challenge Gate`, `Spec vs plan decision`, `Stop before implementation execution`.
 - Load `superpowers-brainstorming` as the core workflow.
 - Read `references/workflow.md` before presenting the final design direction.
 - Keep the `superpowers-brainstorming` hard gate: no implementation action before the user approves the design or direct-plan recommendation.

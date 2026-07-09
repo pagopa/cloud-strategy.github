@@ -11,6 +11,32 @@ def contains_all(text: str, markers: list[str]) -> bool:
     return all(marker in text for marker in markers)
 
 
+def contains_in_order(text: str, markers: list[str]) -> bool:
+    try:
+        positions = [text.index(marker) for marker in markers]
+    except ValueError:
+        return False
+    return positions == sorted(positions)
+
+
+MANDATORY_SEQUENCE = [
+    "Specialization Checkpoint: gated",
+    "Idea Gate 0",
+    "Assumption Challenge Gate",
+    "Alternative discovery",
+    "Critical Challenge Gate",
+    "Spec vs plan decision",
+    "Stop before implementation execution",
+]
+
+RUNTIME_SEQUENCE = [
+    "Specialization Checkpoint: gated",
+    "Idea Gate 0",
+    "Critical Challenge Gate",
+    "spec-vs-plan decision",
+]
+
+
 def main() -> int:
     bundle_dir = Path(__file__).resolve().parent.parent
     skill_text = (bundle_dir / "SKILL.md").read_text(encoding="utf-8")
@@ -55,6 +81,11 @@ def main() -> int:
                 "spec-vs-plan decision",
             ],
         ),
+        "skill_gate_sequence": contains_in_order(skill_text, MANDATORY_SEQUENCE),
+        "workflow_gate_sequence": contains_in_order(workflow_text, MANDATORY_SEQUENCE),
+        "runtime_gate_sequence": contains_in_order(runtime_text, RUNTIME_SEQUENCE),
+        "local_fast_lane_documented": "make internal-gateway-idea-fast-check" in skill_text
+        and "make internal-gateway-idea-fast-check" in workflow_text,
         "workflow_mermaid_and_rules": contains_all(workflow_text, workflow_only_markers),
         "canonical_alignment": "agent filename, frontmatter name, and workflow aligned" in skill_text
         and "agent filename, frontmatter name, and workflow aligned" in workflow_text
