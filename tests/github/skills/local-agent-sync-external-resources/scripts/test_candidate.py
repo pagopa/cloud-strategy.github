@@ -15,6 +15,7 @@ SCRIPT_DIR = (
 )
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
+from sync_external_resources import _build_candidate_patch  # noqa: E402
 from sync_external_resources_core import (  # noqa: E402
     ImportedOverride,
     ManagedAsset,
@@ -28,6 +29,7 @@ from sync_external_resources_core import (  # noqa: E402
     replay_overrides,
     select_overrides,
     validate_external_workspace,
+    validate_override_patches,
     verify_override_hash,
 )
 
@@ -311,3 +313,193 @@ overrides:
     assert len(overrides) == 1
     assert overrides[0].override_id == "test-override"
     assert overrides[0].expected_content_hash == "abcdef0123456789" * 4
+
+
+def test_build_candidate_patch_detects_repo_vs_candidate_diff(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
+    _commit_all(repo)
+
+    candidate = tmp_path / "candidate"
+    candidate.mkdir()
+    cand_target = candidate / ".github/skills/example/SKILL.md"
+    cand_target.parent.mkdir(parents=True)
+    cand_target.write_text(
+        "---\nname: example\n---\nNew content.\n", encoding="utf-8"
+    )
+
+    asset = ManagedAsset(
+        source="test-source",
+        upstream="skills/example",
+        local=".github/skills/example",
+        canonical_name="example",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="test-source",
+                repository="https://example.com/repo.git",
+                ref="abc",
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    patch = _build_candidate_patch(repo, candidate, resources)
+    assert patch.strip(), "patch must be non-empty when candidate differs from repo"
+    assert "New content." in patch
+
+
+def test_materialize_candidate_uses_explicit_source_root(
+    tmp_path: Path,
+) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    external_sources = tmp_path / "external-sources"
+    source_checkout = external_sources / "test-source" / "skills" / "example"
+    source_checkout.mkdir(parents=True)
+    (source_checkout / "SKILL.md").write_text(
+        "---\nname: upstream-name\n---\n", encoding="utf-8"
+    )
+
+    asset = ManagedAsset(
+        source="test-source",
+        upstream="skills/example",
+        local=".github/skills/example",
+        canonical_name="example",
+    )
+    source = ManagedSource(
+        source_id="test-source",
+        repository="https://example.com/repo.git",
+        ref="abc",
+        assets=(asset,),
+    )
+    resources = ManagedResources(
+        sources=(source,), replacements=(), watchlist=()
+    )
+
+    candidate = tmp_path / "candidate"
+    materialize_candidate(resources, workspace, candidate, sources_root=external_sources)
+
+    target = candidate / ".github/skills/example/SKILL.md"
+    assert target.exists()
+    assert "upstream-name" in target.read_text(encoding="utf-8")
+
+
+def test_materialize_candidate_reports_all_missing_upstreams(
+    tmp_path: Path,
+) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    sources_root = tmp_path / "sources"
+    sources_root.mkdir()
+
+    asset_a = ManagedAsset(
+        source="src-a",
+        upstream="skills/a",
+        local=".github/skills/a",
+        canonical_name="a",
+    )
+    asset_b = ManagedAsset(
+        source="src-b",
+        upstream="skills/b",
+        local=".github/skills/b",
+        canonical_name="b",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="src-a",
+                repository="https://example.com/a.git",
+                ref="abc",
+                assets=(asset_a,),
+            ),
+            ManagedSource(
+                source_id="src-b",
+                repository="https://example.com/b.git",
+                ref="def",
+                assets=(asset_b,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    candidate = tmp_path / "candidate"
+    with pytest.raises(ValueError, match="Missing upstream paths") as exc_info:
+        materialize_candidate(resources, workspace, candidate, sources_root=sources_root)
+    message = str(exc_info.value)
+    assert "src-a" in message
+    assert "src-b" in message
+
+
+def test_load_overrides_rejects_missing_patch_file(tmp_path: Path) -> None:
+    registry = tmp_path / "overrides.yaml"
+    registry.write_text(
+        """\
+version: 1
+overrides:
+  - id: test-override
+    target_path: .github/skills/test/SKILL.md
+    patch_path: patches/nonexistent.patch
+    apply_strategy: git-apply
+    expected_content_hash: abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+""",
+        encoding="utf-8",
+    )
+
+    overrides = load_overrides(registry)
+    bundle_root = tmp_path
+    with pytest.raises(ValueError, match="Override patch missing"):
+        validate_override_patches(overrides, bundle_root)
+
+
+def test_override_3way_replay_uses_real_git_repo(
+    candidate_repo: Path,
+) -> None:
+    target = candidate_repo / ".github/skills/test/SKILL.md"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("---\nname: test\n---\nOriginal.\n", encoding="utf-8")
+    _commit_all(candidate_repo)
+
+    patch_dir = candidate_repo / "patches"
+    patch_dir.mkdir(exist_ok=True)
+    patch_path = patch_dir / "test-3way.patch"
+
+    target.write_text("---\nname: test\n---\nPatched.\n", encoding="utf-8")
+    result = subprocess.run(
+        ["git", "diff", "--", ".github/skills/test/SKILL.md"],
+        cwd=candidate_repo,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    patch_path.write_text(result.stdout, encoding="utf-8")
+    target.write_text("---\nname: test\n---\nOriginal.\n", encoding="utf-8")
+
+    override = ImportedOverride(
+        override_id="test-3way",
+        target_path=".github/skills/test/SKILL.md",
+        patch_path=patch_path.relative_to(candidate_repo).as_posix(),
+        apply_strategy="git-apply-3way",
+        expected_content_hash=_sha256("---\nname: test\n---\nPatched.\n"),
+    )
+
+    results = replay_overrides(
+        candidate_repo, (override,), patches_root=candidate_repo
+    )
+
+    assert len(results) == 1
+    assert results[0].status == "applied"
+    assert "Patched." in target.read_text(encoding="utf-8")

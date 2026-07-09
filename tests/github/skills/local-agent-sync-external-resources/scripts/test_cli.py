@@ -131,6 +131,238 @@ overrides: []
     assert result.returncode == 2
 
 
+def test_apply_reports_repository_changed_when_candidate_diff_applies(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: abc123
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text(
+        """\
+version: 1
+overrides: []
+""",
+        encoding="utf-8",
+    )
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
+    _commit_all(repo)
+
+    workspace = tmp_path / "external-workspace"
+    workspace.mkdir()
+    source_dir = workspace / "sources" / "test-source" / "skills" / "example"
+    source_dir.mkdir(parents=True)
+    (source_dir / "SKILL.md").write_text(
+        "---\nname: example\n---\nNew content.\n", encoding="utf-8"
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "apply",
+            "--repo-root",
+            str(repo),
+            "--workspace",
+            str(workspace),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["repository_changed"] is True
+    assert "New content." in target.read_text(encoding="utf-8")
+
+
+def test_plan_uses_explicit_source_root(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: abc123
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text(
+        """\
+version: 1
+overrides: []
+""",
+        encoding="utf-8",
+    )
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
+    _commit_all(repo)
+
+    workspace = tmp_path / "external-workspace"
+    workspace.mkdir()
+    external_sources = tmp_path / "external-sources" / "test-source" / "skills" / "example"
+    external_sources.mkdir(parents=True)
+    (external_sources / "SKILL.md").write_text(
+        "---\nname: example\n---\nNew content.\n", encoding="utf-8"
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "plan",
+            "--repo-root",
+            str(repo),
+            "--workspace",
+            str(workspace),
+            "--source-root",
+            str(tmp_path / "external-sources"),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["mode"] == "plan"
+
+
+def test_plan_then_apply_end_to_end(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: abc123
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text(
+        """\
+version: 1
+overrides: []
+""",
+        encoding="utf-8",
+    )
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
+    _commit_all(repo)
+
+    workspace = tmp_path / "external-workspace"
+    workspace.mkdir()
+    source_dir = workspace / "sources" / "test-source" / "skills" / "example"
+    source_dir.mkdir(parents=True)
+    (source_dir / "SKILL.md").write_text(
+        "---\nname: example\n---\nNew content.\n", encoding="utf-8"
+    )
+
+    common_args = [
+        sys.executable,
+        str(SCRIPT_DIR / "sync_external_resources.py"),
+        "--repo-root",
+        str(repo),
+        "--workspace",
+        str(workspace),
+        "--manifest",
+        str(manifest_src),
+        "--overrides",
+        str(overrides_src),
+        "--format",
+        "json",
+    ]
+
+    plan_result = subprocess.run(
+        [*common_args, "plan"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert plan_result.returncode == 0, plan_result.stderr
+    plan_payload = json.loads(plan_result.stdout)
+    assert plan_payload["repository_changed"] is False
+
+    apply_result = subprocess.run(
+        [*common_args, "apply"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert apply_result.returncode == 0, apply_result.stderr
+    apply_payload = json.loads(apply_result.stdout)
+    assert apply_payload["repository_changed"] is True
+    assert "New content." in target.read_text(encoding="utf-8")
+
+
 def test_bundle_exposes_one_public_cli(repo_root: Path) -> None:
     scripts = repo_root / ".github/skills/local-agent-sync-external-resources/scripts"
     public_scripts = sorted(

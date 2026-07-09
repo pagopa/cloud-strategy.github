@@ -255,25 +255,33 @@ def materialize_candidate(
     resources: ManagedResources,
     workspace: Path,
     candidate: Path,
+    sources_root: Path | None = None,
 ) -> None:
     if candidate.exists():
         shutil.rmtree(candidate)
     candidate.mkdir(parents=True)
 
+    if sources_root is None:
+        sources_root = workspace / "sources"
+
+    missing: list[tuple[str, str]] = []
     for source in resources.sources:
-        source_root = workspace / "sources" / source.source_id
+        source_dir = sources_root / source.source_id
         for asset in source.assets:
-            upstream_path = source_root / asset.upstream
+            upstream_path = source_dir / asset.upstream
             if not upstream_path.exists():
-                raise ValueError(
-                    f"Missing upstream path: {asset.upstream} in source {source.source_id}"
-                )
+                missing.append((source.source_id, asset.upstream))
+                continue
             target_path = candidate / asset.local
             target_path.parent.mkdir(parents=True, exist_ok=True)
             if upstream_path.is_dir():
                 shutil.copytree(upstream_path, target_path)
             else:
                 shutil.copy2(upstream_path, target_path)
+
+    if missing:
+        details = "; ".join(f"{sid}:{path}" for sid, path in missing)
+        raise ValueError(f"Missing upstream paths: {details}")
 
 
 _FRONTMATTER_NAME_RE = re.compile(r"^(name\s*:\s*).*$", re.MULTILINE)
@@ -368,6 +376,23 @@ def load_overrides(path: Path) -> tuple[ImportedOverride, ...]:
     return tuple(overrides)
 
 
+def _resolve_override_patch(bundle_root: Path, patch_path: str) -> Path:
+    return bundle_root / patch_path
+
+
+def validate_override_patches(
+    overrides: tuple[ImportedOverride, ...],
+    bundle_root: Path,
+) -> None:
+    missing: list[str] = []
+    for override in overrides:
+        resolved = _resolve_override_patch(bundle_root, override.patch_path)
+        if not resolved.exists():
+            missing.append(override.patch_path)
+    if missing:
+        raise ValueError(f"Override patch missing: {', '.join(missing)}")
+
+
 def select_overrides(
     overrides: tuple[ImportedOverride, ...],
     requested_ids: tuple[str, ...],
@@ -405,12 +430,23 @@ def verify_override_hash(
         )
 
 
+def _init_trial_git_repo(trial: Path) -> None:
+    _run_command(["git", "init"], cwd=trial)
+    _run_command(["git", "config", "user.email", "test@test.com"], cwd=trial)
+    _run_command(["git", "config", "user.name", "Test"], cwd=trial)
+    _run_command(["git", "add", "-A"], cwd=trial)
+    _run_command(
+        ["git", "commit", "-m", "trial-baseline", "--allow-empty"],
+        cwd=trial,
+    )
+
+
 def _replay_one_override(
     trial_repo: Path,
     override: ImportedOverride,
     patches_root: Path,
 ) -> OverrideResult:
-    patch_file = patches_root / override.patch_path
+    patch_file = _resolve_override_patch(patches_root, override.patch_path)
     if not patch_file.exists():
         raise ValueError(f"Override patch missing: {override.patch_path}")
 
@@ -493,6 +529,7 @@ def replay_overrides(
     with tempfile.TemporaryDirectory(prefix="external-override-") as raw_trial:
         trial = Path(raw_trial) / "candidate"
         shutil.copytree(candidate_repo, trial)
+        _init_trial_git_repo(trial)
         results: list[OverrideResult] = []
         for item in overrides:
             result = _replay_one_override(trial, item, patches_root)

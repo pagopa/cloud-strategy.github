@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Sequence
@@ -13,6 +16,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_external_resources_core import (  # noqa: E402
+    ManagedAsset,
     ManagedResources,
     OverrideResult,
     SyncCommandError,
@@ -23,6 +27,7 @@ from sync_external_resources_core import (  # noqa: E402
     normalize_candidate,
     replay_overrides,
     validate_external_workspace,
+    validate_override_patches,
 )
 
 DEFAULT_MANIFEST = (
@@ -96,20 +101,99 @@ def _run_git(repo_root: Path, args: list[str]) -> subprocess.CompletedProcess[st
     return result
 
 
+def _materialize_managed_repo_snapshot(
+    repo_root: Path, resources: ManagedResources, snapshot: Path
+) -> None:
+    snapshot.mkdir(parents=True, exist_ok=True)
+    for asset in resources.assets:
+        src = repo_root / asset.local
+        dst = snapshot / asset.local
+        if not src.exists():
+            continue
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src, dst)
+
+
 def _build_candidate_patch(
     repo_root: Path, candidate: Path, resources: ManagedResources
 ) -> str:
-    diff_result = subprocess.run(
-        ["git", "diff", "--no-index", "--", "."],
-        cwd=candidate,
-        check=False,
-        capture_output=True,
-        text=True,
+    with tempfile.TemporaryDirectory(prefix="sync-snapshot-") as raw_snapshot:
+        snapshot = Path(raw_snapshot) / "snapshot"
+        _materialize_managed_repo_snapshot(repo_root, resources, snapshot)
+        diff_result = subprocess.run(
+            [
+                "git",
+                "diff",
+                "--no-index",
+                "--",
+                str(snapshot),
+                str(candidate),
+            ],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    return _rewrite_patch_paths(
+        diff_result.stdout, str(snapshot), str(candidate)
     )
-    return diff_result.stdout
 
 
-def _apply_candidate_patch(repo_root: Path, patch_text: str) -> bool:
+def _rewrite_patch_paths(
+    patch_text: str, snapshot_prefix: str, candidate_prefix: str
+) -> str:
+    lines = patch_text.splitlines(keepends=True)
+    result: list[str] = []
+    for line in lines:
+        if line.startswith("--- "):
+            path = line[4:].strip()
+            if path.startswith("a" + snapshot_prefix):
+                relative = path[len("a" + snapshot_prefix) :].lstrip("/")
+                result.append(f"--- a/{relative}\n")
+            else:
+                result.append(line)
+        elif line.startswith("+++ "):
+            path = line[4:].strip()
+            if path.startswith("b" + candidate_prefix):
+                relative = path[len("b" + candidate_prefix) :].lstrip("/")
+                result.append(f"+++ b/{relative}\n")
+            else:
+                result.append(line)
+        else:
+            result.append(line)
+    return "".join(result)
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _snapshot_managed_targets(
+    repo_root: Path, resources: ManagedResources
+) -> dict[str, str]:
+    snapshot: dict[str, str] = {}
+    for asset in resources.assets:
+        target = repo_root / asset.local
+        if target.is_file():
+            snapshot[asset.local] = _sha256_file(target)
+        elif target.is_dir():
+            for file_path in sorted(target.rglob("*")):
+                if file_path.is_file():
+                    rel = file_path.relative_to(repo_root).as_posix()
+                    snapshot[rel] = _sha256_file(file_path)
+    return snapshot
+
+
+def _apply_candidate_patch(
+    repo_root: Path, patch_text: str, resources: ManagedResources
+) -> bool:
     if not patch_text.strip():
         return False
     result = subprocess.run(
@@ -122,6 +206,7 @@ def _apply_candidate_patch(repo_root: Path, patch_text: str) -> bool:
     )
     if result.returncode != 0:
         raise ValueError(f"Patch check failed: {result.stderr[:500]}")
+    before = _snapshot_managed_targets(repo_root, resources)
     subprocess.run(
         ["git", "apply", "-"],
         cwd=repo_root,
@@ -130,7 +215,12 @@ def _apply_candidate_patch(repo_root: Path, patch_text: str) -> bool:
         capture_output=True,
         text=True,
     )
-    return True
+    after = _snapshot_managed_targets(repo_root, resources)
+    if before != after:
+        return True
+    raise ValueError(
+        "Patch applied but no managed target files changed in the repository."
+    )
 
 
 def _audit(
@@ -143,7 +233,18 @@ def _audit(
     if dirty:
         blockers.append(f"dirty managed targets: {', '.join(dirty)}")
 
-    overrides = load_overrides(overrides_path) if overrides_path.exists() else ()
+    validations: list[str] = ["manifest-parsed"]
+    if overrides_path.exists():
+        overrides = load_overrides(overrides_path)
+        validations.append("overrides-parsed")
+        bundle_root = overrides_path.parent.parent
+        try:
+            validate_override_patches(overrides, bundle_root)
+            validations.append("override-patches-exist")
+        except ValueError as exc:
+            blockers.append(str(exc))
+    else:
+        overrides = ()
 
     return SyncOutcome(
         mode="audit",
@@ -151,10 +252,14 @@ def _audit(
         managed_assets=len(resources.assets),
         changed_paths=(),
         override_results=(),
-        validations=("manifest-parsed", "overrides-parsed"),
+        validations=tuple(validations),
         blockers=tuple(blockers),
         repository_changed=False,
     )
+
+
+def _resolve_sources_root(workspace: Path, source_root: Path | None) -> Path:
+    return source_root if source_root is not None else workspace / "sources"
 
 
 def _plan(
@@ -166,12 +271,17 @@ def _plan(
 ) -> SyncOutcome:
     validate_external_workspace(repo_root, workspace)
 
+    sources_root = _resolve_sources_root(workspace, source_root)
     candidate = workspace / "candidate"
-    materialize_candidate(resources, workspace, candidate)
+    materialize_candidate(resources, workspace, candidate, sources_root=sources_root)
     changed = normalize_candidate(resources, candidate)
 
-    overrides = load_overrides(overrides_path) if overrides_path.exists() else ()
-    override_results = replay_overrides(candidate, overrides, overrides_path.parent.parent) if overrides else ()
+    override_results: tuple[OverrideResult, ...] = ()
+    if overrides_path.exists():
+        overrides = load_overrides(overrides_path)
+        bundle_root = overrides_path.parent.parent
+        validate_override_patches(overrides, bundle_root)
+        override_results = replay_overrides(candidate, overrides, bundle_root)
 
     return SyncOutcome(
         mode="plan",
@@ -208,15 +318,20 @@ def _apply(
             repository_changed=False,
         )
 
+    sources_root = _resolve_sources_root(workspace, source_root)
     candidate = workspace / "candidate"
-    materialize_candidate(resources, workspace, candidate)
+    materialize_candidate(resources, workspace, candidate, sources_root=sources_root)
     changed = normalize_candidate(resources, candidate)
 
-    overrides = load_overrides(overrides_path) if overrides_path.exists() else ()
-    override_results = replay_overrides(candidate, overrides, overrides_path.parent.parent) if overrides else ()
+    override_results: tuple[OverrideResult, ...] = ()
+    if overrides_path.exists():
+        overrides = load_overrides(overrides_path)
+        bundle_root = overrides_path.parent.parent
+        validate_override_patches(overrides, bundle_root)
+        override_results = replay_overrides(candidate, overrides, bundle_root)
 
     patch_text = _build_candidate_patch(repo_root, candidate, resources)
-    repository_changed = _apply_candidate_patch(repo_root, patch_text)
+    repository_changed = _apply_candidate_patch(repo_root, patch_text, resources)
 
     return SyncOutcome(
         mode="apply",
