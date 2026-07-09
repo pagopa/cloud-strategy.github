@@ -3,8 +3,6 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -12,7 +10,7 @@ REPO_ROOT = next(
 )
 sys.path.insert(0, str(REPO_ROOT / ".github/scripts"))
 
-from lib.shared import git_dirty_paths, git_revision, is_git_dirty
+from lib.shared import git_dirty_paths, git_revision, is_git_dirty  # noqa: E402
 
 
 def test_git_revision_handles_timeout(tmp_path: Path) -> None:

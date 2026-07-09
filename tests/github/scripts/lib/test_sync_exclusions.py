@@ -1,8 +1,6 @@
 import sys
 from pathlib import Path
 
-import pytest
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -10,7 +8,7 @@ REPO_ROOT = next(
 )
 sys.path.insert(0, str(REPO_ROOT / ".github/scripts"))
 
-from lib.sync_exclusions import (
+from lib.sync_exclusions import (  # noqa: E402
     IGNORED_SYNC_PARTS,
     IGNORED_SYNC_SUFFIXES,
     should_ignore_sync_path,

@@ -10,7 +10,7 @@ REPO_ROOT = next(
 )
 sys.path.insert(0, str(REPO_ROOT / ".github/scripts"))
 
-from lib.repo_paths import find_repo_root
+from lib.repo_paths import find_repo_root  # noqa: E402
 
 
 def test_find_repo_root_from_nested_path(tmp_path: Path) -> None:

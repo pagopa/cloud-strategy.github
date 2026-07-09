@@ -67,4 +67,4 @@ Keep the agent filename, frontmatter name, and workflow aligned.
 
 ## Local validation lane
 
-Run `python3 scripts/audit_workflow.py` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.
+Run `python3 scripts/audit_workflow.py` or `make internal-gateway-idea-fast-check` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.

@@ -13,11 +13,6 @@ REPO_ROOT = next(
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
-from sync_external_resources import main  # noqa: E402
-from sync_external_resources_core import (  # noqa: E402
-    load_managed_resources,
-    load_overrides,
-)
 
 
 def _run_git(cwd: Path, args: list[str]) -> None:
@@ -69,15 +64,6 @@ def test_apply_refuses_dirty_target(tmp_path: Path) -> None:
     _run_git(repo, ["init"])
     _run_git(repo, ["config", "user.email", "test@test.com"])
     _run_git(repo, ["config", "user.name", "Test"])
-
-    manifest_src = (
-        REPO_ROOT
-        / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
-    )
-    overrides_src = (
-        REPO_ROOT
-        / ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
-    )
 
     mini_manifest = tmp_path / "manifest.yaml"
     mini_manifest.write_text(

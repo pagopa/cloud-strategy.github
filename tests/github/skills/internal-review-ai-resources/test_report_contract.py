@@ -26,7 +26,6 @@ def test_skill_output_points_to_report_contract_required_sections() -> None:
 
 def test_profile_names_are_consistent_across_bundle() -> None:
     skill_text = SKILL_PATH.read_text()
-    contract_text = REPORT_CONTRACT_PATH.read_text()
     profiles_text = REVIEW_PROFILES_PATH.read_text()
 
     for profile_name in ("focused", "bundle", "catalog", "retained-report"):

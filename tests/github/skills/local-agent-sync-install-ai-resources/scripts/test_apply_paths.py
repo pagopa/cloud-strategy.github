@@ -1,9 +1,5 @@
-import json
 import sys
-import textwrap
 from pathlib import Path
-
-import pytest
 
 REPO_ROOT = next(
     parent

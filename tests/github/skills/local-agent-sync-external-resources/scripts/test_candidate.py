@@ -1,5 +1,4 @@
 import hashlib
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -30,7 +29,6 @@ from sync_external_resources_core import (  # noqa: E402
     select_overrides,
     validate_external_workspace,
     validate_override_patches,
-    verify_override_hash,
 )
 
 
