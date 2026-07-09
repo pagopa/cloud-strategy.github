@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Review Code"
-  short_description: "Line-level code review wrapper"
-  default_prompt: "Use $internal-review-code for line-level review of code changes; load language anti-pattern references from the nearest language owner as needed."
+  short_description: "Repository wrapper for two-axis code review"
+  default_prompt: "Use $internal-review-code as the repository wrapper and follow $mattpocock-code-review as its review core."
