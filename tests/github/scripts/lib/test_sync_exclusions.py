@@ -1,9 +1,11 @@
-import pytest
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import pytest
 
 REPO_ROOT = next(
-    parent for parent in Path(__file__).resolve().parents
+    parent
+    for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 sys.path.insert(0, str(REPO_ROOT / ".github/scripts"))

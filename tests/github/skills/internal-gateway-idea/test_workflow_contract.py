@@ -3,16 +3,19 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 SKILL_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/SKILL.md"
-WORKFLOW_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/references/workflow.md"
+WORKFLOW_PATH = (
+    REPO_ROOT / ".github/skills/internal-gateway-idea/references/workflow.md"
+)
 AGENT_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
-SCRIPT_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/audit_workflow.py"
+SCRIPT_PATH = (
+    REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/audit_workflow.py"
+)
 
 MANDATORY_SEQUENCE = [
     "Specialization Checkpoint: gated",

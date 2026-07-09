@@ -4,12 +4,11 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = next(
-    parent for parent in Path(__file__).resolve().parents
+    parent
+    for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SCRIPT_DIR = (
-    REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-)
+SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_external_resources_core import (  # noqa: E402
@@ -50,7 +49,9 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         ".github/skills/superpowers-writing-plans",
     }
     assert {
-        item.local for item in manifest.assets if item.source == "addyosmani-agent-skills"
+        item.local
+        for item in manifest.assets
+        if item.source == "addyosmani-agent-skills"
     } == {
         ".github/skills/addyosmani-code-review-and-quality",
         ".github/skills/addyosmani-code-simplification",

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -15,10 +14,7 @@ AGENT_PATH = (
 def test_plan_execution_routes_only_preapproved_simplification() -> None:
     skill_text = SKILL_PATH.read_text()
 
-    assert (
-        "`addyosmani-code-simplification`: plan-bound method owner"
-        in skill_text
-    )
+    assert "`addyosmani-code-simplification`: plan-bound method owner" in skill_text
     assert "current approved plan task explicitly requires" in skill_text
     assert "approved review remediation" in skill_text
     assert "never introduce it as cleanup outside the approved plan" in skill_text

@@ -1,7 +1,6 @@
 import re
 from pathlib import Path
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -25,9 +24,18 @@ def test_global_guidance_documents_generic_test_placement_rule() -> None:
 
     assert "repository-root `tests/`" in agents_text
     assert "make the owning\n  source or checked behavior obvious" in agents_text
-    assert "When adding tests, keep them under repository-root `tests/`" in internal_tdd_text
-    assert "test paths under `tests/` should make the covered owner or checked behavior obvious" in contract_text
-    assert "without paths that make the covered owner or checked behavior obvious" in anti_patterns_text
+    assert (
+        "When adding tests, keep them under repository-root `tests/`"
+        in internal_tdd_text
+    )
+    assert (
+        "test paths under `tests/` should make the covered owner or checked behavior obvious"
+        in contract_text
+    )
+    assert (
+        "without paths that make the covered owner or checked behavior obvious"
+        in anti_patterns_text
+    )
 
 
 def test_github_owned_python_tests_make_owner_obvious() -> None:
@@ -52,7 +60,11 @@ def test_github_owned_python_tests_make_owner_obvious() -> None:
             continue
 
         skill_name = skill_match.group(1)
-        if "github" not in rel_path.parts or "skills" not in rel_path.parts or skill_name not in rel_path.parts:
+        if (
+            "github" not in rel_path.parts
+            or "skills" not in rel_path.parts
+            or skill_name not in rel_path.parts
+        ):
             violations.append(
                 f"{rel_path} should make the .github/skills/{skill_name}/ owner obvious"
             )

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -30,15 +29,21 @@ def test_generic_skill_shape_is_conditional_not_rigid() -> None:
     assert "Do not require every section for every skill" in checklist_text
 
 
-def test_skill_cleanup_preserves_triggers_and_removes_responsibility_duplication() -> None:
+def test_skill_cleanup_preserves_triggers_and_removes_responsibility_duplication() -> (
+    None
+):
     checklist_text = CHECKLIST_PATH.read_text()
 
-    assert "Remove duplicated responsibility, not useful trigger reinforcement" in checklist_text
+    assert (
+        "Remove duplicated responsibility, not useful trigger reinforcement"
+        in checklist_text
+    )
     assert "Preserve a working `description:` during cleanup" in checklist_text
 
 
 def test_skill_md_does_not_restate_checklist() -> None:
     import re
+
     skill_text = SKILL_PATH.read_text()
     checklist_text = CHECKLIST_PATH.read_text()
 
@@ -65,7 +70,8 @@ def test_skill_md_does_not_restate_checklist() -> None:
     ]
 
     duplicates = [
-        phrase for phrase in shared_phrases
+        phrase
+        for phrase in shared_phrases
         if phrase in skill_norm and phrase in checklist_norm
     ]
 

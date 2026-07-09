@@ -2,7 +2,6 @@ import sys
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -17,7 +16,8 @@ SUPPORT_ROUTING_PATH = (
     / ".github/skills/internal-gateway-simple-task/references/support-routing.md"
 )
 RESOLVE_SCRIPT_PATH = (
-    REPO_ROOT / ".github/skills/internal-gateway-simple-task/scripts/resolve_simple_task.py"
+    REPO_ROOT
+    / ".github/skills/internal-gateway-simple-task/scripts/resolve_simple_task.py"
 )
 SUGGEST_SCRIPT_PATH = (
     REPO_ROOT
@@ -79,7 +79,9 @@ def test_gate_helper_mentions_internal_tdd_for_executable_behavior() -> None:
     assert "internal-tdd" in decision["readiness_brief"]["executable_behavior"]
 
 
-def test_support_skill_helper_suggests_internal_tdd_for_code_paths_and_symptom() -> None:
+def test_support_skill_helper_suggests_internal_tdd_for_code_paths_and_symptom() -> (
+    None
+):
     assert suggest_support_skills.SYMPTOM_METHODS["tdd"][0] == "load-internal-tdd"
 
     suggestions: dict[str, set[str]] = {}
@@ -173,8 +175,17 @@ def test_claim_requirements_return_documented_methods() -> None:
 
 def test_suggest_does_not_emit_worktree_mapping() -> None:
     import subprocess
+
     result = subprocess.run(
-        [sys.executable, str(SUGGEST_SCRIPT_PATH), "--symptom", "bug", "--symptom", "tdd", "src/app.py"],
+        [
+            sys.executable,
+            str(SUGGEST_SCRIPT_PATH),
+            "--symptom",
+            "bug",
+            "--symptom",
+            "tdd",
+            "src/app.py",
+        ],
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
@@ -188,10 +199,7 @@ def test_suggest_does_not_emit_worktree_mapping() -> None:
 def test_code_simplification_requires_explicit_authorization() -> None:
     skill_text = SKILL_PATH.read_text()
 
-    assert (
-        "`addyosmani-code-simplification`: on-demand method owner"
-        in skill_text
-    )
+    assert "`addyosmani-code-simplification`: on-demand method owner" in skill_text
     assert "explicit code-simplification request" in skill_text
     assert "already-approved simplification remediation" in skill_text
     assert "establish a passing behavior baseline" in skill_text

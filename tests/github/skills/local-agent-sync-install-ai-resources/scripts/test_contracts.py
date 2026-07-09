@@ -14,9 +14,7 @@ REPO_ROOT = next(
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SCRIPT_DIR = (
-    REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
-)
+SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from agent_translation import target_extension, translate_agent_for_target  # noqa: E402
@@ -36,14 +34,14 @@ from home_syncing import (  # noqa: E402
     parse_targets,
     state_root_for_home,
 )
+from sync_home_ai_resources import (  # noqa: E402
+    bisync_requires_review,
+    install_auto_apply_blockers,
+)
 from sync_output import (  # noqa: E402
     render_doctor_report,
     render_install_report,
     render_sync_report,
-)
-from sync_home_ai_resources import (  # noqa: E402
-    bisync_requires_review,
-    install_auto_apply_blockers,
 )
 
 
@@ -332,9 +330,13 @@ def test_bisync_requires_review_only_for_non_safe_drift() -> None:
 
 def test_skill_run_sh_should_quiet_only_for_compact_modes() -> None:
     run_sh = (
-        REPO_ROOT
-        / ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
-    ).resolve().as_posix()
+        (
+            REPO_ROOT
+            / ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
+        )
+        .resolve()
+        .as_posix()
+    )
     script = textwrap.dedent(
         f"""\
         source "{run_sh}"

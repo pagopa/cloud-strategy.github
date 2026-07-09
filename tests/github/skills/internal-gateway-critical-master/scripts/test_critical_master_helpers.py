@@ -8,7 +8,8 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 MODULE_PATH = (
-    REPO_ROOT / ".github/skills/internal-gateway-critical-master/scripts/critical_master.py"
+    REPO_ROOT
+    / ".github/skills/internal-gateway-critical-master/scripts/critical_master.py"
 )
 SPEC = spec_from_file_location("critical_master", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None

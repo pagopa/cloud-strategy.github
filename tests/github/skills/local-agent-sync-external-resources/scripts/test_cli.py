@@ -6,12 +6,11 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = next(
-    parent for parent in Path(__file__).resolve().parents
+    parent
+    for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SCRIPT_DIR = (
-    REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-)
+SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_external_resources import main  # noqa: E402
@@ -71,8 +70,14 @@ def test_apply_refuses_dirty_target(tmp_path: Path) -> None:
     _run_git(repo, ["config", "user.email", "test@test.com"])
     _run_git(repo, ["config", "user.name", "Test"])
 
-    manifest_src = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
-    overrides_src = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
+    manifest_src = (
+        REPO_ROOT
+        / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
+    )
+    overrides_src = (
+        REPO_ROOT
+        / ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
+    )
 
     mini_manifest = tmp_path / "manifest.yaml"
     mini_manifest.write_text(
@@ -246,7 +251,9 @@ overrides: []
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
-    external_sources = tmp_path / "external-sources" / "test-source" / "skills" / "example"
+    external_sources = (
+        tmp_path / "external-sources" / "test-source" / "skills" / "example"
+    )
     external_sources.mkdir(parents=True)
     (external_sources / "SKILL.md").write_text(
         "---\nname: example\n---\nNew content.\n", encoding="utf-8"
@@ -366,9 +373,7 @@ overrides: []
 def test_bundle_exposes_one_public_cli(repo_root: Path) -> None:
     scripts = repo_root / ".github/skills/local-agent-sync-external-resources/scripts"
     public_scripts = sorted(
-        path.name
-        for path in scripts.glob("*.py")
-        if not path.name.endswith("_core.py")
+        path.name for path in scripts.glob("*.py") if not path.name.endswith("_core.py")
     )
 
     assert public_scripts == ["sync_external_resources.py"]
@@ -428,7 +433,9 @@ watchlist: []
 
     assert result.returncode == 0
     payload = json.loads(result.stdout)
-    assert payload["blockers"] == ["dirty managed targets: .github/skills/example/SKILL.md"]
+    assert payload["blockers"] == [
+        "dirty managed targets: .github/skills/example/SKILL.md"
+    ]
 
 
 def test_plan_missing_sources_names_explicit_source_root(tmp_path: Path) -> None:

@@ -7,12 +7,11 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = next(
-    parent for parent in Path(__file__).resolve().parents
+    parent
+    for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SCRIPT_DIR = (
-    REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
-)
+SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_external_resources import _build_candidate_patch  # noqa: E402
@@ -184,9 +183,7 @@ def test_materialize_candidate_copies_upstream_to_local(
         ref="abc",
         assets=(asset,),
     )
-    resources = ManagedResources(
-        sources=(source,), replacements=(), watchlist=()
-    )
+    resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
 
     candidate = tmp_path / "candidate"
     materialize_candidate(resources, workspace, candidate)
@@ -339,9 +336,7 @@ def test_build_candidate_patch_detects_repo_vs_candidate_diff(
     candidate.mkdir()
     cand_target = candidate / ".github/skills/example/SKILL.md"
     cand_target.parent.mkdir(parents=True)
-    cand_target.write_text(
-        "---\nname: example\n---\nNew content.\n", encoding="utf-8"
-    )
+    cand_target.write_text("---\nname: example\n---\nNew content.\n", encoding="utf-8")
 
     asset = ManagedAsset(
         source="test-source",
@@ -391,12 +386,12 @@ def test_materialize_candidate_uses_explicit_source_root(
         ref="abc",
         assets=(asset,),
     )
-    resources = ManagedResources(
-        sources=(source,), replacements=(), watchlist=()
-    )
+    resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
 
     candidate = tmp_path / "candidate"
-    materialize_candidate(resources, workspace, candidate, sources_root=external_sources)
+    materialize_candidate(
+        resources, workspace, candidate, sources_root=external_sources
+    )
 
     target = candidate / ".github/skills/example/SKILL.md"
     assert target.exists()
@@ -444,7 +439,9 @@ def test_materialize_candidate_reports_all_missing_upstreams(
 
     candidate = tmp_path / "candidate"
     with pytest.raises(ValueError, match="Missing upstream paths") as exc_info:
-        materialize_candidate(resources, workspace, candidate, sources_root=sources_root)
+        materialize_candidate(
+            resources, workspace, candidate, sources_root=sources_root
+        )
     message = str(exc_info.value)
     assert "src-a" in message
     assert "src-b" in message
@@ -465,7 +462,10 @@ def test_materialize_candidate_reports_expected_source_root(tmp_path: Path) -> N
     message = str(excinfo.value)
     assert "Missing upstream paths:" in message
     assert (workspace / "sources").as_posix() in message
-    assert "Prepare the missing source checkout under that root or pass --source-root." in message
+    assert (
+        "Prepare the missing source checkout under that root or pass --source-root."
+        in message
+    )
 
 
 def test_load_overrides_rejects_missing_patch_file(tmp_path: Path) -> None:
@@ -520,9 +520,7 @@ def test_override_3way_replay_uses_real_git_repo(
         expected_content_hash=_sha256("---\nname: test\n---\nPatched.\n"),
     )
 
-    results = replay_overrides(
-        candidate_repo, (override,), patches_root=candidate_repo
-    )
+    results = replay_overrides(candidate_repo, (override,), patches_root=candidate_repo)
 
     assert len(results) == 1
     assert results[0].status == "applied"

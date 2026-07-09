@@ -6,12 +6,11 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = next(
-    parent for parent in Path(__file__).resolve().parents
+    parent
+    for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SCRIPT_DIR = (
-    REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
-)
+SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from home_syncing import (  # noqa: E402

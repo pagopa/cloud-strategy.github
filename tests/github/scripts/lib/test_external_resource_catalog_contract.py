@@ -5,7 +5,8 @@ import pytest
 import yaml
 
 REPO_ROOT = next(
-    parent for parent in Path(__file__).resolve().parents
+    parent
+    for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 sys.path.insert(0, str(REPO_ROOT / ".github/scripts"))
@@ -17,7 +18,9 @@ from lib.catalog_checks import (  # noqa: E402
 
 
 def _write_valid_managed_resources(root: Path) -> None:
-    manifest_dir = root / ".github/skills/local-agent-sync-external-resources/references"
+    manifest_dir = (
+        root / ".github/skills/local-agent-sync-external-resources/references"
+    )
     manifest_dir.mkdir(parents=True, exist_ok=True)
     manifest = manifest_dir / "managed-resources.yaml"
     manifest.write_text(
@@ -56,7 +59,9 @@ def test_catalog_check_uses_consolidated_manifest(tmp_path: Path) -> None:
 
 
 def test_catalog_check_rejects_duplicate_managed_target(tmp_path: Path) -> None:
-    manifest_dir = tmp_path / ".github/skills/local-agent-sync-external-resources/references"
+    manifest_dir = (
+        tmp_path / ".github/skills/local-agent-sync-external-resources/references"
+    )
     manifest_dir.mkdir(parents=True, exist_ok=True)
     manifest = manifest_dir / "managed-resources.yaml"
     manifest.write_text(
@@ -99,6 +104,5 @@ def test_catalog_check_rejects_residual_managed_upstream_name(
     findings = check_superpowers_import_naming(tmp_path)
 
     assert any(
-        finding.code == "superpowers-import-skill-name-mismatch"
-        for finding in findings
+        finding.code == "superpowers-import-skill-name-mismatch" for finding in findings
     )

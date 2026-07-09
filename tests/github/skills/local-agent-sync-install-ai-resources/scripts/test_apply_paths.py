@@ -6,21 +6,20 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = next(
-    parent for parent in Path(__file__).resolve().parents
+    parent
+    for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SCRIPT_DIR = (
-    REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
-)
+SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from home_syncing import (  # noqa: E402
     HomeSyncOperation,
     HomeSyncPlan,
     ManagedResource,
+    _stale_confinement_check,
     apply_home_sync_plan,
     hash_resource,
-    _stale_confinement_check,
 )
 
 
@@ -41,20 +40,37 @@ def test_apply_copies_skill_to_home(tmp_path: Path) -> None:
     state_root.mkdir()
 
     resource = ManagedResource(
-        target="skills", resource_id="demo", resource_family="skills",
-        source_path=".github/skills/demo", target_path=str(target_path),
-        source_hash="abc", content_hash=content_hash, last_action="copy",
+        target="skills",
+        resource_id="demo",
+        resource_family="skills",
+        source_path=".github/skills/demo",
+        target_path=str(target_path),
+        source_hash="abc",
+        content_hash=content_hash,
+        last_action="copy",
     )
     operation = HomeSyncOperation(
-        target="skills", action="copy", path=str(target_path),
-        reason="first install", source_path=".github/skills/demo", resource_id="demo",
+        target="skills",
+        action="copy",
+        path=str(target_path),
+        reason="first install",
+        source_path=".github/skills/demo",
+        resource_id="demo",
     )
     plan = HomeSyncPlan(
-        source_root=tmp_path, home_root=home_root, state_root=state_root,
-        mode="apply", selected_targets=("skills",), retired_targets=(),
-        source_revision="abc", source_resources_considered=1,
-        operations=(operation,), desired_resources=(resource,),
-        missing_dirs=(), unsupported_families_by_target={}, residual_drift=(),
+        source_root=tmp_path,
+        home_root=home_root,
+        state_root=state_root,
+        mode="apply",
+        selected_targets=("skills",),
+        retired_targets=(),
+        source_revision="abc",
+        source_resources_considered=1,
+        operations=(operation,),
+        desired_resources=(resource,),
+        missing_dirs=(),
+        unsupported_families_by_target={},
+        residual_drift=(),
     )
 
     manifest_path = apply_home_sync_plan(plan)
@@ -72,15 +88,26 @@ def test_apply_delete_with_prune(tmp_path: Path) -> None:
     state_root.mkdir()
 
     operation = HomeSyncOperation(
-        target="skills", action="delete", path=str(stale_path),
-        reason="stale managed resource", code="stale-managed",
+        target="skills",
+        action="delete",
+        path=str(stale_path),
+        reason="stale managed resource",
+        code="stale-managed",
     )
     plan = HomeSyncPlan(
-        source_root=tmp_path, home_root=home_root, state_root=state_root,
-        mode="apply", selected_targets=("skills",), retired_targets=(),
-        source_revision="abc", source_resources_considered=0,
-        operations=(operation,), desired_resources=(),
-        missing_dirs=(), unsupported_families_by_target={}, residual_drift=(),
+        source_root=tmp_path,
+        home_root=home_root,
+        state_root=state_root,
+        mode="apply",
+        selected_targets=("skills",),
+        retired_targets=(),
+        source_revision="abc",
+        source_resources_considered=0,
+        operations=(operation,),
+        desired_resources=(),
+        missing_dirs=(),
+        unsupported_families_by_target={},
+        residual_drift=(),
     )
 
     apply_home_sync_plan(plan, prune_managed=True)
@@ -96,15 +123,26 @@ def test_apply_delete_without_prune_preserves_file(tmp_path: Path) -> None:
     state_root.mkdir()
 
     operation = HomeSyncOperation(
-        target="skills", action="delete", path=str(stale_path),
-        reason="stale managed resource", code="stale-managed",
+        target="skills",
+        action="delete",
+        path=str(stale_path),
+        reason="stale managed resource",
+        code="stale-managed",
     )
     plan = HomeSyncPlan(
-        source_root=tmp_path, home_root=home_root, state_root=state_root,
-        mode="apply", selected_targets=("skills",), retired_targets=(),
-        source_revision="abc", source_resources_considered=0,
-        operations=(operation,), desired_resources=(),
-        missing_dirs=(), unsupported_families_by_target={}, residual_drift=(),
+        source_root=tmp_path,
+        home_root=home_root,
+        state_root=state_root,
+        mode="apply",
+        selected_targets=("skills",),
+        retired_targets=(),
+        source_revision="abc",
+        source_resources_considered=0,
+        operations=(operation,),
+        desired_resources=(),
+        missing_dirs=(),
+        unsupported_families_by_target={},
+        residual_drift=(),
     )
 
     apply_home_sync_plan(plan, prune_managed=False)
@@ -118,8 +156,12 @@ def test_stale_confinement_blocks_path_outside_home(tmp_path: Path) -> None:
     outside_path.mkdir(parents=True)
 
     code = _stale_confinement_check(
-        item={"target": "skills", "resource_family": "skills",
-              "resource_id": "x", "content_hash": "abc"},
+        item={
+            "target": "skills",
+            "resource_family": "skills",
+            "resource_id": "x",
+            "content_hash": "abc",
+        },
         target_path=str(outside_path),
         home_root=home_root,
         mode="plan",
@@ -138,8 +180,12 @@ def test_stale_confinement_blocks_symlink(tmp_path: Path) -> None:
     symlink.symlink_to(outside)
 
     code = _stale_confinement_check(
-        item={"target": "skills", "resource_family": "skills",
-              "resource_id": "x", "content_hash": "abc"},
+        item={
+            "target": "skills",
+            "resource_family": "skills",
+            "resource_id": "x",
+            "content_hash": "abc",
+        },
         target_path=str(symlink),
         home_root=home_root,
         mode="plan",
