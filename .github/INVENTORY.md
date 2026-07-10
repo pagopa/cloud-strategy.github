@@ -32,6 +32,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 ## Skills
 
+- `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
+- `.github/skills/addyosmani-code-simplification/SKILL.md`
 - `.github/skills/agent-os-discover-standards/SKILL.md`
 - `.github/skills/agent-os-index-standards/SKILL.md`
 - `.github/skills/agent-os-inject-standards/SKILL.md`
@@ -53,11 +55,11 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-codeql/SKILL.md`
 - `.github/skills/awesome-copilot-dependabot/SKILL.md`
 - `.github/skills/awesome-copilot-secret-scanning/SKILL.md`
+- `.github/skills/awesome-copilot-security-review/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
 - `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
 - `.github/skills/internal-agent-support-next-step/SKILL.md`
-- `.github/skills/internal-ai-resource-review/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-lambda/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
@@ -73,7 +75,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-bash/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
 - `.github/skills/internal-cloud-policy/SKILL.md`
-- `.github/skills/internal-code-review/SKILL.md`
 - `.github/skills/internal-context-handoff/SKILL.md`
 - `.github/skills/internal-copilot-audit/SKILL.md`
 - `.github/skills/internal-copilot-docs-research/SKILL.md`
@@ -84,7 +85,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-excel/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-execute-plans/SKILL.md`
-- `.github/skills/internal-gateway-idea-brainstorming/SKILL.md`
 - `.github/skills/internal-gateway-idea/SKILL.md`
 - `.github/skills/internal-gateway-simple-task/SKILL.md`
 - `.github/skills/internal-gateway-writing-plans/SKILL.md`
@@ -99,7 +99,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-github-pr/SKILL.md`
 - `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
-- `.github/skills/internal-high-level-review/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`
 - `.github/skills/internal-java/SKILL.md`
@@ -116,6 +115,9 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-python-project/SKILL.md`
 - `.github/skills/internal-python-script/SKILL.md`
 - `.github/skills/internal-python/SKILL.md`
+- `.github/skills/internal-review-ai-resources/SKILL.md`
+- `.github/skills/internal-review-code/SKILL.md`
+- `.github/skills/internal-review-high-level/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
 - `.github/skills/internal-tdd/SKILL.md`
 - `.github/skills/internal-terraform/SKILL.md`
@@ -124,7 +126,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
-- `.github/skills/mattpocock-caveman/SKILL.md`
+- `.github/skills/mattpocock-handoff/SKILL.md`
+- `.github/skills/mattpocock-research/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
@@ -147,6 +150,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/superpowers-writing-plans/SKILL.md`
 - `.github/skills/terraform-terraform-search-import/SKILL.md`
 - `.github/skills/terraform-terraform-test/SKILL.md`
+- `.github/skills/vercel-find-skills/SKILL.md`
 
 ### Support-only imported office skills
 
@@ -168,21 +172,22 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/lib/internal_skills.py`
 - `.github/scripts/lib/inventory.py`
 - `.github/scripts/lib/jsonc.py`
+- `.github/scripts/lib/repo_paths.py`
 - `.github/scripts/lib/shared.py`
+- `.github/scripts/lib/sync_exclusions.py`
 - `.github/scripts/lib/syncing.py`
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
 - `.github/scripts/sync_copilot_catalog.py`
-- `.github/scripts/sync_home_ai_resources.py`
 - `.github/scripts/validate_internal_skills.py`
 
 ## Agents
 
-- `.github/agents/internal-code-review.agent.md`
 - `.github/agents/internal-gateway-critical-master.agent.md`
-- `.github/agents/internal-gateway-idea-brainstorming.agent.md`
+- `.github/agents/internal-gateway-idea.agent.md`
 - `.github/agents/internal-gateway-review.agent.md`
 - `.github/agents/internal-gateway-simple-task.agent.md`
+- `.github/agents/internal-review-code.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`

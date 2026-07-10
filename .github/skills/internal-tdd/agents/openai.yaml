@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal TDD"
-  short_description: "Risk-driven test-first guardrails for executable coding changes"
-  default_prompt: "Use $internal-tdd for coding changes with executable behavior and choose the lightest useful test-first guardrail before implementation."
+  short_description: "Risk-driven TDD routing for code changes"
+  default_prompt: "Use $internal-tdd for coding changes with executable or evaluable behavior; classify the seam, then delegate mandatory red-green-refactor work to $superpowers-test-driven-development."

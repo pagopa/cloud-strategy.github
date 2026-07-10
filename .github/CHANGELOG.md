@@ -21,11 +21,11 @@ Use this format for new updates:
 
 ## 2026-06-02
 
-- Added `internal-gateway-idea-brainstorming` as a visible fourth gateway skill and thin Copilot wrapper agent, owning substantive idea definition, guided decision interview, convergence, Definition Brief, mandatory critical pass, and validated handoff before operational planning.
+- Added `internal-gateway-idea` as a visible fourth gateway skill and thin Copilot wrapper agent, owning substantive idea definition, guided decision interview, convergence, Definition Brief, mandatory critical pass, and validated handoff before operational planning.
 - Absorbed and retired `internal-idea-define-advisor`, moving its useful owner-map and question-bank concepts into the new gateway bundle without a compatibility stub or alias.
 - Narrowed `internal-gateway-operational-flow` to delegate unresolved idea work visibly to the new gateway and consume validated Definition Brief handoffs for `plan` without repeating ideation or its critical pass.
 - Added guided decision interview semantics: evidence-first discovery, iterative numbered question blocks through `grill-me`, visible defaults, compact decision ledger, proportional depth, and checkpoint states.
-- Retired the standalone `idea-refine` skill immediately after extracting its useful shaping frameworks and evaluation criteria into `internal-gateway-idea-brainstorming` references, preserving its upstream license and removing the competing runtime entrypoint.
+- Retired the standalone `idea-refine` skill immediately after extracting its useful shaping frameworks and evaluation criteria into `internal-gateway-idea` references, preserving its upstream license and removing the competing runtime entrypoint.
 - Updated adjacent routing owners (`internal-agent-support-next-step`, `internal-agent-support-lane-change-engine`, `internal-gateway-simple-task`, `internal-gateway-critical-master`) to recognize the new gateway in handoffs and lane-change recommendations.
 - Updated `.github/agents/README.md`, `.github/README.md`, `INTERNAL_CONTRACT.md`, `docs`, wrapper-alignment, mode-contracts, subagent-patterns, home-sync catalog, token benchmarks, and regression tests for the four-gateway model.
 
@@ -133,7 +133,7 @@ Use this format for new updates:
 - Added `internal-python-runner.sh`, Bash wrappers for every executable repository Python entrypoint, explicit `PyYAML` requirements for `openai-skill-creator`, and wrapper-first invocation guidance across prompts, skills, scripts, security docs, and maintainer workflow references.
 - Hardened `.github/scripts/validate-copilot-customizations.py`, `tests/test_contract_runner.py`, and `tests/test_validate_copilot_customizations.py` so canonical operational agents must point only to real canonical escalation targets, must not self-route, and stale retired-agent references are caught case-insensitively.
 - Clarified `internal-router` and `internal-agent-routing-engine` so medium-confidence routing asks at most one targeted clarification question with two clear options before falling back to `internal-planning-leader`.
-- Strengthened `.github/skills/internal-code-review/SKILL.md` with a standalone quick-start so the skill stays usable directly as a tactical review asset, not only as the review guard's engine.
+- Strengthened `.github/skills/internal-review-code/SKILL.md` with a standalone quick-start so the skill stays usable directly as a tactical review asset, not only as the review guard's engine.
 - Refreshed `.github/README.md` so the maintainer-facing catalog now matches the live `internal-*`, `obra-*`, and imported support families, the canonical internal agent model, and the actual scripts and workflow present on disk after recent repository restructuring.
 
 ## 2026-04-04

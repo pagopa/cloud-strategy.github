@@ -3,7 +3,7 @@
 ## GitHub Actions
 
 ```yaml
-name: Terraform Tests
+name: terraform-terraform-test
 
 on:
   pull_request:

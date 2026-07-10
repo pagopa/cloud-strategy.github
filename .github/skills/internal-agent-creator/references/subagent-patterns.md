@@ -73,7 +73,7 @@ Focused instructions for domain A work.
 ### Router with explicit dispatch targets
 
 ```yaml
-agents: ['internal-gateway-idea-brainstorming', 'internal-gateway-review', 'internal-gateway-critical-master', 'internal-gateway-simple-task']
+agents: ['internal-gateway-idea', 'internal-gateway-review', 'internal-gateway-critical-master', 'internal-gateway-simple-task']
 ```
 
 Only these four agents can be invoked as subagents. The platform enforces this.

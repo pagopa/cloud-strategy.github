@@ -19,6 +19,7 @@ Expected state files:
 - `manifest.json`
 - `last-plan.json`
 - `last-audit.json`
+- `last-bisync-plan.json`
 - `locks/home-ai-resources.lock`
 
 Optional debug logs may live under `logs/` when the implementation needs durable operator evidence.
@@ -66,6 +67,13 @@ Each `managed_resources[]` item should capture:
 
 ## Reporting Contract
 
+`--format compact` is the default and the preferred format for AI/tool
+iteration. It emits a single-line JSON object with status, counts, blockers,
+next action, and a small bounded evidence sample. Use `--format report` only
+when a human-readable command report is explicitly needed. In chat, agents
+should translate compact output into concise Markdown instead of asking the CLI
+to spend tokens on tables.
+
 Deterministic report output (`--format report`) and JSON reporting should expose at least:
 
 - `selected_targets`
@@ -84,11 +92,55 @@ Deterministic report output (`--format report`) and JSON reporting should expose
 
 Text reports must use a summary-first layout rather than a raw field dump. Use tables where columns clarify changes, blockers, or completed actions; use short bullets for counts and state summaries.
 
-Model-facing report tables should stay bounded for routine change and completed-action rows. Keep all blocker, attention, and readiness-failure rows visible. When rows are omitted, add an explicit omitted-count row and point to `--format json` for full detail.
+Human-readable report tables should stay bounded for routine change and completed-action rows. Keep all blocker, attention, and readiness-failure rows visible. When rows are omitted, add an explicit omitted-count row and point to `--format json` for full detail.
+
+## Canonical Chat Template
+
+Use this template when you need to answer the user directly in chat. Keep the wording plain and convert the labels into the conversation language when appropriate.
+
+### Problem Report
+
+Use this structure when the sync is not yet finished or when the user needs to choose a direction. Skip any section that would be empty instead of rendering a heading with no content:
+
+1. `🚦 Status`
+  - One short line with the overall result.
+2. `📌 What is happening`
+  - One short paragraph that explains the current state in plain language.
+3. `🔁 Differences`
+  - List only the actionable changes.
+  - Omit the section entirely when there is nothing actionable to show.
+  - Number the items when the user may need to choose between them.
+  - Summarize unchanged or skipped resources by count unless the user asked for the full list.
+4. `⛔ Why it stops`
+  - Explain the smallest real blocker, not the internal code name.
+  - Include only the drift or policy item that prevents the next step.
+5. `🎯 Choices`
+  - Present only the actions the user can actually take now.
+  - Use numbered options.
+  - Put the recommended choice first.
+  - Keep each option to one line when possible.
+
+### Completion Report
+
+Use this structure when the work is finished. Skip any section that would be empty instead of rendering a heading with no content:
+
+1. `✅ Result`
+  - Say whether the run completed, applied changes, or ended as no-op.
+2. `🛠️ What changed`
+  - One short paragraph with the concrete outcome.
+  - Omit the section entirely when nothing changed.
+3. `🔎 Final verification`
+  - State the strongest evidence available, such as a clean plan, hash match, or zero residual drift.
+4. `🧾 Residuals`
+  - Include only if something still needs attention.
+  - If nothing remains, say `none`.
+5. `➡️ Next step`
+  - If the run is done, say there is nothing else to do.
+  - If the run is blocked, name the single next action.
 
 ### Shared Header
 
-Always start with a short status line that includes:
+Always start with a short `🚦 Status` line that includes:
 
 - mode
 - human-friendly lane label, such as `repo-to-home install` for install or `repo-home drift` for bisync
@@ -101,13 +153,13 @@ Always start with a short status line that includes:
 
 Use these stable sections when rendering model-facing reports:
 
-- `Summary`: target, resource, drift, blocked, and already-aligned counts.
-- `Readiness`: doctor-only non-ok checks with why they matter, what blocks next, and the recommended action.
-- `Changes`: proposed or completed writes, with one row per changed resource.
-- `Attention`: blockers, ambiguous drift, or decisions that need a user.
-- `Validation`: strongest available evidence such as hash match, manifest path, state path, or post-apply clean plan.
-- `Remaining Work`: include only when something remains.
-- `Next`: structured next action and reason.
+- `🧭 Summary`: target, resource, drift, blocked, and already-aligned counts.
+- `🩺 Readiness`: doctor-only non-ok checks with why they matter, what blocks next, and the recommended action.
+- `🛠️ Changes`: proposed or completed writes, with one row per changed resource.
+- `⚠️ Attention`: blockers, ambiguous drift, or decisions that need a user.
+- `🔎 Validation`: strongest available evidence such as hash match, manifest path, state path, or post-apply clean plan.
+- `🧾 Remaining Work`: include only when something remains.
+- `➡️ Next`: structured next action and reason.
 
 Do not list every unchanged managed resource in model-facing reports. Summarize skipped or already-aligned resources by count unless the user asks for full audit detail or selects JSON output.
 
@@ -122,7 +174,7 @@ Use this table for missing roots, documentation gaps, manifest problems, permiss
 
 ### Sync, Plan, Audit, And Bisync Plan Report
 
-For top-level `sync`, use this compact chat order: `Status`, `Summary`, `Auto-applied` or `Planned repo-to-home copies`, `Stopped on`, `Validation`, and `Next`.
+For top-level `sync`, use this compact chat order: `🚦 Status`, `🧭 Summary`, `🚀 Auto-applied` or `📋 Planned repo-to-home copies`, `⛔ Stopped on`, `🔎 Validation`, and `➡️ Next`.
 
 After the shared header and summary, show one change-oriented table and one attention table when they are useful.
 
@@ -195,16 +247,17 @@ When no changes are proposed or applied, report `no-op` explicitly with the reas
 
 ## Automation Entry Points
 
-- Bundled CLI: `scripts/sync_home_ai_resources.py`
-- Bundled dependency bootstrap: `scripts/run.sh`
+- Bundled dependency bootstrap and canonical CLI: `scripts/run.sh`
+- Bundled Python CLI: `scripts/sync_home_ai_resources.py`
 - Bundled implementation: `scripts/home_syncing.py`
 - Bundled bisync engine: `scripts/bisync_skills.py`
 - Bundled reference loader: `scripts/home_sync_contract.py`
 - Bundled dependency lock: `scripts/requirements.txt`
-- Repository wrapper: `.github/scripts/sync_home_ai_resources.py`
-- Repository Bash wrapper: `.github/scripts/sync_home_ai_resources.sh`
+- Repository dispatcher compatibility path: `.github/scripts/run.sh sync_home_ai_resources ...`
 
-Prefer the bundled scripts when the skill is direct-copied into a home runtime. Prefer the repository wrappers when running from this source repository because they reuse the repository maintenance-tool environment.
+Prefer the bundled runner in this repository and after direct-copy into a home
+runtime. The repository dispatcher exists only as a compatibility path and must
+delegate to the bundled runner instead of carrying duplicate sync logic.
 
 ## Install Sync Contract
 
@@ -215,6 +268,7 @@ The install lane provides unidirectional `repo -> home` materialization of allow
 - `sync`: safe top-level automation that may apply only clean repo-to-home install work before running the bisync review gate.
 - `plan`: dry run that produces a readable diff and machine-readable state. Read-only.
 - `audit`: compare source, manifest, and managed target paths. Read-only.
+- `--fast`: manifest-focused shortcut for `plan` and `audit` only. It must not change `apply` or `sync` source discovery.
 - `doctor`: verify runtime roots, permissions, symlink posture, and manifest health. Read-only.
 - `apply`: materialize approved operations. Writes to home only.
 - `dry-run`: alias of `plan`.
@@ -244,7 +298,7 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
 ### Bisync Modes
 
 - `bisync plan`: detect drift. Read-only. Produces a drift list with entries for `repo-to-home`, `home-to-repo`, `only-repo`, `only-home`, and `equal-mtime`.
-- `bisync apply`: resolve drift by copying winner to loser. Writes to both repo and home as needed.
+- `bisync apply`: resolve drift by copying winner to loser. Writes to both repo and home as needed, but only after a reviewed matching `bisync plan` snapshot exists for the same repo and home roots.
 
 ### Logic
 
@@ -266,9 +320,10 @@ The `bisync` lane provides explicit bidirectional reconciliation between `.githu
 
 Before any write in `bisync apply`:
 
-1. Verify `git status --porcelain --untracked-files=all` on the source repository.
-2. Block `apply` if the repository is not clean.
-3. Block `apply` if any `only-home` or `equal-mtime` entry exists in the current plan.
+1. Require a reviewed `last-bisync-plan.json` snapshot that matches the current drift plan for the same repo and home roots.
+2. Verify `git status --porcelain --untracked-files=all` on the source repository.
+3. Block `apply` if the repository is not clean.
+4. Block `apply` if any `only-home` or `equal-mtime` entry exists in the current plan.
 
 ### Apply
 
@@ -297,3 +352,4 @@ The `bisync` payload includes:
 - `next_step`: human-readable next instruction.
 - `next_action`: structured object with `action`, `allowed`, `requires_explicit_approval`, `command`, `reason`.
 - `verification`: post-apply status with `status` and optional `reason` or `residual_drifts`.
+- `bisync-plan-required`: emitted when `bisync apply` is requested without a matching reviewed snapshot.

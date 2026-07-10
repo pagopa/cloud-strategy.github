@@ -2,9 +2,9 @@
 """Purpose: plan and apply local home-directory AI resource sync operations.
 
 Usage examples:
-    python3 scripts/sync_home_ai_resources.py sync --targets skills --format report
-    python3 scripts/sync_home_ai_resources.py plan --targets skills --format report
-    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs --format report
+    python3 scripts/sync_home_ai_resources.py sync --targets skills
+    python3 scripts/sync_home_ai_resources.py plan --targets skills --compact
+    python3 scripts/sync_home_ai_resources.py apply --targets skills --create-missing-dirs
 """
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ from home_syncing import (
 from sync_output import (
     build_compact_bisync_output,
     build_compact_install_output,
+    dump_compact_json,
     render_doctor_report,
     render_install_report,
     render_sync_report,
@@ -40,8 +41,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Plan, audit, doctor, or apply allowlisted home AI resource sync operations."
     )
-    subparsers = parser.add_subparsers(dest="command", required=False)
-    subparsers.required = True
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     for cmd in ("sync", "plan", "apply", "audit", "doctor", "dry-run"):
         cmd_parser = subparsers.add_parser(cmd, help=f"Run {cmd} sync operation.")
@@ -80,8 +80,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         cmd_parser.add_argument(
             "--format",
             choices=["text", "json", "compact", "report"],
-            default="report",
+            default="compact",
             help="Output format.",
+        )
+        cmd_parser.add_argument(
+            "--compact",
+            action="store_true",
+            help="Alias for --format compact; optimized for AI/tool iteration.",
         )
         cmd_parser.add_argument(
             "--fast",
@@ -106,8 +111,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     bisync_plan.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
+    )
+    bisync_plan.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
     )
     bisync_apply = bisync_sub.add_parser("apply", help="Apply bisync resolution.")
     bisync_apply.add_argument("--source-root", default=".", help="Source repository root.")
@@ -119,11 +129,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     bisync_apply.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
     )
+    bisync_apply.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
+    )
 
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if getattr(args, "compact", False):
+        args.format = "compact"
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -203,17 +221,30 @@ def run(args: argparse.Namespace) -> int:
         emit_output(payload, format_name=args.format)
         return 0
 
-    plan = build_home_sync_plan(
-        source_root=source_root,
-        home_root=home_root,
-        targets=targets,
-        retired_targets=retire_targets,
-        mode=command,
-        experimental_targets=args.experimental_targets,
-        prune_managed=args.prune_managed,
-        fast=args.fast,
-        changed_only=args.changed_only,
-    )
+    try:
+        plan = build_home_sync_plan(
+            source_root=source_root,
+            home_root=home_root,
+            targets=targets,
+            retired_targets=retire_targets,
+            mode=command,
+            experimental_targets=args.experimental_targets,
+            prune_managed=args.prune_managed,
+            fast=args.fast,
+            changed_only=args.changed_only,
+        )
+    except (RuntimeError, ValueError, FileNotFoundError, KeyError) as exc:
+        code = _extract_blocked_code(exc)
+        payload = {
+            "mode": command,
+            "selected_targets": list(targets),
+            "retired_targets": list(retire_targets),
+            "blocked_codes": [code],
+            "error": str(exc),
+            **blocked_report_fields(str(exc)),
+        }
+        emit_output(payload, format_name=args.format, failure_message=str(exc))
+        return 1
 
     if command == "apply":
         return run_apply(plan, args)
@@ -232,17 +263,30 @@ def run_sync(
     retire_targets: tuple[str, ...],
     args: argparse.Namespace,
 ) -> int:
-    install_plan = build_home_sync_plan(
-        source_root=source_root,
-        home_root=home_root,
-        targets=targets,
-        retired_targets=retire_targets,
-        mode="apply",
-        experimental_targets=args.experimental_targets,
-        prune_managed=args.prune_managed,
-        fast=args.fast,
-        changed_only=args.changed_only,
-    )
+    try:
+        install_plan = build_home_sync_plan(
+            source_root=source_root,
+            home_root=home_root,
+            targets=targets,
+            retired_targets=retire_targets,
+            mode="apply",
+            experimental_targets=args.experimental_targets,
+            prune_managed=args.prune_managed,
+            fast=args.fast,
+            changed_only=args.changed_only,
+        )
+    except (RuntimeError, ValueError, FileNotFoundError, KeyError) as exc:
+        code = _extract_blocked_code(exc)
+        payload = {
+            "mode": "sync",
+            "status": "blocked",
+            "blocked_codes": [code],
+            "reason": str(exc),
+            "install": {"error": str(exc)},
+            "bisync": None,
+        }
+        emit_sync_output(payload, format_name=args.format)
+        return 1
     install_payload = install_plan.to_dict()
     auto_blockers = install_auto_apply_blockers(install_plan, args)
     if auto_blockers:
@@ -370,7 +414,7 @@ def emit_sync_output(payload: dict[str, object], *, format_name: str) -> None:
             compact["install"] = build_compact_install_output(install_payload)
         if isinstance(bisync_payload, dict):
             compact["bisync"] = build_compact_bisync_output(bisync_payload)
-        print(json.dumps(compact, indent=2, sort_keys=True))
+        print(dump_compact_json(compact))
         return
 
     print(render_sync_report(payload), end="")
@@ -416,7 +460,7 @@ def next_action_for_doctor(blocked_codes: list[str]) -> dict[str, object]:
         "action": "plan",
         "allowed": True,
         "requires_explicit_approval": False,
-        "command": "plan --targets <targets> --format report",
+        "command": "plan --targets <targets>",
         "reason": "Doctor found no readiness blockers.",
     }
 
@@ -435,6 +479,13 @@ def blocked_report_fields(reason: str) -> dict[str, object]:
     }
 
 
+def _extract_blocked_code(exc: BaseException) -> str:
+    message = str(exc)
+    if ":" in message:
+        return message.split(":", 1)[0].strip()
+    return type(exc).__name__
+
+
 def normalize_mode(command: str) -> str:
     return "plan" if command == "dry-run" else command
 
@@ -449,7 +500,7 @@ def emit_output(
         compact_payload = build_compact_install_output(payload)
         if failure_message and "error" not in compact_payload:
             compact_payload["error"] = failure_message
-        print(json.dumps(compact_payload, indent=2, sort_keys=True))
+        print(dump_compact_json(compact_payload))
         return
 
     if format_name == "json":

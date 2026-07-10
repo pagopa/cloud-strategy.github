@@ -196,6 +196,21 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - when historical context is retained, it is clearly marked as historical rather than normative
   - future automation is rebuilt from the current contract, not from stale references
 
+### Test Layout
+
+#### `testing-python-tests-mirror-source-layout`
+
+- Goal: keep Python test ownership obvious from the test path alone.
+- Scope:
+  - repository-root `tests/`
+  - Python tests that target nested repository-owned source paths
+- Expected behavior:
+  - Python tests remain under repository-root `tests/`
+  - test paths under `tests/` should make the covered owner or checked behavior obvious
+  - when a test targets a nested source path, prefer a directory layout that stays discoverable to the active test runner and preserves owner clarity
+  - flat root-level files such as `tests/test_*.py` are best reserved for root-owned contracts or sources that also live at the repository root
+  - deeper layout conventions may be defined by a nearer language or tool owner when the repository-wide rule is not enough
+
 ### Naming And Operating Model
 
 #### `resource-governance-uses-supported-origin-naming`

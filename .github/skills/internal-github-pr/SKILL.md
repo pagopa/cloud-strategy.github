@@ -12,9 +12,9 @@ Treat the referenced skills below as on-demand supports. Do not preload them
 for every PR task; load only the owner proved by the touched surface, review
 need, workflow change, or lifecycle claim.
 
-- `internal-code-review`: defect-first review after PR body or lifecycle work.
+- `internal-review-code`: defect-first review after PR body or lifecycle work.
 - `internal-github-actions`: workflow/action pinning and Actions security rules for PRs that touch workflows.
-- `internal-high-level-review`: systems-level impact analysis that feeds PR risk.
+- `internal-review-high-level`: systems-level impact analysis that feeds PR risk.
 - `openai-gh-address-comments`: review-thread remediation after PR body work exists.
 - `superpowers-verification-before-completion`: evidence gate before claiming PR readiness, validity, mergeability, or completion.
 
@@ -98,8 +98,8 @@ If the user provides a specification, issue, or acceptance outline:
 
 ## Cross-references
 
-- **internal-high-level-review**: for systems-level impact analysis that feeds the risk section.
-- **internal-code-review**: for the review that follows the PR.
+- **internal-review-high-level**: for systems-level impact analysis that feeds the risk section.
+- **internal-review-code**: for the review that follows the PR.
 - **internal-github-actions**: for workflow/action pinning and Actions security rules touched by the PR.
 - **openai-gh-address-comments**: for addressing review threads and PR comments after the PR body exists; keep review-thread remediation separate from PR lifecycle/body work.
 - **superpowers-verification-before-completion**: for evidence before readiness,

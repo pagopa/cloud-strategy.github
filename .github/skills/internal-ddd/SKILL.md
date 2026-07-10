@@ -10,7 +10,7 @@ description: Use when deciding whether a complex domain needs Domain-Driven Desi
 This index lists every other skill that this file asks the agent to load, route
 to, compare against, or delegate to.
 
-- `internal-high-level-review`: incremental adoption review inside existing systems.
+- `internal-review-high-level`: incremental adoption review inside existing systems.
 - `internal-oop-design-patterns`: implementation-level pattern owner after tactical modeling.
 - `antigravity-api-design-principles`: API or contract design owner when bounded-context seams become interface work.
 
@@ -57,7 +57,7 @@ Use this skill to decide how much Domain-Driven Design a problem deserves, then 
 
 ## Adjacent lanes
 
-- Use `internal-high-level-review` when the challenge is incremental adoption inside an existing system.
+- Use `internal-review-high-level` when the challenge is incremental adoption inside an existing system.
 - Use `internal-oop-design-patterns` when a tactical model now needs implementation-level pattern choices.
 - Use `antigravity-api-design-principles` when bounded-context seams are turning into API or contract design work.
 - Treat infrastructure boundaries as legitimate bounded-context candidates when the real seams are module ownership, environment contracts, or repo-level responsibility lines rather than object-oriented code.

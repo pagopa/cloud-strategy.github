@@ -11,9 +11,9 @@ defaults:
     - copilot
     - opencode
 resources:
-  - resource_id: internal-gateway-idea-brainstorming
+  - resource_id: internal-gateway-idea
     source_family: agents
-    source_path: .github/agents/internal-gateway-idea-brainstorming.agent.md
+    source_path: .github/agents/internal-gateway-idea.agent.md
     include_targets:
       - codex
       - copilot
@@ -29,9 +29,9 @@ resources:
       - opencode
     target_support: See runtime support matrix
     notes: Gateway agent for non-code and mixed review targets.
-  - resource_id: internal-code-review
+  - resource_id: internal-review-code
     source_family: agents
-    source_path: .github/agents/internal-code-review.agent.md
+    source_path: .github/agents/internal-review-code.agent.md
     include_targets:
       - codex
       - copilot

@@ -74,7 +74,7 @@ VSCODE_COPILOT_SETTINGS = (
 )
 INVENTORY_PATH = ".github/INVENTORY.md"
 IMPORTED_ASSET_OVERRIDES_PATH = ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
-SUPERPOWERS_NORMALIZATION_PATH = ".github/skills/local-agent-sync-external-resources/references/superpowers-normalization.yaml"
+MANAGED_EXTERNAL_RESOURCES_PATH = ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
 
 
 @dataclass(frozen=True)
@@ -190,38 +190,50 @@ def sha256_file(path: Path) -> str:
 
 
 def git_revision(root: Path) -> str | None:
-    result = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"],
-        cwd=root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode != 0:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return None
+        return result.stdout.strip() or None
+    except (subprocess.TimeoutExpired, OSError):
         return None
-    return result.stdout.strip() or None
 
 
 def is_git_dirty(root: Path) -> bool:
-    result = subprocess.run(
-        ["git", "status", "--porcelain"],
-        cwd=root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode != 0:
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return False
+        return bool(result.stdout.strip())
+    except (subprocess.TimeoutExpired, OSError):
         return False
-    return bool(result.stdout.strip())
 
 
 def git_dirty_paths(root: Path) -> list[str]:
-    result = subprocess.run(
-        ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
-        cwd=root,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
+            cwd=root,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return []
     if result.returncode != 0 or not result.stdout:
         return []
 

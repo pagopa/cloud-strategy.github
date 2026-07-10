@@ -13,6 +13,10 @@ package architecture, or deterministic test design becomes the real issue.
 
 - `internal-nodejs-project`: Node.js or TypeScript services, APIs, middleware, modules, and deterministic tests when project-level architecture becomes the main concern.
 
+## Referenced files
+
+- `references/review-anti-patterns.md`: Node.js/TypeScript review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Node.js-specific defect depth.
+
 ## When to use
 
 - `.js`, `.cjs`, `.mjs`, `.ts`, `.tsx`, `package.json`, `tsconfig.json`, or Node.js package-manager lockfile changes.

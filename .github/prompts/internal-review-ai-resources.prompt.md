@@ -35,9 +35,9 @@ Use these repository sources first:
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
 - [.github/agents/internal-gateway-review.agent.md](../agents/internal-gateway-review.agent.md)
-- [.github/skills/internal-ai-resource-review/SKILL.md](../skills/internal-ai-resource-review/SKILL.md)
+- [.github/skills/internal-review-ai-resources/SKILL.md](../skills/internal-review-ai-resources/SKILL.md)
 
-Then use `internal-ai-resource-review` as the reusable qualitative owner for
+Then use `internal-review-ai-resources` as the reusable qualitative owner for
 profile selection, target coverage, lifecycle checks, report shape, and bundle
 review depth.
 

@@ -1,0 +1,234 @@
+version: 1
+sources:
+  github-awesome-copilot:
+    repository: https://github.com/github/awesome-copilot.git
+    ref: e986f49695491311df2774030ebe11efabd0fb77
+    assets:
+      - upstream: skills/agentic-eval
+        local: .github/skills/awesome-copilot-agentic-eval
+        canonical_name: awesome-copilot-agentic-eval
+      - upstream: skills/azure-devops-cli
+        local: .github/skills/awesome-copilot-azure-devops-cli
+        canonical_name: awesome-copilot-azure-devops-cli
+      - upstream: skills/azure-pricing
+        local: .github/skills/awesome-copilot-azure-pricing
+        canonical_name: awesome-copilot-azure-pricing
+      - upstream: skills/azure-resource-health-diagnose
+        local: .github/skills/awesome-copilot-azure-resource-health-diagnose
+        canonical_name: awesome-copilot-azure-resource-health-diagnose
+      - upstream: skills/azure-role-selector
+        local: .github/skills/awesome-copilot-azure-role-selector
+        canonical_name: awesome-copilot-azure-role-selector
+      - upstream: skills/cloud-design-patterns
+        local: .github/skills/awesome-copilot-cloud-design-patterns
+        canonical_name: awesome-copilot-cloud-design-patterns
+      - upstream: skills/codeql
+        local: .github/skills/awesome-copilot-codeql
+        canonical_name: awesome-copilot-codeql
+      - upstream: skills/dependabot
+        local: .github/skills/awesome-copilot-dependabot
+        canonical_name: awesome-copilot-dependabot
+      - upstream: skills/secret-scanning
+        local: .github/skills/awesome-copilot-secret-scanning
+        canonical_name: awesome-copilot-secret-scanning
+      - upstream: skills/security-review
+        local: .github/skills/awesome-copilot-security-review
+        canonical_name: awesome-copilot-security-review
+  obra-superpowers:
+    repository: https://github.com/obra/superpowers.git
+    ref: d884ae04edebef577e82ff7c4e143debd0bbec99
+    assets:
+      - upstream: skills/brainstorming
+        local: .github/skills/superpowers-brainstorming
+        canonical_name: superpowers-brainstorming
+      - upstream: skills/dispatching-parallel-agents
+        local: .github/skills/superpowers-dispatching-parallel-agents
+        canonical_name: superpowers-dispatching-parallel-agents
+      - upstream: skills/executing-plans
+        local: .github/skills/superpowers-executing-plans
+        canonical_name: superpowers-executing-plans
+      - upstream: skills/finishing-a-development-branch
+        local: .github/skills/superpowers-finishing-a-development-branch
+        canonical_name: superpowers-finishing-a-development-branch
+      - upstream: skills/receiving-code-review
+        local: .github/skills/superpowers-receiving-code-review
+        canonical_name: superpowers-receiving-code-review
+      - upstream: skills/requesting-code-review
+        local: .github/skills/superpowers-requesting-code-review
+        canonical_name: superpowers-requesting-code-review
+      - upstream: skills/subagent-driven-development
+        local: .github/skills/superpowers-subagent-driven-development
+        canonical_name: superpowers-subagent-driven-development
+      - upstream: skills/systematic-debugging
+        local: .github/skills/superpowers-systematic-debugging
+        canonical_name: superpowers-systematic-debugging
+      - upstream: skills/test-driven-development
+        local: .github/skills/superpowers-test-driven-development
+        canonical_name: superpowers-test-driven-development
+      - upstream: skills/using-git-worktrees
+        local: .github/skills/superpowers-using-git-worktrees
+        canonical_name: superpowers-using-git-worktrees
+      - upstream: skills/using-superpowers
+        local: .github/skills/superpowers-using-superpowers
+        canonical_name: superpowers-using-superpowers
+      - upstream: skills/verification-before-completion
+        local: .github/skills/superpowers-verification-before-completion
+        canonical_name: superpowers-verification-before-completion
+      - upstream: skills/writing-plans
+        local: .github/skills/superpowers-writing-plans
+        canonical_name: superpowers-writing-plans
+  hashicorp-agent-skills:
+    repository: https://github.com/hashicorp/agent-skills.git
+    ref: 339a113935812ad75c6ff90d418b739a021826d1
+    assets:
+      - upstream: terraform/code-generation/skills/terraform-search-import
+        local: .github/skills/terraform-terraform-search-import
+        canonical_name: terraform-terraform-search-import
+      - upstream: terraform/code-generation/skills/terraform-test
+        local: .github/skills/terraform-terraform-test
+        canonical_name: terraform-terraform-test
+  mattpocock-skills:
+    repository: https://github.com/mattpocock/skills.git
+    ref: efa058a349f5ce98b6115bf8b4e0d0ef9c310e0d
+    assets:
+      - upstream: skills/engineering/grill-with-docs
+        local: .github/skills/grill-me
+        canonical_name: grill-me
+      - upstream: skills/engineering/research
+        local: .github/skills/mattpocock-research
+        canonical_name: mattpocock-research
+      - upstream: skills/productivity/handoff
+        local: .github/skills/mattpocock-handoff
+        canonical_name: mattpocock-handoff
+  vercel-labs-skills:
+    repository: https://github.com/vercel-labs/skills.git
+    ref: 4ce6d48ac44c8b637db87b2102fea3baca719df1
+    assets:
+      - upstream: skills/find-skills
+        local: .github/skills/vercel-find-skills
+        canonical_name: vercel-find-skills
+  openai-skills-curated:
+    repository: https://github.com/openai/skills.git
+    ref: 49f948faa9258a0c61caceaf225e179651397431
+    assets:
+      - upstream: skills/.curated/gh-address-comments
+        local: .github/skills/openai-gh-address-comments
+        canonical_name: openai-gh-address-comments
+      - upstream: skills/.curated/gh-fix-ci
+        local: .github/skills/openai-gh-fix-ci
+        canonical_name: openai-gh-fix-ci
+      - upstream: skills/.system/skill-creator
+        local: .github/skills/openai-skill-creator
+        canonical_name: openai-skill-creator
+      - upstream: skills/.curated/pdf
+        local: .github/skills/openai-pdf
+        canonical_name: openai-pdf
+  openai-skills-retained-doc:
+    repository: https://github.com/openai/skills.git
+    ref: 45d05d75363abf13f99d09e899d61e07b8010685
+    assets:
+      - upstream: skills/.curated/doc
+        local: .github/skills/openai-docx
+        canonical_name: openai-docx
+  openai-skills-retained-office:
+    repository: https://github.com/openai/skills.git
+    ref: e6afb0d74cc75d220df2faf3dd6c635c2dc6a108
+    assets:
+      - upstream: skills/.curated/spreadsheet
+        local: .github/skills/openai-spreadsheet
+        canonical_name: openai-spreadsheet
+      - upstream: skills/.curated/slides
+        local: .github/skills/openai-slides
+        canonical_name: openai-slides
+  sickn33-antigravity:
+    repository: https://github.com/sickn33/antigravity-awesome-skills.git
+    ref: 8946c6cdc8468183426d52f85054639b3e1844ae
+    assets:
+      - upstream: skills/api-design-principles
+        local: .github/skills/antigravity-api-design-principles
+        canonical_name: antigravity-api-design-principles
+      - upstream: skills/aws-cost-optimizer
+        local: .github/skills/antigravity-aws-cost-optimizer
+        canonical_name: antigravity-aws-cost-optimizer
+      - upstream: skills/cloudformation-best-practices
+        local: .github/skills/antigravity-cloudformation-best-practices
+        canonical_name: antigravity-cloudformation-best-practices
+      - upstream: skills/golang-pro
+        local: .github/skills/antigravity-golang-pro
+        canonical_name: antigravity-golang-pro
+      - upstream: skills/grafana-dashboards
+        local: .github/skills/antigravity-grafana-dashboards
+        canonical_name: antigravity-grafana-dashboards
+      - upstream: skills/kubernetes-architect
+        local: .github/skills/antigravity-kubernetes-architect
+        canonical_name: antigravity-kubernetes-architect
+      - upstream: skills/network-engineer
+        local: .github/skills/antigravity-network-engineer
+        canonical_name: antigravity-network-engineer
+  addyosmani-agent-skills:
+    repository: https://github.com/addyosmani/agent-skills.git
+    ref: 0e63d8ea962ecac51637421d8fff63702fac766b
+    assets:
+      - upstream: skills/code-simplification
+        local: .github/skills/addyosmani-code-simplification
+        canonical_name: addyosmani-code-simplification
+      - upstream: skills/code-review-and-quality
+        local: .github/skills/addyosmani-code-review-and-quality
+        canonical_name: addyosmani-code-review-and-quality
+normalizations:
+  - source: obra-superpowers
+    from: docs/superpowers
+    to: tmp/superpowers
+watchlist:
+  - source_family: github/awesome-copilot
+    upstream_id: azure-devops-pipelines.instructions.md
+    local_owner: internal-azure-devops
+    reason: Azure DevOps pipeline guidance was extracted into a repository-owned skill-first owner.
+  - source_family: github/awesome-copilot
+    upstream_id: go.instructions.md
+    local_owner: internal-go
+    reason: Go guidance was extracted into a repository-owned skill-first owner.
+  - source_family: github/awesome-copilot
+    upstream_id: kubernetes_manifests.instructions.md
+    local_owner: internal-kubernetes
+    reason: Kubernetes manifest guidance was extracted into repository-owned Kubernetes skills.
+  - source_family: github/awesome-copilot
+    upstream_id: shell.instructions.md
+    local_owner: internal-bash
+    reason: Shell guidance was extracted into the repository-owned Bash baseline and script skill split.
+  - source_family: mattpocock/skills
+    upstream_id: diagnose
+    local_owner: internal-debugging
+    reason: Root-cause diagnosis loop was extracted into a repository-owned owner.
+  - source_family: mattpocock/skills
+    upstream_id: tdd
+    local_owner: internal-tdd
+    reason: Test-first delivery rules were extracted into a repository-owned owner.
+  - source_family: mattpocock/skills
+    upstream_id: improve-codebase-architecture
+    local_owner: internal-review-high-level
+    reason: Architecture deepening lenses were extracted into high-level review.
+  - source_family: mattpocock/skills
+    upstream_id: zoom-out
+    local_owner: internal-review-high-level
+    reason: Codebase orientation, module maps, caller maps, and domain vocabulary were extracted into high-level review.
+  - source_family: mattpocock/skills
+    upstream_id: grill-with-docs
+    local_owner: internal-gateway-writing-plans
+    reason: Glossary and ADR side effects are not default repository conventions.
+  - source_family: mattpocock/skills
+    upstream_id: setup-matt-pocock-skills
+    local_owner: local-agent-sync-external-resources
+    reason: Setup conventions are not part of the managed source catalog.
+  - source_family: mattpocock/skills
+    upstream_id: caveman
+    local_owner: retired
+    reason: The previously retained caveman import was retired from the managed catalog by explicit user scope reduction. Do not reimport unless the user re-approves the retained import.
+  - source_family: mattpocock/skills
+    upstream_id: code-review
+    local_owner: retired
+    reason: The mattpocock-code-review import was replaced by addyosmani-code-review-and-quality from addyosmani/agent-skills. Do not reimport unless the user re-approves the retained import.
+  - source_family: addyosmani/agent-skills
+    upstream_id: idea-refine
+    local_owner: internal-gateway-idea
+    reason: Useful shaping frameworks and evaluation criteria were extracted into the repository-owned idea gateway; the competing autonomous workflow was retired.

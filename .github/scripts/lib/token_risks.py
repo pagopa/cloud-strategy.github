@@ -51,7 +51,7 @@ AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
 )
 
 
-GATEWAY_CORE_SKILL_PATH = ".github/skills/internal-gateway-idea-brainstorming/SKILL.md"
+GATEWAY_CORE_SKILL_PATH = ".github/skills/internal-gateway-idea/SKILL.md"
 GATEWAY_CORE_BYTE_BUDGET = 16286
 GATEWAY_REQUIRED_CONTEXT_BYTE_BUDGET = 30000
 GATEWAY_UNIVERSAL_PRELOAD_MARKERS = (
@@ -153,7 +153,7 @@ def check_delegated_review_prompt_budget(root: Path) -> list[Finding]:
             ),
             suggestion=(
                 "Keep user inputs and the analysis-only boundary in the prompt, but move reusable workflow "
-                "detail into .github/skills/internal-ai-resource-review/."
+                "detail into .github/skills/internal-review-ai-resources/."
             ),
         )
     ]

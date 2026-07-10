@@ -1,6 +1,6 @@
 ---
 name: internal-tdd
-description: Use when coding changes have executable behavior, including features, bugfixes, behavior changes, public-interface changes, regression tests, contract seams, or risk-driven test-first guardrails.
+description: Use when modifying code with executable or evaluable behavior, including features, bugfixes, behavior changes, public-interface changes, regression tests, contract seams, or risk-driven test-first guardrails.
 ---
 
 # Internal TDD
@@ -9,62 +9,91 @@ description: Use when coding changes have executable behavior, including feature
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `internal-debugging`: root-cause diagnosis before regression tests when the failure is not yet understood.
-- `superpowers-test-driven-development`: strict red-green-refactor execution when an executable test-first slice is selected.
-- `superpowers-verification-before-completion`: evidence gate before claiming coverage, fix completion, or red-green-refactor success.
+- `superpowers-test-driven-development`: core red-green-refactor loop after this wrapper selects a mandatory test-first slice.
+- `superpowers-verification-before-completion`: evidence gate before completion, passing, or coverage claims.
 
-Use this skill as the repository-owned owner for coding changes with executable behavior. Keep the test strategy risk-driven, keep the loop focused on observable behavior, and explain briefly when no new test is useful.
+Use this skill as the repository-owned owner for coding changes with executable
+or evaluable behavior. It classifies the local seam, names the lightest useful
+guardrail, and then delegates mandatory TDD execution to
+`superpowers-test-driven-development`.
+
+This wrapper does not redefine red, green, refactor, test quality, or recovery
+mechanics. Those belong to the core skill.
 
 ## When to use
 
 - Features, bugfixes, or intentional behavior changes with an executable seam.
-- Public-interface changes, adapters, tools, modules, validators, or structured outputs whose behavior can be checked through a stable boundary.
-- Prompt, agent, or LLM-output drift when the change has an executable or evaluable contract with concrete failure examples.
-- Any coding change where the main failure mode should be identified before implementation and guarded with the lightest useful test-first slice.
+- Public-interface changes, adapters, tools, modules, validators, scripts,
+  CLIs, parsers, sync automation, generators, reports, or structured outputs
+  whose behavior can be checked through a stable boundary.
+- Prompt, agent, or LLM-output drift with concrete failure examples or an
+  evaluable contract.
+- Coding work that needs a repository-local decision about whether TDD is
+  mandatory, recommended, or not useful.
 
 ## When not to use
 
-- Prose-only, prompt-only, skill-only, inventory-only, generated-only, formatting-only, or governance-only edits with no executable or evaluable contract.
-- Review-only work; use the review lane separately when the job is defect-first review rather than implementation.
-- Mechanical realignment with no behavior change and no credible executable seam.
+- Prose-only, prompt-only, skill-only, inventory-only, generated-only,
+  formatting-only, or governance-only edits with no executable or evaluable
+  contract.
+- Review-only work where the job is defect-first review rather than
+  implementation.
+- Mechanical realignment with no behavior change and no credible executable
+  seam.
 
 ## Applicability Levels
 
 | Level | Use when | Required posture |
 | --- | --- | --- |
-| Mandatory | The change adds or changes executable behavior, or the user explicitly asks for TDD. | Identify the main failure mode, choose the lightest useful guardrail, and write or update the focused failing test first unless no new test is useful. |
-| Recommended | The change touches public boundaries, adapters, modules, structured outputs, or evaluable prompt behavior with meaningful risk. | Prefer contract tests at public boundaries and keep the slice small and reviewable. |
-| Not suitable | The change is prose-only, prompt-only, skill-only, inventory-only, generated-only, formatting-only, or governance-only with no executable or evaluable contract. | Do not manufacture tests; explain briefly why no new test is useful and use the closest validator or review gate instead. |
+| Mandatory | The change adds or changes executable behavior, or the user explicitly asks for TDD. | Name the observable behavior or risk, choose the smallest useful stable check, then load `superpowers-test-driven-development`. |
+| Recommended | The change touches public boundaries, adapters, modules, structured outputs, or evaluable prompt behavior with meaningful risk. | Prefer a public-boundary check and keep the slice small. |
+| Not suitable | The change has no practical executable or evaluable contract. | Do not manufacture tests; name the seam gap and use the closest validator or review gate. |
+
+## Core Contract
+
+- Delegate mandatory red-green-refactor work to
+  `superpowers-test-driven-development`; do not run a local copy of its loop.
+- Before implementation, record one of three routing outcomes:
+  `mandatory`, `recommended`, or `not suitable`.
+- For `mandatory`, load the core skill before changing behavior.
+- For `recommended`, keep the check at the most meaningful public or stable
+  boundary.
+- When adding tests, keep them under repository-root `tests/` and choose paths
+  that make the covered owner or checked behavior obvious. Use the nearest
+  owner for deeper layout conventions.
+- For `not suitable`, name the seam gap and the alternate validation path before
+  implementation.
+- Tests or checks added after implementation are regression coverage only. Do
+  not describe them as test-first work.
 
 ## Workflow
 
-1. Identify the main failure mode before implementation.
-2. Choose the lightest useful guardrail for the active risk.
-3. Write or update a focused failing test first for new or changed behavior.
-4. Add the regression test before the bug fix when the task is a bugfix.
-5. Prefer contract tests at public boundaries over tests of private implementation details.
-6. Use small, reviewable golden or snapshot tests only when they are the clearest guardrail.
-7. For prompt, agent, or LLM-output drift, define concrete eval examples or failure cases before changing the implementation.
-8. Finish with the closest broader validation and do not weaken, delete, skip, or rewrite tests just to pass.
+1. Identify the observable behavior, risk, or evaluable contract.
+2. Pick the closest public or stable boundary that can prove it.
+3. Choose `mandatory`, `recommended`, or `not suitable`.
+4. Load `superpowers-test-driven-development` only for mandatory TDD execution.
+5. For prompt, agent, or LLM-output drift, define concrete eval examples or
+   failure cases before changing behavior.
+6. Finish with the focused check, the closest broader validation, and
+   `superpowers-verification-before-completion` before positive claims.
 
-## Test Shape Rules
+## Completion States
 
-- Test behavior, not implementation details.
-- Prefer public APIs, CLIs, generated outputs, or stable validator entrypoints.
-- Mock only external boundaries or expensive collaborators when the real path would make the test slow, flaky, unsafe, or unavailable.
-- Keep test names in the repository's domain language when one exists.
-
-## Support Skills
-
-- `superpowers-test-driven-development`: core red-green-refactor execution when an executable test-first slice is selected.
-- `internal-debugging`: root-cause diagnosis before the regression test when the failure is not yet understood.
-- `superpowers-verification-before-completion`: evidence gate before claiming coverage, fix completion, or red-green-refactor success.
+- `red-green-refactor`: the core skill owned the loop and fresh evidence shows
+  the focused check plus broader validation passed.
+- `exception-based`: the seam gap was named before implementation and the
+  alternate validation ran or its gap was reported.
+- `regression-only`: tests or checks were added after implementation. Report
+  this honestly and do not claim test-first work.
 
 ## Validation
 
-- The failing test failed before the fix, or the explicit seam gap is recorded.
-- The test exercises a public or stable interface.
-- The implementation is the smallest behavior needed for the active slice.
-- Focused tests and the closest broader validation pass.
-- No speculative tests or features were added beyond the requested behavior.
-- Use `superpowers-verification-before-completion` before claiming red-green-refactor completion or that a regression is covered.
+- The wrapper chose `mandatory`, `recommended`, or `not suitable` before
+  implementation.
+- Mandatory slices loaded `superpowers-test-driven-development`.
+- Not-suitable slices named the seam gap and alternate validation path.
+- Focused checks and the closest broader validation ran, or the gap was
+  reported.
+- Completion declares whether the work was `red-green-refactor`,
+  `exception-based`, or `regression-only`.
+- Final claims passed through `superpowers-verification-before-completion`.

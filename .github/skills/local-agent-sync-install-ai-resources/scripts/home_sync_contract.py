@@ -59,22 +59,31 @@ class HomeSyncPolicy:
 
 def load_runtime_support_matrix(source_root: Path) -> list[RuntimeSupportRow]:
     matrix_path = resolve_skill_reference(source_root, RUNTIME_SUPPORT_MATRIX_PATH)
-    payload = yaml.safe_load(matrix_path.read_text(encoding="utf-8")) or {}
+    try:
+        payload = yaml.safe_load(matrix_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as exc:
+        raise ValueError(f"manifest-corrupt: failed to parse runtime support matrix: {exc}") from exc
     rows = payload.get("rows", [])
-    return [
-        RuntimeSupportRow(
-            target=row["target"],
-            resource_family=row["resource_family"],
-            support_level=row["support_level"],
-            home_path=row.get("home_path"),
-            direct_copy_possible=bool(row.get("direct_copy_possible")),
-            translation_required=bool(row.get("translation_required")),
-            include_in_v1=bool(row.get("include_in_v1")),
-            evidence=tuple(row.get("evidence", [])),
-            notes=row.get("notes", ""),
+    result = []
+    for row in rows:
+        evidence_raw = row.get("evidence", [])
+        if isinstance(evidence_raw, str):
+            raise ValueError("manifest-corrupt: evidence must be a list, got string")
+        evidence = tuple(evidence_raw) if isinstance(evidence_raw, list) else ()
+        result.append(
+            RuntimeSupportRow(
+                target=row["target"],
+                resource_family=row["resource_family"],
+                support_level=row["support_level"],
+                home_path=row.get("home_path"),
+                direct_copy_possible=bool(row.get("direct_copy_possible")),
+                translation_required=bool(row.get("translation_required")),
+                include_in_v1=bool(row.get("include_in_v1")),
+                evidence=evidence,
+                notes=row.get("notes", ""),
+            )
         )
-        for row in rows
-    ]
+    return result
 
 
 def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
@@ -141,7 +150,10 @@ def load_home_sync_policy(source_root: Path) -> HomeSyncPolicy:
 
 def _load_home_sync_catalog_payload(source_root: Path) -> dict[str, object]:
     catalog_path = resolve_skill_reference(source_root, HOME_SYNC_CATALOG_PATH)
-    return yaml.safe_load(catalog_path.read_text(encoding="utf-8")) or {}
+    try:
+        return yaml.safe_load(catalog_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as exc:
+        raise ValueError(f"manifest-corrupt: failed to parse home sync catalog: {exc}") from exc
 
 
 def discover_skill_resources(
@@ -205,11 +217,6 @@ def runtime_agent_root(home_root: Path, target: str) -> Path:
 
 def has_agent_root(target: str) -> bool:
     return target in TARGET_AGENT_ROOTS
-
-
-def load_agent_catalog(source_root: Path) -> list[CatalogResource]:
-    catalog = load_home_sync_catalog(source_root)
-    return [resource for resource in catalog if resource.source_family == "agents"]
 
 
 def resolve_support_row(

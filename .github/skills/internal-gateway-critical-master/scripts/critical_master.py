@@ -39,13 +39,14 @@ REQUIRED_FINDING_FIELDS: tuple[str, ...] = (
     "Mitigation",
 )
 
-OPTIONAL_FINDING_FIELDS: tuple[str, ...] = ("Reframe",)
+OPTIONAL_FINDING_FIELDS: tuple[str, ...] = ("Reframe", "Question")
 
 SUMMARY_MAX_WORDS = 75
 SYNTHESIS_MAX_WORDS = 100
 FINDING_OBJECTION_MAX_WORDS = 30
 FINDING_FIELD_MAX_WORDS = 30
 FINDING_REFRAME_MAX_WORDS = 25
+FINDING_QUESTION_MAX_WORDS = 25
 TOTAL_MAX_WORDS = 600
 MIN_FINDINGS = 1
 MAX_FINDINGS = 3
@@ -125,6 +126,7 @@ class ParsedFinding:
     has_evidence: bool
     has_mitigation: bool
     has_reframe: bool
+    has_question: bool
     evidence_class: str | None
     raw_lines: tuple[str, ...]
 
@@ -146,6 +148,7 @@ def parse_findings(findings_body: str) -> list[ParsedFinding]:
         has_evidence = "**evidence:**" in lower_body
         has_mitigation = "**mitigation:**" in lower_body
         has_reframe = "**reframe:**" in lower_body
+        has_question = "**question:**" in lower_body
         evidence_class = _extract_evidence_class(body)
         parsed.append(
             ParsedFinding(
@@ -155,6 +158,7 @@ def parse_findings(findings_body: str) -> list[ParsedFinding]:
                 has_evidence=has_evidence,
                 has_mitigation=has_mitigation,
                 has_reframe=has_reframe,
+                has_question=has_question,
                 evidence_class=evidence_class,
                 raw_lines=tuple(body.splitlines()),
             )
@@ -203,6 +207,12 @@ __all__ = [
     "ALLOWED_CLAIM_CLASSES",
     "ALLOWED_OUTCOMES",
     "Finding",
+    "FINDING_FIELD_MAX_WORDS",
+    "FINDING_OBJECTION_MAX_WORDS",
+    "FINDING_QUESTION_MAX_WORDS",
+    "FINDING_REFRAME_MAX_WORDS",
+    "MAX_FINDINGS",
+    "MIN_FINDINGS",
     "OPTIONAL_FINDING_FIELDS",
     "ParsedFinding",
     "REQUIRED_FINDING_FIELDS",

@@ -2,16 +2,22 @@
 #
 # Purpose: Bootstrap this skill's local Python environment and run the home AI resource sync tool.
 # Usage examples:
-#   ./scripts/run.sh sync --targets skills --format report
-#   ./scripts/run.sh apply --targets codex --create-missing-dirs --format report
+#   ./scripts/run.sh sync --targets skills
+#   ./scripts/run.sh apply --targets codex --create-missing-dirs
 
 set -Eeuo pipefail
 
 log_info() {
+  if [[ "${SYNC_HOME_AI_RESOURCES_QUIET:-false}" == "true" ]]; then
+    return
+  fi
   printf 'ℹ️  %s\n' "$*"
 }
 
 log_success() {
+  if [[ "${SYNC_HOME_AI_RESOURCES_QUIET:-false}" == "true" ]]; then
+    return
+  fi
   printf '✅ %s\n' "$*"
 }
 
@@ -62,12 +68,45 @@ install_dependencies() {
   fi
 
   log_info "Installing locked skill dependencies."
-  "$VENV_DIR/bin/pip" install --require-hashes -r "$REQUIREMENTS_FILE"
+  if [[ "${SYNC_HOME_AI_RESOURCES_QUIET:-false}" == "true" ]]; then
+    "$VENV_DIR/bin/pip" install --quiet --disable-pip-version-check --require-hashes -r "$REQUIREMENTS_FILE"
+  else
+    "$VENV_DIR/bin/pip" install --disable-pip-version-check --require-hashes -r "$REQUIREMENTS_FILE"
+  fi
   printf '%s' "$requirements_hash" >"$REQUIREMENTS_HASH_FILE"
   log_success "Skill Python environment is ready."
 }
 
+should_quiet() {
+  local previous=""
+  for arg in "$@"; do
+    if [[ "$previous" == "--format" ]]; then
+      [[ "$arg" == "compact" ]] && return 0
+      return 1
+    fi
+    case "$arg" in
+      --compact|--format=compact)
+        return 0
+        ;;
+      --format)
+        previous="--format"
+        continue
+        ;;
+      --format=*)
+        return 1
+        ;;
+    esac
+    previous=""
+  done
+  return 0
+}
+
 main() {
+  if should_quiet "$@"; then
+    export SYNC_HOME_AI_RESOURCES_QUIET="true"
+  else
+    export SYNC_HOME_AI_RESOURCES_QUIET="false"
+  fi
   require_command "$PYTHON_BIN"
   ensure_venv
   install_dependencies
@@ -80,4 +119,6 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 REQUIREMENTS_HASH_FILE="$VENV_DIR/.requirements.sha256"
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

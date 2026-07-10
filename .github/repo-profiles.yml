@@ -9,7 +9,7 @@ version: 1
 
 _common_skills: &common_skills
   - skills/superpowers-brainstorming/SKILL.md
-  - skills/internal-code-review/SKILL.md
+  - skills/internal-review-code/SKILL.md
   - skills/superpowers-dispatching-parallel-agents/SKILL.md
   - skills/superpowers-executing-plans/SKILL.md
   - skills/superpowers-finishing-a-development-branch/SKILL.md

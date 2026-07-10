@@ -16,35 +16,33 @@ import hashlib
 import json
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from home_sync_contract import load_home_sync_policy
-from home_syncing import reconcile_manifest_entry_after_bisync_copy
-from sync_output import build_compact_bisync_output, render_bisync_report
+_SCRIPTS_LIB = Path(__file__).resolve().parents[3] / "scripts" / "lib"
+if _SCRIPTS_LIB.parent.as_posix() not in sys.path:
+    sys.path.insert(0, _SCRIPTS_LIB.parent.as_posix())
 
-IGNORED_SYNC_PARTS: tuple[str, ...] = (".venv", "__pycache__", ".pytest_cache")
-IGNORED_SYNC_SUFFIXES: tuple[str, ...] = (".pyc", ".pyo")
+from home_sync_contract import load_home_sync_policy, state_root_for_home
+from home_syncing import reconcile_manifest_entry_after_bisync_copy
+from lib.sync_exclusions import should_ignore_sync_path, sync_copytree_ignore
+from sync_output import (
+    build_compact_bisync_output,
+    dump_compact_json,
+    render_bisync_report,
+)
+
 EXCLUDED_BUNDLE_PREFIX: str = "local-"
+BISYNC_PLAN_PATH = "last-bisync-plan.json"
 
 
 def should_ignore(path: Path) -> bool:
-    return (
-        any(part in IGNORED_SYNC_PARTS for part in path.parts)
-        or path.suffix in IGNORED_SYNC_SUFFIXES
-    )
+    return should_ignore_sync_path(path)
 
 
 def should_ignore_copytree(directory: str, names: list[str]) -> set[str]:
-    base = Path(directory)
-    ignored: set[str] = set()
-    for name in names:
-        candidate = base / name
-        if candidate.is_dir() and name in IGNORED_SYNC_PARTS:
-            ignored.add(name)
-        elif candidate.is_file() and candidate.suffix in IGNORED_SYNC_SUFFIXES:
-            ignored.add(name)
-    return ignored
+    return sync_copytree_ignore(directory, names)
 
 
 def get_max_mtime(directory: Path) -> float:
@@ -66,13 +64,17 @@ def hash_bundle(directory: Path) -> str:
 
 
 def is_repo_clean(source_root: Path) -> tuple[bool, str, str]:
-    result = subprocess.run(
-        ["git", "status", "--porcelain", "--untracked-files=all"],
-        cwd=source_root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=source_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except subprocess.TimeoutExpired:
+        return False, "bisync-repo-git-failed", "git status timed out"
     if result.returncode != 0:
         return False, "bisync-repo-git-failed", "Unable to run git status before bisync apply."
     if result.stdout.strip():
@@ -140,7 +142,7 @@ def compute_next_action(
     }
 
 
-@dataclass
+@dataclass(frozen=True)
 class BisyncDriftEntry:
     skill_name: str
     drift_type: str
@@ -151,7 +153,7 @@ class BisyncDriftEntry:
     home_hash: str = ""
     repo_mtime: float = 0.0
     home_mtime: float = 0.0
-    blocked_codes: list[str] = field(default_factory=list)
+    blocked_codes: tuple[str, ...] = ()
 
     def to_dict(self) -> dict:
         result: dict = {
@@ -419,6 +421,18 @@ def apply_bisync_plan(
         else:
             continue
 
+        for check_path in (src, dst):
+            resolved = check_path.resolve()
+            if check_path.is_symlink() or any(p.is_symlink() for p in check_path.parents):
+                plan.blocked_codes.append("symlink-not-allowed")
+                plan.blocked_codes = sorted(set(plan.blocked_codes))
+                plan.verification = {"status": "blocked", "code": "symlink-not-allowed", "path": str(check_path)}
+                plan.next_step = _next_step_for_bisync(plan)
+                plan.next_action = compute_next_action(
+                    plan.blocked_codes, bool(plan.drifts), "apply", source_root, home_root
+                )
+                return plan
+
         if dst.exists():
             shutil.rmtree(dst)
         shutil.copytree(src, dst, ignore=should_ignore_copytree)
@@ -501,6 +515,44 @@ def apply_bisync_plan(
     return plan
 
 
+def write_bisync_plan_snapshot(plan: BisyncPlan) -> Path:
+    state_root = state_root_for_home(plan.home_root)
+    state_root.mkdir(parents=True, exist_ok=True)
+    snapshot_path = state_root / BISYNC_PLAN_PATH
+    snapshot = {
+        "source_root": plan.source_root.as_posix(),
+        "home_root": plan.home_root.as_posix(),
+        "drifts": [drift.to_dict() for drift in plan.drifts],
+        "blocked_codes": plan.blocked_codes,
+    }
+    snapshot_path.write_text(json.dumps(snapshot, indent=2, sort_keys=True), encoding="utf-8")
+    return snapshot_path
+
+
+def load_bisync_plan_snapshot(source_root: Path, home_root: Path) -> dict[str, object] | None:
+    snapshot_path = state_root_for_home(home_root) / BISYNC_PLAN_PATH
+    if not snapshot_path.exists():
+        return None
+    try:
+        snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(snapshot, dict):
+        return None
+    if snapshot.get("source_root") != source_root.as_posix():
+        return None
+    if snapshot.get("home_root") != home_root.as_posix():
+        return None
+    return snapshot
+
+
+def reviewed_bisync_plan_matches(plan: BisyncPlan, snapshot: dict[str, object]) -> bool:
+    return (
+        snapshot.get("drifts") == [drift.to_dict() for drift in plan.drifts]
+        and snapshot.get("blocked_codes") == plan.blocked_codes
+    )
+
+
 def _next_step_for_bisync(plan: BisyncPlan) -> str:
     if plan.mode == "plan":
         if plan.blocked_codes:
@@ -534,6 +586,7 @@ def run_bisync_plan(args: argparse.Namespace) -> int:
     source_root = _resolve_source_root(args)
     home_root = Path(args.home_root).expanduser().resolve()
     plan = build_bisync_plan(source_root, home_root, mode="plan")
+    write_bisync_plan_snapshot(plan)
     _emit_bisync_output(plan, args.format)
     return 1 if plan.blocked_codes else 0
 
@@ -542,6 +595,25 @@ def run_bisync_apply(args: argparse.Namespace) -> int:
     source_root = _resolve_source_root(args)
     home_root = Path(args.home_root).expanduser().resolve()
     plan = build_bisync_plan(source_root, home_root, mode="plan")
+    snapshot = load_bisync_plan_snapshot(source_root, home_root)
+    if snapshot is None or not reviewed_bisync_plan_matches(plan, snapshot):
+        plan.mode = "apply"
+        plan.blocked_codes = sorted(set([*plan.blocked_codes, "bisync-plan-required"]))
+        plan.next_step = "Run bisync plan first, review that exact drift snapshot, then rerun bisync apply."
+        plan.next_action = {
+            "action": "review",
+            "allowed": False,
+            "requires_explicit_approval": True,
+            "command": f"bisync plan --source-root {source_root} --home-root {home_root}",
+            "reason": "Bisync apply requires a reviewed matching plan snapshot before any write.",
+        }
+        plan.verification = {
+            "status": "blocked",
+            "code": "bisync-plan-required",
+            "reason": "Bisync apply requires a reviewed matching plan snapshot.",
+        }
+        _emit_bisync_output(plan, args.format)
+        return 1
     resolvable_during_apply = {"bisync-only-repo"}
     remaining_blockers = [
         code for code in plan.blocked_codes if code not in resolvable_during_apply
@@ -565,7 +637,7 @@ def _resolve_source_root(args: argparse.Namespace) -> Path:
 def _emit_bisync_output(plan: BisyncPlan, format_name: str) -> None:
     payload = plan.to_dict()
     if format_name == "compact":
-        print(json.dumps(build_compact_bisync_output(payload), indent=2, sort_keys=True))
+        print(dump_compact_json(build_compact_bisync_output(payload)))
         return
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -588,8 +660,13 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     plan_parser.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
+    )
+    plan_parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
     )
     apply_parser = subparsers.add_parser("apply", help="Apply bisync resolution")
     apply_parser.add_argument("--source-root", default=".", help="Source repository root.")
@@ -601,8 +678,13 @@ def build_bisync_parser() -> argparse.ArgumentParser:
     apply_parser.add_argument(
         "--format",
         choices=["text", "json", "compact", "report"],
-        default="report",
+        default="compact",
         help="Output format.",
+    )
+    apply_parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Alias for --format compact; optimized for AI/tool iteration.",
     )
     return parser
 
@@ -610,6 +692,8 @@ def build_bisync_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     parser = build_bisync_parser()
     args = parser.parse_args(argv)
+    if getattr(args, "compact", False):
+        args.format = "compact"
     if args.bisync_command == "plan":
         raise SystemExit(run_bisync_plan(args))
     elif args.bisync_command == "apply":

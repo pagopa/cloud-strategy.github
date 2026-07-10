@@ -13,7 +13,7 @@ from .shared import (
     IMPORTED_ASSET_OVERRIDES_PATH,
     INVENTORY_PATH,
     LEGACY_AGENT_TOOL_IDS,
-    SUPERPOWERS_NORMALIZATION_PATH,
+    MANAGED_EXTERNAL_RESOURCES_PATH,
     Finding,
     finding_sort_key,
     is_imported_asset,
@@ -55,6 +55,7 @@ def run_consistency_checks(root: Path, include_token_risks: bool = False) -> lis
     findings.extend(check_source_instruction_contracts(root))
     findings.extend(check_residual_instruction_family_references(root))
     findings.extend(check_imported_asset_overrides(root))
+    findings.extend(check_external_resource_manifest(root))
     findings.extend(check_superpowers_import_naming(root))
     findings.extend(check_broken_local_links(root))
     if include_token_risks:
@@ -742,181 +743,155 @@ def check_imported_asset_overrides(root: Path) -> list[Finding]:
     return findings
 
 
-def check_superpowers_import_naming(root: Path) -> list[Finding]:
-    config_path = root / SUPERPOWERS_NORMALIZATION_PATH
-    if not config_path.exists():
+def check_external_resource_manifest(root: Path) -> list[Finding]:
+    manifest_path = root / MANAGED_EXTERNAL_RESOURCES_PATH
+    if not manifest_path.exists():
         return [
             Finding(
                 severity="blocking",
-                code="superpowers-normalization-reference-missing",
-                path=SUPERPOWERS_NORMALIZATION_PATH,
-                message="The obra/superpowers import normalization reference is missing.",
-                suggestion="Restore the reference so sync refreshes and catalog validation share one naming map.",
+                code="external-resource-manifest-missing",
+                path=MANAGED_EXTERNAL_RESOURCES_PATH,
+                message="The consolidated external resource manifest is missing.",
+                suggestion="Restore references/managed-resources.yaml in the sync bundle.",
             )
         ]
 
     try:
-        payload = yaml.safe_load(read_text(config_path)) or {}
+        payload = yaml.safe_load(read_text(manifest_path)) or {}
     except yaml.YAMLError as error:
         return [
             Finding(
                 severity="blocking",
-                code="superpowers-normalization-reference-invalid-yaml",
-                path=SUPERPOWERS_NORMALIZATION_PATH,
-                message=f"The obra/superpowers normalization reference is not valid YAML: {error}.",
-                suggestion="Fix the YAML syntax before relying on sync normalization.",
+                code="external-resource-manifest-invalid-yaml",
+                path=MANAGED_EXTERNAL_RESOURCES_PATH,
+                message=f"The consolidated manifest is not valid YAML: {error}.",
+                suggestion="Fix the YAML syntax so the manifest remains auditable.",
             )
         ]
 
-    managed_skills = normalize_superpowers_managed_skills(payload)
-    if not managed_skills:
+    if not isinstance(payload, dict) or payload.get("version") != 1:
         return [
             Finding(
                 severity="blocking",
-                code="superpowers-normalization-reference-empty",
-                path=SUPERPOWERS_NORMALIZATION_PATH,
-                message="The obra/superpowers normalization reference does not declare managed skills.",
-                suggestion="Add the managed skill map from the retained migration plan.",
+                code="external-resource-manifest-invalid-shape",
+                path=MANAGED_EXTERNAL_RESOURCES_PATH,
+                message="The consolidated manifest must be a version 1 YAML mapping.",
+                suggestion="Set version: 1 and declare sources, normalizations, and watchlist.",
+            )
+        ]
+
+    raw_sources = payload.get("sources")
+    if not isinstance(raw_sources, dict) or not raw_sources:
+        return [
+            Finding(
+                severity="blocking",
+                code="external-resource-manifest-invalid-shape",
+                path=MANAGED_EXTERNAL_RESOURCES_PATH,
+                message="The consolidated manifest must declare a non-empty sources mapping.",
+                suggestion="Add at least one source with pinned ref and assets.",
             )
         ]
 
     findings: list[Finding] = []
-    for entry in managed_skills:
-        legacy_local = entry["legacy_local"]
-        local = entry["local"]
-        legacy_directory = root / ".github/skills" / legacy_local
-        if legacy_directory.exists():
-            findings.append(
-                Finding(
-                    severity="blocking",
-                    code="superpowers-import-legacy-skill-directory",
-                    path=legacy_directory.relative_to(root).as_posix(),
-                    message="A managed obra/superpowers skill still uses the retired `obra-*` directory name.",
-                    suggestion=f"Rename the skill directory to `.github/skills/{local}`.",
-                )
-            )
-
-        for skill_file in (legacy_directory / "SKILL.md", root / ".github/skills" / local / "SKILL.md"):
-            if not skill_file.exists():
+    seen_local: set[str] = set()
+    for source_id, raw_source in raw_sources.items():
+        if not isinstance(raw_source, dict):
+            continue
+        raw_assets = raw_source.get("assets")
+        if not isinstance(raw_assets, list):
+            continue
+        for raw_asset in raw_assets:
+            if not isinstance(raw_asset, dict):
                 continue
-            skill_name = load_frontmatter(skill_file).get("name")
-            if skill_name == local:
+            local = raw_asset.get("local")
+            if not isinstance(local, str) or not local.strip():
                 continue
-            findings.append(
-                Finding(
-                    severity="blocking",
-                    code="superpowers-import-skill-name-mismatch",
-                    path=skill_file.relative_to(root).as_posix(),
-                    message="A managed obra/superpowers skill frontmatter name does not match its canonical local id.",
-                    suggestion=f"Set `name: {local}` so the skill id matches the directory name.",
+            local = local.strip()
+            if local in seen_local:
+                findings.append(
+                    Finding(
+                        severity="blocking",
+                        code="external-resource-manifest-duplicate-target",
+                        path=local,
+                        message=f"The managed target {local} is declared more than once.",
+                        suggestion="Keep one manifest entry per managed local path.",
+                    )
                 )
-            )
+            else:
+                seen_local.add(local)
 
-    findings.extend(check_superpowers_legacy_references(root, payload, managed_skills))
     return findings
 
 
-def normalize_superpowers_managed_skills(payload: dict[str, object]) -> list[dict[str, str]]:
-    raw_entries = payload.get("managed_skills")
-    if not isinstance(raw_entries, list):
+def check_superpowers_import_naming(root: Path) -> list[Finding]:
+    manifest_path = root / MANAGED_EXTERNAL_RESOURCES_PATH
+    if not manifest_path.exists():
         return []
 
-    normalized_entries: list[dict[str, str]] = []
-    for raw_entry in raw_entries:
-        if not isinstance(raw_entry, dict):
+    try:
+        payload = yaml.safe_load(read_text(manifest_path)) or {}
+    except yaml.YAMLError:
+        return []
+
+    if not isinstance(payload, dict):
+        return []
+
+    raw_sources = payload.get("sources")
+    if not isinstance(raw_sources, dict):
+        return []
+
+    superpowers_source = raw_sources.get("obra-superpowers")
+    if not isinstance(superpowers_source, dict):
+        return []
+
+    raw_assets = superpowers_source.get("assets")
+    if not isinstance(raw_assets, list):
+        return []
+
+    managed_skills: list[dict[str, str]] = []
+    for raw_asset in raw_assets:
+        if not isinstance(raw_asset, dict):
             continue
-        upstream = raw_entry.get("upstream")
-        legacy_local = raw_entry.get("legacy_local")
-        local = raw_entry.get("local")
-        if not all(isinstance(value, str) and value.strip() for value in (upstream, legacy_local, local)):
+        local = raw_asset.get("local")
+        canonical_name = raw_asset.get("canonical_name")
+        if not (
+            isinstance(local, str)
+            and local.strip()
+            and isinstance(canonical_name, str)
+            and canonical_name.strip()
+        ):
             continue
-        normalized_entries.append(
+        local_dir = local.strip().removeprefix(".github/skills/")
+        managed_skills.append(
             {
-                "upstream": upstream.strip(),
-                "legacy_local": legacy_local.strip(),
                 "local": local.strip(),
+                "local_dir": local_dir,
+                "canonical_name": canonical_name.strip(),
             }
         )
-    return normalized_entries
 
+    if not managed_skills:
+        return []
 
-def check_superpowers_legacy_references(
-    root: Path,
-    payload: dict[str, object],
-    managed_skills: list[dict[str, str]],
-) -> list[Finding]:
     findings: list[Finding] = []
-    legacy_tokens = {entry["legacy_local"] for entry in managed_skills}
-    upstream_reference_tokens = {
-        f"superpowers:{entry['upstream']}": entry["local"] for entry in managed_skills
-    }
-
-    for relative_path in collect_superpowers_scan_paths(root, payload):
-        text = read_text(root / relative_path)
-        for legacy_token in sorted(legacy_tokens):
-            if legacy_token not in text:
-                continue
-            findings.append(
-                Finding(
-                    severity="blocking",
-                    code="superpowers-import-legacy-reference",
-                    path=relative_path,
-                    message=f"A live catalog asset still references retired local id `{legacy_token}`.",
-                    suggestion="Replace managed obra/superpowers ids with the canonical `superpowers-*` ids.",
-                )
+    for entry in managed_skills:
+        skill_file = root / entry["local"] / "SKILL.md"
+        if not skill_file.exists():
+            continue
+        skill_name = load_frontmatter(skill_file).get("name")
+        if skill_name == entry["canonical_name"]:
+            continue
+        findings.append(
+            Finding(
+                severity="blocking",
+                code="superpowers-import-skill-name-mismatch",
+                path=skill_file.relative_to(root).as_posix(),
+                message="A managed obra/superpowers skill frontmatter name does not match its canonical local id.",
+                suggestion=f"Set `name: {entry['canonical_name']}` so the skill id matches the directory name.",
             )
-
-        for upstream_token, local in sorted(upstream_reference_tokens.items()):
-            if upstream_token not in text:
-                continue
-            findings.append(
-                Finding(
-                    severity="blocking",
-                    code="superpowers-import-upstream-reference",
-                    path=relative_path,
-                    message=f"A live catalog asset still references upstream skill id `{upstream_token}`.",
-                    suggestion=f"Use the canonical local id `{local}` instead.",
-                )
-            )
+        )
 
     return findings
-
-
-def collect_superpowers_scan_paths(root: Path, payload: dict[str, object]) -> list[str]:
-    live_scan = payload.get("live_scan") if isinstance(payload.get("live_scan"), dict) else {}
-    raw_includes = live_scan.get("include") if isinstance(live_scan, dict) else None
-    includes = raw_includes if isinstance(raw_includes, list) else []
-    ignored_files = set(IGNORED_SYNC_FILENAMES)
-    raw_ignored_files = live_scan.get("ignored_files") if isinstance(live_scan, dict) else None
-    if isinstance(raw_ignored_files, list):
-        ignored_files.update(item for item in raw_ignored_files if isinstance(item, str))
-
-    paths: set[str] = set()
-    for include in includes:
-        if not isinstance(include, str) or not include.strip():
-            continue
-        candidate = root / include
-        if candidate.is_file() and should_scan_superpowers_path(root, candidate, ignored_files):
-            paths.add(candidate.relative_to(root).as_posix())
-            continue
-        if not candidate.is_dir():
-            continue
-        for child in candidate.rglob("*"):
-            if child.is_file() and should_scan_superpowers_path(root, child, ignored_files):
-                paths.add(child.relative_to(root).as_posix())
-
-    return sorted(paths)
-
-
-def should_scan_superpowers_path(root: Path, path: Path, ignored_files: set[str]) -> bool:
-    relative_path = path.relative_to(root).as_posix()
-    if path.name in ignored_files:
-        return False
-    if any(part in IGNORED_SYNC_PARTS for part in path.relative_to(root).parts):
-        return False
-    if relative_path.startswith("tmp/"):
-        return False
-    return path.suffix in {".md", ".yaml", ".yml", ".json", ".jsonc", ".py", ".patch"}
 
 
 def check_broken_local_links(root: Path) -> list[Finding]:

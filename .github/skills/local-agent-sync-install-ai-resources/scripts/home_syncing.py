@@ -5,9 +5,14 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+
+_SCRIPTS_LIB = Path(__file__).resolve().parents[3] / "scripts" / "lib"
+if _SCRIPTS_LIB.parent.as_posix() not in sys.path:
+    sys.path.insert(0, _SCRIPTS_LIB.parent.as_posix())
 
 from agent_translation import target_extension, translate_agent_for_target
 from home_sync_contract import (
@@ -24,6 +29,12 @@ from home_sync_contract import (
     runtime_skill_root,
     state_root_for_home,
 )
+from lib.sync_exclusions import (
+    IGNORED_SYNC_PARTS,
+    IGNORED_SYNC_SUFFIXES,
+    should_ignore_sync_path as _shared_should_ignore_sync_path,
+    sync_copytree_ignore,
+)
 
 MANIFEST_PATH = "manifest.json"
 LAST_PLAN_PATH = "last-plan.json"
@@ -31,8 +42,6 @@ LAST_AUDIT_PATH = "last-audit.json"
 LOCK_PATH = "locks/home-ai-resources.lock"
 NORMALIZATION_VERSION = "v1"
 TEXT_EXTENSIONS = (".md", ".txt", ".yml", ".yaml", ".json", ".sh", ".py")
-IGNORED_SYNC_PARTS = {".venv", "__pycache__", ".pytest_cache"}
-IGNORED_SYNC_SUFFIXES = {".pyc", ".pyo"}
 
 
 @dataclass(frozen=True)
@@ -179,7 +188,7 @@ def build_home_sync_plan(
     source_root = source_root.resolve()
     home_root = home_root.resolve()
     state_root = state_root_for_home(home_root)
-    if is_relative_to(source_root, state_root):
+    if source_root.is_relative_to(state_root):
         raise RuntimeError("reverse-sync-blocked: source_root is under the home sync state, sync must be repo → home only")
     runtime_rows = load_runtime_support_matrix(source_root)
     catalog = load_home_sync_catalog(source_root)
@@ -194,8 +203,15 @@ def build_home_sync_plan(
     unsupported_families_by_target: dict[str, set[str]] = {target: set() for target in targets}
 
     add_manifest_state_operation(operations, state_root, mode, manifest_error)
-    catalog_resources = filter_catalog_for_fast_mode(catalog, manifest_payload, targets, fast=fast)
+    catalog_resources = filter_catalog_for_fast_mode(
+        catalog,
+        manifest_payload,
+        targets,
+        mode=mode,
+        fast=fast,
+    )
     add_target_root_operations(operations, missing_dirs, home_root, targets, mode)
+    seen_target_paths: set[str] = set()
 
     for resource in catalog_resources:
         source_path = source_root / resource.source_path
@@ -256,6 +272,9 @@ def build_home_sync_plan(
                 content_hash=content_hash,
                 last_action="copy",
             )
+            if managed_resource.target_path in seen_target_paths:
+                continue
+            seen_target_paths.add(managed_resource.target_path)
             desired_resources.append(managed_resource)
             add_materialization_operation(
                 operations,
@@ -280,6 +299,8 @@ def build_home_sync_plan(
         home_root,
         policy,
     )
+    operations = list(dedupe_operations_by_identity(operations))
+    desired_resources = list(dedupe_resources_by_target_path(desired_resources))
     return HomeSyncPlan(
         source_root=source_root,
         home_root=home_root,
@@ -305,6 +326,18 @@ def build_home_sync_plan(
             )
         ),
     )
+
+
+def _verify_apply_confinement(target_path: Path, home_root: Path) -> str | None:
+    resolved_home = home_root.resolve()
+    if target_path.is_symlink() or any(p.is_symlink() for p in target_path.parents if p != target_path):
+        return "symlink-not-allowed"
+    try:
+        resolved_target = target_path.resolve() if target_path.exists() else target_path
+        resolved_target.relative_to(resolved_home)
+    except ValueError:
+        return "unsafe-home-path"
+    return None
 
 
 def apply_home_sync_plan(
@@ -333,6 +366,9 @@ def apply_home_sync_plan(
         if operation.action not in {"copy", "delete"}:
             continue
         target_path = Path(operation.path)
+        confinement_code = _verify_apply_confinement(target_path, plan.home_root)
+        if confinement_code:
+            raise RuntimeError(f"{confinement_code}: {target_path}")
         if operation.action == "delete":
             if prune_managed:
                 remove_resource(target_path)
@@ -481,8 +517,11 @@ def filter_catalog_for_fast_mode(
     manifest_payload: dict[str, object],
     targets: tuple[str, ...],
     *,
+    mode: str,
     fast: bool,
 ) -> list[CatalogResource]:
+    if mode not in {"plan", "audit"}:
+        return catalog
     if not fast or not manifest_payload.get("managed_resources"):
         return catalog
     resource_ids = {
@@ -493,6 +532,30 @@ def filter_catalog_for_fast_mode(
     return [resource for resource in catalog if resource.resource_id in resource_ids]
 
 
+def dedupe_operations_by_identity(
+    operations: list[HomeSyncOperation],
+) -> tuple[HomeSyncOperation, ...]:
+    ordered: dict[tuple[str, str, str | None, str | None], HomeSyncOperation] = {}
+    for operation in operations:
+        key = (
+            operation.action,
+            operation.path,
+            operation.code,
+            operation.resource_id,
+        )
+        ordered.setdefault(key, operation)
+    return tuple(ordered.values())
+
+
+def dedupe_resources_by_target_path(
+    resources: list[ManagedResource],
+) -> tuple[ManagedResource, ...]:
+    ordered: dict[str, ManagedResource] = {}
+    for resource in resources:
+        ordered.setdefault(resource.target_path, resource)
+    return tuple(ordered.values())
+
+
 def add_target_root_operations(
     operations: list[HomeSyncOperation],
     missing_dirs: list[str],
@@ -500,12 +563,17 @@ def add_target_root_operations(
     targets: tuple[str, ...],
     mode: str,
 ) -> None:
+    seen_roots: set[str] = set()
     for target in targets:
         skill_root = runtime_skill_root(home_root, target)
-        _add_root_operation(operations, missing_dirs, home_root, target, skill_root, mode)
+        if skill_root.as_posix() not in seen_roots:
+            seen_roots.add(skill_root.as_posix())
+            _add_root_operation(operations, missing_dirs, home_root, target, skill_root, mode)
         if has_agent_root(target):
             agent_root = runtime_agent_root(home_root, target)
-            _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
+            if agent_root.as_posix() not in seen_roots:
+                seen_roots.add(agent_root.as_posix())
+                _add_root_operation(operations, missing_dirs, home_root, target, agent_root, mode)
 
 
 def _add_root_operation(
@@ -847,7 +915,7 @@ def _stale_confinement_check(
         stale_path = home_root / target_path
     resolved_stale = stale_path.resolve()
 
-    if not is_relative_to(resolved_stale, resolved_home):
+    if not resolved_stale.is_relative_to(resolved_home):
         if stale_path.is_symlink() or any(p.is_symlink() for p in stale_path.parents):
             return "symlink-not-allowed"
         return "unsafe-home-path"
@@ -863,7 +931,7 @@ def _stale_confinement_check(
     else:
         return "unsafe-home-path"
 
-    if not is_relative_to(resolved_stale, expected_root):
+    if not resolved_stale.is_relative_to(expected_root):
         return "unsafe-home-path"
 
     if stale_path.is_symlink() or any(p.is_symlink() for p in stale_path.parents):
@@ -1168,9 +1236,13 @@ def build_manifest_payload(
 ) -> dict[str, object]:
     blocked_paths = {operation.path for operation in plan.operations if operation.action == "blocked"}
     managed_resources = []
+    seen_target_paths: set[str] = set()
     for resource in plan.desired_resources:
         if resource.target_path in blocked_paths:
             continue
+        if resource.target_path in seen_target_paths:
+            continue
+        seen_target_paths.add(resource.target_path)
         entry = resource.to_dict()
         if actual_content_hashes and resource.target_path in actual_content_hashes:
             entry["content_hash"] = actual_content_hashes[resource.target_path]
@@ -1206,7 +1278,7 @@ def assess_target_root_safety(
 ) -> HomeSyncOperation | None:
     resolved_home = home_root.resolve()
     resolved_target = target_root.resolve()
-    if not is_relative_to(resolved_target, resolved_home):
+    if not resolved_target.is_relative_to(resolved_home):
         code = "symlink-not-allowed" if target_root.is_symlink() else "unsafe-home-path"
         return HomeSyncOperation(
             target=target,
@@ -1247,17 +1319,11 @@ def remove_resource(target_path: Path) -> None:
 
 
 def copytree_ignore_runtime_artifacts(directory: str, names: list[str]) -> set[str]:
-    return {
-        name
-        for name in names
-        if should_ignore_sync_path(Path(directory, name))
-    }
+    return sync_copytree_ignore(directory, names)
 
 
 def should_ignore_sync_path(path: Path) -> bool:
-    if any(part in IGNORED_SYNC_PARTS for part in path.parts):
-        return True
-    return path.suffix in IGNORED_SYNC_SUFFIXES
+    return _shared_should_ignore_sync_path(path)
 
 
 def resource_mtime(path: Path) -> float:
@@ -1269,14 +1335,6 @@ def resource_mtime(path: Path) -> float:
         if candidate.is_file() and not should_ignore_sync_path(candidate):
             max_time = max(max_time, candidate.stat().st_mtime)
     return max_time
-
-
-def is_relative_to(path: Path, other: Path) -> bool:
-    try:
-        path.relative_to(other)
-    except ValueError:
-        return False
-    return True
 
 
 def is_read_write_accessible(path: Path) -> bool:
@@ -1382,16 +1440,20 @@ def next_action_for_plan(
 
 
 def git_revision(root: Path) -> str | None:
-    result = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"],
-        cwd=root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode != 0:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return None
+        return result.stdout.strip() or None
+    except (subprocess.TimeoutExpired, OSError):
         return None
-    return result.stdout.strip() or None
 
 
 def render_json(data: object) -> str:

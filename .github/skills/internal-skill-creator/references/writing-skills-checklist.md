@@ -2,18 +2,26 @@
 
 Load this reference when creating a new repository-owned skill or materially revising an existing one.
 
-This is a local distilled checklist informed by `writing-skills`. It exists to keep the wrapper self-contained without cloning the upstream bundle.
+This is a local distilled checklist informed by external skill-authoring guidance. It exists to keep the wrapper self-contained without cloning the upstream bundle.
 
 ## Core posture
 
 - Treat a skill as a reusable guide for future agents, not as a narrative about one past task.
 - Prefer executable process over prose: steps, evidence, and exit criteria must change what a future agent does.
-- Iron law: do not create or materially revise a skill without first seeing the failure it must fix.
-- Do not create or materially revise a skill without first observing the failure, miss, or ambiguity it must fix.
+- Iron law: do not create or materially revise a skill without first observing the failure, miss, or ambiguity it must fix.
 - Use the same proof standard for edits as for new skills.
 - Check frontmatter validity before reviewing route quality or body wording. Structural breakage outranks content cleanup.
 - Compare the target skill against the closest neighboring owners before deciding the fix. Route quality is a lane-level property.
 - Keep `## Referenced skills` immediately after the H1 for any created or materially revised `SKILL.md`.
+
+## Generic skill shape
+
+- Required sections are conditional on behavior, not a rigid template. Frontmatter, H1, trigger-focused `description:`, a clear operating contract, and validation guidance are the stable minimum for material repository-owned skills.
+- Conditional sections such as `## Referenced skills`, `## When to use`, `## When not to use`, local references, scripts, examples, and fixtures should appear only when they improve routing, boundary clarity, portability, or maintenance.
+- Do not require every section for every skill. A small single-owner skill should stay small when extra sections would only repeat the trigger or body.
+- Treat `## Referenced skills` as an audit index, not a preload list. Do not load referenced skills from this section alone; load another skill only when the active task, file, framework, runtime, blocker, validation path, or explicit user request proves that owner is needed.
+- Remove duplicated responsibility, not useful trigger reinforcement. Keep short repeated safety or retrieval language when it protects activation, stop conditions, or claim discipline.
+- Preserve a working `description:` during cleanup unless the observed baseline failure is routing itself.
 
 ## Discovery and retrieval
 
@@ -30,6 +38,16 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Prefer the smallest fix that solves the miss: one description tighten, one boundary note, or one misleading phrase removed.
 - Do not rewrite a long body just because it is long. Rewrite only when it duplicates the route, duplicates another owner, or keeps reference material inline.
 - A clean "tighten" outcome is often better than expanding the skill.
+
+## Core-backed wrappers
+
+- Compare the wrapper against its core before editing. Inventory which responsibilities the core already owns and remove local restatements instead of polishing them.
+- Keep the wrapper limited to its retrieval trigger, repository-local policy, and proven environment fallbacks that the core cannot know.
+- Do not restate the core's workflow, decision logic, output contract, or validation procedure. Reference the core by skill name and owner behavior.
+- Check the wrapper `SKILL.md`, `agents/openai.yaml`, paired agent, focused tests, and nearby routing text for conflicting or stale contracts.
+- Verify external assumptions such as required paths, setup commands, integrations, and runtime capabilities against the current repository before adding a local fallback.
+- Structural validation is not semantic alignment. Compare the final wrapper and core responsibilities explicitly, then search for removed owners, stale workflow terms, and conflicting output rules.
+- Measure token change with the same method before and after cleanup, but preserve a working trigger and required local safeguards even when they cost a small number of tokens.
 
 ## Token discipline
 
@@ -54,6 +72,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Reference other skills by skill name and owner behavior, not by file paths inside their bundles.
 - Keep `## Referenced skills` as an audit index: one backticked skill name plus one short owner-behavior phrase per item, or `- None.` when no other skill is referenced.
 - Update the referenced-skill index whenever the body adds, removes, renames, routes to, delegates to, or compares against another skill.
+- When a referenced-skill rule changes, compare the touched skill with nearby skills that cite it or that it cites. Keep optional owners lazy and on-demand unless the active contract explicitly requires loading.
 - Prefer one strong example over several repetitive ones.
 
 ## Test posture
@@ -65,6 +84,7 @@ This is a local distilled checklist informed by `writing-skills`. It exists to k
 - Make every verification item evidence-shaped: command output, diff evidence, rendered artifact, or an explicit validation gap.
 - When the bundle owns runnable automation, validate the bundled entrypoint directly and validate any repository wrapper separately.
 - Verify that every listed referenced skill exists or is explicitly marked as external/on-demand, and that no later skill reference is missing from the index.
+- Verify that related skills use compatible referenced-skill wording and do not turn optional owners into preload instructions.
 
 ## Skill-type checks
 

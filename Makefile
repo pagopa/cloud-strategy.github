@@ -12,7 +12,7 @@ CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*" "\#.claude/commands/agent-os/**"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint critical-validate all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint critical-validate internal-gateway-idea-fast-check all
 
 help:
 	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint critical-validate all'
@@ -69,6 +69,11 @@ skill-lint: scripts-bootstrap
 
 critical-validate: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_critical_output --file .github/skills/internal-gateway-critical-master/fixtures/critical_output_valid.md
+
+internal-gateway-idea-fast-check: scripts-bootstrap
+	@$(PYTHON) .github/skills/internal-gateway-idea/scripts/audit_workflow.py
+	@$(SCRIPTS_RUNNER) validate_internal_skills --skill internal-gateway-idea --strict
+	@$(SCRIPTS_VENV)/bin/python -m pytest -q tests/github/skills/internal-gateway-idea
 
 docs-lint:
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \

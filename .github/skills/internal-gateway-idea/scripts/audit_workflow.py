@@ -11,6 +11,32 @@ def contains_all(text: str, markers: list[str]) -> bool:
     return all(marker in text for marker in markers)
 
 
+def contains_in_order(text: str, markers: list[str]) -> bool:
+    try:
+        positions = [text.index(marker) for marker in markers]
+    except ValueError:
+        return False
+    return positions == sorted(positions)
+
+
+MANDATORY_SEQUENCE = [
+    "Specialization Checkpoint: gated",
+    "Idea Gate 0",
+    "Assumption Challenge Gate",
+    "Alternative discovery",
+    "Critical Challenge Gate",
+    "Spec vs plan decision",
+    "Stop before implementation execution",
+]
+
+RUNTIME_SEQUENCE = [
+    "Specialization Checkpoint: gated",
+    "Idea Gate 0",
+    "Critical Challenge Gate",
+    "spec-vs-plan decision",
+]
+
+
 def main() -> int:
     bundle_dir = Path(__file__).resolve().parent.parent
     skill_text = (bundle_dir / "SKILL.md").read_text(encoding="utf-8")
@@ -20,9 +46,11 @@ def main() -> int:
     shared_markers = [
         "Specialization Checkpoint: gated",
         "Idea Gate 0",
+        "visible numbered question block",
         "Assumption Challenge Gate",
         "Alternative discovery",
         "Critical Challenge Gate",
+        "embedded critique does not satisfy Critical Challenge Gate",
         "Spec vs plan decision",
         "internal-gateway-writing-plans",
         "Stop before implementation execution",
@@ -30,13 +58,14 @@ def main() -> int:
     workflow_only_markers = [
         "flowchart TD",
         "Approval Rules",
-        "Coexistence Rule",
+        "Routing Stability Rule",
     ]
     runtime_only_markers = [
         "$internal-gateway-idea",
         "$superpowers-brainstorming",
         "$internal-gateway-writing-plans",
         "do not implement",
+        "agent filename, frontmatter name, and workflow aligned",
     ]
 
     markers = {
@@ -52,13 +81,25 @@ def main() -> int:
                 "spec-vs-plan decision",
             ],
         ),
+        "skill_gate_sequence": contains_in_order(skill_text, MANDATORY_SEQUENCE),
+        "workflow_gate_sequence": contains_in_order(workflow_text, MANDATORY_SEQUENCE),
+        "runtime_gate_sequence": contains_in_order(runtime_text, RUNTIME_SEQUENCE),
+        "local_fast_lane_documented": "scripts/audit_workflow.py" in skill_text
+        and "scripts/audit_workflow.py" in workflow_text,
         "workflow_mermaid_and_rules": contains_all(workflow_text, workflow_only_markers),
-        "coexistence_boundary": "internal-gateway-idea-brainstorming" in skill_text
-        and "internal-gateway-idea-brainstorming" in workflow_text
-        and "internal-gateway-idea-brainstorming" in runtime_text,
+        "canonical_alignment": "agent filename, frontmatter name, and workflow aligned" in skill_text
+        and "agent filename, frontmatter name, and workflow aligned" in workflow_text
+        and "agent filename, frontmatter name, and workflow aligned" in runtime_text,
         "approval_is_gate_local": "active visible gate" in skill_text
         and "active visible gate" in workflow_text
         and "active visible gate" in runtime_text,
+        "evidence_cannot_replace_questions": "evidence cannot replace Idea Gate 0"
+        in skill_text
+        and "evidence cannot replace Idea Gate 0" in workflow_text
+        and "evidence cannot replace Idea Gate 0" in runtime_text,
+        "skipped_gate_recovery": "first skipped mandatory gate" in skill_text
+        and "first skipped mandatory gate" in workflow_text
+        and "first skipped mandatory gate" in runtime_text,
         "stop_before_execution": "Stop before implementation execution" in workflow_text
         and "Stop after the delegated writing outcome" in skill_text
         and "Stop after the writing outcome" in runtime_text,

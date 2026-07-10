@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Agent Sync External Resources"
-  short_description: "Govern sync catalog decisions safely."
-  default_prompt: "Use $local-agent-sync-external-resources to audit the managed .github catalog, decide keep/update/extract/retire outcomes, and use the bundled fingerprinting script when deterministic change evidence is needed."
+  display_name: "Local Sync External Resources"
+  short_description: "Audit, plan, or apply declared external refreshes."
+  default_prompt: "Use $local-agent-sync-external-resources to refresh only declared managed external resources through the staged sync CLI."

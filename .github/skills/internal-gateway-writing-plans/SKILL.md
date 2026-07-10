@@ -16,6 +16,9 @@ stops after the delegated outcome.
 ## When to use
 
 - Use after the user approves retained spec or implementation-plan writing.
+
+## When not to use
+
 - Do not use for quick same-chat tasks, substantive ideation, execution, or
   imported `superpowers-*` edits.
 
@@ -26,13 +29,21 @@ stops after the delegated outcome.
 2. Load `superpowers-writing-plans` and let it create a plan, ask a blocking
    clarification, redirect, or stop with a reason. Pass an explicit anti-scope
     and the relevant owners already identified in the preflight so the delegated
-    plan avoids duplicate or speculative tasks at the source.
+    plan avoids duplicate or speculative tasks at the source. Pass an explicit
+    delivery rule: the delegated plan must not tell the user to run `git add`,
+    `git commit`, or `git push`, and must not present committing changes as the
+    default next step unless the user explicitly asks for commit help. If the
+    delegated writing outcome persists a retained artifact, require timestamped local
+    naming with four-digit 24-hour time: plans use
+    `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md` and specs use
+    `tmp/superpowers/specs/YYYY-MM-DD-HHMM-<topic>-design.md` such as
+    `2026-07-03-1143-<name>`.
 3. If a retained plan is created, verify execution-readiness and apply Plan
    Authoring Discipline: ordered tasks, concrete file targets, clear edit
    intent, validation commands or explicit gaps, stop conditions, and handoff
    readiness. Reject the draft if any task duplicates an existing owner, adds
-    speculative scope, or lacks validation commands or an explicit validation
-    gap.
+    speculative scope, includes direct commit instructions without explicit
+    user approval, or lacks validation commands or an explicit validation gap.
 4. Stop after the writing outcome and wait for the user's next choice.
 
 Preserve handoff quality with targeted rereads only when the delegation has a
@@ -46,9 +57,15 @@ real evidence gap.
 - Single responsibility: each task must carry one clear deliverable tied to
   the approved target; split or merge tasks that don't.
 - Fail-fast and redirect: if the delegated plan adds speculative scope,
-  duplicates an existing owner, or lacks validation commands or an explicit
-  validation gap, send it back for revision instead of accepting it.
+  duplicates an existing owner, includes direct `git add`/`git commit`/`git push`
+  instructions without explicit user approval, or lacks validation commands or
+  an explicit validation gap, send it back for revision instead of accepting it.
 
 DRY, YAGNI, and TDD stay owned by `superpowers-writing-plans`; this section
 adds only the owner-awareness and redirect gate that the delegated skill does
 not enforce.
+
+## Validation
+
+- Confirm the delegated plan carries ordered tasks, concrete file targets, clear edit intent, validation commands or explicit gaps, no duplicate-owner or speculative-scope drift, and no direct commit instructions unless the user explicitly asked for commit help.
+- `git diff --check`

@@ -5,6 +5,10 @@ description: Use when a repository-owned plan, proposal, or decision needs a cri
 
 # Internal Gateway Critical Master
 
+## Referenced skills
+
+- None.
+
 Use this skill as the portable core for critical challenge work. The calling
 gateway decides when to invoke it; this skill challenges only.
 
@@ -35,7 +39,9 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 - Select **2-3 lenses** from the table below based on the highest-risk gaps in the summary.
 - The **third lens must be lateral**: `analogy` or `reverse assumption`.
 - Apply one optional pre-mortem pass if failure modes are material and not covered by the selected lenses.
-- Ask probing questions only when the answer changes the critique.
+- Lead with the strongest supported objection first. Stop at one finding when that objection controls the decision; do not pad findings.
+- Ask exactly one concise root question only when the answer would materially change the critique, and put it in `finding.question`.
+- Treat mitigations as conditions to continue, not as implementation designs that rescue the proposal.
 - Output: 1-3 raw findings, each with a claim class and a note on evidence quality.
 
 | Lens | Question | Use when |
@@ -63,6 +69,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 ### Phase 3: Synthesize
 
 - Run the Final Consistency Gate: name the strongest supported objection, downgrade weak claims to hypotheses, and surface unresolved uncertainty.
+- When the user has already defended the proposal, classify the defense as `resolves`, `narrows`, `accepts-risk`, or `unanswered`, then name the strongest defense and the remaining vulnerability inside the synthesis.
 - Format the result using the contract in `references/output-contract.md`.
 - Recommend exactly one outcome from `## Outcome meanings`.
 
@@ -70,8 +77,8 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 
 - Target output: **600 words or fewer** per challenge cycle.
 - Maximum findings: **3**.
-- Maximum per finding: **150 words**.
-- Maximum synthesis: **300 words**.
+- Per-field limits are authoritative; see `references/output-contract.md`.
+- Maximum synthesis: **100 words**.
 - If the topic demands more depth, split the work into another critical cycle.
 
 ## Claim Discipline
@@ -86,7 +93,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 - Optional: `scripts/validate_critical_output.py` checks a rendered output against the contract in `references/output-contract.md`.
 - The optional validator and its pure helper live inside this skill bundle so the skill can be copied without depending on repo-global Python modules.
 - Reuse `fixtures/critical_output_valid.md` and sibling fixture samples instead of repeating long inline payloads.
-- Follow `references/maintenance-guidance.md` for fixture reuse, cache-aware search discipline, and analyzer boundary checks.
+- Follow `references/maintenance-guidance.md` for fixture reuse and cache-aware search discipline.
 - Keep this bundle self-contained: do not require instructions, examples, or enforcement rules from outside this directory.
 
 ## Outcome meanings

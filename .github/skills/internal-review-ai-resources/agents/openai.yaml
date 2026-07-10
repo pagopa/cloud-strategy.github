@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Review AI Resources"
+  short_description: "Review internal AI resource bundles"
+  default_prompt: "Use $internal-review-ai-resources to assess an AI resource, bundle, or catalog path and recommend keep, patch, split, or retire actions."

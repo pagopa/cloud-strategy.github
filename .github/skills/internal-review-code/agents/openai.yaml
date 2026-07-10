@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal Review Code"
+  short_description: "Repository wrapper for five-axis code review"
+  default_prompt: "Use $internal-review-code as the repository wrapper, follow $addyosmani-code-review-and-quality as the full review core, and use $awesome-copilot-security-review only if the user explicitly asks for security-specialist depth."

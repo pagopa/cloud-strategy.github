@@ -263,7 +263,7 @@ The `category` value appears as `<run>.automationDetails.id` in the SARIF output
 Create `.github/codeql/codeql-config.yml` for advanced path and query configuration:
 
 ```yaml
-name: "CodeQL Configuration"
+name: awesome-copilot-codeql
 
 # Directories to scan
 paths:
