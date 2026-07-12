@@ -59,7 +59,7 @@ rows:
     include_in_v1: true
     evidence:
       - https://code.visualstudio.com/docs/copilot/customization/custom-agents
-    notes: Direct copy of .agent.md files.
+    notes: .agent.md files are supported as canonical links to repository sources.
   - target: opencode
     resource_family: agents
     support_level: Documented

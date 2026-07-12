@@ -14,7 +14,8 @@ bundle directly.
 
 - Repository skill bundles are materialized only as absolute links under
   `~/.agents/skills/`.
-- Translated agent resources retain the existing repository-to-home copy path.
+- Copilot agents are absolute links back to `.github/agents/`; Codex and
+  OpenCode agents retain their translated copy paths.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
   `graphify` and every `local-*` bundle.
 - Reverse synchronization, reconciliation, and copied-skill fallback are
@@ -40,12 +41,17 @@ compatibility entrypoint.
 
 - Keep `~/.agents/skills/` a real directory. Never replace the root with a
   link.
+- Keep `~/.copilot/agents/` a real directory. Never replace the root with a
+  link.
 - Create one canonical absolute link for every eligible repository skill.
+- Create one canonical absolute link for every eligible Copilot agent.
+- Migrate a manifest-managed unchanged Copilot copy to its canonical link;
+  block unmanaged or locally modified copies.
 - A colliding home directory with an eligible repository skill ID is removed
   without backup and replaced by that link.
 - A matching unmanaged link is adopted into the manifest without replacement.
 - A broken link or a link to another checkout blocks the operation.
-- Manifest-v2 stale managed skill links are unlinked automatically; copied
+- Manifest-v2 stale managed links are unlinked automatically; copied translated
   agents retain explicit `--prune-managed` safety.
 - Unsupported symlink capability blocks the operation. Never copy a skill as a
   fallback.
@@ -65,8 +71,8 @@ compatibility entrypoint.
 
 ## Reporting
 
-Use `--format compact` for automation. Reports must summarize linked skills,
-unlinked skills, copied agents, unchanged resources, and blockers. Do not list
+Use `--format compact` for automation. Reports must summarize linked resources,
+unlinked resources, copied translated agents, unchanged resources, and blockers. Do not list
 all unchanged skills. Translate blocker codes into a plain-language next
 action; see `references/error-codes.md`.
 

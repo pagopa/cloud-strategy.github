@@ -17,7 +17,7 @@ code in an operator report.
 | `link-target-mismatch` | A home link points to another checkout. | Rerun after correcting the link; do not overwrite it automatically. |
 | `manifest-missing` | A read-only manifest-backed mode has no prior state. | Treat it as first-run evidence. |
 | `manifest-corrupt` | The manifest cannot be trusted. | Repair or remove the state before apply. |
-| `target-exists-unmanaged` | A copied agent target is unmanaged. | Preserve it or resolve ownership before apply. |
+| `target-exists-unmanaged` | A managed resource target is unmanaged. | Preserve it or resolve ownership before apply. |
 | `target-modified-managed` | A copied agent changed after the recorded hash. | Review the local change before replacing it. |
 | `source-missing` | A catalog source no longer exists. | Repair the catalog or source. |
 | `source-invalid-skill` | A repository skill lacks `SKILL.md`. | Repair the source bundle. |

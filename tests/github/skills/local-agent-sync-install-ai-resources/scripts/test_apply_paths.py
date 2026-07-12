@@ -258,6 +258,114 @@ rows:
         assert payload["counts"]["residual"] == 0
 
 
+def test_copilot_agents_are_symlinked_with_write_through(
+    tmp_path: Path, capsys
+) -> None:
+    refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    refs.mkdir(parents=True)
+    (refs / "home-sync-catalog.yaml").write_text(
+        """version: 1
+defaults:
+  include_internal_skills: true
+  include_local_skills: false
+  include_unlisted_skills: true
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills: []
+  skill_targets: [copilot]
+resources:
+  - resource_id: demo-agent
+    source_family: agents
+    source_path: .github/agents/demo-agent.agent.md
+    include_targets: [copilot]
+    target_support: documented
+    notes: test agent
+""",
+        encoding="utf-8",
+    )
+    (refs / "runtime-support-matrix.yaml").write_text(
+        """version: 1
+rows:
+  - target: copilot
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.copilot/agents/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: test
+""",
+        encoding="utf-8",
+    )
+    source = tmp_path / ".github/agents/demo-agent.agent.md"
+    source.parent.mkdir(parents=True)
+    source.write_text("---\nname: demo-agent\n---\nRepository agent.\n", encoding="utf-8")
+
+    home = tmp_path / "home"
+    assert run(
+        parse_args(
+            [
+                "sync",
+                "--source-root",
+                str(tmp_path),
+                "--home-root",
+                str(home),
+                "--targets",
+                "copilot",
+                "--create-missing-dirs",
+            ]
+        )
+    ) == 0
+    capsys.readouterr()
+
+    target = home / ".copilot/agents/demo-agent.agent.md"
+    assert target.is_symlink()
+    assert target.resolve() == source.resolve()
+    source.write_text("---\nname: demo-agent\n---\nUpdated in repository.\n", encoding="utf-8")
+    assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")
+    target.write_text("---\nname: demo-agent\n---\nUpdated through home.\n", encoding="utf-8")
+    assert source.read_text(encoding="utf-8") == "---\nname: demo-agent\n---\nUpdated through home.\n"
+
+
+def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / ".github/agents/demo-agent.agent.md"
+    source.parent.mkdir(parents=True)
+    source.write_text("Repository agent.\n", encoding="utf-8")
+    target = tmp_path / "home/.copilot/agents/demo-agent.agent.md"
+    target.parent.mkdir(parents=True)
+    target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+    resource = CatalogResource(
+        resource_id="demo-agent",
+        source_family="agents",
+        source_path=".github/agents/demo-agent.agent.md",
+        include_targets=("copilot",),
+        target_support="documented",
+        notes="test agent",
+    )
+    operations: list[HomeSyncOperation] = []
+
+    add_materialization_operation(
+        operations,
+        target="copilot",
+        target_path=target,
+        source_path=source,
+        resource=resource,
+        source_hash="source-hash",
+        manifest_index={
+            target.as_posix(): {
+                "materialization": "copy",
+                "content_hash": hash_resource(target),
+            }
+        },
+        changed_only=False,
+        policy=_repo_wins_policy(),
+    )
+
+    assert [(operation.action, operation.code) for operation in operations] == [("link", None)]
+
+
 def _setup_skill_source(tmp_path: Path) -> tuple[Path, str]:
     skill_dir = tmp_path / ".github" / "skills" / "demo"
     skill_dir.mkdir(parents=True)

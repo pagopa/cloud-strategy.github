@@ -92,9 +92,9 @@ def render_sync_report(payload: dict[str, object]) -> str:
         *_report_section("Summary"),
         *_bullet_lines(
             [
-                f"Linked skills: {_count_value(install.get('linked'))}",
-                f"Unlinked skills: {_count_value(install.get('unlinked'))}",
-                f"Copied agents: {_count_value(install.get('copied'))}",
+                f"Linked resources: {_count_value(install.get('linked'))}",
+                f"Unlinked resources: {_count_value(install.get('unlinked'))}",
+                f"Copied translated agents: {_count_value(install.get('copied'))}",
                 f"Unchanged resources: {_count_value(install.get('skipped'))}",
                 f"Blockers: {_count_value(install.get('blocked'))}",
             ]
@@ -120,9 +120,9 @@ def render_install_report(payload: dict[str, object]) -> str:
         *_report_section("Summary"),
         *_bullet_lines(
             [
-                f"Linked skills: {_count_value(payload.get('linked'))}",
-                f"Unlinked skills: {_count_value(payload.get('unlinked'))}",
-                f"Copied agents: {_count_value(payload.get('copied'))}",
+                f"Linked resources: {_count_value(payload.get('linked'))}",
+                f"Unlinked resources: {_count_value(payload.get('unlinked'))}",
+                f"Copied translated agents: {_count_value(payload.get('copied'))}",
                 f"Unchanged resources: {_count_value(payload.get('skipped'))}",
                 f"Blockers: {_count_value(payload.get('blocked'))}",
             ]

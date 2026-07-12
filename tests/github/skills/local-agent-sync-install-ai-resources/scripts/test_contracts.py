@@ -175,6 +175,14 @@ def test_valid_v2_manifest_rows_load_unchanged(tmp_path: Path) -> None:
             "content_hash": "agent-content",
             "target_path": (tmp_path / "home/.codex/agents/review.toml").as_posix(),
         },
+        {
+            "target": "copilot",
+            "resource_family": "agents",
+            "materialization": "symlink",
+            "link_target": (tmp_path / "repo/.github/agents/review.agent.md").as_posix(),
+            "content_hash": None,
+            "target_path": (tmp_path / "home/.copilot/agents/review.agent.md").as_posix(),
+        },
     ]
     path = tmp_path / "manifest.json"
     path.write_text(json.dumps({"schema_version": 2, "managed_resources": rows}), encoding="utf-8")

@@ -268,6 +268,9 @@ def build_home_sync_plan(
                     source_path=resource.source_path,
                     target=target,
                 )
+            linked_resource = resource.source_family == "skills" or (
+                resource.source_family == "agents" and target == "copilot"
+            )
             managed_resource = ManagedResource(
                 target=target,
                 resource_id=resource.resource_id,
@@ -275,10 +278,10 @@ def build_home_sync_plan(
                 source_path=resource.source_path,
                 target_path=target_path.as_posix(),
                 source_hash=source_hash,
-                materialization="symlink" if resource.source_family == "skills" else "copy",
-                link_target=(source_path.resolve().as_posix() if resource.source_family == "skills" else None),
-                content_hash=(None if resource.source_family == "skills" else content_hash),
-                last_action="link" if resource.source_family == "skills" else "copy",
+                materialization="symlink" if linked_resource else "copy",
+                link_target=(source_path.resolve().as_posix() if linked_resource else None),
+                content_hash=(None if linked_resource else content_hash),
+                last_action="link" if linked_resource else "copy",
             )
             if managed_resource.target_path in seen_target_paths:
                 continue
@@ -352,7 +355,7 @@ def canonical_skill_link_target(source_root: Path, source_path: str) -> Path:
     return (source_root.resolve() / source_path).resolve()
 
 
-def assess_skill_link(target_path: Path, expected_target: Path) -> tuple[str, str | None]:
+def assess_resource_link(target_path: Path, expected_target: Path) -> tuple[str, str | None]:
     if not os.path.lexists(target_path):
         return "missing", None
     if not target_path.is_symlink():
@@ -368,13 +371,22 @@ def assess_skill_link(target_path: Path, expected_target: Path) -> tuple[str, st
     return "blocked", "link-target-mismatch"
 
 
-def _verify_skill_target_path(
+def assess_skill_link(target_path: Path, expected_target: Path) -> tuple[str, str | None]:
+    return assess_resource_link(target_path, expected_target)
+
+
+def _verify_link_target_path(
     *,
     home_root: Path,
     target: str,
     target_path: Path,
+    resource_family: str = "skills",
 ) -> str | None:
-    target_root = runtime_skill_root(home_root, target)
+    target_root = (
+        runtime_agent_root(home_root, target)
+        if resource_family == "agents" and target == "copilot"
+        else runtime_skill_root(home_root, target)
+    )
     resolved_home = home_root.resolve()
     if target_path.parent != target_root:
         return "unsafe-home-path"
@@ -397,10 +409,24 @@ def _verify_skill_target_path(
     return None
 
 
-def create_skill_link(source_path: Path, target_path: Path) -> None:
+def _verify_skill_target_path(
+    *,
+    home_root: Path,
+    target: str,
+    target_path: Path,
+) -> str | None:
+    return _verify_link_target_path(
+        home_root=home_root,
+        target=target,
+        target_path=target_path,
+        resource_family="skills",
+    )
+
+
+def create_resource_link(source_path: Path, target_path: Path) -> None:
     source_path = source_path.resolve()
-    if not is_valid_skill_bundle(source_path):
-        raise RuntimeError(f"source-invalid-skill: {source_path}")
+    if not source_path.exists():
+        raise RuntimeError(f"link-target-missing: {source_path}")
     if os.path.lexists(target_path):
         if target_path.is_symlink():
             target_path.unlink()
@@ -408,7 +434,13 @@ def create_skill_link(source_path: Path, target_path: Path) -> None:
             shutil.rmtree(target_path)
         else:
             target_path.unlink()
-    os.symlink(source_path, target_path, target_is_directory=True)
+    os.symlink(source_path, target_path, target_is_directory=source_path.is_dir())
+
+
+def create_skill_link(source_path: Path, target_path: Path) -> None:
+    if not is_valid_skill_bundle(source_path.resolve()):
+        raise RuntimeError(f"source-invalid-skill: {source_path}")
+    create_resource_link(source_path, target_path)
 
 
 def unlink_managed_skill(target_path: Path) -> None:
@@ -416,15 +448,21 @@ def unlink_managed_skill(target_path: Path) -> None:
         target_path.unlink()
 
 
-def verify_skill_link(source_path: Path, target_path: Path) -> str | None:
+def verify_resource_link(source_path: Path, target_path: Path) -> str | None:
     expected_target = source_path.resolve()
-    if not is_valid_skill_bundle(expected_target) or not target_path.is_symlink():
+    if not expected_target.exists() or not target_path.is_symlink():
         return "link-target-missing"
     if not target_path.exists():
         return "link-target-missing"
     if target_path.resolve() != expected_target:
         return "link-target-mismatch"
     return None
+
+
+def verify_skill_link(source_path: Path, target_path: Path) -> str | None:
+    if not is_valid_skill_bundle(source_path.resolve()):
+        return "link-target-missing"
+    return verify_resource_link(source_path, target_path)
 
 
 def probe_symlink_support(state_root: Path) -> str | None:
@@ -476,27 +514,39 @@ def apply_home_sync_plan(
             continue
         target_path = Path(operation.path)
         if operation.action in {"link", "unlink"}:
-            skill_path_code = _verify_skill_target_path(
+            managed_resource = desired_by_path.get(operation.path)
+            link_family = (
+                managed_resource.resource_family
+                if managed_resource is not None
+                else (
+                    "agents"
+                    if operation.target == "copilot"
+                    and target_path.parent == runtime_agent_root(plan.home_root, "copilot")
+                    else "skills"
+                )
+            )
+            link_path_code = _verify_link_target_path(
                 home_root=plan.home_root,
                 target=operation.target,
                 target_path=target_path,
+                resource_family=link_family,
             )
-            if skill_path_code is not None:
-                raise RuntimeError(f"{skill_path_code}: {target_path}")
+            if link_path_code is not None:
+                raise RuntimeError(f"{link_path_code}: {target_path}")
             if operation.action == "unlink":
                 unlink_managed_skill(target_path)
                 continue
 
-            managed_resource = desired_by_path.get(operation.path)
-            if managed_resource is None or managed_resource.resource_family != "skills":
-                raise RuntimeError(f"source-invalid-skill: {target_path}")
-            source_path = canonical_skill_link_target(plan.source_root, managed_resource.source_path)
-            link_state, link_code = assess_skill_link(target_path, source_path)
+            if managed_resource is None or managed_resource.materialization != "symlink":
+                invalid_code = "source-invalid-agent" if operation.target == "copilot" else "source-invalid-skill"
+                raise RuntimeError(f"{invalid_code}: {target_path}")
+            source_path = (plan.source_root / managed_resource.source_path).resolve()
+            link_state, link_code = assess_resource_link(target_path, source_path)
             if link_state == "blocked":
                 raise RuntimeError(f"{link_code}: {target_path}")
             if link_state != "matching":
-                create_skill_link(source_path, target_path)
-            verification_code = verify_skill_link(source_path, target_path)
+                create_resource_link(source_path, target_path)
+            verification_code = verify_resource_link(source_path, target_path)
             if verification_code is not None:
                 raise RuntimeError(f"{verification_code}: {target_path}")
             continue
@@ -525,9 +575,9 @@ def apply_home_sync_plan(
 
     for resource in plan.desired_resources:
         target_path = Path(resource.target_path)
-        if resource.resource_family == "skills":
-            verification_code = verify_skill_link(
-                canonical_skill_link_target(plan.source_root, resource.source_path), target_path
+        if resource.materialization == "symlink":
+            verification_code = verify_resource_link(
+                (plan.source_root / resource.source_path).resolve(), target_path
             )
             if verification_code is not None:
                 raise RuntimeError(f"{verification_code}: {target_path}")
@@ -761,7 +811,7 @@ def add_resource_blockers(
     reason = {
         "source-missing": "Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
         "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid repository skill bundle must contain SKILL.md.",
-        "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for translation.",
+        "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for linking or translation.",
     }[code]
     for target in intersection_targets(resource, targets):
         add_blocked_operation(
@@ -863,16 +913,18 @@ def add_materialization_operation(
     policy: HomeSyncPolicy,
 ) -> None:
     manifest_entry = manifest_index.get(target_path.as_posix())
-    if resource.source_family == "skills":
+    copilot_agent_link = resource.source_family == "agents" and target == "copilot"
+    linked_resource = resource.source_family == "skills" or copilot_agent_link
+    if linked_resource:
         expected_target = source_path.resolve()
-        link_state, link_code = assess_skill_link(target_path, expected_target)
+        link_state, link_code = assess_resource_link(target_path, expected_target)
         if link_state == "blocked":
             add_blocked_operation(
                 operations,
                 target=target,
                 target_path=target_path,
                 code=link_code or "link-target-mismatch",
-                reason="Existing home link does not identify the canonical repository skill bundle.",
+                reason="Existing home link does not identify the canonical repository resource.",
                 resource=resource,
             )
             return
@@ -882,21 +934,68 @@ def add_materialization_operation(
                     target=target,
                     action="skip",
                     path=target_path.as_posix(),
-                    reason="Home skill already links to the canonical repository bundle.",
+                    reason="Home resource already links to the canonical repository source.",
                     source_path=resource.source_path,
                     resource_id=resource.resource_id,
                 )
             )
             return
+        if copilot_agent_link and link_state == "replace-directory":
+            if manifest_entry is None:
+                add_blocked_operation(
+                    operations,
+                    target=target,
+                    target_path=target_path,
+                    code="target-exists-unmanaged",
+                    reason="Existing Copilot agent content is not manifest-managed, so replacing it with a repository link is unsafe.",
+                    resource=resource,
+                )
+                return
+            if manifest_entry.get("materialization") != "copy":
+                add_blocked_operation(
+                    operations,
+                    target=target,
+                    target_path=target_path,
+                    code="manifest-corrupt",
+                    reason="Existing linked-resource state does not describe a migratable copied agent.",
+                    resource=resource,
+                )
+                return
+            current_hash = hash_resource(target_path)
+            if current_hash != manifest_entry.get("content_hash"):
+                code = "target-modified-managed"
+                reason = "Managed copied Copilot agent diverged from the recorded hash; review local edits before converting it to a repository link."
+                if resource_mtime(target_path) > resource_mtime(source_path):
+                    operations.append(
+                        HomeSyncOperation(
+                            target=target,
+                            action="warning",
+                            path=target_path.as_posix(),
+                            reason=reason,
+                            code=code,
+                            source_path=resource.source_path,
+                            resource_id=resource.resource_id,
+                        )
+                    )
+                else:
+                    add_blocked_operation(
+                        operations,
+                        target=target,
+                        target_path=target_path,
+                        code=code,
+                        reason=reason,
+                        resource=resource,
+                    )
+                return
         operations.append(
             HomeSyncOperation(
                 target=target,
                 action="link",
                 path=target_path.as_posix(),
                 reason=(
-                    "Create the canonical repository skill link."
+                    "Create the canonical repository resource link."
                     if link_state == "missing"
-                    else "Replace the colliding home directory with the canonical repository skill link."
+                    else "Replace the managed copied resource with the canonical repository link."
                 ),
                 source_path=resource.source_path,
                 resource_id=resource.resource_id,
@@ -1029,24 +1128,25 @@ def add_stale_managed_operations(
         if not isinstance(target_path, str) or target_path in desired_paths:
             continue
 
-        if (
+        if item.get("materialization") == "symlink" and (
             item.get("resource_family") == "skills"
-            and item.get("materialization") == "symlink"
+            or (item.get("resource_family") == "agents" and item.get("target") == "copilot")
         ):
             stale_path = Path(target_path)
-            skill_path_code = _verify_skill_target_path(
+            link_path_code = _verify_link_target_path(
                 home_root=home_root,
                 target=str(item.get("target", "")),
                 target_path=stale_path,
+                resource_family=str(item.get("resource_family", "")),
             )
-            if skill_path_code is not None:
+            if link_path_code is not None:
                 operations.append(
                     HomeSyncOperation(
                         target=str(item.get("target", "")),
                         action="blocked",
                         path=target_path,
-                        reason="Stale managed skill link fails the direct runtime-root confinement check.",
-                        code=skill_path_code,
+                        reason="Stale managed link fails the direct runtime-root confinement check.",
+                        code=link_path_code,
                         resource_id=str(item.get("resource_id", "")),
                     )
                 )
@@ -1057,7 +1157,7 @@ def add_stale_managed_operations(
                         target=str(item.get("target", "")),
                         action="unlink",
                         path=target_path,
-                        reason="Stale manifest-managed skill link is removed automatically without following its target.",
+                        reason="Stale manifest-managed link is removed automatically without following its target.",
                         resource_id=str(item.get("resource_id", "")),
                     )
                 )
@@ -1279,7 +1379,7 @@ def _is_valid_v2_manifest_row(item: dict[str, object]) -> bool:
         return False
     if not isinstance(target_path, str) or not Path(target_path).is_absolute():
         return False
-    if family == "skills":
+    if family == "skills" or (family == "agents" and item.get("target") == "copilot"):
         return (
             materialization == "symlink"
             and isinstance(link_target, str)
