@@ -42,6 +42,12 @@ LAST_AUDIT_PATH = "last-audit.json"
 LOCK_PATH = "locks/home-ai-resources.lock"
 NORMALIZATION_VERSION = "v1"
 TEXT_EXTENSIONS = (".md", ".txt", ".yml", ".yaml", ".json", ".sh", ".py")
+AGENTS_MD_FAMILY = "agents-md"
+AGENTS_MD_TARGET = "agents.md"
+SHARED_BASELINE_START = "`<shared-baseline>`"
+SHARED_BASELINE_END = "`</shared-baseline>`"
+LOCAL_RULES_START = "`<standards-repository-local-rules>`"
+LOCAL_RULES_END = "`</standards-repository-local-rules>`"
 
 
 @dataclass(frozen=True)
@@ -162,6 +168,7 @@ class HomeSyncPlan:
 
 
 CROSS_ALIASES = {"cross", "all", "tutto"}
+TARGET_ALIASES = {"agents-md": AGENTS_MD_TARGET}
 
 def parse_targets(raw_targets: str) -> tuple[str, ...]:
     normalized = [part.strip().lower() for part in raw_targets.split(",") if part.strip()]
@@ -170,7 +177,7 @@ def parse_targets(raw_targets: str) -> tuple[str, ...]:
     if len(normalized) == 1 and normalized[0] in CROSS_ALIASES:
         return TARGET_ORDER
 
-    requested = set(normalized)
+    requested = {TARGET_ALIASES.get(target, target) for target in normalized}
     unknown = requested.difference(TARGET_ORDER)
     if unknown:
         invalid = ", ".join(sorted(unknown))
@@ -234,7 +241,11 @@ def build_home_sync_plan(
             add_resource_blockers(operations, home_root, resource, targets, resource_block_code(resource.source_family))
             continue
 
-        source_hash = hash_resource(source_path)
+        source_hash = (
+            hash_portable_agents_md(source_path)
+            if resource.source_family == AGENTS_MD_FAMILY
+            else hash_resource(source_path)
+        )
         for target in intersection_targets(resource, targets):
             target_path = resource_target_path(home_root, resource, target)
             support_row = resolve_support_row(runtime_rows, target, resource.source_family)
@@ -566,7 +577,9 @@ def apply_home_sync_plan(
         if managed_resource.resource_family == "skills":
             raise RuntimeError(f"source-invalid-skill: copied skill fallback is not supported: {target_path}")
         source_path = plan.source_root / managed_resource.source_path
-        if managed_resource.resource_family == "agents" and managed_resource.target != "copilot":
+        if managed_resource.resource_family == AGENTS_MD_FAMILY:
+            _apply_portable_agents_md(source_path, target_path)
+        elif managed_resource.resource_family == "agents" and managed_resource.target != "copilot":
             _apply_translated_agent(source_path, target_path, managed_resource.target)
         else:
             copy_resource(source_path, target_path)
@@ -651,7 +664,8 @@ def run_doctor(
     for target in targets:
         target_root = runtime_skill_root(home_root, target)
         add_doctor_target_check(checks, blocked_codes, target, target_root)
-        support_row = resolve_support_row(runtime_rows, target, "skills")
+        primary_family = AGENTS_MD_FAMILY if target == AGENTS_MD_TARGET else "skills"
+        support_row = resolve_support_row(runtime_rows, target, primary_family)
         add_doctor_support_check(checks, blocked_codes, target, target_root, support_row, experimental_targets)
         if has_agent_root(target):
             agent_root = runtime_agent_root(home_root, target)
@@ -812,6 +826,7 @@ def add_resource_blockers(
         "source-missing": "Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
         "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid repository skill bundle must contain SKILL.md.",
         "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for linking or translation.",
+        "source-invalid-agents-md": "Root AGENTS.md is missing the portable shared baseline or the repository-local rules block. Blocked because the global projection must remove repository-only policy deterministically.",
     }[code]
     for target in intersection_targets(resource, targets):
         add_blocked_operation(
@@ -1006,7 +1021,7 @@ def add_materialization_operation(
     if target_path.exists():
         current_hash = hash_resource(target_path)
         if manifest_entry is None:
-            if (
+            if resource.source_family == AGENTS_MD_FAMILY or (
                 resource.source_family == "skills"
                 and policy.unmanaged_existing_skills_policy == "repo-wins"
             ):
@@ -1015,7 +1030,11 @@ def add_materialization_operation(
                         target=target,
                         action="copy",
                         path=target_path.as_posix(),
-                        reason="Target already exists in home but is not manifest-managed. Repo wins for unmanaged skills under the active catalog policy, so sync adopts the home path and overwrites it with the repository bundle.",
+                        reason=(
+                            "Repository AGENTS.md is the source of truth for the global baseline, so sync adopts and overwrites the unmanaged home projection."
+                            if resource.source_family == AGENTS_MD_FAMILY
+                            else "Target already exists in home but is not manifest-managed. Repo wins for unmanaged skills under the active catalog policy, so sync adopts the home path and overwrites it with the repository bundle."
+                        ),
                         source_path=resource.source_path,
                         resource_id=resource.resource_id,
                     )
@@ -1241,7 +1260,11 @@ def _stale_confinement_check(
 
     target_name = str(item.get("target", ""))
     resource_family = str(item.get("resource_family", ""))
-    if resource_family == "agents":
+    if resource_family == AGENTS_MD_FAMILY:
+        expected_path = (home_root / ".agents" / "AGENTS.md").resolve()
+        if resolved_stale != expected_path:
+            return "unsafe-home-path"
+    elif resource_family == "agents":
         if not has_agent_root(target_name):
             return "unsafe-home-path"
         expected_root = runtime_agent_root(home_root, target_name).resolve()
@@ -1317,7 +1340,7 @@ def add_doctor_support_check(
                 "name": f"support:{target}",
                 "status": "blocked",
                 "path": target_root.as_posix(),
-                "reason": "The selected target does not support skills.",
+                "reason": "The selected target does not support the requested resource family.",
                 "code": "unsupported-family",
             }
         )
@@ -1387,6 +1410,8 @@ def _is_valid_v2_manifest_row(item: dict[str, object]) -> bool:
             and Path(link_target).resolve().as_posix() == link_target
             and content_hash is None
         )
+    if family == AGENTS_MD_FAMILY:
+        return materialization == "copy" and link_target is None and isinstance(content_hash, str)
     if family == "agents":
         return materialization == "copy" and link_target is None and isinstance(content_hash, str)
     return False
@@ -1415,6 +1440,12 @@ def is_valid_skill_bundle(path: Path) -> bool:
 
 
 def is_valid_resource(path: Path, source_family: str) -> bool:
+    if source_family == AGENTS_MD_FAMILY:
+        try:
+            render_portable_agents_md(path)
+        except ValueError:
+            return False
+        return True
     if source_family == "agents":
         return path.is_file() and path.suffix == ".md"
     return is_valid_skill_bundle(path)
@@ -1425,6 +1456,10 @@ def resource_target_path(
     resource: CatalogResource,
     target: str,
 ) -> Path:
+    if resource.source_family == AGENTS_MD_FAMILY:
+        if target != AGENTS_MD_TARGET:
+            raise ValueError(f"Target {target} does not support AGENTS.md")
+        return home_root / ".agents" / "AGENTS.md"
     if resource.source_family == "agents":
         if not has_agent_root(target):
             raise ValueError(f"Target {target} does not support agents")
@@ -1435,6 +1470,8 @@ def resource_target_path(
 
 
 def resource_block_code(source_family: str) -> str:
+    if source_family == AGENTS_MD_FAMILY:
+        return "source-invalid-agents-md"
     if source_family == "agents":
         return "source-invalid-agent"
     return "source-invalid-skill"
@@ -1446,6 +1483,30 @@ def hash_resource(path: Path) -> str:
 
     fingerprints = [build_fingerprint(path, file_path) for file_path in collect_files(path)]
     return sha256_bytes(json.dumps(fingerprints, sort_keys=True).encode("utf-8"))
+
+
+def render_portable_agents_md(source_path: Path) -> str:
+    if not source_path.is_file():
+        raise ValueError("source-invalid-agents-md: root AGENTS.md is missing")
+    source = source_path.read_text(encoding="utf-8")
+    shared_start = source.find(SHARED_BASELINE_START)
+    shared_end = source.find(SHARED_BASELINE_END, shared_start + 1)
+    local_start = source.find(LOCAL_RULES_START)
+    local_end = source.find(LOCAL_RULES_END, local_start + 1)
+    if not (0 <= shared_start < shared_end < local_start < local_end):
+        raise ValueError(
+            "source-invalid-agents-md: expected ordered shared-baseline and standards-repository-local-rules blocks"
+        )
+
+    prefix = source[:local_start].rstrip()
+    suffix = source[local_end + len(LOCAL_RULES_END) :].strip()
+    if suffix:
+        return f"{prefix}\n\n{suffix}\n"
+    return f"{prefix}\n"
+
+
+def hash_portable_agents_md(source_path: Path) -> str:
+    return sha256_bytes(render_portable_agents_md(source_path).encode("utf-8"))
 
 
 def build_fingerprint(root: Path, file_path: Path) -> dict[str, object]:
@@ -1528,6 +1589,11 @@ def _apply_translated_agent(
     translated = translate_agent_for_target(source_path, target, config_path)
     target_path.parent.mkdir(parents=True, exist_ok=True)
     target_path.write_text(translated, encoding="utf-8")
+
+
+def _apply_portable_agents_md(source_path: Path, target_path: Path) -> None:
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(render_portable_agents_md(source_path), encoding="utf-8")
 
 
 def write_snapshot(plan: HomeSyncPlan, relative_path: str) -> Path:

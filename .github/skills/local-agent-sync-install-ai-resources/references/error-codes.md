@@ -21,6 +21,7 @@ code in an operator report.
 | `target-modified-managed` | A copied agent changed after the recorded hash. | Review the local change before replacing it. |
 | `source-missing` | A catalog source no longer exists. | Repair the catalog or source. |
 | `source-invalid-skill` | A repository skill lacks `SKILL.md`. | Repair the source bundle. |
+| `source-invalid-agents-md` | Root `AGENTS.md` lacks the ordered shared and repository-local policy blocks required for safe projection. | Restore both blocks before updating `~/.agents/AGENTS.md`. |
 | `stale-managed` | A copied managed resource is no longer planned. | Review and use explicit `--prune-managed` if appropriate. |
 | `prune-not-approved` | Copied-resource pruning needs explicit approval. | Rerun apply with `--prune-managed`. |
 | `stale-content-drifted` | A stale copied resource changed locally. | Review it before deletion. |

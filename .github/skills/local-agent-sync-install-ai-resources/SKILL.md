@@ -1,9 +1,13 @@
 ---
 name: local-agent-sync-install-ai-resources
-description: Use when planning, auditing, or applying allowlisted repository-owned AI resources to local Codex, Copilot, or OpenCode runtimes.
+description: Use when planning, auditing, or applying repository-owned AI resources or the portable AGENTS.md baseline to local home runtimes.
 ---
 
 # Local Agent Sync Home AI Resources
+
+## Referenced skills
+
+- None.
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
 The repository is the only source of truth for managed resources. Home is a
@@ -14,6 +18,8 @@ bundle directly.
 
 - Repository skill bundles are materialized only as absolute links under
   `~/.agents/skills/`.
+- Root `AGENTS.md` is projected to `~/.agents/AGENTS.md` as a managed copy with
+  the complete `<standards-repository-local-rules>` block removed.
 - Copilot agents are absolute links back to `.github/agents/`; Codex and
   OpenCode agents retain their translated copy paths.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
@@ -27,6 +33,7 @@ Use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
 
 | Request | Command |
 | --- | --- |
+| Update the global `AGENTS.md` baseline | `sync --targets agents.md` |
 | Default repository-to-home sync | `sync --targets skills` |
 | Dry review | `plan --targets skills` |
 | Explicit materialization | `apply --targets skills` |
@@ -37,10 +44,16 @@ Use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
 `./.github/scripts/run.sh sync_home_ai_resources ...` remains a delegating
 compatibility entrypoint.
 
+When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
+Accept `agents-md` as a CLI alias for the same target.
+
 ## Operating Contract
 
 - Keep `~/.agents/skills/` a real directory. Never replace the root with a
   link.
+- Treat repository root `AGENTS.md` as the only source of truth for the managed
+  `~/.agents/AGENTS.md` projection. Adopt and overwrite an unmanaged target
+  file, but never include `<standards-repository-local-rules>` in the result.
 - Keep `~/.copilot/agents/` a real directory. Never replace the root with a
   link.
 - Create one canonical absolute link for every eligible repository skill.
@@ -62,7 +75,8 @@ compatibility entrypoint.
 
 ## Mode Selection
 
-- `sync` may auto-apply clean repository-to-home work. It stops for blockers,
+- `sync` may auto-apply clean repository-to-home work, including `agents.md`.
+  It stops for blockers,
   missing-directory approval, or copied-agent prune gates.
 - `plan` and `audit` are read-only.
 - `apply` needs an explicit request; `--create-missing-dirs` and

@@ -18,6 +18,7 @@ BLOCKER_REASON_MAP: dict[str, str] = {
     "target-modified-managed": "Manifest-managed content diverged from the recorded hash.",
     "source-missing": "A catalog source path does not exist.",
     "source-invalid-skill": "A skill bundle is missing required files.",
+    "source-invalid-agents-md": "Root AGENTS.md cannot produce the portable global baseline.",
     "stale-managed": "A previously managed resource is stale and pending prune review.",
     "prune-not-approved": "Prune was not approved for stale managed resources.",
     "stale-content-drifted": "A stale managed resource drifted and cannot be removed safely.",

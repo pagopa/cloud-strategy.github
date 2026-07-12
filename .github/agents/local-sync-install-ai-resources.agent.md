@@ -1,6 +1,6 @@
 ---
 name: local-sync-install-ai-resources
-description: Use this agent when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, Copilot, or OpenCode targets.
+description: Use this agent when planning, auditing, or applying repository-owned AI resources or the portable AGENTS.md baseline to local home runtimes.
 tools: ["read", "edit", "search", "execute"]
 disable-model-invocation: true
 agents: []
@@ -11,3 +11,7 @@ agents: []
 ## Core Skill
 
 - `local-agent-sync-install-ai-resources`
+
+When the user names `agents.md`, `agents.md` means `sync --targets agents.md`.
+This updates `~/.agents/AGENTS.md` from root `AGENTS.md` without the
+`<standards-repository-local-rules>` block.

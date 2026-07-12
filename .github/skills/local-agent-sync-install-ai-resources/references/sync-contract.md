@@ -5,6 +5,8 @@ Use this reference for the exact repository-to-home contract.
 ## Scope And Ownership
 
 - `.github/skills/` is the sole source of truth for managed skill bundles.
+- Root `AGENTS.md` is the sole source of truth for the managed global
+  `~/.agents/AGENTS.md` baseline.
 - `~/.agents/skills/` remains a real directory. It is a runtime projection,
   not a second source.
 - Eligible skills are materialized as one absolute canonical symbolic link per
@@ -14,6 +16,9 @@ Use this reference for the exact repository-to-home contract.
 - Never copy, merge, or reconcile home skill content into the repository.
 - Preserve all home-only skills, including `graphify`, every `local-*` bundle,
   invalid repository bundles, and every catalog-excluded ID.
+- For the `agents.md` target, remove the complete
+  `<standards-repository-local-rules>` block and preserve the rest of root
+  `AGENTS.md`. Adopt and overwrite an unmanaged home copy.
 
 ## State And Manifest
 
@@ -32,6 +37,8 @@ State belongs under `~/.sync/cloud-strategy-governance/home-ai-resources/`:
 Skill rows and Copilot agent rows have `materialization: symlink`, an absolute
 canonical `link_target`, and `content_hash: null`. Codex and OpenCode agent
 rows have `materialization: copy`, `link_target: null`, and a content hash.
+The `agents-md` row is also a managed copy. Its source and content hashes
+describe the rendered portable projection, excluding repository-local policy.
 Schema-v1 rows are normalized in memory as copied resources and are rewritten
 only after a successful apply.
 
@@ -75,6 +82,7 @@ the link itself, including a broken link, and never follows its target.
 
 Apply verifies every skill and Copilot agent by exact link identity, and every
 translated copied agent by its expected hash. It then writes manifest v2.
+The global `AGENTS.md` copy is verified against its rendered portable hash.
 Unsupported link capability is
 `symlink-unsupported`; do not fall back to copied skills.
 

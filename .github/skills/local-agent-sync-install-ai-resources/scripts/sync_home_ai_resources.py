@@ -48,7 +48,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         cmd_parser.add_argument(
             "--targets",
             default="skills",
-            help="Target runtimes: skills, codex, copilot, opencode, comma-separated combinations, or cross/all/tutto.",
+            help="Targets: agents.md, skills, codex, copilot, opencode, comma-separated combinations, or cross/all/tutto. agents-md aliases agents.md.",
         )
         if cmd != "doctor":
             cmd_parser.add_argument(

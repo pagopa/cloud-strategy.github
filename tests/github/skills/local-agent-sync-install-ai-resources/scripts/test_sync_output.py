@@ -10,7 +10,11 @@ REPO_ROOT = next(
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
-from sync_output import build_compact_install_output, dump_compact_json  # noqa: E402
+from sync_output import (  # noqa: E402
+    build_compact_install_output,
+    dump_compact_json,
+    render_doctor_report,
+)
 
 
 def test_compact_install_output_is_single_line_and_bounded() -> None:
@@ -58,3 +62,18 @@ def test_compact_install_output_is_single_line_and_bounded() -> None:
             "resource": "internal-two",
         },
     ]
+
+
+def test_agents_md_source_blocker_has_specific_operator_guidance() -> None:
+    report = render_doctor_report(
+        {
+            "selected_targets": ["agents.md"],
+            "validation": "blocked",
+            "checks": [],
+            "blocked_codes": ["source-invalid-agents-md"],
+            "next_action": {"action": "resolve_blockers"},
+        }
+    )
+
+    assert "Root AGENTS.md cannot produce the portable global baseline." in report
+    assert "Manual review required." not in report
