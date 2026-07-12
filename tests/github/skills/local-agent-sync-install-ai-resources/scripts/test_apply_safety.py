@@ -16,6 +16,7 @@ from home_syncing import (  # noqa: E402
     HomeSyncPlan,
     ManagedResource,
     apply_home_sync_plan,
+    probe_symlink_support,
 )
 
 
@@ -31,12 +32,14 @@ def _make_plan(tmp_path: Path, target_path: Path) -> HomeSyncPlan:
         source_path=".github/skills/demo",
         target_path=str(target_path),
         source_hash="abc",
-        content_hash="abc",
-        last_action="copy",
+        materialization="symlink",
+        link_target=source_skill.resolve().as_posix(),
+        content_hash=None,
+        last_action="link",
     )
     operation = HomeSyncOperation(
         target="skills",
-        action="copy",
+        action="link",
         path=str(target_path),
         reason="first install",
         code=None,
@@ -81,5 +84,16 @@ def test_apply_blocks_symlink_escape(tmp_path: Path) -> None:
     plan = _make_plan(tmp_path, symlink_path)
     (tmp_path / "state").mkdir()
 
-    with pytest.raises(RuntimeError, match="symlink-not-allowed|unsafe-home-path"):
+    with pytest.raises(RuntimeError, match="link-target-mismatch"):
         apply_home_sync_plan(plan)
+
+
+def test_probe_symlink_support_returns_blocker_when_os_rejects_link_creation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def reject_symlink(*args: object, **kwargs: object) -> None:
+        raise OSError("not supported")
+
+    monkeypatch.setattr("home_syncing.os.symlink", reject_symlink)
+
+    assert probe_symlink_support(tmp_path) == "symlink-unsupported"

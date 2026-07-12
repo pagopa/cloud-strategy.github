@@ -52,10 +52,12 @@ class ManagedResource:
     source_path: str
     target_path: str
     source_hash: str
-    content_hash: str
-    last_action: str
+    materialization: str = "copy"
+    link_target: str | None = None
+    content_hash: str | None = None
+    last_action: str = "copy"
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, str | None]:
         return {
             "target": self.target,
             "resource_family": self.resource_family,
@@ -63,6 +65,8 @@ class ManagedResource:
             "source_path": self.source_path,
             "target_path": self.target_path,
             "source_hash": self.source_hash,
+            "materialization": self.materialization,
+            "link_target": self.link_target,
             "content_hash": self.content_hash,
             "last_action": self.last_action,
         }
@@ -127,6 +131,8 @@ class HomeSyncPlan:
             "state_root": self.state_root.as_posix(),
             "source_revision": self.source_revision,
             "source_resources_considered": self.source_resources_considered,
+            "linked": operation_paths(self.operations, "link"),
+            "unlinked": operation_paths(self.operations, "unlink"),
             "copied": operation_paths(self.operations, "copy"),
             "skipped": operation_paths(self.operations, "skip"),
             "blocked": operation_paths(self.operations, "blocked"),
@@ -269,8 +275,10 @@ def build_home_sync_plan(
                 source_path=resource.source_path,
                 target_path=target_path.as_posix(),
                 source_hash=source_hash,
-                content_hash=content_hash,
-                last_action="copy",
+                materialization="symlink" if resource.source_family == "skills" else "copy",
+                link_target=(source_path.resolve().as_posix() if resource.source_family == "skills" else None),
+                content_hash=(None if resource.source_family == "skills" else content_hash),
+                last_action="link" if resource.source_family == "skills" else "copy",
             )
             if managed_resource.target_path in seen_target_paths:
                 continue
@@ -340,6 +348,102 @@ def _verify_apply_confinement(target_path: Path, home_root: Path) -> str | None:
     return None
 
 
+def canonical_skill_link_target(source_root: Path, source_path: str) -> Path:
+    return (source_root.resolve() / source_path).resolve()
+
+
+def assess_skill_link(target_path: Path, expected_target: Path) -> tuple[str, str | None]:
+    if not os.path.lexists(target_path):
+        return "missing", None
+    if not target_path.is_symlink():
+        return "replace-directory", None
+
+    actual_target = target_path.resolve(strict=False)
+    if actual_target == expected_target:
+        if expected_target.exists():
+            return "matching", None
+        return "blocked", "link-target-missing"
+    if not target_path.exists():
+        return "blocked", "link-target-missing"
+    return "blocked", "link-target-mismatch"
+
+
+def _verify_skill_target_path(
+    *,
+    home_root: Path,
+    target: str,
+    target_path: Path,
+) -> str | None:
+    target_root = runtime_skill_root(home_root, target)
+    resolved_home = home_root.resolve()
+    if target_path.parent != target_root:
+        return "unsafe-home-path"
+    if not target_root.is_dir():
+        return "unsafe-home-path"
+    if target_root.is_symlink():
+        return "symlink-not-allowed"
+    try:
+        target_root.resolve().relative_to(resolved_home)
+    except ValueError:
+        return "unsafe-home-path"
+
+    current_path = target_root
+    while current_path != resolved_home:
+        if current_path.is_symlink():
+            return "symlink-not-allowed"
+        if current_path.parent == current_path:
+            return "unsafe-home-path"
+        current_path = current_path.parent
+    return None
+
+
+def create_skill_link(source_path: Path, target_path: Path) -> None:
+    source_path = source_path.resolve()
+    if not is_valid_skill_bundle(source_path):
+        raise RuntimeError(f"source-invalid-skill: {source_path}")
+    if os.path.lexists(target_path):
+        if target_path.is_symlink():
+            target_path.unlink()
+        elif target_path.is_dir():
+            shutil.rmtree(target_path)
+        else:
+            target_path.unlink()
+    os.symlink(source_path, target_path, target_is_directory=True)
+
+
+def unlink_managed_skill(target_path: Path) -> None:
+    if target_path.is_symlink():
+        target_path.unlink()
+
+
+def verify_skill_link(source_path: Path, target_path: Path) -> str | None:
+    expected_target = source_path.resolve()
+    if not is_valid_skill_bundle(expected_target) or not target_path.is_symlink():
+        return "link-target-missing"
+    if not target_path.exists():
+        return "link-target-missing"
+    if target_path.resolve() != expected_target:
+        return "link-target-mismatch"
+    return None
+
+
+def probe_symlink_support(state_root: Path) -> str | None:
+    state_root.mkdir(parents=True, exist_ok=True)
+    probe_path = state_root / ".symlink-probe"
+    try:
+        if os.path.lexists(probe_path):
+            if probe_path.is_dir() and not probe_path.is_symlink():
+                return "symlink-unsupported"
+            probe_path.unlink()
+        os.symlink(state_root.resolve(), probe_path, target_is_directory=True)
+    except OSError:
+        return "symlink-unsupported"
+    finally:
+        if probe_path.is_symlink():
+            probe_path.unlink()
+    return None
+
+
 def apply_home_sync_plan(
     plan: HomeSyncPlan,
     *,
@@ -360,12 +464,43 @@ def apply_home_sync_plan(
         Path(operation.path).mkdir(parents=True, exist_ok=True)
 
     desired_by_path = {resource.target_path: resource for resource in plan.desired_resources}
+    if any(operation.action == "link" for operation in plan.operations):
+        symlink_code = probe_symlink_support(plan.state_root)
+        if symlink_code is not None:
+            raise RuntimeError(symlink_code)
+
     copied_paths: set[str] = set()
     actual_content_hashes: dict[str, str] = {}
     for operation in plan.operations:
-        if operation.action not in {"copy", "delete"}:
+        if operation.action not in {"link", "unlink", "copy", "delete"}:
             continue
         target_path = Path(operation.path)
+        if operation.action in {"link", "unlink"}:
+            skill_path_code = _verify_skill_target_path(
+                home_root=plan.home_root,
+                target=operation.target,
+                target_path=target_path,
+            )
+            if skill_path_code is not None:
+                raise RuntimeError(f"{skill_path_code}: {target_path}")
+            if operation.action == "unlink":
+                unlink_managed_skill(target_path)
+                continue
+
+            managed_resource = desired_by_path.get(operation.path)
+            if managed_resource is None or managed_resource.resource_family != "skills":
+                raise RuntimeError(f"source-invalid-skill: {target_path}")
+            source_path = canonical_skill_link_target(plan.source_root, managed_resource.source_path)
+            link_state, link_code = assess_skill_link(target_path, source_path)
+            if link_state == "blocked":
+                raise RuntimeError(f"{link_code}: {target_path}")
+            if link_state != "matching":
+                create_skill_link(source_path, target_path)
+            verification_code = verify_skill_link(source_path, target_path)
+            if verification_code is not None:
+                raise RuntimeError(f"{verification_code}: {target_path}")
+            continue
+
         confinement_code = _verify_apply_confinement(target_path, plan.home_root)
         if confinement_code:
             raise RuntimeError(f"{confinement_code}: {target_path}")
@@ -378,6 +513,8 @@ def apply_home_sync_plan(
             continue
 
         managed_resource = desired_by_path[operation.path]
+        if managed_resource.resource_family == "skills":
+            raise RuntimeError(f"source-invalid-skill: copied skill fallback is not supported: {target_path}")
         source_path = plan.source_root / managed_resource.source_path
         if managed_resource.resource_family == "agents" and managed_resource.target != "copilot":
             _apply_translated_agent(source_path, target_path, managed_resource.target)
@@ -388,6 +525,13 @@ def apply_home_sync_plan(
 
     for resource in plan.desired_resources:
         target_path = Path(resource.target_path)
+        if resource.resource_family == "skills":
+            verification_code = verify_skill_link(
+                canonical_skill_link_target(plan.source_root, resource.source_path), target_path
+            )
+            if verification_code is not None:
+                raise RuntimeError(f"{verification_code}: {target_path}")
+            continue
         if not target_path.exists():
             raise RuntimeError(f"post-apply-verify-failed: {target_path} missing after copy")
         actual_hash = actual_content_hashes.get(target_path.as_posix())
@@ -616,7 +760,7 @@ def add_resource_blockers(
 ) -> None:
     reason = {
         "source-missing": "Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
-        "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid direct-copy skill bundle must contain SKILL.md.",
+        "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid repository skill bundle must contain SKILL.md.",
         "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for translation.",
     }[code]
     for target in intersection_targets(resource, targets):
@@ -719,6 +863,47 @@ def add_materialization_operation(
     policy: HomeSyncPolicy,
 ) -> None:
     manifest_entry = manifest_index.get(target_path.as_posix())
+    if resource.source_family == "skills":
+        expected_target = source_path.resolve()
+        link_state, link_code = assess_skill_link(target_path, expected_target)
+        if link_state == "blocked":
+            add_blocked_operation(
+                operations,
+                target=target,
+                target_path=target_path,
+                code=link_code or "link-target-mismatch",
+                reason="Existing home link does not identify the canonical repository skill bundle.",
+                resource=resource,
+            )
+            return
+        if link_state == "matching":
+            operations.append(
+                HomeSyncOperation(
+                    target=target,
+                    action="skip",
+                    path=target_path.as_posix(),
+                    reason="Home skill already links to the canonical repository bundle.",
+                    source_path=resource.source_path,
+                    resource_id=resource.resource_id,
+                )
+            )
+            return
+        operations.append(
+            HomeSyncOperation(
+                target=target,
+                action="link",
+                path=target_path.as_posix(),
+                reason=(
+                    "Create the canonical repository skill link."
+                    if link_state == "missing"
+                    else "Replace the colliding home directory with the canonical repository skill link."
+                ),
+                source_path=resource.source_path,
+                resource_id=resource.resource_id,
+            )
+        )
+        return
+
     if target_path.exists():
         current_hash = hash_resource(target_path)
         if manifest_entry is None:
@@ -753,7 +938,7 @@ def add_materialization_operation(
                         target=target,
                         action="warning",
                         path=target_path.as_posix(),
-                        reason="Managed target diverged from the last recorded manifest hash and the home copy is newer than the repo source. Install skips this resource so an explicit home-to-repo review can decide whether to keep or copy back the newer home state.",
+                        reason="Managed target diverged from the last recorded manifest hash and is newer than the repository source. Install skips it to prevent losing local copied-agent edits.",
                         code="target-modified-managed",
                         source_path=resource.source_path,
                         resource_id=resource.resource_id,
@@ -842,6 +1027,40 @@ def add_stale_managed_operations(
             continue
         target_path = item.get("target_path")
         if not isinstance(target_path, str) or target_path in desired_paths:
+            continue
+
+        if (
+            item.get("resource_family") == "skills"
+            and item.get("materialization") == "symlink"
+        ):
+            stale_path = Path(target_path)
+            skill_path_code = _verify_skill_target_path(
+                home_root=home_root,
+                target=str(item.get("target", "")),
+                target_path=stale_path,
+            )
+            if skill_path_code is not None:
+                operations.append(
+                    HomeSyncOperation(
+                        target=str(item.get("target", "")),
+                        action="blocked",
+                        path=target_path,
+                        reason="Stale managed skill link fails the direct runtime-root confinement check.",
+                        code=skill_path_code,
+                        resource_id=str(item.get("resource_id", "")),
+                    )
+                )
+                continue
+            if stale_path.is_symlink():
+                operations.append(
+                    HomeSyncOperation(
+                        target=str(item.get("target", "")),
+                        action="unlink",
+                        path=target_path,
+                        reason="Stale manifest-managed skill link is removed automatically without following its target.",
+                        resource_id=str(item.get("resource_id", "")),
+                    )
+                )
             continue
 
         confinement_code = _stale_confinement_check(
@@ -1019,7 +1238,7 @@ def add_doctor_support_check(
 
 def load_manifest(path: Path) -> tuple[dict[str, object], str | None]:
     if not path.exists():
-        return {"managed_resources": []}, None
+        return {"schema_version": 2, "managed_resources": []}, None
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
@@ -1028,58 +1247,49 @@ def load_manifest(path: Path) -> tuple[dict[str, object], str | None]:
         return {"managed_resources": []}, "manifest-corrupt"
     if not isinstance(payload.get("managed_resources"), list):
         return {"managed_resources": []}, "manifest-corrupt"
-    for i, item in enumerate(payload.get("managed_resources", [])):
+    schema_version = payload.get("schema_version", 1)
+    if schema_version not in {1, 2}:
+        return {"managed_resources": []}, "manifest-corrupt"
+    if schema_version == 1:
+        payload["schema_version"] = 1
+    for item in payload.get("managed_resources", []):
         if not isinstance(item, dict):
             return {"managed_resources": []}, "manifest-corrupt"
         if not isinstance(item.get("target"), str):
             return {"managed_resources": []}, "manifest-corrupt"
         if not isinstance(item.get("target_path"), str):
             return {"managed_resources": []}, "manifest-corrupt"
+        if schema_version == 1:
+            item["materialization"] = "copy"
+            item["link_target"] = None
+            item.setdefault("content_hash", None)
+            continue
+        if not _is_valid_v2_manifest_row(item):
+            return {"managed_resources": []}, "manifest-corrupt"
     return payload, None
 
 
-def reconcile_manifest_entry_after_bisync_copy(
-    *,
-    source_root: Path,
-    home_root: Path,
-    source_path: Path,
-    target_path: Path,
-) -> str | None:
-    manifest_path = state_root_for_home(home_root) / MANIFEST_PATH
-    manifest_payload, manifest_error = load_manifest(manifest_path)
-    if manifest_error is not None:
-        return "bisync-manifest-reconcile-failed"
-
-    managed_resources = manifest_payload.get("managed_resources")
-    if not isinstance(managed_resources, list):
-        return "bisync-manifest-reconcile-failed"
-
-    manifest_index = index_manifest(manifest_payload)
-    manifest_entry = manifest_index.get(target_path.as_posix())
-    if manifest_entry is None:
-        # The copied bundle is not install-managed, so there is nothing to reconcile.
-        return None
-    try:
-        source_path_rel = source_path.relative_to(source_root).as_posix()
-    except ValueError:
-        return "bisync-manifest-reconcile-failed"
-    if manifest_entry.get("source_path") != source_path_rel:
-        return "bisync-manifest-reconcile-failed"
-
-    try:
-        source_hash = hash_resource(source_path)
-        target_hash = hash_resource(target_path)
-    except (OSError, PermissionError, ValueError):
-        return "bisync-manifest-reconcile-failed"
-
-    if source_hash != target_hash:
-        return "bisync-manifest-reconcile-failed"
-
-    manifest_entry["source_hash"] = source_hash
-    manifest_entry["content_hash"] = target_hash
-    manifest_entry["last_action"] = "bisync-copy"
-    manifest_path.write_text(render_json(manifest_payload), encoding="utf-8")
-    return None
+def _is_valid_v2_manifest_row(item: dict[str, object]) -> bool:
+    materialization = item.get("materialization")
+    family = item.get("resource_family")
+    link_target = item.get("link_target")
+    content_hash = item.get("content_hash")
+    target_path = item.get("target_path")
+    if materialization not in {"symlink", "copy"} or not isinstance(family, str):
+        return False
+    if not isinstance(target_path, str) or not Path(target_path).is_absolute():
+        return False
+    if family == "skills":
+        return (
+            materialization == "symlink"
+            and isinstance(link_target, str)
+            and Path(link_target).is_absolute()
+            and Path(link_target).resolve().as_posix() == link_target
+            and content_hash is None
+        )
+    if family == "agents":
+        return materialization == "copy" and link_target is None and isinstance(content_hash, str)
+    return False
 
 
 def index_manifest(payload: dict[str, object]) -> dict[str, dict[str, object]]:
@@ -1244,11 +1454,15 @@ def build_manifest_payload(
             continue
         seen_target_paths.add(resource.target_path)
         entry = resource.to_dict()
-        if actual_content_hashes and resource.target_path in actual_content_hashes:
+        if (
+            resource.materialization == "copy"
+            and actual_content_hashes
+            and resource.target_path in actual_content_hashes
+        ):
             entry["content_hash"] = actual_content_hashes[resource.target_path]
         managed_resources.append(entry)
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": now_isoformat(),
         "source_root": plan.source_root.as_posix(),
         "source_revision": plan.source_revision,
@@ -1311,6 +1525,9 @@ def copy_resource(source_path: Path, target_path: Path) -> None:
 
 
 def remove_resource(target_path: Path) -> None:
+    if target_path.is_symlink():
+        target_path.unlink()
+        return
     if target_path.is_dir():
         shutil.rmtree(target_path)
         return

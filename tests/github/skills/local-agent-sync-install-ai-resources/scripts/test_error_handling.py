@@ -13,7 +13,7 @@ SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/s
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from home_sync_contract import load_home_sync_catalog  # noqa: E402
-from home_syncing import build_home_sync_plan  # noqa: E402
+from home_syncing import build_home_sync_plan, load_manifest  # noqa: E402
 
 
 def test_load_catalog_raises_valueerror_on_malformed_yaml(tmp_path: Path) -> None:
@@ -89,3 +89,15 @@ def test_build_plan_raises_reverse_sync_blocked(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError, match="reverse-sync-blocked"):
         build_home_sync_plan(source_under_state, home_root, ("skills",), mode="plan")
+
+
+def test_load_manifest_rejects_unsupported_schema(tmp_path: Path) -> None:
+    path = tmp_path / "manifest.json"
+    path.write_text(
+        '{"schema_version": 99, "managed_resources": []}',
+        encoding="utf-8",
+    )
+
+    _, error = load_manifest(path)
+
+    assert error == "manifest-corrupt"

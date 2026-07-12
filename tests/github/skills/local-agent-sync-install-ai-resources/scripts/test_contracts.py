@@ -5,7 +5,6 @@ import sys
 import textwrap
 import tomllib
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -18,31 +17,220 @@ SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/s
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from agent_translation import target_extension, translate_agent_for_target  # noqa: E402
-from bisync_skills import (  # noqa: E402
-    build_bisync_plan,
-    run_bisync_apply,
-    run_bisync_plan,
-)
 from home_sync_contract import (  # noqa: E402
     load_home_sync_catalog,
     load_home_sync_policy,
 )
 from home_syncing import (  # noqa: E402
     HomeSyncOperation,
+    HomeSyncPlan,
+    ManagedResource,
     build_home_sync_plan,
     build_manifest_payload,
+    load_manifest,
     parse_targets,
     state_root_for_home,
 )
 from sync_home_ai_resources import (  # noqa: E402
-    bisync_requires_review,
     install_auto_apply_blockers,
+    parse_args,
 )
 from sync_output import (  # noqa: E402
+    build_compact_install_output,
     render_doctor_report,
     render_install_report,
     render_sync_report,
 )
+
+
+def test_parse_args_rejects_removed_bisync_and_preserves_supported_modes() -> None:
+    for command in ("sync", "plan", "apply", "audit", "doctor", "dry-run"):
+        assert parse_args([command]).command == command
+
+    with pytest.raises(SystemExit):
+        parse_args(["bisync", "plan"])
+
+
+def test_install_payload_reports_linked_and_unlinked_without_bisync() -> None:
+    compact = build_compact_install_output(
+        {
+            "mode": "plan",
+            "validation": "ok",
+            "linked": ["/home/.agents/skills/alpha"],
+            "unlinked": ["/home/.agents/skills/removed"],
+            "operations": [],
+        }
+    )
+
+    assert compact["counts"]["linked"] == 1
+    assert compact["counts"]["unlinked"] == 1
+    assert "bisync" not in compact
+
+
+def test_empty_manifest_defaults_to_schema_v2(tmp_path: Path) -> None:
+    payload, error = load_manifest(tmp_path / "manifest.json")
+
+    assert error is None
+    assert payload == {"schema_version": 2, "managed_resources": []}
+
+
+def test_v1_manifest_rows_are_normalized_as_copy_without_rewrite(tmp_path: Path) -> None:
+    path = tmp_path / "manifest.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "managed_resources": [
+                    {
+                        "target": "skills",
+                        "resource_family": "skills",
+                        "resource_id": "demo",
+                        "source_path": ".github/skills/demo",
+                        "target_path": str(tmp_path / "home/demo"),
+                        "source_hash": "source",
+                        "content_hash": "content",
+                        "last_action": "copy",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload, error = load_manifest(path)
+
+    assert error is None
+    assert payload["managed_resources"][0]["materialization"] == "copy"
+    assert payload["managed_resources"][0]["link_target"] is None
+    assert path.read_text(encoding="utf-8").startswith('{"schema_version": 1')
+
+
+@pytest.mark.parametrize(
+    ("row", "expected_error"),
+    [
+        (
+            {
+                "target": "skills",
+                "resource_family": "skills",
+                "materialization": "copy",
+                "link_target": None,
+                "content_hash": None,
+                "target_path": "/home/.agents/skills/demo",
+            },
+            "manifest-corrupt",
+        ),
+        (
+            {
+                "target": "skills",
+                "resource_family": "skills",
+                "materialization": "symlink",
+                "link_target": None,
+                "content_hash": None,
+                "target_path": "/home/.agents/skills/demo",
+            },
+            "manifest-corrupt",
+        ),
+        (
+            {
+                "target": "codex",
+                "resource_family": "agents",
+                "materialization": "copy",
+                "link_target": "/repo/.github/agents/demo.agent.md",
+                "content_hash": "hash",
+                "target_path": "/home/.codex/agents/demo.toml",
+            },
+            "manifest-corrupt",
+        ),
+    ],
+)
+def test_manifest_rejects_inconsistent_v2_rows(
+    tmp_path: Path, row: dict[str, object], expected_error: str
+) -> None:
+    path = tmp_path / "manifest.json"
+    path.write_text(
+        json.dumps({"schema_version": 2, "managed_resources": [row]}),
+        encoding="utf-8",
+    )
+
+    _, error = load_manifest(path)
+
+    assert error == expected_error
+
+
+def test_valid_v2_manifest_rows_load_unchanged(tmp_path: Path) -> None:
+    rows = [
+        {
+            "target": "skills",
+            "resource_family": "skills",
+            "materialization": "symlink",
+            "link_target": (tmp_path / "repo/.github/skills/demo").as_posix(),
+            "content_hash": None,
+            "target_path": (tmp_path / "home/.agents/skills/demo").as_posix(),
+        },
+        {
+            "target": "codex",
+            "resource_family": "agents",
+            "materialization": "copy",
+            "link_target": None,
+            "content_hash": "agent-content",
+            "target_path": (tmp_path / "home/.codex/agents/review.toml").as_posix(),
+        },
+    ]
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps({"schema_version": 2, "managed_resources": rows}), encoding="utf-8")
+
+    payload, error = load_manifest(path)
+
+    assert error is None
+    assert payload["schema_version"] == 2
+    assert payload["managed_resources"] == rows
+
+
+def test_manifest_serialization_emits_v2_link_and_copy_rows(tmp_path: Path) -> None:
+    skill = ManagedResource(
+        target="skills",
+        resource_id="demo",
+        resource_family="skills",
+        source_path=".github/skills/demo",
+        target_path=str(tmp_path / "home/.agents/skills/demo"),
+        source_hash="source",
+        materialization="symlink",
+        link_target=str(tmp_path / ".github/skills/demo"),
+        content_hash=None,
+        last_action="link",
+    )
+    agent = ManagedResource(
+        target="codex",
+        resource_id="review",
+        resource_family="agents",
+        source_path=".github/agents/review.agent.md",
+        target_path=str(tmp_path / "home/.codex/agents/review.toml"),
+        source_hash="source-agent",
+        materialization="copy",
+        link_target=None,
+        content_hash="content-agent",
+        last_action="copy",
+    )
+    plan = HomeSyncPlan(
+        source_root=tmp_path,
+        home_root=tmp_path / "home",
+        state_root=tmp_path / "state",
+        mode="apply",
+        selected_targets=("skills", "codex"),
+        retired_targets=(),
+        source_revision=None,
+        source_resources_considered=2,
+        operations=(),
+        desired_resources=(skill, agent),
+        missing_dirs=(),
+        unsupported_families_by_target={},
+        residual_drift=(),
+    )
+
+    payload = build_manifest_payload(plan)
+
+    assert payload["schema_version"] == 2
+    assert payload["managed_resources"] == [skill.to_dict(), agent.to_dict()]
 
 
 def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -> None:
@@ -204,11 +392,6 @@ def test_render_sync_report_omits_empty_action_sections() -> None:
                 "state_path": "/tmp/state",
                 "manifest_path": "/tmp/manifest",
             },
-            "bisync": {
-                "mode": "plan",
-                "drifts": [],
-                "verification": {"status": "ok"},
-            },
             "next_action": {
                 "action": "done",
                 "allowed": True,
@@ -222,66 +405,11 @@ def test_render_sync_report_omits_empty_action_sections() -> None:
     assert "🚦 Status:" in report
     assert "## 🧭 Summary" in report
     assert "## 🚀 Auto-applied" not in report
-    assert "## 📋 Planned repo-to-home copies" not in report
+    assert "## 📋 Planned changes" not in report
     assert "## ⛔ Stopped on" not in report
     assert "## 🔎 Validation" in report
     assert "## ➡️ Next" in report
-
-
-def test_build_bisync_plan_filters_local_and_excluded_bundles(tmp_path: Path) -> None:
-    refs_dir = (
-        tmp_path
-        / ".github"
-        / "skills"
-        / "local-agent-sync-install-ai-resources"
-        / "references"
-    )
-    refs_dir.mkdir(parents=True)
-    (refs_dir / "home-sync-catalog.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            defaults:
-              include_internal_skills: true
-              include_local_skills: false
-              include_unlisted_skills: false
-              unmanaged_existing_skills_policy: block
-              excluded_skills:
-                - graphify
-              skill_targets:
-                - codex
-            resources: []
-            """
-        ),
-        encoding="utf-8",
-    )
-
-    repo_skills = tmp_path / ".github" / "skills"
-    home_root = tmp_path / "home"
-    home_skills = home_root / ".agents" / "skills"
-    home_skills.mkdir(parents=True)
-
-    for skill_name, root in (
-        ("shared-skill", repo_skills),
-        ("local-helper", repo_skills),
-        ("graphify", repo_skills),
-        ("home-only-skill", home_skills),
-    ):
-        skill_dir = root / skill_name
-        skill_dir.mkdir(parents=True, exist_ok=True)
-        (skill_dir / "SKILL.md").write_text(f"# {skill_name}\n", encoding="utf-8")
-
-    plan = build_bisync_plan(tmp_path, home_root, mode="plan")
-
-    assert {(drift.skill_name, drift.drift_type) for drift in plan.drifts} == {
-        ("shared-skill", "only-repo"),
-        ("home-only-skill", "only-home"),
-    }
-    assert "bisync-only-home" in plan.blocked_codes
-    assert "bisync-only-repo" in plan.blocked_codes
-    assert all(
-        drift.skill_name not in {"local-helper", "graphify"} for drift in plan.drifts
-    )
+    assert "bisync" not in report
 
 
 def test_install_auto_apply_blockers_require_explicit_review() -> None:
@@ -312,20 +440,6 @@ def test_install_auto_apply_blockers_require_explicit_review() -> None:
     )
 
     assert blockers == ["install-residual-drift", "needs-directory-create"]
-
-
-def test_bisync_requires_review_only_for_non_safe_drift() -> None:
-    safe_plan = SimpleNamespace(
-        blocked_codes=["bisync-only-repo"],
-        drifts=[SimpleNamespace(drift_type="only-repo", direction="repo-to-home")],
-    )
-    review_plan = SimpleNamespace(
-        blocked_codes=[],
-        drifts=[SimpleNamespace(drift_type="drift", direction="home-to-repo")],
-    )
-
-    assert bisync_requires_review(safe_plan) is False
-    assert bisync_requires_review(review_plan) is True
 
 
 def test_skill_run_sh_should_quiet_only_for_compact_modes() -> None:
@@ -439,124 +553,6 @@ def test_fast_mode_does_not_filter_apply_catalog(tmp_path: Path) -> None:
     assert fast.source_resources_considered == normal.source_resources_considered == 2
 
 
-def test_bisync_apply_requires_reviewed_plan_snapshot(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = tmp_path / "repo"
-    home_root = tmp_path / "home"
-    refs_dir = (
-        repo_root
-        / ".github"
-        / "skills"
-        / "local-agent-sync-install-ai-resources"
-        / "references"
-    )
-    refs_dir.mkdir(parents=True)
-    (refs_dir / "home-sync-catalog.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            defaults:
-              include_internal_skills: true
-              include_local_skills: false
-              include_unlisted_skills: false
-              unmanaged_existing_skills_policy: block
-              excluded_skills: []
-              skill_targets:
-                - codex
-            resources: []
-            """
-        ),
-        encoding="utf-8",
-    )
-    (repo_root / ".github" / "skills" / "demo-skill").mkdir(parents=True)
-    (repo_root / ".github" / "skills" / "demo-skill" / "SKILL.md").write_text(
-        "# demo\n", encoding="utf-8"
-    )
-    (home_root / ".agents" / "skills").mkdir(parents=True)
-
-    subprocess.run(["git", "init", "-q"], cwd=repo_root, check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True
-    )
-    subprocess.run(["git", "add", "."], cwd=repo_root, check=True)
-    subprocess.run(["git", "commit", "-qm", "init"], cwd=repo_root, check=True)
-
-    args = argparse.Namespace(
-        source_root=repo_root.as_posix(),
-        home_root=home_root.as_posix(),
-        format="compact",
-        compact=True,
-    )
-
-    assert run_bisync_apply(args) == 1
-    payload = json.loads(capsys.readouterr().out)
-    assert "bisync-plan-required" in payload["blockers"]
-
-
-def test_bisync_apply_uses_matching_reviewed_plan_snapshot(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = tmp_path / "repo"
-    home_root = tmp_path / "home"
-    refs_dir = (
-        repo_root
-        / ".github"
-        / "skills"
-        / "local-agent-sync-install-ai-resources"
-        / "references"
-    )
-    refs_dir.mkdir(parents=True)
-    (refs_dir / "home-sync-catalog.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            defaults:
-              include_internal_skills: true
-              include_local_skills: false
-              include_unlisted_skills: false
-              unmanaged_existing_skills_policy: block
-              excluded_skills: []
-              skill_targets:
-                - codex
-            resources: []
-            """
-        ),
-        encoding="utf-8",
-    )
-    (repo_root / ".github" / "skills" / "demo-skill").mkdir(parents=True)
-    (repo_root / ".github" / "skills" / "demo-skill" / "SKILL.md").write_text(
-        "# demo\n", encoding="utf-8"
-    )
-    (home_root / ".agents" / "skills").mkdir(parents=True)
-
-    subprocess.run(["git", "init", "-q"], cwd=repo_root, check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "review@example.com"], cwd=repo_root, check=True
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "reviewer"], cwd=repo_root, check=True
-    )
-    subprocess.run(["git", "add", "."], cwd=repo_root, check=True)
-    subprocess.run(["git", "commit", "-qm", "init"], cwd=repo_root, check=True)
-
-    args = argparse.Namespace(
-        source_root=repo_root.as_posix(),
-        home_root=home_root.as_posix(),
-        format="compact",
-        compact=True,
-    )
-
-    assert run_bisync_plan(args) == 1
-    _ = capsys.readouterr()
-
-    assert run_bisync_apply(args) == 0
-    assert (home_root / ".agents" / "skills" / "demo-skill" / "SKILL.md").is_file()
-
-
 def test_cross_target_skill_plan_deduplicates_shared_paths(
     tmp_path: Path,
 ) -> None:
@@ -643,11 +639,11 @@ def test_cross_target_skill_plan_deduplicates_shared_paths(
         mode="plan",
     )
 
-    copy_paths = [
-        operation.path for operation in plan.operations if operation.action == "copy"
+    link_paths = [
+        operation.path for operation in plan.operations if operation.action == "link"
     ]
     assert (
-        copy_paths.count(
+        link_paths.count(
             str((tmp_path / "home" / ".agents" / "skills" / "demo-skill").resolve())
         )
         == 1

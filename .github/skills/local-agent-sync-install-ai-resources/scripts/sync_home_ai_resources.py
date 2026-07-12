@@ -13,11 +13,6 @@ import argparse
 import json
 from pathlib import Path
 
-from bisync_skills import (
-    build_bisync_plan,
-    run_bisync_apply,
-    run_bisync_plan,
-)
 from home_syncing import (
     apply_home_sync_plan,
     build_home_sync_plan,
@@ -28,7 +23,6 @@ from home_syncing import (
     write_plan_snapshot,
 )
 from sync_output import (
-    build_compact_bisync_output,
     build_compact_install_output,
     dump_compact_json,
     render_doctor_report,
@@ -99,45 +93,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             help="Skip unchanged manifest-managed resources when possible.",
         )
 
-    bisync_parser = subparsers.add_parser("bisync", help="Bidirectional sync between repo skills and home skills.")
-    bisync_sub = bisync_parser.add_subparsers(dest="bisync_command", required=True)
-    bisync_plan = bisync_sub.add_parser("plan", help="Detect drift without writing.")
-    bisync_plan.add_argument("--source-root", default=".", help="Source repository root.")
-    bisync_plan.add_argument(
-        "--home-root",
-        default=str(Path.home()),
-        help="Home directory root.",
-    )
-    bisync_plan.add_argument(
-        "--format",
-        choices=["text", "json", "compact", "report"],
-        default="compact",
-        help="Output format.",
-    )
-    bisync_plan.add_argument(
-        "--compact",
-        action="store_true",
-        help="Alias for --format compact; optimized for AI/tool iteration.",
-    )
-    bisync_apply = bisync_sub.add_parser("apply", help="Apply bisync resolution.")
-    bisync_apply.add_argument("--source-root", default=".", help="Source repository root.")
-    bisync_apply.add_argument(
-        "--home-root",
-        default=str(Path.home()),
-        help="Home directory root.",
-    )
-    bisync_apply.add_argument(
-        "--format",
-        choices=["text", "json", "compact", "report"],
-        default="compact",
-        help="Output format.",
-    )
-    bisync_apply.add_argument(
-        "--compact",
-        action="store_true",
-        help="Alias for --format compact; optimized for AI/tool iteration.",
-    )
-
     args = parser.parse_args(argv)
     if getattr(args, "compact", False):
         args.format = "compact"
@@ -149,11 +104,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def run(args: argparse.Namespace) -> int:
-    if args.command == "bisync":
-        if args.bisync_command == "plan":
-            return run_bisync_plan(args)
-        return run_bisync_apply(args)
-
     source_root = find_repo_root(Path(args.source_root))
     home_root = Path(args.home_root).expanduser().resolve()
     try:
@@ -283,7 +233,6 @@ def run_sync(
             "blocked_codes": [code],
             "reason": str(exc),
             "install": {"error": str(exc)},
-            "bisync": None,
         }
         emit_sync_output(payload, format_name=args.format)
         return 1
@@ -298,14 +247,13 @@ def run_sync(
                 "status": "needs_review",
                 "reason": "Install lane needs review before writing home resources.",
                 "install": install_payload,
-                "bisync": None,
             },
             format_name=args.format,
         )
         return 1
 
     install_changed = any(
-        operation.action in {"copy", "delete", "mkdir"}
+        operation.action in {"link", "unlink", "copy", "delete", "mkdir"}
         for operation in install_plan.operations
     )
     if install_changed:
@@ -324,7 +272,6 @@ def run_sync(
                     "status": "blocked",
                     "reason": str(error),
                     "install": install_payload,
-                    "bisync": None,
                 },
                 format_name=args.format,
             )
@@ -332,49 +279,16 @@ def run_sync(
         install_payload["manifest_path"] = manifest_path.as_posix()
     install_payload["state_path"] = write_plan_snapshot(install_plan).as_posix()
 
-    bisync_payload: dict[str, object] | None = None
-    if targets == ("skills",) and not retire_targets:
-        bisync_plan = build_bisync_plan(source_root, home_root, mode="plan")
-        bisync_payload = bisync_plan.to_dict()
-        if bisync_requires_review(bisync_plan):
-            emit_sync_output(
-                {
-                    "mode": "sync",
-                    "status": "needs_review",
-                    "reason": "Bisync detected home-owned or ambiguous drift that needs human review before sync can finish.",
-                    "install": install_payload,
-                    "bisync": bisync_payload,
-                },
-                format_name=args.format,
-            )
-            return 1
-
     emit_sync_output(
         {
             "mode": "sync",
             "status": "done",
-            "reason": "Repo-to-home install completed and no home-owned bisync drift needs review.",
+            "reason": "Home resource install completed.",
             "install": install_payload,
-            "bisync": bisync_payload,
         },
         format_name=args.format,
     )
     return 0
-
-
-def bisync_requires_review(plan) -> bool:
-    safe_blocked_codes = {"bisync-only-repo"}
-    if any(code not in safe_blocked_codes for code in plan.blocked_codes):
-        return True
-
-    for drift in plan.drifts:
-        if drift.drift_type == "only-repo":
-            continue
-        if drift.drift_type == "drift" and drift.direction == "repo-to-home":
-            continue
-        return True
-
-    return False
 
 
 def install_auto_apply_blockers(
@@ -400,7 +314,6 @@ def install_auto_apply_blockers(
 
 def emit_sync_output(payload: dict[str, object], *, format_name: str) -> None:
     install_payload = payload.get("install")
-    bisync_payload = payload.get("bisync")
     if format_name == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
@@ -412,8 +325,6 @@ def emit_sync_output(payload: dict[str, object], *, format_name: str) -> None:
         }
         if isinstance(install_payload, dict):
             compact["install"] = build_compact_install_output(install_payload)
-        if isinstance(bisync_payload, dict):
-            compact["bisync"] = build_compact_bisync_output(bisync_payload)
         print(dump_compact_json(compact))
         return
 

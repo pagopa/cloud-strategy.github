@@ -1,39 +1,29 @@
 # Error Codes
 
-Use these stable error identifiers for planner, doctor, audit, and apply output.
+Convert every active code into its plain-language route. Do not surface a bare
+code in an operator report.
 
-When rendering a user-visible report, convert each active code into a plain-language `why blocked` or `why skipped` explanation by combining the `Meaning` and `Rationale` columns. Do not surface a bare code without the policy reason behind it.
-
-| Code | Meaning | Default route | Rationale |
-| --- | --- | --- | --- |
-| `unknown-target` | The selected runtime target is not supported by the parser. | Stop and correct the target selection. | Prevents misconfigured or typoed targets from being silently ignored. |
-| `unsupported-family` | The source resource family is not supported for the selected target. | Skip or block according to mode. | Only allowlisted families per target are materialized to avoid incompatible or untested runtime files. |
-| `docs-unverified` | Runtime support exists only as an unverified claim. | Allow `plan`, `audit`, and `doctor`; block `apply`. | Materialization requires explicit evidence in the runtime support matrix to prevent untested runtime corruption. |
-| `missing-target-root` | The runtime root directory does not exist. | Show remediation and block `apply` unless creation is approved. | Avoids creating unexpected directory trees without user confirmation. |
-| `needs-directory-create` | The target directory tree can be created safely but does not exist yet. | Plan or doctor can suggest creation; `apply` needs explicit approval. | Home runtime directories are user-owned; creation must be an explicit decision. |
-| `permission-denied` | The runtime path exists but is not writable or readable enough for the selected mode. | Stop and surface the failing path. | Prevents runtime I/O errors and partial materialization that could leave the home state inconsistent. |
-| `unsafe-home-path` | A resolved path escapes the expected home root or lands in an unsafe location. | Block immediately. | Path confinement is a core safety gate to prevent writing outside the intended home runtime tree. |
-| `symlink-not-allowed` | The resolved target path crosses a disallowed symlink boundary. | Block immediately. | Symlink hops can escape the home root or point to unintended destinations; they are treated as unsafe paths. |
-| `manifest-missing` | A manifest-backed mode needs state that does not exist yet. | Fall back to first-run planning or doctor guidance. | Without a manifest, the tool cannot distinguish managed from unmanaged targets and must default to cautious first-run behavior. |
-| `manifest-corrupt` | The manifest exists but cannot be parsed or trusted. | Block apply and require remediation. | A corrupt manifest could hide stale entries or misrepresent ownership; applying against it risks data loss. |
-| `target-exists-unmanaged` | A target path already exists but is not manifest-managed. | Block overwrite unless the active catalog policy explicitly adopts unmanaged skills with repo-wins behavior. | Protects user-created or locally-installed files from being silently overwritten by repository-managed copies unless the selected skill policy intentionally promotes the repo copy to source of truth. |
-| `target-modified-managed` | A manifest-managed target diverged from the last recorded content hash. | Block overwrite until reviewed. Re-run install plan after verified bisync reconciliation; if the blocker persists, treat it as real local divergence. | Prevents losing local edits or runtime-generated changes that occurred after the last sync. |
-| `source-missing` | A catalog entry points to a source path that no longer exists. | Block that resource and flag catalog drift. | Materializing a missing source would create a stale or incomplete runtime copy; instead, surface catalog inconsistency. |
-| `source-invalid-skill` | A source skill bundle is incomplete for direct-copy sync. | Block that resource and fix the bundle. | A valid skill bundle must contain `SKILL.md`; copying an incomplete bundle would produce an unusable runtime skill. |
-| `stale-managed` | A previously managed target is no longer planned. | Mark for prune, but do not delete automatically. | Removal is opt-in (`--prune-managed`) to prevent accidental deletion of files that were previously managed. |
-| `prune-not-approved` | A stale managed resource could be removed, but prune was not approved. | Keep the file and report the follow-up. | Default policy preserves stale managed files until the user explicitly approves cleanup to avoid surprise data loss. |
-| `stale-content-drifted` | A stale managed file was modified since its last manifest entry. | Block delete until reviewed. | Even when pruning is approved, a locally modified stale file may contain valuable changes that must be preserved. |
-| `stale-path-unresolvable` | A stale managed path from the manifest cannot be resolved safely. | Block delete and surface the path. | Prevents deleting files at paths that may have been moved, symlinked, or otherwise made unsafe since the last sync. |
-| `reverse-sync-blocked` | Source root is under the home sync state directory (`~/.sync/...`), indicating attempted reverse sync. | Block immediately. Sync must be repo → home only. | Unidirectional sync preserves the repository as the single source of truth and prevents home state from polluting the repo. |
-| `retire-target-overlap` | The same runtime target was requested as both active and retired. | Stop and correct the target selection. | Target retirement must be explicit and unambiguous, otherwise the tool cannot derive the final managed target set safely. |
-| `bisync-source-missing` | The source `.github/skills/` directory does not exist or is not readable. | Block bisync plan and apply. | Bisync requires both source and home skill roots to exist for meaningful comparison. |
-| `bisync-home-missing` | The home `~/.agents/skills/` directory does not exist or is not readable. | Block bisync plan and apply. | A missing home root prevents meaningful comparison and safe bidirectional reconciliation. |
-| `bisync-repo-dirty` | The source repository has uncommitted or untracked changes detected by `git status --porcelain --untracked-files=all`. | Block bisync apply. | Writing to a dirty repository risks overwriting uncommitted work and makes post-apply verification unreliable. |
-| `bisync-repo-git-failed` | The `git status` command failed on the source repository. | Block bisync apply. | Without a reliable dirty-repo check, bisync cannot guarantee safe writes to the repository side. |
-| `bisync-only-repo` | A skill bundle exists in the source repo but not in the home directory. | Non-blocking bisync status; explicit apply may create the home bundle. | Repo-to-home creation is allowed for valid non-excluded bundles, but still requires explicit apply approval. |
-| `bisync-plan-required` | No reviewed matching bisync plan snapshot exists for the current repo/home drift set. | Block bisync apply and rerun `bisync plan`. | Bisync apply must write only from a drift set that was just reviewed; otherwise the write could target stale or changed drift decisions. |
-| `bisync-only-home` | A skill bundle exists in the home directory but not in the source repo. | Block bisync apply; require manual resolution. | Automatic resolution would mean deleting the home copy or creating a new repo copy without user intent. |
-| `bisync-equal-mtime` | Hashes differ between repo and home, but mtime is equal for both sides. | Block bisync apply; require manual resolution. | When mtime is equal, the tool cannot determine which side is newer; the user must decide the direction. |
-| `bisync-verify-failed` | Post-copy hash verification failed for a specific skill. | Block bisync apply; report the failing skill. | A hash mismatch after copy indicates a copy error, filesystem issue, or concurrent modification during apply. |
-| `bisync-manifest-reconcile-failed` | Bisync copied a repo-wins bundle, but the install manifest entry could not be safely refreshed to match it. | Block bisync apply and keep the reconciliation failure visible. | A verified copy must not be treated as converged unless the matching manifest row can be updated safely and revalidated. |
-| `bisync-residual-drift` | A post-apply verification plan still found drift entries. | Block bisync apply and inspect the residual plan. | Apply is not complete until a second plan reports zero drift and zero blockers. |
+| Code | Meaning | Route |
+| --- | --- | --- |
+| `unknown-target` | The requested runtime target is unsupported. | Correct the target. |
+| `unsupported-family` | The target does not support this resource family. | Select a supported target. |
+| `docs-unverified` | Runtime support is not documented enough for writes. | Use read-only modes or add support evidence. |
+| `needs-directory-create` | A required runtime directory is absent. | Rerun apply with explicit `--create-missing-dirs`. |
+| `permission-denied` | The runtime path is not accessible enough. | Repair permissions. |
+| `unsafe-home-path` | A path escaped its allowed runtime location. | Stop and repair the path. |
+| `symlink-not-allowed` | The runtime root or an intermediate path crosses a link boundary. | Replace it with a real confined directory. |
+| `symlink-unsupported` | The filesystem cannot create required skill links. | Use a supported filesystem; copied skills are not allowed. |
+| `link-target-missing` | A managed home link is broken or its source disappeared. | Restore the source or remove the broken link after review. |
+| `link-target-mismatch` | A home link points to another checkout. | Rerun after correcting the link; do not overwrite it automatically. |
+| `manifest-missing` | A read-only manifest-backed mode has no prior state. | Treat it as first-run evidence. |
+| `manifest-corrupt` | The manifest cannot be trusted. | Repair or remove the state before apply. |
+| `target-exists-unmanaged` | A copied agent target is unmanaged. | Preserve it or resolve ownership before apply. |
+| `target-modified-managed` | A copied agent changed after the recorded hash. | Review the local change before replacing it. |
+| `source-missing` | A catalog source no longer exists. | Repair the catalog or source. |
+| `source-invalid-skill` | A repository skill lacks `SKILL.md`. | Repair the source bundle. |
+| `stale-managed` | A copied managed resource is no longer planned. | Review and use explicit `--prune-managed` if appropriate. |
+| `prune-not-approved` | Copied-resource pruning needs explicit approval. | Rerun apply with `--prune-managed`. |
+| `stale-content-drifted` | A stale copied resource changed locally. | Review it before deletion. |
+| `stale-path-unresolvable` | A stale path cannot be confined safely. | Repair manifest state before deletion. |
+| `reverse-sync-blocked` | The requested source is inside home sync state. | Select the repository source; reverse writes are forbidden. |
+| `retire-target-overlap` | A runtime was selected and retired simultaneously. | Make target selection unambiguous. |

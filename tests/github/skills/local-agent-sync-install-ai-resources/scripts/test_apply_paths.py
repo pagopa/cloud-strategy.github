@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -14,9 +15,247 @@ from home_syncing import (  # noqa: E402
     HomeSyncPlan,
     ManagedResource,
     _stale_confinement_check,
+    add_materialization_operation,
+    add_stale_managed_operations,
+    assess_skill_link,
     apply_home_sync_plan,
+    canonical_skill_link_target,
     hash_resource,
 )
+from home_sync_contract import CatalogResource, HomeSyncPolicy  # noqa: E402
+from sync_home_ai_resources import parse_args, run  # noqa: E402
+
+
+def _demo_resource() -> CatalogResource:
+    return CatalogResource(
+        resource_id="demo",
+        source_family="skills",
+        source_path=".github/skills/demo",
+        include_targets=("skills",),
+        target_support="documented",
+        notes="",
+    )
+
+
+def _repo_wins_policy() -> HomeSyncPolicy:
+    return HomeSyncPolicy(
+        include_local_skills=False,
+        include_internal_skills=True,
+        include_unlisted_skills=True,
+        skill_targets=("skills",),
+        excluded_skills=(),
+        unmanaged_existing_skills_policy="repo-wins",
+    )
+
+
+def test_skill_link_assessment_is_deterministic(tmp_path: Path) -> None:
+    source = tmp_path / ".github/skills/demo"
+    source.mkdir(parents=True)
+    (source / "SKILL.md").write_text("# demo\n", encoding="utf-8")
+    expected = canonical_skill_link_target(tmp_path, ".github/skills/demo")
+    missing = tmp_path / "home/.agents/skills/demo"
+    missing.parent.mkdir(parents=True)
+
+    assert assess_skill_link(missing, expected) == ("missing", None)
+
+    missing.symlink_to(expected)
+    assert assess_skill_link(missing, expected) == ("matching", None)
+
+    missing.unlink()
+    missing.mkdir()
+    assert assess_skill_link(missing, expected) == ("replace-directory", None)
+
+    missing.rmdir()
+    other_checkout = tmp_path / "other-checkout"
+    other_checkout.mkdir()
+    missing.symlink_to(other_checkout, target_is_directory=True)
+    assert assess_skill_link(missing, expected) == ("blocked", "link-target-mismatch")
+
+    missing.unlink()
+    missing.symlink_to(tmp_path / "removed-checkout", target_is_directory=True)
+    assert assess_skill_link(missing, expected) == ("blocked", "link-target-missing")
+
+
+def test_skill_planning_uses_link_and_adopts_matching_link(tmp_path: Path) -> None:
+    source, source_hash = _setup_skill_source(tmp_path)
+    target = tmp_path / "home/.agents/skills/demo"
+    target.parent.mkdir(parents=True)
+    operations: list[HomeSyncOperation] = []
+
+    add_materialization_operation(
+        operations,
+        target="skills",
+        target_path=target,
+        source_path=source,
+        resource=_demo_resource(),
+        source_hash=source_hash,
+        manifest_index={},
+        changed_only=False,
+        policy=_repo_wins_policy(),
+    )
+    assert [operation.action for operation in operations] == ["link"]
+
+    target.symlink_to(source.resolve(), target_is_directory=True)
+    operations.clear()
+    add_materialization_operation(
+        operations,
+        target="skills",
+        target_path=target,
+        source_path=source,
+        resource=_demo_resource(),
+        source_hash=source_hash,
+        manifest_index={},
+        changed_only=False,
+        policy=_repo_wins_policy(),
+    )
+    assert [operation.action for operation in operations] == ["skip"]
+
+
+def test_stale_manifest_skill_link_is_unlinked_without_prune_flag(tmp_path: Path) -> None:
+    target = tmp_path / "home/.agents/skills/old"
+    target.parent.mkdir(parents=True)
+    source = tmp_path / "repo/.github/skills/old"
+    source.mkdir(parents=True)
+    (source / "SKILL.md").write_text("# old\n", encoding="utf-8")
+    target.symlink_to(source.resolve(), target_is_directory=True)
+    operations: list[HomeSyncOperation] = []
+
+    add_stale_managed_operations(
+        operations,
+        {
+            "schema_version": 2,
+            "managed_resources": [
+                {
+                    "target": "skills",
+                    "resource_family": "skills",
+                    "resource_id": "old",
+                    "source_path": ".github/skills/old",
+                    "target_path": target.as_posix(),
+                    "source_hash": "source",
+                    "materialization": "symlink",
+                    "link_target": source.resolve().as_posix(),
+                    "content_hash": None,
+                    "last_action": "link",
+                }
+            ],
+        },
+        [],
+        ("skills",),
+        (),
+        "plan",
+        False,
+        tmp_path / "home",
+        _repo_wins_policy(),
+    )
+
+    assert [(operation.action, operation.code) for operation in operations] == [("unlink", None)]
+
+
+def test_temporary_home_sync_links_skills_preserves_home_only_and_copies_agents(
+    tmp_path: Path, capsys
+) -> None:
+    refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    refs.mkdir(parents=True)
+    (refs / "home-sync-catalog.yaml").write_text(
+        """version: 1
+defaults:
+  include_internal_skills: true
+  include_local_skills: false
+  include_unlisted_skills: true
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills: [graphify]
+  skill_targets: [codex]
+resources:
+  - resource_id: demo-agent
+    source_family: agents
+    source_path: .github/agents/demo-agent.agent.md
+    include_targets: [codex]
+    target_support: documented
+    notes: test agent
+""",
+        encoding="utf-8",
+    )
+    (refs / "runtime-support-matrix.yaml").write_text(
+        """version: 1
+rows:
+  - target: skills
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: test
+  - target: codex
+    resource_family: skills
+    support_level: Documented
+    home_path: ~/.agents/skills/<skill>/
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: test
+  - target: codex
+    resource_family: agents
+    support_level: Documented
+    home_path: ~/.codex/agents/
+    direct_copy_possible: false
+    translation_required: true
+    include_in_v1: true
+    evidence: []
+    notes: test
+""",
+        encoding="utf-8",
+    )
+    source_skill = tmp_path / ".github/skills/demo"
+    source_skill.mkdir(parents=True)
+    (source_skill / "SKILL.md").write_text("# demo\n", encoding="utf-8")
+    for skill_id in ("graphify", "local-private"):
+        skill = tmp_path / ".github/skills" / skill_id
+        skill.mkdir()
+        (skill / "SKILL.md").write_text(f"# {skill_id}\n", encoding="utf-8")
+    agent = tmp_path / ".github/agents/demo-agent.agent.md"
+    agent.parent.mkdir(parents=True)
+    agent.write_text("---\nname: demo-agent\ndescription: test\n---\nTest agent.\n", encoding="utf-8")
+
+    home = tmp_path / "home"
+    divergent = home / ".agents/skills/demo"
+    divergent.mkdir(parents=True)
+    (divergent / "SKILL.md").write_text("# divergent\n", encoding="utf-8")
+    for skill_id in ("graphify", "home-only"):
+        skill = home / ".agents/skills" / skill_id
+        skill.mkdir(parents=True, exist_ok=True)
+        (skill / "SKILL.md").write_text(f"# {skill_id}\n", encoding="utf-8")
+
+    assert run(parse_args(["sync", "--source-root", str(tmp_path), "--home-root", str(home), "--targets", "skills,codex", "--create-missing-dirs"])) == 0
+
+    target_skill = home / ".agents/skills/demo"
+    assert target_skill.is_symlink()
+    assert target_skill.resolve() == source_skill.resolve()
+    assert (home / ".agents/skills/graphify/SKILL.md").is_file()
+    assert (home / ".agents/skills/home-only/SKILL.md").is_file()
+    assert (home / ".codex/agents/demo-agent.toml").is_file()
+    (source_skill / "SKILL.md").write_text("# repo edit\n", encoding="utf-8")
+    assert (target_skill / "SKILL.md").read_text(encoding="utf-8") == "# repo edit\n"
+    (target_skill / "SKILL.md").write_text("# home write\n", encoding="utf-8")
+    assert (source_skill / "SKILL.md").read_text(encoding="utf-8") == "# home write\n"
+
+    import shutil
+
+    shutil.rmtree(source_skill)
+    assert run(parse_args(["sync", "--source-root", str(tmp_path), "--home-root", str(home), "--targets", "skills,codex", "--create-missing-dirs"])) == 0
+    capsys.readouterr()
+    assert not target_skill.exists()
+    assert not target_skill.is_symlink()
+    for mode in ("plan", "audit", "doctor"):
+        assert run(parse_args([mode, "--source-root", str(tmp_path), "--home-root", str(home), "--targets", "skills,codex"])) == 0
+        payload = json.loads(capsys.readouterr().out)
+        assert payload.get("blocked_codes", []) == []
+        assert payload["counts"]["linked"] == 0
+        assert payload["counts"]["unlinked"] == 0
+        assert payload["counts"]["blocked"] == 0
+        assert payload["counts"]["residual"] == 0
 
 
 def _setup_skill_source(tmp_path: Path) -> tuple[Path, str]:
@@ -27,8 +266,8 @@ def _setup_skill_source(tmp_path: Path) -> tuple[Path, str]:
     return skill_dir, content_hash
 
 
-def test_apply_copies_skill_to_home(tmp_path: Path) -> None:
-    _, content_hash = _setup_skill_source(tmp_path)
+def test_apply_links_skill_to_home_with_write_through(tmp_path: Path) -> None:
+    source, _ = _setup_skill_source(tmp_path)
     home_root = tmp_path / "home"
     target_path = home_root / ".agents" / "skills" / "demo"
     target_path.parent.mkdir(parents=True)
@@ -42,12 +281,14 @@ def test_apply_copies_skill_to_home(tmp_path: Path) -> None:
         source_path=".github/skills/demo",
         target_path=str(target_path),
         source_hash="abc",
-        content_hash=content_hash,
-        last_action="copy",
+        materialization="symlink",
+        link_target=source.resolve().as_posix(),
+        content_hash=None,
+        last_action="link",
     )
     operation = HomeSyncOperation(
         target="skills",
-        action="copy",
+        action="link",
         path=str(target_path),
         reason="first install",
         source_path=".github/skills/demo",
@@ -71,8 +312,13 @@ def test_apply_copies_skill_to_home(tmp_path: Path) -> None:
 
     manifest_path = apply_home_sync_plan(plan)
     assert manifest_path.is_file()
+    assert target_path.is_symlink()
+    assert target_path.resolve() == source.resolve()
     assert (target_path / "SKILL.md").is_file()
-    assert hash_resource(target_path) == content_hash
+    (source / "SKILL.md").write_text("# changed in repo\n", encoding="utf-8")
+    assert (target_path / "SKILL.md").read_text(encoding="utf-8") == "# changed in repo\n"
+    (target_path / "SKILL.md").write_text("# changed through home\n", encoding="utf-8")
+    assert (source / "SKILL.md").read_text(encoding="utf-8") == "# changed through home\n"
 
 
 def test_apply_delete_with_prune(tmp_path: Path) -> None:
