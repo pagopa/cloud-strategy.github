@@ -60,6 +60,18 @@ def main() -> int:
         "Approval Rules",
         "Routing Stability Rule",
     ]
+    research_markers = [
+        "mattpocock-research",
+        "External Research Checkpoint",
+        "tmp/research/",
+        "on-demand",
+        "local evidence is insufficient",
+        "feasibility, approach, constraints, or risk",
+        "one bounded research question",
+        "one Markdown report",
+        "decision-relevant conclusions",
+        "do not start a second research pass automatically",
+    ]
     runtime_only_markers = [
         "$internal-gateway-idea",
         "$superpowers-brainstorming",
@@ -87,6 +99,10 @@ def main() -> int:
         "local_fast_lane_documented": "scripts/audit_workflow.py" in skill_text
         and "scripts/audit_workflow.py" in workflow_text,
         "workflow_mermaid_and_rules": contains_all(workflow_text, workflow_only_markers),
+        "skill_research_escalation": contains_all(skill_text, research_markers),
+        "workflow_research_escalation": contains_all(
+            workflow_text, research_markers
+        ),
         "canonical_alignment": "agent filename, frontmatter name, and workflow aligned" in skill_text
         and "agent filename, frontmatter name, and workflow aligned" in workflow_text
         and "agent filename, frontmatter name, and workflow aligned" in runtime_text,

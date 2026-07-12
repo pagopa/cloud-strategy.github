@@ -9,6 +9,7 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 
 - `superpowers-brainstorming`: core idea-to-design workflow.
 - `internal-gateway-writing-plans`: retained spec or implementation-plan writing after the user approves the direction.
+- `mattpocock-research`: on-demand owner for decision-relevant external research after local evidence is exhausted; this reference does not preload the skill.
 
 ## Local references
 
@@ -33,14 +34,14 @@ Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainsto
 
 ## Core contract
 
-- Follow the mandatory gate sequence: `Specialization Checkpoint: gated`, `Idea Gate 0`, `Assumption Challenge Gate`, `Alternative discovery`, `Critical Challenge Gate`, `Spec vs plan decision`, `Stop before implementation execution`.
+- Follow the mandatory gate sequence: `Specialization Checkpoint: gated`, `Idea Gate 0`, `External Research Checkpoint`, `Assumption Challenge Gate`, `Alternative discovery`, `Critical Challenge Gate`, `Spec vs plan decision`, `Stop before implementation execution`.
 - Load `superpowers-brainstorming` as the core workflow.
 - Read `references/workflow.md` before presenting the final design direction.
 - Keep the `superpowers-brainstorming` hard gate: no implementation action before the user approves the design or direct-plan recommendation.
 - Treat approval as gate-local. `procedi`, `ok`, `go`, or similar approval advances only the active visible gate.
 - If approval wording is ambiguous, ask whether it means critical review, retained spec or plan writing, or implementation execution.
 - After the bounded evidence pass, run `Idea Gate 0` as a visible numbered question block with `Question`, `Recommendation`, `Why`, and `Default if accepted`; evidence cannot replace Idea Gate 0.
-- Do not proceed to assumption challenge, alternative discovery, design direction, critical challenge, or spec-vs-plan decision until `Idea Gate 0` is accepted or the user explicitly overrides its defaults.
+- Do not proceed to `External Research Checkpoint`, assumption challenge, alternative discovery, design direction, critical challenge, or spec-vs-plan decision until `Idea Gate 0` is accepted or the user explicitly overrides its defaults.
 - Run `Critical Challenge Gate` as its own visible gate after the user approves the design direction and before the spec-vs-plan decision; an embedded critique does not satisfy Critical Challenge Gate.
 - If any mandatory gate was skipped, stop, name the missed gate, mark any downstream artifact as draft-only, and resume at the first skipped mandatory gate.
 - Use this skill only to add repository-owned idea gates, not to fork the core brainstorming process.
@@ -65,13 +66,14 @@ Follow `references/workflow.md` in this order:
 1. `Bounded evidence pass`
 2. `Specialization Checkpoint: gated` when the incoming ask is execution-shaped.
 3. `Idea Gate 0`
-4. `Assumption Challenge Gate`
-5. `Alternative discovery`
-6. `Present design direction`
-7. `Critical Challenge Gate`
-8. `Spec vs plan decision`
-9. `Approved writing handoff`
-10. `Stop before implementation execution`
+4. `External Research Checkpoint`
+5. `Assumption Challenge Gate`
+6. `Alternative discovery`
+7. `Present design direction`
+8. `Critical Challenge Gate`
+9. `Spec vs plan decision`
+10. `Approved writing handoff`
+11. `Stop before implementation execution`
 
 If a later step happened before an earlier mandatory gate, use `Skipped-gate
 recovery`: stop the current lane, identify the first skipped mandatory gate,
@@ -98,6 +100,34 @@ Questions should focus only on decisions repository evidence cannot safely
 answer: intent, accepted defaults, constraints, success criteria, validation
 path, and anti-scope. A bounded evidence pass may prepare recommended defaults,
 but evidence cannot replace Idea Gate 0.
+
+## External Research Checkpoint
+
+Run this checkpoint after `Idea Gate 0` is accepted and before `Assumption
+Challenge Gate`. Local evidence remains the default.
+
+Skip external research unless all of these are true:
+
+- the unresolved question is owned by an external primary source;
+- local evidence is insufficient;
+- the answer could change feasibility, approach, constraints, or risk.
+
+When all conditions hold:
+
+1. Define one bounded research question.
+2. load `mattpocock-research` on-demand and write one Markdown report under
+   `tmp/research/YYYY-MM-DD-<slug>.md`.
+3. Bring only the report path and decision-relevant conclusions back into the
+   brainstorming flow.
+4. Continue to `Assumption Challenge Gate`, or return to `Idea Gate 0` when the
+   evidence changes an accepted constraint or default.
+
+`internal-gateway-idea` owns when research is warranted.
+`mattpocock-research` owns how the research is performed. Do not copy its
+research procedure here, and do not start a second research pass automatically.
+
+Validation must keep this checkpoint on-demand, bounded to one question and one
+report, preceded by local evidence, and routed to `tmp/research/`.
 
 ## Assumption Challenge Gate
 
