@@ -74,6 +74,10 @@ This block is the portable source baseline used to generate
 
 ## Delivery And Validation
 
+- Be extremely concise in user-facing reporting without sacrificing clarity,
+  correctness, safety, required evidence, or actionable next steps. Lead with
+  the outcome, omit repetition and incidental process detail, and expand only
+  when requested or necessary.
 - Reason from repository evidence. Do not invent runtimes, validators, sync
   flows, or tests.
 - For non-trivial work, make target state, anti-scope, assumptions, tradeoffs,
