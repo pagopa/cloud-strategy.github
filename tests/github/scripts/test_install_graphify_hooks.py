@@ -5,7 +5,6 @@ import shutil
 import subprocess
 from pathlib import Path
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 INSTALLER = REPOSITORY_ROOT / ".github/scripts/install-graphify-hooks.sh"
 DELEGATE = REPOSITORY_ROOT / ".github/scripts/graphify-file-change-hook.sh"
@@ -43,7 +42,9 @@ def test_installer_creates_idempotent_delegating_hooks_and_preserves_foreign_hoo
     hooks = repository / ".github/hooks"
     hooks.mkdir(parents=True)
     foreign_hook = hooks / "post-merge"
-    foreign_hook.write_text("#!/usr/bin/env bash\nprintf 'foreign\n'\n", encoding="utf-8")
+    foreign_hook.write_text(
+        "#!/usr/bin/env bash\nprintf 'foreign\n'\n", encoding="utf-8"
+    )
     foreign_hook.chmod(0o755)
 
     _run_installer(repository)
@@ -52,13 +53,16 @@ def test_installer_creates_idempotent_delegating_hooks_and_preserves_foreign_hoo
     }
     _run_installer(repository)
 
-    assert subprocess.run(
-        ["git", "config", "--get", "core.hooksPath"],
-        cwd=repository,
-        check=True,
-        text=True,
-        capture_output=True,
-    ).stdout.strip() == ".github/hooks"
+    assert (
+        subprocess.run(
+            ["git", "config", "--get", "core.hooksPath"],
+            cwd=repository,
+            check=True,
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        == ".github/hooks"
+    )
 
     for name in HOOK_NAMES:
         hook = hooks / name
@@ -71,5 +75,7 @@ def test_installer_creates_idempotent_delegating_hooks_and_preserves_foreign_hoo
         assert contents == first_contents[name]
 
     preserved = hooks / "post-merge.graphify-original"
-    assert preserved.read_text(encoding="utf-8") == "#!/usr/bin/env bash\nprintf 'foreign\n'\n"
-
+    assert (
+        preserved.read_text(encoding="utf-8")
+        == "#!/usr/bin/env bash\nprintf 'foreign\n'\n"
+    )

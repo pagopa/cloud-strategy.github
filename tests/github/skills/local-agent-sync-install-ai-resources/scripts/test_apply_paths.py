@@ -10,6 +10,7 @@ REPO_ROOT = next(
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
+from home_sync_contract import CatalogResource, HomeSyncPolicy  # noqa: E402
 from home_syncing import (  # noqa: E402
     HomeSyncOperation,
     HomeSyncPlan,
@@ -17,12 +18,11 @@ from home_syncing import (  # noqa: E402
     _stale_confinement_check,
     add_materialization_operation,
     add_stale_managed_operations,
-    assess_skill_link,
     apply_home_sync_plan,
+    assess_skill_link,
     canonical_skill_link_target,
     hash_resource,
 )
-from home_sync_contract import CatalogResource, HomeSyncPolicy  # noqa: E402
 from sync_home_ai_resources import parse_args, run  # noqa: E402
 
 
@@ -111,7 +111,9 @@ def test_skill_planning_uses_link_and_adopts_matching_link(tmp_path: Path) -> No
     assert [operation.action for operation in operations] == ["skip"]
 
 
-def test_stale_manifest_skill_link_is_unlinked_without_prune_flag(tmp_path: Path) -> None:
+def test_stale_manifest_skill_link_is_unlinked_without_prune_flag(
+    tmp_path: Path,
+) -> None:
     target = tmp_path / "home/.agents/skills/old"
     target.parent.mkdir(parents=True)
     source = tmp_path / "repo/.github/skills/old"
@@ -148,7 +150,9 @@ def test_stale_manifest_skill_link_is_unlinked_without_prune_flag(tmp_path: Path
         _repo_wins_policy(),
     )
 
-    assert [(operation.action, operation.code) for operation in operations] == [("unlink", None)]
+    assert [(operation.action, operation.code) for operation in operations] == [
+        ("unlink", None)
+    ]
 
 
 def test_temporary_home_sync_links_skills_preserves_home_only_and_copies_agents(
@@ -217,7 +221,9 @@ rows:
         (skill / "SKILL.md").write_text(f"# {skill_id}\n", encoding="utf-8")
     agent = tmp_path / ".github/agents/demo-agent.agent.md"
     agent.parent.mkdir(parents=True)
-    agent.write_text("---\nname: demo-agent\ndescription: test\n---\nTest agent.\n", encoding="utf-8")
+    agent.write_text(
+        "---\nname: demo-agent\ndescription: test\n---\nTest agent.\n", encoding="utf-8"
+    )
 
     home = tmp_path / "home"
     divergent = home / ".agents/skills/demo"
@@ -228,7 +234,23 @@ rows:
         skill.mkdir(parents=True, exist_ok=True)
         (skill / "SKILL.md").write_text(f"# {skill_id}\n", encoding="utf-8")
 
-    assert run(parse_args(["sync", "--source-root", str(tmp_path), "--home-root", str(home), "--targets", "skills,codex", "--create-missing-dirs"])) == 0
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "skills,codex",
+                    "--create-missing-dirs",
+                ]
+            )
+        )
+        == 0
+    )
 
     target_skill = home / ".agents/skills/demo"
     assert target_skill.is_symlink()
@@ -244,12 +266,43 @@ rows:
     import shutil
 
     shutil.rmtree(source_skill)
-    assert run(parse_args(["sync", "--source-root", str(tmp_path), "--home-root", str(home), "--targets", "skills,codex", "--create-missing-dirs"])) == 0
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "skills,codex",
+                    "--create-missing-dirs",
+                ]
+            )
+        )
+        == 0
+    )
     capsys.readouterr()
     assert not target_skill.exists()
     assert not target_skill.is_symlink()
     for mode in ("plan", "audit", "doctor"):
-        assert run(parse_args([mode, "--source-root", str(tmp_path), "--home-root", str(home), "--targets", "skills,codex"])) == 0
+        assert (
+            run(
+                parse_args(
+                    [
+                        mode,
+                        "--source-root",
+                        str(tmp_path),
+                        "--home-root",
+                        str(home),
+                        "--targets",
+                        "skills,codex",
+                    ]
+                )
+            )
+            == 0
+        )
         payload = json.loads(capsys.readouterr().out)
         assert payload.get("blocked_codes", []) == []
         assert payload["counts"]["linked"] == 0
@@ -320,22 +373,27 @@ Repository-only policy.
     target.parent.mkdir(parents=True)
     target.write_text("old local policy\n", encoding="utf-8")
 
-    assert run(
-        parse_args(
-            [
-                "sync",
-                "--source-root",
-                str(tmp_path),
-                "--home-root",
-                str(home),
-                "--targets",
-                "agents.md",
-            ]
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "agents.md",
+                ]
+            )
         )
-    ) == 0
+        == 0
+    )
     capsys.readouterr()
 
-    assert target.read_text(encoding="utf-8") == """# Global agent policy
+    assert (
+        target.read_text(encoding="utf-8")
+        == """# Global agent policy
 
 `<shared-baseline>`
 
@@ -343,10 +401,11 @@ Shared policy.
 
 `</shared-baseline>`
 """
+    )
     manifest = json.loads(
-        (home / ".sync/cloud-strategy-governance/home-ai-resources/manifest.json").read_text(
-            encoding="utf-8"
-        )
+        (
+            home / ".sync/cloud-strategy-governance/home-ai-resources/manifest.json"
+        ).read_text(encoding="utf-8")
     )
     assert manifest["managed_resources"][0]["target"] == "agents.md"
     assert manifest["managed_resources"][0]["resource_family"] == "agents-md"
@@ -393,32 +452,44 @@ rows:
     )
     source = tmp_path / ".github/agents/demo-agent.agent.md"
     source.parent.mkdir(parents=True)
-    source.write_text("---\nname: demo-agent\n---\nRepository agent.\n", encoding="utf-8")
+    source.write_text(
+        "---\nname: demo-agent\n---\nRepository agent.\n", encoding="utf-8"
+    )
 
     home = tmp_path / "home"
-    assert run(
-        parse_args(
-            [
-                "sync",
-                "--source-root",
-                str(tmp_path),
-                "--home-root",
-                str(home),
-                "--targets",
-                "copilot",
-                "--create-missing-dirs",
-            ]
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "copilot",
+                    "--create-missing-dirs",
+                ]
+            )
         )
-    ) == 0
+        == 0
+    )
     capsys.readouterr()
 
     target = home / ".copilot/agents/demo-agent.agent.md"
     assert target.is_symlink()
     assert target.resolve() == source.resolve()
-    source.write_text("---\nname: demo-agent\n---\nUpdated in repository.\n", encoding="utf-8")
+    source.write_text(
+        "---\nname: demo-agent\n---\nUpdated in repository.\n", encoding="utf-8"
+    )
     assert target.read_text(encoding="utf-8") == source.read_text(encoding="utf-8")
-    target.write_text("---\nname: demo-agent\n---\nUpdated through home.\n", encoding="utf-8")
-    assert source.read_text(encoding="utf-8") == "---\nname: demo-agent\n---\nUpdated through home.\n"
+    target.write_text(
+        "---\nname: demo-agent\n---\nUpdated through home.\n", encoding="utf-8"
+    )
+    assert (
+        source.read_text(encoding="utf-8")
+        == "---\nname: demo-agent\n---\nUpdated through home.\n"
+    )
 
 
 def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
@@ -457,7 +528,9 @@ def test_manifest_managed_copilot_copy_migrates_to_link_when_unchanged(
         policy=_repo_wins_policy(),
     )
 
-    assert [(operation.action, operation.code) for operation in operations] == [("link", None)]
+    assert [(operation.action, operation.code) for operation in operations] == [
+        ("link", None)
+    ]
 
 
 def _setup_skill_source(tmp_path: Path) -> tuple[Path, str]:
@@ -518,9 +591,13 @@ def test_apply_links_skill_to_home_with_write_through(tmp_path: Path) -> None:
     assert target_path.resolve() == source.resolve()
     assert (target_path / "SKILL.md").is_file()
     (source / "SKILL.md").write_text("# changed in repo\n", encoding="utf-8")
-    assert (target_path / "SKILL.md").read_text(encoding="utf-8") == "# changed in repo\n"
+    assert (target_path / "SKILL.md").read_text(
+        encoding="utf-8"
+    ) == "# changed in repo\n"
     (target_path / "SKILL.md").write_text("# changed through home\n", encoding="utf-8")
-    assert (source / "SKILL.md").read_text(encoding="utf-8") == "# changed through home\n"
+    assert (source / "SKILL.md").read_text(
+        encoding="utf-8"
+    ) == "# changed through home\n"
 
 
 def test_apply_delete_with_prune(tmp_path: Path) -> None:

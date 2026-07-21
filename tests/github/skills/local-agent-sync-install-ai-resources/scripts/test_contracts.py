@@ -74,7 +74,9 @@ def test_empty_manifest_defaults_to_schema_v2(tmp_path: Path) -> None:
     assert payload == {"schema_version": 2, "managed_resources": []}
 
 
-def test_v1_manifest_rows_are_normalized_as_copy_without_rewrite(tmp_path: Path) -> None:
+def test_v1_manifest_rows_are_normalized_as_copy_without_rewrite(
+    tmp_path: Path,
+) -> None:
     path = tmp_path / "manifest.json"
     path.write_text(
         json.dumps(
@@ -179,13 +181,19 @@ def test_valid_v2_manifest_rows_load_unchanged(tmp_path: Path) -> None:
             "target": "copilot",
             "resource_family": "agents",
             "materialization": "symlink",
-            "link_target": (tmp_path / "repo/.github/agents/review.agent.md").as_posix(),
+            "link_target": (
+                tmp_path / "repo/.github/agents/review.agent.md"
+            ).as_posix(),
             "content_hash": None,
-            "target_path": (tmp_path / "home/.copilot/agents/review.agent.md").as_posix(),
+            "target_path": (
+                tmp_path / "home/.copilot/agents/review.agent.md"
+            ).as_posix(),
         },
     ]
     path = tmp_path / "manifest.json"
-    path.write_text(json.dumps({"schema_version": 2, "managed_resources": rows}), encoding="utf-8")
+    path.write_text(
+        json.dumps({"schema_version": 2, "managed_resources": rows}), encoding="utf-8"
+    )
 
     payload, error = load_manifest(path)
 
