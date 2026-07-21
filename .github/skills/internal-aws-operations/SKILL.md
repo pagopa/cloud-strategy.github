@@ -7,7 +7,7 @@ description: Use when the user needs AWS operational guidance for monitoring, lo
 
 ## Referenced skills
 
-- `internal-aws-strategic`: route back when the platform direction is still unsettled.
+- `internal-aws`: use only when material routing uncertainty prevents selecting a primary AWS specialist.
 - `internal-aws-organization-structure`: route when account, OU, delegated admin, or topology structure is the main decision.
 - `internal-aws-governance`: route when IAM, trust, SCP, or guardrail design is the main decision.
 - `internal-aws-mcp-research`: load when current AWS service behavior or IAM inspection can change the validation plan.
@@ -74,8 +74,8 @@ For broader asks, return:
 
 ## Relationship to adjacent skills
 
-- `internal-aws-strategic`
-  Use first when the core decision is still unsettled.
+- `internal-aws`
+  Use only when material routing uncertainty prevents selecting a primary AWS specialist; do not use it when operations clearly owns the deliverable.
 - `internal-aws-organization-structure`
   Use when the operations question is actually about account, OU, or topology placement.
 - `internal-aws-governance`

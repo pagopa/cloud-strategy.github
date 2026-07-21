@@ -7,7 +7,7 @@ description: Use when the user needs AWS governance guidance for IAM operating m
 
 ## Referenced skills
 
-- `internal-aws-strategic`: route back when direction or tradeoff framing is still unsettled.
+- `internal-aws`: use only when material routing uncertainty prevents selecting a primary AWS specialist.
 - `internal-aws-organization-structure`: route when account, OU, delegated admin, or topology structure is the main decision.
 - `internal-aws-operations`: route when rollout validation, monitoring, or evidence is the main need.
 - `internal-aws-mcp-research`: load when current AWS IAM or service documentation can change the answer.
@@ -75,8 +75,8 @@ For broader asks, return:
 
 ## Relationship to adjacent skills
 
-- `internal-aws-strategic`
-  Use first when the user still needs option framing or lens selection.
+- `internal-aws`
+  Use only when material routing uncertainty prevents selecting a primary AWS specialist; do not use it when governance clearly owns the deliverable.
 - `internal-aws-organization-structure`
   Use when the governance question is actually about where a capability should live.
 - `internal-aws-operations`

@@ -7,14 +7,9 @@ description: Use when designing, implementing, refactoring, or reviewing AWS Lam
 
 ## Referenced skills
 
-- `internal-aws-strategic`: AWS direction or tradeoff questions before implementation.
+- `internal-aws`: use only when material routing uncertainty prevents selecting a primary AWS specialist.
 - `internal-aws-governance`: IAM, trust, queue policy, and guardrail design around Lambda.
 - `internal-aws-operations`: rollout validation, monitoring, evidence, recovery, and operational proof.
-- `internal-python`: shared Python baseline for Python Lambda code.
-- `internal-nodejs`: shared JavaScript, Node.js, and TypeScript baseline for Lambda code.
-- `internal-python-project`: structured Python modules used by Lambda handlers.
-- `internal-nodejs-project`: structured Node.js or TypeScript modules used by Lambda handlers.
-- `internal-terraform`: Terraform infrastructure for Lambda resources.
 
 ## When to use
 
@@ -55,12 +50,9 @@ Load `references/sharp-edges.md` when diagnosing cold starts, VPC latency, retry
 
 ## Relationship to adjacent skills
 
-- Use `internal-aws-strategic` when the AWS direction or tradeoff is still unsettled.
+- Use `internal-aws` only when material routing uncertainty prevents selecting a primary AWS specialist.
 - Use `internal-aws-governance` when the next question is IAM, trust, queue policy, or another guardrail design concern.
 - Use `internal-aws-operations` when the next question is rollout validation, monitoring, evidence, or recovery proof rather than implementation.
-- Use `internal-python-project` when the Lambda code lives in structured Python application modules.
-- Use `internal-nodejs-project` when the Lambda code lives in structured Node.js or TypeScript modules.
-- Use `internal-terraform` when the primary change is Terraform infrastructure rather than runtime code.
 
 ## Common mistakes
 

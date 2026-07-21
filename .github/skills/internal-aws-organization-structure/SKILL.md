@@ -7,7 +7,7 @@ description: Use when the user needs AWS control-plane or multi-account structur
 
 ## Referenced skills
 
-- `internal-aws-strategic`: route back when the platform direction or tradeoff frame is still unsettled.
+- `internal-aws`: use only when material routing uncertainty prevents selecting a primary AWS specialist.
 - `internal-aws-governance`: route guardrail, IAM, SCP, trust, or federation design.
 - `internal-aws-operations`: route monitoring, validation, backup, reporting, or post-rollout evidence.
 - `internal-aws-mcp-research`: load when current AWS service support or delegated-admin behavior can change the structure answer.
@@ -80,8 +80,8 @@ For broader asks, return:
 
 ## Relationship to adjacent skills
 
-- `internal-aws-strategic`
-  Use first when the user still needs a broader decision framing or lens selection.
+- `internal-aws`
+  Use only when material routing uncertainty prevents selecting a primary AWS specialist; do not use it when structure clearly owns the deliverable.
 - `internal-aws-governance`
   Use when the structural decision is accepted and the next need is IAM, SCP, trust, federation, or guardrail definition.
 - `internal-aws-operations`

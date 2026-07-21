@@ -65,7 +65,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
 - `.github/skills/internal-aws-organization-structure/SKILL.md`
-- `.github/skills/internal-aws-strategic/SKILL.md`
+- `.github/skills/internal-aws/SKILL.md`
 - `.github/skills/internal-azure-devops/SKILL.md`
 - `.github/skills/internal-azure-governance/SKILL.md`
 - `.github/skills/internal-azure-operations/SKILL.md`

@@ -7,7 +7,7 @@ description: Use when the task needs current AWS documentation or safe IAM inspe
 
 ## Referenced skills
 
-- `internal-aws-strategic`: route recommendations that affect platform direction or tradeoffs.
+- `internal-aws`: use only when material routing uncertainty prevents selecting a primary AWS specialist.
 - `internal-aws-organization-structure`: route recommendations that affect account, OU, delegated admin, or StackSets topology.
 - `internal-aws-governance`: route recommendations that affect SCPs, IAM, trust, or federation.
 - `internal-aws-operations`: route recommendations that affect validation, monitoring, backup, or rollout evidence.
@@ -107,7 +107,7 @@ Prefer these operations when available:
 - Do not create, delete, attach, detach, or rotate IAM resources unless the user explicitly asks for a change and the blast radius is understood.
 - Prefer `simulate_principal_policy` before proposing policy rollout steps.
 - Distinguish clearly between documentation-backed statements and observations from a real AWS account.
-- When the answer affects strategic framing, route the recommendation back through `internal-aws-strategic`.
+- When material routing uncertainty remains after research, use `internal-aws` only to select the primary AWS specialist; otherwise hand the recommendation directly to its clear owner.
 - When the answer affects account layout, delegated admin placement, or StackSets topology, route it through `internal-aws-organization-structure`.
 - When the answer affects SCPs, IAM, trust, or federation, route it through `internal-aws-governance`.
 - When the answer affects validation, backup, monitoring, or rollout evidence, route it through `internal-aws-operations`.
@@ -125,7 +125,7 @@ Prefer these operations when available:
 
 - `references/official-source-map.md`
 - `references/mcp-capabilities.md`
-- `internal-aws-strategic`
+- `internal-aws`: material routing uncertainty fallback only.
 - `internal-aws-organization-structure`
 - `internal-aws-governance`
 - `internal-aws-operations`
