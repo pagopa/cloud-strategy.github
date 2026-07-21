@@ -44,10 +44,6 @@ NORMALIZATION_VERSION = "v1"
 TEXT_EXTENSIONS = (".md", ".txt", ".yml", ".yaml", ".json", ".sh", ".py")
 AGENTS_MD_FAMILY = "agents-md"
 AGENTS_MD_TARGET = "agents.md"
-SHARED_BASELINE_START = "`<shared-baseline>`"
-SHARED_BASELINE_END = "`</shared-baseline>`"
-LOCAL_RULES_START = "`<standards-repository-local-rules>`"
-LOCAL_RULES_END = "`</standards-repository-local-rules>`"
 
 
 @dataclass(frozen=True)
@@ -826,7 +822,7 @@ def add_resource_blockers(
         "source-missing": "Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
         "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid repository skill bundle must contain SKILL.md.",
         "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for linking or translation.",
-        "source-invalid-agents-md": "Root AGENTS.md is missing the portable shared baseline or the repository-local rules block. Blocked because the global projection must remove repository-only policy deterministically.",
+        "source-invalid-agents-md": "Root AGENTS.md is missing or unreadable. Blocked because the global projection needs a deterministic repository-wide policy source.",
     }[code]
     for target in intersection_targets(resource, targets):
         add_blocked_operation(
@@ -1489,20 +1485,7 @@ def render_portable_agents_md(source_path: Path) -> str:
     if not source_path.is_file():
         raise ValueError("source-invalid-agents-md: root AGENTS.md is missing")
     source = source_path.read_text(encoding="utf-8")
-    shared_start = source.find(SHARED_BASELINE_START)
-    shared_end = source.find(SHARED_BASELINE_END, shared_start + 1)
-    local_start = source.find(LOCAL_RULES_START)
-    local_end = source.find(LOCAL_RULES_END, local_start + 1)
-    if not (0 <= shared_start < shared_end < local_start < local_end):
-        raise ValueError(
-            "source-invalid-agents-md: expected ordered shared-baseline and standards-repository-local-rules blocks"
-        )
-
-    prefix = source[:local_start].rstrip()
-    suffix = source[local_end + len(LOCAL_RULES_END) :].strip()
-    if suffix:
-        return f"{prefix}\n\n{suffix}\n"
-    return f"{prefix}\n"
+    return f"{source.rstrip()}\n"
 
 
 def hash_portable_agents_md(source_path: Path) -> str:

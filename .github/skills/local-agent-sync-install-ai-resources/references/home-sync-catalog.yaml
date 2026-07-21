@@ -17,7 +17,7 @@ resources:
     include_targets:
       - agents.md
     target_support: See runtime support matrix
-    notes: Portable global baseline generated without standards-repository-local-rules.
+    notes: Portable global baseline generated without optional AGENTS.local.md policy.
   - resource_id: internal-gateway-idea
     source_family: agents
     source_path: .github/agents/internal-gateway-idea.agent.md

@@ -34,11 +34,13 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Goal: preserve the current root-policy shape without restoring the retired bridge or context-routing model.
 - Scope:
   - root `AGENTS.md`
+  - root `AGENTS.local.md`
   - `INTERNAL_CONTRACT.md`
   - source-side contract tests
 - Expected behavior:
-  - root `AGENTS.md` may carry a portable `<shared-baseline>` block that serves as source content for the generated global `~/.agents/AGENTS.md` baseline
-  - root `AGENTS.md` may carry a source-local `<standards-repository-local-rules>` block that remains non-portable by default
+  - root `AGENTS.md` may carry the portable shared baseline used as source content for the generated global `~/.agents/AGENTS.md` baseline
+  - root `AGENTS.md` may reference optional `AGENTS.local.md` policy that is loaded only when present and remains non-portable by default
+  - root `AGENTS.local.md` owns standards-repository-only policy and is not synchronized to home runtimes
   - root `AGENTS.md` may keep compact graph orientation rules in the shared baseline when those rules are globally safe and conditionally worded
   - tests and validators must align to the current on-disk root-policy shape instead of assuming a separate `## Context Routing` section or the absence of root-level graph guidance
 

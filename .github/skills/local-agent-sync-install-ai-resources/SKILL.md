@@ -18,8 +18,8 @@ bundle directly.
 
 - Repository skill bundles are materialized only as absolute links under
   `~/.agents/skills/`.
-- Root `AGENTS.md` is projected to `~/.agents/AGENTS.md` as a managed copy with
-  the complete `<standards-repository-local-rules>` block removed.
+- Root `AGENTS.md` is projected to `~/.agents/AGENTS.md` as a managed copy.
+  Optional repository-local rules in `AGENTS.local.md` are not synchronized.
 - Copilot agents are absolute links back to `.github/agents/`; Codex and
   OpenCode agents retain their translated copy paths.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
@@ -52,8 +52,9 @@ Accept `agents-md` as a CLI alias for the same target.
 - Keep `~/.agents/skills/` a real directory. Never replace the root with a
   link.
 - Treat repository root `AGENTS.md` as the only source of truth for the managed
-  `~/.agents/AGENTS.md` projection. Adopt and overwrite an unmanaged target
-  file, but never include `<standards-repository-local-rules>` in the result.
+  `~/.agents/AGENTS.md` projection. Treat `AGENTS.local.md` as an optional
+  repository-only layer that is never synchronized. Adopt and overwrite an
+  unmanaged target file.
 - Keep `~/.copilot/agents/` a real directory. Never replace the root with a
   link.
 - Create one canonical absolute link for every eligible repository skill.

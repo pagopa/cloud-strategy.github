@@ -6,7 +6,8 @@ Use this reference for the exact repository-to-home contract.
 
 - `.github/skills/` is the sole source of truth for managed skill bundles.
 - Root `AGENTS.md` is the sole source of truth for the managed global
-  `~/.agents/AGENTS.md` baseline.
+  `~/.agents/AGENTS.md` baseline. A repository-root `AGENTS.local.md` is an
+  optional local policy layer and is not synchronized.
 - `~/.agents/skills/` remains a real directory. It is a runtime projection,
   not a second source.
 - Eligible skills are materialized as one absolute canonical symbolic link per
@@ -16,9 +17,8 @@ Use this reference for the exact repository-to-home contract.
 - Never copy, merge, or reconcile home skill content into the repository.
 - Preserve all home-only skills, including `graphify`, every `local-*` bundle,
   invalid repository bundles, and every catalog-excluded ID.
-- For the `agents.md` target, remove the complete
-  `<standards-repository-local-rules>` block and preserve the rest of root
-  `AGENTS.md`. Adopt and overwrite an unmanaged home copy.
+- For the `agents.md` target, render and preserve root `AGENTS.md`. Do not read
+  or materialize `AGENTS.local.md`. Adopt and overwrite an unmanaged home copy.
 
 ## State And Manifest
 
