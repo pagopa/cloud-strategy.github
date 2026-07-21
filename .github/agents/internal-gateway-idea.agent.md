@@ -14,8 +14,8 @@ handoffs:
     prompt: "Pressure-test the reasoning, assumptions, or failure modes behind the retained planning decision."
     send: false
   - label: "Next step: Review target"
-    agent: "internal-gateway-review"
-    prompt: "The work above became review-oriented rather than planning-oriented. Review the concrete artifact and stop before fixes."
+    agent: "internal-gateway-review-generic"
+    prompt: "The work above became review-oriented rather than planning-oriented. Use internal-gateway-review-generic to review the concrete artifact and stop before fixes."
     send: false
 ---
 

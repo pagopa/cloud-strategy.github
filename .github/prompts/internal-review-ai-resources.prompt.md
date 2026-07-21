@@ -1,6 +1,6 @@
 ---
 name: "internal-review-ai-resources"
-agent: "internal-gateway-review"
+agent: "internal-gateway-review-generic"
 description: "Review repository-owned AI resources, referenced assets, and flow behavior across AGENTS.md and .github"
 argument-hint: "Target one file, one or more folders, the full AI catalog, or an existing retained report package"
 ---
@@ -34,7 +34,7 @@ Use these repository sources first:
 - [.github/copilot-instructions.md](../copilot-instructions.md)
 - [.github/INVENTORY.md](../INVENTORY.md)
 - [INTERNAL_CONTRACT.md](../../INTERNAL_CONTRACT.md)
-- [.github/agents/internal-gateway-review.agent.md](../agents/internal-gateway-review.agent.md)
+- [.github/agents/internal-gateway-review-generic.agent.md](../agents/internal-gateway-review-generic.agent.md)
 - [.github/skills/internal-review-ai-resources/SKILL.md](../skills/internal-review-ai-resources/SKILL.md)
 
 Then use `internal-review-ai-resources` as the reusable qualitative owner for

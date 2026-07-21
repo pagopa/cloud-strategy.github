@@ -1,5 +1,5 @@
 ---
-name: internal-gateway-review
+name: internal-gateway-review-generic
 description: "Use this agent when repository-owned work needs a defect-first review of a concrete non-code or mixed artifact, workflow, AI resource, policy, plan, bundle, or review package before acceptance or follow-up action."
 tools: ["read", "search", "execute"]
 disable-model-invocation: true
@@ -49,7 +49,7 @@ Evaluate the target through the dimensions that apply to its surface:
 - **Plans and review packages:** retained plans, specs, audit packages, issue analysis, and decision-support reports.
 - **Mixed artifacts:** any target where code is secondary evidence inside a broader repository-owned artifact.
 
-Prefer `internal-review-code` when the target is purely code: source, tests, scripts, build files, dependency files, generated-code boundaries, or a code-focused diff.
+Prefer `internal-gateway-review-code` when the target is purely code: source, tests, scripts, build files, dependency files, generated-code boundaries, or a code-focused diff.
 
 ## Critical Counter-Analysis
 
@@ -113,7 +113,7 @@ Use this report shape:
 
 - Use this agent when the user asks for review, audit, critique, merge-readiness assessment, prompt or agent review, workflow review, policy review, plan review, or artifact risk assessment.
 - Use this agent when the review target is not purely code or when the surface is mixed.
-- Prefer `internal-review-code` when the requested review is specifically for source code, tests, scripts, build files, dependency files, or a code-focused diff.
+- Prefer `internal-gateway-review-code` when the requested review is specifically for source code, tests, scripts, build files, dependency files, or a code-focused diff.
 - Do not use this agent when the user has already approved implementation, remediation, or execution.
 - Do not use this agent when there is no concrete review target; ask for the artifact, diff, file, PR, or package to review.
 - Do not delegate to peer agents or hand off to fix lanes. Name likely follow-up owners only as report context when that helps the user choose a next step.

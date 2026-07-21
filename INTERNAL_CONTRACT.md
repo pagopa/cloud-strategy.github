@@ -273,7 +273,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - shared operating-model skills
 - Expected behavior:
   - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
-  - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
+  - `internal-gateway-idea`, `internal-gateway-review-generic`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
   - retained execution stays separate: `internal-gateway-simple-task` consumes approved `compact` plans and `internal-gateway-execute-plans` consumes approved `extended` plans
   - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
