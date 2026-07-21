@@ -75,7 +75,7 @@ jobs:
           "${TEST_VENV}/bin/python" ".github/scripts/audit_copilot_catalog.py" --help
           "${TEST_VENV}/bin/python" ".github/scripts/detect_token_risks.py" --help
           "${TEST_VENV}/bin/python" ".github/scripts/validate_internal_skills.py" --help
-          "${TEST_VENV}/bin/python" ".github/scripts/sync_copilot_catalog.py" --help
+          "${TEST_VENV}/bin/python" ".github/skills/local-sync-repos/scripts/sync_repos.py" --help
           "${TEST_VENV}/bin/python" ".github/scripts/github_catalog_validation.py" --help
 
       - name: 🔥 Smoke test Bash entry points

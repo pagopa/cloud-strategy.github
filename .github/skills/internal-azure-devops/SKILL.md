@@ -1,18 +1,17 @@
 ---
 name: internal-azure-devops
-description: Use when authoring, reviewing, or routing Azure DevOps pipelines or project automation before CLI operations need a narrower owner.
+description: Use when the user needs Azure DevOps pipeline YAML authoring or review, project automation, pipeline triggers, variables, environments, approvals, or artifact-flow guidance. Do not use for GitHub Actions; Azure CLI or Resource Manager work with no pipeline surface; tenant, governance, or operations design; or materially ambiguous requests with no clear pipeline deliverable.
 ---
 
 # Internal Azure DevOps
 
-## Referenced skills
+## Handoffs
 
-Treat the referenced skills below as on-demand supports. Do not preload them
-for every pipeline task; load only the owner proved by YAML structure, CLI
-operations, or the active Azure DevOps surface.
-
-- `internal-yaml`: baseline YAML structure when editing Azure DevOps pipeline YAML.
-- `awesome-copilot-azure-devops-cli`: Azure DevOps CLI operations, projects, repos, pipelines, builds, pull requests, work items, artifacts, and service endpoints.
+| To | When |
+|---|---|
+| `internal-azure` | material routing uncertainty prevents selecting a primary Azure specialist |
+| `internal-yaml` | baseline YAML structure when editing pipeline YAML |
+| `awesome-copilot-azure-devops-cli` | direct CLI operations |
 
 ## When to use
 
@@ -25,6 +24,7 @@ operations, or the active Azure DevOps surface.
 - GitHub Actions workflows or composite actions; use the GitHub Actions owners.
 - Azure CLI or Azure Resource Manager work with no Azure DevOps project or pipeline surface.
 - Direct Azure DevOps CLI execution; use `awesome-copilot-azure-devops-cli`.
+- The request is materially ambiguous and no primary Azure owner can be named → `internal-azure`.
 
 ## Baseline
 

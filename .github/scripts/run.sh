@@ -3,7 +3,6 @@
 # Purpose: Bootstrap the local Python environment and run a Copilot maintenance tool.
 # Usage examples:
 #   ./.github/scripts/run.sh build_inventory --root .
-#   ./.github/scripts/run.sh sync_copilot_catalog plan --target-repo ../consumer-repo
 
 set -Eeuo pipefail
 
@@ -40,7 +39,6 @@ Tools:
   audit_copilot_catalog
   detect_token_risks
     sync_home_ai_resources
-  sync_copilot_catalog
   validate_critical_output
     validate_internal_skills
 EOF
@@ -139,9 +137,6 @@ resolve_script() {
             ;;
         sync_home_ai_resources|sync_home_ai_resources.py)
             printf '%s\n' "$REPO_ROOT/.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
-            ;;
-        sync_copilot_catalog|sync_copilot_catalog.py)
-            printf '%s\n' "$SCRIPT_DIR/sync_copilot_catalog.py"
             ;;
         validate_critical_output)
             printf '%s\n' "$REPO_ROOT/.github/skills/internal-gateway-critical-master/scripts/validate_critical_output.py"

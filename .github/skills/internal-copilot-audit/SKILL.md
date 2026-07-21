@@ -36,7 +36,7 @@ For skill bundles, treat `references/`, `scripts/`, `assets/`, and `agents/opena
 - Detect sync workflows that skip or fail to report governance review for `.github/copilot-instructions.md` and root `AGENTS.md`.
 - Detect naming violations and stale inventory references.
 - Detect governance files that still describe removed, renamed, or retired assets.
-- Detect catalog retirements or remaps that were not propagated in the same change to the supported consistency and sync entrypoints, `./.github/scripts/run.sh check_catalog_consistency` and `./.github/scripts/run.sh sync_copilot_catalog`.
+- Detect catalog retirements or remaps that were not propagated in the same change to the supported consistency entrypoint `./.github/scripts/run.sh check_catalog_consistency`.
 - Detect token-risk claims that rely on assumed runtime loading behavior instead of observable repository signals such as description length, exact trigger collisions, or repo-profile coverage.
 
 ## Audit Order

@@ -80,7 +80,7 @@ profiles:
       - skills/internal-terraform/SKILL.md
       - skills/internal-yaml/SKILL.md
       - skills/internal-markdown/SKILL.md
-      - skills/internal-azure-strategic/SKILL.md
+      - skills/internal-azure/SKILL.md
       - skills/internal-azure-organization-structure/SKILL.md
       - skills/internal-azure-governance/SKILL.md
       - skills/internal-azure-operations/SKILL.md

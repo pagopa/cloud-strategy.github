@@ -23,6 +23,7 @@ MAX_SKILL_BODY_LINES = 220
 INLINE_TEMPLATE_THRESHOLD = 4
 TRIGGER_FIRST_PREFIXES = (
     "Use when",
+    "Use only when",
     "Use first when",
     "Use this",
     "Use before",

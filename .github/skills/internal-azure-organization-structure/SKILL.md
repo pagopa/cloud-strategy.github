@@ -1,15 +1,17 @@
 ---
 name: internal-azure-organization-structure
-description: Use when the user needs Azure control-plane or platform-structure guidance for tenant hierarchy, management groups, subscription models, landing-zone placement, environment segmentation, platform-level network topology, or other layout decisions that shape how Azure is organized before implementation.
+description: Use when the user needs Azure tenant hierarchy, management-group layout, subscription models, landing-zone placement, environment segmentation, or platform-level network topology guidance before implementation. Do not use for RBAC, Policy, or identity design; monitoring, backup, or rollout validation; Azure DevOps pipelines; or materially ambiguous requests with no clear structural deliverable.
 ---
 
 # Internal Azure Organization Structure
 
-## Referenced skills
+## Handoffs
 
-- `internal-azure-strategic`: route back when direction or tradeoff framing is still unsettled.
-- `internal-azure-governance`: route RBAC, managed identity, PIM, Policy, tagging, or guardrail design.
-- `internal-azure-operations`: route monitoring, validation, backup, Site Recovery, reporting, or audit evidence.
+| To | When |
+|---|---|
+| `internal-azure` | material routing uncertainty prevents selecting a primary Azure specialist |
+| `internal-azure-governance` | controls and permissions after placement |
+| `internal-azure-operations` | validation and evidence after structure |
 
 Use this skill when the next need is to design or review how Azure is structured at tenant and platform level.
 
@@ -27,7 +29,7 @@ This skill owns Azure layout decisions, not generic strategy and not detailed RB
 
 - The question is mainly RBAC, PIM, managed identities, or Policy logic.
 - The task is mainly monitoring, backup, reporting, or post-rollout validation.
-- The user only needs generic strategic comparison with no concrete structure question.
+- The request is materially ambiguous and no primary Azure owner can be named → `internal-azure`.
 - The task is already implementation-focused.
 
 ## Main domains covered
@@ -74,15 +76,6 @@ For broader asks, return:
 - smallest safe rollout unit
 - main risks
 - what should move next to `internal-azure-governance` or `internal-azure-operations`
-
-## Relationship to adjacent skills
-
-- `internal-azure-strategic`
-  Use first when the user still needs broader decision framing or lens selection.
-- `internal-azure-governance`
-  Use when the structural decision is accepted and the next need is RBAC, managed identity, PIM/PAM, Policy, or guardrail definition.
-- `internal-azure-operations`
-  Use when the structure is accepted and the next need is validation, monitoring, backup, or operational evidence.
 
 ## Common mistakes
 

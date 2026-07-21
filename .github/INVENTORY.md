@@ -70,7 +70,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-azure-governance/SKILL.md`
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
-- `.github/skills/internal-azure-strategic/SKILL.md`
+- `.github/skills/internal-azure/SKILL.md`
 - `.github/skills/internal-bash-script/SKILL.md`
 - `.github/skills/internal-bash/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
@@ -122,9 +122,9 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/internal-yaml/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
-- `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
+- `.github/skills/local-sync-repos/SKILL.md`
 - `.github/skills/mattpocock-handoff/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
 - `.github/skills/openai-docx/SKILL.md`
@@ -174,10 +174,8 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/lib/repo_paths.py`
 - `.github/scripts/lib/shared.py`
 - `.github/scripts/lib/sync_exclusions.py`
-- `.github/scripts/lib/syncing.py`
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
-- `.github/scripts/sync_copilot_catalog.py`
 - `.github/scripts/validate_internal_skills.py`
 
 ## Agents
@@ -188,12 +186,11 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/agents/internal-gateway-review-generic.agent.md`
 - `.github/agents/internal-gateway-simple-task.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
-- `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
+- `.github/agents/local-sync-repos.agent.md`
 
 ## Prompts
 
 - `.github/prompts/internal-architecture-md-creator.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
 - `.github/prompts/internal-review-ai-resources.prompt.md`
-- `.github/prompts/internal-sync-plan.prompt.md`

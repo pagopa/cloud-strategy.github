@@ -1,16 +1,18 @@
 ---
 name: internal-azure-operations
-description: Use when the user needs Azure operational guidance for monitoring, logging, backup and restore, Site Recovery or DR validation, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision has already been made.
+description: Use when the user needs Azure monitoring and logging posture, backup and restore proof, Site Recovery or DR validation, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for tenant or subscription layout; RBAC, Policy, or identity design; Azure DevOps pipelines; or materially ambiguous requests with no clear operational deliverable.
 ---
 
 # Internal Azure Operations
 
-## Referenced skills
+## Handoffs
 
-- `internal-azure-strategic`: route back when direction or tradeoff framing is still unsettled.
-- `internal-azure-organization-structure`: route when tenant, management-group, subscription, or landing-zone layout is the main decision.
-- `internal-azure-governance`: route when RBAC, managed identity, PIM, Policy, or guardrail design is the main decision.
-- `awesome-copilot-azure-resource-health-diagnose`: Azure resource-health diagnosis depth.
+| To | When |
+|---|---|
+| `internal-azure` | material routing uncertainty prevents selecting a primary Azure specialist |
+| `internal-azure-organization-structure` | placement questions |
+| `internal-azure-governance` | new RBAC or Policy design |
+| `awesome-copilot-azure-resource-health-diagnose` | per-resource health diagnosis depth |
 
 Use this skill when the next need is to validate, observe, or operationalize an Azure platform decision.
 
@@ -25,7 +27,7 @@ This skill owns the operational side of the platform: monitoring, evidence, pref
 
 ## When not to use
 
-- The main problem is still choosing the high-level direction.
+- The request is materially ambiguous and no primary Azure owner can be named → `internal-azure`.
 - The main problem is management-group, landing-zone, or subscription structure.
 - The main problem is RBAC, managed identity, PIM, or Policy design.
 - The task is a narrow implementation change with no operational design question.
@@ -71,17 +73,6 @@ For broader asks, return:
 - post-rollout evidence path
 - recovery or DR note when relevant
 - open operational risks
-
-## Relationship to adjacent skills
-
-- `internal-azure-strategic`
-  Use first when the core decision is still unsettled.
-- `internal-azure-organization-structure`
-  Use when the operations question is actually about management-group, subscription, or topology placement.
-- `internal-azure-governance`
-  Use when the operations question is actually about RBAC, managed identity, Policy, or guardrail design rather than validation.
-- `awesome-copilot-azure-resource-health-diagnose`
-  Use as depth support when the Azure resource is already identified and the next need is deep health diagnosis, log and telemetry analysis, or a remediation plan for that specific resource.
 
 ## Common mistakes
 
