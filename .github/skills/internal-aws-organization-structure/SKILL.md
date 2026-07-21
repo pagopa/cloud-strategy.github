@@ -5,103 +5,65 @@ description: Use when the user needs AWS control-plane or multi-account structur
 
 # Internal AWS Organization Structure
 
-## Referenced skills
-
-- `internal-aws`: use only when material routing uncertainty prevents selecting a primary AWS specialist.
-- `internal-aws-governance`: route guardrail, IAM, SCP, trust, or federation design.
-- `internal-aws-operations`: route monitoring, validation, backup, reporting, or post-rollout evidence.
-- `internal-aws-mcp-research`: load when current AWS service support or delegated-admin behavior can change the structure answer.
-
-Use this skill when the next need is to design or review how AWS is structured at organization and platform level.
-
-This skill owns AWS layout decisions, not generic strategy and not detailed IAM or monitoring implementation. It helps translate a platform goal into account, OU, delegated admin, network, and rollout structure.
+Owns AWS layout decisions: account, OU, delegated admin, StackSets topology, and platform-level network layout. Translates a platform goal into account, OU, delegated admin, network, and rollout structure. Does not own generic strategy, detailed IAM, or monitoring implementation.
 
 ## When to use
 
-- The user is shaping or reviewing AWS Organizations layout.
-- The user needs account, OU, or payer-management separation guidance.
-- The user is deciding delegated administrator placement.
-- The user needs StackSets topology or rollout-scope guidance.
-- The user needs network placement or multi-region layout at platform level.
+- Shaping or reviewing AWS Organizations layout.
+- Account, OU, or payer-management separation guidance.
+- Delegated administrator placement decisions.
+- StackSets topology or rollout-scope guidance.
+- Network placement or multi-region layout at platform level.
 
 ## When not to use
 
-- The question is mainly IAM, SCP, federation, or guardrail logic.
-- The task is mainly monitoring, backup, reporting, or post-rollout validation.
-- The user only needs generic strategic comparison with no concrete structure question.
-- The task is already implementation-focused.
+- Mainly IAM, SCP, federation, or guardrail logic → `internal-aws-governance`.
+- Mainly monitoring, backup, reporting, or post-rollout validation → `internal-aws-operations`.
+- Generic strategic comparison with no concrete structure question → `internal-aws`.
+- Already implementation-focused → `internal-aws-lambda`.
 
-## Main domains covered
+## Domains
 
-- AWS Organizations hierarchy
-- OU design and safe rollout scope
-- management account versus payer responsibilities
-- account segmentation and account purpose
-- shared services, security, and log archive account layout
-- delegated administrator placement
-- StackSets topology and blast radius at structure level
-- platform-level network topology
-- multi-account and multi-region structural decisions
+AWS Organizations hierarchy · OU design and safe rollout scope · management vs payer responsibilities · account segmentation and purpose · shared services, security, and log-archive account layout · delegated administrator placement · StackSets topology and blast radius · platform-level network topology · multi-account and multi-region structural decisions.
 
 ## Working model
 
 - Keep the management account minimal unless AWS explicitly requires otherwise.
 - Distinguish financial ownership from operational ownership.
 - Prefer delegated administration when it materially reduces blast radius.
-- Separate structure decisions from governance decisions:
-  - structure decides where capabilities live
-  - governance decides what controls and permissions apply
+- Separate structure (where capabilities live) from governance (what controls apply).
 - Name the smallest safe rollout unit for structural change: account, OU, or region set.
-
-## Research and current facts
-
-Use `internal-aws-mcp-research` when the answer depends on current AWS service support, delegated admin capabilities, StackSets behavior, or region-sensitive platform constraints.
 
 Load `references/control-surface-map.md` for the control-surface split and default review checklist when the structure choice is ambiguous.
 
+## Handoffs
+
+| To | When |
+|---|---|
+| `internal-aws-mcp-research` | answer depends on current AWS service support, delegated admin capabilities, StackSets behavior, or region-sensitive constraints |
+| `internal-aws-governance` | structure is accepted and next need is IAM, SCP, trust, federation, or guardrail definition |
+| `internal-aws-operations` | structure is accepted and next need is validation, monitoring, backup, or operational evidence |
+
 ## Output expectations
 
-Keep outputs proportional to the question.
-
-For narrow asks, return:
-
-- recommended structure choice
-- short reason
-- main blast-radius or rollout note
-
-For broader asks, return:
-
-- structural objective
-- candidate layouts
-- recommended placement model
-- smallest safe rollout unit
-- main risks
-- what should move next to `internal-aws-governance` or `internal-aws-operations`
-
-## Relationship to adjacent skills
-
-- `internal-aws`
-  Use only when material routing uncertainty prevents selecting a primary AWS specialist; do not use it when structure clearly owns the deliverable.
-- `internal-aws-governance`
-  Use when the structural decision is accepted and the next need is IAM, SCP, trust, federation, or guardrail definition.
-- `internal-aws-operations`
-  Use when the structure is accepted and the next need is validation, monitoring, backup, or operational evidence.
+Narrow asks: recommended structure choice · short reason · main blast-radius or rollout note.
+Broader asks: structural objective · candidate layouts · recommended placement model · smallest safe rollout unit · main risks · next handoff.
 
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Treating the management account as the default operating account | It increases blast radius and weakens separation of duties | Keep the management account minimal and prefer delegated administrator accounts when AWS supports them |
-| Mixing payer responsibility with day-to-day operational ownership without making the reason explicit | Finance and platform controls drift together and are harder to change safely | State the financial owner and the operational owner separately |
+|---|---|---|
+| Treating the management account as the default operating account | Increases blast radius and weakens separation of duties | Keep management account minimal and prefer delegated administrator accounts |
+| Mixing payer responsibility with day-to-day operational ownership | Finance and platform controls drift together and are harder to change | State financial owner and operational owner separately |
 | Proposing OU or account layouts without a rollout scope | Structural changes become hard to stage or roll back | Name the smallest safe rollout unit: account, OU, or region set |
 | Hiding global-resource or cross-region blast radius in StackSets discussions | Failures spread further than the rollout plan suggests | Make regional scope, global resources, and rollback boundaries explicit |
-| Using structure answers to sneak in IAM or SCP design without separating the concerns | The lane boundary blurs and review gets weaker | Keep placement decisions in this skill and hand guardrail logic to `internal-aws-governance` |
-| Recommending shared services placement without naming service ownership | Central accounts become generic dumping grounds | State which platform capability lives centrally and which workload teams still own their execution accounts |
+| Using structure answers to sneak in IAM or SCP design | Lane boundary blurs and review gets weaker | Keep placement here and hand guardrail logic to `internal-aws-governance` |
+| Recommending shared services placement without naming ownership | Central accounts become dumping grounds | State which platform capability lives centrally and which workload teams own execution accounts |
 
 ## Validation
 
-- Confirm the placement model is explicit: management account, delegated administrator, shared-services account, or member account.
-- Confirm the smallest safe rollout unit is named and matches the proposed structural change.
-- Confirm blast radius is explicit for OU moves, delegated admin changes, StackSets rollout, or regional topology shifts.
-- Confirm financial ownership and operational ownership are separated when both appear in the answer.
-- Confirm the next handoff is clear when the user now needs guardrails or operational validation.
+- Placement model is explicit: management account, delegated administrator, shared-services account, or member account.
+- Smallest safe rollout unit is named and matches the proposed structural change.
+- Blast radius is explicit for OU moves, delegated admin changes, StackSets rollout, or regional topology shifts.
+- Financial ownership and operational ownership are separated when both appear.
+- Next handoff is clear when the user now needs guardrails or operational validation.
