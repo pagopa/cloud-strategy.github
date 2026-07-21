@@ -1,5 +1,15 @@
 version: 1
 rows:
+  - target: agents.md
+    resource_family: agents-md
+    support_level: Documented
+    home_path: ~/.agents/AGENTS.md
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence:
+      - Root AGENTS.md declares the shared baseline as the source for ~/.agents/AGENTS.md.
+    notes: Copy the portable root policy projection after removing standards-repository-local-rules.
   - target: skills
     resource_family: skills
     support_level: Documented
@@ -59,7 +69,7 @@ rows:
     include_in_v1: true
     evidence:
       - https://code.visualstudio.com/docs/copilot/customization/custom-agents
-    notes: Direct copy of .agent.md files.
+    notes: .agent.md files are supported as canonical links to repository sources.
   - target: opencode
     resource_family: agents
     support_level: Documented

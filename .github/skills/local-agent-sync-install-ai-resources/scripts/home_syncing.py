@@ -42,6 +42,12 @@ LAST_AUDIT_PATH = "last-audit.json"
 LOCK_PATH = "locks/home-ai-resources.lock"
 NORMALIZATION_VERSION = "v1"
 TEXT_EXTENSIONS = (".md", ".txt", ".yml", ".yaml", ".json", ".sh", ".py")
+AGENTS_MD_FAMILY = "agents-md"
+AGENTS_MD_TARGET = "agents.md"
+SHARED_BASELINE_START = "`<shared-baseline>`"
+SHARED_BASELINE_END = "`</shared-baseline>`"
+LOCAL_RULES_START = "`<standards-repository-local-rules>`"
+LOCAL_RULES_END = "`</standards-repository-local-rules>`"
 
 
 @dataclass(frozen=True)
@@ -52,10 +58,12 @@ class ManagedResource:
     source_path: str
     target_path: str
     source_hash: str
-    content_hash: str
-    last_action: str
+    materialization: str = "copy"
+    link_target: str | None = None
+    content_hash: str | None = None
+    last_action: str = "copy"
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, str | None]:
         return {
             "target": self.target,
             "resource_family": self.resource_family,
@@ -63,6 +71,8 @@ class ManagedResource:
             "source_path": self.source_path,
             "target_path": self.target_path,
             "source_hash": self.source_hash,
+            "materialization": self.materialization,
+            "link_target": self.link_target,
             "content_hash": self.content_hash,
             "last_action": self.last_action,
         }
@@ -127,6 +137,8 @@ class HomeSyncPlan:
             "state_root": self.state_root.as_posix(),
             "source_revision": self.source_revision,
             "source_resources_considered": self.source_resources_considered,
+            "linked": operation_paths(self.operations, "link"),
+            "unlinked": operation_paths(self.operations, "unlink"),
             "copied": operation_paths(self.operations, "copy"),
             "skipped": operation_paths(self.operations, "skip"),
             "blocked": operation_paths(self.operations, "blocked"),
@@ -156,6 +168,7 @@ class HomeSyncPlan:
 
 
 CROSS_ALIASES = {"cross", "all", "tutto"}
+TARGET_ALIASES = {"agents-md": AGENTS_MD_TARGET}
 
 def parse_targets(raw_targets: str) -> tuple[str, ...]:
     normalized = [part.strip().lower() for part in raw_targets.split(",") if part.strip()]
@@ -164,7 +177,7 @@ def parse_targets(raw_targets: str) -> tuple[str, ...]:
     if len(normalized) == 1 and normalized[0] in CROSS_ALIASES:
         return TARGET_ORDER
 
-    requested = set(normalized)
+    requested = {TARGET_ALIASES.get(target, target) for target in normalized}
     unknown = requested.difference(TARGET_ORDER)
     if unknown:
         invalid = ", ".join(sorted(unknown))
@@ -228,7 +241,11 @@ def build_home_sync_plan(
             add_resource_blockers(operations, home_root, resource, targets, resource_block_code(resource.source_family))
             continue
 
-        source_hash = hash_resource(source_path)
+        source_hash = (
+            hash_portable_agents_md(source_path)
+            if resource.source_family == AGENTS_MD_FAMILY
+            else hash_resource(source_path)
+        )
         for target in intersection_targets(resource, targets):
             target_path = resource_target_path(home_root, resource, target)
             support_row = resolve_support_row(runtime_rows, target, resource.source_family)
@@ -262,6 +279,9 @@ def build_home_sync_plan(
                     source_path=resource.source_path,
                     target=target,
                 )
+            linked_resource = resource.source_family == "skills" or (
+                resource.source_family == "agents" and target == "copilot"
+            )
             managed_resource = ManagedResource(
                 target=target,
                 resource_id=resource.resource_id,
@@ -269,8 +289,10 @@ def build_home_sync_plan(
                 source_path=resource.source_path,
                 target_path=target_path.as_posix(),
                 source_hash=source_hash,
-                content_hash=content_hash,
-                last_action="copy",
+                materialization="symlink" if linked_resource else "copy",
+                link_target=(source_path.resolve().as_posix() if linked_resource else None),
+                content_hash=(None if linked_resource else content_hash),
+                last_action="link" if linked_resource else "copy",
             )
             if managed_resource.target_path in seen_target_paths:
                 continue
@@ -340,6 +362,137 @@ def _verify_apply_confinement(target_path: Path, home_root: Path) -> str | None:
     return None
 
 
+def canonical_skill_link_target(source_root: Path, source_path: str) -> Path:
+    return (source_root.resolve() / source_path).resolve()
+
+
+def assess_resource_link(target_path: Path, expected_target: Path) -> tuple[str, str | None]:
+    if not os.path.lexists(target_path):
+        return "missing", None
+    if not target_path.is_symlink():
+        return "replace-directory", None
+
+    actual_target = target_path.resolve(strict=False)
+    if actual_target == expected_target:
+        if expected_target.exists():
+            return "matching", None
+        return "blocked", "link-target-missing"
+    if not target_path.exists():
+        return "blocked", "link-target-missing"
+    return "blocked", "link-target-mismatch"
+
+
+def assess_skill_link(target_path: Path, expected_target: Path) -> tuple[str, str | None]:
+    return assess_resource_link(target_path, expected_target)
+
+
+def _verify_link_target_path(
+    *,
+    home_root: Path,
+    target: str,
+    target_path: Path,
+    resource_family: str = "skills",
+) -> str | None:
+    target_root = (
+        runtime_agent_root(home_root, target)
+        if resource_family == "agents" and target == "copilot"
+        else runtime_skill_root(home_root, target)
+    )
+    resolved_home = home_root.resolve()
+    if target_path.parent != target_root:
+        return "unsafe-home-path"
+    if not target_root.is_dir():
+        return "unsafe-home-path"
+    if target_root.is_symlink():
+        return "symlink-not-allowed"
+    try:
+        target_root.resolve().relative_to(resolved_home)
+    except ValueError:
+        return "unsafe-home-path"
+
+    current_path = target_root
+    while current_path != resolved_home:
+        if current_path.is_symlink():
+            return "symlink-not-allowed"
+        if current_path.parent == current_path:
+            return "unsafe-home-path"
+        current_path = current_path.parent
+    return None
+
+
+def _verify_skill_target_path(
+    *,
+    home_root: Path,
+    target: str,
+    target_path: Path,
+) -> str | None:
+    return _verify_link_target_path(
+        home_root=home_root,
+        target=target,
+        target_path=target_path,
+        resource_family="skills",
+    )
+
+
+def create_resource_link(source_path: Path, target_path: Path) -> None:
+    source_path = source_path.resolve()
+    if not source_path.exists():
+        raise RuntimeError(f"link-target-missing: {source_path}")
+    if os.path.lexists(target_path):
+        if target_path.is_symlink():
+            target_path.unlink()
+        elif target_path.is_dir():
+            shutil.rmtree(target_path)
+        else:
+            target_path.unlink()
+    os.symlink(source_path, target_path, target_is_directory=source_path.is_dir())
+
+
+def create_skill_link(source_path: Path, target_path: Path) -> None:
+    if not is_valid_skill_bundle(source_path.resolve()):
+        raise RuntimeError(f"source-invalid-skill: {source_path}")
+    create_resource_link(source_path, target_path)
+
+
+def unlink_managed_skill(target_path: Path) -> None:
+    if target_path.is_symlink():
+        target_path.unlink()
+
+
+def verify_resource_link(source_path: Path, target_path: Path) -> str | None:
+    expected_target = source_path.resolve()
+    if not expected_target.exists() or not target_path.is_symlink():
+        return "link-target-missing"
+    if not target_path.exists():
+        return "link-target-missing"
+    if target_path.resolve() != expected_target:
+        return "link-target-mismatch"
+    return None
+
+
+def verify_skill_link(source_path: Path, target_path: Path) -> str | None:
+    if not is_valid_skill_bundle(source_path.resolve()):
+        return "link-target-missing"
+    return verify_resource_link(source_path, target_path)
+
+
+def probe_symlink_support(state_root: Path) -> str | None:
+    state_root.mkdir(parents=True, exist_ok=True)
+    probe_path = state_root / ".symlink-probe"
+    try:
+        if os.path.lexists(probe_path):
+            if probe_path.is_dir() and not probe_path.is_symlink():
+                return "symlink-unsupported"
+            probe_path.unlink()
+        os.symlink(state_root.resolve(), probe_path, target_is_directory=True)
+    except OSError:
+        return "symlink-unsupported"
+    finally:
+        if probe_path.is_symlink():
+            probe_path.unlink()
+    return None
+
+
 def apply_home_sync_plan(
     plan: HomeSyncPlan,
     *,
@@ -360,12 +513,55 @@ def apply_home_sync_plan(
         Path(operation.path).mkdir(parents=True, exist_ok=True)
 
     desired_by_path = {resource.target_path: resource for resource in plan.desired_resources}
+    if any(operation.action == "link" for operation in plan.operations):
+        symlink_code = probe_symlink_support(plan.state_root)
+        if symlink_code is not None:
+            raise RuntimeError(symlink_code)
+
     copied_paths: set[str] = set()
     actual_content_hashes: dict[str, str] = {}
     for operation in plan.operations:
-        if operation.action not in {"copy", "delete"}:
+        if operation.action not in {"link", "unlink", "copy", "delete"}:
             continue
         target_path = Path(operation.path)
+        if operation.action in {"link", "unlink"}:
+            managed_resource = desired_by_path.get(operation.path)
+            link_family = (
+                managed_resource.resource_family
+                if managed_resource is not None
+                else (
+                    "agents"
+                    if operation.target == "copilot"
+                    and target_path.parent == runtime_agent_root(plan.home_root, "copilot")
+                    else "skills"
+                )
+            )
+            link_path_code = _verify_link_target_path(
+                home_root=plan.home_root,
+                target=operation.target,
+                target_path=target_path,
+                resource_family=link_family,
+            )
+            if link_path_code is not None:
+                raise RuntimeError(f"{link_path_code}: {target_path}")
+            if operation.action == "unlink":
+                unlink_managed_skill(target_path)
+                continue
+
+            if managed_resource is None or managed_resource.materialization != "symlink":
+                invalid_code = "source-invalid-agent" if operation.target == "copilot" else "source-invalid-skill"
+                raise RuntimeError(f"{invalid_code}: {target_path}")
+            source_path = (plan.source_root / managed_resource.source_path).resolve()
+            link_state, link_code = assess_resource_link(target_path, source_path)
+            if link_state == "blocked":
+                raise RuntimeError(f"{link_code}: {target_path}")
+            if link_state != "matching":
+                create_resource_link(source_path, target_path)
+            verification_code = verify_resource_link(source_path, target_path)
+            if verification_code is not None:
+                raise RuntimeError(f"{verification_code}: {target_path}")
+            continue
+
         confinement_code = _verify_apply_confinement(target_path, plan.home_root)
         if confinement_code:
             raise RuntimeError(f"{confinement_code}: {target_path}")
@@ -378,8 +574,12 @@ def apply_home_sync_plan(
             continue
 
         managed_resource = desired_by_path[operation.path]
+        if managed_resource.resource_family == "skills":
+            raise RuntimeError(f"source-invalid-skill: copied skill fallback is not supported: {target_path}")
         source_path = plan.source_root / managed_resource.source_path
-        if managed_resource.resource_family == "agents" and managed_resource.target != "copilot":
+        if managed_resource.resource_family == AGENTS_MD_FAMILY:
+            _apply_portable_agents_md(source_path, target_path)
+        elif managed_resource.resource_family == "agents" and managed_resource.target != "copilot":
             _apply_translated_agent(source_path, target_path, managed_resource.target)
         else:
             copy_resource(source_path, target_path)
@@ -388,6 +588,13 @@ def apply_home_sync_plan(
 
     for resource in plan.desired_resources:
         target_path = Path(resource.target_path)
+        if resource.materialization == "symlink":
+            verification_code = verify_resource_link(
+                (plan.source_root / resource.source_path).resolve(), target_path
+            )
+            if verification_code is not None:
+                raise RuntimeError(f"{verification_code}: {target_path}")
+            continue
         if not target_path.exists():
             raise RuntimeError(f"post-apply-verify-failed: {target_path} missing after copy")
         actual_hash = actual_content_hashes.get(target_path.as_posix())
@@ -457,7 +664,8 @@ def run_doctor(
     for target in targets:
         target_root = runtime_skill_root(home_root, target)
         add_doctor_target_check(checks, blocked_codes, target, target_root)
-        support_row = resolve_support_row(runtime_rows, target, "skills")
+        primary_family = AGENTS_MD_FAMILY if target == AGENTS_MD_TARGET else "skills"
+        support_row = resolve_support_row(runtime_rows, target, primary_family)
         add_doctor_support_check(checks, blocked_codes, target, target_root, support_row, experimental_targets)
         if has_agent_root(target):
             agent_root = runtime_agent_root(home_root, target)
@@ -616,8 +824,9 @@ def add_resource_blockers(
 ) -> None:
     reason = {
         "source-missing": "Catalog entry points to a source path that does not exist. Blocked to avoid materializing a stale or incomplete resource and to surface catalog drift.",
-        "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid direct-copy skill bundle must contain SKILL.md.",
-        "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for translation.",
+        "source-invalid-skill": "Source skill bundle is missing SKILL.md. Blocked because a valid repository skill bundle must contain SKILL.md.",
+        "source-invalid-agent": "Source agent file is missing or not a .md file. Blocked because only allowlisted .agent.md files are eligible for linking or translation.",
+        "source-invalid-agents-md": "Root AGENTS.md is missing the portable shared baseline or the repository-local rules block. Blocked because the global projection must remove repository-only policy deterministically.",
     }[code]
     for target in intersection_targets(resource, targets):
         add_blocked_operation(
@@ -719,10 +928,100 @@ def add_materialization_operation(
     policy: HomeSyncPolicy,
 ) -> None:
     manifest_entry = manifest_index.get(target_path.as_posix())
+    copilot_agent_link = resource.source_family == "agents" and target == "copilot"
+    linked_resource = resource.source_family == "skills" or copilot_agent_link
+    if linked_resource:
+        expected_target = source_path.resolve()
+        link_state, link_code = assess_resource_link(target_path, expected_target)
+        if link_state == "blocked":
+            add_blocked_operation(
+                operations,
+                target=target,
+                target_path=target_path,
+                code=link_code or "link-target-mismatch",
+                reason="Existing home link does not identify the canonical repository resource.",
+                resource=resource,
+            )
+            return
+        if link_state == "matching":
+            operations.append(
+                HomeSyncOperation(
+                    target=target,
+                    action="skip",
+                    path=target_path.as_posix(),
+                    reason="Home resource already links to the canonical repository source.",
+                    source_path=resource.source_path,
+                    resource_id=resource.resource_id,
+                )
+            )
+            return
+        if copilot_agent_link and link_state == "replace-directory":
+            if manifest_entry is None:
+                add_blocked_operation(
+                    operations,
+                    target=target,
+                    target_path=target_path,
+                    code="target-exists-unmanaged",
+                    reason="Existing Copilot agent content is not manifest-managed, so replacing it with a repository link is unsafe.",
+                    resource=resource,
+                )
+                return
+            if manifest_entry.get("materialization") != "copy":
+                add_blocked_operation(
+                    operations,
+                    target=target,
+                    target_path=target_path,
+                    code="manifest-corrupt",
+                    reason="Existing linked-resource state does not describe a migratable copied agent.",
+                    resource=resource,
+                )
+                return
+            current_hash = hash_resource(target_path)
+            if current_hash != manifest_entry.get("content_hash"):
+                code = "target-modified-managed"
+                reason = "Managed copied Copilot agent diverged from the recorded hash; review local edits before converting it to a repository link."
+                if resource_mtime(target_path) > resource_mtime(source_path):
+                    operations.append(
+                        HomeSyncOperation(
+                            target=target,
+                            action="warning",
+                            path=target_path.as_posix(),
+                            reason=reason,
+                            code=code,
+                            source_path=resource.source_path,
+                            resource_id=resource.resource_id,
+                        )
+                    )
+                else:
+                    add_blocked_operation(
+                        operations,
+                        target=target,
+                        target_path=target_path,
+                        code=code,
+                        reason=reason,
+                        resource=resource,
+                    )
+                return
+        operations.append(
+            HomeSyncOperation(
+                target=target,
+                action="link",
+                path=target_path.as_posix(),
+                reason=(
+                    "Create the canonical repository resource link."
+                    if link_state == "missing"
+                    else "Replace the managed copied resource with the canonical repository link."
+                ),
+                source_path=resource.source_path,
+                resource_id=resource.resource_id,
+            )
+        )
+        return
+
     if target_path.exists():
         current_hash = hash_resource(target_path)
         if manifest_entry is None:
-            if (
+            if resource.source_family == AGENTS_MD_FAMILY or (
                 resource.source_family == "skills"
                 and policy.unmanaged_existing_skills_policy == "repo-wins"
             ):
@@ -731,7 +1030,11 @@ def add_materialization_operation(
                         target=target,
                         action="copy",
                         path=target_path.as_posix(),
-                        reason="Target already exists in home but is not manifest-managed. Repo wins for unmanaged skills under the active catalog policy, so sync adopts the home path and overwrites it with the repository bundle.",
+                        reason=(
+                            "Repository AGENTS.md is the source of truth for the global baseline, so sync adopts and overwrites the unmanaged home projection."
+                            if resource.source_family == AGENTS_MD_FAMILY
+                            else "Target already exists in home but is not manifest-managed. Repo wins for unmanaged skills under the active catalog policy, so sync adopts the home path and overwrites it with the repository bundle."
+                        ),
                         source_path=resource.source_path,
                         resource_id=resource.resource_id,
                     )
@@ -753,7 +1056,7 @@ def add_materialization_operation(
                         target=target,
                         action="warning",
                         path=target_path.as_posix(),
-                        reason="Managed target diverged from the last recorded manifest hash and the home copy is newer than the repo source. Install skips this resource so an explicit home-to-repo review can decide whether to keep or copy back the newer home state.",
+                        reason="Managed target diverged from the last recorded manifest hash and is newer than the repository source. Install skips it to prevent losing local copied-agent edits.",
                         code="target-modified-managed",
                         source_path=resource.source_path,
                         resource_id=resource.resource_id,
@@ -844,6 +1147,41 @@ def add_stale_managed_operations(
         if not isinstance(target_path, str) or target_path in desired_paths:
             continue
 
+        if item.get("materialization") == "symlink" and (
+            item.get("resource_family") == "skills"
+            or (item.get("resource_family") == "agents" and item.get("target") == "copilot")
+        ):
+            stale_path = Path(target_path)
+            link_path_code = _verify_link_target_path(
+                home_root=home_root,
+                target=str(item.get("target", "")),
+                target_path=stale_path,
+                resource_family=str(item.get("resource_family", "")),
+            )
+            if link_path_code is not None:
+                operations.append(
+                    HomeSyncOperation(
+                        target=str(item.get("target", "")),
+                        action="blocked",
+                        path=target_path,
+                        reason="Stale managed link fails the direct runtime-root confinement check.",
+                        code=link_path_code,
+                        resource_id=str(item.get("resource_id", "")),
+                    )
+                )
+                continue
+            if stale_path.is_symlink():
+                operations.append(
+                    HomeSyncOperation(
+                        target=str(item.get("target", "")),
+                        action="unlink",
+                        path=target_path,
+                        reason="Stale manifest-managed link is removed automatically without following its target.",
+                        resource_id=str(item.get("resource_id", "")),
+                    )
+                )
+            continue
+
         confinement_code = _stale_confinement_check(
             item=item,
             target_path=target_path,
@@ -922,7 +1260,11 @@ def _stale_confinement_check(
 
     target_name = str(item.get("target", ""))
     resource_family = str(item.get("resource_family", ""))
-    if resource_family == "agents":
+    if resource_family == AGENTS_MD_FAMILY:
+        expected_path = (home_root / ".agents" / "AGENTS.md").resolve()
+        if resolved_stale != expected_path:
+            return "unsafe-home-path"
+    elif resource_family == "agents":
         if not has_agent_root(target_name):
             return "unsafe-home-path"
         expected_root = runtime_agent_root(home_root, target_name).resolve()
@@ -998,7 +1340,7 @@ def add_doctor_support_check(
                 "name": f"support:{target}",
                 "status": "blocked",
                 "path": target_root.as_posix(),
-                "reason": "The selected target does not support skills.",
+                "reason": "The selected target does not support the requested resource family.",
                 "code": "unsupported-family",
             }
         )
@@ -1019,7 +1361,7 @@ def add_doctor_support_check(
 
 def load_manifest(path: Path) -> tuple[dict[str, object], str | None]:
     if not path.exists():
-        return {"managed_resources": []}, None
+        return {"schema_version": 2, "managed_resources": []}, None
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
@@ -1028,58 +1370,51 @@ def load_manifest(path: Path) -> tuple[dict[str, object], str | None]:
         return {"managed_resources": []}, "manifest-corrupt"
     if not isinstance(payload.get("managed_resources"), list):
         return {"managed_resources": []}, "manifest-corrupt"
-    for i, item in enumerate(payload.get("managed_resources", [])):
+    schema_version = payload.get("schema_version", 1)
+    if schema_version not in {1, 2}:
+        return {"managed_resources": []}, "manifest-corrupt"
+    if schema_version == 1:
+        payload["schema_version"] = 1
+    for item in payload.get("managed_resources", []):
         if not isinstance(item, dict):
             return {"managed_resources": []}, "manifest-corrupt"
         if not isinstance(item.get("target"), str):
             return {"managed_resources": []}, "manifest-corrupt"
         if not isinstance(item.get("target_path"), str):
             return {"managed_resources": []}, "manifest-corrupt"
+        if schema_version == 1:
+            item["materialization"] = "copy"
+            item["link_target"] = None
+            item.setdefault("content_hash", None)
+            continue
+        if not _is_valid_v2_manifest_row(item):
+            return {"managed_resources": []}, "manifest-corrupt"
     return payload, None
 
 
-def reconcile_manifest_entry_after_bisync_copy(
-    *,
-    source_root: Path,
-    home_root: Path,
-    source_path: Path,
-    target_path: Path,
-) -> str | None:
-    manifest_path = state_root_for_home(home_root) / MANIFEST_PATH
-    manifest_payload, manifest_error = load_manifest(manifest_path)
-    if manifest_error is not None:
-        return "bisync-manifest-reconcile-failed"
-
-    managed_resources = manifest_payload.get("managed_resources")
-    if not isinstance(managed_resources, list):
-        return "bisync-manifest-reconcile-failed"
-
-    manifest_index = index_manifest(manifest_payload)
-    manifest_entry = manifest_index.get(target_path.as_posix())
-    if manifest_entry is None:
-        # The copied bundle is not install-managed, so there is nothing to reconcile.
-        return None
-    try:
-        source_path_rel = source_path.relative_to(source_root).as_posix()
-    except ValueError:
-        return "bisync-manifest-reconcile-failed"
-    if manifest_entry.get("source_path") != source_path_rel:
-        return "bisync-manifest-reconcile-failed"
-
-    try:
-        source_hash = hash_resource(source_path)
-        target_hash = hash_resource(target_path)
-    except (OSError, PermissionError, ValueError):
-        return "bisync-manifest-reconcile-failed"
-
-    if source_hash != target_hash:
-        return "bisync-manifest-reconcile-failed"
-
-    manifest_entry["source_hash"] = source_hash
-    manifest_entry["content_hash"] = target_hash
-    manifest_entry["last_action"] = "bisync-copy"
-    manifest_path.write_text(render_json(manifest_payload), encoding="utf-8")
-    return None
+def _is_valid_v2_manifest_row(item: dict[str, object]) -> bool:
+    materialization = item.get("materialization")
+    family = item.get("resource_family")
+    link_target = item.get("link_target")
+    content_hash = item.get("content_hash")
+    target_path = item.get("target_path")
+    if materialization not in {"symlink", "copy"} or not isinstance(family, str):
+        return False
+    if not isinstance(target_path, str) or not Path(target_path).is_absolute():
+        return False
+    if family == "skills" or (family == "agents" and item.get("target") == "copilot"):
+        return (
+            materialization == "symlink"
+            and isinstance(link_target, str)
+            and Path(link_target).is_absolute()
+            and Path(link_target).resolve().as_posix() == link_target
+            and content_hash is None
+        )
+    if family == AGENTS_MD_FAMILY:
+        return materialization == "copy" and link_target is None and isinstance(content_hash, str)
+    if family == "agents":
+        return materialization == "copy" and link_target is None and isinstance(content_hash, str)
+    return False
 
 
 def index_manifest(payload: dict[str, object]) -> dict[str, dict[str, object]]:
@@ -1105,6 +1440,12 @@ def is_valid_skill_bundle(path: Path) -> bool:
 
 
 def is_valid_resource(path: Path, source_family: str) -> bool:
+    if source_family == AGENTS_MD_FAMILY:
+        try:
+            render_portable_agents_md(path)
+        except ValueError:
+            return False
+        return True
     if source_family == "agents":
         return path.is_file() and path.suffix == ".md"
     return is_valid_skill_bundle(path)
@@ -1115,6 +1456,10 @@ def resource_target_path(
     resource: CatalogResource,
     target: str,
 ) -> Path:
+    if resource.source_family == AGENTS_MD_FAMILY:
+        if target != AGENTS_MD_TARGET:
+            raise ValueError(f"Target {target} does not support AGENTS.md")
+        return home_root / ".agents" / "AGENTS.md"
     if resource.source_family == "agents":
         if not has_agent_root(target):
             raise ValueError(f"Target {target} does not support agents")
@@ -1125,6 +1470,8 @@ def resource_target_path(
 
 
 def resource_block_code(source_family: str) -> str:
+    if source_family == AGENTS_MD_FAMILY:
+        return "source-invalid-agents-md"
     if source_family == "agents":
         return "source-invalid-agent"
     return "source-invalid-skill"
@@ -1136,6 +1483,30 @@ def hash_resource(path: Path) -> str:
 
     fingerprints = [build_fingerprint(path, file_path) for file_path in collect_files(path)]
     return sha256_bytes(json.dumps(fingerprints, sort_keys=True).encode("utf-8"))
+
+
+def render_portable_agents_md(source_path: Path) -> str:
+    if not source_path.is_file():
+        raise ValueError("source-invalid-agents-md: root AGENTS.md is missing")
+    source = source_path.read_text(encoding="utf-8")
+    shared_start = source.find(SHARED_BASELINE_START)
+    shared_end = source.find(SHARED_BASELINE_END, shared_start + 1)
+    local_start = source.find(LOCAL_RULES_START)
+    local_end = source.find(LOCAL_RULES_END, local_start + 1)
+    if not (0 <= shared_start < shared_end < local_start < local_end):
+        raise ValueError(
+            "source-invalid-agents-md: expected ordered shared-baseline and standards-repository-local-rules blocks"
+        )
+
+    prefix = source[:local_start].rstrip()
+    suffix = source[local_end + len(LOCAL_RULES_END) :].strip()
+    if suffix:
+        return f"{prefix}\n\n{suffix}\n"
+    return f"{prefix}\n"
+
+
+def hash_portable_agents_md(source_path: Path) -> str:
+    return sha256_bytes(render_portable_agents_md(source_path).encode("utf-8"))
 
 
 def build_fingerprint(root: Path, file_path: Path) -> dict[str, object]:
@@ -1220,6 +1591,11 @@ def _apply_translated_agent(
     target_path.write_text(translated, encoding="utf-8")
 
 
+def _apply_portable_agents_md(source_path: Path, target_path: Path) -> None:
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(render_portable_agents_md(source_path), encoding="utf-8")
+
+
 def write_snapshot(plan: HomeSyncPlan, relative_path: str) -> Path:
     ensure_state_root(plan.state_root)
     write_lock_file(plan.state_root)
@@ -1244,11 +1620,15 @@ def build_manifest_payload(
             continue
         seen_target_paths.add(resource.target_path)
         entry = resource.to_dict()
-        if actual_content_hashes and resource.target_path in actual_content_hashes:
+        if (
+            resource.materialization == "copy"
+            and actual_content_hashes
+            and resource.target_path in actual_content_hashes
+        ):
             entry["content_hash"] = actual_content_hashes[resource.target_path]
         managed_resources.append(entry)
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": now_isoformat(),
         "source_root": plan.source_root.as_posix(),
         "source_revision": plan.source_revision,
@@ -1311,6 +1691,9 @@ def copy_resource(source_path: Path, target_path: Path) -> None:
 
 
 def remove_resource(target_path: Path) -> None:
+    if target_path.is_symlink():
+        target_path.unlink()
+        return
     if target_path.is_dir():
         shutil.rmtree(target_path)
         return

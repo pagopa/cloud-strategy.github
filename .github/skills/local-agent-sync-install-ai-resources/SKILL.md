@@ -1,6 +1,6 @@
 ---
 name: local-agent-sync-install-ai-resources
-description: Use when planning, auditing, or applying allowlisted home-directory sync of repository-owned AI runtime resources to local Codex, Copilot, or OpenCode targets.
+description: Use when planning, auditing, or applying repository-owned AI resources or the portable AGENTS.md baseline to local home runtimes.
 ---
 
 # Local Agent Sync Home AI Resources
@@ -10,202 +10,100 @@ description: Use when planning, auditing, or applying allowlisted home-directory
 - None.
 
 Use this skill as the operating engine for `.github/agents/local-sync-install-ai-resources.agent.md`.
-The paired agent is only a thin UX wrapper; this skill owns mode selection,
-approval posture, safety gates, and report interpretation for repo-to-home sync
-and bisync. Keep user-visible output deterministic, bounded, summary-first,
-and emoji-led in chat.
+The repository is the only source of truth for managed resources. Home is a
+runtime projection: a write through a managed skill link writes the repository
+bundle directly.
 
-Canonical command examples use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
-The CLI defaults to `--format compact` for AI/tool iteration. Use
-`--format report` only when a human-readable command report is explicitly
-needed; in chat, summarize compact output as concise Markdown for the user.
+## Scope
 
-## When to use
+- Repository skill bundles are materialized only as absolute links under
+  `~/.agents/skills/`.
+- Root `AGENTS.md` is projected to `~/.agents/AGENTS.md` as a managed copy with
+  the complete `<standards-repository-local-rules>` block removed.
+- Copilot agents are absolute links back to `.github/agents/`; Codex and
+  OpenCode agents retain their translated copy paths.
+- Home-only skills are unmanaged and preserved. This includes catalog-excluded
+  `graphify` and every `local-*` bundle.
+- Reverse synchronization, reconciliation, and copied-skill fallback are
+  forbidden.
 
-- Plan a local home-directory sync for supported AI runtime resources, including shared skills and runtime-specific agents.
-- Audit drift between repository-managed resources and the local runtime copies under the user home directory.
-- Run readiness or doctor checks before touching runtime-owned directories.
-- Apply an already reviewed plan for supported direct-copy skill families and allowlisted agent translations.
-- Run bidirectional drift detection and reconciliation between `.github/skills/` and `~/.agents/skills/`.
+## Commands
 
-## When not to use
+Use `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh`.
 
-- Source-side catalog governance in this repository; use `local-sync-external-resources` instead.
-- Consumer-repository baseline sync; use `local-sync-global-copilot-configs-into-repo` instead.
-- Personal configuration merge, runtime adapter generation, or general dotfiles management.
-- Undocumented runtime families outside the allowlisted direct-copy skills and translated agents for OpenCode and Codex.
+| Request | Command |
+| --- | --- |
+| Update the global `AGENTS.md` baseline | `sync --targets agents.md` |
+| Default repository-to-home sync | `sync --targets skills` |
+| Dry review | `plan --targets skills` |
+| Explicit materialization | `apply --targets skills` |
+| Drift inspection | `audit --targets skills` |
+| Readiness check | `doctor --targets skills` |
 
-## Deterministic Operator Protocol
+`dry-run` is an alias for `plan`. The repository dispatcher
+`./.github/scripts/run.sh sync_home_ai_resources ...` remains a delegating
+compatibility entrypoint.
 
-Every mode has exactly one command. Do not infer the mode, do not skip blockers, and do not treat `next_action` as user approval for `apply`. Plain `apply` and `bisync apply` still require an explicit user request. The `sync` command is the only auto-execute exception: it may write only through the install lane after a zero-blocker, no-drift preflight.
+When the user calls this skill with an `agents.md` request, `agents.md` means `sync --targets agents.md`.
+Accept `agents-md` as a CLI alias for the same target.
 
-### Command Map
+## Operating Contract
 
-| User request | Lane | Command |
-| --- | --- | --- |
-| Generic `sync`, `repo→home`, or `repo wins` | Auto-run safe repo-to-home install for `skills`, then review only home-owned or ambiguous bisync drift | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh sync --targets skills` |
-| Explicit `home→repo` | Review home-newer drift, then use explicit bisync commands with a git-clean repo | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh bisync plan` then `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh bisync apply` |
-| Readiness check | Verify roots, support matrix, catalog, and state root without writes | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh doctor --targets skills` |
-| Dry install review | Show repo-to-home changes without writes | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh plan --targets skills` |
-| Explicit install write | Materialize a reviewed install plan | `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh apply --targets skills` |
+- Keep `~/.agents/skills/` a real directory. Never replace the root with a
+  link.
+- Treat repository root `AGENTS.md` as the only source of truth for the managed
+  `~/.agents/AGENTS.md` projection. Adopt and overwrite an unmanaged target
+  file, but never include `<standards-repository-local-rules>` in the result.
+- Keep `~/.copilot/agents/` a real directory. Never replace the root with a
+  link.
+- Create one canonical absolute link for every eligible repository skill.
+- Create one canonical absolute link for every eligible Copilot agent.
+- Migrate a manifest-managed unchanged Copilot copy to its canonical link;
+  block unmanaged or locally modified copies.
+- A colliding home directory with an eligible repository skill ID is removed
+  without backup and replaced by that link.
+- A matching unmanaged link is adopted into the manifest without replacement.
+- A broken link or a link to another checkout blocks the operation.
+- Manifest-v2 stale managed links are unlinked automatically; copied translated
+  agents retain explicit `--prune-managed` safety.
+- Unsupported symlink capability blocks the operation. Never copy a skill as a
+  fallback.
+- If the repository checkout moves, rerun sync so links point to the new
+  canonical source paths.
+- Do not run a real-home command unless the user requested a home change. Use
+  a temporary home for tests and acceptance checks.
 
-The repository dispatcher `./.github/scripts/run.sh sync_home_ai_resources ...`
-may be used for compatibility; it delegates to the bundled skill runner.
+## Mode Selection
 
-### Mode Selection
+- `sync` may auto-apply clean repository-to-home work, including `agents.md`.
+  It stops for blockers,
+  missing-directory approval, or copied-agent prune gates.
+- `plan` and `audit` are read-only.
+- `apply` needs an explicit request; `--create-missing-dirs` and
+  `--prune-managed` remain explicit.
+- `doctor` is read-only and checks roots, support, catalog sources, and state.
 
-- `sync`: default safe automation for shared skills. Auto-apply clean repo-to-home install work, then stop only on home-owned or ambiguous bisync drift.
-- `doctor`: read-only readiness checks for runtime roots, support matrix, catalog paths, and sync state.
-- `plan` or `dry-run`: install-lane dry run.
-- `audit`: compare source, manifest, and managed target paths without writing runtime files.
-- `--fast`: read-only shortcut for `plan` and `audit` only. Write modes still evaluate the full source catalog.
-- `apply`: explicit install-lane materialization. Never run from `next_action` alone.
-- `bisync plan`: read-only drift detection between `.github/skills/` and `~/.agents/skills/`.
-- `bisync apply`: explicit bidirectional drift resolution after a reviewed matching `bisync plan` snapshot and clean repo preflight.
+## Reporting
 
-### Default Sync Sequence
-
-When the user says "sync" without a mode:
-
-1. Run `sync` for the default `skills` target.
-2. The command builds an install-lane `apply` plan and stops before writing when blockers, missing directory creation, stale managed resources, destructive cleanup, or other manual gates are present.
-3. If the install lane is clean, the command applies repo-to-home materialization and reports copied, skipped, validation, state, and manifest evidence.
-4. After install, the command runs `bisync plan` as a review gate. Stop and ask for user direction only when bisync reports `home-to-repo`, `only-home`, or `equal-mtime` drift, or another non-safe blocker.
-5. `repo-to-home` and `only-repo` bisync entries are safe informational leftovers for the default lane. Report them, but do not stop the sync run for them. Do not run `bisync apply` automatically.
-
-Install must run before bisync because bisync modifies `~/.agents/skills/` directories that the install manifest tracks. Running install first copies fresh content from the repo with matching manifest hashes; bisync then finds both sides already aligned, avoiding spurious `target-modified-managed` blockers.
-
-### Stop Conditions
-
-Stop and report when any of these occur:
-
-- A blocker code is present in the output.
-- `next_action.allowed` is `false`, except for `sync` reports that have already completed their safe install-lane work and are reporting `done`.
-- `next_action.requires_explicit_approval` is `true` and the user has not explicitly approved, except for the `sync` command's built-in install-lane auto-execute path.
-- `sync` reports install-lane residual drift, missing directory creation without `--create-missing-dirs`, stale managed resources, or any install blocker.
-- `sync` reports `home-to-repo`, `only-home`, `equal-mtime`, or another non-safe bisync blocker after install. Treat this as a review state, not an apply failure.
-- `bisync apply` was requested without a prior matching reviewed `bisync plan` snapshot.
-- The source repository has uncommitted or untracked changes during `bisync apply`.
-- After `bisync apply` modifies `~/.agents/skills/` files that the install lane also manages, re-run install `plan`. Verified repo-to-home bisync copies refresh the manifest state; if `target-modified-managed` still appears, treat it as a real local divergence and review the path instead of deleting it as a routine recovery step.
-- If `bisync apply` is blocked by `bisync-repo-dirty` and the local workspace has unrelated uncommitted changes, run bisync from a clean detached worktree at the same commit and pass it through `--source-root`.
-
-## Core Operating Contract
-
-- For the install lane, treat this repository as the source of truth for allowlisted home-sync resources.
-- Install sync is unidirectional: repo -> home only. Block any attempt to sync from home to repo.
-- Default generic sync requests to `sync`; keep plain `apply`, prune, directory creation, and all `bisync apply` writes explicit unless the user provided the matching flags or request.
-- Limit v1 materialization to documented direct-copy skill families and allowlisted agent translations for Codex and OpenCode.
-- Preserve unmanaged target-local files and directories.
-- Prune stale managed assets only when explicit approval is present and the manifest entry passes schema validation, path confinement, and content-hash drift checks.
-- Keep local sync state under `~/.sync/cloud-strategy-governance/home-ai-resources/`.
-- Block writes when runtime support is undocumented, target paths are unsafe, ownership evidence is missing, the manifest is corrupt, or the source root sits under home sync state.
-- Use `--retire-targets` when the managed target set should shrink, for example removing `opencode` while keeping `codex` and `copilot`.
-- Accept `codex`, `copilot`, `opencode`, comma-separated combinations, `cross`, `all`, or `tutto`; normalize and order targets deterministically.
-- Keep `references/home-sync-catalog.yaml` as policy and explicit non-skill resources only; skill bundles are auto-discovered from `.github/skills/` when `include_unlisted_skills` is true. Use catalog defaults to exclude home-kept skills from future install and bisync lanes and to declare whether unmanaged home skill bundles must block or be adopted with repo-wins behavior.
-
-## Bisync Lane
-
-The `bisync` lane provides explicit bidirectional synchronization between `.github/skills/` and `~/.agents/skills/`. It is a separate lane from install sync.
-
-- Blocks `apply` when the source repository has uncommitted or untracked changes.
-- Blocks `apply` when any `only-home` or `equal-mtime` entry exists.
-- Blocks `apply` when post-copy hash verification fails.
-- Blocks `apply` when post-apply plan still shows residual drift.
-- Excludes all `local-*` bundles and runtime artifacts (`.venv`, `__pycache__`, `.pytest_cache`, `.pyc`, `.pyo`) from scanning and copying.
-- `only-repo`: when not excluded, `bisync apply` can create the bundle in home from the repository side.
-- `only-home`: manual intervention required. Decide whether to keep it only in home, remove it, or add it to the repository.
-- `equal-mtime`: hashes differ but mtime is equal. Manual decision required because the winner cannot be determined from timestamps alone.
-
-## Reporting Contract
-
-Use compact output for model-facing runs. Do not dump raw JSON unless the user
-explicitly asks for it. Machine-readable output is available as `--format compact`
-or `--compact` by default; full raw state remains available as `--format json`
-for debugging. Use `--format report` only for a human-readable command report.
-
-Every report must be summary-first and start with one status line that includes mode or lane, selected targets, overall status, blocker count, and `next_action.action`.
-
-Then follow the exact text layout in `references/sync-contract.md`:
-
-- `doctor`: `Status`, `Summary`, `Readiness`, `Validation`, and `Next`. Show non-ok readiness checks and tell the user what blocks the next write.
-- `sync`: `Status`, `Summary`, `Auto-applied` or `Planned repo-to-home copies`, `Stopped on`, `Validation`, and `Next`. Summarize counts first, then show only the copied resources when writes occurred, or the planned copies when install review stopped the run before writing, plus the exact drift or blockers that stopped completion.
-- `plan`, `audit`, and `bisync plan`: a compact summary, a change table when there are changes, and an attention table when there are blockers or drift decisions. For every proposed modification, explain the decision cause, for example repo copy is newer, home copy is newer, a managed resource is stale, or runtime support is not documented enough for apply.
-- `apply` and `bisync apply`: a compact summary, an actions-performed table for writes, and a residual-issues table when needed. List copied, updated, pruned, or created resources and state why they were handled that way and how they were verified. Summarize unchanged managed resources by count instead of listing every skip.
-
-Never report blocker codes alone. Translate each code into a plain-language reason and required follow-up. Never say a resource will change without stating what evidence selected the winner or triggered the recommendation. Bounded chat reports may omit excess change rows, but they must keep all blocker and attention rows visible and point to `--format json` for full detail.
-
-### Canonical Chat Report Template
-
-When answering the user in chat, use this structure so the report stays easy to scan and easy to answer. Use emoji-led headings in chat:
-
-1. `🚦 Status`
-	- One short line with the overall result.
-	- Prefer `completata`, `in corso`, `bloccata`, or `no-op`.
-2. `📌 What is happening`
-	- One short paragraph that explains the current state in plain language.
-3. `🔁 Differences`
-	- List only the actionable changes.
-	- Number the items when the user may need to choose between them.
-	- Summarize unchanged or skipped resources by count unless the user asked for the full list.
-4. `⛔ Why it stops`
-	- Explain the smallest real blocker, not the internal code name.
-	- Include only the drift or policy item that prevents the next step.
-5. `🎯 Choices`
-	- Present only the actions the user can actually take now.
-	- Use numbered options.
-	- Put the recommended choice first.
-	- Keep each option to one line when possible.
-
-### Canonical Completion Template
-
-When the work is finished, close with this structure instead of repeating the full diff. Use emoji-led headings in chat:
-
-1. `✅ Result`
-	- Say whether the run completed, applied changes, or ended as no-op.
-2. `🛠️ What changed`
-	- One short paragraph with the concrete outcome.
-3. `🔎 Final verification`
-	- State the strongest evidence available, such as a clean plan, hash match, or zero residual drift.
-4. `🧾 Residuals`
-	- Include only if something still needs attention.
-	- If nothing remains, say `none`.
-5. `➡️ Next step`
-	- If the run is done, say there is nothing else to do.
-	- If the run is blocked, name the single next action.
-
-## Bundled Automation
-
-- Prefer `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh` for deterministic `plan`, `audit`, `doctor`, `apply`, and `bisync plan|apply` behavior.
-- Use compact output for automation and AI loops. Convert compact results into concise Markdown in chat when the user needs to decide what to do.
-- The bundled runner installs locked dependencies from `scripts/requirements.txt` and suppresses bootstrap noise when compact output is selected.
-- Keep orchestration inside `scripts/sync_home_ai_resources.py`, install behavior inside `scripts/home_syncing.py`, bisync behavior inside `scripts/bisync_skills.py`, report rendering inside `scripts/sync_output.py`, and reference loading inside `scripts/home_sync_contract.py`.
-
-## Conflict Resolution
-
-When plan, audit, or sync reports blocked paths, resolve them before apply:
-
-- `target-exists-unmanaged`: target content exists at home but is not manifest-managed. Review and move or remove it manually before rerunning plan unless the active catalog policy explicitly adopts unmanaged skills with repo-wins behavior.
-- `target-modified-managed`: manifest-managed content diverged from the recorded hash. If home is clearly newer, let bisync surface the explicit home-to-repo decision; if it persists after verified bisync reconciliation, treat it as real local divergence.
-- `stale-managed`: previously managed content is no longer planned. Re-run with `--prune-managed` only after review.
-- `retire-target-overlap`: the same target was requested as active and retired. Remove the overlap and rerun.
-- `bisync-only-home`: decide whether to keep it only in home, remove it, or add it to the repository.
-- `bisync-equal-mtime`: choose the winning side and touch the winner to advance mtime.
-- `bisync-repo-dirty`: commit or stash, or run `bisync apply` from a clean detached worktree with `--source-root`.
-
-After any manual cleanup, re-run `plan` or `bisync plan` and require zero blockers before any explicit apply.
+Use `--format compact` for automation. Reports must summarize linked resources,
+unlinked resources, copied translated agents, unchanged resources, and blockers. Do not list
+all unchanged skills. Translate blocker codes into a plain-language next
+action; see `references/error-codes.md`.
 
 ## Load On Demand
 
-- Read `references/runtime-support-matrix.yaml` when the runtime family or support level decides the mode.
-- Read `references/sync-contract.md` for state files, manifest fields, materialization rules, doctor readiness, bisync contract, and reporting requirements.
-- Read `references/error-codes.md` when the correct blocking code or remediation must be surfaced.
-- Read `references/home-sync-catalog.yaml` only when changing default discovery policy or explicit agent resources.
+- Read `references/sync-contract.md` for manifest, planning, path safety, and
+  verification details.
+- Read `references/error-codes.md` when a blocker or remediation is relevant.
+- Read `references/home-sync-catalog.yaml` only when changing discovery policy
+  or explicit agent resources.
+- Read `references/runtime-support-matrix.yaml` when runtime support decides a
+  mode.
 
 ## Validation
 
-- Rebuild `.github/INVENTORY.md` when the bundle or related scripts change by using `./.github/scripts/run.sh build_inventory --root .`.
-- Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.
+- Run focused tests under
+  `tests/github/skills/local-agent-sync-install-ai-resources/scripts`.
 - Run `bash -n .github/skills/local-agent-sync-install-ai-resources/scripts/run.sh .github/scripts/run.sh` after shell entrypoint changes.
-- Run `.github/skills/local-agent-sync-install-ai-resources/scripts/run.sh plan --targets skills,copilot,codex --compact` after output or CLI changes to confirm low-token output remains valid.
-- Run focused agent or skill contract tests for this bundle.
-- Run focused sync tests for report layout, target parsing, support-matrix policy, manifest handling, overwrite gates, bisync protocol, and missing-directory behavior when automation changes.
+- Rebuild `.github/INVENTORY.md` with `./.github/scripts/run.sh build_inventory --root .` after bundle changes.
+- Run `./.github/scripts/run.sh check_catalog_consistency --root . --include-token-risks` after bundle or automation changes.

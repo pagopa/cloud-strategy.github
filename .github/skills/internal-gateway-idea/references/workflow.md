@@ -16,25 +16,31 @@ flowchart TD
     C1 --> D
     D --> E{Intent and defaults accepted?}
     E -- no --> D
-    E -- yes --> F[Assumption Challenge Gate]
-    F --> G[Alternative discovery]
-    G --> H[Present design direction]
-    H --> I{User approves design direction?}
-    I -- no --> D
-    I -- yes --> J[Critical Challenge Gate]
-    J --> K{Critical result}
-    K -- reopen --> D
-    K -- narrow --> H
-    K -- continue --> L[Spec vs plan decision]
-    L --> M{Decision}
-    M -- spec first --> N[Ask approval for retained spec path]
-    M -- direct plan --> O[Ask approval for direct plan path]
-    N --> P{Approved?}
-    O --> P
-    P -- no --> L
-    P -- yes --> Q[Load internal-gateway-writing-plans]
-    Q --> R[Writing outcome only]
-    R --> S[Stop before implementation execution]
+    E -- yes --> F{External Research Checkpoint}
+    F -- skip --> H[Assumption Challenge Gate]
+    F -- research needed --> G[Load mattpocock-research on-demand]
+    G --> G1[Write one report under tmp/research/]
+    G1 --> G2{Accepted defaults changed?}
+    G2 -- yes --> D
+    G2 -- no --> H
+    H --> I[Alternative discovery]
+    I --> J[Present design direction]
+    J --> K{User approves design direction?}
+    K -- no --> D
+    K -- yes --> L[Critical Challenge Gate]
+    L --> M{Critical result}
+    M -- reopen --> D
+    M -- narrow --> J
+    M -- continue --> N[Spec vs plan decision]
+    N --> O{Decision}
+    O -- spec first --> P[Ask approval for retained spec path]
+    O -- direct plan --> Q[Ask approval for direct plan path]
+    P --> R{Approved?}
+    Q --> R
+    R -- no --> N
+    R -- yes --> S[Load internal-gateway-writing-plans]
+    S --> T[Writing outcome only]
+    T --> U[Stop before implementation execution]
 ```
 
 ## Gate Contract
@@ -44,6 +50,7 @@ flowchart TD
 | `Specialization Checkpoint: gated` | Use when the incoming ask is already a file edit, command run, validator run, implementation step, or other execution-shaped request. Name the later execution owner only as a future consequence. | Do not execute, hand off, or present the post-critical recommendation. |
 | `Skipped-gate recovery` | Stop the current lane, name the first skipped mandatory gate, mark downstream artifacts draft-only, and resume at that gate. | Do not continue from an invalid later state or ask the user to approve a handoff built on skipped gates. |
 | `Idea Gate 0` | Confirm the recovered intent, defaults, constraints, success criteria, validation path, and anti-scope with a visible numbered question block using `Question`, `Recommendation`, `Why`, and `Default if accepted`; evidence cannot replace Idea Gate 0. | Do not treat repository evidence alone as user approval, and do not proceed to challenge, alternatives, design, or planning until this gate is accepted. |
+| `External Research Checkpoint` | Skip unless local evidence is insufficient and one external fact could change feasibility, approach, constraints, or risk. When needed, load `mattpocock-research` on-demand with one bounded question, write one Markdown report under `tmp/research/`, and return only decision-relevant conclusions. | Do not preload the research skill, copy its research procedure, run generic best-practice research, or start a second research pass automatically. |
 | `Assumption Challenge Gate` | Test whether the proposed target or solution is necessary before choosing an approach. | Do not only polish the user's proposed solution. |
 | `Alternative discovery` | Present 2-3 approaches and explain why the recommended one beats the strongest rejected option. | Do not present a single-path design as inevitable. |
 | `Critical Challenge Gate` | Challenge the chosen direction as its own visible gate after design-direction approval and before spec or plan writing. Reopen or narrow when the objection is material. | Do not use this gate after loading `internal-gateway-writing-plans`; an embedded critique does not satisfy Critical Challenge Gate. |
@@ -68,3 +75,5 @@ Keep the agent filename, frontmatter name, and workflow aligned.
 ## Local validation lane
 
 Run `python3 scripts/audit_workflow.py` or `make internal-gateway-idea-fast-check` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.
+
+The checkpoint must use one bounded research question; do not start a second research pass automatically.

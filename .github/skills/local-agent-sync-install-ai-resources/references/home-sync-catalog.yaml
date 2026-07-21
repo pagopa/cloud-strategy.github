@@ -11,6 +11,13 @@ defaults:
     - copilot
     - opencode
 resources:
+  - resource_id: global-agents
+    source_family: agents-md
+    source_path: AGENTS.md
+    include_targets:
+      - agents.md
+    target_support: See runtime support matrix
+    notes: Portable global baseline generated without standards-repository-local-rules.
   - resource_id: internal-gateway-idea
     source_family: agents
     source_path: .github/agents/internal-gateway-idea.agent.md

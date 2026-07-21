@@ -1,4 +1,4 @@
 interface:
   display_name: "Home AI Resource Sync"
-  short_description: "Plan, apply, audit, doctor, or bisync local AI home sync"
-  default_prompt: "Use $local-agent-sync-install-ai-resources to run safe repo-to-home sync with compact output by default; require explicit approval for apply or bisync apply; when replying in chat, follow the canonical Problem Report or Completion Report template from the skill, keep differences and blockers plain-language, and render user choices as numbered options with the recommended choice first."
+  short_description: "Sync AI resources and the portable AGENTS.md baseline to home"
+  default_prompt: "Use $local-agent-sync-install-ai-resources for repository-to-home sync. Treat an agents.md request as sync --targets agents.md, generating ~/.agents/AGENTS.md from root AGENTS.md without standards-repository-local-rules. Repository skills use managed absolute links; never sync home content into the repository. Default to compact output, require explicit approval for apply, and explain each blocker in plain language."

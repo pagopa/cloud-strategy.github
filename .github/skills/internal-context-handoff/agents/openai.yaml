@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal Context Handoff"
-  short_description: "Create paste-ready, token-efficient cross-chat resume context"
-  default_prompt: "Use $internal-context-handoff to create a compact, paste-ready context handoff for a new chat. Default to compact compression. Redact secrets. Include only continuation-critical fields."

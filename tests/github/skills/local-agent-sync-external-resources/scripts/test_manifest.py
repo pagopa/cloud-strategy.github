@@ -117,3 +117,22 @@ def test_live_override_targets_sit_under_managed_assets(repo_root: Path) -> None
             f"Override {override.override_id} target {override.target_path} "
             f"does not sit under any managed local asset"
         )
+
+
+def test_live_handoff_override_forces_repo_tmp_handoff(repo_root: Path) -> None:
+    overrides_path = (
+        repo_root
+        / ".github/skills/local-agent-sync-external-resources/references/imported-asset-overrides.yaml"
+    )
+    bundle_root = repo_root / ".github/skills/local-agent-sync-external-resources"
+
+    overrides = load_overrides(overrides_path)
+    handoff = next(
+        override
+        for override in overrides
+        if override.target_path == ".github/skills/mattpocock-handoff/SKILL.md"
+    )
+
+    assert handoff.override_id == "mattpocock-handoff-tmp-path"
+    patch_text = (bundle_root / handoff.patch_path).read_text(encoding="utf-8")
+    assert "tmp/handoff/" in patch_text

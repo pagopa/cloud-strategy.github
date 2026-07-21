@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# graphify-hook: managed delegate
+set -Eeuo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ORIGINAL_HOOK="$SCRIPT_DIR/post-commit.graphify-original"
+original_status=0
+if [ -f "$ORIGINAL_HOOK" ]; then
+    set +e
+    if [ -x "$ORIGINAL_HOOK" ]; then
+        "$ORIGINAL_HOOK" "$@"
+    else
+        bash "$ORIGINAL_HOOK" "$@"
+    fi
+    original_status=$?
+    set -e
+fi
+set +e
+"$SCRIPT_DIR/../scripts/graphify-file-change-hook.sh" post-commit "$@"
+delegate_status=$?
+set -e
+if [ "$original_status" -ne 0 ]; then
+    exit "$original_status"
+fi
+exit "$delegate_status"

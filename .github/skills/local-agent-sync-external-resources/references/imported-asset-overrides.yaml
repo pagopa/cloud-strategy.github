@@ -8,6 +8,20 @@ policy:
     --3way` fallback when upstream text drift is compatible. Stop for review if neither
     path applies cleanly.
 overrides:
+- id: mattpocock-handoff-tmp-path
+  target_path: .github/skills/mattpocock-handoff/SKILL.md
+  source_family: mattpocock/skills
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply
+  approval: explicit-user-counter-validated
+  reason: Force handoff documents imported from mattpocock/skills to use the
+    repository-local tmp/handoff directory instead of the operating system
+    temporary directory.
+  patch_path: patches/mattpocock-handoff-tmp-path.patch
+  expected_content_hash: c41182a1631c303fd024b4acd83124791aeaf4bc28a7ba1af5eba48eb26a5cfa
+  baseline_repo_commit: efa058a
+  validation_note: Stop the refresh if the patch does not apply cleanly; review
+    whether the repository-local handoff path remains the intended contract.
 - id: grill-me-bulk-recommended-questions
   target_path: .github/skills/grill-me/SKILL.md
   source_family: mattpocock/skills
