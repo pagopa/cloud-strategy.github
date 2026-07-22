@@ -1,29 +1,19 @@
 ---
-name: internal-gcp-strategic
-description: Use when the user needs high-level Google Cloud platform decision support or tradeoff framing before implementation, and the next step is not yet structure, governance, operations, or code delivery.
+name: internal-gcp
+description: Use when a Google Cloud task cannot be routed confidently to a specific GCP skill because the request is materially ambiguous, has multiple GCP domains with no clear primary owner, or requires clarification before selecting the correct specialist, or when the user needs high-level Google Cloud platform decision support or tradeoff framing before implementation. Do not use for clearly scoped organization structure, governance or IAM, or operations or validation tasks.
 ---
 
-# Internal GCP Strategic
+# Internal GCP
 
-## Referenced skills
-
-- `internal-gcp-organization-structure`: route when org, folder, project, Shared VPC, or topology layout becomes the decision.
-- `internal-gcp-governance`: route when IAM, workload identity, service account, or Org Policy design becomes the decision.
-- `internal-gcp-operations`: route when monitoring, backup, reporting, inventory, or post-rollout validation becomes the decision.
-- `internal-terraform`: route implementation work in Terraform or OpenTofu.
-- `internal-python-script`: route implementation work in standalone Python automation.
-- `internal-bash-script`: route implementation work in standalone Bash automation.
-
-Use this skill when the main need is to reason about a GCP decision before implementation.
-
-This is a strategic support skill. It helps frame the decision, compare realistic options, expose tradeoffs, and recommend a direction. It does not implement the change and it does not choose Terraform, Python, or Bash on behalf of the user.
+Fallback router for Google Cloud tasks that cannot be assigned confidently to one specialist, and strategic support skill for high-level GCP decision framing. Do not activate only because the task concerns Google Cloud; activate only when material routing uncertainty blocks owner selection or when the user needs decision support before the next step is structure, governance, operations, or delivery.
 
 ## When to use
 
-- The user needs GCP decision support before execution.
-- Multiple GCP approaches are credible and tradeoffs matter.
-- The user wants a recommendation grounded in current Google Cloud guidance.
-- The user wants high-level support for platform, organization, governance, resilience, cost, or operational decisions.
+- Material ambiguity prevents selecting one primary GCP specialist.
+- Multiple GCP domains are material and no primary owner can be identified safely.
+- The user explicitly invokes `$internal-gcp`.
+- The task asks which GCP lane should own the work before requesting a domain solution.
+- The user needs high-level GCP decision support or tradeoff framing before implementation.
 
 ## When not to use
 
@@ -32,15 +22,34 @@ This is a strategic support skill. It helps frame the decision, compare realisti
 - The task is purely post-rollout validation or evidence gathering.
 - The request is narrow and operational with no real decision to frame.
 
-## Main domains covered
+## Routing threshold
 
-- platform and control-plane decision framing
-- Google Cloud Architecture Framework guidance at decision level
-- org, folder, project, and billing-model implications at decision level
-- governance and identity implications at decision level
-- operational implications at decision level
-- resilience and continuity implications at decision level
-- cost-value and FinOps implications at decision level
+Activate only when at least one holds:
+
+- the request is materially ambiguous and clarification is required before a GCP owner can be selected;
+- multiple GCP domains are material and no primary owner can be identified safely;
+- the task asks which GCP problem-solving lane should own the work;
+- the user needs strategic decision framing and the next step is not yet structure, governance, operations, or delivery.
+
+Do not activate when one specialist clearly owns the next step; route directly to that specialist instead. Explicit `$internal-gcp` invocation remains valid.
+
+## Handoffs
+
+| To | Owns |
+|---|---|
+| `internal-gcp-organization-structure` | org, folder, project, billing-account, Shared VPC, and platform topology layout |
+| `internal-gcp-governance` | IAM, workload identity, service account, Org Policy, and guardrail design |
+| `internal-gcp-operations` | monitoring, validation, backup, recovery, inventory, reporting, evidence |
+
+## Dispatch contract
+
+1. State the routing uncertainty.
+2. Identify candidate GCP owners.
+3. Select the minimum specialist set.
+4. Keep strategic comparison here only while needed to choose the owner.
+5. Hand the resolved task to the primary specialist instead of retaining ownership.
+
+Load `references/routing-matrix.md` for the routing decision tree. Load `references/lens-playbook.md` when the fallback trigger fires and the choice of GCP owner or lens needs structured comparison, or when the user wants a deeper decision-framing aid.
 
 ## Optional lens activation
 
@@ -69,8 +78,6 @@ Rules:
 - Expand only when the request is broad, risky, or ambiguous.
 - If another lens would materially improve the recommendation, suggest it briefly instead of forcing it.
 - Keep the active lenses explicit when more than one is in play.
-
-Load `references/lens-playbook.md` when the user wants a deeper framing aid or when the choice of lenses is not obvious.
 
 ## Optional BC/DR lens
 
@@ -138,17 +145,6 @@ Include:
 - main risks and blast radius
 - validation or follow-up path
 
-## Relationship to adjacent skills
-
-- `internal-gcp-organization-structure`
-  Use when the next need is org or folder layout, billing-account model, project topology, Shared VPC placement, or platform structure.
-- `internal-gcp-governance`
-  Use when the next need is IAM model, workload identity federation, Org Policy design, or guardrail definition.
-- `internal-gcp-operations`
-  Use when the next need is Cloud Monitoring, backup, DR validation, inventory, reporting, preflight, or post-rollout checks.
-- `internal-terraform`, `internal-python-script`, `internal-bash-script`
-  Use when the decision is settled and implementation begins.
-
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
@@ -158,10 +154,12 @@ Include:
 | Recommending a direction without current-source verification when freshness matters | Product limits, Org Policy behavior, or regional support may have changed | Call out the freshness dependency and say which Google Cloud facts still need current verification |
 | Confusing decision support with implementation guidance | The user loses the strategic framing they asked for | Keep the answer at decision level and hand off only after the direction is chosen |
 | Expanding into tool or automation selection when the user did not ask for it | The response drifts from platform tradeoffs into delivery detail | Keep the recommendation centered on the GCP choice, not the tooling |
-| Giving generic best-practice advice without context, tradeoff, or cost implication | Generic advice is hard to act on and easy to misapply | Tie the recommendation to assumptions, viable options, and cost-value consequences |
+| Activating the fallback when one specialist clearly owns the next step | The router delays work a direct specialist should own | Route directly to the specialist and keep the fallback for genuine uncertainty |
 
 ## Validation
 
+- State why the request could not be assigned to one primary GCP specialist, or name the decision being framed.
+- Confirm the selected specialist set is the minimum needed to resolve the uncertainty.
 - Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
 - Confirm assumptions, active lenses, and the main tradeoff are named instead of implied.
 - Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.

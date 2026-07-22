@@ -13,7 +13,7 @@ INTERNAL_CONTRACT = REPO_ROOT / "INTERNAL_CONTRACT.md"
 ANTI_PATTERNS = (
     REPO_ROOT / ".github/skills/internal-python/references/review-anti-patterns.md"
 )
-SKILL_PATH_PATTERN = re.compile(r"\.github/skills/([^/]+)/")
+SKILL_PATH_PATTERN = re.compile(r"\.github/skills/([^/\n]+)/")
 
 
 def test_global_guidance_documents_generic_test_placement_rule() -> None:

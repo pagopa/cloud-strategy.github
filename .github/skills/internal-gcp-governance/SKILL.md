@@ -1,15 +1,17 @@
 ---
 name: internal-gcp-governance
-description: Use when the user needs Google Cloud governance guidance for IAM operating models, workload identity federation, service account boundaries, Org Policy design, inheritance strategy, security guardrails, exception handling, or other controls that define what principals can do after the GCP structure is chosen.
+description: Use when the user needs Google Cloud governance guidance for IAM operating models, workload identity federation, service account boundaries, Org Policy design, inheritance strategy, security guardrails, or exception handling that define what principals can do after the GCP structure is chosen. Do not use for org, folder, project, or Shared VPC layout; monitoring, backup, or rollout validation; or materially ambiguous requests with no clear governance deliverable.
 ---
 
 # Internal GCP Governance
 
-## Referenced skills
+## Handoffs
 
-- `internal-gcp-strategic`: route back when direction or tradeoff framing is still unsettled.
-- `internal-gcp-organization-structure`: route when org, folder, project, Shared VPC, or topology layout is the main decision.
-- `internal-gcp-operations`: route when monitoring, reporting, backup, inventory, or post-rollout validation is the main need.
+| To | When |
+|---|---|
+| `internal-gcp` | material routing uncertainty prevents selecting a primary GCP specialist |
+| `internal-gcp-organization-structure` | where a capability should live |
+| `internal-gcp-operations` | preflight, reporting, evidence after design |
 
 Use this skill when the next need is to define or review Google Cloud identity, access, and guardrail decisions.
 
@@ -25,7 +27,7 @@ This skill owns governance logic after the broad structure is known. It helps se
 ## When not to use
 
 - The main problem is org, folder, project, or Shared VPC layout.
-- The main problem is strategic option framing before the governance surface is clear.
+- The request is materially ambiguous and no primary GCP owner can be named → `internal-gcp`.
 - The main problem is monitoring, reporting, backup, inventory, or post-rollout validation.
 - The task is implementation-only.
 
@@ -69,15 +71,6 @@ For broader asks, return:
 - recommended control stack
 - exception or blast-radius note
 - what should be validated before rollout
-
-## Relationship to adjacent skills
-
-- `internal-gcp-strategic`
-  Use first when the user still needs option framing or lens selection.
-- `internal-gcp-organization-structure`
-  Use when the governance question is actually about where a capability should live.
-- `internal-gcp-operations`
-  Use when the next need is preflight, reporting, validation, inventory, or operational evidence after the governance design is chosen.
 
 ## Common mistakes
 

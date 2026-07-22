@@ -1,15 +1,17 @@
 ---
 name: internal-gcp-organization-structure
-description: Use when the user needs Google Cloud control-plane or platform-structure guidance for org or folder layout, billing-account model, project segmentation, Shared VPC host and service project topology, environment segmentation, platform-level network structure, or other layout decisions that shape how GCP is organized before implementation.
+description: Use when the user needs Google Cloud control-plane or platform-structure guidance for org or folder layout, billing-account model, project segmentation, Shared VPC host and service project topology, environment segmentation, or platform-level network topology that shapes how GCP is organized before implementation. Do not use for IAM, service account, workload identity, or Org Policy design; monitoring, backup, or rollout validation; or materially ambiguous requests with no clear structural deliverable.
 ---
 
 # Internal GCP Organization Structure
 
-## Referenced skills
+## Handoffs
 
-- `internal-gcp-strategic`: route back when direction or tradeoff framing is still unsettled.
-- `internal-gcp-governance`: route IAM, service account, workload identity, or Org Policy design.
-- `internal-gcp-operations`: route monitoring, backup, reporting, inventory, or post-rollout validation.
+| To | When |
+|---|---|
+| `internal-gcp` | material routing uncertainty prevents selecting a primary GCP specialist |
+| `internal-gcp-governance` | controls and permissions after placement |
+| `internal-gcp-operations` | validation and evidence after structure |
 
 Use this skill when the next need is to design or review how GCP is structured at org and platform level.
 
@@ -27,7 +29,7 @@ This skill owns GCP layout decisions, not generic strategy and not detailed IAM 
 
 - The question is mainly IAM, service account, workload identity, or Org Policy logic.
 - The task is mainly monitoring, backup, reporting, or post-rollout validation.
-- The user only needs generic strategic comparison with no concrete structure question.
+- The request is materially ambiguous and no primary GCP owner can be named → `internal-gcp`.
 - The task is already implementation-focused.
 
 ## Main domains covered
@@ -75,15 +77,6 @@ For broader asks, return:
 - smallest safe rollout unit
 - main risks
 - what should move next to `internal-gcp-governance` or `internal-gcp-operations`
-
-## Relationship to adjacent skills
-
-- `internal-gcp-strategic`
-  Use first when the user still needs broader decision framing or lens selection.
-- `internal-gcp-governance`
-  Use when the structural decision is accepted and the next need is IAM, workload identity federation, Org Policy, or guardrail definition.
-- `internal-gcp-operations`
-  Use when the structure is accepted and the next need is validation, monitoring, backup, inventory, or operational evidence.
 
 ## Common mistakes
 

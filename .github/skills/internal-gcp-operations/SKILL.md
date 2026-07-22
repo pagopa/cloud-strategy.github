@@ -1,15 +1,17 @@
 ---
 name: internal-gcp-operations
-description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision has already been made.
+description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for org, folder, project, or Shared VPC layout; IAM, workload identity, or Org Policy design; or materially ambiguous requests with no clear operational deliverable.
 ---
 
 # Internal GCP Operations
 
-## Referenced skills
+## Handoffs
 
-- `internal-gcp-strategic`: route back when direction or tradeoff framing is still unsettled.
-- `internal-gcp-organization-structure`: route when org, folder, project, Shared VPC, or topology layout is the main decision.
-- `internal-gcp-governance`: route when IAM, workload identity, service account, or Org Policy design is the main decision.
+| To | When |
+|---|---|
+| `internal-gcp` | material routing uncertainty prevents selecting a primary GCP specialist |
+| `internal-gcp-organization-structure` | placement questions |
+| `internal-gcp-governance` | new IAM or Org Policy design |
 
 Use this skill when the next need is to validate, observe, or operationalize a GCP platform decision.
 
@@ -25,6 +27,7 @@ This skill owns the operational side of the platform: monitoring, evidence, inve
 
 ## When not to use
 
+- The request is materially ambiguous and no primary GCP owner can be named → `internal-gcp`.
 - The main problem is still choosing the high-level direction.
 - The main problem is org, folder, project, or Shared VPC structure.
 - The main problem is IAM, workload identity, service account, or Org Policy design.
@@ -71,15 +74,6 @@ For broader asks, return:
 - post-rollout evidence path
 - recovery, DR, or inventory note when relevant
 - open operational risks
-
-## Relationship to adjacent skills
-
-- `internal-gcp-strategic`
-  Use first when the core decision is still unsettled.
-- `internal-gcp-organization-structure`
-  Use when the operations question is actually about org, project, or topology placement.
-- `internal-gcp-governance`
-  Use when the operations question is actually about IAM, workload identity, Org Policy, or guardrail design rather than validation.
 
 Until a dedicated GCP serverless owner is justified by real usage, keep Cloud Run and Cloud Functions operational readiness, validation, and evidence questions in this skill instead of inventing a fifth lane for symmetry alone.
 
