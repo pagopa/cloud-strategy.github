@@ -13,7 +13,7 @@ reuse decision, delivery question, or infrastructure coupling.
 
 - `internal-devops-core-principles`: delivery-system strategy, release safety, operational readiness, and incident learning.
 - `internal-github-action-composite`: composite-action authoring and step-level reuse.
-- `internal-terraform`: Terraform resources deployed by CI/CD.
+- `internal-github`: route back under material routing uncertainty when the owning GitHub lane is unclear or the work is still strategic platform framing.
 
 ## When to use
 

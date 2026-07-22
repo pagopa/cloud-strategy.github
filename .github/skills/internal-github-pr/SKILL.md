@@ -17,6 +17,7 @@ need, workflow change, or lifecycle claim.
 - `internal-review-high-level`: systems-level impact analysis that feeds PR risk.
 - `openai-gh-address-comments`: review-thread remediation after PR body work exists.
 - `superpowers-verification-before-completion`: evidence gate before claiming PR readiness, validity, mergeability, or completion.
+- `internal-github`: route back under material routing uncertainty when the owning GitHub lane is unclear or the work is still strategic platform framing.
 
 ## When to use
 

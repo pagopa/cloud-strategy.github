@@ -17,7 +17,7 @@ Owns AWS IAM, trust, SCP, federation, permission-boundary, and access-guardrail 
 ## When not to use
 
 - The main problem is account, OU, or topology layout → `internal-aws-organization-structure`.
-- The main problem is strategic framing before the governance surface is clear → `internal-aws`.
+- Routing is unclear under material routing uncertainty, or strategic framing is needed before the governance surface is clear → `internal-aws`.
 - The main problem is monitoring, reporting, backup, or post-rollout validation → `internal-aws-operations`.
 - The task is implementation-only → `internal-aws-lambda`.
 

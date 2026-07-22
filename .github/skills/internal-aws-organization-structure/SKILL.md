@@ -19,7 +19,7 @@ Owns AWS layout decisions: account, OU, delegated admin, StackSets topology, and
 
 - Mainly IAM, SCP, federation, or guardrail logic → `internal-aws-governance`.
 - Mainly monitoring, backup, reporting, or post-rollout validation → `internal-aws-operations`.
-- Generic strategic comparison with no concrete structure question → `internal-aws`.
+- Routing is unclear under material routing uncertainty, or the comparison stays strategic with no concrete structure question → `internal-aws`.
 - Already implementation-focused → `internal-aws-lambda`.
 
 ## Domains

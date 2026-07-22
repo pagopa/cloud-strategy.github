@@ -1,6 +1,6 @@
 ---
 name: internal-azure
-description: Use only when an Azure task cannot be routed confidently to a specific Azure skill because the request is materially ambiguous, has multiple Azure domains with no clear primary owner, or requires clarification before selecting the correct specialist. Do not use for clearly scoped organization structure, governance or identity, operations or validation, or Azure DevOps pipeline tasks.
+description: Use when an Azure task cannot be routed confidently to a specific Azure skill because the request is materially ambiguous, has multiple Azure domains with no clear primary owner, or requires clarification before selecting the correct specialist, or when the user needs high-level Azure platform decision support or tradeoff framing before implementation. Do not use for clearly scoped organization structure, governance or identity, operations or validation, or Azure DevOps pipeline tasks.
 ---
 
 # Internal Azure
@@ -13,13 +13,21 @@ description: Use only when an Azure task cannot be routed confidently to a speci
 - `internal-azure-devops`: Azure DevOps pipeline and project-automation owner.
 - `awesome-copilot-azure-pricing`: Azure-specific pricing depth when cost data is the primary problem.
 
-Use this skill only as a fallback under material routing uncertainty. Do not activate only because the task concerns Azure. Do not activate when one specialist clearly owns the next step.
+Fallback router for Azure tasks that cannot be assigned confidently to one specialist, and strategic support skill for high-level Azure decision framing. Do not activate only because the task concerns Azure; activate only when material routing uncertainty blocks owner selection or when the user needs decision support before the next step is structure, governance, operations, or delivery. Do not activate when one specialist clearly owns the next step.
 
 ## When to use
 
 - Use this fallback when material ambiguity prevents selecting one primary Azure specialist.
 - Use it when multiple Azure domains are material and no primary owner can be identified safely.
 - Use it when the user explicitly invokes `$internal-azure`.
+- Use it when the user needs high-level Azure decision support or tradeoff framing before implementation.
+
+## When not to use
+
+- The task is already a clear implementation change.
+- The user only needs detailed RBAC, Policy, monitoring, backup, or pipeline implementation detail.
+- The task is purely post-rollout validation or evidence gathering.
+- The request is narrow and operational with no real decision to frame.
 
 ## Routing threshold
 
@@ -27,7 +35,8 @@ Activate only when at least one condition holds:
 
 - the request is materially ambiguous and clarification is required before an Azure owner can be selected;
 - multiple Azure domains are material and no primary owner can be identified safely;
-- the task asks which Azure problem-solving lane should own the work before requesting a domain solution.
+- the task asks which Azure problem-solving lane should own the work before requesting a domain solution;
+- the user needs strategic decision framing and the next step is not yet structure, governance, operations, or delivery.
 
 Explicit `$internal-azure` invocation remains valid.
 
@@ -69,11 +78,71 @@ Rules:
 
 Load `references/lens-playbook.md` when the user wants a deeper framing aid or when the choice of lenses is not obvious.
 
+## Optional BC/DR lens
+
+BC/DR is optional.
+
+Activate it only when:
+
+- the user asks about resilience, backup, recovery, failover, RTO, RPO, Site Recovery, or regional continuity
+- the decision has clear continuity implications
+- the recommendation would be materially incomplete without it
+
+If BC/DR seems relevant but is not requested, suggest it as an optional lens instead of forcing it.
+
 ## Use of current documentation
 
 Use current Microsoft documentation only when freshness materially affects the answer, especially for Azure service support, landing-zone guidance updates, Policy behavior, RBAC semantics, regional capability, or service limits.
 
 Do not invoke current-doc research by default for stable, generic reasoning.
+
+## Mandatory behavior
+
+- Identify the decision first, not the implementation tool.
+- Make assumptions explicit.
+- Compare realistic options, not strawmen.
+- Keep tradeoffs concrete.
+- Surface material risk, blast radius, and reversibility when relevant.
+- Include cost-value considerations when they matter to the decision.
+- Stay proportional to the size of the question.
+
+## Adaptive output modes
+
+Choose the lightest output that fits the request.
+
+### Quick answer
+
+Use for narrow asks.
+
+Include:
+
+- direct recommendation
+- short rationale
+- optional risk or follow-up note
+
+### Decision note
+
+Use for normal strategic support.
+
+Include:
+
+- decision statement
+- key options or tradeoff
+- recommended direction
+- main risk or validation note
+
+### Deep analysis
+
+Use only for broad, ambiguous, high-risk, or explicitly detailed requests.
+
+Include:
+
+- context and assumptions
+- options considered
+- active lenses used
+- recommendation and why it wins
+- main risks and blast radius
+- validation or follow-up path
 
 ## Anti-patterns
 
@@ -83,3 +152,14 @@ Do not invoke current-doc research by default for stable, generic reasoning.
 - activating this fallback when one specialist clearly owns the next step
 - expanding into tool selection when the user did not ask for it
 - giving generic best-practice advice without context, tradeoff, or cost implication
+
+## Validation
+
+- State why the request could not be assigned to one primary Azure specialist, or name the decision being framed.
+- Confirm the selected specialist set is the minimum needed to resolve the uncertainty.
+- Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
+- Confirm assumptions, active lenses, and the main tradeoff are named instead of implied.
+- Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.
+- Confirm cost-value or operational impact is called out when it materially changes the recommendation.
+- Confirm the answer states when freshness matters and which current Microsoft fact still needs validation.
+- Confirm the resolved task is handed to a primary specialist.

@@ -7,7 +7,7 @@ description: Use when the user needs GitHub operational guidance — Actions hea
 
 ## Referenced skills
 
-- `internal-github`: route back when enterprise, org, repo, or operating-model direction is still unsettled and the owning specialist is not yet clear.
+- `internal-github`: route back under material routing uncertainty when enterprise, org, repo, or operating-model direction is still unsettled and the owning specialist is not yet clear.
 - `internal-github-governance`: route rulesets, permissions, Actions permissions, OIDC, secrets, environments, or guardrail design.
 
 Use this skill when the next need is to validate, observe, or operationalize a GitHub platform decision.

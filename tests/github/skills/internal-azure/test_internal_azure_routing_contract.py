@@ -13,14 +13,16 @@ LEGACY_SKILL_DIR = REPO_ROOT / ".github/skills" / ("internal-azure-" + "strategi
 SKILL_PATH = SKILL_DIR / "SKILL.md"
 AGENT_PATH = SKILL_DIR / "agents/openai.yaml"
 ROUTING_MATRIX_PATH = SKILL_DIR / "references/routing-matrix.md"
+LENS_PLAYBOOK_PATH = SKILL_DIR / "references/lens-playbook.md"
 
 EXPECTED_DESCRIPTION = (
-    "Use only when an Azure task cannot be routed confidently to a specific Azure "
-    "skill because the request is materially ambiguous, has multiple Azure domains "
-    "with no clear primary owner, or requires clarification before selecting the "
-    "correct specialist. Do not use for clearly scoped organization structure, "
-    "governance or identity, operations or validation, or Azure DevOps pipeline "
-    "tasks."
+    "Use when an Azure task cannot be routed confidently to a specific Azure "
+    "skill because the request is materially ambiguous, has multiple Azure "
+    "domains with no clear primary owner, or requires clarification before "
+    "selecting the correct specialist, or when the user needs high-level Azure "
+    "platform decision support or tradeoff framing before implementation. "
+    "Do not use for clearly scoped organization structure, governance or "
+    "identity, operations or validation, or Azure DevOps pipeline tasks."
 )
 
 
@@ -38,29 +40,38 @@ def test_internal_azure_replaces_the_legacy_bundle() -> None:
     }
 
 
-def test_internal_azure_contract_is_fallback_only() -> None:
+def test_internal_azure_contract_is_router_and_strategic() -> None:
     skill_text = SKILL_PATH.read_text()
 
-    required_markers = (
+    router_markers = (
         "material routing uncertainty",
         "Do not activate only because the task concerns Azure",
         "Do not activate when one specialist clearly owns the next step",
         "Select the minimum specialist set",
         "Explicit `$internal-azure` invocation remains valid",
     )
-    for marker in required_markers:
+    for marker in router_markers:
+        assert marker in skill_text
+
+    strategic_markers = (
+        "Identify the decision first, not the implementation tool",
+        "Compare realistic options, not strawmen.",
+        "Keep tradeoffs concrete.",
+    )
+    for marker in strategic_markers:
         assert marker in skill_text
 
 
-def test_internal_azure_interface_names_only_the_narrow_fallback() -> None:
+def test_internal_azure_interface_names_router_and_strategic() -> None:
     interface = yaml.safe_load(AGENT_PATH.read_text())["interface"]
 
     assert interface == {
         "display_name": "Internal Azure",
-        "short_description": "Azure fallback for material routing uncertainty",
+        "short_description": "Azure routing and strategic decision support",
         "default_prompt": (
-            "Use $internal-azure only when this Azure task has no clear specialist "
-            "owner; clarify the lane and select the minimum Azure skill set."
+            "Use $internal-azure to route an unclear Azure task to the minimum "
+            "specialist set, or to frame an Azure decision when the next "
+            "step is not yet structure, governance, operations, or delivery."
         ),
     }
 
@@ -75,6 +86,17 @@ def test_routing_matrix_covers_positive_negative_and_multi_domain_cases() -> Non
         "## Review rule",
     ):
         assert heading in matrix_text
+
+
+def test_lens_playbook_keeps_strategic_depth() -> None:
+    playbook_text = LENS_PLAYBOOK_PATH.read_text()
+
+    for heading in (
+        "## Common lens combinations",
+        "## Decision note pattern",
+        "## Depth control",
+    ):
+        assert heading in playbook_text
 
 
 AZURE_SKILL_PATHS = sorted(

@@ -1,11 +1,11 @@
 ---
 name: internal-github
-description: Use only when a GitHub task cannot be routed confidently to a specific GitHub skill because the request is materially ambiguous, has multiple GitHub domains with no clear primary owner, or requires clarification before selecting the correct specialist. Do not use for clearly scoped governance, operations, PR lifecycle, Actions workflow authoring, composite-action authoring, or current Copilot platform behavior research.
+description: Use when a GitHub task cannot be routed confidently to a specific GitHub skill because the request is materially ambiguous, has multiple GitHub domains with no clear primary owner, or requires clarification before selecting the correct specialist, or when the user needs high-level GitHub platform or operating-model decision support or tradeoff framing before implementation. Do not use for clearly scoped governance, operations, PR lifecycle, Actions workflow authoring, composite-action authoring, or current Copilot platform behavior research.
 ---
 
 # Internal GitHub
 
-Fallback router for GitHub tasks that cannot be assigned confidently to one specialist. Do not activate only because the task concerns GitHub; activate only when material routing uncertainty blocks owner selection.
+Fallback router for GitHub tasks that cannot be assigned confidently to one specialist, and strategic support skill for high-level GitHub platform and operating-model decision framing. Do not activate only because the task concerns GitHub; activate only when material routing uncertainty blocks owner selection or when the user needs decision support before the next step is governance, operations, or delivery.
 
 ## Referenced skills
 
@@ -22,6 +22,7 @@ Fallback router for GitHub tasks that cannot be assigned confidently to one spec
 - Multiple GitHub domains are material and no primary owner can be identified safely.
 - The user explicitly invokes `$internal-github`.
 - The task asks which GitHub lane should own the work before requesting a domain solution.
+- The user needs high-level GitHub platform or operating-model decision support or tradeoff framing before implementation.
 
 ## Routing threshold
 
@@ -29,9 +30,10 @@ Activate only when at least one holds:
 
 - the request is materially ambiguous and clarification is required before a GitHub owner can be selected;
 - multiple GitHub domains are material and no primary owner can be identified safely;
-- the task asks which GitHub problem-solving lane should own the work.
+- the task asks which GitHub problem-solving lane should own the work;
+- the user needs strategic decision framing and the next step is not yet governance, operations, or delivery.
 
-Explicit `$internal-github` invocation remains valid.
+Do not activate when one specialist clearly owns the next step; route directly to that specialist instead. Explicit `$internal-github` invocation remains valid.
 
 ## Handoffs
 
@@ -54,7 +56,7 @@ Explicit `$internal-github` invocation remains valid.
 
 ## On-demand references
 
-Load `references/routing-matrix.md` for the routing decision tree. Load `references/strategic-framing.md` when the fallback trigger fires and the choice of GitHub owner needs structured decision framing, optional lenses, or worked-shape comparison before handoff. Do not load either by default for a clearly scoped single-owner request.
+Load `references/routing-matrix.md` for the routing decision tree. Load `references/strategic-framing.md` when the choice of GitHub owner or lens needs worked lens combinations, decision-note depth, or worked-shape comparison before handoff. Do not load either by default for a clearly scoped single-owner request.
 
 ## Optional lens activation
 
@@ -85,9 +87,69 @@ Rules:
 - If another lens would materially improve the recommendation, suggest it briefly instead of forcing it.
 - Keep the active lenses explicit when more than one is in play.
 
+## Optional BC/DR lens
+
+BC/DR is optional.
+
+Activate it only when:
+
+- the user asks about delivery continuity, runner resilience, backup, recovery, or failover expectations
+- the decision has clear continuity implications for build, release, or repository operations
+- the recommendation would be materially incomplete without it
+
+If BC/DR seems relevant but is not requested, suggest it as an optional lens instead of forcing it.
+
 ## Use of current documentation
 
 Use current GitHub documentation only when freshness materially affects the answer. When the question is about Copilot or MCP behavior specifically, route to `internal-copilot-docs-research` instead of answering from memory.
+
+## Mandatory behavior
+
+- Identify the decision first, not the implementation tool.
+- Make assumptions explicit.
+- Compare realistic options, not strawmen.
+- Keep tradeoffs concrete.
+- Surface material risk, blast radius, and reversibility when relevant.
+- Include cost-value considerations when they matter to the decision.
+- Stay proportional to the size of the question.
+
+## Adaptive output modes
+
+Choose the lightest output that fits the request.
+
+### Quick answer
+
+Use for narrow asks.
+
+Include:
+
+- direct recommendation
+- short rationale
+- optional risk or follow-up note
+
+### Decision note
+
+Use for normal strategic support.
+
+Include:
+
+- decision statement
+- key options or tradeoff
+- recommended direction
+- main risk or validation note
+
+### Deep analysis
+
+Use only for broad, ambiguous, high-risk, or explicitly detailed requests.
+
+Include:
+
+- context and assumptions
+- options considered
+- active lenses used
+- recommendation and why it wins
+- main risks and blast radius
+- validation or follow-up path
 
 ## Anti-scope
 
@@ -114,3 +176,7 @@ Use current GitHub documentation only when freshness materially affects the answ
 - Confirm the resolved task is handed to a primary specialist and not retained by this fallback.
 - Confirm assumptions, tradeoffs, and the next owner are explicit.
 - Confirm lenses, when used, are the minimum set and named explicitly when more than one is active.
+- Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
+- Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.
+- Confirm cost-value or operational impact, including licensing or runner cost, is called out when it materially changes the recommendation.
+- Confirm the answer states when freshness matters and whether current GitHub or Copilot behavior still needs verification.

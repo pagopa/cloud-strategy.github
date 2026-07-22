@@ -63,6 +63,7 @@ Exact configured name can vary by client.
 
 | To | When |
 |---|---|
+| `internal-aws` | routing is unclear under material routing uncertainty or strategic framing is still needed |
 | `internal-aws-organization-structure` | answer affects account layout, delegated admin placement, or StackSets topology |
 | `internal-aws-governance` | answer affects SCPs, IAM, trust, or federation |
 | `internal-aws-operations` | answer affects validation, backup, monitoring, or rollout evidence |

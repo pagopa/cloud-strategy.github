@@ -16,7 +16,7 @@ Owns the operational side of the AWS platform: monitoring, evidence, preflight, 
 
 ## When not to use
 
-- Still choosing the high-level direction → `internal-aws`.
+- Routing is unclear under material routing uncertainty, or the high-level direction is still being chosen → `internal-aws`.
 - Account, OU, or delegated admin structure → `internal-aws-organization-structure`.
 - IAM, SCP, or trust-policy design → `internal-aws-governance`.
 - Narrow implementation change with no operational design question → `internal-aws-lambda`.

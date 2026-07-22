@@ -12,7 +12,7 @@ for every composite action edit; load only the owner proved by the reusable
 unit, extracted script depth, or broader workflow question.
 
 - `internal-github-actions`: GitHub Actions workflow umbrella and reuse-pattern selection.
-- `internal-bash-script`: extracted shell scripts inside composite actions.
+- `internal-github`: route back under material routing uncertainty when the owning GitHub lane is unclear or the work is still strategic platform framing.
 
 ## When to use
 

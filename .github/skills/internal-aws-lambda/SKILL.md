@@ -16,10 +16,10 @@ Owns AWS Lambda handler, trigger, packaging, retry, and cold-start behavior afte
 
 ## When not to use
 
-- The main problem is still strategic AWS decision support → `internal-aws`.
+- Routing is unclear under material routing uncertainty, or the problem is still strategic AWS decision support → `internal-aws`.
 - The main problem is IAM, SCP, trust, or organization-structure design → `internal-aws-governance`.
 - The next need is operational evidence, rollout validation, monitoring, or DR validation → `internal-aws-operations`.
-- The task is generic Python or Node.js module design with no Lambda behavior in scope → `internal-nodejs-project` / `internal-python-project`.
+- The task is generic Python or Node.js module design with no Lambda behavior in scope.
 
 ## Core guidance
 

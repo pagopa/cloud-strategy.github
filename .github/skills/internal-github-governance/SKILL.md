@@ -7,7 +7,7 @@ description: Use when the user needs GitHub guardrail or permission guidance —
 
 ## Referenced skills
 
-- `internal-github`: route back when enterprise, org, repo, or operating-model direction is still unsettled and the owning specialist is not yet clear.
+- `internal-github`: route back under material routing uncertainty when enterprise, org, repo, or operating-model direction is still unsettled and the owning specialist is not yet clear.
 - `internal-github-operations`: route runner health, reporting, audit evidence, drift checks, or post-rollout validation.
 
 Use this skill when the next need is to define or review GitHub permissions, guardrails, and policy decisions.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal GitHub"
-  short_description: "GitHub fallback for material routing uncertainty"
-  default_prompt: "Use $internal-github only when this GitHub task has no clear specialist owner; clarify the lane and select the minimum GitHub skill set."
+  short_description: "GitHub routing and strategic decision support"
+  default_prompt: "Use $internal-github to route an unclear GitHub task to the minimum specialist set, or to frame a GitHub platform or operating-model decision when the next step is not yet governance, operations, or delivery."

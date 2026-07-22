@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal AWS"
-  short_description: "AWS fallback for material routing uncertainty"
-  default_prompt: "Use $internal-aws only when this AWS task has no clear specialist owner; clarify the lane and select the minimum AWS skill set."
+  short_description: "AWS routing and strategic decision support"
+  default_prompt: "Use $internal-aws to route an unclear AWS task to the minimum specialist set, or to frame an AWS decision when the next step is not yet structure, governance, operations, or delivery."
