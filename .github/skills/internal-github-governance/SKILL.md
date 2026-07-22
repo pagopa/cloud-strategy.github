@@ -1,13 +1,13 @@
 ---
 name: internal-github-governance
-description: Use when the user needs GitHub governance guidance for rulesets, branch protection, permissions models, GitHub Apps permissions, Actions permissions, OIDC posture, secret handling, environments, Copilot governance, or other controls that define what actors can do after the GitHub operating model is chosen.
+description: Use when the user needs GitHub guardrail or permission guidance — rulesets, branch protection, repository or organization permissions, GitHub Apps permissions, Actions permissions, OIDC posture, secret handling, environments, or Copilot governance — after the broad operating model is known. Do not use for enterprise, org, or repo-model decision framing; route those to internal-github.
 ---
 
 # Internal GitHub Governance
 
 ## Referenced skills
 
-- `internal-github-strategic`: route back when enterprise, org, repo, or operating-model direction is still unsettled.
+- `internal-github`: route back when enterprise, org, repo, or operating-model direction is still unsettled and the owning specialist is not yet clear.
 - `internal-github-operations`: route runner health, reporting, audit evidence, drift checks, or post-rollout validation.
 
 Use this skill when the next need is to define or review GitHub permissions, guardrails, and policy decisions.
@@ -74,7 +74,7 @@ For broader asks, return:
 
 ## Relationship to adjacent skills
 
-- `internal-github-strategic`
+- `internal-github`
   Use first when the user still needs option framing, repo-model tradeoffs, or operating-model decisions.
 - `internal-github-operations`
   Use when the next need is preflight, audit evidence, drift checks, or validation after the governance design is chosen.

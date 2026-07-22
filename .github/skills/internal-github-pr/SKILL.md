@@ -1,6 +1,6 @@
 ---
 name: internal-github-pr
-description: Use when creating, updating, validating, or merging GitHub pull requests in this repository, including PR template bodies, approval checks, merge method, terminal state verification, or PR lifecycle evidence.
+description: Use when creating, updating, validating, or merging GitHub pull requests in this repository — PR template bodies, approval and required-review checks, merge method choice, terminal-state verification via `gh pr view --json state,mergedAt`, or PR lifecycle evidence. Do not use for workflow authoring touched by a PR; route that to internal-github-actions.
 ---
 
 # Internal GitHub PR

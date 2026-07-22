@@ -1,13 +1,13 @@
 ---
 name: internal-github-operations
-description: Use when the user needs GitHub operational guidance for Actions health, runner operations, audit logs, reporting and export, drift checks, preflight checks, post-rollout validation, or operational evidence after a governance or operating-model decision has already been made.
+description: Use when the user needs GitHub operational guidance — Actions health, runner operations, audit logs, reporting and export, drift checks, preflight checks, post-rollout validation, or operational evidence — after a governance or operating-model decision has already been made. Do not use for direction framing or guardrail design; route those to internal-github or internal-github-governance.
 ---
 
 # Internal GitHub Operations
 
 ## Referenced skills
 
-- `internal-github-strategic`: route back when enterprise, org, repo, or operating-model direction is still unsettled.
+- `internal-github`: route back when enterprise, org, repo, or operating-model direction is still unsettled and the owning specialist is not yet clear.
 - `internal-github-governance`: route rulesets, permissions, Actions permissions, OIDC, secrets, environments, or guardrail design.
 
 Use this skill when the next need is to validate, observe, or operationalize a GitHub platform decision.
@@ -71,7 +71,7 @@ For broader asks, return:
 
 ## Relationship to adjacent skills
 
-- `internal-github-strategic`
+- `internal-github`
   Use first when the core decision is still unsettled.
 - `internal-github-governance`
   Use when the operations question is actually about rulesets, permissions, OIDC, secret posture, or guardrail design rather than validation.

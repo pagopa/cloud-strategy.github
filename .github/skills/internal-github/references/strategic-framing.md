@@ -1,6 +1,91 @@
-# GitHub Strategic Lens Playbook
+# GitHub Strategic Framing Reference
 
-Use this reference when the user wants more depth than the base skill should load by default.
+Use this reference only when the fallback trigger fires and the choice of GitHub owner needs structured decision framing before handoff. Do not load it for single-owner requests or routine routing.
+
+## Optional lenses
+
+Do not load every lens by default.
+
+Use only the minimum set of lenses needed for the request. If the user explicitly names one or more lenses, prioritize only those. If the user does not name lenses, infer the smallest useful set.
+
+Available lenses include:
+
+- security
+- identity and access
+- organization and repo model
+- governance
+- operations
+- runner model
+- Copilot
+- BC/DR
+- FinOps
+- compliance
+- rollout and rollback
+- blast radius
+- maintainability
+
+Rules:
+
+- Start narrow.
+- Expand only when the request is broad, risky, or ambiguous.
+- If another lens would materially improve the recommendation, suggest it briefly instead of forcing it.
+- Keep the active lenses explicit when more than one is in play.
+
+## Optional BC/DR lens
+
+BC/DR is optional.
+
+Activate it only when:
+
+- the user asks about delivery continuity, runner resilience, backup, recovery, or failover expectations
+- the decision has clear continuity implications for build, release, or repository operations
+- the recommendation would be materially incomplete without it
+
+If BC/DR seems relevant but is not requested, suggest it as an optional lens instead of forcing it.
+
+## Use of current documentation
+
+Use current GitHub documentation only when freshness materially affects the answer, especially for GitHub Apps permissions, Actions behavior, runner support, OIDC guidance, rulesets, or Copilot product boundaries.
+
+Do not invoke current-doc research by default for stable, generic reasoning.
+
+## Adaptive output modes
+
+Choose the lightest output that fits the request.
+
+### Quick answer
+
+Use for narrow asks.
+
+Include:
+
+- direct recommendation
+- short rationale
+- optional risk or follow-up note
+
+### Decision note
+
+Use for normal strategic support.
+
+Include:
+
+- decision statement
+- key options or tradeoff
+- recommended direction
+- main risk or validation note
+
+### Deep analysis
+
+Use only for broad, ambiguous, high-risk, or explicitly detailed requests.
+
+Include:
+
+- context and assumptions
+- options considered
+- active lenses used
+- recommendation and why it wins
+- main risks and blast radius
+- validation or follow-up path
 
 ## Common lens combinations
 
@@ -19,12 +104,6 @@ Use this reference when the user wants more depth than the base skill should loa
 - The rollout adds runner, audit, or validation burden: suggest `operations`
 - The decision changes delivery continuity or recovery posture: suggest `BC/DR`
 - The choice materially affects developer workflow or repo shape: suggest `maintainability`
-
-## Depth control
-
-- Stay in `Quick answer` mode when one option is clearly better and the user asked a narrow question.
-- Upgrade to `Decision note` when at least two viable options exist.
-- Upgrade to `Deep analysis` only when the user asks for it or the risk profile justifies it.
 
 ## Worked GitHub decision shapes
 
@@ -71,3 +150,9 @@ Use this when the question is too consequential for a quick answer but does not 
 | The choice does not alter trust, continuity, or repo ownership posture | The choice changes repo model, Apps trust, runner model, or Copilot posture |
 | The answer can stay within one lens without hiding material risk | A second lens changes the recommendation or the risk statement |
 | Freshness is not the deciding factor | Current GitHub behavior, permissions, or product limits could change the outcome |
+
+## Depth control
+
+- Stay in `Quick answer` mode when one option is clearly better and the user asked a narrow question.
+- Upgrade to `Decision note` when at least two viable options exist.
+- Upgrade to `Deep analysis` only when the user asks for it or the risk profile justifies it.
