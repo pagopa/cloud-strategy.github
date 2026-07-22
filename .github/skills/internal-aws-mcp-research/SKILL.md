@@ -7,6 +7,8 @@ description: Use when the task needs current AWS documentation or safe IAM inspe
 
 Standardizes an AWS research workflow that prefers AWS MCP servers when available and falls back to official AWS documentation. Designed for principal-level platform governance questions, not only application coding.
 
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
+
 ## When to use
 
 - Current AWS documentation, regional availability, or official guidance that may have changed.
@@ -59,15 +61,6 @@ Exact configured name can vary by client.
 - Prefer `simulate_principal_policy` before proposing policy rollout.
 - Distinguish documentation-backed statements from observations of a real AWS account.
 
-## Handoffs
-
-| To | When |
-|---|---|
-| `internal-aws` | routing is unclear under material routing uncertainty or strategic framing is still needed |
-| `internal-aws-organization-structure` | answer affects account layout, delegated admin placement, or StackSets topology |
-| `internal-aws-governance` | answer affects SCPs, IAM, trust, or federation |
-| `internal-aws-operations` | answer affects validation, backup, monitoring, or rollout evidence |
-
 Load `references/mcp-capabilities.md` for capability splits across the two MCP servers.
 
 ## Output expectations
@@ -83,4 +76,4 @@ Load `references/mcp-capabilities.md` for capability splits across the two MCP s
 
 - Source type (docs / live IAM / inference) is labeled for every claim.
 - IAM MCP usage stayed read-only unless an explicit change was requested.
-- Routing handoff is named when the answer affects another lane.
+- Implications beyond the research lane are reported as labeled findings, not acted on.

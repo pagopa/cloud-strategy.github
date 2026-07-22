@@ -5,18 +5,11 @@ description: Use when the user needs Azure RBAC operating models, managed identi
 
 # Internal Azure Governance
 
-## Handoffs
-
-| To | When |
-|---|---|
-| `internal-azure` | material routing uncertainty prevents selecting a primary Azure specialist |
-| `internal-azure-organization-structure` | where a capability should live |
-| `internal-azure-operations` | preflight, reporting, evidence after design |
-| `awesome-copilot-azure-role-selector` | least-privilege role selection depth |
-
 Use this skill when the next need is to define or review Azure identity, access, and guardrail decisions.
 
 This skill owns governance logic after the broad structure is known. It helps separate tenant or management-group guardrails from subscription or workload grants and keeps permission decisions auditable.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-azure`.
 
 ## When to use
 
@@ -24,13 +17,6 @@ This skill owns governance logic after the broad structure is known. It helps se
 - The user needs managed identity or privileged-access posture guidance.
 - The user needs Azure Policy, initiative, naming, or tagging guardrails.
 - The user needs a review of guardrail design, exceptions, or access governance.
-
-## When not to use
-
-- The main problem is management-group, landing-zone, or subscription layout.
-- The request is materially ambiguous and no primary Azure owner can be named → `internal-azure`.
-- The main problem is monitoring, reporting, backup, or post-rollout validation.
-- The task is implementation-only.
 
 ## Main domains covered
 
@@ -91,4 +77,4 @@ For broader asks, return:
 - Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains privileged access.
 - Confirm identity boundaries and exception paths are explicit for human and workload access.
 - Confirm staged rollout validation is named before high-blast-radius Policy, RBAC, or PIM changes.
-- Confirm the answer says when operational proof should move to `internal-azure-operations` and when least-privilege role depth should move to `awesome-copilot-azure-role-selector`.
+- Confirm out-of-scope needs, such as operational proof or structure placement, are identified as outside this lane instead of being answered here.

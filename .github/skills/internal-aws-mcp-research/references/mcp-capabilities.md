@@ -49,4 +49,4 @@ Operational notes:
 | "Which regions support this?" | AWS Knowledge MCP |
 | "What does this role or user currently have?" | AWS IAM MCP |
 | "Would this policy allow action X on resource Y?" | AWS IAM MCP with simulation |
-| "How should we govern this across the org?" | `internal-aws-organization-structure` or `internal-aws-governance` plus whichever MCP source supplies the facts; use `internal-aws` only when the primary owner cannot be selected from the request |
+| "How should we govern this across the org?" | Beyond this research lane; supply the facts from whichever MCP source applies and route back to `internal-aws` when the primary owner cannot be selected from the request |

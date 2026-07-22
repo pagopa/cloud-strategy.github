@@ -5,17 +5,11 @@ description: Use when the user needs Google Cloud control-plane or platform-stru
 
 # Internal GCP Organization Structure
 
-## Handoffs
-
-| To | When |
-|---|---|
-| `internal-gcp` | material routing uncertainty prevents selecting a primary GCP specialist |
-| `internal-gcp-governance` | controls and permissions after placement |
-| `internal-gcp-operations` | validation and evidence after structure |
-
 Use this skill when the next need is to design or review how GCP is structured at org and platform level.
 
 This skill owns GCP layout decisions, not generic strategy and not detailed IAM or monitoring implementation. It helps translate a platform goal into org, folder, project, Shared VPC, topology, and rollout structure.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
 
 ## When to use
 
@@ -24,13 +18,6 @@ This skill owns GCP layout decisions, not generic strategy and not detailed IAM 
 - The user is deciding Shared VPC host and service project topology.
 - The user needs platform-level network or regional structure guidance.
 - The user needs rollout-scope guidance for structural GCP change.
-
-## When not to use
-
-- The question is mainly IAM, service account, workload identity, or Org Policy logic.
-- The task is mainly monitoring, backup, reporting, or post-rollout validation.
-- The request is materially ambiguous and no primary GCP owner can be named → `internal-gcp`.
-- The task is already implementation-focused.
 
 ## Main domains covered
 
@@ -76,16 +63,15 @@ For broader asks, return:
 - recommended placement model
 - smallest safe rollout unit
 - main risks
-- what should move next to `internal-gcp-governance` or `internal-gcp-operations`
 
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
 | Proposing org or project layouts without a rollout scope | Structural changes are hard to unwind if staged poorly | Name the smallest safe rollout unit: folder, project set, or region set |
-| Mixing Shared VPC placement and IAM design into one vague answer | Structure and governance review get blurred together | Keep host and service project placement here and move access design to `internal-gcp-governance` |
+| Mixing Shared VPC placement and IAM design into one vague answer | Structure and governance review get blurred together | Keep host and service project placement here and keep access design out of the structure answer |
 | Treating billing layout as an afterthought when it changes ownership or blast radius | Finance and platform decisions drift together and become hard to review | Make billing ownership explicit when it differs from project or folder ownership |
-| Using structure answers to sneak in Org Policy or IAM design without separating the concerns | The lane boundary becomes unreliable | State where the capability lives and hand off what controls or permissions apply |
+| Using structure answers to sneak in Org Policy or IAM design without separating the concerns | The lane boundary becomes unreliable | State where the capability lives and keep what controls or permissions apply out of the structure answer |
 | Ignoring region or residency implications when they materially shape layout | Project or Shared VPC placement can violate real requirements | Make sovereignty, region choice, and continuity assumptions explicit |
 | Recommending central host projects without naming who operates them | Shared infrastructure becomes a vague platform bucket | State the host-project owner and which service projects depend on it |
 
@@ -95,4 +81,4 @@ For broader asks, return:
 - Confirm the smallest safe rollout unit is named and matches the proposed structural change.
 - Confirm region or residency implications are explicit when they shape folder, project, or network placement.
 - Confirm billing ownership and platform ownership are separated when both appear in the recommendation.
-- Confirm the next handoff is clear when the user now needs governance controls or operational proof.
+- Confirm out-of-scope needs, such as governance controls or operational proof, are identified as outside this lane instead of being answered here.

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import yaml
@@ -132,6 +133,43 @@ def test_specialists_name_internal_github_only_as_uncertainty_fallback() -> None
         skill_text = path.read_text()
         assert "`internal-github`" in skill_text
         assert "material routing uncertainty" in skill_text
+
+
+LANE_SKILL_IDS = (
+    "internal-github-governance",
+    "internal-github-operations",
+    "internal-github-pr",
+)
+
+SKILL_REFERENCE_PATTERN = re.compile(
+    r"`((?:internal|awesome|openai|superpowers|agent-os|antigravity|addyosmani"
+    r"|local|mattpocock|terraform|vercel|customize|grill|graphify)-[a-z0-9-]+)`"
+)
+
+REMOVED_SECTION_HEADINGS = (
+    "## Handoffs",
+    "## Cross-references",
+    "## Referenced skills",
+    "## Relationship to adjacent skills",
+    "## When not to use",
+)
+
+
+def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
+    for skill_id in LANE_SKILL_IDS:
+        skill_dir = REPO_ROOT / ".github/skills" / skill_id
+        text_paths = [skill_dir / "SKILL.md", *sorted(skill_dir.glob("references/*.md"))]
+        for text_path in text_paths:
+            skill_text = text_path.read_text()
+            for heading in REMOVED_SECTION_HEADINGS:
+                assert heading not in skill_text, f"{skill_id} keeps {heading}"
+            references = set(SKILL_REFERENCE_PATTERN.findall(skill_text))
+            assert references <= {"internal-github"}, (
+                f"{text_path.name} references {sorted(references)}"
+            )
+            assert "handoff" not in skill_text.lower(), (
+                f"{text_path.name} still mentions handoffs"
+            )
 
 
 def test_inventory_lists_only_the_canonical_internal_github_bundle() -> None:

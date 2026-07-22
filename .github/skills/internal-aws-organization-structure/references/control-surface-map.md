@@ -21,7 +21,7 @@ Use this reference when turning a structural AWS question into the right control
 
 | Need | Use first | Notes |
 | --- | --- | --- |
-| Shape preventive boundaries across many accounts | OU design plus `internal-aws-governance` | Keep the structure and the guardrail choice separate |
+| Shape preventive boundaries across many accounts | OU design | Keep the structure choice here and treat the guardrail mechanism as a separate decision |
 | Design a central operating account for an AWS service | Delegated admin placement | Use management account only when AWS requires it |
 | Roll out a baseline stack across many accounts | StackSets topology | Keep global-resource blast radius explicit |
 | Separate finance oversight from platform execution | payer and management responsibility split | Make the ownership model explicit |

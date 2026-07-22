@@ -7,19 +7,14 @@ description: Use when designing, implementing, refactoring, or reviewing AWS Lam
 
 Owns AWS Lambda handler, trigger, packaging, retry, and cold-start behavior after the AWS platform direction is chosen.
 
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
+
 ## When to use
 
 - Implementing or reviewing Lambda handlers in Python, Node.js, or TypeScript.
 - Designing API Gateway, Function URL, or other HTTP-triggered request/response handling.
 - Designing SQS-triggered batch processing, retry, DLQ, or partial-batch-failure flows.
 - Packaging, dependency, cold-start, VPC, or runtime-configuration choices specific to Lambda.
-
-## When not to use
-
-- Routing is unclear under material routing uncertainty, or the problem is still strategic AWS decision support → `internal-aws`.
-- The main problem is IAM, SCP, trust, or organization-structure design → `internal-aws-governance`.
-- The next need is operational evidence, rollout validation, monitoring, or DR validation → `internal-aws-operations`.
-- The task is generic Python or Node.js module design with no Lambda behavior in scope.
 
 ## Core guidance
 
@@ -43,13 +38,6 @@ Owns AWS Lambda handler, trigger, packaging, retry, and cold-start behavior afte
 Load `references/examples.md` for minimal handler patterns and event-source checklists.
 Load `references/sharp-edges.md` when diagnosing cold starts, VPC latency, retry storms, response-shape mismatches, or file-ingest recursion.
 Load `references/common-mistakes.md` for the full mistake table.
-
-## Handoffs
-
-| To | When |
-|---|---|
-| `internal-aws-governance` | next question is IAM, trust, queue policy, or another guardrail design concern |
-| `internal-aws-operations` | next question is rollout validation, monitoring, evidence, or recovery proof |
 
 ## Validation
 

@@ -5,17 +5,11 @@ description: Use when the user needs Google Cloud governance guidance for IAM op
 
 # Internal GCP Governance
 
-## Handoffs
-
-| To | When |
-|---|---|
-| `internal-gcp` | material routing uncertainty prevents selecting a primary GCP specialist |
-| `internal-gcp-organization-structure` | where a capability should live |
-| `internal-gcp-operations` | preflight, reporting, evidence after design |
-
 Use this skill when the next need is to define or review Google Cloud identity, access, and guardrail decisions.
 
 This skill owns governance logic after the broad structure is known. It helps separate org or folder guardrails from project-level grants and keeps permission decisions auditable.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
 
 ## When to use
 
@@ -23,13 +17,6 @@ This skill owns governance logic after the broad structure is known. It helps se
 - The user needs workload identity federation or service account boundary guidance.
 - The user needs Org Policy, inheritance, or security-guardrail guidance.
 - The user needs a review of guardrail design, exceptions, or access governance.
-
-## When not to use
-
-- The main problem is org, folder, project, or Shared VPC layout.
-- The request is materially ambiguous and no primary GCP owner can be named → `internal-gcp`.
-- The main problem is monitoring, reporting, backup, inventory, or post-rollout validation.
-- The task is implementation-only.
 
 ## Main domains covered
 
@@ -89,4 +76,4 @@ For broader asks, return:
 - Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains workload identity.
 - Confirm service-account and human-access boundaries are explicit when access crosses project or folder boundaries.
 - Confirm staged rollout validation is named before high-blast-radius Org Policy or IAM changes.
-- Confirm the answer says when operational proof should move to `internal-gcp-operations`.
+- Confirm out-of-scope needs, such as operational proof or structure placement, are identified as outside this lane instead of being answered here.

@@ -5,17 +5,11 @@ description: Use when the user needs Google Cloud operational guidance for monit
 
 # Internal GCP Operations
 
-## Handoffs
-
-| To | When |
-|---|---|
-| `internal-gcp` | material routing uncertainty prevents selecting a primary GCP specialist |
-| `internal-gcp-organization-structure` | placement questions |
-| `internal-gcp-governance` | new IAM or Org Policy design |
-
 Use this skill when the next need is to validate, observe, or operationalize a GCP platform decision.
 
 This skill owns the operational side of the platform: monitoring, evidence, inventory, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
 
 ## When to use
 
@@ -24,14 +18,6 @@ This skill owns the operational side of the platform: monitoring, evidence, inve
 - The user needs asset inventory, reporting, or export guidance.
 - The user needs preflight or post-rollout validation patterns.
 - The user needs operational guidance for Cloud Run or Cloud Functions after the broader GCP structure and governance choices are already settled.
-
-## When not to use
-
-- The request is materially ambiguous and no primary GCP owner can be named → `internal-gcp`.
-- The main problem is still choosing the high-level direction.
-- The main problem is org, folder, project, or Shared VPC structure.
-- The main problem is IAM, workload identity, service account, or Org Policy design.
-- The task is a narrow implementation change with no operational design question.
 
 ## Main domains covered
 
@@ -84,7 +70,7 @@ Until a dedicated GCP serverless owner is justified by real usage, keep Cloud Ru
 | Treating monitoring as proof that restore or recovery works | Healthy metrics do not prove recovery viability | Keep monitoring evidence, backup proof, and restore proof as separate lines |
 | Skipping preflight for high-blast-radius rollout | IAM, Org Policy, or Shared VPC regressions surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
 | Reporting only control intent without operational evidence | The platform appears compliant without proof that it works | Record what Monitoring, Logging, asset inventory, or recovery exercises actually showed |
-| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Org Policy or IAM design in `internal-gcp-governance` and validate it here |
+| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Org Policy or IAM design out of the validation answer and validate the chosen design here |
 | Giving a DR answer without making the business criticality assumption visible | Recovery guidance can be overbuilt or incomplete | State the assumed criticality, RTO, or RPO before recommending the evidence path |
 | Treating one successful rollout wave as proof for all folders or projects | Wider inheritance or network paths can still fail differently | Validate the first safe unit and widen only after recording real evidence |
 

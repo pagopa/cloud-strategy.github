@@ -5,18 +5,11 @@ description: Use when the user needs Azure monitoring and logging posture, backu
 
 # Internal Azure Operations
 
-## Handoffs
-
-| To | When |
-|---|---|
-| `internal-azure` | material routing uncertainty prevents selecting a primary Azure specialist |
-| `internal-azure-organization-structure` | placement questions |
-| `internal-azure-governance` | new RBAC or Policy design |
-| `awesome-copilot-azure-resource-health-diagnose` | per-resource health diagnosis depth |
-
 Use this skill when the next need is to validate, observe, or operationalize an Azure platform decision.
 
 This skill owns the operational side of the platform: monitoring, evidence, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-azure`.
 
 ## When to use
 
@@ -24,13 +17,6 @@ This skill owns the operational side of the platform: monitoring, evidence, pref
 - The user needs Azure Monitor, Log Analytics, backup, restore, or DR validation guidance.
 - The user needs preflight or post-rollout validation patterns.
 - The user needs reporting, export, compliance evidence, or operational proof.
-
-## When not to use
-
-- The request is materially ambiguous and no primary Azure owner can be named → `internal-azure`.
-- The main problem is management-group, landing-zone, or subscription structure.
-- The main problem is RBAC, managed identity, PIM, or Policy design.
-- The task is a narrow implementation change with no operational design question.
 
 ## Main domains covered
 
@@ -81,7 +67,7 @@ For broader asks, return:
 | Treating monitoring as proof that restore or recovery works | Healthy dashboards do not prove recovery viability | Keep monitoring evidence, backup proof, and restore proof as separate lines |
 | Skipping preflight for high-blast-radius rollout | Policy, identity, or connectivity failures surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
 | Reporting only control intent without operational evidence | The platform appears compliant without proof that it works | Record what Azure Monitor, Log Analytics, backup, or compliance signals actually showed |
-| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Policy or RBAC design in `internal-azure-governance` and validate it here |
+| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Policy or RBAC design out of the validation answer and validate the chosen design here |
 | Giving a DR answer without making the business criticality assumption visible | Recovery guidance can be overbuilt or incomplete | State the assumed criticality, RTO, or RPO before recommending the validation path |
 | Treating one successful rollout wave as proof for all subscriptions or regions | Wider inheritance, network, or residency paths can still fail differently | Validate the first safe unit and widen only after recording real evidence |
 

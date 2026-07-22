@@ -1,18 +1,15 @@
 ---
 name: internal-github-governance
-description: Use when the user needs GitHub guardrail or permission guidance — rulesets, branch protection, repository or organization permissions, GitHub Apps permissions, Actions permissions, OIDC posture, secret handling, environments, or Copilot governance — after the broad operating model is known. Do not use for enterprise, org, or repo-model decision framing; route those to internal-github.
+description: Use when the user needs GitHub guardrail or permission guidance — rulesets, branch protection, repository or organization permissions, GitHub Apps permissions, Actions permissions, OIDC posture, secret handling, environments, or Copilot governance — after the broad operating model is known. Do not use for enterprise, org, or repo-model decision framing.
 ---
 
 # Internal GitHub Governance
 
-## Referenced skills
-
-- `internal-github`: route back under material routing uncertainty when enterprise, org, repo, or operating-model direction is still unsettled and the owning specialist is not yet clear.
-- `internal-github-operations`: route runner health, reporting, audit evidence, drift checks, or post-rollout validation.
-
 Use this skill when the next need is to define or review GitHub permissions, guardrails, and policy decisions.
 
 This skill owns governance logic after the broad operating model is known. It helps separate enterprise or org guardrails from repo or environment grants and keeps permission decisions auditable.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-github`.
 
 ## When to use
 
@@ -20,12 +17,6 @@ This skill owns governance logic after the broad operating model is known. It he
 - The user needs GitHub Apps permission, Actions permission, or OIDC posture guidance.
 - The user needs secret, environment, or Copilot governance guidance.
 - The user needs a review of guardrail design, exceptions, or access governance.
-
-## When not to use
-
-- The main problem is enterprise, org, repo, or mono-repo versus multi-repo decision framing.
-- The main problem is runner health, reporting, audit evidence, or post-rollout validation.
-- The task is implementation-only.
 
 ## Main domains covered
 
@@ -72,13 +63,6 @@ For broader asks, return:
 - exception or blast-radius note
 - what should be validated before rollout
 
-## Relationship to adjacent skills
-
-- `internal-github`
-  Use first when the user still needs option framing, repo-model tradeoffs, or operating-model decisions.
-- `internal-github-operations`
-  Use when the next need is preflight, audit evidence, drift checks, or validation after the governance design is chosen.
-
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
@@ -96,5 +80,5 @@ For broader asks, return:
 - Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains automation.
 - Confirm trust boundaries are explicit for Apps, Actions, OIDC, secrets, or Copilot policy choices.
 - Confirm staged rollout validation is named before high-blast-radius ruleset, permission, or environment changes.
-- Confirm the answer says when operational proof should move to `internal-github-operations`.
+- Confirm out-of-scope needs, such as operational proof or operating-model framing, are identified as outside this lane instead of being answered here.
 - Before enabling CODEOWNERS-backed review enforcement in a consumer repository, confirm no template placeholder owner remains.
