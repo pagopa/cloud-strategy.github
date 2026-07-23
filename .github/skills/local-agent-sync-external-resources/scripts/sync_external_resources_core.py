@@ -12,6 +12,9 @@ from typing import Literal
 import yaml
 
 
+_COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+
+
 @dataclass(frozen=True)
 class ManagedAsset:
     source: str
@@ -25,6 +28,7 @@ class ManagedSource:
     source_id: str
     repository: str
     ref: str
+    advertised_ref: str | None
     assets: tuple[ManagedAsset, ...]
 
 
@@ -60,6 +64,23 @@ def _require_non_empty_string(value: object, field: str) -> str:
     return value.strip()
 
 
+def _optional_non_empty_string(value: object, field: str) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string when provided.")
+    return value.strip()
+
+
+def _require_commit_object_id(value: str, field: str) -> str:
+    stripped = value.strip()
+    if not _COMMIT_OBJECT_ID_RE.match(stripped):
+        raise ValueError(
+            f"{field} must be a full lowercase commit object ID, got {stripped!r}."
+        )
+    return stripped
+
+
 def load_managed_resources(path: Path) -> ManagedResources:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("version") != 1:
@@ -89,8 +110,15 @@ def load_managed_resources(path: Path) -> ManagedResources:
         repository = _require_non_empty_string(
             raw_source.get("repository"), f"source {source_id} repository"
         )
-        ref = _require_non_empty_string(
-            raw_source.get("ref"), f"source {source_id} ref"
+        ref = _require_commit_object_id(
+            _require_non_empty_string(
+                raw_source.get("ref"), f"source {source_id} ref"
+            ),
+            f"source {source_id} ref",
+        )
+        advertised_ref = _optional_non_empty_string(
+            raw_source.get("advertised_ref"),
+            f"source {source_id} advertised_ref",
         )
         raw_assets = raw_source.get("assets")
         if not isinstance(raw_assets, list) or not raw_assets:
@@ -139,6 +167,7 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 source_id=source_id,
                 repository=repository,
                 ref=ref,
+                advertised_ref=advertised_ref,
                 assets=tuple(assets),
             )
         )
@@ -265,6 +294,27 @@ def collect_missing_upstream_paths(
     return tuple(missing)
 
 
+def validate_prepared_sources(
+    resources: ManagedResources,
+    sources_root: Path,
+) -> None:
+    missing: list[str] = []
+    for source in resources.sources:
+        metadata = (
+            sources_root / source.source_id / ".external-resource-source.tsv"
+        )
+        if not metadata.exists():
+            missing.append(source.source_id)
+    if missing:
+        raise ValueError(
+            "Missing prepared source metadata: "
+            + ", ".join(missing)
+            + ". Expected prepared sources under "
+            + sources_root.as_posix()
+            + ". Run prepare before audit/plan/apply."
+        )
+
+
 def materialize_candidate(
     resources: ManagedResources,
     workspace: Path,
@@ -277,6 +327,8 @@ def materialize_candidate(
 
     if sources_root is None:
         sources_root = workspace / "sources"
+
+    validate_prepared_sources(resources, sources_root)
 
     missing = collect_missing_upstream_paths(resources, sources_root)
     if missing:

@@ -29,10 +29,19 @@ from sync_external_resources_core import (  # noqa: E402
     validate_external_workspace,
     validate_override_patches,
 )
+from sync_output_core import (  # noqa: E402
+    OutputRecord,
+    render_tsv,
+)
 
 DEFAULT_MANIFEST = (
     SCRIPT_DIR.parent / "references" / "managed-resources.yaml"
 ).as_posix()
+from source_prepare_core import (  # noqa: E402
+    PrepareSourceResult,
+    prepare_sources,
+)
+
 DEFAULT_OVERRIDES = (
     SCRIPT_DIR.parent / "references" / "imported-asset-overrides.yaml"
 ).as_posix()
@@ -40,7 +49,7 @@ DEFAULT_OVERRIDES = (
 
 @dataclass(frozen=True)
 class SyncOutcome:
-    mode: Literal["audit", "plan", "apply"]
+    mode: Literal["prepare", "audit", "plan", "apply"]
     workspace: str | None
     managed_assets: int
     changed_paths: tuple[str, ...]
@@ -48,9 +57,10 @@ class SyncOutcome:
     validations: tuple[str, ...]
     blockers: tuple[str, ...]
     repository_changed: bool
+    source_results: tuple[object, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        result: dict[str, object] = {
             "mode": self.mode,
             "workspace": self.workspace,
             "managed_assets": self.managed_assets,
@@ -67,13 +77,136 @@ class SyncOutcome:
             "blockers": list(self.blockers),
             "repository_changed": self.repository_changed,
         }
+        if self.source_results:
+            result["source_results"] = [
+                {
+                    "source_id": r.source_id,
+                    "repository": r.repository,
+                    "ref": r.ref,
+                    "cache_status": r.cache_status,
+                    "fetch_strategy": r.fetch_strategy,
+                    "materialized_files": r.materialized_files,
+                    "materialized_bytes": r.materialized_bytes,
+                    "cache_bytes_added": r.cache_bytes_added,
+                    "duration_ms": r.duration_ms,
+                }
+                for r in self.source_results
+            ]
+        return result
+
+    def to_records(self) -> tuple[OutputRecord, ...]:
+        records: list[OutputRecord] = []
+        records.append(
+            OutputRecord("summary", "mode", "ok", self.mode)
+        )
+        records.append(
+            OutputRecord(
+                "summary", "managed_assets", "ok", str(self.managed_assets)
+            )
+        )
+        records.append(
+            OutputRecord(
+                "summary", "changed_paths", "ok", str(len(self.changed_paths))
+            )
+        )
+        records.append(
+            OutputRecord(
+                "summary",
+                "override_results",
+                "ok",
+                str(len(self.override_results)),
+            )
+        )
+        records.append(
+            OutputRecord(
+                "summary",
+                "repository_changed",
+                "ok",
+                str(self.repository_changed).lower(),
+            )
+        )
+        if self.workspace is not None:
+            records.append(
+                OutputRecord("summary", "workspace", "ok", self.workspace)
+            )
+        for validation in self.validations:
+            records.append(
+                OutputRecord("validation", validation, "ok", "")
+            )
+        for blocker in self.blockers:
+            records.append(
+                OutputRecord("blocker", blocker, "fail", "")
+            )
+        for path in self.changed_paths:
+            records.append(
+                OutputRecord("change", path, "ok", "")
+            )
+        for result in self.override_results:
+            records.append(
+                OutputRecord(
+                    "override",
+                    result.override_id,
+                    result.status,
+                    result.target_path,
+                )
+            )
+        for sr in self.source_results:
+            records.append(
+                OutputRecord(
+                    "source",
+                    sr.source_id,
+                    sr.cache_status,
+                    sr.ref,
+                )
+            )
+            records.append(
+                OutputRecord(
+                    "metric",
+                    sr.source_id,
+                    "materialized_files",
+                    str(sr.materialized_files),
+                )
+            )
+            records.append(
+                OutputRecord(
+                    "metric",
+                    sr.source_id,
+                    "materialized_bytes",
+                    str(sr.materialized_bytes),
+                )
+            )
+            records.append(
+                OutputRecord(
+                    "metric",
+                    sr.source_id,
+                    "cache_bytes_added",
+                    str(sr.cache_bytes_added),
+                )
+            )
+            records.append(
+                OutputRecord(
+                    "metric",
+                    sr.source_id,
+                    "duration_ms",
+                    str(sr.duration_ms),
+                )
+            )
+            records.append(
+                OutputRecord(
+                    "validation",
+                    sr.source_id,
+                    "fetch_strategy",
+                    sr.fetch_strategy,
+                )
+            )
+        return tuple(records)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Audit, plan, or apply declared external resource refreshes."
     )
-    parser.add_argument("mode", choices=("audit", "plan", "apply"))
+    parser.add_argument("mode", choices=("prepare", "audit", "plan", "apply"))
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--workspace")
     parser.add_argument("--manifest", default=DEFAULT_MANIFEST)
@@ -83,7 +216,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Use prepared source checkouts instead of network fetch.",
     )
     parser.add_argument("--allow-dirty", action="store_true")
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--format", choices=("text", "tsv", "json"), default="text")
+    parser.add_argument(
+        "--rebuild-cache",
+        action="store_true",
+        help="Force rebuild of the Git object cache (prepare mode only).",
+    )
     return parser
 
 
@@ -261,6 +399,35 @@ def _apply_candidate_patch(
     )
 
 
+def _prepare(
+    repo_root: Path,
+    workspace: Path,
+    resources: ManagedResources,
+    rebuild_cache: bool,
+) -> SyncOutcome:
+    validate_external_workspace(repo_root, workspace)
+    sources_root = workspace / "sources"
+
+    results = prepare_sources(
+        resources,
+        workspace,
+        sources_root,
+        rebuild_cache=rebuild_cache,
+    )
+
+    return SyncOutcome(
+        mode="prepare",
+        workspace=str(workspace),
+        managed_assets=len(resources.assets),
+        changed_paths=(),
+        override_results=(),
+        validations=("manifest-pins-validated", "sources-prepared"),
+        blockers=(),
+        repository_changed=False,
+        source_results=results,
+    )
+
+
 def _audit(
     repo_root: Path,
     resources: ManagedResources,
@@ -412,11 +579,26 @@ def run(argv: Sequence[str] | None = None) -> int:
 
     resources = load_managed_resources(manifest_path)
 
-    if args.mode == "audit":
+    if args.mode == "prepare":
+        if not args.workspace:
+            parser.error("prepare mode requires --workspace")
+        if args.rebuild_cache:
+            pass
+        outcome = _prepare(
+            repo_root,
+            Path(args.workspace).resolve(),
+            resources,
+            args.rebuild_cache,
+        )
+    elif args.mode == "audit":
+        if args.rebuild_cache:
+            parser.error("--rebuild-cache is only valid for prepare mode")
         outcome = _audit(repo_root, resources, overrides_path)
     elif args.mode == "plan":
         if not args.workspace:
             parser.error("plan mode requires --workspace")
+        if args.rebuild_cache:
+            parser.error("--rebuild-cache is only valid for prepare mode")
         outcome = _plan(
             repo_root,
             Path(args.workspace).resolve(),
@@ -427,6 +609,8 @@ def run(argv: Sequence[str] | None = None) -> int:
     elif args.mode == "apply":
         if not args.workspace:
             parser.error("apply mode requires --workspace")
+        if args.rebuild_cache:
+            parser.error("--rebuild-cache is only valid for prepare mode")
         outcome = _apply(
             repo_root,
             Path(args.workspace).resolve(),
@@ -440,10 +624,14 @@ def run(argv: Sequence[str] | None = None) -> int:
 
     if args.format == "json":
         print(json.dumps(outcome.to_dict(), indent=2))
+    elif args.format == "tsv":
+        print(render_tsv(outcome.to_records()), end="")
     else:
         print(_format_text(outcome))
 
     if args.mode == "audit":
+        return 0
+    if args.mode == "prepare":
         return 0
     if outcome.blockers:
         return 2

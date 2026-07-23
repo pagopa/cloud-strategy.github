@@ -62,6 +62,22 @@ def git_repo(tmp_path: Path) -> Path:
     return repo
 
 
+def _write_source_metadata(sources_root: Path, source: ManagedSource) -> None:
+    source_dir = sources_root / source.source_id
+    source_dir.mkdir(parents=True, exist_ok=True)
+    upstream_paths = sorted(asset.upstream for asset in source.assets)
+    digest = hashlib.sha256(
+        ",".join(upstream_paths).encode("utf-8")
+    ).hexdigest()
+    tsv = (
+        f"source_id\trepository\tref\tpaths_sha256\n"
+        f"{source.source_id}\t{source.repository}\t{source.ref}\t{digest}\n"
+    )
+    (source_dir / ".external-resource-source.tsv").write_text(
+        tsv, encoding="utf-8"
+    )
+
+
 def _example_asset(local: str = ".github/skills/example") -> ManagedAsset:
     return ManagedAsset(
         source="test",
@@ -82,6 +98,7 @@ def _superpowers_resources() -> ManagedResources:
         source_id="obra-superpowers",
         repository="https://github.com/obra/superpowers.git",
         ref="abc123",
+        advertised_ref=None,
         assets=(asset,),
     )
     replacement = TextReplacement(
@@ -163,7 +180,8 @@ def test_materialize_candidate_copies_upstream_to_local(
     tmp_path: Path,
 ) -> None:
     workspace = tmp_path / "workspace"
-    source_checkout = workspace / "sources" / "test-source" / "skills" / "example"
+    sources_root = workspace / "sources"
+    source_checkout = sources_root / "test-source" / "skills" / "example"
     source_checkout.mkdir(parents=True)
     (source_checkout / "SKILL.md").write_text(
         "---\nname: upstream-name\n---\n", encoding="utf-8"
@@ -178,9 +196,11 @@ def test_materialize_candidate_copies_upstream_to_local(
     source = ManagedSource(
         source_id="test-source",
         repository="https://example.com/repo.git",
-        ref="abc",
+        ref="a" * 40,
+        advertised_ref=None,
         assets=(asset,),
     )
+    _write_source_metadata(sources_root, source)
     resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
 
     candidate = tmp_path / "candidate"
@@ -348,6 +368,7 @@ def test_build_candidate_patch_detects_repo_vs_candidate_diff(
                 source_id="test-source",
                 repository="https://example.com/repo.git",
                 ref="abc",
+                advertised_ref=None,
                 assets=(asset,),
             ),
         ),
@@ -381,9 +402,11 @@ def test_materialize_candidate_uses_explicit_source_root(
     source = ManagedSource(
         source_id="test-source",
         repository="https://example.com/repo.git",
-        ref="abc",
+        ref="a" * 40,
+        advertised_ref=None,
         assets=(asset,),
     )
+    _write_source_metadata(external_sources, source)
     resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
 
     candidate = tmp_path / "candidate"
@@ -416,21 +439,24 @@ def test_materialize_candidate_reports_all_missing_upstreams(
         local=".github/skills/b",
         canonical_name="b",
     )
+    source_a = ManagedSource(
+        source_id="src-a",
+        repository="https://example.com/a.git",
+        ref="a" * 40,
+        advertised_ref=None,
+        assets=(asset_a,),
+    )
+    source_b = ManagedSource(
+        source_id="src-b",
+        repository="https://example.com/b.git",
+        ref="b" * 40,
+        advertised_ref=None,
+        assets=(asset_b,),
+    )
+    _write_source_metadata(sources_root, source_a)
+    _write_source_metadata(sources_root, source_b)
     resources = ManagedResources(
-        sources=(
-            ManagedSource(
-                source_id="src-a",
-                repository="https://example.com/a.git",
-                ref="abc",
-                assets=(asset_a,),
-            ),
-            ManagedSource(
-                source_id="src-b",
-                repository="https://example.com/b.git",
-                ref="def",
-                assets=(asset_b,),
-            ),
-        ),
+        sources=(source_a, source_b),
         replacements=(),
         watchlist=(),
     )
@@ -458,12 +484,8 @@ def test_materialize_candidate_reports_expected_source_root(tmp_path: Path) -> N
         materialize_candidate(resources, workspace, candidate)
 
     message = str(excinfo.value)
-    assert "Missing upstream paths:" in message
-    assert (workspace / "sources").as_posix() in message
-    assert (
-        "Prepare the missing source checkout under that root or pass --source-root."
-        in message
-    )
+    assert "Missing prepared source metadata:" in message
+    assert "Run prepare before audit/plan/apply." in message
 
 
 def test_load_overrides_rejects_missing_patch_file(tmp_path: Path) -> None:

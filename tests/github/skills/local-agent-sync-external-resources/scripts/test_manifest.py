@@ -1,3 +1,4 @@
+import re
 import sys
 from pathlib import Path
 
@@ -18,9 +19,118 @@ from sync_external_resources_core import (  # noqa: E402
 )
 
 
+_COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+
+_FULL_SHA40 = "a" * 40
+_FULL_SHA40_ALT = "b" * 40
+
+
 @pytest.fixture
 def repo_root() -> Path:
     return REPO_ROOT
+
+
+def _write_manifest(tmp_path: Path, body: str) -> Path:
+    path = tmp_path / "managed-resources.yaml"
+    path.write_text(body, encoding="utf-8")
+    return path
+
+
+def test_live_manifest_refs_are_full_lowercase_object_ids(repo_root: Path) -> None:
+    manifest = load_managed_resources(
+        repo_root
+        / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
+    )
+    for source in manifest.sources:
+        assert _COMMIT_OBJECT_ID_RE.match(source.ref), (
+            f"source {source.source_id} ref {source.ref!r} "
+            f"is not a full lowercase commit object ID"
+        )
+
+
+def test_manifest_accepts_optional_advertised_ref(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    advertised_ref: refs/heads/main
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        )
+    )
+    assert manifest.sources[0].advertised_ref == "refs/heads/main"
+
+
+def test_manifest_rejects_short_ref(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="full lowercase commit object ID"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                """\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: abc123
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_branch_name_ref(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="full lowercase commit object ID"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                """\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: main
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_uppercase_sha_ref(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="full lowercase commit object ID"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {"A" * 40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+            )
+        )
 
 
 def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
@@ -73,12 +183,12 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
 def test_manifest_rejects_duplicate_local_paths(tmp_path: Path) -> None:
     path = tmp_path / "managed-resources.yaml"
     path.write_text(
-        """\
+        f"""\
 version: 1
 sources:
   source:
     repository: https://github.com/example/repo.git
-    ref: abc123
+    ref: {_FULL_SHA40}
     assets:
       - upstream: skills/one
         local: .github/skills/example
