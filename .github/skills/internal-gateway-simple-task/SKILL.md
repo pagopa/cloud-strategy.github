@@ -138,6 +138,7 @@ Keep the implementation posture simple:
 - `scripts/resolve_simple_task.py gate`: returns a deterministic gate outcome plus a local Readiness Brief.
 - `scripts/resolve_simple_task.py claim`: returns evidence requirements for strong status claims.
 - `scripts/suggest_support_skills.py`: returns generic method hints when the next move is still noisy.
+- Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
 
 ## Validation
 

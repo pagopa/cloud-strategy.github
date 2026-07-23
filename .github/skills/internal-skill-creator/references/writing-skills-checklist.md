@@ -75,6 +75,16 @@ This is a local distilled checklist informed by external skill-authoring guidanc
 - When a referenced-skill rule changes, compare the touched skill with nearby skills that cite it or that it cites. Keep optional owners lazy and on-demand unless the active contract explicitly requires loading.
 - Prefer one strong example over several repetitive ones.
 
+## Script output contract (evidence-based)
+
+Apply these rules when a skill introduces or revises scripts, CLIs, or deterministic automation:
+
+- Default to `text` for short operator-facing summaries; use `json` for nested or machine-consumed output; reserve `tsv`/`csv` for large flat tables where token cost is material.
+- Do not migrate output formats by default: no first-party source (OpenAI, Anthropic, agentskills.io) ranks TSV above JSON; the spec lists JSON, CSV, and TSV as equivalent structured options.
+- Put data on stdout and diagnostics on stderr; keep output bounded with summaries, `--offset`, or `--output` options.
+- Require documented `--help`, meaningful exit codes, and scripts that solve their own errors when the failure is deterministic.
+- Sources: `agentskills.io/skill-creation/using-scripts.md`, `developers.openai.com/codex/build-skills`, OpenAI curated skill `gh-fix-ci`.
+
 ## Test posture
 
 - Run a baseline scenario without the skill or before the edit and capture the failure.
@@ -85,6 +95,9 @@ This is a local distilled checklist informed by external skill-authoring guidanc
 - When the bundle owns runnable automation, validate the bundled entrypoint directly and validate any repository wrapper separately.
 - Verify that every listed referenced skill exists or is explicitly marked as external/on-demand, and that no later skill reference is missing from the index.
 - Verify that related skills use compatible referenced-skill wording and do not turn optional owners into preload instructions.
+- Verify bundle hygiene: no `__pycache__/`, stale `.pyc`, or other build artifacts inside the touched bundle.
+- Verify `agents/openai.yaml` consistency: it must not duplicate top-level `name:` or `description:` keys that can drift from the `SKILL.md` frontmatter, which is the single source of truth.
+- Scan the touched bundle for contradictory or ambiguous rules: GPT-5-family models follow instructions literally and degrade on conflicting instructions (OpenAI GPT-5 prompting guide).
 
 ## Skill-type checks
 

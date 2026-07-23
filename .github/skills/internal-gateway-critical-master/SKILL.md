@@ -95,6 +95,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 - Reuse `fixtures/critical_output_valid.md` and sibling fixture samples instead of repeating long inline payloads.
 - Follow `references/maintenance-guidance.md` for fixture reuse and cache-aware search discipline.
 - Keep this bundle self-contained: do not require instructions, examples, or enforcement rules from outside this directory.
+- Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
 
 ## Outcome meanings
 
