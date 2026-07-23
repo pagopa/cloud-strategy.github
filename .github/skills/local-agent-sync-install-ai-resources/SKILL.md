@@ -20,6 +20,8 @@ bundle directly.
   `~/.agents/skills/`.
 - Root `AGENTS.md` is projected to `~/.agents/AGENTS.md` as a managed copy.
   Optional repository-local rules in `AGENTS.local.md` are not synchronized.
+- Repository agents under `.github/agents/*.agent.md` are discovered
+  automatically except files whose name starts with `local-`.
 - Copilot agents are absolute links back to `.github/agents/`; Codex and
   OpenCode agents retain their translated copy paths.
 - Home-only skills are unmanaged and preserved. This includes catalog-excluded
