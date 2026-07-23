@@ -41,6 +41,7 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
 
 - `AGENTS.md` owns stable repository-wide policy, precedence, tactical defaults,
   ownership boundaries, and routing anchors.
+- `.github/INVENTORY.md` is the exact live inventory of the GitHub Copilot catalog.
 - Do not put long operational procedures, detailed checklists, detailed
   file-shape recipes, command playbooks, or tool-specific workflows here.
 - Short, globally safe best-practice defaults may live here when they improve

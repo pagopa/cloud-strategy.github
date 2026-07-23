@@ -29,8 +29,20 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 45
+    assert len(manifest.assets) == 46
     assert len(manifest.watchlist) == 13
+    assert {
+        (source.repository, asset.upstream, asset.local, asset.canonical_name)
+        for source in manifest.sources
+        for asset in source.assets
+    } >= {
+        (
+            "https://github.com/atlassian/atlassian-mcp-server.git",
+            "skills/search-company-knowledge",
+            ".github/skills/search-company-knowledge",
+            "search-company-knowledge",
+        )
+    }
     assert {
         item.local for item in manifest.assets if item.source == "obra-superpowers"
     } == {

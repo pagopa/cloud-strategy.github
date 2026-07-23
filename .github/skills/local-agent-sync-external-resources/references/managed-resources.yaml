@@ -175,6 +175,13 @@ sources:
       - upstream: skills/code-review-and-quality
         local: .github/skills/addyosmani-code-review-and-quality
         canonical_name: addyosmani-code-review-and-quality
+  atlassian-mcp-server:
+    repository: https://github.com/atlassian/atlassian-mcp-server.git
+    ref: f22e7075136a62baa7c10200a64884f83bf3ebe1
+    assets:
+      - upstream: skills/search-company-knowledge
+        local: .github/skills/search-company-knowledge
+        canonical_name: search-company-knowledge
 normalizations:
   - source: obra-superpowers
     from: docs/superpowers
