@@ -49,6 +49,18 @@ stops after the delegated outcome.
 Preserve handoff quality with targeted rereads only when the delegation has a
 real evidence gap.
 
+## No-Commit Rule
+
+- The skill must never run `git add`, `git commit`, `git push`, or any other
+  git mutation while creating, persisting, or handing off plans or specs.
+  Retained artifacts stay uncommitted under `tmp/superpowers/`; the user
+  reviews and commits them personally.
+- This rule is mandatory. The user may bypass it only with an explicit
+  request for commit help in the current task; state the bypass in the
+  outcome summary.
+- Keep this rule distinct from the Contract delivery rule: this rule governs
+  the skill's own git actions, while the delivery rule governs plan content.
+
 ## Plan Authoring Discipline
 
 - Owner-first: before the delegated plan adds a task, confirm no existing
@@ -68,4 +80,5 @@ not enforce.
 ## Validation
 
 - Confirm the delegated plan carries ordered tasks, concrete file targets, clear edit intent, validation commands or explicit gaps, no duplicate-owner or speculative-scope drift, and no direct commit instructions unless the user explicitly asked for commit help.
+- Confirm no git mutation ran while producing the writing outcome and that retained artifacts remain uncommitted, unless the user explicitly asked for commit help.
 - `git diff --check`
