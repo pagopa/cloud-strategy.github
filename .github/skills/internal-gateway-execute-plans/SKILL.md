@@ -54,6 +54,22 @@ repo-local start, task-transition, stop, and status-file policy;
 10. Stop on scope drift, destructive action, owner conflict, missing validation path, human approval need, secret exposure risk, or repeated non-improving failures.
 11. Before final response or pause, replace any older sibling `<plan-basename>.*.md` status file for the same plan basename, then write exactly one sibling status file named `<plan-basename>.<STATUS>.md`.
 
+## No-Commit Rule
+
+- The skill must never run `git add`, `git commit`, `git push`, `git merge`,
+  or any other git mutation while executing, pausing, or closing out a plan.
+  Executed changes stay uncommitted in the working tree; the user reviews and
+  commits them personally.
+- This rule is mandatory. The user may bypass it only with an explicit
+  request for commit help in the current task; state the bypass in the status
+  file and the final response.
+- If an approved plan contains `git add`, `git commit`, or `git push` steps,
+  skip them, record them as plan drift in the status file, and continue with
+  the remaining steps.
+- Do not run merge, push, or branch-cleanup actions from
+  `superpowers-finishing-a-development-branch` unless the user explicitly
+  chooses that action in the current task.
+
 ## Status closeout
 
 Supported statuses are `DONE`, `BLOCKED`, `PARTIAL`, and `NEEDS_REVIEW`.
