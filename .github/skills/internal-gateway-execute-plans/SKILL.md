@@ -88,3 +88,4 @@ Do not create `done-*`, `completion-report.md`, `evidence-envelope.md`, or `<STA
 - Confirm no live repository references point to removed bundle files.
 - `git diff --check`
 - Confirm simplification loads only from an explicitly authorizing plan task, preserves task scope, and reruns the same focused validation used for the baseline.
+- Confirm no git mutation ran during execution or closeout, plan commit steps were skipped and recorded as drift, and executed changes remain uncommitted, unless the user explicitly asked for commit help.

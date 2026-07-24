@@ -30,9 +30,10 @@ stops after the delegated outcome.
    clarification, redirect, or stop with a reason. Pass an explicit anti-scope
    and the relevant owners already identified in the preflight so the delegated
    plan avoids duplicate or speculative tasks at the source. Pass an explicit
-   delivery rule: the delegated plan must not tell the user to run `git add`,
-   `git commit`, or `git push`, and must not present committing changes as the
-   default next step unless the user explicitly asks for commit help. If the
+   delivery rule: the delegated plan must not contain `git add`, `git commit`,
+   or `git push` steps or instructions, and must not present committing
+   changes as the default next step unless the user explicitly asks for
+   commit help. If the
    delegated writing outcome persists a retained artifact, require timestamped local
    naming with four-digit 24-hour time: plans use
    `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md` and specs use
