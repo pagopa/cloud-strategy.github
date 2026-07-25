@@ -192,7 +192,8 @@ def detect_depth_keywords(prompt: str, explicit_keywords: list[str]) -> list[str
     found = set(explicit_keywords)
     lowered_prompt = prompt.lower()
     for keyword in DEPTH_KEYWORDS:
-        if re.search(rf"\b{re.escape(keyword)}\b", lowered_prompt):
+        explicit_prompt = rf"(?:/{re.escape(keyword)}\b|\b(?:depth|mode|gate)\s*[:=]\s*{re.escape(keyword)}\b|\b{re.escape(keyword)}\s+(?:gate|mode|workflow)\b)"
+        if re.search(explicit_prompt, lowered_prompt):
             found.add(keyword)
     return sorted(found)
 
@@ -337,8 +338,6 @@ def build_gate_decision(
     if missing_validation_evidence:
         reason_codes.append("validation-path-missing")
         blocking_reasons.append("validation-path-missing")
-    if validation_obvious and missing_validation_evidence:
-        reason_codes.append("validation-path-missing")
 
     if blocking_reasons:
         gate_outcome = "stop-with-reason"

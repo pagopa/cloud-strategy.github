@@ -7,7 +7,6 @@ description: Use when a repository-owned internal agent needs a consistent user-
 
 ## Referenced skills
 
-- `internal-gateway-simple-task`: source or target lane for concrete local follow-up work.
 - `internal-gateway-idea`: source lane when planning or scope definition is needed; target lane when planning or scope definition dominates.
 - `internal-gateway-critical-master`: source lane when assumption pressure-testing dominates; target lane when assumption pressure-testing dominates.
 - `internal-gateway-execute-plans`: target lane when approved retained-plan execution is the next step.
@@ -31,7 +30,5 @@ agents.
 
 | Current agent | When the boundary breaks | Recommend |
 | --- | --- | --- |
-| `internal-gateway-simple-task` | Planning or governance becomes dominant | `internal-gateway-idea` |
-| `internal-gateway-simple-task` | Assumption pressure-testing becomes dominant | `internal-gateway-critical-master` |
 | `internal-gateway-critical-master` | The next step is planning | `internal-gateway-idea` |
 | `internal-gateway-idea` | An approved retained plan is ready for execution | `internal-gateway-execute-plans` |

@@ -12,7 +12,7 @@ repo-only sync workflows.
 - `internal-gateway-review-code`: owns dedicated code-focused review for source, tests,
   scripts, build metadata, dependency metadata, and code diffs.
 - `internal-gateway-critical-master`: owns pressure testing.
-- `internal-gateway-simple-task`: owns concrete execution and approved retained-plan consumption.
+- `internal-gateway-simple-task`: owns concrete execution through one focused lane.
 
 ## Active Gateway Agents
 

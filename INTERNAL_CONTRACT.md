@@ -275,7 +275,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
   - `internal-gateway-idea`, `internal-gateway-review-generic`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
-  - retained execution stays separate: `internal-gateway-simple-task` consumes approved `compact` plans and `internal-gateway-execute-plans` consumes approved `extended` plans
+  - retained execution stays separate: approved retained plans are executed by `internal-gateway-execute-plans`
   - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
   - unclear target state and multiple credible paths are explicit planning triggers
   - `internal-gateway-codebase-improvement` is a manual-only specialist gateway outside the canonical gateway core; it must not become an implicit fallback, peer-dispatch target, or replacement for an existing gateway owner

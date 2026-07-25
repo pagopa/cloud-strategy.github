@@ -1,7 +1,6 @@
 ---
 name: internal-gateway-idea
 description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, and a spec-vs-plan recommendation before implementation planning.
-disable-model-invocation: true
 ---
 
 # Internal Gateway Idea
@@ -16,7 +15,7 @@ disable-model-invocation: true
 
 - `references/workflow.md`: authoritative state machine, Mermaid workflow,
   approval rules, routing stability, and scoped local validation lane for this bundle.
-- `scripts/audit_workflow.py`: marker-consistency validator; run via `python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py` or `make internal-gateway-idea-fast-check`.
+- `scripts/audit_workflow.py`: marker-consistency validator; run via `python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py`.
 - Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
 
 Lightweight repository-owned wrapper for idea shaping. Use `/superpowers-brainstorming` as the core workflow and add the local gates below. Loading `/superpowers-brainstorming` is an intentional, globally-resolvable exception to the bundle self-containment rule. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.

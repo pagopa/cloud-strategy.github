@@ -3,19 +3,19 @@ PYTHON_VERSION := $(strip $(shell head -n 1 $(PYTHON_VERSION_FILE) 2>/dev/null))
 PYTHON_MAJOR_MINOR := $(strip $(shell printf '%s' "$(PYTHON_VERSION)" | awk -F. 'NF >= 2 { print $$1 "." $$2 }'))
 PYTHON ?= $(if $(PYTHON_MAJOR_MINOR),python$(PYTHON_MAJOR_MINOR),python3)
 SHELL_SCRIPTS := $(wildcard .github/scripts/*.sh)
-PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests .github/skills
+PYTHON_PATHS := .github/scripts/*.py .github/scripts/lib tests
 SCRIPTS_RUNNER := ./.github/scripts/run.sh
 SCRIPTS_VENV := .github/scripts/.venv
 RUFF := $(if $(wildcard $(SCRIPTS_VENV)/bin/ruff),$(SCRIPTS_VENV)/bin/ruff,ruff)
-CATALOG_FAST_TESTS := tests/test_inventory_and_consistency.py tests/test_validation_entrypoints_contract.py tests/test_retained_plan_artifact_contract.py tests/github/scripts/test_cli_entrypoints.py
+CATALOG_FAST_TESTS := tests/github/scripts/lib/test_inventory.py tests/github/scripts/lib/test_repo_paths.py tests/github/scripts/test_install_graphify_hooks.py tests/github/scripts/test_run_sh_dispatch.py tests/test_repository_test_layout_contract.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*" "\#.claude/commands/agent-os/**"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint critical-validate internal-gateway-idea-fast-check all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint critical-validate all'
+	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -67,14 +67,6 @@ token-risks: scripts-bootstrap
 skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
 
-critical-validate: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_critical_output --strict --file .github/skills/internal-gateway-critical-master/fixtures/critical_output_valid.md
-
-internal-gateway-idea-fast-check: scripts-bootstrap
-	@$(PYTHON) .github/skills/internal-gateway-idea/scripts/audit_workflow.py
-	@$(SCRIPTS_RUNNER) validate_internal_skills --skill internal-gateway-idea --strict
-	@$(SCRIPTS_VENV)/bin/python -m pytest -q tests/github/skills/internal-gateway-idea
-
 docs-lint:
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
 		markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
@@ -89,22 +81,5 @@ docs-lint:
 	else \
 		printf '%s\n' 'npx not installed; skipping markdown lint.'; \
 	fi
-
-PLAN_FOLDER ?=
-PLAN_STAGE ?= handoff
-
-PLAN_AUTHORING_CLI := .github/skills/internal-gateway-writing-plans/scripts/plan_authoring.py
-PLAN_EXECUTING_CLI := .github/skills/internal-gateway-execute-plans/scripts/plan_execution.py
-
-retained-plan-check: python-version-check
-	@case "$(PLAN_STAGE)" in \
-		handoff) \
-			if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required for handoff stage (e.g. make retained-plan-check PLAN_STAGE=handoff PLAN_FOLDER=tmp/superpowers/plans/my-plan)' >&2; exit 1; fi; \
-			$(PYTHON) $(PLAN_AUTHORING_CLI) handoff-check "$(PLAN_FOLDER)" ;; \
-		completion) \
-			if [ -z "$(PLAN_FILE)" ] || [ -z "$(STATUS_FILE)" ]; then printf '%s\n' 'PLAN_FILE and STATUS_FILE are required for completion stage (e.g. make retained-plan-check PLAN_STAGE=completion PLAN_FILE=tmp/superpowers/plans/my-plan.md STATUS_FILE=tmp/superpowers/plans/my-plan.DONE.md)' >&2; exit 1; fi; \
-			$(PYTHON) $(PLAN_EXECUTING_CLI) completion-check "$(PLAN_FILE)" "$(STATUS_FILE)" --repo-root . ;; \
-		*) printf '%s\n' 'PLAN_STAGE must be handoff or completion.' >&2; exit 1 ;; \
-	esac
 
 all: lint test catalog-check

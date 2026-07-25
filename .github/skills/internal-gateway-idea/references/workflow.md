@@ -84,6 +84,6 @@ and user decisions remain visible.
 
 ## Local validation lane
 
-Run `python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py` or `make internal-gateway-idea-fast-check` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.
+Run `python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.
 
 The checkpoint must use one bounded research question; do not start a second research pass automatically.

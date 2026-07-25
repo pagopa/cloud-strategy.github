@@ -1,4 +1,5 @@
 import re
+import shlex
 from pathlib import Path
 
 REPO_ROOT = next(
@@ -7,6 +8,7 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 TESTS_ROOT = REPO_ROOT / "tests"
+MAKEFILE = REPO_ROOT / "Makefile"
 AGENTS = REPO_ROOT / "AGENTS.md"
 INTERNAL_TDD = REPO_ROOT / ".github/skills/internal-tdd/SKILL.md"
 INTERNAL_CONTRACT = REPO_ROOT / "INTERNAL_CONTRACT.md"
@@ -73,3 +75,17 @@ def test_github_owned_python_tests_make_owner_obvious() -> None:
         )
 
     assert not violations, "\n".join(violations)
+
+
+def test_catalog_fast_check_lists_existing_test_files() -> None:
+    makefile_text = MAKEFILE.read_text(encoding="utf-8")
+    line = next(
+        line
+        for line in makefile_text.splitlines()
+        if line.startswith("CATALOG_FAST_TESTS :=")
+    )
+    test_paths = shlex.split(line.split(":=", 1)[1].strip())
+    missing_paths = [path for path in test_paths if not (REPO_ROOT / path).is_file()]
+
+    missing_summary = ", ".join(missing_paths)
+    assert not missing_paths, f"catalog-fast-check lists missing tests: {missing_summary}"

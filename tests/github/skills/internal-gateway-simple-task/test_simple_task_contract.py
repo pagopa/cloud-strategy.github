@@ -576,6 +576,45 @@ def test_clarification_reference_has_no_broken_stop_rules_pointer() -> None:
     assert "Stop Conditions above" in clarification_text
 
 
+def test_depth_keywords_require_explicit_depth_language() -> None:
+    assert resolve_simple_task.detect_depth_keywords("fix the full path", []) == []
+    assert resolve_simple_task.detect_depth_keywords("run a full gate", []) == [
+        "full"
+    ]
+    assert resolve_simple_task.detect_depth_keywords("complete the TODO", []) == []
+
+
+def test_missing_validation_reason_is_emitted_once() -> None:
+    decision = resolve_simple_task.build_gate_decision(
+        task="A task with unnamed validation",
+        lane="edit",
+        trivial_kind=None,
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=False,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=False,
+        validation_obvious=True,
+        validation_path="",
+        validation_gap="",
+    )
+
+    assert decision["reason_codes"].count("validation-path-missing") == 1
+
+
+def test_simple_task_does_not_own_retained_plan_consumption() -> None:
+    contract_text = (REPO_ROOT / "INTERNAL_CONTRACT.md").read_text()
+    agents_text = (REPO_ROOT / ".github/agents/README.md").read_text()
+
+    assert "internal-gateway-simple-task` consumes approved `compact` plans" not in contract_text
+    assert "approved retained-plan consumption" not in agents_text
+    assert "retained execution stays separate: approved retained plans are executed by `internal-gateway-execute-plans`" in contract_text
+
+
+
 @pytest.mark.parametrize(
     ("overrides", "expected_outcome"),
     [
@@ -667,3 +706,21 @@ def test_skill_and_agent_allow_model_invocation() -> None:
 
     assert skill_frontmatter.get("disable-model-invocation") is not True
     assert agent_frontmatter.get("disable-model-invocation") is not True
+
+
+def test_simple_task_support_references_match_its_no_delegation_boundary() -> None:
+    skill_text = SKILL_PATH.read_text()
+    next_step_text = (
+        REPO_ROOT
+        / ".github/skills/internal-agent-support-next-step/SKILL.md"
+    ).read_text()
+    lane_change_text = (
+        REPO_ROOT
+        / ".github/skills/internal-agent-support-lane-change-engine/SKILL.md"
+    ).read_text()
+
+    assert skill_text.count(
+        "only when a missing bounded fact blocks the active lane."
+    ) == 1
+    assert "internal-gateway-simple-task" not in next_step_text
+    assert "internal-gateway-simple-task" not in lane_change_text
