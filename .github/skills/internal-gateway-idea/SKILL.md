@@ -1,6 +1,7 @@
 ---
 name: internal-gateway-idea
 description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, and a spec-vs-plan recommendation before implementation planning.
+disable-model-invocation: true
 ---
 
 # Internal Gateway Idea
