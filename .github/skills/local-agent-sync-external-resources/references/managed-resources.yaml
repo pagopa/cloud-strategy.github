@@ -111,6 +111,9 @@ sources:
       - upstream: skills/engineering/implement
         local: .github/skills/mattpocock-implement
         canonical_name: mattpocock-implement
+      - upstream: skills/engineering/to-tickets
+        local: .github/skills/mattpocock-to-tickets
+        canonical_name: mattpocock-to-tickets
       - upstream: skills/engineering/tdd
         local: .github/skills/mattpocock-tdd
         canonical_name: mattpocock-tdd
@@ -261,10 +264,6 @@ watchlist:
     upstream_id: prototype
     local_owner: unmanaged
     reason: Referenced by wayfinder but outside the user-approved import scope; keep visible until explicitly approved or mapped to a local owner.
-  - source_family: mattpocock/skills
-    upstream_id: to-tickets
-    local_owner: unmanaged
-    reason: Referenced by setup-matt-pocock-skills but not installed in this repository; keep visible until explicitly approved or mapped to a local owner.
   - source_family: mattpocock/skills
     upstream_id: qa
     local_owner: unmanaged
