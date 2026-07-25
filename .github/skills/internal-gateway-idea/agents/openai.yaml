@@ -2,7 +2,7 @@ interface:
   display_name: "Internal Gateway Idea"
   short_description: "Idea brainstorming with assumption challenge"
   default_prompt: >-
-    Use $internal-gateway-idea when a repository-owned idea, proposed direction,
+    Use /internal-gateway-idea when a repository-owned idea, proposed direction,
     unclear goal, or option set needs brainstorming before planning. Load
     /superpowers-brainstorming as the core workflow, then read
     references/workflow.md for the local state machine. If the incoming request

@@ -2,7 +2,7 @@ interface:
   display_name: "Internal Gateway Writing Plans"
   short_description: "Approved implementation-plan writing"
   default_prompt: >-
-    Use $internal-gateway-writing-plans to capture Target, Anti-scope,
+    Use /internal-gateway-writing-plans to capture Target, Anti-scope,
     Nearest owner, Validation path, Stop conditions, and Observable acceptance.
     Then load /superpowers-writing-plans and delegate the approved implementation plan
     writing outcome. The delegated draft remains draft-only until the local acceptance gate

@@ -90,7 +90,7 @@ def main() -> int:
         "do not start a second research pass automatically",
     ]
     runtime_only_markers = [
-        "$internal-gateway-idea",
+        "/internal-gateway-idea",
         "/superpowers-brainstorming",
         "/internal-gateway-writing-plans",
         "do not implement",

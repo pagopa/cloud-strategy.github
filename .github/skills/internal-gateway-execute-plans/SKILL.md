@@ -13,10 +13,10 @@ description: "Use when executing or resuming an approved repository-owned retain
 
 ## Referenced skills
 
-- `/superpowers-executing-plans` owns critical plan review, todo tracking, task execution, and its core stop behavior.
-- `/internal-tdd` owns executable-behavior test-first guidance at the local task gate.
-- `/superpowers-verification-before-completion` owns final evidence before completion claims.
-- `/addyosmani-code-simplification` is conditional and may be loaded only when the approved task explicitly authorizes simplification.
+- `superpowers-executing-plans` owns critical plan review, todo tracking, task execution, and its core stop behavior.
+- `internal-tdd` owns executable-behavior test-first guidance at the local task gate.
+- `superpowers-verification-before-completion` owns final evidence before completion claims.
+- `addyosmani-code-simplification` is conditional and may be loaded only when the approved task explicitly authorizes simplification.
 
 ## When to use
 

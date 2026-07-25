@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 ## Referenced skills
 
-- `/superpowers-brainstorming`: core idea-to-design workflow; retained spec writing and review stay with this owner.
-- `/internal-gateway-writing-plans`: implementation-plan writing only, after the user approves the direction.
-- `/mattpocock-research`: on-demand owner for decision-relevant external research after local evidence is exhausted; this reference does not preload the skill.
+- `superpowers-brainstorming`: core idea-to-design workflow; retained spec writing and review stay with this owner.
+- `internal-gateway-writing-plans`: implementation-plan writing only, after the user approves the direction.
+- `mattpocock-research`: on-demand owner for decision-relevant external research after local evidence is exhausted; this reference does not preload the skill.
 
 ## Local references
 

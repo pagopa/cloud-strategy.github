@@ -11,11 +11,14 @@ description: Use when creating or materially revising repository-owned skills un
 revision. Load it before drafting. Apply its relevant rules throughout the
 change instead of repeating them here.
 
-## Cross-skill invocation
+## Cross-skill notation
 
-Prefix every cross-skill invocation with `/`. Write `/skill-name` whenever
-this skill asks the agent to load, run, use, invoke, or delegate to another
-skill. Keep the target skill model-invocable; a called skill must not set
+Use the bare `skill-name` when a skill is only named or referenced, including
+reference lists, identifiers, state labels, fixtures, scripts, and catalog
+entries. Use `/skill-name` whenever an operational verb asks the agent to
+load, run, use, invoke, delegate to, or route work to that skill. Apply this
+distinction consistently to the six internal gateway skills covered by this
+convention. Keep the target skill model-invocable; a called skill must not set
 `disable-model-invocation: true`.
 
 ## When to use

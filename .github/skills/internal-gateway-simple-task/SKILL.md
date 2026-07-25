@@ -75,7 +75,7 @@ For `full-gate`, complete the gates in this order:
 2. Confirm the task still fits one bounded run.
 3. Complete Initial Idea Ordering.
 4. Ask one compact `/grill-me` block only when a missing bounded fact blocks the active lane. Use `/grill-me` only when a missing bounded fact blocks the active lane.
-5. Run the critical challenge before non-trivial action.
+5. Run `/internal-gateway-critical-master` before non-trivial action.
 6. Write a short Readiness Brief.
 7. If executable or evaluable behavior changes, load `/internal-tdd` before implementation and follow its routed posture.
 8. For an explicit code-simplification request or already-approved simplification remediation, establish a passing behavior baseline, then load `/addyosmani-code-simplification`; do not create a simplification pass after unrelated implementation.

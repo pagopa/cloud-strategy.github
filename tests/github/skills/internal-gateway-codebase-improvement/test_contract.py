@@ -55,10 +55,12 @@ LANES = (
     "combined",
 )
 METHOD_OWNERS = (
-    "mattpocock-improve-codebase-architecture",
-    "addyosmani-code-simplification",
     "internal-tdd",
     "superpowers-verification-before-completion",
+)
+REFERENCE_ONLY_OWNERS = (
+    "mattpocock-improve-codebase-architecture",
+    "addyosmani-code-simplification",
 )
 
 
@@ -77,6 +79,9 @@ def test_skill_references_existing_method_owners_without_copying_them() -> None:
     skill = SKILL_PATH.read_text(encoding="utf-8")
     for owner in METHOD_OWNERS:
         assert f"`/{owner}`" in skill
+    for owner in REFERENCE_ONLY_OWNERS:
+        assert f"`{owner}`" in skill
+        assert f"`/{owner}`" not in skill
     assert "HTML report scaffold" not in skill
     assert "The Five Principles" not in skill
 

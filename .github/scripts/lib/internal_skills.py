@@ -241,14 +241,17 @@ def validate_openai_yaml(skill_dir: Path, skill_name: str) -> list[Finding]:
                 suggestion="Add a deterministic default prompt that shows how to invoke the skill.",
             )
         )
-    elif f"${skill_name}" not in default_prompt:
+    elif f"${skill_name}" not in default_prompt and f"/{skill_name}" not in default_prompt:
         findings.append(
             Finding(
                 severity="non-blocking",
                 code="default-prompt-skill-mention",
                 path=openai_yaml.as_posix(),
                 message="interface.default_prompt does not mention the skill identifier explicitly.",
-                suggestion=f"Mention ${skill_name} in the default prompt for consistent invocation hints.",
+                suggestion=(
+                    f"Mention ${skill_name} or /{skill_name} in the default prompt "
+                    "for consistent invocation hints."
+                ),
             )
         )
 

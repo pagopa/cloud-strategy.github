@@ -7,7 +7,7 @@ description: Use when repository-owned work needs approved implementation plan w
 
 ## Referenced skills
 
-- `/superpowers-writing-plans`: required owner after the repository preflight.
+- `superpowers-writing-plans`: required owner after the repository preflight.
 
 Thin repository wrapper for approved implementation-plan writing. This skill records the local handoff facts, delegates artifact decisions to `/superpowers-writing-plans`, treats the delegated result as a draft until the local acceptance gate passes, and stops after reporting the accepted plan path.
 

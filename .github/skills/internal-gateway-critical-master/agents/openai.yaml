@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Gateway Critical Master"
   short_description: "Critical challenge for plans and decisions"
-  default_prompt: "Use $internal-gateway-critical-master to pressure-test this plan or decision. Complete the three internal phases and retain the critical record internally. In normal chat, emit only the localized three-to-five-line emoji card from references/output-contract.md, in the user's language. Always explain the critique with one concrete reason, surface any material risk or decision-changing question, and keep canonical classifications and routing codes internal unless the user asks for details."
+  default_prompt: "Use /internal-gateway-critical-master to pressure-test this plan or decision. Complete the three internal phases and retain the critical record internally. In normal chat, emit only the localized three-to-five-line emoji card from references/output-contract.md, in the user's language. Always explain the critique with one concrete reason, surface any material risk or decision-changing question, and keep canonical classifications and routing codes internal unless the user asks for details."
