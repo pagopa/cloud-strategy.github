@@ -158,6 +158,21 @@ def test_wrapper_keeps_generic_bundle_mechanics_with_core_owner() -> None:
     assert "references/script-output-contract.md" in skill_text
 
 
+def test_skill_creator_routing_has_vendor_specific_downstream_lanes() -> None:
+    skill_text = SKILL_PATH.read_text()
+
+    assert "anthropic-skill-creator" in skill_text
+    assert "explicitly requests Anthropic or Claude" in skill_text
+    assert "openai-skill-creator" in skill_text
+    assert "repository-owned" in skill_text
+
+    internal_pos = skill_text.index("internal-skill-creator")
+    anthropic_pos = skill_text.index("anthropic-skill-creator")
+    openai_pos = skill_text.index("openai-skill-creator")
+    assert internal_pos < anthropic_pos
+    assert internal_pos < openai_pos
+
+
 def test_local_bundle_guidance_is_model_neutral() -> None:
     bundle_text = "\n".join(
         path.read_text()

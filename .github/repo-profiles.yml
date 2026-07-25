@@ -61,10 +61,10 @@ profiles:
     recommended_skills:
       - skills/internal-markdown/SKILL.md
       - skills/internal-yaml/SKILL.md
-      - skills/openai-docx/SKILL.md
+      - skills/anthropic-docx/SKILL.md
       - skills/openai-pdf/SKILL.md
-      - skills/openai-slides/SKILL.md
-      - skills/openai-spreadsheet/SKILL.md
+      - skills/anthropic-pptx/SKILL.md
+      - skills/anthropic-xlsx/SKILL.md
 
   infrastructure-heavy:
     description: Infrastructure repositories with Terraform as primary language.

@@ -39,6 +39,10 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/agent-os-inject-standards/SKILL.md`
 - `.github/skills/agent-os-plan-product/SKILL.md`
 - `.github/skills/agent-os-shape-spec/SKILL.md`
+- `.github/skills/anthropic-docx/SKILL.md`
+- `.github/skills/anthropic-pptx/SKILL.md`
+- `.github/skills/anthropic-skill-creator/SKILL.md`
+- `.github/skills/anthropic-xlsx/SKILL.md`
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
@@ -127,6 +131,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-sync-repos/SKILL.md`
 - `.github/skills/mattpocock-code-review/SKILL.md`
 - `.github/skills/mattpocock-domain-modeling/SKILL.md`
+- `.github/skills/mattpocock-grill-with-docs/SKILL.md`
 - `.github/skills/mattpocock-handoff/SKILL.md`
 - `.github/skills/mattpocock-implement/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
@@ -135,13 +140,11 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/mattpocock-to-spec/SKILL.md`
 - `.github/skills/mattpocock-wayfinder/SKILL.md`
 - `.github/skills/mattpocock-writing-great-skills/SKILL.md`
-- `.github/skills/openai-docx/SKILL.md`
+- `.github/skills/openai-docs/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
 - `.github/skills/openai-pdf/SKILL.md`
 - `.github/skills/openai-skill-creator/SKILL.md`
-- `.github/skills/openai-slides/SKILL.md`
-- `.github/skills/openai-spreadsheet/SKILL.md`
 - `.github/skills/search-company-knowledge/SKILL.md`
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
@@ -160,9 +163,9 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/terraform-terraform-test/SKILL.md`
 - `.github/skills/vercel-find-skills/SKILL.md`
 
-### Support-only imported office skills
+### Support-only imported document skills
 
-These imported `openai-*` office skills remain support-only depth for repositories that explicitly need document workflows.
+These vendor-prefixed imported document skills remain support-only depth for repositories that explicitly need document workflows.
 
 ## Scripts
 

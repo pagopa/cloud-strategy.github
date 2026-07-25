@@ -42,8 +42,9 @@ declared external resource refreshes safely. The single public entrypoint is
   asset basename. Keep aliases source-local and point them only at declared
   canonical names.
 - The `mattpocock-skills` source uses the `mattpocock-` canonical prefix for
-  every imported skill except `grill-me`. Its `grilling` alias also resolves to
-  `grill-me`.
+  every imported skill. The upstream `/grilling` reference is normalized to
+  the repository-owned `grill-me` through a declared source replacement,
+  not through a source-local alias.
 - References to undeclared skills remain unchanged and must be reported as
   unresolved dependencies; do not silently import or rewrite them.
 

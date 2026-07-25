@@ -124,8 +124,8 @@ def _mattpocock_resources() -> ManagedResources:
         ManagedAsset(
             source="mattpocock-skills",
             upstream="skills/engineering/grill-with-docs",
-            local=".github/skills/grill-me",
-            canonical_name="grill-me",
+            local=".github/skills/mattpocock-grill-with-docs",
+            canonical_name="mattpocock-grill-with-docs",
         ),
         ManagedAsset(
             source="mattpocock-skills",
@@ -141,9 +141,15 @@ def _mattpocock_resources() -> ManagedResources:
         advertised_ref=None,
         assets=assets,
         rewrite_skill_references=True,
-        skill_reference_aliases=(("grilling", "grill-me"),),
     )
-    return ManagedResources(sources=(source,), replacements=(), watchlist=())
+    replacement = TextReplacement(
+        source="mattpocock-skills",
+        old="/grilling",
+        new="/grill-me",
+    )
+    return ManagedResources(
+        sources=(source,), replacements=(replacement,), watchlist=()
+    )
 
 
 def test_workspace_inside_repository_is_rejected(tmp_path: Path) -> None:
@@ -228,8 +234,11 @@ def test_normalization_rewrites_declared_mattpocock_skill_references(
     content = skill.read_text(encoding="utf-8")
     assert "name: mattpocock-tdd" in content
     assert "/mattpocock-tdd" in content
-    assert "/grill-me" in content
     assert "`mattpocock-tdd`" in content
+    assert "/mattpocock-grill-with-docs" in content
+    assert "/grill-me" in content
+    assert "/mattpocock-domain-modeling" in content
+    assert "/grilling" not in content
     assert "/domain-modeling" not in content
     assert "/unmanaged" in content
 
@@ -603,3 +612,68 @@ def test_override_3way_replay_uses_real_git_repo(
     assert len(results) == 1
     assert results[0].status == "applied"
     assert "Patched." in target.read_text(encoding="utf-8")
+
+
+def test_grill_with_docs_normalizes_to_mattpocock_wrapper_delegating_to_grill_me(
+    tmp_path: Path,
+) -> None:
+    workspace = tmp_path / "workspace"
+    sources_root = workspace / "sources"
+    grill_dir = sources_root / "mattpocock-skills" / "skills" / "engineering" / "grill-with-docs"
+    grill_dir.mkdir(parents=True)
+    (grill_dir / "SKILL.md").write_text(
+        "---\nname: grill-with-docs\n---\n"
+        "Run a `/grilling` session, using the `/domain-modeling` skill.\n",
+        encoding="utf-8",
+    )
+    domain_dir = sources_root / "mattpocock-skills" / "skills" / "engineering" / "domain-modeling"
+    domain_dir.mkdir(parents=True)
+    (domain_dir / "SKILL.md").write_text(
+        "---\nname: domain-modeling\n---\nDomain modeling.\n",
+        encoding="utf-8",
+    )
+
+    assets = (
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/grill-with-docs",
+            local=".github/skills/mattpocock-grill-with-docs",
+            canonical_name="mattpocock-grill-with-docs",
+        ),
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/domain-modeling",
+            local=".github/skills/mattpocock-domain-modeling",
+            canonical_name="mattpocock-domain-modeling",
+        ),
+    )
+    source = ManagedSource(
+        source_id="mattpocock-skills",
+        repository="https://github.com/mattpocock/skills.git",
+        ref="abc123",
+        advertised_ref=None,
+        assets=assets,
+        rewrite_skill_references=True,
+    )
+    replacement = TextReplacement(
+        source="mattpocock-skills",
+        old="/grilling",
+        new="/grill-me",
+    )
+    resources = ManagedResources(
+        sources=(source,), replacements=(replacement,), watchlist=()
+    )
+    _write_source_metadata(sources_root, source)
+
+    candidate = tmp_path / "candidate"
+    materialize_candidate(resources, workspace, candidate)
+    normalize_candidate(resources, candidate)
+
+    wrapper = candidate / ".github/skills/mattpocock-grill-with-docs/SKILL.md"
+    assert wrapper.exists()
+    content = wrapper.read_text(encoding="utf-8")
+    assert "name: mattpocock-grill-with-docs" in content
+    assert "/grill-me" in content
+    assert "/mattpocock-domain-modeling" in content
+    assert "/grilling" not in content
+    assert "/mattpocock-grill-with-docs session" not in content

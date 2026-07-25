@@ -91,12 +91,10 @@ sources:
     repository: https://github.com/mattpocock/skills.git
     ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
     rewrite_skill_references: true
-    skill_reference_aliases:
-      grilling: grill-me
     assets:
       - upstream: skills/engineering/grill-with-docs
-        local: .github/skills/grill-me
-        canonical_name: grill-me
+        local: .github/skills/mattpocock-grill-with-docs
+        canonical_name: mattpocock-grill-with-docs
       - upstream: skills/engineering/domain-modeling
         local: .github/skills/mattpocock-domain-modeling
         canonical_name: mattpocock-domain-modeling
@@ -155,8 +153,8 @@ sources:
     ref: 49f948faa9258a0c61caceaf225e179651397431
     assets:
       - upstream: skills/.curated/openai-docs
-        local: .github/skills/openai-docx
-        canonical_name: openai-docx
+        local: .github/skills/openai-docs
+        canonical_name: openai-docs
   sickn33-antigravity:
     repository: https://github.com/sickn33/antigravity-awesome-skills.git
     ref: e66fc833f2022c3534ba74af835db14c34f9a732
@@ -199,10 +197,30 @@ sources:
       - upstream: skills/search-company-knowledge
         local: .github/skills/search-company-knowledge
         canonical_name: search-company-knowledge
+  anthropic-skills:
+    repository: https://github.com/anthropics/skills.git
+    ref: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
+    rewrite_skill_references: true
+    assets:
+      - upstream: skills/docx
+        local: .github/skills/anthropic-docx
+        canonical_name: anthropic-docx
+      - upstream: skills/pptx
+        local: .github/skills/anthropic-pptx
+        canonical_name: anthropic-pptx
+      - upstream: skills/xlsx
+        local: .github/skills/anthropic-xlsx
+        canonical_name: anthropic-xlsx
+      - upstream: skills/skill-creator
+        local: .github/skills/anthropic-skill-creator
+        canonical_name: anthropic-skill-creator
 normalizations:
   - source: obra-superpowers
     from: docs/superpowers
     to: tmp/superpowers
+  - source: mattpocock-skills
+    from: /grilling
+    to: /grill-me
 watchlist:
   - source_family: github/awesome-copilot
     upstream_id: azure-devops-pipelines.instructions.md

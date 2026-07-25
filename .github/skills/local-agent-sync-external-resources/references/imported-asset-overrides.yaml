@@ -22,21 +22,6 @@ overrides:
   baseline_repo_commit: efa058a
   validation_note: Stop the refresh if the patch does not apply cleanly; review
     whether the repository-local handoff path remains the intended contract.
-- id: grill-me-bulk-recommended-questions
-  target_path: .github/skills/grill-me/SKILL.md
-  source_family: mattpocock/skills
-  lifecycle_mode: post-refresh-patch
-  apply_strategy: git-apply-3way
-  approval: explicit-user-counter-validated
-  reason: Default the initial grilling pass to a dependency-ordered numbered question
-    set with clear recommendations that the user can accept by default, while preserving
-    follow-up pressure on contradictions, risks, and unresolved decisions; keep operational
-    gate semantics in internal-gateway-review.
-  patch_path: patches/grill-me.patch
-  expected_content_hash: 4965b2f80bed21a005e0baa241e8e9e0d502c276cdf83c394cb3feac1d4dc71b
-  baseline_repo_commit: efa058a
-  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
-    an internal wrapper should replace the override.
 - id: superpowers-brainstorming-guided-plan-gate
   target_path: .github/skills/superpowers-brainstorming/SKILL.md
   source_family: obra/superpowers
@@ -91,3 +76,18 @@ overrides:
   baseline_repo_commit: e986f49
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     an internal wrapper should replace the override.
+- id: anthropic-skill-creator-disable-invocation
+  target_path: .github/skills/anthropic-skill-creator/SKILL.md
+  source_family: anthropic/skills
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply
+  approval: explicit-user-counter-validated
+  reason: The imported Anthropic skill-creator has a generic trigger that would compete
+    with internal-skill-creator and openai-skill-creator. Adding disable-model-invocation
+    ensures it is only callable directly from the repository-owned internal-skill-creator
+    when the user explicitly requests Anthropic or Claude methodology.
+  patch_path: patches/anthropic-skill-creator-disable-invocation.patch
+  expected_content_hash: a969cb2930de615067efd977b5c485ec4e1ddabcec672516960ba30cc5507325
+  baseline_repo_commit: b29e7cf
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    the non-invocation contract still matches the intended routing boundary.
