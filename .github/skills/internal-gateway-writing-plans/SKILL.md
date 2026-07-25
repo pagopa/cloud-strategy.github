@@ -41,7 +41,7 @@ Delegated output remains draft-only until objective checks pass and human judgme
 
 Objective checks: run `python3 scripts/validate_plan.py <retained-plan-path>`. A non-zero finding result keeps the artifact draft-only. Follow mechanical validation with human checks.
 
-Human judgment checks: owner duplication, speculative scope, task responsibility, edit intent, validation quality, stop conditions, and handoff readiness.
+Human judgment checks: owner duplication, speculative scope, coherent task boundaries, one responsibility per task, edit intent, focused validation, stop conditions, and handoff readiness. Reject unapproved simplification or duplicated execution workflow.
 
 Completion criterion: objective checks pass and human judgment checks pass.
 

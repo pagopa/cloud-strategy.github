@@ -97,6 +97,19 @@ def test_delegated_output_is_draft_until_local_acceptance() -> None:
     assert "revise the draft in place" in skill
 
 
+def test_local_acceptance_enforces_authoring_discipline() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    required = (
+        "coherent task boundaries",
+        "one responsibility per task",
+        "focused validation",
+        "Reject unapproved simplification or duplicated execution workflow.",
+    )
+    for marker in required:
+        assert marker in skill
+    assert "## Execution Discipline" not in skill
+
+
 def test_accepted_plan_routes_to_the_repository_execution_gateway() -> None:
     skill = SKILL_PATH.read_text(encoding="utf-8")
     assert "`/internal-gateway-execute-plans`" in skill

@@ -29,6 +29,17 @@ review, todo, task execution, or core stop procedure.
 - If the plan authorizes simplification, `/addyosmani-code-simplification`
   may be loaded at that task's explicit gate.
 
+## Execution discipline
+
+- **TF (tight feedback):** Within the current approved task, treat the smallest
+  coherent dependency set as one execution unit. Keep coupled edits, such as a
+  signature, its callers, and its implementation, together; keep unrelated plan
+  tasks separate. Use the task's focused validation as its transition gate.
+- **FFD (fail fast on drift):** Stop the delegated loop when execution reveals
+  plan drift, an owner conflict, missing required validation, or unapproved
+  scope expansion. Record the gap and the exact evidence needed to continue in
+  the applicable status sibling.
+
 ## Pause and resume
 
 - On pause, record the exact status sibling, remaining tasks, validation gap,
