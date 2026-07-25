@@ -8,8 +8,6 @@ import yaml
 
 from .inventory import collect_inventory_sections, parse_inventory_markdown
 from .shared import (
-    IGNORED_SYNC_FILENAMES,
-    IGNORED_SYNC_PARTS,
     IMPORTED_ASSET_OVERRIDES_PATH,
     INVENTORY_PATH,
     LEGACY_AGENT_TOOL_IDS,

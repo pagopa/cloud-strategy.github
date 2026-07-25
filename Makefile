@@ -47,7 +47,7 @@ catalog-fast-check: scripts-bootstrap
 	fi
 
 github-catalog-validation: python-version-check
-	@bash ./github_catalog_validation.sh
+	@$(SCRIPTS_RUNNER) github_catalog_validation --root .
 
 test: scripts-bootstrap
 	@$(SCRIPTS_VENV)/bin/python -m pytest tests -q
@@ -68,16 +68,20 @@ skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
 
 docs-lint:
-	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
-		markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
-	elif command -v npx >/dev/null 2>&1; then \
+	@if command -v npx >/dev/null 2>&1; then \
 		if [ -n "$${CI:-}" ]; then \
 			npx --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) $(MARKDOWNLINT_PATTERNS); \
 		elif npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- --version >/dev/null 2>&1; then \
 			npm exec --offline --yes markdownlint-cli2@$(MARKDOWNLINT_VERSION) -- $(MARKDOWNLINT_PATTERNS); \
+		elif command -v markdownlint-cli2 >/dev/null 2>&1 \
+			&& markdownlint-cli2 --version 2>/dev/null | grep -Fq "markdownlint-cli2 v$(MARKDOWNLINT_VERSION)"; then \
+			markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
 		else \
 			printf '%s\n' 'markdownlint-cli2 is not installed or cached; skipping markdown lint outside CI.'; \
 		fi; \
+	elif command -v markdownlint-cli2 >/dev/null 2>&1 \
+		&& markdownlint-cli2 --version 2>/dev/null | grep -Fq "markdownlint-cli2 v$(MARKDOWNLINT_VERSION)"; then \
+		markdownlint-cli2 $(MARKDOWNLINT_PATTERNS); \
 	else \
 		printf '%s\n' 'npx not installed; skipping markdown lint.'; \
 	fi
