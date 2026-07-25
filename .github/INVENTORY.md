@@ -200,4 +200,3 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 ## Prompts
 
 - `.github/prompts/internal-architecture-md-creator.prompt.md`
-- `.github/prompts/internal-mega-review.prompt.md`

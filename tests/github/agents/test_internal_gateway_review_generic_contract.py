@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -28,3 +27,19 @@ def test_generic_review_remains_analysis_only() -> None:
     text = AGENT_PATH.read_text(encoding="utf-8")
     assert "Do not edit files" in text
     assert "internal-skill-creator" not in text
+
+
+def test_generic_review_uses_local_consistency_not_critical_agent() -> None:
+    text = AGENT_PATH.read_text(encoding="utf-8")
+
+    assert "## Review Consistency Gate" in text
+    assert "test the strongest contrary explanation" in text
+    assert "internal-gateway-critical-master" not in text
+    assert "Critical Counter-Analysis" not in text
+
+
+def test_generic_review_has_no_synthetic_core_skill() -> None:
+    text = AGENT_PATH.read_text(encoding="utf-8")
+
+    assert "## Core Skill" not in text
+    assert "Do not delegate to peer agents" in text

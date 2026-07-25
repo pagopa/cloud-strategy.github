@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents

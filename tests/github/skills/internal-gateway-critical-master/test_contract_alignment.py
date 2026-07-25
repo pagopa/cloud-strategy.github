@@ -150,3 +150,47 @@ def test_critical_master_description_leads_with_challenge() -> None:
     assert frontmatter_match is not None
     description = frontmatter_match.group(1).strip().lower()
     assert "critical challenge" in description or "critical" in description
+
+
+MAINTENANCE_GUIDANCE = BUNDLE / "references/maintenance-guidance.md"
+
+
+def _phase_text(phase: int, next_phase: int | None) -> str:
+    start = SKILL_TEXT.index(f"### Phase {phase}:")
+    if next_phase is None:
+        end = SKILL_TEXT.index("## Internal critical record")
+    else:
+        end = SKILL_TEXT.index(f"### Phase {next_phase}:")
+    return SKILL_TEXT[start:end]
+
+
+def test_each_critical_phase_has_an_observable_completion_criterion() -> None:
+    for phase, next_phase in ((1, 2), (2, 3), (3, None)):
+        assert "Completion criterion:" in _phase_text(phase, next_phase)
+
+
+def test_critical_skill_is_not_an_automatic_review_countercheck() -> None:
+    assert "not an automatic counter-analysis" in SKILL_TEXT.lower()
+    assert "evidence-first review" in SKILL_TEXT.lower()
+
+
+def test_critical_agent_declares_exactly_one_core_skill_item() -> None:
+    core = AGENT_MD_TEXT.split("## Core Skill", 1)[1]
+    bullets = [
+        line for line in core.splitlines()
+        if line.startswith("- ")
+    ]
+    assert bullets == ["- `internal-gateway-critical-master`"]
+
+
+def test_critical_bundle_has_no_unused_maintenance_or_legacy_exports() -> None:
+    assert not MAINTENANCE_GUIDANCE.exists()
+    assert "maintenance-guidance.md" not in SKILL_TEXT
+    for name in (
+        "ALLOWED_CLAIM_CLASSES",
+        "ALLOWED_EVIDENCE_QUALITY",
+        "ALLOWED_LIKELIHOODS",
+        "ALLOWED_DEFENSE_VALUES",
+        "TOTAL_MAX_WORDS",
+    ):
+        assert not hasattr(critical_master, name)

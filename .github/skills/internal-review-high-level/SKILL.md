@@ -1,207 +1,81 @@
 ---
 name: internal-review-high-level
-description: Use when a task needs systems-level evidence about architecture, workflow, cross-cutting impact, blind spots, merge risk, or an orientation map of unfamiliar code.
+description: Use when a task needs systems-fit evidence about architecture, workflow, cross-cutting impact, blind spots, operational context, or an orientation map of unfamiliar code.
 ---
 
 # Internal Review High Level
 
-## Referenced skills
-
-This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
-Treat the referenced skills below as on-demand supports. Do not preload them
-for every review; load only the owner proved by the active lens, review scope,
-or final claim.
-
-- `internal-review-code`: line-level defect review owner.
-- `internal-gateway-critical-master`: pressure-test owner when the main need is challenge rather than review evidence.
-- `superpowers-verification-before-completion`: evidence gate before claiming no systems findings or merge readiness.
-
-Use this skill as the systems-level owner for repository changes and unfamiliar
-code orientation. It complements defect-first code review by checking whether a
-change fits the surrounding architecture, workflow, ownership model, and
-operational context.
+This skill owns systems-fit review and architecture/orientation only. It is an
+evidence-first reviewer, not a remediation owner. Keep cross-owner routes
+recommendation-only. Do not delegate.
 
 ## When to use
 
-- Analyze a branch diff, PR, retained plan, or file list for systems-level risk.
-- Evaluate architectural implications, workflow impact, and unconsidered effects.
-- Review cross-cutting concerns before merge when line-level findings are not enough.
-- Complement `internal-review-code` with broader evidence about coupling, ownership, and operational fit.
-- Build a higher-level orientation map for unfamiliar code, including relevant
-  modules, callers, boundaries, and repository domain vocabulary.
+- Review whether a change fits its architecture, workflow, ownership, and
+  operational context.
+- Check cross-cutting impact, blind spots, scope drift, and merge risk.
+- Build an evidence-based orientation map of unfamiliar code.
 
 ## When not to use
 
-- Use `internal-review-code` for line-level defects, language anti-patterns, tests, and file-specific findings.
-- Use `internal-gateway-critical-master` for pre-mortems, hidden-assumption tests, and pressure testing.
+- Use `internal-review-code` for line-level defects, language anti-patterns,
+  tests, and file-specific findings.
+- Use `internal-gateway-critical-master` for explicit pressure testing rather
+  than evidence-first systems review.
 - Route security-specific gaps through the closest existing owner and state the
   missing specialized-owner gap when no promoted security owner exists.
-- Do not turn advisory architecture notes into mandatory changes without evidence.
-- Do not introduce `CONTEXT.md`, ADR folders, or glossary maintenance as a side
-  effect of review unless those structures already exist and the user asks to
-  adopt them.
+- Do not turn advisory architecture notes into mandatory changes without
+  evidence, and do not create new context or glossary structures as a review
+  side effect.
 
-## Relationship to other skills
+## Branch selection
 
-- `internal-review-code`: code defects, regressions, tests, language anti-patterns, and file/line findings.
-- This skill: architecture, workflow, cross-cutting impact, operational fit,
-  blind spots, and higher-level codebase orientation.
-- `internal-gateway-critical-master`: challenge work when the main need is pressure testing rather than review evidence.
-- Security-specific review depth stays with the closest existing owner until a
-  specialized security owner is promoted.
+### Systems-fit review
 
-## Analysis dimensions
+Use this branch for systems-level findings, workflow impact, architecture fit,
+blind spots, scope drift, or merge-readiness evidence. Load
+`references/analysis-dimensions.md`, `references/review-lenses.md`, and
+`references/scope-drift.md` only when their evidence is needed. Report findings
+with the single severity/confidence vocabulary in `review-lenses.md`.
 
-Dimensions are loaded from `references/analysis-dimensions.md` when deeper checklists are needed. Summary:
+### Architecture and orientation
 
-1. **Correctness** — Does the code do what the change claims? Edge cases? Error paths? Input validation?
-2. **Separation of concerns** — Business vs I/O? Module boundaries? Naming clarity? Dependency direction? Interface stability?
-3. **Architecture** — Coupling, cohesion, extensibility, testability, operational readiness?
-4. **Blind spots** — Temporal analysis, team dynamics, cross-service impact, operational burden, data implications, security surface, performance cliffs, configuration drift, missing observability, alternative solutions?
+Use this branch for architecture-fit questions or an orientation map of an
+unfamiliar area. Load only the architecture and codebase-orientation portions
+of `references/analysis-dimensions.md`. Keep the result descriptive unless
+concrete evidence supports a systems finding.
 
-## Workflow Review Lenses
+## Compatibility-only plan audit
 
-Load the workflow references when review evidence needs more detail than the
-main skill should carry:
+Use `references/plan-completion-audit.md` only for an explicit retained-plan
+audit request or an existing execution-owner compatibility path. Plan audit is
+not a primary trigger, and ownership migration is outside this change.
 
-- `references/plan-completion-audit.md`: plan-vs-diff mapping, completion
-  status, and `UNVERIFIABLE` evidence gaps.
-- `references/scope-drift.md`: declared intent, observed delivery, out-of-scope
-  changes, and missing requirements.
-- `references/review-lenses.md`: always-on, cross-cutting, and stack-specific
-  review lenses with severity and confidence calibration.
-- `references/audit-dispatch.md`: optional subagent dispatch for heavy plan or
-  diff audits, with main-assistant spot checks.
+## Evidence-first workflow
 
-Workflow findings should cover plan-vs-diff mapping, scope drift, evidence gaps,
-contract coverage, and governance drift when those dimensions are in scope.
+1. Resolve the target, declared intent, anti-scope, and nearest owner.
+2. Select exactly one branch and load only its referenced evidence.
+3. Read the target and immediate dependencies; map boundaries and callers.
+4. Test contrary explanations and record concrete evidence gaps.
+5. Project the matching finding or orientation output.
+6. Validate every claim, route code defects to `internal-review-code`, and keep
+   recommendations non-binding.
 
-## Architecture Fit Lenses
+## Systems-fit output
 
-Use these lenses when a review crosses module, workflow, or ownership boundaries:
+Present findings by severity, then evidence gaps, blind spots, architecture
+notes, and a short summary. Every actionable finding must cite concrete file
+and line evidence, explain the causal layer, and name a minimal recommendation-
+only route. Speculative concerns are evidence gaps, not actionable findings.
 
-- **Locality**: Does the change concentrate related knowledge, bugs, and future
-  edits in one place, or does it force maintainers to chase behavior across
-  several files?
-- **Leverage**: Does the interface hide meaningful behavior behind a small
-  contract, or does every caller still need to understand the implementation?
-- **Module depth**: A deep module has a small interface and useful behavior
-  behind it. A shallow module mostly passes complexity through to its callers.
-- **Deletion test**: If the module vanished, would complexity disappear, or
-  would the same complexity reappear across multiple callers?
-- **Real seam test**: One adapter can be hypothetical. Two or more real users of
-  a seam make the abstraction easier to justify.
-- **Cross-boundary fit**: Check whether a change belongs in the touched owner,
-  an adjacent internal skill, a reference, a validator, or a generated catalog
-  artifact before recommending more files.
+## Architecture and orientation output
 
-Keep these as review lenses, not mandatory refactor demands. Recommend a
-deepening change only when the evidence shows current shallowness is creating
-real maintenance, testability, or workflow cost.
+For an orientation request, provide the target area, domain vocabulary, module
+map, flow map, boundary notes, and uncertainty. Name caller or entrypoint
+evidence and validation gaps. Do not include review sections in an
+orientation-only response.
 
-## Orientation Map Lens
+## Completion boundary
 
-Use this lens when the user asks to zoom out, understand an unfamiliar area, or
-see how code fits into the larger system before planning, reviewing, or editing.
-
-Keep the output evidence-based and compact:
-
-- Target area: the file, module, workflow, or behavior being explained.
-- Domain vocabulary: repository terms that name the concepts in play.
-- Module map: relevant modules, responsibilities, dependencies, and callers.
-- Flow map: the main data, control, or operational path through those modules.
-- Boundary notes: ownership, extension points, and cross-boundary risks.
-- Uncertainty: missing evidence, likely next files to inspect, or validation gaps.
-
-Do not turn orientation into review findings unless the user asks for a review
-or the inspected evidence exposes a concrete systems risk.
-
-## Severity mappings
-
-| Category | Severity | Criteria |
-| --- | --- | --- |
-| Error | Critical | Security flaw, data loss risk, correctness bug affecting business logic |
-| Error | Major | Missing error handling, broken contract, regression risk |
-| Improvement | Readability | Code clarity, naming, structure |
-| Improvement | Performance | Algorithmic efficiency, resource usage |
-| Improvement | Maintainability | Technical debt, coupling, cohesion |
-| Improvement | Testability | Test coverage gaps, untestable designs |
-| Improvement | Security | Hardening, least privilege, input validation |
-
-| Effort | Meaning |
-| --- | --- |
-| Low | Less than 1 hour, isolated change |
-| Medium | 1-4 hours, may touch multiple files |
-| High | More than 4 hours, may require design discussion |
-
-## Review Output
-
-Present findings directly in conversation (never write files unless the user explicitly asks):
-
-1. **Findings** — systems-level risks ordered by severity, with evidence and fix route.
-2. **Evidence gaps** — validation, context, or dependency information still missing.
-3. **Blind spots** — realistic concerns the current change does not address.
-4. **Architecture notes** — non-binding structural guidance with impact and effort.
-5. **Summary** — brief overall assessment after findings.
-
-For empty sections, state "No findings in this category."
-
-## Orientation Output
-
-When the request is explanatory rather than review-owned, present a map instead
-of findings:
-
-1. **Target Area** — the file, module, workflow, or behavior being explained.
-2. **Domain Vocabulary** — repository terms that matter for the area.
-3. **Module Map** — modules, responsibilities, dependencies, and callers.
-4. **Flow Map** — main data, control, or operational path.
-5. **Boundary Notes** — ownership, extension points, and risks to respect.
-6. **Uncertainty** — missing evidence and next files or checks.
-
-Do not include empty review sections in an orientation-only answer.
-
-## Common mistakes
-
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Flagging code style as a systems issue | Inflates findings and dilutes trust | Use `internal-review-code` for nit-level checks |
-| Making ungrounded findings ("this might break X") | Speculation ≠ evidence | Every finding must cite a concrete file and line from the diff |
-| Scope creep — analyzing the entire codebase | The user asked about a specific change | Analyze only changed files and their immediate dependencies |
-| Reporting without effort estimation | Leaves the author without prioritization signal | Always include Low/Medium/High effort per finding |
-| Treating advisory notes as blockers | Obscures urgency | Block only on evidenced systems risk |
-| Skipping blind-spot analysis | The most valuable part of this skill gets dropped | Run all 4 dimensions, even if some are empty |
-| Treating orientation as critique | The user may only need a codebase map | Separate maps from findings unless a concrete risk is evidenced |
-
-## Self-questioning
-
-Before presenting findings, verify:
-
-- Is this finding based on evidence in the diff, or am I assuming?
-- Could I be wrong about the intent of this change?
-- Am I flagging something that is actually fine for this specific context?
-- What is the simplest correct interpretation?
-
-## Workflow
-
-1. Identify changed files (diff against default branch or explicit file list).
-2. Load applicable instruction files based on detected languages.
-3. Read each changed file or requested target area and its immediate dependencies.
-4. Analyze across all dimensions, or build an orientation map when the request
-   is explanatory rather than review-owned. Load
-   `references/analysis-dimensions.md` for detailed checklists.
-5. For review-owned work, self-question each finding before including it.
-6. Route code defects back to `internal-review-code` when they are not systems-level issues.
-7. Present review findings or an orientation map using the matching output
-   structure above.
-
-## Validation
-
-- Every finding must reference a concrete file and line number.
-- Every finding must include a *why* explanation.
-- Every finding must include a minimal fix route or recommended owner.
-- Architecture recommendations must include impact and effort assessment.
-- Orientation maps must name the target area, domain vocabulary, module map,
-  caller or entrypoint evidence, boundary notes, and uncertainty.
-- Security-specific gaps must not imply that an unpromoted security owner exists.
-- Use `superpowers-verification-before-completion` before claiming there are no
-  systems findings, the review is complete, or the change is merge-ready.
+Keep no-findings, merge-readiness, and complete-review claims behind
+`superpowers-verification-before-completion`.

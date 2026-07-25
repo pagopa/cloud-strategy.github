@@ -19,6 +19,7 @@ gateway decides when to invoke it; this skill challenges only.
 ## When not to use
 
 - The next step is retained planning, implementation, or evidence-first review.
+- This skill is not an automatic counter-analysis step for evidence-first review.
 
 ## Boundaries
 
@@ -34,6 +35,9 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 - Identify the material claims, constraints, success criteria, and anti-scope.
 - Record internally: what is being challenged and why it matters now.
 
+Completion criterion: the challenged target, material claims, constraints,
+success criteria, anti-scope, and evidence gaps are recorded.
+
 ### Phase 2: Challenge
 
 - Select exactly **three lenses** from the table below based on the highest-risk gaps in the summary.
@@ -42,6 +46,9 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 - Lead with the strongest supported objection first. Stop at one finding when that objection controls the decision; do not pad findings.
 - Ask at most one concise root question across all findings when the answer would materially change the critique.
 - Treat mitigations as conditions to continue, not as implementation designs that rescue the proposal.
+
+Completion criterion: exactly three lenses were applied, the third is lateral,
+and the strongest supported objection controls the result.
 
 | Lens | Question | Use when |
 | --- | --- | --- |
@@ -69,6 +76,9 @@ Trigger a pre-mortem when at least one of these is true:
 - Set Defense to one of `none`, `resolves`, `narrows`, `accepts-risk`, or `unanswered`.
 - When Defense is not `none`, name the strongest defense and the remaining vulnerability inside the synthesis.
 - Select exactly one canonical routing outcome from `## Outcome meanings`.
+
+Completion criterion: defense, residual uncertainty, and exactly one canonical
+outcome are resolved.
 
 ## Internal critical record
 
@@ -101,7 +111,6 @@ In normal chat, emit only the localized three-to-five-line emoji card defined in
 - Optional: `scripts/validate_critical_output.py` checks a rendered card against the contract in `references/output-contract.md`.
 - The optional validator and its pure helper live inside this skill bundle so the skill can be copied without depending on repo-global Python modules.
 - Reuse `fixtures/critical_output_valid.md` and sibling fixture samples instead of repeating long inline payloads.
-- Follow `references/maintenance-guidance.md` for fixture reuse and cache-aware search discipline.
 - Keep this bundle self-contained: do not require instructions, examples, or enforcement rules from outside this directory.
 - Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `compact` for status and counts; validation findings on stdout, file and usage failures on stderr; keep output bounded.
 

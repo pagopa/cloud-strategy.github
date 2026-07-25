@@ -1,82 +1,63 @@
 # Analysis Dimensions — Detailed Checklists
 
-## 1. Correctness analysis
+## Systems fit
 
-- Does the code do what the change claims?
-- Are edge cases handled?
-- Are error paths tested?
-- Is input validation present and sufficient?
-- Do return types match caller expectations?
-- Are concurrency assumptions safe?
+Use these checks when a diff changes module shape, workflow ownership, or
+cross-boundary behavior:
 
-## 2. Separation of concerns
+### Separation of concerns
 
-| Principle | What to check |
-| --- | --- |
-| Business vs I/O | Is business logic cleanly separated from I/O, SDKs, and persistence? |
-| Module boundaries | Are module boundaries clear and cohesive? |
-| Naming clarity | Do names reflect what the code does in business terms? |
-| Dependency direction | Do high-level modules avoid depending on low-level details? |
-| Interface stability | Are module contracts (inputs/outputs) stable and documented? |
+- Are business logic, I/O, and presentation layers distinct?
+- Are module boundaries clear and cohesive?
+- Does dependency direction keep higher-level behavior independent of details?
+- Are interfaces stable for their callers?
 
-## 3. Architecture
+### Architecture
 
-| Quality | What to check |
-| --- | --- |
-| Separation of concerns | Are business logic, I/O, and presentation layers distinct? |
-| Dependency direction | Do dependencies point inward (infrastructure → application → core logic)? |
-| Coupling | Is coupling between modules explicit and minimal? |
-| Cohesion | Are related concepts grouped together? |
-| Extensibility | Can this design accommodate likely future changes without significant rework? |
-| Testability | Can each component be tested in isolation? |
-| Operational readiness | Are logs, metrics, and health checks present for production visibility? |
+- Is coupling explicit and minimal?
+- Are related concepts grouped together?
+- Can likely future changes be made without significant rework?
+- Can components be tested in isolation?
+- Are logs, metrics, and health checks sufficient for operational visibility?
 
-### Repository-local deepening lens
+### Repository-local deepening
 
-Use these checks when the diff changes module shape, workflow ownership, or
-cross-boundary review surfaces:
+- **Locality:** can a maintainer find the relevant knowledge, bug, and fix in
+  one place?
+- **Leverage:** does a small interface hide meaningful behavior from callers?
+- **Module depth:** does the module hide useful complexity rather than pass it
+  through?
+- **Deletion test:** would deleting the module remove complexity or reproduce it
+  across callers?
+- **Real seam:** do at least two real users justify the abstraction boundary?
+- **Cross-boundary fit:** does the change belong in the touched owner, an
+  adjacent skill, a reference, a validator, or a generated catalog artifact?
 
-| Lens | What to check |
-| --- | --- |
-| Locality | Does a future maintainer find the relevant knowledge, bug, and fix in one place? |
-| Leverage | Does a small interface carry meaningful behavior, or do callers still need the implementation details? |
-| Shallow module | Is the module mostly a pass-through whose interface is nearly as complex as the implementation? |
-| Deep module | Does the module hide real complexity behind a stable, useful interface? |
-| Deletion test | If the module is deleted, does complexity vanish or reappear across multiple callers? |
-| Real seam | Is there more than one real adapter or caller proving the seam earns its abstraction cost? |
+Do not require `CONTEXT.md`, ADR folders, or glossary updates unless those
+structures already exist and the user explicitly asks for them.
 
-Do not require `CONTEXT.md`, ADR folders, or glossary updates for this repository
-unless those structures already exist and the user explicitly makes them part of
-the task.
+## Architecture and orientation
 
-### Codebase orientation lens
+When the user needs a map rather than a defect review, identify:
 
-Use these checks when the user needs a higher-level map of unfamiliar code
-instead of a defect review:
-
-| Lens | What to check |
-| --- | --- |
-| Target area | Which file, module, workflow, or behavior anchors the question? |
-| Domain vocabulary | Which repository terms name the relevant concepts? |
-| Module map | Which modules own the behavior, and what does each one hide or expose? |
-| Caller map | Which direct callers, consumers, or workflow entrypoints depend on it? |
-| Flow map | What data, control, or operational path connects the modules? |
-| Boundary risk | Which ownership, abstraction, or validation boundary should a future edit respect? |
+- **Target area:** the file, module, workflow, or behavior being explained.
+- **Domain vocabulary:** repository terms naming the concepts in play.
+- **Module map:** responsibilities, dependencies, and callers.
+- **Caller map:** direct consumers and workflow entrypoints.
+- **Flow map:** the main data, control, or operational path.
+- **Boundary risk:** ownership, abstraction, and validation boundaries to
+  respect.
 
 Keep the map descriptive. Promote observations to findings only when concrete
 evidence shows a systems risk.
 
-## 4. Blind-spot detection
+## Blind spots
 
-Apply lateral thinking on each dimension:
+Apply lateral checks to systems-fit review:
 
-- **Temporal analysis**: Will this change cause problems at scale? After 6 months of accumulation?
-- **Team dynamics**: Does this change increase onboarding friction for new team members?
-- **Cross-service impact**: Could this change break consumers or upstream producers?
-- **Operational burden**: What happens when this fails at 3 AM? Can on-call engineers debug it?
-- **Data implications**: Are there schema changes, migration needs, or data consistency risks?
-- **Security surface**: Does this change expand the attack surface?
-- **Performance cliffs**: Is there a hidden O(n²) or unbounded resource consumption?
-- **Configuration drift**: Are there environment-specific assumptions that break in other stages?
-- **Missing observability**: Can we know if something goes wrong after deployment?
-- **Alternative solutions**: Is there a fundamentally simpler approach that was not considered?
+- temporal accumulation and long-term maintenance;
+- onboarding and team dynamics;
+- cross-service impact and operational burden;
+- data implications and configuration drift;
+- security surface and performance cliffs;
+- missing observability and simpler alternatives.

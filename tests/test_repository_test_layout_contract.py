@@ -58,12 +58,25 @@ def test_github_owned_python_tests_make_owner_obvious() -> None:
             and "skills" in rel_path.parts
             and any(owner in rel_path.parts for owner in owners)
         )
+        agent_owner_is_obvious = (
+            "github" in rel_path.parts
+            and "agents" in rel_path.parts
+            and any(
+                owner in rel_path.parts
+                or owner.replace("-", "_") in test_path.stem
+                for owner in owners
+            )
+        )
         script_owner_is_obvious = (
             ".github/scripts" in text
             and "github" in rel_path.parts
             and "scripts" in rel_path.parts
         )
-        if skill_or_agent_owner_is_obvious or script_owner_is_obvious:
+        if (
+            skill_or_agent_owner_is_obvious
+            or agent_owner_is_obvious
+            or script_owner_is_obvious
+        ):
             continue
 
         if not owners:

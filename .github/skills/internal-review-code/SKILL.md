@@ -7,69 +7,74 @@ description: Use when reviewing a branch, pull request, work-in-progress diff, o
 
 ## Referenced skills
 
-- `addyosmani-code-review-and-quality`: complete five-axis review core, approval standard, and finding categories.
-- `awesome-copilot-security-review`: security-specialist depth only when the user explicitly asks for it.
-- `addyosmani-code-simplification`: on-demand remediation owner for an explicitly approved, behavior-preserving simplification follow-up; never part of the review pass.
+- `/addyosmani-code-review-and-quality`: complete and sole code-review engine,
+  including its review reasoning, severity, categories, and approval standard.
+- `/awesome-copilot-security-review`: security-specialist depth only when the
+  user explicitly asks for it.
+- `addyosmani-code-simplification`: on-demand remediation owner for an
+  explicitly approved, behavior-preserving simplification follow-up; never
+  part of the review pass.
 
 ## When to use
 
 Use for a branch, pull request, work-in-progress diff, or code-focused change
-that needs defect-first review before merge or before a follow-up patch
-decision.
+that needs defect-first review before merge or a separate follow-up decision.
 
-## Core contract
+## Repository wrapper
 
-Use `addyosmani-code-review-and-quality` as the complete review engine and
-follow its process end to end. This wrapper provides the stable
-repository-owned entrypoint and the local boundaries below. It must not
-redefine the core's five axes, review order, approval standard, finding
-categories, structural remedies, or verification posture.
+Use `/addyosmani-code-review-and-quality` as the complete review engine. This
+wrapper owns only repository preflight, target boundaries, escalation rules,
+the detailed-to-chat projection, and final validation. It must not restate the
+engine's review axes, procedure, approval standard, finding categories, or
+remediation workflow.
 
-The core owns review reasoning and severity. This wrapper owns the public chat projection
-and repository-facing boundaries. The projection may reorder and compress supported
-evidence, but it must not introduce another review axis, severity model, approval
-standard, or remediation workflow.
+The core owns review reasoning and severity. This wrapper owns the public chat projection.
+The projection may reorder and compress supported evidence, but it
+must not introduce another review axis, severity model, approval standard, or
+remediation workflow.
 
 ## Boundaries
 
-- Review only the requested code surface and the supporting tests, spec, task,
-  or validation evidence needed to judge it.
-- Review tests before implementation when tests are present because that order
-  belongs to the core contract.
-- Do not apply fixes unless the user asks in a separate step.
-- Do not load implementation-language skills or systems-level review skills
-  merely because their file types or topics appear in the diff. Load a narrower
-  owner only when the file type, runtime, or defect pattern would materially
-  change the review.
-- Do not load `awesome-copilot-security-review` automatically. Use it only when
-  the user explicitly asks for security-specialist depth.
-- Do not redefine the core review model. Project its result through the same
-  `🔎`, `📌`, `🧪`, and `👉` semantics used by the code gateway.
-- If the requested fixed point, diff, or code target is missing, invalid, or
-  empty, stop at the core preflight and state the evidence gap.
-- If no spec or task context exists, follow the core no-spec path and state the
-  evidence gap.
-- When a concrete readability or complexity finding is best addressed by behavior-preserving refactoring, name `addyosmani-code-simplification` only as a separate simplification follow-up for the user to approve.
+- Resolve a concrete, non-empty diff or explicit read-only code target before
+  review; state the evidence gap when the target, fixed point, or context is
+  missing.
+- Read the spec, task, and tests before implementation when those sources
+  exist. Review only the requested code surface and immediate evidence.
+- Do not edit files, apply fixes, author plans, or delegate to peer agents.
+- Load `/awesome-copilot-security-review` only on explicit user request.
+- Name `addyosmani-code-simplification` only as a separate simplification
+  follow-up for a concrete readability or complexity finding.
 - Do not load or execute `addyosmani-code-simplification` during the review pass.
+- Project the result through the shared `🔎`, `📌`, `🧪`, and `👉` semantics.
+
+## Completion criteria
+
+The review is complete only when the target is resolved and non-empty, core
+categories are used without a second severity scale, claims are source-backed
+or marked as explicit evidence gaps, every blocking and important finding is
+preserved, and the report contains one boundary-safe next action.
+
+## Public projection
+
+Start with exactly four fields in this order:
+
+- `🔎`: localized verdict and counts by severity.
+- `📌`: one sentence explaining why that verdict follows.
+- `🧪`: reviewed scope, completed validation, and material evidence gaps.
+- `👉`: one user action and the consequence of accepting it.
+
+For each material finding, preserve `Location`, `Evidence`, `Impact`,
+`Correction`, and `Expected verification` when closure is not obvious. Map the
+engine's categories to `B`, `I`, and `S` identifiers, show every blocking and
+important finding, consolidate equivalent findings, and mark uncertainty inline
+as `to confirm`.
+
+Keep internal review details hidden unless they alter the verdict. State that
+no changes were applied, and offer remediation only as a separate follow-up.
 
 ## Validation
 
-Before reporting the review, confirm that:
-
-- the reviewed surface resolved to the intended non-empty diff or explicit
-  read-only code target;
-- tests were reviewed before implementation when tests were present;
-- findings use the core finding categories consistently and do not add a second
-  local severity scale;
-- correctness and security issues lead the report before lower-leverage
-  comments;
-- any spec, task, or repository-standard claim cites its source, or the report
-  states the evidence gap;
-- security-specialist escalation was used only on explicit user request;
-- simplification is surfaced only as a separate follow-up backed by a concrete readability or complexity finding;
-- `addyosmani-code-simplification` was not loaded or executed during review.
-- all Critical and Important findings remain visible;
-- `B`/`I`/`S` identifiers map to the core finding categories;
-- material findings include concrete evidence, impact, correction, and expected verification;
-- the projection contains one boundary-safe user action;
-- internal counter-analysis details stay hidden unless they alter the verdict.
+Before reporting, verify the completion criteria, source evidence, target scope,
+security escalation boundary, and separate simplification follow-up. Keep
+no-findings or merge-readiness claims behind
+`/superpowers-verification-before-completion`.

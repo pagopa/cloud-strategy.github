@@ -40,3 +40,27 @@ def test_code_review_runtime_prompt_requests_the_adaptive_projection() -> None:
 
     assert "adaptive chat projection" in prompt_text
     assert "separate follow-up" in prompt_text
+
+
+CODE_AGENT = REPO_ROOT / ".github/agents/internal-gateway-review-code.agent.md"
+
+
+def test_code_agent_has_one_core_skill_and_no_duplicate_review_engine() -> None:
+    text = CODE_AGENT.read_text(encoding="utf-8")
+
+    assert 'description: "Use this agent when ' in text
+    assert "## Core Skill" in text
+    assert "- `internal-review-code`" in text
+    assert "### 1. Correctness" not in text
+    assert "### 2. Readability" not in text
+    assert "internal-gateway-critical-master" not in text
+
+
+def test_code_wrapper_uses_operational_invocation_and_completion_criteria() -> None:
+    skill_text = SKILL_PATH.read_text(encoding="utf-8")
+    runtime_text = AGENT_PATH.read_text(encoding="utf-8")
+
+    assert "/addyosmani-code-review-and-quality" in skill_text
+    assert "## Completion criteria" in skill_text
+    assert "/internal-review-code" in runtime_text
+    assert "$internal-review-code" not in runtime_text
