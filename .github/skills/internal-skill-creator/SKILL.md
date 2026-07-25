@@ -7,10 +7,13 @@ description: Use when creating, splitting, replacing, or materially revising a r
 
 ## Referenced skills
 
-- `anthropic-skill-creator`: authoring and proportional evaluation stage for repository-owned skill work.
 - `mattpocock-writing-great-skills`: predictability review and revision stage applied after authoring.
 - `local-agent-sync-external-resources`: catalog-governance sync for broader external-asset or inventory-wide work.
 - `internal-agent-creator`: agent authoring and agent/skill boundary rewrites.
+
+## Local references
+
+- `references/authoring-and-evaluation.md`: read when creating a skill, changing a boundary or trigger, or running any evaluation branch.
 
 ## When to use
 
@@ -33,14 +36,15 @@ description: Use when creating, splitting, replacing, or materially revising a r
 
 ## Workflow
 
-### 1. Anthropic authoring
+### 1. Authoring and proportional evaluation
 
-Load `anthropic-skill-creator` and run the authoring stage. Run only the
-applicable evaluation branches for the current task; record every omitted
-branch and its reason. Produce a draft with evidence: draft, evidence, blockers, and completion status for each evaluation branch.
+Read `references/authoring-and-evaluation.md`. Capture the intent contract,
+inventory the bundle, and produce the smallest draft that satisfies the
+requested behavior. Select only the applicable evaluation branches and record
+every skipped branch and its reason.
 
-Exit criteria: the draft exists with applicable evaluation branches assessed,
-skipped branches and reasons recorded, and completion status stated.
+Exit criteria: the draft exists; applicable evaluation branches are assessed;
+skipped branches and reasons are recorded; and draft, evidence, blockers, and completion status are explicit.
 
 ### 2. Predictability review
 

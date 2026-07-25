@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import fcntl
 import hashlib
+import io
 import os
 import shutil
 import subprocess
+import tarfile
 import tempfile
 import time
 from dataclasses import dataclass

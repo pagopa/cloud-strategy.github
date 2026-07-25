@@ -208,9 +208,6 @@ sources:
       - upstream: skills/xlsx
         local: .github/skills/anthropic-xlsx
         canonical_name: anthropic-xlsx
-      - upstream: skills/skill-creator
-        local: .github/skills/anthropic-skill-creator
-        canonical_name: anthropic-skill-creator
 normalizations:
   - source: obra-superpowers
     from: docs/superpowers

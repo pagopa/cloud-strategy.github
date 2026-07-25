@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Skill Creator"
-  short_description: "Orchestrator for repo skill work"
-  default_prompt: "Use $internal-skill-creator to create or revise a repository-owned skill. Run anthropic-skill-creator for authoring, then mattpocock-writing-great-skills for predictability review, then repository closure."
+  short_description: "Create and revise repository-owned skills"
+  default_prompt: "Use $internal-skill-creator to create or revise a repository-owned skill. Run local authoring and proportional evaluation, then mattpocock-writing-great-skills for predictability review, then repository closure."

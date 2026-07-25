@@ -1,8 +1,10 @@
 import hashlib
+import io
 import os
 import stat
 import subprocess
 import sys
+import tarfile
 from pathlib import Path
 
 import pytest
@@ -25,6 +27,7 @@ from source_prepare_core import (  # noqa: E402
     PrepareSourceResult,
     _build_fetch_command,
     _cache_key_for_repository,
+    _extract_archive,
     _validate_upstream_paths,
     prepare_sources,
 )
@@ -360,3 +363,100 @@ def test_validate_prepared_sources_reports_missing_metadata(
 
     with pytest.raises(ValueError, match="test-source"):
         validate_prepared_sources(resources, sources_root)
+
+
+def _tar_bytes_with(info: tarfile.TarInfo, payload: bytes = b"") -> bytes:
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w") as tar:
+        info.size = len(payload)
+        tar.addfile(info, io.BytesIO(payload))
+    return buffer.getvalue()
+
+
+def test_extract_archive_rejects_parent_traversal_member(tmp_path: Path) -> None:
+    export_dir = tmp_path / "export"
+    export_dir.mkdir()
+    archive = _tar_bytes_with(tarfile.TarInfo("../escaped.txt"), b"escaped\n")
+
+    with pytest.raises(tarfile.FilterError):
+        _extract_archive(archive, export_dir)
+
+    assert not (tmp_path / "escaped.txt").exists()
+
+
+def test_extract_archive_rejects_absolute_member(tmp_path: Path) -> None:
+    export_dir = tmp_path / "export"
+    export_dir.mkdir()
+    archive = _tar_bytes_with(tarfile.TarInfo("/tmp/escaped.txt"), b"escaped\n")
+
+    with pytest.raises(tarfile.FilterError):
+        _extract_archive(archive, export_dir)
+
+
+def test_extract_archive_rejects_symlink_escaping_snapshot(tmp_path: Path) -> None:
+    export_dir = tmp_path / "export"
+    export_dir.mkdir()
+    info = tarfile.TarInfo("link")
+    info.type = tarfile.SYMTYPE
+    info.linkname = "../../etc/passwd"
+    archive = _tar_bytes_with(info)
+
+    with pytest.raises(tarfile.FilterError):
+        _extract_archive(archive, export_dir)
+
+
+@pytest.fixture
+def fixture_remote_without_sha_upload(tmp_path: Path) -> tuple[Path, str]:
+    remote = tmp_path / "strict-remote.git"
+    remote.mkdir()
+    _run_git(remote, ["init", "--bare"])
+    _run_git(remote, ["config", "uploadpack.allowFilter", "true"])
+    _run_git(remote, ["config", "uploadpack.allowReachableSHA1InWant", "false"])
+    _run_git(remote, ["config", "uploadpack.allowAnySHA1InWant", "false"])
+
+    work = tmp_path / "strict-work"
+    work.mkdir()
+    _run_git(work, ["init"])
+    _run_git(work, ["config", "user.email", "test@test.com"])
+    _run_git(work, ["config", "user.name", "Test"])
+    skill_dir = work / "skills" / "target-skill"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: target-skill\n---\nTarget content.\n", encoding="utf-8"
+    )
+    commit_sha = _commit_all(work)
+    _run_git(work, ["remote", "add", "origin", str(remote)])
+    _run_git(work, ["push", "origin", "HEAD:refs/heads/main"])
+    return remote, commit_sha
+
+
+def test_advertised_ref_fallback_is_reported_as_advertised_ref(
+    tmp_path: Path,
+    fixture_remote_without_sha_upload: tuple[Path, str],
+) -> None:
+    remote_path, commit_sha = fixture_remote_without_sha_upload
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    sources_root = tmp_path / "sources"
+    sources_root.mkdir()
+
+    asset = ManagedAsset(
+        source="strict-source",
+        upstream="skills/target-skill",
+        local=".github/skills/target-skill",
+        canonical_name="target-skill",
+    )
+    source = ManagedSource(
+        source_id="strict-source",
+        repository=str(remote_path),
+        ref=commit_sha,
+        advertised_ref="refs/heads/main",
+        assets=(asset,),
+    )
+    resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
+
+    results = prepare_sources(resources, workspace, sources_root)
+
+    assert results[0].cache_status == "fetched"
+    assert results[0].fetch_strategy == "advertised-ref"
+    assert (sources_root / "strict-source" / "skills" / "target-skill" / "SKILL.md").exists()

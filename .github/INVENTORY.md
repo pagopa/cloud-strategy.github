@@ -42,7 +42,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/anthropic-docx/SKILL.md`
 - `.github/skills/anthropic-pdf/SKILL.md`
 - `.github/skills/anthropic-pptx/SKILL.md`
-- `.github/skills/anthropic-skill-creator/SKILL.md`
 - `.github/skills/anthropic-xlsx/SKILL.md`
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`

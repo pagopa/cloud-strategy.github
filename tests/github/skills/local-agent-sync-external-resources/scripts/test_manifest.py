@@ -139,7 +139,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 55
+    assert len(manifest.assets) == 54
     assert len(manifest.watchlist) == 13
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
@@ -202,13 +202,18 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
             ".github/skills/anthropic-xlsx",
             "anthropic-xlsx",
         ),
-        (
-            "https://github.com/anthropics/skills.git",
-            "skills/skill-creator",
-            ".github/skills/anthropic-skill-creator",
-            "anthropic-skill-creator",
-        ),
     }
+    imported_assets = {
+        (source.repository, asset.upstream, asset.local, asset.canonical_name)
+        for source in manifest.sources
+        for asset in source.assets
+    }
+    assert (
+        "https://github.com/anthropics/skills.git",
+        "skills/skill-creator",
+        ".github/skills/anthropic-skill-creator",
+        "anthropic-skill-creator",
+    ) not in imported_assets
     assert {
         item.local for item in manifest.assets if item.source == "obra-superpowers"
     } == {
@@ -316,7 +321,7 @@ def test_live_handoff_override_forces_repo_tmp_handoff(repo_root: Path) -> None:
     assert "tmp/handoff/" in patch_text
 
 
-def test_skill_creator_delegates_have_invocation_overrides(
+def test_mattpocock_skill_creator_review_keeps_invocation_override(
     repo_root: Path,
 ) -> None:
     overrides_path = (
@@ -331,8 +336,6 @@ def test_skill_creator_delegates_have_invocation_overrides(
     by_target = {override.target_path: override for override in overrides}
 
     expected = {
-        ".github/skills/anthropic-skill-creator/SKILL.md":
-            "anthropic-skill-creator-delegated-invocation",
         ".github/skills/mattpocock-writing-great-skills/SKILL.md":
             "mattpocock-writing-great-skills-delegated-invocation",
     }
@@ -344,3 +347,7 @@ def test_skill_creator_delegates_have_invocation_overrides(
         )
         assert "-disable-model-invocation: true" in patch
         assert "internal-skill-creator" in patch
+    assert (
+        ".github/skills/anthropic-skill-creator/SKILL.md"
+        not in by_target
+    )
