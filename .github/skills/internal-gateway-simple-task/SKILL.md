@@ -8,11 +8,11 @@ disable-model-invocation: true
 
 ## Referenced skills
 
-- `grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
-- `internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
-- `internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
-- `superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
-- `addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
+- `/grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
+- `/internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
+- `/internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
+- `/superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
+- `/addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
 
 Do not introduce other skills, agents, or workflow owners from this bundle. When stopping, explain the violated condition and let the user choose the next path.
 
@@ -75,11 +75,11 @@ For `full-gate`, complete the gates in this order:
 1. Inspect the nearest local evidence.
 2. Confirm the task still fits one bounded run.
 3. Complete Initial Idea Ordering.
-4. Ask one compact `grill-me` block only when a missing bounded fact blocks the active lane. Use `grill-me` only when a missing bounded fact blocks the active lane.
+4. Ask one compact `/grill-me` block only when a missing bounded fact blocks the active lane. Use `/grill-me` only when a missing bounded fact blocks the active lane.
 5. Run the critical challenge before non-trivial action.
 6. Write a short Readiness Brief.
-7. If executable or evaluable behavior changes, load `internal-tdd` before implementation and follow its routed posture.
-8. For an explicit code-simplification request or already-approved simplification remediation, establish a passing behavior baseline, then load `addyosmani-code-simplification`; do not create a simplification pass after unrelated implementation.
+7. If executable or evaluable behavior changes, load `/internal-tdd` before implementation and follow its routed posture.
+8. For an explicit code-simplification request or already-approved simplification remediation, establish a passing behavior baseline, then load `/addyosmani-code-simplification`; do not create a simplification pass after unrelated implementation.
 9. Execute the smallest coherent in-scope move.
 10. Run focused validation or report the exact validation gap.
 11. Use the final evidence gate before positive claims.
@@ -180,11 +180,11 @@ Use `--format json` when complete readiness and evidence data is required.
 - Concrete bounded work completes in the same run unless `stop-with-reason` is explicit.
 - Stop output explains the exact violated condition and required evidence.
 - `trivial-skip` names the validation path directly or states the exact validation gap.
-- Non-trivial work completes Initial Idea Ordering before `grill-me`.
+- Non-trivial work completes Initial Idea Ordering before `/grill-me`.
 - The critical challenge runs before non-trivial action.
 - Non-trivial work has a Gate Evidence Ledger entry for each required row, or an explicit blocker.
 - Skipped gates record the reason that made the skip valid.
 - Blocked gates prevent completion, readiness, passing, fixed, or no-gap claims.
-- Executable or evaluable behavior changes load `internal-tdd` before implementation when a meaningful seam exists.
-- `addyosmani-code-simplification` loads only for an explicit simplification request or already-approved remediation after a passing behavior baseline exists.
+- Executable or evaluable behavior changes load `/internal-tdd` before implementation when a meaningful seam exists.
+- `/addyosmani-code-simplification` loads only for an explicit simplification request or already-approved remediation after a passing behavior baseline exists.
 - Positive claims rely on fresh evidence before completion.

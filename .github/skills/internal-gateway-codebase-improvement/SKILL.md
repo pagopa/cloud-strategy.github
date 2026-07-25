@@ -8,12 +8,12 @@ disable-model-invocation: true
 
 ## Referenced skills
 
-- `mattpocock-improve-codebase-architecture`: architecture discovery and
+- `/mattpocock-improve-codebase-architecture`: architecture discovery and
   candidate report owner.
-- `addyosmani-code-simplification`: behavior-preserving implementation
+- `/addyosmani-code-simplification`: behavior-preserving implementation
   simplification owner.
-- `internal-tdd`: executable or evaluable behavior-change gate.
-- `superpowers-verification-before-completion`: final evidence owner.
+- `/internal-tdd`: executable or evaluable behavior-change gate.
+- `/superpowers-verification-before-completion`: final evidence owner.
 
 ## Manual invocation boundary
 
@@ -53,7 +53,7 @@ ask before changing from `local-simplification` to an architecture lane.
 4. Establish a Passing behavior baseline.
 5. For architecture lanes, run architecture discovery and stop at the
    Structural Approval Gate before any write.
-6. For executable changes, load `internal-tdd`.
+6. For executable changes, load `/internal-tdd`.
 7. Record the approved interfaces and seams as the Protected seam set.
 8. Apply the executable refactor in the approved scope.
 9. Apply behavior-preserving simplification only for
@@ -77,6 +77,6 @@ Simplification must not alter any protected seam.
 
 ## Final Evidence Gate
 
-After all writes, load `superpowers-verification-before-completion` and
+After all writes, load `/superpowers-verification-before-completion` and
 present fresh passing evidence for the focused validation path before
 claiming completion.

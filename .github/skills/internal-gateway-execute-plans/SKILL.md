@@ -1,7 +1,6 @@
 ---
 name: internal-gateway-execute-plans
 description: "Use when executing or resuming an approved repository-owned retained plan under tmp/superpowers/plans/."
-disable-model-invocation: true
 ---
 
 # Internal Gateway Execute Plans

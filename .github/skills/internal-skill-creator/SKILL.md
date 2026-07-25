@@ -7,9 +7,16 @@ description: Use when creating or materially revising repository-owned skills un
 
 ## Core method
 
-`mattpocock-writing-great-skills` is the core method for skill authoring and
+`/mattpocock-writing-great-skills` is the core method for skill authoring and
 revision. Load it before drafting. Apply its relevant rules throughout the
 change instead of repeating them here.
+
+## Cross-skill invocation
+
+Prefix every cross-skill invocation with `/`. Write `/skill-name` whenever
+this skill asks the agent to load, run, use, invoke, or delegate to another
+skill. Keep the target skill model-invocable; a called skill must not set
+`disable-model-invocation: true`.
 
 ## When to use
 
@@ -33,7 +40,7 @@ repository validation path are explicit.
 
 ### 2. Core authoring and revision
 
-Load `mattpocock-writing-great-skills` as the core method. Draft or revise the
+Load `/mattpocock-writing-great-skills` as the core method. Draft or revise the
 smallest coherent bundle. Check invocation, description, information hierarchy,
 retrieval quality, and predictability. Remove duplication, sediment, and no-ops;
 revise the draft in place instead of only reporting findings.

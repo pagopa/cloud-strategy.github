@@ -79,13 +79,13 @@ refactor must not alter. Simplification applies only within these bounds.
 
 ## Behavior-preserving simplification
 
-Apply `addyosmani-code-simplification` only for `local-simplification` or the
+Apply `/addyosmani-code-simplification` only for `local-simplification` or the
 approved changed scope of `combined`. The simplification must not alter any
 entry in the Protected seam set.
 
 ## Executable refactor
 
-For executable changes, load `internal-tdd` before implementation. Apply the
+For executable changes, load `/internal-tdd` before implementation. Apply the
 refactor within the approved scope and protected seam set.
 
 ## Focused validation
@@ -95,7 +95,7 @@ must cover the changed files and their direct dependents.
 
 ## Final Evidence Gate
 
-Load `superpowers-verification-before-completion` and present fresh passing
+Load `/superpowers-verification-before-completion` and present fresh passing
 evidence before claiming completion.
 
 ## Stop conditions

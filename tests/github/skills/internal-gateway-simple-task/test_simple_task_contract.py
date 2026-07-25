@@ -60,10 +60,10 @@ def test_simple_task_bundle_routes_code_changes_to_internal_tdd() -> None:
     agent_text = AGENT_PATH.read_text()
     support_routing_text = SUPPORT_ROUTING_PATH.read_text()
 
-    assert "`internal-tdd`" in skill_text
-    assert "load `internal-tdd` before implementation" in skill_text
-    assert "load `internal-tdd` before implementation" in agent_text
-    assert "Load `internal-tdd`" in support_routing_text
+    assert "`/internal-tdd`" in skill_text
+    assert "load `/internal-tdd` before implementation" in skill_text
+    assert "load `/internal-tdd` before implementation" in agent_text
+    assert "Load `/internal-tdd`" in support_routing_text
 
 
 def test_simple_task_skill_has_one_compact_execution_contract() -> None:
@@ -216,7 +216,7 @@ def test_suggest_does_not_emit_worktree_mapping() -> None:
 def test_code_simplification_requires_explicit_authorization() -> None:
     skill_text = SKILL_PATH.read_text()
 
-    assert "`addyosmani-code-simplification`: on-demand method owner" in skill_text
+    assert "`/addyosmani-code-simplification`: on-demand method owner" in skill_text
     assert "explicit code-simplification request" in skill_text
     assert "already-approved simplification remediation" in skill_text
     assert "establish a passing behavior baseline" in skill_text

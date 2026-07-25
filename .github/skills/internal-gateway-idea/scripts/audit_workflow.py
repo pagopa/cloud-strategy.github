@@ -91,8 +91,8 @@ def main() -> int:
     ]
     runtime_only_markers = [
         "$internal-gateway-idea",
-        "$superpowers-brainstorming",
-        "$internal-gateway-writing-plans",
+        "/superpowers-brainstorming",
+        "/internal-gateway-writing-plans",
         "do not implement",
         "agent filename, frontmatter name, and workflow aligned",
     ]
@@ -148,11 +148,11 @@ def main() -> int:
             contains_all(text, chat_projection_markers)
             for text in (skill_text, workflow_text, runtime_text)
         ),
-        "retained_spec_owner": "Retained spec writing stays with `superpowers-brainstorming`" in skill_text,
+        "retained_spec_owner": "Retained spec writing stays with `/superpowers-brainstorming`" in skill_text,
         "spec_review_before_plan_handoff": "Write retained spec" in workflow_text
         and "User reviews retained spec" in workflow_text
         and "Approve implementation-plan writing" in workflow_text
-        and "Load internal-gateway-writing-plans" in workflow_text,
+        and "Load /internal-gateway-writing-plans" in workflow_text,
         "writing_gateway_is_plan_only": "implementation-plan writing" in skill_text
         and "retained spec or implementation-plan writing" not in skill_text
         and "retained spec or implementation-plan writing" not in workflow_text

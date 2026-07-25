@@ -4,7 +4,7 @@ interface:
   default_prompt: >-
     Use $internal-gateway-idea when a repository-owned idea, proposed direction,
     unclear goal, or option set needs brainstorming before planning. Load
-    $superpowers-brainstorming as the core workflow, then read
+    /superpowers-brainstorming as the core workflow, then read
     references/workflow.md for the local state machine. If the incoming request
     is execution-shaped, record Specialization Checkpoint: gated internally and
     project only the decision-relevant consequence, then continue through Idea
@@ -14,15 +14,15 @@ interface:
     Assumption Challenge Gate, Alternative discovery, Critical Challenge Gate,
     Spec vs plan decision, Stop before implementation execution. External
     research is on-demand after local evidence is insufficient; load
-    mattpocock-research only when one external fact could change feasibility,
+    /mattpocock-research only when one external fact could change feasibility,
     approach, constraints, or risk. Run Critical Challenge Gate as its own
     visible gate after design-direction approval; an embedded critique does not
     satisfy Critical Challenge Gate. Treat procedi, ok, go, or similar approval
     as advancing only the active visible gate; clarify ambiguous approval before
     loading another owner. If a mandatory gate was skipped, stop and resume at
-    the first skipped mandatory gate. Load $internal-gateway-writing-plans only
+    the first skipped mandatory gate. Load /internal-gateway-writing-plans only
     after the user explicitly approves implementation-plan writing. Retained spec
-    writing stays with $superpowers-brainstorming. Stop after the writing outcome;
+    writing stays with /superpowers-brainstorming. Stop after the writing outcome;
     do not implement or invoke execution owners from this skill.
     Keep mandatory gates as internal workflow state. In chat, emit one compact user-facing decision card with 🎯 🧭 🛠️ 🧪 ⚠️ ✅ 💡 ✈️ for status, approval,
     routing, material risk, blocker, and requested user action. Content-bearing

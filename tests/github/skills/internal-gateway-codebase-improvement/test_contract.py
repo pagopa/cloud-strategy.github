@@ -76,7 +76,7 @@ def test_skill_defines_exactly_three_evidence_selected_lanes() -> None:
 def test_skill_references_existing_method_owners_without_copying_them() -> None:
     skill = SKILL_PATH.read_text(encoding="utf-8")
     for owner in METHOD_OWNERS:
-        assert f"`{owner}`" in skill
+        assert f"`/{owner}`" in skill
     assert "HTML report scaffold" not in skill
     assert "The Five Principles" not in skill
 

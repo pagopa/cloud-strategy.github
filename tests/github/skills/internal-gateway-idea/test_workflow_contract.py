@@ -177,7 +177,7 @@ def test_external_research_checkpoint_has_bounded_outcomes() -> None:
 
     outcomes = [
         "skip",
-        "load `mattpocock-research`",
+        "load `/mattpocock-research`",
         "one bounded research question",
         "one Markdown report",
         "decision-relevant conclusions",
@@ -191,14 +191,14 @@ def test_external_research_checkpoint_has_bounded_outcomes() -> None:
 def test_spec_is_written_and_reviewed_before_plan_gateway_handoff() -> None:
     skill = SKILL_PATH.read_text(encoding="utf-8")
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
-    assert "Retained spec writing stays with `superpowers-brainstorming`" in skill
+    assert "Retained spec writing stays with `/superpowers-brainstorming`" in skill
     _assert_in_order(
         workflow,
         [
             "Write retained spec",
             "User reviews retained spec",
             "Approve implementation-plan writing",
-            "Load internal-gateway-writing-plans",
+            "Load /internal-gateway-writing-plans",
         ],
     )
 

@@ -1,0 +1,12 @@
+diff --git a/.github/skills/mattpocock-improve-codebase-architecture/SKILL.md b/.github/skills/mattpocock-improve-codebase-architecture/SKILL.md
+index 0000000..0000000 100644
+--- a/.github/skills/mattpocock-improve-codebase-architecture/SKILL.md
++++ b/.github/skills/mattpocock-improve-codebase-architecture/SKILL.md
+@@ -1,7 +1,6 @@
+ ---
+ name: mattpocock-improve-codebase-architecture
+ description: Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
+-disable-model-invocation: true
+ ---
+ 
+ # Improve Codebase Architecture

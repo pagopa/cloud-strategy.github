@@ -92,5 +92,5 @@ def test_delegated_output_is_draft_until_local_acceptance() -> None:
 
 def test_accepted_plan_routes_to_the_repository_execution_gateway() -> None:
     skill = SKILL_PATH.read_text(encoding="utf-8")
-    assert "`internal-gateway-execute-plans`" in skill
+    assert "`/internal-gateway-execute-plans`" in skill
     assert "Stop after reporting the accepted plan path" in skill

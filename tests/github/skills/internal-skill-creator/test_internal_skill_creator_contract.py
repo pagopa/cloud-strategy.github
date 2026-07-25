@@ -27,7 +27,7 @@ def test_material_work_uses_core_method_before_local_evaluation() -> None:
     )
     positions = [workflow.index(heading) for heading in headings]
     assert positions == sorted(positions)
-    assert "Load `mattpocock-writing-great-skills`" in workflow
+    assert "Load `/mattpocock-writing-great-skills`" in workflow
     assert "core method" in workflow
 
 

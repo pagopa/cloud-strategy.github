@@ -4,7 +4,7 @@ Use this reference when the simple-task bundle must decide whether one focused c
 
 ## Core Rule
 
-Default to the full gate for non-trivial work: bounded evidence, Initial Idea Ordering, one compact `grill-me` block when needed, critical challenge, then the internal readiness record. Complete the internal readiness record, then render only the compact user-facing projection. Do not paste the internal record or Gate Evidence.
+Default to the full gate for non-trivial work: bounded evidence, Initial Idea Ordering, one compact `/grill-me` block when needed, critical challenge, then the internal readiness record. Complete the internal readiness record, then render only the compact user-facing projection. Do not paste the internal record or Gate Evidence.
 
 Skip the gate only with a Trivial-skip proof showing:
 
@@ -31,7 +31,7 @@ If `1` or `2` is yes and `3-5` are no, use the full gate. If any of `3-5` is yes
 
 ## Single Clarification Limit
 
-Ask at most one compact `grill-me` block for:
+Ask at most one compact `/grill-me` block for:
 
 - missing file, path, or artifact target
 - missing input data or reproduction step
@@ -40,16 +40,16 @@ Ask at most one compact `grill-me` block for:
 
 If that answer creates another dependent question set, stop with reason.
 
-## `grill-me` Boundary
+## `/grill-me` Boundary
 
-`grill-me` may recover:
+`/grill-me` may recover:
 
 - a missing path or artifact
 - a missing reproduction step
 - one bounded blocker
 - one missing local fact needed to execute
 
-`grill-me` must not decide:
+`/grill-me` must not decide:
 
 - staged workflow changes
 - architecture or design tradeoffs

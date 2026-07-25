@@ -7,9 +7,9 @@ description: Use when repository-owned work needs approved implementation plan w
 
 ## Referenced skills
 
-- `superpowers-writing-plans`: required owner after the repository preflight.
+- `/superpowers-writing-plans`: required owner after the repository preflight.
 
-Thin repository wrapper for approved implementation-plan writing. This skill records the local handoff facts, delegates artifact decisions to `superpowers-writing-plans`, treats the delegated result as a draft until the local acceptance gate passes, and stops after reporting the accepted plan path.
+Thin repository wrapper for approved implementation-plan writing. This skill records the local handoff facts, delegates artifact decisions to `/superpowers-writing-plans`, treats the delegated result as a draft until the local acceptance gate passes, and stops after reporting the accepted plan path.
 
 ## When to use
 
@@ -31,7 +31,7 @@ Completion criterion: all six preflight facts are present and no fact is missing
 
 ### Delegated Draft Gate
 
-Load `superpowers-writing-plans` and let it create a plan, ask a blocking clarification, redirect, or stop with a reason. Pass an explicit anti-scope and the relevant owners already identified in the preflight so the delegated plan avoids duplicate or speculative tasks at the source. Pass an explicit delivery rule: the delegated plan must not contain `git add`, `git commit`, or `git push` steps or instructions, and must not present committing changes as the default next step unless the user explicitly asks for commit help. The delegated writing outcome persists as a draft-only artifact under `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md`.
+Load `/superpowers-writing-plans` and let it create a plan, ask a blocking clarification, redirect, or stop with a reason. Pass an explicit anti-scope and the relevant owners already identified in the preflight so the delegated plan avoids duplicate or speculative tasks at the source. Pass an explicit delivery rule: the delegated plan must not contain `git add`, `git commit`, or `git push` steps or instructions, and must not present committing changes as the default next step unless the user explicitly asks for commit help. The delegated writing outcome persists as a draft-only artifact under `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md`.
 
 Completion criterion: one delegated plan artifact exists under the timestamped plan path and is marked draft-only.
 
@@ -47,9 +47,9 @@ Completion criterion: objective checks pass and human judgment checks pass.
 
 ### Writing Stop
 
-After the local acceptance gate passes, name `internal-gateway-execute-plans` as the next owner. Stop after reporting the accepted plan path and wait for the user's next choice.
+After the local acceptance gate passes, name `/internal-gateway-execute-plans` as the next owner. Stop after reporting the accepted plan path and wait for the user's next choice.
 
-Completion criterion: accepted plan path is reported and `internal-gateway-execute-plans` is named as the next owner.
+Completion criterion: accepted plan path is reported and `/internal-gateway-execute-plans` is named as the next owner.
 
 Preserve handoff quality with targeted rereads only when the delegation has a real evidence gap.
 
