@@ -130,10 +130,12 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
 - `.github/skills/local-sync-repos/SKILL.md`
 - `.github/skills/mattpocock-code-review/SKILL.md`
+- `.github/skills/mattpocock-codebase-design/SKILL.md`
 - `.github/skills/mattpocock-domain-modeling/SKILL.md`
 - `.github/skills/mattpocock-grill-with-docs/SKILL.md`
 - `.github/skills/mattpocock-handoff/SKILL.md`
 - `.github/skills/mattpocock-implement/SKILL.md`
+- `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`

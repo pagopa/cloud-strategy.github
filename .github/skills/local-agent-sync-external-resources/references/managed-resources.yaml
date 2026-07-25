@@ -102,6 +102,12 @@ sources:
       - upstream: skills/engineering/domain-modeling
         local: .github/skills/mattpocock-domain-modeling
         canonical_name: mattpocock-domain-modeling
+      - upstream: skills/engineering/codebase-design
+        local: .github/skills/mattpocock-codebase-design
+        canonical_name: mattpocock-codebase-design
+      - upstream: skills/engineering/improve-codebase-architecture
+        local: .github/skills/mattpocock-improve-codebase-architecture
+        canonical_name: mattpocock-improve-codebase-architecture
       - upstream: skills/engineering/implement
         local: .github/skills/mattpocock-implement
         canonical_name: mattpocock-implement

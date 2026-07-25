@@ -70,7 +70,7 @@ def test_audit_does_not_fetch_or_write(repo_root: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["mode"] == "audit"
     assert payload["repository_changed"] is False
-    assert payload["managed_assets"] == 54
+    assert payload["managed_assets"] == 56
 
 
 def test_apply_refuses_dirty_target(tmp_path: Path) -> None:

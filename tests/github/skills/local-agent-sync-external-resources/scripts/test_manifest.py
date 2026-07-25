@@ -1,3 +1,4 @@
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -139,7 +140,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 54
+    assert len(manifest.assets) == 56
     assert len(manifest.watchlist) == 13
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
@@ -156,6 +157,8 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
     } >= {
         "mattpocock-grill-with-docs",
         "mattpocock-domain-modeling",
+        "mattpocock-codebase-design",
+        "mattpocock-improve-codebase-architecture",
         "mattpocock-implement",
         "mattpocock-tdd",
         "mattpocock-to-spec",
@@ -342,6 +345,10 @@ def test_mattpocock_skill_creator_review_keeps_invocation_override(
     for target, override_id in expected.items():
         override = by_target[target]
         assert override.override_id == override_id
+        digest = hashlib.sha256(
+            (repo_root / target).read_bytes()
+        ).hexdigest()
+        assert override.expected_content_hash == digest
         patch = (bundle_root / override.patch_path).read_text(
             encoding="utf-8"
         )

@@ -86,7 +86,7 @@ overrides:
     use by internal-skill-creator and remove disable-model-invocation so the orchestrator
     can invoke it programmatically during the predictability review stage.
   patch_path: patches/mattpocock-writing-great-skills-delegated-invocation.patch
-  expected_content_hash: 2cde2c28c32b40d57f2766ddf806a962752fef7050c4dc474405314000df3938
+  expected_content_hash: 41d4749ab5b4d903a8242b2e799c52ec405c35a520969bff6a43d6e788fe9254
   baseline_repo_commit: ed37663cc5fbef691ddfecd080dff42f7e7e350d
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     the delegation contract still matches the intended orchestration order.
