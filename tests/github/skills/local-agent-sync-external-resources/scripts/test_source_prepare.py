@@ -405,36 +405,12 @@ def test_extract_archive_rejects_symlink_escaping_snapshot(tmp_path: Path) -> No
         _extract_archive(archive, export_dir)
 
 
-@pytest.fixture
-def fixture_remote_without_sha_upload(tmp_path: Path) -> tuple[Path, str]:
-    remote = tmp_path / "strict-remote.git"
-    remote.mkdir()
-    _run_git(remote, ["init", "--bare"])
-    _run_git(remote, ["config", "uploadpack.allowFilter", "true"])
-    _run_git(remote, ["config", "uploadpack.allowReachableSHA1InWant", "false"])
-    _run_git(remote, ["config", "uploadpack.allowAnySHA1InWant", "false"])
-
-    work = tmp_path / "strict-work"
-    work.mkdir()
-    _run_git(work, ["init"])
-    _run_git(work, ["config", "user.email", "test@test.com"])
-    _run_git(work, ["config", "user.name", "Test"])
-    skill_dir = work / "skills" / "target-skill"
-    skill_dir.mkdir(parents=True)
-    (skill_dir / "SKILL.md").write_text(
-        "---\nname: target-skill\n---\nTarget content.\n", encoding="utf-8"
-    )
-    commit_sha = _commit_all(work)
-    _run_git(work, ["remote", "add", "origin", str(remote)])
-    _run_git(work, ["push", "origin", "HEAD:refs/heads/main"])
-    return remote, commit_sha
-
-
 def test_advertised_ref_fallback_is_reported_as_advertised_ref(
     tmp_path: Path,
-    fixture_remote_without_sha_upload: tuple[Path, str],
+    fixture_remote: tuple[Path, str],
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    remote_path, commit_sha = fixture_remote_without_sha_upload
+    remote_path, commit_sha = fixture_remote
     workspace = tmp_path / "workspace"
     workspace.mkdir()
     sources_root = tmp_path / "sources"
@@ -455,8 +431,106 @@ def test_advertised_ref_fallback_is_reported_as_advertised_ref(
     )
     resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
 
+    import source_prepare_core
+    original_fetch_sha = source_prepare_core._fetch_sha
+
+    def failing_fetch_sha(cache: Path, sha: str) -> None:
+        from sync_external_resources_core import SyncCommandError
+        raise SyncCommandError(["git", "fetch"], 128, "simulated failure")
+
+    monkeypatch.setattr(source_prepare_core, "_fetch_sha", failing_fetch_sha)
+
     results = prepare_sources(resources, workspace, sources_root)
 
     assert results[0].cache_status == "fetched"
     assert results[0].fetch_strategy == "advertised-ref"
     assert (sources_root / "strict-source" / "skills" / "target-skill" / "SKILL.md").exists()
+
+
+def _single_source_resources(remote_path: Path, commit_sha: str) -> ManagedResources:
+    asset = ManagedAsset(
+        source="test-source",
+        upstream="skills/target-skill",
+        local=".github/skills/target-skill",
+        canonical_name="target-skill",
+    )
+    source = ManagedSource(
+        source_id="test-source",
+        repository=str(remote_path),
+        ref=commit_sha,
+        advertised_ref=None,
+        assets=(asset,),
+    )
+    return ManagedResources(sources=(source,), replacements=(), watchlist=())
+
+
+def test_rebuild_cache_refetches_even_when_pin_is_present(
+    tmp_path: Path,
+    fixture_remote: tuple[Path, str],
+) -> None:
+    remote_path, commit_sha = fixture_remote
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    sources_root = tmp_path / "sources"
+    sources_root.mkdir()
+    resources = _single_source_resources(remote_path, commit_sha)
+
+    warm = prepare_sources(resources, workspace, sources_root)
+    assert warm[0].cache_status == "fetched"
+
+    rebuilt = prepare_sources(
+        resources, workspace, sources_root, rebuild_cache=True
+    )
+
+    assert rebuilt[0].cache_status == "rebuilt"
+    assert rebuilt[0].fetch_strategy == "direct-sha"
+    assert rebuilt[0].cache_bytes_added > 0
+    assert (sources_root / "test-source" / "skills" / "target-skill" / "SKILL.md").exists()
+
+
+def test_rebuild_cache_leaves_no_staging_directories(
+    tmp_path: Path,
+    fixture_remote: tuple[Path, str],
+) -> None:
+    remote_path, commit_sha = fixture_remote
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    sources_root = tmp_path / "sources"
+    sources_root.mkdir()
+    resources = _single_source_resources(remote_path, commit_sha)
+
+    prepare_sources(resources, workspace, sources_root)
+    prepare_sources(resources, workspace, sources_root, rebuild_cache=True)
+
+    repositories = workspace / "cache" / "repositories"
+    leftovers = [
+        entry.name
+        for entry in repositories.iterdir()
+        if entry.name.endswith(".rebuild") or entry.name.endswith(".prior")
+    ]
+    assert leftovers == []
+
+
+import source_prepare_core  # noqa: E402
+
+
+def test_network_fetch_uses_extended_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[list[str], int]] = []
+
+    def fake_run_command(command: list[str], cwd: Path | None = None, timeout: int = 60):
+        calls.append((command, timeout))
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(source_prepare_core, "_run_command", fake_run_command)
+
+    source_prepare_core._fetch_sha(Path("/nonexistent-cache"), _FULL_SHA40)
+    source_prepare_core._fetch_advertised_ref(
+        Path("/nonexistent-cache"), "refs/heads/main"
+    )
+
+    assert source_prepare_core.NETWORK_COMMAND_TIMEOUT_SECONDS >= 900
+    assert all(
+        timeout == source_prepare_core.NETWORK_COMMAND_TIMEOUT_SECONDS
+        for _, timeout in calls
+    )
+    assert len(calls) == 2

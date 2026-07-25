@@ -17,41 +17,41 @@ def workflow_text() -> str:
     return SKILL_PATH.read_text(encoding="utf-8").split("## Workflow", 1)[1]
 
 
-def test_material_work_runs_local_authoring_then_delegates_review() -> None:
+def test_material_work_uses_core_method_before_local_evaluation() -> None:
     workflow = workflow_text()
     headings = (
-        "### 1. Authoring and proportional evaluation",
-        "### 2. Predictability review",
-        "### 3. Repository closure",
+        "### 1. Repository preflight",
+        "### 2. Core authoring and revision",
+        "### 3. Proportional evaluation",
+        "### 4. Repository closure",
     )
     positions = [workflow.index(heading) for heading in headings]
     assert positions == sorted(positions)
-    assert "anthropic-skill-creator" not in workflow
     assert "Load `mattpocock-writing-great-skills`" in workflow
+    assert "core method" in workflow
 
 
-def test_local_authoring_stage_is_evidence_gated() -> None:
+def test_local_evaluation_stage_is_evidence_gated() -> None:
     workflow = workflow_text()
-    authoring = workflow.split(
-        "### 1. Authoring and proportional evaluation", 1
-    )[1].split("### 2. Predictability review", 1)[0]
-    assert "references/authoring-and-evaluation.md" in authoring
-    assert "applicable evaluation branches" in authoring
-    assert "skipped branches and reasons" in authoring
-    assert "draft, evidence, blockers, and completion status" in authoring
+    evaluation = workflow.split(
+        "### 3. Proportional evaluation", 1
+    )[1].split("### 4. Repository closure", 1)[0]
+    normalized = " ".join(evaluation.split())
+    assert "references/authoring-and-evaluation.md" in normalized
+    assert "applicable evaluation branches" in normalized
+    assert "skipped branches and reasons" in normalized
+    assert "evidence, blockers, and completion status" in normalized
 
 
 def test_local_authoring_reference_covers_the_retained_contract() -> None:
     reference = REFERENCE_PATH.read_text(encoding="utf-8")
     required_markers = (
         "## Intent contract",
-        "## Bundle anatomy",
         "## Evaluation selection",
         "## Baselines",
         "## Evidence and human review",
         "## Description trigger checks",
         "## Iteration stop conditions",
-        "## Intentionally retired capabilities",
     )
     for marker in required_markers:
         assert marker in reference
@@ -61,28 +61,31 @@ def test_local_authoring_reference_covers_the_retained_contract() -> None:
     assert "holdout" in reference.lower()
 
 
-def test_internal_bundle_has_no_anthropic_skill_creator_dependency() -> None:
+def test_internal_bundle_has_only_the_core_skill_dependency() -> None:
     bundle_text = "\n".join(
         path.read_text(encoding="utf-8")
         for path in BUNDLE_ROOT.rglob("*")
         if path.is_file()
     )
     assert "anthropic-skill-creator" not in bundle_text
+    assert "local-agent-sync-external-resources" not in bundle_text
+    assert "internal-agent-creator" not in bundle_text
+    assert bundle_text.count("mattpocock-writing-great-skills") >= 2
 
 
-def test_predictability_stage_revises_instead_of_only_reporting() -> None:
+def test_core_stage_revises_instead_of_only_reporting() -> None:
     workflow = workflow_text()
-    review = workflow.split("### 2. Predictability review", 1)[1].split(
-        "### 3. Repository closure", 1
+    review = workflow.split("### 2. Core authoring and revision", 1)[1].split(
+        "### 3. Proportional evaluation", 1
     )[0]
     assert "revise the draft" in review
     assert "invocation, description, information hierarchy" in review
-    assert "duplication, sediment, no-op, and predictability" in review
+    assert "duplication, sediment, and no-ops" in review
 
 
 def test_local_closure_keeps_repository_specific_checks() -> None:
     workflow = workflow_text()
-    closure = workflow.split("### 3. Repository closure", 1)[1]
+    closure = workflow.split("### 4. Repository closure", 1)[1]
     assert "agents/openai.yaml" in closure
     assert "validate_internal_skills" in closure
     assert "routing fallout" in closure
@@ -98,10 +101,10 @@ def test_redundant_local_references_are_removed() -> None:
     ).exists()
 
 
-def test_default_prompt_names_local_authoring_before_review() -> None:
+def test_default_prompt_names_core_method_before_local_closure() -> None:
     prompt = OPENAI_PATH.read_text(encoding="utf-8")
-    authoring = prompt.index("local authoring")
     matt = prompt.index("mattpocock-writing-great-skills")
+    evaluation = prompt.index("proportional evaluation")
     closure = prompt.index("repository closure")
-    assert authoring < matt < closure
+    assert matt < evaluation < closure
     assert "anthropic-skill-creator" not in prompt

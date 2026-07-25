@@ -501,7 +501,7 @@ watchlist: []
     )
     assert first.returncode == 0, first.stderr
     assert "source\ttest-source" in first.stdout
-    assert "metric\ttest-source\tmaterialized_files" in first.stdout
+    assert "metric\ttest-source.materialized_files\tok" in first.stdout
 
     snapshot_skill = workspace / "sources" / "test-source" / "skills" / "example" / "SKILL.md"
     assert snapshot_skill.exists()
@@ -686,3 +686,76 @@ def test_agent_and_skill_do_not_route_to_unneeded_skills(repo_root: Path) -> Non
         "internal-copilot-audit",
     ):
         assert forbidden not in text
+
+
+def test_invalid_manifest_emits_blocker_not_traceback(
+    tmp_path: Path, repo_root: Path
+) -> None:
+    bad_manifest = tmp_path / "bad-manifest.yaml"
+    bad_manifest.write_text("version: 2\nsources: {}\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "audit",
+            "--repo-root",
+            str(repo_root),
+            "--manifest",
+            str(bad_manifest),
+            "--format",
+            "tsv",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "Traceback" not in result.stderr
+    assert result.stdout.splitlines()[0] == "record\tkey\tstatus\tvalue"
+    assert "blocker\t" in result.stdout
+    assert "version 1" in result.stdout
+
+
+def test_prepare_tsv_metric_rows_use_status_column_for_status(
+    tmp_path: Path, repo_root: Path
+) -> None:
+    from sync_external_resources import SyncOutcome  # noqa: E402
+    from source_prepare_core import PrepareSourceResult  # noqa: E402
+
+    outcome = SyncOutcome(
+        mode="prepare",
+        workspace="/tmp/ws",
+        managed_assets=1,
+        changed_paths=(),
+        override_results=(),
+        validations=(),
+        blockers=(),
+        repository_changed=False,
+        source_results=(
+            PrepareSourceResult(
+                source_id="example",
+                repository="https://example.com/repo.git",
+                ref="a" * 40,
+                cache_status="fetched",
+                fetch_strategy="direct-sha",
+                materialized_files=3,
+                materialized_bytes=42,
+                cache_bytes_added=7,
+                duration_ms=5,
+            ),
+        ),
+    )
+
+    rows = {
+        (record.record, record.key): (record.status, record.value)
+        for record in outcome.to_records()
+    }
+
+    assert rows[("metric", "example.materialized_files")] == ("ok", "3")
+    assert rows[("metric", "example.materialized_bytes")] == ("ok", "42")
+    assert rows[("metric", "example.cache_bytes_added")] == ("ok", "7")
+    assert rows[("metric", "example.duration_ms")] == ("ok", "5")
+    assert rows[("validation", "example.fetch_strategy")] == ("ok", "direct-sha")
+    assert rows[("source", "example")] == ("fetched", "a" * 40)

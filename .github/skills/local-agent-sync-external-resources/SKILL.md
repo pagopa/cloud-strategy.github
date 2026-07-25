@@ -9,7 +9,8 @@ description: Audit, plan, or apply declared external resource refreshes through 
 
 This skill owns the manifest-driven CLI that stages, validates, and applies
 declared external resource refreshes safely. The single public entrypoint is
-`scripts/sync_external_resources.py`.
+`scripts/sync_external_resources.py`. Bundle siblings: `references/`,
+`patches/`, `agents/openai.yaml`, `scripts/`.
 
 ## Modes
 
@@ -64,7 +65,8 @@ declared external resource refreshes safely. The single public entrypoint is
 - Warm `prepare` finds the pin ref already cached and performs no fetch,
   reporting `cached` status and zero added cache bytes.
 - `--rebuild-cache` forces a fresh cache rebuild beside the active one,
-  replacing it only after verification.
+  replacing it only after verification. The rebuild reports `cache_status`
+  `rebuilt` only after the fresh cache replaces the active one.
 
 ## TSV Output
 
@@ -72,6 +74,8 @@ declared external resource refreshes safely. The single public entrypoint is
 - Header: `record\tkey\tstatus\tvalue`.
 - Record types: `summary`, `source`, `metric`, `change`, `override`,
   `validation`, `blocker`.
+- `metric` and per-source `validation` rows use `key` `<source_id>.<name>`,
+  `status` `ok` or `fail`, and the measured value in `value`.
 - `--format text` remains the default for operators.
 - `--format json` retains backward-compatible keys.
 
@@ -106,15 +110,9 @@ python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external
 
 ## Live Network Benchmark (Separate Authorization Required)
 
-```bash
-python3 .github/skills/local-agent-sync-external-resources/scripts/sync_external_resources.py \
-  prepare \
-  --workspace ../cloud-strategy.github-external-refresh \
-  --format tsv
-```
-
-Compare `github-awesome-copilot` and `sickn33-antigravity` snapshot metrics
-with 242 MiB and 318 MiB baselines. Require at least 90% reduction. Run again
+Run `prepare` (see `## Canonical Commands`) against the two largest sources
+(`github-awesome-copilot` and `sickn33-antigravity`) with 242 MiB and 318 MiB
+baselines. Require at least 90% reduction in `materialized_bytes`. Run again
 and require `cached` with zero added cache bytes. The command must not alter
 manifest refs or repository targets. Do not run without separate authorization.
 

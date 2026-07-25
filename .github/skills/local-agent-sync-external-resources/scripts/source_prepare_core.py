@@ -18,8 +18,10 @@ from sync_external_resources_core import (
     ManagedSource,
     SyncCommandError,
     _run_command,
-    validate_prepared_sources,
 )
+
+
+NETWORK_COMMAND_TIMEOUT_SECONDS = 1800
 
 
 @dataclass(frozen=True)
@@ -145,17 +147,6 @@ def _init_bare_cache(cache: Path, repository: str) -> None:
     )
 
 
-def _detect_object_format(cache: Path) -> int:
-    result = _run_command(
-        ["git", "rev-parse", "--object-format"],
-        cwd=cache,
-    )
-    fmt = result.stdout.strip()
-    if fmt == "sha256":
-        return 64
-    return 40
-
-
 def _pin_ref(sha: str) -> str:
     return f"refs/cache/pins/{sha}"
 
@@ -202,7 +193,7 @@ def _write_pin(cache: Path, sha: str) -> None:
 
 def _fetch_sha(cache: Path, sha: str) -> None:
     cmd = _build_fetch_command(sha)
-    _run_command(cmd, cwd=cache)
+    _run_command(cmd, cwd=cache, timeout=NETWORK_COMMAND_TIMEOUT_SECONDS)
 
 
 def _fetch_advertised_ref(cache: Path, ref: str) -> None:
@@ -219,7 +210,7 @@ def _fetch_advertised_ref(cache: Path, ref: str) -> None:
         "--filter=blob:none",
         "--refmap=",
     ]
-    _run_command(cmd, cwd=cache)
+    _run_command(cmd, cwd=cache, timeout=NETWORK_COMMAND_TIMEOUT_SECONDS)
 
 
 def _cache_size(cache: Path) -> int:
@@ -236,24 +227,35 @@ def _cache_size(cache: Path) -> int:
 def _fetch_source(
     cache: Path,
     source: ManagedSource,
-    sha_length: int,
 ) -> tuple[Literal["cached", "fetched"], Literal["cache", "direct-sha", "advertised-ref"]]:
     if _has_pin(cache, source.ref):
         return "cached", "cache"
 
-    before = _cache_size(cache)
+    fetch_strategy: Literal["direct-sha", "advertised-ref"] = "direct-sha"
     try:
         _fetch_sha(cache, source.ref)
-    except Exception:
-        if source.advertised_ref is not None:
-            _fetch_advertised_ref(cache, source.advertised_ref)
-        else:
+    except SyncCommandError:
+        if source.advertised_ref is None:
             raise
+        _fetch_advertised_ref(cache, source.advertised_ref)
+        fetch_strategy = "advertised-ref"
 
     _verify_commit(cache, source.ref)
     _write_pin(cache, source.ref)
 
-    return "fetched", "direct-sha"
+    return "fetched", fetch_strategy
+
+
+def _safe_filter(member: tarfile.TarInfo, dest_path: str) -> tarfile.TarInfo:
+    if member.name.startswith("/"):
+        raise tarfile.FilterError(f"absolute path in tar member: {member.name!r}")
+    result = tarfile.data_filter(member, dest_path)
+    return result
+
+
+def _extract_archive(archive_bytes: bytes, export_dir: Path) -> None:
+    with tarfile.open(fileobj=io.BytesIO(archive_bytes)) as tar:
+        tar.extractall(path=export_dir, filter=_safe_filter)
 
 
 def _export_paths(
@@ -284,11 +286,7 @@ def _export_paths(
             result.stderr.decode("utf-8", errors="replace")[:500],
         )
 
-    import tarfile
-    import io
-
-    with tarfile.open(fileobj=io.BytesIO(result.stdout)) as tar:
-        tar.extractall(path=export_dir)
+    _extract_archive(result.stdout, export_dir)
 
     files_count = 0
     bytes_count = 0
@@ -308,14 +306,6 @@ def _write_source_metadata(
     source: ManagedSource,
 ) -> None:
     upstream_paths = sorted(asset.upstream for asset in source.assets)
-    payload = "\n".join(
-        [
-            f"source_id\t{source.source_id}",
-            f"repository\t{source.repository}",
-            f"ref\t{source.ref}",
-            f"upstream_paths\t{','.join(upstream_paths)}",
-        ]
-    )
     digest = hashlib.sha256(
         ",".join(upstream_paths).encode("utf-8")
     ).hexdigest()
@@ -355,19 +345,35 @@ def _publish_snapshot_atomic(
         shutil.rmtree(prior)
 
 
-def _measure_materialized(snapshot: Path) -> tuple[int, int]:
-    files_count = 0
-    bytes_count = 0
-    for entry in snapshot.rglob("*"):
-        if entry.name == ".external-resource-source.tsv":
-            continue
-        if entry.is_file():
-            files_count += 1
-            bytes_count += entry.lstat().st_size
-        elif entry.is_symlink():
-            files_count += 1
-            bytes_count += len(os.readlink(entry))
-    return files_count, bytes_count
+def _rebuild_cache_beside(
+    cache: Path,
+    source: ManagedSource,
+) -> tuple[Literal["direct-sha", "advertised-ref"], int]:
+    staging = cache.parent / f"{cache.name}.rebuild"
+    prior = cache.parent / f"{cache.name}.prior"
+    if staging.exists():
+        shutil.rmtree(staging)
+    if prior.exists():
+        shutil.rmtree(prior)
+
+    _init_bare_cache(staging, source.repository)
+    _, fetch_strategy = _fetch_source(staging, source)
+    if fetch_strategy == "cache":
+        raise ValueError("rebuilt cache must perform a fetch")
+    rebuilt_bytes = _cache_size(staging)
+
+    if cache.exists():
+        cache.rename(prior)
+    try:
+        staging.rename(cache)
+    except Exception:
+        if prior.exists():
+            prior.rename(cache)
+        raise
+    if prior.exists():
+        shutil.rmtree(prior)
+
+    return fetch_strategy, rebuilt_bytes
 
 
 def _prepare_one_source(
@@ -386,19 +392,13 @@ def _prepare_one_source(
         if needs_init:
             _init_bare_cache(cache, source.repository)
 
-        sha_length = _detect_object_format(cache)
-
         if rebuild_cache and (cache / "HEAD").exists():
-            before = _cache_size(cache)
-            _fetch_source(cache, source, sha_length)
+            fetch_strategy, rebuilt_bytes = _rebuild_cache_beside(cache, source)
             cache_status: Literal["cached", "fetched", "rebuilt"] = "rebuilt"
-            fetch_strategy: Literal["cache", "direct-sha", "advertised-ref"] = "direct-sha"
-            bytes_added = max(0, _cache_size(cache) - before)
+            bytes_added = rebuilt_bytes
         else:
             before = _cache_size(cache)
-            cache_status, fetch_strategy = _fetch_source(
-                cache, source, sha_length
-            )
+            cache_status, fetch_strategy = _fetch_source(cache, source)
             bytes_added = max(0, _cache_size(cache) - before)
 
         staging_dir = sources_root.parent / f".{source.source_id}.staging"

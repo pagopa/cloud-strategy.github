@@ -91,6 +91,10 @@ sources:
     repository: https://github.com/mattpocock/skills.git
     ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
     rewrite_skill_references: true
+    backtick_skill_references:
+      - code-review
+      - tdd
+      - to-spec
     assets:
       - upstream: skills/engineering/grill-with-docs
         local: .github/skills/mattpocock-grill-with-docs

@@ -351,3 +351,26 @@ def test_mattpocock_skill_creator_review_keeps_invocation_override(
         ".github/skills/anthropic-skill-creator/SKILL.md"
         not in by_target
     )
+
+
+def test_manifest_rejects_undeclared_backtick_skill_reference(tmp_path: Path) -> None:
+    manifest = tmp_path / "managed-resources.yaml"
+    manifest.write_text(
+        "version: 1\n"
+        "sources:\n"
+        "  example-source:\n"
+        "    repository: https://example.com/repo.git\n"
+        f"    ref: {'a' * 40}\n"
+        "    rewrite_skill_references: true\n"
+        "    backtick_skill_references:\n"
+        "      - not-an-asset\n"
+        "    assets:\n"
+        "      - upstream: skills/example\n"
+        "        local: .github/skills/example\n"
+        "        canonical_name: example\n"
+        "watchlist: []\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="not-an-asset"):
+        load_managed_resources(manifest)

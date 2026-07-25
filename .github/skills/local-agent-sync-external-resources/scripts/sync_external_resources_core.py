@@ -32,6 +32,7 @@ class ManagedSource:
     assets: tuple[ManagedAsset, ...]
     rewrite_skill_references: bool = False
     skill_reference_aliases: tuple[tuple[str, str], ...] = ()
+    backtick_skill_references: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -191,6 +192,25 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 )
             skill_reference_aliases.append((alias, canonical_name))
 
+        raw_backtick_refs = raw_source.get("backtick_skill_references", [])
+        if not isinstance(raw_backtick_refs, list):
+            raise ValueError(
+                f"source {source_id} backtick_skill_references must be a list."
+            )
+        upstream_basenames = {Path(asset.upstream).name for asset in assets}
+        alias_names = {alias for alias, _ in skill_reference_aliases}
+        backtick_skill_references: list[str] = []
+        for raw_backtick_ref in raw_backtick_refs:
+            backtick_ref = _require_non_empty_string(
+                raw_backtick_ref, f"source {source_id} backtick skill reference"
+            )
+            if backtick_ref not in upstream_basenames and backtick_ref not in alias_names:
+                raise ValueError(
+                    f"source {source_id} backtick skill reference {backtick_ref} "
+                    "is not a declared upstream asset basename or alias."
+                )
+            backtick_skill_references.append(backtick_ref)
+
         sources.append(
             ManagedSource(
                 source_id=source_id,
@@ -200,6 +220,7 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 assets=tuple(assets),
                 rewrite_skill_references=rewrite_skill_references,
                 skill_reference_aliases=tuple(skill_reference_aliases),
+                backtick_skill_references=tuple(backtick_skill_references),
             )
         )
 
@@ -267,14 +288,21 @@ class SyncCommandError(Exception):
         )
 
 
-def _run_command(command: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+LOCAL_COMMAND_TIMEOUT_SECONDS = 60
+
+
+def _run_command(
+    command: list[str],
+    cwd: Path | None = None,
+    timeout: int = LOCAL_COMMAND_TIMEOUT_SECONDS,
+) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         command,
         cwd=cwd,
         check=False,
         capture_output=True,
         text=True,
-        timeout=60,
+        timeout=timeout,
     )
     if result.returncode != 0:
         raise SyncCommandError(command, result.returncode, result.stderr)
@@ -302,13 +330,19 @@ def find_dirty_targets(
         return ()
     result = _run_git(
         repo_root,
-        ["status", "--porcelain=v1", "--", *(asset.local for asset in assets)],
+        ["status", "--porcelain=v1", "-z", "--", *(asset.local for asset in assets)],
     )
-    return tuple(
-        line[3:]
-        for line in result.stdout.splitlines()
-        if len(line) > 3
-    )
+    fields = [field for field in result.stdout.split("\0") if field]
+    dirty: list[str] = []
+    index = 0
+    while index < len(fields):
+        entry = fields[index]
+        status_code = entry[:2]
+        dirty.append(entry[3:])
+        if status_code[0] in {"R", "C"}:
+            index += 1
+        index += 1
+    return tuple(dirty)
 
 
 def collect_missing_upstream_paths(
@@ -402,6 +436,7 @@ def normalize_candidate(
 
     changed: list[str] = []
     skill_references_by_source: dict[str, dict[str, str]] = {}
+    backtick_references_by_source: dict[str, dict[str, str]] = {}
     for source in resources.sources:
         if not source.rewrite_skill_references:
             continue
@@ -411,6 +446,12 @@ def normalize_candidate(
         }
         skill_references.update(dict(source.skill_reference_aliases))
         skill_references_by_source[source.source_id] = skill_references
+        declared_backticks = set(source.backtick_skill_references)
+        backtick_references_by_source[source.source_id] = {
+            name: canonical
+            for name, canonical in skill_references.items()
+            if name in declared_backticks
+        }
 
     for asset in resources.assets:
         asset_dir = candidate / asset.local
@@ -443,9 +484,11 @@ def normalize_candidate(
                         ),
                         content,
                     )
+                backtick_references = backtick_references_by_source.get(asset.source, {})
+                if backtick_references:
                     content = _BACKTICK_SKILL_REF_RE.sub(
                         lambda match: "`"
-                        + skill_references.get(
+                        + backtick_references.get(
                             match.group("name"), match.group("name")
                         )
                         + "`",

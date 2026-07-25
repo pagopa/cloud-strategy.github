@@ -141,6 +141,7 @@ def _mattpocock_resources() -> ManagedResources:
         advertised_ref=None,
         assets=assets,
         rewrite_skill_references=True,
+        backtick_skill_references=("tdd",),
     )
     replacement = TextReplacement(
         source="mattpocock-skills",
@@ -677,3 +678,45 @@ def test_grill_with_docs_normalizes_to_mattpocock_wrapper_delegating_to_grill_me
     assert "/mattpocock-domain-modeling" in content
     assert "/grilling" not in content
     assert "/mattpocock-grill-with-docs session" not in content
+
+
+def test_undeclared_backtick_reference_is_left_unchanged(tmp_path: Path) -> None:
+    candidate = tmp_path / "candidate"
+    skill = candidate / ".github/skills/mattpocock-domain-modeling/SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: domain-modeling\n---\n"
+        "Use `domain-modeling` for vocabulary and `tdd` for the loop.\n"
+        "See /domain-modeling for the command form.\n",
+        encoding="utf-8",
+    )
+
+    normalize_candidate(_mattpocock_resources(), candidate)
+
+    content = skill.read_text(encoding="utf-8")
+    assert "`domain-modeling`" in content
+    assert "`mattpocock-domain-modeling`" not in content
+    assert "`mattpocock-tdd`" in content
+    assert "/mattpocock-domain-modeling" in content
+
+
+def _example_asset() -> ManagedAsset:
+    return ManagedAsset(
+        source="test-source",
+        upstream="skills/example",
+        local=".github/skills/example",
+        canonical_name="example",
+    )
+
+
+def test_renamed_managed_file_is_reported_once_with_new_path(git_repo: Path) -> None:
+    target = git_repo / ".github/skills/example"
+    target.mkdir(parents=True)
+    (target / "SKILL.md").write_text("---\nname: example\n---\n", encoding="utf-8")
+    _commit_all(git_repo)
+
+    _run_git(git_repo, ["mv", ".github/skills/example/SKILL.md", ".github/skills/example/RENAMED.md"])
+
+    dirty = find_dirty_targets(git_repo, (_example_asset(),))
+
+    assert dirty == (".github/skills/example/RENAMED.md",)

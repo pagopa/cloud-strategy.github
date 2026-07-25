@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Sequence
 
@@ -38,7 +38,6 @@ DEFAULT_MANIFEST = (
     SCRIPT_DIR.parent / "references" / "managed-resources.yaml"
 ).as_posix()
 from source_prepare_core import (  # noqa: E402
-    PrepareSourceResult,
     prepare_sources,
 )
 
@@ -159,43 +158,25 @@ class SyncOutcome:
                     sr.ref,
                 )
             )
-            records.append(
-                OutputRecord(
-                    "metric",
-                    sr.source_id,
-                    "materialized_files",
-                    str(sr.materialized_files),
+            for metric_name, metric_value in (
+                ("materialized_files", sr.materialized_files),
+                ("materialized_bytes", sr.materialized_bytes),
+                ("cache_bytes_added", sr.cache_bytes_added),
+                ("duration_ms", sr.duration_ms),
+            ):
+                records.append(
+                    OutputRecord(
+                        "metric",
+                        f"{sr.source_id}.{metric_name}",
+                        "ok",
+                        str(metric_value),
+                    )
                 )
-            )
-            records.append(
-                OutputRecord(
-                    "metric",
-                    sr.source_id,
-                    "materialized_bytes",
-                    str(sr.materialized_bytes),
-                )
-            )
-            records.append(
-                OutputRecord(
-                    "metric",
-                    sr.source_id,
-                    "cache_bytes_added",
-                    str(sr.cache_bytes_added),
-                )
-            )
-            records.append(
-                OutputRecord(
-                    "metric",
-                    sr.source_id,
-                    "duration_ms",
-                    str(sr.duration_ms),
-                )
-            )
             records.append(
                 OutputRecord(
                     "validation",
-                    sr.source_id,
-                    "fetch_strategy",
+                    f"{sr.source_id}.fetch_strategy",
+                    "ok",
                     sr.fetch_strategy,
                 )
             )
@@ -565,6 +546,25 @@ def _format_text(outcome: SyncOutcome) -> str:
     return "\n".join(lines)
 
 
+def _requested_format(argv: Sequence[str] | None) -> str:
+    values = list(argv) if argv is not None else sys.argv[1:]
+    for index, value in enumerate(values):
+        if value == "--format" and index + 1 < len(values):
+            return values[index + 1]
+        if value.startswith("--format="):
+            return value.split("=", 1)[1]
+    return "text"
+
+
+def _emit_failure(fmt: str, message: str) -> None:
+    if fmt == "json":
+        print(json.dumps({"blockers": [message], "repository_changed": False}, indent=2))
+    elif fmt == "tsv":
+        print(render_tsv((OutputRecord("blocker", message, "fail", ""),)), end="")
+    else:
+        print(f"Blockers: {message}")
+
+
 def run(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -582,8 +582,6 @@ def run(argv: Sequence[str] | None = None) -> int:
     if args.mode == "prepare":
         if not args.workspace:
             parser.error("prepare mode requires --workspace")
-        if args.rebuild_cache:
-            pass
         outcome = _prepare(
             repo_root,
             Path(args.workspace).resolve(),
@@ -639,7 +637,11 @@ def run(argv: Sequence[str] | None = None) -> int:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    return run(argv)
+    try:
+        return run(argv)
+    except (ValueError, SyncCommandError) as exc:
+        _emit_failure(_requested_format(argv), str(exc))
+        return 2
 
 
 if __name__ == "__main__":
