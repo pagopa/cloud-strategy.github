@@ -10,7 +10,7 @@ RUFF := $(if $(wildcard $(SCRIPTS_VENV)/bin/ruff),$(SCRIPTS_VENV)/bin/ruff,ruff)
 CATALOG_FAST_TESTS := tests/github/scripts/lib/test_inventory.py tests/github/scripts/lib/test_repo_paths.py tests/github/scripts/test_install_graphify_hooks.py tests/github/scripts/test_run_sh_dispatch.py tests/test_repository_test_layout_contract.py
 CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.18.1
-MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*" "\#.claude/commands/agent-os/**"
+MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
 
 .PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
 
