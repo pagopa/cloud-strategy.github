@@ -707,20 +707,3 @@ def test_skill_and_agent_allow_model_invocation() -> None:
     assert skill_frontmatter.get("disable-model-invocation") is not True
     assert agent_frontmatter.get("disable-model-invocation") is not True
 
-
-def test_simple_task_support_references_match_its_no_delegation_boundary() -> None:
-    skill_text = SKILL_PATH.read_text()
-    next_step_text = (
-        REPO_ROOT
-        / ".github/skills/internal-agent-support-next-step/SKILL.md"
-    ).read_text()
-    lane_change_text = (
-        REPO_ROOT
-        / ".github/skills/internal-agent-support-lane-change-engine/SKILL.md"
-    ).read_text()
-
-    assert skill_text.count(
-        "only when a missing bounded fact blocks the active lane."
-    ) == 1
-    assert "internal-gateway-simple-task" not in next_step_text
-    assert "internal-gateway-simple-task" not in lane_change_text

@@ -16,15 +16,6 @@ def test_execute_plan_handoff_targets_a_real_agent() -> None:
     assert "extended" not in idea.lower()
 
 
-def test_lane_engine_uses_artifact_presence_not_legacy_profiles() -> None:
-    text = (
-        REPO_ROOT / ".github/skills/internal-agent-support-lane-change-engine/SKILL.md"
-    ).read_text()
-    assert "approved retained plan" in text
-    assert "compact" not in text.lower()
-    assert "extended" not in text.lower()
-
-
 def test_agent_loads_gateway_and_allows_model_invocation() -> None:
     text = (
         REPO_ROOT / ".github/agents/internal-gateway-execute-plans.agent.md"

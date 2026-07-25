@@ -62,8 +62,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-security-review/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
-- `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
-- `.github/skills/internal-agent-support-next-step/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-lambda/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`

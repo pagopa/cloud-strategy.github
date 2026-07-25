@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal Agent Support Lane Change Engine"
-  short_description: "Shared user-visible lane-change guidance"
-  default_prompt: "Use $internal-agent-support-lane-change-engine when a repository-owned internal agent needs the shared stop-and-recommend lane-change workflow."
