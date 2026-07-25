@@ -1,144 +1,54 @@
 # Output Contract
 
-Use this reference to produce a compact, consistent critical challenge deliverable.
+Use this reference to produce the public projection of a critical challenge.
 
-## Required section order
-
-1. `## Summary`
-2. `## Challenge Context`
-3. Optional `## Pre-mortem` (required only when pre-mortem status is `triggered`)
-4. `## Findings`
-5. `## Synthesis`
-6. `## Outcome`
-
-## Required fields
-
-| Field | Description | Max length |
-| --- | --- | --- |
-| `summary` | One paragraph: what is being challenged and why it matters now. | 75 words |
-| `challenge_context.lenses` | Exactly three lenses used; the third must be `analogy` or `reverse-assumption`. | 3 items |
-| `challenge_context.premortem` | `triggered` or `not-triggered`. | 1 value |
-| `findings` | 1-3 findings. Each finding uses the sub-fields below. | 3 items |
-| `finding.objection` | Strongest objection or assumption gap. | 30 words |
-| `finding.impact` | Why it matters now. | 30 words |
-| `finding.evidence` | Claim class and evidence quality; see evidence shape below. | 30 words |
-| `finding.mitigation` | Condition or action required before execution resumes. | 30 words |
-| `finding.reframe` | Optional lateral reframe. | 25 words |
-| `finding.question` | Optional single root question across all findings. At most one. | 25 words |
-| `synthesis.defense` | One of `none`, `resolves`, `narrows`, `accepts-risk`, `unanswered`. | 1 value |
-| `synthesis.strongest_objection` | The strongest supported objection. | 15 words |
-| `synthesis.unresolved_uncertainty` | Named uncertainty remaining after the gate. | 15 words |
-| `synthesis.strongest_defense` | Required when Defense is not `none`. | 15 words |
-| `synthesis.remaining_vulnerability` | Required when Defense is not `none`. | 15 words |
-| `outcome` | Exactly one value from `## Outcome meanings` in `SKILL.md`. | 1 value |
-
-## Evidence shape
-
-Each finding's evidence bullet declares a claim class and an evidence quality:
+## Adaptive card layout
 
 ```markdown
-- **Evidence:** `inference`; quality=`partial` — no replacement audit record is described.
+🎯 **<localized plan label>:** <what is being proposed>
+⚠️ **<localized critique label>:** <what does not work and one concrete reason>
+💥 **<localized risk label>:** <material consequence>        <!-- optional -->
+✅ **<localized advice label>:** <what should happen next>
+❓ **<localized question label>:** <decision-changing question> <!-- optional -->
 ```
 
-Allowed claim classes: `confirmed`, `inference`, `estimate`.
-Allowed evidence quality values: `strong`, `partial`, `weak`.
+## Rules
 
-## Pre-mortem shape
+- Three required lines: 🎯, ⚠️, ✅.
+- Two optional lines: 💥 and ❓.
+- Exact order: 🎯, ⚠️, [💥], ✅, [❓].
+- Adaptive length: three to five content lines.
+- 💥 only when there is a material risk.
+- ❓ only when the answer could change the advice.
+- No visible canonical outcome codes or technical classification labels.
+- No headings, preamble, appendix, or old report sections.
+- Visible labels match the user's language. Emoji identify fields for validation.
+- The critique line (⚠️) states both what is wrong and one concrete reason.
 
-When `Pre-mortem: triggered`, include one failure and 2-3 causes with qualitative likelihood:
+## Examples
+
+### Minimal
 
 ```markdown
-## Pre-mortem
-
-- **Failure:** Central compliance evidence disappears after rollout.
-- **Cause 1:** Local-only logs | class=`inference` | likelihood=`high` | mitigation=retain central signed validation.
-- **Cause 2:** Partial adoption | class=`estimate` | likelihood=`medium` | mitigation=gate rollout on repository coverage.
+🎯 **Plan:** Move validation from CI to developer machines.
+⚠️ **Critique:** Central proof disappears because local checks do not create a shared record.
+✅ **Advice:** Keep CI until an equivalent central control exists.
 ```
 
-Allowed likelihood values: `high`, `medium`, `low`.
-A non-empty mitigation is required for every `high` or `medium` cause.
-
-## Defense shape
-
-When Defense is `none`, no additional defense fields are required.
-When Defense is not `none`, add both `Strongest defense` and `Remaining vulnerability`:
+### Complex (Italian)
 
 ```markdown
-- **Defense:** `narrows`
-- **Strongest objection:** Compliance visibility remains unowned.
-- **Unresolved uncertainty:** The replacement audit record is unknown.
-- **Strongest defense:** A signed attestation step narrows the audit gap.
-- **Remaining vulnerability:** Attestation coverage depends on local adoption.
+🎯 **Piano:** Spostare tutti i controlli dalla CI ai computer degli sviluppatori.
+⚠️ **Critica:** Perderemmo la prova centrale perché i controlli locali non producono un registro condiviso.
+💥 **Rischio:** Alcuni repository potrebbero saltare i controlli senza che nessuno se ne accorga.
+✅ **Consiglio:** Mantenere la CI finché non esiste un controllo centrale equivalente.
+❓ **Da chiarire:** Cosa sostituirà ufficialmente i log della CI?
 ```
 
-## Output template
+## Validator limits
 
-```markdown
-## Summary
-
-<summary>
-
-## Challenge Context
-
-- **Lenses:** <lens1>, <lens2>, <lens3>
-- **Pre-mortem:** `not-triggered`
-
-## Findings
-
-### 1. <objection>
-
-- **Impact:** <impact>
-- **Evidence:** `<class>`; quality=`<quality>` — <evidence>
-- **Mitigation:** <mitigation>
-- **Reframe:** <reframe>
-- **Question:** <question>
-
-## Synthesis
-
-- **Defense:** `<defense>`
-- **Strongest objection:** <objection>
-- **Unresolved uncertainty:** <uncertainty>
-
-## Outcome
-
-`<outcome>`
-```
-
-## Example
-
-```markdown
-## Summary
-
-We are challenging a proposal to move validation logic from CI into a pre-commit hook. The change matters now because it affects every contributor's workflow and could hide failures from the central audit log.
-
-## Challenge Context
-
-- **Lenses:** first-principles, constraint-audit, reverse-assumption
-- **Pre-mortem:** `not-triggered`
-
-## Findings
-
-### 1. The audit trail weakens
-
-- **Impact:** Central CI logs become incomplete for compliance reviews.
-- **Evidence:** `inference`; quality=`partial` — no replacement logging is described.
-- **Mitigation:** Add a signed attestation step before the hook is enabled.
-- **Reframe:** Treat local validation as an early filter, not a replacement for CI.
-- **Question:** Which central audit record replaces the CI validation log?
-
-## Synthesis
-
-- **Defense:** `none`
-- **Strongest objection:** Compliance visibility remains unowned.
-- **Unresolved uncertainty:** The replacement audit record is unknown.
-
-## Outcome
-
-`accept-with-risk`
-```
-
-## Budget
-
-- Total output target: **600 words or fewer**.
-- If the material demands more, split the work into another critical cycle.
-- Do not pad findings to reach 3; one strong finding is better than three weak ones.
+- Per-line word budget: 30 words.
+- Total word budget: 100 words (overridable via `--max-words`).
+- Legacy H2 sections are rejected.
+- Non-empty prose outside the card is rejected.
+- Semantic reason quality (whether the critique actually states a useful reason) is prompt-governed, not validator-enforced.

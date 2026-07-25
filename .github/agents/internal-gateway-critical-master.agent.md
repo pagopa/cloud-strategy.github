@@ -11,3 +11,5 @@ agents: []
 ## Core Skill
 
 - `internal-gateway-critical-master`
+- Keep the full critical record internal and emit only the localized compact
+  card defined by the skill's output contract.

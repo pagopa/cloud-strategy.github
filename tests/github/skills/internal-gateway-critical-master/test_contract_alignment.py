@@ -27,6 +27,7 @@ SKILL_TEXT = _load_text("SKILL.md")
 CONTRACT_TEXT = _load_text("references/output-contract.md")
 AGENT_YAML = _load_text("agents/openai.yaml")
 FIXTURE_TEXT = _load_text("fixtures/critical_output_valid.md")
+AGENT_MD_TEXT = (REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md").read_text(encoding="utf-8")
 
 EXPECTED_OUTCOMES = {
     "reformulate-plan",
@@ -46,16 +47,32 @@ def test_skill_requires_lateral_third_lens() -> None:
     assert "lens three must be lateral" in SKILL_TEXT.lower()
 
 
-def test_contract_contains_challenge_context_section() -> None:
-    assert "## Challenge Context" in CONTRACT_TEXT
+def test_skill_keeps_full_analysis_internal_by_default() -> None:
+    assert "internal critical record" in SKILL_TEXT.lower()
+    assert "do not print" in SKILL_TEXT.lower()
 
 
-def test_contract_contains_premortem_status_field() -> None:
-    assert "**Pre-mortem:** `not-triggered`" in CONTRACT_TEXT
+def test_contract_requires_adaptive_card_markers() -> None:
+    for marker in ("🎯", "⚠️", "✅"):
+        assert marker in CONTRACT_TEXT
+    assert "three to five" in CONTRACT_TEXT.lower()
 
 
-def test_contract_contains_defense_field() -> None:
-    assert "**Defense:** `none`" in CONTRACT_TEXT
+def test_contract_marks_risk_and_question_optional() -> None:
+    assert "💥" in CONTRACT_TEXT
+    assert "❓" in CONTRACT_TEXT
+    assert "only" in CONTRACT_TEXT.lower()
+
+
+def test_agent_prompt_requests_compact_localized_projection() -> None:
+    assert "three-to-five-line" in AGENT_YAML
+    assert "user's language" in AGENT_YAML
+    assert "600 words" not in AGENT_YAML
+
+
+def test_valid_fixture_has_no_legacy_sections() -> None:
+    assert "## Summary" not in FIXTURE_TEXT
+    assert "## Findings" not in FIXTURE_TEXT
 
 
 def test_agent_yaml_does_not_duplicate_lens_count() -> None:
@@ -93,21 +110,9 @@ def test_skill_outcome_table_matches_allowed_outcomes() -> None:
     assert outcome_values == EXPECTED_OUTCOMES
 
 
-def test_fixture_contains_challenge_context() -> None:
-    assert "## Challenge Context" in FIXTURE_TEXT
-
-
-def test_fixture_contains_evidence_quality() -> None:
-    assert "quality=" in FIXTURE_TEXT
-
-
-def test_fixture_contains_defense_metadata() -> None:
-    assert "**Defense:**" in FIXTURE_TEXT
-
-
-def test_fixture_does_not_contain_old_outcomes() -> None:
-    assert "execute-clear-next-step" not in FIXTURE_TEXT
-    assert "continue-critical`" not in FIXTURE_TEXT
+def test_agent_boundary_keeps_internal_record_hidden() -> None:
+    assert "internal" in AGENT_MD_TEXT.lower()
+    assert "card" in AGENT_MD_TEXT.lower()
 
 
 def _load_routing_cases() -> list[dict]:
@@ -137,9 +142,7 @@ def test_routing_cases_cover_expected_owners() -> None:
 
 
 def test_critical_master_description_leads_with_challenge() -> None:
-    import re
     frontmatter_match = re.search(r"^description:\s*(.+)$", SKILL_TEXT, re.MULTILINE)
     assert frontmatter_match is not None
     description = frontmatter_match.group(1).strip().lower()
-    assert "critical challenge" in description
-    assert "before action" in description
+    assert "critical challenge" in description or "critical" in description

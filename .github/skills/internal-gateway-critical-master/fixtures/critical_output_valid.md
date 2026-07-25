@@ -1,28 +1,3 @@
-## Summary
-
-We are challenging a proposal to move validation logic from CI into a pre-commit hook. The change matters now because it affects every contributor's workflow and could hide failures from the central audit log.
-
-## Challenge Context
-
-- **Lenses:** first-principles, constraint-audit, reverse-assumption
-- **Pre-mortem:** `not-triggered`
-
-## Findings
-
-### 1. The audit trail weakens
-
-- **Impact:** Central CI logs become incomplete for compliance reviews.
-- **Evidence:** `inference`; quality=`partial` — no replacement logging is described.
-- **Mitigation:** Add a signed attestation step before the hook is enabled.
-- **Reframe:** Treat local validation as an early filter, not a replacement for CI.
-- **Question:** Which central audit record replaces the CI validation log?
-
-## Synthesis
-
-- **Defense:** `none`
-- **Strongest objection:** Compliance visibility remains unowned.
-- **Unresolved uncertainty:** The replacement audit record is unknown.
-
-## Outcome
-
-`accept-with-risk`
+🎯 **Plan:** Move validation from CI to developer machines.
+⚠️ **Critique:** Central proof disappears because local checks do not create a shared record.
+✅ **Advice:** Keep CI until an equivalent central control exists.

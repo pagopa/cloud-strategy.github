@@ -26,14 +26,25 @@ def test_count_words_ignores_fenced_code_blocks() -> None:
     assert critical_master.count_words("alpha ```python\nbeta\n``` gamma") == 2
 
 
-def test_parse_findings_detects_optional_root_question() -> None:
-    findings = critical_master.parse_findings(
-        "### 1. Audit trail weakens\n\n"
-        "- **Impact:** Central logs become incomplete.\n"
-        "- **Evidence:** `inference` - no replacement is described.\n"
-        "- **Mitigation:** Add a signed attestation.\n"
-        "- **Question:** Which audit record replaces CI?\n"
+def test_parse_critical_card_uses_emoji_as_language_neutral_keys() -> None:
+    card = critical_master.parse_critical_card(
+        "🎯 **Piano:** Spostare i controlli sui computer locali.\n"
+        "⚠️ **Critica:** Perderemmo la prova centrale perché i controlli locali "
+        "non producono un registro condiviso.\n"
+        "✅ **Consiglio:** Mantenere la CI fino a un sostituto centrale.\n"
     )
 
-    assert len(findings) == 1
-    assert findings[0].has_question
+    assert tuple(card.by_marker) == ("🎯", "⚠️", "✅")
+    assert card.by_marker["⚠️"].content.startswith("Perderemmo")
+
+
+def test_parse_critical_card_tracks_optional_risk_and_question() -> None:
+    card = critical_master.parse_critical_card(
+        "🎯 **Plan:** Move validation to developer machines.\n"
+        "⚠️ **Critique:** Central proof disappears because local checks are private.\n"
+        "💥 **Risk:** Some repositories may silently skip validation.\n"
+        "✅ **Advice:** Keep CI until an equivalent central control exists.\n"
+        "❓ **Open point:** What officially replaces the CI logs?\n"
+    )
+
+    assert tuple(card.by_marker) == ("🎯", "⚠️", "💥", "✅", "❓")

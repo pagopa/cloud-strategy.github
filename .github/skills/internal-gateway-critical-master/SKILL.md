@@ -32,7 +32,7 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 
 - Read only the smallest evidence needed to understand the proposal, decision, or assumption set.
 - Identify the material claims, constraints, success criteria, and anti-scope.
-- Output: a one-paragraph summary of what is being challenged and why it matters now.
+- Record internally: what is being challenged and why it matters now.
 
 ### Phase 2: Challenge
 
@@ -40,9 +40,8 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 - Lens three must be lateral: `analogy` or `reverse-assumption`.
 - Apply one optional pre-mortem pass if failure modes are material and not covered by the selected lenses.
 - Lead with the strongest supported objection first. Stop at one finding when that objection controls the decision; do not pad findings.
-- Ask at most one concise root question across all findings when the answer would materially change the critique, and put it in one `finding.question`.
+- Ask at most one concise root question across all findings when the answer would materially change the critique.
 - Treat mitigations as conditions to continue, not as implementation designs that rescue the proposal.
-- Output: 1-3 raw findings, each with a claim class and evidence quality `strong`, `partial`, or `weak`.
 
 | Lens | Question | Use when |
 | --- | --- | --- |
@@ -64,23 +63,31 @@ Trigger a pre-mortem when at least one of these is true:
 - The plan introduces a new operational owner, on-call rotation, or handoff.
 - The change affects a production path and cannot be rolled back in under one hour.
 
-For a pre-mortem, set `Pre-mortem: triggered` or `Pre-mortem: not-triggered`. When triggered, state one concrete failure, list 2-3 most likely root causes with claim class and qualitative likelihood (`high`, `medium`, or `low`), and define a required mitigation for each `high` or `medium` cause.
-
 ### Phase 3: Synthesize
 
 - Run the Final Consistency Gate: name the strongest supported objection, downgrade weak claims to hypotheses, and surface unresolved uncertainty.
-- Set `Defense:` to one of `none`, `resolves`, `narrows`, `accepts-risk`, or `unanswered`.
+- Set Defense to one of `none`, `resolves`, `narrows`, `accepts-risk`, or `unanswered`.
 - When Defense is not `none`, name the strongest defense and the remaining vulnerability inside the synthesis.
-- Format the result using the contract in `references/output-contract.md`.
-- Recommend exactly one outcome from `## Outcome meanings`.
+- Select exactly one canonical routing outcome from `## Outcome meanings`.
 
-## Token Budget
+## Internal critical record
 
-- Target output: **600 words or fewer** per challenge cycle.
-- Maximum findings: **3**.
-- Per-field limits are authoritative; see `references/output-contract.md`.
-- Maximum synthesis: **100 words**.
-- If the topic demands more depth, split the work into another critical cycle.
+Keep the following as internal working state. Do not print the internal critical record in normal chat; use it to produce the public card.
+
+- Challenged proposal and timing
+- Selected lenses (exactly three; third is lateral)
+- Material claims with claim class (`confirmed`, `inference`, `estimate`) and evidence quality (`strong`, `partial`, `weak`)
+- Strongest objection
+- Defense classification and, when not `none`, strongest defense and remaining vulnerability
+- Pre-mortem failure, causes, and mitigations when triggered
+- Unresolved uncertainty
+- Exactly one canonical routing outcome
+
+Material risk and decisive uncertainty must never be hidden. Details are available when the user asks. The visible labels match the user's language. The critique line states both what is wrong and one concrete reason. The old multi-section report is forbidden.
+
+## Public projection
+
+In normal chat, emit only the localized three-to-five-line emoji card defined in `references/output-contract.md`.
 
 ## Claim Discipline
 
@@ -91,7 +98,7 @@ For a pre-mortem, set `Pre-mortem: triggered` or `Pre-mortem: not-triggered`. Wh
 
 ## Tooling
 
-- Optional: `scripts/validate_critical_output.py` checks a rendered output against the contract in `references/output-contract.md`.
+- Optional: `scripts/validate_critical_output.py` checks a rendered card against the contract in `references/output-contract.md`.
 - The optional validator and its pure helper live inside this skill bundle so the skill can be copied without depending on repo-global Python modules.
 - Reuse `fixtures/critical_output_valid.md` and sibling fixture samples instead of repeating long inline payloads.
 - Follow `references/maintenance-guidance.md` for fixture reuse and cache-aware search discipline.

@@ -1,32 +1,5 @@
-## Summary
-
-We are challenging a migration plan that depends on three teams synchronizing their rollout within one sprint.
-
-## Challenge Context
-
-- **Lenses:** first-principles, role-reversal, analogy
-- **Pre-mortem:** `triggered`
-
-## Pre-mortem
-
-- **Failure:** Central compliance evidence disappears after rollout.
-- **Cause 1:** Local-only logs | class=`inference` | likelihood=`high` | mitigation=retain central signed validation.
-- **Cause 2:** Partial adoption | class=`estimate` | likelihood=`medium` | mitigation=gate rollout on repository coverage.
-
-## Findings
-
-### 1. Coordination across teams is under-specified
-
-- **Impact:** Rollout timing assumptions are not contractually bound.
-- **Evidence:** `inference`; quality=`partial` — no synchronization SLA described.
-- **Mitigation:** Define explicit handoff contracts before rollout.
-
-## Synthesis
-
-- **Defense:** `none`
-- **Strongest objection:** Compliance visibility remains unowned.
-- **Unresolved uncertainty:** The replacement audit record is unknown.
-
-## Outcome
-
-`accept-with-risk`
+🎯 **Piano:** Spostare tutti i controlli dalla CI ai computer degli sviluppatori.
+⚠️ **Critica:** Perderemmo la prova centrale perché i controlli locali non producono un registro condiviso.
+💥 **Rischio:** Alcuni repository potrebbero saltare i controlli senza che nessuno se ne accorga.
+✅ **Consiglio:** Mantenere la CI finché non esiste un controllo centrale equivalente.
+❓ **Da chiarire:** Cosa sostituirà ufficialmente i log della CI?
