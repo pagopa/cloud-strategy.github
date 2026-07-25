@@ -9,7 +9,7 @@ rows:
     include_in_v1: true
     evidence:
       - Root AGENTS.md declares the shared baseline as the source for ~/.agents/AGENTS.md.
-    notes: Copy the portable root policy projection after removing standards-repository-local-rules.
+    notes: Copy the portable root policy projection without optional AGENTS.local.md policy.
   - target: skills
     resource_family: skills
     support_level: Documented

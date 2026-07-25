@@ -17,7 +17,7 @@ resources:
     include_targets:
       - agents.md
     target_support: See runtime support matrix
-    notes: Portable global baseline generated without standards-repository-local-rules.
+    notes: Portable global baseline generated without optional AGENTS.local.md policy.
   - resource_id: internal-gateway-idea
     source_family: agents
     source_path: .github/agents/internal-gateway-idea.agent.md
@@ -27,18 +27,18 @@ resources:
       - opencode
     target_support: See runtime support matrix
     notes: Gateway agent for substantive idea definition and brainstorming.
-  - resource_id: internal-gateway-review
+  - resource_id: internal-gateway-review-generic
     source_family: agents
-    source_path: .github/agents/internal-gateway-review.agent.md
+    source_path: .github/agents/internal-gateway-review-generic.agent.md
     include_targets:
       - codex
       - copilot
       - opencode
     target_support: See runtime support matrix
     notes: Gateway agent for non-code and mixed review targets.
-  - resource_id: internal-review-code
+  - resource_id: internal-gateway-review-code
     source_family: agents
-    source_path: .github/agents/internal-review-code.agent.md
+    source_path: .github/agents/internal-gateway-review-code.agent.md
     include_targets:
       - codex
       - copilot

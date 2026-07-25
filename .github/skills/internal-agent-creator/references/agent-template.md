@@ -15,6 +15,9 @@ tools: ['read', 'search']
 
 # Internal Example
 
+## Role
+
+State the operating stance in one or two behavioral sentences.
 
 ## Routing Rules
 
@@ -130,6 +133,9 @@ Focused instructions for the worker's domain.
 
 ## Notes
 
+- Use `## Role` to encode a concise operating stance, not a prestige biography
+  or invented credentials. Keep personality language only when it changes
+  decisions, evidence handling, or output.
 - `## Core Skill` is optional. Add it only when exactly one existing skill owns required reusable logic for the agent.
 - Do not add `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills` to new repository-owned agents.
 - `## Skill Usage Contract` is an exception for user-approved command centers, not a default template section.
@@ -140,3 +146,5 @@ Focused instructions for the worker's domain.
 - Use `user-invocable: false` for agents that should only be accessible as subagents.
 - If you can remove a section without losing routing clarity, remove it.
 - `description:` should describe selection conditions, not prestige or generic expertise.
+- Run the requirements gate in `requirements-and-persona.md` before using a
+  template for a new or materially changed role.

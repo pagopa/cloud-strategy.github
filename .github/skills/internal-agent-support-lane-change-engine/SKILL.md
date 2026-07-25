@@ -34,5 +34,4 @@ agents.
 | `internal-gateway-simple-task` | Planning or governance becomes dominant | `internal-gateway-idea` |
 | `internal-gateway-simple-task` | Assumption pressure-testing becomes dominant | `internal-gateway-critical-master` |
 | `internal-gateway-critical-master` | The next step is planning | `internal-gateway-idea` |
-| `internal-gateway-idea` | A retained `compact` plan is approved for execution | `internal-gateway-simple-task` |
-| `internal-gateway-idea` | A retained `extended` plan is approved for execution | `internal-gateway-execute-plans` |
+| `internal-gateway-idea` | An approved retained plan is ready for execution | `internal-gateway-execute-plans` |

@@ -1,22 +1,13 @@
 ---
 name: internal-github-pr
-description: Use when creating, updating, validating, or merging GitHub pull requests in this repository, including PR template bodies, approval checks, merge method, terminal state verification, or PR lifecycle evidence.
+description: Use when creating, updating, validating, or merging GitHub pull requests in this repository — PR template bodies, approval and required-review checks, merge method choice, terminal-state verification via `gh pr view --json state,mergedAt`, or PR lifecycle evidence. Do not use for workflow authoring touched by a PR.
 ---
 
 # Internal GitHub PR
 
-## Referenced skills
+Owns pull request lifecycle work in this repository: template-compliant bodies, readiness checks, merge method choice, and terminal-state evidence.
 
-This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
-Treat the referenced skills below as on-demand supports. Do not preload them
-for every PR task; load only the owner proved by the touched surface, review
-need, workflow change, or lifecycle claim.
-
-- `internal-review-code`: defect-first review after PR body or lifecycle work.
-- `internal-github-actions`: workflow/action pinning and Actions security rules for PRs that touch workflows.
-- `internal-review-high-level`: systems-level impact analysis that feeds PR risk.
-- `openai-gh-address-comments`: review-thread remediation after PR body work exists.
-- `superpowers-verification-before-completion`: evidence gate before claiming PR readiness, validity, mergeability, or completion.
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-github`.
 
 ## When to use
 
@@ -41,9 +32,8 @@ need, workflow change, or lifecycle claim.
 - Prefer `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method.
 - Use `--admin` only when policy explicitly allows a bypass.
 - Treat organization-wide `gh search prs` results as eventually consistent immediately after merge; confirm terminal state with repository-scoped `gh pr view --json state,mergedAt` before treating a just-merged PR as still open.
-- When the PR touches GitHub Actions workflow/action pinning, follow `internal-github-actions` for full-SHA and adjacent release-reference rules.
-- Use `superpowers-verification-before-completion` before claiming a PR is ready,
-  valid, mergeable, merged, or complete.
+- When the PR touches GitHub Actions workflow or action pinning, require full-SHA pinning and consistent release references in the PR evidence.
+- Verify fresh evidence before claiming a PR is ready, valid, mergeable, merged, or complete.
 
 ## Template resolution
 
@@ -96,15 +86,6 @@ If the user provides a specification, issue, or acceptance outline:
 | Listing every changed file instead of summarizing | Noisy description that obscures intent | Group changes by purpose; detail only non-obvious changes |
 | Not including validation commands and output | Reviewer has no confidence that code was tested | Always include the exact commands and their results |
 
-## Cross-references
-
-- **internal-review-high-level**: for systems-level impact analysis that feeds the risk section.
-- **internal-review-code**: for the review that follows the PR.
-- **internal-github-actions**: for workflow/action pinning and Actions security rules touched by the PR.
-- **openai-gh-address-comments**: for addressing review threads and PR comments after the PR body exists; keep review-thread remediation separate from PR lifecycle/body work.
-- **superpowers-verification-before-completion**: for evidence before readiness,
-  mergeability, merge, or completion claims.
-
 ## Validation
 
 - Every template-defined section heading is present.
@@ -113,5 +94,4 @@ If the user provides a specification, issue, or acceptance outline:
 - Final PR body is persisted when tooling supports PR updates.
 - Merge readiness is based on PR-scoped checks and qualifying review evidence.
 - Recently merged PR state is confirmed with repository-scoped `gh pr view --json state,mergedAt`.
-- `superpowers-verification-before-completion` was applied before claiming PR
-  readiness, validity, mergeability, merge, or completion.
+- Fresh evidence was verified before claiming PR readiness, validity, mergeability, merge, or completion.

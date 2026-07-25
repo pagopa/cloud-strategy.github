@@ -1,20 +1,15 @@
 ---
 name: internal-azure-governance
-description: Use when the user needs Azure governance guidance for RBAC operating models, managed identity boundaries, PIM or PAM posture, Azure Policy and initiatives, naming and tagging guardrails, exception handling, or other controls that define what principals can do after the Azure structure is chosen.
+description: Use when the user needs Azure RBAC operating models, managed identity boundaries, PIM or PAM posture, Azure Policy and initiatives, naming and tagging guardrails, or exception-handling design after the Azure structure is chosen. Do not use for tenant or subscription layout; monitoring, backup, or rollout validation; Azure DevOps pipelines; or materially ambiguous requests with no clear governance deliverable.
 ---
 
 # Internal Azure Governance
 
-## Referenced skills
-
-- `internal-azure-strategic`: route back when direction or tradeoff framing is still unsettled.
-- `internal-azure-organization-structure`: route when tenant, management-group, subscription, or landing-zone layout is the main decision.
-- `internal-azure-operations`: route when rollout validation, monitoring, backup, or evidence is the main need.
-- `awesome-copilot-azure-role-selector`: least-privilege RBAC role selection depth.
-
 Use this skill when the next need is to define or review Azure identity, access, and guardrail decisions.
 
 This skill owns governance logic after the broad structure is known. It helps separate tenant or management-group guardrails from subscription or workload grants and keeps permission decisions auditable.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-azure`.
 
 ## When to use
 
@@ -22,13 +17,6 @@ This skill owns governance logic after the broad structure is known. It helps se
 - The user needs managed identity or privileged-access posture guidance.
 - The user needs Azure Policy, initiative, naming, or tagging guardrails.
 - The user needs a review of guardrail design, exceptions, or access governance.
-
-## When not to use
-
-- The main problem is management-group, landing-zone, or subscription layout.
-- The main problem is strategic option framing before the governance surface is clear.
-- The main problem is monitoring, reporting, backup, or post-rollout validation.
-- The task is implementation-only.
 
 ## Main domains covered
 
@@ -72,17 +60,6 @@ For broader asks, return:
 - exception or blast-radius note
 - what should be validated before rollout
 
-## Relationship to adjacent skills
-
-- `internal-azure-strategic`
-  Use first when the user still needs option framing or lens selection.
-- `internal-azure-organization-structure`
-  Use when the governance question is actually about where a capability should live.
-- `internal-azure-operations`
-  Use when the next need is preflight, reporting, validation, or operational evidence after the governance design is chosen.
-- `awesome-copilot-azure-role-selector`
-  Use as depth support when the governance boundary is already clear and the next need is least-privilege role selection, custom-role fallback, or assignment artifacts such as CLI commands and Bicep snippets.
-
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
@@ -100,4 +77,4 @@ For broader asks, return:
 - Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains privileged access.
 - Confirm identity boundaries and exception paths are explicit for human and workload access.
 - Confirm staged rollout validation is named before high-blast-radius Policy, RBAC, or PIM changes.
-- Confirm the answer says when operational proof should move to `internal-azure-operations` and when least-privilege role depth should move to `awesome-copilot-azure-role-selector`.
+- Confirm out-of-scope needs, such as operational proof or structure placement, are identified as outside this lane instead of being answered here.

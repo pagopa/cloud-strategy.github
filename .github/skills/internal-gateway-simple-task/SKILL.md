@@ -7,17 +7,30 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 ## Referenced skills
 
-- `grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
-- `internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
-- `internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
-- `superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
-- `addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
+- `/grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
+- `/internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
+- `/internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
+- `/superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
+- `/addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
 
 Do not introduce other skills, agents, or workflow owners from this bundle. When stopping, explain the violated condition and let the user choose the next path.
+
+## Local references
+
+- Read `references/simple-lanes.md` after gate classification when the
+  `answer`, `edit`, `diagnose`, or `validate` posture is not already obvious.
+- Read `references/clarification-gate.md` only when one missing bounded fact
+  blocks the active lane.
+- Read `references/plan-mode.md` only when cost or complexity may require a
+  retained plan.
+- Read `references/support-routing.md` only when the next method or evidence
+  requirement remains noisy after lane selection.
 
 ## Core Contract
 
 Use this skill as the fast path for concrete bounded work that should finish in the current run. It owns the decision to continue or stop, then answers, edits, diagnoses, or validates end-to-end when the target, anti-scope, and validation path are concrete enough to execute safely.
+
+Ordinary `full-gate` work continues after the internal Readiness Brief without redundant approval. An approval boundary produces `stop-with-reason`. Non-trivial work with an established validation gap stops before execution. `trivial-skip` may report an exact bounded validation gap. `gate requirements` are pre-action expectations; Gate Evidence is the actual internal ledger recorded during work. The default helper text has no more than four content lines.
 
 Stop only when the work becomes materially complex, too costly for the current run, ambiguous, unsafe, multi-phase, approval-bound, or not locally verifiable. Stop output must explain the boundary break instead of delegating by name.
 
@@ -61,11 +74,11 @@ For `full-gate`, complete the gates in this order:
 1. Inspect the nearest local evidence.
 2. Confirm the task still fits one bounded run.
 3. Complete Initial Idea Ordering.
-4. Ask one compact `grill-me` block only when a missing bounded fact blocks the active lane.
-5. Run the critical challenge before non-trivial action.
+4. Ask one compact `/grill-me` block only when a missing bounded fact blocks the active lane. Use `/grill-me` only when a missing bounded fact blocks the active lane.
+5. Run `/internal-gateway-critical-master` before non-trivial action.
 6. Write a short Readiness Brief.
-7. If executable or evaluable behavior changes, load `internal-tdd` before implementation and follow its routed posture.
-8. For an explicit code-simplification request or already-approved simplification remediation, establish a passing behavior baseline, then load `addyosmani-code-simplification`; do not create a simplification pass after unrelated implementation.
+7. If executable or evaluable behavior changes, load `/internal-tdd` before implementation and follow its routed posture.
+8. For an explicit code-simplification request or already-approved simplification remediation, establish a passing behavior baseline, then load `/addyosmani-code-simplification`; do not create a simplification pass after unrelated implementation.
 9. Execute the smallest coherent in-scope move.
 10. Run focused validation or report the exact validation gap.
 11. Use the final evidence gate before positive claims.
@@ -133,11 +146,32 @@ Keep the implementation posture simple:
 - Give each changed section, helper, or code path one current reason to exist.
 - When behavior changes, name the observable contract and validate it with the closest stable check.
 
+## User-facing communication
+
+Keep the Readiness Brief fields as an internal readiness record. Keep Gate
+Evidence internal by default; normal chat must not dump either structure.
+
+Render one compact user-facing projection:
+
+- `🧭` names the quick plan or decision.
+- `🎯` states the goal.
+- `🛠️` states the bounded change.
+- `🧪` states the validation path or exact gap.
+- `⚠️` states a material risk or blocker when present.
+- `✅` states a verified result.
+- `💡` gives one short reason when it changes the decision.
+- `✈️` states the exact user action when approval or direction is required.
+
+Omit fields that do not affect the user. Use no more than four content lines.
+Use `--format json` when complete readiness and evidence data is required.
+
 ## Deterministic Helpers
 
-- `scripts/resolve_simple_task.py gate`: returns a deterministic gate outcome plus a local Readiness Brief.
+- `scripts/resolve_simple_task.py gate`: resolves normalized task facts into a
+  gate outcome, Readiness Brief, and pre-execution gate requirements.
 - `scripts/resolve_simple_task.py claim`: returns evidence requirements for strong status claims.
 - `scripts/suggest_support_skills.py`: returns generic method hints when the next move is still noisy.
+- Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
 
 ## Validation
 
@@ -145,11 +179,11 @@ Keep the implementation posture simple:
 - Concrete bounded work completes in the same run unless `stop-with-reason` is explicit.
 - Stop output explains the exact violated condition and required evidence.
 - `trivial-skip` names the validation path directly or states the exact validation gap.
-- Non-trivial work completes Initial Idea Ordering before `grill-me`.
+- Non-trivial work completes Initial Idea Ordering before `/grill-me`.
 - The critical challenge runs before non-trivial action.
 - Non-trivial work has a Gate Evidence Ledger entry for each required row, or an explicit blocker.
 - Skipped gates record the reason that made the skip valid.
 - Blocked gates prevent completion, readiness, passing, fixed, or no-gap claims.
-- Executable or evaluable behavior changes load `internal-tdd` before implementation when a meaningful seam exists.
-- `addyosmani-code-simplification` loads only for an explicit simplification request or already-approved remediation after a passing behavior baseline exists.
+- Executable or evaluable behavior changes load `/internal-tdd` before implementation when a meaningful seam exists.
+- `/addyosmani-code-simplification` loads only for an explicit simplification request or already-approved remediation after a passing behavior baseline exists.
 - Positive claims rely on fresh evidence before completion.

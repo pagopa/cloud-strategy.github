@@ -183,3 +183,18 @@ A question about a UI topic is not automatically a visual question. "What does p
 
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
+
+<!-- local-sync:guided-questions:start -->
+## Local guided-question contract
+
+This repository-owned contract overrides any earlier instruction to ask one question at a time.
+
+- Ask all currently known questions in numbered bulk question blocks.
+- Use `Question`, `Recommendation`, `Why`, and `Default if accepted` for every
+  numbered question.
+- Make `Recommendation` the suggested answer and `Why` its concrete rationale.
+- Keep each question, recommendation, and reason brief, clear, and
+  decision-ready.
+- Put unresolved follow-ups in another numbered block. If only one blocking
+  question remains, present it as a numbered one-item block.
+<!-- local-sync:guided-questions:end -->

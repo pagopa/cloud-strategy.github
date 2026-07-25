@@ -67,6 +67,60 @@ def test_install_payload_reports_linked_and_unlinked_without_bisync() -> None:
     assert "bisync" not in compact
 
 
+def test_live_catalog_discovers_all_non_local_agents_for_copilot() -> None:
+    resources = load_home_sync_catalog(REPO_ROOT)
+
+    expected_paths = {
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in (REPO_ROOT / ".github/agents").glob("*.agent.md")
+        if not path.name.startswith("local-")
+    }
+    agent_resources = {
+        resource.source_path
+        for resource in resources
+        if resource.source_family == "agents"
+    }
+
+    assert agent_resources == expected_paths
+    assert all(
+        resource.include_targets == ("codex", "copilot", "opencode")
+        for resource in resources
+        if resource.source_family == "agents"
+    )
+    assert not any(
+        resource.source_path.endswith("local-sync-external-resources.agent.md")
+        for resource in resources
+    )
+
+
+def test_agent_discovery_excludes_local_agents_and_keeps_runtime_targets(
+    tmp_path: Path,
+) -> None:
+    references = (
+        tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    )
+    references.mkdir(parents=True)
+    (references / "home-sync-catalog.yaml").write_text(
+        "version: 1\ndefaults:\n  include_unlisted_skills: false\nresources: []\n",
+        encoding="utf-8",
+    )
+    agents_root = tmp_path / ".github/agents"
+    agents_root.mkdir(parents=True)
+    (agents_root / "review.agent.md").write_text(
+        "---\nname: review\n---\n", encoding="utf-8"
+    )
+    (agents_root / "local-review.agent.md").write_text(
+        "---\nname: local-review\n---\n", encoding="utf-8"
+    )
+
+    resources = load_home_sync_catalog(tmp_path)
+
+    assert [resource.source_path for resource in resources] == [
+        ".github/agents/review.agent.md"
+    ]
+    assert resources[0].include_targets == ("codex", "copilot", "opencode")
+
+
 def test_empty_manifest_defaults_to_schema_v2(tmp_path: Path) -> None:
     payload, error = load_manifest(tmp_path / "manifest.json")
 
@@ -259,7 +313,7 @@ def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -
             description: Review changes carefully.
             handoffs:
               - label: Escalate
-                agent: internal-review-code
+                agent: internal-gateway-review-code
                 prompt: Include the risky files.
             ---
             Main body instructions.
@@ -275,7 +329,7 @@ def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -
     assert payload["name"] == "review-agent"
     assert "Main body instructions." in payload["developer_instructions"]
     assert "## Handoffs" in payload["developer_instructions"]
-    assert "internal-review-code" in payload["developer_instructions"]
+    assert "internal-gateway-review-code" in payload["developer_instructions"]
 
 
 def test_load_home_sync_catalog_autodiscovers_skills_and_honors_policy(

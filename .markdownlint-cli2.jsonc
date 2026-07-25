@@ -11,6 +11,8 @@
     "tools/analyze_copilot_debug_log/.venv/**",
     // Test fixtures are intentionally non-document-shaped markdown inputs.
     "tests/fixtures/critical_output_*.md",
+    // Skill bundle card fixtures are emoji cards, not structured Markdown documents.
+    ".github/skills/internal-gateway-critical-master/fixtures/*.md",
     // Ignore local OpenCode runtime artifacts.
     ".opencode/**",
     // Preserve imported support skill families verbatim by default; lint only repo-owned Markdown.

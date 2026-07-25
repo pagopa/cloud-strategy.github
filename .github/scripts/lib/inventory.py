@@ -18,11 +18,11 @@ SCRIPT_GLOB_PATTERNS = (
     ".github/scripts/*.sh",
     ".github/scripts/lib/*.py",
 )
-OFFICE_SUPPORT_ONLY_SKILLS = (
-    ".github/skills/openai-docx/SKILL.md",
-    ".github/skills/openai-pdf/SKILL.md",
-    ".github/skills/openai-slides/SKILL.md",
-    ".github/skills/openai-spreadsheet/SKILL.md",
+DOCUMENT_SUPPORT_ONLY_SKILLS = (
+    ".github/skills/anthropic-docx/SKILL.md",
+    ".github/skills/anthropic-pdf/SKILL.md",
+    ".github/skills/anthropic-pptx/SKILL.md",
+    ".github/skills/anthropic-xlsx/SKILL.md",
 )
 IGNORED_SCRIPT_BASENAMES = {"__init__.py"}
 
@@ -81,13 +81,13 @@ def render_inventory_markdown(sections: dict[str, list[str]]) -> str:
         if entries:
             lines.extend(f"- `{entry}`" for entry in entries)
             if section == "Skills":
-                office_entries = [entry for entry in entries if entry in OFFICE_SUPPORT_ONLY_SKILLS]
-                if office_entries:
+                doc_entries = [entry for entry in entries if entry in DOCUMENT_SUPPORT_ONLY_SKILLS]
+                if doc_entries:
                     lines.append("")
-                    lines.append("### Support-only imported office skills")
+                    lines.append("### Support-only imported document skills")
                     lines.append("")
                     lines.append(
-                        "These imported `openai-*` office skills remain support-only depth for repositories that explicitly need document workflows."
+                        "These vendor-prefixed imported document skills remain support-only depth for repositories that explicitly need document workflows."
                     )
         else:
             lines.append(EMPTY_MESSAGES[section])

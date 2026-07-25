@@ -1,6 +1,6 @@
 ---
 name: internal-github-action-composite
-description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially when input validation, shell safety, or contract compatibility matters.
+description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially when input validation, shell safety, `outputs:` contract compatibility, or backward compatibility matters. Do not use for workflow-level authoring or reuse-pattern selection; route those to internal-github-actions.
 ---
 
 # GitHub Composite Action Skill
@@ -12,7 +12,7 @@ for every composite action edit; load only the owner proved by the reusable
 unit, extracted script depth, or broader workflow question.
 
 - `internal-github-actions`: GitHub Actions workflow umbrella and reuse-pattern selection.
-- `internal-bash-script`: extracted shell scripts inside composite actions.
+- `internal-github`: route back under material routing uncertainty when the owning GitHub lane is unclear or the work is still strategic platform framing.
 
 ## When to use
 

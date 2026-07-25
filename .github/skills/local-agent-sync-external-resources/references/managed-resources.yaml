@@ -2,7 +2,7 @@ version: 1
 sources:
   github-awesome-copilot:
     repository: https://github.com/github/awesome-copilot.git
-    ref: e986f49695491311df2774030ebe11efabd0fb77
+    ref: aa280f28b1b73f9b6e6917b607eb92127b67b419
     assets:
       - upstream: skills/agentic-eval
         local: .github/skills/awesome-copilot-agentic-eval
@@ -36,7 +36,7 @@ sources:
         canonical_name: awesome-copilot-security-review
   obra-superpowers:
     repository: https://github.com/obra/superpowers.git
-    ref: d884ae04edebef577e82ff7c4e143debd0bbec99
+    ref: 3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9
     assets:
       - upstream: skills/brainstorming
         local: .github/skills/superpowers-brainstorming
@@ -79,7 +79,7 @@ sources:
         canonical_name: superpowers-writing-plans
   hashicorp-agent-skills:
     repository: https://github.com/hashicorp/agent-skills.git
-    ref: 339a113935812ad75c6ff90d418b739a021826d1
+    ref: 8c6573abbd21e8094fab8f538eb5f97db63133fd
     assets:
       - upstream: terraform/code-generation/skills/terraform-search-import
         local: .github/skills/terraform-terraform-search-import
@@ -89,20 +89,55 @@ sources:
         canonical_name: terraform-terraform-test
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
-    ref: efa058a349f5ce98b6115bf8b4e0d0ef9c310e0d
+    ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
+    rewrite_skill_references: true
+    backtick_skill_references:
+      - code-review
+      - tdd
+      - to-spec
     assets:
       - upstream: skills/engineering/grill-with-docs
-        local: .github/skills/grill-me
-        canonical_name: grill-me
+        local: .github/skills/mattpocock-grill-with-docs
+        canonical_name: mattpocock-grill-with-docs
+      - upstream: skills/engineering/domain-modeling
+        local: .github/skills/mattpocock-domain-modeling
+        canonical_name: mattpocock-domain-modeling
+      - upstream: skills/engineering/codebase-design
+        local: .github/skills/mattpocock-codebase-design
+        canonical_name: mattpocock-codebase-design
+      - upstream: skills/engineering/improve-codebase-architecture
+        local: .github/skills/mattpocock-improve-codebase-architecture
+        canonical_name: mattpocock-improve-codebase-architecture
+      - upstream: skills/engineering/implement
+        local: .github/skills/mattpocock-implement
+        canonical_name: mattpocock-implement
+      - upstream: skills/engineering/tdd
+        local: .github/skills/mattpocock-tdd
+        canonical_name: mattpocock-tdd
+      - upstream: skills/engineering/to-spec
+        local: .github/skills/mattpocock-to-spec
+        canonical_name: mattpocock-to-spec
+      - upstream: skills/engineering/setup-matt-pocock-skills
+        local: .github/skills/mattpocock-setup-matt-pocock-skills
+        canonical_name: mattpocock-setup-matt-pocock-skills
+      - upstream: skills/engineering/code-review
+        local: .github/skills/mattpocock-code-review
+        canonical_name: mattpocock-code-review
+      - upstream: skills/engineering/wayfinder
+        local: .github/skills/mattpocock-wayfinder
+        canonical_name: mattpocock-wayfinder
       - upstream: skills/engineering/research
         local: .github/skills/mattpocock-research
         canonical_name: mattpocock-research
       - upstream: skills/productivity/handoff
         local: .github/skills/mattpocock-handoff
         canonical_name: mattpocock-handoff
+      - upstream: skills/productivity/writing-great-skills
+        local: .github/skills/mattpocock-writing-great-skills
+        canonical_name: mattpocock-writing-great-skills
   vercel-labs-skills:
     repository: https://github.com/vercel-labs/skills.git
-    ref: 4ce6d48ac44c8b637db87b2102fea3baca719df1
+    ref: e173b8c88f2581cfdaa1b6767c6519a08155790e
     assets:
       - upstream: skills/find-skills
         local: .github/skills/vercel-find-skills
@@ -117,32 +152,16 @@ sources:
       - upstream: skills/.curated/gh-fix-ci
         local: .github/skills/openai-gh-fix-ci
         canonical_name: openai-gh-fix-ci
-      - upstream: skills/.system/skill-creator
-        local: .github/skills/openai-skill-creator
-        canonical_name: openai-skill-creator
-      - upstream: skills/.curated/pdf
-        local: .github/skills/openai-pdf
-        canonical_name: openai-pdf
   openai-skills-retained-doc:
     repository: https://github.com/openai/skills.git
-    ref: 45d05d75363abf13f99d09e899d61e07b8010685
+    ref: 49f948faa9258a0c61caceaf225e179651397431
     assets:
-      - upstream: skills/.curated/doc
-        local: .github/skills/openai-docx
-        canonical_name: openai-docx
-  openai-skills-retained-office:
-    repository: https://github.com/openai/skills.git
-    ref: e6afb0d74cc75d220df2faf3dd6c635c2dc6a108
-    assets:
-      - upstream: skills/.curated/spreadsheet
-        local: .github/skills/openai-spreadsheet
-        canonical_name: openai-spreadsheet
-      - upstream: skills/.curated/slides
-        local: .github/skills/openai-slides
-        canonical_name: openai-slides
+      - upstream: skills/.curated/openai-docs
+        local: .github/skills/openai-docs
+        canonical_name: openai-docs
   sickn33-antigravity:
     repository: https://github.com/sickn33/antigravity-awesome-skills.git
-    ref: 8946c6cdc8468183426d52f85054639b3e1844ae
+    ref: e66fc833f2022c3534ba74af835db14c34f9a732
     assets:
       - upstream: skills/api-design-principles
         local: .github/skills/antigravity-api-design-principles
@@ -167,7 +186,7 @@ sources:
         canonical_name: antigravity-network-engineer
   addyosmani-agent-skills:
     repository: https://github.com/addyosmani/agent-skills.git
-    ref: 0e63d8ea962ecac51637421d8fff63702fac766b
+    ref: ff2df4c07e7836a092ed28e1e9b42f4d6009280c
     assets:
       - upstream: skills/code-simplification
         local: .github/skills/addyosmani-code-simplification
@@ -175,10 +194,37 @@ sources:
       - upstream: skills/code-review-and-quality
         local: .github/skills/addyosmani-code-review-and-quality
         canonical_name: addyosmani-code-review-and-quality
+  atlassian-mcp-server:
+    repository: https://github.com/atlassian/atlassian-mcp-server.git
+    ref: f22e7075136a62baa7c10200a64884f83bf3ebe1
+    assets:
+      - upstream: skills/search-company-knowledge
+        local: .github/skills/search-company-knowledge
+        canonical_name: search-company-knowledge
+  anthropic-skills:
+    repository: https://github.com/anthropics/skills.git
+    ref: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
+    rewrite_skill_references: true
+    assets:
+      - upstream: skills/docx
+        local: .github/skills/anthropic-docx
+        canonical_name: anthropic-docx
+      - upstream: skills/pdf
+        local: .github/skills/anthropic-pdf
+        canonical_name: anthropic-pdf
+      - upstream: skills/pptx
+        local: .github/skills/anthropic-pptx
+        canonical_name: anthropic-pptx
+      - upstream: skills/xlsx
+        local: .github/skills/anthropic-xlsx
+        canonical_name: anthropic-xlsx
 normalizations:
   - source: obra-superpowers
     from: docs/superpowers
     to: tmp/superpowers
+  - source: mattpocock-skills
+    from: /grilling
+    to: /grill-me
 watchlist:
   - source_family: github/awesome-copilot
     upstream_id: azure-devops-pipelines.instructions.md
@@ -201,10 +247,6 @@ watchlist:
     local_owner: internal-debugging
     reason: Root-cause diagnosis loop was extracted into a repository-owned owner.
   - source_family: mattpocock/skills
-    upstream_id: tdd
-    local_owner: internal-tdd
-    reason: Test-first delivery rules were extracted into a repository-owned owner.
-  - source_family: mattpocock/skills
     upstream_id: improve-codebase-architecture
     local_owner: internal-review-high-level
     reason: Architecture deepening lenses were extracted into high-level review.
@@ -213,21 +255,25 @@ watchlist:
     local_owner: internal-review-high-level
     reason: Codebase orientation, module maps, caller maps, and domain vocabulary were extracted into high-level review.
   - source_family: mattpocock/skills
-    upstream_id: grill-with-docs
-    local_owner: internal-gateway-writing-plans
-    reason: Glossary and ADR side effects are not default repository conventions.
+    upstream_id: prototype
+    local_owner: unmanaged
+    reason: Referenced by wayfinder but outside the user-approved import scope; keep visible until explicitly approved or mapped to a local owner.
   - source_family: mattpocock/skills
-    upstream_id: setup-matt-pocock-skills
-    local_owner: local-agent-sync-external-resources
-    reason: Setup conventions are not part of the managed source catalog.
+    upstream_id: triage
+    local_owner: unmanaged
+    reason: Referenced by setup-matt-pocock-skills but not installed in this repository; keep visible until explicitly approved or mapped to a local owner.
+  - source_family: mattpocock/skills
+    upstream_id: to-tickets
+    local_owner: unmanaged
+    reason: Referenced by setup-matt-pocock-skills but not installed in this repository; keep visible until explicitly approved or mapped to a local owner.
+  - source_family: mattpocock/skills
+    upstream_id: qa
+    local_owner: unmanaged
+    reason: Referenced by setup-matt-pocock-skills but not installed in this repository; keep visible until explicitly approved or mapped to a local owner.
   - source_family: mattpocock/skills
     upstream_id: caveman
     local_owner: retired
     reason: The previously retained caveman import was retired from the managed catalog by explicit user scope reduction. Do not reimport unless the user re-approves the retained import.
-  - source_family: mattpocock/skills
-    upstream_id: code-review
-    local_owner: retired
-    reason: The mattpocock-code-review import was replaced by addyosmani-code-review-and-quality from addyosmani/agent-skills. Do not reimport unless the user re-approves the retained import.
   - source_family: addyosmani/agent-skills
     upstream_id: idea-refine
     local_owner: internal-gateway-idea

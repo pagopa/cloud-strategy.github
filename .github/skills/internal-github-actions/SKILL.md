@@ -1,6 +1,6 @@
 ---
 name: internal-github-actions
-description: Use when authoring or revising GitHub Actions workflows, reusable workflows, or deciding when shared step logic should move into a composite action.
+description: Use when authoring or revising GitHub Actions workflows under `.github/workflows/`, creating reusable workflows via `workflow_call`, deciding whether shared step logic should stay inline, move to a reusable workflow, or move to a composite action. Do not use for ruleset, permission, OIDC, or guardrail design; route those to internal-github-governance.
 ---
 
 # GitHub Actions Skill
@@ -13,7 +13,7 @@ reuse decision, delivery question, or infrastructure coupling.
 
 - `internal-devops-core-principles`: delivery-system strategy, release safety, operational readiness, and incident learning.
 - `internal-github-action-composite`: composite-action authoring and step-level reuse.
-- `internal-terraform`: Terraform resources deployed by CI/CD.
+- `internal-github`: route back under material routing uncertainty when the owning GitHub lane is unclear or the work is still strategic platform framing.
 
 ## When to use
 

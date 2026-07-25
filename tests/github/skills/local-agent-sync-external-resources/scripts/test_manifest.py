@@ -1,3 +1,5 @@
+import hashlib
+import re
 import sys
 from pathlib import Path
 
@@ -17,10 +19,118 @@ from sync_external_resources_core import (  # noqa: E402
     validate_override_patches,
 )
 
+_COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+
+_FULL_SHA40 = "a" * 40
+_FULL_SHA40_ALT = "b" * 40
+
 
 @pytest.fixture
 def repo_root() -> Path:
     return REPO_ROOT
+
+
+def _write_manifest(tmp_path: Path, body: str) -> Path:
+    path = tmp_path / "managed-resources.yaml"
+    path.write_text(body, encoding="utf-8")
+    return path
+
+
+def test_live_manifest_refs_are_full_lowercase_object_ids(repo_root: Path) -> None:
+    manifest = load_managed_resources(
+        repo_root
+        / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
+    )
+    for source in manifest.sources:
+        assert _COMMIT_OBJECT_ID_RE.match(source.ref), (
+            f"source {source.source_id} ref {source.ref!r} "
+            f"is not a full lowercase commit object ID"
+        )
+
+
+def test_manifest_accepts_optional_advertised_ref(tmp_path: Path) -> None:
+    manifest = load_managed_resources(
+        _write_manifest(
+            tmp_path,
+            f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {_FULL_SHA40}
+    advertised_ref: refs/heads/main
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        )
+    )
+    assert manifest.sources[0].advertised_ref == "refs/heads/main"
+
+
+def test_manifest_rejects_short_ref(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="full lowercase commit object ID"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                """\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: abc123
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_branch_name_ref(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="full lowercase commit object ID"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                """\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: main
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+            )
+        )
+
+
+def test_manifest_rejects_uppercase_sha_ref(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="full lowercase commit object ID"):
+        load_managed_resources(
+            _write_manifest(
+                tmp_path,
+                f"""\
+version: 1
+sources:
+  source:
+    repository: https://github.com/example/repo.git
+    ref: {"A" * 40}
+    assets:
+      - upstream: skills/one
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+            )
+        )
 
 
 def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
@@ -29,8 +139,79 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 45
+    assert len(manifest.assets) == 56
     assert len(manifest.watchlist) == 13
+    matt_source = next(
+        source for source in manifest.sources if source.source_id == "mattpocock-skills"
+    )
+    assert matt_source.rewrite_skill_references is True
+    assert dict(matt_source.skill_reference_aliases) == {}
+    assert {
+        item.upstream_id
+        for item in manifest.watchlist
+        if item.source_family == "mattpocock/skills"
+    } >= {"prototype", "triage", "to-tickets", "qa"}
+    assert {item.canonical_name for item in matt_source.assets} >= {
+        "mattpocock-grill-with-docs",
+        "mattpocock-domain-modeling",
+        "mattpocock-codebase-design",
+        "mattpocock-improve-codebase-architecture",
+        "mattpocock-implement",
+        "mattpocock-tdd",
+        "mattpocock-to-spec",
+        "mattpocock-setup-matt-pocock-skills",
+        "mattpocock-code-review",
+        "mattpocock-wayfinder",
+        "mattpocock-writing-great-skills",
+    }
+    assert "grill-me" not in {item.canonical_name for item in matt_source.assets}
+    assert {
+        (source.repository, asset.upstream, asset.local, asset.canonical_name)
+        for source in manifest.sources
+        for asset in source.assets
+    } >= {
+        (
+            "https://github.com/atlassian/atlassian-mcp-server.git",
+            "skills/search-company-knowledge",
+            ".github/skills/search-company-knowledge",
+            "search-company-knowledge",
+        ),
+        (
+            "https://github.com/openai/skills.git",
+            "skills/.curated/openai-docs",
+            ".github/skills/openai-docs",
+            "openai-docs",
+        ),
+        (
+            "https://github.com/anthropics/skills.git",
+            "skills/docx",
+            ".github/skills/anthropic-docx",
+            "anthropic-docx",
+        ),
+        (
+            "https://github.com/anthropics/skills.git",
+            "skills/pptx",
+            ".github/skills/anthropic-pptx",
+            "anthropic-pptx",
+        ),
+        (
+            "https://github.com/anthropics/skills.git",
+            "skills/xlsx",
+            ".github/skills/anthropic-xlsx",
+            "anthropic-xlsx",
+        ),
+    }
+    imported_assets = {
+        (source.repository, asset.upstream, asset.local, asset.canonical_name)
+        for source in manifest.sources
+        for asset in source.assets
+    }
+    assert (
+        "https://github.com/anthropics/skills.git",
+        "skills/skill-creator",
+        ".github/skills/anthropic-skill-creator",
+        "anthropic-skill-creator",
+    ) not in imported_assets
     assert {
         item.local for item in manifest.assets if item.source == "obra-superpowers"
     } == {
@@ -61,12 +242,12 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
 def test_manifest_rejects_duplicate_local_paths(tmp_path: Path) -> None:
     path = tmp_path / "managed-resources.yaml"
     path.write_text(
-        """\
+        f"""\
 version: 1
 sources:
   source:
     repository: https://github.com/example/repo.git
-    ref: abc123
+    ref: {_FULL_SHA40}
     assets:
       - upstream: skills/one
         local: .github/skills/example
@@ -136,3 +317,51 @@ def test_live_handoff_override_forces_repo_tmp_handoff(repo_root: Path) -> None:
     assert handoff.override_id == "mattpocock-handoff-tmp-path"
     patch_text = (bundle_root / handoff.patch_path).read_text(encoding="utf-8")
     assert "tmp/handoff/" in patch_text
+
+
+def test_mattpocock_skill_creator_review_keeps_invocation_override(
+    repo_root: Path,
+) -> None:
+    overrides_path = (
+        repo_root / ".github/skills/local-agent-sync-external-resources/references/"
+        "imported-asset-overrides.yaml"
+    )
+    bundle_root = repo_root / ".github/skills/local-agent-sync-external-resources"
+    overrides = load_overrides(overrides_path)
+    by_target = {override.target_path: override for override in overrides}
+
+    expected = {
+        ".github/skills/mattpocock-writing-great-skills/SKILL.md": "mattpocock-writing-great-skills-delegated-invocation",
+    }
+    for target, override_id in expected.items():
+        override = by_target[target]
+        assert override.override_id == override_id
+        digest = hashlib.sha256((repo_root / target).read_bytes()).hexdigest()
+        assert override.expected_content_hash == digest
+        patch = (bundle_root / override.patch_path).read_text(encoding="utf-8")
+        assert "-disable-model-invocation: true" in patch
+        assert "internal-skill-creator" in patch
+    assert ".github/skills/anthropic-skill-creator/SKILL.md" not in by_target
+
+
+def test_manifest_rejects_undeclared_backtick_skill_reference(tmp_path: Path) -> None:
+    manifest = tmp_path / "managed-resources.yaml"
+    manifest.write_text(
+        "version: 1\n"
+        "sources:\n"
+        "  example-source:\n"
+        "    repository: https://example.com/repo.git\n"
+        f"    ref: {'a' * 40}\n"
+        "    rewrite_skill_references: true\n"
+        "    backtick_skill_references:\n"
+        "      - not-an-asset\n"
+        "    assets:\n"
+        "      - upstream: skills/example\n"
+        "        local: .github/skills/example\n"
+        "        canonical_name: example\n"
+        "watchlist: []\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="not-an-asset"):
+        load_managed_resources(manifest)

@@ -311,7 +311,7 @@ rows:
         assert payload["counts"]["residual"] == 0
 
 
-def test_agents_md_sync_removes_repository_local_rules_and_overwrites_home_copy(
+def test_agents_md_sync_keeps_optional_local_reference_and_overwrites_home_copy(
     tmp_path: Path, capsys
 ) -> None:
     refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
@@ -354,17 +354,17 @@ rows:
     source.write_text(
         """# Global agent policy
 
-`<shared-baseline>`
-
 Shared policy.
 
-`</shared-baseline>`
-
-`<standards-repository-local-rules>`
+If `AGENTS.local.md` exists next to this file, load and apply it after this
+baseline. If it does not exist, continue without error.
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "AGENTS.local.md").write_text(
+        """# Repository-local policy
 
 Repository-only policy.
-
-`</standards-repository-local-rules>`
 """,
         encoding="utf-8",
     )
@@ -395,11 +395,10 @@ Repository-only policy.
         target.read_text(encoding="utf-8")
         == """# Global agent policy
 
-`<shared-baseline>`
-
 Shared policy.
 
-`</shared-baseline>`
+If `AGENTS.local.md` exists next to this file, load and apply it after this
+baseline. If it does not exist, continue without error.
 """
     )
     manifest = json.loads(
@@ -409,6 +408,83 @@ Shared policy.
     )
     assert manifest["managed_resources"][0]["target"] == "agents.md"
     assert manifest["managed_resources"][0]["resource_family"] == "agents-md"
+
+
+def test_agents_md_sync_accepts_missing_optional_local_policy(
+    tmp_path: Path, capsys
+) -> None:
+    refs = tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
+    refs.mkdir(parents=True)
+    (refs / "home-sync-catalog.yaml").write_text(
+        """version: 1
+defaults:
+  include_internal_skills: false
+  include_local_skills: false
+  include_unlisted_skills: false
+  unmanaged_existing_skills_policy: repo-wins
+  excluded_skills: []
+  skill_targets: []
+resources:
+  - resource_id: global-agents
+    source_family: agents-md
+    source_path: AGENTS.md
+    include_targets: [agents.md]
+    target_support: documented
+    notes: Portable global agent baseline.
+""",
+        encoding="utf-8",
+    )
+    (refs / "runtime-support-matrix.yaml").write_text(
+        """version: 1
+rows:
+  - target: agents.md
+    resource_family: agents-md
+    support_level: Documented
+    home_path: ~/.agents/AGENTS.md
+    direct_copy_possible: true
+    translation_required: false
+    include_in_v1: true
+    evidence: []
+    notes: Portable global agent baseline.
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "AGENTS.md").write_text(
+        """# Global agent policy
+
+Shared policy.
+
+If `AGENTS.local.md` exists next to this file, load and apply it after this
+baseline. If it does not exist, continue without error.
+""",
+        encoding="utf-8",
+    )
+    home = tmp_path / "home"
+    (home / ".agents").mkdir(parents=True)
+
+    assert (
+        run(
+            parse_args(
+                [
+                    "sync",
+                    "--source-root",
+                    str(tmp_path),
+                    "--home-root",
+                    str(home),
+                    "--targets",
+                    "agents.md",
+                ]
+            )
+        )
+        == 0
+    )
+    capsys.readouterr()
+
+    assert (
+        (home / ".agents/AGENTS.md")
+        .read_text(encoding="utf-8")
+        .endswith("If it does not exist, continue without error.\n")
+    )
 
 
 def test_copilot_agents_are_symlinked_with_write_through(

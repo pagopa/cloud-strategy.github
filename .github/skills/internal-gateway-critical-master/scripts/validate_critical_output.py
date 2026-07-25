@@ -3,8 +3,8 @@
 
 Usage examples:
   python3 scripts/validate_critical_output.py --file fixtures/critical_output_valid.md
-  python3 scripts/validate_critical_output.py --file fixtures/critical_output_invalid_missing_section.md --format json
-  python3 scripts/validate_critical_output.py --file fixtures/critical_output_advisory.md --strict
+  python3 scripts/validate_critical_output.py --file fixtures/critical_output_valid.md --strict
+  python3 scripts/validate_critical_output.py --file fixtures/critical_output_valid.md --format json
 """
 
 from __future__ import annotations
@@ -17,25 +17,14 @@ from pathlib import Path
 from typing import Protocol, TypeVar
 
 from critical_master import (
-    ALLOWED_CLAIM_CLASSES,
-    ALLOWED_OUTCOMES,
-    FINDING_FIELD_MAX_WORDS,
-    FINDING_OBJECTION_MAX_WORDS,
-    FINDING_QUESTION_MAX_WORDS,
-    FINDING_REFRAME_MAX_WORDS,
-    MAX_FINDINGS,
-    MIN_FINDINGS,
-    REQUIRED_FINDING_FIELDS,
-    REQUIRED_SECTIONS,
-    SUMMARY_MAX_WORDS,
-    SYNTHESIS_MAX_WORDS,
-    TOTAL_MAX_WORDS,
+    CARD_LINE_MAX_WORDS,
+    CARD_MARKER_ORDER,
+    CARD_MAX_LINES,
+    CARD_MIN_LINES,
+    CARD_TOTAL_MAX_WORDS,
     Finding,
     count_words,
-    extract_outcome_value,
-    parse_findings,
-    parse_markdown_sections,
-    validate_outcome_value,
+    parse_critical_card,
 )
 
 
@@ -46,6 +35,8 @@ class FindingLike(Protocol):
 
 
 FindingT = TypeVar("FindingT", bound=FindingLike)
+
+_H2_PATTERN = re.compile(r"^##\s+", re.MULTILINE)
 
 
 def parse_args() -> argparse.Namespace:
@@ -65,7 +56,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-words",
         type=int,
-        default=TOTAL_MAX_WORDS,
+        default=CARD_TOTAL_MAX_WORDS,
         help="Override the total output word limit.",
     )
     parser.add_argument(
@@ -114,18 +105,15 @@ def render_json(data: object) -> str:
     return json.dumps(data, indent=2, sort_keys=True)
 
 
-def log_info(message: str) -> None:
-    print(f"INFO: {message}", flush=True)
-
-
-def log_warn(message: str) -> None:
-    print(f"WARN: {message}", flush=True)
-
-
 def main() -> int:
     args = parse_args()
     if args.file:
-        text = Path(args.file).read_text(encoding="utf-8")
+        path = Path(args.file)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            print(f"ERROR: cannot read '{path}': {exc}", file=sys.stderr)
+            return 2
     else:
         text = sys.stdin.read()
 
@@ -138,109 +126,152 @@ def main() -> int:
     return 1 if should_fail(findings, strict=args.strict) else 0
 
 
-def validate_output(text: str, *, max_words: int = TOTAL_MAX_WORDS) -> list[Finding]:
-    """Run every output-contract check and return a list of Findings."""
+def validate_output(
+    text: str, *, max_words: int = CARD_TOTAL_MAX_WORDS
+) -> list[Finding]:
     findings: list[Finding] = []
-    sections = parse_markdown_sections(text)
 
-    for required in REQUIRED_SECTIONS:
-        if required not in sections:
+    if _H2_PATTERN.search(text):
+        findings.append(
+            Finding(
+                severity="blocking",
+                code="legacy-section-format",
+                path="(output)",
+                message="Legacy H2 sections are not allowed in the new card format.",
+                suggestion="Use the emoji card layout from references/output-contract.md.",
+            )
+        )
+        return findings
+
+    lines = text.splitlines()
+    card = parse_critical_card(text)
+    non_empty_prose = [
+        line for line in lines if line.strip() and line.strip() not in {
+            cl.raw.strip() for cl in card.lines
+        }
+    ]
+    if non_empty_prose:
+        findings.append(
+            Finding(
+                severity="blocking",
+                code="unexpected-content-line",
+                path="(output)",
+                message="Non-empty line does not match any card marker.",
+                suggestion="Each content line must start with an emoji marker.",
+            )
+        )
+
+    markers_present = [cl.marker for cl in card.lines]
+    seen_markers: set[str] = set()
+    for marker in markers_present:
+        if marker in seen_markers:
             findings.append(
                 Finding(
                     severity="blocking",
-                    code=f"missing-section-{_section_slug(required)}",
+                    code="duplicate-marker",
                     path="(output)",
-                    message=f"Required section '## {required}' is missing.",
-                    suggestion=(
-                        f"Add a '## {required}' section. "
-                        "See references/output-contract.md for the template."
-                    ),
+                    message=f"Marker '{marker}' appears more than once.",
+                    suggestion="Each marker is allowed at most once.",
+                )
+            )
+        seen_markers.add(marker)
+
+    for required in ("🎯", "⚠️", "✅"):
+        if required not in seen_markers:
+            code_map = {"🎯": "missing-plan", "⚠️": "missing-critique", "✅": "missing-advice"}
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code=code_map[required],
+                    path="(output)",
+                    message=f"Required marker '{required}' is missing.",
+                    suggestion="Add the missing emoji line to the card.",
                 )
             )
 
-    summary_body = sections.get("Summary", "")
-    synthesis_body = sections.get("Synthesis", "")
-    findings_body = sections.get("Findings", "")
-    outcome_body = sections.get("Outcome", "")
-
-    summary_words = count_words(summary_body)
-    if summary_body and summary_words > SUMMARY_MAX_WORDS:
-        findings.append(
-            Finding(
-                severity="non-blocking",
-                code="summary-word-limit",
-                path="## Summary",
-                message=(
-                    f"Summary has {summary_words} words; limit is {SUMMARY_MAX_WORDS}."
-                ),
-                suggestion="Compress the summary paragraph.",
-                extras={"words": summary_words, "limit": SUMMARY_MAX_WORDS},
+    if "💥" in seen_markers and "✅" in seen_markers:
+        risk_idx = markers_present.index("💥")
+        advice_idx = markers_present.index("✅")
+        if risk_idx > advice_idx:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="card-line-order",
+                    path="(output)",
+                    message="Risk marker 💥 must appear before advice ✅.",
+                    suggestion="Move 💥 before ✅.",
+                )
             )
-        )
 
-    synthesis_words = count_words(synthesis_body)
-    if synthesis_body and synthesis_words > SYNTHESIS_MAX_WORDS:
-        findings.append(
-            Finding(
-                severity="non-blocking",
-                code="synthesis-word-limit",
-                path="## Synthesis",
-                message=(
-                    f"Synthesis has {synthesis_words} words; limit is {SYNTHESIS_MAX_WORDS}."
-                ),
-                suggestion="Compress the synthesis paragraph.",
-                extras={"words": synthesis_words, "limit": SYNTHESIS_MAX_WORDS},
+    if "❓" in seen_markers and "✅" in seen_markers:
+        question_idx = markers_present.index("❓")
+        advice_idx = markers_present.index("✅")
+        if question_idx < advice_idx:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="card-line-order",
+                    path="(output)",
+                    message="Question marker ❓ must appear after advice ✅.",
+                    suggestion="Move ❓ after ✅.",
+                )
             )
-        )
 
-    parsed_findings = parse_findings(findings_body)
-    finding_count = len(parsed_findings)
-    if finding_count < MIN_FINDINGS or finding_count > MAX_FINDINGS:
-        findings.append(
-            Finding(
-                severity="blocking",
-                code="finding-count-out-of-range",
-                path="## Findings",
-                message=(
-                    f"Found {finding_count} findings; expected {MIN_FINDINGS}-{MAX_FINDINGS}."
-                ),
-                suggestion=(
-                    "Adjust the count to fit the contract: one strong finding is "
-                    "better than three weak ones."
-                ),
-                extras={"count": finding_count, "min": MIN_FINDINGS, "max": MAX_FINDINGS},
+    expected_order = [m for m in CARD_MARKER_ORDER if m in seen_markers]
+    actual_order = []
+    for marker in markers_present:
+        if marker not in actual_order:
+            actual_order.append(marker)
+    if expected_order != actual_order:
+        already_reported_order = any(f.code == "card-line-order" for f in findings)
+        if not already_reported_order:
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="card-line-order",
+                    path="(output)",
+                    message="Card markers are not in canonical order.",
+                    suggestion="Use order: 🎯, ⚠️, [💥], ✅, [❓].",
+                )
             )
-        )
 
-    for parsed in parsed_findings:
-        _check_finding(parsed, findings)
-
-    outcome_value = extract_outcome_value(outcome_body)
-    if outcome_value is None:
+    line_count = len(card.lines)
+    if line_count < CARD_MIN_LINES or line_count > CARD_MAX_LINES:
         findings.append(
             Finding(
                 severity="blocking",
-                code="missing-outcome-value",
-                path="## Outcome",
-                message="Outcome section is missing a backtick-wrapped value.",
-                suggestion="Wrap the outcome value in single backticks, e.g. `accept-with-risk`.",
+                code="card-line-count",
+                path="(output)",
+                message=f"Card has {line_count} lines; expected {CARD_MIN_LINES}-{CARD_MAX_LINES}.",
+                suggestion="Use three to five content lines.",
+                extras={"count": line_count, "min": CARD_MIN_LINES, "max": CARD_MAX_LINES},
             )
         )
-    elif not validate_outcome_value(outcome_value):
-        findings.append(
-            Finding(
-                severity="blocking",
-                code="invalid-outcome-value",
-                path="## Outcome",
-                message=(
-                    f"Outcome value '{outcome_value}' is not in the allowed set."
-                ),
-                suggestion=(
-                    f"Use one of: {', '.join(sorted(ALLOWED_OUTCOMES))}."
-                ),
-                extras={"allowed": sorted(ALLOWED_OUTCOMES)},
+
+    for cl in card.lines:
+        if not cl.content.strip():
+            findings.append(
+                Finding(
+                    severity="blocking",
+                    code="unexpected-content-line",
+                    path=f"(marker {cl.marker})",
+                    message="Card line has empty content after label.",
+                    suggestion="Add content after the bold label.",
+                )
             )
-        )
+            continue
+        line_words = count_words(cl.content)
+        if line_words > CARD_LINE_MAX_WORDS:
+            findings.append(
+                Finding(
+                    severity="non-blocking",
+                    code="card-line-word-limit",
+                    path=f"(marker {cl.marker})",
+                    message=f"Line has {line_words} words; limit is {CARD_LINE_MAX_WORDS}.",
+                    suggestion="Shorten the line.",
+                    extras={"words": line_words, "limit": CARD_LINE_MAX_WORDS},
+                )
+            )
 
     total_words = count_words(text)
     if total_words > max_words:
@@ -249,139 +280,13 @@ def validate_output(text: str, *, max_words: int = TOTAL_MAX_WORDS) -> list[Find
                 severity="non-blocking",
                 code="total-word-limit",
                 path="(output)",
-                message=(
-                    f"Total output is {total_words} words; limit is {max_words}."
-                ),
-                suggestion="Compress the deliverable or split into multiple cycles.",
+                message=f"Total output is {total_words} words; limit is {max_words}.",
+                suggestion="Compress the card.",
                 extras={"words": total_words, "limit": max_words},
             )
         )
 
     return findings
-
-
-def _check_finding(parsed, findings: list[Finding]) -> None:
-    path = f"## Findings :: {parsed.heading}"
-    for required in REQUIRED_FINDING_FIELDS:
-        if not getattr(parsed, f"has_{required.lower()}"):
-            findings.append(
-                Finding(
-                    severity="blocking",
-                    code=f"missing-finding-field-{required.lower()}",
-                    path=path,
-                    message=f"Finding is missing **'{required}:'** field.",
-                    suggestion=(
-                        f"Add a '**{required}:**' bullet under the finding heading."
-                    ),
-                )
-            )
-    if parsed.evidence_class is None:
-        findings.append(
-            Finding(
-                severity="blocking",
-                code="missing-claim-class",
-                path=path,
-                message=(
-                    "Evidence field must declare a claim class "
-                    f"({', '.join(sorted(ALLOWED_CLAIM_CLASSES))})."
-                ),
-                suggestion=(
-                    "Append the class to the Evidence bullet, "
-                    "e.g. '**Evidence:** `inference` — ...'."
-                ),
-            )
-        )
-    elif parsed.evidence_class not in ALLOWED_CLAIM_CLASSES:
-        findings.append(
-            Finding(
-                severity="blocking",
-                code="invalid-claim-class",
-                path=path,
-                message=(
-                    f"Claim class '{parsed.evidence_class}' is not in the allowed set."
-                ),
-                suggestion=(
-                    f"Use one of: {', '.join(sorted(ALLOWED_CLAIM_CLASSES))}."
-                ),
-            )
-        )
-    objection_text = re.sub(r"^\d+\.\s+", "", parsed.heading)
-    objection_words = count_words(objection_text)
-    if objection_words > FINDING_OBJECTION_MAX_WORDS:
-        findings.append(
-            Finding(
-                severity="non-blocking",
-                code="finding-objection-word-limit",
-                path=path,
-                message=(
-                    f"Objection has {objection_words} words; "
-                    f"limit is {FINDING_OBJECTION_MAX_WORDS}."
-                ),
-                suggestion="Shorten the objection heading.",
-                extras={"words": objection_words, "limit": FINDING_OBJECTION_MAX_WORDS},
-            )
-        )
-    for field_name in ("Impact", "Evidence", "Mitigation"):
-        words = _field_word_count(parsed.body, field_name)
-        if words > FINDING_FIELD_MAX_WORDS:
-            findings.append(
-                Finding(
-                    severity="non-blocking",
-                    code=f"finding-field-word-limit-{field_name.lower()}",
-                    path=path,
-                    message=(
-                        f"'{field_name}' has {words} words; "
-                        f"limit is {FINDING_FIELD_MAX_WORDS}."
-                    ),
-                    suggestion=f"Shorten the '{field_name}' bullet.",
-                    extras={
-                        "words": words,
-                        "limit": FINDING_FIELD_MAX_WORDS,
-                    },
-                )
-            )
-    if parsed.has_reframe:
-        words = _field_word_count(parsed.body, "Reframe")
-        if words > FINDING_REFRAME_MAX_WORDS:
-            findings.append(
-                Finding(
-                    severity="non-blocking",
-                    code="finding-reframe-word-limit",
-                    path=path,
-                    message=(
-                        f"Reframe has {words} words; limit is {FINDING_REFRAME_MAX_WORDS}."
-                    ),
-                    suggestion="Shorten the optional reframe.",
-                    extras={"words": words, "limit": FINDING_REFRAME_MAX_WORDS},
-                )
-            )
-    if parsed.has_question:
-        words = _field_word_count(parsed.body, "Question")
-        if words > FINDING_QUESTION_MAX_WORDS:
-            findings.append(
-                Finding(
-                    severity="non-blocking",
-                    code="finding-question-word-limit",
-                    path=path,
-                    message=(
-                        f"Question has {words} words; limit is {FINDING_QUESTION_MAX_WORDS}."
-                    ),
-                    suggestion="Shorten the optional root question.",
-                    extras={"words": words, "limit": FINDING_QUESTION_MAX_WORDS},
-                )
-            )
-
-
-def _field_word_count(body: str, field_name: str) -> int:
-    pattern = re.compile(rf"\*\*{field_name}:\*\*\s*(.*?)(?=\n\s*-\s*\*\*|\Z)", re.DOTALL)
-    match = pattern.search(body)
-    if not match:
-        return 0
-    return count_words(match.group(1))
-
-
-def _section_slug(title: str) -> str:
-    return title.lower().replace(" ", "-")
 
 
 def _compact_payload(findings: list[Finding]) -> dict[str, object]:
@@ -405,7 +310,7 @@ def render_text(findings: list[Finding]) -> None:
         return
     for finding in findings:
         marker = "BLOCKING" if finding.severity == "blocking" else "advisory"
-        log_warn(f"[{marker}] {finding.path} :: {finding.code} :: {finding.message}")
+        print(f"[{marker}] {finding.path} :: {finding.code} :: {finding.message}")
         print(f"   Suggestion: {finding.suggestion}")
 
 

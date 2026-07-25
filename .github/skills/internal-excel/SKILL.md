@@ -7,7 +7,7 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 
 ## Referenced skills
 
-- `openai-spreadsheet`: on-demand support owner when rendered fidelity, cached recalculation, charts, or polished workbook presentation are the primary requirement.
+- `anthropic-xlsx`: on-demand support owner when rendered fidelity, cached recalculation, charts, or polished workbook presentation are the primary requirement.
 
 ## When to use
 
@@ -19,7 +19,7 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 
 ## When not to use
 
-- Charts, rendered review, cached recalculation, or polished workbook presentation as a first-class delivery requirement; use `openai-spreadsheet`.
+- Charts, rendered review, cached recalculation, or polished workbook presentation as a first-class delivery requirement; use `anthropic-xlsx`.
 - Single-language implementation work after the tabular-data approach is already chosen; use the narrower file or runtime owner for that code.
 - Database or warehouse design work that is not primarily about local CSV, TSV, or Excel artifacts.
 
@@ -27,7 +27,7 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 
 - This skill owns data integrity first: headers, types, nulls, duplicates, joins, reconciliation, stable IDs, delimiter detection, encoding, locale-sensitive numeric fields, and row-count preservation.
 - Keep evidence compact for large files: report headers, counts, targeted anomalies, transformation rules, exact validation gaps, and any locale or coercion assumptions that change numeric meaning.
-- Treat `.xlsx` as a workbook container first. Stay here for tabular extraction, safe value-level transformation, workbook contract inspection, writer parity checks, and formula-column decisions. Route to `openai-spreadsheet` only when rendered fidelity, cached recalculation, charts, or presentation-preserving delivery is the main job.
+- Treat `.xlsx` as a workbook container first. Stay here for tabular extraction, safe value-level transformation, workbook contract inspection, writer parity checks, and formula-column decisions. Route to `anthropic-xlsx` only when rendered fidelity, cached recalculation, charts, or presentation-preserving delivery is the main job.
 - Preserve identifier fidelity before coercion: keep leading zeros, long numeric IDs, and day-first date text exact until an explicit schema rule says otherwise.
 - Flag spreadsheet-bound text that could execute as a formula and minimize sensitive-column exposure in samples or logs.
 - Read `references/tool-selection.md` when choosing between Python `csv`, `pandas`, `openpyxl`, PyArrow, Polars, or DuckDB, or when scale, memory use, file format, or workbook fidelity makes the engine choice non-obvious.
@@ -52,7 +52,7 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 - When a sample workbook or sample tab defines the expected layout, treat that tab as a contract: column order, widths, header style, body style, money style, alert or error row style, and formula columns.
 - Verify that every tab produced by the same writer receives the same contract where applicable, not just the sampled tab.
 - When the user asks for verifiable formulas, keep derived columns as Excel formulas and keep source columns as atomic input values instead of precomputed results.
-- If workbook behavior stays contract-level and formula-level, keep the guidance here. Route to `openai-spreadsheet` only when visual polish, charts, or recalculated delivery artifacts become primary.
+- If workbook behavior stays contract-level and formula-level, keep the guidance here. Route to `anthropic-xlsx` only when visual polish, charts, or recalculated delivery artifacts become primary.
 
 ## Binary Artifacts
 

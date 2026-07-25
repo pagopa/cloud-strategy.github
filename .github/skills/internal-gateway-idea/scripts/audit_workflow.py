@@ -22,6 +22,7 @@ def contains_in_order(text: str, markers: list[str]) -> bool:
 MANDATORY_SEQUENCE = [
     "Specialization Checkpoint: gated",
     "Idea Gate 0",
+    "External Research Checkpoint",
     "Assumption Challenge Gate",
     "Alternative discovery",
     "Critical Challenge Gate",
@@ -32,8 +33,12 @@ MANDATORY_SEQUENCE = [
 RUNTIME_SEQUENCE = [
     "Specialization Checkpoint: gated",
     "Idea Gate 0",
+    "External Research Checkpoint",
+    "Assumption Challenge Gate",
+    "Alternative discovery",
     "Critical Challenge Gate",
-    "spec-vs-plan decision",
+    "Spec vs plan decision",
+    "Stop before implementation execution",
 ]
 
 
@@ -46,7 +51,7 @@ def main() -> int:
     shared_markers = [
         "Specialization Checkpoint: gated",
         "Idea Gate 0",
-        "visible numbered question block",
+        "compact user-facing decision card",
         "Assumption Challenge Gate",
         "Alternative discovery",
         "Critical Challenge Gate",
@@ -54,6 +59,18 @@ def main() -> int:
         "Spec vs plan decision",
         "internal-gateway-writing-plans",
         "Stop before implementation execution",
+    ]
+    chat_projection_markers = [
+        "compact user-facing decision card",
+        "internal workflow state",
+        "🎯",
+        "🧭",
+        "🛠️",
+        "🧪",
+        "⚠️",
+        "✅",
+        "💡",
+        "✈️",
     ]
     workflow_only_markers = [
         "flowchart TD",
@@ -73,9 +90,9 @@ def main() -> int:
         "do not start a second research pass automatically",
     ]
     runtime_only_markers = [
-        "$internal-gateway-idea",
-        "$superpowers-brainstorming",
-        "$internal-gateway-writing-plans",
+        "/internal-gateway-idea",
+        "/superpowers-brainstorming",
+        "/internal-gateway-writing-plans",
         "do not implement",
         "agent filename, frontmatter name, and workflow aligned",
     ]
@@ -90,14 +107,22 @@ def main() -> int:
                 "Specialization Checkpoint: gated",
                 "Idea Gate 0",
                 "Critical Challenge Gate",
-                "spec-vs-plan decision",
+                "Spec vs plan decision",
             ],
         ),
         "skill_gate_sequence": contains_in_order(skill_text, MANDATORY_SEQUENCE),
         "workflow_gate_sequence": contains_in_order(workflow_text, MANDATORY_SEQUENCE),
         "runtime_gate_sequence": contains_in_order(runtime_text, RUNTIME_SEQUENCE),
-        "local_fast_lane_documented": "scripts/audit_workflow.py" in skill_text
-        and "scripts/audit_workflow.py" in workflow_text,
+        "runtime_research_checkpoint": contains_all(
+            runtime_text,
+            [
+                "External Research Checkpoint",
+                "mattpocock-research",
+                "on-demand",
+            ],
+        ),
+        "local_fast_lane_documented": ".github/skills/internal-gateway-idea/scripts/audit_workflow.py" in skill_text
+        and ".github/skills/internal-gateway-idea/scripts/audit_workflow.py" in workflow_text,
         "workflow_mermaid_and_rules": contains_all(workflow_text, workflow_only_markers),
         "skill_research_escalation": contains_all(skill_text, research_markers),
         "workflow_research_escalation": contains_all(
@@ -119,6 +144,19 @@ def main() -> int:
         "stop_before_execution": "Stop before implementation execution" in workflow_text
         and "Stop after the delegated writing outcome" in skill_text
         and "Stop after the writing outcome" in runtime_text,
+        "compact_chat_projection": all(
+            contains_all(text, chat_projection_markers)
+            for text in (skill_text, workflow_text, runtime_text)
+        ),
+        "retained_spec_owner": "Retained spec writing stays with `/superpowers-brainstorming`" in skill_text,
+        "spec_review_before_plan_handoff": "Write retained spec" in workflow_text
+        and "User reviews retained spec" in workflow_text
+        and "Approve implementation-plan writing" in workflow_text
+        and "Load /internal-gateway-writing-plans" in workflow_text,
+        "writing_gateway_is_plan_only": "implementation-plan writing" in skill_text
+        and "retained spec or implementation-plan writing" not in skill_text
+        and "retained spec or implementation-plan writing" not in workflow_text
+        and "retained spec or implementation-plan writing" not in runtime_text,
     }
     payload = {"strict_ok": all(markers.values()), "markers": markers}
     print(json.dumps(payload, indent=2, sort_keys=True))

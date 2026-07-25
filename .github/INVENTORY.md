@@ -39,6 +39,10 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/agent-os-inject-standards/SKILL.md`
 - `.github/skills/agent-os-plan-product/SKILL.md`
 - `.github/skills/agent-os-shape-spec/SKILL.md`
+- `.github/skills/anthropic-docx/SKILL.md`
+- `.github/skills/anthropic-pdf/SKILL.md`
+- `.github/skills/anthropic-pptx/SKILL.md`
+- `.github/skills/anthropic-xlsx/SKILL.md`
 - `.github/skills/antigravity-api-design-principles/SKILL.md`
 - `.github/skills/antigravity-aws-cost-optimizer/SKILL.md`
 - `.github/skills/antigravity-cloudformation-best-practices/SKILL.md`
@@ -65,12 +69,12 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
 - `.github/skills/internal-aws-organization-structure/SKILL.md`
-- `.github/skills/internal-aws-strategic/SKILL.md`
+- `.github/skills/internal-aws/SKILL.md`
 - `.github/skills/internal-azure-devops/SKILL.md`
 - `.github/skills/internal-azure-governance/SKILL.md`
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
-- `.github/skills/internal-azure-strategic/SKILL.md`
+- `.github/skills/internal-azure/SKILL.md`
 - `.github/skills/internal-bash-script/SKILL.md`
 - `.github/skills/internal-bash/SKILL.md`
 - `.github/skills/internal-changelog-automation/SKILL.md`
@@ -82,6 +86,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-excel/SKILL.md`
+- `.github/skills/internal-gateway-codebase-improvement/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-execute-plans/SKILL.md`
 - `.github/skills/internal-gateway-idea/SKILL.md`
@@ -90,13 +95,13 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-gcp-governance/SKILL.md`
 - `.github/skills/internal-gcp-operations/SKILL.md`
 - `.github/skills/internal-gcp-organization-structure/SKILL.md`
-- `.github/skills/internal-gcp-strategic/SKILL.md`
+- `.github/skills/internal-gcp/SKILL.md`
 - `.github/skills/internal-github-action-composite/SKILL.md`
 - `.github/skills/internal-github-actions/SKILL.md`
 - `.github/skills/internal-github-governance/SKILL.md`
 - `.github/skills/internal-github-operations/SKILL.md`
 - `.github/skills/internal-github-pr/SKILL.md`
-- `.github/skills/internal-github-strategic/SKILL.md`
+- `.github/skills/internal-github/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
 - `.github/skills/internal-java-spring-boot-development/SKILL.md`
@@ -122,18 +127,26 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-terraform/SKILL.md`
 - `.github/skills/internal-yaml/SKILL.md`
 - `.github/skills/local-agent-sync-external-resources/SKILL.md`
-- `.github/skills/local-agent-sync-global-copilot-configs-into-repo/SKILL.md`
 - `.github/skills/local-agent-sync-install-ai-resources/SKILL.md`
 - `.github/skills/local-copilot-log-analyzer/SKILL.md`
+- `.github/skills/local-sync-repos/SKILL.md`
+- `.github/skills/mattpocock-code-review/SKILL.md`
+- `.github/skills/mattpocock-codebase-design/SKILL.md`
+- `.github/skills/mattpocock-domain-modeling/SKILL.md`
+- `.github/skills/mattpocock-grill-with-docs/SKILL.md`
 - `.github/skills/mattpocock-handoff/SKILL.md`
+- `.github/skills/mattpocock-implement/SKILL.md`
+- `.github/skills/mattpocock-improve-codebase-architecture/SKILL.md`
 - `.github/skills/mattpocock-research/SKILL.md`
-- `.github/skills/openai-docx/SKILL.md`
+- `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
+- `.github/skills/mattpocock-tdd/SKILL.md`
+- `.github/skills/mattpocock-to-spec/SKILL.md`
+- `.github/skills/mattpocock-wayfinder/SKILL.md`
+- `.github/skills/mattpocock-writing-great-skills/SKILL.md`
+- `.github/skills/openai-docs/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
-- `.github/skills/openai-pdf/SKILL.md`
-- `.github/skills/openai-skill-creator/SKILL.md`
-- `.github/skills/openai-slides/SKILL.md`
-- `.github/skills/openai-spreadsheet/SKILL.md`
+- `.github/skills/search-company-knowledge/SKILL.md`
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`
 - `.github/skills/superpowers-executing-plans/SKILL.md`
@@ -151,9 +164,9 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/terraform-terraform-test/SKILL.md`
 - `.github/skills/vercel-find-skills/SKILL.md`
 
-### Support-only imported office skills
+### Support-only imported document skills
 
-These imported `openai-*` office skills remain support-only depth for repositories that explicitly need document workflows.
+These vendor-prefixed imported document skills remain support-only depth for repositories that explicitly need document workflows.
 
 ## Scripts
 
@@ -174,26 +187,24 @@ These imported `openai-*` office skills remain support-only depth for repositori
 - `.github/scripts/lib/repo_paths.py`
 - `.github/scripts/lib/shared.py`
 - `.github/scripts/lib/sync_exclusions.py`
-- `.github/scripts/lib/syncing.py`
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
-- `.github/scripts/sync_copilot_catalog.py`
 - `.github/scripts/validate_internal_skills.py`
 
 ## Agents
 
 - `.github/agents/internal-gateway-critical-master.agent.md`
+- `.github/agents/internal-gateway-execute-plans.agent.md`
 - `.github/agents/internal-gateway-idea.agent.md`
-- `.github/agents/internal-gateway-review.agent.md`
+- `.github/agents/internal-gateway-review-code.agent.md`
+- `.github/agents/internal-gateway-review-generic.agent.md`
 - `.github/agents/internal-gateway-simple-task.agent.md`
-- `.github/agents/internal-review-code.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
-- `.github/agents/local-sync-global-copilot-configs-into-repo.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
+- `.github/agents/local-sync-repos.agent.md`
 
 ## Prompts
 
 - `.github/prompts/internal-architecture-md-creator.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
 - `.github/prompts/internal-review-ai-resources.prompt.md`
-- `.github/prompts/internal-sync-plan.prompt.md`

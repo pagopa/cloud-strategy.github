@@ -1,18 +1,15 @@
 ---
 name: internal-github-operations
-description: Use when the user needs GitHub operational guidance for Actions health, runner operations, audit logs, reporting and export, drift checks, preflight checks, post-rollout validation, or operational evidence after a governance or operating-model decision has already been made.
+description: Use when the user needs GitHub operational guidance — Actions health, runner operations, audit logs, reporting and export, drift checks, preflight checks, post-rollout validation, or operational evidence — after a governance or operating-model decision has already been made. Do not use for direction framing or guardrail design.
 ---
 
 # Internal GitHub Operations
 
-## Referenced skills
-
-- `internal-github-strategic`: route back when enterprise, org, repo, or operating-model direction is still unsettled.
-- `internal-github-governance`: route rulesets, permissions, Actions permissions, OIDC, secrets, environments, or guardrail design.
-
 Use this skill when the next need is to validate, observe, or operationalize a GitHub platform decision.
 
 This skill owns the operational side of the platform: workflow health, runner evidence, preflight, and post-rollout verification. It does not replace strategic framing or governance design.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-github`.
 
 ## When to use
 
@@ -20,12 +17,6 @@ This skill owns the operational side of the platform: workflow health, runner ev
 - The user needs Actions health, runner operations, or audit-log guidance.
 - The user needs preflight, post-rollout validation, reporting, or export patterns.
 - The user needs drift checks or operational proof that a change behaved as expected.
-
-## When not to use
-
-- The main problem is still choosing the high-level direction.
-- The main problem is repo-model, Apps strategy, or governance design.
-- The task is a narrow implementation change with no operational design question.
 
 ## Main domains covered
 
@@ -69,13 +60,6 @@ For broader asks, return:
 - runner, audit, or continuity note when relevant
 - open operational risks
 
-## Relationship to adjacent skills
-
-- `internal-github-strategic`
-  Use first when the core decision is still unsettled.
-- `internal-github-governance`
-  Use when the operations question is actually about rulesets, permissions, OIDC, secret posture, or guardrail design rather than validation.
-
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
@@ -83,7 +67,7 @@ For broader asks, return:
 | Treating workflow success as proof that permissions or guardrails are correct | A single green run can hide excessive privilege or missing failure paths | Check expected permission boundaries, audit trails, and negative cases as separate signals |
 | Skipping preflight for high-blast-radius rollout | Ruleset, token, runner, or environment regressions surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
 | Reporting only intended policy without operational evidence | Governance looks correct on paper without proof that delivery still works | Record what workflows, runners, and audit surfaces actually showed |
-| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new guardrail design in `internal-github-governance` and validate it here |
+| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new guardrail design out of the validation answer and validate the chosen design here |
 | Giving a continuity answer without making the build or release criticality assumption visible | Continuity guidance can be overbuilt or incomplete | State the assumed pipeline or release criticality before recommending the evidence path |
 | Treating one successful rollout wave as proof for all repositories or environments | Wider repo sets or runner groups can still fail differently | Validate the first safe unit and widen only after recording real evidence |
 

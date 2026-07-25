@@ -34,11 +34,13 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Goal: preserve the current root-policy shape without restoring the retired bridge or context-routing model.
 - Scope:
   - root `AGENTS.md`
+  - root `AGENTS.local.md`
   - `INTERNAL_CONTRACT.md`
   - source-side contract tests
 - Expected behavior:
-  - root `AGENTS.md` may carry a portable `<shared-baseline>` block that serves as source content for the generated global `~/.agents/AGENTS.md` baseline
-  - root `AGENTS.md` may carry a source-local `<standards-repository-local-rules>` block that remains non-portable by default
+  - root `AGENTS.md` may carry the portable shared baseline used as source content for the generated global `~/.agents/AGENTS.md` baseline
+  - root `AGENTS.md` may reference optional `AGENTS.local.md` policy that is loaded only when present and remains non-portable by default
+  - root `AGENTS.local.md` owns standards-repository-only policy and is not synchronized to home runtimes
   - root `AGENTS.md` may keep compact graph orientation rules in the shared baseline when those rules are globally safe and conditionally worded
   - tests and validators must align to the current on-disk root-policy shape instead of assuming a separate `## Context Routing` section or the absence of root-level graph guidance
 
@@ -271,11 +273,12 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - shared operating-model skills
 - Expected behavior:
   - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
-  - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
+  - `internal-gateway-idea`, `internal-gateway-review-generic`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
   - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
   - retained execution stays separate: `internal-gateway-simple-task` consumes approved `compact` plans and `internal-gateway-execute-plans` consumes approved `extended` plans
   - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
   - unclear target state and multiple credible paths are explicit planning triggers
+  - `internal-gateway-codebase-improvement` is a manual-only specialist gateway outside the canonical gateway core; it must not become an implicit fallback, peer-dispatch target, or replacement for an existing gateway owner
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
   - critical challenge can return reformulation, simple, execute, review, continue-critical, or accept-with-risk outcomes

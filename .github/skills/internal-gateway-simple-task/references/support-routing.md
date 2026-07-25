@@ -24,7 +24,7 @@ If no strong signal exists, stay local or stop with reason.
 | --- | --- | --- |
 | Missing intent, target path, input data, local context, or one blocker prevents starting | Ask one compact clarification block. | Stop if the answer would change scope, validation, cost, or risk. |
 | Bug, failing test, failing build, drift, or unexpected output | Reproduce first, then debug by falsifiable hypothesis. | Do not patch from correlation alone. |
-| Executable behavior change | Load `internal-tdd` to classify `mandatory`, `recommended`, or `not suitable` routing when a meaningful executable or evaluable seam exists. | Do not force it onto pure prose or governance wording with no executable seam. |
+| Executable behavior change | Load `/internal-tdd` to classify `mandatory`, `recommended`, or `not suitable` routing when a meaningful executable or evaluable seam exists. | Do not force it onto pure prose or governance wording with no executable seam. |
 | Existing diff needs findings or merge-readiness | Stop with reason because the work is no longer simple execution. | Do not turn simple validation into review. |
 | Orientation or unfamiliar code mapping | Stay descriptive and bounded. | Do not turn orientation into findings without concrete evidence. |
 | Architecture, workflow, cross-cutting impact, or blind spots dominate | Stop with reason. | Do not keep editing while the boundary is unsettled. |
@@ -47,7 +47,7 @@ If the evidence gate would require broader staged work, stop with reason instead
 
 ## Advisory Helpers
 
-Run `scripts/resolve_simple_task.py gate` when the task facts are already normalized and only the gate outcome plus Readiness Brief is noisy.
+Run `scripts/resolve_simple_task.py gate` for compact operator text. Add `--format json` only when a tool or diagnostic flow needs the complete internal readiness record and gate requirements.
 
 Run `scripts/resolve_simple_task.py claim` before strong status claims when the evidence requirements are the noisy part.
 

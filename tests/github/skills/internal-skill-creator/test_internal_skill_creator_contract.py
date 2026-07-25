@@ -5,97 +5,100 @@ REPO_ROOT = next(
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SKILL_PATH = REPO_ROOT / ".github/skills/internal-skill-creator/SKILL.md"
-CHECKLIST_PATH = (
-    REPO_ROOT
-    / ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
-)
+BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-skill-creator"
+SKILL_PATH = BUNDLE_ROOT / "SKILL.md"
+OPENAI_PATH = BUNDLE_ROOT / "agents/openai.yaml"
+REFERENCE_PATH = BUNDLE_ROOT / "references" / "authoring-and-evaluation.md"
 
 
-def test_referenced_skills_are_audit_index_not_preload() -> None:
-    skill_text = SKILL_PATH.read_text()
-    checklist_text = CHECKLIST_PATH.read_text()
-
-    assert "audit index, not a preload" in skill_text
-    assert "audit index, not a preload" in checklist_text
-    assert "Do not load referenced skills from this section alone" in checklist_text
+def workflow_text() -> str:
+    return SKILL_PATH.read_text(encoding="utf-8").split("## Workflow", 1)[1]
 
 
-def test_generic_skill_shape_is_conditional_not_rigid() -> None:
-    checklist_text = CHECKLIST_PATH.read_text()
-
-    assert "## Generic skill shape" in checklist_text
-    assert "Conditional sections" in checklist_text
-    assert "Do not require every section for every skill" in checklist_text
-
-
-def test_skill_cleanup_preserves_triggers_and_removes_responsibility_duplication() -> (
-    None
-):
-    checklist_text = CHECKLIST_PATH.read_text()
-
-    assert (
-        "Remove duplicated responsibility, not useful trigger reinforcement"
-        in checklist_text
+def test_material_work_uses_core_method_before_local_evaluation() -> None:
+    workflow = workflow_text()
+    headings = (
+        "### 1. Repository preflight",
+        "### 2. Core authoring and revision",
+        "### 3. Proportional evaluation",
+        "### 4. Repository closure",
     )
-    assert "Preserve a working `description:` during cleanup" in checklist_text
+    positions = [workflow.index(heading) for heading in headings]
+    assert positions == sorted(positions)
+    assert "Load `/mattpocock-writing-great-skills`" in workflow
+    assert "core method" in workflow
 
 
-def test_skill_md_does_not_restate_checklist() -> None:
-    import re
+def test_local_evaluation_stage_is_evidence_gated() -> None:
+    workflow = workflow_text()
+    evaluation = workflow.split("### 3. Proportional evaluation", 1)[1].split(
+        "### 4. Repository closure", 1
+    )[0]
+    normalized = " ".join(evaluation.split())
+    assert "references/authoring-and-evaluation.md" in normalized
+    assert "applicable evaluation branches" in normalized
+    assert "skipped branches and reasons" in normalized
+    assert "evidence, blockers, and completion status" in normalized
 
-    skill_text = SKILL_PATH.read_text()
-    checklist_text = CHECKLIST_PATH.read_text()
 
-    def normalize(text: str) -> str:
-        return re.sub(r"\s+", " ", text).strip().lower()
-
-    skill_norm = normalize(skill_text)
-    checklist_norm = normalize(checklist_text)
-
-    shared_phrases = [
-        "iron law: do not create or materially revise a skill without first seeing the failure",
-        "treat skills as reusable reference guides, not narratives",
-        "prefer the smallest change that fixes the local problem",
-        "keep `description:` trigger-only",
-        "preserve a working `description:` during token optimization",
-        "treat generic skill shape as conditional, not a rigid section template",
-        "treat `## referenced skills` as an audit index, not a preload list",
-        "remove duplicated responsibility, not useful trigger reinforcement",
-        "prefer `references/` over new `scripts/` for static tables",
-        "reference other skills by skill name and behavior only",
-        "prefer bundle-relative references to files under",
-        "do not copy the same material back into `skill.md`",
-        "compare the wrapper against its core before editing",
-    ]
-
-    duplicates = [
-        phrase
-        for phrase in shared_phrases
-        if phrase in skill_norm and phrase in checklist_norm
-    ]
-
-    assert not duplicates, (
-        f"SKILL.md restates {len(duplicates)} phrases also in checklist: {duplicates[:3]}"
+def test_local_authoring_reference_covers_the_retained_contract() -> None:
+    reference = REFERENCE_PATH.read_text(encoding="utf-8")
+    required_markers = (
+        "## Intent contract",
+        "## Evaluation selection",
+        "## Baselines",
+        "## Evidence and human review",
+        "## Description trigger checks",
+        "## Iteration stop conditions",
     )
+    for marker in required_markers:
+        assert marker in reference
+    assert "objective" in reference.lower()
+    assert "subjective" in reference.lower()
+    assert "near-miss" in reference.lower()
+    assert "holdout" in reference.lower()
 
 
-def test_core_backed_wrapper_guidance_is_generic_and_reference_owned() -> None:
-    skill_text = SKILL_PATH.read_text()
-    checklist_text = CHECKLIST_PATH.read_text()
-
-    required_guidance = (
-        "## Core-backed wrappers",
-        "Compare the wrapper against its core before editing",
-        "trigger, repository-local policy, and proven environment fallbacks",
-        "Do not restate the core's workflow, decision logic, output contract, or validation procedure",
-        "Structural validation is not semantic alignment",
-        "paired agent",
+def test_internal_bundle_has_only_the_core_skill_dependency() -> None:
+    bundle_text = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in BUNDLE_ROOT.rglob("*")
+        if path.is_file()
     )
+    assert "anthropic-skill-creator" not in bundle_text
+    assert "local-agent-sync-external-resources" not in bundle_text
+    assert "internal-agent-creator" not in bundle_text
+    assert bundle_text.count("mattpocock-writing-great-skills") >= 2
 
-    for phrase in required_guidance:
-        assert phrase in checklist_text
 
-    assert "Compare the wrapper against its core before editing" not in skill_text
-    assert "internal-review-code" not in checklist_text
-    assert "addyosmani-code-review-and-quality" not in checklist_text
+def test_core_stage_revises_instead_of_only_reporting() -> None:
+    workflow = workflow_text()
+    review = workflow.split("### 2. Core authoring and revision", 1)[1].split(
+        "### 3. Proportional evaluation", 1
+    )[0]
+    assert "revise the draft" in review
+    assert "invocation, description, information hierarchy" in review
+    assert "duplication, sediment, and no-ops" in review
+
+
+def test_local_closure_keeps_repository_specific_checks() -> None:
+    workflow = workflow_text()
+    closure = workflow.split("### 4. Repository closure", 1)[1]
+    assert "agents/openai.yaml" in closure
+    assert "validate_internal_skills" in closure
+    assert "routing fallout" in closure
+    assert "before/after" in closure
+
+
+def test_redundant_local_references_are_removed() -> None:
+    assert not (BUNDLE_ROOT / "references/writing-skills-checklist.md").exists()
+    assert not (BUNDLE_ROOT / "references/script-output-contract.md").exists()
+
+
+def test_default_prompt_names_core_method_before_local_closure() -> None:
+    prompt = OPENAI_PATH.read_text(encoding="utf-8")
+    matt = prompt.index("mattpocock-writing-great-skills")
+    evaluation = prompt.index("proportional evaluation")
+    closure = prompt.index("repository closure")
+    assert matt < evaluation < closure
+    assert "anthropic-skill-creator" not in prompt

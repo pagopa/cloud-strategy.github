@@ -1,19 +1,15 @@
 ---
 name: internal-gcp-operations
-description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision has already been made.
+description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for org, folder, project, or Shared VPC layout; IAM, workload identity, or Org Policy design; or materially ambiguous requests with no clear operational deliverable.
 ---
 
 # Internal GCP Operations
 
-## Referenced skills
-
-- `internal-gcp-strategic`: route back when direction or tradeoff framing is still unsettled.
-- `internal-gcp-organization-structure`: route when org, folder, project, Shared VPC, or topology layout is the main decision.
-- `internal-gcp-governance`: route when IAM, workload identity, service account, or Org Policy design is the main decision.
-
 Use this skill when the next need is to validate, observe, or operationalize a GCP platform decision.
 
 This skill owns the operational side of the platform: monitoring, evidence, inventory, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.
+
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
 
 ## When to use
 
@@ -22,13 +18,6 @@ This skill owns the operational side of the platform: monitoring, evidence, inve
 - The user needs asset inventory, reporting, or export guidance.
 - The user needs preflight or post-rollout validation patterns.
 - The user needs operational guidance for Cloud Run or Cloud Functions after the broader GCP structure and governance choices are already settled.
-
-## When not to use
-
-- The main problem is still choosing the high-level direction.
-- The main problem is org, folder, project, or Shared VPC structure.
-- The main problem is IAM, workload identity, service account, or Org Policy design.
-- The task is a narrow implementation change with no operational design question.
 
 ## Main domains covered
 
@@ -72,15 +61,6 @@ For broader asks, return:
 - recovery, DR, or inventory note when relevant
 - open operational risks
 
-## Relationship to adjacent skills
-
-- `internal-gcp-strategic`
-  Use first when the core decision is still unsettled.
-- `internal-gcp-organization-structure`
-  Use when the operations question is actually about org, project, or topology placement.
-- `internal-gcp-governance`
-  Use when the operations question is actually about IAM, workload identity, Org Policy, or guardrail design rather than validation.
-
 Until a dedicated GCP serverless owner is justified by real usage, keep Cloud Run and Cloud Functions operational readiness, validation, and evidence questions in this skill instead of inventing a fifth lane for symmetry alone.
 
 ## Common mistakes
@@ -90,7 +70,7 @@ Until a dedicated GCP serverless owner is justified by real usage, keep Cloud Ru
 | Treating monitoring as proof that restore or recovery works | Healthy metrics do not prove recovery viability | Keep monitoring evidence, backup proof, and restore proof as separate lines |
 | Skipping preflight for high-blast-radius rollout | IAM, Org Policy, or Shared VPC regressions surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
 | Reporting only control intent without operational evidence | The platform appears compliant without proof that it works | Record what Monitoring, Logging, asset inventory, or recovery exercises actually showed |
-| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Org Policy or IAM design in `internal-gcp-governance` and validate it here |
+| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Org Policy or IAM design out of the validation answer and validate the chosen design here |
 | Giving a DR answer without making the business criticality assumption visible | Recovery guidance can be overbuilt or incomplete | State the assumed criticality, RTO, or RPO before recommending the evidence path |
 | Treating one successful rollout wave as proof for all folders or projects | Wider inheritance or network paths can still fail differently | Validate the first safe unit and widen only after recording real evidence |
 

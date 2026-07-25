@@ -23,6 +23,7 @@ TARGET_AGENT_ROOTS = {
     "copilot": Path(".copilot/agents"),
     "opencode": Path(".config/opencode/agents"),
 }
+AGENT_TARGETS = ("codex", "copilot", "opencode")
 
 
 @dataclass(frozen=True)
@@ -110,13 +111,28 @@ def load_home_sync_catalog(source_root: Path) -> list[CatalogResource]:
             if (resource["resource_id"], resource["source_family"]) not in explicit_ids
         )
 
+    explicit_agent_ids = {
+        (resource.get("resource_id", ""), resource.get("source_family", ""))
+        for resource in resources
+        if isinstance(resource, dict)
+    }
+    resources.extend(
+        resource
+        for resource in discover_agent_resources(source_root)
+        if (resource["resource_id"], resource["source_family"]) not in explicit_agent_ids
+    )
+
     filtered = []
     for resource in resources:
         rid = resource.get("resource_id", "")
         source_family = resource.get("source_family", "")
         if source_family == "skills" and rid in policy.excluded_skills:
             continue
-        if not policy.include_local_skills and rid.startswith("local-"):
+        if (
+            source_family == "skills"
+            and not policy.include_local_skills
+            and rid.startswith("local-")
+        ):
             continue
         if not policy.include_internal_skills and rid.startswith("internal-"):
             continue
@@ -187,6 +203,29 @@ def discover_skill_resources(
                 "include_targets": list(skill_targets),
                 "target_support": "See runtime support matrix",
                 "notes": "Auto-discovered skill bundle.",
+            }
+        )
+    return resources
+
+
+def discover_agent_resources(source_root: Path) -> list[dict[str, object]]:
+    agents_root = source_root / ".github" / "agents"
+    if not agents_root.is_dir():
+        return []
+
+    resources: list[dict[str, object]] = []
+    for agent_path in sorted(agents_root.glob("*.agent.md")):
+        resource_id = agent_path.name.removesuffix(".agent.md")
+        if resource_id.startswith("local-"):
+            continue
+        resources.append(
+            {
+                "resource_id": resource_id,
+                "source_family": "agents",
+                "source_path": agent_path.relative_to(source_root).as_posix(),
+                "include_targets": list(AGENT_TARGETS),
+                "target_support": "See runtime support matrix",
+                "notes": "Auto-discovered agent.",
             }
         )
     return resources

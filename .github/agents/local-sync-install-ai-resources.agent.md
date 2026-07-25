@@ -14,4 +14,4 @@ agents: []
 
 When the user names `agents.md`, `agents.md` means `sync --targets agents.md`.
 This updates `~/.agents/AGENTS.md` from root `AGENTS.md` without the
-`<standards-repository-local-rules>` block.
+repository-local `AGENTS.local.md` file.

@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Sequence
 
@@ -29,10 +29,18 @@ from sync_external_resources_core import (  # noqa: E402
     validate_external_workspace,
     validate_override_patches,
 )
+from sync_output_core import (  # noqa: E402
+    OutputRecord,
+    render_tsv,
+)
 
 DEFAULT_MANIFEST = (
     SCRIPT_DIR.parent / "references" / "managed-resources.yaml"
 ).as_posix()
+from source_prepare_core import (  # noqa: E402
+    prepare_sources,
+)
+
 DEFAULT_OVERRIDES = (
     SCRIPT_DIR.parent / "references" / "imported-asset-overrides.yaml"
 ).as_posix()
@@ -40,7 +48,7 @@ DEFAULT_OVERRIDES = (
 
 @dataclass(frozen=True)
 class SyncOutcome:
-    mode: Literal["audit", "plan", "apply"]
+    mode: Literal["prepare", "audit", "plan", "apply"]
     workspace: str | None
     managed_assets: int
     changed_paths: tuple[str, ...]
@@ -48,9 +56,10 @@ class SyncOutcome:
     validations: tuple[str, ...]
     blockers: tuple[str, ...]
     repository_changed: bool
+    source_results: tuple[object, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        result: dict[str, object] = {
             "mode": self.mode,
             "workspace": self.workspace,
             "managed_assets": self.managed_assets,
@@ -67,13 +76,118 @@ class SyncOutcome:
             "blockers": list(self.blockers),
             "repository_changed": self.repository_changed,
         }
+        if self.source_results:
+            result["source_results"] = [
+                {
+                    "source_id": r.source_id,
+                    "repository": r.repository,
+                    "ref": r.ref,
+                    "cache_status": r.cache_status,
+                    "fetch_strategy": r.fetch_strategy,
+                    "materialized_files": r.materialized_files,
+                    "materialized_bytes": r.materialized_bytes,
+                    "cache_bytes_added": r.cache_bytes_added,
+                    "duration_ms": r.duration_ms,
+                }
+                for r in self.source_results
+            ]
+        return result
+
+    def to_records(self) -> tuple[OutputRecord, ...]:
+        records: list[OutputRecord] = []
+        records.append(
+            OutputRecord("summary", "mode", "ok", self.mode)
+        )
+        records.append(
+            OutputRecord(
+                "summary", "managed_assets", "ok", str(self.managed_assets)
+            )
+        )
+        records.append(
+            OutputRecord(
+                "summary", "changed_paths", "ok", str(len(self.changed_paths))
+            )
+        )
+        records.append(
+            OutputRecord(
+                "summary",
+                "override_results",
+                "ok",
+                str(len(self.override_results)),
+            )
+        )
+        records.append(
+            OutputRecord(
+                "summary",
+                "repository_changed",
+                "ok",
+                str(self.repository_changed).lower(),
+            )
+        )
+        if self.workspace is not None:
+            records.append(
+                OutputRecord("summary", "workspace", "ok", self.workspace)
+            )
+        for validation in self.validations:
+            records.append(
+                OutputRecord("validation", validation, "ok", "")
+            )
+        for blocker in self.blockers:
+            records.append(
+                OutputRecord("blocker", blocker, "fail", "")
+            )
+        for path in self.changed_paths:
+            records.append(
+                OutputRecord("change", path, "ok", "")
+            )
+        for result in self.override_results:
+            records.append(
+                OutputRecord(
+                    "override",
+                    result.override_id,
+                    result.status,
+                    result.target_path,
+                )
+            )
+        for sr in self.source_results:
+            records.append(
+                OutputRecord(
+                    "source",
+                    sr.source_id,
+                    sr.cache_status,
+                    sr.ref,
+                )
+            )
+            for metric_name, metric_value in (
+                ("materialized_files", sr.materialized_files),
+                ("materialized_bytes", sr.materialized_bytes),
+                ("cache_bytes_added", sr.cache_bytes_added),
+                ("duration_ms", sr.duration_ms),
+            ):
+                records.append(
+                    OutputRecord(
+                        "metric",
+                        f"{sr.source_id}.{metric_name}",
+                        "ok",
+                        str(metric_value),
+                    )
+                )
+            records.append(
+                OutputRecord(
+                    "validation",
+                    f"{sr.source_id}.fetch_strategy",
+                    "ok",
+                    sr.fetch_strategy,
+                )
+            )
+        return tuple(records)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Audit, plan, or apply declared external resource refreshes."
     )
-    parser.add_argument("mode", choices=("audit", "plan", "apply"))
+    parser.add_argument("mode", choices=("prepare", "audit", "plan", "apply"))
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--workspace")
     parser.add_argument("--manifest", default=DEFAULT_MANIFEST)
@@ -83,7 +197,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Use prepared source checkouts instead of network fetch.",
     )
     parser.add_argument("--allow-dirty", action="store_true")
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--format", choices=("text", "tsv", "json"), default="text")
+    parser.add_argument(
+        "--rebuild-cache",
+        action="store_true",
+        help="Force rebuild of the Git object cache (prepare mode only).",
+    )
     return parser
 
 
@@ -261,6 +380,35 @@ def _apply_candidate_patch(
     )
 
 
+def _prepare(
+    repo_root: Path,
+    workspace: Path,
+    resources: ManagedResources,
+    rebuild_cache: bool,
+) -> SyncOutcome:
+    validate_external_workspace(repo_root, workspace)
+    sources_root = workspace / "sources"
+
+    results = prepare_sources(
+        resources,
+        workspace,
+        sources_root,
+        rebuild_cache=rebuild_cache,
+    )
+
+    return SyncOutcome(
+        mode="prepare",
+        workspace=str(workspace),
+        managed_assets=len(resources.assets),
+        changed_paths=(),
+        override_results=(),
+        validations=("manifest-pins-validated", "sources-prepared"),
+        blockers=(),
+        repository_changed=False,
+        source_results=results,
+    )
+
+
 def _audit(
     repo_root: Path,
     resources: ManagedResources,
@@ -398,6 +546,25 @@ def _format_text(outcome: SyncOutcome) -> str:
     return "\n".join(lines)
 
 
+def _requested_format(argv: Sequence[str] | None) -> str:
+    values = list(argv) if argv is not None else sys.argv[1:]
+    for index, value in enumerate(values):
+        if value == "--format" and index + 1 < len(values):
+            return values[index + 1]
+        if value.startswith("--format="):
+            return value.split("=", 1)[1]
+    return "text"
+
+
+def _emit_failure(fmt: str, message: str) -> None:
+    if fmt == "json":
+        print(json.dumps({"blockers": [message], "repository_changed": False}, indent=2))
+    elif fmt == "tsv":
+        print(render_tsv((OutputRecord("blocker", message, "fail", ""),)), end="")
+    else:
+        print(f"Blockers: {message}")
+
+
 def run(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -412,11 +579,24 @@ def run(argv: Sequence[str] | None = None) -> int:
 
     resources = load_managed_resources(manifest_path)
 
-    if args.mode == "audit":
+    if args.mode == "prepare":
+        if not args.workspace:
+            parser.error("prepare mode requires --workspace")
+        outcome = _prepare(
+            repo_root,
+            Path(args.workspace).resolve(),
+            resources,
+            args.rebuild_cache,
+        )
+    elif args.mode == "audit":
+        if args.rebuild_cache:
+            parser.error("--rebuild-cache is only valid for prepare mode")
         outcome = _audit(repo_root, resources, overrides_path)
     elif args.mode == "plan":
         if not args.workspace:
             parser.error("plan mode requires --workspace")
+        if args.rebuild_cache:
+            parser.error("--rebuild-cache is only valid for prepare mode")
         outcome = _plan(
             repo_root,
             Path(args.workspace).resolve(),
@@ -427,6 +607,8 @@ def run(argv: Sequence[str] | None = None) -> int:
     elif args.mode == "apply":
         if not args.workspace:
             parser.error("apply mode requires --workspace")
+        if args.rebuild_cache:
+            parser.error("--rebuild-cache is only valid for prepare mode")
         outcome = _apply(
             repo_root,
             Path(args.workspace).resolve(),
@@ -440,10 +622,14 @@ def run(argv: Sequence[str] | None = None) -> int:
 
     if args.format == "json":
         print(json.dumps(outcome.to_dict(), indent=2))
+    elif args.format == "tsv":
+        print(render_tsv(outcome.to_records()), end="")
     else:
         print(_format_text(outcome))
 
     if args.mode == "audit":
+        return 0
+    if args.mode == "prepare":
         return 0
     if outcome.blockers:
         return 2
@@ -451,7 +637,11 @@ def run(argv: Sequence[str] | None = None) -> int:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    return run(argv)
+    try:
+        return run(argv)
+    except (ValueError, SyncCommandError) as exc:
+        _emit_failure(_requested_format(argv), str(exc))
+        return 2
 
 
 if __name__ == "__main__":

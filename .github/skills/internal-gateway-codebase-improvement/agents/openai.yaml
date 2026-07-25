@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codebase Improvement"
+  short_description: "Manually improve architecture and code clarity"
+  default_prompt: "Use /internal-gateway-codebase-improvement to manually improve codebase architecture and implementation clarity. Select exactly one lane from repository evidence, establish a passing behavior baseline, protect approved seams, and run the final evidence gate before claiming completion."
+policy:
+  allow_implicit_invocation: false

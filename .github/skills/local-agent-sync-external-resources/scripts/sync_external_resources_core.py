@@ -12,6 +12,9 @@ from typing import Literal
 import yaml
 
 
+_COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+
+
 @dataclass(frozen=True)
 class ManagedAsset:
     source: str
@@ -25,7 +28,11 @@ class ManagedSource:
     source_id: str
     repository: str
     ref: str
+    advertised_ref: str | None
     assets: tuple[ManagedAsset, ...]
+    rewrite_skill_references: bool = False
+    skill_reference_aliases: tuple[tuple[str, str], ...] = ()
+    backtick_skill_references: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -60,6 +67,23 @@ def _require_non_empty_string(value: object, field: str) -> str:
     return value.strip()
 
 
+def _optional_non_empty_string(value: object, field: str) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string when provided.")
+    return value.strip()
+
+
+def _require_commit_object_id(value: str, field: str) -> str:
+    stripped = value.strip()
+    if not _COMMIT_OBJECT_ID_RE.match(stripped):
+        raise ValueError(
+            f"{field} must be a full lowercase commit object ID, got {stripped!r}."
+        )
+    return stripped
+
+
 def load_managed_resources(path: Path) -> ManagedResources:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("version") != 1:
@@ -89,8 +113,15 @@ def load_managed_resources(path: Path) -> ManagedResources:
         repository = _require_non_empty_string(
             raw_source.get("repository"), f"source {source_id} repository"
         )
-        ref = _require_non_empty_string(
-            raw_source.get("ref"), f"source {source_id} ref"
+        ref = _require_commit_object_id(
+            _require_non_empty_string(
+                raw_source.get("ref"), f"source {source_id} ref"
+            ),
+            f"source {source_id} ref",
+        )
+        advertised_ref = _optional_non_empty_string(
+            raw_source.get("advertised_ref"),
+            f"source {source_id} advertised_ref",
         )
         raw_assets = raw_source.get("assets")
         if not isinstance(raw_assets, list) or not raw_assets:
@@ -134,12 +165,62 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 )
             )
 
+        rewrite_skill_references = raw_source.get("rewrite_skill_references", False)
+        if not isinstance(rewrite_skill_references, bool):
+            raise ValueError(
+                f"source {source_id} rewrite_skill_references must be a boolean."
+            )
+        raw_skill_reference_aliases = raw_source.get("skill_reference_aliases", {})
+        if not isinstance(raw_skill_reference_aliases, dict):
+            raise ValueError(
+                f"source {source_id} skill_reference_aliases must be a mapping."
+            )
+        canonical_names = {asset.canonical_name for asset in assets}
+        skill_reference_aliases: list[tuple[str, str]] = []
+        for alias, canonical_name in raw_skill_reference_aliases.items():
+            alias = _require_non_empty_string(
+                alias, f"source {source_id} skill reference alias"
+            )
+            canonical_name = _require_non_empty_string(
+                canonical_name,
+                f"source {source_id} skill reference alias target",
+            )
+            if canonical_name not in canonical_names:
+                raise ValueError(
+                    f"source {source_id} skill reference alias target "
+                    f"{canonical_name} is not a declared asset canonical name."
+                )
+            skill_reference_aliases.append((alias, canonical_name))
+
+        raw_backtick_refs = raw_source.get("backtick_skill_references", [])
+        if not isinstance(raw_backtick_refs, list):
+            raise ValueError(
+                f"source {source_id} backtick_skill_references must be a list."
+            )
+        upstream_basenames = {Path(asset.upstream).name for asset in assets}
+        alias_names = {alias for alias, _ in skill_reference_aliases}
+        backtick_skill_references: list[str] = []
+        for raw_backtick_ref in raw_backtick_refs:
+            backtick_ref = _require_non_empty_string(
+                raw_backtick_ref, f"source {source_id} backtick skill reference"
+            )
+            if backtick_ref not in upstream_basenames and backtick_ref not in alias_names:
+                raise ValueError(
+                    f"source {source_id} backtick skill reference {backtick_ref} "
+                    "is not a declared upstream asset basename or alias."
+                )
+            backtick_skill_references.append(backtick_ref)
+
         sources.append(
             ManagedSource(
                 source_id=source_id,
                 repository=repository,
                 ref=ref,
+                advertised_ref=advertised_ref,
                 assets=tuple(assets),
+                rewrite_skill_references=rewrite_skill_references,
+                skill_reference_aliases=tuple(skill_reference_aliases),
+                backtick_skill_references=tuple(backtick_skill_references),
             )
         )
 
@@ -207,14 +288,21 @@ class SyncCommandError(Exception):
         )
 
 
-def _run_command(command: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+LOCAL_COMMAND_TIMEOUT_SECONDS = 60
+
+
+def _run_command(
+    command: list[str],
+    cwd: Path | None = None,
+    timeout: int = LOCAL_COMMAND_TIMEOUT_SECONDS,
+) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         command,
         cwd=cwd,
         check=False,
         capture_output=True,
         text=True,
-        timeout=60,
+        timeout=timeout,
     )
     if result.returncode != 0:
         raise SyncCommandError(command, result.returncode, result.stderr)
@@ -242,13 +330,19 @@ def find_dirty_targets(
         return ()
     result = _run_git(
         repo_root,
-        ["status", "--porcelain=v1", "--", *(asset.local for asset in assets)],
+        ["status", "--porcelain=v1", "-z", "--", *(asset.local for asset in assets)],
     )
-    return tuple(
-        line[3:]
-        for line in result.stdout.splitlines()
-        if len(line) > 3
-    )
+    fields = [field for field in result.stdout.split("\0") if field]
+    dirty: list[str] = []
+    index = 0
+    while index < len(fields):
+        entry = fields[index]
+        status_code = entry[:2]
+        dirty.append(entry[3:])
+        if status_code[0] in {"R", "C"}:
+            index += 1
+        index += 1
+    return tuple(dirty)
 
 
 def collect_missing_upstream_paths(
@@ -265,6 +359,27 @@ def collect_missing_upstream_paths(
     return tuple(missing)
 
 
+def validate_prepared_sources(
+    resources: ManagedResources,
+    sources_root: Path,
+) -> None:
+    missing: list[str] = []
+    for source in resources.sources:
+        metadata = (
+            sources_root / source.source_id / ".external-resource-source.tsv"
+        )
+        if not metadata.exists():
+            missing.append(source.source_id)
+    if missing:
+        raise ValueError(
+            "Missing prepared source metadata: "
+            + ", ".join(missing)
+            + ". Expected prepared sources under "
+            + sources_root.as_posix()
+            + ". Run prepare before audit/plan/apply."
+        )
+
+
 def materialize_candidate(
     resources: ManagedResources,
     workspace: Path,
@@ -277,6 +392,8 @@ def materialize_candidate(
 
     if sources_root is None:
         sources_root = workspace / "sources"
+
+    validate_prepared_sources(resources, sources_root)
 
     missing = collect_missing_upstream_paths(resources, sources_root)
     if missing:
@@ -301,6 +418,46 @@ def materialize_candidate(
 
 _FRONTMATTER_NAME_RE = re.compile(r"^(name\s*:\s*).*$", re.MULTILINE)
 _SUPERPOWERS_SKILL_REF_RE = re.compile(r"\bsuperpowers:([a-z0-9][a-z0-9-]*)")
+_SLASH_SKILL_REF_RE = re.compile(
+    r"(?<![A-Za-z0-9_-])/(?P<name>[a-z0-9][a-z0-9-]*)\b"
+)
+_BACKTICK_SKILL_REF_RE = re.compile(
+    r"(?<![A-Za-z0-9_-])`(?P<name>[a-z0-9][a-z0-9-]*)`"
+)
+_GUIDED_QUESTION_SKILLS = frozenset({"superpowers-brainstorming", "grill-me"})
+_GUIDED_QUESTION_CONTRACT_START = "<!-- local-sync:guided-questions:start -->"
+_GUIDED_QUESTION_CONTRACT_END = "<!-- local-sync:guided-questions:end -->"
+_GUIDED_QUESTION_CONTRACT_RE = re.compile(
+    re.escape(_GUIDED_QUESTION_CONTRACT_START)
+    + r".*?"
+    + re.escape(_GUIDED_QUESTION_CONTRACT_END),
+    re.DOTALL,
+)
+_GUIDED_QUESTION_CONTRACT = f"""\
+{_GUIDED_QUESTION_CONTRACT_START}
+## Local guided-question contract
+
+This repository-owned contract overrides any earlier instruction to ask one question at a time.
+
+- Ask all currently known questions in numbered bulk question blocks.
+- Use `Question`, `Recommendation`, `Why`, and `Default if accepted` for every
+  numbered question.
+- Make `Recommendation` the suggested answer and `Why` its concrete rationale.
+- Keep each question, recommendation, and reason brief, clear, and
+  decision-ready.
+- Put unresolved follow-ups in another numbered block. If only one blocking
+  question remains, present it as a numbered one-item block.
+{_GUIDED_QUESTION_CONTRACT_END}"""
+
+
+def _enforce_guided_question_contract(content: str) -> str:
+    if _GUIDED_QUESTION_CONTRACT_RE.search(content):
+        return _GUIDED_QUESTION_CONTRACT_RE.sub(
+            _GUIDED_QUESTION_CONTRACT,
+            content,
+            count=1,
+        )
+    return content.rstrip() + "\n\n" + _GUIDED_QUESTION_CONTRACT + "\n"
 
 
 def normalize_candidate(
@@ -312,6 +469,24 @@ def normalize_candidate(
         replacements_by_source.setdefault(replacement.source, []).append(replacement)
 
     changed: list[str] = []
+    skill_references_by_source: dict[str, dict[str, str]] = {}
+    backtick_references_by_source: dict[str, dict[str, str]] = {}
+    for source in resources.sources:
+        if not source.rewrite_skill_references:
+            continue
+        skill_references = {
+            Path(asset.upstream).name: asset.canonical_name
+            for asset in source.assets
+        }
+        skill_references.update(dict(source.skill_reference_aliases))
+        skill_references_by_source[source.source_id] = skill_references
+        declared_backticks = set(source.backtick_skill_references)
+        backtick_references_by_source[source.source_id] = {
+            name: canonical
+            for name, canonical in skill_references.items()
+            if name in declared_backticks
+        }
+
     for asset in resources.assets:
         asset_dir = candidate / asset.local
         if not asset_dir.exists():
@@ -333,6 +508,32 @@ def normalize_candidate(
                     content = _SUPERPOWERS_SKILL_REF_RE.sub(
                         r"superpowers-\1", content
                     )
+
+                skill_references = skill_references_by_source.get(asset.source, {})
+                if skill_references:
+                    content = _SLASH_SKILL_REF_RE.sub(
+                        lambda match: "/"
+                        + skill_references.get(
+                            match.group("name"), match.group("name")
+                        ),
+                        content,
+                    )
+                backtick_references = backtick_references_by_source.get(asset.source, {})
+                if backtick_references:
+                    content = _BACKTICK_SKILL_REF_RE.sub(
+                        lambda match: "`"
+                        + backtick_references.get(
+                            match.group("name"), match.group("name")
+                        )
+                        + "`",
+                        content,
+                    )
+
+            if (
+                asset.canonical_name in _GUIDED_QUESTION_SKILLS
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_guided_question_contract(content)
 
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)

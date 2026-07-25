@@ -26,7 +26,7 @@ version: 1
 sources:
   obra-superpowers:
     repository: https://github.com/obra/superpowers.git
-    ref: abc123
+    ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     assets:
       - upstream: skills/brainstorming
         local: .github/skills/superpowers-brainstorming
@@ -67,14 +67,14 @@ version: 1
 sources:
   source-a:
     repository: https://example.com/a.git
-    ref: abc
+    ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     assets:
       - upstream: skills/one
         local: .github/skills/same
         canonical_name: same
   source-b:
     repository: https://example.com/b.git
-    ref: def
+    ref: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     assets:
       - upstream: skills/two
         local: .github/skills/same

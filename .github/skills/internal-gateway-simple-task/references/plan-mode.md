@@ -18,6 +18,10 @@ Recommend a plan when one or more of these signals is present:
 - the task risks context pressure before validation can complete
 - the work centers on large exports, tables, logs, or broad mechanical change
 
+The step, file-family, and validator counts are warning signals. Stop only
+when their combination makes same-run completion unsafe or uneconomical;
+do not classify from one count alone.
+
 ## Procedure
 
 1. Classify the cost or complexity signal.

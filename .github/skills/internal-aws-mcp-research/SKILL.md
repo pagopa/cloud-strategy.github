@@ -5,112 +5,63 @@ description: Use when the task needs current AWS documentation or safe IAM inspe
 
 # Internal AWS MCP Research
 
-## Referenced skills
+Standardizes an AWS research workflow that prefers AWS MCP servers when available and falls back to official AWS documentation. Designed for principal-level platform governance questions, not only application coding.
 
-- `internal-aws-strategic`: route recommendations that affect platform direction or tradeoffs.
-- `internal-aws-organization-structure`: route recommendations that affect account, OU, delegated admin, or StackSets topology.
-- `internal-aws-governance`: route recommendations that affect SCPs, IAM, trust, or federation.
-- `internal-aws-operations`: route recommendations that affect validation, monitoring, backup, or rollout evidence.
-
-Use this skill when AWS decisions depend on up-to-date documentation or on safe inspection of real IAM state.
+If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
 
 ## When to use
 
-- The task needs current AWS documentation, regional availability facts, or official AWS guidance that may have changed.
-- The task needs safe IAM inspection or policy simulation for Organizations, SCPs, IAM policies, roles, or delegated administrators.
-- AWS Knowledge MCP or AWS IAM MCP should be preferred when available, with an AWS-doc fallback when they are not.
-
-## Purpose
-
-This skill standardizes an AWS research workflow that prefers AWS MCP servers when available and falls back to official AWS documentation when they are not.
-
-It is designed for principal-level platform governance questions, not only for application coding.
+- Current AWS documentation, regional availability, or official guidance that may have changed.
+- Safe IAM inspection or policy simulation for Organizations, SCPs, IAM policies, roles, or delegated administrators.
+- AWS Knowledge MCP or AWS IAM MCP should be preferred when available, with an AWS-doc fallback.
 
 ## Source priority
 
-1. AWS Knowledge MCP for current AWS documentation, latest guidance, and regional availability
-2. AWS IAM MCP in read-only mode for account-specific IAM inspection and policy simulation
-3. Official AWS documentation when MCP is unavailable or insufficient
+1. AWS Knowledge MCP — current docs, latest guidance, regional availability.
+2. AWS IAM MCP (read-only) — account-specific IAM inspection and policy simulation.
+3. Official AWS documentation when MCP is unavailable or insufficient.
 
-Do not assume both MCP servers are configured in the current client or session.
+Do not assume both MCP servers are configured in the current client.
 
-## Server expectations
-
-Common server identities:
+## Server identities
 
 - AWS Knowledge MCP: `aws-knowledge-mcp-server`
 - AWS IAM MCP: `awslabs.iam-mcp-server` or `iam-mcp-server`
 
-The exact configured name can vary by client.
+Exact configured name can vary by client.
 
-## Research workflow
+## Workflow
 
 1. Classify the question.
-   - Documentation, best practices, service behavior, regional support: start with AWS Knowledge MCP
-   - Real IAM state, principals, attached policies, or permission testing: use AWS IAM MCP
-   - Mixed questions: use Knowledge MCP first, then IAM MCP for confirmation
+   - Docs, best practices, service behavior, regional support → Knowledge MCP.
+   - Real IAM state, principals, attached policies, permission testing → IAM MCP.
+   - Mixed → Knowledge MCP first, IAM MCP for confirmation.
 2. Detect available AWS MCP servers in the current environment.
-3. Use the safest tool path first.
-   - Knowledge MCP for documentation lookup
-   - IAM MCP in read-only mode for inspection and `simulate_principal_policy`
-4. If AWS MCP is unavailable, use official AWS documentation from `references/official-source-map.md`.
-5. Summarize the answer with source type clearly labeled:
-   - AWS docs or Knowledge MCP guidance
-   - live IAM observation
-   - inferred recommendation
+3. Use the safest tool path first (Knowledge MCP for docs; IAM MCP read-only for inspection and `simulate_principal_policy`).
+4. If AWS MCP is unavailable, use `references/official-source-map.md`.
+5. Summarize with source type labeled: AWS docs / Knowledge MCP guidance / live IAM observation / inferred recommendation.
 
-## AWS Knowledge MCP usage
+## Knowledge MCP tool patterns
 
-Use AWS Knowledge MCP for:
+- `search_documentation` — find relevant pages
+- `read_documentation` — pull exact page into markdown
+- `recommend` — expand from one page to adjacent guidance
+- `list_regions`, `get_regional_availability` — region-sensitive design
 
-- service documentation and API behavior
-- best practices and architectural guidance
-- latest public AWS guidance
-- regional availability checks
-- CloudFormation and CDK reference lookups
+## IAM MCP tool patterns (read-only default)
 
-Prefer these tool patterns when available:
-
-- `search_documentation` to find relevant pages
-- `read_documentation` to pull the exact page into markdown
-- `recommend` to expand from one AWS page to adjacent guidance
-- `list_regions` and `get_regional_availability` for region-sensitive design
-
-## AWS IAM MCP usage
-
-Default to read-only and simulation-oriented work.
-
-Use AWS IAM MCP for:
-
-- listing users, roles, groups, and policies
-- retrieving attached or inline policy details
-- understanding trust relationships
-- testing policy effects with `simulate_principal_policy`
-
-Prefer these operations when available:
-
-- `list_users`
-- `get_user`
-- `list_roles`
-- `list_groups`
-- `get_group`
-- `list_policies`
-- `get_user_policy`
-- `get_role_policy`
-- `list_user_policies`
-- `list_role_policies`
-- `simulate_principal_policy`
+- `list_users`, `get_user`, `list_roles`, `list_groups`, `get_group`
+- `list_policies`, `get_user_policy`, `get_role_policy`, `list_user_policies`, `list_role_policies`
+- `simulate_principal_policy` — test policy effects before proposing rollout
 
 ## Safety rules
 
 - Treat IAM MCP as read-only by default.
-- Do not create, delete, attach, detach, or rotate IAM resources unless the user explicitly asks for a change and the blast radius is understood.
-- Prefer `simulate_principal_policy` before proposing policy rollout steps.
-- Distinguish clearly between documentation-backed statements and observations from a real AWS account.
-- When the answer affects strategic framing, route the recommendation back through `internal-aws-strategic`.
-- When the answer affects account layout, delegated admin placement, or StackSets topology, route it through `internal-aws-organization-structure`.
-- When the answer affects SCPs, IAM, trust, or federation, route it through `internal-aws-governance`.
-- When the answer affects validation, backup, monitoring, or rollout evidence, route it through `internal-aws-operations`.
+- Do not create, delete, attach, detach, or rotate IAM resources unless the user explicitly asks and blast radius is understood.
+- Prefer `simulate_principal_policy` before proposing policy rollout.
+- Distinguish documentation-backed statements from observations of a real AWS account.
+
+Load `references/mcp-capabilities.md` for capability splits across the two MCP servers.
 
 ## Output expectations
 
@@ -121,11 +72,8 @@ Prefer these operations when available:
 - What remains an architectural recommendation or inference
 - Safe next steps
 
-## References
+## Validation
 
-- `references/official-source-map.md`
-- `references/mcp-capabilities.md`
-- `internal-aws-strategic`
-- `internal-aws-organization-structure`
-- `internal-aws-governance`
-- `internal-aws-operations`
+- Source type (docs / live IAM / inference) is labeled for every claim.
+- IAM MCP usage stayed read-only unless an explicit change was requested.
+- Implications beyond the research lane are reported as labeled findings, not acted on.

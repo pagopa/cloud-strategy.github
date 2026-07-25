@@ -50,8 +50,7 @@ Immediate removal is allowed only for security or compliance issues. The removal
 - `.github/skills/internal-data-registry/SKILL.md`: **Removed**. Retired from the live catalog after confirmation that
   no live references remained.
 - `.github/scripts/bootstrap-copilot-config.sh`: **Removed**. Replaced by the
-  `local-sync-global-copilot-configs-into-repo` agent and the
-  `local-agent-sync-global-copilot-configs-into-repo` skill workflow.
+  `local-sync-repos` agent and skill workflow.
 - `.github/skills/internal-terraform-feature/SKILL.md`: **Removed**. Merged into
   `.github/skills/internal-terraform/SKILL.md`.
 - `.github/skills/internal-terraform-module/SKILL.md`: **Removed**. Merged into

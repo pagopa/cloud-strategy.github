@@ -68,7 +68,7 @@ skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
 
 critical-validate: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_critical_output --file .github/skills/internal-gateway-critical-master/fixtures/critical_output_valid.md
+	@$(SCRIPTS_RUNNER) validate_critical_output --strict --file .github/skills/internal-gateway-critical-master/fixtures/critical_output_valid.md
 
 internal-gateway-idea-fast-check: scripts-bootstrap
 	@$(PYTHON) .github/skills/internal-gateway-idea/scripts/audit_workflow.py
@@ -97,10 +97,13 @@ PLAN_AUTHORING_CLI := .github/skills/internal-gateway-writing-plans/scripts/plan
 PLAN_EXECUTING_CLI := .github/skills/internal-gateway-execute-plans/scripts/plan_execution.py
 
 retained-plan-check: python-version-check
-	@if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required (e.g. make retained-plan-check PLAN_FOLDER=tmp/superpowers/my-plan)' >&2; exit 1; fi
 	@case "$(PLAN_STAGE)" in \
-		handoff) $(PYTHON) $(PLAN_AUTHORING_CLI) handoff-check "$(PLAN_FOLDER)" ;; \
-		completion) $(PYTHON) $(PLAN_EXECUTING_CLI) completion-check "$(PLAN_FOLDER)" ;; \
+		handoff) \
+			if [ -z "$(PLAN_FOLDER)" ]; then printf '%s\n' 'PLAN_FOLDER is required for handoff stage (e.g. make retained-plan-check PLAN_STAGE=handoff PLAN_FOLDER=tmp/superpowers/plans/my-plan)' >&2; exit 1; fi; \
+			$(PYTHON) $(PLAN_AUTHORING_CLI) handoff-check "$(PLAN_FOLDER)" ;; \
+		completion) \
+			if [ -z "$(PLAN_FILE)" ] || [ -z "$(STATUS_FILE)" ]; then printf '%s\n' 'PLAN_FILE and STATUS_FILE are required for completion stage (e.g. make retained-plan-check PLAN_STAGE=completion PLAN_FILE=tmp/superpowers/plans/my-plan.md STATUS_FILE=tmp/superpowers/plans/my-plan.DONE.md)' >&2; exit 1; fi; \
+			$(PYTHON) $(PLAN_EXECUTING_CLI) completion-check "$(PLAN_FILE)" "$(STATUS_FILE)" --repo-root . ;; \
 		*) printf '%s\n' 'PLAN_STAGE must be handoff or completion.' >&2; exit 1 ;; \
 	esac
 

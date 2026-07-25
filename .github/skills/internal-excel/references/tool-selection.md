@@ -12,7 +12,7 @@ Read this reference when scale, file format, or workbook fidelity makes the engi
 | Columnar scans, type-stable interchange, Parquet or Arrow conversion | PyArrow | Strong schema control and efficient IO | Prefer when conversion fidelity and explicit types matter. |
 | Large in-memory transforms with strict schema and speed focus | Polars | Fast columnar execution | Prefer when `pandas` becomes memory-heavy or slow. |
 | Reading or updating `.xlsx` cell values while workbook UX is secondary | `openpyxl` | Native workbook access | Stay here only when layout, styles, and rendered review are not the main goal. |
-| Formulas, styles, charts, cached recalculation, rendered review, workbook preservation | `openai-spreadsheet` | Workbook UX owner | Route out of this skill. |
+| Formulas, styles, charts, cached recalculation, rendered review, workbook preservation | `anthropic-xlsx` | Workbook UX owner | Route out of this skill. |
 
 ## Selection rules
 
@@ -22,9 +22,9 @@ Read this reference when scale, file format, or workbook fidelity makes the engi
 - Prefer DuckDB, Polars, or PyArrow when file size or join volume makes full `pandas` loads risky.
 - Prefer engines that support explicit schema declarations when inference could corrupt IDs, dates, currency, or nullable numeric fields.
 
-## Escalation to `openai-spreadsheet`
+## Escalation to `anthropic-xlsx`
 
-Route to `openai-spreadsheet` when any of these are first-class requirements:
+Route to `anthropic-xlsx` when any of these are first-class requirements:
 
 - formulas or cached recalculation
 - charts or workbook layout
