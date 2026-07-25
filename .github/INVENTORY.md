@@ -194,6 +194,7 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 ## Agents
 
 - `.github/agents/internal-gateway-critical-master.agent.md`
+- `.github/agents/internal-gateway-execute-plans.agent.md`
 - `.github/agents/internal-gateway-idea.agent.md`
 - `.github/agents/internal-gateway-review-code.agent.md`
 - `.github/agents/internal-gateway-review-generic.agent.md`
