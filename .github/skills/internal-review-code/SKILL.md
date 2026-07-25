@@ -25,6 +25,11 @@ repository-owned entrypoint and the local boundaries below. It must not
 redefine the core's five axes, review order, approval standard, finding
 categories, structural remedies, or verification posture.
 
+The core owns review reasoning and severity. This wrapper owns the public chat projection
+and repository-facing boundaries. The projection may reorder and compress supported
+evidence, but it must not introduce another review axis, severity model, approval
+standard, or remediation workflow.
+
 ## Boundaries
 
 - Review only the requested code surface and the supporting tests, spec, task,
@@ -38,8 +43,8 @@ categories, structural remedies, or verification posture.
   change the review.
 - Do not load `awesome-copilot-security-review` automatically. Use it only when
   the user explicitly asks for security-specialist depth.
-- Do not add another severity model, review lens set, workflow, or output
-  template around the core.
+- Do not redefine the core review model. Project its result through the same
+  `🔎`, `📌`, `🧪`, and `👉` semantics used by the code gateway.
 - If the requested fixed point, diff, or code target is missing, invalid, or
   empty, stop at the core preflight and state the evidence gap.
 - If no spec or task context exists, follow the core no-spec path and state the
@@ -63,3 +68,8 @@ Before reporting the review, confirm that:
 - security-specialist escalation was used only on explicit user request;
 - simplification is surfaced only as a separate follow-up backed by a concrete readability or complexity finding;
 - `addyosmani-code-simplification` was not loaded or executed during review.
+- all Critical and Important findings remain visible;
+- `B`/`I`/`S` identifiers map to the core finding categories;
+- material findings include concrete evidence, impact, correction, and expected verification;
+- the projection contains one boundary-safe user action;
+- internal counter-analysis details stay hidden unless they alter the verdict.

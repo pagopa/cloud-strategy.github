@@ -100,9 +100,11 @@ Bundle coverage rules: see `references/review-profiles.md` 'bundle minimum evide
 
 ## Output
 
-Required sections: see `references/report-contract.md` 'Required sections'. The review
-output should always be decision-useful and include an explicit no-findings result
-when no material findings exist.
+- Chat projection: see `references/report-contract.md` 'Chat projection'.
+- Retained output: see `references/report-contract.md` 'Retained output'.
+
+The review output should always be decision-useful and include an explicit
+no-findings result when no material findings exist.
 
 ## Validation
 

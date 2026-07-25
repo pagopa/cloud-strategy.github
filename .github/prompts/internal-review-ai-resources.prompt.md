@@ -28,6 +28,10 @@ ${input:constraints:List no-touch areas, rollout constraints, evidence limits, o
 Output preference:
 ${input:output:Write chat-only, retained report under tmp/, or infer from target size}
 
+For `chat-only`, use the adaptive chat projection owned by the selected review
+lane. For retained output, preserve the retained report contract and return a
+compact chat summary with the retained path.
+
 Use these repository sources first:
 
 - [AGENTS.md](../../AGENTS.md)

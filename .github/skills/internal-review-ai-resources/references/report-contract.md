@@ -47,25 +47,45 @@ Use one primary action per finding or summary line:
 - `retained-report`: retained output under `tmp/` only when the user asked for
   it or the target is already a retained package
 
-## Adaptive layout patterns
+## Chat projection
 
-Use the shortest layout that still supports the user's decision. Section names
-may vary, but the final answer must preserve the decision logic.
+For `chat-only` reviews, use the shortest projection that still supports the
+user's decision. Start with exactly four fields in this order:
 
-For normal AI-resource reviews, prefer:
+- `🔎`: a localized verdict and counts by severity.
+- `📌`: one sentence explaining why that verdict follows.
+- `🧪`: reviewed scope, completed validation, and any material evidence gap.
+- `👉`: one user action and the consequence of accepting it.
 
-1. verdict with confidence
-2. material findings, defect-first
-3. evidence digest
-4. decision trace
-5. next step
-6. residual risk
+Visible labels match the user's chat language. Canonical uppercase decision
+values and evidence labels are internal by default. Map Critical findings to
+`B` identifiers, Important findings to `I` identifiers, and Suggestions to
+`S` identifiers. Show every blocking and important finding, consolidate
+equivalent findings, and keep suggestions compact.
 
-For high-severity findings, lead with findings, then impact and next step.
+Every material finding contains `Location`, `Evidence`, `Impact`, and
+`Correction`. Add `Expected verification` when closure is not obvious. Mark
+uncertainty inline as `to confirm` and do not create another severity.
 
-For no-finding or low-finding reviews, make the decision logic explicit with a
-verdict, evidence digest, decision trace, next step, and residual risk. Do not
-invent extra findings to make a small review look more substantial.
+Keep counter-analysis records, review gates, decision traces, and internal
+evidence digests hidden unless they materially change the verdict. Missing
+proof stays visible through `🧪`. The final action names one user response and
+states its consequence; a review never implies that a patch was already
+applied.
+
+## Retained output
+
+Use retained output only when the user asks for it or the selected target is a
+retained review package. Preserve profile-proportional detail, evidence
+labels, evidence digest, decision trace, validation gaps, and residual risk
+when the retained artifact needs them. Retained output may keep canonical
+uppercase decision values and internal evidence labels.
+
+Retained review completion returns a compact chat card plus the retained path.
+The chat summary must remain distinct from the retained report and must not
+replace its evidence, decision trace, validation gaps, or residual-risk
+detail. Keep retained reports under `tmp/` and preserve their existing file
+layout.
 
 ## Evidence compression
 
@@ -95,23 +115,12 @@ When a proof cannot be run or loaded, report:
 Partial evidence may support a verdict, but the unavailable focused proof stays
 visible as residual risk.
 
-## Required sections
+## Conditional requirements
 
-Every final review should include:
-
-1. selected profile and target
-2. findings first, or an explicit no-findings result
-3. evidence labels for each material claim
-4. evidence digest
-5. decision trace
-6. decision or recommended next action
-7. validation path or explicit evidence gap
-8. residual risk
-
-Decision trace and evidence digest are expected for normal reviews; see Adaptive layout patterns.
-
-Small reviews may merge sections only when the verdict, evidence digest,
-decision trace, next action, and residual risk remain understandable.
+Chat-only output follows `Chat projection`. Retained output follows `Retained
+output` and returns the compact chat card with the retained path. Use the
+selected profile and target as internal review context, and surface them in
+chat only when they change the user's decision.
 
 ## Completeness pass
 

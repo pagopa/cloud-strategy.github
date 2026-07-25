@@ -63,53 +63,35 @@ Before presenting the final report, pressure-test the review with `internal-gate
 
 If the counter-analysis exposes a material gap, reopen the review and return `Verdict: NEEDS INVESTIGATION` instead of presenting an unsupported approval or request-changes verdict.
 
-## Output Format
+## User-facing chat projection
 
-Categorize every finding:
+Keep the full review record and counter-analysis internal. In normal chat,
+project only the decision-relevant result and match the user's chat language.
 
-**Critical** - Must fix before merge (security vulnerability, data loss risk, broken functionality)
+Start with exactly four fields in this order:
 
-**Important** - Should fix before merge (missing test, wrong abstraction, poor error handling)
+- `🔎`: localized verdict and counts by severity.
+- `📌`: one sentence explaining why that verdict follows.
+- `🧪`: reviewed scope, completed validation, and any material evidence gap.
+- `👉`: one user action and the consequence of accepting it.
 
-**Suggestion** - Consider for improvement (naming, code style, optional optimization)
+Map Critical findings to `B` identifiers, Important findings to `I`
+identifiers, and Suggestions to `S` identifiers; show every blocking and important finding;
+consolidate equivalent findings and list all affected locations under one identifier.
+Keep suggestions compact.
 
-## Review Output Template
+Every material finding contains `Location`, `Evidence`, `Impact`, and
+`Correction`. Add `Expected verification` when closure is not obvious.
+Mark uncertainty inline as `to confirm`; do not create another severity.
 
-```markdown
-## Review Summary
+Do not print empty sections, the internal review gate, the counter-analysis
+record, or a decision trace. Surface those facts only through the verdict or
+evidence-gap field when they change the user's decision.
 
-**Verdict:** APPROVE | REQUEST CHANGES | NEEDS INVESTIGATION
-
-**Overview:** [1-2 sentences summarizing the change and overall assessment]
-
-### Critical Issues
-- [File:line] [Description, impact, and recommended fix]
-
-### Important Issues
-- [File:line] [Description, impact, and recommended fix]
-
-### Suggestions
-- [File:line] [Description and recommended fix when useful]
-
-### Sound Decisions / Preserved Conventions
-- [Evidence-backed note explaining why a risky-looking choice is acceptable or why a local convention should be preserved]
-
-### Verification Story
-- Tests reviewed: [yes/no, observations]
-- Build verified: [yes/no]
-- Security checked: [yes/no, observations]
-- Validation missing: [specific command, test, or review gap]
-
-### Critical Counter-Analysis Result
-- Result: [passed/reopened]
-- Notes: [severity changes, false positives removed, missing evidence, or residual uncertainty]
-
-### Residual Risk
-- [Specific remaining risk, or "No material residual risk found within reviewed scope."]
-
-### Next Decision
-- [accept | patch | investigate | accept with risk]
-```
+For request-changes results, the action may invite the user to request a
+separate follow-up for named finding IDs, but it must state that no changes were applied.
+Approval results state that no user action is required.
+Investigation results ask for the exact missing evidence or authorization.
 
 ## Rules
 

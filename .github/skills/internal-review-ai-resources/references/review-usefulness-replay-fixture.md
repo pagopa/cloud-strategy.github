@@ -30,34 +30,12 @@ without becoming long reports.
 ## Compressed Output Shape
 
 ```markdown
-## Verdict
+🔎 **Esito:** approvabile con un miglioramento facoltativo.
+📌 **Perché:** il prompt pack passa il validator, ma il profilo non ha una regressione dedicata.
+🧪 **Evidenza:** validator e sync verificati; pytest focalizzato non disponibile.
+👉 **Azione richiesta:** nessuna correzione obbligatoria; chiedi una fase separata per aggiungere S1 se vuoi ridurre il rischio.
 
-No immediate runtime break observed. The live `coach-personale` pack passes the
-updated validator, but the tightened profile lacks dedicated regression
-coverage.
+## 💡 Suggerimenti (1)
 
-## Findings
-
-Low: `coach-personale` profile rules changed without a focused pass/fail test.
-
-## Evidence Digest
-
-Checked branch diff, validator helper, live prompt pack, nearby tests, and
-inventory/sync references.
-
-## Decision Trace
-
-Runtime break is not supported because the live pack passes. Sync drift is not
-supported because the changed surface is the validator helper and catalog
-references remain present. The supported risk is test protection for the new
-profile contract.
-
-## Next Step
-
-Add focused `coach-personale` validator tests for the required tokens and
-support files.
-
-## Residual Risk
-
-Focused pytest execution was unavailable in the active environment.
+- **S1:** aggiungere test pass/fail specifici per il profilo `coach-personale`.
 ```
