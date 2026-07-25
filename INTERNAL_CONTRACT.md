@@ -278,6 +278,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - retained execution stays separate: `internal-gateway-simple-task` consumes approved `compact` plans and `internal-gateway-execute-plans` consumes approved `extended` plans
   - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
   - unclear target state and multiple credible paths are explicit planning triggers
+  - `internal-gateway-codebase-improvement` is a manual-only specialist gateway outside the canonical gateway core; it must not become an implicit fallback, peer-dispatch target, or replacement for an existing gateway owner
   - wrapper owners define boundaries and recommendations instead of active delegation
   - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
   - critical challenge can return reformulation, simple, execute, review, continue-critical, or accept-with-risk outcomes
