@@ -1,66 +1,60 @@
 ---
 name: internal-skill-creator
-description: Use when creating, splitting, replacing, or materially revising a repository-owned skill under `.github/skills/`.
+description: Use when creating or materially revising repository-owned skills under `.github/skills/`, including splits, replacements, or changes to scope, triggers, structure, or validation.
 ---
 
 # Internal Skill Creator
 
-## Referenced skills
+## Core method
 
-- `mattpocock-writing-great-skills`: predictability review and revision stage applied after authoring.
-- `local-agent-sync-external-resources`: catalog-governance sync for broader external-asset or inventory-wide work.
-- `internal-agent-creator`: agent authoring and agent/skill boundary rewrites.
-
-## Local references
-
-- `references/authoring-and-evaluation.md`: read when creating a skill, changing a boundary or trigger, or running any evaluation branch.
+`mattpocock-writing-great-skills` is the core method for skill authoring and
+revision. Load it before drafting. Apply its relevant rules throughout the
+change instead of repeating them here.
 
 ## When to use
 
-- Creating a new repository-owned skill under `.github/skills/`.
-- Replacing or splitting an existing repository-owned skill whose boundary is wrong.
-- Materially revising a repository-owned skill's scope, trigger, structure, or validation.
+- The requested skill change affects repository-owned behavior or structure.
 
-## When not to use
+## Local reference
 
-- Catalog governance, inventory maintenance, or sync routing. Use `local-agent-sync-external-resources`.
-- Agent authoring or agent/skill boundary rewrites. Use `internal-agent-creator`.
-- Pure copyedit that does not affect retrieval, boundary, validation, or bundle structure.
-
-## Preflight
-
-1. Read the target `SKILL.md` and the nearest competing skills.
-2. Read `AGENTS.md` before changing repository-owned scope or policy.
-3. Read `.github/INVENTORY.md` when a skill may be added, retired, renamed, or replaced.
-4. Inventory the touched bundle: `SKILL.md`, `agents/openai.yaml`, `references/`, `scripts/`, `assets/`.
+Read `references/authoring-and-evaluation.md` when creating a skill, changing
+its boundary or trigger, or selecting an evaluation branch.
 
 ## Workflow
 
-### 1. Authoring and proportional evaluation
+### 1. Repository preflight
 
-Read `references/authoring-and-evaluation.md`. Capture the intent contract,
-inventory the bundle, and produce the smallest draft that satisfies the
-requested behavior. Select only the applicable evaluation branches and record
-every skipped branch and its reason.
+Read the target `SKILL.md`, the nearest competing skills, and the applicable
+`AGENTS.md`. Inventory the touched bundle. Read `.github/INVENTORY.md` only
+when adding, retiring, renaming, or replacing a skill.
 
-Exit criteria: the draft exists; applicable evaluation branches are assessed;
-skipped branches and reasons are recorded; and draft, evidence, blockers, and completion status are explicit.
+Completion criterion: the intended boundary, anti-scope, touched files, and
+repository validation path are explicit.
 
-### 2. Predictability review
+### 2. Core authoring and revision
 
-Load `mattpocock-writing-great-skills` and use its vocabulary to revise the draft.
-Apply all relevant rules. Check invocation, description, information hierarchy,
-retrieval quality, and predictability. Detect duplication, sediment, no-op, and predictability failures. Revise the draft in place; do not merely report findings.
+Load `mattpocock-writing-great-skills` as the core method. Draft or revise the
+smallest coherent bundle. Check invocation, description, information hierarchy,
+retrieval quality, and predictability. Remove duplication, sediment, and no-ops;
+revise the draft in place instead of only reporting findings.
 
-Exit criteria: the draft has been revised with all applicable predictability
-rules applied and the changes are traceable to specific rules.
+Completion criterion: every applicable core rule is reflected in the draft,
+and each retained local instruction has a repository-specific reason to exist.
 
-### 3. Repository closure
+### 3. Proportional evaluation
+
+Read `references/authoring-and-evaluation.md`. Select the applicable evaluation
+branches. Record skipped branches and reasons.
+
+Completion criterion: applicable branches have evidence; evidence, blockers,
+and completion status are explicit.
+
+### 4. Repository closure
 
 1. Update `agents/openai.yaml` to match the revised skill purpose.
 2. Run `python3 .github/scripts/validate_internal_skills.py --skill <name> --strict`.
 3. Check routing fallout in nearby skills and agents.
 4. Record before/after line and word counts for the touched bundle.
 
-Exit criteria: structural validation passes, routing fallout is resolved, and
+Completion criterion: structural validation passes, routing fallout is resolved, and
 before/after measurements are recorded.
