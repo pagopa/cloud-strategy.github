@@ -112,7 +112,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-python-project/SKILL.md`
 - `.github/skills/internal-python-script/SKILL.md`
 - `.github/skills/internal-python/SKILL.md`
-- `.github/skills/internal-review-ai-resources/SKILL.md`
 - `.github/skills/internal-review-code/SKILL.md`
 - `.github/skills/internal-review-high-level/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
@@ -202,4 +201,3 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 - `.github/prompts/internal-architecture-md-creator.prompt.md`
 - `.github/prompts/internal-mega-review.prompt.md`
-- `.github/prompts/internal-review-ai-resources.prompt.md`

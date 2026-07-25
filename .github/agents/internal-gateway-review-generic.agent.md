@@ -48,7 +48,7 @@ Evaluate the target through the dimensions that apply to its surface:
 
 ## Generic Review Surfaces
 
-- **AI resources:** agents, skills, prompts, instructions, bundle siblings, catalog entries, sync behavior, and customization drift.
+- **AI resources:** agents, skills, prompts, instructions, bundle siblings, catalog entries, sync behavior, and customization drift. For material changes, check compatibility, propagation, periodic review, and retirement readiness using affected inventory, sync, validators, and tests; record an explicit evidence gap when a surface is unavailable.
 - **Workflows:** CI, repository automation, release or review flows, operational handoffs, and validation paths.
 - **Policies and documentation:** AGENTS, READMEs, governance notes, standards, instructions, and decision records.
 - **Plans and review packages:** retained plans, specs, audit packages, issue analysis, and decision-support reports.

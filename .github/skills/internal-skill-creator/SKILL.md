@@ -1,6 +1,6 @@
 ---
 name: internal-skill-creator
-description: Use when creating or materially revising repository-owned skills under `.github/skills/`, including splits, replacements, or changes to scope, triggers, structure, or validation.
+description: Use when creating, materially revising, replacing, or retiring repository-owned skills under `.github/skills/`, including changes to scope, triggers, structure, or validation.
 ---
 
 # Internal Skill Creator
@@ -25,7 +25,8 @@ convention. Keep the target skill model-invocable; a called skill must not set
 
 ## When to use
 
-- The requested skill change affects repository-owned behavior or structure.
+- The requested skill change affects repository-owned behavior or structure,
+  including creating, materially revising, replacing, or retiring a skill.
 
 ## Local reference
 
@@ -37,8 +38,11 @@ its boundary or trigger, or selecting an evaluation branch.
 ### 1. Repository preflight
 
 Read the target `SKILL.md`, the nearest competing skills, and the applicable
-`AGENTS.md`. Inventory the touched bundle. Read `.github/INVENTORY.md` only
-when adding, retiring, renaming, or replacing a skill.
+`AGENTS.md`. Inventory every existing sibling in the touched bundle:
+`SKILL.md`, `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`.
+Distinguish real consumption from mere existence by mapping selectors,
+cross-skill routing, validators, tests, inventory, and sync surfaces. Read
+`.github/INVENTORY.md` when adding, retiring, renaming, or replacing a skill.
 
 Completion criterion: the intended boundary, anti-scope, touched files, and
 repository validation path are explicit.
@@ -56,7 +60,8 @@ and each retained local instruction has a repository-specific reason to exist.
 ### 3. Proportional evaluation
 
 Read `references/authoring-and-evaluation.md`. Select the applicable evaluation
-branches. Record skipped branches and reasons.
+branches, including compatibility, lifecycle, propagation, and retirement when
+material. Record skipped branches and reasons.
 
 Completion criterion: applicable branches have evidence; evidence, blockers,
 and completion status are explicit.
@@ -66,7 +71,9 @@ and completion status are explicit.
 1. Update `agents/openai.yaml` to match the revised skill purpose.
 2. Run `python3 .github/scripts/validate_internal_skills.py --skill <name> --strict`.
 3. Check routing fallout in nearby skills and agents.
-4. Record before/after line and word counts for the touched bundle.
+4. For replacement or retirement work, remove hollow references and obsolete
+   entrypoints, then record before/after line and word counts for the touched
+   bundle.
 
 Completion criterion: structural validation passes, routing fallout is resolved, and
 before/after measurements are recorded.

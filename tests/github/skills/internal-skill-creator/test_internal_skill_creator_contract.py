@@ -102,3 +102,36 @@ def test_default_prompt_names_core_method_before_local_closure() -> None:
     closure = prompt.index("repository closure")
     assert matt < evaluation < closure
     assert "anthropic-skill-creator" not in prompt
+
+
+def test_preflight_maps_complete_bundle_and_real_consumers() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    normalized = " ".join(skill.split())
+    for marker in (
+        "references/",
+        "scripts/",
+        "assets/",
+        "agents/openai.yaml",
+        "consumption",
+        "routing",
+    ):
+        assert marker in normalized
+
+
+def test_evaluation_covers_lifecycle_propagation_and_retirement() -> None:
+    reference = REFERENCE_PATH.read_text(encoding="utf-8")
+    for marker in (
+        "## Bundle evidence",
+        "## Consumption and ownership",
+        "## Lifecycle and retirement",
+        "## Propagation and proof",
+        "## Self-review risk",
+    ):
+        assert marker in reference
+
+
+def test_creator_scope_includes_replacement_and_retirement() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    runtime = OPENAI_PATH.read_text(encoding="utf-8")
+    assert "retiring" in skill.lower()
+    assert "retire" in runtime.lower()
