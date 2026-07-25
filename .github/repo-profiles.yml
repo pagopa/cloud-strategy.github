@@ -62,7 +62,7 @@ profiles:
       - skills/internal-markdown/SKILL.md
       - skills/internal-yaml/SKILL.md
       - skills/anthropic-docx/SKILL.md
-      - skills/openai-pdf/SKILL.md
+      - skills/anthropic-pdf/SKILL.md
       - skills/anthropic-pptx/SKILL.md
       - skills/anthropic-xlsx/SKILL.md
 

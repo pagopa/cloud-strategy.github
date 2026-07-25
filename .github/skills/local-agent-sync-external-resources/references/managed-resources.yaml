@@ -142,9 +142,6 @@ sources:
       - upstream: skills/.curated/gh-fix-ci
         local: .github/skills/openai-gh-fix-ci
         canonical_name: openai-gh-fix-ci
-      - upstream: skills/.curated/pdf
-        local: .github/skills/openai-pdf
-        canonical_name: openai-pdf
   openai-skills-retained-doc:
     repository: https://github.com/openai/skills.git
     ref: 49f948faa9258a0c61caceaf225e179651397431
@@ -202,6 +199,9 @@ sources:
       - upstream: skills/docx
         local: .github/skills/anthropic-docx
         canonical_name: anthropic-docx
+      - upstream: skills/pdf
+        local: .github/skills/anthropic-pdf
+        canonical_name: anthropic-pdf
       - upstream: skills/pptx
         local: .github/skills/anthropic-pptx
         canonical_name: anthropic-pptx

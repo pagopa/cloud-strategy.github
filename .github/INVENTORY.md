@@ -40,6 +40,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/agent-os-plan-product/SKILL.md`
 - `.github/skills/agent-os-shape-spec/SKILL.md`
 - `.github/skills/anthropic-docx/SKILL.md`
+- `.github/skills/anthropic-pdf/SKILL.md`
 - `.github/skills/anthropic-pptx/SKILL.md`
 - `.github/skills/anthropic-skill-creator/SKILL.md`
 - `.github/skills/anthropic-xlsx/SKILL.md`
@@ -143,7 +144,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/openai-docs/SKILL.md`
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
-- `.github/skills/openai-pdf/SKILL.md`
 - `.github/skills/search-company-knowledge/SKILL.md`
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`

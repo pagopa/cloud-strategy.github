@@ -16,9 +16,9 @@ def test_document_support_heading_is_vendor_neutral() -> None:
         "Instructions": [],
         "Skills": [
             ".github/skills/anthropic-docx/SKILL.md",
+            ".github/skills/anthropic-pdf/SKILL.md",
             ".github/skills/anthropic-pptx/SKILL.md",
             ".github/skills/anthropic-xlsx/SKILL.md",
-            ".github/skills/openai-pdf/SKILL.md",
         ],
         "Scripts": [],
         "Agents": [],
@@ -29,7 +29,7 @@ def test_document_support_heading_is_vendor_neutral() -> None:
 
     assert "Support-only imported document skills" in rendered
     assert "anthropic-docx" in rendered
+    assert "anthropic-pdf" in rendered
     assert "anthropic-pptx" in rendered
     assert "anthropic-xlsx" in rendered
-    assert "openai-pdf" in rendered
     assert "openai-* office skills" not in rendered

@@ -20,9 +20,9 @@ SCRIPT_GLOB_PATTERNS = (
 )
 DOCUMENT_SUPPORT_ONLY_SKILLS = (
     ".github/skills/anthropic-docx/SKILL.md",
+    ".github/skills/anthropic-pdf/SKILL.md",
     ".github/skills/anthropic-pptx/SKILL.md",
     ".github/skills/anthropic-xlsx/SKILL.md",
-    ".github/skills/openai-pdf/SKILL.md",
 )
 IGNORED_SCRIPT_BASENAMES = {"__init__.py"}
 
