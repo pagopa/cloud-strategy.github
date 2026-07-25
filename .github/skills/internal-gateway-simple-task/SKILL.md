@@ -136,7 +136,7 @@ Keep the implementation posture simple:
 ## User-facing communication
 
 Keep the Readiness Brief fields as an internal readiness record. Keep Gate
-Evidence internal by default. Normal chat must not dump either structure.
+Evidence internal by default; normal chat must not dump either structure.
 
 Render one compact user-facing projection:
 
