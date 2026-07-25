@@ -30,6 +30,8 @@ class ManagedSource:
     ref: str
     advertised_ref: str | None
     assets: tuple[ManagedAsset, ...]
+    rewrite_skill_references: bool = False
+    skill_reference_aliases: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -162,6 +164,33 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 )
             )
 
+        rewrite_skill_references = raw_source.get("rewrite_skill_references", False)
+        if not isinstance(rewrite_skill_references, bool):
+            raise ValueError(
+                f"source {source_id} rewrite_skill_references must be a boolean."
+            )
+        raw_skill_reference_aliases = raw_source.get("skill_reference_aliases", {})
+        if not isinstance(raw_skill_reference_aliases, dict):
+            raise ValueError(
+                f"source {source_id} skill_reference_aliases must be a mapping."
+            )
+        canonical_names = {asset.canonical_name for asset in assets}
+        skill_reference_aliases: list[tuple[str, str]] = []
+        for alias, canonical_name in raw_skill_reference_aliases.items():
+            alias = _require_non_empty_string(
+                alias, f"source {source_id} skill reference alias"
+            )
+            canonical_name = _require_non_empty_string(
+                canonical_name,
+                f"source {source_id} skill reference alias target",
+            )
+            if canonical_name not in canonical_names:
+                raise ValueError(
+                    f"source {source_id} skill reference alias target "
+                    f"{canonical_name} is not a declared asset canonical name."
+                )
+            skill_reference_aliases.append((alias, canonical_name))
+
         sources.append(
             ManagedSource(
                 source_id=source_id,
@@ -169,6 +198,8 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 ref=ref,
                 advertised_ref=advertised_ref,
                 assets=tuple(assets),
+                rewrite_skill_references=rewrite_skill_references,
+                skill_reference_aliases=tuple(skill_reference_aliases),
             )
         )
 
@@ -353,6 +384,12 @@ def materialize_candidate(
 
 _FRONTMATTER_NAME_RE = re.compile(r"^(name\s*:\s*).*$", re.MULTILINE)
 _SUPERPOWERS_SKILL_REF_RE = re.compile(r"\bsuperpowers:([a-z0-9][a-z0-9-]*)")
+_SLASH_SKILL_REF_RE = re.compile(
+    r"(?<![A-Za-z0-9_-])/(?P<name>[a-z0-9][a-z0-9-]*)\b"
+)
+_BACKTICK_SKILL_REF_RE = re.compile(
+    r"(?<![A-Za-z0-9_-])`(?P<name>[a-z0-9][a-z0-9-]*)`"
+)
 
 
 def normalize_candidate(
@@ -364,6 +401,17 @@ def normalize_candidate(
         replacements_by_source.setdefault(replacement.source, []).append(replacement)
 
     changed: list[str] = []
+    skill_references_by_source: dict[str, dict[str, str]] = {}
+    for source in resources.sources:
+        if not source.rewrite_skill_references:
+            continue
+        skill_references = {
+            Path(asset.upstream).name: asset.canonical_name
+            for asset in source.assets
+        }
+        skill_references.update(dict(source.skill_reference_aliases))
+        skill_references_by_source[source.source_id] = skill_references
+
     for asset in resources.assets:
         asset_dir = candidate / asset.local
         if not asset_dir.exists():
@@ -384,6 +432,24 @@ def normalize_candidate(
                 if asset.source == "obra-superpowers":
                     content = _SUPERPOWERS_SKILL_REF_RE.sub(
                         r"superpowers-\1", content
+                    )
+
+                skill_references = skill_references_by_source.get(asset.source, {})
+                if skill_references:
+                    content = _SLASH_SKILL_REF_RE.sub(
+                        lambda match: "/"
+                        + skill_references.get(
+                            match.group("name"), match.group("name")
+                        ),
+                        content,
+                    )
+                    content = _BACKTICK_SKILL_REF_RE.sub(
+                        lambda match: "`"
+                        + skill_references.get(
+                            match.group("name"), match.group("name")
+                        )
+                        + "`",
+                        content,
                     )
 
             for replacement in replacements_by_source.get(asset.source, []):

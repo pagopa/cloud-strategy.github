@@ -33,6 +33,20 @@ declared external resource refreshes safely. The single public entrypoint is
 - No `git pull`, no argumentless `git fetch`, no `git remote update`.
 - No package managers: `pip`, `uv`, `npm`, `brew`, `yarn`, `pnpm` are forbidden.
 
+## Managed Skill Reference Normalization
+
+- A source may set `rewrite_skill_references: true` to rewrite slash commands and
+  backtick skill references from each declared upstream asset basename to its
+  declared `canonical_name` during candidate normalization.
+- Use `skill_reference_aliases` for upstream command names that do not match an
+  asset basename. Keep aliases source-local and point them only at declared
+  canonical names.
+- The `mattpocock-skills` source uses the `mattpocock-` canonical prefix for
+  every imported skill except `grill-me`. Its `grilling` alias also resolves to
+  `grill-me`.
+- References to undeclared skills remain unchanged and must be reported as
+  unresolved dependencies; do not silently import or rewrite them.
+
 ## Workspace Convention
 
 - The runtime workspace must be outside this repository.

@@ -113,6 +113,39 @@ def _superpowers_resources() -> ManagedResources:
     )
 
 
+def _mattpocock_resources() -> ManagedResources:
+    assets = (
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/tdd",
+            local=".github/skills/mattpocock-tdd",
+            canonical_name="mattpocock-tdd",
+        ),
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/grill-with-docs",
+            local=".github/skills/grill-me",
+            canonical_name="grill-me",
+        ),
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/domain-modeling",
+            local=".github/skills/mattpocock-domain-modeling",
+            canonical_name="mattpocock-domain-modeling",
+        ),
+    )
+    source = ManagedSource(
+        source_id="mattpocock-skills",
+        repository="https://github.com/mattpocock/skills.git",
+        ref="abc123",
+        advertised_ref=None,
+        assets=assets,
+        rewrite_skill_references=True,
+        skill_reference_aliases=(("grilling", "grill-me"),),
+    )
+    return ManagedResources(sources=(source,), replacements=(), watchlist=())
+
+
 def test_workspace_inside_repository_is_rejected(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     workspace = repo / "tmp" / "refresh"
@@ -174,6 +207,31 @@ def test_normalization_updates_name_and_declared_text_only(
     assert "tmp/superpowers" in content
     assert "`superpowers-test-driven-development`" in content
     assert "superpowers-verification-before-completion" in content
+
+
+def test_normalization_rewrites_declared_mattpocock_skill_references(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    skill = candidate / ".github/skills/mattpocock-tdd/SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: tdd\n---\n"
+        "Use /domain-modeling, /tdd, /grill-with-docs, and /grilling.\n"
+        "See `tdd` and /unmanaged when needed.\n",
+        encoding="utf-8",
+    )
+
+    changed = normalize_candidate(_mattpocock_resources(), candidate)
+
+    assert changed == (".github/skills/mattpocock-tdd/SKILL.md",)
+    content = skill.read_text(encoding="utf-8")
+    assert "name: mattpocock-tdd" in content
+    assert "/mattpocock-tdd" in content
+    assert "/grill-me" in content
+    assert "`mattpocock-tdd`" in content
+    assert "/domain-modeling" not in content
+    assert "/unmanaged" in content
 
 
 def test_materialize_candidate_copies_upstream_to_local(

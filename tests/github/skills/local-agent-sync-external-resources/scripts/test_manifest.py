@@ -139,8 +139,30 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 46
+    assert len(manifest.assets) == 53
     assert len(manifest.watchlist) == 13
+    matt_source = next(
+        source for source in manifest.sources if source.source_id == "mattpocock-skills"
+    )
+    assert matt_source.rewrite_skill_references is True
+    assert dict(matt_source.skill_reference_aliases) == {"grilling": "grill-me"}
+    assert {
+        item.upstream_id
+        for item in manifest.watchlist
+        if item.source_family == "mattpocock/skills"
+    } >= {"prototype", "triage", "to-tickets", "qa"}
+    assert {
+        item.canonical_name for item in matt_source.assets
+    } >= {
+        "grill-me",
+        "mattpocock-domain-modeling",
+        "mattpocock-implement",
+        "mattpocock-tdd",
+        "mattpocock-to-spec",
+        "mattpocock-setup-matt-pocock-skills",
+        "mattpocock-code-review",
+        "mattpocock-wayfinder",
+    }
     assert {
         (source.repository, asset.upstream, asset.local, asset.canonical_name)
         for source in manifest.sources
