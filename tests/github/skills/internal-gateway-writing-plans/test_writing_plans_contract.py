@@ -63,6 +63,13 @@ def test_runtime_prompt_carries_the_narrowed_boundary() -> None:
     assert "specs/" not in prompt
 
 
+def test_writing_runtime_surfaces_delegate_to_expected_owners() -> None:
+    for path in (SKILL_PATH, AGENT_PATH):
+        text = path.read_text(encoding="utf-8")
+        assert "/superpowers-writing-plans" in text
+        assert "/internal-gateway-execute-plans" in text
+
+
 GATES = (
     "Preflight Gate",
     "Delegated Draft Gate",

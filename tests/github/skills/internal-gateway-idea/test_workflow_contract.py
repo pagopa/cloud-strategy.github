@@ -3,6 +3,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import yaml
+
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -13,6 +15,7 @@ WORKFLOW_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-idea/references/workflow.md"
 )
 AGENT_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
+ROOT_AGENT_PATH = REPO_ROOT / ".github/agents/internal-gateway-idea.agent.md"
 SCRIPT_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/audit_workflow.py"
 )
@@ -46,6 +49,23 @@ def test_bundle_docs_reference_the_scoped_fast_lane() -> None:
 
 def test_runtime_prompt_keeps_the_full_mandatory_gate_sequence() -> None:
     _assert_in_order(AGENT_PATH.read_text(), MANDATORY_SEQUENCE)
+
+
+def test_idea_runtime_surfaces_delegate_to_the_expected_owners() -> None:
+    surfaces = (
+        SKILL_PATH.read_text(encoding="utf-8"),
+        WORKFLOW_PATH.read_text(encoding="utf-8"),
+        AGENT_PATH.read_text(encoding="utf-8"),
+        SCRIPT_PATH.read_text(encoding="utf-8"),
+    )
+    for text in surfaces:
+        assert "/superpowers-brainstorming" in text
+        assert "/internal-gateway-writing-plans" in text
+
+
+def test_idea_agent_allows_model_invocation() -> None:
+    frontmatter = yaml.safe_load(ROOT_AGENT_PATH.read_text().split("---", 2)[1])
+    assert frontmatter.get("disable-model-invocation") is not True
 
 
 def test_bundle_docs_use_repository_root_validation_commands() -> None:

@@ -1,7 +1,6 @@
 ---
 name: internal-gateway-simple-task
 description: Use when a concrete low-to-medium-risk repository-owned coding or non-coding task can be completed quickly in one bounded run.
-disable-model-invocation: true
 ---
 
 # Internal Gateway Simple Task

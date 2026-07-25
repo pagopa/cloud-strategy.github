@@ -1,6 +1,8 @@
 # Internal Gateway Idea Workflow
 
 This workflow defines the canonical contract for `internal-gateway-idea`.
+The delegated core workflow is `/superpowers-brainstorming`; retained-spec
+writing remains with that owner.
 
 ## State Machine
 

@@ -664,9 +664,9 @@ def _frontmatter(path: Path) -> dict[str, object]:
     return parsed
 
 
-def test_skill_and_agent_remain_user_invoked() -> None:
+def test_skill_and_agent_allow_model_invocation() -> None:
     skill_frontmatter = _frontmatter(SKILL_PATH)
     agent_frontmatter = _frontmatter(ROOT_AGENT_PATH)
 
-    assert skill_frontmatter["disable-model-invocation"] is True
-    assert agent_frontmatter["disable-model-invocation"] is True
+    assert skill_frontmatter.get("disable-model-invocation") is not True
+    assert agent_frontmatter.get("disable-model-invocation") is not True

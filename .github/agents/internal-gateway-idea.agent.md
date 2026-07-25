@@ -2,7 +2,6 @@
 name: internal-gateway-idea
 description: "Use this agent when a repository-owned request starts with a vague idea, unclear goal, unresolved option set, or needs substantive definition, convergence, critical challenge, and retained planning before execution."
 tools: ["read", "edit", "search", "execute", "web"]
-disable-model-invocation: true
 agents: []
 handoffs:
   - label: "Next step: Execute retained plan"

@@ -10,46 +10,24 @@ BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-execute-plans"
 SKILL = BUNDLE / "SKILL.md"
 AGENT = BUNDLE / "agents/openai.yaml"
 
-FORBIDDEN_RUNTIME_OWNERS = (
-    "superpowers-executing-plans",
-    "superpowers-subagent-driven-development",
-    "superpowers-verification-before-completion",
-    "superpowers-finishing-a-development-branch",
-    "internal-tdd",
-    "addyosmani-code-simplification",
+REQUIRED_CORE_OWNERS = (
+    "/superpowers-executing-plans",
+    "/internal-tdd",
+    "/superpowers-verification-before-completion",
+    "/addyosmani-code-simplification",
 )
 ALLOWED_STATUSES = ("DONE", "PARTIAL", "BLOCKED", "NEEDS_REVIEW")
 
 
-def test_bundle_has_only_local_runtime_dependencies() -> None:
-    bundle_text = "\n".join(
-        path.read_text()
-        for path in sorted(BUNDLE.rglob("*"))
-        if path.is_file() and path.suffix in {".md", ".yaml", ".py"}
-    )
-    for owner in FORBIDDEN_RUNTIME_OWNERS:
-        assert owner not in bundle_text
-    assert "references/execution-contract.md" in SKILL.read_text()
-    assert "references/status-contract.md" in SKILL.read_text()
-    assert "scripts/plan_execution.py" in SKILL.read_text()
-
-
-def test_skill_defines_the_complete_execution_state_machine() -> None:
-    text = SKILL.read_text()
-    phases = (
-        "Bind plan",
-        "Workspace preflight",
-        "Plan review",
-        "Task preflight",
-        "Test-first gate",
-        "Execution unit",
-        "Task transition",
-        "Plan closeout",
-        "Stop",
-    )
-    positions = [text.index(phase) for phase in phases]
-    assert positions == sorted(positions)
-    assert all(word in text for word in ("Plan-bound", "Evidence-gated", "Fail-fast"))
+def test_bundle_delegates_execution_and_keeps_local_guardrails() -> None:
+    skill = SKILL.read_text(encoding="utf-8")
+    runtime = AGENT.read_text(encoding="utf-8")
+    combined = f"{skill}\n{runtime}"
+    assert all(owner in combined for owner in REQUIRED_CORE_OWNERS)
+    assert "self-contained" not in combined
+    assert "references/execution-contract.md" in skill
+    assert "references/status-contract.md" in skill
+    assert "scripts/plan_execution.py" in skill
 
 
 def test_status_names_and_replacement_scope_are_exact() -> None:
@@ -59,10 +37,9 @@ def test_status_names_and_replacement_scope_are_exact() -> None:
     assert "exact allowed sibling filenames" in text
 
 
-def test_runtime_prompt_projects_the_autonomous_contract() -> None:
-    text = AGENT.read_text()
-    assert "self-contained" in text
+def test_runtime_prompt_projects_the_delegated_contract() -> None:
+    text = AGENT.read_text(encoding="utf-8")
+    assert all(owner in text for owner in REQUIRED_CORE_OWNERS)
     assert "plan fingerprint" in text
     assert "fresh task-level evidence" in text
     assert "no Git mutation" in text
-    assert not any(owner in text for owner in FORBIDDEN_RUNTIME_OWNERS)

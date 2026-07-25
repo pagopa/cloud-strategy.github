@@ -26,9 +26,9 @@ def test_lane_engine_uses_artifact_presence_not_legacy_profiles() -> None:
     assert "extended" not in text.lower()
 
 
-def test_agent_loads_only_the_self_contained_core_skill() -> None:
+def test_agent_loads_gateway_and_allows_model_invocation() -> None:
     text = (
         REPO_ROOT / ".github/agents/internal-gateway-execute-plans.agent.md"
     ).read_text()
     assert "internal-gateway-execute-plans" in text
-    assert "superpowers-" not in text
+    assert "disable-model-invocation: true" not in text

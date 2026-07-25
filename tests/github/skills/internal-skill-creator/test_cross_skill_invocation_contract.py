@@ -37,6 +37,12 @@ CALLED_SKILLS = {
         "internal-gateway-execute-plans",
         "superpowers-writing-plans",
     },
+    "internal-gateway-execute-plans": {
+        "addyosmani-code-simplification",
+        "internal-tdd",
+        "superpowers-executing-plans",
+        "superpowers-verification-before-completion",
+    },
 }
 
 

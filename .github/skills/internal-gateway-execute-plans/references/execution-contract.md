@@ -1,109 +1,49 @@
 # Execution Contract
 
-Detailed operational rules for every execution phase. The main skill file owns the nine-phase sequence and completion conditions; this file owns the operational depth.
+This reference maps repository-local hooks around the delegated
+`/superpowers-executing-plans` loop. It does not duplicate that skill's plan
+review, todo, task execution, or core stop procedure.
 
-## Plan Readiness
+## Before the delegated loop
 
-A plan is ready for execution when it contains at minimum:
+- Require the exact retained plan path under `tmp/superpowers/plans/`.
+- Confirm explicit user approval is present in the current conversation.
+- Compute and record the SHA-256 plan fingerprint with `scripts/plan_execution.py`.
+- Record branch, dirty files, and in-scope overlap before editing.
+- Name the local task dependency set and focused validation command.
+- Preserve the no-Git-mutation rule throughout execution.
 
-- **Goal** — one sentence describing the target outcome.
-- **Repository Preflight** — target, anti-scope, nearest owner, validation path, stop conditions, and observable acceptance criteria.
-- **Global Constraints** — invariants that apply to every task.
-- **Ordered Tasks** — each with explicit files, interfaces, and step-by-step instructions.
+## Before each delegated task
 
-Each task must name:
+- State the task's observable outcome, dependency set, and focused validation.
+- For executable or evaluable behavior, load `/internal-tdd` and establish
+  red-first evidence before the first implementation edit.
+- Keep repository-owned routing, status, fixtures, and approval gates in scope;
+  do not edit imported core skills.
 
-- The files it creates or modifies.
-- The interfaces it consumes and produces.
-- Concrete steps with focused validation commands.
-- A checkable completion condition.
+## After each delegated task
 
-## Workspace Baseline
+- Run the plan-specified focused validation command.
+- Confirm the dependency set no longer asserts the replaced behavior.
+- Retain fresh evidence before transitioning to the next task.
+- If the plan authorizes simplification, `/addyosmani-code-simplification`
+  may be loaded at that task's explicit gate.
 
-Before the first task, record:
+## Pause and resume
 
-- Current branch name.
-- Dirty files relevant to the plan scope.
-- Overlap between plan targets and uncommitted user changes.
-- Affected callers, implementations, tests, and contracts for any interface change.
+- On pause, record the exact status sibling, remaining tasks, validation gap,
+  and next action using `references/status-contract.md`.
+- On resume, run `resume-check` and require the recorded fingerprint to match
+  the retained plan before continuing.
+- If the plan changed after approval, stop and record plan drift until the
+  approval and fingerprint are refreshed.
 
-Preserve this baseline in the status file under `## Workspace Baseline`. Resume must detect drift between the recorded baseline and the current working tree.
+## Closeout
 
-## Plan Review Defect Classes
-
-Raise these before starting execution:
-
-- **Ambiguous target** — the goal or acceptance criteria are unclear.
-- **Missing validation path** — no focused command to verify a task.
-- **Destructive step** — a step that deletes, overwrites, or mutates external state without explicit user approval.
-- **Owner conflict** — a task modifies a file owned by a narrower contract.
-- **Scope creep** — a task introduces work outside the plan's stated target.
-- **Unapproved external dependency** — a task requires a library, tool, or service not already in the stack.
-
-## Task Dependency Set
-
-Before editing, name every artifact the task touches:
-
-- Source files created or modified.
-- Callers of changed functions or interfaces.
-- Implementations of changed contracts.
-- Tests that assert the changed behavior.
-- Documentation that references the changed interface.
-
-After editing, perform a consistency pass across the dependency set. Confirm that no caller, implementation, test, or contract asserts the old behavior.
-
-## Red-Green-Refactor Evidence
-
-For tasks that change executable or evaluable behavior:
-
-1. **Red** — write a failing test that asserts the new behavior. Confirm it fails for the right reason.
-2. **Green** — make the smallest implementation edit that makes the test pass. Confirm all tests in the focused set pass.
-3. **Refactor** — improve the implementation without changing behavior. Confirm all tests still pass.
-
-Pre-code seam exceptions are allowed only when:
-
-- The task is prose-only documentation.
-- The task is mechanical formatting.
-- The task is a behavior-neutral rename.
-- The task is read-only validation.
-- The plan explicitly names the exception and an alternate validation path.
-
-Tests created after implementation count only as regression coverage, not as test-first work.
-
-## Plan Drift
-
-When the plan forces confusing code, duplicated logic, missing validation, owner conflict, or scope drift:
-
-1. Stop execution of the current task.
-2. Record the defect in the status file under `## Reason`.
-3. Write a `PARTIAL` or `BLOCKED` status sibling with the exact evidence needed to resume.
-4. Do not continue with workaround code.
-
-## Approved Destructive Actions
-
-If the plan contains destructive steps (delete, overwrite, mutate external state):
-
-1. Confirm explicit user approval in the current conversation.
-2. Record the approval in the status file under `## Reason`.
-3. Execute the destructive step.
-4. Verify the outcome with a focused validation command.
-
-If approval is not explicit, stop and record the blocker.
-
-## Retry and Fail-Fast
-
-When a focused validation fails:
-
-1. Diagnose the failure from the validator output.
-2. Make the smallest fix that addresses the root cause.
-3. Rerun the focused validation.
-4. If the failure repeats three times without improvement, stop and record the blocker.
-
-Do not retry by widening the change set. Do not retry by skipping the validation.
-
-## Task Validator vs. Broader Plan Validation
-
-- **Task validator** — a focused command that verifies the current task's observable outcome. Run this before marking the task complete.
-- **Broader plan validation** — a comprehensive check that verifies the entire plan's acceptance criteria. Run this before claiming `DONE`.
-
-A task cannot become complete without fresh task-validator evidence. A plan cannot become `DONE` without fresh broader-validation evidence. A final broad check does not retroactively validate skipped task gates.
+- Run all broader validation required by the retained plan.
+- Load `/superpowers-verification-before-completion` before claiming completion.
+- Run `git diff --check` and verify no Git mutation was performed.
+- Replace older status siblings for the same plan basename and write exactly
+  one allowed status sibling.
+- Run `completion-check` only when every task and broader check has fresh
+  passing evidence.
