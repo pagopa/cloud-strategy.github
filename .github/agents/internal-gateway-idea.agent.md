@@ -5,9 +5,9 @@ tools: ["read", "edit", "search", "execute", "web"]
 disable-model-invocation: true
 agents: []
 handoffs:
-  - label: "Next step: Execute compact plan"
+  - label: "Next step: Execute retained plan"
     agent: "internal-gateway-execute-plans"
-    prompt: "Execute only the approved compact retained plan left by the idea definition above. Verify the plan declares `Recommended consumer: internal-gateway-execute-plans`."
+    prompt: "Execute only the approved retained plan under tmp/superpowers/plans/ left by the idea definition above. Verify the plan path is exact and the user has approved execution."
     send: false
   - label: "Next step: Pressure-test decision"
     agent: "internal-gateway-critical-master"

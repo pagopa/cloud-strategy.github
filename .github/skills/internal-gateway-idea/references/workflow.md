@@ -33,13 +33,15 @@ flowchart TD
     M -- narrow --> J
     M -- continue --> N[Spec vs plan decision]
     N --> O{Decision}
-    O -- spec first --> P[Ask approval for retained spec path]
-    O -- direct plan --> Q[Ask approval for direct plan path]
-    P --> R{Approved?}
-    Q --> R
-    R -- no --> N
-    R -- yes --> S[Load internal-gateway-writing-plans]
-    S --> T[Writing outcome only]
+    O -- spec first --> P1[Write retained spec in brainstorming]
+    P1 --> P2[Self-review]
+    P2 --> P3[User reviews retained spec]
+    P3 --> P4[Approve implementation-plan writing]
+    P4 --> P5[Load internal-gateway-writing-plans]
+    O -- direct plan --> Q1[Approve implementation-plan writing]
+    Q1 --> Q2[Load internal-gateway-writing-plans]
+    P5 --> T[Writing outcome only]
+    Q2 --> T
     T --> U[Stop before implementation execution]
 ```
 
@@ -49,7 +51,7 @@ flowchart TD
 | --- | --- | --- |
 | `Specialization Checkpoint: gated` | Use when the incoming ask is already a file edit, command run, validator run, implementation step, or other execution-shaped request. Name the later execution owner only as a future consequence. | Do not execute, hand off, or present the post-critical recommendation. |
 | `Skipped-gate recovery` | Stop the current lane, name the first skipped mandatory gate, mark downstream artifacts draft-only, and resume at that gate. | Do not continue from an invalid later state or ask the user to approve a handoff built on skipped gates. |
-| `Idea Gate 0` | Confirm the recovered intent, defaults, constraints, success criteria, validation path, and anti-scope internally; render one compact user-facing decision card; evidence cannot replace Idea Gate 0. | Do not treat repository evidence alone as user approval, and do not proceed to challenge, alternatives, design, or planning until this gate is accepted. |
+| `Idea Gate 0` | Confirm the recovered intent, defaults, constraints, success criteria, validation path, and anti-scope internally; render all currently known unresolved questions in one numbered bulk question block with `Question`, `Recommendation`, `Why`, and `Default if accepted`; evidence cannot replace Idea Gate 0. | Do not treat repository evidence alone as user approval, and do not proceed to challenge, alternatives, design, or planning until this gate is accepted. |
 | `External Research Checkpoint` | Skip unless local evidence is insufficient and one external fact could change feasibility, approach, constraints, or risk. When needed, load `mattpocock-research` on-demand with one bounded question, write one Markdown report under `tmp/research/`, and return only decision-relevant conclusions. | Do not preload the research skill, copy its research procedure, run generic best-practice research, or start a second research pass automatically. |
 | `Assumption Challenge Gate` | Test whether the proposed target or solution is necessary before choosing an approach. | Do not only polish the user's proposed solution. |
 | `Alternative discovery` | Present 2-3 approaches and explain why the recommended one beats the strongest rejected option. | Do not present a single-path design as inevitable. |
@@ -72,13 +74,14 @@ flowchart TD
 
 Keep the agent filename, frontmatter name, and workflow aligned.
 
-The state-machine labels are internal workflow state. Normal chat emits one compact user-facing decision card and never dumps the state-machine trace.
+The state-machine labels are internal workflow state. Normal chat emits one compact user-facing decision card for status, approval, routing, material risk, blocker, and requested user action, and never dumps the state-machine trace.
+Content-bearing output uses its owning schema and is outside the four-line card limit. Guided questions, alternatives, design sections, and required critique schemas are content-bearing output.
 Use 🎯 for a goal, 🧭 for a decision, 🛠️ for a proposed change, 🧪 for validation, ⚠️ for a material risk or blocker, ✅ for a recommendation or result, 💡 for a short reason, and ✈️ for a requested user action.
 Skipped checkpoints remain silent. Material risks, blockers, validation gaps,
 and user decisions remain visible.
 
 ## Local validation lane
 
-Run `python3 scripts/audit_workflow.py` or `make internal-gateway-idea-fast-check` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.
+Run `python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py` or `make internal-gateway-idea-fast-check` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.
 
 The checkpoint must use one bounded research question; do not start a second research pass automatically.

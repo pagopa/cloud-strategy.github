@@ -20,6 +20,7 @@ SCRIPT_PATH = (
 MANDATORY_SEQUENCE = [
     "Specialization Checkpoint: gated",
     "Idea Gate 0",
+    "External Research Checkpoint",
     "Assumption Challenge Gate",
     "Alternative discovery",
     "Critical Challenge Gate",
@@ -43,6 +44,19 @@ def test_bundle_docs_reference_the_scoped_fast_lane() -> None:
     assert "make internal-gateway-idea-fast-check" in WORKFLOW_PATH.read_text()
 
 
+def test_runtime_prompt_keeps_the_full_mandatory_gate_sequence() -> None:
+    _assert_in_order(AGENT_PATH.read_text(), MANDATORY_SEQUENCE)
+
+
+def test_bundle_docs_use_repository_root_validation_commands() -> None:
+    root_command = (
+        "python3 "
+        ".github/skills/internal-gateway-idea/scripts/audit_workflow.py"
+    )
+    assert root_command in SKILL_PATH.read_text()
+    assert root_command in WORKFLOW_PATH.read_text()
+
+
 def test_audit_workflow_reports_extended_contract_status() -> None:
     result = subprocess.run(
         [sys.executable, str(SCRIPT_PATH)],
@@ -61,6 +75,8 @@ def test_audit_workflow_reports_extended_contract_status() -> None:
     assert payload["markers"]["runtime_core_markers"] is True
     assert payload["markers"]["local_fast_lane_documented"] is True
     assert payload["markers"]["compact_chat_projection"] is True
+    assert payload["markers"]["runtime_gate_sequence"] is True
+    assert payload["markers"]["runtime_research_checkpoint"] is True
 
 
 def test_idea_bundle_has_compact_user_facing_projection() -> None:
@@ -92,7 +108,28 @@ def test_idea_projection_hides_non_decision_bookkeeping() -> None:
     assert "Do not announce skipped checkpoints" in skill_text
     assert "Do not print the internal gate ledger" in skill_text
     assert "four content lines" in skill_text
-    assert "one unresolved decision at a time" in skill_text
+
+
+def test_idea_gate_preserves_bulk_questions_and_scopes_compact_cards() -> None:
+    skill_text = SKILL_PATH.read_text()
+    workflow_text = WORKFLOW_PATH.read_text()
+    runtime_text = AGENT_PATH.read_text()
+
+    required = [
+        "numbered bulk question block",
+        "Question",
+        "Recommendation",
+        "Why",
+        "Default if accepted",
+        "content-bearing output",
+    ]
+    for text in (skill_text, workflow_text, runtime_text):
+        for marker in required:
+            assert marker in text
+
+    assert "one unresolved decision at a time" not in skill_text
+    assert "one unresolved decision at a time" not in workflow_text
+    assert "one unresolved decision at a time" not in runtime_text
 
 
 def test_external_research_checkpoint_is_lazy_and_skill_owned() -> None:
@@ -135,8 +172,8 @@ def test_external_research_checkpoint_sits_between_idea_and_challenge() -> None:
 
 
 def test_external_research_checkpoint_has_bounded_outcomes() -> None:
-    skill_text = SKILL_PATH.read_text()
-    workflow_text = WORKFLOW_PATH.read_text()
+    skill_text = SKILL_PATH.read_text(encoding="utf-8")
+    workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
 
     outcomes = [
         "skip",
@@ -149,3 +186,30 @@ def test_external_research_checkpoint_has_bounded_outcomes() -> None:
     for marker in outcomes:
         assert marker in skill_text
         assert marker in workflow_text
+
+
+def test_spec_is_written_and_reviewed_before_plan_gateway_handoff() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    assert "Retained spec writing stays with `superpowers-brainstorming`" in skill
+    _assert_in_order(
+        workflow,
+        [
+            "Write retained spec",
+            "User reviews retained spec",
+            "Approve implementation-plan writing",
+            "Load internal-gateway-writing-plans",
+        ],
+    )
+
+
+def test_writing_gateway_is_only_an_implementation_plan_owner() -> None:
+    surfaces = (
+        SKILL_PATH.read_text(encoding="utf-8"),
+        WORKFLOW_PATH.read_text(encoding="utf-8"),
+        AGENT_PATH.read_text(encoding="utf-8"),
+    )
+    for text in surfaces:
+        assert "internal-gateway-writing-plans" in text
+        assert "retained spec or implementation-plan writing" not in text
+    assert "implementation-plan writing" in surfaces[0]
