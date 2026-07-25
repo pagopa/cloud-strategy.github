@@ -2,7 +2,7 @@ version: 1
 sources:
   github-awesome-copilot:
     repository: https://github.com/github/awesome-copilot.git
-    ref: e986f49695491311df2774030ebe11efabd0fb77
+    ref: aa280f28b1b73f9b6e6917b607eb92127b67b419
     assets:
       - upstream: skills/agentic-eval
         local: .github/skills/awesome-copilot-agentic-eval
@@ -36,7 +36,7 @@ sources:
         canonical_name: awesome-copilot-security-review
   obra-superpowers:
     repository: https://github.com/obra/superpowers.git
-    ref: d884ae04edebef577e82ff7c4e143debd0bbec99
+    ref: 3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9
     assets:
       - upstream: skills/brainstorming
         local: .github/skills/superpowers-brainstorming
@@ -79,7 +79,7 @@ sources:
         canonical_name: superpowers-writing-plans
   hashicorp-agent-skills:
     repository: https://github.com/hashicorp/agent-skills.git
-    ref: 339a113935812ad75c6ff90d418b739a021826d1
+    ref: 8c6573abbd21e8094fab8f538eb5f97db63133fd
     assets:
       - upstream: terraform/code-generation/skills/terraform-search-import
         local: .github/skills/terraform-terraform-search-import
@@ -89,7 +89,7 @@ sources:
         canonical_name: terraform-terraform-test
   mattpocock-skills:
     repository: https://github.com/mattpocock/skills.git
-    ref: efa058a349f5ce98b6115bf8b4e0d0ef9c310e0d
+    ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
     rewrite_skill_references: true
     skill_reference_aliases:
       grilling: grill-me
@@ -129,7 +129,7 @@ sources:
         canonical_name: mattpocock-writing-great-skills
   vercel-labs-skills:
     repository: https://github.com/vercel-labs/skills.git
-    ref: 4ce6d48ac44c8b637db87b2102fea3baca719df1
+    ref: e173b8c88f2581cfdaa1b6767c6519a08155790e
     assets:
       - upstream: skills/find-skills
         local: .github/skills/vercel-find-skills
@@ -152,24 +152,14 @@ sources:
         canonical_name: openai-pdf
   openai-skills-retained-doc:
     repository: https://github.com/openai/skills.git
-    ref: 45d05d75363abf13f99d09e899d61e07b8010685
+    ref: 49f948faa9258a0c61caceaf225e179651397431
     assets:
-      - upstream: skills/.curated/doc
+      - upstream: skills/.curated/openai-docs
         local: .github/skills/openai-docx
         canonical_name: openai-docx
-  openai-skills-retained-office:
-    repository: https://github.com/openai/skills.git
-    ref: e6afb0d74cc75d220df2faf3dd6c635c2dc6a108
-    assets:
-      - upstream: skills/.curated/spreadsheet
-        local: .github/skills/openai-spreadsheet
-        canonical_name: openai-spreadsheet
-      - upstream: skills/.curated/slides
-        local: .github/skills/openai-slides
-        canonical_name: openai-slides
   sickn33-antigravity:
     repository: https://github.com/sickn33/antigravity-awesome-skills.git
-    ref: 8946c6cdc8468183426d52f85054639b3e1844ae
+    ref: e66fc833f2022c3534ba74af835db14c34f9a732
     assets:
       - upstream: skills/api-design-principles
         local: .github/skills/antigravity-api-design-principles
@@ -194,7 +184,7 @@ sources:
         canonical_name: antigravity-network-engineer
   addyosmani-agent-skills:
     repository: https://github.com/addyosmani/agent-skills.git
-    ref: 0e63d8ea962ecac51637421d8fff63702fac766b
+    ref: ff2df4c07e7836a092ed28e1e9b42f4d6009280c
     assets:
       - upstream: skills/code-simplification
         local: .github/skills/addyosmani-code-simplification

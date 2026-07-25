@@ -139,7 +139,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 54
+    assert len(manifest.assets) == 52
     assert len(manifest.watchlist) == 13
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"

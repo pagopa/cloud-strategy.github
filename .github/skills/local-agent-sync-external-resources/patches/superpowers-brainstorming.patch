@@ -3,16 +3,16 @@ index ddfb2c4..47afc6e 100644
 --- a/.github/skills/superpowers-brainstorming/SKILL.md
 +++ b/.github/skills/superpowers-brainstorming/SKILL.md
 @@ -7,7 +7,7 @@ description: "You MUST use this before any creative work - creating features, bu
- 
+
  Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
- 
+
 -Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 +Start by understanding the current project context, then Ask clarifying questions in numbered bulk question blocks. Each question must include a short recommendation, a short reason for that recommendation, and the default that will be treated as accepted when the user accepts the suggestions. Once you understand what you're building, decide whether a retained spec adds real design value or whether moving directly to an implementation plan is the better next step.
- 
+
  <HARD-GATE>
  Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 @@ -23,34 +23,38 @@ You MUST create a task for each of these items and complete them in order:
- 
+
  1. **Explore project context** — check files, docs, recent commits
  2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 -3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
@@ -28,9 +28,9 @@ index ddfb2c4..47afc6e 100644
 +8. **Spec self-review when needed** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 +9. **User reviews written spec when needed** — ask user to review the spec file before proceeding
 +10. **Transition to implementation planning** — invoke writing-plans skill after the user approves either the design or the direct-plan recommendation
- 
+
  ## Process Flow
- 
+
  ```dot
  digraph brainstorming {
      "Explore project context" [shape=box];
@@ -44,7 +44,7 @@ index ddfb2c4..47afc6e 100644
      "Spec self-review\n(fix inline)" [shape=box];
      "User reviews spec?" [shape=diamond];
      "Invoke writing-plans skill" [shape=doublecircle];
- 
+
 -    "Explore project context" -> "Ask clarifying questions";
 -    "Ask clarifying questions" -> "Propose 2-3 approaches";
 +    "Explore project context" -> "Ask bulk clarifying questions";
@@ -62,12 +62,12 @@ index ddfb2c4..47afc6e 100644
 @@ -58,7 +62,7 @@ digraph brainstorming {
  }
  ```
- 
+
 -**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
 +**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans. The path to writing-plans may be either `Decision: direct plan` or `Decision: spec first`.
- 
+
  ## The Process
- 
+
 @@ -67,9 +71,13 @@ digraph brainstorming {
  - Check out the current project state first (files, docs, recent commits)
  - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
@@ -82,12 +82,20 @@ index ddfb2c4..47afc6e 100644
 +- Accepted defaults do not mean discovery is complete. If the accepted answers create contradictions, weak assumptions, unresolved risks, or dependent decisions, ask another focused numbered bulk question block.
 +- Ask another focused numbered bulk question block only for unresolved, dependent, or reopened branches. Do not ask questions that project evidence can answer.
  - Focus on understanding: purpose, constraints, success criteria
- 
+
  **Exploring approaches:**
-@@ -86,6 +94,23 @@ digraph brainstorming {
+@@ -77,7 +85,6 @@
+ - Propose 2-3 different approaches with trade-offs
+ - Present options conversationally with your recommendation and reasoning
+ - Lead with your recommended option and explain why
+-- YAGNI ruthlessly - remove unnecessary features from every approach and design
+
+ **Presenting the design:**
+
+@@ -87,6 +94,23 @@
  - Cover: architecture, components, data flow, error handling, testing
  - Be ready to go back and clarify if something doesn't make sense
- 
+
 +**Design-Depth Gate:**
 +
 +Before writing a retained spec, decide whether the spec has meaningful marginal value over going directly to an implementation plan.
@@ -106,12 +114,12 @@ index ddfb2c4..47afc6e 100644
 +Ask for user approval before invoking writing-plans. Direct plan skips the retained spec, not the user approval gate.
 +
  **Design for isolation and clarity:**
- 
+
  - Break the system into smaller units that each have one clear purpose, communicate through well-defined interfaces, and can be understood and tested independently
 @@ -103,10 +128,11 @@ digraph brainstorming {
- 
+
  **Documentation:**
- 
+
 -- Write the validated design (spec) to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
 +- Write the validated design (spec) to chat by default
 +- Persist it to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md` only when `Decision: spec first` is chosen and the user explicitly wants a retained file
@@ -119,28 +127,33 @@ index ddfb2c4..47afc6e 100644
  - Use elements-of-style:writing-clearly-and-concisely skill if available
 -- Commit the design document to git
 +- Never commit files from `tmp/`
- 
+
  **Spec Self-Review:**
  After writing the spec document, look at it with fresh eyes:
-@@ -121,18 +147,18 @@ Fix any issues inline. No need to re-review — just fix and move on.
+@@ -122,15 +147,24 @@
  **User Review Gate:**
  After the spec review loop passes, ask the user to review the written spec before proceeding:
- 
+
 -> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
 +> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
- 
+
  Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
- 
+
  **Implementation:**
- 
+
 -- Invoke the writing-plans skill to create a detailed implementation plan
 +- Invoke the writing-plans skill to create a detailed implementation plan after the user approves either `Decision: direct plan` or the reviewed spec
  - Do NOT invoke any other skill. writing-plans is the next step.
- 
- ## Key Principles
- 
--- **One question at a time** - Don't overwhelm with multiple questions
+
++## Key Principles
++
 +- **Bulk guided question blocks** - Ask the full known question set together, with recommendations, reasons, and defaults
- - **Multiple choice preferred** - Easier to answer than open-ended when possible
- - **YAGNI ruthlessly** - Remove unnecessary features from all designs
- - **Explore alternatives** - Always propose 2-3 approaches before settling
++- **Multiple choice preferred** - Easier to answer than open-ended when possible
++- **YAGNI ruthlessly** - Remove unnecessary features from all designs
++- **Explore alternatives** - Always propose 2-3 approaches before settling
++- **Incremental validation** - Present design, get approval before moving on
++- **Be flexible** - Go back and clarify when something doesn't make sense
++
+ ## Visual Companion
+
+ A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.

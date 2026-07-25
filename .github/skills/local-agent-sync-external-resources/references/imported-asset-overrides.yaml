@@ -37,34 +37,6 @@ overrides:
   baseline_repo_commit: efa058a
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     an internal wrapper should replace the override.
-- id: openai-spreadsheet-structured-data-evidence-budget
-  target_path: .github/skills/openai-spreadsheet/SKILL.md
-  source_family: openai/skills
-  lifecycle_mode: post-refresh-patch
-  apply_strategy: git-apply-3way
-  approval: explicit-user-counter-validated
-  reason: Preserve the repository-specific structured-data evidence budget so CSV,
-    TSV, and XLSX work stays low-token without weakening full-file integrity checks
-    after an imported office-skill refresh.
-  patch_path: patches/openai-spreadsheet.patch
-  expected_content_hash: f42e8ea1128c448a7ccaa42b2ca39540c5b9109a7e6e6ee4abf4e3e5e4a80722
-  baseline_repo_commit: e6afb0d
-  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
-    an internal wrapper should replace the override.
-- id: openai-docx-executable-renderer
-  target_path: .github/skills/openai-docx/scripts/render_docx.py
-  source_family: openai/skills
-  lifecycle_mode: post-refresh-patch
-  apply_strategy: git-apply
-  approval: explicit-user-counter-validated
-  reason: Preserve a valid executable entrypoint for the bundled DOCX renderer
-    so repository pre-commit validation does not fail after a retained office-skill
-    refresh.
-  patch_path: patches/openai-docx-render-docx.patch
-  expected_content_hash: b6b1c18d5a46d81d161a57e84947ad7b2941f8095f1d52fbfe1a2c57585d7a3a
-  baseline_repo_commit: 45d05d7
-  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
-    the retained support-only skill should instead stop shipping an executable renderer.
 - id: superpowers-brainstorming-guided-plan-gate
   target_path: .github/skills/superpowers-brainstorming/SKILL.md
   source_family: obra/superpowers
