@@ -19,7 +19,7 @@ safety to standalone script behavior.
 
 ## When to use
 
-- `.sh` files and Bash snippets where the main need is a shared safety baseline.
+- Sourced `.sh` helpers and Bash snippets where the main need is a shared safety baseline.
 - Shell embedded in repository automation when no narrower owner has stronger rules.
 - Non-operator Bash helpers that do not own a standalone operator entrypoint.
 - Quick checks for quoting, strict mode, guard clauses, temp files, and parser choices.

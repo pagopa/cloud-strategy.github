@@ -27,7 +27,14 @@ main() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --target) target="${2:?❌ --target requires a value}"; shift 2 ;;
+      --target)
+        [[ $# -ge 2 && "$2" != -* ]] || {
+          log_error "--target requires a value"
+          exit 1
+        }
+        target="$2"
+        shift 2
+        ;;
       --help) usage; exit 0 ;;
       *) log_error "Unknown option: $1"; usage; exit 1 ;;
     esac
@@ -53,10 +60,18 @@ main "$@"
 ```bash
 DEFAULT_SCOPE="repo"
 SCOPE="$DEFAULT_SCOPE"
+DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --scope)  SCOPE="${2:?❌ --scope requires a value}"; shift 2 ;;
+    --scope)
+      [[ $# -ge 2 && "$2" != -* ]] || {
+        log_error "--scope requires a value"
+        exit 1
+      }
+      SCOPE="$2"
+      shift 2
+      ;;
     --dry-run) DRY_RUN=true; shift ;;
     --help)   usage; exit 0 ;;
     *)        log_error "Unknown option: $1"; usage; exit 1 ;;
