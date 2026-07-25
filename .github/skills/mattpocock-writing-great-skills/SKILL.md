@@ -1,7 +1,6 @@
 ---
 name: mattpocock-writing-great-skills
-description: Reference for writing and editing skills well — the vocabulary and principles that make a skill predictable.
-disable-model-invocation: true
+description: Predictability review and revision stage applied after authoring. Loaded by internal-skill-creator after the Anthropic authoring stage when delegating skill work.
 ---
 
 A skill exists to wrangle determinism out of a stochastic system. **Predictability** — the agent taking the same _process_ every run, not producing the same output — is the root virtue; every lever below serves it.

@@ -1,181 +1,62 @@
 ---
 name: internal-skill-creator
-description: Use when creating, splitting, replacing, or materially revising a repository-owned skill under `.github/skills/`, including trigger, boundary, validation, bundle anatomy, and structural decisions.
+description: Use when creating, splitting, replacing, or materially revising a repository-owned skill under `.github/skills/`.
 ---
 
 # Internal Skill Creator
 
 ## Referenced skills
 
-This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to. Keep it current before changing downstream wording. Self-references to `internal-skill-creator` identify this current skill and are not a dependency.
-
-- `anthropic-skill-creator`: loaded only when the user explicitly requests Anthropic or Claude methodology, compatibility, or comparison. This imported skill has `disable-model-invocation: true` and is called directly from this repository-owned owner; it may not override repository-local policy.
-- `local-agent-sync-external-resources`: catalog-governance operating engine behind the local sync command center when work becomes sync-managed catalog maintenance, external refresh, or inventory-wide keep/update/extract/retire decisions.
-- `internal-agent-creator`: repository-owned agent authoring and agent/skill boundary rewrites.
-
-Use this skill as the canonical repository-owned first entrypoint for skill authoring in this repository.
-
-Keep the ownership model explicit:
-
-- `internal-skill-creator` is the canonical local owner for repository-owned `.github/skills/` work.
-- This skill owns the full lifecycle: prove the need, choose reuse versus creation, keep triggers retrieval-safe, harden the result against rationalization and boundary drift, manage bundle anatomy, reusable resources, `agents/openai.yaml`, initialization workflow, and structural validation.
-
-Treat skill self-containment as a default local quality gate: when creating or
-materially revising a skill, prefer a bundle that can be understood, copied,
-and validated from its own directory without depending on instructions,
-examples, or the only runnable automation living elsewhere in the repository.
-
-Use `local-agent-sync-external-resources` through `local-sync-external-resources` when the task is broader catalog governance, sync-managed external assets, or inventory-wide retirement and refresh work.
-
-Use `internal-agent-creator` when the primary output is an agent change or an agent/skill boundary rewrite.
-
-## Read first
-
-- Read the target `SKILL.md` plus the nearest competing skills that could already own the request.
-- Read root `AGENTS.md` and `.github/copilot-instructions.md` before changing repository-owned scope or policy language.
-- Read `.github/INVENTORY.md` when a skill may be added, retired, renamed, or replaced.
-- Load `references/writing-skills-checklist.md` when creating a new skill or materially revising an existing one.
-- Load `references/script-output-contract.md` when a skill introduces or materially revises scripts, CLIs, or deterministic automation.
-- Confirm the target `SKILL.md` has an up-to-date `## Referenced skills` section immediately after the H1 before finalizing a new or materially revised skill.
-- Inventory the touched bundle itself before widening scope: `SKILL.md`,
-  `agents/openai.yaml`, existing `references/`, `scripts/`, `assets/`, and
-  `fixtures/` if present.
+- `anthropic-skill-creator`: authoring and proportional evaluation stage for repository-owned skill work.
+- `mattpocock-writing-great-skills`: predictability review and revision stage applied after authoring.
+- `local-agent-sync-external-resources`: catalog-governance sync for broader external-asset or inventory-wide work.
+- `internal-agent-creator`: agent authoring and agent/skill boundary rewrites.
 
 ## When to use
 
 - Creating a new repository-owned skill under `.github/skills/`.
-- Replacing or splitting an existing repository-owned skill whose current boundary is wrong.
-- Materially revising a repository-owned skill's scope, trigger, structure, bundled resources, or validation.
-- Tightening a skill whose description is too broad, too procedural, or too weak to retrieve reliably.
+- Replacing or splitting an existing repository-owned skill whose boundary is wrong.
+- Materially revising a repository-owned skill's scope, trigger, structure, or validation.
 
 ## When not to use
 
-- The task is catalog governance, inventory maintenance, or sync routing. Use `local-agent-sync-external-resources` through `local-sync-external-resources` instead.
-- The task is primarily agent authoring or agent/skill architecture. Use `internal-agent-creator` instead.
-- The task is outside `.github/skills/` or does not change a repository-owned skill.
-- The existing skill already covers the need and the change is a pure copyedit that does not affect retrieval, boundary, validation, or bundle structure.
+- Catalog governance, inventory maintenance, or sync routing. Use `local-agent-sync-external-resources`.
+- Agent authoring or agent/skill boundary rewrites. Use `internal-agent-creator`.
+- Pure copyedit that does not affect retrieval, boundary, validation, or bundle structure.
 
-## Division of labor
+## Preflight
 
-This skill owns the full lifecycle for repository-owned `.github/skills/` work:
-
-- decide whether the task really belongs to a repository-owned skill in this repository
-- choose no-op, reuse, revise in place, split, replace, or retire
-- define the local ownership boundary and trigger wording
-- enforce bundle self-containment for created or materially revised skills
-- enforce the failing-baseline rule, token discipline, and skill-type testing expectations
-- re-check routing fallout in nearby repository-owned assets
-- scaffold or normalize the bundle shape
-- handle reusable-resource anatomy for `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
-- provide initializer, metadata-generation, and structural-validation workflow
-
-## Trigger precedence
-
-- For any repository-owned skill work under `.github/skills/`, use `internal-skill-creator`.
-- If both this skill and another skill appear relevant, prefer this skill because its description is the repo-local route.
-
-## Decision gate
-
-| Situation | Best answer |
-| --- | --- |
-| Wording cleanup with no change to retrieval, owner, or validation | Update in place or do nothing |
-| Same owner, but weak trigger/body/validation is causing misses | Revise the existing skill |
-| One skill is handling two intents or colliding with another local owner | Split, replace, or retire the weaker skill |
-| The change affects multiple skills, inventory meaning, or sync-managed assets | Use `local-agent-sync-external-resources` through `local-sync-external-resources` |
-
-## Core rules
-
-- Start by checking whether an existing repository-owned skill can be reused, narrowed, or updated in place.
-- Do not create a new skill until you can state the concrete failure, ambiguity, or repeated authoring miss it must prevent.
-- Require a baseline failure before a new or materially revised skill is accepted. If the undesired behavior has not been observed, the case is not ready.
-- Check frontmatter integrity before debating trigger wording. Broken frontmatter is a structural failure, not a content-polish issue.
-- Review the nearest competing skills before editing. Retrieval quality is judged against neighboring owners, not in isolation.
-- Prefer the smallest change that fixes the local problem.
-- Make descriptions searchable with concrete terms people would actually type: skill, trigger, `.github/skills/`, `SKILL.md`, create, replace, revise, update, reuse, validation.
-- Use active, searchable naming when creating a new skill. Prefer direct verbs or action-shaped names over abstract labels when that improves retrieval.
-- A good outcome may be reuse, narrowing, deletion, or replacement. Do not let the workflow bias toward creating another skill.
-- Every repository-owned `SKILL.md` this skill creates or materially revises must keep `## Referenced skills` immediately after the H1 as an audit index, not a preload list.
-- In `## Referenced skills`, list every other skill the file asks the agent to load, route to, compare against, or delegate to; use `- None.` only when no other skill is referenced.
-- Update `## Referenced skills` whenever adding, removing, renaming, or repairing a skill reference. Treat stale or missing skill names as validation failures.
-- When a referenced-skill rule changes, verify the touched skill against nearby skills that cite it or that it cites, so the index remains a lazy routing contract instead of drifting into preload wording.
-- In `SKILL.md`, reference another skill by name and behavior only. Do not cite file paths inside another skill bundle; those files are private to the owning skill and may change.
-- In source-side skill Markdown, cite only paths that exist on disk in the source repository. When sync materializes a target-only file, prefer the source template path or descriptive prose over the consumer-only materialized path.
-- When a skill introduces or materially revises scripts, load `references/script-output-contract.md`; keep operator presentation distinct from the JSON machine contract and preserve compact decision evidence.
-
-For trigger-wording, token-discipline, loophole, and skill-type test detail, enforce `references/writing-skills-checklist.md`.
-
-## Baseline evidence
-
-- Iron law: no new skill and no material skill edit without a failing baseline first.
-- Accept concrete local evidence such as a failed retrieval, repeated review feedback, trigger overlap, weak discovery wording, stale validation expectations, or a documented miss in `tmp/superpowers/`.
-- Reject vague justification such as "this feels reusable", "the repo might need it later", or "the text looks light".
+1. Read the target `SKILL.md` and the nearest competing skills.
+2. Read `AGENTS.md` before changing repository-owned scope or policy.
+3. Read `.github/INVENTORY.md` when a skill may be added, retired, renamed, or replaced.
+4. Inventory the touched bundle: `SKILL.md`, `agents/openai.yaml`, `references/`, `scripts/`, `assets/`.
 
 ## Workflow
 
-1. Prove the need first.
-   Record the baseline failure, ambiguity, or repeated authoring miss the skill must prevent.
-2. Reject the weakest answer.
-   Prefer reuse, tightening an existing trigger, or doing nothing when the evidence does not justify a new repository-owned owner.
-3. Set the boundary before writing.
-   Decide what this skill owns locally and which adjacent owner should win when the task is really sync governance, agent authoring, or another domain.
-4. Plan the bundle.
-   Identify reusable resources for `scripts/`, `references/`, `assets/`, and `agents/openai.yaml`.
-5. Enforce bundle locality.
-   Repair repo-rooted self-references, missing bundle-local examples, and any
-   external-only operating engine that would break a copied-out skill.
-6. Scaffold and implement.
-   Create or update the skill bundle with proper frontmatter, `agents/openai.yaml`, and reusable resources.
-7. Tighten trigger and discipline.
-   Use `references/writing-skills-checklist.md` to tighten trigger wording, token discipline, loophole closure, and test design.
-8. Validate.
-   Run structural validation, then check retrieval quality plus skill-type behavior before treating the skill as done.
-9. Re-check routing fallout.
-   Update nearby references or paired agent text only when the visible local entrypoint or ownership meaning actually changed.
+### 1. Anthropic authoring
 
-Use `references/writing-skills-checklist.md` for the anti-rationalization rules, token-discipline reminders, and skill-type testing expectations.
+Load `anthropic-skill-creator` and run the authoring stage. Run only the
+applicable evaluation branches for the current task; record every omitted
+branch and its reason. Produce a draft with evidence: draft, evidence, blockers, and completion status for each evaluation branch.
 
-## Validation
+Exit criteria: the draft exists with applicable evaluation branches assessed,
+skipped branches and reasons recorded, and completion status stated.
 
-- Automated: `python3 ./.github/scripts/validate_internal_skills.py --skill <name>` (covers name match, description trigger-first, openai.yaml shape, local-reference existence, cross-skill-file-reference absence, body line count, inline-template density). Remaining checks below are manual.
+### 2. Predictability review
 
-Then confirm:
+Load `mattpocock-writing-great-skills` and use its vocabulary to revise the draft.
+Apply all relevant rules. Check invocation, description, information hierarchy,
+retrieval quality, and predictability. Detect duplication, sediment, no-op, and predictability failures. Revise the draft in place; do not merely report findings.
 
-- `name:` matches the folder name exactly.
-- `agents/openai.yaml` exists and still matches the skill's current purpose when bundle metadata was part of the task.
-- the skill is repository-owned and still the smallest credible answer to the problem.
-- any touched script contract has a named consumer, bounded deterministic output, explicit compact evidence, and no speculative serialization
-- the top-level `## Referenced skills` section exists immediately after the H1 for any created or materially revised `SKILL.md`.
-- every non-`None` referenced-skill entry maps to a real repository skill or an explicitly justified external/on-demand skill.
-- the referenced-skill index matches all skill names used later for loading, routing, comparison, or delegation.
-- referenced-skill wording agrees with nearby skills that cite or are cited by the touched skill, and no entry implies eager loading unless the active contract explicitly requires it.
-- the description matches the real trigger without describing the workflow.
-- the description is strong enough that repository-owned skill requests should retrieve this skill reliably.
-- the result makes rejection, reuse, and in-place tightening as natural as creation or replacement.
-- the skill still points to the right adjacent owner when the work is actually catalog governance or agent authoring.
-- the skill reads like a reusable guide instead of a one-off narrative.
-- the edited skill does not repeat agent-owned routing or boundary language.
-- the edited skill points to reference-owned deep material instead of copying it back into `SKILL.md`.
-- the edited `SKILL.md` does not point at another skill's internal files.
-- the touched bundle is self-contained by default: required instructions,
-  examples, fixtures, metadata, and deterministic automation are bundle-local,
-  or any exception is explicit and justified by the contract.
-- self-references inside the touched bundle use bundle-relative paths unless a
-  different path shape is required by the contract.
-- any paired agent or local references still agree with the skill boundary when they exist.
-- when direct-copy portability or out-of-repo execution is part of the skill contract, the bundle still contains the required runnable automation and repository scripts do not become the only operating engine.
-- the retrieval and pressure tests appropriate to the skill type have actually been run.
+Exit criteria: the draft has been revised with all applicable predictability
+rules applied and the changes are traceable to specific rules.
 
-## Repository follow-up
+### 3. Repository closure
 
-- Update nearby routing or support-skill references when this skill changes the visible local entrypoint.
-- Re-check `.github/INVENTORY.md` whenever a repository-owned skill is added, retired, renamed, or replaced.
-- Escalate to `local-agent-sync-external-resources` through `local-sync-external-resources` when the change becomes catalog governance instead of one-skill authoring.
+1. Update `agents/openai.yaml` to match the revised skill purpose.
+2. Run `python3 .github/scripts/validate_internal_skills.py --skill <name> --strict`.
+3. Check routing fallout in nearby skills and agents.
+4. Record before/after line and word counts for the touched bundle.
 
-## Common mistakes
-
-- Writing a skill because a request feels familiar, not because the repository needs a reusable owner.
-- Mixing catalog governance into a repo-owned skill authoring contract.
-- Turning every change into a new skill instead of tightening or reusing an existing one.
-- Using a long description that tells the agent what to do instead of when to load the skill.
-- Skipping `agents/openai.yaml` even though the repository expects it for internal skills.
-- Skipping the baseline and rationalizing the change as "small enough".
+Exit criteria: structural validation passes, routing fallout is resolved, and
+before/after measurements are recorded.

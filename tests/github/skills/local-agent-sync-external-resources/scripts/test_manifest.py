@@ -314,3 +314,33 @@ def test_live_handoff_override_forces_repo_tmp_handoff(repo_root: Path) -> None:
     assert handoff.override_id == "mattpocock-handoff-tmp-path"
     patch_text = (bundle_root / handoff.patch_path).read_text(encoding="utf-8")
     assert "tmp/handoff/" in patch_text
+
+
+def test_skill_creator_delegates_have_invocation_overrides(
+    repo_root: Path,
+) -> None:
+    overrides_path = (
+        repo_root
+        / ".github/skills/local-agent-sync-external-resources/references/"
+        "imported-asset-overrides.yaml"
+    )
+    bundle_root = (
+        repo_root / ".github/skills/local-agent-sync-external-resources"
+    )
+    overrides = load_overrides(overrides_path)
+    by_target = {override.target_path: override for override in overrides}
+
+    expected = {
+        ".github/skills/anthropic-skill-creator/SKILL.md":
+            "anthropic-skill-creator-delegated-invocation",
+        ".github/skills/mattpocock-writing-great-skills/SKILL.md":
+            "mattpocock-writing-great-skills-delegated-invocation",
+    }
+    for target, override_id in expected.items():
+        override = by_target[target]
+        assert override.override_id == override_id
+        patch = (bundle_root / override.patch_path).read_text(
+            encoding="utf-8"
+        )
+        assert "-disable-model-invocation: true" in patch
+        assert "internal-skill-creator" in patch

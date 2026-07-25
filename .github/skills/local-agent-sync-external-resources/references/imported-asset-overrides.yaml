@@ -76,18 +76,31 @@ overrides:
   baseline_repo_commit: e986f49
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     an internal wrapper should replace the override.
-- id: anthropic-skill-creator-disable-invocation
+- id: anthropic-skill-creator-delegated-invocation
   target_path: .github/skills/anthropic-skill-creator/SKILL.md
   source_family: anthropic/skills
   lifecycle_mode: post-refresh-patch
   apply_strategy: git-apply
   approval: explicit-user-counter-validated
-  reason: The imported Anthropic skill-creator has a generic trigger that would compete
-    with internal-skill-creator. Adding disable-model-invocation
-    ensures it is only callable directly from the repository-owned internal-skill-creator
-    when the user explicitly requests Anthropic or Claude methodology.
-  patch_path: patches/anthropic-skill-creator-disable-invocation.patch
+  reason: Narrow the imported Anthropic skill-creator description to delegation-oriented
+    use by internal-skill-creator and remove disable-model-invocation so the orchestrator
+    can invoke it programmatically during the authoring stage.
+  patch_path: patches/anthropic-skill-creator-delegated-invocation.patch
   expected_content_hash: a969cb2930de615067efd977b5c485ec4e1ddabcec672516960ba30cc5507325
   baseline_repo_commit: b29e7cf
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
-    the non-invocation contract still matches the intended routing boundary.
+    the delegation contract still matches the intended orchestration order.
+- id: mattpocock-writing-great-skills-delegated-invocation
+  target_path: .github/skills/mattpocock-writing-great-skills/SKILL.md
+  source_family: mattpocock/skills
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply
+  approval: explicit-user-counter-validated
+  reason: Narrow the imported Matt Pocock writing-great-skills description to delegation-oriented
+    use by internal-skill-creator and remove disable-model-invocation so the orchestrator
+    can invoke it programmatically during the predictability review stage.
+  patch_path: patches/mattpocock-writing-great-skills-delegated-invocation.patch
+  expected_content_hash: 2cde2c28c32b40d57f2766ddf806a962752fef7050c4dc474405314000df3938
+  baseline_repo_commit: ed37663cc5fbef691ddfecd080dff42f7e7e350d
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    the delegation contract still matches the intended orchestration order.
