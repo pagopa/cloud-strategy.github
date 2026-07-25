@@ -18,6 +18,14 @@ Use this checklist before finalizing a new or revised internal agent.
 - Are unrelated responsibilities forcing `and/or` language into the route?
 - Does any large procedure make the edit out of scope for an agent-only workflow?
 
+## Requirements and Operating Stance
+
+- Was the requirements gate proportional to the ambiguity and risk?
+- Does the role describe observable behavior instead of a prestige biography?
+- Are expertise and personality statements limited to behavior that changes the result?
+- Are approval, stopping, and validation boundaries explicit where needed?
+- For a new agent, was the canonical name validated and the resolved target kept under `.github/agents/`?
+
 ## Core Skill Section Contract
 
 - Are the skill identifiers exact and canonical?
@@ -54,6 +62,8 @@ Use this checklist before finalizing a new or revised internal agent.
 - If `agents:` is present, is `agent` included in `tools:`?
 - Are `handoffs` used only for user-visible sequential transitions, not for autonomous within-turn delegation?
 - Has `references/subagent-patterns.md` been consulted for orchestration design?
+- Does each coordinator-to-worker context handoff include objective, bounded evidence, constraints, expected output, and validation?
+- Does the handoff avoid assuming that the worker can see the parent conversation?
 
 ## Platform Verification
 

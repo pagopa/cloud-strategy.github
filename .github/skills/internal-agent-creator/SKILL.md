@@ -43,6 +43,7 @@ Prefer a singular core-skill architecture for routers and broader command center
 
 - Build agents that are easy to route to.
 - Keep one cohesive operating role per agent.
+- Expand vague requests into a bounded requirements and operating contract.
 - Translate imported agent value into repo-local GitHub Copilot form.
 - Keep long reusable procedures out of agent bodies.
 - Keep paired agent, existing core skill, and reference files coherent without duplicating the same subtopic across files.
@@ -52,6 +53,8 @@ Prefer a singular core-skill architecture for routers and broader command center
 - Preserve evidence-first guidance patterns for fast-moving vendor or platform domains without cargo-culting obsolete tool wiring.
 - Use current GitHub Copilot custom-agent frontmatter deliberately instead of stripping supported properties by default.
 - Make approval boundaries, auditability, and dangerous-operation gates explicit when an agent or nearby workflow needs them.
+- Validate new agent names and paths before writing.
+- Make context handoff explicit when a coordinator delegates to a worker.
 
 ## Read First
 
@@ -62,6 +65,7 @@ Load these inputs before finalizing an internal agent:
 - `.github/copilot-instructions.md` for the non-negotiable behavior layer
 - `references/agent-contract.md` when editing frontmatter, `tools:`, core-skill sections, or subagent controls
 - `references/agent-template.md` when drafting a new agent from scratch
+- `references/requirements-and-persona.md` when the request is vague, the role is new or materially changing, or a coordinator must package context for workers
 - `references/conversion-checklist.md` when normalizing an imported or legacy agent
 - `references/design-patterns.md` when broadening, splitting, or strengthening an agent
 - `references/example-transformations.md` when you need before-and-after conversion examples
@@ -129,23 +133,29 @@ kept clear without a new reusable owner, stop and surface that boundary.
 
 ## Authoring Workflow
 
-1. Define the operating role in one sentence.
-   Use behavioral scope, not prestige language.
-2. Scan neighboring agents and trigger overlap.
+1. Run a proportional requirements gate.
+   Resolve purpose, route, inputs, actions, invocation boundary, risk, output, and validation. Ask only questions that materially change the contract.
+2. Define the operating role and stance in one sentence.
+   Translate persona language into observable behavior. Do not invent credentials or prestige.
+3. Validate a new name and target path.
+   Keep the canonical identifier aligned and confirm the resolved path stays under `.github/agents/`.
+4. Scan neighboring agents and trigger overlap.
    Compare `description:` lines first and resolve collisions before drafting.
-3. Confirm the behavior belongs in an agent.
+5. Confirm the behavior belongs in an agent.
    Stop if the main deliverable is a procedure, prompt, scoped instruction, validator, or doc.
-4. If the agent cites an existing core skill, define the split explicitly.
+6. If the agent cites an existing core skill, define the split explicitly.
    Keep route, stance, tool contract, and output shape in the agent; keep deep tables, templates, and long checklists in references.
-5. Draft the `description:` before the body.
+7. Draft the `description:` before the body.
    If the routing sentence is vague, the rest of the agent will stay vague.
-6. Choose the frontmatter and core-skill strategy intentionally.
+8. Choose the frontmatter and core-skill strategy intentionally.
    Keep `tools:` explicit, core skills rare, and support-skill references out of the agent unless explicitly requested.
-7. Normalize imported patterns and remove stale baggage.
+9. Normalize imported patterns and remove stale baggage.
    Preserve the decision model while deleting obsolete runtime-specific scaffolding.
-8. Add real boundaries and measurable output expectations.
+10. Add real boundaries and measurable output expectations.
    Non-router agents recommend the better owner when the boundary breaks instead of routing automatically.
-9. Validate, de-duplicate, and re-check paired assets.
+11. Define context handoff for coordinators and workers.
+   Package objective, bounded evidence, constraints, output shape, and validation without assuming shared chat history.
+12. Validate, de-duplicate, and re-check paired assets.
    Run repository validation and re-check whether the new agent makes another one redundant or leaves the paired bundle out of sync.
 
 ## Capability Translation Rules
@@ -154,8 +164,9 @@ When learning from richer upstream agents, keep the signal and drop the
 scaffolding. Translate tool catalogs to short canonical `tools:` lists,
 expertise catalogs to route or output rules, governance patterns to approval
 boundaries, and helper-skill lists to zero skill references or one existing
-core skill. Use `references/design-patterns.md` for the detailed translation
-map.
+core skill. Translate persona claims into operating behavior rather than
+fictional credentials. Use `references/design-patterns.md` and
+`references/requirements-and-persona.md` for the detailed translation maps.
 
 ## Governance And Trust Boundaries
 
@@ -197,10 +208,13 @@ Load `references/design-patterns.md` for command-center structure questions and 
 
 - Prestige-first descriptions that never say when the agent wins routing.
 - Imported agents copied with stale frontmatter, obsolete tool ids, or UI-only scaffolding.
+- Prestige biographies, invented credentials, or personality traits that do not change behavior.
+- Mandatory interviews that ask for information already available in repository evidence.
 - A skill-list section as a dumping ground for unrelated capabilities.
 - A `## Core Skill` section with more than one skill.
 - New `## Mandatory Engine Skills`, `## Optional Support Skills`, or `## Preferred/Optional Skills` sections without explicit legacy-compatibility scope.
 - Routers or coordinators that classify only and do not produce a delegated result or blocking explanation.
+- Coordinator prompts that assume workers can see the parent conversation.
 - Agent bodies that hide constraints in long narrative prose or duplicate existing core-skill detail.
 
 ## Validation
@@ -208,6 +222,7 @@ Load `references/design-patterns.md` for command-center structure questions and 
 - Run `scripts/audit_agent_contract.py --root .` when comparing against the live agent catalog.
 - Run `scripts/measure_skill_bundle_tokens.py --skill-dir .github/skills/internal-agent-creator` after editing this bundle.
 - Confirm name, route, `tools:`, subagent controls, and output expectations with `references/review-checklist.md`.
+- Confirm requirements, operating stance, name and path safety, and context handoff with `references/requirements-and-persona.md`.
 - Confirm `## Core Skill`, when present, has exactly one existing skill; otherwise confirm no skill-list section exists.
 - Confirm new agents do not introduce legacy skill headings unless the user explicitly requested legacy compatibility.
 - Confirm referenced core skills and references stay aligned, and run the closest repository validation after changes that affect agent naming or inventory.
