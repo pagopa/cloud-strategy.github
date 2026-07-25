@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal TDD"
   short_description: "Risk-driven TDD routing for code changes"
-  default_prompt: "Use $internal-tdd for coding changes with executable or evaluable behavior; classify the seam, then delegate mandatory red-green-refactor work to $superpowers-test-driven-development."
+  default_prompt: "Use $internal-tdd for coding changes with executable or evaluable behavior; classify the seam, then delegate mandatory red-green-refactor work to /superpowers-test-driven-development."

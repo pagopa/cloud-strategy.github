@@ -1,6 +1,6 @@
 ---
 name: internal-yaml
-description: Use when editing YAML or YML files that need formatting, schema awareness, or domain-owner routing.
+description: Use when editing or reviewing YAML or YML files that need formatting, schema awareness, or domain-owner routing.
 ---
 
 # Internal YAML
@@ -16,6 +16,7 @@ validation need proves a narrower schema-aware owner.
 - `internal-kubernetes`: Kubernetes manifests and deployment routing when workload, service, rollout, or cluster semantics are the real problem.
 - `internal-terraform`: Terraform-adjacent generated or configuration checks when HCL ownership dominates and YAML is incidental.
 - `internal-azure-devops`: Azure DevOps pipeline YAML when pipeline behavior is the target.
+- `antigravity-cloudformation-best-practices`: CloudFormation template semantics and schema-aware validation when intrinsic functions or resource definitions are the target.
 
 ## When to use
 
@@ -25,10 +26,11 @@ validation need proves a narrower schema-aware owner.
 
 ## When not to use
 
-- GitHub Actions workflow semantics; use `internal-github-actions`.
-- Composite action metadata; use `internal-github-action-composite`.
-- Kubernetes workload, service, probe, rollout, or policy semantics; use `internal-kubernetes`.
-- Azure DevOps pipeline behavior; use `internal-azure-devops`.
+- GitHub Actions workflow semantics; use `/internal-github-actions`.
+- Composite action metadata; use `/internal-github-action-composite`.
+- Kubernetes workload, service, probe, rollout, or policy semantics; use `/internal-kubernetes`.
+- Azure DevOps pipeline behavior; use `/internal-azure-devops`.
+- CloudFormation template semantics; use `/antigravity-cloudformation-best-practices`.
 
 ## Baseline
 
@@ -42,5 +44,6 @@ validation need proves a narrower schema-aware owner.
 ## Validation
 
 - Run the nearest generic YAML parser only when the file is safe for generic YAML parsing.
-- Use schema-aware validation for GitHub Actions, Kubernetes, CloudFormation-style tags, or platform-specific YAML.
+- Use schema-aware validation for GitHub Actions, Kubernetes, or other platform-specific YAML.
+- For CloudFormation templates, route to `/antigravity-cloudformation-best-practices` and run `aws cloudformation validate-template --template-body file://<template>`.
 - Reuse the repository validator when one already covers the touched YAML family.

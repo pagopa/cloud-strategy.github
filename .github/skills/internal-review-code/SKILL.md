@@ -40,7 +40,9 @@ remediation workflow.
   missing.
 - Read the spec, task, and tests before implementation when those sources
   exist. Review only the requested code surface and immediate evidence.
-- Do not edit files, apply fixes, author plans, or delegate to peer agents.
+- During the review pass, do not edit files, apply fixes, author plans, or
+  delegate to peer agents. A separate follow-up may execute only remediation
+  that the user explicitly authorizes and scopes to named finding IDs.
 - Load `/awesome-copilot-security-review` only on explicit user request.
 - Name `addyosmani-code-simplification` only as a separate simplification
   follow-up for a concrete readability or complexity finding.
@@ -70,7 +72,8 @@ important finding, consolidate equivalent findings, and mark uncertainty inline
 as `to confirm`.
 
 Keep internal review details hidden unless they alter the verdict. State that
-no changes were applied, and offer remediation only as a separate follow-up.
+no changes were applied, and offer remediation only as a separate follow-up
+after the user manually selects the finding IDs and authorizes the task.
 
 ## Validation
 

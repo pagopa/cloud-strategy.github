@@ -1,6 +1,6 @@
 ---
 name: internal-json
-description: Use when editing repository-owned JSON registry, organization, data, or configuration files that need formatting and consistency rules.
+description: Use when editing or reviewing repository-owned JSON registry, organization, data, or configuration files that need formatting and consistency rules.
 ---
 
 # Internal JSON
@@ -32,5 +32,6 @@ description: Use when editing repository-owned JSON registry, organization, data
 
 ## Validation
 
-- Run `python -m json.tool <file>` or the repository JSON validator when no narrower check exists.
+- Use `python -m json.tool <file>` only for JSON syntax; it does not reject duplicate object keys.
+- For consistency checks, prefer the repository JSON validator or a parser configured to reject duplicate keys, such as Python's `object_pairs_hook`.
 - Run the owning schema or focused test when the JSON participates in a registry or generated contract.

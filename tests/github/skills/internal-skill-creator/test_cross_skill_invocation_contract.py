@@ -43,6 +43,11 @@ CALLED_SKILLS = {
         "superpowers-executing-plans",
         "superpowers-verification-before-completion",
     },
+    "internal-tdd": {
+        "internal-debugging",
+        "superpowers-test-driven-development",
+        "superpowers-verification-before-completion",
+    },
 }
 
 
@@ -53,6 +58,23 @@ def _instruction_text(skill_name: str) -> str:
     return "\n".join(
         path.read_text(encoding="utf-8") for path in paths if path.exists()
     )
+
+
+def _operational_instruction_text(skill_name: str) -> str:
+    root = SKILLS_ROOT / skill_name
+    paths = [root / "SKILL.md", root / "agents" / "openai.yaml"]
+    paths.extend(sorted((root / "references").glob("*.md")))
+    texts = []
+    for path in paths:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        if path.name == "SKILL.md" and "## Referenced skills" in text:
+            before, referenced = text.split("## Referenced skills", 1)
+            _, separator, after = referenced.partition("\n## ")
+            text = before + (f"\n## {after}" if separator else "")
+        texts.append(text)
+    return "\n".join(texts)
 
 
 def _frontmatter(skill_name: str) -> dict[str, object]:
@@ -68,9 +90,10 @@ def test_skill_creator_defines_slash_prefixed_cross_skill_invocation() -> None:
 def test_creator_and_gateway_calls_are_slash_prefixed() -> None:
     for caller, callees in CALLED_SKILLS.items():
         text = _instruction_text(caller)
+        operational_text = _operational_instruction_text(caller)
         for callee in callees:
             unprefixed = re.compile(rf"(?<![/a-z0-9-]){re.escape(callee)}(?![a-z0-9-])")
-            assert not unprefixed.search(text), (
+            assert not unprefixed.search(operational_text), (
                 f"{caller} references {callee} without the required slash prefix"
             )
             assert f"/{callee}" in text

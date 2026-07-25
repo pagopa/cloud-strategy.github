@@ -1,13 +1,13 @@
 ---
 name: internal-makefile
-description: Use when editing Makefile or .mk files that need deterministic targets, readable recipes, and phony target hygiene.
+description: Use when editing or reviewing Makefile or .mk files that need deterministic targets, readable recipes, and phony target hygiene.
 ---
 
 # Internal Makefile
 
 ## Referenced skills
 
-- None.
+- `internal-bash`: embedded shell safety when quoting, pipelines, failure behavior, temporary files, or dynamic commands dominate a recipe change.
 
 ## When to use
 
@@ -19,6 +19,7 @@ description: Use when editing Makefile or .mk files that need deterministic targ
 
 - CI workflow semantics are the main concern; use the matching CI owner.
 - The Make target only wraps a script whose behavior is owned by a language or script skill.
+- Embedded shell behavior dominates the recipe change; use `/internal-bash`.
 - Generated Makefiles unless the generator is the intended edit point.
 
 ## Baseline
@@ -33,5 +34,5 @@ description: Use when editing Makefile or .mk files that need deterministic targ
 ## Validation
 
 - Run the touched target when it is safe and deterministic.
-- Use `make -n <target>` when execution would mutate state.
+- Treat `make -n <target>` as a preview, not a safety boundary. Recursive `$(MAKE)` recipes and forced recipe lines may execute and produce side effects, so inspect the recipe first.
 - Run the nearest focused test when a target is part of validator behavior.

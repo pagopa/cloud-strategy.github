@@ -1,6 +1,6 @@
 ---
 name: internal-markdown
-description: Use when editing repository-owned Markdown that needs concise structure, explicit paths, links, and maintainable prose.
+description: Use when editing or reviewing repository-owned Markdown that needs concise structure, explicit paths, links, and maintainable prose.
 ---
 
 # Internal Markdown
@@ -17,7 +17,6 @@ description: Use when editing repository-owned Markdown that needs concise struc
 
 ## When not to use
 
-- README files unless the user explicitly authorizes the README change.
 - Deep skill-reference rewrites that change bundle boundaries; use the skill-authoring owner first.
 - Imported upstream Markdown that must remain verbatim unless the task explicitly allows a fork or refresh.
 

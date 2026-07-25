@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Makefile"
   short_description: "Makefile targets and recipes"
-  default_prompt: "Use $internal-makefile for Makefile or .mk target, recipe, and validation changes."
+  default_prompt: "Use $internal-makefile when editing or reviewing Makefile or .mk targets, recipes, and validation changes."
