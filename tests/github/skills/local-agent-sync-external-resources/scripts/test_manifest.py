@@ -139,13 +139,13 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 52
+    assert len(manifest.assets) == 56
     assert len(manifest.watchlist) == 13
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
     )
     assert matt_source.rewrite_skill_references is True
-    assert dict(matt_source.skill_reference_aliases) == {"grilling": "grill-me"}
+    assert dict(matt_source.skill_reference_aliases) == {}
     assert {
         item.upstream_id
         for item in manifest.watchlist
@@ -154,7 +154,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
     assert {
         item.canonical_name for item in matt_source.assets
     } >= {
-        "grill-me",
+        "mattpocock-grill-with-docs",
         "mattpocock-domain-modeling",
         "mattpocock-implement",
         "mattpocock-tdd",
@@ -163,6 +163,9 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         "mattpocock-code-review",
         "mattpocock-wayfinder",
         "mattpocock-writing-great-skills",
+    }
+    assert "grill-me" not in {
+        item.canonical_name for item in matt_source.assets
     }
     assert {
         (source.repository, asset.upstream, asset.local, asset.canonical_name)
@@ -174,7 +177,37 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
             "skills/search-company-knowledge",
             ".github/skills/search-company-knowledge",
             "search-company-knowledge",
-        )
+        ),
+        (
+            "https://github.com/openai/skills.git",
+            "skills/.curated/openai-docs",
+            ".github/skills/openai-docs",
+            "openai-docs",
+        ),
+        (
+            "https://github.com/anthropics/skills.git",
+            "skills/docx",
+            ".github/skills/anthropic-docx",
+            "anthropic-docx",
+        ),
+        (
+            "https://github.com/anthropics/skills.git",
+            "skills/pptx",
+            ".github/skills/anthropic-pptx",
+            "anthropic-pptx",
+        ),
+        (
+            "https://github.com/anthropics/skills.git",
+            "skills/xlsx",
+            ".github/skills/anthropic-xlsx",
+            "anthropic-xlsx",
+        ),
+        (
+            "https://github.com/anthropics/skills.git",
+            "skills/skill-creator",
+            ".github/skills/anthropic-skill-creator",
+            "anthropic-skill-creator",
+        ),
     }
     assert {
         item.local for item in manifest.assets if item.source == "obra-superpowers"
