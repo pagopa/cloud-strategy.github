@@ -23,6 +23,16 @@ MATERIAL_RISKS = (
     "cross-file",
     "user-visible",
 )
+
+STOP_REASON_TEXT = {
+    "plan-recommended": "The work needs a retained plan before execution.",
+    "review-shaped": "The request is findings-first rather than simple execution.",
+    "owner-ambiguous": "The controlling owner is not established.",
+    "clarification-overflow": "More than one dependent clarification is required.",
+    "approval-required": "Execution depends on a separate approval.",
+    "validation-gap": "The non-trivial task has no usable local validation path.",
+    "validation-path-missing": "The validation path or exact allowed gap is not named.",
+}
 CLAIMS = (
     "completion",
     "covered",
@@ -162,6 +172,7 @@ def parse_args() -> argparse.Namespace:
     gate_parser.add_argument("--validation-obvious", action="store_true")
     gate_parser.add_argument("--validation-path", default="")
     gate_parser.add_argument("--validation-gap", default="")
+    gate_parser.add_argument("--approval-required", action="store_true")
     gate_parser.add_argument("--format", choices=("text", "json"), default="text")
 
     claim_parser = subparsers.add_parser(
@@ -198,7 +209,7 @@ def infer_lane(lane: str, trivial_kind: str | None) -> str:
     return mapping.get(trivial_kind or "", "unspecified")
 
 
-def build_gate_evidence(
+def build_gate_requirements(
     *,
     gate_outcome: str,
     validation_path: str,
@@ -281,50 +292,65 @@ def build_gate_decision(
     validation_obvious: bool,
     validation_path: str,
     validation_gap: str,
+    approval_required: bool = False,
 ) -> dict[str, object]:
     resolved_depth_keywords = detect_depth_keywords(prompt, depth_keywords)
     resolved_risks = sorted(set(risks))
     resolved_lane = infer_lane(lane, trivial_kind)
-    stop_reasons: list[str] = []
-    stop_for_material_boundary = bool(validation_gap) and any(
-        risk in {"architecture", "cross-file", "governance", "rollout"}
-        for risk in resolved_risks
+
+    has_named_validation = bool(validation_path)
+    has_explicit_gap = bool(validation_gap)
+    is_trivial_candidate = trivial_kind in TRIVIAL_KINDS
+    missing_validation_evidence = (
+        not has_named_validation and not has_explicit_gap
     )
+    nontrivial_validation_gap = has_explicit_gap and not is_trivial_candidate
+    approval_boundary = approval_required
+
+    reason_codes: list[str] = []
+    blocking_reasons: list[str] = []
 
     if needs_plan:
-        stop_reasons.append("plan-recommended")
+        reason_codes.append("plan-recommended")
+        blocking_reasons.append("plan-recommended")
     if needs_review:
-        stop_reasons.append("review-shaped")
+        reason_codes.append("review-shaped")
+        blocking_reasons.append("review-shaped")
     if needs_critical:
-        stop_reasons.append("critical-challenge-needed")
+        reason_codes.append("critical-challenge-needed")
     if owner_ambiguous:
-        stop_reasons.append("owner-ambiguous")
+        reason_codes.append("owner-ambiguous")
+        blocking_reasons.append("owner-ambiguous")
     if clarification_overflow:
-        stop_reasons.append("clarification-overflow")
+        reason_codes.append("clarification-overflow")
+        blocking_reasons.append("clarification-overflow")
+    if approval_boundary:
+        reason_codes.append("approval-required")
+        blocking_reasons.append("approval-required")
     for keyword in resolved_depth_keywords:
-        stop_reasons.append(f"depth-keyword:{keyword}")
+        reason_codes.append(f"depth-keyword:{keyword}")
     for risk in resolved_risks:
-        stop_reasons.append(f"material-risk:{risk}")
-    if stop_for_material_boundary:
-        stop_reasons.append("material-boundary-break")
+        reason_codes.append(f"material-risk:{risk}")
+    if nontrivial_validation_gap:
+        reason_codes.append("validation-gap")
+        blocking_reasons.append("validation-gap")
+    if missing_validation_evidence:
+        reason_codes.append("validation-path-missing")
+        blocking_reasons.append("validation-path-missing")
+    if validation_obvious and missing_validation_evidence:
+        reason_codes.append("validation-path-missing")
 
-    if (
-        needs_plan
-        or needs_review
-        or owner_ambiguous
-        or clarification_overflow
-        or stop_for_material_boundary
-    ):
+    if blocking_reasons:
         gate_outcome = "stop-with-reason"
     elif (
-        trivial_kind in TRIVIAL_KINDS
+        is_trivial_candidate
         and not resolved_depth_keywords
         and not resolved_risks
         and not needs_critical
-        and (validation_obvious or bool(validation_path) or bool(validation_gap))
+        and (has_named_validation or has_explicit_gap)
     ):
         gate_outcome = "trivial-skip"
-        stop_reasons.append(f"trivial-kind:{trivial_kind}")
+        reason_codes.append(f"trivial-kind:{trivial_kind}")
     else:
         gate_outcome = "full-gate"
 
@@ -333,7 +359,7 @@ def build_gate_decision(
     elif validation_gap:
         focused_validation_path = f"Validation gap: {validation_gap}"
     elif validation_obvious:
-        focused_validation_path = "Validation is obvious but not yet named."
+        focused_validation_path = "Validation path not yet named."
     else:
         focused_validation_path = "Validation path not yet identified."
 
@@ -353,6 +379,16 @@ def build_gate_decision(
     else:
         approval = "explicit user approval before non-trivial operational work"
 
+    why_stopped = (
+        STOP_REASON_TEXT[blocking_reasons[0]] if blocking_reasons else ""
+    )
+    violated_condition = blocking_reasons[0] if blocking_reasons else ""
+    evidence_required = (
+        "Provide the missing validation path, approval, owner, or bounded plan evidence."
+        if blocking_reasons
+        else ""
+    )
+
     readiness_brief = {
         "task": task,
         "goal": "Complete the current bounded task in one run when safe.",
@@ -365,29 +401,32 @@ def build_gate_decision(
         "main_risk": main_risk,
         "stop_conditions": "Stop for complexity, cost, ambiguity, safety, approval, or validation gaps.",
         "approval": approval,
+        "why_stopped": why_stopped,
+        "violated_condition": violated_condition,
+        "evidence_required": evidence_required,
     }
     if gate_outcome == "trivial-skip":
-        gate_evidence = {
+        gate_requirements = {
             "validation": focused_validation_path,
-            "final_evidence": "Fresh evidence supporting the trivial claim.",
+            "final_evidence": "Fresh evidence supporting the final claim.",
         }
     else:
-        gate_evidence = build_gate_evidence(
+        gate_requirements = build_gate_requirements(
             gate_outcome=gate_outcome,
             validation_path=validation_path,
             validation_gap=validation_gap,
             clarification_required=needs_clarification,
-            stop_reasons=stop_reasons,
+            stop_reasons=reason_codes,
         )
 
     return {
         "gate_outcome": gate_outcome,
-        "next_action": "stop" if gate_outcome == "stop-with-reason" else "execute",
+        "next_action": "stop" if blocking_reasons else "execute",
         "lane": resolved_lane,
-        "reason_codes": stop_reasons,
-        "needs_explicit_approval": gate_outcome != "trivial-skip",
+        "reason_codes": reason_codes,
+        "needs_explicit_approval": approval_boundary,
         "readiness_brief": readiness_brief,
-        "gate_evidence": gate_evidence,
+        "gate_requirements": gate_requirements,
     }
 
 
@@ -406,18 +445,18 @@ def resolve_claim_requirements(claims: list[str]) -> list[dict[str, str]]:
 
 def render_gate_text(decision: dict[str, object]) -> None:
     brief = decision["readiness_brief"]
-    print("🧭 Quick plan")
-    print(f"🎯 Goal: {brief['task']}")
-    print(f"🛠️ Change: {brief['scope']} {brief['approach']}")
-    print(f"🧪 Check: {brief['validation_path']}")
-
     if decision["next_action"] == "stop":
-        print(
-            f"⚠️ Blocked: {brief['main_risk']}. "
-            "✈️ Action: choose how to resolve this before execution."
-        )
-    elif decision["needs_explicit_approval"]:
-        print("✈️ Action: Confirm before non-trivial work starts.")
+        print(f"🧭 Stop: {brief['why_stopped']}")
+        print(f"🎯 Boundary: {brief['violated_condition']}")
+        print(f"🧪 Needed: {brief['evidence_required']}")
+        print("✈️ Action: resolve the named boundary before execution.")
+        return
+
+    print(f"🧭 {decision['gate_outcome']}: {brief['task']}")
+    print(f"🛠️ Scope: {brief['scope']}")
+    print(f"🧪 Check: {brief['validation_path']}")
+    if brief["main_risk"]:
+        print(f"⚠️ Risk: {brief['main_risk']}")
 
 
 def render_claim_text(claims: list[str], requirements: list[dict[str, str]]) -> None:
@@ -445,6 +484,7 @@ def main() -> int:
             validation_obvious=args.validation_obvious,
             validation_path=args.validation_path,
             validation_gap=args.validation_gap,
+            approval_required=args.approval_required,
         )
         if args.format == "json":
             print(json.dumps(decision, indent=2))

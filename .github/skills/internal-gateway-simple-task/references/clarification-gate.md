@@ -59,4 +59,4 @@ If that answer creates another dependent question set, stop with reason.
 
 ## Stop Conditions
 
-Stop conditions are owned by `references/support-routing.md`; this gate adds only the per-question stop rules listed in Stop rules above.
+Stop conditions are owned by `references/support-routing.md`; this gate adds only the per-question stop rules listed in Stop Conditions above.

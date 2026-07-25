@@ -15,13 +15,17 @@ If cost or complexity exceeds same-run execution, stop and recommend a retained 
 
 ## Output Shapes
 
+Normal chat uses the compact user-facing projection from `SKILL.md`. Lane
+evidence and the actual Gate Evidence Ledger remain internal unless the user
+requests diagnostic JSON.
+
 For `answer`, return the answer, evidence, uncertainty, and any validation gap when applicable.
 
-For `edit`, return `lane`, `files-touched`, `gate-ledger`, validation, and residual risk.
+For `edit`, return `lane`, `files-touched`, validation, and residual risk.
 
-For `diagnose`, return `lane`, reproduced failure, root cause, fix or blocker, `gate-ledger`, and evidence.
+For `diagnose`, return `lane`, reproduced failure, root cause, fix or blocker, and evidence.
 
-For `validate`, return `lane`, check, result, `gate-ledger`, and any follow-up gap.
+For `validate`, return `lane`, check, result, and any follow-up gap.
 
 For `stop-with-reason`, return:
 
