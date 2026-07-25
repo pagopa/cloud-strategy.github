@@ -437,8 +437,7 @@ _GUIDED_QUESTION_CONTRACT = f"""\
 {_GUIDED_QUESTION_CONTRACT_START}
 ## Local guided-question contract
 
-This repository-owned contract overrides any earlier instruction to ask one
-question at a time.
+This repository-owned contract overrides any earlier instruction to ask one question at a time.
 
 - Ask all currently known questions in numbered bulk question blocks.
 - Use `Question`, `Recommendation`, `Why`, and `Default if accepted` for every

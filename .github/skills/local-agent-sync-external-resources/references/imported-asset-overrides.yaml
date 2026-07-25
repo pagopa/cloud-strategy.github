@@ -22,21 +22,6 @@ overrides:
   baseline_repo_commit: efa058a
   validation_note: Stop the refresh if the patch does not apply cleanly; review
     whether the repository-local handoff path remains the intended contract.
-- id: superpowers-brainstorming-guided-plan-gate
-  target_path: .github/skills/superpowers-brainstorming/SKILL.md
-  source_family: obra/superpowers
-  lifecycle_mode: post-refresh-patch
-  apply_strategy: git-apply-3way
-  approval: explicit-user-counter-validated
-  reason: Preserve the repository-specific brainstorming flow that asks guided numbered
-    bulk question blocks, keeps discovery open after accepted defaults when risks
-    or dependent decisions remain, and chooses between direct plan and spec first
-    based on the marginal value of a spec.
-  patch_path: patches/superpowers-brainstorming.patch
-  expected_content_hash: 4e44155f52c800784b3fb19be4c1e6fb8298cb49c20f611ead09b39f4998e6c7
-  baseline_repo_commit: local-plan-2026-07-05
-  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
-    an internal wrapper or upstream proposal should replace the override.
 - id: awesome-copilot-dependabot-description-budget
   target_path: .github/skills/awesome-copilot-dependabot/SKILL.md
   source_family: github/awesome-copilot

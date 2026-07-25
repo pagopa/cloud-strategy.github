@@ -35,3 +35,18 @@ Do not ask questions that can be answered by exploring the codebase, documentati
 
 End by summarizing the resolved decisions, explicit assumptions, and any
 unresolved questions the user chose to accept or defer.
+
+<!-- local-sync:guided-questions:start -->
+## Local guided-question contract
+
+This repository-owned contract overrides any earlier instruction to ask one question at a time.
+
+- Ask all currently known questions in numbered bulk question blocks.
+- Use `Question`, `Recommendation`, `Why`, and `Default if accepted` for every
+  numbered question.
+- Make `Recommendation` the suggested answer and `Why` its concrete rationale.
+- Keep each question, recommendation, and reason brief, clear, and
+  decision-ready.
+- Put unresolved follow-ups in another numbered block. If only one blocking
+  question remains, present it as a numbered one-item block.
+<!-- local-sync:guided-questions:end -->

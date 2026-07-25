@@ -49,6 +49,18 @@ declared external resource refreshes safely. The single public entrypoint is
 - References to undeclared skills remain unchanged and must be reported as
   unresolved dependencies; do not silently import or rewrite them.
 
+## Guided Question Contract
+
+- Candidate normalization appends a repository-owned contract to
+  `superpowers-brainstorming` and `grill-me` whenever either canonical skill is
+  managed, regardless of its source or upstream wording.
+- The contract requires numbered bulk question blocks. Every question includes
+  a brief `Recommendation`, `Why`, and `Default if accepted`.
+- The appended contract explicitly overrides upstream one-question-at-a-time
+  pacing. A single remaining blocker is still a numbered one-item block.
+- The append is marker-based and idempotent. Do not replace it with a
+  context-sensitive replay patch.
+
 ## Workspace Convention
 
 - The runtime workspace must be outside this repository.
