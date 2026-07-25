@@ -68,7 +68,7 @@ skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
 
 critical-validate: scripts-bootstrap
-	@$(SCRIPTS_RUNNER) validate_critical_output --file .github/skills/internal-gateway-critical-master/fixtures/critical_output_valid.md
+	@$(SCRIPTS_RUNNER) validate_critical_output --strict --file .github/skills/internal-gateway-critical-master/fixtures/critical_output_valid.md
 
 internal-gateway-idea-fast-check: scripts-bootstrap
 	@$(PYTHON) .github/skills/internal-gateway-idea/scripts/audit_workflow.py

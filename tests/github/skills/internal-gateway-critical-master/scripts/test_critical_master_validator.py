@@ -143,3 +143,350 @@ The challenge surfaces one open question.
 """
     findings = VALIDATOR_MODULE.validate_output(text)
     assert any(finding.code == "finding-objection-word-limit" for finding in findings)
+
+
+def test_adversarial_fixture_produces_expected_codes() -> None:
+    text = (FIXTURES / "critical_output_invalid_adversarial.md").read_text(encoding="utf-8")
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    expected_codes = {
+        "empty-section-summary",
+        "empty-section-synthesis",
+        "finding-number-sequence",
+        "invalid-finding-field-label",
+        "multiple-root-questions",
+        "multiple-outcome-values",
+    }
+    assert expected_codes <= codes
+
+
+def test_duplicate_required_section_detected() -> None:
+    text = """
+## Summary
+
+One paragraph summary.
+
+## Summary
+
+Duplicate summary section.
+
+## Challenge Context
+
+- **Lenses:** first-principles, constraint-audit, reverse-assumption
+- **Pre-mortem:** `not-triggered`
+
+## Findings
+
+### 1. The objection
+
+- **Impact:** Something matters.
+- **Evidence:** `inference`; quality=`partial` — evidence.
+- **Mitigation:** Fix it.
+
+## Synthesis
+
+- **Defense:** `none`
+- **Strongest objection:** Something.
+- **Unresolved uncertainty:** Something.
+
+## Outcome
+
+`accept-with-risk`
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "duplicate-section-summary" in codes or "section-order" in codes
+
+
+def test_section_order_violation_detected() -> None:
+    text = """
+## Summary
+
+One paragraph summary.
+
+## Findings
+
+### 1. The objection
+
+- **Impact:** Something matters.
+- **Evidence:** `inference`; quality=`partial` — evidence.
+- **Mitigation:** Fix it.
+
+## Challenge Context
+
+- **Lenses:** first-principles, constraint-audit, reverse-assumption
+- **Pre-mortem:** `not-triggered`
+
+## Synthesis
+
+- **Defense:** `none`
+- **Strongest objection:** Something.
+- **Unresolved uncertainty:** Something.
+
+## Outcome
+
+`accept-with-risk`
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "section-order" in codes
+
+
+def test_unknown_claim_class_detected() -> None:
+    text = """
+## Summary
+
+One paragraph summary.
+
+## Challenge Context
+
+- **Lenses:** first-principles, constraint-audit, reverse-assumption
+- **Pre-mortem:** `not-triggered`
+
+## Findings
+
+### 1. The objection
+
+- **Impact:** Something matters.
+- **Evidence:** `speculation`; quality=`partial` — evidence.
+- **Mitigation:** Fix it.
+
+## Synthesis
+
+- **Defense:** `none`
+- **Strongest objection:** Something.
+- **Unresolved uncertainty:** Something.
+
+## Outcome
+
+`accept-with-risk`
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "invalid-claim-class" in codes
+
+
+def test_missing_evidence_quality_detected() -> None:
+    text = """
+## Summary
+
+One paragraph summary.
+
+## Challenge Context
+
+- **Lenses:** first-principles, constraint-audit, reverse-assumption
+- **Pre-mortem:** `not-triggered`
+
+## Findings
+
+### 1. The objection
+
+- **Impact:** Something matters.
+- **Evidence:** `inference` — evidence without quality marker.
+- **Mitigation:** Fix it.
+
+## Synthesis
+
+- **Defense:** `none`
+- **Strongest objection:** Something.
+- **Unresolved uncertainty:** Something.
+
+## Outcome
+
+`accept-with-risk`
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "missing-evidence-quality" in codes
+
+
+def test_valid_premortem_fixture_passes_strict() -> None:
+    result = run_validator(
+        "--file",
+        str(FIXTURES / "critical_output_valid_premortem.md"),
+        "--strict",
+    )
+    assert result.returncode == 0
+
+
+def test_valid_defended_fixture_passes_strict() -> None:
+    result = run_validator(
+        "--file",
+        str(FIXTURES / "critical_output_valid_defended.md"),
+        "--strict",
+    )
+    assert result.returncode == 0
+
+
+def test_invalid_premortem_missing_mitigation_for_high_cause() -> None:
+    text = (FIXTURES / "critical_output_invalid_premortem.md").read_text(encoding="utf-8")
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "missing-cause-mitigation" in codes
+
+
+def test_invalid_defense_missing_remaining_vulnerability() -> None:
+    text = (FIXTURES / "critical_output_invalid_defense.md").read_text(encoding="utf-8")
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "missing-remaining-vulnerability" in codes
+
+
+def test_premortem_section_rejected_when_not_triggered() -> None:
+    text = """
+## Summary
+
+One paragraph summary.
+
+## Challenge Context
+
+- **Lenses:** first-principles, constraint-audit, reverse-assumption
+- **Pre-mortem:** `not-triggered`
+
+## Pre-mortem
+
+- **Failure:** Something goes wrong.
+- **Cause 1:** Root cause | class=`inference` | likelihood=`high` | mitigation=do something.
+
+## Findings
+
+### 1. The objection
+
+- **Impact:** Something matters.
+- **Evidence:** `inference`; quality=`partial` — evidence.
+- **Mitigation:** Fix it.
+
+## Synthesis
+
+- **Defense:** `none`
+- **Strongest objection:** Something.
+- **Unresolved uncertainty:** Something.
+
+## Outcome
+
+`accept-with-risk`
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "premortem-not-triggered" in codes
+
+
+def test_premortem_section_required_when_triggered() -> None:
+    text = """
+## Summary
+
+One paragraph summary.
+
+## Challenge Context
+
+- **Lenses:** first-principles, constraint-audit, reverse-assumption
+- **Pre-mortem:** `triggered`
+
+## Findings
+
+### 1. The objection
+
+- **Impact:** Something matters.
+- **Evidence:** `inference`; quality=`partial` — evidence.
+- **Mitigation:** Fix it.
+
+## Synthesis
+
+- **Defense:** `none`
+- **Strongest objection:** Something.
+- **Unresolved uncertainty:** Something.
+
+## Outcome
+
+`accept-with-risk`
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "missing-premortem-section" in codes
+
+
+def test_defense_none_does_not_require_strongest_defense() -> None:
+    text = """
+## Summary
+
+One paragraph summary.
+
+## Challenge Context
+
+- **Lenses:** first-principles, constraint-audit, reverse-assumption
+- **Pre-mortem:** `not-triggered`
+
+## Findings
+
+### 1. The objection
+
+- **Impact:** Something matters.
+- **Evidence:** `inference`; quality=`partial` — evidence.
+- **Mitigation:** Fix it.
+
+## Synthesis
+
+- **Defense:** `none`
+- **Strongest objection:** Something.
+- **Unresolved uncertainty:** Something.
+
+## Outcome
+
+`accept-with-risk`
+"""
+    findings = VALIDATOR_MODULE.validate_output(text)
+    codes = {f.code for f in findings}
+    assert "missing-strongest-defense" not in codes
+    assert "missing-remaining-vulnerability" not in codes
+
+
+def test_cli_format_text_renders_findings() -> None:
+    result = run_validator(
+        "--file",
+        str(FIXTURES / "critical_output_invalid_adversarial.md"),
+        "--format", "text",
+    )
+    assert result.returncode != 0
+    assert "[BLOCKING]" in result.stdout or "[advisory]" in result.stdout
+
+
+def test_cli_format_json_returns_finding_list() -> None:
+    result = run_validator(
+        "--file",
+        str(FIXTURES / "critical_output_invalid_adversarial.md"),
+        "--format", "json",
+    )
+    import json as json_mod
+    data = json_mod.loads(result.stdout)
+    assert isinstance(data, list)
+    assert len(data) > 0
+    assert "code" in data[0]
+
+
+def test_cli_format_compact_returns_status_and_counts() -> None:
+    result = run_validator(
+        "--file",
+        str(FIXTURES / "critical_output_invalid_adversarial.md"),
+        "--format", "compact",
+    )
+    import json as json_mod
+    data = json_mod.loads(result.stdout)
+    assert "status" in data
+    assert "finding_counts" in data
+    assert "next_action" in data
+
+
+def test_cli_unreadable_file_exits_nonzero_with_stderr() -> None:
+    result = run_validator(
+        "--file", "/nonexistent/path/missing_file.md",
+    )
+    assert result.returncode != 0
+    assert result.stderr.strip() != ""
+
+
+def test_cli_make_target_includes_strict() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+    assert "--strict" in makefile
+    assert "critical-validate" in makefile
+
+

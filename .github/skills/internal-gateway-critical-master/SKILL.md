@@ -36,13 +36,13 @@ Run exactly three phases. Do not skip a phase and do not loop back unless new ev
 
 ### Phase 2: Challenge
 
-- Select **2-3 lenses** from the table below based on the highest-risk gaps in the summary.
-- The **third lens must be lateral**: `analogy` or `reverse assumption`.
+- Select exactly **three lenses** from the table below based on the highest-risk gaps in the summary.
+- Lens three must be lateral: `analogy` or `reverse-assumption`.
 - Apply one optional pre-mortem pass if failure modes are material and not covered by the selected lenses.
 - Lead with the strongest supported objection first. Stop at one finding when that objection controls the decision; do not pad findings.
-- Ask exactly one concise root question only when the answer would materially change the critique, and put it in `finding.question`.
+- Ask at most one concise root question across all findings when the answer would materially change the critique, and put it in one `finding.question`.
 - Treat mitigations as conditions to continue, not as implementation designs that rescue the proposal.
-- Output: 1-3 raw findings, each with a claim class and a note on evidence quality.
+- Output: 1-3 raw findings, each with a claim class and evidence quality `strong`, `partial`, or `weak`.
 
 | Lens | Question | Use when |
 | --- | --- | --- |
@@ -64,12 +64,13 @@ Trigger a pre-mortem when at least one of these is true:
 - The plan introduces a new operational owner, on-call rotation, or handoff.
 - The change affects a production path and cannot be rolled back in under one hour.
 
-For a pre-mortem, state one concrete failure, list the 2-3 most likely root causes with classification and probability, and define a required mitigation for each `high` or `medium` cause.
+For a pre-mortem, set `Pre-mortem: triggered` or `Pre-mortem: not-triggered`. When triggered, state one concrete failure, list 2-3 most likely root causes with claim class and qualitative likelihood (`high`, `medium`, or `low`), and define a required mitigation for each `high` or `medium` cause.
 
 ### Phase 3: Synthesize
 
 - Run the Final Consistency Gate: name the strongest supported objection, downgrade weak claims to hypotheses, and surface unresolved uncertainty.
-- When the user has already defended the proposal, classify the defense as `resolves`, `narrows`, `accepts-risk`, or `unanswered`, then name the strongest defense and the remaining vulnerability inside the synthesis.
+- Set `Defense:` to one of `none`, `resolves`, `narrows`, `accepts-risk`, or `unanswered`.
+- When Defense is not `none`, name the strongest defense and the remaining vulnerability inside the synthesis.
 - Format the result using the contract in `references/output-contract.md`.
 - Recommend exactly one outcome from `## Outcome meanings`.
 
@@ -95,7 +96,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 - Reuse `fixtures/critical_output_valid.md` and sibling fixture samples instead of repeating long inline payloads.
 - Follow `references/maintenance-guidance.md` for fixture reuse and cache-aware search discipline.
 - Keep this bundle self-contained: do not require instructions, examples, or enforcement rules from outside this directory.
-- Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
+- Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `compact` for status and counts; validation findings on stdout, file and usage failures on stderr; keep output bounded.
 
 ## Outcome meanings
 
@@ -103,7 +104,7 @@ For a pre-mortem, state one concrete failure, list the 2-3 most likely root caus
 | --- | --- |
 | `reformulate-plan` | Planning must be rewritten. |
 | `de-escalate-to-simple` | A concrete local task remains. |
-| `execute-clear-next-step` | Execution is approved and clear. |
+| `route-to-execution-owner` | The plan is challenge-ready and an execution owner can proceed; this is routing readiness, not execution approval. |
 | `review-evidence` | The next risk is correctness evidence. |
-| `continue-critical` | Another pressure-test loop is needed. |
+| `continue-critical-with-new-evidence` | Another pressure-test loop is needed; legal only when the synthesis names the new evidence required for the next cycle. |
 | `accept-with-risk` | The user may proceed while accepting a named residual risk. |
