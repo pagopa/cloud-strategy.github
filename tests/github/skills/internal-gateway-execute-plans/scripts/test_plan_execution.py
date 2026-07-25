@@ -14,7 +14,7 @@ FIXTURES = BUNDLE / "fixtures"
 
 sys.path.insert(0, str(SCRIPTS))
 
-from plan_execution import (
+from plan_execution import (  # noqa: E402
     Finding,
     build_compact_payload,
     compute_sha256,

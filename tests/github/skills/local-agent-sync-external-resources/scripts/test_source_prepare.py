@@ -20,7 +20,6 @@ SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scr
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from source_prepare_core import (  # noqa: E402
-    PrepareSourceResult,
     _build_fetch_command,
     _cache_key_for_repository,
     _extract_archive,
@@ -433,8 +432,6 @@ def test_advertised_ref_fallback_is_reported_as_advertised_ref(
     resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
 
     import source_prepare_core
-
-    original_fetch_sha = source_prepare_core._fetch_sha
 
     def failing_fetch_sha(cache: Path, sha: str) -> None:
         from sync_external_resources_core import SyncCommandError

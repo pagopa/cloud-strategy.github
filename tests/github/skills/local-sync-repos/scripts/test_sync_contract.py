@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -9,18 +10,12 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-sync-repos/scripts"
-
-import sys
-
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_contract import (  # noqa: E402
     MANAGED_COPY_PATHS,
     SourceContractError,
-    SyncPlan,
     build_plan,
-    dirty_paths,
-    plan_fingerprint,
 )
 
 MANAGED_COPY_PATHS_EXPECTED = (

@@ -185,8 +185,17 @@ def test_cli_format_text_renders_findings() -> None:
         "⚠️ **Critique:** Something is wrong.\n"
         "Some stray line.\n"
     )
-    result = run_validator("--format", "text")
-    pass
+    result = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--format", "text"],
+        input=text,
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 1
+    assert "[BLOCKING]" in result.stdout
+    assert "unexpected-content-line" in result.stdout
 
 
 def test_cli_format_json_returns_finding_list() -> None:
