@@ -38,6 +38,7 @@ Use `internal-agent-creator` when the primary output is an agent change or an ag
 - Read root `AGENTS.md` and `.github/copilot-instructions.md` before changing repository-owned scope or policy language.
 - Read `.github/INVENTORY.md` when a skill may be added, retired, renamed, or replaced.
 - Load `references/writing-skills-checklist.md` when creating a new skill or materially revising an existing one.
+- Load `references/script-output-contract.md` when a skill introduces or materially revises scripts, CLIs, or deterministic automation.
 - Read `openai-skill-creator` only after the local boundary is clear and only for the remaining bundle work that this skill is not meant to repeat.
 - Confirm the target `SKILL.md` has an up-to-date `## Referenced skills` section immediately after the H1 before finalizing a new or materially revised skill.
 - Inventory the touched bundle itself before widening scope: `SKILL.md`,
@@ -113,7 +114,7 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 - When a referenced-skill rule changes, verify the touched skill against nearby skills that cite it or that it cites, so the index remains a lazy routing contract instead of drifting into preload wording.
 - In `SKILL.md`, reference another skill by name and behavior only. Do not cite file paths inside another skill bundle; those files are private to the owning skill and may change.
 - In source-side skill Markdown, cite only paths that exist on disk in the source repository. When sync materializes a target-only file, prefer the source template path or descriptive prose over the consumer-only materialized path.
-- When creating or materially revising a skill that introduces scripts, CLIs, or deterministic automation, require an explicit output-contract decision: operator default output, model-facing bounded or compact output, and when full JSON is required for audits.
+- When a skill introduces or materially revises scripts, load `references/script-output-contract.md`; keep operator presentation distinct from the JSON machine contract and preserve compact decision evidence.
 
 For trigger-wording, token-discipline, loophole, and skill-type test detail, enforce `references/writing-skills-checklist.md`.
 
@@ -165,6 +166,7 @@ Then confirm:
 - `name:` matches the folder name exactly.
 - `agents/openai.yaml` exists and still matches the skill's current purpose when bundle metadata was part of the task.
 - the skill is repository-owned and still the smallest credible answer to the problem.
+- any touched script contract has a named consumer, bounded deterministic output, explicit compact evidence, and no speculative serialization
 - the top-level `## Referenced skills` section exists immediately after the H1 for any created or materially revised `SKILL.md`.
 - every non-`None` referenced-skill entry maps to a real repository skill or an explicitly justified external/on-demand skill.
 - the referenced-skill index matches all skill names used later for loading, routing, comparison, or delegation.

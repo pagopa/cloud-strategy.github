@@ -10,6 +10,10 @@ CHECKLIST_PATH = (
     REPO_ROOT
     / ".github/skills/internal-skill-creator/references/writing-skills-checklist.md"
 )
+SCRIPT_OUTPUT_CONTRACT_PATH = (
+    REPO_ROOT
+    / ".github/skills/internal-skill-creator/references/script-output-contract.md"
+)
 
 
 def test_referenced_skills_are_audit_index_not_preload() -> None:
@@ -99,3 +103,66 @@ def test_core_backed_wrapper_guidance_is_generic_and_reference_owned() -> None:
     assert "Compare the wrapper against its core before editing" not in skill_text
     assert "internal-review-code" not in checklist_text
     assert "addyosmani-code-review-and-quality" not in checklist_text
+
+
+def test_script_output_contract_uses_one_machine_serialization() -> None:
+    contract_text = SCRIPT_OUTPUT_CONTRACT_PATH.read_text()
+
+    assert "JSON is the only common machine-readable contract" in contract_text
+    assert "`text` is operator presentation" in contract_text
+    assert "`compact` and `full` are detail profiles" in contract_text
+    assert "`--format json --detail compact|full`" in contract_text
+
+
+def test_compact_profile_preserves_decision_evidence() -> None:
+    contract_text = SCRIPT_OUTPUT_CONTRACT_PATH.read_text()
+
+    for required_field in (
+        "status",
+        "material counts",
+        "blockers",
+        "traceable evidence",
+        "truncation state",
+        "next action",
+    ):
+        assert required_field in contract_text
+
+
+def test_unapproved_formats_remain_out_of_scope() -> None:
+    contract_text = SCRIPT_OUTPUT_CONTRACT_PATH.read_text().lower()
+
+    assert "out of scope" in contract_text
+    for deferred_format in ("tsv", "csv", "jsonl", "ndjson", "toon"):
+        assert deferred_format in contract_text
+
+
+def test_existing_compact_aliases_are_not_forced_to_migrate() -> None:
+    contract_text = SCRIPT_OUTPUT_CONTRACT_PATH.read_text()
+
+    assert "Existing `--format compact` interfaces may remain" in contract_text
+    assert "Do not require repository-wide migration" in contract_text
+
+
+def test_skill_routes_script_contract_detail_to_local_reference() -> None:
+    skill_text = SKILL_PATH.read_text()
+
+    assert "references/script-output-contract.md" in skill_text
+    assert "when a skill introduces or materially revises scripts" in skill_text
+
+
+def test_wrapper_keeps_generic_bundle_mechanics_with_core_owner() -> None:
+    skill_text = SKILL_PATH.read_text()
+
+    assert "openai-skill-creator" in skill_text
+    assert "generic bundle" in skill_text
+    assert "references/script-output-contract.md" in skill_text
+
+
+def test_local_bundle_guidance_is_model_neutral() -> None:
+    bundle_text = "\n".join(
+        path.read_text()
+        for path in (SKILL_PATH, CHECKLIST_PATH, SCRIPT_OUTPUT_CONTRACT_PATH)
+    ).lower()
+
+    for forbidden_name in ("chatgpt", "gpt-5", "gpt-6"):
+        assert forbidden_name not in bundle_text
