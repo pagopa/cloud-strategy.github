@@ -8,12 +8,12 @@ disable-model-invocation: true
 
 ## Referenced skills
 
-- `mattpocock-improve-codebase-architecture`: architecture discovery and
+- `/mattpocock-improve-codebase-architecture`: architecture discovery and
   candidate report owner.
-- `addyosmani-code-simplification`: behavior-preserving implementation
+- `/addyosmani-code-simplification`: behavior-preserving implementation
   simplification owner.
-- `internal-tdd`: executable or evaluable behavior-change gate.
-- `superpowers-verification-before-completion`: final evidence owner.
+- `/internal-tdd`: executable or evaluable behavior-change gate.
+- `/superpowers-verification-before-completion`: final evidence owner.
 
 ## Manual invocation boundary
 

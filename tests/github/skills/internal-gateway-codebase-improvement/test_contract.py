@@ -74,8 +74,7 @@ def test_skill_references_existing_method_owners_without_copying_them() -> None:
     for owner in METHOD_OWNERS:
         assert f"`/{owner}`" in skill
     for owner in REFERENCE_ONLY_OWNERS:
-        assert f"`{owner}`" in skill
-        assert f"`/{owner}`" not in skill
+        assert f"`/{owner}`" in skill
     assert "HTML report scaffold" not in skill
     assert "The Five Principles" not in skill
 

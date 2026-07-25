@@ -13,6 +13,8 @@ change instead of repeating them here.
 
 ## Cross-skill notation
 
+Prefix every cross-skill invocation with `/`.
+
 Use the bare `skill-name` when a skill is only named or referenced, including
 reference lists, identifiers, state labels, fixtures, scripts, and catalog
 entries. Use `/skill-name` whenever an operational verb asks the agent to

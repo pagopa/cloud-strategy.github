@@ -212,7 +212,7 @@ def test_suggest_does_not_emit_worktree_mapping() -> None:
 def test_code_simplification_requires_explicit_authorization() -> None:
     skill_text = SKILL_PATH.read_text()
 
-    assert "`addyosmani-code-simplification`: on-demand method owner" in skill_text
+    assert "`/addyosmani-code-simplification`: on-demand method owner" in skill_text
     assert "load `/addyosmani-code-simplification`" in skill_text
     assert "explicit code-simplification request" in skill_text
     assert "already-approved simplification remediation" in skill_text

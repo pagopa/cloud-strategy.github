@@ -13,7 +13,8 @@ INTERNAL_CONTRACT = REPO_ROOT / "INTERNAL_CONTRACT.md"
 ANTI_PATTERNS = (
     REPO_ROOT / ".github/skills/internal-python/references/review-anti-patterns.md"
 )
-SKILL_PATH_PATTERN = re.compile(r"\.github/skills/([^/\n]+)/")
+SKILL_PATH_PATTERN = re.compile(r"\.github/skills/([a-z0-9-]+)(?:/|[\"'])")
+AGENT_PATH_PATTERN = re.compile(r"\.github/agents/([a-z0-9-]+)\.agent\.md")
 
 
 def test_global_guidance_documents_generic_test_placement_rule() -> None:
@@ -48,25 +49,27 @@ def test_github_owned_python_tests_make_owner_obvious() -> None:
         rel_path = test_path.relative_to(TESTS_ROOT)
         text = test_path.read_text(encoding="utf-8")
 
-        if ".github/scripts/run.sh" in text:
-            if "github" not in rel_path.parts or "scripts" not in rel_path.parts:
-                violations.append(
-                    f"{rel_path} should make the .github/scripts owner obvious"
-                )
+        owners = set(SKILL_PATH_PATTERN.findall(text))
+        owners.update(AGENT_PATH_PATTERN.findall(text))
+        skill_or_agent_owner_is_obvious = (
+            "github" in rel_path.parts
+            and "skills" in rel_path.parts
+            and any(owner in rel_path.parts for owner in owners)
+        )
+        script_owner_is_obvious = (
+            ".github/scripts" in text
+            and "github" in rel_path.parts
+            and "scripts" in rel_path.parts
+        )
+        if skill_or_agent_owner_is_obvious or script_owner_is_obvious:
             continue
 
-        skill_match = SKILL_PATH_PATTERN.search(text)
-        if skill_match is None:
+        if not owners:
             continue
 
-        skill_name = skill_match.group(1)
-        if (
-            "github" not in rel_path.parts
-            or "skills" not in rel_path.parts
-            or skill_name not in rel_path.parts
-        ):
-            violations.append(
-                f"{rel_path} should make the .github/skills/{skill_name}/ owner obvious"
-            )
+        owner_names = ", ".join(sorted(owners))
+        violations.append(
+            f"{rel_path} should make one of the referenced owners obvious: {owner_names}"
+        )
 
     assert not violations, "\n".join(violations)

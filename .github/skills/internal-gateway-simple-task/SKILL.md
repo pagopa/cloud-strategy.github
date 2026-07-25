@@ -7,11 +7,11 @@ description: Use when a concrete low-to-medium-risk repository-owned coding or n
 
 ## Referenced skills
 
-- `grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
-- `internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
-- `internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
-- `superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
-- `addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
+- `/grill-me`: compact Gate 1 interview after local preflight and Initial Idea Ordering.
+- `/internal-gateway-critical-master`: Gate 2 challenge before non-trivial action.
+- `/internal-tdd`: executable or evaluable behavior changes that need repository-owned TDD routing before implementation.
+- `/superpowers-verification-before-completion`: final evidence gate before completion, readiness, passing, fixed, or no-gap claims.
+- `/addyosmani-code-simplification`: on-demand method owner only for an explicit code-simplification request or an already-approved simplification remediation.
 
 Do not introduce other skills, agents, or workflow owners from this bundle. When stopping, explain the violated condition and let the user choose the next path.
 
