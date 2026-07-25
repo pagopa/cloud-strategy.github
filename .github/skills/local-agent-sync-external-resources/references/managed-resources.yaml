@@ -120,6 +120,9 @@ sources:
       - upstream: skills/engineering/setup-matt-pocock-skills
         local: .github/skills/mattpocock-setup-matt-pocock-skills
         canonical_name: mattpocock-setup-matt-pocock-skills
+      - upstream: skills/engineering/triage
+        local: .github/skills/mattpocock-triage
+        canonical_name: mattpocock-triage
       - upstream: skills/engineering/code-review
         local: .github/skills/mattpocock-code-review
         canonical_name: mattpocock-code-review
@@ -258,10 +261,6 @@ watchlist:
     upstream_id: prototype
     local_owner: unmanaged
     reason: Referenced by wayfinder but outside the user-approved import scope; keep visible until explicitly approved or mapped to a local owner.
-  - source_family: mattpocock/skills
-    upstream_id: triage
-    local_owner: unmanaged
-    reason: Referenced by setup-matt-pocock-skills but not installed in this repository; keep visible until explicitly approved or mapped to a local owner.
   - source_family: mattpocock/skills
     upstream_id: to-tickets
     local_owner: unmanaged

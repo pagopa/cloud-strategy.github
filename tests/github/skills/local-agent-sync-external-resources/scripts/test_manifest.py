@@ -139,8 +139,8 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 56
-    assert len(manifest.watchlist) == 13
+    assert len(manifest.assets) == 57
+    assert len(manifest.watchlist) == 12
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
     )
@@ -150,7 +150,12 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         item.upstream_id
         for item in manifest.watchlist
         if item.source_family == "mattpocock/skills"
-    } >= {"prototype", "triage", "to-tickets", "qa"}
+    } >= {"prototype", "to-tickets", "qa"}
+    assert "triage" not in {
+        item.upstream_id
+        for item in manifest.watchlist
+        if item.source_family == "mattpocock/skills"
+    }
     assert {item.canonical_name for item in matt_source.assets} >= {
         "mattpocock-grill-with-docs",
         "mattpocock-domain-modeling",
@@ -161,6 +166,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         "mattpocock-to-spec",
         "mattpocock-setup-matt-pocock-skills",
         "mattpocock-code-review",
+        "mattpocock-triage",
         "mattpocock-wayfinder",
         "mattpocock-writing-great-skills",
     }
