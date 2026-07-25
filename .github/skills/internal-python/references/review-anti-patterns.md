@@ -14,14 +14,12 @@ Baseline owner: `internal-python`
 
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
-| PY-M01 | Bare `except:` or `except Exception:` without re-raise or logging | Swallows errors silently |
+| PY-M01 | Bare `except:` or broad `except Exception` without handling, logging, or re-raise | Can swallow control-flow or ordinary application failures silently |
 | PY-M02 | Mutable default arguments (`def f(items=[])`) | Shared state across calls |
 | PY-M03 | `os.system()` or `subprocess` with `shell=True` | Shell injection risk |
 | PY-M04 | Missing type hints on public function signatures | Reduces readability and tooling support |
-| PY-M05 | Function body longer than 40 lines (excluding docstring) | Complexity and testability concern |
-| PY-M06 | Cyclomatic complexity > 10 per function | Hard to test and maintain |
 | PY-M07 | `print()` instead of `logging` in application/library code | No log level control in production |
-| PY-M08 | Missing unit tests for new public functions | Violates test coverage mandate |
+| PY-M08 | Missing focused tests for new or changed behavior | Leaves the changed contract without regression coverage |
 | PY-M09 | Python tests outside repository-root `tests/` or without paths that make the covered owner or checked behavior obvious | Breaks repository test discoverability and ownership mapping |
 | PY-M10 | `rich`, emoji, tables, or panels outside human-facing CLI/reporting boundaries | Mixes terminal UI with importable logic or machine-readable output such as JSON |
 
@@ -31,12 +29,8 @@ Baseline owner: `internal-python`
 | --- | --- | --- |
 | PY-m01 | Unused imports | Dead code noise |
 | PY-m02 | Hardcoded file paths or URLs | Portability and configuration concern |
-| PY-m03 | Missing docstring on public functions/classes | Reduces discoverability |
 | PY-m04 | `noqa` or `type: ignore` without inline justification | Hides real issues |
-| PY-m05 | Mixed `str.format()` and f-strings in the same module | Style inconsistency |
 | PY-m06 | Dead code (unreachable branches, commented-out blocks) | Maintenance burden |
-| PY-m07 | Missing `__all__` in modules with public API | Ambiguous public surface |
-| PY-m08 | Nested functions deeper than 2 levels | Readability concern |
 
 ## Formatter and linter boundary
 
@@ -44,6 +38,9 @@ Defer line length, quote style, import order, trailing newline, ambiguous-name,
 and blank-line diagnostics to the repository's configured formatter and linter.
 Report them here only when repository evidence proves a behavioral or contract
 defect beyond the tool diagnostic.
+
+Report readability or complexity only when repository evidence shows a
+behavioral, maintainability, or declared-contract defect.
 
 ## Good vs bad examples
 

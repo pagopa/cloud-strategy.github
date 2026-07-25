@@ -5,14 +5,15 @@
 | Missing `if __name__ == "__main__":` guard | Script runs on import, breaks testing and reuse | Always guard the entry point |
 | Using a hyphenated or file-only entrypoint that cannot be imported cleanly | Breaks `python -m`, packaging, and test reuse | Expose an importable `cli.py`, package `__main__.py`, or `console_scripts` entrypoint |
 | Using `print()` for errors | Errors go to stdout, mixed with normal output | Use `print(..., file=sys.stderr)` or `logging` |
-| Bare `except:` or `except Exception:` at top level | Swallows all errors including KeyboardInterrupt | Catch specific exceptions; let unexpected ones propagate |
+| bare `except:` at the script boundary | Also catches control-flow exceptions such as `KeyboardInterrupt` and `SystemExit` | Catch the narrowest expected exception and let control-flow exceptions propagate |
+| Broad `except Exception` without handling, logging, or re-raise | Can hide ordinary application failures and leave partial work unexplained | Handle expected failures explicitly and let unexpected failures propagate |
 | Hardcoded file paths | Non-portable across machines | Use `argparse`, `pathlib`, or environment variables |
 | No argument parsing | Caller has to modify script source to change behavior | Use `argparse` for any configurable parameter |
-| Installing deps globally or without hash-locked version pinning | Non-reproducible environment and hidden setup drift | Keep dependencies in the local `requirements.txt` with exact pins and hashes |
+| Installing deps outside the declared dependency manager or without a reproducible lock | Non-reproducible environment and hidden setup drift | Preserve the declared manager; for pip use exact pins and hashes, otherwise use its canonical lock artifact |
 | Adding an empty `requirements.txt` to a stdlib-only tool | Adds noise and implies missing setup steps | Omit `requirements.txt` when the script uses only the standard library |
-| Updating `requirements.txt` without refreshed hashes | Breaks reproducible installs and hides dependency drift | Regenerate exact pins and hashes, then validate with `pip install --require-hashes -r requirements.txt` |
+| Changing dependencies without updating the declared manager's lock artifact | Breaks reproducible installs and hides dependency drift | Preserve the declared manager; for pip regenerate exact pins and hashes, otherwise run its frozen or locked validation command |
 | Wrapping a stdlib-only script in Bash | Adds setup indirection without solving a real dependency problem | Document direct `python3 <script>.py` execution and skip the wrapper |
-| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to run the tool safely | Generate a self-contained folder and add `run.sh` plus `requirements.txt` only when external packages are needed |
+| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to run the tool safely | Generate a self-contained folder and add a pip `run.sh` plus `requirements.txt` only when external packages are needed and no other manager is declared |
 | Treating a multi-entrypoint toolkit as app code just because it has `lib/` and tests | Pushes script tooling into the wrong guidance lane | Keep it in `internal-python-script` when the primary contract is still direct execution |
 | Copying the same `.venv` bootstrap and dependency install code into every wrapper | Maintenance drift and inconsistent operator behavior | Use one shared `run.sh` and let thin wrappers delegate to it |
 | Assuming the tool will always run from the repository root | Breaks when operators call it from subdirectories or nested paths | Resolve the repo root from an explicit `--root` or path argument when needed |

@@ -77,14 +77,36 @@ def test_python_script_uses_one_toolkit_helper_convention() -> None:
     assert skill.count("references/reporting.md") == 1
 
 
-def test_dependency_example_matches_its_decision() -> None:
+def test_dependency_policy_preserves_the_declared_toolchain() -> None:
+    instruction = (
+        REPO_ROOT / ".github/instructions/internal-python.instructions.md"
+    ).read_text(encoding="utf-8")
+    generic = (PYTHON / "SKILL.md").read_text(encoding="utf-8")
+    project = (PROJECT / "SKILL.md").read_text(encoding="utf-8")
+    script = (SCRIPT / "SKILL.md").read_text(encoding="utf-8")
+
+    for text in (instruction, generic, project, script):
+        assert "declared dependency manager" in text
+        assert "exact pins and hashes" in text
+
+
+def test_dependency_template_does_not_publish_partial_real_hashes() -> None:
     layout = (SCRIPT / "references/layout-and-templates.md").read_text(
         encoding="utf-8"
     )
 
-    assert "Final choice: PyYAML" in layout
-    assert "PyYAML==" in layout
-    assert "requests==" not in layout
+    assert "00c4bdeba853cc34e7dd471f16b4114f" not in layout
+    assert "0150219816b6a1fa26fb4699fb7daa9c" not in layout
+    assert "requirements.in" in layout
+    assert "pip-compile --generate-hashes" in layout
+    assert "illustrative input" in layout.lower()
+
+
+def test_script_dependency_policy_has_one_authoritative_section() -> None:
+    skill = (SCRIPT / "SKILL.md").read_text(encoding="utf-8")
+
+    assert skill.count("## Dependency policy") == 1
+    assert skill.count("pip-compile --generate-hashes") == 1
 
 
 def test_reporter_skeleton_implements_the_advertised_summary_method() -> None:
@@ -96,6 +118,18 @@ def test_reporter_skeleton_implements_the_advertised_summary_method() -> None:
     assert "Diagnostics" in reporting
 
 
+def test_reporter_skeleton_redacts_sensitive_options() -> None:
+    reporting = (SCRIPT / "references/reporting.md").read_text(encoding="utf-8")
+
+    assert "SENSITIVE_OPTION_MARKERS" in reporting
+    assert "def _render_option(" in reporting
+    assert 'return "[REDACTED]"' in reporting
+    assert "_render_option(str(key), value)" in reporting
+    assert "escape(str(value))" not in reporting.split("if options:", 1)[1].split(
+        "self.console.print", 1
+    )[0]
+
+
 def test_python_review_catalog_defers_formatter_owned_nits() -> None:
     review = (PYTHON / "references/review-anti-patterns.md").read_text(
         encoding="utf-8"
@@ -103,3 +137,42 @@ def test_python_review_catalog_defers_formatter_owned_nits() -> None:
 
     assert "## Nit" not in review
     assert "configured formatter and linter" in review
+
+
+def test_exception_guidance_respects_python_exception_hierarchy() -> None:
+    project_mistakes = (PROJECT / "references/common-mistakes.md").read_text(
+        encoding="utf-8"
+    )
+    script_mistakes = (SCRIPT / "references/common-mistakes.md").read_text(
+        encoding="utf-8"
+    )
+
+    for text in (project_mistakes, script_mistakes):
+        assert "`except Exception` catches `KeyboardInterrupt`" not in text
+        assert "`except Exception` catches `SystemExit`" not in text
+        assert "bare `except:`" in text
+        assert "`except Exception`" in text
+
+
+def test_review_catalog_requires_evidence_for_python_findings() -> None:
+    review = (PYTHON / "references/review-anti-patterns.md").read_text(
+        encoding="utf-8"
+    )
+
+    unsupported_rules = (
+        "Function body longer than 40 lines",
+        "Cyclomatic complexity > 10",
+        "Missing docstring on public functions/classes",
+        "Mixed `str.format()` and f-strings",
+        "Missing `__all__` in modules with public API",
+        "Nested functions deeper than 2 levels",
+    )
+    assert all(rule not in review for rule in unsupported_rules)
+    assert "Missing focused tests for new or changed behavior" in review
+
+
+def test_project_test_example_imports_its_subject() -> None:
+    examples = (PROJECT / "references/examples.md").read_text(encoding="utf-8")
+
+    assert "account_status.py" in examples
+    assert "from account_status import AccountId" in examples

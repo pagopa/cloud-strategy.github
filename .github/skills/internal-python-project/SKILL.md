@@ -41,7 +41,7 @@ description: Use when creating, modifying, or reviewing importable Python packag
 - Pass configuration into reusable project code through typed settings, constructor arguments, or function parameters. Domain and service code should not read environment variables, files, or deployment defaults directly unless that boundary is its explicit responsibility.
 - Do not confuse domain invariants with configuration. Stable rules that belong to the domain may stay near the domain code; deployment-specific paths, endpoints, thresholds, defaults, and feature switches should live at the configuration boundary.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
-- If external packages are introduced, keep exact pins and hashes in the owning requirements file.
+- Preserve the repository-declared dependency manager. For pip requirements, keep exact pins and hashes in the owning requirements file; for another declared dependency manager, update its canonical lock artifact and use its frozen or locked validation command.
 
 ## Application-specific guidance
 
@@ -88,6 +88,6 @@ Load `references/common-mistakes.md` for the full mistake table.
 ## Validation
 
 - `python -m compileall <paths>` (syntax check)
-- `pip install --require-hashes -r requirements.txt` (dependency integrity check, only when requirements change)
+- For pip-managed projects, run `pip install --require-hashes -r requirements.txt` when requirements change; for another declared manager, run its canonical frozen or locked validation command.
 - `pytest tests/` (run tests)
 - Lint with project's configured linter.

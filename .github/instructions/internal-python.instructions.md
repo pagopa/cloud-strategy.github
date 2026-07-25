@@ -17,7 +17,7 @@ This file is optimized for Copilot code review and should produce only evidenced
 - Flag manual formatting churn that fights the repository formatter; when Ruff is configured, prefer `ruff format` and Ruff diagnostics over subjective style edits.
 - Report dependency usage that is unpinned, unnecessary for the change, or unjustified for the data volume and import or install cost.
 - Flag vendored libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
-- Flag new external dependencies that are missing hash-locked pins in the owning requirements file.
+- Preserve the repository-declared dependency manager. For pip requirements, require exact pins and hashes in the owning requirements file; for another declared dependency manager, require its canonical lock artifact and frozen or locked validation command.
 - When behavior changes, verify docs and output contracts stay aligned: filenames, produced artifacts, columns, and other user-visible output details must match reality.
 - Check tests for deterministic coverage of changed behavior.
 - Flag test setup that bypasses the repository's shared runner, pytest rootdir or testpaths contract, or declared interpreter or virtualenv setup without a reproducibility reason.

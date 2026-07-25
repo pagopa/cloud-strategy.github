@@ -58,7 +58,7 @@ umbrella that remains active after ownership is known.
 - When a test must modify `sys.path` before importing a standalone script, keep the affected import after that setup and mark only that import with `# noqa: E402`; remove truly unused imports or variables instead of suppressing them.
 - Add or update tests for testable logic.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
-- If external packages are introduced, keep exact pins and hashes in the owning requirements file.
+- Preserve the repository-declared dependency manager. For pip requirements, keep exact pins and hashes in the owning requirements file; for another declared dependency manager, update its canonical lock artifact and use its frozen or locked validation command.
 - Keep human-facing console reporting separate from reusable Python logging and machine-readable output. Script or CLI adapter boundaries may use `rich`; project/package internals and JSON-style output paths should stay neutral, structured, or plain data.
 
 ## Dependency And Runtime Depth

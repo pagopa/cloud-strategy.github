@@ -2,6 +2,8 @@
 
 ## Minimal Module Example
 
+`account_status.py`
+
 ```python
 """Purpose: Resolve account status based on domain rules."""
 
@@ -26,6 +28,8 @@ def resolve_account_state(account_id: AccountId, is_locked: bool) -> str:
 ## Minimal Test Example
 
 ```python
+from account_status import AccountId
+
 import pytest
 
 

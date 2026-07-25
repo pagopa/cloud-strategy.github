@@ -1,6 +1,6 @@
 # Python Script Layout And Templates
 
-Use this reference when you need the default folder layout, a repo-aligned toolkit layout, a starter entry point, a locked `requirements.txt`, or a `run.sh` launcher.
+Use this reference when you need the default folder layout, a repo-aligned toolkit layout, a starter entry point, a pip-managed locked `requirements.txt`, or a `run.sh` launcher.
 
 ## Default Layout
 
@@ -8,8 +8,8 @@ Use this reference when you need the default folder layout, a repo-aligned toolk
 repo-root/
 ├── {script_path}/
 │   ├── {script_name}.py
-│   ├── requirements.txt  # only when external packages are used
-│   └── run.sh            # only when external packages are used
+│   ├── requirements.txt  # only for pip-managed external packages
+│   └── run.sh            # only for pip-managed external packages
 └── tests/
     └── {script_path}/
         └── test_{script_name}.py
@@ -23,7 +23,7 @@ Use this when several operator-facing entrypoints share one dependency set and l
 repo-root/
 ├── .github/scripts/
 │   ├── run.sh
-│   ├── requirements.txt
+│   ├── requirements.txt  # shared pip lock
 │   ├── {tool_a}.py
 │   ├── {tool_b}.py
 │   └── lib/
@@ -36,7 +36,7 @@ repo-root/
 ```
 
 - Keep each entrypoint thin and import reusable helpers from the local `lib/` package.
-- Keep the dependency decision note and pinned hashes in the shared `requirements.txt`.
+- Keep the dependency decision note and the declared manager's canonical lock artifact in the shared toolkit.
 
 ## Minimal Python Entry Point
 
@@ -140,18 +140,23 @@ if __name__ == "__main__":
 ## Minimal Requirements Example
 
 ```text
+# requirements.in — illustrative input; generate requirements.txt before use
 # Dependency decision note
 # Candidates: standard library only, PyYAML, python-frontmatter
 # Final choice: PyYAML
 # Why: explicit YAML parsing without carrying a heavier content wrapper.
-
-# PyYAML 6.0.3
-PyYAML==6.0.3 \
-    --hash=sha256:00c4bdeba853cc34e7dd471f16b4114f4162dc03e6b7afcc2128711f0eca823c \
-    --hash=sha256:0150219816b6a1fa26fb4699fb7daa9caf09eb1999f3b70fb6e786805e80375a
+PyYAML==6.0.3
 ```
 
-Generate `requirements.txt` with `pip-compile --generate-hashes` or an equivalent workflow that locks the full dependency closure.
+Generate and validate the full pip lock with:
+
+```bash
+pip-compile --generate-hashes requirements.in
+python -m pip install --require-hashes -r requirements.txt
+```
+
+Generated lock output is intentionally not copied into this reusable template
+because valid wheel hashes vary by release and platform support.
 
 ## Minimal Launcher Example
 

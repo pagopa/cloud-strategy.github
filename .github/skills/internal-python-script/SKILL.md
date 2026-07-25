@@ -61,9 +61,18 @@ description: Use when creating, modifying, or reviewing directly executed Python
 - Keep comments, docstrings, logs, exceptions, and CLI output in English.
 - Use the repository-declared runtime before falling back to ambient `python3`.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
-- If external packages are introduced, keep exact pins and hashes in the owning requirements file.
+- Keep dependency changes in the repository-declared dependency manager and its canonical lock artifact.
 
-## Dependency decision note
+## Dependency policy
+
+Preserve the repository-declared dependency manager. For pip requirements, keep
+exact pins and hashes in the owning requirements file. For another declared
+dependency manager, update its canonical lock artifact and use its frozen or
+locked validation command.
+
+For pip requirements, generate the lock output with
+`pip-compile --generate-hashes` and validate it with
+`pip install --require-hashes -r requirements.txt`.
 
 When the Python baseline requires a dependency decision note, keep it short, for example:
 
@@ -76,13 +85,12 @@ Dependency decision note
 
 - Keep the note short and task-specific.
 - Compare the standard library with realistic third-party candidates.
-- If the final choice uses external libraries, create or update the local `requirements.txt` before finishing the task.
-- Keep exact pins and current hashes in `requirements.txt`. Use `pip-compile --generate-hashes` or an equivalent repository-approved workflow, then validate with `pip install --require-hashes -r requirements.txt` when the requirements file changes.
-- If several entrypoints share the same lock file, record the decision once at the shared toolkit `requirements.txt` rather than repeating it in every script.
+- If the final choice uses external libraries and no other dependency manager is declared, create or update the local `requirements.txt` before finishing the task; otherwise update the declared manager's canonical lock artifact.
+- If several entrypoints share the same pip lock file, record the decision once at the shared toolkit `requirements.txt` rather than repeating it in every script.
 
 ## Layout and templates
 
-Load `references/layout-and-templates.md` when you need the default folder layout, a repo-aligned multi-tool toolkit layout, a minimal entry point, a hash-locked `requirements.txt`, or the launcher pattern.
+Load `references/layout-and-templates.md` when you need the default folder layout, a repo-aligned multi-tool toolkit layout, a minimal entry point, a pip-managed hash-locked `requirements.txt`, or the launcher pattern.
 
 Load `references/reporting.md` when the script needs polished human-facing
 output, `rich` rendering, status tables, redaction, verbose diagnostics, or a
@@ -91,8 +99,7 @@ final operator summary.
 Keep these rules visible while drafting:
 
 - Use a dedicated tool folder or toolkit root rather than a loose top-level `.py` file.
-- Add `requirements.txt` and `run.sh` only when external packages are actually needed.
-- Generate `requirements.txt` with `pip-compile --generate-hashes` or an equivalent locked workflow.
+- Add a pip-managed `requirements.txt` and `run.sh` only when external packages are actually needed and no other dependency manager is declared.
 - Reuse an existing shared runner such as `.github/scripts/run.sh` instead of cloning bootstrap logic into every entrypoint.
 - Mirror script or toolkit coverage under the repository-root `tests/` tree; do not create ad-hoc test folders beside the tool.
 
@@ -120,6 +127,6 @@ Load `references/common-mistakes.md` for the full mistake table.
 
 - `python -m py_compile <script_name>.py` (syntax check)
 - `bash -n run.sh` (launcher syntax check, only when `run.sh` exists)
-- `pip install --require-hashes -r requirements.txt` (dependency integrity check, only when requirements change)
+- For pip-managed tools, run `pip install --require-hashes -r requirements.txt` when requirements change; for another declared manager, run its canonical frozen or locked validation command.
 - `pytest tests/` (run tests)
 - `python -m compileall <changed_paths>` or the repository's canonical shared runner when the tool already lives inside a maintained toolkit

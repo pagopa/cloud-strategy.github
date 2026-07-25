@@ -4,11 +4,12 @@
 | --- | --- | --- |
 | Business logic mixed with I/O (DB calls, HTTP) | Untestable, hard to refactor | Extract pure logic into service/domain modules |
 | Mutable default arguments (`def f(items=[])`) | Shared state between calls — classic Python gotcha | Use `None` default + create inside function |
-| Bare `except:` or `except Exception:` | Swallows `KeyboardInterrupt`, `SystemExit` | Catch specific exceptions |
+| bare `except:` | Also catches control-flow exceptions such as `KeyboardInterrupt` and `SystemExit` | Catch the narrowest expected exception |
+| Broad `except Exception` without handling, logging, or re-raise | Can hide ordinary application failures and leave partial work unexplained | Handle expected failures explicitly and let unexpected failures propagate |
 | No type hints on public API | Hard to understand contracts, no static analysis | Add type hints on function signatures |
 | Injecting every collaborator as a `*_fn` hook or alias shim | Hides real seams and makes call flow harder to follow | Inject only true external boundaries or variability points; call stable helpers directly |
 | Copying shared helper logic across modules | Fixes drift and behavior diverges across call sites | Define the helper once in the owning module and import it |
-| Updating dependency requirements without refreshed hashes | Reproducible installs break or drift silently | Regenerate exact pins and hashes, then validate with `pip install --require-hashes -r requirements.txt` |
+| Changing dependencies without updating the declared manager's lock artifact | Reproducible installs break or drift silently | Preserve the declared dependency manager; for pip, regenerate exact pins and hashes, and otherwise use its canonical frozen or locked validation command |
 | Tests that depend on execution order | Fragile test suite, non-deterministic failures | Each test must be self-contained |
 | Forcing async into CPU-bound or simple flows | Adds complexity without throughput benefit | Keep it synchronous unless I/O concurrency is the real bottleneck |
 | HTTP client pools smaller than worker or task concurrency | Work queues behind the pool and hides throughput bottlenecks | Size connection pools and limits to match max worker or async concurrency |
