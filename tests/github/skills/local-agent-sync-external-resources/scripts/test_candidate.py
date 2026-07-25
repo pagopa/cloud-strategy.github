@@ -216,6 +216,56 @@ def test_normalization_updates_name_and_declared_text_only(
     assert "superpowers-verification-before-completion" in content
 
 
+@pytest.mark.parametrize(
+    "canonical_name",
+    ("superpowers-brainstorming", "grill-me"),
+)
+def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
+    tmp_path: Path,
+    canonical_name: str,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = f".github/skills/{canonical_name}"
+    skill = candidate / local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        f"---\nname: {canonical_name}\n---\n"
+        "Ask clarifying questions one at a time.\n",
+        encoding="utf-8",
+    )
+    asset = ManagedAsset(
+        source="upstream",
+        upstream=f"skills/{canonical_name}",
+        local=local,
+        canonical_name=canonical_name,
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="upstream",
+                repository="https://example.com/upstream.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    content = skill.read_text(encoding="utf-8")
+    assert first_changed == (f"{local}/SKILL.md",)
+    assert second_changed == ()
+    assert content.count("Local guided-question contract") == 1
+    assert "numbered bulk question blocks" in content
+    assert "`Question`, `Recommendation`, `Why`, and `Default if accepted`" in content
+    assert "Keep each question, recommendation, and reason brief" in content
+    assert "overrides any earlier instruction to ask one question at a time" in content
+
+
 def test_normalization_rewrites_declared_mattpocock_skill_references(
     tmp_path: Path,
 ) -> None:

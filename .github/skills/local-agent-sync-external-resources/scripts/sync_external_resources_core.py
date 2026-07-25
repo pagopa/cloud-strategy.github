@@ -424,6 +424,41 @@ _SLASH_SKILL_REF_RE = re.compile(
 _BACKTICK_SKILL_REF_RE = re.compile(
     r"(?<![A-Za-z0-9_-])`(?P<name>[a-z0-9][a-z0-9-]*)`"
 )
+_GUIDED_QUESTION_SKILLS = frozenset({"superpowers-brainstorming", "grill-me"})
+_GUIDED_QUESTION_CONTRACT_START = "<!-- local-sync:guided-questions:start -->"
+_GUIDED_QUESTION_CONTRACT_END = "<!-- local-sync:guided-questions:end -->"
+_GUIDED_QUESTION_CONTRACT_RE = re.compile(
+    re.escape(_GUIDED_QUESTION_CONTRACT_START)
+    + r".*?"
+    + re.escape(_GUIDED_QUESTION_CONTRACT_END),
+    re.DOTALL,
+)
+_GUIDED_QUESTION_CONTRACT = f"""\
+{_GUIDED_QUESTION_CONTRACT_START}
+## Local guided-question contract
+
+This repository-owned contract overrides any earlier instruction to ask one
+question at a time.
+
+- Ask all currently known questions in numbered bulk question blocks.
+- Use `Question`, `Recommendation`, `Why`, and `Default if accepted` for every
+  numbered question.
+- Make `Recommendation` the suggested answer and `Why` its concrete rationale.
+- Keep each question, recommendation, and reason brief, clear, and
+  decision-ready.
+- Put unresolved follow-ups in another numbered block. If only one blocking
+  question remains, present it as a numbered one-item block.
+{_GUIDED_QUESTION_CONTRACT_END}"""
+
+
+def _enforce_guided_question_contract(content: str) -> str:
+    if _GUIDED_QUESTION_CONTRACT_RE.search(content):
+        return _GUIDED_QUESTION_CONTRACT_RE.sub(
+            _GUIDED_QUESTION_CONTRACT,
+            content,
+            count=1,
+        )
+    return content.rstrip() + "\n\n" + _GUIDED_QUESTION_CONTRACT + "\n"
 
 
 def normalize_candidate(
@@ -494,6 +529,12 @@ def normalize_candidate(
                         + "`",
                         content,
                     )
+
+            if (
+                asset.canonical_name in _GUIDED_QUESTION_SKILLS
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_guided_question_contract(content)
 
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
