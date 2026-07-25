@@ -8,9 +8,7 @@ REPO_ROOT = next(
 BUNDLE_ROOT = REPO_ROOT / ".github/skills/internal-skill-creator"
 SKILL_PATH = BUNDLE_ROOT / "SKILL.md"
 OPENAI_PATH = BUNDLE_ROOT / "agents/openai.yaml"
-REFERENCE_PATH = (
-    BUNDLE_ROOT / "references" / "authoring-and-evaluation.md"
-)
+REFERENCE_PATH = BUNDLE_ROOT / "references" / "authoring-and-evaluation.md"
 
 
 def workflow_text() -> str:
@@ -33,9 +31,9 @@ def test_material_work_uses_core_method_before_local_evaluation() -> None:
 
 def test_local_evaluation_stage_is_evidence_gated() -> None:
     workflow = workflow_text()
-    evaluation = workflow.split(
-        "### 3. Proportional evaluation", 1
-    )[1].split("### 4. Repository closure", 1)[0]
+    evaluation = workflow.split("### 3. Proportional evaluation", 1)[1].split(
+        "### 4. Repository closure", 1
+    )[0]
     normalized = " ".join(evaluation.split())
     assert "references/authoring-and-evaluation.md" in normalized
     assert "applicable evaluation branches" in normalized
@@ -93,12 +91,8 @@ def test_local_closure_keeps_repository_specific_checks() -> None:
 
 
 def test_redundant_local_references_are_removed() -> None:
-    assert not (
-        BUNDLE_ROOT / "references/writing-skills-checklist.md"
-    ).exists()
-    assert not (
-        BUNDLE_ROOT / "references/script-output-contract.md"
-    ).exists()
+    assert not (BUNDLE_ROOT / "references/writing-skills-checklist.md").exists()
+    assert not (BUNDLE_ROOT / "references/script-output-contract.md").exists()
 
 
 def test_default_prompt_names_core_method_before_local_closure() -> None:

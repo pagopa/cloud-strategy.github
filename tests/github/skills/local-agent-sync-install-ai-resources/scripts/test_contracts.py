@@ -97,8 +97,7 @@ def test_agent_discovery_excludes_local_agents_and_keeps_runtime_targets(
     tmp_path: Path,
 ) -> None:
     references = (
-        tmp_path
-        / ".github/skills/local-agent-sync-install-ai-resources/references"
+        tmp_path / ".github/skills/local-agent-sync-install-ai-resources/references"
     )
     references.mkdir(parents=True)
     (references / "home-sync-catalog.yaml").write_text(
@@ -107,7 +106,9 @@ def test_agent_discovery_excludes_local_agents_and_keeps_runtime_targets(
     )
     agents_root = tmp_path / ".github/agents"
     agents_root.mkdir(parents=True)
-    (agents_root / "review.agent.md").write_text("---\nname: review\n---\n", encoding="utf-8")
+    (agents_root / "review.agent.md").write_text(
+        "---\nname: review\n---\n", encoding="utf-8"
+    )
     (agents_root / "local-review.agent.md").write_text(
         "---\nname: local-review\n---\n", encoding="utf-8"
     )

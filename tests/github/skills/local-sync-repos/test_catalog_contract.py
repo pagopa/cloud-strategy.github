@@ -47,7 +47,13 @@ def test_retired_sync_identifiers_have_zero_matches() -> None:
     matches: list[str] = []
     this_file = Path(__file__).resolve()
     for path in REPO_ROOT.rglob("*"):
-        if not path.is_file() or ".git" in path.parts or "tmp" in path.parts or "graphify-out" in path.parts or "__pycache__" in path.parts:
+        if (
+            not path.is_file()
+            or ".git" in path.parts
+            or "tmp" in path.parts
+            or "graphify-out" in path.parts
+            or "__pycache__" in path.parts
+        ):
             continue
         if path.resolve() == this_file:
             continue
@@ -58,14 +64,10 @@ def test_retired_sync_identifiers_have_zero_matches() -> None:
 
 
 def test_retired_bundle_paths_are_absent() -> None:
-    missing = [
-        p for p in RETIRED_BUNDLE_PATHS if (REPO_ROOT / p).exists()
-    ]
+    missing = [p for p in RETIRED_BUNDLE_PATHS if (REPO_ROOT / p).exists()]
     assert missing == []
 
 
 def test_new_bundle_paths_are_present() -> None:
-    missing = [
-        p for p in NEW_BUNDLE_PATHS if not (REPO_ROOT / p).exists()
-    ]
+    missing = [p for p in NEW_BUNDLE_PATHS if not (REPO_ROOT / p).exists()]
     assert missing == []

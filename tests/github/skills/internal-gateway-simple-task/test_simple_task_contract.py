@@ -19,20 +19,16 @@ SUPPORT_ROUTING_PATH = (
     / ".github/skills/internal-gateway-simple-task/references/support-routing.md"
 )
 SIMPLE_LANES_PATH = (
-    REPO_ROOT
-    / ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
+    REPO_ROOT / ".github/skills/internal-gateway-simple-task/references/simple-lanes.md"
 )
 CLARIFICATION_PATH = (
     REPO_ROOT
     / ".github/skills/internal-gateway-simple-task/references/clarification-gate.md"
 )
 PLAN_MODE_PATH = (
-    REPO_ROOT
-    / ".github/skills/internal-gateway-simple-task/references/plan-mode.md"
+    REPO_ROOT / ".github/skills/internal-gateway-simple-task/references/plan-mode.md"
 )
-ROOT_AGENT_PATH = (
-    REPO_ROOT / ".github/agents/internal-gateway-simple-task.agent.md"
-)
+ROOT_AGENT_PATH = REPO_ROOT / ".github/agents/internal-gateway-simple-task.agent.md"
 RESOLVE_SCRIPT_PATH = (
     REPO_ROOT
     / ".github/skills/internal-gateway-simple-task/scripts/resolve_simple_task.py"

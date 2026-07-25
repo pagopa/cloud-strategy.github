@@ -2,21 +2,17 @@ from pathlib import Path
 
 import yaml
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SKILL_ROOT = (
-    REPO_ROOT / ".github/skills/internal-gateway-codebase-improvement"
-)
+SKILL_ROOT = REPO_ROOT / ".github/skills/internal-gateway-codebase-improvement"
 SKILL_PATH = SKILL_ROOT / "SKILL.md"
 OPENAI_PATH = SKILL_ROOT / "agents/openai.yaml"
 CONTRACT_PATH = REPO_ROOT / "INTERNAL_CONTRACT.md"
 AGENT_WRAPPER = (
-    REPO_ROOT
-    / ".github/agents/internal-gateway-codebase-improvement.agent.md"
+    REPO_ROOT / ".github/agents/internal-gateway-codebase-improvement.agent.md"
 )
 
 
@@ -28,9 +24,7 @@ def _frontmatter() -> dict[str, object]:
 def test_skill_is_manual_only_in_both_metadata_surfaces() -> None:
     assert _frontmatter()["name"] == "internal-gateway-codebase-improvement"
     assert _frontmatter()["disable-model-invocation"] is True
-    policy = yaml.safe_load(
-        OPENAI_PATH.read_text(encoding="utf-8")
-    )["policy"]
+    policy = yaml.safe_load(OPENAI_PATH.read_text(encoding="utf-8"))["policy"]
     assert policy["allow_implicit_invocation"] is False
 
 

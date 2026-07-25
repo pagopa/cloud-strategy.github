@@ -158,7 +158,10 @@ REMOVED_SECTION_HEADINGS = (
 def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
     for skill_id in LANE_SKILL_IDS:
         skill_dir = REPO_ROOT / ".github/skills" / skill_id
-        text_paths = [skill_dir / "SKILL.md", *sorted(skill_dir.glob("references/*.md"))]
+        text_paths = [
+            skill_dir / "SKILL.md",
+            *sorted(skill_dir.glob("references/*.md")),
+        ]
         for text_path in text_paths:
             skill_text = text_path.read_text()
             for heading in REMOVED_SECTION_HEADINGS:

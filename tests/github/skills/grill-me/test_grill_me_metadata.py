@@ -2,7 +2,6 @@ from pathlib import Path
 
 import yaml
 
-
 SKILL_ROOT = Path(__file__).parents[4] / ".github" / "skills" / "grill-me"
 
 
@@ -12,4 +11,7 @@ def test_grill_me_metadata_identifies_the_interview_skill() -> None:
     )["interface"]
 
     assert interface["display_name"] == "Grill Me"
-    assert interface["short_description"] == "Relentless interview to sharpen a plan or design"
+    assert (
+        interface["short_description"]
+        == "Relentless interview to sharpen a plan or design"
+    )

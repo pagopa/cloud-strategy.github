@@ -3,7 +3,6 @@ from pathlib import Path
 
 import yaml
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -164,7 +163,10 @@ REMOVED_SECTION_HEADINGS = (
 def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
     for skill_id in LANE_SKILL_IDS:
         skill_dir = REPO_ROOT / ".github/skills" / skill_id
-        text_paths = [skill_dir / "SKILL.md", *sorted(skill_dir.glob("references/*.md"))]
+        text_paths = [
+            skill_dir / "SKILL.md",
+            *sorted(skill_dir.glob("references/*.md")),
+        ]
         for text_path in text_paths:
             skill_text = text_path.read_text()
             for heading in REMOVED_SECTION_HEADINGS:
@@ -186,9 +188,7 @@ def test_specialist_descriptions_carry_positive_and_negative_triggers() -> None:
             continue
         assert name in EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES
         description = frontmatter["description"]
-        assert description.startswith(
-            EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES[name]
-        )
+        assert description.startswith(EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES[name])
         assert "Do not use" in description
 
 
@@ -200,9 +200,7 @@ def test_inventory_lists_only_the_canonical_internal_azure_bundle() -> None:
 
 
 def test_repo_profiles_reference_the_canonical_internal_azure_bundle() -> None:
-    profiles = yaml.safe_load(
-        (REPO_ROOT / ".github/repo-profiles.yml").read_text()
-    )
+    profiles = yaml.safe_load((REPO_ROOT / ".github/repo-profiles.yml").read_text())
     azure_skills = profiles["profiles"]["azure-platform"]["recommended_skills"]
 
     assert "skills/internal-azure/SKILL.md" in azure_skills

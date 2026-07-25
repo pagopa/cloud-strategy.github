@@ -11,6 +11,7 @@ REPO_ROOT = next(
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-sync-repos/scripts"
 
 import sys
+
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
 from sync_contract import (  # noqa: E402
@@ -21,7 +22,6 @@ from sync_contract import (  # noqa: E402
     dirty_paths,
     plan_fingerprint,
 )
-
 
 MANAGED_COPY_PATHS_EXPECTED = (
     "AGENTS.md",
@@ -175,12 +175,18 @@ def test_identical_files_produce_no_mutation(
         target_file = target_repo / relative
         target_file.parent.mkdir(parents=True, exist_ok=True)
         target_file.write_bytes((source_repo / relative).read_bytes())
-    instruction_src = source_repo / ".github" / "instructions" / "internal-python.instructions.md"
-    instruction_tgt = target_repo / ".github" / "instructions" / "internal-python.instructions.md"
+    instruction_src = (
+        source_repo / ".github" / "instructions" / "internal-python.instructions.md"
+    )
+    instruction_tgt = (
+        target_repo / ".github" / "instructions" / "internal-python.instructions.md"
+    )
     instruction_tgt.parent.mkdir(parents=True, exist_ok=True)
     instruction_tgt.write_bytes(instruction_src.read_bytes())
     (target_repo / "AGENTS.local.md").write_text(
-        (REPO_ROOT / ".github/skills/local-sync-repos/templates/AGENTS.local.md").read_text(),
+        (
+            REPO_ROOT / ".github/skills/local-sync-repos/templates/AGENTS.local.md"
+        ).read_text(),
         encoding="utf-8",
     )
     plan = build_plan(source_repo, target_repo)
@@ -203,9 +209,7 @@ def test_missing_source_path_raises_source_contract_error(
         build_plan(empty_source, target_repo)
 
 
-def test_fingerprint_is_deterministic(
-    source_repo: Path, target_repo: Path
-) -> None:
+def test_fingerprint_is_deterministic(source_repo: Path, target_repo: Path) -> None:
     first = build_plan(source_repo, target_repo)
     second = build_plan(source_repo, target_repo)
     assert first.fingerprint == second.fingerprint

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[4]
 SKILL_DIR = ROOT / ".github" / "skills" / "internal-agent-creator"
 

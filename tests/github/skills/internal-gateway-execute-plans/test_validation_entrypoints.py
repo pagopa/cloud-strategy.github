@@ -1,5 +1,5 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 REPO_ROOT = next(
     parent
@@ -10,10 +10,7 @@ REPO_ROOT = next(
 
 def test_make_completion_cli_exists() -> None:
     makefile = (REPO_ROOT / "Makefile").read_text()
-    expected = (
-        ".github/skills/internal-gateway-execute-plans/"
-        "scripts/plan_execution.py"
-    )
+    expected = ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
     assert expected in makefile
     assert (REPO_ROOT / expected).is_file()
 

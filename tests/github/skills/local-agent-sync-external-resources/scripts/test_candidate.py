@@ -66,16 +66,12 @@ def _write_source_metadata(sources_root: Path, source: ManagedSource) -> None:
     source_dir = sources_root / source.source_id
     source_dir.mkdir(parents=True, exist_ok=True)
     upstream_paths = sorted(asset.upstream for asset in source.assets)
-    digest = hashlib.sha256(
-        ",".join(upstream_paths).encode("utf-8")
-    ).hexdigest()
+    digest = hashlib.sha256(",".join(upstream_paths).encode("utf-8")).hexdigest()
     tsv = (
         f"source_id\trepository\tref\tpaths_sha256\n"
         f"{source.source_id}\t{source.repository}\t{source.ref}\t{digest}\n"
     )
-    (source_dir / ".external-resource-source.tsv").write_text(
-        tsv, encoding="utf-8"
-    )
+    (source_dir / ".external-resource-source.tsv").write_text(tsv, encoding="utf-8")
 
 
 def _example_asset(local: str = ".github/skills/example") -> ManagedAsset:
@@ -229,8 +225,7 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     skill = candidate / local / "SKILL.md"
     skill.parent.mkdir(parents=True)
     skill.write_text(
-        f"---\nname: {canonical_name}\n---\n"
-        "Ask clarifying questions one at a time.\n",
+        f"---\nname: {canonical_name}\n---\nAsk clarifying questions one at a time.\n",
         encoding="utf-8",
     )
     asset = ManagedAsset(
@@ -670,14 +665,26 @@ def test_grill_with_docs_normalizes_to_mattpocock_wrapper_delegating_to_grill_me
 ) -> None:
     workspace = tmp_path / "workspace"
     sources_root = workspace / "sources"
-    grill_dir = sources_root / "mattpocock-skills" / "skills" / "engineering" / "grill-with-docs"
+    grill_dir = (
+        sources_root
+        / "mattpocock-skills"
+        / "skills"
+        / "engineering"
+        / "grill-with-docs"
+    )
     grill_dir.mkdir(parents=True)
     (grill_dir / "SKILL.md").write_text(
         "---\nname: grill-with-docs\n---\n"
         "Run a `/grilling` session, using the `/domain-modeling` skill.\n",
         encoding="utf-8",
     )
-    domain_dir = sources_root / "mattpocock-skills" / "skills" / "engineering" / "domain-modeling"
+    domain_dir = (
+        sources_root
+        / "mattpocock-skills"
+        / "skills"
+        / "engineering"
+        / "domain-modeling"
+    )
     domain_dir.mkdir(parents=True)
     (domain_dir / "SKILL.md").write_text(
         "---\nname: domain-modeling\n---\nDomain modeling.\n",
@@ -765,7 +772,10 @@ def test_renamed_managed_file_is_reported_once_with_new_path(git_repo: Path) -> 
     (target / "SKILL.md").write_text("---\nname: example\n---\n", encoding="utf-8")
     _commit_all(git_repo)
 
-    _run_git(git_repo, ["mv", ".github/skills/example/SKILL.md", ".github/skills/example/RENAMED.md"])
+    _run_git(
+        git_repo,
+        ["mv", ".github/skills/example/SKILL.md", ".github/skills/example/RENAMED.md"],
+    )
 
     dirty = find_dirty_targets(git_repo, (_example_asset(),))
 

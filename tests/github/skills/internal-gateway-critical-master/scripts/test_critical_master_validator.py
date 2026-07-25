@@ -59,24 +59,21 @@ def test_legacy_section_report_is_rejected() -> None:
 
 def test_missing_plan_marker_detected() -> None:
     findings = VALIDATOR_MODULE.validate_output(
-        "⚠️ **Critique:** Something is wrong.\n"
-        "✅ **Advice:** Do this instead.\n"
+        "⚠️ **Critique:** Something is wrong.\n✅ **Advice:** Do this instead.\n"
     )
     assert "missing-plan" in {finding.code for finding in findings}
 
 
 def test_missing_critique_marker_detected() -> None:
     findings = VALIDATOR_MODULE.validate_output(
-        "🎯 **Plan:** Do something.\n"
-        "✅ **Advice:** Do this instead.\n"
+        "🎯 **Plan:** Do something.\n✅ **Advice:** Do this instead.\n"
     )
     assert "missing-critique" in {finding.code for finding in findings}
 
 
 def test_missing_advice_marker_detected() -> None:
     findings = VALIDATOR_MODULE.validate_output(
-        "🎯 **Plan:** Do something.\n"
-        "⚠️ **Critique:** Something is wrong.\n"
+        "🎯 **Plan:** Do something.\n⚠️ **Critique:** Something is wrong.\n"
     )
     assert "missing-advice" in {finding.code for finding in findings}
 
@@ -130,8 +127,7 @@ def test_more_than_five_lines_detected() -> None:
         "❓ **Question:** What if?\n"
     )
     assert any(
-        finding.code in ("card-line-count", "duplicate-marker")
-        for finding in findings
+        finding.code in ("card-line-count", "duplicate-marker") for finding in findings
     )
 
 
@@ -179,9 +175,7 @@ def test_localized_labels_accepted_when_emoji_order_valid() -> None:
         "⚠️ **Critica:** La prova centrale scompare.\n"
         "✅ **Consiglio:** Mantenere la CI.\n"
     )
-    blocking_codes = {
-        f.code for f in findings if f.severity == "blocking"
-    }
+    blocking_codes = {f.code for f in findings if f.severity == "blocking"}
     assert not blocking_codes
 
 
@@ -239,7 +233,8 @@ def test_cli_format_compact_returns_status_and_counts() -> None:
 
 def test_cli_unreadable_file_exits_nonzero_with_stderr() -> None:
     result = run_validator(
-        "--file", "/nonexistent/path/missing_file.md",
+        "--file",
+        "/nonexistent/path/missing_file.md",
     )
     assert result.returncode != 0
     assert result.stderr.strip() != ""

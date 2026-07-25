@@ -19,12 +19,6 @@ REPO_ROOT = next(
 SCRIPT_DIR = REPO_ROOT / ".github/skills/local-agent-sync-external-resources/scripts"
 sys.path.insert(0, SCRIPT_DIR.as_posix())
 
-from sync_external_resources_core import (  # noqa: E402
-    ManagedAsset,
-    ManagedResources,
-    ManagedSource,
-    validate_prepared_sources,
-)
 from source_prepare_core import (  # noqa: E402
     PrepareSourceResult,
     _build_fetch_command,
@@ -33,7 +27,12 @@ from source_prepare_core import (  # noqa: E402
     _validate_upstream_paths,
     prepare_sources,
 )
-
+from sync_external_resources_core import (  # noqa: E402
+    ManagedAsset,
+    ManagedResources,
+    ManagedSource,
+    validate_prepared_sources,
+)
 
 _FULL_SHA40 = "a" * 40
 
@@ -434,10 +433,12 @@ def test_advertised_ref_fallback_is_reported_as_advertised_ref(
     resources = ManagedResources(sources=(source,), replacements=(), watchlist=())
 
     import source_prepare_core
+
     original_fetch_sha = source_prepare_core._fetch_sha
 
     def failing_fetch_sha(cache: Path, sha: str) -> None:
         from sync_external_resources_core import SyncCommandError
+
         raise SyncCommandError(["git", "fetch"], 128, "simulated failure")
 
     monkeypatch.setattr(source_prepare_core, "_fetch_sha", failing_fetch_sha)
@@ -446,7 +447,9 @@ def test_advertised_ref_fallback_is_reported_as_advertised_ref(
 
     assert results[0].cache_status == "fetched"
     assert results[0].fetch_strategy == "advertised-ref"
-    assert (sources_root / "strict-source" / "skills" / "target-skill" / "SKILL.md").exists()
+    assert (
+        sources_root / "strict-source" / "skills" / "target-skill" / "SKILL.md"
+    ).exists()
 
 
 def _single_source_resources(remote_path: Path, commit_sha: str) -> ManagedResources:
@@ -480,14 +483,14 @@ def test_rebuild_cache_refetches_even_when_pin_is_present(
     warm = prepare_sources(resources, workspace, sources_root)
     assert warm[0].cache_status == "fetched"
 
-    rebuilt = prepare_sources(
-        resources, workspace, sources_root, rebuild_cache=True
-    )
+    rebuilt = prepare_sources(resources, workspace, sources_root, rebuild_cache=True)
 
     assert rebuilt[0].cache_status == "rebuilt"
     assert rebuilt[0].fetch_strategy == "direct-sha"
     assert rebuilt[0].cache_bytes_added > 0
-    assert (sources_root / "test-source" / "skills" / "target-skill" / "SKILL.md").exists()
+    assert (
+        sources_root / "test-source" / "skills" / "target-skill" / "SKILL.md"
+    ).exists()
 
 
 def test_rebuild_cache_leaves_no_staging_directories(
@@ -519,7 +522,9 @@ import source_prepare_core  # noqa: E402
 def test_network_fetch_uses_extended_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[tuple[list[str], int]] = []
 
-    def fake_run_command(command: list[str], cwd: Path | None = None, timeout: int = 60):
+    def fake_run_command(
+        command: list[str], cwd: Path | None = None, timeout: int = 60
+    ):
         calls.append((command, timeout))
         return subprocess.CompletedProcess(command, 0, "", "")
 

@@ -41,7 +41,9 @@ def test_plan_outside_retained_plan_directory_is_rejected(tmp_path: Path) -> Non
     assert {item.code for item in findings} >= {"plan-outside-retained-directory"}
 
 
-def test_status_rejects_unknown_state_and_missing_headings(invalid_status: Path) -> None:
+def test_status_rejects_unknown_state_and_missing_headings(
+    invalid_status: Path,
+) -> None:
     findings = validate_status(invalid_status)
     codes = {item.code for item in findings}
     assert "unknown-status" in codes
@@ -57,9 +59,7 @@ def test_resume_rejects_plan_fingerprint_drift(
 
 
 def test_compact_output_is_bounded() -> None:
-    payload = build_compact_payload(
-        [Finding("missing-heading", "detail", "blocking")]
-    )
+    payload = build_compact_payload([Finding("missing-heading", "detail", "blocking")])
     assert payload == {
         "status": "failed",
         "finding_counts": {"total": 1, "blocking": 1, "notice": 0},

@@ -99,9 +99,7 @@ def test_lens_playbook_keeps_strategic_depth() -> None:
         assert heading in playbook_text
 
 
-GCP_SKILL_PATHS = sorted(
-    (REPO_ROOT / ".github/skills").glob("internal-gcp*/SKILL.md")
-)
+GCP_SKILL_PATHS = sorted((REPO_ROOT / ".github/skills").glob("internal-gcp*/SKILL.md"))
 LEGACY_SKILL_ID = "internal-gcp-" + "strategic"
 FORBIDDEN_GENERIC_REFERENCES = (
     "internal-bash-script",
@@ -162,7 +160,10 @@ REMOVED_SECTION_HEADINGS = (
 def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
     for skill_id in LANE_SKILL_IDS:
         skill_dir = REPO_ROOT / ".github/skills" / skill_id
-        text_paths = [skill_dir / "SKILL.md", *sorted(skill_dir.glob("references/*.md"))]
+        text_paths = [
+            skill_dir / "SKILL.md",
+            *sorted(skill_dir.glob("references/*.md")),
+        ]
         for text_path in text_paths:
             skill_text = text_path.read_text()
             for heading in REMOVED_SECTION_HEADINGS:
@@ -184,9 +185,7 @@ def test_specialist_descriptions_carry_positive_and_negative_triggers() -> None:
             continue
         assert name in EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES
         description = frontmatter["description"]
-        assert description.startswith(
-            EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES[name]
-        )
+        assert description.startswith(EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES[name])
         assert "Do not use" in description
 
 

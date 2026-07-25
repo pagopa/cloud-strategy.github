@@ -27,7 +27,9 @@ SKILL_TEXT = _load_text("SKILL.md")
 CONTRACT_TEXT = _load_text("references/output-contract.md")
 AGENT_YAML = _load_text("agents/openai.yaml")
 FIXTURE_TEXT = _load_text("fixtures/critical_output_valid.md")
-AGENT_MD_TEXT = (REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md").read_text(encoding="utf-8")
+AGENT_MD_TEXT = (
+    REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md"
+).read_text(encoding="utf-8")
 
 EXPECTED_OUTCOMES = {
     "reformulate-plan",
@@ -92,11 +94,12 @@ def test_skill_contains_continue_critical_with_new_evidence() -> None:
 
 
 def test_skill_outcome_table_matches_allowed_outcomes() -> None:
-    table_rows = re.findall(
-        r"^\|\s*`([^`]+)`\s*\|", SKILL_TEXT, re.MULTILINE
-    )
+    table_rows = re.findall(r"^\|\s*`([^`]+)`\s*\|", SKILL_TEXT, re.MULTILINE)
     outcome_values = {
-        row.strip() for row in table_rows if row.strip() in {
+        row.strip()
+        for row in table_rows
+        if row.strip()
+        in {
             "reformulate-plan",
             "de-escalate-to-simple",
             "route-to-execution-owner",
@@ -117,6 +120,7 @@ def test_agent_boundary_keeps_internal_record_hidden() -> None:
 
 def _load_routing_cases() -> list[dict]:
     import json
+
     path = BUNDLE / "fixtures/routing_cases.json"
     return json.loads(path.read_text(encoding="utf-8"))
 

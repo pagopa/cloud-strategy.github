@@ -3,7 +3,6 @@ from pathlib import Path
 
 import yaml
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -88,9 +87,7 @@ def test_routing_matrix_covers_positive_negative_and_multi_domain_cases() -> Non
         assert heading in matrix_text
 
 
-AWS_SKILL_PATHS = sorted(
-    (REPO_ROOT / ".github/skills").glob("internal-aws*/SKILL.md")
-)
+AWS_SKILL_PATHS = sorted((REPO_ROOT / ".github/skills").glob("internal-aws*/SKILL.md"))
 LEGACY_SKILL_ID = "internal-aws-" + "strategic"
 FORBIDDEN_GENERIC_REFERENCES = (
     "internal-bash-script",
@@ -147,7 +144,10 @@ REMOVED_SECTION_HEADINGS = (
 def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
     for skill_id in LANE_SKILL_IDS:
         skill_dir = REPO_ROOT / ".github/skills" / skill_id
-        text_paths = [skill_dir / "SKILL.md", *sorted(skill_dir.glob("references/*.md"))]
+        text_paths = [
+            skill_dir / "SKILL.md",
+            *sorted(skill_dir.glob("references/*.md")),
+        ]
         for text_path in text_paths:
             skill_text = text_path.read_text()
             for heading in REMOVED_SECTION_HEADINGS:

@@ -480,8 +480,10 @@ baseline. If it does not exist, continue without error.
     )
     capsys.readouterr()
 
-    assert (home / ".agents/AGENTS.md").read_text(encoding="utf-8").endswith(
-        "If it does not exist, continue without error.\n"
+    assert (
+        (home / ".agents/AGENTS.md")
+        .read_text(encoding="utf-8")
+        .endswith("If it does not exist, continue without error.\n")
     )
 
 

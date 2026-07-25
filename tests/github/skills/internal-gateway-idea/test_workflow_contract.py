@@ -70,8 +70,7 @@ def test_idea_agent_allows_model_invocation() -> None:
 
 def test_bundle_docs_use_repository_root_validation_commands() -> None:
     root_command = (
-        "python3 "
-        ".github/skills/internal-gateway-idea/scripts/audit_workflow.py"
+        "python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py"
     )
     assert root_command in SKILL_PATH.read_text()
     assert root_command in WORKFLOW_PATH.read_text()

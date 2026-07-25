@@ -1,5 +1,5 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 REPO_ROOT = next(
     parent
@@ -32,7 +32,9 @@ def test_bundle_delegates_execution_and_keeps_local_guardrails() -> None:
 
 def test_status_names_and_replacement_scope_are_exact() -> None:
     text = (BUNDLE / "references/status-contract.md").read_text()
-    assert set(re.findall(r"`(DONE|PARTIAL|BLOCKED|NEEDS_REVIEW)`", text)) == set(ALLOWED_STATUSES)
+    assert set(re.findall(r"`(DONE|PARTIAL|BLOCKED|NEEDS_REVIEW)`", text)) == set(
+        ALLOWED_STATUSES
+    )
     assert "<plan-basename>.*.md" not in text
     assert "exact allowed sibling filenames" in text
 

@@ -19,7 +19,6 @@ from sync_external_resources_core import (  # noqa: E402
     validate_override_patches,
 )
 
-
 _COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 
 _FULL_SHA40 = "a" * 40
@@ -152,9 +151,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         for item in manifest.watchlist
         if item.source_family == "mattpocock/skills"
     } >= {"prototype", "triage", "to-tickets", "qa"}
-    assert {
-        item.canonical_name for item in matt_source.assets
-    } >= {
+    assert {item.canonical_name for item in matt_source.assets} >= {
         "mattpocock-grill-with-docs",
         "mattpocock-domain-modeling",
         "mattpocock-codebase-design",
@@ -167,9 +164,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         "mattpocock-wayfinder",
         "mattpocock-writing-great-skills",
     }
-    assert "grill-me" not in {
-        item.canonical_name for item in matt_source.assets
-    }
+    assert "grill-me" not in {item.canonical_name for item in matt_source.assets}
     assert {
         (source.repository, asset.upstream, asset.local, asset.canonical_name)
         for source in manifest.sources
@@ -328,36 +323,25 @@ def test_mattpocock_skill_creator_review_keeps_invocation_override(
     repo_root: Path,
 ) -> None:
     overrides_path = (
-        repo_root
-        / ".github/skills/local-agent-sync-external-resources/references/"
+        repo_root / ".github/skills/local-agent-sync-external-resources/references/"
         "imported-asset-overrides.yaml"
     )
-    bundle_root = (
-        repo_root / ".github/skills/local-agent-sync-external-resources"
-    )
+    bundle_root = repo_root / ".github/skills/local-agent-sync-external-resources"
     overrides = load_overrides(overrides_path)
     by_target = {override.target_path: override for override in overrides}
 
     expected = {
-        ".github/skills/mattpocock-writing-great-skills/SKILL.md":
-            "mattpocock-writing-great-skills-delegated-invocation",
+        ".github/skills/mattpocock-writing-great-skills/SKILL.md": "mattpocock-writing-great-skills-delegated-invocation",
     }
     for target, override_id in expected.items():
         override = by_target[target]
         assert override.override_id == override_id
-        digest = hashlib.sha256(
-            (repo_root / target).read_bytes()
-        ).hexdigest()
+        digest = hashlib.sha256((repo_root / target).read_bytes()).hexdigest()
         assert override.expected_content_hash == digest
-        patch = (bundle_root / override.patch_path).read_text(
-            encoding="utf-8"
-        )
+        patch = (bundle_root / override.patch_path).read_text(encoding="utf-8")
         assert "-disable-model-invocation: true" in patch
         assert "internal-skill-creator" in patch
-    assert (
-        ".github/skills/anthropic-skill-creator/SKILL.md"
-        not in by_target
-    )
+    assert ".github/skills/anthropic-skill-creator/SKILL.md" not in by_target
 
 
 def test_manifest_rejects_undeclared_backtick_skill_reference(tmp_path: Path) -> None:

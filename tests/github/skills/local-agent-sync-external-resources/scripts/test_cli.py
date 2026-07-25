@@ -20,14 +20,13 @@ def _write_source_metadata_for_fixture(
     source_dir = sources_root / source_id
     source_dir.mkdir(parents=True, exist_ok=True)
     import hashlib
+
     digest = hashlib.sha256(upstream.encode("utf-8")).hexdigest()
     tsv = (
         f"source_id\trepository\tref\tpaths_sha256\n"
         f"{source_id}\t{repository}\t{ref}\t{digest}\n"
     )
-    (source_dir / ".external-resource-source.tsv").write_text(
-        tsv, encoding="utf-8"
-    )
+    (source_dir / ".external-resource-source.tsv").write_text(tsv, encoding="utf-8")
 
 
 def _run_git(cwd: Path, args: list[str]) -> None:
@@ -260,9 +259,7 @@ overrides: []
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
     external_sources_root = tmp_path / "external-sources"
-    external_sources = (
-        external_sources_root / "test-source" / "skills" / "example"
-    )
+    external_sources = external_sources_root / "test-source" / "skills" / "example"
     external_sources.mkdir(parents=True)
     (external_sources / "SKILL.md").write_text(
         "---\nname: example\n---\nNew content.\n", encoding="utf-8"
@@ -503,7 +500,9 @@ watchlist: []
     assert "source\ttest-source" in first.stdout
     assert "metric\ttest-source.materialized_files\tok" in first.stdout
 
-    snapshot_skill = workspace / "sources" / "test-source" / "skills" / "example" / "SKILL.md"
+    snapshot_skill = (
+        workspace / "sources" / "test-source" / "skills" / "example" / "SKILL.md"
+    )
     assert snapshot_skill.exists()
     assert not (workspace / "sources" / "test-source" / "decoy.bin").exists()
 
@@ -537,9 +536,7 @@ def test_owner_docs_state_prepare_is_the_only_network_mode(
         "pinned",
         "no package",
     ):
-        assert phrase.lower() in combined.lower(), (
-            f"Owner docs must mention {phrase!r}"
-        )
+        assert phrase.lower() in combined.lower(), f"Owner docs must mention {phrase!r}"
 
 
 def test_bundle_exposes_one_public_cli(repo_root: Path) -> None:
@@ -721,8 +718,8 @@ def test_invalid_manifest_emits_blocker_not_traceback(
 def test_prepare_tsv_metric_rows_use_status_column_for_status(
     tmp_path: Path, repo_root: Path
 ) -> None:
-    from sync_external_resources import SyncOutcome  # noqa: E402
     from source_prepare_core import PrepareSourceResult  # noqa: E402
+    from sync_external_resources import SyncOutcome  # noqa: E402
 
     outcome = SyncOutcome(
         mode="prepare",

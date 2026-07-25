@@ -74,8 +74,10 @@ def _find_argumentless_fetch(commands: list[list[str]]) -> list[list[str]]:
         if "fetch" not in cmd:
             continue
         non_flag_args = [
-            a for a in cmd[1:]
-            if not a.startswith("-") and not a.startswith("--")
+            a
+            for a in cmd[1:]
+            if not a.startswith("-")
+            and not a.startswith("--")
             and a != "fetch"
             and not a.startswith("+")
         ]
@@ -112,9 +114,7 @@ def test_no_script_invokes_git_pull_or_remote_update() -> None:
             if "pull" in cmd:
                 pytest.fail(f"{script.name} invokes git pull: {cmd}")
             if len(cmd) >= 3 and cmd[1] == "remote" and cmd[2] == "update":
-                pytest.fail(
-                    f"{script.name} invokes git remote update: {cmd}"
-                )
+                pytest.fail(f"{script.name} invokes git remote update: {cmd}")
 
 
 def test_only_source_prepare_core_executes_git_fetch() -> None:
@@ -146,7 +146,10 @@ def test_only_source_prepare_core_executes_git_fetch() -> None:
                     elif isinstance(func, ast.Name):
                         func_name = func.id
                     if func_name in (
-                        "run", "Popen", "check_output", "check_call",
+                        "run",
+                        "Popen",
+                        "check_output",
+                        "check_call",
                         "_run_command",
                     ):
                         has_git_command = True
@@ -167,9 +170,15 @@ def test_audit_does_not_call_prepare_sources() -> None:
         if isinstance(node, ast.FunctionDef) and node.name == "_audit":
             for inner in ast.walk(node):
                 if isinstance(inner, ast.Call):
-                    if isinstance(inner.func, ast.Name) and inner.func.id == "prepare_sources":
+                    if (
+                        isinstance(inner.func, ast.Name)
+                        and inner.func.id == "prepare_sources"
+                    ):
                         pytest.fail("_audit calls prepare_sources")
-                    if isinstance(inner.func, ast.Attribute) and inner.func.attr == "prepare_sources":
+                    if (
+                        isinstance(inner.func, ast.Attribute)
+                        and inner.func.attr == "prepare_sources"
+                    ):
                         pytest.fail("_audit calls prepare_sources")
 
 
@@ -180,9 +189,15 @@ def test_plan_does_not_call_prepare_sources() -> None:
         if isinstance(node, ast.FunctionDef) and node.name == "_plan":
             for inner in ast.walk(node):
                 if isinstance(inner, ast.Call):
-                    if isinstance(inner.func, ast.Name) and inner.func.id == "prepare_sources":
+                    if (
+                        isinstance(inner.func, ast.Name)
+                        and inner.func.id == "prepare_sources"
+                    ):
                         pytest.fail("_plan calls prepare_sources")
-                    if isinstance(inner.func, ast.Attribute) and inner.func.attr == "prepare_sources":
+                    if (
+                        isinstance(inner.func, ast.Attribute)
+                        and inner.func.attr == "prepare_sources"
+                    ):
                         pytest.fail("_plan calls prepare_sources")
 
 
@@ -193,7 +208,13 @@ def test_apply_does_not_call_prepare_sources() -> None:
         if isinstance(node, ast.FunctionDef) and node.name == "_apply":
             for inner in ast.walk(node):
                 if isinstance(inner, ast.Call):
-                    if isinstance(inner.func, ast.Name) and inner.func.id == "prepare_sources":
+                    if (
+                        isinstance(inner.func, ast.Name)
+                        and inner.func.id == "prepare_sources"
+                    ):
                         pytest.fail("_apply calls prepare_sources")
-                    if isinstance(inner.func, ast.Attribute) and inner.func.attr == "prepare_sources":
+                    if (
+                        isinstance(inner.func, ast.Attribute)
+                        and inner.func.attr == "prepare_sources"
+                    ):
                         pytest.fail("_apply calls prepare_sources")

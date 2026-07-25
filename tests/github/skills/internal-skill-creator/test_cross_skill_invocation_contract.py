@@ -69,9 +69,7 @@ def test_creator_and_gateway_calls_are_slash_prefixed() -> None:
     for caller, callees in CALLED_SKILLS.items():
         text = _instruction_text(caller)
         for callee in callees:
-            unprefixed = re.compile(
-                rf"(?<![/a-z0-9-]){re.escape(callee)}(?![a-z0-9-])"
-            )
+            unprefixed = re.compile(rf"(?<![/a-z0-9-]){re.escape(callee)}(?![a-z0-9-])")
             assert not unprefixed.search(text), (
                 f"{caller} references {callee} without the required slash prefix"
             )

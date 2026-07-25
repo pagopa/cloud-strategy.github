@@ -87,24 +87,27 @@ def target_repo(tmp_path: Path) -> Path:
     return repo
 
 
-def _run_cli(command: str, source: Path, target: Path, output_format: str = "compact") -> subprocess.CompletedProcess[str]:
+def _run_cli(
+    command: str, source: Path, target: Path, output_format: str = "compact"
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [
             sys.executable,
             CLI.as_posix(),
             command,
-            "--source-root", str(source),
-            "--target-repo", str(target),
-            "--format", output_format,
+            "--source-root",
+            str(source),
+            "--target-repo",
+            str(target),
+            "--format",
+            output_format,
         ],
         capture_output=True,
         text=True,
     )
 
 
-def test_plan_writes_only_target_tmp_plan(
-    source_repo: Path, target_repo: Path
-) -> None:
+def test_plan_writes_only_target_tmp_plan(source_repo: Path, target_repo: Path) -> None:
     result = _run_cli("plan", source_repo, target_repo)
     assert result.returncode == 0
     assert (target_repo / "tmp/local-sync-repos.plan.md").is_file()
@@ -175,9 +178,7 @@ def test_apply_deletes_target_only_non_local_instruction(
     assert not stale.exists()
 
 
-def test_agents_local_is_create_once(
-    source_repo: Path, target_repo: Path
-) -> None:
+def test_agents_local_is_create_once(source_repo: Path, target_repo: Path) -> None:
     _run_cli("plan", source_repo, target_repo)
     assert _run_cli("apply", source_repo, target_repo).returncode == 0
     first_content = (target_repo / "AGENTS.local.md").read_bytes()
