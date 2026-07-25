@@ -17,10 +17,10 @@ set -euo pipefail
 
 DEFAULT_TARGET="default-target"
 
-log_info()    { echo "ℹ️  $*"; }
-log_warn()    { echo "⚠️  $*"; }
-log_success() { echo "✅ $*"; }
-log_error()   { echo "❌ $*" >&2; }
+log_info()    { printf 'ℹ️  %s\n' "$*"; }
+log_warn()    { printf '⚠️  %s\n' "$*"; }
+log_success() { printf '✅ %s\n' "$*"; }
+log_error()   { printf '❌ %s\n' "$*" >&2; }
 
 main() {
   local target="$DEFAULT_TARGET"

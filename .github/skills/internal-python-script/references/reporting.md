@@ -107,6 +107,25 @@ class ExecutionReporter:
         for row in rows:
             table.add_row(*(escape(str(value)) for value in row))
         self.console.print(table)
+
+    def summary(
+        self,
+        *,
+        status: str,
+        counts: Mapping[str, int],
+        produced_files: Sequence[Path],
+        diagnostics: Sequence[str],
+    ) -> None:
+        rows = [(name, value) for name, value in counts.items()]
+        if rows:
+            self.table("Counts", ("Metric", "Value"), rows)
+        self.console.print(f"Status: {escape(status)}")
+        self.console.print("Produced files:")
+        for path in produced_files:
+            self.console.print(f"• {escape(path.as_posix())}")
+        self.console.print("Diagnostics:")
+        for diagnostic in diagnostics:
+            self.console.print(f"• {escape(diagnostic)}")
 ```
 
 ## Summary Expectations

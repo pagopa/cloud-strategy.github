@@ -1,6 +1,6 @@
 ---
 name: internal-python
-description: Use when editing Python files that need lightweight runtime, typing, testing, dependency, or readability guidance before script or project depth is needed.
+description: Use when Python work needs a lightweight shared baseline or its primary contract is still unclear, including small fixes and reviews before script or application ownership is established.
 ---
 
 # Internal Python
@@ -19,15 +19,22 @@ every Python edit; load them only when the task proves script or project depth.
 
 ## When to use
 
-- `.py` changes where the first need is the shared Python baseline.
+- `.py` changes where the first need is the shared Python baseline or the
+  primary contract is still unclear.
 - Lightweight reviews of typing, guard clauses, tests, runtime version, imports, or dependencies.
-- Small Python fixes where it is not yet clear whether script or project depth is needed.
+- Small Python fixes where it is not yet clear whether direct operator-facing
+  execution or importable application behavior is the primary contract.
 
 ## When not to use
 
 - Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-python-script`.
 - Package, application, service, or framework-owned behavior; use `internal-python-project`.
 - Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
+
+Once direct operator-facing execution is established, route to
+`internal-python-script`. Once importable behavior is established, route to
+`internal-python-project`; this baseline is an uncertainty fallback, not an
+umbrella that remains active after ownership is known.
 
 ## Baseline
 

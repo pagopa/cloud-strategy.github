@@ -1,6 +1,6 @@
 ---
 name: internal-python-script
-description: Use when creating or modifying standalone Python scripts, CLIs, or small operator-facing toolkits whose primary contract is direct execution rather than reusable package or application code.
+description: Use when creating, modifying, or reviewing directly executed Python scripts, CLIs, automation, or small operator-facing toolkits rather than importable application behavior.
 ---
 
 # Python Script Skill
@@ -25,7 +25,9 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 
 - This skill covers standalone operational tools, CLI entrypoints, and small script toolkits whose primary contract is direct execution.
 - A tool does not become application code just because it has multiple files, a `lib/` folder, or root-level tests.
-- Move out of this lane only when the primary contract becomes imported behavior, service boundaries, or framework-owned flows.
+- Move out of this lane only when the primary contract becomes imported behavior,
+  service boundaries, or framework-owned flows; route those cases to
+  `internal-python-project`.
 
 ## Script-specific guidance
 
@@ -35,14 +37,13 @@ description: Use when creating or modifying standalone Python scripts, CLIs, or 
 - Name configuration values by purpose, not by type: paths, file names, field lists, thresholds, defaults, mappings, filters, and output modes should explain what behavior they control.
 - Do not hide script-specific configuration inside helper modules or libraries. Helpers should accept explicit parameters or a small typed settings object when several values travel together.
 - Keep single-file scripts under 400 lines when possible. At 300 lines, review whether orchestration and helper boundaries stay clear; at 400 lines, split-or-justify is required.
-- Place shared helper logic in local helper modules, preferably under `utils/` when the toolkit structure supports that layout.
+- Place shared helper logic in local helper modules, preferably under `lib/` when the toolkit structure supports that layout.
 - For operator-facing script work, crossing the 400-line threshold should move toward a toolkit or project structure according to the primary contract, not an ever-growing single entrypoint.
 - Keep policy checks focused on maintained source; generated outputs and large fixture data are excluded unless directly edited.
 - Prefer `argparse`, `pathlib.Path`, and small helper functions for operator-facing tools.
 - Keep operator-facing console reporting centralized in a dedicated reporter, for example `ExecutionReporter`. Application logic should call semantic reporter methods instead of constructing styled strings or scattered `print()` calls.
 - Use `rich` as the preferred console rendering library for polished human-facing CLI reports when the terminal experience is part of the contract. Keep it out of `--format json`, other machine-readable outputs, and reusable helper logic.
 - Keep emoji, panels, tables, and color at human-facing boundaries such as banners, sections, success, warning, error, and summaries. Keep reusable helpers and machine-readable output paths free of decorative log formatting.
-- Load `references/reporting.md` when a script needs professional console reporting, `rich` rendering, an `ExecutionReporter` shape, redaction rules, or verbose/debug output boundaries.
 - When a tool can be called from subdirectories, resolve the repository root explicitly instead of assuming the current working directory.
 - Use type hints on non-trivial public helpers and CLI-facing boundaries.
 - Use `asyncio` only when the script truly coordinates multiple I/O-bound tasks.
@@ -83,7 +84,9 @@ Dependency decision note
 
 Load `references/layout-and-templates.md` when you need the default folder layout, a repo-aligned multi-tool toolkit layout, a minimal entry point, a hash-locked `requirements.txt`, or the launcher pattern.
 
-Load `references/reporting.md` when the script needs a richer `ExecutionReporter`, `rich` console rendering, status tables, redaction behavior, or a final operator summary.
+Load `references/reporting.md` when the script needs polished human-facing
+output, `rich` rendering, status tables, redaction, verbose diagnostics, or a
+final operator summary.
 
 Keep these rules visible while drafting:
 

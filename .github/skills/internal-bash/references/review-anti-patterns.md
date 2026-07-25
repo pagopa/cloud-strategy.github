@@ -20,7 +20,7 @@ Baseline owner: `internal-bash`
 | SH-M04 | Missing `local` keyword for function variables | Pollutes global scope |
 | SH-M05 | POSIX `#!/bin/sh` instead of `#!/usr/bin/env bash` | Repo mandates Bash |
 | SH-M06 | Missing cleanup trap (`trap cleanup EXIT`) for temp files | Resource leak |
-| SH-M07 | Function body longer than 30 lines | Complexity concern |
+| SH-M07 | Function mixes parsing, orchestration, and mutation | Coupled responsibilities make failure handling and safe testing difficult |
 
 ## Minor
 
@@ -56,9 +56,16 @@ rm -rf $name
 #!/usr/bin/env bash
 set -euo pipefail
 
-local name="${1:?Missing required argument: name}"
-cd /tmp || { echo "❌ Failed to cd /tmp"; exit 1; }
-rm -rf "${name}"
+process_directory() {
+  local base_dir="${1:?Missing base directory}"
+  local name="${2:?Missing name}"
+
+  cd -- "$base_dir" || {
+    printf '❌ Failed to enter %s\n' "$base_dir" >&2
+    return 1
+  }
+  printf 'ℹ️ Processing %s\n' "$name"
+}
 ```
 
 ```bash

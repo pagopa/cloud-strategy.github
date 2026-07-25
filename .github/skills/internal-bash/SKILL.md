@@ -1,6 +1,6 @@
 ---
 name: internal-bash
-description: Use when editing shell or Bash files that need lightweight safety, quoting, parser, or validation guidance.
+description: Use when embedded shell, Bash snippets, or non-operator Bash helpers need lightweight safety, quoting, parser, or validation guidance before standalone script design is required.
 ---
 
 # Internal Bash
@@ -21,6 +21,7 @@ safety to standalone script behavior.
 
 - `.sh` files and Bash snippets where the main need is a shared safety baseline.
 - Shell embedded in repository automation when no narrower owner has stronger rules.
+- Non-operator Bash helpers that do not own a standalone operator entrypoint.
 - Quick checks for quoting, strict mode, guard clauses, temp files, and parser choices.
 
 ## When not to use
@@ -28,6 +29,9 @@ safety to standalone script behavior.
 - Standalone script design, launcher behavior, operator UX, or script templates; use `internal-bash-script`.
 - Bash embedded in GitHub composite actions; use `internal-github-action-composite`.
 - GitHub workflow-level behavior; use `internal-github-actions`.
+
+When a helper becomes a standalone operator-facing script, route to
+`internal-bash-script`; this baseline does not remain a required preload.
 
 ## Baseline
 

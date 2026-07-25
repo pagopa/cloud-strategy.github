@@ -1,6 +1,6 @@
 ---
 name: internal-python-project
-description: Use when creating or modifying Python package or application code whose primary contract is imported behavior, service boundaries, or framework-owned flows rather than operator-facing scripts.
+description: Use when creating, modifying, or reviewing importable Python package, library, application, service, or framework behavior rather than directly executed operator tooling.
 ---
 
 # Python Project Skill
@@ -26,6 +26,9 @@ description: Use when creating or modifying Python package or application code w
 - This skill covers structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
 - Small operator-facing tools remain out of scope even when they have multiple files or tests.
 - A `lib/` folder, root-level tests, or multiple entrypoints alone do not make a tool application code.
+- A thin CLI adapter remains project-owned when the primary contract is
+  importable behavior; route direct-execution tooling to
+  `internal-python-script`.
 
 ## Compact Python baseline
 

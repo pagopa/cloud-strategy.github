@@ -129,7 +129,7 @@ def main() -> int:
     if args.format == "json":
         print(render_json(payload))
     else:
-        reporter.detail(f"Resolved repository root: {root.as_posix()}")
+        reporter.success(f"Resolved repository root: {root.as_posix()}")
     return 0
 
 
@@ -145,10 +145,10 @@ if __name__ == "__main__":
 # Final choice: PyYAML
 # Why: explicit YAML parsing without carrying a heavier content wrapper.
 
-# requests 2.32.3
-requests==2.32.3 \
-    --hash=sha256:<hash1> \
-    --hash=sha256:<hash2>
+# PyYAML 6.0.3
+PyYAML==6.0.3 \
+    --hash=sha256:00c4bdeba853cc34e7dd471f16b4114f4162dc03e6b7afcc2128711f0eca823c \
+    --hash=sha256:0150219816b6a1fa26fb4699fb7daa9caf09eb1999f3b70fb6e786805e80375a
 ```
 
 Generate `requirements.txt` with `pip-compile --generate-hashes` or an equivalent workflow that locks the full dependency closure.

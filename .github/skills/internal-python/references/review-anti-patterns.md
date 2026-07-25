@@ -38,16 +38,12 @@ Baseline owner: `internal-python`
 | PY-m07 | Missing `__all__` in modules with public API | Ambiguous public surface |
 | PY-m08 | Nested functions deeper than 2 levels | Readability concern |
 
-## Nit
+## Formatter and linter boundary
 
-| ID | Anti-pattern | Why |
-| --- | --- | --- |
-| PY-N01 | Line length > 120 characters | PEP8 / repo convention |
-| PY-N02 | Missing trailing newline at end of file | POSIX convention |
-| PY-N03 | Inconsistent quote style (single vs double) within a module | Style preference |
-| PY-N04 | Import not sorted (stdlib → third-party → local) | Convention consistency |
-| PY-N05 | Variable named `l`, `O`, `I` (ambiguous with digits) | Readability |
-| PY-N06 | Missing empty line between logical sections | Visual structure |
+Defer line length, quote style, import order, trailing newline, ambiguous-name,
+and blank-line diagnostics to the repository's configured formatter and linter.
+Report them here only when repository evidence proves a behavioral or contract
+defect beyond the tool diagnostic.
 
 ## Good vs bad examples
 
