@@ -124,6 +124,9 @@ sources:
       - upstream: skills/productivity/handoff
         local: .github/skills/mattpocock-handoff
         canonical_name: mattpocock-handoff
+      - upstream: skills/productivity/writing-great-skills
+        local: .github/skills/mattpocock-writing-great-skills
+        canonical_name: mattpocock-writing-great-skills
   vercel-labs-skills:
     repository: https://github.com/vercel-labs/skills.git
     ref: 4ce6d48ac44c8b637db87b2102fea3baca719df1
