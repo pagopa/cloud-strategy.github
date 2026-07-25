@@ -144,7 +144,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/openai-gh-address-comments/SKILL.md`
 - `.github/skills/openai-gh-fix-ci/SKILL.md`
 - `.github/skills/openai-pdf/SKILL.md`
-- `.github/skills/openai-skill-creator/SKILL.md`
 - `.github/skills/search-company-knowledge/SKILL.md`
 - `.github/skills/superpowers-brainstorming/SKILL.md`
 - `.github/skills/superpowers-dispatching-parallel-agents/SKILL.md`

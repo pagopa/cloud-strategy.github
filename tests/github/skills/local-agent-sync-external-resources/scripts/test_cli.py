@@ -70,7 +70,7 @@ def test_audit_does_not_fetch_or_write(repo_root: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["mode"] == "audit"
     assert payload["repository_changed"] is False
-    assert payload["managed_assets"] == 56
+    assert payload["managed_assets"] == 55
 
 
 def test_apply_refuses_dirty_target(tmp_path: Path) -> None:
@@ -679,7 +679,6 @@ def test_agent_and_skill_do_not_route_to_unneeded_skills(repo_root: Path) -> Non
         pytest.skip("Agent or skill file not yet rewritten")
 
     for forbidden in (
-        "openai-skill-creator",
         "internal-skill-creator",
         "internal-agent-creator",
         "internal-gateway-idea",

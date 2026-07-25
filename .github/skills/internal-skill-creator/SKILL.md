@@ -1,6 +1,6 @@
 ---
 name: internal-skill-creator
-description: Use first when creating, splitting, replacing, or materially revising a repository-owned skill under `.github/skills/`, especially when trigger, boundary, or validation decisions must be made locally before `openai-skill-creator`.
+description: Use when creating, splitting, replacing, or materially revising a repository-owned skill under `.github/skills/`, including trigger, boundary, validation, bundle anatomy, and structural decisions.
 ---
 
 # Internal Skill Creator
@@ -9,7 +9,6 @@ description: Use first when creating, splitting, replacing, or materially revisi
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to. Keep it current before changing downstream wording. Self-references to `internal-skill-creator` identify this current skill and are not a dependency.
 
-- `openai-skill-creator`: generic bundle anatomy, reusable-resource layout, `agents/openai.yaml`, initialization workflow, and structural validation after the local boundary is clear.
 - `anthropic-skill-creator`: loaded only when the user explicitly requests Anthropic or Claude methodology, compatibility, or comparison. This imported skill has `disable-model-invocation: true` and is called directly from this repository-owned owner; it may not override repository-local policy.
 - `local-agent-sync-external-resources`: catalog-governance operating engine behind the local sync command center when work becomes sync-managed catalog maintenance, external refresh, or inventory-wide keep/update/extract/retire decisions.
 - `internal-agent-creator`: repository-owned agent authoring and agent/skill boundary rewrites.
@@ -19,10 +18,7 @@ Use this skill as the canonical repository-owned first entrypoint for skill auth
 Keep the ownership model explicit:
 
 - `internal-skill-creator` is the canonical local owner for repository-owned `.github/skills/` work.
-- `openai-skill-creator` is the core operating engine inside that wrapper for bundle anatomy, reusable resources, `agents/openai.yaml`, initialization workflow, and structural validation.
-- This skill adds the repository-specific gate: prove the need, choose reuse versus creation, keep triggers retrieval-safe, harden the result against rationalization and boundary drift, and delegate only the remaining bundle work to OpenAI.
-
-This means `internal-skill-creator` should trigger first for repository-owned skill work, establish the local boundary, and then deliberately hand only the remaining bundle mechanics to `openai-skill-creator` instead of competing with it or duplicating it.
+- This skill owns the full lifecycle: prove the need, choose reuse versus creation, keep triggers retrieval-safe, harden the result against rationalization and boundary drift, manage bundle anatomy, reusable resources, `agents/openai.yaml`, initialization workflow, and structural validation.
 
 Treat skill self-containment as a default local quality gate: when creating or
 materially revising a skill, prefer a bundle that can be understood, copied,
@@ -40,7 +36,6 @@ Use `internal-agent-creator` when the primary output is an agent change or an ag
 - Read `.github/INVENTORY.md` when a skill may be added, retired, renamed, or replaced.
 - Load `references/writing-skills-checklist.md` when creating a new skill or materially revising an existing one.
 - Load `references/script-output-contract.md` when a skill introduces or materially revises scripts, CLIs, or deterministic automation.
-- Read `openai-skill-creator` only after the local boundary is clear and only for the remaining bundle work that this skill is not meant to repeat.
 - Confirm the target `SKILL.md` has an up-to-date `## Referenced skills` section immediately after the H1 before finalizing a new or materially revised skill.
 - Inventory the touched bundle itself before widening scope: `SKILL.md`,
   `agents/openai.yaml`, existing `references/`, `scripts/`, `assets/`, and
@@ -62,9 +57,7 @@ Use `internal-agent-creator` when the primary output is an agent change or an ag
 
 ## Division of labor
 
-Treat `internal-skill-creator` and `openai-skill-creator` as complementary, not symmetric.
-
-This skill should do:
+This skill owns the full lifecycle for repository-owned `.github/skills/` work:
 
 - decide whether the task really belongs to a repository-owned skill in this repository
 - choose no-op, reuse, revise in place, split, replace, or retire
@@ -72,21 +65,14 @@ This skill should do:
 - enforce bundle self-containment for created or materially revised skills
 - enforce the failing-baseline rule, token discipline, and skill-type testing expectations
 - re-check routing fallout in nearby repository-owned assets
-
-`openai-skill-creator` should do:
-
 - scaffold or normalize the bundle shape
 - handle reusable-resource anatomy for `references/`, `scripts/`, `assets/`, and `agents/openai.yaml`
 - provide initializer, metadata-generation, and structural-validation workflow
 
-Do not restate the full OpenAI creation workflow here. Use this skill to decide and constrain the work, then hand off only the remainder that OpenAI already handles better.
-
 ## Trigger precedence
 
-- For any repository-owned skill work under `.github/skills/`, start with `internal-skill-creator`, not `openai-skill-creator`.
-- Use `openai-skill-creator` only after this wrapper has established that the task really belongs to a repository-owned skill in this repository and there is remaining bundle work that should not be duplicated locally.
-- If both skills appear relevant, prefer this skill first because its description is the repo-local route and the OpenAI skill is the embedded engine.
-- If `openai-skill-creator` is already in play for generic bundle mechanics, hand repository-specific routing, ownership, and retrieval decisions back to this skill instead of letting OpenAI guess the local policy.
+- For any repository-owned skill work under `.github/skills/`, use `internal-skill-creator`.
+- If both this skill and another skill appear relevant, prefer this skill because its description is the repo-local route.
 
 ## Decision gate
 
@@ -96,7 +82,6 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 | Same owner, but weak trigger/body/validation is causing misses | Revise the existing skill |
 | One skill is handling two intents or colliding with another local owner | Split, replace, or retire the weaker skill |
 | The change affects multiple skills, inventory meaning, or sync-managed assets | Use `local-agent-sync-external-resources` through `local-sync-external-resources` |
-| The local decision is made and the remaining work is bundle anatomy, reusable resources, `agents/openai.yaml`, or validator usage | Delegate that remainder to `openai-skill-creator` |
 
 ## Core rules
 
@@ -119,15 +104,6 @@ Do not restate the full OpenAI creation workflow here. Use this skill to decide 
 
 For trigger-wording, token-discipline, loophole, and skill-type test detail, enforce `references/writing-skills-checklist.md`.
 
-## OpenAI handoff points
-
-After the local decision gate is complete, hand off to `openai-skill-creator` only when you need one or more of these:
-
-- new bundle scaffolding
-- regeneration or repair of `agents/openai.yaml`
-- bundle-shape guidance for `references/`, `scripts/`, or `assets/`
-- structural validation via the OpenAI validator
-
 ## Baseline evidence
 
 - Iron law: no new skill and no material skill edit without a failing baseline first.
@@ -142,21 +118,21 @@ After the local decision gate is complete, hand off to `openai-skill-creator` on
    Prefer reuse, tightening an existing trigger, or doing nothing when the evidence does not justify a new repository-owned owner.
 3. Set the boundary before writing.
    Decide what this skill owns locally and which adjacent owner should win when the task is really sync governance, agent authoring, or another domain.
-4. Isolate the remainder.
-   Identify which parts of the job are still local policy work and which parts are now generic OpenAI bundle work.
-5. Enforce bundle locality before handoff.
+4. Plan the bundle.
+   Identify reusable resources for `scripts/`, `references/`, `assets/`, and `agents/openai.yaml`.
+5. Enforce bundle locality.
    Repair repo-rooted self-references, missing bundle-local examples, and any
    external-only operating engine that would break a copied-out skill.
-6. Hand off only the remainder that OpenAI already handles well.
-   Load `openai-skill-creator` for scaffolding, resource anatomy, `agents/openai.yaml`, or structural validation, but do not replay its full workflow in this skill.
-7. Resume local control for wrapper checks.
+6. Scaffold and implement.
+   Create or update the skill bundle with proper frontmatter, `agents/openai.yaml`, and reusable resources.
+7. Tighten trigger and discipline.
    Use `references/writing-skills-checklist.md` to tighten trigger wording, token discipline, loophole closure, and test design.
-8. Validate the right thing.
-   Ensure OpenAI-side structural checks ran if bundle mechanics changed, then check retrieval quality plus skill-type behavior before treating the skill as done.
+8. Validate.
+   Run structural validation, then check retrieval quality plus skill-type behavior before treating the skill as done.
 9. Re-check routing fallout.
    Update nearby references or paired agent text only when the visible local entrypoint or ownership meaning actually changed.
 
-Use `references/writing-skills-checklist.md` for the anti-rationalization rules, token-discipline reminders, and skill-type testing expectations that this wrapper should enforce.
+Use `references/writing-skills-checklist.md` for the anti-rationalization rules, token-discipline reminders, and skill-type testing expectations.
 
 ## Validation
 
@@ -173,7 +149,7 @@ Then confirm:
 - the referenced-skill index matches all skill names used later for loading, routing, comparison, or delegation.
 - referenced-skill wording agrees with nearby skills that cite or are cited by the touched skill, and no entry implies eager loading unless the active contract explicitly requires it.
 - the description matches the real trigger without describing the workflow.
-- the description is strong enough that repository-owned skill requests should retrieve this skill before the generic OpenAI one.
+- the description is strong enough that repository-owned skill requests should retrieve this skill reliably.
 - the result makes rejection, reuse, and in-place tightening as natural as creation or replacement.
 - the skill still points to the right adjacent owner when the work is actually catalog governance or agent authoring.
 - the skill reads like a reusable guide instead of a one-off narrative.
@@ -187,9 +163,7 @@ Then confirm:
   different path shape is required by the contract.
 - any paired agent or local references still agree with the skill boundary when they exist.
 - when direct-copy portability or out-of-repo execution is part of the skill contract, the bundle still contains the required runnable automation and repository scripts do not become the only operating engine.
-- OpenAI-side scaffolding or validation was invoked only when the remaining work actually required it.
 - the retrieval and pressure tests appropriate to the skill type have actually been run.
-- the body did not become a maintenance fork of generic OpenAI bundle documentation.
 
 ## Repository follow-up
 
@@ -200,10 +174,8 @@ Then confirm:
 ## Common mistakes
 
 - Writing a skill because a request feels familiar, not because the repository needs a reusable owner.
-- Treating `openai-skill-creator` as irrelevant when it should be the bundle-design core.
 - Mixing catalog governance into a repo-owned skill authoring contract.
 - Turning every change into a new skill instead of tightening or reusing an existing one.
 - Using a long description that tells the agent what to do instead of when to load the skill.
 - Skipping `agents/openai.yaml` even though the repository expects it for internal skills.
 - Skipping the baseline and rationalizing the change as "small enough".
-- Copying OpenAI bundle anatomy or bundle-process weight wholesale into the local wrapper instead of selecting only what improves the repository-owned owner.
