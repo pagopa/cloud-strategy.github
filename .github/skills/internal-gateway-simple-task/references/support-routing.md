@@ -47,7 +47,7 @@ If the evidence gate would require broader staged work, stop with reason instead
 
 ## Advisory Helpers
 
-Run `scripts/resolve_simple_task.py gate` when the task facts are already normalized and only the gate outcome plus Readiness Brief is noisy.
+Run `scripts/resolve_simple_task.py gate` for compact operator text. Add `--format json` only when a tool or diagnostic flow needs the complete internal readiness record and Gate Evidence.
 
 Run `scripts/resolve_simple_task.py claim` before strong status claims when the evidence requirements are the noisy part.
 

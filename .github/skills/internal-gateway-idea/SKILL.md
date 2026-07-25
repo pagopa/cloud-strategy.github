@@ -41,7 +41,7 @@ Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainsto
 - Keep the `superpowers-brainstorming` hard gate: no implementation action before the user approves the design or direct-plan recommendation.
 - Treat approval as gate-local. `procedi`, `ok`, `go`, or similar approval advances only the active visible gate.
 - If approval wording is ambiguous, ask whether it means critical review, retained spec or plan writing, or implementation execution.
-- After the bounded evidence pass, run `Idea Gate 0` as a visible numbered question block with `Question`, `Recommendation`, `Why`, and `Default if accepted`; evidence cannot replace Idea Gate 0.
+- After the bounded evidence pass, run `Idea Gate 0` as a compact user-facing decision card; evidence cannot replace Idea Gate 0.
 - Do not proceed to `External Research Checkpoint`, assumption challenge, alternative discovery, design direction, critical challenge, or spec-vs-plan decision until `Idea Gate 0` is accepted or the user explicitly overrides its defaults.
 - Run `Critical Challenge Gate` as its own visible gate after the user approves the design direction and before the spec-vs-plan decision; an embedded critique does not satisfy Critical Challenge Gate.
 - If any mandatory gate was skipped, stop, name the missed gate, mark any downstream artifact as draft-only, and resume at the first skipped mandatory gate.
@@ -50,6 +50,27 @@ Lightweight repository-owned wrapper for idea shaping. Use `superpowers-brainsto
 - Load `internal-gateway-writing-plans` only after the user approves retained spec or implementation-plan writing.
 - Stop after the delegated writing outcome. Do not implement, invoke execution owners, or run execution commands from this skill.
 - Keep the agent filename, frontmatter name, and workflow aligned.
+
+## User-facing communication
+
+Keep mandatory gates, research decisions, assumption checks, approval state,
+and recovery state as internal workflow state. Project only decision-relevant
+information into chat through one compact user-facing decision card.
+
+Use at most four content lines:
+
+- `🧭` names one unresolved decision.
+- `✅` gives the recommendation or result.
+- `💡` gives one short reason when it changes the decision.
+- `✈️` states the exact user action and what acceptance advances.
+
+Use `🎯` for a goal, `🛠️` for a proposed change, `🧪` for validation, and
+`⚠️` for a material risk or blocker when one of those facts is the decision.
+
+Do not announce skipped checkpoints. Do not print the internal gate ledger,
+bounded-evidence notes, anti-scope inventory, research checkpoint, or routing
+bookkeeping unless the user asks for details or one item blocks progress.
+Show one unresolved decision at a time. Match the user's language.
 
 ## Bounded context pass
 
@@ -90,12 +111,9 @@ selected writing path.
 Run this gate after bounded evidence and before any challenge or alternative
 recommendation.
 
-Use one visible numbered question block. Each question must include:
-
-- `Question`
-- `Recommendation`
-- `Why`
-- `Default if accepted`
+Capture the question, recommendation, reason, and accepted default internally.
+Render them through one compact user-facing decision card. The `✈️` line must
+state what acceptance means for the active gate.
 
 Questions should focus only on decisions repository evidence cannot safely
 answer: intent, accepted defaults, constraints, success criteria, validation

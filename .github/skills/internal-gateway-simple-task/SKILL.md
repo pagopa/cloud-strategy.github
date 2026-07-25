@@ -133,6 +133,25 @@ Keep the implementation posture simple:
 - Give each changed section, helper, or code path one current reason to exist.
 - When behavior changes, name the observable contract and validate it with the closest stable check.
 
+## User-facing communication
+
+Keep the Readiness Brief fields as an internal readiness record. Keep Gate
+Evidence internal by default. Normal chat must not dump either structure.
+
+Render one compact user-facing projection:
+
+- `🧭` names the quick plan or decision.
+- `🎯` states the goal.
+- `🛠️` states the bounded change.
+- `🧪` states the validation path or exact gap.
+- `⚠️` states a material risk or blocker when present.
+- `✅` states a verified result.
+- `💡` gives one short reason when it changes the decision.
+- `✈️` states the exact user action when approval or direction is required.
+
+Omit fields that do not affect the user. Use no more than four content lines.
+Use `--format json` when complete readiness and evidence data is required.
+
 ## Deterministic Helpers
 
 - `scripts/resolve_simple_task.py gate`: returns a deterministic gate outcome plus a local Readiness Brief.

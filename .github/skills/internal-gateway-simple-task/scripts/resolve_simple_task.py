@@ -406,36 +406,18 @@ def resolve_claim_requirements(claims: list[str]) -> list[dict[str, str]]:
 
 def render_gate_text(decision: dict[str, object]) -> None:
     brief = decision["readiness_brief"]
-    print(f"Gate outcome: {decision['gate_outcome']}")
-    print(f"Next action: {decision['next_action']}")
-    print(f"Lane: {decision['lane']}")
-    if decision["reason_codes"]:
-        print("Reason codes:")
-        for reason in decision["reason_codes"]:
-            print(f"- {reason}")
-    print("Readiness Brief:")
-    print(f"- Task: {brief['task']}")
-    print(f"- Goal: {brief['goal']}")
-    print(f"- Scope: {brief['scope']}")
-    print(f"- Anti-scope: {brief['anti_scope']}")
-    print(f"- Files expected: {brief['files_expected']}")
-    print(f"- Approach: {brief['approach']}")
-    print(f"- Executable behavior: {brief['executable_behavior']}")
-    print(f"- Validation path: {brief['validation_path']}")
-    print(f"- Main risk: {brief['main_risk']}")
-    print(f"- Stop conditions: {brief['stop_conditions']}")
-    print(f"- Approval: {brief['approval']}")
-    print("Gate Evidence:")
-    gate_evidence = decision["gate_evidence"]
-    if isinstance(gate_evidence, dict):
-        for key, value in gate_evidence.items():
-            print(f"- {key}: {value}")
-    else:
-        for evidence in gate_evidence:
-            print(
-                f"- {evidence['gate']}: required={str(evidence['required']).lower()}; "
-                f"expected={evidence['expected_evidence']}"
-            )
+    print("🧭 Quick plan")
+    print(f"🎯 Goal: {brief['task']}")
+    print(f"🛠️ Change: {brief['scope']} {brief['approach']}")
+    print(f"🧪 Check: {brief['validation_path']}")
+
+    if decision["next_action"] == "stop":
+        print(
+            f"⚠️ Blocked: {brief['main_risk']}. "
+            "✈️ Action: choose how to resolve this before execution."
+        )
+    elif decision["needs_explicit_approval"]:
+        print("✈️ Action: Confirm before non-trivial work starts.")
 
 
 def render_claim_text(claims: list[str], requirements: list[dict[str, str]]) -> None:

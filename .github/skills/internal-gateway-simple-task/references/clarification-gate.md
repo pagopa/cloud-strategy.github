@@ -4,7 +4,7 @@ Use this reference when the simple-task bundle must decide whether one focused c
 
 ## Core Rule
 
-Default to the full gate for non-trivial work: bounded evidence, Initial Idea Ordering, one compact `grill-me` block when needed, critical challenge, then the local Readiness Brief.
+Default to the full gate for non-trivial work: bounded evidence, Initial Idea Ordering, one compact `grill-me` block when needed, critical challenge, then the internal readiness record. Complete the internal readiness record, then render only the compact user-facing projection. Do not paste the internal record or Gate Evidence.
 
 Skip the gate only with a Trivial-skip proof showing:
 

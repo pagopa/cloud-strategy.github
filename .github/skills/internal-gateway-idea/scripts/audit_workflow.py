@@ -46,7 +46,7 @@ def main() -> int:
     shared_markers = [
         "Specialization Checkpoint: gated",
         "Idea Gate 0",
-        "visible numbered question block",
+        "compact user-facing decision card",
         "Assumption Challenge Gate",
         "Alternative discovery",
         "Critical Challenge Gate",
@@ -54,6 +54,18 @@ def main() -> int:
         "Spec vs plan decision",
         "internal-gateway-writing-plans",
         "Stop before implementation execution",
+    ]
+    chat_projection_markers = [
+        "compact user-facing decision card",
+        "internal workflow state",
+        "🎯",
+        "🧭",
+        "🛠️",
+        "🧪",
+        "⚠️",
+        "✅",
+        "💡",
+        "✈️",
     ]
     workflow_only_markers = [
         "flowchart TD",
@@ -119,6 +131,10 @@ def main() -> int:
         "stop_before_execution": "Stop before implementation execution" in workflow_text
         and "Stop after the delegated writing outcome" in skill_text
         and "Stop after the writing outcome" in runtime_text,
+        "compact_chat_projection": all(
+            contains_all(text, chat_projection_markers)
+            for text in (skill_text, workflow_text, runtime_text)
+        ),
     }
     payload = {"strict_ok": all(markers.values()), "markers": markers}
     print(json.dumps(payload, indent=2, sort_keys=True))

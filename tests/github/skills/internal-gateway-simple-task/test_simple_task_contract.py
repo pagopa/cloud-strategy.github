@@ -209,3 +209,145 @@ def test_code_simplification_requires_explicit_authorization() -> None:
     )
     assert "Only the five referenced skill names appear in this bundle." in skill_text
     assert "addyosmani-code-simplification" not in AGENT_PATH.read_text()
+
+
+def _full_gate_decision() -> dict[str, object]:
+    return resolve_simple_task.build_gate_decision(
+        task="Enable the global Copilot link",
+        lane="edit",
+        trivial_kind=None,
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=False,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=False,
+        validation_obvious=False,
+        validation_path="pytest -q tests/example.py",
+        validation_gap="",
+    )
+
+
+def test_default_gate_text_is_compact(capsys) -> None:
+    resolve_simple_task.render_gate_text(_full_gate_decision())
+
+    lines = capsys.readouterr().out.splitlines()
+    assert lines == [
+        "🧭 Quick plan",
+        "🎯 Goal: Enable the global Copilot link",
+        (
+            "🛠️ Change: Single-lane edit work. "
+            "Use the smallest coherent move that preserves validation coverage."
+        ),
+        "🧪 Check: pytest -q tests/example.py",
+        "✈️ Action: Confirm before non-trivial work starts.",
+    ]
+
+
+def test_trivial_gate_text_needs_no_extra_approval(capsys) -> None:
+    decision = resolve_simple_task.build_gate_decision(
+        task="Fix a typo",
+        lane="edit",
+        trivial_kind="tiny-edit",
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=False,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=False,
+        validation_obvious=False,
+        validation_path="make docs-lint",
+        validation_gap="",
+    )
+
+    resolve_simple_task.render_gate_text(decision)
+
+    output = capsys.readouterr().out
+    assert len(output.splitlines()) == 4
+    assert "✈️ Action:" not in output
+    assert "Readiness Brief:" not in output
+    assert "Gate Evidence:" not in output
+
+
+def test_stopped_gate_text_surfaces_blocker_and_action(capsys) -> None:
+    decision = resolve_simple_task.build_gate_decision(
+        task="Redesign the workflow",
+        lane="edit",
+        trivial_kind=None,
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=True,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=False,
+        validation_obvious=False,
+        validation_path="make skill-lint",
+        validation_gap="",
+    )
+
+    resolve_simple_task.render_gate_text(decision)
+
+    lines = capsys.readouterr().out.splitlines()
+    assert len(lines) == 5
+    assert lines[-1].startswith("⚠️ Blocked:")
+    assert "✈️ Action:" in lines[-1]
+
+
+def test_gate_cli_json_retains_complete_internal_evidence() -> None:
+    import json
+    import subprocess
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(RESOLVE_SCRIPT_PATH),
+            "gate",
+            "--task",
+            "Enable the global Copilot link",
+            "--lane",
+            "edit",
+            "--validation-path",
+            "pytest -q tests/example.py",
+            "--format",
+            "json",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["readiness_brief"]["anti_scope"]
+    assert payload["readiness_brief"]["stop_conditions"]
+    assert payload["gate_evidence"]
+
+
+def test_simple_task_bundle_documents_compact_projection() -> None:
+    skill_text = SKILL_PATH.read_text()
+    runtime_text = AGENT_PATH.read_text()
+
+    for marker in [
+        "compact user-facing projection",
+        "internal readiness record",
+        "🎯",
+        "🧭",
+        "🛠️",
+        "🧪",
+        "⚠️",
+        "✅",
+        "💡",
+        "✈️",
+    ]:
+        assert marker in skill_text
+        assert marker in runtime_text
+
+    assert "normal chat must not dump" in skill_text
+    assert "`--format json`" in skill_text

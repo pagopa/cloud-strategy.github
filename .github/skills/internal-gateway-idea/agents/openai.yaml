@@ -7,8 +7,7 @@ interface:
     $superpowers-brainstorming as the core workflow, then read
     references/workflow.md for the local state machine. If the incoming request
     is execution-shaped, emit Specialization Checkpoint: gated and continue
-    through Idea Gate 0 before any recommendation. Run Idea Gate 0 as a visible
-    numbered question block; evidence cannot replace Idea Gate 0. Add the local
+    through Idea Gate 0 before any recommendation. Run Idea Gate 0 as a compact user-facing decision card; evidence cannot replace Idea Gate 0. Add the local
     Assumption Challenge Gate, Alternative discovery, Critical Challenge Gate,
     and visible spec-vs-plan decision from SKILL.md. Run Critical Challenge Gate
     as its own visible gate after design-direction approval; an embedded critique
@@ -17,4 +16,7 @@ interface:
     approval before loading another owner. If a mandatory gate was skipped, stop
     and resume at the first skipped mandatory gate. Load
     $internal-gateway-writing-plans only after the user explicitly approves
-    retained spec or implementation-plan writing. Stop after the writing outcome; do not implement or invoke execution owners from this skill.     Keep the agent filename, frontmatter name, and workflow aligned.
+    retained spec or implementation-plan writing. Stop after the writing outcome; do not implement or invoke execution owners from this skill.
+    Keep mandatory gates as internal workflow state. In chat, emit one compact user-facing decision card with 🎯 🧭 🛠️ 🧪 ⚠️ ✅ 💡 ✈️ and no more than four content lines. Do not announce skipped checkpoints or print internal ledgers.
+    Always show a material risk, blocker, validation gap, or user decision.
+    Keep the agent filename, frontmatter name, and workflow aligned.

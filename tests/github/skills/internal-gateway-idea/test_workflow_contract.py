@@ -60,6 +60,39 @@ def test_audit_workflow_reports_extended_contract_status() -> None:
     assert payload["markers"]["workflow_gate_sequence"] is True
     assert payload["markers"]["runtime_core_markers"] is True
     assert payload["markers"]["local_fast_lane_documented"] is True
+    assert payload["markers"]["compact_chat_projection"] is True
+
+
+def test_idea_bundle_has_compact_user_facing_projection() -> None:
+    skill_text = SKILL_PATH.read_text()
+    workflow_text = WORKFLOW_PATH.read_text()
+    runtime_text = AGENT_PATH.read_text()
+
+    required = [
+        "compact user-facing decision card",
+        "internal workflow state",
+        "🎯",
+        "🧭",
+        "🛠️",
+        "🧪",
+        "⚠️",
+        "✅",
+        "💡",
+        "✈️",
+    ]
+    for marker in required:
+        assert marker in skill_text
+        assert marker in workflow_text
+        assert marker in runtime_text
+
+
+def test_idea_projection_hides_non_decision_bookkeeping() -> None:
+    skill_text = SKILL_PATH.read_text()
+
+    assert "Do not announce skipped checkpoints" in skill_text
+    assert "Do not print the internal gate ledger" in skill_text
+    assert "four content lines" in skill_text
+    assert "one unresolved decision at a time" in skill_text
 
 
 def test_external_research_checkpoint_is_lazy_and_skill_owned() -> None:
