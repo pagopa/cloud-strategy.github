@@ -18,7 +18,11 @@ require_checkmake() {
 
   local version_output
   version_output="$(checkmake --version 2>&1)"
-  if ! printf '%s\n' "$version_output" | grep -Eq '(^|[^[:digit:]])0[.]3[.]2([^[:digit:]]|$)'; then
+  local detected_version=""
+  if [[ "$version_output" =~ ^checkmake([[:space:]]+version)?[[:space:]]+([^[:space:]]+) ]]; then
+    detected_version="${BASH_REMATCH[2]}"
+  fi
+  if [[ "$detected_version" != "0.3.2" ]]; then
     printf 'error: required %s, found: %s\n' "$required_version" "$version_output" >&2
     printf 'install with: go install github.com/checkmake/checkmake/cmd/checkmake@v0.3.2\n' >&2
     return 2

@@ -89,6 +89,27 @@ def test_homebrew_version_banner_with_required_version_is_accepted(
     assert result.returncode == 0
 
 
+@pytest.mark.parametrize(
+    "banner",
+    [
+        "checkmake version 0.3.2-rc1",
+        "checkmake version 0.3.20",
+        "checkmake 0.3.2-rc1 built locally",
+    ],
+)
+def test_checkmake_near_match_versions_are_rejected(
+    fake_checkmake: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    banner: str,
+) -> None:
+    monkeypatch.setenv("FAKE_CHECKMAKE_VERSION", banner)
+
+    result = run_checker(VALID_FIXTURE)
+
+    assert result.returncode == 2
+    assert "required checkmake version 0.3.2" in result.stderr
+
+
 def test_checker_uses_bundle_config_and_all_explicit_files(
     fake_checkmake: Path, tmp_path: Path
 ) -> None:

@@ -18,6 +18,7 @@ MAX_BINARY64 = decimal.Decimal(str(sys.float_info.max))
 @dataclass(frozen=True)
 class Finding:
     code: str
+    source: str
     path: str
     line: int | None
     column: int | None
@@ -38,13 +39,14 @@ class JsonObject:
 def _append_finding(
     findings: list[Finding],
     code: str,
+    source: str,
     path: str,
     message: str,
     line: int | None = None,
     column: int | None = None,
 ) -> None:
     if len(findings) < MAX_FINDINGS:
-        findings.append(Finding(code, path, line, column, message))
+        findings.append(Finding(code, source, path, line, column, message))
 
 
 def _member_path(path: str, key: str) -> str:
@@ -55,13 +57,24 @@ def _contains_surrogate(value: str) -> bool:
     return any(0xD800 <= ord(character) <= 0xDFFF for character in value)
 
 
-def _check_number(number: JsonNumber, path: str, findings: list[Finding]) -> None:
+def _integer_exceeds_safe_limit(raw: str) -> bool:
+    digits = raw[1:] if raw.startswith("-") else raw
+    safe_limit = str(MAX_SAFE_INTEGER)
+    return len(digits) > len(safe_limit) or (
+        len(digits) == len(safe_limit) and digits > safe_limit
+    )
+
+
+def _check_number(
+    number: JsonNumber, source: str, path: str, findings: list[Finding]
+) -> None:
     try:
         if number.integer:
-            if abs(int(number.raw)) > MAX_SAFE_INTEGER:
+            if _integer_exceeds_safe_limit(number.raw):
                 _append_finding(
                     findings,
                     "JSON_UNSAFE_INTEGER",
+                    source,
                     path,
                     f"integer magnitude exceeds {MAX_SAFE_INTEGER}",
                 )
@@ -72,6 +85,7 @@ def _check_number(number: JsonNumber, path: str, findings: list[Finding]) -> Non
         _append_finding(
             findings,
             "JSON_SYNTAX",
+            source,
             path,
             "number could not be interpreted",
         )
@@ -81,12 +95,15 @@ def _check_number(number: JsonNumber, path: str, findings: list[Finding]) -> Non
         _append_finding(
             findings,
             "JSON_NUMBER_RANGE",
+            source,
             path,
             "finite number exceeds IEEE-754 binary64 range",
         )
 
 
-def _inspect_value(value: object, path: str, findings: list[Finding]) -> None:
+def _inspect_value(
+    value: object, source: str, path: str, findings: list[Finding]
+) -> None:
     if len(findings) >= MAX_FINDINGS:
         return
     if isinstance(value, JsonObject):
@@ -97,6 +114,7 @@ def _inspect_value(value: object, path: str, findings: list[Finding]) -> None:
                 _append_finding(
                     findings,
                     "JSON_DUPLICATE_KEY",
+                    source,
                     path,
                     f"object name {key!r} is repeated",
                 )
@@ -105,30 +123,37 @@ def _inspect_value(value: object, path: str, findings: list[Finding]) -> None:
                 _append_finding(
                     findings,
                     "JSON_UNPAIRED_SURROGATE",
+                    source,
                     child_path,
                     "string contains an unpaired UTF-16 surrogate",
                 )
-            _inspect_value(child, child_path, findings)
+            _inspect_value(child, source, child_path, findings)
         return
     if isinstance(value, list):
         for index, child in enumerate(value):
-            _inspect_value(child, f"{path}[{index}]", findings)
+            _inspect_value(child, source, f"{path}[{index}]", findings)
         return
     if isinstance(value, str) and _contains_surrogate(value):
         _append_finding(
             findings,
             "JSON_UNPAIRED_SURROGATE",
+            source,
             path,
             "string contains an unpaired UTF-16 surrogate",
         )
     elif isinstance(value, JsonNumber):
-        _check_number(value, path, findings)
+        _check_number(value, source, path, findings)
 
 
 def _line_column(text: str, position: int) -> tuple[int, int]:
     line = text.count("\n", 0, position) + 1
     previous_newline = text.rfind("\n", 0, position)
     return line, position - previous_newline
+
+
+def _byte_line_column(data: bytes, byte_position: int) -> tuple[int, int]:
+    valid_prefix = data[:byte_position].decode("utf-8", errors="strict")
+    return _line_column(valid_prefix, len(valid_prefix))
 
 
 def check_bytes(data: bytes, path: str) -> list[Finding]:
@@ -138,6 +163,7 @@ def check_bytes(data: bytes, path: str) -> list[Finding]:
             findings,
             "JSON_BOM",
             path,
+            "$",
             "UTF-8 BOM is not allowed",
             1,
             1,
@@ -147,13 +173,15 @@ def check_bytes(data: bytes, path: str) -> list[Finding]:
     try:
         text = data.decode("utf-8", errors="strict")
     except UnicodeDecodeError as error:
+        line, column = _byte_line_column(data, error.start)
         _append_finding(
             findings,
             "JSON_ENCODING",
             path,
+            "$",
             "input is not valid UTF-8",
-            error.start + 1,
-            error.start + 1,
+            line,
+            column,
         )
         return findings
 
@@ -161,6 +189,7 @@ def check_bytes(data: bytes, path: str) -> list[Finding]:
         _append_finding(
             findings,
             "JSON_NON_FINITE",
+            path,
             "$",
             f"non-standard constant {raw} is not allowed",
         )
@@ -179,13 +208,14 @@ def check_bytes(data: bytes, path: str) -> list[Finding]:
             findings,
             "JSON_SYNTAX",
             path,
+            "$",
             error.msg,
             error.lineno,
             error.colno,
         )
         return findings
 
-    _inspect_value(value, "$", findings)
+    _inspect_value(value, path, "$", findings)
     return findings
 
 
@@ -202,10 +232,10 @@ def _render_text(findings: list[Finding]) -> str:
         return "checks passed within supported scope\n"
     lines = []
     for finding in findings:
-        location = finding.path
+        location = finding.source
         if finding.line is not None and finding.column is not None:
             location += f":{finding.line}:{finding.column}"
-        lines.append(f"{location} {finding.code}: {finding.message}")
+        lines.append(f"{location} {finding.path} {finding.code}: {finding.message}")
     return "\n".join(lines) + "\n"
 
 
@@ -218,6 +248,7 @@ def _render_json(findings: list[Finding], files_checked: int) -> str:
             "findings": [
                 {
                     "code": finding.code,
+                    "source": finding.source,
                     "path": finding.path,
                     "line": finding.line,
                     "column": finding.column,

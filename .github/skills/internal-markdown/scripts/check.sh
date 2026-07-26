@@ -19,7 +19,11 @@ require_markdownlint() {
 
   local version_output
   version_output="$(markdownlint-cli2 --version 2>&1)"
-  if [[ "$version_output" != *"$required_version"* ]]; then
+  local detected_version=""
+  if [[ "$version_output" =~ ^markdownlint-cli2[[:space:]]+v([^[:space:]]+) ]]; then
+    detected_version="${BASH_REMATCH[1]}"
+  fi
+  if [[ "$detected_version" != "0.22.1" ]]; then
     printf 'error: required %s, found: %s\n' "$required_version" "$version_output" >&2
     printf 'install with: npm install -g markdownlint-cli2@0.22.1\n' >&2
     return 2
@@ -48,7 +52,14 @@ run_file() {
     --config "${script_dir}/markdownlint-cli2.jsonc" \
     - < "$file" >"$output_file" 2>&1
   rc=$?
-  sed -n "1,${max_findings}p" "$output_file"
+  local line line_count=0
+  while IFS= read -r line && [[ "$line_count" -lt "$max_findings" ]]; do
+    line_count=$((line_count + 1))
+    case "$line" in
+      stdin:*) printf '%s:%s\n' "$file" "${line#stdin:}" ;;
+      *) printf '%s: %s\n' "$file" "$line" ;;
+    esac
+  done < "$output_file"
   rm -f "$output_file"
 
   case "$rc" in
@@ -62,13 +73,9 @@ run_file() {
 }
 
 run_files() {
-  local finding=0 rc file_count=0
+  local finding=0 rc
   local file
   for file in "$@"; do
-    file_count=$((file_count + 1))
-    if [[ "$file_count" -gt "$max_files" ]]; then
-      break
-    fi
     run_file "$file"
     rc=$?
     case "$rc" in
@@ -116,6 +123,12 @@ fi
 if [[ "$#" -eq 0 ]]; then
   printf 'error: at least one input file is required\n' >&2
   usage
+  exit 2
+fi
+
+if [[ "$#" -gt "$max_files" ]]; then
+  printf 'error: at most %s input files are supported; received %s\n' \
+    "$max_files" "$#" >&2
   exit 2
 fi
 

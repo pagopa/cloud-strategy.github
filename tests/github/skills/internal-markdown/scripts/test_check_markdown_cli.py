@@ -31,7 +31,7 @@ if [[ -f "$FAKE_MARKDOWN_COUNT" ]]; then count=$(cat "$FAKE_MARKDOWN_COUNT"); fi
 printf '%s\\n' "$((count + 1))" > "$FAKE_MARKDOWN_COUNT"
 cat > "$FAKE_MARKDOWN_INPUT"
 if [[ "${FAKE_MARKDOWN_EXIT:-0}" != "0" ]]; then
-  printf '%s\\n' "fixture finding"
+  printf '%s\\n' "${FAKE_MARKDOWN_OUTPUT:-fixture finding}"
   exit "$FAKE_MARKDOWN_EXIT"
 fi
 if grep -q "Broken references" "$FAKE_MARKDOWN_INPUT"; then
@@ -84,6 +84,43 @@ def test_version_mismatch_is_actionable(
     assert "required markdownlint-cli2 v0.22.1" in result.stderr
 
 
+@pytest.mark.parametrize(
+    "banner",
+    [
+        "markdownlint-cli2 v0.22.1",
+        "markdownlint-cli2 v0.22.1 (markdownlint v0.40.0)",
+    ],
+)
+def test_exact_markdownlint_version_banners_are_accepted(
+    fake_markdownlint: dict[str, Path],
+    monkeypatch: pytest.MonkeyPatch,
+    banner: str,
+) -> None:
+    monkeypatch.setenv("FAKE_MARKDOWN_VERSION", banner)
+
+    assert run_checker(VALID_FIXTURE).returncode == 0
+
+
+@pytest.mark.parametrize(
+    "banner",
+    [
+        "markdownlint-cli2 v0.22.10",
+        "markdownlint-cli2 v0.22.1-rc1",
+    ],
+)
+def test_markdownlint_near_match_versions_are_rejected(
+    fake_markdownlint: dict[str, Path],
+    monkeypatch: pytest.MonkeyPatch,
+    banner: str,
+) -> None:
+    monkeypatch.setenv("FAKE_MARKDOWN_VERSION", banner)
+
+    result = run_checker(VALID_FIXTURE)
+
+    assert result.returncode == 2
+    assert "required markdownlint-cli2 v0.22.1" in result.stderr
+
+
 def test_checker_uses_bundle_config_and_stdin(
     fake_markdownlint: dict[str, Path], tmp_path: Path
 ) -> None:
@@ -129,6 +166,26 @@ def test_tool_findings_are_normalized_to_one(
     assert "fixture finding" in result.stdout
 
 
+def test_multi_file_findings_preserve_each_source_path(
+    fake_markdownlint: dict[str, Path], tmp_path: Path
+) -> None:
+    first = tmp_path / "first.md"
+    second = tmp_path / "second.md"
+    first.write_text("# First\n", encoding="utf-8")
+    second.write_text("# Second\n", encoding="utf-8")
+
+    result = run_checker(
+        str(first),
+        str(second),
+        FAKE_MARKDOWN_EXIT="1",
+        FAKE_MARKDOWN_OUTPUT="stdin:5:1 MD052/reference-links-images Reference links and images should use a label that is defined",
+    )
+
+    assert result.returncode == 1
+    assert f"{first}:5:1 MD052" in result.stdout
+    assert f"{second}:5:1 MD052" in result.stdout
+
+
 def test_unexpected_tool_exit_is_normalized_to_two(
     fake_markdownlint: dict[str, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -140,7 +197,7 @@ def test_unexpected_tool_exit_is_normalized_to_two(
     assert "status 7" in result.stderr
 
 
-def test_file_processing_is_bounded_at_one_hundred(
+def test_more_than_one_hundred_files_is_a_usage_failure(
     fake_markdownlint: dict[str, Path], tmp_path: Path
 ) -> None:
     files = []
@@ -151,8 +208,9 @@ def test_file_processing_is_bounded_at_one_hundred(
 
     result = run_checker(*files)
 
-    assert result.returncode == 0
-    assert fake_markdownlint["count"].read_text(encoding="utf-8").strip() == "100"
+    assert result.returncode == 2
+    assert "at most 100 input files" in result.stderr
+    assert not fake_markdownlint["count"].exists()
 
 
 def test_self_test_runs_bundled_fixtures(fake_markdownlint: dict[str, Path]) -> None:
