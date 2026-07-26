@@ -28,7 +28,6 @@ CLARIFICATION_PATH = (
 PLAN_MODE_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-simple-task/references/plan-mode.md"
 )
-ROOT_AGENT_PATH = REPO_ROOT / ".github/agents/internal-gateway-simple-task.agent.md"
 RESOLVE_SCRIPT_PATH = (
     REPO_ROOT
     / ".github/skills/internal-gateway-simple-task/scripts/resolve_simple_task.py"
@@ -700,10 +699,7 @@ def _frontmatter(path: Path) -> dict[str, object]:
     return parsed
 
 
-def test_skill_and_agent_allow_model_invocation() -> None:
+def test_skill_runtime_allows_model_invocation() -> None:
     skill_frontmatter = _frontmatter(SKILL_PATH)
-    agent_frontmatter = _frontmatter(ROOT_AGENT_PATH)
 
     assert skill_frontmatter.get("disable-model-invocation") is not True
-    assert agent_frontmatter.get("disable-model-invocation") is not True
-

@@ -27,10 +27,6 @@ SKILL_TEXT = _load_text("SKILL.md")
 CONTRACT_TEXT = _load_text("references/output-contract.md")
 AGENT_YAML = _load_text("agents/openai.yaml")
 FIXTURE_TEXT = _load_text("fixtures/critical_output_valid.md")
-AGENT_MD_TEXT = (
-    REPO_ROOT / ".github/agents/internal-gateway-critical-master.agent.md"
-).read_text(encoding="utf-8")
-
 EXPECTED_OUTCOMES = {
     "reformulate-plan",
     "de-escalate-to-simple",
@@ -113,11 +109,6 @@ def test_skill_outcome_table_matches_allowed_outcomes() -> None:
     assert outcome_values == EXPECTED_OUTCOMES
 
 
-def test_agent_boundary_keeps_internal_record_hidden() -> None:
-    assert "internal" in AGENT_MD_TEXT.lower()
-    assert "card" in AGENT_MD_TEXT.lower()
-
-
 def _load_routing_cases() -> list[dict]:
     import json
 
@@ -172,15 +163,6 @@ def test_each_critical_phase_has_an_observable_completion_criterion() -> None:
 def test_critical_skill_is_not_an_automatic_review_countercheck() -> None:
     assert "not an automatic counter-analysis" in SKILL_TEXT.lower()
     assert "evidence-first review" in SKILL_TEXT.lower()
-
-
-def test_critical_agent_declares_exactly_one_core_skill_item() -> None:
-    core = AGENT_MD_TEXT.split("## Core Skill", 1)[1]
-    bullets = [
-        line for line in core.splitlines()
-        if line.startswith("- ")
-    ]
-    assert bullets == ["- `internal-gateway-critical-master`"]
 
 
 def test_critical_bundle_has_no_unused_maintenance_or_legacy_exports() -> None:

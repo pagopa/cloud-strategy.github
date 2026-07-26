@@ -86,7 +86,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 - Scope:
   - `AGENTS.md`
   - `.github/skills/internal-gateway-idea/**`
-  - `.github/skills/internal-gateway-review/**`
+  - `.github/skills/internal-review-high-level/**`
   - `.github/skills/internal-gateway-simple-task/**`
   - `.github/skills/internal-gateway-execute-plans/**`
   - `.github/skills/internal-gateway-simple-task/**`
@@ -119,7 +119,7 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - `docs/repository-context.md`, `docs/architecture.md`, `docs/tech.md`, and `docs/structure.md` are mandatory consumer-local knowledge documents scaffolded only when missing and preserved after creation
   - `docs/README.md` explains knowledge-document roles and routing without becoming a policy owner
   - each knowledge document remains descriptive and cannot override binding policy
-  - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-execute-plans`
+  - runtime workflow and context-loading guidance lives in relevant skills, especially `internal-gateway-idea`, `internal-review-high-level`, `internal-gateway-simple-task`, and `internal-gateway-execute-plans`
   - the retired `docs/03-local-ai-runtime-operating-model.md` file is not recreated or synchronized into consumers
   - sync automation preserves existing consumer-local knowledge documents after initial scaffold creation and blocks ambiguous legacy coexistence
   - `.github/templates/` remains source-side scaffold material and is not mirrored as a target catalog family
@@ -269,21 +269,16 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
 
 - Goal: keep the canonical repository-owned operating model clear across owner-specific surfaces.
 - Scope:
-  - canonical operational wrapper agents
   - shared operating-model skills
 - Expected behavior:
-  - `internal-gateway-idea`, `internal-gateway-review`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
-  - `internal-gateway-idea`, `internal-gateway-review-generic`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the current Copilot wrapper entrypoints for that core
-  - the default operational model uses direct owner selection or user-selected gateway skills with visible phases instead of a hidden repository-owned front-door router
+  - `internal-gateway-idea`, `internal-gateway-simple-task`, and `internal-gateway-critical-master` remain the canonical repository-owned skill-first gateway core
+  - the default operational model uses direct owner selection or user-selected skills with visible phases instead of a hidden repository-owned front-door router
   - retained execution stays separate: approved retained plans are executed by `internal-gateway-execute-plans`
   - ambiguous or mixed-shape entry fails safe to `internal-gateway-idea`
   - unclear target state and multiple credible paths are explicit planning triggers
   - `internal-gateway-codebase-improvement` is a manual-only specialist gateway outside the canonical gateway core; it must not become an implicit fallback, peer-dispatch target, or replacement for an existing gateway owner
-  - wrapper owners define boundaries and recommendations instead of active delegation
-  - wrapper owners are not subagent-invoked by default, so hidden peer dispatch stays opt-in and explicit
   - critical challenge can return reformulation, simple, execute, review, continue-critical, or accept-with-risk outcomes
-  - any future peer-automation exception between wrapper owners must be narrow, one-directional, auditably bounded, and non-mesh
-  - core-skill and support-selection contracts remain explicit where the wrapper behavior depends on them
+  - core-skill and support-selection contracts remain explicit where the skill behavior depends on them
 
 ### Repository Workflow
 

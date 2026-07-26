@@ -22,7 +22,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 
 - Use this agent for consumer-repository baseline propagation, drift assessment, `plan`, and explicit `apply` runs.
 - Select `apply` only on explicit request, after the current evidence shows a conflict-safe plan and no unmanaged target-local cleanup is being implied.
-- Do not use this agent for source-side catalog governance, external-resource refreshes, home AI sync, or managed-scope redesign; recommend `local-sync-external-resources`, `local-agent-sync-install-ai-resources`, or `internal-gateway-idea` as appropriate.
+- Do not use this agent for source-side catalog governance, external-resource refreshes, home AI sync, or managed-scope redesign; recommend the corresponding source-side owner instead.
 
 ## Boundary Definition
 

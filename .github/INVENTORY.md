@@ -187,16 +187,10 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Agents
 
-- `.github/agents/internal-gateway-critical-master.agent.md`
-- `.github/agents/internal-gateway-execute-plans.agent.md`
-- `.github/agents/internal-gateway-idea.agent.md`
-- `.github/agents/internal-gateway-review-code.agent.md`
-- `.github/agents/internal-gateway-review-generic.agent.md`
-- `.github/agents/internal-gateway-simple-task.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
 - `.github/agents/local-sync-repos.agent.md`
 
 ## Prompts
 
-- `.github/prompts/internal-architecture-md-creator.prompt.md`
+No prompt files currently ship in the live catalog.

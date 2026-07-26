@@ -32,7 +32,7 @@ Use this format for new updates:
 ## 2026-05-19
 
 - Migrated the repository to the skill-first Copilot model under the approved architecture-migration exception: replacement owners, routing, references, and validators moved first, `.github/instructions/` was removed afterward, `internal-aws-serverless` was replaced by `internal-aws-lambda`, and no standards release was published as part of the repository edit.
-- Added the three canonical gateway wrapper agents `.github/agents/internal-gateway-operational-flow.agent.md`, `.github/agents/internal-gateway-critical-master.agent.md`, and `.github/agents/internal-gateway-simple-task.agent.md`, soft-deprecated the four prior operational wrappers as non-invocable compatibility stubs, and realigned active prompt, README, lane-change, wrapper-alignment, internal-contract, test, and inventory contracts to the new model.
+- Added the canonical gateway wrapper agents, soft-deprecated prior operational wrappers as non-invocable compatibility stubs, and realigned active prompt, README, lane-change, wrapper-alignment, internal-contract, test, and inventory contracts to the new model.
 
 ## 2026-05-16
 

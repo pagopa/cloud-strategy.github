@@ -52,7 +52,7 @@ def test_bundle_is_agent_independent_and_pruned() -> None:
         "custom agent",
         "persona agent",
         "delegat",
-        "internal-gateway-review-generic",
+        "custom review agent",
     ):
         assert marker not in text
     assert ANALYSIS.exists()

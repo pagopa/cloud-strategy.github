@@ -15,7 +15,6 @@ WORKFLOW_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-idea/references/workflow.md"
 )
 AGENT_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
-ROOT_AGENT_PATH = REPO_ROOT / ".github/agents/internal-gateway-idea.agent.md"
 SCRIPT_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/audit_workflow.py"
 )
@@ -58,12 +57,10 @@ def test_idea_runtime_surfaces_delegate_to_the_expected_owners() -> None:
         assert "/internal-gateway-writing-plans" in text
 
 
-def test_idea_skill_and_agent_allow_model_invocation() -> None:
+def test_idea_skill_allows_model_invocation() -> None:
     skill_frontmatter = yaml.safe_load(SKILL_PATH.read_text().split("---", 2)[1])
-    agent_frontmatter = yaml.safe_load(ROOT_AGENT_PATH.read_text().split("---", 2)[1])
 
     assert skill_frontmatter.get("disable-model-invocation") is not True
-    assert agent_frontmatter.get("disable-model-invocation") is not True
 
 
 def test_bundle_docs_use_repository_root_validation_commands() -> None:

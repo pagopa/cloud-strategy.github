@@ -73,7 +73,7 @@ Focused instructions for domain A work.
 ### Router with explicit dispatch targets
 
 ```yaml
-agents: ['internal-gateway-idea', 'internal-gateway-review-generic', 'internal-gateway-critical-master', 'internal-gateway-simple-task']
+agents: ['internal-worker-a', 'internal-worker-b', 'internal-worker-c', 'internal-worker-d']
 ```
 
 Only these four agents can be invoked as subagents. The platform enforces this.
@@ -117,7 +117,7 @@ Handoffs create guided sequential workflows with user-visible buttons between ag
 ```yaml
 handoffs:
   - label: Start Implementation
-    agent: internal-gateway-review-generic
+    agent: internal-worker-b
     prompt: Implement the plan outlined above.
     send: false
 ```
