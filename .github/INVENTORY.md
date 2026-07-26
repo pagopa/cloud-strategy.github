@@ -34,11 +34,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 
 - `.github/skills/addyosmani-code-review-and-quality/SKILL.md`
 - `.github/skills/addyosmani-code-simplification/SKILL.md`
-- `.github/skills/agent-os-discover-standards/SKILL.md`
-- `.github/skills/agent-os-index-standards/SKILL.md`
-- `.github/skills/agent-os-inject-standards/SKILL.md`
-- `.github/skills/agent-os-plan-product/SKILL.md`
-- `.github/skills/agent-os-shape-spec/SKILL.md`
 - `.github/skills/anthropic-docx/SKILL.md`
 - `.github/skills/anthropic-pdf/SKILL.md`
 - `.github/skills/anthropic-pptx/SKILL.md`
@@ -62,8 +57,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/awesome-copilot-security-review/SKILL.md`
 - `.github/skills/grill-me/SKILL.md`
 - `.github/skills/internal-agent-creator/SKILL.md`
-- `.github/skills/internal-agent-support-lane-change-engine/SKILL.md`
-- `.github/skills/internal-agent-support-next-step/SKILL.md`
 - `.github/skills/internal-aws-governance/SKILL.md`
 - `.github/skills/internal-aws-lambda/SKILL.md`
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
@@ -119,7 +112,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-python-project/SKILL.md`
 - `.github/skills/internal-python-script/SKILL.md`
 - `.github/skills/internal-python/SKILL.md`
-- `.github/skills/internal-review-ai-resources/SKILL.md`
 - `.github/skills/internal-review-code/SKILL.md`
 - `.github/skills/internal-review-high-level/SKILL.md`
 - `.github/skills/internal-skill-creator/SKILL.md`
@@ -141,6 +133,8 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
 - `.github/skills/mattpocock-to-spec/SKILL.md`
+- `.github/skills/mattpocock-to-tickets/SKILL.md`
+- `.github/skills/mattpocock-triage/SKILL.md`
 - `.github/skills/mattpocock-wayfinder/SKILL.md`
 - `.github/skills/mattpocock-writing-great-skills/SKILL.md`
 - `.github/skills/openai-docs/SKILL.md`
@@ -193,18 +187,10 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 
 ## Agents
 
-- `.github/agents/internal-gateway-critical-master.agent.md`
-- `.github/agents/internal-gateway-execute-plans.agent.md`
-- `.github/agents/internal-gateway-idea.agent.md`
-- `.github/agents/internal-gateway-review-code.agent.md`
-- `.github/agents/internal-gateway-review-generic.agent.md`
-- `.github/agents/internal-gateway-simple-task.agent.md`
 - `.github/agents/local-sync-external-resources.agent.md`
 - `.github/agents/local-sync-install-ai-resources.agent.md`
 - `.github/agents/local-sync-repos.agent.md`
 
 ## Prompts
 
-- `.github/prompts/internal-architecture-md-creator.prompt.md`
-- `.github/prompts/internal-mega-review.prompt.md`
-- `.github/prompts/internal-review-ai-resources.prompt.md`
+No prompt files currently ship in the live catalog.

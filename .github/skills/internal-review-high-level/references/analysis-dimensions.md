@@ -1,82 +1,46 @@
-# Analysis Dimensions — Detailed Checklists
+# Analysis Dimensions
 
-## 1. Correctness analysis
+Use these optional questions to deepen a high-level review. Select only the
+groups that fit the target and question.
 
-- Does the code do what the change claims?
-- Are edge cases handled?
-- Are error paths tested?
-- Is input validation present and sufficient?
-- Do return types match caller expectations?
-- Are concurrency assumptions safe?
+## Intent and contract
 
-## 2. Separation of concerns
+- What outcome does the target promise?
+- Are the terms, boundaries, and obligations clear?
+- Does the observed change match the stated intent?
 
-| Principle | What to check |
-| --- | --- |
-| Business vs I/O | Is business logic cleanly separated from I/O, SDKs, and persistence? |
-| Module boundaries | Are module boundaries clear and cohesive? |
-| Naming clarity | Do names reflect what the code does in business terms? |
-| Dependency direction | Do high-level modules avoid depending on low-level details? |
-| Interface stability | Are module contracts (inputs/outputs) stable and documented? |
+## System fit and boundaries
 
-## 3. Architecture
+- Does the target fit the surrounding system?
+- Are responsibilities and boundaries clear?
+- What assumptions cross the boundary?
 
-| Quality | What to check |
-| --- | --- |
-| Separation of concerns | Are business logic, I/O, and presentation layers distinct? |
-| Dependency direction | Do dependencies point inward (infrastructure → application → core logic)? |
-| Coupling | Is coupling between modules explicit and minimal? |
-| Cohesion | Are related concepts grouped together? |
-| Extensibility | Can this design accommodate likely future changes without significant rework? |
-| Testability | Can each component be tested in isolation? |
-| Operational readiness | Are logs, metrics, and health checks present for production visibility? |
+## Cross-cutting and operational impact
 
-### Repository-local deepening lens
+- What workflows, teams, or services could be affected?
+- What operational burden or failure mode could follow?
+- Is the impact observable and reversible?
 
-Use these checks when the diff changes module shape, workflow ownership, or
-cross-boundary review surfaces:
+## Ownership and maintainability
 
-| Lens | What to check |
-| --- | --- |
-| Locality | Does a future maintainer find the relevant knowledge, bug, and fix in one place? |
-| Leverage | Does a small interface carry meaningful behavior, or do callers still need the implementation details? |
-| Shallow module | Is the module mostly a pass-through whose interface is nearly as complex as the implementation? |
-| Deep module | Does the module hide real complexity behind a stable, useful interface? |
-| Deletion test | If the module is deleted, does complexity vanish or reappear across multiple callers? |
-| Real seam | Is there more than one real adapter or caller proving the seam earns its abstraction cost? |
+- Is ongoing ownership clear?
+- Can a maintainer find and update the relevant guidance?
+- Does the target reduce or add unnecessary complexity?
 
-Do not require `CONTEXT.md`, ADR folders, or glossary updates for this repository
-unless those structures already exist and the user explicitly makes them part of
-the task.
+## Scope alignment
 
-### Codebase orientation lens
+- Does the work stay within its declared scope?
+- Are exclusions and adjacent concerns explicit?
+- Is any expansion supported by evidence?
 
-Use these checks when the user needs a higher-level map of unfamiliar code
-instead of a defect review:
+## Validation and evidence
 
-| Lens | What to check |
-| --- | --- |
-| Target area | Which file, module, workflow, or behavior anchors the question? |
-| Domain vocabulary | Which repository terms name the relevant concepts? |
-| Module map | Which modules own the behavior, and what does each one hide or expose? |
-| Caller map | Which direct callers, consumers, or workflow entrypoints depend on it? |
-| Flow map | What data, control, or operational path connects the modules? |
-| Boundary risk | Which ownership, abstraction, or validation boundary should a future edit respect? |
+- What evidence supports each material conclusion?
+- What checks have been completed?
+- Which gaps could change the result?
 
-Keep the map descriptive. Promote observations to findings only when concrete
-evidence shows a systems risk.
+## Orientation
 
-## 4. Blind-spot detection
-
-Apply lateral thinking on each dimension:
-
-- **Temporal analysis**: Will this change cause problems at scale? After 6 months of accumulation?
-- **Team dynamics**: Does this change increase onboarding friction for new team members?
-- **Cross-service impact**: Could this change break consumers or upstream producers?
-- **Operational burden**: What happens when this fails at 3 AM? Can on-call engineers debug it?
-- **Data implications**: Are there schema changes, migration needs, or data consistency risks?
-- **Security surface**: Does this change expand the attack surface?
-- **Performance cliffs**: Is there a hidden O(n²) or unbounded resource consumption?
-- **Configuration drift**: Are there environment-specific assumptions that break in other stages?
-- **Missing observability**: Can we know if something goes wrong after deployment?
-- **Alternative solutions**: Is there a fundamentally simpler approach that was not considered?
+- What are the key concepts and relationships?
+- What is the main flow or decision path?
+- Where is uncertainty highest?

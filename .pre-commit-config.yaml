@@ -34,7 +34,9 @@ repos:
 
       # Structured data validation
       - id: check-yaml # Validate YAML syntax before CI sees it.
+        exclude: '^\.github/skills/internal-yaml/fixtures/invalid/'
       - id: check-json # Validate JSON syntax before runtime uses it.
+        exclude: '^\.github/skills/internal-json/fixtures/invalid/'
 
       # Python safety rails
       - id: check-ast # Ensure Python files are syntactically valid.

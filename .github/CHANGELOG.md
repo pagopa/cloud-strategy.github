@@ -26,13 +26,13 @@ Use this format for new updates:
 - Narrowed `internal-gateway-operational-flow` to delegate unresolved idea work visibly to the new gateway and consume validated Definition Brief handoffs for `plan` without repeating ideation or its critical pass.
 - Added guided decision interview semantics: evidence-first discovery, iterative numbered question blocks through `grill-me`, visible defaults, compact decision ledger, proportional depth, and checkpoint states.
 - Retired the standalone `idea-refine` skill immediately after extracting its useful shaping frameworks and evaluation criteria into `internal-gateway-idea` references, preserving its upstream license and removing the competing runtime entrypoint.
-- Updated adjacent routing owners (`internal-agent-support-next-step`, `internal-agent-support-lane-change-engine`, `internal-gateway-simple-task`, `internal-gateway-critical-master`) to recognize the new gateway in handoffs and lane-change recommendations.
+- Updated adjacent gateway routing owners to recognize the new gateway in handoffs and lane-change recommendations.
 - Updated `.github/agents/README.md`, `.github/README.md`, `INTERNAL_CONTRACT.md`, `docs`, wrapper-alignment, mode-contracts, subagent-patterns, home-sync catalog, token benchmarks, and regression tests for the four-gateway model.
 
 ## 2026-05-19
 
 - Migrated the repository to the skill-first Copilot model under the approved architecture-migration exception: replacement owners, routing, references, and validators moved first, `.github/instructions/` was removed afterward, `internal-aws-serverless` was replaced by `internal-aws-lambda`, and no standards release was published as part of the repository edit.
-- Added the three canonical gateway wrapper agents `.github/agents/internal-gateway-operational-flow.agent.md`, `.github/agents/internal-gateway-critical-master.agent.md`, and `.github/agents/internal-gateway-simple-task.agent.md`, soft-deprecated the four prior operational wrappers as non-invocable compatibility stubs, and realigned active prompt, README, lane-change, wrapper-alignment, internal-contract, test, and inventory contracts to the new model.
+- Added the canonical gateway wrapper agents, soft-deprecated prior operational wrappers as non-invocable compatibility stubs, and realigned active prompt, README, lane-change, wrapper-alignment, internal-contract, test, and inventory contracts to the new model.
 
 ## 2026-05-16
 

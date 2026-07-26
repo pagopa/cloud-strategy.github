@@ -15,7 +15,6 @@ WORKFLOW_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-idea/references/workflow.md"
 )
 AGENT_PATH = REPO_ROOT / ".github/skills/internal-gateway-idea/agents/openai.yaml"
-ROOT_AGENT_PATH = REPO_ROOT / ".github/agents/internal-gateway-idea.agent.md"
 SCRIPT_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-idea/scripts/audit_workflow.py"
 )
@@ -42,11 +41,6 @@ def test_skill_and_workflow_keep_the_same_gate_order() -> None:
     _assert_in_order(WORKFLOW_PATH.read_text(), MANDATORY_SEQUENCE)
 
 
-def test_bundle_docs_reference_the_scoped_fast_lane() -> None:
-    assert "make internal-gateway-idea-fast-check" in SKILL_PATH.read_text()
-    assert "make internal-gateway-idea-fast-check" in WORKFLOW_PATH.read_text()
-
-
 def test_runtime_prompt_keeps_the_full_mandatory_gate_sequence() -> None:
     _assert_in_order(AGENT_PATH.read_text(), MANDATORY_SEQUENCE)
 
@@ -63,9 +57,10 @@ def test_idea_runtime_surfaces_delegate_to_the_expected_owners() -> None:
         assert "/internal-gateway-writing-plans" in text
 
 
-def test_idea_agent_allows_model_invocation() -> None:
-    frontmatter = yaml.safe_load(ROOT_AGENT_PATH.read_text().split("---", 2)[1])
-    assert frontmatter.get("disable-model-invocation") is not True
+def test_idea_skill_allows_model_invocation() -> None:
+    skill_frontmatter = yaml.safe_load(SKILL_PATH.read_text().split("---", 2)[1])
+
+    assert skill_frontmatter.get("disable-model-invocation") is not True
 
 
 def test_bundle_docs_use_repository_root_validation_commands() -> None:

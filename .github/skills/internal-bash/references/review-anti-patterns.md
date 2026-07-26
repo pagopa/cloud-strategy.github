@@ -14,21 +14,21 @@ Baseline owner: `internal-bash`
 
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
-| SH-M01 | Missing `set -euo pipefail` | Silent failures and undefined variables |
+| SH-M01 | Strict mode omitted without a documented compatibility reason or equivalent error handling | Unchecked failures and undefined variables can silently corrupt behavior |
 | SH-M02 | Unquoted variable expansion outside `[[ ]]` | Word splitting and globbing bugs |
 | SH-M03 | `cd` without error handling (`cd dir \|\| exit 1`) | Silent directory change failure |
 | SH-M04 | Missing `local` keyword for function variables | Pollutes global scope |
-| SH-M05 | POSIX `#!/bin/sh` instead of `#!/usr/bin/env bash` | Repo mandates Bash |
+| SH-M05 | Bash-specific syntax under a POSIX shell shebang | The declared interpreter cannot reliably execute the script |
 | SH-M06 | Missing cleanup trap (`trap cleanup EXIT`) for temp files | Resource leak |
-| SH-M07 | Function body longer than 30 lines | Complexity concern |
+| SH-M07 | Function mixes parsing, orchestration, and mutation | Coupled responsibilities make failure handling and safe testing difficult |
 
 ## Minor
 
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
-| SH-m01 | `echo` for status messages instead of emoji logs (`ℹ️ ✅ ⚠️ ❌`) | Repo convention violation |
+| SH-m01 | `echo` used where portable formatting or escape handling matters | Output can vary between shells and inputs |
 | SH-m02 | Hardcoded paths (e.g., `/usr/local/bin/tool`) | Portability concern |
-| SH-m03 | Missing purpose header comment | Repo convention |
+| SH-m03 | Operator-facing script lacks purpose or usage context | Operators cannot discover the entrypoint contract locally |
 | SH-m04 | `grep \| awk` where a single `awk` suffices | Unnecessary pipe |
 | SH-m05 | Missing `command -v` check before using external tools | Fails confusingly if tool missing |
 | SH-m06 | Non-English log messages or comments | Language policy violation |
@@ -56,9 +56,16 @@ rm -rf $name
 #!/usr/bin/env bash
 set -euo pipefail
 
-local name="${1:?Missing required argument: name}"
-cd /tmp || { echo "❌ Failed to cd /tmp"; exit 1; }
-rm -rf "${name}"
+process_directory() {
+  local base_dir="${1:?Missing base directory}"
+  local name="${2:?Missing name}"
+
+  cd -- "$base_dir" || {
+    printf '❌ Failed to enter %s\n' "$base_dir" >&2
+    return 1
+  }
+  printf 'ℹ️ Processing %s\n' "$name"
+}
 ```
 
 ```bash
@@ -74,6 +81,6 @@ process_file() {
   local count
   result=$(cat "$1")
   count=${#result}
-  echo "ℹ️ Processed ${count} bytes"
+  printf 'ℹ️ Processed %s bytes\n' "$count"
 }
 ```

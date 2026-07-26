@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Review High Level"
-  short_description: "Help with Internal Review High Level tasks"
-  default_prompt: "Use $internal-review-high-level for this task and follow the repository-owned workflow in the skill."
+  short_description: "High-level non-code review"
+  default_prompt: "Use /internal-review-high-level for an evidence-first, high-level review of a non-code target. Resolve intent and scope, apply only relevant dimensions, support material conclusions with evidence, use the compact emoji projection, and state uncertainty and validation gaps."

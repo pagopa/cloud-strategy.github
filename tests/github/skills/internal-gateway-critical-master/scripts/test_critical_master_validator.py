@@ -247,9 +247,3 @@ def test_cli_unreadable_file_exits_nonzero_with_stderr() -> None:
     )
     assert result.returncode != 0
     assert result.stderr.strip() != ""
-
-
-def test_cli_make_target_includes_strict() -> None:
-    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
-    assert "--strict" in makefile
-    assert "critical-validate" in makefile

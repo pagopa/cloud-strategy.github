@@ -5,61 +5,108 @@ description: Use when reviewing a branch, pull request, work-in-progress diff, o
 
 # Internal Review Code
 
-## Referenced skills
+## Review engine
 
-- `addyosmani-code-review-and-quality`: complete five-axis review core, approval standard, and finding categories.
-- `awesome-copilot-security-review`: security-specialist depth only when the user explicitly asks for it.
-- `addyosmani-code-simplification`: on-demand remediation owner for an explicitly approved, behavior-preserving simplification follow-up; never part of the review pass.
+Use `/addyosmani-code-review-and-quality` as the complete and sole review
+engine. The core owns review reasoning and severity. This wrapper owns the public chat projection,
+repository preflight, target boundaries, escalation rules, and final validation. It must not restate the engine's review axes,
+procedure, approval standard, or finding categories.
 
 ## When to use
 
-Use for a branch, pull request, work-in-progress diff, or code-focused change
-that needs defect-first review before merge or before a follow-up patch
-decision.
+Use when reviewing a code-focused branch, pull request, work-in-progress diff,
+or explicit read-only code target before merge or a separately authorized
+follow-up.
 
-## Core contract
+## Review preflight
 
-Use `addyosmani-code-review-and-quality` as the complete review engine and
-follow its process end to end. This wrapper provides the stable
-repository-owned entrypoint and the local boundaries below. It must not
-redefine the core's five axes, review order, approval standard, finding
-categories, structural remedies, or verification posture.
+Before substantive review, resolve the concrete target and fully load the
+declared review engine from its resolved source. Record the target identity,
+target fingerprint, engine identity, and source. If the target is empty or the
+engine identity or resolved source cannot be confirmed, stop with
+`NEEDS INVESTIGATION` and name the missing evidence.
+
+The review is report-only. Planning, remediation, and other state-changing
+follow-ups require a separate explicit request outside the current review.
+
+## Ordered repository review
+
+Run this sequence after the review preflight:
+
+1. Resolve the fixed point or explicit read-only target once. Fail on a bad
+   reference or empty target, and record target identity.
+2. Record the target fingerprint, commit list when applicable, requested code
+   surface, and impacted-validation surface.
+3. Discover repository Standards sources and the originating Spec sources or
+   task source. Cite them or record `to confirm`.
+4. Run the Addy engine without restating its five review axes.
+5. Compare the diff against missing/partial requirements, wrong implementation,
+   and scope creep.
+6. Derive concrete adversarial probes from the changed contracts, assumptions,
+   boundaries, and observed evidence.
+7. Apply green-test anchoring: treat green tests as evidence only and ask
+   which defect classes they would fail to catch.
+8. Run a final coverage counter-analysis before approval and project severity
+   to `B`, `I`, and `S`.
+
+The wrapper owns the repository-specific differential sequence; Addy owns the
+substantive review standard. Security stays inside the engine's security axis
+for the whole review pass. A readability or complexity correction may be
+proposed, but no separate simplification runtime is loaded.
 
 ## Boundaries
 
-- Review only the requested code surface and the supporting tests, spec, task,
-  or validation evidence needed to judge it.
-- Review tests before implementation when tests are present because that order
-  belongs to the core contract.
-- Do not apply fixes unless the user asks in a separate step.
-- Do not load implementation-language skills or systems-level review skills
-  merely because their file types or topics appear in the diff. Load a narrower
-  owner only when the file type, runtime, or defect pattern would materially
-  change the review.
-- Do not load `awesome-copilot-security-review` automatically. Use it only when
-  the user explicitly asks for security-specialist depth.
-- Do not add another severity model, review lens set, workflow, or output
-  template around the core.
-- If the requested fixed point, diff, or code target is missing, invalid, or
-  empty, stop at the core preflight and state the evidence gap.
-- If no spec or task context exists, follow the core no-spec path and state the
-  evidence gap.
-- When a concrete readability or complexity finding is best addressed by behavior-preserving refactoring, name `addyosmani-code-simplification` only as a separate simplification follow-up for the user to approve.
-- Do not load or execute `addyosmani-code-simplification` during the review pass.
+- Resolve a concrete, non-empty diff or explicit read-only code target before
+  review; state the evidence gap when the target, fixed point, or context is
+  missing.
+- Read the spec, task, and tests before implementation when those sources
+  exist. Review only the requested code surface and immediate evidence.
+- During the review pass, do not edit files, apply fixes, or author plans.
+- Keep the review pass report-only. Planning or remediation requires a
+  separate explicit request and remains outside the current review.
+
+## Completion criteria
+
+The review is complete only when the target is resolved and non-empty, the
+engine's categories are used without a second severity scale, claims are
+source-backed or marked as explicit evidence gaps, every blocking and
+important finding is preserved, and the report contains one boundary-safe next
+action.
+
+## Public projection
+
+Start with exactly four fields in this order:
+
+- `🔎`: localized verdict and counts by severity.
+- `📌`: one sentence explaining why that verdict follows.
+- `🧪`: reviewed scope, completed validation, and material evidence gaps.
+- `👉`: one user action and the consequence of accepting it.
+
+For each material finding, preserve `Location`, `Evidence`, `Impact`,
+`Correction`, and `Expected verification` when closure is not obvious. Map the
+engine category using this table, show every blocking and important finding,
+consolidate equivalent findings, and mark uncertainty inline as `to confirm`.
+
+| Engine category | Projection identifier | Rule |
+| --- | --- | --- |
+| Critical | `B` | Blocking finding. |
+| Required change | `B` | Blocking required change by default. |
+| Optional / Consider | `S` | Non-blocking suggestion. |
+| Nit | `S` | Non-blocking suggestion. |
+| FYI | — | Omit unless it changes the verdict. |
+
+Reserve `I` for a required change that does not block merge; it is not a third
+undefined severity scale.
+
+This mapping depends on the imported engine's categories; after an engine
+refresh, rerun the review-engine contract before relying on this projection.
+
+Keep internal review details hidden unless they alter the verdict. State that
+no changes were applied. For request-changes results, invite the user to
+manually select named finding IDs for a separately authorized plan-only
+follow-up. Approval results state that no user action is required.
 
 ## Validation
 
-Before reporting the review, confirm that:
-
-- the reviewed surface resolved to the intended non-empty diff or explicit
-  read-only code target;
-- tests were reviewed before implementation when tests were present;
-- findings use the core finding categories consistently and do not add a second
-  local severity scale;
-- correctness and security issues lead the report before lower-leverage
-  comments;
-- any spec, task, or repository-standard claim cites its source, or the report
-  states the evidence gap;
-- security-specialist escalation was used only on explicit user request;
-- simplification is surfaced only as a separate follow-up backed by a concrete readability or complexity finding;
-- `addyosmani-code-simplification` was not loaded or executed during review.
+Before reporting, verify the completion criteria, source evidence, target scope,
+the review escalation boundary, and the separate follow-up boundary.

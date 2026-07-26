@@ -49,6 +49,15 @@ declared external resource refreshes safely. The single public entrypoint is
 - References to undeclared skills remain unchanged and must be reported as
   unresolved dependencies; do not silently import or rewrite them.
 
+## Executable Python Normalization
+
+- A source may set `ensure_python_shebangs: true` to prepend
+  `#!/usr/bin/env python3` to executable `.py` files that have no shebang.
+- The Anthropic skills source enables this normalization so refreshed
+  candidates continue to pass the executable-shebang repository check.
+- Preserve existing shebangs, non-executable Python modules, and non-Python
+  executables unchanged.
+
 ## Guided Question Contract
 
 - Candidate normalization appends a repository-owned contract to

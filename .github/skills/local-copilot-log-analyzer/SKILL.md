@@ -53,6 +53,18 @@ or aggregation logic in ad-hoc scripts or one-off shell pipelines.
    command, output format, and the exact aggregate or slice that supported the
    conclusion.
 
+## Measurement And Privacy
+
+- The `debug-logs` command accepts direct `.jsonl` paths as well as existing
+  JSON, OTLP, legacy-session, and prompt-export inputs.
+- Report cache-read tokens, uncached input tokens, output tokens, and AIU
+  separately when present. Treat gross cumulative input as context volume, not
+  realized savings.
+- Require a before/after run for an optimization claim; otherwise label it as
+  an upper bound.
+- Keep raw prompt, response, reasoning, user-request, and tool-result bodies
+  excluded from output by default.
+
 ## Validation
 
 - `bash tools/analyze_copilot_debug_log/run.sh prompt-exports --help`

@@ -116,7 +116,7 @@ GATEWAY_REQUIRED_CONTEXT_SCENARIOS: dict[str, list[str]] = {
     "Define idea and critical": [
         GATEWAY_SKILL, "grill-me", "internal-gateway-critical-master",
     ],
-    "Plan handoff": [GATEWAY_SKILL, "internal-gateway-writing-plans", "internal-agent-support-next-step"],
+    "Plan handoff": [GATEWAY_SKILL, "internal-gateway-writing-plans"],
     "Approved apply-plan": [GATEWAY_SKILL, "internal-gateway-execute-plans"],
     "Review counter-check": [
         REVIEW_COUNTERCHECK_SKILL,
@@ -131,7 +131,7 @@ IDEA_GATEWAY_SCENARIOS: dict[str, list[str]] = {
     "Mandatory critical pass": [
         IDEA_GATEWAY_SKILL, "internal-gateway-critical-master",
     ],
-    "Visible handoff": [IDEA_GATEWAY_SKILL, "internal-agent-support-next-step"],
+    "Visible handoff": [IDEA_GATEWAY_SKILL],
 }
 
 GATEWAY_OUTPUT_FIELD_SCENARIOS: dict[str, list[str]] = {

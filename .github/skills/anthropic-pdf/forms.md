@@ -14,6 +14,7 @@ If the PDF has fillable form fields:
     "rect": ([left, bottom, right, top] bounding box in PDF coordinates, y=0 is the bottom of the page),
     "type": ("text", "checkbox", "radio_group", or "choice"),
   },
+  // Checkboxes have "checked_value" and "unchecked_value" properties:
   {
     "field_id": (unique ID for the field),
     "page": (page number, 1-based),
@@ -21,6 +22,7 @@ If the PDF has fillable form fields:
     "checked_value": (Set the field to this value to check the checkbox),
     "unchecked_value": (Set the field to this value to uncheck the checkbox),
   },
+  // Radio groups have a "radio_options" list with the possible choices.
   {
     "field_id": (unique ID for the field),
     "page": (page number, 1-based),
@@ -30,8 +32,10 @@ If the PDF has fillable form fields:
         "value": (set the field to this value to select this radio option),
         "rect": (bounding box for the radio button for this option)
       },
+      // Other radio options
     ]
   },
+  // Multiple choice fields have a "choice_options" list with the possible choices:
   {
     "field_id": (unique ID for the field),
     "page": (page number, 1-based),
@@ -41,6 +45,7 @@ If the PDF has fillable form fields:
         "value": (set the field to this value to select this option),
         "text": (display text of the option)
       },
+      // Other choice options
     ],
   }
 ]
@@ -52,17 +57,18 @@ Then analyze the images to determine the purpose of each form field (make sure t
 ```
 [
   {
-    "field_id": "last_name",
+    "field_id": "last_name", // Must match the field_id from `extract_form_field_info.py`
     "description": "The user's last name",
-    "page": 1,
+    "page": 1, // Must match the "page" value in field_info.json
     "value": "Simpson"
   },
   {
     "field_id": "Checkbox12",
     "description": "Checkbox to be checked if the user is 18 or over",
     "page": 1,
-    "value": "/On"
+    "value": "/On" // If this is a checkbox, use its "checked_value" value to check it. If it's a radio button group, use one of the "value" values in "radio_options".
   },
+  // more fields
 ]
 ```
 - Run the `fill_fillable_fields.py` script from this file's directory to create a filled-in PDF:

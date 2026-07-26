@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Script Bash"
-  short_description: "Help with Internal Script Bash tasks"
-  default_prompt: "Use $internal-bash-script for this task and follow the repository-owned workflow in the skill."
+  short_description: "Standalone operator-facing Bash"
+  default_prompt: "Use $internal-bash-script for standalone Bash scripts, utilities, wrappers, launchers, and other operator-facing shell entrypoints; route embedded shell and non-operator Bash helpers to $internal-bash."

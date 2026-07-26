@@ -139,28 +139,44 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 56
-    assert len(manifest.watchlist) == 13
+    assert len(manifest.assets) == 58
+    assert len(manifest.watchlist) == 11
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
     )
     assert matt_source.rewrite_skill_references is True
     assert dict(matt_source.skill_reference_aliases) == {}
+    anthropic_source = next(
+        source for source in manifest.sources if source.source_id == "anthropic-skills"
+    )
+    assert anthropic_source.ensure_python_shebangs is True
     assert {
         item.upstream_id
         for item in manifest.watchlist
         if item.source_family == "mattpocock/skills"
-    } >= {"prototype", "triage", "to-tickets", "qa"}
+    } >= {"prototype", "qa"}
+    assert "to-tickets" not in {
+        item.upstream_id
+        for item in manifest.watchlist
+        if item.source_family == "mattpocock/skills"
+    }
+    assert "triage" not in {
+        item.upstream_id
+        for item in manifest.watchlist
+        if item.source_family == "mattpocock/skills"
+    }
     assert {item.canonical_name for item in matt_source.assets} >= {
         "mattpocock-grill-with-docs",
         "mattpocock-domain-modeling",
         "mattpocock-codebase-design",
         "mattpocock-improve-codebase-architecture",
         "mattpocock-implement",
+        "mattpocock-to-tickets",
         "mattpocock-tdd",
         "mattpocock-to-spec",
         "mattpocock-setup-matt-pocock-skills",
         "mattpocock-code-review",
+        "mattpocock-triage",
         "mattpocock-wayfinder",
         "mattpocock-writing-great-skills",
     }

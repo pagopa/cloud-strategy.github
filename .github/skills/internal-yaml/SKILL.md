@@ -1,46 +1,48 @@
 ---
 name: internal-yaml
-description: Use when editing YAML or YML files that need formatting, schema awareness, or domain-owner routing.
+description: Use when editing or reviewing YAML or YML syntax, encoding, parser safety, or format-owner routing.
 ---
 
 # Internal YAML
 
-## Referenced skills
-
-Treat the referenced skills below as on-demand owners. Do not preload them for
-every YAML edit; load them only when path, platform semantics, runtime, or
-validation need proves a narrower schema-aware owner.
-
-- `internal-github-actions`: GitHub Actions workflows when `.github/workflows/` or workflow behavior is the target.
-- `internal-github-action-composite`: GitHub composite action metadata when `action.yml` or `action.yaml` is the target.
-- `internal-kubernetes`: Kubernetes manifests and deployment routing when workload, service, rollout, or cluster semantics are the real problem.
-- `internal-terraform`: Terraform-adjacent generated or configuration checks when HCL ownership dominates and YAML is incidental.
-- `internal-azure-devops`: Azure DevOps pipeline YAML when pipeline behavior is the target.
-
 ## When to use
 
-- `.yaml` or `.yml` edits where no narrower schema owner is already obvious.
-- Reviews focused on indentation, stable keys, comments, anchors, and parser-safe YAML.
-- Routing decisions for YAML files that may belong to a CI, Kubernetes, Azure DevOps, or other domain owner.
+- YAML or YML edits where generic format ownership is the active concern.
+- Reviews focused on syntax, indentation, duplicate mapping keys, encoding,
+  comments, anchors, aliases, and parser-safe structure.
+- Routing a file to a narrower owner when platform or schema semantics are the
+  real concern.
 
 ## When not to use
 
-- GitHub Actions workflow semantics; use `internal-github-actions`.
-- Composite action metadata; use `internal-github-action-composite`.
-- Kubernetes workload, service, probe, rollout, or policy semantics; use `internal-kubernetes`.
-- Azure DevOps pipeline behavior; use `internal-azure-devops`.
+- GitHub Actions workflow semantics; use `/internal-github-actions`.
+- Composite action metadata; use `/internal-github-action-composite`.
+- Kubernetes workload, service, rollout, or policy semantics; use
+  `/internal-kubernetes`.
+- Azure DevOps pipeline behavior; use `/internal-azure-devops`.
+- CloudFormation template semantics; use
+  `/antigravity-cloudformation-best-practices`.
 
 ## Baseline
 
-- Use 2-space indentation and avoid tabs.
-- Keep key names stable and readable.
-- Quote values only when needed for correctness.
-- Keep anchors and aliases simple.
-- Keep comments concise and in English.
-- Validate with the schema-aware owner when YAML tags or platform semantics make generic YAML parsing unsafe.
+- Use 2-space indentation and never use tabs for indentation.
+- Preserve encoding, comments, anchors, aliases, and key spelling unless the
+  requested change requires otherwise.
+- Treat duplicate mapping keys as findings, including duplicate keys hidden by
+  merge behavior when the checker supports that parser rule.
+- Keep generic YAML checks separate from platform schema and domain semantics.
 
 ## Validation
 
-- Run the nearest generic YAML parser only when the file is safe for generic YAML parsing.
-- Use schema-aware validation for GitHub Actions, Kubernetes, CloudFormation-style tags, or platform-specific YAML.
-- Reuse the repository validator when one already covers the touched YAML family.
+Run the bundle-owned checker with explicit files:
+
+```bash
+.github/skills/internal-yaml/scripts/check.sh FILE [FILE ...]
+```
+
+The checker returns `0` when checks passed within supported scope, `1` for
+format findings, and `2` for usage, dependency, file, or internal failures.
+It requires `yamllint` 1.38.0 and does not install dependencies. Supported
+checks are parser-backed YAML syntax and duplicate-key detection. Schema,
+tag, platform, and domain-content semantics are unsupported; route those
+questions to the relevant owner.

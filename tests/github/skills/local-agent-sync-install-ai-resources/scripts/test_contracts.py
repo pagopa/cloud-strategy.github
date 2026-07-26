@@ -313,7 +313,7 @@ def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -
             description: Review changes carefully.
             handoffs:
               - label: Escalate
-                agent: internal-gateway-review-code
+                agent: review-specialist
                 prompt: Include the risky files.
             ---
             Main body instructions.
@@ -329,7 +329,7 @@ def test_translate_agent_for_codex_preserves_body_and_handoffs(tmp_path: Path) -
     assert payload["name"] == "review-agent"
     assert "Main body instructions." in payload["developer_instructions"]
     assert "## Handoffs" in payload["developer_instructions"]
-    assert "internal-gateway-review-code" in payload["developer_instructions"]
+    assert "review-specialist" in payload["developer_instructions"]
 
 
 def test_load_home_sync_catalog_autodiscovers_skills_and_honors_policy(

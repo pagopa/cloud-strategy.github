@@ -7,7 +7,7 @@ description: "You MUST use this before any creative work - creating features, bu
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-Start by understanding the current project context, then Ask clarifying questions in numbered bulk question blocks. Each question must include a short recommendation, a short reason for that recommendation, and the default that will be treated as accepted when the user accepts the suggestions. Once you understand what you're building, decide whether a retained spec adds real design value or whether moving directly to an implementation plan is the better next step.
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
 <HARD-GATE>
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
@@ -23,38 +23,34 @@ You MUST create a task for each of these items and complete them in order:
 
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
-3. **Ask clarifying questions** — use numbered bulk question blocks with `Question`, `Recommendation`, `Why`, and `Default if accepted`
+3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Run the Design-Depth Gate** — choose `Decision: direct plan` or `Decision: spec first`, and tell the user why
-7. **Write design doc when needed** — if the gate chooses `spec first` and the user wants a retained file, save it to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md`; never commit files from `tmp/`
-8. **Spec self-review when needed** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-9. **User reviews written spec when needed** — ask user to review the spec file before proceeding
-10. **Transition to implementation planning** — invoke writing-plans skill after the user approves either the design or the direct-plan recommendation
+6. **Write design doc** — save to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
+8. **User reviews written spec** — ask user to review the spec file before proceeding
+9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
 
 ```dot
 digraph brainstorming {
     "Explore project context" [shape=box];
-    "Ask bulk clarifying questions" [shape=box];
+    "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
     "User approves design?" [shape=diamond];
-    "Design-Depth Gate" [shape=diamond];
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
     "Invoke writing-plans skill" [shape=doublecircle];
 
-    "Explore project context" -> "Ask bulk clarifying questions";
-    "Ask bulk clarifying questions" -> "Propose 2-3 approaches";
+    "Explore project context" -> "Ask clarifying questions";
+    "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "User approves design?";
     "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Design-Depth Gate" [label="yes"];
-    "Design-Depth Gate" -> "Invoke writing-plans skill" [label="direct plan"];
-    "Design-Depth Gate" -> "Write design doc" [label="spec first"];
+    "User approves design?" -> "Write design doc" [label="yes"];
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
@@ -62,7 +58,7 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans. The path to writing-plans may be either `Decision: direct plan` or `Decision: spec first`.
+**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
 
 ## The Process
 
@@ -71,13 +67,9 @@ digraph brainstorming {
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
-- For appropriately-scoped projects, ask clarifying questions in numbered bulk question blocks to refine the idea
+- For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
-- Each numbered question must use this format: `Question`, `Recommendation`, `Why`, and `Default if accepted`
-- The recommendation and why must be clear and brief
-- The user may accept all suggested defaults, accept only some numbered defaults, or override any numbered recommendation
-- Accepted defaults do not mean discovery is complete. If the accepted answers create contradictions, weak assumptions, unresolved risks, or dependent decisions, ask another focused numbered bulk question block.
-- Ask another focused numbered bulk question block only for unresolved, dependent, or reopened branches. Do not ask questions that project evidence can answer.
+- Only one question per message - if a topic needs more exploration, break it into multiple questions
 - Focus on understanding: purpose, constraints, success criteria
 
 **Exploring approaches:**
@@ -85,6 +77,7 @@ digraph brainstorming {
 - Propose 2-3 different approaches with trade-offs
 - Present options conversationally with your recommendation and reasoning
 - Lead with your recommended option and explain why
+- YAGNI ruthlessly - remove unnecessary features from every approach and design
 
 **Presenting the design:**
 
@@ -93,23 +86,6 @@ digraph brainstorming {
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
 - Be ready to go back and clarify if something doesn't make sense
-
-**Design-Depth Gate:**
-
-Before writing a retained spec, decide whether the spec has meaningful marginal value over going directly to an implementation plan.
-
-Choose `Decision: direct plan` when the target, owner, scope, constraints, rejected alternatives, and validation path are already clear, and a retained spec would mostly duplicate the implementation plan.
-
-Choose `Decision: spec first` when product, design, architecture, data flow, user experience, rollout, or risk decisions are still material enough that a retained spec would reduce the chance of building the wrong thing.
-
-In both cases, tell the user the decision and one short reason:
-
-- `Decision: direct plan`
-- `Why: <one short evidence-based sentence>`
-- `Decision: spec first`
-- `Why: <one short evidence-based sentence>`
-
-Ask for user approval before invoking writing-plans. Direct plan skips the retained spec, not the user approval gate.
 
 **Design for isolation and clarity:**
 
@@ -128,11 +104,10 @@ Ask for user approval before invoking writing-plans. Direct plan skips the retai
 
 **Documentation:**
 
-- Write the validated design (spec) to chat by default
-- Persist it to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md` only when `Decision: spec first` is chosen and the user explicitly wants a retained file
+- Write the validated design (spec) to `tmp/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Never commit files from `tmp/`
+- Commit the design document to git
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
@@ -147,23 +122,14 @@ Fix any issues inline. No need to re-review — just fix and move on.
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
-> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 
 **Implementation:**
 
-- Invoke the writing-plans skill to create a detailed implementation plan after the user approves either `Decision: direct plan` or the reviewed spec
+- Invoke the writing-plans skill to create a detailed implementation plan
 - Do NOT invoke any other skill. writing-plans is the next step.
-
-## Key Principles
-
-- **Bulk guided question blocks** - Ask the full known question set together, with recommendations, reasons, and defaults
-- **Multiple choice preferred** - Easier to answer than open-ended when possible
-- **YAGNI ruthlessly** - Remove unnecessary features from all designs
-- **Explore alternatives** - Always propose 2-3 approaches before settling
-- **Incremental validation** - Present design, get approval before moving on
-- **Be flexible** - Go back and clarify when something doesn't make sense
 
 ## Visual Companion
 

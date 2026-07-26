@@ -34,6 +34,23 @@ def test_valid_plan_is_bound_to_its_sha256(valid_plan: Path) -> None:
     assert compute_sha256(valid_plan).startswith("sha256:")
 
 
+def test_plan_accepts_preflight_heading_alias(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text("# agents\n")
+    (tmp_path / ".github").mkdir()
+    staged = tmp_path / "tmp" / "superpowers" / "plans"
+    staged.mkdir(parents=True)
+    plan = staged / "preflight-alias.md"
+    plan.write_text(
+        "# Plan\n\n"
+        "## Goal\n\n- Validate the plan.\n\n"
+        "## Preflight\n\n- Use the repository validator.\n\n"
+        "## Global Constraints\n\n- Keep the plan unchanged.\n\n"
+        "## Task 1: Validate\n\n- [ ] Run the check.\n"
+    )
+
+    assert validate_plan(plan, repo_root=tmp_path) == []
+
+
 def test_plan_outside_retained_plan_directory_is_rejected(tmp_path: Path) -> None:
     plan = tmp_path / "plan.md"
     plan.write_text("# Plan\n")

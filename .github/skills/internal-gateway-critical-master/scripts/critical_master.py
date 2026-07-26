@@ -22,22 +22,6 @@ ALLOWED_OUTCOMES: frozenset[str] = frozenset(
     }
 )
 
-ALLOWED_CLAIM_CLASSES: frozenset[str] = frozenset(
-    {"confirmed", "inference", "estimate"}
-)
-
-ALLOWED_EVIDENCE_QUALITY: frozenset[str] = frozenset(
-    {"strong", "partial", "weak"}
-)
-
-ALLOWED_LIKELIHOODS: frozenset[str] = frozenset({"high", "medium", "low"})
-
-ALLOWED_DEFENSE_VALUES: frozenset[str] = frozenset(
-    {"none", "resolves", "narrows", "accepts-risk", "unanswered"}
-)
-
-TOTAL_MAX_WORDS = 600
-
 REQUIRED_CARD_MARKERS = ("🎯", "⚠️", "✅")
 OPTIONAL_CARD_MARKERS = ("💥", "❓")
 CARD_MARKER_ORDER = ("🎯", "⚠️", "💥", "✅", "❓")
@@ -127,10 +111,6 @@ def validate_outcome_value(value: str) -> bool:
 
 
 __all__ = [
-    "ALLOWED_CLAIM_CLASSES",
-    "ALLOWED_DEFENSE_VALUES",
-    "ALLOWED_EVIDENCE_QUALITY",
-    "ALLOWED_LIKELIHOODS",
     "ALLOWED_OUTCOMES",
     "CARD_LINE_MAX_WORDS",
     "CARD_MARKER_ORDER",
@@ -142,7 +122,6 @@ __all__ = [
     "Finding",
     "OPTIONAL_CARD_MARKERS",
     "REQUIRED_CARD_MARKERS",
-    "TOTAL_MAX_WORDS",
     "count_words",
     "parse_critical_card",
     "validate_outcome_value",

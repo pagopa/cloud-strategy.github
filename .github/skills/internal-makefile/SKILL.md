@@ -1,37 +1,48 @@
 ---
 name: internal-makefile
-description: Use when editing Makefile or .mk files that need deterministic targets, readable recipes, and phony target hygiene.
+description: Use when editing or reviewing Makefile or .mk syntax, targets, prerequisites, recipes, variables, or static format checks.
 ---
 
 # Internal Makefile
 
-## Referenced skills
-
-- None.
-
 ## When to use
 
-- `Makefile` or `*.mk` changes.
-- Reviews of target naming, phony declarations, recipe clarity, and deterministic command behavior.
-- Small build-orchestration edits that do not belong to a narrower runtime or CI owner.
+- Makefile or `.mk` edits where static Make format ownership is the active
+  concern.
+- Reviews of targets, prerequisites, recipe prefixes, `.PHONY`, variables,
+  and `$` versus `$$`.
+- Reviews of safe static validation and routing when embedded shell behavior
+  dominates.
 
 ## When not to use
 
-- CI workflow semantics are the main concern; use the matching CI owner.
-- The Make target only wraps a script whose behavior is owned by a language or script skill.
+- Embedded shell behavior dominates the recipe; use `/internal-bash`.
+- CI or runtime semantics are the main concern; use the matching owner.
 - Generated Makefiles unless the generator is the intended edit point.
 
 ## Baseline
 
-- Use lowercase, hyphenated target names.
 - Mark non-file targets with `.PHONY`.
-- Keep common variables near the top.
-- Prefer a `help` target when the Makefile is operator-facing.
-- Keep recipes readable and deterministic.
-- Avoid hidden side effects in the default target.
+- Keep prerequisites, order-only prerequisites, variables, and recipes
+  explicit and readable.
+- Preserve tab-prefixed recipes and distinguish Make variables (`$`) from
+  shell variables (`$$`).
+- Treat recursive Make, parallelism, recipe side effects, and domain behavior
+  as review concerns.
+- `make` and `make -n` are not generic safety boundaries; `make -n` is only a
+  preview, so inspect recipes before execution.
 
 ## Validation
 
-- Run the touched target when it is safe and deterministic.
-- Use `make -n <target>` when execution would mutate state.
-- Run the nearest focused test when a target is part of validator behavior.
+Run the bundle-owned static checker with explicit files:
+
+```bash
+.github/skills/internal-makefile/scripts/check.sh FILE [FILE ...]
+```
+
+The checker returns `0` when checks passed within supported scope, `1` for
+format findings, and `2` for usage, dependency, file, or internal failures.
+It requires `checkmake` 0.3.2 and never invokes GNU Make or recipe commands.
+Supported checks are parser-backed Makefile rules and configured static
+limits. Variable intent, `$`/`$$` behavior, parallelism, order-only
+prerequisites, recipe side effects, and domain behavior are unsupported.

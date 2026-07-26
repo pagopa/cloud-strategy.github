@@ -34,12 +34,12 @@ Tools:
     github_catalog_validation
     analyze_copilot_debug_log
     benchmark_skill_tokens
-  build_inventory
-  check_catalog_consistency
-  audit_copilot_catalog
-  detect_token_risks
+    build_inventory
+    check_catalog_consistency
+    audit_copilot_catalog
+    detect_token_risks
     sync_home_ai_resources
-  validate_critical_output
+    validate_critical_output
     validate_internal_skills
 EOF
 }

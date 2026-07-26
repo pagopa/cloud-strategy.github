@@ -27,9 +27,12 @@ STATUS_FILENAME_RE = re.compile(
 
 REQUIRED_PLAN_HEADINGS = (
     "Goal",
-    "Repository Preflight",
     "Global Constraints",
 )
+
+PLAN_HEADING_ALIASES = {
+    "Repository Preflight": ("Repository Preflight", "Preflight"),
+}
 
 REQUIRED_STATUS_HEADINGS = (
     "Status",
@@ -103,6 +106,15 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
                 findings.append(
                     Finding("missing-heading", f"Plan missing required heading: {required}")
                 )
+
+    for canonical, aliases in PLAN_HEADING_ALIASES.items():
+        if not any(alias in heading_set for alias in aliases):
+            findings.append(
+                Finding(
+                    "missing-heading",
+                    f"Plan missing required heading: {canonical}",
+                )
+            )
 
     if "Task" not in " ".join(headings) and "## Task" not in text:
         findings.append(

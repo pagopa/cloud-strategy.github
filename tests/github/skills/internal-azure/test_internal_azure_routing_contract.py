@@ -147,7 +147,7 @@ LANE_SKILL_IDS = (
 )
 
 SKILL_REFERENCE_PATTERN = re.compile(
-    r"`((?:internal|awesome|openai|superpowers|agent-os|antigravity|addyosmani"
+    r"`((?:internal|awesome|openai|superpowers|antigravity|addyosmani"
     r"|local|mattpocock|terraform|vercel|customize|grill|graphify)-[a-z0-9-]+)`"
 )
 

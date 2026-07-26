@@ -1,37 +1,37 @@
 ---
 name: internal-excel
-description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, schema validation, cleanup, joins, conversions, optimization, or large-file integrity.
+description: Use when any task reads, creates, edits, validates, converts, or mentions an Excel workbook or an XLSX, XLSM, CSV, or TSV file. Load this skill first and keep it active even when formatting, charts, rendered review, or recalculation also require anthropic-xlsx.
 ---
 
 # Internal Excel
 
 ## Referenced skills
 
-- `anthropic-xlsx`: on-demand support owner when rendered fidelity, cached recalculation, charts, or polished workbook presentation are the primary requirement.
+- `anthropic-xlsx`: add alongside this skill when rendered fidelity, cached recalculation, charts, or polished workbook presentation are first-class requirements.
 
 ## When to use
 
-- CSV, TSV, or `.xlsx` tasks centered on tabular data quality, profiling, schema choices, normalization, joins, dedupe, reconciliation, conversion, or large-file processing.
+- Any request that reads, creates, edits, validates, converts, or mentions an Excel workbook or an XLSX, XLSM, CSV, or TSV file.
+- CSV, TSV, `.xlsx`, or `.xlsm` tasks centered on tabular data quality, profiling, schema choices, normalization, joins, dedupe, reconciliation, conversion, or large-file processing.
 - Requests where the main decision is tool selection for scale, memory use, or integrity tradeoffs across local data files.
 - Workbook extraction, contract inspection, writer parity checks, or value-level updates where rendered presentation fidelity is not the primary requirement.
 - Requests to copy a workbook tab contract into generated tabs: column order, widths, header or body style, money style, alert or error row style, and formula columns.
 - Requests where derived workbook columns must stay as Excel formulas and raw source fields remain atomic input values.
 
-## When not to use
+## When to add adjacent skills
 
-- Charts, rendered review, cached recalculation, or polished workbook presentation as a first-class delivery requirement; use `anthropic-xlsx`.
-- Single-language implementation work after the tabular-data approach is already chosen; use the narrower file or runtime owner for that code.
-- Database or warehouse design work that is not primarily about local CSV, TSV, or Excel artifacts.
+- For charts, rendered review, cached recalculation, or polished workbook presentation, keep this skill active and add `anthropic-xlsx`.
+- For single-language implementation work, add the narrower file or runtime owner while this skill retains the spreadsheet integrity contract.
+- For database or warehouse design, add the relevant data-platform owner; keep this skill active only while local CSV, TSV, or Excel artifacts remain in scope.
 
 ## Boundary
 
 - This skill owns data integrity first: headers, types, nulls, duplicates, joins, reconciliation, stable IDs, delimiter detection, encoding, locale-sensitive numeric fields, and row-count preservation.
 - Keep evidence compact for large files: report headers, counts, targeted anomalies, transformation rules, exact validation gaps, and any locale or coercion assumptions that change numeric meaning.
-- Treat `.xlsx` as a workbook container first. Stay here for tabular extraction, safe value-level transformation, workbook contract inspection, writer parity checks, and formula-column decisions. Route to `anthropic-xlsx` only when rendered fidelity, cached recalculation, charts, or presentation-preserving delivery is the main job.
+- Treat `.xlsx` and `.xlsm` as workbook containers first. Stay here for tabular extraction, safe value-level transformation, workbook contract inspection, writer parity checks, and formula-column decisions. Add `anthropic-xlsx` while keeping this skill active when rendered fidelity, cached recalculation, charts, or presentation-preserving delivery is part of the job.
 - Preserve identifier fidelity before coercion: keep leading zeros, long numeric IDs, and day-first date text exact until an explicit schema rule says otherwise.
-- Flag spreadsheet-bound text that could execute as a formula and minimize sensitive-column exposure in samples or logs.
+- Flag spreadsheet-bound text that could execute as a formula and minimize sensitive-column exposure in samples or logs; apply the safeguards in `references/data-integrity-and-safety.md` when those risks are material.
 - Read `references/tool-selection.md` when choosing between Python `csv`, `pandas`, `openpyxl`, PyArrow, Polars, or DuckDB, or when scale, memory use, file format, or workbook fidelity makes the engine choice non-obvious.
-- Read `references/data-integrity-and-safety.md` when delimiter or encoding detection, locale coercion, operation-specific proof, formula injection, or sensitive data exposure are material.
 - Read `references/large-file-token-discipline.md` when file size, broad profiling, repeated output, sampling strategy, or context pressure could make the tabular workflow expensive.
 
 ## Noise Exclusions
@@ -40,19 +40,12 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 - Ignore workbook lock files such as `~$*` and `.~lock.*`.
 - Prefer targeted `rg` queries on source files, writer modules, and the named workbook path. Do not start with broad repo scans when the target file or owner path is already known.
 
-## Workbook Token Gate
-
-- Before broad `.xlsx` reads, collect only bounded metadata: file size, sheet names, target-sheet dimensions, target headers, essential row counts, formula count, and style or style-id counts.
-- Do not dump workbook XML, full worksheets, broad profiler output, or whole tables into chat unless they are the missing evidence.
-- Read only the target sheets, columns, ranges, or writer blocks needed for the active question.
-- Before opening large code modules, use `rg` to find owner functions, workbook writers, style builders, and formula helpers, then read only the needed blocks.
-
 ## Workbook Contracts
 
 - When a sample workbook or sample tab defines the expected layout, treat that tab as a contract: column order, widths, header style, body style, money style, alert or error row style, and formula columns.
 - Verify that every tab produced by the same writer receives the same contract where applicable, not just the sampled tab.
 - When the user asks for verifiable formulas, keep derived columns as Excel formulas and keep source columns as atomic input values instead of precomputed results.
-- If workbook behavior stays contract-level and formula-level, keep the guidance here. Route to `anthropic-xlsx` only when visual polish, charts, or recalculated delivery artifacts become primary.
+- If workbook behavior stays contract-level and formula-level, keep the guidance here. Add `anthropic-xlsx` when visual polish, charts, or recalculated delivery artifacts become primary, without replacing this skill.
 
 ## Binary Artifacts
 
@@ -60,32 +53,19 @@ description: Use when tasks involve CSV, TSV, or Excel tabular data profiling, s
 - If output validation needs a generated workbook, write it to `tmp/` or another declared controlled path and report that path.
 - Do not include Excel or LibreOffice lock files in discovery, validation, diffs, or deliverables.
 
-## Runtime And Validation
-
-- If the local toolchain or bundle exposes a `.venv` or declared runtime, use that runtime for `py_compile`, tests, or `pytest` instead of ambient Python.
-- Run the smallest deterministic validation that proves the workbook or tabular change; keep output bounded and artifact-oriented.
-
-## Token Discipline
-
-- Run a token budget gate before inspecting large or unknown-size files: capture file size, format, sheet names or delimiter, cheap row and column counts, headers, encoding clues, and the smallest representative sample needed.
-- Do not paste full tables, raw workbook XML, full profiling JSON, or broad command output into chat by default. Report bounded summaries, counts, schema, anomalies, transformation rules, artifact paths, and validation gaps.
-- Treat row samples as discovery only. Keep samples small and redacted, then prove transformations with full-file aggregate checks such as counts, key scans, coercion failures, or reconciliation queries.
-- Prefer streaming reads, column projection, chunked scans, DuckDB, Polars, or PyArrow for large files. Use full `pandas` loads or full workbook traversal only after size and scope show that the token and memory cost is justified.
-- For `.xlsx`, inspect workbook metadata first and read only the target sheets or ranges when possible. Do not escalate to broad workbook traversal unless the metadata gate shows it is necessary.
-- Pause before expensive expansions such as dumping more rows, profiling every sheet, loading all columns, or running repeated wide joins. If the user explicitly asks for full output, state the context impact and provide the smallest bounded next slice or a local artifact path.
-
 ## Workflow
 
 1. Confirm the artifact type, row scale, token budget risk, whether workbook fidelity matters, and whether locale-specific numeric conventions or spreadsheet reopening are in play.
 2. Pick the narrowest tool that preserves the needed integrity and performance.
 3. Inspect headers, sample rows, counts, null patterns, key columns, and locale-sensitive numeric fields before broad transforms.
-4. For `.xlsx`, inspect metadata and the active workbook contract before broad reads: sheet names, target dimensions, headers, formula counts, style counts, and the relevant writer blocks.
+4. For `.xlsx` or `.xlsm`, inspect metadata and the active workbook contract before broad reads: sheet names, target dimensions, headers, formula counts, style counts, and the relevant writer blocks.
 5. Apply deterministic transformations with explicit schema rules for IDs, dates, currency, and decimal text, and keep a reconciliation path for row counts, keys, duplicates, dropped records, and formula-column intent.
 6. Re-run focused integrity and safety checks after each material transform or workbook-writer change.
-7. Hand off only when rendered workbook polish, charts, cached recalculation, or presentation-preserving delivery becomes the main requirement.
+7. Add `anthropic-xlsx` when rendered workbook polish, charts, cached recalculation, or presentation-preserving delivery is required, and keep this skill active as the spreadsheet entry point.
 
 ## Validation
 
+- If the local toolchain or bundle exposes a `.venv` or declared runtime, use that runtime for validation instead of ambient Python.
 - Run the smallest deterministic check that proves the transform: row counts, schema diff, duplicate-key scan, delimiter or encoding confirmation, locale-sensitive numeric confirmation, join cardinality, or a reconciliation sample.
 - For large files, validation output must stay compact: full-file checks should produce aggregate evidence, anomaly counts, sampled examples only when needed, and paths to generated reports instead of inline dumps.
 - When data may return to spreadsheet tools, verify formula-injection handling and avoid exposing raw sensitive values in samples or validation output.

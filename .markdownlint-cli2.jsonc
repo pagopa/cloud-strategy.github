@@ -9,13 +9,20 @@
     ".github/scripts/.venv/**",
     // Ignore local tool virtualenv artifacts generated during development.
     "tools/analyze_copilot_debug_log/.venv/**",
+    // Ignore any generated virtual environment, including task-specific variants.
+    "**/.venv*/**",
+    // Ignore temporary retained execution artifacts outside tmp/.
+    ".superpowers/**",
     // Test fixtures are intentionally non-document-shaped markdown inputs.
     "tests/fixtures/critical_output_*.md",
     // Skill bundle card fixtures are emoji cards, not structured Markdown documents.
     ".github/skills/internal-gateway-critical-master/fixtures/*.md",
+    // Retained-plan and status fixtures intentionally start at contract-owned H2 headings.
+    ".github/skills/internal-gateway-execute-plans/fixtures/*.md",
     // Ignore local OpenCode runtime artifacts.
     ".opencode/**",
     // Preserve imported support skill families verbatim by default; lint only repo-owned Markdown.
+    ".github/skills/!(internal-*|local-*)/**",
     ".github/skills/antigravity-*/**",
     ".github/skills/awesome-copilot-*/**",
     ".github/skills/graphify/**",

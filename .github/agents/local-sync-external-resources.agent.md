@@ -50,6 +50,17 @@ contract instead of reproducing its procedure here.
 - When changing the sync tooling itself, do not refresh or modify imported
   resources in the same task.
 
+## Post-Apply Validation Boundaries
+
+1. After repository mutation, run the closest focused validation as its own next action.
+2. Stop on the first failure and report the failing evidence.
+3. Only after the focused check passes, run remaining declared validations and
+   a bounded worktree summary in one subsequent terminal action with
+   short-circuit semantics.
+4. Keep separately authorized, interactive, or networked operations outside
+   that consolidated action.
+5. Do not repeat unchanged command output across progress and final reports.
+
 ## Outcome
 
 Report the core skill's complete result without optimistic compression:

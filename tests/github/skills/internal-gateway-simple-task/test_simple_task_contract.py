@@ -28,7 +28,6 @@ CLARIFICATION_PATH = (
 PLAN_MODE_PATH = (
     REPO_ROOT / ".github/skills/internal-gateway-simple-task/references/plan-mode.md"
 )
-ROOT_AGENT_PATH = REPO_ROOT / ".github/agents/internal-gateway-simple-task.agent.md"
 RESOLVE_SCRIPT_PATH = (
     REPO_ROOT
     / ".github/skills/internal-gateway-simple-task/scripts/resolve_simple_task.py"
@@ -576,6 +575,48 @@ def test_clarification_reference_has_no_broken_stop_rules_pointer() -> None:
     assert "Stop Conditions above" in clarification_text
 
 
+def test_depth_keywords_require_explicit_depth_language() -> None:
+    assert resolve_simple_task.detect_depth_keywords("fix the full path", []) == []
+    assert resolve_simple_task.detect_depth_keywords("run a full gate", []) == ["full"]
+    assert resolve_simple_task.detect_depth_keywords("complete the TODO", []) == []
+
+
+def test_missing_validation_reason_is_emitted_once() -> None:
+    decision = resolve_simple_task.build_gate_decision(
+        task="A task with unnamed validation",
+        lane="edit",
+        trivial_kind=None,
+        prompt="",
+        depth_keywords=[],
+        risks=[],
+        needs_plan=False,
+        needs_review=False,
+        needs_critical=False,
+        owner_ambiguous=False,
+        clarification_overflow=False,
+        validation_obvious=True,
+        validation_path="",
+        validation_gap="",
+    )
+
+    assert decision["reason_codes"].count("validation-path-missing") == 1
+
+
+def test_simple_task_does_not_own_retained_plan_consumption() -> None:
+    contract_text = (REPO_ROOT / "INTERNAL_CONTRACT.md").read_text()
+    agents_text = (REPO_ROOT / ".github/agents/README.md").read_text()
+
+    assert (
+        "internal-gateway-simple-task` consumes approved `compact` plans"
+        not in contract_text
+    )
+    assert "approved retained-plan consumption" not in agents_text
+    assert (
+        "retained execution stays separate: approved retained plans are executed by `internal-gateway-execute-plans`"
+        in contract_text
+    )
+
+
 @pytest.mark.parametrize(
     ("overrides", "expected_outcome"),
     [
@@ -661,9 +702,7 @@ def _frontmatter(path: Path) -> dict[str, object]:
     return parsed
 
 
-def test_skill_and_agent_allow_model_invocation() -> None:
+def test_skill_runtime_allows_model_invocation() -> None:
     skill_frontmatter = _frontmatter(SKILL_PATH)
-    agent_frontmatter = _frontmatter(ROOT_AGENT_PATH)
 
     assert skill_frontmatter.get("disable-model-invocation") is not True
-    assert agent_frontmatter.get("disable-model-invocation") is not True

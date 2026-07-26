@@ -6,6 +6,34 @@ Recover known answers from the request and repository evidence. Capture the
 capability, invocation conditions, expected output, constraints, dependencies,
 success criteria, validation path, and anti-scope.
 
+## Bundle evidence
+
+For a bundle change, inspect every existing sibling under `references/`,
+`scripts/`, `assets/`, and `agents/openai.yaml`, or record why a sibling is
+intentionally unaffected. Checked-clean surfaces are evidence, not findings.
+
+## Consumption and ownership
+
+Distinguish a file's existence from selection or consumption through routing,
+cross-skill calls, validators, tests, inventory, or sync. Keep generic
+analysis-only review outside this creator.
+
+## Lifecycle and retirement
+
+Check compatibility, periodic maintenance, replacement, propagation, and
+retirement readiness when the change affects them. Retirement must leave no
+hollow references or unmanaged catalog fallout.
+
+## Propagation and proof
+
+Name each affected inventory, sync, validator, and test surface. Prefer the
+smallest deterministic proof and record unavailable proof as a gap.
+
+## Self-review risk
+
+When this skill revises its own contract, name the rationalization risk and
+prefer evidence from external consumers and focused tests.
+
 ## Evaluation selection
 
 Classify each candidate branch as applicable, skipped, or blocked. Objective

@@ -99,6 +99,20 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
 - If this gate is skipped, agents must stop, disclose the violation, establish
   the recovery path, and must not claim retroactive red-green-refactor work.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs are tracked in GitHub Issues for `pagopa/cloud-strategy.github`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default canonical triage labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repository uses the single-context domain documentation layout. See `docs/agents/domain.md`.
+
 ## graphify
 
 For any question about this repo's architecture, structure, components, or how to add/modify/find
@@ -107,7 +121,7 @@ exists. Use `graphify path "<A>" "<B>"` for relationship questions and `graphify
 for focused-concept questions. These return a scoped subgraph, usually much smaller than the full
 report or raw grep output.
 
-Triggers: "how do I…", "where is…", "what does … do", "add/modify a <component>",
+Triggers: "how do I…", "where is…", "what does … do", "add/modify a `<component>`",
 "explain the architecture", or anything that depends on how files or classes relate.
 
 If `graphify-out/wiki/index.md` exists, use it for broad navigation. Read `graphify-out/GRAPH_REPORT.md`

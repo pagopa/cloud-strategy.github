@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Remove unreferenced files from an unpacked PPTX directory.
 
 Usage: python clean.py <unpacked_dir>

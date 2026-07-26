@@ -74,7 +74,7 @@ For `full-gate`, complete the gates in this order:
 1. Inspect the nearest local evidence.
 2. Confirm the task still fits one bounded run.
 3. Complete Initial Idea Ordering.
-4. Ask one compact `/grill-me` block only when a missing bounded fact blocks the active lane. Use `/grill-me` only when a missing bounded fact blocks the active lane.
+4. Ask one compact `/grill-me` block only when a missing bounded fact blocks the active lane.
 5. Run `/internal-gateway-critical-master` before non-trivial action.
 6. Write a short Readiness Brief.
 7. If executable or evaluable behavior changes, load `/internal-tdd` before implementation and follow its routed posture.

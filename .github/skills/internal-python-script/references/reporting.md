@@ -11,7 +11,7 @@ Use this reference when a Python script or operator-facing toolkit needs polishe
 
 ## Dependency Decision
 
-Use `rich` when the human-facing terminal experience is part of the script contract. Keep the dependency decision close to the owning `requirements.txt`.
+Use `rich` when the human-facing terminal experience is part of the script contract. Preserve the declared dependency manager and keep the decision close to its canonical lock artifact.
 
 ```text
 Dependency decision note
@@ -20,7 +20,7 @@ Dependency decision note
 - Why: the tool has operator-facing sections, status tables, warnings, and summaries where consistent terminal rendering reduces mistakes.
 ```
 
-After adding or updating dependencies, regenerate exact pins and hashes with `pip-compile --generate-hashes` or the repository-approved equivalent, then validate with `pip install --require-hashes -r requirements.txt`.
+After adding or updating dependencies, follow the `internal-python-script` Dependency policy for the declared manager's lock generation and validation.
 
 ## Reporter Shape
 
@@ -52,6 +52,22 @@ from rich.panel import Panel
 from rich.table import Table
 
 
+SENSITIVE_OPTION_MARKERS = (
+    "authorization",
+    "credential",
+    "password",
+    "secret",
+    "token",
+)
+
+
+def _render_option(key: str, value: object) -> str:
+    normalized_key = key.casefold().replace("-", "_")
+    if any(marker in normalized_key for marker in SENSITIVE_OPTION_MARKERS):
+        return "[REDACTED]"
+    return escape(str(value))
+
+
 class ExecutionReporter:
     def __init__(self, *, console: Console | None = None, verbose: bool = False) -> None:
         self.console = console or Console()
@@ -75,7 +91,10 @@ class ExecutionReporter:
         if output_path is not None:
             lines.append(f"Output: {escape(output_path.as_posix())}")
         if options:
-            rendered = ", ".join(f"{escape(str(key))}={escape(str(value))}" for key, value in options.items())
+            rendered = ", ".join(
+                f"{escape(str(key))}={_render_option(str(key), value)}"
+                for key, value in options.items()
+            )
             lines.append(f"Options: {rendered}")
         self.console.print(Panel("\n".join(lines), title=escape(title), border_style="blue"))
 
@@ -107,7 +126,28 @@ class ExecutionReporter:
         for row in rows:
             table.add_row(*(escape(str(value)) for value in row))
         self.console.print(table)
+
+    def summary(
+        self,
+        *,
+        status: str,
+        counts: Mapping[str, int],
+        produced_files: Sequence[Path],
+        diagnostics: Sequence[str],
+    ) -> None:
+        rows = [(name, value) for name, value in counts.items()]
+        if rows:
+            self.table("Counts", ("Metric", "Value"), rows)
+        self.console.print(f"Status: {escape(status)}")
+        self.console.print("Produced files:")
+        for path in produced_files:
+            self.console.print(f"• {escape(path.as_posix())}")
+        self.console.print("Diagnostics:")
+        for diagnostic in diagnostics:
+            self.console.print(f"• {escape(diagnostic)}")
 ```
+
+Callers must pass only sanitized diagnostics because arbitrary free-text diagnostics cannot be reliably redacted by key inspection.
 
 ## Summary Expectations
 

@@ -1,6 +1,6 @@
 ---
 name: internal-python-project
-description: Use when creating or modifying Python package or application code whose primary contract is imported behavior, service boundaries, or framework-owned flows rather than operator-facing scripts.
+description: Use when creating, modifying, or reviewing importable Python package, library, application, service, or framework behavior rather than directly executed operator tooling.
 ---
 
 # Python Project Skill
@@ -26,6 +26,9 @@ description: Use when creating or modifying Python package or application code w
 - This skill covers structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
 - Small operator-facing tools remain out of scope even when they have multiple files or tests.
 - A `lib/` folder, root-level tests, or multiple entrypoints alone do not make a tool application code.
+- A thin CLI adapter remains project-owned when the primary contract is
+  importable behavior; route direct-execution tooling to
+  `internal-python-script`.
 
 ## Compact Python baseline
 
@@ -38,7 +41,7 @@ description: Use when creating or modifying Python package or application code w
 - Pass configuration into reusable project code through typed settings, constructor arguments, or function parameters. Domain and service code should not read environment variables, files, or deployment defaults directly unless that boundary is its explicit responsibility.
 - Do not confuse domain invariants with configuration. Stable rules that belong to the domain may stay near the domain code; deployment-specific paths, endpoints, thresholds, defaults, and feature switches should live at the configuration boundary.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
-- If external packages are introduced, keep exact pins and hashes in the owning requirements file.
+- Preserve the repository-declared dependency manager. For pip requirements, keep exact pins and hashes in the owning requirements file; for another declared dependency manager, update its canonical lock artifact and use its frozen or locked validation command.
 
 ## Application-specific guidance
 
@@ -85,6 +88,6 @@ Load `references/common-mistakes.md` for the full mistake table.
 ## Validation
 
 - `python -m compileall <paths>` (syntax check)
-- `pip install --require-hashes -r requirements.txt` (dependency integrity check, only when requirements change)
+- For pip-managed projects, run `pip install --require-hashes -r requirements.txt` when requirements change; for another declared manager, run its canonical frozen or locked validation command.
 - `pytest tests/` (run tests)
 - Lint with project's configured linter.

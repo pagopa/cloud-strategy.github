@@ -183,6 +183,121 @@ def normalize_log_records(value: object) -> list[dict[str, object]]:
     return records
 
 
+def load_input(path: Path) -> object:
+    text = path.read_text(encoding="utf-8")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        records: list[dict[str, object]] = []
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            if not line.strip():
+                continue
+            try:
+                value = json.loads(line)
+            except json.JSONDecodeError as error:
+                raise ValueError(
+                    f"{path.name}: invalid JSONL at line {line_number}"
+                ) from error
+            if not isinstance(value, dict):
+                raise ValueError(
+                    f"{path.name}: JSONL line {line_number} must be an object"
+                )
+            records.append(value)
+        return records
+
+
+def _direct_numeric(value: object) -> int | float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return 0
+    return value
+
+
+def summarize_direct_events(
+    events: list[dict[str, object]], source_name: str
+) -> list[dict[str, object]]:
+    llm_requests = [event for event in events if event.get("type") == "llm_request"]
+    tool_calls = [event for event in events if event.get("type") == "tool_call"]
+    nano_aiu_divisor = 1_000_000_000
+
+    input_tokens_total = 0
+    output_tokens_total = 0
+    cache_read_total = 0
+    non_cached_total = 0
+    aiu_total = 0.0
+    context_series: list[int] = []
+    tool_result_bytes = 0
+    error_count = 0
+    session_id = next(
+        (
+            event.get("sid")
+            for event in events
+            if isinstance(event.get("sid"), str) and event.get("sid")
+        ),
+        source_name,
+    )
+
+    for event in llm_requests:
+        attrs = event.get("attrs")
+        attributes = attrs if isinstance(attrs, dict) else {}
+        input_tokens = max(int(_direct_numeric(attributes.get("inputTokens"))), 0)
+        cached_tokens = int(_direct_numeric(attributes.get("cachedTokens")))
+        cached_tokens = min(max(cached_tokens, 0), input_tokens)
+        output_tokens = max(int(_direct_numeric(attributes.get("outputTokens"))), 0)
+        nano_aiu = _direct_numeric(attributes.get("copilotUsageNanoAiu"))
+        input_tokens_total += input_tokens
+        output_tokens_total += output_tokens
+        cache_read_total += cached_tokens
+        non_cached_total += input_tokens - cached_tokens
+        aiu_total += float(nano_aiu) / nano_aiu_divisor
+        context_series.append(input_tokens)
+
+    for event in tool_calls:
+        attrs = event.get("attrs")
+        attributes = attrs if isinstance(attrs, dict) else {}
+        tool_result_bytes += measure_payload_bytes(attributes.get("result"))
+        if str(event.get("status") or "").lower() in {"error", "failed", "failure"}:
+            error_count += 1
+
+    return [
+        {
+            "session_id": str(session_id),
+            "title": str(session_id),
+            "model_request_count": len(llm_requests),
+            "tool_call_count": len(tool_calls),
+            "request_count": len(llm_requests),
+            "input_tokens": input_tokens_total,
+            "output_tokens": output_tokens_total,
+            "cache_read_tokens": cache_read_total,
+            "estimated_cache_read_tokens": None,
+            "non_cached_input_tokens": non_cached_total,
+            "estimated_non_cached_input_tokens": None,
+            "aiu_total": round(aiu_total, 6),
+            "estimated_aiu_total": None,
+            "request_message_bytes": 0,
+            "tool_calls": len(tool_calls),
+            "tool_result_bytes": tool_result_bytes,
+            "tool_result_volume_bytes": tool_result_bytes,
+            "tool_schema_bytes": 0,
+            "error_count": error_count,
+            "invocation_error_count": error_count,
+            "missing_memory_path_error_count": 0,
+            "graphify_invocation_count": 0,
+            "graphify_discovery_count": 0,
+            "max_context_tokens": max(context_series) if context_series else 0,
+            "runtime_context_tokens": max(context_series) if context_series else 0,
+            "context_growth_tokens": (
+                max(context_series[-1] - context_series[0], 0)
+                if len(context_series) > 1
+                else 0
+            ),
+            "first_context_tokens": context_series[0] if context_series else 0,
+            "last_context_tokens": context_series[-1] if context_series else 0,
+            "tool_schema_count": None,
+            "limits": ["direct-debug-jsonl", "summary-only"],
+        }
+    ]
+
+
 def extract_int(mapping: dict[str, object], *keys: str) -> int | None:
     for key in keys:
         value = mapping.get(key)
@@ -613,8 +728,14 @@ def summarize_legacy_sessions(data: dict[str, object]) -> list[dict[str, object]
     return summaries
 
 
-def summarize_input(path: Path) -> tuple[str, list[dict[str, object]], int]:
-    data = json.loads(path.read_text(encoding="utf-8"))
+def summarize_input(
+    path: Path, data: object
+) -> tuple[str, list[dict[str, object]], int]:
+    if path.suffix.lower() == ".jsonl" and isinstance(data, list):
+        events = [item for item in data if isinstance(item, dict)]
+        return "direct-jsonl", summarize_direct_events(events, path.name), 0
+    if isinstance(data, dict) and data.get("type") in {"llm_request", "tool_call"}:
+        return "direct-jsonl", summarize_direct_events([data], path.name), 0
     if isinstance(data, dict) and isinstance(data.get("resourceSpans"), list):
         return (
             "otlp",
@@ -709,9 +830,9 @@ def build_report(paths: list[Path]) -> dict[str, object]:
     raw_snapshot_count = 0
     unsupported_inputs: list[str] = []
     for path in paths:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        kind, summaries, snapshot_like_count = summarize_input(path)
-        if kind in {"otlp", "otlp-legacy"}:
+        data = load_input(path)
+        kind, summaries, snapshot_like_count = summarize_input(path, data)
+        if kind in {"otlp", "otlp-legacy", "direct-jsonl"}:
             session_summaries.extend(summaries)
             continue
         if kind == "prompt-export":
@@ -796,12 +917,13 @@ def render_markdown(report: dict[str, object]) -> str:
     lines = [
         "# Debug Log Summary",
         "",
-        "| Session | Requests | Input tokens | Output tokens | Cache read | Non-cached input | First ctx | Last ctx | Max ctx | Tool bytes | Errors |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Session | Requests | Input tokens | Output tokens | Cache read | Non-cached input | AIU | First ctx | Last ctx | Max ctx | Tool bytes | Errors |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for summary in sessions:
+        aiu = f"{as_float(summary.get('aiu_total')):.6f}".rstrip("0").rstrip(".")
         lines.append(
-            f"| {summary['title']} | {summary['request_count']} | {summary['input_tokens']} | {summary['output_tokens']} | {summary.get('cache_read_tokens', 0)} | {summary.get('non_cached_input_tokens', 0)} | {summary.get('first_context_tokens', 0)} | {summary.get('last_context_tokens', 0)} | {summary.get('max_context_tokens', 0)} | {summary.get('tool_result_bytes', 0)} | {summary.get('error_count', 0)} |"
+            f"| {summary['title']} | {summary['request_count']} | {summary['input_tokens']} | {summary['output_tokens']} | {summary.get('cache_read_tokens', 0)} | {summary.get('non_cached_input_tokens', 0)} | {aiu or '0'} | {summary.get('first_context_tokens', 0)} | {summary.get('last_context_tokens', 0)} | {summary.get('max_context_tokens', 0)} | {summary.get('tool_result_bytes', 0)} | {summary.get('error_count', 0)} |"
         )
     lines.append("")
     lines.append(

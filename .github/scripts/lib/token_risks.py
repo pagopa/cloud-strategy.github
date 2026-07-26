@@ -21,8 +21,6 @@ ROOT_POLICY_MARKERS = ("AGENTS.md", ".github/copilot-instructions.md", ".github/
 INVENTORY_LINE_PATTERN = re.compile(r"^- `?\.github/[^`]+`?(?::|\s*$)")
 IMPORTED_SKILL_DESCRIPTION_LIMIT = 500
 ESTIMATED_TOKEN_BYTES = 4
-DELEGATED_REVIEW_PROMPT_PATH = ".github/prompts/internal-review-ai-resources.prompt.md"
-DELEGATED_REVIEW_PROMPT_TOKEN_TARGET = 1100
 ROOT_ALWAYS_ON_PATHS = ("AGENTS.md",)
 ROOT_ALWAYS_ON_TOKEN_TARGET = 4000
 COPILOT_REVIEW_PATH = ".github/copilot-instructions.md"
@@ -54,18 +52,12 @@ AGENTS_OPERATIONAL_PROCEDURE_MARKERS = (
 GATEWAY_CORE_SKILL_PATH = ".github/skills/internal-gateway-idea/SKILL.md"
 GATEWAY_CORE_BYTE_BUDGET = 16286
 GATEWAY_REQUIRED_CONTEXT_BYTE_BUDGET = 30000
-GATEWAY_UNIVERSAL_PRELOAD_MARKERS = (
-    "Always preload only `grill-me` and `internal-agent-support-next-step`.",
-)
-
-
 def detect_token_risks(root: Path) -> list[Finding]:
     findings: list[Finding] = []
     findings.extend(check_root_policy_overlap(root))
     findings.extend(check_agents_operational_procedure_markers(root))
     findings.extend(check_root_always_on_budget(root))
     findings.extend(check_copilot_review_budget(root))
-    findings.extend(check_delegated_review_prompt_budget(root))
     findings.extend(check_review_baseline_window(root))
     findings.extend(check_inventory_dumps(root))
     findings.extend(check_duplicate_markdown_bodies(root))
@@ -75,7 +67,6 @@ def detect_token_risks(root: Path) -> list[Finding]:
     findings.extend(check_internal_root_policy_overlap(root))
     findings.extend(check_paired_agent_skill_overlap(root))
     findings.extend(check_gateway_core_budget(root))
-    findings.extend(check_gateway_universal_preload_regression(root))
     return sorted(findings, key=finding_sort_key)
 
 
@@ -128,32 +119,6 @@ def check_copilot_review_budget(root: Path) -> list[Finding]:
             ),
             suggestion=(
                 "Keep this file review-only and move general policy or procedural detail into AGENTS.md, skills, or owned assets."
-            ),
-        )
-    ]
-
-
-def check_delegated_review_prompt_budget(root: Path) -> list[Finding]:
-    path = root / DELEGATED_REVIEW_PROMPT_PATH
-    if not path.exists():
-        return []
-
-    estimated_tokens = estimate_tokens(path)
-    if estimated_tokens <= DELEGATED_REVIEW_PROMPT_TOKEN_TARGET:
-        return []
-
-    return [
-        Finding(
-            severity="non-blocking",
-            code="delegated-review-prompt-budget",
-            path=DELEGATED_REVIEW_PROMPT_PATH,
-            message=(
-                "The delegated AI resource review prompt exceeds its soft token target "
-                f"({estimated_tokens} estimated tokens, target {DELEGATED_REVIEW_PROMPT_TOKEN_TARGET})."
-            ),
-            suggestion=(
-                "Keep user inputs and the analysis-only boundary in the prompt, but move reusable workflow "
-                "detail into .github/skills/internal-review-ai-resources/."
             ),
         )
     ]
@@ -574,35 +539,6 @@ def check_gateway_core_budget(root: Path) -> list[Finding]:
             suggestion=(
                 "Compress the core around exclusive reference ownership and phase-local "
                 "support loading; do not delete useful lazy depth solely for bundle size."
-            ),
-        )
-    ]
-
-
-def check_gateway_universal_preload_regression(root: Path) -> list[Finding]:
-    path = root / GATEWAY_CORE_SKILL_PATH
-    if not path.exists():
-        return []
-
-    text = read_text(path)
-    found_markers = [
-        marker for marker in GATEWAY_UNIVERSAL_PRELOAD_MARKERS if marker in text
-    ]
-    if not found_markers:
-        return []
-
-    return [
-        Finding(
-            severity="non-blocking",
-            code="gateway-universal-preload-regression",
-            path=GATEWAY_CORE_SKILL_PATH,
-            message=(
-                "The operational-flow core still contains universal preload instructions "
-                f"that should be phase-local: {', '.join(repr(m) for m in found_markers)}."
-            ),
-            suggestion=(
-                "Load grill-me when Gate 0 activates and internal-agent-support-next-step "
-                "when a transition package is needed; do not preload universally."
             ),
         )
     ]

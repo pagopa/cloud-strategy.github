@@ -73,6 +73,12 @@ For each finding, include:
 - proposed replacement or fix
 - tool-contract note when the issue involves explicit tool scope, MCP access, or legacy tool ids
 
+### Review-lane projection
+
+When this audit runs inside a review lane, project `blocking` to `B` and
+`non-blocking` to `S`. Keep the `Delete`, `Replace`, `Patch`, and `Keep` action inside the finding's
+`Correction` field; it is not a second severity scale.
+
 ## No-Fallback Rule
 
 When a repository-owned internal replacement exists, prefer deleting the weaker upstream asset instead of keeping a compatibility fallback.

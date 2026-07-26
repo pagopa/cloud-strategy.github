@@ -1,6 +1,7 @@
 ---
 name: anthropic-pdf
-description: "Use when tasks involve reading, creating, or reviewing PDF files where rendering and layout matter; prefer visual checks by rendering pages (Poppler) and use Python tools such as `reportlab`, `pdfplumber`, and `pypdf` for generation and extraction."
+description: Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill.
+license: Proprietary. LICENSE.txt has complete terms
 ---
 
 # PDF Processing Guide
@@ -14,9 +15,11 @@ This guide covers essential PDF processing operations using Python libraries and
 ```python
 from pypdf import PdfReader, PdfWriter
 
+# Read a PDF
 reader = PdfReader("document.pdf")
 print(f"Pages: {len(reader.pages)}")
 
+# Extract text
 text = ""
 for page in reader.pages:
     text += page.extract_text()
@@ -62,13 +65,11 @@ print(f"Creator: {meta.creator}")
 
 #### Rotate Pages
 ```python
-from pypdf import PdfReader, PdfWriter
-
 reader = PdfReader("input.pdf")
 writer = PdfWriter()
 
 page = reader.pages[0]
-page.rotate(90)
+page.rotate(90)  # Rotate 90 degrees clockwise
 writer.add_page(page)
 
 with open("rotated.pdf", "wb") as output:
@@ -107,10 +108,11 @@ with pdfplumber.open("document.pdf") as pdf:
     for page in pdf.pages:
         tables = page.extract_tables()
         for table in tables:
-            if table:
+            if table:  # Check if table is not empty
                 df = pd.DataFrame(table[1:], columns=table[0])
                 all_tables.append(df)
 
+# Combine all tables
 if all_tables:
     combined_df = pd.concat(all_tables, ignore_index=True)
     combined_df.to_excel("extracted_tables.xlsx", index=False)
@@ -126,10 +128,14 @@ from reportlab.pdfgen import canvas
 c = canvas.Canvas("hello.pdf", pagesize=letter)
 width, height = letter
 
+# Add text
 c.drawString(100, height - 100, "Hello World!")
 c.drawString(100, height - 120, "This is a PDF created with reportlab")
+
+# Add a line
 c.line(100, height - 140, 400, height - 140)
 
+# Save
 c.save()
 ```
 
@@ -143,6 +149,7 @@ doc = SimpleDocTemplate("report.pdf", pagesize=letter)
 styles = getSampleStyleSheet()
 story = []
 
+# Add content
 title = Paragraph("Report Title", styles['Title'])
 story.append(title)
 story.append(Spacer(1, 12))
@@ -151,15 +158,17 @@ body = Paragraph("This is the body of the report. " * 20, styles['Normal'])
 story.append(body)
 story.append(PageBreak())
 
+# Page 2
 story.append(Paragraph("Page 2", styles['Heading1']))
 story.append(Paragraph("Content for page 2", styles['Normal']))
 
+# Build PDF
 doc.build(story)
 ```
 
 #### Subscripts and Superscripts
 
-**IMPORTANT**: Never use Unicode subscript/superscript characters in ReportLab PDFs. The built-in fonts do not include these glyphs, causing them to render as solid black boxes.
+**IMPORTANT**: Never use Unicode subscript/superscript characters (₀₁₂₃₄₅₆₇₈₉, ⁰¹²³⁴⁵⁶⁷⁸⁹) in ReportLab PDFs. The built-in fonts do not include these glyphs, causing them to render as solid black boxes.
 
 Instead, use ReportLab's XML markup tags in Paragraph objects:
 ```python
@@ -168,32 +177,54 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 styles = getSampleStyleSheet()
 
+# Subscripts: use <sub> tag
 chemical = Paragraph("H<sub>2</sub>O", styles['Normal'])
+
+# Superscripts: use <super> tag
 squared = Paragraph("x<super>2</super> + y<super>2</super>", styles['Normal'])
 ```
+
+For canvas-drawn text (not Paragraph objects), manually adjust font the size and position rather than using Unicode subscripts/superscripts.
 
 ## Command-Line Tools
 
 ### pdftotext (poppler-utils)
 ```bash
+# Extract text
 pdftotext input.pdf output.txt
+
+# Extract text preserving layout
 pdftotext -layout input.pdf output.txt
-pdftotext -f 1 -l 5 input.pdf output.txt
+
+# Extract specific pages
+pdftotext -f 1 -l 5 input.pdf output.txt  # Pages 1-5
 ```
 
 ### qpdf
 ```bash
+# Merge PDFs
 qpdf --empty --pages file1.pdf file2.pdf -- merged.pdf
+
+# Split pages
 qpdf input.pdf --pages . 1-5 -- pages1-5.pdf
 qpdf input.pdf --pages . 6-10 -- pages6-10.pdf
-qpdf input.pdf output.pdf --rotate=+90:1
+
+# Rotate pages
+qpdf input.pdf output.pdf --rotate=+90:1  # Rotate page 1 by 90 degrees
+
+# Remove password
 qpdf --password=mypassword --decrypt encrypted.pdf decrypted.pdf
 ```
 
 ### pdftk (if available)
 ```bash
+# Merge
 pdftk file1.pdf file2.pdf cat output merged.pdf
+
+# Split
 pdftk input.pdf burst
+
+# Rotate
 pdftk input.pdf rotate 1east output rotated.pdf
 ```
 
@@ -201,11 +232,14 @@ pdftk input.pdf rotate 1east output rotated.pdf
 
 ### Extract Text from Scanned PDFs
 ```python
+# Requires: pip install pytesseract pdf2image
 import pytesseract
 from pdf2image import convert_from_path
 
+# Convert PDF to images
 images = convert_from_path('scanned.pdf')
 
+# OCR each page
 text = ""
 for i, image in enumerate(images):
     text += f"Page {i+1}:\n"
@@ -219,8 +253,10 @@ print(text)
 ```python
 from pypdf import PdfReader, PdfWriter
 
+# Create watermark (or load existing)
 watermark = PdfReader("watermark.pdf").pages[0]
 
+# Apply to all pages
 reader = PdfReader("document.pdf")
 writer = PdfWriter()
 
@@ -234,7 +270,10 @@ with open("watermarked.pdf", "wb") as output:
 
 ### Extract Images
 ```bash
+# Using pdfimages (poppler-utils)
 pdfimages -j input.pdf output_prefix
+
+# This extracts all images as output_prefix-000.jpg, output_prefix-001.jpg, etc.
 ```
 
 ### Password Protection
@@ -247,6 +286,7 @@ writer = PdfWriter()
 for page in reader.pages:
     writer.add_page(page)
 
+# Add password
 writer.encrypt("userpassword", "ownerpassword")
 
 with open("encrypted.pdf", "wb") as output:
