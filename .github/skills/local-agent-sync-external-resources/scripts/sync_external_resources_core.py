@@ -31,6 +31,7 @@ class ManagedSource:
     advertised_ref: str | None
     assets: tuple[ManagedAsset, ...]
     rewrite_skill_references: bool = False
+    ensure_python_shebangs: bool = False
     skill_reference_aliases: tuple[tuple[str, str], ...] = ()
     backtick_skill_references: tuple[str, ...] = ()
 
@@ -170,6 +171,11 @@ def load_managed_resources(path: Path) -> ManagedResources:
             raise ValueError(
                 f"source {source_id} rewrite_skill_references must be a boolean."
             )
+        ensure_python_shebangs = raw_source.get("ensure_python_shebangs", False)
+        if not isinstance(ensure_python_shebangs, bool):
+            raise ValueError(
+                f"source {source_id} ensure_python_shebangs must be a boolean."
+            )
         raw_skill_reference_aliases = raw_source.get("skill_reference_aliases", {})
         if not isinstance(raw_skill_reference_aliases, dict):
             raise ValueError(
@@ -219,6 +225,7 @@ def load_managed_resources(path: Path) -> ManagedResources:
                 advertised_ref=advertised_ref,
                 assets=tuple(assets),
                 rewrite_skill_references=rewrite_skill_references,
+                ensure_python_shebangs=ensure_python_shebangs,
                 skill_reference_aliases=tuple(skill_reference_aliases),
                 backtick_skill_references=tuple(backtick_skill_references),
             )
@@ -469,6 +476,7 @@ def normalize_candidate(
         replacements_by_source.setdefault(replacement.source, []).append(replacement)
 
     changed: list[str] = []
+    sources_by_id = {source.source_id: source for source in resources.sources}
     skill_references_by_source: dict[str, dict[str, str]] = {}
     backtick_references_by_source: dict[str, dict[str, str]] = {}
     for source in resources.sources:
@@ -500,6 +508,15 @@ def normalize_candidate(
                 continue
 
             original = content
+            source = sources_by_id[asset.source]
+            if (
+                source.ensure_python_shebangs
+                and file_path.suffix == ".py"
+                and file_path.stat().st_mode & 0o111
+                and not content.startswith("#!")
+            ):
+                content = "#!/usr/bin/env python3\n" + content
+
             if file_path.suffix in {".md", ".yaml", ".yml"}:
                 content = _FRONTMATTER_NAME_RE.sub(
                     rf"\g<1>{asset.canonical_name}", content, count=1

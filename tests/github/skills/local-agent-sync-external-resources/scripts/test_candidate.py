@@ -757,6 +757,66 @@ def test_undeclared_backtick_reference_is_left_unchanged(tmp_path: Path) -> None
     assert "/mattpocock-domain-modeling" in content
 
 
+def test_normalize_candidate_adds_shebang_only_to_opted_in_executable_python(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    asset_dir = candidate / ".github/skills/anthropic-docx"
+    scripts_dir = asset_dir / "scripts"
+    scripts_dir.mkdir(parents=True)
+
+    missing_shebang = scripts_dir / "missing.py"
+    missing_shebang.write_text('"""Tool."""\n', encoding="utf-8")
+    missing_shebang.chmod(0o755)
+
+    existing_shebang = scripts_dir / "existing.py"
+    existing_shebang.write_text(
+        "#!/usr/bin/python3\nprint('ok')\n",
+        encoding="utf-8",
+    )
+    existing_shebang.chmod(0o755)
+
+    non_executable = scripts_dir / "library.py"
+    non_executable.write_text('"""Library."""\n', encoding="utf-8")
+    non_executable.chmod(0o644)
+
+    shell_script = scripts_dir / "tool.sh"
+    shell_script.write_text("set -eu\n", encoding="utf-8")
+    shell_script.chmod(0o755)
+
+    asset = ManagedAsset(
+        source="anthropic-skills",
+        upstream="skills/docx",
+        local=".github/skills/anthropic-docx",
+        canonical_name="anthropic-docx",
+    )
+    source = ManagedSource(
+        source_id="anthropic-skills",
+        repository="https://github.com/anthropics/skills.git",
+        ref="a" * 40,
+        advertised_ref=None,
+        assets=(asset,),
+        ensure_python_shebangs=True,
+    )
+    resources = ManagedResources(
+        sources=(source,),
+        replacements=(),
+        watchlist=(),
+    )
+
+    changed = normalize_candidate(resources, candidate)
+
+    assert missing_shebang.read_text(encoding="utf-8") == (
+        '#!/usr/bin/env python3\n"""Tool."""\n'
+    )
+    assert existing_shebang.read_text(encoding="utf-8").startswith(
+        "#!/usr/bin/python3\n"
+    )
+    assert non_executable.read_text(encoding="utf-8") == '"""Library."""\n'
+    assert shell_script.read_text(encoding="utf-8") == "set -eu\n"
+    assert changed == (".github/skills/anthropic-docx/scripts/missing.py",)
+
+
 def _example_asset() -> ManagedAsset:
     return ManagedAsset(
         source="test-source",

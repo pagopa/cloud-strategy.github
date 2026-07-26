@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Add comments to a DOCX document.
 
 Accepts either an unpacked directory OR a .docx/.dotx file directly.

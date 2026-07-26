@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Extract form structure from a non-fillable PDF.
 

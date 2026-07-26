@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Add a slide to a PPTX: duplicate an existing slide or instantiate a layout.
 
 Does all of the package bookkeeping, so the deck stays valid:

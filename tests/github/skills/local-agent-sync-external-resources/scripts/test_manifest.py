@@ -146,6 +146,10 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
     )
     assert matt_source.rewrite_skill_references is True
     assert dict(matt_source.skill_reference_aliases) == {}
+    anthropic_source = next(
+        source for source in manifest.sources if source.source_id == "anthropic-skills"
+    )
+    assert anthropic_source.ensure_python_shebangs is True
     assert {
         item.upstream_id
         for item in manifest.watchlist

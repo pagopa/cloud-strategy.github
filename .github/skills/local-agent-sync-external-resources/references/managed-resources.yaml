@@ -211,6 +211,7 @@ sources:
     repository: https://github.com/anthropics/skills.git
     ref: b29e7cf65e5cb78a5ac33d582270551bc74a14eb
     rewrite_skill_references: true
+    ensure_python_shebangs: true
     assets:
       - upstream: skills/docx
         local: .github/skills/anthropic-docx
