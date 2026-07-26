@@ -1,0 +1,12 @@
+{
+  "noBanner": true,
+  "noProgress": true,
+  "config": {
+    "default": false,
+    "MD011": true,
+    "MD042": true,
+    "MD051": true,
+    "MD052": true,
+    "MD053": true
+  }
+}

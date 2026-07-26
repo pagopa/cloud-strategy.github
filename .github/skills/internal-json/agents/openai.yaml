@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal JSON"
-  short_description: "JSON formatting and registry rules"
-  default_prompt: "Use $internal-json when editing or reviewing repository-owned JSON registry, organization, data, or configuration files."
+  short_description: "Strict JSON format handling"
+  default_prompt: "Use $internal-json when editing or reviewing JSON syntax, encoding, duplicate keys, numeric portability, or format-owner routing."

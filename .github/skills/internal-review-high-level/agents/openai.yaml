@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Review High Level"
-  short_description: "Systems-fit, architecture, and orientation review"
-  default_prompt: "Use /internal-review-high-level to review systems-fit and architecture or to build an evidence-based orientation map. Select one branch, load only its referenced evidence, keep cross-owner routes recommendation-only, and report uncertainty explicitly."
+  short_description: "High-level non-code review"
+  default_prompt: "Use /internal-review-high-level for an evidence-first, high-level review of a non-code target. Resolve intent and scope, apply only relevant dimensions, support material conclusions with evidence, use the compact emoji projection, and state uncertainty and validation gaps."

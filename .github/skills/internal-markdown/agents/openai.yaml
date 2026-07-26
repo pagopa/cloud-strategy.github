@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Markdown"
-  short_description: "Markdown structure and prose"
-  default_prompt: "Use $internal-markdown when editing or reviewing repository-owned Markdown structure, links, paths, and prose."
+  short_description: "Strict Markdown format handling"
+  default_prompt: "Use $internal-markdown when editing or reviewing Markdown structure, fences, references, paths, links, or dialect-aware format checks."

@@ -13,7 +13,7 @@ customization assets maintained in `cloud-strategy.github`.
   `internal-gateway-idea`, `internal-gateway-review-generic`,
   `internal-gateway-critical-master`, `internal-gateway-simple-task`
 - Specialist repository-owned review agents:
-  `internal-gateway-review-code` for code-focused review before merge or follow-up action.
+  `internal-gateway-review-code` for report-only code review or a separately authorized plan-only follow-up.
 - Approved retained plans under tmp/superpowers/plans/ execute through
   `internal-gateway-execute-plans`.
 - When extra provenance helps, offer it as an optional follow-up detail and accept

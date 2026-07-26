@@ -1,0 +1,18 @@
+{
+  "model": "comparison-model-2026-07-26",
+  "target_sha256": "sha256:seeded-target-v1",
+  "review_skill_sha256": "sha256:internal-review-code",
+  "engine_sha256": "sha256:addyosmani-code-review-and-quality",
+  "chat_debug_reference": "sanitized://chat-debug/seeded-review-fail",
+  "contract_version": "internal-review-code-eval-v1",
+  "loaded_skills": [
+    "internal-review-code"
+  ],
+  "matched_finding_ids": [
+    "CAP_101",
+    "VERSION_BOUNDARY",
+    "SOURCE_IDENTITY"
+  ],
+  "verdict": "approve",
+  "scope_violations": []
+}

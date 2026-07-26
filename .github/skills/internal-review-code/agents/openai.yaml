@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Review Code"
   short_description: "Repository wrapper for the imported code-review engine"
-  default_prompt: "Use /internal-review-code as the repository wrapper, follow /addyosmani-code-review-and-quality as the complete review engine, return the result through the adaptive chat projection with one user action, and state that remediation requires a separate follow-up; use /awesome-copilot-security-review only if the user explicitly asks for security-specialist depth."
+  default_prompt: "Use /internal-review-code as the repository wrapper and /addyosmani-code-review-and-quality as the sole review engine; complete the review preflight, resolve the target and source provenance, derive adversarial probes from target evidence, run the ordered review sequence, return the report-only adaptive chat projection with one user action, and stop with NEEDS INVESTIGATION when the target, engine identity, or resolved source is unavailable."

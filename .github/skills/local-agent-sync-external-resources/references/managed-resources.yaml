@@ -254,12 +254,12 @@ watchlist:
     reason: Root-cause diagnosis loop was extracted into a repository-owned owner.
   - source_family: mattpocock/skills
     upstream_id: improve-codebase-architecture
-    local_owner: internal-review-high-level
-    reason: Architecture deepening lenses were extracted into high-level review.
+    local_owner: unmanaged
+    reason: No promoted local owner covers codebase architecture after high-level review was narrowed to non-code targets.
   - source_family: mattpocock/skills
     upstream_id: zoom-out
-    local_owner: internal-review-high-level
-    reason: Codebase orientation, module maps, caller maps, and domain vocabulary were extracted into high-level review.
+    local_owner: unmanaged
+    reason: No promoted local owner covers codebase orientation after high-level review was narrowed to non-code targets.
   - source_family: mattpocock/skills
     upstream_id: prototype
     local_owner: unmanaged

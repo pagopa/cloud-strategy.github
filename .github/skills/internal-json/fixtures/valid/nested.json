@@ -1,0 +1,10 @@
+{
+  "name": "nested",
+  "enabled": true,
+  "count": 42,
+  "ratio": 1.5,
+  "items": [
+    {"id": "one", "values": [null, false]},
+    {"id": "two", "values": [0, -3.25]}
+  ]
+}

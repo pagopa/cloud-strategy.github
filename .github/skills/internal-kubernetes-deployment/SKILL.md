@@ -8,7 +8,7 @@ description: Use when authoring or reviewing Kubernetes workload manifests, serv
 ## Referenced skills
 
 - `internal-kubernetes`: Kubernetes umbrella lane selection when ownership is not already clear.
-- `internal-yaml`: YAML formatting and schema awareness baseline.
+- `internal-yaml`: YAML formatting and parser-safety baseline.
 
 Use this skill for operational Kubernetes delivery work after the platform direction is already known.
 
@@ -48,7 +48,7 @@ Use this skill for operational Kubernetes delivery work after the platform direc
 - Prefer raw manifests by default; add Helm only when repeated installs, versioned packaging, or environment overlays justify chart maintenance.
 - Treat service mesh integration as conditional: configure traffic policy, mTLS, and mesh telemetry only when the cluster already runs a mesh or the platform standard requires it.
 - Prefer controller-driven delivery such as GitOps only when the team already operates that model and the rollout ownership is explicit.
-- Load `internal-yaml` for YAML formatting and schema-awareness checks when manifest syntax, indentation, or parser behavior is the main issue.
+- Load `internal-yaml` for YAML formatting and parser checks when manifest syntax, indentation, or parser behavior is the main issue.
 
 ## Operational Rules
 

@@ -18,8 +18,6 @@ def test_no_live_legacy_execute_plan_references() -> None:
     )
     paths = (
         REPO_ROOT / ".github/skills/internal-gateway-execute-plans",
-        REPO_ROOT
-        / ".github/skills/internal-review-high-level/references/plan-completion-audit.md",
     )
     text_parts = []
     for path in paths:

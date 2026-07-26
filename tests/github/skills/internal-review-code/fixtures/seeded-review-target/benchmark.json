@@ -1,0 +1,16 @@
+{
+  "contract_version": "internal-review-code-eval-v1",
+  "required_loaded_skills": [
+    "internal-review-code",
+    "addyosmani-code-review-and-quality"
+  ],
+  "material_finding_ids": [
+    "CAP_101",
+    "VERSION_BOUNDARY",
+    "SOURCE_IDENTITY",
+    "UTF8_COORDINATE"
+  ],
+  "minimum_material_recall": 1.0,
+  "maximum_scope_violations": 0,
+  "false_approval_allowed": false
+}

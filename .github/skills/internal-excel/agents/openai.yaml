@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Excel"
-  short_description: "Tabular data profiling and cleanup"
-  default_prompt: "Use $internal-excel for CSV, TSV, or Excel tabular data profiling, schema checks, cleanup, conversions, and large-file transformations."
+  short_description: "Universal Excel and tabular-data entry point"
+  default_prompt: "Use $internal-excel as the primary entry point for any Excel, XLSX, XLSM, CSV, or TSV task, adding anthropic-xlsx when workbook presentation or recalculation is required."
