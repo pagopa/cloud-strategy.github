@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 REQUIRED_PROVENANCE_FIELDS = (
     "model",
     "target_sha256",

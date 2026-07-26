@@ -2,7 +2,6 @@ from pathlib import Path
 
 import yaml
 
-
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -67,9 +66,7 @@ def test_python_runtime_metadata_names_real_owners() -> None:
 
 def test_python_script_uses_one_toolkit_helper_convention() -> None:
     skill = (SCRIPT / "SKILL.md").read_text(encoding="utf-8")
-    layout = (SCRIPT / "references/layout-and-templates.md").read_text(
-        encoding="utf-8"
-    )
+    layout = (SCRIPT / "references/layout-and-templates.md").read_text(encoding="utf-8")
 
     assert "`lib/`" in skill
     assert "`utils/`" not in skill
@@ -91,9 +88,7 @@ def test_dependency_policy_preserves_the_declared_toolchain() -> None:
 
 
 def test_dependency_template_does_not_publish_partial_real_hashes() -> None:
-    layout = (SCRIPT / "references/layout-and-templates.md").read_text(
-        encoding="utf-8"
-    )
+    layout = (SCRIPT / "references/layout-and-templates.md").read_text(encoding="utf-8")
 
     assert "00c4bdeba853cc34e7dd471f16b4114f" not in layout
     assert "0150219816b6a1fa26fb4699fb7daa9c" not in layout
@@ -125,15 +120,14 @@ def test_reporter_skeleton_redacts_sensitive_options() -> None:
     assert "def _render_option(" in reporting
     assert 'return "[REDACTED]"' in reporting
     assert "_render_option(str(key), value)" in reporting
-    assert "escape(str(value))" not in reporting.split("if options:", 1)[1].split(
-        "self.console.print", 1
-    )[0]
+    assert (
+        "escape(str(value))"
+        not in reporting.split("if options:", 1)[1].split("self.console.print", 1)[0]
+    )
 
 
 def test_python_review_catalog_defers_formatter_owned_nits() -> None:
-    review = (PYTHON / "references/review-anti-patterns.md").read_text(
-        encoding="utf-8"
-    )
+    review = (PYTHON / "references/review-anti-patterns.md").read_text(encoding="utf-8")
 
     assert "## Nit" not in review
     assert "configured formatter and linter" in review
@@ -155,9 +149,7 @@ def test_exception_guidance_respects_python_exception_hierarchy() -> None:
 
 
 def test_review_catalog_requires_evidence_for_python_findings() -> None:
-    review = (PYTHON / "references/review-anti-patterns.md").read_text(
-        encoding="utf-8"
-    )
+    review = (PYTHON / "references/review-anti-patterns.md").read_text(encoding="utf-8")
 
     unsupported_rules = (
         "Function body longer than 40 lines",

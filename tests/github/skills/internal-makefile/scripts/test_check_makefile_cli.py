@@ -62,7 +62,10 @@ def test_missing_checkmake_is_actionable(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert result.returncode == 2
     assert "checkmake version 0.3.2" in result.stderr
-    assert "go install github.com/checkmake/checkmake/cmd/checkmake@v0.3.2" in result.stderr
+    assert (
+        "go install github.com/checkmake/checkmake/cmd/checkmake@v0.3.2"
+        in result.stderr
+    )
 
 
 def test_version_mismatch_is_actionable(

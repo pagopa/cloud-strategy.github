@@ -13,7 +13,9 @@ VALID_FIXTURE = ".github/skills/internal-markdown/fixtures/valid/document.md"
 
 
 @pytest.fixture
-def fake_markdownlint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Path]:
+def fake_markdownlint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> dict[str, Path]:
     executable = tmp_path / "markdownlint-cli2"
     arguments = tmp_path / "arguments"
     input_text = tmp_path / "input"
@@ -126,7 +128,9 @@ def test_checker_uses_bundle_config_and_stdin(
 ) -> None:
     source = tmp_path / "consumer.md"
     source.write_text("# Consumer\n\nText.\n", encoding="utf-8")
-    (tmp_path / ".markdownlint.json").write_text('{"default": true}\n', encoding="utf-8")
+    (tmp_path / ".markdownlint.json").write_text(
+        '{"default": true}\n', encoding="utf-8"
+    )
 
     result = run_checker(str(source))
 

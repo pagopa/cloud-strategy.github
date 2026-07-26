@@ -10,9 +10,7 @@ RETIRED_NAME = "internal-review-ai-resources"
 
 def test_obsolete_review_entrypoints_are_removed() -> None:
     assert not (REPO_ROOT / f".github/skills/{RETIRED_NAME}").exists()
-    assert not (
-        REPO_ROOT / f".github/prompts/{RETIRED_NAME}.prompt.md"
-    ).exists()
+    assert not (REPO_ROOT / f".github/prompts/{RETIRED_NAME}.prompt.md").exists()
 
 
 def test_catalog_contract_has_no_retired_identity() -> None:

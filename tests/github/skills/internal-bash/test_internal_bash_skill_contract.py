@@ -1,9 +1,8 @@
-from pathlib import Path
 import re
 import subprocess
+from pathlib import Path
 
 import yaml
-
 
 REPO_ROOT = next(
     parent
@@ -33,7 +32,9 @@ def _bash_block(path: Path, heading: str) -> str:
     return re.search(r"```bash\n(.*?)```", section, re.DOTALL).group(1)
 
 
-def _run_bash(tmp_path: Path, body: str, *args: str) -> subprocess.CompletedProcess[str]:
+def _run_bash(
+    tmp_path: Path, body: str, *args: str
+) -> subprocess.CompletedProcess[str]:
     script = tmp_path / "contract.sh"
     script.write_text(body, encoding="utf-8")
     return subprocess.run(
@@ -106,9 +107,7 @@ def test_minimal_template_rejects_an_option_as_target_value(tmp_path: Path) -> N
 def test_argument_parser_defaults_dry_run_and_rejects_option_values(
     tmp_path: Path,
 ) -> None:
-    parser = _bash_block(
-        SCRIPT / "references/templates.md", "Argument Parsing Pattern"
-    )
+    parser = _bash_block(SCRIPT / "references/templates.md", "Argument Parsing Pattern")
     harness = f"""#!/usr/bin/env bash
 set -euo pipefail
 log_error() {{ printf '%s\\n' "$*" >&2; }}
@@ -127,14 +126,10 @@ printf 'scope=%s dry_run=%s\\n' "$SCOPE" "$DRY_RUN"
 
 
 def test_bash_review_examples_avoid_invalid_or_unsafe_positive_patterns() -> None:
-    review = (BASH / "references/review-anti-patterns.md").read_text(
-        encoding="utf-8"
-    )
+    review = (BASH / "references/review-anti-patterns.md").read_text(encoding="utf-8")
 
     assert "| SH-M07 | Function body longer than 30 lines" not in review
-    assert (
-        "| SH-M07 | Function mixes parsing, orchestration, and mutation" in review
-    )
+    assert "| SH-M07 | Function mixes parsing, orchestration, and mutation" in review
     assert 'rm -rf "${name}"' not in review
     assert "process_directory() {" in review
     assert 'cd -- "$base_dir"' in review
@@ -142,9 +137,7 @@ def test_bash_review_examples_avoid_invalid_or_unsafe_positive_patterns() -> Non
 
 
 def test_bash_review_rules_match_the_declared_conditional_baseline() -> None:
-    review = (BASH / "references/review-anti-patterns.md").read_text(
-        encoding="utf-8"
-    )
+    review = (BASH / "references/review-anti-patterns.md").read_text(encoding="utf-8")
 
     assert "Repo mandates Bash" not in review
     assert "Repo convention violation" not in review

@@ -22,8 +22,7 @@ CODE_ORIENTED_CONSUMERS = (
 
 def _bundle_runtime_text() -> str:
     return "\n".join(
-        path.read_text(encoding="utf-8")
-        for path in (SKILL, ANALYSIS, LENSES, RUNTIME)
+        path.read_text(encoding="utf-8") for path in (SKILL, ANALYSIS, LENSES, RUNTIME)
     )
 
 

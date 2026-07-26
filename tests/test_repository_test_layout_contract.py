@@ -62,8 +62,7 @@ def test_github_owned_python_tests_make_owner_obvious() -> None:
             "github" in rel_path.parts
             and "agents" in rel_path.parts
             and any(
-                owner in rel_path.parts
-                or owner.replace("-", "_") in test_path.stem
+                owner in rel_path.parts or owner.replace("-", "_") in test_path.stem
                 for owner in owners
             )
         )
@@ -101,4 +100,6 @@ def test_catalog_fast_check_lists_existing_test_files() -> None:
     missing_paths = [path for path in test_paths if not (REPO_ROOT / path).is_file()]
 
     missing_summary = ", ".join(missing_paths)
-    assert not missing_paths, f"catalog-fast-check lists missing tests: {missing_summary}"
+    assert not missing_paths, (
+        f"catalog-fast-check lists missing tests: {missing_summary}"
+    )

@@ -33,9 +33,7 @@ def _description(skill_name: str) -> str:
 
 def _default_prompt(skill_name: str) -> str:
     payload = yaml.safe_load(
-        (SKILLS_ROOT / skill_name / "agents/openai.yaml").read_text(
-            encoding="utf-8"
-        )
+        (SKILLS_ROOT / skill_name / "agents/openai.yaml").read_text(encoding="utf-8")
     )
     return str(payload["interface"]["default_prompt"])
 
@@ -76,9 +74,9 @@ def test_yaml_consumers_limit_generic_owner_to_parser_concerns() -> None:
 
 
 def test_makefile_valid_fixture_marks_build_as_phony() -> None:
-    fixture = (
-        SKILLS_ROOT / "internal-makefile/fixtures/valid/Makefile"
-    ).read_text(encoding="utf-8")
+    fixture = (SKILLS_ROOT / "internal-makefile/fixtures/valid/Makefile").read_text(
+        encoding="utf-8"
+    )
 
     assert ".PHONY: all build clean test" in fixture
 

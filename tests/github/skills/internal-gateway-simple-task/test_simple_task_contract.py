@@ -577,9 +577,7 @@ def test_clarification_reference_has_no_broken_stop_rules_pointer() -> None:
 
 def test_depth_keywords_require_explicit_depth_language() -> None:
     assert resolve_simple_task.detect_depth_keywords("fix the full path", []) == []
-    assert resolve_simple_task.detect_depth_keywords("run a full gate", []) == [
-        "full"
-    ]
+    assert resolve_simple_task.detect_depth_keywords("run a full gate", []) == ["full"]
     assert resolve_simple_task.detect_depth_keywords("complete the TODO", []) == []
 
 
@@ -608,10 +606,15 @@ def test_simple_task_does_not_own_retained_plan_consumption() -> None:
     contract_text = (REPO_ROOT / "INTERNAL_CONTRACT.md").read_text()
     agents_text = (REPO_ROOT / ".github/agents/README.md").read_text()
 
-    assert "internal-gateway-simple-task` consumes approved `compact` plans" not in contract_text
+    assert (
+        "internal-gateway-simple-task` consumes approved `compact` plans"
+        not in contract_text
+    )
     assert "approved retained-plan consumption" not in agents_text
-    assert "retained execution stays separate: approved retained plans are executed by `internal-gateway-execute-plans`" in contract_text
-
+    assert (
+        "retained execution stays separate: approved retained plans are executed by `internal-gateway-execute-plans`"
+        in contract_text
+    )
 
 
 @pytest.mark.parametrize(

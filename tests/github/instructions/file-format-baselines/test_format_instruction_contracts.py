@@ -4,9 +4,11 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 
 
 def instruction(name: str) -> str:
-    return (REPO_ROOT / f".github/instructions/internal-{name}.instructions.md").read_text(
-        encoding="utf-8"
-    ).lower()
+    return (
+        (REPO_ROOT / f".github/instructions/internal-{name}.instructions.md")
+        .read_text(encoding="utf-8")
+        .lower()
+    )
 
 
 def test_yaml_instruction_covers_format_boundaries_without_domain_cli() -> None:

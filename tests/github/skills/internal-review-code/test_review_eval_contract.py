@@ -14,8 +14,7 @@ SCRIPT_PATH = (
     / "tests/github/skills/internal-review-code/evaluation/score_review_eval.py"
 )
 FIXTURE_DIR = (
-    REPO_ROOT
-    / "tests/github/skills/internal-review-code/fixtures/seeded-review-target"
+    REPO_ROOT / "tests/github/skills/internal-review-code/fixtures/seeded-review-target"
 )
 
 MANIFEST = {

@@ -16,9 +16,7 @@ def test_no_live_legacy_execute_plan_references() -> None:
         "Plan profile: compact",
         "Plan profile: extended",
     )
-    paths = (
-        REPO_ROOT / ".github/skills/internal-gateway-execute-plans",
-    )
+    paths = (REPO_ROOT / ".github/skills/internal-gateway-execute-plans",)
     text_parts = []
     for path in paths:
         if path.is_file():

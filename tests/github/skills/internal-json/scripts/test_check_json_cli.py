@@ -93,13 +93,11 @@ def test_structural_findings_keep_source_and_json_path(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     "payload",
     [
-        b"\xef\xbb\xbf{\"name\": \"value\"}",
-        b"{\"name\": \xff}",
+        b'\xef\xbb\xbf{"name": "value"}',
+        b'{"name": \xff}',
     ],
 )
-def test_bom_and_invalid_utf8_are_rejected(
-    tmp_path: Path, payload: bytes
-) -> None:
+def test_bom_and_invalid_utf8_are_rejected(tmp_path: Path, payload: bytes) -> None:
     path = tmp_path / "invalid.json"
     path.write_bytes(payload)
 
