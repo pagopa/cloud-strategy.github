@@ -8,10 +8,14 @@ excludeAgent: "cloud-agent"
 
 This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-- Verify JSON is valid and structurally consistent with adjacent files in the same family.
-- Flag key renames or type changes that break existing consumers.
-- Check required fields are present and optional fields are used consistently.
-- Report duplicate keys, ambiguous defaults, or contradictory values.
-- Verify identifiers, enums, and policy values match repository conventions.
-- Flag ordering or formatting drift only when it harms diff readability or tooling.
-- Check for embedded secrets or sensitive values that must not be committed.
+- Use the bundle checker for `JSON_BOM`, `JSON_ENCODING`, `JSON_SYNTAX`,
+  `JSON_DUPLICATE_KEY`, `JSON_NON_FINITE`, `JSON_UNSAFE_INTEGER`,
+  `JSON_NUMBER_RANGE`, and `JSON_UNPAIRED_SURROGATE` findings.
+- Review BOM/UTF-8 handling, duplicate keys, strict grammar, and numeric interoperability
+  at the format boundary.
+- Remember that object order is not semantic in JSON; report ordering only
+  when a consuming owner explicitly defines presentation requirements.
+- Separately review schema-sensitive key or type changes, required properties,
+  identifiers or enums, and content meaning against an evidenced local contract.
+- Report secret exposure and contradictory defaults when the changed file
+  provides evidence; route broader domain semantics to the owning instruction.

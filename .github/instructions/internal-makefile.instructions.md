@@ -8,10 +8,16 @@ excludeAgent: "cloud-agent"
 
 This file is optimized for Copilot code review and should produce only evidenced findings on matching changed files.
 
-- Verify target names and dependencies reflect deterministic build order.
-- Flag missing `.PHONY` declarations for non-file targets.
-- Check recipe commands for shell safety and clear failure behavior.
-- Report hidden environment coupling that breaks reproducible runs.
-- Verify variable defaults and overrides are explicit and non-ambiguous.
-- Check parallelism-sensitive targets for race-prone shared artifacts.
-- Flag undocumented side effects in commonly used targets.
+- Use the bundle checker and distinguish its `phonydeclared` finding from
+  review-only Make behavior.
+- Check target prerequisites, recipe prefix characters, `.PHONY`, variables,
+  and `$ / $$` expansion intent.
+- Review order-only prerequisites, parallelism, recursive Make, and shared
+  artifacts when target ordering or concurrency matters.
+- Separately review deterministic build order, hidden environment coupling,
+  failure behavior, and undocumented side effects when the changed file
+  provides evidence.
+- Treat shell semantics and domain behavior as human review concerns; the
+  checker never invokes recipes.
+- Remember that `make -n` is not a generic safety boundary: recipes may still
+  have observable expansion or tool-specific behavior.
