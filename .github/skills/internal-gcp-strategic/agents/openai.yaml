@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal GCP Strategic"
   short_description: "GCP strategic decision support"
-  default_prompt: "Use $internal-gcp-strategic to frame a high-level Google Cloud decision, compare tradeoffs, or run a multi-lens analysis before implementation."
+  default_prompt: "Use $internal-gcp-strategic when $internal-gcp selects strategic decision support for GCP options, assumptions, tradeoffs, reversibility, or recommendation framing."

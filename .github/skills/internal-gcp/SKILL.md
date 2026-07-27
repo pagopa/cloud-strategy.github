@@ -1,43 +1,38 @@
 ---
 name: internal-gcp
-description: Official entry point for any Google Cloud task. Routes every GCP request to the right specialist - organization structure, governance, or operations - or to internal-gcp-strategic for high-level decision framing. Use for any Google Cloud request, scoped or ambiguous.
+description: Route any Google Cloud request to organization structure, governance, operations, or strategic decision support. Use internal-gcp as the official and default GCP entry point for scoped, ambiguous, or cross-domain work.
 ---
 
 # Internal GCP
 
-Official entry point and lightweight router for Google Cloud work. This skill routes; it does not answer GCP domain questions itself.
+`internal-gcp` is the official and default router for Google Cloud work.
 
 ## When to use
 
-Use this skill as the entry point for any Google Cloud request, scoped or ambiguous. It always routes: to one specialist when the owner is clear, to `internal-gcp-strategic` for cross-domain ambiguity or high-level decision framing before implementation.
+Use this skill for any Google Cloud request when the primary deliverable must be classified.
 
-## Destinations
+## Route by primary deliverable
 
-| To | Owns |
-|---|---|
-| `internal-gcp-organization-structure` | org, folder, project, billing-account, Shared VPC, platform topology |
-| `internal-gcp-governance` | IAM, workload identity, service account, Org Policy, guardrails |
-| `internal-gcp-operations` | monitoring, validation, backup, recovery, inventory, reporting, evidence |
-| `internal-gcp-strategic` | high-level decision support, tradeoff framing, multi-lens analysis |
+| Primary deliverable | Invoke |
+| --- | --- |
+| Organization, folder, billing-account, project, Shared VPC, environment, or regional placement | `/internal-gcp-organization-structure` |
+| IAM, workload identity, service-account, Org Policy, inherited guardrail, or governed exception | `/internal-gcp-governance` |
+| Monitoring, logging, backup, restore, recovery, inventory, rollout validation, reporting, or evidence | `/internal-gcp-operations` |
+| Decision framing, option comparison, tradeoff analysis, or recommendation before implementation | `/internal-gcp-strategic` |
 
-## How to route
+## Routing process
 
-1. Read the request. If it is clearly scoped to one specialist, name that owner. If it is ambiguous, spans multiple domains, or asks for decision framing before implementation, name `internal-gcp-strategic`. Ask one clarifying question only when ownership turns on the answer.
-2. Hand off by reading the chosen skill's `SKILL.md` and adopting its instructions for the rest of the turn. Handoff by file read works regardless of the target's disable-model-invocation flag.
-3. State the chosen owner and a one-line reason before handing off.
+1. Identify the next concrete deliverable.
+2. Select one primary owner for that lane.
+3. Ask one clarifying question only when the deliverable cannot be determined.
+4. Invoke the selected skill and apply its instructions for the remainder of the lane.
 
-Load `references/routing-matrix.md` when the owner choice is not obvious.
+For multi-domain requests, route by the primary deliverable rather than domain count. Sequence another lane only when the request contains a second independent deliverable.
 
-## Rules
+Load `references/routing-matrix.md` only when the primary deliverable remains ambiguous after the first reading.
 
-- Always route. Never answer a GCP domain question from this skill.
-- Route directly when one specialist clearly owns the next step; use `internal-gcp-strategic` only for genuine cross-domain ambiguity or decision framing.
-- Pick the minimum specialist set; one primary owner per lane.
-- Every destination carries `disable-model-invocation: true`; reach it by this handoff or explicit manual invocation only.
-- Do not retain ownership after the lane is resolved.
+## Completion
 
-## Validation
-
-- The chosen owner is named with a one-line reason.
-- The handoff is performed by reading the owner's SKILL.md, not by answering here.
-- The selected specialist set is the minimum needed.
+- One primary owner is selected for the active lane.
+- The selected owner is invoked using `/skill-name`.
+- Any later lane is ordered by deliverable dependency.
