@@ -1,8 +1,8 @@
 import json
+import re
 from pathlib import Path
 
 import yaml
-
 
 REPO_ROOT = next(
     parent
@@ -14,25 +14,27 @@ FIXTURE_PATH = Path(__file__).parent / "fixtures/routing_cases.json"
 
 EXPECTED_DESCRIPTIONS = {
     "internal-java": (
-        "Use when editing or reviewing Java source or generic Maven/Gradle "
-        "metadata and the main concern is language-level correctness, "
-        "readability, dependency intent, compiler release, toolchains, or "
-        "focused build validation. Do not use when application architecture "
-        "or Spring Boot runtime semantics drive the work."
+        "Use when Java language or source correctness, readability, resource "
+        "handling, error behavior, or generic Maven/Gradle build metadata is "
+        "the primary concern, including compiler release, toolchains, plugins, "
+        "dependencies, reproducibility, and focused build validation. Do not "
+        "use when module or domain design, API and concurrency architecture, "
+        "or framework-managed runtime behavior determines correctness."
     ),
     "internal-java-project": (
-        "Use when designing or changing framework-neutral Java application or "
-        "library structure, domain boundaries, APIs, concurrency, or unit and "
-        "contract tests. Do not use when Spring Boot wiring, configuration, "
-        "transactions, dependency management, or test contexts determine "
-        "correctness."
+        "Use when framework-neutral Java application or library design is the "
+        "primary concern, including module, package, domain, API, collaborator, "
+        "concurrency, unit-test, or contract-test boundaries. Do not use for "
+        "isolated language-level source changes, generic build metadata, or "
+        "framework-managed wiring and runtime behavior."
     ),
     "internal-java-spring-boot-development": (
-        "Use when Spring Boot runtime or framework semantics drive work involving "
-        "dependency management, bean wiring, configuration, HTTP or data adapters, "
-        "scheduling, transactions, test contexts, service connections, or Boot "
-        "virtual-thread enablement. Do not use for ordinary Java edits, generic "
-        "Maven/Gradle metadata, or framework-neutral application design."
+        "Use when Spring Boot-specific framework or runtime semantics determine "
+        "correctness, including parent, plugin, BOM, starter, auto-configuration, "
+        "bean wiring, configuration binding, HTTP or data adapters, scheduling, "
+        "transactions, test contexts, service connections, or virtual-thread "
+        "enablement. Do not use for ordinary Java source work, generic Maven/Gradle "
+        "metadata, or framework-neutral application and library design."
     ),
 }
 
@@ -41,27 +43,24 @@ EXPECTED_INTERFACES = {
         "display_name": "Internal Java",
         "short_description": "Java source and build metadata",
         "default_prompt": (
-            "Use $internal-java for ordinary Java source or generic Maven/Gradle "
-            "metadata work; route project design and Spring Boot semantics to "
-            "their dedicated owners."
+            "Use $internal-java when Java language or source correctness, or "
+            "generic Maven/Gradle build metadata, is the primary concern."
         ),
     },
     "internal-java-project": {
         "display_name": "Internal Java Project",
         "short_description": "Framework-neutral Java project design",
         "default_prompt": (
-            "Use $internal-java-project for framework-neutral Java application or "
-            "library design; route Spring Boot runtime semantics to "
-            "$internal-java-spring-boot-development."
+            "Use $internal-java-project when framework-neutral Java application "
+            "or library boundaries and design are the primary concern."
         ),
     },
     "internal-java-spring-boot-development": {
         "display_name": "Internal Spring Boot",
         "short_description": "Spring Boot runtime and framework semantics",
         "default_prompt": (
-            "Use $internal-java-spring-boot-development when Spring Boot wiring, "
-            "configuration, transactions, dependency management, or test contexts "
-            "determine correctness."
+            "Use $internal-java-spring-boot-development when Spring Boot-specific "
+            "framework or runtime semantics determine correctness."
         ),
     },
 }
@@ -91,6 +90,22 @@ def skill_text(skill_id: str) -> str:
         path.read_text(encoding="utf-8")
         for path in sorted(skill_dir.glob("**/*.md"))
     )
+
+
+def bundle_text(skill_id: str) -> str:
+    skill_dir = SKILLS_ROOT / skill_id
+    return "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(skill_dir.glob("**/*"))
+        if path.is_file() and path.suffix in {".md", ".yaml", ".yml"}
+    )
+
+
+def known_skill_ids() -> set[str]:
+    return {
+        path.parent.name
+        for path in SKILLS_ROOT.glob("*/SKILL.md")
+    }
 
 
 def load_frontmatter(skill_id: str) -> dict[str, object]:
@@ -146,6 +161,25 @@ def test_internal_java_spring_interface_is_exact() -> None:
     assert load_interfaces()["internal-java-spring-boot-development"] == EXPECTED_INTERFACES[
         "internal-java-spring-boot-development"
     ]
+
+
+def test_java_bundles_do_not_reference_other_skills() -> None:
+    all_skill_ids = known_skill_ids()
+
+    for skill_id in JAVA_SKILL_IDS:
+        text = bundle_text(skill_id)
+        foreign_references = {
+            candidate
+            for candidate in all_skill_ids - {skill_id}
+            if re.search(
+                rf"(?<![A-Za-z0-9-]){re.escape(candidate)}(?![A-Za-z0-9-])",
+                text,
+            )
+        }
+
+        assert foreign_references == set(), (
+            f"{skill_id} references other skills: {sorted(foreign_references)}"
+        )
 
 
 def test_project_bundle_excludes_spring_runtime_markers() -> None:

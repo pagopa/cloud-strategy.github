@@ -26,6 +26,27 @@ def _runtime(bundle: Path) -> dict[str, str]:
     return payload["interface"]
 
 
+def _bundle_text(bundle: Path) -> str:
+    paths = [bundle / "SKILL.md", bundle / "agents/openai.yaml"]
+    paths.extend(sorted((bundle / "references").glob("*.md")))
+    return "\n".join(path.read_text(encoding="utf-8") for path in paths)
+
+
+def _other_skill_mentions(bundle: Path) -> set[str]:
+    own_name = bundle.name
+    text = _bundle_text(bundle)
+    skill_names = {
+        path.parent.name
+        for path in SKILLS_ROOT.glob("*/SKILL.md")
+        if path.parent.name != own_name
+    }
+    return {
+        name
+        for name in skill_names
+        if re.search(rf"(?<![a-z0-9-]){re.escape(name)}(?![a-z0-9-])", text)
+    }
+
+
 def _bash_block(path: Path, heading: str) -> str:
     text = path.read_text(encoding="utf-8")
     section = text.split(f"## {heading}", 1)[1]
@@ -62,30 +83,27 @@ def test_bash_descriptions_separate_dialects_and_work_modes() -> None:
     assert "embedded" in generic
     assert "sourced" in generic
     assert "non-operator" in generic
+    assert "creating" in generic
+    assert "reviewing" in generic
+    assert "modifying" in generic
     assert "bash" in script and "posix `sh`" in script
-    assert "creating or modifying" in script
+    assert "creating" in script
+    assert "reviewing" in script
+    assert "modifying" in script
     assert "standalone" in script
     assert "operator-facing" in script
-    assert "reviewing" not in script
 
 
-def test_review_only_and_narrower_platform_work_have_distinct_owners() -> None:
-    generic = (BASH / "SKILL.md").read_text(encoding="utf-8")
-    script = (SCRIPT / "SKILL.md").read_text(encoding="utf-8")
-
-    assert "/internal-review-code" in generic
-    assert "/internal-review-code" in script
-    assert "/internal-github-action-composite" in generic
-    assert "/internal-github-actions" in generic
+def test_bash_bundles_do_not_call_or_route_to_other_skills() -> None:
+    assert _other_skill_mentions(BASH) == set()
+    assert _other_skill_mentions(SCRIPT) == set()
 
 
-def test_bash_script_routes_lightweight_near_misses_without_preloading() -> None:
-    text = (SCRIPT / "SKILL.md").read_text(encoding="utf-8")
+def test_bash_script_excludes_lightweight_near_misses_without_cross_routing() -> None:
+    text = (SCRIPT / "SKILL.md").read_text(encoding="utf-8").lower()
 
     assert "embedded shell" in text
-    assert "non-operator Bash helper" in text
-    assert "internal-bash" in text
-    assert "load `internal-bash` first" not in text.lower()
+    assert "non-operator bash helper" in text
 
 
 def test_bash_script_uses_repository_test_first_contract() -> None:
@@ -106,6 +124,7 @@ def test_bash_runtime_metadata_names_real_owners() -> None:
         runtime = _runtime(bundle)
         assert runtime["short_description"] == short_description
         assert invocation in runtime["default_prompt"]
+        assert not _other_skill_mentions(bundle)
         assert "Help with Internal" not in runtime["short_description"]
 
 
@@ -176,7 +195,7 @@ def test_bash_routing_reserves_standalone_sh_files_for_script_owner() -> None:
     generic = (BASH / "SKILL.md").read_text(encoding="utf-8")
 
     assert "- `.sh` files and Bash snippets" not in generic
-    assert "Sourced `.sh` helpers" in generic
+    assert "sourced `.sh` helpers" in generic.lower()
 
 
 def test_bash_skills_classify_the_dialect_before_applying_rules() -> None:

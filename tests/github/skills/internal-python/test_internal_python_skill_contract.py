@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import yaml
@@ -30,58 +31,50 @@ def test_python_descriptions_express_distinct_primary_contracts() -> None:
     project = _frontmatter_description(PROJECT).lower()
     script = _frontmatter_description(SCRIPT).lower()
 
-    assert "primary contract is still unclear" in generic
+    assert "ownership is unclear" in generic
+    assert "cross-cutting" in generic
     assert "importable" in project
     assert "directly executed" in script
     assert len({generic, project, script}) == 3
 
 
-def test_python_skills_route_near_miss_cases_to_the_right_owner() -> None:
-    generic = (PYTHON / "SKILL.md").read_text(encoding="utf-8")
-    project = (PROJECT / "SKILL.md").read_text(encoding="utf-8")
-    script = (SCRIPT / "SKILL.md").read_text(encoding="utf-8")
+def test_python_skills_do_not_call_or_reference_other_skills() -> None:
+    all_skill_names = {
+        path.name
+        for path in SKILLS_ROOT.iterdir()
+        if path.is_dir() and (path / "SKILL.md").exists()
+    }
 
-    assert "operator-facing" in generic and "internal-python-script" in generic
-    assert "importable" in generic and "internal-python-project" in generic
-    assert "operator-facing" in project and "internal-python-script" in project
-    assert "imported behavior" in script and "internal-python-project" in script
+    for bundle in (PYTHON, PROJECT, SCRIPT):
+        skill = (bundle / "SKILL.md").read_text(encoding="utf-8")
+        prompt = _runtime(bundle)["default_prompt"]
 
-
-TRIGGER_CASES = {
-    PYTHON: (
-        "shared python baseline",
-        "ownership",
-    ),
-    PROJECT: (
-        "importable",
-        "package",
-        "service",
-    ),
-    SCRIPT: (
-        "direct",
-        "script",
-        "cli",
-    ),
-}
+        assert "## Referenced skills" not in skill
+        for other_name in all_skill_names - {bundle.name}:
+            invocation = re.compile(
+                rf"(?<![\w-])(?:/|\$|`){re.escape(other_name)}(?![\w-])"
+            )
+            assert invocation.search(skill) is None
+            assert invocation.search(prompt) is None
 
 
-def test_python_descriptions_cover_their_distinct_trigger_branches() -> None:
-    for bundle, markers in TRIGGER_CASES.items():
-        description = _frontmatter_description(bundle).lower()
-        assert all(marker in description for marker in markers)
-
-
-def test_python_near_misses_route_without_mandatory_baseline_chaining() -> None:
+def test_python_skills_define_balanced_positive_and_negative_boundaries() -> None:
     generic = (PYTHON / "SKILL.md").read_text(encoding="utf-8").lower()
     project = (PROJECT / "SKILL.md").read_text(encoding="utf-8").lower()
     script = (SCRIPT / "SKILL.md").read_text(encoding="utf-8").lower()
 
-    assert "internal-python-project" in generic
-    assert "internal-python-script" in generic
-    assert "internal-python-script" in project
-    assert "internal-python-project" in script
-    assert "not a required preload" in project
-    assert "not a required preload" in script
+    assert "cross-cutting" in generic and "ownership is unclear" in generic
+    assert "do not use" in generic
+    assert "reusable imported code" in generic
+    assert "direct-execution tool" in generic
+
+    assert "reusable imported behavior" in project
+    assert "do not use" in project
+    assert "primary contract is direct execution" in project
+
+    assert "primary contract is direct execution" in script
+    assert "do not use" in script
+    assert "primary contract is reusable imported behavior" in script
 
 
 def test_python_baseline_stays_cross_cutting_and_template_free() -> None:
@@ -139,7 +132,7 @@ def test_script_references_do_not_silently_provision_on_every_run() -> None:
 
 
 OWNER_MARKERS = {
-    PYTHON: ("shared baseline", "ownership"),
+    PYTHON: ("cross-cutting", "ownership"),
     PROJECT: ("import", "package"),
     SCRIPT: ("direct", "script"),
 }
@@ -159,7 +152,7 @@ def test_frontmatter_body_and_runtime_share_the_owner_vocabulary() -> None:
 
 def test_python_runtime_metadata_names_real_owners() -> None:
     expected = {
-        PYTHON: ("Python baseline and ownership routing", "$internal-python"),
+        PYTHON: ("Cross-cutting Python baseline", "$internal-python"),
         PROJECT: (
             "Importable Python application guidance",
             "$internal-python-project",

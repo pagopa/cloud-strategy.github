@@ -31,25 +31,36 @@ def test_descriptions_partition_baseline_and_project_work() -> None:
     baseline = str(_frontmatter("internal-nodejs")["description"])
     project = str(_frontmatter("internal-nodejs-project")["description"])
 
-    assert baseline.startswith("Use when reviewing JavaScript or TypeScript")
+    assert baseline.startswith(
+        "Use when reviewing localized JavaScript or TypeScript changes"
+    )
     assert "package metadata, runtime configuration, dependencies" in baseline
-    assert "/internal-nodejs-project" in baseline
+    assert "established application boundaries" in baseline
 
     assert project.startswith(
-        "Use when creating, modifying, or refactoring Node.js or TypeScript"
+        "Use when creating, modifying, reviewing, or refactoring Node.js or TypeScript"
     )
     assert "application behavior and structure" in project
-    assert "/internal-nodejs" in project
+    assert "across services, APIs, handlers, modules, adapters, or tests" in project
 
 
-def test_each_skill_routes_its_near_miss_to_the_other_owner() -> None:
-    baseline = _skill_text("internal-nodejs")
-    project = _skill_text("internal-nodejs-project")
+def test_skills_do_not_call_or_reference_other_skills() -> None:
+    for name in ("internal-nodejs", "internal-nodejs-project"):
+        skill = _skill_text(name)
 
-    assert "use `/internal-nodejs-project`" in baseline
-    assert "use `/internal-nodejs`" in project
+        assert "## Referenced skills" not in skill
+        assert "/internal-" not in skill
+        assert "$internal-" not in skill
+
+
+def test_each_skill_excludes_the_other_ownership_boundary_without_routing() -> None:
+    baseline = _skill_text("internal-nodejs").lower()
+    project = _skill_text("internal-nodejs-project").lower()
+
+    assert "application-wide changes" in baseline
+    assert "multiple application boundaries" in baseline
     assert "metadata-only" in project
-    assert "application structure or behavior" in baseline
+    assert "isolated module changes" in project
 
 
 def test_runtime_metadata_names_the_same_ownership_boundary() -> None:
@@ -59,11 +70,13 @@ def test_runtime_metadata_names_the_same_ownership_boundary() -> None:
     assert baseline["display_name"] == "Internal Node.js"
     assert "review and metadata" in baseline["short_description"].lower()
     assert "$internal-nodejs" in baseline["default_prompt"]
-    assert "review" in baseline["default_prompt"].lower()
+    assert "localized" in baseline["default_prompt"].lower()
+    assert "package metadata" in baseline["default_prompt"].lower()
 
     assert project["display_name"] == "Internal Node.js Project"
     assert "application structure" in project["short_description"].lower()
     assert "$internal-nodejs-project" in project["default_prompt"]
+    assert "review" in project["default_prompt"].lower()
     assert "application behavior" in project["default_prompt"].lower()
 
 
