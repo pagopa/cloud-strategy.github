@@ -1,3 +1,4 @@
+import json
 import re
 from pathlib import Path
 
@@ -8,225 +9,218 @@ REPO_ROOT = next(
     for parent in Path(__file__).resolve().parents
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
-SKILL_DIR = REPO_ROOT / ".github/skills/internal-aws"
-STRATEGIC_SKILL_DIR = REPO_ROOT / ".github/skills/internal-aws-strategic"
+SKILLS_ROOT = REPO_ROOT / ".github/skills"
+SKILL_DIR = SKILLS_ROOT / "internal-aws"
 SKILL_PATH = SKILL_DIR / "SKILL.md"
 AGENT_PATH = SKILL_DIR / "agents/openai.yaml"
 ROUTING_MATRIX_PATH = SKILL_DIR / "references/routing-matrix.md"
-STRATEGIC_SKILL_PATH = STRATEGIC_SKILL_DIR / "SKILL.md"
-STRATEGIC_AGENT_PATH = STRATEGIC_SKILL_DIR / "agents/openai.yaml"
-LENS_PLAYBOOK_PATH = STRATEGIC_SKILL_DIR / "references/lens-playbook.md"
-
-EXPECTED_ROUTER_DESCRIPTION = (
-    "Official entry point for any AWS task. Routes every AWS request to the "
-    "right specialist - organization structure, governance, operations, "
-    "Lambda, or AWS documentation research - or to internal-aws-strategic "
-    "for high-level decision framing. Use for any AWS request, scoped or "
-    "ambiguous."
+FIXTURE_PATH = (
+    REPO_ROOT
+    / "tests/github/skills/internal-aws/fixtures/routing_cases.json"
 )
 
-EXPECTED_STRATEGIC_DESCRIPTION = (
-    "Use when you need high-level AWS decision support, tradeoff framing, "
-    "or multi-lens analysis before implementation, or when internal-aws "
-    "routes a strategic question here. Invoke manually "
-    "($internal-aws-strategic) or via internal-aws handoff. Do not use for "
-    "clearly scoped specialist tasks with a known owner."
+AWS_SPECIALIST_IDS = (
+    "internal-aws-governance",
+    "internal-aws-lambda",
+    "internal-aws-mcp-research",
+    "internal-aws-operations",
+    "internal-aws-organization-structure",
+    "internal-aws-strategic",
+)
+
+ROUTED_DESTINATIONS = (
+    *AWS_SPECIALIST_IDS,
+    "antigravity-aws-cost-optimizer",
+)
+
+EXPECTED_SPECIALIST_DESCRIPTIONS = {
+    "internal-aws-organization-structure": (
+        "Use when /internal-aws selects the AWS organization-structure lane "
+        "for Organizations, accounts, OUs, delegated administrators, "
+        "StackSets topology, or platform-level network placement."
+    ),
+    "internal-aws-governance": (
+        "Use when /internal-aws selects the AWS governance lane for IAM "
+        "operating models, trust policies, federation, permission boundaries, "
+        "SCPs, tag policies, exception controls, or access guardrails."
+    ),
+    "internal-aws-operations": (
+        "Use when /internal-aws selects the AWS operations lane for "
+        "monitoring, logging, rollout validation, backup and restore proof, "
+        "DR evidence, reporting, or audit evidence."
+    ),
+    "internal-aws-mcp-research": (
+        "Use when /internal-aws selects the AWS research lane to retrieve "
+        "current official AWS documentation, regional availability, service "
+        "behavior, IAM state, or policy-simulation evidence."
+    ),
+    "internal-aws-lambda": (
+        "Use when /internal-aws selects the AWS Lambda lane for handlers, "
+        "event sources, runtimes, packaging, retries, concurrency, cold "
+        "starts, or Lambda-specific configuration."
+    ),
+    "internal-aws-strategic": (
+        "Use when /internal-aws selects the AWS strategic lane for option "
+        "comparison, multi-lens tradeoffs, cost-value analysis, blast radius, "
+        "or reversibility before implementation."
+    ),
+}
+
+EXPECTED_ROUTER_DESCRIPTION = (
+    "Use first for every AWS request. Classify the primary deliverable and "
+    "invoke the minimum specialist lane for AWS structure, governance, "
+    "operations, Lambda, current documentation or IAM evidence, strategic "
+    "decisions, or cost optimization."
+)
+
+FORBIDDEN_ROUTING_LANGUAGE = (
+    "handoff",
+    "hand off",
+    "route back",
+    "outside this lane",
+    "out-of-scope",
+)
+
+SKILL_REFERENCE_PATTERN = re.compile(
+    r"(?<![a-z0-9-])(?:internal-aws(?:-[a-z0-9-]+)?|"
+    r"antigravity-aws-cost-optimizer)(?![a-z0-9-])"
 )
 
 
 def load_frontmatter(path: Path) -> dict[str, object]:
-    _, raw_frontmatter, _ = path.read_text().split("---", maxsplit=2)
+    _, raw_frontmatter, _ = path.read_text(encoding="utf-8").split(
+        "---", maxsplit=2
+    )
     return yaml.safe_load(raw_frontmatter)
 
 
-def test_internal_aws_router_is_the_unflagged_entry_point() -> None:
-    assert SKILL_PATH.is_file()
+def _body(path: Path) -> str:
+    parts = path.read_text(encoding="utf-8").split("---", maxsplit=2)
+    return parts[2] if len(parts) == 3 else parts[-1]
+
+
+def _specialist_paths() -> list[Path]:
+    return [SKILLS_ROOT / skill_id / "SKILL.md" for skill_id in AWS_SPECIALIST_IDS]
+
+
+def test_internal_aws_router_is_the_canonical_entry_point() -> None:
     assert load_frontmatter(SKILL_PATH) == {
         "name": "internal-aws",
         "description": EXPECTED_ROUTER_DESCRIPTION,
     }
 
 
-def test_internal_aws_strategic_is_user_invoked_only() -> None:
-    assert STRATEGIC_SKILL_PATH.is_file()
-    assert load_frontmatter(STRATEGIC_SKILL_PATH) == {
-        "name": "internal-aws-strategic",
-        "description": EXPECTED_STRATEGIC_DESCRIPTION,
-        "disable-model-invocation": True,
+def test_specialist_descriptions_identify_router_selection() -> None:
+    for skill_id, expected in EXPECTED_SPECIALIST_DESCRIPTIONS.items():
+        frontmatter = load_frontmatter(SKILLS_ROOT / skill_id / "SKILL.md")
+        assert frontmatter["description"] == expected
+
+
+def test_routed_destinations_allow_model_invocation() -> None:
+    for skill_id in AWS_SPECIALIST_IDS:
+        frontmatter = load_frontmatter(SKILLS_ROOT / skill_id / "SKILL.md")
+        assert frontmatter.get("disable-model-invocation") is not True
+
+
+def test_router_uses_slash_prefixed_operational_destinations() -> None:
+    router_text = SKILL_PATH.read_text(encoding="utf-8")
+    for destination in ROUTED_DESTINATIONS:
+        assert f"/{destination}" in router_text
+
+
+def test_specialists_contain_no_forbidden_routing_language() -> None:
+    for skill_path in _specialist_paths():
+        text_paths = [skill_path, *sorted(skill_path.parent.glob("references/*.md"))]
+        for text_path in text_paths:
+            text = text_path.read_text(encoding="utf-8").lower()
+            assert not any(term in text for term in FORBIDDEN_ROUTING_LANGUAGE), (
+                f"{text_path} contains forbidden routing language"
+            )
+
+
+def test_specialists_contain_no_sibling_skill_identifiers() -> None:
+    for skill_path in _specialist_paths():
+        text_paths = [skill_path, *sorted(skill_path.parent.glob("references/*.md"))]
+        for text_path in text_paths:
+            text = _body(text_path) if text_path == skill_path else text_path.read_text()
+            references = set(SKILL_REFERENCE_PATTERN.findall(text))
+            assert not references, f"{text_path} references {sorted(references)}"
+
+
+def test_specialist_metadata_is_purpose_specific() -> None:
+    for skill_id in AWS_SPECIALIST_IDS:
+        interface = yaml.safe_load(
+            (SKILLS_ROOT / skill_id / "agents/openai.yaml").read_text(
+                encoding="utf-8"
+            )
+        )["interface"]
+        assert interface["default_prompt"].find(f"${skill_id}") >= 0
+        assert interface["short_description"]
+        assert "AWS" in interface["short_description"]
+        assert not re.search(r"(?<!A)aws", interface["short_description"])
+
+
+def test_routing_fixture_covers_the_approved_destinations() -> None:
+    cases = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    assert isinstance(cases, list)
+    assert len({case["id"] for case in cases}) == len(cases)
+
+    for case in cases:
+        assert set(case) == {
+            "id",
+            "kind",
+            "prompt",
+            "expected_sequence",
+            "reason",
+        }
+        if case["kind"] == "near-miss":
+            assert case["expected_sequence"] == []
+        else:
+            assert case["expected_sequence"]
+        assert set(case["expected_sequence"]) <= set(ROUTED_DESTINATIONS)
+
+    destinations = {
+        destination
+        for case in cases
+        for destination in case["expected_sequence"]
     }
+    assert destinations == set(ROUTED_DESTINATIONS)
+    assert sum(case["kind"] == "near-miss" for case in cases) >= 2
+    assert sum(case["kind"] == "multi-owner" for case in cases) >= 2
 
 
-def test_internal_aws_router_contract() -> None:
-    skill_text = SKILL_PATH.read_text()
-
-    router_markers = (
-        "Official entry point and lightweight router",
-        "## When to use",
-        "## Destinations",
-        "`internal-aws-strategic`",
-        "Hand off by reading the chosen skill's `SKILL.md`",
-        "disable-model-invocation: true",
-    )
-    for marker in router_markers:
-        assert marker in skill_text
-
-
-def test_internal_aws_strategic_contract() -> None:
-    skill_text = STRATEGIC_SKILL_PATH.read_text()
-
-    strategic_markers = (
-        "## When to use",
-        "## Optional lens activation",
-        "## Adaptive output modes",
-        "Identify the decision first, not the implementation tool",
-        "`internal-aws` handoff or explicit manual invocation",
-    )
-    for marker in strategic_markers:
-        assert marker in skill_text
-
-
-def test_internal_aws_interface_names_the_entry_point() -> None:
-    interface = yaml.safe_load(AGENT_PATH.read_text())["interface"]
-
-    assert interface == {
-        "display_name": "Internal AWS",
-        "short_description": "Official AWS entry point and router",
-        "default_prompt": (
-            "Use $internal-aws as the entry point for any AWS task; it "
-            "routes to the minimum specialist set, or to "
-            "$internal-aws-strategic for decision framing."
-        ),
+def test_inventory_lists_exactly_the_expected_aws_bundles() -> None:
+    inventory_text = (REPO_ROOT / ".github/INVENTORY.md").read_text(encoding="utf-8")
+    expected_paths = {
+        f".github/skills/{skill_id}/SKILL.md"
+        for skill_id in ("internal-aws", *AWS_SPECIALIST_IDS)
     }
+    listed_paths = {
+        line.strip().lstrip("- `").rstrip("`")
+        for line in inventory_text.splitlines()
+        if ".github/skills/internal-aws" in line and "/SKILL.md" in line
+    }
+    assert listed_paths == expected_paths
 
 
-def test_internal_aws_strategic_has_agent_metadata() -> None:
-    interface = yaml.safe_load(STRATEGIC_AGENT_PATH.read_text())["interface"]
-
-    assert interface["display_name"] == "Internal AWS Strategic"
-    assert interface["short_description"]
-    assert interface["default_prompt"]
-
-
-def test_routing_matrix_covers_positive_negative_and_multi_domain_cases() -> None:
-    matrix_text = ROUTING_MATRIX_PATH.read_text()
-
+def test_routing_matrix_has_the_new_primary_deliverable_shape() -> None:
+    matrix_text = ROUTING_MATRIX_PATH.read_text(encoding="utf-8")
     for heading in (
-        "## Fallback-positive cases",
-        "## Direct-specialist negative cases",
-        "## Multi-domain primary-owner cases",
-        "## Review rule",
+        "## Single-owner cases",
+        "## Primary-owner disambiguation",
+        "## Permitted multi-deliverable sequences",
+        "## Near-miss distinctions",
     ):
         assert heading in matrix_text
 
 
-def test_lens_playbook_keeps_strategic_depth() -> None:
-    playbook_text = LENS_PLAYBOOK_PATH.read_text()
-
-    for heading in (
-        "## Common lens combinations",
-        "## Decision note pattern",
-        "## Depth control",
-    ):
-        assert heading in playbook_text
-
-
-AWS_SKILL_PATHS = sorted((REPO_ROOT / ".github/skills").glob("internal-aws*/SKILL.md"))
-STRATEGIC_SKILL_ID = "internal-aws-strategic"
-FORBIDDEN_GENERIC_REFERENCES = (
-    "internal-bash-script",
-    "internal-python-script",
-    "internal-python",
-    "internal-python-project",
-    "internal-nodejs",
-    "internal-nodejs-project",
-    "internal-terraform",
-)
-
-
-def test_aws_family_shape_and_generic_reference_ban() -> None:
-    assert len(AWS_SKILL_PATHS) == 7
-
-    for path in AWS_SKILL_PATHS:
-        skill_text = path.read_text()
-        for forbidden_name in FORBIDDEN_GENERIC_REFERENCES:
-            assert f"`{forbidden_name}`" not in skill_text
-
-
-def test_specialists_name_internal_aws_only_as_uncertainty_fallback() -> None:
-    specialist_paths = [
-        path
-        for path in AWS_SKILL_PATHS
-        if path != SKILL_PATH and path != STRATEGIC_SKILL_PATH
-    ]
-    assert len(specialist_paths) == 5
-
-    for path in specialist_paths:
-        skill_text = path.read_text()
-        assert "`internal-aws`" in skill_text
-        assert "material routing uncertainty" in skill_text
-
-
-def test_strategic_hands_back_to_the_router() -> None:
-    skill_text = STRATEGIC_SKILL_PATH.read_text()
-
-    assert "`internal-aws`" in skill_text
-    assert "explicit manual invocation" in skill_text
-
-
-LANE_SKILL_IDS = (
-    "internal-aws-governance",
-    "internal-aws-lambda",
-    "internal-aws-mcp-research",
-    "internal-aws-operations",
-    "internal-aws-organization-structure",
-)
-
-SKILL_REFERENCE_PATTERN = re.compile(
-    r"`((?:internal|awesome|openai|superpowers|antigravity|addyosmani"
-    r"|local|mattpocock|terraform|vercel|customize|grill|graphify)-[a-z0-9-]+)`"
-)
-
-REMOVED_SECTION_HEADINGS = (
-    "## Handoffs",
-    "## Cross-references",
-    "## Referenced skills",
-    "## Relationship to adjacent skills",
-    "## When not to use",
-)
-
-
-def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
-    for skill_id in LANE_SKILL_IDS:
-        skill_dir = REPO_ROOT / ".github/skills" / skill_id
-        text_paths = [
-            skill_dir / "SKILL.md",
-            *sorted(skill_dir.glob("references/*.md")),
-        ]
-        for text_path in text_paths:
-            skill_text = text_path.read_text()
-            for heading in REMOVED_SECTION_HEADINGS:
-                assert heading not in skill_text, f"{skill_id} keeps {heading}"
-            references = set(SKILL_REFERENCE_PATTERN.findall(skill_text))
-            assert references <= {"internal-aws"}, (
-                f"{text_path.name} references {sorted(references)}"
-            )
-            assert "handoff" not in skill_text.lower(), (
-                f"{text_path.name} still mentions handoffs"
-            )
-
-
-def test_mcp_capability_map_uses_the_canonical_fallback_name() -> None:
-    capability_map = (
-        REPO_ROOT
-        / ".github/skills/internal-aws-mcp-research/references/mcp-capabilities.md"
-    ).read_text()
-
-    assert STRATEGIC_SKILL_ID not in capability_map
-    assert "`internal-aws`" in capability_map
-
-
-def test_inventory_lists_the_router_and_the_strategic() -> None:
-    inventory_text = (REPO_ROOT / ".github/INVENTORY.md").read_text()
-
-    assert ".github/skills/internal-aws/SKILL.md" in inventory_text
-    assert ".github/skills/internal-aws-strategic/SKILL.md" in inventory_text
+def test_router_interface_names_the_canonical_entry_point() -> None:
+    interface = yaml.safe_load(AGENT_PATH.read_text(encoding="utf-8"))["interface"]
+    assert interface == {
+        "display_name": "Internal AWS",
+        "short_description": "Canonical entry point for every AWS request",
+        "default_prompt": (
+            "Use $internal-aws to classify this AWS request and invoke the "
+            "minimum specialist lane."
+        ),
+    }

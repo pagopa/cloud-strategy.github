@@ -26,7 +26,8 @@ MANDATORY_SEQUENCE = [
     "Assumption Challenge Gate",
     "Alternative discovery",
     "Critical Challenge Gate",
-    "Spec vs plan decision",
+    "Critical resolution loop",
+    "Automatic plan handoff",
     "Stop before implementation execution",
 ]
 
@@ -202,17 +203,49 @@ def test_external_research_checkpoint_has_bounded_outcomes() -> None:
         assert marker in workflow_text
 
 
-def test_spec_is_written_and_reviewed_before_plan_gateway_handoff() -> None:
-    skill = SKILL_PATH.read_text(encoding="utf-8")
-    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
-    assert "Retained spec writing stays with `/superpowers-brainstorming`" in skill
+def test_confirmed_critical_consensus_starts_plan_without_spec_decision() -> None:
+    surfaces = (
+        SKILL_PATH.read_text(encoding="utf-8"),
+        WORKFLOW_PATH.read_text(encoding="utf-8"),
+        AGENT_PATH.read_text(encoding="utf-8"),
+    )
+    required = [
+        "Critical result: confirmed",
+        "start implementation-plan writing immediately",
+        "notify the user only that plan writing has started",
+        "do not run a spec-vs-plan decision",
+    ]
+    for text in surfaces:
+        for marker in required:
+            assert marker in text
+        assert "Spec vs plan decision" not in text
+        assert "Decision: spec first" not in text
+        assert "Approval request" not in text
+
+
+def test_unresolved_critical_consensus_runs_repeatable_grill_me_sessions() -> None:
+    surfaces = (
+        SKILL_PATH.read_text(encoding="utf-8"),
+        WORKFLOW_PATH.read_text(encoding="utf-8"),
+        AGENT_PATH.read_text(encoding="utf-8"),
+    )
+    required = [
+        "Critical result: unresolved",
+        "load `/grill-me`",
+        "one or more `/grill-me` sessions",
+        "new elements raised by the critic",
+        "until every material point is definitively resolved",
+    ]
+    for text in surfaces:
+        for marker in required:
+            assert marker in text
+
+    workflow = surfaces[1]
     _assert_in_order(
         workflow,
         [
-            "Write retained spec",
-            "User reviews retained spec",
-            "Approve implementation-plan writing",
-            "Load /internal-gateway-writing-plans",
+            "M -- unresolved --> R[Run one or more /grill-me sessions]",
+            "R --> L",
         ],
     )
 

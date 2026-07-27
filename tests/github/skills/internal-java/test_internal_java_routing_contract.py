@@ -222,7 +222,9 @@ def test_java_profiles_have_deterministic_skill_membership() -> None:
         "skills/internal-java/SKILL.md",
         "skills/internal-java-project/SKILL.md",
         "skills/internal-java-spring-boot-development/SKILL.md",
+        "skills/internal-github/SKILL.md",
         "skills/internal-github-actions/SKILL.md",
+        "skills/internal-github-action-composite/SKILL.md",
         "skills/internal-markdown/SKILL.md",
     ]
 

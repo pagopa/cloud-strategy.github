@@ -1,0 +1,93 @@
+[
+  {
+    "id": "organization-ou-layout",
+    "kind": "single-owner",
+    "prompt": "Design the OU and account layout for a new AWS landing zone.",
+    "expected_sequence": ["internal-aws-organization-structure"],
+    "reason": "The primary deliverable is structural placement."
+  },
+  {
+    "id": "governance-scp",
+    "kind": "single-owner",
+    "prompt": "Review this SCP and permission-boundary model.",
+    "expected_sequence": ["internal-aws-governance"],
+    "reason": "The primary deliverable is a preventive and delegated permission model."
+  },
+  {
+    "id": "operations-restore-proof",
+    "kind": "single-owner",
+    "prompt": "Define evidence that our AWS backups can actually be restored.",
+    "expected_sequence": ["internal-aws-operations"],
+    "reason": "The primary deliverable is operational recovery proof."
+  },
+  {
+    "id": "lambda-partial-batch",
+    "kind": "single-owner",
+    "prompt": "Fix partial batch failure handling in this SQS-triggered Lambda.",
+    "expected_sequence": ["internal-aws-lambda"],
+    "reason": "The primary deliverable is Lambda event-source behavior."
+  },
+  {
+    "id": "research-regional-availability",
+    "kind": "single-owner",
+    "prompt": "Check whether this AWS service is currently available in eu-south-1.",
+    "expected_sequence": ["internal-aws-mcp-research"],
+    "reason": "The answer depends on current official AWS facts."
+  },
+  {
+    "id": "strategic-control-plane-choice",
+    "kind": "single-owner",
+    "prompt": "Compare Control Tower with a custom landing-zone control plane for our constraints.",
+    "expected_sequence": ["internal-aws-strategic"],
+    "reason": "The deliverable is an option and tradeoff decision."
+  },
+  {
+    "id": "cost-primary",
+    "kind": "external-owner",
+    "prompt": "Analyze our AWS spend and identify the largest savings opportunities.",
+    "expected_sequence": ["antigravity-aws-cost-optimizer"],
+    "reason": "Cost analysis is the primary deliverable."
+  },
+  {
+    "id": "fresh-facts-before-strategy",
+    "kind": "multi-owner",
+    "prompt": "Verify the current Control Tower regional support, then recommend whether we should adopt it.",
+    "expected_sequence": ["internal-aws-mcp-research", "internal-aws-strategic"],
+    "reason": "Current facts control a separate strategic decision."
+  },
+  {
+    "id": "structure-before-proof",
+    "kind": "multi-owner",
+    "prompt": "Design the target OU layout and define how we will validate its rollout.",
+    "expected_sequence": ["internal-aws-organization-structure", "internal-aws-operations"],
+    "reason": "The request contains distinct structure and validation deliverables."
+  },
+  {
+    "id": "lambda-iam-governance",
+    "kind": "primary-owner",
+    "prompt": "Review the trust boundary and permission policy of this Lambda execution role.",
+    "expected_sequence": ["internal-aws-governance"],
+    "reason": "The requested result is an IAM and trust review, not handler behavior."
+  },
+  {
+    "id": "lambda-runtime-primary",
+    "kind": "primary-owner",
+    "prompt": "Reduce retry storms in this Lambda while preserving its existing execution role.",
+    "expected_sequence": ["internal-aws-lambda"],
+    "reason": "The requested result is runtime and retry behavior."
+  },
+  {
+    "id": "near-miss-python-lambda",
+    "kind": "near-miss",
+    "prompt": "Explain how a Python lambda expression captures variables.",
+    "expected_sequence": [],
+    "reason": "Lambda is a language construct here, not AWS Lambda."
+  },
+  {
+    "id": "near-miss-azure-governance",
+    "kind": "near-miss",
+    "prompt": "Design an Azure management-group governance model.",
+    "expected_sequence": [],
+    "reason": "The cloud platform is Azure."
+  }
+]

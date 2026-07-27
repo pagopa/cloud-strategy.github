@@ -2,7 +2,6 @@ import json
 import re
 from pathlib import Path
 
-
 FIXTURE = Path(__file__).parent / "fixtures" / "review_cases.json"
 REQUIRED_CASE_IDS = {
     "standalone-document-contradiction",

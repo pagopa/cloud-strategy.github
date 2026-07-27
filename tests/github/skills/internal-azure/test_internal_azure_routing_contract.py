@@ -17,21 +17,34 @@ STRATEGIC_SKILL_PATH = STRATEGIC_SKILL_DIR / "SKILL.md"
 STRATEGIC_AGENT_PATH = STRATEGIC_SKILL_DIR / "agents/openai.yaml"
 LENS_PLAYBOOK_PATH = STRATEGIC_SKILL_DIR / "references/lens-playbook.md"
 
-EXPECTED_ROUTER_DESCRIPTION = (
-    "Official entry point for any Azure task. Routes every Azure request to "
-    "the right specialist - organization structure, governance, operations, "
-    "or Azure DevOps - or to internal-azure-strategic for high-level decision "
-    "framing. Use for any Azure request, scoped or ambiguous."
+DIRECT_SPECIALISTS = {
+    "internal-azure-organization-structure",
+    "internal-azure-governance",
+    "internal-azure-operations",
+    "internal-azure-devops",
+    "internal-azure-strategic",
+}
+
+FORBIDDEN_SPECIALIST_LANGUAGE = (
+    "handoff",
+    "route back",
+    "when not to use",
+    "do not use",
+    "outside this lane",
 )
 
-EXPECTED_STRATEGIC_DESCRIPTION = (
-    "Use when you need high-level Azure decision support, tradeoff framing, "
-    "or multi-lens analysis before implementation, or when internal-azure "
-    "routes a strategic question here. Invoke manually "
-    "($internal-azure-strategic) or via internal-azure handoff. Do not use "
-    "for clearly scoped specialist tasks with a known owner."
-)
 
+def assert_reach_only_specialist(skill_id: str) -> None:
+    path = REPO_ROOT / ".github/skills" / skill_id / "SKILL.md"
+    frontmatter = load_frontmatter(path)
+    assert "disable-model-invocation" not in frontmatter
+    assert frontmatter["description"].startswith("Use when /internal-azure ")
+    bundle_text = "\n".join(
+        candidate.read_text()
+        for candidate in [path, *sorted(path.parent.glob("references/*.md"))]
+    ).lower()
+    for phrase in FORBIDDEN_SPECIALIST_LANGUAGE:
+        assert phrase not in bundle_text
 
 def load_frontmatter(path: Path) -> dict[str, object]:
     _, raw_frontmatter, _ = path.read_text().split("---", maxsplit=2)
@@ -40,34 +53,135 @@ def load_frontmatter(path: Path) -> dict[str, object]:
 
 def test_internal_azure_router_is_the_unflagged_entry_point() -> None:
     assert SKILL_PATH.is_file()
-    assert load_frontmatter(SKILL_PATH) == {
-        "name": "internal-azure",
-        "description": EXPECTED_ROUTER_DESCRIPTION,
-    }
+    frontmatter = load_frontmatter(SKILL_PATH)
+    assert frontmatter["name"] == "internal-azure"
+    assert "Azure platform" in frontmatter["description"]
+    assert "any Azure task" not in frontmatter["description"]
 
 
-def test_internal_azure_strategic_is_user_invoked_only() -> None:
-    assert STRATEGIC_SKILL_PATH.is_file()
-    assert load_frontmatter(STRATEGIC_SKILL_PATH) == {
-        "name": "internal-azure-strategic",
-        "description": EXPECTED_STRATEGIC_DESCRIPTION,
-        "disable-model-invocation": True,
-    }
+def test_router_invokes_direct_specialists() -> None:
+    text = SKILL_PATH.read_text()
+    for skill_id in DIRECT_SPECIALISTS:
+        assert f"/{skill_id}" in text
+    assert "reading the chosen skill" not in text.lower()
+    assert "disable-model-invocation" not in text
+    assert "handoff" not in text.lower()
 
 
-def test_internal_azure_router_contract() -> None:
+def test_router_is_platform_scoped_and_deliverable_driven() -> None:
     skill_text = SKILL_PATH.read_text()
+    assert "Azure platform" in skill_text
+    assert "immediate deliverable" in skill_text
 
-    router_markers = (
-        "Official entry point and lightweight router",
-        "## When to use",
-        "## Destinations",
-        "`internal-azure-strategic`",
-        "Hand off by reading the chosen skill's `SKILL.md`",
-        "disable-model-invocation: true",
+
+def test_organization_structure_is_reach_only_and_workflow_ordered() -> None:
+    assert_reach_only_specialist("internal-azure-organization-structure")
+    skill_text = (
+        REPO_ROOT
+        / ".github/skills/internal-azure-organization-structure/SKILL.md"
+    ).read_text().lower()
+    markers = (
+        "azure objective",
+        "placement choice",
+        "rollout unit",
+        "validation conditions",
     )
-    for marker in router_markers:
+    positions = [skill_text.index(marker) for marker in markers]
+    assert positions == sorted(positions)
+
+
+def test_governance_is_reach_only_and_workflow_complete() -> None:
+    assert_reach_only_specialist("internal-azure-governance")
+    skill_text = (
+        REPO_ROOT / ".github/skills/internal-azure-governance/SKILL.md"
+    ).read_text().lower()
+    for marker in (
+        "governance objective",
+        "control scope",
+        "authorization",
+        "exception",
+        "rollout",
+        "completion criteria",
+    ):
         assert marker in skill_text
+
+    reference_text = (
+        REPO_ROOT / ".github/skills/internal-azure-governance/references/guardrail-map.md"
+    ).read_text().lower()
+    assert "preventive" in reference_text
+    assert "detective" in reference_text
+    assert "authorization" in reference_text
+    assert "workload identity" in reference_text
+
+
+def test_operations_is_reach_only_and_evidence_workflow_ordered() -> None:
+    assert_reach_only_specialist("internal-azure-operations")
+    skill_text = (
+        REPO_ROOT / ".github/skills/internal-azure-operations/SKILL.md"
+    ).read_text().split("---", maxsplit=2)[2].lower()
+    markers = (
+        "operational objective",
+        "evidence state",
+        "rollout unit",
+        "preflight",
+        "observation signals",
+        "recovery proof",
+        "completion criteria",
+    )
+    positions = [skill_text.index(marker) for marker in markers]
+    assert positions == sorted(positions)
+
+    reference_text = (
+        REPO_ROOT / ".github/skills/internal-azure-operations/references/validation-and-evidence.md"
+    ).read_text().lower()
+    for marker in ("backup success", "restore proof", "dr exercise"):
+        assert marker in reference_text
+
+
+def test_azure_devops_is_reach_only_and_pipeline_workflow_complete() -> None:
+    assert_reach_only_specialist("internal-azure-devops")
+    skill_text = (
+        REPO_ROOT / ".github/skills/internal-azure-devops/SKILL.md"
+    ).read_text().lower()
+    assert "## handoffs" not in skill_text
+    for marker in (
+        "request classification",
+        "repository convention discovery",
+        "pipeline or automation design",
+        "security controls",
+        "focused validation",
+    ):
+        assert marker in skill_text
+
+    reference_text = (
+        REPO_ROOT / ".github/skills/internal-azure-devops/references/pipelines.md"
+    ).read_text().lower()
+    assert "pipeline" in reference_text
+    assert "routing" not in reference_text
+
+
+def test_strategic_is_reach_only_and_decision_workflow_proportional() -> None:
+    assert_reach_only_specialist("internal-azure-strategic")
+    skill_text = (
+        REPO_ROOT / ".github/skills/internal-azure-strategic/SKILL.md"
+    ).read_text().split("---", maxsplit=2)[2].lower()
+    markers = (
+        "decision statement",
+        "assumptions",
+        "minimum lenses",
+        "options",
+        "recommendation and explain",
+        "risk",
+        "reversibility",
+        "completion criteria",
+    )
+    positions = [skill_text.index(marker) for marker in markers]
+    assert positions == sorted(positions)
+    assert "bc/dr" not in skill_text
+
+    playbook_text = LENS_PLAYBOOK_PATH.read_text().lower()
+    assert "## bc/dr activation" in playbook_text
+    assert playbook_text.count("bc/dr activation") == 1
 
 
 def test_internal_azure_strategic_contract() -> None:
@@ -75,10 +189,10 @@ def test_internal_azure_strategic_contract() -> None:
 
     strategic_markers = (
         "## When to use",
-        "## Optional lens activation",
-        "## Adaptive output modes",
-        "Identify the decision first, not the implementation tool",
-        "`internal-azure` handoff or explicit manual invocation",
+        "## Workflow",
+        "## Proportional output",
+        "decision statement",
+        "references/lens-playbook.md",
     )
     for marker in strategic_markers:
         assert marker in skill_text
@@ -89,12 +203,8 @@ def test_internal_azure_interface_names_the_entry_point() -> None:
 
     assert interface == {
         "display_name": "Internal Azure",
-        "short_description": "Official Azure entry point and router",
-        "default_prompt": (
-            "Use $internal-azure as the entry point for any Azure task; it "
-            "routes to the minimum specialist set, or to "
-            "$internal-azure-strategic for decision framing."
-        ),
+        "short_description": "Azure platform entry point and deliverable selector",
+        "default_prompt": "Use $internal-azure to select the right Azure platform specialist for the immediate deliverable.",
     }
 
 
@@ -106,16 +216,26 @@ def test_internal_azure_strategic_has_agent_metadata() -> None:
     assert interface["default_prompt"]
 
 
-def test_routing_matrix_covers_positive_negative_and_multi_domain_cases() -> None:
+def test_routing_matrix_covers_direct_adjacent_and_multi_deliverable_cases() -> None:
     matrix_text = ROUTING_MATRIX_PATH.read_text()
 
     for heading in (
-        "## Fallback-positive cases",
-        "## Direct-specialist negative cases",
-        "## Multi-domain primary-owner cases",
-        "## Review rule",
+        "## Direct specialist cases",
+        "## Strategic decision cases",
+        "## Adjacent-owner cases",
+        "## Multi-deliverable ordering",
     ):
         assert heading in matrix_text
+
+    for skill_id in (
+        "internal-cloud-policy",
+        "internal-terraform",
+        "awesome-copilot-azure-role-selector",
+        "awesome-copilot-azure-resource-health-diagnose",
+        "awesome-copilot-azure-devops-cli",
+        "awesome-copilot-azure-pricing",
+    ):
+        assert f"/{skill_id}" in matrix_text
 
 
 def test_lens_playbook_keeps_strategic_depth() -> None:
@@ -133,6 +253,17 @@ AZURE_SKILL_PATHS = sorted(
     (REPO_ROOT / ".github/skills").glob("internal-azure*/SKILL.md")
 )
 STRATEGIC_SKILL_ID = "internal-azure-strategic"
+TRIGGER_FIXTURES = (
+    ("management-group layout", "internal-azure-organization-structure"),
+    ("RBAC operating model", "internal-azure-governance"),
+    ("restore exercise evidence", "internal-azure-operations"),
+    ("pipeline YAML review", "internal-azure-devops"),
+    ("choosing between landing-zone alternatives", "internal-azure-strategic"),
+    ("concrete Terraform edit", "internal-terraform"),
+    ("concrete Azure Policy definition", "internal-cloud-policy"),
+    ("current SKU price", "awesome-copilot-azure-pricing"),
+    ("generic application code hosted on Azure", None),
+)
 FORBIDDEN_GENERIC_REFERENCES = (
     "internal-bash-script",
     "internal-python-script",
@@ -153,31 +284,18 @@ def test_azure_family_shape_and_generic_reference_ban() -> None:
             assert f"`{forbidden_name}`" not in skill_text
 
 
-def test_specialists_name_internal_azure_only_as_uncertainty_fallback() -> None:
-    specialist_paths = [
-        path
-        for path in AZURE_SKILL_PATHS
-        if path != SKILL_PATH and path != STRATEGIC_SKILL_PATH
-    ]
-    assert len(specialist_paths) == 4
-
-    for path in specialist_paths:
-        skill_text = path.read_text()
-        assert "`internal-azure`" in skill_text
-        assert "material routing uncertainty" in skill_text
-
-
-def test_strategic_hands_back_to_the_router() -> None:
-    skill_text = STRATEGIC_SKILL_PATH.read_text()
-
-    assert "`internal-azure`" in skill_text
-    assert "explicit manual invocation" in skill_text
+def test_specialists_are_reach_only_and_self_contained() -> None:
+    assert len(DIRECT_SPECIALISTS) == 5
+    for skill_id in DIRECT_SPECIALISTS:
+        assert_reach_only_specialist(skill_id)
 
 
 LANE_SKILL_IDS = (
     "internal-azure-governance",
     "internal-azure-operations",
     "internal-azure-organization-structure",
+    "internal-azure-devops",
+    "internal-azure-strategic",
 )
 
 SKILL_REFERENCE_PATTERN = re.compile(
@@ -214,25 +332,13 @@ def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
             )
 
 
-EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES = {
-    "internal-azure-organization-structure": "Use when ",
-    "internal-azure-governance": "Use when ",
-    "internal-azure-operations": "Use when ",
-    "internal-azure-devops": "Use when ",
-    "internal-azure-strategic": "Use when ",
-}
-
-
-def test_specialist_descriptions_carry_positive_and_negative_triggers() -> None:
-    for path in AZURE_SKILL_PATHS:
-        frontmatter = load_frontmatter(path)
-        name = frontmatter["name"]
-        if name == "internal-azure":
-            continue
-        assert name in EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES
-        description = frontmatter["description"]
-        assert description.startswith(EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES[name])
-        assert "Do not use" in description
+def test_specialist_descriptions_are_positive_and_reachable() -> None:
+    for skill_id in DIRECT_SPECIALISTS:
+        frontmatter = load_frontmatter(
+            REPO_ROOT / ".github/skills" / skill_id / "SKILL.md"
+        )
+        assert frontmatter["description"].startswith("Use when /internal-azure ")
+        assert "Do not use" not in frontmatter["description"]
 
 
 def test_inventory_lists_the_router_and_the_strategic() -> None:
@@ -242,9 +348,23 @@ def test_inventory_lists_the_router_and_the_strategic() -> None:
     assert ".github/skills/internal-azure-strategic/SKILL.md" in inventory_text
 
 
-def test_repo_profiles_point_to_the_router_only() -> None:
+def test_azure_profile_includes_router_and_all_direct_specialists() -> None:
     profiles = yaml.safe_load((REPO_ROOT / ".github/repo-profiles.yml").read_text())
-    azure_skills = profiles["profiles"]["azure-platform"]["recommended_skills"]
+    configured = set(profiles["profiles"]["azure-platform"]["recommended_skills"])
+    required = {
+        "skills/internal-azure/SKILL.md",
+        *{f"skills/{skill_id}/SKILL.md" for skill_id in DIRECT_SPECIALISTS},
+    }
+    assert required <= configured
 
-    assert "skills/internal-azure/SKILL.md" in azure_skills
-    assert not any(STRATEGIC_SKILL_ID in entry for entry in azure_skills)
+
+def test_trigger_evaluation_fixtures_have_deterministic_matrix_coverage() -> None:
+    matrix_text = ROUTING_MATRIX_PATH.read_text().lower()
+    # Descriptions and fixtures are deterministic; live model invocation frequency
+    # remains a validation gap that this repository cannot measure.
+    for scenario, expected_skill in TRIGGER_FIXTURES:
+        assert scenario.lower() in matrix_text
+        if expected_skill is None:
+            assert "no forced azure specialist" in matrix_text
+        else:
+            assert f"/{expected_skill}" in matrix_text
