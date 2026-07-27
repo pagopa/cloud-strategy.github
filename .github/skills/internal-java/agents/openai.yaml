@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Java"
   short_description: "Java source and build metadata"
-  default_prompt: "Use $internal-java for ordinary Java source or generic Maven/Gradle metadata work; route project design and Spring Boot semantics to their dedicated owners."
+  default_prompt: "Use $internal-java when Java language or source correctness, or generic Maven/Gradle build metadata, is the primary concern."

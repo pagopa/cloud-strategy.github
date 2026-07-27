@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Java Project"
   short_description: "Framework-neutral Java project design"
-  default_prompt: "Use $internal-java-project for framework-neutral Java application or library design; route Spring Boot runtime semantics to $internal-java-spring-boot-development."
+  default_prompt: "Use $internal-java-project when framework-neutral Java application or library boundaries and design are the primary concern."

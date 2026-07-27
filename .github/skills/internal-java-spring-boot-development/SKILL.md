@@ -1,18 +1,9 @@
 ---
 name: internal-java-spring-boot-development
-description: Use when Spring Boot runtime or framework semantics drive work involving dependency management, bean wiring, configuration, HTTP or data adapters, scheduling, transactions, test contexts, service connections, or Boot virtual-thread enablement. Do not use for ordinary Java edits, generic Maven/Gradle metadata, or framework-neutral application design.
+description: Use when Spring Boot-specific framework or runtime semantics determine correctness, including parent, plugin, BOM, starter, auto-configuration, bean wiring, configuration binding, HTTP or data adapters, scheduling, transactions, test contexts, service connections, or virtual-thread enablement. Do not use for ordinary Java source work, generic Maven/Gradle metadata, or framework-neutral application and library design.
 ---
 
 # Internal Spring Boot Development
-
-## Referenced skills
-
-- `internal-java`: Ordinary Java source and generic Maven/Gradle metadata.
-- `internal-java-project`: Framework-neutral Java application, library, service,
-  package, domain, API, and collaborator structure.
-
-Route adjacent work to those owners when Spring Boot semantics do not
-determine correctness. Keep this skill focused on the active Boot branch.
 
 ## When to use
 
@@ -22,6 +13,13 @@ determine correctness. Keep this skill focused on the active Boot branch.
   enablement.
 - The task depends on Boot parent, plugin, BOM, starter, auto-configuration,
   lifecycle, annotation, context, or executor semantics.
+
+## When not to use
+
+- Ordinary Java source correctness or generic Maven/Gradle metadata is the main
+  concern and no Spring Boot-specific behavior determines the outcome.
+- Framework-neutral module, package, domain, API, collaborator, concurrency, or
+  test design is the main concern.
 
 ## Workflow
 

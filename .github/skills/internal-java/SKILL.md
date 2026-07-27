@@ -1,26 +1,14 @@
 ---
 name: internal-java
-description: Use when editing or reviewing Java source or generic Maven/Gradle metadata and the main concern is language-level correctness, readability, dependency intent, compiler release, toolchains, or focused build validation. Do not use when application architecture or Spring Boot runtime semantics drive the work.
+description: Use when Java language or source correctness, readability, resource handling, error behavior, or generic Maven/Gradle build metadata is the primary concern, including compiler release, toolchains, plugins, dependencies, reproducibility, and focused build validation. Do not use when module or domain design, API and concurrency architecture, or framework-managed runtime behavior determines correctness.
 ---
 
 # Internal Java
 
-## Referenced skills
-
-Treat the referenced skills below as on-demand owners. Load them only when the
-task proves which owner is needed.
-
-- `internal-java-project`: Framework-neutral Java application and library
-  structure, domain boundaries, APIs, concurrency, or contract tests.
-- `internal-java-spring-boot-development`: Spring Boot dependency management,
-  wiring, configuration, adapters, scheduling, transactions, test contexts,
-  service connections, or Boot virtual-thread semantics.
-
 ## Referenced files
 
 - `references/review-anti-patterns.md`: Evidence-oriented Java review defects.
-  Load when `internal-review-code` or another review caller needs Java-specific
-  defect depth.
+  Load when a review needs Java-specific defect depth.
 
 ## When to use
 
@@ -34,10 +22,10 @@ task proves which owner is needed.
 
 ## When not to use
 
-- Application or library structure is the main concern; use
-  `internal-java-project`.
-- Spring Boot runtime semantics drive the work; use
-  `internal-java-spring-boot-development`.
+- Module, package, domain, API, collaborator, or concurrency architecture is
+  the main concern.
+- Framework-managed wiring, configuration, lifecycle, transactions, test
+  contexts, or runtime semantics determine correctness.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
 ## Working contract
@@ -54,11 +42,11 @@ task proves which owner is needed.
 - Keep compiler, toolchain, dependency-intent, plugin, and reproducibility
   guidance aligned with the repository's existing build. Prefer the checked-in
   wrapper and the repository's established validation tasks.
-- Route application or library design to `internal-java-project` when package,
+- Keep application and library architecture outside this skill when package,
   module, domain, API, collaborator, or concurrency structure drives the work.
-- Route Boot parent, plugin, BOM, starter, bean, configuration, adapter,
-  transaction, scheduling, test-context, service-connection, or virtual-thread
-  semantics to `internal-java-spring-boot-development`.
+- Keep framework-specific parent, plugin, BOM, starter, bean, configuration,
+  adapter, transaction, scheduling, test-context, service-connection, and
+  runtime semantics outside this skill.
 
 ## Validation
 

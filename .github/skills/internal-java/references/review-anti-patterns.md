@@ -1,8 +1,8 @@
 # Java Review Defects
 
-Primary owner: `internal-java`. Report a pattern only when repository evidence
-shows that it creates a correctness, security, maintainability, or observable
-boundary problem. Review cues are not universal mandates.
+Report a pattern only when repository evidence shows that it creates a
+correctness, security, maintainability, or observable boundary problem. Review
+cues are not universal mandates.
 
 ## Critical
 

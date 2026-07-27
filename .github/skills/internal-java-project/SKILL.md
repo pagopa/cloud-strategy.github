@@ -1,19 +1,9 @@
 ---
 name: internal-java-project
-description: Use when designing or changing framework-neutral Java application or library structure, domain boundaries, APIs, concurrency, or unit and contract tests. Do not use when Spring Boot wiring, configuration, transactions, dependency management, or test contexts determine correctness.
+description: Use when framework-neutral Java application or library design is the primary concern, including module, package, domain, API, collaborator, concurrency, unit-test, or contract-test boundaries. Do not use for isolated language-level source changes, generic build metadata, or framework-managed wiring and runtime behavior.
 ---
 
 # Java Project Skill
-
-## Referenced skills
-
-Treat the referenced skill below as an on-demand owner. Do not preload it for
-every Java project edit; load it only when Spring Boot framework behavior is
-the main constraint.
-
-- `internal-java-spring-boot-development`: Spring Boot wiring, configuration,
-  transactions, dependency management, HTTP or data adapters, scheduling,
-  test contexts, service connections, and Boot runtime semantics.
 
 ## When to use
 
@@ -26,12 +16,10 @@ the main constraint.
 
 ## When not to use
 
-- Spring Boot wiring, configuration binding, transactions, HTTP or data
-  adapters, scheduling, test contexts, service connections, or Boot runtime
-  behavior determines correctness; use
-  `internal-java-spring-boot-development`.
-- Generic Java source or build metadata is the main concern; use
-  `internal-java`.
+- Framework-managed wiring, configuration binding, transactions, HTTP or data
+  adapters, scheduling, test contexts, service connections, or runtime
+  behavior determines correctness.
+- An isolated Java source change or generic build metadata is the main concern.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
 ## Project design
