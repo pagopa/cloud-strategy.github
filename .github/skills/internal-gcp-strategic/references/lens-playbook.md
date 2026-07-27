@@ -61,7 +61,7 @@ Use this when the question is too consequential for a quick answer but does not 
 3. Viable options: usually two or three realistic GCP-local paths.
 4. Recommendation: which option wins and why.
 5. Tradeoffs and blast radius: what gets better, what gets harder, and what is difficult to reverse.
-6. Validation note: which current fact, proof, or handoff is still required.
+6. Validation note: which current fact, proof, or specialist follow-up is still required.
 
 ## When to stay quick answer versus upgrade to a decision note
 

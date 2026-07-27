@@ -1,6 +1,6 @@
 ---
 name: internal-gcp-organization-structure
-description: Use when the user needs Google Cloud control-plane or platform-structure guidance for org or folder layout, billing-account model, project segmentation, Shared VPC host and service project topology, environment segmentation, or platform-level network topology that shapes how GCP is organized before implementation. Do not use for IAM, service account, workload identity, or Org Policy design; monitoring, backup, or rollout validation; or materially ambiguous requests with no clear structural deliverable.
+description: Use when the user needs Google Cloud control-plane or platform-structure guidance for org or folder layout, billing-account model, project segmentation, Shared VPC host and service project topology, environment segmentation, or platform-level network topology that shapes how GCP is organized before implementation.
 disable-model-invocation: true
 ---
 
@@ -9,8 +9,6 @@ disable-model-invocation: true
 Use this skill when the next need is to design or review how GCP is structured at org and platform level.
 
 This skill owns GCP layout decisions, not generic strategy and not detailed IAM or monitoring implementation. It helps translate a platform goal into org, folder, project, Shared VPC, topology, and rollout structure.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
 
 ## When to use
 

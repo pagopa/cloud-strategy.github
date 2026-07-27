@@ -1,6 +1,6 @@
 ---
 name: internal-gcp-governance
-description: Use when the user needs Google Cloud governance guidance for IAM operating models, workload identity federation, service account boundaries, Org Policy design, inheritance strategy, security guardrails, or exception handling that define what principals can do after the GCP structure is chosen. Do not use for org, folder, project, or Shared VPC layout; monitoring, backup, or rollout validation; or materially ambiguous requests with no clear governance deliverable.
+description: Use when the user needs Google Cloud governance guidance for IAM operating models, workload identity federation, service account boundaries, Org Policy design, inheritance strategy, security guardrails, or exception handling that define what principals can do after the GCP structure is chosen.
 disable-model-invocation: true
 ---
 
@@ -9,8 +9,6 @@ disable-model-invocation: true
 Use this skill when the next need is to define or review Google Cloud identity, access, and guardrail decisions.
 
 This skill owns governance logic after the broad structure is known. It helps separate org or folder guardrails from project-level grants and keeps permission decisions auditable.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
 
 ## When to use
 

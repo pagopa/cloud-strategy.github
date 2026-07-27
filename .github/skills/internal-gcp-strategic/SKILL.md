@@ -1,16 +1,16 @@
 ---
 name: internal-gcp-strategic
-description: Use when you need high-level Google Cloud decision support, tradeoff framing, or multi-lens analysis before implementation, or when internal-gcp routes a strategic question here. Invoke manually ($internal-gcp-strategic) or via internal-gcp handoff. Do not use for clearly scoped specialist tasks with a known owner.
+description: Use when the user needs high-level Google Cloud decision support, tradeoff framing, or multi-lens analysis before implementation, especially for cross-domain or ambiguous GCP questions with no clear specialist owner.
 disable-model-invocation: true
 ---
 
 # Internal GCP Strategic
 
-Strategic support skill for high-level Google Cloud decision framing. Reached via `internal-gcp` handoff or explicit manual invocation. Identify the decision first, not the implementation tool, and hand back to `internal-gcp` for specialist routing once the direction is chosen.
+Strategic support skill for high-level Google Cloud decision framing. Identify the decision first, not the implementation tool, and keep the answer at decision level.
 
 ## When to use
 
-Use this skill for high-level Google Cloud decision support, tradeoff framing, or multi-lens analysis before implementation. Do not use it for clearly scoped specialist tasks with a known owner; those belong to the specialists via `internal-gcp`.
+Use this skill for high-level Google Cloud decision support, tradeoff framing, or multi-lens analysis before implementation.
 
 ## Optional lens activation
 
@@ -115,7 +115,7 @@ Include:
 | Forcing a full multi-lens analysis for a small question | The answer becomes heavier than the decision requires | Start with the smallest useful lens set and widen only if risk or ambiguity justifies it |
 | Treating BC/DR as mandatory for every answer | Continuity language crowds out the actual GCP tradeoff | Activate BC/DR only when regional continuity or recovery posture changes the recommendation |
 | Recommending a direction without current-source verification when freshness matters | Product limits, Org Policy behavior, or regional support may have changed | Call out the freshness dependency and say which Google Cloud facts still need current verification |
-| Confusing decision support with implementation guidance | The user loses the strategic framing they asked for | Keep the answer at decision level and hand back to `internal-gcp` after the direction is chosen |
+| Confusing decision support with implementation guidance | The user loses the strategic framing they asked for | Keep the answer at decision level |
 | Expanding into tool or automation selection when the user did not ask for it | The response drifts from platform tradeoffs into delivery detail | Keep the recommendation centered on the GCP choice, not the tooling |
 
 ## Validation

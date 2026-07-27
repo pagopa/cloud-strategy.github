@@ -1,6 +1,6 @@
 ---
 name: internal-gcp-operations
-description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for org, folder, project, or Shared VPC layout; IAM, workload identity, or Org Policy design; or materially ambiguous requests with no clear operational deliverable.
+description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made.
 disable-model-invocation: true
 ---
 
@@ -9,8 +9,6 @@ disable-model-invocation: true
 Use this skill when the next need is to validate, observe, or operationalize a GCP platform decision.
 
 This skill owns the operational side of the platform: monitoring, evidence, inventory, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
 
 ## When to use
 
@@ -61,8 +59,6 @@ For broader asks, return:
 - post-rollout evidence path
 - recovery, DR, or inventory note when relevant
 - open operational risks
-
-Until a dedicated GCP serverless owner is justified by real usage, keep Cloud Run and Cloud Functions operational readiness, validation, and evidence questions in this skill instead of inventing a fifth lane for symmetry alone.
 
 ## Common mistakes
 

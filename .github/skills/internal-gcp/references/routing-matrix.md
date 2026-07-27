@@ -1,12 +1,12 @@
 # GCP Routing Scenario Matrix
 
-## Fallback-positive cases
+## Strategic-destination cases
 
 | Scenario | Why no primary owner |
 |---|---|
 | Underspecified cross-org control problem mixing structure, governance, and operations with no clear primary deliverable | The request names multiple GCP domains but does not identify which deliverable takes priority. |
-| GCP platform question asking which lane should own the work without naming structure, governance, or operations | The user has not selected a domain; the fallback must clarify the lane before any specialist can engage. |
-| Broad Google Cloud adoption review where the user wants a general health assessment across all domains | No single specialist owns a cross-domain health review; the fallback selects the minimum set. |
+| GCP platform question asking which lane should own the work without naming structure, governance, or operations | The user has not selected a domain; `internal-gcp-strategic` frames the lane choice before any specialist can engage. |
+| Broad Google Cloud adoption review where the user wants a general health assessment across all domains | No single specialist owns a cross-domain health review; `internal-gcp-strategic` frames the review and names the minimum specialist set. |
 
 ## Direct-specialist negative cases
 
@@ -26,4 +26,4 @@
 
 ## Review rule
 
-Prefer a direct specialist whenever a reasonable reviewer can name one primary owner from the request itself. Activate the fallback only when the request does not identify a primary owner and clarification is required before a specialist can engage. The fallback is not a prerequisite for ordinary GCP work and must never activate all GCP skills by default.
+Prefer a direct specialist whenever a reasonable reviewer can name one primary owner from the request itself. Route to `internal-gcp-strategic` only when the request does not identify a primary owner, spans multiple domains, or asks for decision framing before implementation. The strategic destination is not a prerequisite for ordinary GCP work and must never activate all GCP skills by default.
