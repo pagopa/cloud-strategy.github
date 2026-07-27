@@ -31,6 +31,11 @@ description: Use when editing or reviewing Makefile or .mk syntax, targets, prer
 - `make` and `make -n` are not generic safety boundaries; `make -n` is only a
   preview, so inspect recipes before execution.
 
+## Narrow owner routing
+
+- Route embedded shell behavior to `/internal-bash` when shell semantics are
+  the primary concern.
+
 ## Validation
 
 Run the bundle-owned static checker with explicit files:
