@@ -1,14 +1,9 @@
 ---
 name: internal-nodejs
-description: Use when reviewing JavaScript or TypeScript, or when creating or editing Node.js package metadata, runtime configuration, dependencies, or a small localized module; use /internal-nodejs-project when application structure or behavior is the main concern.
+description: Use when reviewing localized JavaScript or TypeScript changes, changing Node.js package metadata, runtime configuration, dependencies, or editing a single module within established application boundaries.
 ---
 
 # Internal Node.js
-
-## Referenced skills
-
-- `/internal-nodejs-project`: application structure and behavior across
-  services, APIs, handlers, modules, adapters, and tests.
 
 ## Referenced files
 
@@ -17,19 +12,26 @@ description: Use when reviewing JavaScript or TypeScript, or when creating or ed
 
 ## When to use
 
-- Review JavaScript or TypeScript changes for language, runtime, dependency,
-  async, module-system, and boundary defects.
+- Review localized JavaScript or TypeScript changes for language, runtime,
+  dependency, async, module-system, and resource-lifecycle defects.
 - Change `package.json`, `tsconfig.json`, supported lockfiles, scripts,
   dependencies, or runtime configuration.
-- Make a localized module change whose package, architecture, and validation
-  path are already clear.
+- Create, fix, or refactor a single module whose application boundaries and
+  validation path are already clear.
 
 ## When not to use
 
-- When application structure or behavior across services, APIs, handlers,
-  modules, adapters, or tests is the primary concern, use `/internal-nodejs-project`.
+- Do not use for application-wide changes spanning services, APIs, handlers,
+  modules, adapters, or tests across multiple application boundaries.
 - Route frontend design, generic JSON, Docker, workflows, and infrastructure
   to their domain owners.
+
+## Responsibility boundary
+
+- Own Node.js and TypeScript runtime correctness, package and compiler
+  configuration, dependency intent, and localized module quality.
+- Do not own application decomposition, cross-boundary behavior, transport
+  orchestration, or application-wide test strategy.
 
 ## Baseline
 

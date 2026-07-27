@@ -1,30 +1,33 @@
 ---
 name: internal-nodejs-project
-description: Use when creating, modifying, or refactoring Node.js or TypeScript application behavior and structure across services, APIs, handlers, modules, adapters, or tests; use /internal-nodejs for metadata-only, toolchain, or lightweight file-level work.
+description: Use when creating, modifying, reviewing, or refactoring Node.js or TypeScript application behavior and structure across services, APIs, handlers, modules, adapters, or tests.
 ---
 
 # Node.js Project Skill
 
-## Referenced skills
-
-- `/internal-nodejs`: Node.js and TypeScript review, package metadata,
-  dependencies, runtime configuration, compiler settings, and localized module
-  work.
-
 ## When to use
 
-- Create, modify, or refactor application behavior across services, APIs,
-  handlers, modules, adapters, or tests.
+- Create, modify, review, or refactor application behavior across services,
+  APIs, handlers, modules, adapters, or tests.
 - Change boundaries between transport, domain logic, and infrastructure.
 - Design or revise application-level error handling, concurrency, validation,
   or test seams.
 
 ## When not to use
 
-- For metadata-only, toolchain, dependency, compiler, lockfile, review-only, or
-  lightweight file-level work, use `/internal-nodejs`.
+- Do not use for metadata-only, toolchain, dependency, compiler, or lockfile
+  work.
+- Do not use for isolated module changes whose application boundaries and
+  validation path are already established.
 - Route frontend design, Docker, workflows, and infrastructure to their domain
   owners.
+
+## Responsibility boundary
+
+- Own application composition, cross-boundary behavior, transport-to-domain
+  flow, infrastructure adapters, and application-level test seams.
+- Supporting package or runtime changes may stay in scope only when required by
+  the application change; metadata-only work remains outside this boundary.
 
 ## Application boundaries
 

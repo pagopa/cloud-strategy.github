@@ -2,5 +2,6 @@ interface:
   display_name: "Internal Node.js"
   short_description: "Node.js and TypeScript review and metadata"
   default_prompt: >-
-    Use $internal-nodejs for Node.js or TypeScript review, package metadata,
-    dependencies, runtime configuration, or localized module work.
+    Use $internal-nodejs for localized Node.js or TypeScript review, package
+    metadata, dependencies, runtime configuration, or single-module work with
+    established application boundaries.
