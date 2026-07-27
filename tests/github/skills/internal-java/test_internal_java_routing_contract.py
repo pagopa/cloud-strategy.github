@@ -87,8 +87,7 @@ SPRING_REQUIRED_MARKERS = (
 def skill_text(skill_id: str) -> str:
     skill_dir = SKILLS_ROOT / skill_id
     return "\n".join(
-        path.read_text(encoding="utf-8")
-        for path in sorted(skill_dir.glob("**/*.md"))
+        path.read_text(encoding="utf-8") for path in sorted(skill_dir.glob("**/*.md"))
     )
 
 
@@ -102,10 +101,7 @@ def bundle_text(skill_id: str) -> str:
 
 
 def known_skill_ids() -> set[str]:
-    return {
-        path.parent.name
-        for path in SKILLS_ROOT.glob("*/SKILL.md")
-    }
+    return {path.parent.name for path in SKILLS_ROOT.glob("*/SKILL.md")}
 
 
 def load_frontmatter(skill_id: str) -> dict[str, object]:
@@ -117,9 +113,7 @@ def load_frontmatter(skill_id: str) -> dict[str, object]:
 def load_interfaces() -> dict[str, dict[str, object]]:
     return {
         skill_id: yaml.safe_load(
-            (SKILLS_ROOT / skill_id / "agents/openai.yaml").read_text(
-                encoding="utf-8"
-            )
+            (SKILLS_ROOT / skill_id / "agents/openai.yaml").read_text(encoding="utf-8")
         )["interface"]
         for skill_id in JAVA_SKILL_IDS
     }
@@ -130,21 +124,24 @@ def load_routing_cases() -> list[dict[str, str]]:
 
 
 def test_internal_java_description_is_exact() -> None:
-    assert load_frontmatter("internal-java")["description"] == EXPECTED_DESCRIPTIONS[
-        "internal-java"
-    ]
+    assert (
+        load_frontmatter("internal-java")["description"]
+        == EXPECTED_DESCRIPTIONS["internal-java"]
+    )
 
 
 def test_internal_java_project_description_is_exact() -> None:
-    assert load_frontmatter("internal-java-project")["description"] == EXPECTED_DESCRIPTIONS[
-        "internal-java-project"
-    ]
+    assert (
+        load_frontmatter("internal-java-project")["description"]
+        == EXPECTED_DESCRIPTIONS["internal-java-project"]
+    )
 
 
 def test_internal_java_spring_description_is_exact() -> None:
-    assert load_frontmatter("internal-java-spring-boot-development")["description"] == EXPECTED_DESCRIPTIONS[
-        "internal-java-spring-boot-development"
-    ]
+    assert (
+        load_frontmatter("internal-java-spring-boot-development")["description"]
+        == EXPECTED_DESCRIPTIONS["internal-java-spring-boot-development"]
+    )
 
 
 def test_internal_java_interface_is_exact() -> None:
@@ -152,15 +149,17 @@ def test_internal_java_interface_is_exact() -> None:
 
 
 def test_internal_java_project_interface_is_exact() -> None:
-    assert load_interfaces()["internal-java-project"] == EXPECTED_INTERFACES[
-        "internal-java-project"
-    ]
+    assert (
+        load_interfaces()["internal-java-project"]
+        == EXPECTED_INTERFACES["internal-java-project"]
+    )
 
 
 def test_internal_java_spring_interface_is_exact() -> None:
-    assert load_interfaces()["internal-java-spring-boot-development"] == EXPECTED_INTERFACES[
-        "internal-java-spring-boot-development"
-    ]
+    assert (
+        load_interfaces()["internal-java-spring-boot-development"]
+        == EXPECTED_INTERFACES["internal-java-spring-boot-development"]
+    )
 
 
 def test_java_bundles_do_not_reference_other_skills() -> None:
@@ -215,9 +214,10 @@ def test_java_profiles_have_deterministic_skill_membership() -> None:
         (REPO_ROOT / ".github/repo-profiles.yml").read_text(encoding="utf-8")
     )["profiles"]
 
-    assert "skills/internal-java-spring-boot-development/SKILL.md" not in profiles[
-        "backend-java"
-    ]["recommended_skills"]
+    assert (
+        "skills/internal-java-spring-boot-development/SKILL.md"
+        not in profiles["backend-java"]["recommended_skills"]
+    )
     assert profiles["backend-java-spring"]["recommended_skills"] == [
         "skills/internal-java/SKILL.md",
         "skills/internal-java-project/SKILL.md",

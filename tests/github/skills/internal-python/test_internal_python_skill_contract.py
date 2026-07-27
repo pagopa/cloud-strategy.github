@@ -93,16 +93,21 @@ def test_python_baseline_stays_cross_cutting_and_template_free() -> None:
     assert "domain/service/adapter" not in skill
 
 
-def test_project_skill_follows_repository_conventions_before_optional_patterns() -> None:
+def test_project_skill_follows_repository_conventions_before_optional_patterns() -> (
+    None
+):
     skill = (PROJECT / "SKILL.md").read_text(encoding="utf-8").lower()
 
     assert "existing" in skill and "test naming" in skill
     assert "existing framework" in skill
     assert "when separation improves" in skill
     assert "bdd-like names:" not in skill
-    assert "god classes with 10+ methods" not in (
-        PROJECT / "references/common-mistakes.md"
-    ).read_text(encoding="utf-8").lower()
+    assert (
+        "god classes with 10+ methods"
+        not in (PROJECT / "references/common-mistakes.md")
+        .read_text(encoding="utf-8")
+        .lower()
+    )
 
 
 def test_project_reporting_keeps_human_rendering_at_the_cli_boundary() -> None:
@@ -123,9 +128,7 @@ def test_script_optional_complexity_is_contract_driven() -> None:
 
 
 def test_script_references_do_not_silently_provision_on_every_run() -> None:
-    layout = (SCRIPT / "references/layout-and-templates.md").read_text(
-        encoding="utf-8"
-    )
+    layout = (SCRIPT / "references/layout-and-templates.md").read_text(encoding="utf-8")
 
     assert '"$VENV_DIR/bin/pip" install' not in layout
     assert "repository-declared environment" in layout
