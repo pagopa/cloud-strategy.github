@@ -136,6 +136,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/mattpocock-research/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
+- `.github/skills/mattpocock-teach/SKILL.md`
 - `.github/skills/mattpocock-to-spec/SKILL.md`
 - `.github/skills/mattpocock-to-tickets/SKILL.md`
 - `.github/skills/mattpocock-triage/SKILL.md`
