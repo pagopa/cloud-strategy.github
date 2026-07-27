@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal GitHub Strategic"
-  short_description: "GitHub strategic decision support, manual or router handoff only"
-  default_prompt: "Use $internal-github-strategic to frame a high-level GitHub platform or operating-model decision, compare tradeoffs, or run a multi-lens analysis before implementation."
+  short_description: "GitHub strategic decision framing"
+  default_prompt: "Use /internal-github to route this request to /internal-github-strategic."

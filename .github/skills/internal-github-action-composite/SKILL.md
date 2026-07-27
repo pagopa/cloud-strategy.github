@@ -1,92 +1,57 @@
 ---
 name: internal-github-action-composite
-description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially when input validation, shell safety, `outputs:` contract compatibility, or backward compatibility matters. Do not use for workflow-level authoring or reuse-pattern selection; route those to internal-github-actions.
-disable-model-invocation: true
+description: Use when /internal-github routes composite-action work under `.github/actions/`, including inputs, outputs, shell safety, tests, documentation, and compatibility.
+user-invocable: false
 ---
 
 # GitHub Composite Action Skill
 
-## Referenced skills
-
-Treat the referenced skills below as on-demand supports. Do not preload them
-for every composite action edit; load only the owner proved by the reusable
-unit, extracted script depth, or broader workflow question.
-
-- `internal-github-actions`: GitHub Actions workflow umbrella and reuse-pattern selection.
-- `internal-github`: route back under material routing uncertainty when the owning GitHub lane is unclear or the work is still strategic platform framing.
+Own the concrete composite-action contract under `.github/actions/`: inputs,
+outputs, shell behavior, compatibility, documentation, and validation.
 
 ## When to use
 
-- Create a new reusable composite action under `.github/actions/`.
-- Modify an existing composite action and preserve compatibility.
-- Deepen a GitHub Actions task that has already been classified as composite-action authoring.
-- Add or revise composite-action documentation, outputs, testing guidance, or release discipline.
+- Create or modify an `action.yml` composite action.
+- Preserve compatibility while changing inputs or outputs.
+- Document or test a composite action.
 
-## Relationship to the umbrella skill
+## Composite-action contract
 
-- `internal-github-actions` is the default entry point for GitHub Actions authoring.
-- Load this skill when the work is specifically a composite action or when the umbrella skill decides the reusable unit should move here.
+Input validation is the first contract step; validate required values before
+the action performs its main logic.
 
-## Composite action vs reusable workflow
-
-| Factor | Composite action | Reusable workflow |
-| --- | --- | --- |
-| Granularity | Step-level reuse inside a job | Job-level orchestration |
-| Secrets access | Inherited from the caller job | Passed explicitly to the called workflow |
-| Outputs | Step outputs only | Workflow outputs |
-| Best for | Shared validation, setup, or step logic | Pipelines with their own jobs, runners, or environments |
-
-## Mandatory rules
-
-- Pass expression inputs via `env:` instead of interpolating `${{ }}` directly in `run:`.
-- Keep `shell: bash` explicit on composite steps.
+- Pass expression inputs through `env:` instead of interpolating them directly
+  in `run:`.
+- Keep `shell: bash` explicit on every composite step.
 - Start shell blocks with `set -euo pipefail`.
-- Forward caller-visible values through action `outputs:` mapped from `$GITHUB_OUTPUT`.
+- Validate required inputs before the main logic and fail clearly.
+- Forward caller-visible values through `outputs:` mapped from `$GITHUB_OUTPUT`.
 - Use `$GITHUB_ENV` only for step-to-step state inside the action.
 - Extract long shell logic into a dedicated script early.
-- Preserve backward compatibility when modifying existing inputs or outputs.
+- Preserve backward compatibility for existing inputs and outputs, or treat a
+  breaking contract as a versioning event.
 
 ## Reference map
 
-- Load [minimal template](references/minimal-template.md) for the smallest safe starter `action.yml`.
-- Load [multi-step template](references/multi-step-template.md) when the action coordinates validation, shared state, and caller-visible outputs across several steps.
-- Load [output forwarding pattern](references/output-forwarding-pattern.md) when a step result must become a documented action output.
-- Load [testing pattern](references/testing-pattern.md) for smoke workflow, failure-path, and contract checks.
-- Load [action README template](references/action-readme-template.md) to document inputs, outputs, side effects, and usage.
-- Load [versioning strategy](references/versioning-strategy.md) when the action is published or compatibility-sensitive.
+- Load [minimal template](references/minimal-template.md) for the smallest safe
+  starter `action.yml`.
+- Load [multi-step template](references/multi-step-template.md) when the action
+  shares state and exposes caller-visible outputs.
+- Load [output forwarding pattern](references/output-forwarding-pattern.md)
+  when a step result becomes an action output.
+- Load [testing pattern](references/testing-pattern.md) for smoke, failure-path,
+  and contract checks.
+- Load [action README template](references/action-readme-template.md) for
+  inputs, outputs, side effects, and usage documentation.
+- Load [versioning strategy](references/versioning-strategy.md) for published
+  or compatibility-sensitive actions.
 
-## Common mistakes
+## Completion criteria
 
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Interpolating `${{ inputs.x }}` directly in `run:` | Crafted input values can turn into shell injection | Pass the value through `env:` and use quoted shell variables |
-| Missing `set -euo pipefail` in `run:` blocks | Silent failures and partial execution become hard to spot | Make strict mode the first line of every shell block |
-| Large inline `run:` blocks | They are hard to read, lint, and review | Extract the logic into a dedicated script early |
-| No input validation before the main logic | Failures surface later with weaker error messages | Validate required inputs in the first step and fail fast |
-| Forgetting `shell: bash` on composite steps | Runner defaults can differ and change behavior | Keep `shell: bash` explicit |
-| Hiding caller-visible values in `$GITHUB_ENV` or temp files | Callers cannot read the value and the contract stays implicit | Forward the value through `$GITHUB_OUTPUT` and `outputs:` |
-| Leaving outputs or usage undocumented | Consumers guess the contract and misuse the action | Keep a minimal README with inputs, outputs, side effects, and an example |
-| Breaking an existing input or output contract | Callers can fail without a clear migration path | Add new fields compatibly and preserve the old contract where possible |
-
-## Cross-references
-
-- **internal-github-actions**: for the umbrella GitHub Actions lane and reuse-pattern selection.
-- **internal-bash-script**: for extracted shell scripts inside the action.
-
-## Validation checklist
-
-- [ ] Inputs and outputs are explicit.
-- [ ] Required inputs are validated in the first step.
-- [ ] Multi-step state uses `$GITHUB_OUTPUT` and `$GITHUB_ENV` intentionally.
-- [ ] Longer logic lives in a dedicated script.
-- [ ] The README example matches the real inputs and outputs.
-- [ ] A happy-path smoke validation exists.
-- [ ] Existing input and output names remain compatible, or the breaking change is versioned deliberately.
-
-## Validation
-
-- Inputs and outputs are explicit and validated early.
-- Shell code uses `set -euo pipefail`, quoted variables, and explicit `shell: bash`.
-- A smoke workflow or equivalent fixture validates the happy path.
-- Caller-visible outputs are forwarded through documented `outputs:` mappings.
-- Existing input and output contracts remain backward compatible.
+- `action.yml` inputs and outputs are explicit and validated early.
+- Expressions are passed safely through environment variables.
+- Shell uses strict mode and explicit Bash.
+- Caller-visible outputs are documented and forwarded through
+  `$GITHUB_OUTPUT`.
+- Smoke and failure-path validation cover the contract.
+- Existing compatibility is preserved or versioned deliberately.

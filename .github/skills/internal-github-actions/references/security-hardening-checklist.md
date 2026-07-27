@@ -22,5 +22,3 @@ Use this checklist when a workflow touches deployment, secrets, self-hosted runn
 - [ ] Secrets are scoped to the narrowest job or protected environment that needs them.
 - [ ] Forked or untrusted jobs do not gain access to deployment credentials.
 - [ ] Production deploys use protected environments with reviewers.
-
-Route organization-wide rulesets, runner governance, and GitHub App policy questions to `internal-github-governance`.

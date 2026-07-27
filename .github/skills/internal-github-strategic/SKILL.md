@@ -1,124 +1,74 @@
 ---
 name: internal-github-strategic
-description: Use when you need high-level GitHub platform or operating-model decision support, tradeoff framing, or multi-lens analysis before implementation, or when internal-github routes a strategic question here. Invoke manually ($internal-github-strategic) or via internal-github handoff. Do not use for clearly scoped specialist tasks with a known owner.
-disable-model-invocation: true
+description: Use when /internal-github routes a GitHub platform or operating-model decision that requires option comparison, tradeoff analysis, or multi-lens strategic framing.
+user-invocable: false
 ---
 
 # Internal GitHub Strategic
 
-Strategic support skill for high-level GitHub platform and operating-model decision framing. Reached via `internal-github` handoff or explicit manual invocation. Identify the decision first, not the implementation tool, and hand back to `internal-github` for specialist routing once the direction is chosen.
+Produce a decision for GitHub platform and operating-model choices. This is a
+terminal decision deliverable: make the choice legible, recommend a direction,
+and state the validation needs that remain before implementation.
 
 ## When to use
 
-Use this skill for high-level GitHub platform or operating-model decision support, tradeoff framing, or multi-lens analysis before implementation. Do not use it for clearly scoped specialist tasks with a known owner; those belong to the specialists via `internal-github`.
+Use for a GitHub platform or operating-model decision that has multiple viable
+options, material tradeoffs, or a need for more than one decision lens.
 
-## Optional lens activation
+## Decision workflow
 
-Do not load every lens by default.
+1. State the decision and the outcome it must support.
+2. Make assumptions explicit, including current organization model, trust
+   posture, continuity needs, licensing limits, and scope.
+3. Activate the minimum useful lenses. Name every active lens when more than
+   one is needed.
+4. Compare realistic options against the decision criteria. Do not use
+   strawman alternatives.
+5. Recommend one direction and explain why it wins.
+6. State tradeoffs, blast radius, reversibility, cost-value impact, and facts
+   requiring proof.
 
-Use only the minimum set of lenses needed for the request. If the user explicitly names one or more lenses, prioritize only those. If the user does not name lenses, infer the smallest useful set.
+## Decision lenses
 
-Available lenses include:
+Use only the lenses that can change the recommendation:
 
-- security
-- identity and access
+- security and identity and access
 - organization and repo model
-- governance
-- operations
-- runner model
-- Copilot
-- BC/DR
-- FinOps
-- compliance
-- rollout and rollback
-- blast radius
-- maintainability
+- governance and compliance
+- operations and runner model
+- rollout and rollback and blast radius
+- Copilot, FinOps, BC/DR, or maintainability
 
-Rules:
+Activate BC/DR when the choice affects delivery continuity, runner resilience,
+backup, recovery, or failover. Activate current documentation only when a
+fresh platform fact can change the outcome.
 
-- Start narrow.
-- Expand only when the request is broad, risky, or ambiguous.
-- If another lens would materially improve the recommendation, suggest it briefly instead of forcing it.
-- Keep the active lenses explicit when more than one is in play.
-
-Load `references/strategic-framing.md` when the choice of GitHub lens needs worked lens combinations, decision-note depth, or worked-shape comparison before handoff.
-
-## Optional BC/DR lens
-
-BC/DR is optional.
-
-Activate it only when:
-
-- the user asks about delivery continuity, runner resilience, backup, recovery, or failover expectations
-- the decision has clear continuity implications for build, release, or repository operations
-- the recommendation would be materially incomplete without it
-
-If BC/DR seems relevant but is not requested, suggest it as an optional lens instead of forcing it.
-
-## Use of current documentation
-
-Use current GitHub documentation only when freshness materially affects the answer. When the question is about Copilot or MCP behavior specifically, hand back to `internal-github` to route to `internal-copilot-docs-research` instead of answering from memory.
-
-## Mandatory behavior
-
-- Identify the decision first, not the implementation tool.
-- Make assumptions explicit.
-- Compare realistic options, not strawmen.
-- Keep tradeoffs concrete.
-- Surface material risk, blast radius, and reversibility when relevant.
-- Include cost-value considerations when they matter to the decision.
-- Stay proportional to the size of the question.
+Load `references/strategic-framing.md` when worked lens combinations or a
+decision-note shape will improve the analysis.
 
 ## Adaptive output modes
 
-Choose the lightest output that fits the request.
-
 ### Quick answer
 
-Use for narrow asks.
-
-Include:
-
-- direct recommendation
-- short rationale
-- optional risk or follow-up note
+Use for a narrow decision with one clearly stronger option. Include the
+recommendation, short rationale, and one material risk or validation need.
 
 ### Decision note
 
-Use for normal strategic support.
-
-Include:
-
-- decision statement
-- key options or tradeoff
-- recommended direction
-- main risk or validation note
+Use when two or more realistic options remain. Include the decision statement,
+assumptions, options, recommendation, tradeoffs, and validation needs.
 
 ### Deep analysis
 
-Use only for broad, ambiguous, high-risk, or explicitly detailed requests.
+Use for broad, ambiguous, high-risk, or explicitly detailed decisions. Include
+context, active lenses, options, recommendation, blast radius, reversibility,
+and evidence needed before implementation.
 
-Include:
+## Completion criteria
 
-- context and assumptions
-- options considered
-- active lenses used
-- recommendation and why it wins
-- main risks and blast radius
-- validation or follow-up path
-
-## Anti-patterns
-
-- Forcing a full multi-lens analysis for a small question.
-- Recommending implementation tooling when the user only asked for decision framing.
-- Invoking current-doc research by default for stable, generic reasoning.
-- Retaining ownership after the direction is chosen instead of handing back to `internal-github` for specialist routing.
-
-## Validation
-
-- Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
-- Confirm lenses, when used, are the minimum set and named explicitly when more than one is active.
-- Confirm assumptions, tradeoffs, and the next owner are explicit.
-- Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.
-- Confirm cost-value or operational impact, including licensing or runner cost, is called out when it materially changes the recommendation.
-- Confirm the answer states when freshness matters and whether current GitHub or Copilot behavior still needs verification.
+- The decision statement is explicit and narrow enough to act on.
+- Assumptions and active lenses are visible.
+- Viable options are compared against concrete criteria.
+- One recommendation is stated with material tradeoffs.
+- Blast radius and reversibility are addressed when relevant.
+- Validation needs and freshness-sensitive facts are identified.

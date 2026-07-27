@@ -1,46 +1,56 @@
 ---
 name: internal-github
-description: Official entry point for any GitHub task. Routes every GitHub request to the right specialist - governance, operations, Actions workflows, composite actions, PR lifecycle, or Copilot platform research - or to internal-github-strategic for high-level decision framing. Use for any GitHub request, scoped or ambiguous.
+description: Official entry point for any GitHub task. Routes every GitHub request to the right specialist - governance, operations, Actions workflows, composite actions, PR lifecycle, or Copilot platform research - or to /internal-github-strategic for high-level decision framing. Use for any GitHub request, scoped or ambiguous.
+user-invocable: true
 ---
 
 # Internal GitHub
 
-Official entry point and lightweight router for GitHub work. This skill routes; it does not answer GitHub domain questions itself.
+Use this skill as the single explicit entry point for GitHub work. Classify
+the requested deliverable, invoke the minimum owner set, and stop routing
+after every requested deliverable has an owner.
 
 ## When to use
 
-Use this skill as the entry point for any GitHub request, scoped or ambiguous. It always routes: to one specialist when the owner is clear, to `internal-github-strategic` for cross-domain ambiguity or high-level platform or operating-model decision framing.
+Use for any GitHub request, including a scoped implementation, an operational
+check, a governance decision, a pull-request task, current-platform research,
+or an ambiguous request whose deliverable is not yet clear.
 
-## Destinations
+## Destination table
 
-| To | Owns |
+| Destination | Primary deliverable |
 |---|---|
-| `internal-github-governance` | rulesets, branch protection, repo and org permissions, GitHub Apps permissions, Actions permissions, OIDC, secrets, environments, Copilot governance |
-| `internal-github-operations` | Actions health, runner operations, audit logs, reporting, drift, preflight, post-rollout validation, evidence |
-| `internal-github-actions` | workflow authoring under `.github/workflows/`, reusable workflows, reuse-pattern selection |
-| `internal-github-action-composite` | composite-action authoring under `.github/actions/`, input validation, shell safety, contract compatibility |
-| `internal-github-pr` | PR creation, body, merge readiness, merge method, terminal-state verification, PR lifecycle evidence |
-| `internal-copilot-docs-research` | current GitHub Copilot or MCP platform behavior when freshness materially affects the answer |
-| `internal-github-strategic` | high-level platform and operating-model decision support, tradeoff framing, multi-lens analysis |
+| `/internal-github-strategic` | Platform or operating-model decision with option comparison, tradeoff analysis, or multi-lens framing |
+| `/internal-github-governance` | Rulesets, permissions, Apps, Actions permissions, OIDC trust, secrets, environments, CODEOWNERS, or Copilot policy |
+| `/internal-github-operations` | Actions health, runners, audit evidence, reporting, drift, preflight, rollout validation, or post-rollout proof |
+| `/internal-github-actions` | Workflow authoring or debugging under `.github/workflows/`, including `workflow_call` and reuse-pattern selection |
+| `/internal-github-action-composite` | Composite-action work under `.github/actions/`, including inputs, outputs, shell safety, tests, documentation, and compatibility |
+| `/internal-github-pr` | Pull-request creation, body updates, readiness, reviews, merge, or terminal-state verification |
+| `/internal-copilot-docs-research` | Current Copilot or MCP platform behavior when freshness materially affects the answer |
 
-## How to route
+## Classification algorithm
 
-1. Read the request. If it is clearly scoped to one specialist, name that owner. If it is ambiguous, spans multiple domains, or asks for platform or operating-model decision framing, name `internal-github-strategic`. Ask one clarifying question only when ownership turns on the answer.
-2. Hand off by reading the chosen skill's `SKILL.md` and adopting its instructions for the rest of the turn. Handoff by file read works regardless of the target's disable-model-invocation flag.
-3. State the chosen owner and a one-line reason before handing off.
+1. Identify the requested deliverable and the repository surface it changes or
+   verifies.
+2. Choose one primary destination from the table. Select the decision owner
+   for platform or operating-model choices, the control owner for resulting
+   policy design, and the implementation or evidence owner for concrete work.
+3. Ask one focused question only when the deliverable cannot be inferred
+   safely. Do not ask merely because a request mentions more than one domain.
+4. Invoke the selected destination using its slash-prefixed name, with the
+   deliverable and relevant evidence in the request.
 
-Load `references/routing-matrix.md` when the owner choice is not obvious.
+## Multi-deliverable sequencing
 
-## Rules
+When independent deliverables are requested, assign each a primary owner and
+invoke them in dependency order. A decision precedes its resulting control
+design; a control design precedes rollout evidence; workflow behavior and
+composite-action authoring remain separate implementation deliverables. Keep
+each invocation focused on its own output.
 
-- Always route. Never answer a GitHub domain question from this skill.
-- Route directly when one specialist clearly owns the next step; use `internal-github-strategic` only for genuine cross-domain ambiguity or decision framing.
-- Pick the minimum specialist set; one primary owner per lane.
-- Every destination except `internal-copilot-docs-research` carries `disable-model-invocation: true`; reach it by this handoff or explicit manual invocation only.
-- Do not retain ownership after the lane is resolved.
+## Completion criteria
 
-## Validation
-
-- The chosen owner is named with a one-line reason.
-- The handoff is performed by reading the owner's SKILL.md, not by answering here.
-- The selected specialist set is the minimum needed.
+- Every requested deliverable has exactly one primary owner.
+- The selected owner is invoked with a slash-prefixed skill name.
+- Any sequencing dependency is explicit and independently verifiable.
+- Routing stops once all requested deliverables have an owner.
