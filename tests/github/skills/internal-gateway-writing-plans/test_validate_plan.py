@@ -36,6 +36,7 @@ def test_invalid_fixture_reports_every_objective_rule() -> None:
         assert codes == {
             "filename",
             "preflight",
+            "execution_recovery",
             "ordered_tasks",
             "file_targets",
             "validation",
@@ -63,3 +64,21 @@ def test_cli_is_quiet_on_success_and_bounded_on_failure() -> None:
     assert "PASS" in passed.stdout
     assert failed.returncode == 1
     assert failed.stdout.count("\n") <= 10
+
+
+def test_recovery_fields_require_actionable_content(tmp_path: Path) -> None:
+    plan = tmp_path / "2026-07-27-2000-weak-recovery.md"
+    text = VALID.read_text()
+    text = text.replace(
+        "- Recovery policy: fix only failures caused by the planned changes",
+        "- Recovery policy: TBD",
+    )
+    text = text.replace(
+        "- Escalation conditions: stop on unsafe continuation or unresolved task-local regression",
+        "- Escalation conditions: stop on failure",
+    )
+    plan.write_text(text)
+
+    codes = {finding["code"] for finding in _module().validate_plan(plan)}
+
+    assert "execution_recovery" in codes

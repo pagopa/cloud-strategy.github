@@ -25,9 +25,18 @@ Thin repository wrapper for approved implementation-plan writing. This skill rec
 ### Preflight Gate
 
 Capture the preflight: `Target`, `Anti-scope`, `Nearest owner`,
-`Validation path`, `Stop conditions`, and `Observable acceptance`.
+`Validation path`, `Stop conditions`, `Observable acceptance`,
+`Baseline validation`, `Recovery policy`, `Escalation conditions`, and
+`User-facing report`.
 
-Completion criterion: all six preflight facts are present and no fact is missing or explicitly recorded as a gap.
+`Baseline validation` names the broad commands that must run before edits and
+again at closeout. `Recovery policy` authorizes only bounded recovery that is
+directly required by an in-scope task or validation, without Git mutation or
+speculative work. `Escalation conditions` distinguish fatal conditions from
+pre-existing or unrelated failures. `User-facing report` requires outcome,
+changed work, validation, recovery attempts, remaining gap, and next action.
+
+Completion criterion: all ten preflight facts are present and no fact is missing or explicitly recorded as a gap.
 
 ### Delegated Draft Gate
 
@@ -41,7 +50,11 @@ Delegated output remains draft-only until objective checks pass and human judgme
 
 Objective checks: run `python3 scripts/validate_plan.py <retained-plan-path>`. A non-zero finding result keeps the artifact draft-only. Follow mechanical validation with human checks.
 
-Human judgment checks: owner duplication, speculative scope, coherent task boundaries, one responsibility per task, edit intent, focused validation, stop conditions, and handoff readiness. Reject unapproved simplification or duplicated execution workflow.
+Human judgment checks: owner duplication, speculative scope, coherent task boundaries,
+one responsibility per task, edit intent, focused validation, stop
+conditions, baseline/final delta comparability, bounded recovery, escalation
+conditions, user-facing report quality, and handoff readiness.
+Reject unapproved simplification or duplicated execution workflow.
 
 Completion criterion: objective checks pass and human judgment checks pass.
 
@@ -62,5 +75,8 @@ Preserve handoff quality with targeted rereads only when the delegation has a re
 ## Validation
 
 - Confirm the delegated plan carries ordered tasks, concrete file targets, clear edit intent, validation commands or explicit gaps, no duplicate-owner or speculative-scope drift, and no direct commit instructions unless the user explicitly asked for commit help.
+- Confirm broad validation uses comparable baseline and final commands, recovery
+  is bounded, fatal escalation conditions are explicit, and the final report can
+  be produced without requiring the user to open a status file.
 - Confirm no git mutation ran while producing the writing outcome and that retained artifacts remain uncommitted, unless the user explicitly asked for commit help.
 - `git diff --check`

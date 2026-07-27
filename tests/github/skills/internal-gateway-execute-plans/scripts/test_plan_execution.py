@@ -44,6 +44,10 @@ def test_plan_accepts_preflight_heading_alias(tmp_path: Path) -> None:
         "# Plan\n\n"
         "## Goal\n\n- Validate the plan.\n\n"
         "## Preflight\n\n- Use the repository validator.\n\n"
+        "- Baseline Validation: run `python3 validator.py` before edits.\n"
+        "- Recovery Policy: repair only in-scope regressions.\n"
+        "- Escalation Conditions: continue pre-existing failures; stop on unsafe or task-local regression.\n"
+        "- User-Facing Report: report outcome, validation, recovery, and next action.\n\n"
         "## Global Constraints\n\n- Keep the plan unchanged.\n\n"
         "## Task 1: Validate\n\n- [ ] Run the check.\n"
     )
@@ -58,6 +62,58 @@ def test_plan_outside_retained_plan_directory_is_rejected(tmp_path: Path) -> Non
     assert {item.code for item in findings} >= {"plan-outside-retained-directory"}
 
 
+def test_plan_without_recovery_contract_is_blocking(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text("# agents\n")
+    (tmp_path / ".github").mkdir()
+    staged = tmp_path / "tmp" / "superpowers" / "plans"
+    staged.mkdir(parents=True)
+    plan = staged / "incomplete-plan.md"
+    plan.write_text(
+        "# Plan\n\n"
+        "## Goal\n\n- Validate the plan.\n\n"
+        "## Repository Preflight\n\n- Target: validator.\n\n"
+        "## Global Constraints\n\n- Keep the plan unchanged.\n\n"
+        "## Task 1: Validate\n\n- [ ] Run the check.\n"
+    )
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    messages = {item.message for item in findings}
+    missing_fields = [
+        item for item in findings if item.code == "missing-execution-field"
+    ]
+    assert missing_fields
+    assert all(item.severity == "blocking" for item in missing_fields)
+    assert messages >= {
+        "Plan missing required execution field: Baseline Validation",
+        "Plan missing required execution field: Recovery Policy",
+        "Plan missing required execution field: Escalation Conditions",
+        "Plan missing required execution field: User-Facing Report",
+    }
+
+
+def test_plan_rejects_weak_execution_recovery_fields(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text("# agents\n")
+    (tmp_path / ".github").mkdir()
+    staged = tmp_path / "tmp" / "superpowers" / "plans"
+    staged.mkdir(parents=True)
+    plan = staged / "weak-plan.md"
+    text = _fixture("valid-plan.md").read_text()
+    text = text.replace(
+        "- **Recovery Policy:** repair only task-local validation failures in scope.",
+        "- **Recovery Policy:** TBD.",
+    )
+    text = text.replace(
+        "- **Escalation Conditions:** stop on unsafe continuation or unresolved task-local regression.",
+        "- **Escalation Conditions:** stop on failure.",
+    )
+    plan.write_text(text)
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert {item.code for item in findings} >= {"invalid-execution-field"}
+
+
 def test_status_rejects_unknown_state_and_missing_headings(
     invalid_status: Path,
 ) -> None:
@@ -65,6 +121,89 @@ def test_status_rejects_unknown_state_and_missing_headings(
     codes = {item.code for item in findings}
     assert "unknown-status" in codes
     assert "missing-heading" in codes
+
+
+def test_status_requires_baseline_delta_and_recovery_evidence(tmp_path: Path) -> None:
+    status = tmp_path / "plan.PARTIAL.md"
+    status.write_text(
+        "\n\n".join(
+            f"## {heading}\n\nvalue"
+            for heading in (
+                "Status",
+                "Plan",
+                "Plan Fingerprint",
+                "Reason",
+                "Workspace Baseline",
+                "Files Changed",
+                "Completed",
+                "Remaining",
+                "Validation",
+                "Next",
+                "Resume Notes",
+            )
+        )
+    )
+
+    findings = validate_status(status)
+
+    messages = {item.message for item in findings}
+    assert messages >= {
+        "Status missing required heading: Baseline Validation",
+        "Status missing required heading: Recovery Attempts",
+        "Status missing required heading: Failure Classification",
+    }
+
+
+def test_status_rejects_unclassified_failure_evidence(tmp_path: Path) -> None:
+    status = tmp_path / "valid-plan.PARTIAL.md"
+    status.write_text(
+        _fixture("valid-plan.PARTIAL.md")
+        .read_text()
+        .replace("None; validation passed.", "TBD")
+    )
+
+    findings = validate_status(status)
+
+    assert {item.code for item in findings} >= {"invalid-failure-classification"}
+
+
+def test_status_rejects_noncomparable_baseline_and_final_commands(
+    tmp_path: Path,
+) -> None:
+    status = tmp_path / "valid-plan.PARTIAL.md"
+    status.write_text(
+        _fixture("valid-plan.PARTIAL.md")
+        .read_text()
+        .replace(
+            "`pytest -q tests/fixture/` — passed\n\n## Recovery Attempts",
+            "`make unrelated-check` — passed\n\n## Recovery Attempts",
+        )
+    )
+
+    findings = validate_status(status)
+
+    assert {item.code for item in findings} >= {"validation-delta-mismatch"}
+
+
+def test_needs_review_accepts_environmental_external_gap(tmp_path: Path) -> None:
+    status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
+    text = _fixture("valid-plan.PARTIAL.md").read_text()
+    text = text.replace("`PARTIAL`", "`NEEDS_REVIEW`")
+    text = text.replace(
+        "- Task 2: Integration test",
+        "None.",
+    )
+    text = text.replace(
+        "None; validation passed.",
+        "Environmental: validation service unavailable.",
+    )
+    status.write_text(text)
+
+    findings = validate_status(status)
+
+    assert "needs-review-classification" not in {
+        item.code for item in findings
+    }
 
 
 def test_resume_rejects_plan_fingerprint_drift(
@@ -128,6 +267,41 @@ def test_preflight_cli_rejects_plan_outside_directory() -> None:
     assert result.returncode != 0
     payload = json.loads(result.stdout)
     assert payload["status"] == "failed"
+
+
+def test_preflight_json_rejects_missing_current_fields(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text("# agents\n")
+    (tmp_path / ".github").mkdir()
+    staged = tmp_path / "tmp" / "superpowers" / "plans"
+    staged.mkdir(parents=True)
+    plan = staged / "incomplete-plan.md"
+    plan.write_text(
+        "# Plan\n\n"
+        "## Goal\n\n- Execute an approved plan.\n\n"
+        "## Repository Preflight\n\n- Target: current task.\n\n"
+        "## Global Constraints\n\n- Preserve the fingerprint.\n\n"
+        "## Task 1: Validate\n\n- [ ] Run the check.\n"
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "preflight",
+            str(plan),
+            "--repo-root",
+            str(tmp_path),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    payload = json.loads(result.stdout)
+    assert result.returncode != 0
+    assert payload["status"] == "failed"
+    assert all(item["severity"] == "blocking" for item in payload["findings"])
 
 
 def test_status_check_cli_invalid() -> None:

@@ -45,3 +45,24 @@ def test_runtime_prompt_projects_the_delegated_contract() -> None:
     assert "plan fingerprint" in text
     assert "fresh task-level evidence" in text
     assert "no Git mutation" in text
+
+
+def test_execution_contract_recovers_before_stopping_on_external_failures() -> None:
+    skill = SKILL.read_text(encoding="utf-8")
+    execution = (BUNDLE / "references/execution-contract.md").read_text()
+    status = (BUNDLE / "references/status-contract.md").read_text()
+    runtime = AGENT.read_text(encoding="utf-8")
+    combined = "\n".join((skill, execution, status, runtime))
+    required = (
+        "baseline/final delta",
+        "bounded recovery",
+        "Failure Classification",
+        "Recovery Attempts",
+        "pre-existing or unrelated",
+        "concise user-facing report",
+    )
+    for marker in required:
+        assert marker in combined
+
+    assert "NEEDS_REVIEW" in status
+    assert "task-local regression" in execution

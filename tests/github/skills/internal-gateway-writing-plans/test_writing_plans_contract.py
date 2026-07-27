@@ -110,6 +110,19 @@ def test_local_acceptance_enforces_authoring_discipline() -> None:
     assert "## Execution Discipline" not in skill
 
 
+def test_plan_contract_requires_recoverable_execution_evidence() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    required = (
+        "Baseline validation",
+        "Recovery policy",
+        "Escalation conditions",
+        "User-facing report",
+        "baseline/final delta",
+    )
+    for marker in required:
+        assert marker in skill
+
+
 def test_accepted_plan_routes_to_the_repository_execution_gateway() -> None:
     skill = SKILL_PATH.read_text(encoding="utf-8")
     assert "`/internal-gateway-execute-plans`" in skill

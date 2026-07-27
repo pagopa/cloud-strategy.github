@@ -37,6 +37,54 @@ def _check_preflight(text: str) -> str | None:
     return None
 
 
+def _extract_preflight_value(text: str, marker: str) -> str | None:
+    pattern = re.compile(
+        rf"(?im)^\s*[-*]\s+(?:\*\*)?{re.escape(marker)}:(?:\*\*)?\s*(.+?)\s*$"
+    )
+    match = pattern.search(text)
+    if not match:
+        return None
+    return match.group(1).strip()
+
+
+def _check_execution_recovery(text: str) -> str | None:
+    baseline = _extract_preflight_value(text, "Baseline validation")
+    recovery = _extract_preflight_value(text, "Recovery policy")
+    escalation = _extract_preflight_value(text, "Escalation conditions")
+    report = _extract_preflight_value(text, "User-facing report")
+    if not all((baseline, recovery, escalation, report)):
+        return "execution_recovery"
+
+    assert baseline and recovery and escalation and report
+    if not VALIDATION_PATTERN.search(baseline):
+        return "execution_recovery"
+
+    recovery_lower = recovery.lower()
+    if "tbd" in recovery_lower or not any(
+        marker in recovery_lower
+        for marker in ("in-scope", "in scope", "task-local", "planned changes", "bounded")
+    ):
+        return "execution_recovery"
+
+    escalation_lower = escalation.lower()
+    if (
+        "task-local" not in escalation_lower
+        or not any(
+            marker in escalation_lower
+            for marker in ("pre-existing", "unrelated")
+        )
+    ):
+        return "execution_recovery"
+
+    report_lower = report.lower()
+    if not all(
+        marker in report_lower
+        for marker in ("outcome", "validation", "recovery", "next action")
+    ):
+        return "execution_recovery"
+    return None
+
+
 def _extract_tasks(text: str) -> list[tuple[int, str]]:
     tasks: list[tuple[int, str]] = []
     lines = text.splitlines()
@@ -106,6 +154,15 @@ def validate_plan(path: Path) -> list[dict[str, str]]:
     preflight_code = _check_preflight(text)
     if preflight_code:
         findings.append({"code": preflight_code, "message": "missing preflight fields"})
+
+    recovery_code = _check_execution_recovery(text)
+    if recovery_code:
+        findings.append(
+            {
+                "code": recovery_code,
+                "message": "missing execution recovery fields",
+            }
+        )
 
     tasks = _extract_tasks(text)
     ordered_code = _check_ordered_tasks(tasks)

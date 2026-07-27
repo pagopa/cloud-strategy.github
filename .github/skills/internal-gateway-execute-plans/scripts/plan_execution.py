@@ -34,16 +34,26 @@ PLAN_HEADING_ALIASES = {
     "Repository Preflight": ("Repository Preflight", "Preflight"),
 }
 
+REQUIRED_EXECUTION_FIELDS = (
+    "Baseline Validation",
+    "Recovery Policy",
+    "Escalation Conditions",
+    "User-Facing Report",
+)
+
 REQUIRED_STATUS_HEADINGS = (
     "Status",
     "Plan",
     "Plan Fingerprint",
     "Reason",
     "Workspace Baseline",
+    "Baseline Validation",
     "Files Changed",
     "Completed",
     "Remaining",
     "Validation",
+    "Recovery Attempts",
+    "Failure Classification",
     "Next",
     "Resume Notes",
 )
@@ -76,6 +86,171 @@ def _parse_status_from_content(text: str) -> str | None:
         if stripped in ALLOWED_STATUSES:
             return stripped
     return None
+
+
+def _has_named_field(text: str, name: str) -> bool:
+    escaped = re.escape(name)
+    patterns = (
+        rf"(?im)^#+\s*{escaped}\s*$",
+        rf"(?im)^\s*[-*]\s+\*\*{escaped}:\*\*",
+        rf"(?im)^\s*[-*]\s+{escaped}:",
+    )
+    return any(re.search(pattern, text) for pattern in patterns)
+
+
+def _extract_named_field(text: str, name: str) -> str | None:
+    escaped = re.escape(name)
+    bullet_pattern = re.compile(
+        rf"(?im)^\s*[-*]\s+(?:\*\*)?{escaped}:(?:\*\*)?\s*(.+?)\s*$"
+    )
+    bullet_match = bullet_pattern.search(text)
+    if bullet_match:
+        return bullet_match.group(1).strip()
+
+    section = _extract_section(text, name)
+    if section:
+        return section.strip()
+    return None
+
+
+def _extract_section(text: str, heading: str) -> str:
+    lines = text.splitlines()
+    collecting = False
+    collected: list[str] = []
+    for line in lines:
+        if line.strip() == f"## {heading}":
+            collecting = True
+            continue
+        if collecting and line.startswith("## "):
+            break
+        if collecting:
+            collected.append(line)
+    return "\n".join(collected).strip()
+
+
+def _validate_execution_field_quality(text: str) -> list[Finding]:
+    findings: list[Finding] = []
+    values = {
+        name: _extract_named_field(text, name)
+        for name in REQUIRED_EXECUTION_FIELDS
+    }
+    if any(value is None for value in values.values()):
+        return findings
+
+    baseline = (values["Baseline Validation"] or "").lower()
+    recovery = (values["Recovery Policy"] or "").lower()
+    escalation = (values["Escalation Conditions"] or "").lower()
+    report = (values["User-Facing Report"] or "").lower()
+
+    baseline_is_actionable = bool(
+        re.search(r"`[^`\n]+`|\b(?:rtk|python3|pytest|make)\b", baseline)
+    )
+    recovery_is_bounded = "tbd" not in recovery and any(
+        marker in recovery
+        for marker in ("in-scope", "in scope", "task-local", "bounded")
+    )
+    escalation_distinguishes_failures = (
+        "task-local" in escalation
+        and any(marker in escalation for marker in ("pre-existing", "unrelated"))
+    )
+    report_is_complete = all(
+        marker in report
+        for marker in ("outcome", "validation", "recovery", "next action")
+    )
+
+    if not all(
+        (
+            baseline_is_actionable,
+            recovery_is_bounded,
+            escalation_distinguishes_failures,
+            report_is_complete,
+        )
+    ):
+        findings.append(
+            Finding(
+                "invalid-execution-field",
+                "Execution fields must define an actionable baseline, bounded recovery, failure distinction, and standalone report",
+            )
+        )
+    return findings
+
+
+def _validate_status_evidence(text: str, status: str | None) -> list[Finding]:
+    findings: list[Finding] = []
+    baseline = _extract_section(text, "Baseline Validation")
+    final = _extract_section(text, "Validation")
+    recovery = _extract_section(text, "Recovery Attempts")
+    classification = _extract_section(text, "Failure Classification")
+
+    baseline_commands = set(re.findall(r"`([^`\n]+)`", baseline))
+    final_commands = set(re.findall(r"`([^`\n]+)`", final))
+    if baseline and final and (
+        not baseline_commands
+        or not final_commands
+        or not baseline_commands.intersection(final_commands)
+    ):
+        findings.append(
+            Finding(
+                "validation-delta-mismatch",
+                "Baseline and final validation must include at least one identical command",
+            )
+        )
+
+    if recovery and recovery.strip().lower() in {"tbd", "todo", "pending"}:
+        findings.append(
+            Finding(
+                "invalid-recovery-evidence",
+                "Recovery Attempts must record actions or explicitly state none",
+            )
+        )
+
+    classification_lower = classification.lower()
+    allowed_classifications = (
+        "none",
+        "task-local regression",
+        "pre-existing",
+        "unrelated",
+        "external",
+        "environmental",
+        "unknown",
+    )
+    if classification and not any(
+        marker in classification_lower for marker in allowed_classifications
+    ):
+        findings.append(
+            Finding(
+                "invalid-failure-classification",
+                "Failure Classification must use a contract classification or none",
+            )
+        )
+
+    if status == "NEEDS_REVIEW" and classification and not any(
+        marker in classification_lower
+        for marker in (
+            "pre-existing",
+            "unrelated",
+            "external",
+            "environmental",
+            "human",
+        )
+    ):
+        findings.append(
+            Finding(
+                "needs-review-classification",
+                "NEEDS_REVIEW requires human, pre-existing, unrelated, external, or environmental classification evidence",
+            )
+        )
+    if status == "BLOCKED" and classification and all(
+        marker not in classification_lower
+        for marker in ("task-local regression", "environmental", "unknown", "fatal")
+    ):
+        findings.append(
+            Finding(
+                "blocked-without-fatal-condition",
+                "BLOCKED requires evidence of a fatal execution condition",
+            )
+        )
+    return findings
 
 
 def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
@@ -115,6 +290,17 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
                     f"Plan missing required heading: {canonical}",
                 )
             )
+
+    for required in REQUIRED_EXECUTION_FIELDS:
+        if not _has_named_field(text, required):
+            findings.append(
+                Finding(
+                    "missing-execution-field",
+                    f"Plan missing required execution field: {required}",
+                )
+            )
+
+    findings.extend(_validate_execution_field_quality(text))
 
     if "Task" not in " ".join(headings) and "## Task" not in text:
         findings.append(
@@ -162,6 +348,8 @@ def validate_status(path: Path) -> list[Finding]:
                     f"Status missing required heading: {required}",
                 )
             )
+
+    findings.extend(_validate_status_evidence(text, status_from_file))
 
     return findings
 
@@ -281,9 +469,10 @@ def _format_text(findings: list[Finding]) -> str:
 
 
 def _format_json(findings: list[Finding]) -> str:
+    blocking = any(f.severity == "blocking" for f in findings)
     return json.dumps(
         {
-            "status": "passed" if not findings else "failed",
+            "status": "failed" if blocking else "passed",
             "findings": [
                 {"code": f.code, "message": f.message, "severity": f.severity}
                 for f in findings

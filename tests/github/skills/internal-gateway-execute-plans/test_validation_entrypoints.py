@@ -7,7 +7,7 @@ REPO_ROOT = next(
 )
 
 
-def test_no_live_legacy_execute_plan_references() -> None:
+def test_no_removed_execute_plan_references() -> None:
     forbidden = (
         "done-*",
         "evidence-envelope.md",

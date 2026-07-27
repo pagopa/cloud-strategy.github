@@ -8,6 +8,10 @@ Validate the plan execution CLI against a realistic plan shape.
 - **Anti-scope:** no runtime changes.
 - **Validation Path:** `pytest -q tests/fixture/`
 - **Stop Conditions:** fixture is incomplete.
+- **Baseline Validation:** run `pytest -q tests/fixture/` before edits.
+- **Recovery Policy:** repair only task-local validation failures in scope.
+- **Escalation Conditions:** continue proven pre-existing or unrelated failures; stop on unsafe continuation or unresolved task-local regression.
+- **User-Facing Report:** summarize outcome, changes, validation, recovery, gaps, and next action.
 
 ## Global Constraints
 

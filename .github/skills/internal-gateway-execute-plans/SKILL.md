@@ -36,8 +36,10 @@ delegated owner supplies the core review, todo, execution, and stop loop. Keep
 only these local responsibilities here:
 
 - bind the exact plan path and explicit approval state;
-- compute the SHA-256 fingerprint and run dirty-worktree preflight;
+- compute the SHA-256 fingerprint, run dirty-worktree preflight, and capture
+  the plan-required validation baseline;
 - apply task-level `/internal-tdd` and evidence hooks;
+- classify failures, attempt bounded recovery, and preserve the baseline/final delta;
 - enforce the no-Git-mutation policy;
 - replace the exact `DONE`, `PARTIAL`, `BLOCKED`, or `NEEDS_REVIEW` sibling;
 - run resume and completion checks through `scripts/plan_execution.py`.
@@ -45,18 +47,24 @@ only these local responsibilities here:
 ## Delegation checkpoints
 
 Before loading `/superpowers-executing-plans`, bind the retained plan, record
-approval, fingerprint the plan, and capture the workspace baseline. At each
+approval, fingerprint the plan, capture the workspace baseline, and run the
+plan's broad baseline validation. At each
 task boundary, load `/internal-tdd` when the task changes executable or
 evaluable behavior and require its red-first evidence before implementation.
-After each delegated task, run the plan's focused validation and retain fresh
-evidence. Load `/superpowers-verification-before-completion` before any positive
+After each delegated task, run the plan's focused validation, retain fresh
+evidence, classify failures, and attempt bounded recovery while evidence
+improves. Pre-existing or unrelated broad failures do not stop independent
+tasks. Load `/superpowers-verification-before-completion` before any positive
 completion claim; load `/addyosmani-code-simplification` only when explicitly
 authorized by the plan.
 
 On pause or resume, preserve the plan fingerprint and use the status and resume
 checks from `scripts/plan_execution.py`. At closeout, run the required broader
-validation, verify `git diff --check`, and write exactly one status sibling
-according to `references/status-contract.md`.
+validation with the same commands used at baseline, record the baseline/final
+delta, verify `git diff --check`, and write exactly one status sibling according
+to `references/status-contract.md`. Always provide a concise user-facing report
+with the outcome, changed work, validation, blocker or gap, recovery attempts,
+and exact next action.
 
 ## No-Commit Rule
 

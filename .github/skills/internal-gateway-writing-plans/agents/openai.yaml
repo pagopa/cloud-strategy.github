@@ -3,7 +3,10 @@ interface:
   short_description: "Approved implementation-plan writing"
   default_prompt: >-
     Use /internal-gateway-writing-plans to capture Target, Anti-scope,
-    Nearest owner, Validation path, Stop conditions, and Observable acceptance.
+    Nearest owner, Validation path, Stop conditions, Observable acceptance,
+    Baseline validation, Recovery policy, Escalation conditions, and User-facing
+    report. Require comparable baseline/final validation, bounded recovery, and
+    a concise final report that does not require opening a status file.
     Then load /superpowers-writing-plans and delegate the approved implementation plan
     writing outcome. The delegated draft remains draft-only until the local acceptance gate
     passes. Persist the plan under `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md`.
