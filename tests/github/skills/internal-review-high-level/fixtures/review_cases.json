@@ -85,7 +85,7 @@
     "prompt": "Review the published data-retention policy for a routine governance decision. Its audience, retention periods, exception process, owner, effective date, and review cadence are consistent across the policy and its approval record. Report whether any material findings remain and distinguish a clean result from missing evidence.",
     "expected_route": "review",
     "required_signals": [
-      "no material findings is permitted",
+      "NO MATERIAL CONCERNS FOUND",
       "consistency checked across governing surfaces",
       "residual risk stated only if supported"
     ],
@@ -100,8 +100,8 @@
     "prompt": "Review a one-paragraph concept note that says a service will be secure, scalable, and inexpensive. It names no users, decision, baseline, evidence, owner, constraints, or success criteria. State what can be concluded, what evidence is insufficient, and whether the decision is inconclusive.",
     "expected_route": "review",
     "required_signals": [
-      "insufficient evidence",
-      "inconclusive verdict",
+      "INSUFFICIENT EVIDENCE TO ASSESS",
+      "REVIEW INCONCLUSIVE",
       "known facts separated from unknowns",
       "no fabricated risk rating"
     ],

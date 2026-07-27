@@ -35,16 +35,14 @@ Confidence describes evidence strength and is separate from severity:
 
 ## Verdict
 
-- `ready`: the available evidence supports the declared decision with no
-  material unresolved concern.
-- `ready with residual risk`: the decision is supportable, but a visible,
-  bounded risk remains.
-- `not ready`: a material, supported concern blocks the declared decision.
-- `inconclusive`: evidence gaps prevent a reliable decision.
+- `DECISION READY`: the available evidence supports the declared decision with no material unresolved concern.
+- `DECISION READY WITH KNOWN RISK`: the decision is supportable, but a visible, bounded risk remains.
+- `DECISION BLOCKED`: a material, supported concern blocks the declared decision.
+- `REVIEW INCONCLUSIVE`: evidence gaps prevent a reliable decision.
 
-Use `no material findings` when the review is adequately evidenced and no
-material concern is supported. Use `insufficient evidence` when evidence gaps
-prevent that conclusion; these outcomes are not interchangeable.
+Use `NO MATERIAL CONCERNS FOUND` when the review is adequately evidenced and no
+material concern is supported. Use `INSUFFICIENT EVIDENCE TO ASSESS` when
+evidence gaps prevent that conclusion; these outcomes are not interchangeable.
 
 ## Material finding
 

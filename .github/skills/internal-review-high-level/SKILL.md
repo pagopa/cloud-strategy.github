@@ -71,14 +71,18 @@ Each material finding contains:
 - `Fix owner`: the accountable role or team, when known.
 - `Expected verification`: the check that would confirm resolution.
 
-Keep `no material findings` distinct from `insufficient evidence`. A concern
-without enough support remains an evidence gap and does not become a finding.
+Keep `NO MATERIAL CONCERNS FOUND` distinct from `INSUFFICIENT EVIDENCE TO
+ASSESS`. A concern without enough support remains an evidence gap and does not
+become a finding.
 
 ## Public projection
 
 Use `🔎` for the review result, `📌` for the reason, `🧪` for evidence or an
-evidence gap, and `👉` for the next decision-relevant follow-up. Omit an anchor
-when it adds no information.
+evidence gap, and `👉` for the next decision-relevant follow-up. The verdict
+must be exactly one of `DECISION READY`, `DECISION READY WITH KNOWN RISK`,
+`DECISION BLOCKED`, or `REVIEW INCONCLUSIVE`. Use exactly
+`NO MATERIAL CONCERNS FOUND` or `INSUFFICIENT EVIDENCE TO ASSESS` for the
+evidence outcome. Omit an anchor when it adds no information.
 
 ## Completion
 

@@ -74,8 +74,8 @@ def test_material_findings_are_traceable_and_report_only() -> None:
     ):
         assert field in text
     lower = text.lower()
-    assert "no material findings" in lower
-    assert "insufficient evidence" in lower
+    assert "NO MATERIAL CONCERNS FOUND" in text
+    assert "INSUFFICIENT EVIDENCE TO ASSESS" in text
     assert "omit" in lower
 
 
@@ -127,8 +127,20 @@ def test_review_lenses_separate_evidence_severity_confidence_and_verdict() -> No
     assert "observation" in lower
     assert "inference" in lower
     assert "evidence gap" in lower
-    assert "no material findings" in lower
-    assert "insufficient evidence" in lower
+    for verdict in (
+        "DECISION READY",
+        "DECISION READY WITH KNOWN RISK",
+        "DECISION BLOCKED",
+        "REVIEW INCONCLUSIVE",
+    ):
+        assert verdict in text
+    for outcome in (
+        "NO MATERIAL CONCERNS FOUND",
+        "INSUFFICIENT EVIDENCE TO ASSESS",
+    ):
+        assert outcome in text
+    for severity in ("critical", "high", "medium", "low"):
+        assert f"`{severity}`" in text
 
 
 def test_high_level_review_has_a_non_code_boundary() -> None:

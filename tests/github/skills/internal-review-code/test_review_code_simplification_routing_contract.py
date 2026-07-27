@@ -21,10 +21,10 @@ REVIEW_SPECIFIC_GUIDANCE = (
     "references/agentic-eval.md",
 )
 EXPECTED_SEVERITY_MAPPING = (
-    ("Critical", "`B`"),
-    ("Required change", "`B`"),
-    ("Optional", "`S`"),
-    ("Nit", "`S`"),
+    ("Critical", "`BLOCKER`"),
+    ("Required change", "`BLOCKER`"),
+    ("Optional", "`SUGGESTION`"),
+    ("Nit", "`SUGGESTION`"),
     ("FYI", ""),
 )
 
@@ -56,7 +56,8 @@ def test_runtime_contract_is_independent_of_its_caller() -> None:
         assert phrase not in skill_text
         assert phrase not in prompt_text
     assert "## Review preflight" in skill_text
-    assert "NEEDS INVESTIGATION" in skill_text
+    assert "REVIEW BLOCKED" in skill_text
+    assert "REVIEW BLOCKED" in prompt_text
     assert "report-only" in skill_text
 
 
@@ -107,7 +108,7 @@ def test_code_review_runtime_prompt_requests_the_adaptive_projection() -> None:
     assert "adaptive chat projection" in prompt_text
     assert "target and source provenance" in prompt_text
     assert "derive adversarial probes from target evidence" in prompt_text
-    assert "NEEDS INVESTIGATION" in prompt_text
+    assert "REVIEW BLOCKED" in prompt_text
     assert "report-only" in prompt_text
 
 
@@ -115,7 +116,7 @@ def test_skill_owns_a_reachable_fail_closed_gate() -> None:
     text = SKILL_PATH.read_text(encoding="utf-8")
     section = text.split("## Review preflight", 1)[1].split("\n## ", 1)[0]
 
-    assert "NEEDS INVESTIGATION" in section
+    assert "REVIEW BLOCKED" in section
     assert "resolved source cannot be confirmed" in " ".join(section.split())
     assert "report-only" in section
 
@@ -128,6 +129,14 @@ def test_skill_owns_the_engine_accurate_severity_mapping() -> None:
         assert f"| {category}" in section
         if target:
             assert target in section
+    for verdict in ("MERGE READY", "CHANGES REQUIRED", "REVIEW BLOCKED"):
+        assert verdict in section
+    for label in ("BLOCKER", "IMPORTANT", "SUGGESTION"):
+        assert label in section
+    for finding_id in ("BLOCKER-1", "IMPORTANT-1", "SUGGESTION-1"):
+        assert finding_id in section
+    for legacy_identifier in ("`B`", "`I`", "`S`"):
+        assert legacy_identifier not in section
     assert "Map the engine's categories to" not in section
 
 
