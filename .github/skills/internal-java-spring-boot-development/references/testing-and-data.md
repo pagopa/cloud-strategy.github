@@ -17,10 +17,14 @@ Load this file when the Spring Boot task is mainly about repositories, transacti
 | Pure business logic | Plain unit tests with mocked collaborators | Spring wiring itself changes behavior |
 | MVC endpoint behavior | `@WebMvcTest` | Security, converters, or full application wiring must be proven together |
 | JPA mapping/query behavior | `@DataJpaTest` | The database integration depends on infrastructure outside the slice |
-| Full application behavior | `@SpringBootTest` | Cross-cutting configuration or bootstrap is the thing being verified |
+| Full application behavior | `@SpringBootTest` | Bootstrap or cross-cutting wiring is the thing being verified |
 
 ## Integration Guidance
 
-- Use Testcontainers when the behavior depends on a real database or external service contract.
-- Keep fixture setup explicit and local to the test when possible.
-- Preserve existing package structure and test conventions before adding new patterns.
+- Use a plain unit test when Spring wiring is irrelevant.
+- Use the smallest focused MVC or data slice when that slice proves the behavior.
+- Use the full application context only when bootstrap or cross-cutting wiring is under test.
+- Verify that custom scanning or configuration does not defeat slice isolation.
+- Use a real Testcontainers database or external service only when the contract matters and a container runtime is available.
+- For Boot Testcontainers integration, verify `@ServiceConnection`, `ConnectionDetails` precedence, the required test dependency setup, and the generic-container naming expected by the active Boot line.
+- Keep fixture setup explicit and local to the test when possible, and preserve existing package structure and test conventions.

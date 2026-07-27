@@ -47,6 +47,116 @@ def test_python_skills_route_near_miss_cases_to_the_right_owner() -> None:
     assert "imported behavior" in script and "internal-python-project" in script
 
 
+TRIGGER_CASES = {
+    PYTHON: (
+        "shared python baseline",
+        "ownership",
+    ),
+    PROJECT: (
+        "importable",
+        "package",
+        "service",
+    ),
+    SCRIPT: (
+        "direct",
+        "script",
+        "cli",
+    ),
+}
+
+
+def test_python_descriptions_cover_their_distinct_trigger_branches() -> None:
+    for bundle, markers in TRIGGER_CASES.items():
+        description = _frontmatter_description(bundle).lower()
+        assert all(marker in description for marker in markers)
+
+
+def test_python_near_misses_route_without_mandatory_baseline_chaining() -> None:
+    generic = (PYTHON / "SKILL.md").read_text(encoding="utf-8").lower()
+    project = (PROJECT / "SKILL.md").read_text(encoding="utf-8").lower()
+    script = (SCRIPT / "SKILL.md").read_text(encoding="utf-8").lower()
+
+    assert "internal-python-project" in generic
+    assert "internal-python-script" in generic
+    assert "internal-python-script" in project
+    assert "internal-python-project" in script
+    assert "not a required preload" in project
+    assert "not a required preload" in script
+
+
+def test_python_baseline_stays_cross_cutting_and_template_free() -> None:
+    skill = (PYTHON / "SKILL.md").read_text(encoding="utf-8").lower()
+
+    for marker in (
+        "declared runtime",
+        "declared dependency manager",
+        "focused `pytest`",
+        "machine-readable",
+    ):
+        assert marker in skill
+
+    assert "minimal entry point" not in skill
+    assert "executivereporter" not in skill
+    assert "domain/service/adapter" not in skill
+
+
+def test_project_skill_follows_repository_conventions_before_optional_patterns() -> None:
+    skill = (PROJECT / "SKILL.md").read_text(encoding="utf-8").lower()
+
+    assert "existing" in skill and "test naming" in skill
+    assert "existing framework" in skill
+    assert "when separation improves" in skill
+    assert "bdd-like names:" not in skill
+    assert "god classes with 10+ methods" not in (
+        PROJECT / "references/common-mistakes.md"
+    ).read_text(encoding="utf-8").lower()
+
+
+def test_project_reporting_keeps_human_rendering_at_the_cli_boundary() -> None:
+    skill = (PROJECT / "SKILL.md").read_text(encoding="utf-8").lower()
+
+    assert "human-facing" in skill and "cli adapter" in skill
+    assert "plain data" in skill
+
+
+def test_script_optional_complexity_is_contract_driven() -> None:
+    skill = (SCRIPT / "SKILL.md").read_text(encoding="utf-8").lower()
+
+    assert "follow the repository's existing layout" in skill
+    assert "only when" in skill and "`rich`" in skill
+    assert "only when" in skill and "`run.sh`" in skill
+    assert "configuration section near the end" not in skill
+    assert "rich` as the preferred" not in skill
+
+
+def test_script_references_do_not_silently_provision_on_every_run() -> None:
+    layout = (SCRIPT / "references/layout-and-templates.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert '"$VENV_DIR/bin/pip" install' not in layout
+    assert "repository-declared environment" in layout
+
+
+OWNER_MARKERS = {
+    PYTHON: ("shared baseline", "ownership"),
+    PROJECT: ("import", "package"),
+    SCRIPT: ("direct", "script"),
+}
+
+
+def test_frontmatter_body_and_runtime_share_the_owner_vocabulary() -> None:
+    for bundle, markers in OWNER_MARKERS.items():
+        description = _frontmatter_description(bundle).lower()
+        body = (bundle / "SKILL.md").read_text(encoding="utf-8").lower()
+        prompt = _runtime(bundle)["default_prompt"].lower()
+
+        for marker in markers:
+            assert marker in description
+            assert marker in body
+            assert marker in prompt
+
+
 def test_python_runtime_metadata_names_real_owners() -> None:
     expected = {
         PYTHON: ("Python baseline and ownership routing", "$internal-python"),

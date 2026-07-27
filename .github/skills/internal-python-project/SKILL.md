@@ -1,93 +1,63 @@
 ---
 name: internal-python-project
-description: Use when creating, modifying, or reviewing importable Python package, library, application, service, or framework behavior rather than directly executed operator tooling.
+description: Use when Python imported behavior covers importable packages, libraries, applications, services, and framework-owned flows, while routing direct scripts and CLIs to internal-python-script.
 ---
 
 # Python Project Skill
 
-## Referenced skills
+## Boundary and routing
 
-- `internal-python-script`: route CLI adapters, direct operator execution, and rich console reporting boundaries.
+This skill owns Python imported behavior: packages, libraries, applications,
+services, and framework-owned flows. Directly executed scripts, CLIs,
+automation, and operator-facing toolkits belong to `internal-python-script`.
+The shared `internal-python` baseline is not a required preload; use it only
+when a cross-cutting concern or unresolved ownership question remains.
 
 ## When to use
 
-- Services, use cases, adapters, packages, and modules in Python applications.
-- Refactoring or extending existing Python application components.
-- Reusable Python code whose primary contract is imported behavior rather than operator-facing execution.
-- Python application code that should keep logging neutral or framework-native; operator-facing emoji output belongs to CLI, script, or delivery boundaries instead.
+- Imported packages, libraries, applications, services, and framework-owned
+  behavior whose primary contract is reusable code.
+- Thin CLI or transport adapters whose stable contract remains imported
+  project behavior; direct-execution tooling belongs to the script owner.
 
-## When not to use
+## Project contract
 
-- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-python-script`.
-- Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
+- Follow the repository's existing framework, dependency manager, test naming,
+  module layout, and validation commands before introducing optional patterns.
+- For new test conventions, prefer behavior-oriented names that describe the
+  observable contract; match existing test naming when it is already defined.
+- Keep public APIs and data contracts typed and explicit. Pass configuration
+  through typed settings, constructor arguments, function parameters, or the
+  framework's composition boundary rather than reading deployment defaults from
+  reusable code.
+- Choose async only when the workload is I/O-bound and the surrounding stack
+  supports it cleanly; keep async flows end-to-end.
+- Separate domain, service, persistence, transport, or framework concerns when separation improves observable coupling, reuse, or testability. Do not impose
+  a fixed folder tree or generic catch-all modules without that evidence.
+- Keep imported-module logs neutral, structured, or framework-native. Return
+  typed results, events, DTOs, or framework responses from core code.
+- Keep human-facing rendering at a CLI adapter boundary and keep JSON, API
+  responses, events, and exported files as plain data. Use `rich` only when a
+  human-facing CLI contract owns that dependency.
+- Preserve the repository's declared dependency manager. For pip-managed
+  requirements, keep exact pins and hashes in the owning lock artifact; use the
+  other manager's canonical frozen or locked validation when applicable.
 
-## Boundary
+## References
 
-- This skill covers structured package, library, or application components whose primary contract is reusable domain, service, or framework behavior.
-- Small operator-facing tools remain out of scope even when they have multiple files or tests.
-- A `lib/` folder, root-level tests, or multiple entrypoints alone do not make a tool application code.
-- A thin CLI adapter remains project-owned when the primary contract is
-  importable behavior; route direct-execution tooling to
-  `internal-python-script`.
+- Load `references/common-mistakes.md` for the full imported-code mistake table.
+- Load `references/examples.md` for a minimal importable module and focused
+  test example.
+- Load `references/logging-and-reporting.md` when a project needs structured
+  logs, typed results, adapter rendering, or data-versus-human output guidance.
 
-## Compact Python baseline
+## Testing and validation
 
-- Prefer early returns, guard clauses, clear names, and readable control flow.
-- Keep functions small enough to read without tracing hidden state. Prefer explicit inputs over module-level lookups inside reusable logic.
-- Add type hints on public or non-trivial function signatures.
-- Keep comments, docstrings, logs, exceptions, and CLI output in English.
-- Use the repository-declared runtime before falling back to ambient `python3`.
-- Centralize behavioral configuration instead of scattering magic values through services, adapters, or library modules. Put environment-specific and operator-tuned values in a settings module, application factory, CLI adapter, framework configuration, or composition root.
-- Pass configuration into reusable project code through typed settings, constructor arguments, or function parameters. Domain and service code should not read environment variables, files, or deployment defaults directly unless that boundary is its explicit responsibility.
-- Do not confuse domain invariants with configuration. Stable rules that belong to the domain may stay near the domain code; deployment-specific paths, endpoints, thresholds, defaults, and feature switches should live at the configuration boundary.
-- Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
-- Preserve the repository-declared dependency manager. For pip requirements, keep exact pins and hashes in the owning requirements file; for another declared dependency manager, update its canonical lock artifact and use its frozen or locked validation command.
-
-## Application-specific guidance
-
-- Use type hints on public APIs and keep data contracts explicit.
-- Choose async only when the workload is I/O-bound and the surrounding stack supports it cleanly.
-- Keep request or transport models, domain logic, and persistence concerns in separate modules.
-- Prefer a domain/service/adapter decomposition before adding generic catch-all modules.
-- Keep reusable module and service logs neutral, structured, or framework-native. Log events should be parsable, searchable, and useful in production.
-- Design professional reporting as a boundary concern: core project code returns typed results, events, or DTOs; adapters decide whether to render JSON, HTTP responses, framework logs, metrics, or human-facing CLI reports.
-- No emoji or `rich` rendering inside importable domain, service, persistence, framework modules, or machine-readable output paths such as JSON. Use `rich` only in human-facing CLI adapter reporting.
-- If a project exposes a CLI adapter, keep the CLI adapter thin and route its operator-facing reporting to the script boundary. A CLI adapter may use an `ExecutionReporter`; the core project code should not know that reporter exists.
-
-Load `references/examples.md` when you need a minimal module or test example.
-
-Load `references/logging-and-reporting.md` when project code needs a professional logging/reporting layout, structured log context, result DTOs, adapter-owned rendering, or JSON versus human-output boundaries.
-
-## Testing
-
-- Follow the repository pytest defaults.
-- BDD-like names: `given_when_then` style.
-- Prefer fixtures, parameterization, and mocking only when they reduce duplication or isolate real external boundaries.
-- Use coverage reports to close meaningful behavioral gaps, not as a blanket 100% doctrine.
-- For bugfixes, features, and intentional behavior changes, follow the repository test strategy for the task and keep the most meaningful public API, service boundary, adapter contract, or framework-owned seam under focused test coverage.
-- For refactors, prose-only updates, generated fixtures, or mechanical formatting with no executable behavior change, run existing focused tests and syntax validation instead of manufacturing speculative tests.
-
-## Architecture and framework guidance
-
-- Follow the repository's existing framework before introducing FastAPI, Flask, Django, or a new dependency stack.
-- Use dataclasses or typed DTOs for internal contracts, and boundary-validation models where the framework already expects them.
-- Keep async flows end-to-end; do not mix blocking libraries into async request paths without an explicit bridge.
-- When Ruff is configured for the project, let `ruff format` own formatting and use `ruff check` before broader test runs. Avoid hand-formatting that creates churn against the configured formatter.
-
-## Test-shape guidance
-
-- Use parameterized tests for behavior that varies across a small, explicit input matrix.
-- Mock network, filesystem, database, or queue boundaries; do not mock internal business logic seams by default.
-- Use property-based testing only when the input space is large enough to justify it.
-- Prefer targeted coverage growth on changed code and risk-heavy branches over chasing untouched lines.
-
-## Common mistakes
-
-Load `references/common-mistakes.md` for the full mistake table.
-
-## Validation
-
-- `python -m compileall <paths>` (syntax check)
-- For pip-managed projects, run `pip install --require-hashes -r requirements.txt` when requirements change; for another declared manager, run its canonical frozen or locked validation command.
-- `pytest tests/` (run tests)
-- Lint with project's configured linter.
+- Follow the repository's pytest defaults and keep the public API, service
+  boundary, adapter contract, or framework seam under focused coverage when it
+  changes.
+- Mock true external boundaries; do not mock internal business logic seams by
+  default. Use parameterization or fixtures when they reduce duplication.
+- Run the repository-declared syntax check, focused pytest command, and
+  configured linter for changed behavior. For dependency changes, run the
+  declared manager's canonical frozen or locked validation.

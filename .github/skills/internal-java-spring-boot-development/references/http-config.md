@@ -15,12 +15,16 @@ Load this file when the Spring Boot task is mostly about controllers, API contra
 
 | Need | Prefer | Avoid |
 | --- | --- | --- |
-| Structured settings | `@ConfigurationProperties` with validation | Scattered `@Value` fields for every property |
+| Related or hierarchical settings | `@ConfigurationProperties` with validation | Scattered `@Value` fields for every property |
+| One isolated setting | `@Value` when it matches the existing codebase | Introducing a configuration holder with no cohesive settings |
 | Secrets | External secret stores or environment-driven injection | Hardcoded secrets or checked-in defaults |
 | Environment differences | Existing profile or configuration layering already used by the project | Creating new profiles or property sources unless the task requires them |
 
 ## Practical Cues
 
 - Keep request validation at the boundary so service methods can assume valid inputs.
-- Treat missing configuration as a startup failure unless the user explicitly asked for optional behavior.
+- Prefer fail-fast configuration validation using the mechanism supported by the active Boot line.
+- Keep configuration holders focused on environment binding; keep service behavior in services or collaborators.
+- Verify constructor binding, scanning, nested validation, and default-value semantics against the active Boot line and project setup.
+- Treat missing required configuration as a startup failure unless the user explicitly asked for optional behavior.
 - Follow the existing JSON error envelope or problem-details format instead of inventing a new one mid-task.

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Bash"
-  short_description: "Bash safety and lightweight routing"
-  default_prompt: "Use $internal-bash for embedded shell, Bash snippets, or non-operator Bash helpers that need lightweight safety, quoting, parser, or validation guidance before standalone script design."
+  display_name: "Internal Bash and POSIX Shell"
+  short_description: "Embedded Bash and POSIX shell safety"
+  default_prompt: "Use $internal-bash for embedded Bash or POSIX sh, sourced helpers, and non-operator shell fragments that need dialect selection, safety, quoting, parser, or validation guidance; route standalone operator entrypoints to $internal-bash-script."

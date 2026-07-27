@@ -40,6 +40,15 @@ profiles:
       - skills/internal-github-actions/SKILL.md
       - skills/internal-markdown/SKILL.md
 
+  backend-java-spring:
+    description: Spring Boot service repositories.
+    recommended_skills:
+      - skills/internal-java/SKILL.md
+      - skills/internal-java-project/SKILL.md
+      - skills/internal-java-spring-boot-development/SKILL.md
+      - skills/internal-github-actions/SKILL.md
+      - skills/internal-markdown/SKILL.md
+
   backend-nodejs:
     description: Node.js service repositories.
     recommended_skills:

@@ -1,4 +1,6 @@
 interface:
-  display_name: "Internal Project Nodejs"
-  short_description: "Help with Internal Project Nodejs tasks"
-  default_prompt: "Use $internal-nodejs-project for this task and follow the repository-owned workflow in the skill."
+  display_name: "Internal Node.js Project"
+  short_description: "Node.js application structure and behavior"
+  default_prompt: >-
+    Use $internal-nodejs-project for Node.js or TypeScript application behavior,
+    service structure, boundaries, adapters, and tests.

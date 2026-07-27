@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Python"
   short_description: "Python baseline and ownership routing"
-  default_prompt: "Use $internal-python when Python work needs a lightweight shared baseline or its primary contract is still unclear."
+  default_prompt: "Use $internal-python for the shared Python baseline and ownership routing; the shared baseline handles cross-cutting concerns and unresolved ownership. Route imported behavior to $internal-python-project and direct scripts or CLIs to $internal-python-script."

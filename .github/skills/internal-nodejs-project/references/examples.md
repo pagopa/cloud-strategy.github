@@ -1,58 +1,40 @@
 # Node.js Project Examples
 
-## Minimal Module Example
+## Boundary service example
+
+The service validates application input, calls an injected external adapter,
+and returns a stable domain result without transport objects.
 
 ```javascript
-/** Purpose: Build a user profile response. */
-function buildUserProfile(input) {
-  if (!input?.id) {
-    throw new Error("id is required");
-  }
-  return { id: input.id, name: input.name ?? "unknown" };
+export function createProfileService(profileAdapter) {
+  return async function getProfile(input) {
+    if (!input?.id) {
+      throw new Error("id is required");
+    }
+
+    const profile = await profileAdapter.load(input.id);
+    return {
+      id: profile.id,
+      name: profile.name ?? "unknown",
+    };
+  };
 }
 ```
 
-## Minimal Test Example
+## Boundary behavior test
+
+This is a minimal illustrative fixture using `node:test`; execution follows
+the repository's established test stack.
 
 ```javascript
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-test("given missing id when building profile then throws", () => {
-  assert.throws(() => buildUserProfile({}), /id is required/);
+test("rejects a profile request without an id", async () => {
+  const service = createProfileService({
+    load: async () => ({ id: "unused" }),
+  });
+
+  await assert.rejects(() => service({}), /id is required/);
 });
-```
-
-## Minimal package.json Example
-
-```json
-{
-  "name": "example-service",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --test",
-    "typecheck": "tsc --noEmit"
-  },
-  "engines": {
-    "node": ">=22"
-  }
-}
-```
-
-## Minimal tsconfig.json Example
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "skipLibCheck": true
-  },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
-}
 ```

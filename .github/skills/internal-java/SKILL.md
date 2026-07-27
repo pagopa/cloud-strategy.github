@@ -1,51 +1,67 @@
 ---
 name: internal-java
-description: Use when creating, editing, or reviewing Java files or Java build metadata before project or Spring depth is needed.
+description: Use when editing or reviewing Java source or generic Maven/Gradle metadata and the main concern is language-level correctness, readability, dependency intent, compiler release, toolchains, or focused build validation. Do not use when application architecture or Spring Boot runtime semantics drive the work.
 ---
 
 # Internal Java
 
 ## Referenced skills
 
-Treat the referenced skills below as on-demand owners. Do not preload them for
-every Java edit; load them only when the task proves which owner is needed.
+Treat the referenced skills below as on-demand owners. Load them only when the
+task proves which owner is needed.
 
-- `internal-java-project`: Java package, module, service, library, and deterministic test design when application or library structure becomes the main concern.
-- `internal-java-spring-boot-development`: Spring Boot controllers, configuration, repositories, scheduled jobs, and framework tests when framework behavior becomes the main concern.
+- `internal-java-project`: Framework-neutral Java application and library
+  structure, domain boundaries, APIs, concurrency, or contract tests.
+- `internal-java-spring-boot-development`: Spring Boot dependency management,
+  wiring, configuration, adapters, scheduling, transactions, test contexts,
+  service connections, or Boot virtual-thread semantics.
 
 ## Referenced files
 
-- `references/review-anti-patterns.md`: Java review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Java-specific defect depth.
+- `references/review-anti-patterns.md`: Evidence-oriented Java review defects.
+  Load when `internal-review-code` or another review caller needs Java-specific
+  defect depth.
 
 ## When to use
 
-- `.java`, `pom.xml`, `build.gradle`, or `build.gradle.kts` changes.
-- Lightweight Java reviews focused on readability, naming, dependency intent, tests, and boundary hygiene.
-- Small Java edits where the project structure is already clear.
+- Java source edits or reviews where language-level correctness, readability,
+  control flow, resource handling, error behavior, or boundary validation is
+  the main concern.
+- Generic Maven or Gradle metadata, including compiler release, toolchains,
+  dependency intent, plugins, and reproducibility.
+- Focused Java build validation when the application or framework architecture
+  is already clear.
 
 ## When not to use
 
-- Java application or library structure is the main concern; use `internal-java-project`.
-- Spring Boot framework behavior drives the work; use `internal-java-spring-boot-development`.
+- Application or library structure is the main concern; use
+  `internal-java-project`.
+- Spring Boot runtime semantics drive the work; use
+  `internal-java-spring-boot-development`.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
-## Baseline
+## Working contract
 
-- Keep business logic separate from I/O, persistence, SDK calls, and transport adapters.
-- Prefer clear domain names, guard clauses, and readable control flow.
-- Treat 300 lines as a review threshold for cohesive Java classes and related files.
-- Treat 400 lines as a split-or-justify threshold and extract focused collaborators before classes become large coordinators.
-- Apply pragmatic DRY: factor repeated decision logic into focused methods or collaborators, not abstract hierarchies by default.
-- Add concise JavaDoc only when a new or changed core type has non-obvious intent.
-- Use JUnit 5 for unit tests unless the repository has another established test stack.
-- Keep dependency, plugin, runtime, and test intent explicit in Maven or Gradle files.
-- Keep dependency delivery reproducible: no vendored jars or shaded copies, and pin versions with explicit properties or a BOM.
-- Keep comments, JavaDoc, logs, exceptions, and operator-facing output in English.
-- Centralize runtime configuration and keep domain invariants in code rather than environment toggles.
-- Avoid mutable static state in application code.
-- Validate boundary input fail-fast and reject invalid state early.
+- Keep ordinary Java logic readable: use clear names, explicit control flow,
+  narrow responsibilities, safe resource handling, and meaningful error
+  behavior.
+- Validate external or public-boundary input before invalid state reaches core
+  logic. Preserve established contracts for nullability, exceptions, and
+  output.
+- Discover the repository's compiler release, Java toolchain, runtime target,
+  Maven or Gradle wrapper, dependency-management mechanism, and established
+  test stack before recommending version-sensitive changes.
+- Keep compiler, toolchain, dependency-intent, plugin, and reproducibility
+  guidance aligned with the repository's existing build. Prefer the checked-in
+  wrapper and the repository's established validation tasks.
+- Route application or library design to `internal-java-project` when package,
+  module, domain, API, collaborator, or concurrency structure drives the work.
+- Route Boot parent, plugin, BOM, starter, bean, configuration, adapter,
+  transaction, scheduling, test-context, service-connection, or virtual-thread
+  semantics to `internal-java-spring-boot-development`.
 
 ## Validation
 
-- Run the nearest Maven or Gradle test command already used by the repository.
-- For build-file-only edits, run the closest syntax, dependency, or test task that proves the change.
+- Run the nearest Maven or Gradle command already used by the repository.
+- For build-file-only edits, run the closest syntax, dependency, or test task
+  that proves the change.
