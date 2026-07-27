@@ -1,7 +1,6 @@
 # Shell Review Anti-Patterns
 
-Baseline owner: `internal-bash`. Use `/internal-review-code` for read-only
-branch, pull request, or explicit code review.
+Scope: embedded shell, sourced helpers, and non-operator shell fragments.
 
 ## Controlling review question
 

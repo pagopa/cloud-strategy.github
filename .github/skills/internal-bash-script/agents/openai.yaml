@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Bash and POSIX Script"
   short_description: "Standalone Bash and POSIX shell scripts"
-  default_prompt: "Use $internal-bash-script when creating or modifying standalone Bash or POSIX sh scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints; route embedded shell and non-operator helpers to $internal-bash."
+  default_prompt: "Use $internal-bash-script to create, review, or modify standalone Bash or POSIX sh scripts, utilities, wrappers, launchers, and other operator-facing shell entrypoints."

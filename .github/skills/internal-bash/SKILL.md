@@ -1,44 +1,31 @@
 ---
 name: internal-bash
-description: Use when embedded Bash or POSIX `sh`, sourced shell helpers, or non-operator shell fragments need dialect selection, safety, quoting, parser, or validation guidance; route standalone operator entrypoints to internal-bash-script.
+description: Use when creating, analyzing, reviewing, or modifying embedded Bash or POSIX `sh`, sourced shell helpers, or non-operator shell fragments that need dialect, safety, quoting, parser, or validation guidance.
 ---
 
 # Internal Bash
 
-## Referenced skills
-
-Treat the referenced skill below as an on-demand owner. Do not preload it just
-because the file is Bash; load it only when the task shifts from embedded shell
-safety to standalone script behavior.
-
-- `internal-bash-script`: standalone Bash scripts, shell utilities, wrappers, launchers, and operator-facing behavior.
-
-Use `/internal-review-code` for read-only branch, pull request, or explicit code
-review. Use `/internal-github-action-composite` for Bash embedded in a GitHub
-composite action and `/internal-github-actions` for workflow-level behavior.
-
 ## Referenced files
 
-- `references/review-anti-patterns.md`: Bash review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Bash-specific defect depth.
+- `references/review-anti-patterns.md`: Bash review anti-pattern catalog with
+  ID-tagged patterns, severity, rationale, and examples. Load for focused review
+  of shell content within this skill's scope.
 
 ## When to use
 
-- Sourced `.sh` helpers and Bash snippets where the main need is a shared safety baseline.
+- Review or modification of sourced `.sh` helpers and Bash snippets where the
+  main need is a shared safety baseline.
 - Shell embedded in repository automation when no narrower owner has stronger rules.
 - Non-operator Bash helpers that do not own a standalone operator entrypoint.
 - Quick checks for quoting, strict mode, guard clauses, temp files, and parser choices.
 
-When an operational verb targets an embedded helper, use `/internal-bash`; when
-it targets a standalone operator entrypoint, use `/internal-bash-script`.
-
 ## When not to use
 
-- Standalone script design, launcher behavior, operator UX, or script templates; use `internal-bash-script`.
-- Bash embedded in GitHub composite actions; use `internal-github-action-composite`.
-- GitHub workflow-level behavior; use `internal-github-actions`.
-
-When a helper becomes a standalone operator-facing script, route to
-`internal-bash-script`; this baseline does not remain a required preload.
+- Standalone script design, standalone script review, launcher behavior,
+  operator UX, or script templates.
+- Shell embedded in an automation format whose enclosing platform contract is
+  the primary subject.
+- Workflow-level behavior beyond the shell fragment itself.
 
 ## Dialect decision
 

@@ -1,26 +1,22 @@
 ---
 name: internal-bash-script
-description: Use when creating or modifying standalone Bash or POSIX `sh` scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints.
+description: Use when creating, reviewing, or modifying standalone Bash or POSIX `sh` scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints.
 ---
 
-# Bash Script Skill
-
-Use `/internal-review-code` for read-only branch, pull request, or explicit code
-review. Use `/internal-bash` for embedded shell and non-operator Bash helper
-work; do not load this skill for those near-misses.
+# Internal Bash Script
 
 ## When to use
 
 - New Bash scripts.
-- Existing Bash scripts that need updates.
+- Existing Bash scripts that need review or updates.
 - Standalone operator-facing wrappers, launchers, and shell utilities.
 
 ## When not to use
 
-- embedded shell and non-operator Bash helpers; use `internal-bash`.
-
-Use this skill directly when standalone operator behavior is the primary
-contract; the lightweight sibling is not a required preload.
+- Embedded shell fragments.
+- Sourced or non-operator Bash helpers that do not own an operator-facing
+  entrypoint.
+- Workflow or platform behavior beyond the standalone shell entrypoint.
 
 ## Dialect decision
 
