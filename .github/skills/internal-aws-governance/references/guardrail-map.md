@@ -12,19 +12,17 @@ Use this reference when the user needs a clearer split between AWS governance su
 | Standardize metadata expectations | Tag policy plus local enforcement | Governance consistency |
 | Permit emergency access | Break-glass role design plus audit path | Exceptional access with visibility |
 
-## Review questions
+## Control design checklist
 
-1. Is this question about where a control lives or what a principal may do?
-2. Is the mechanism preventing permission, granting permission, or constraining delegated permission?
-3. Is the scope root, OU, account set, or single account?
-4. What exception path is required, if any?
-5. What should be simulated before rollout?
+1. State the scope: root, OU, account set, account, principal, or session.
+2. State whether the mechanism prevents, grants, constrains, delegates, or creates an exception.
+3. Record the trust boundary and exception path.
+4. Name the simulation or staged validation required before rollout.
 
-## Reminder
+## Control placement
 
-- Structure chooses placement.
-- Governance chooses permissions and guardrails.
-- Operations verifies that the chosen governance behaves as intended after rollout.
+- Keep placement decisions separate from permission and guardrail effects.
+- Record the expected observable effect for each control.
 
 ## Placement patterns
 

@@ -1,37 +1,46 @@
 # Internal AWS Routing Matrix
 
-## Fallback-positive cases
+## Single-owner cases
 
-- An underspecified multi-account control problem mixes organization structure,
-  governance, and operations without identifying a primary deliverable. Use
-  `internal-aws` to state the uncertainty, identify candidate owners, and
-  select the minimum specialist set.
-- An AWS platform question asks which problem-solving lane should own the work,
-  but the request does not identify whether the primary concern is topology,
-  governance, operations, Lambda, or current documentation. Use `internal-aws`
-  to clarify the lane before dispatch.
+- OU or account layout → `/internal-aws-organization-structure`.
+- SCP, permission boundary, or trust review → `/internal-aws-governance`.
+- Backup and restore proof → `/internal-aws-operations`.
+- Lambda retry or event-source behavior → `/internal-aws-lambda`.
+- Current AWS service documentation or regional availability → `/internal-aws-mcp-research`.
+- AWS option comparison or tradeoff decision → `/internal-aws-strategic`.
+- AWS spend or savings analysis → `/antigravity-aws-cost-optimizer`.
 
-## Direct-specialist negative cases
+## Primary-owner disambiguation
 
-- OU layout or account placement → `internal-aws-organization-structure`.
-- SCP or permission-boundary design → `internal-aws-governance`.
-- Backup and restore validation → `internal-aws-operations`.
-- Lambda retry behavior → `internal-aws-lambda`.
-- Current AWS documentation lookup → `internal-aws-mcp-research`.
+- Lambda IAM review → `/internal-aws-governance` when the requested result is
+  trust or permissions; `/internal-aws-lambda` when the requested result is
+  handler or runtime behavior.
+- OU plus SCP wording → `/internal-aws-organization-structure` when placement
+  is the result; `/internal-aws-governance` when access controls are the result.
+- Research plus strategy wording → `/internal-aws-mcp-research` when only facts
+  are requested; `/internal-aws-strategic` when an option or tradeoff decision
+  is requested.
+- Governance plus operations wording → `/internal-aws-governance` when control
+  design is the result; `/internal-aws-operations` when proof is the result.
 
-## Multi-domain primary-owner cases
+## Permitted multi-deliverable sequences
 
-- OU design with later SCP work → `internal-aws-organization-structure` first;
-  hand the resulting governance implications to `internal-aws-governance`.
-- SCP rollout evidence → `internal-aws-governance` first and
-  `internal-aws-operations` second for evidence or validation.
-- Lambda IAM detail → `internal-aws-lambda` when the requested deliverable is
-  Lambda behavior, or `internal-aws-governance` when the requested deliverable
-  is the IAM or trust boundary. Do not use the fallback when that deliverable
-  is explicit.
+- Current fact, then a separate option decision →
+  `/internal-aws-mcp-research`, then `/internal-aws-strategic`.
+- Structural design, then explicit rollout proof →
+  `/internal-aws-organization-structure`, then `/internal-aws-operations`.
+- Governance design, then explicit control evidence →
+  `/internal-aws-governance`, then `/internal-aws-operations`.
+
+## Near-miss distinctions
+
+- A Python lambda expression is not an AWS Lambda request.
+- Azure management-group governance is not an AWS request.
+- Cost is owned by `/antigravity-aws-cost-optimizer` only when spend analysis
+  or savings opportunity is the primary result.
 
 ## Review rule
 
-Prefer a direct specialist whenever a reasonable reviewer can name one primary
-owner from the request itself. The fallback is not a prerequisite for ordinary
-AWS work and must never activate all AWS skills by default.
+Keep ambiguity in the router when the requested result is missing. Strategic
+work requires a real option or tradeoff decision. Invoke only one lane for one
+deliverable, and add a second lane only for a second explicit deliverable.

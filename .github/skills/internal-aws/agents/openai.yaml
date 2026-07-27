@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal AWS"
-  short_description: "Official AWS entry point and router"
-  default_prompt: "Use $internal-aws as the entry point for any AWS task; it routes to the minimum specialist set, or to $internal-aws-strategic for decision framing."
+  short_description: "Canonical entry point for every AWS request"
+  default_prompt: "Use $internal-aws to classify this AWS request and invoke the minimum specialist lane."

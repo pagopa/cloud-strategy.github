@@ -1,22 +1,26 @@
 ---
 name: internal-aws-strategic
-description: Use when you need high-level AWS decision support, tradeoff framing, or multi-lens analysis before implementation, or when internal-aws routes a strategic question here. Invoke manually ($internal-aws-strategic) or via internal-aws handoff. Do not use for clearly scoped specialist tasks with a known owner.
-disable-model-invocation: true
+description: Use when /internal-aws selects the AWS strategic lane for option comparison, multi-lens tradeoffs, cost-value analysis, blast radius, or reversibility before implementation.
 ---
 
 # Internal AWS Strategic
 
-Strategic support skill for high-level AWS decision framing. Reached via `internal-aws` handoff or explicit manual invocation. Identify the decision first, not the implementation tool, and hand back to `internal-aws` for specialist routing once the direction is chosen.
+Frame AWS decisions at the option and tradeoff level. Produce a recommendation
+with explicit assumptions, relevant lenses, cost-value implications, blast
+radius, reversibility, and remaining evidence requirements.
 
 ## When to use
 
-Use this skill for high-level AWS decision support, tradeoff framing, or multi-lens analysis before implementation. Do not use it for clearly scoped specialist tasks with a known owner; those belong to the specialists via `internal-aws`.
+Use this lane when the requested result is an AWS option comparison, tradeoff,
+cost-value decision, or risk decision before implementation. Keep clearly
+scoped structure, governance, operations, research, and Lambda work in its
+positive domain lane.
 
 ## Optional lens activation
 
-Do not load every lens by default.
-
-Use only the minimum set of lenses needed for the request. If the user explicitly names one or more lenses, prioritize only those. If the user does not name lenses, infer the smallest useful set.
+Use only the minimum set of lenses needed for the request. If the user names
+lenses, prioritize those. Otherwise infer the smallest useful set from the
+decision.
 
 Available lenses include:
 
@@ -33,96 +37,65 @@ Available lenses include:
 - blast radius
 - maintainability
 
-Rules:
-
-- Start narrow.
-- Expand only when the request is broad, risky, or ambiguous.
-- If another lens would materially improve the recommendation, suggest it briefly instead of forcing it.
-- Keep the active lenses explicit when more than one is in play.
-
-Load `references/lens-playbook.md` when the choice of AWS lens needs structured comparison or when the user wants a deeper decision-framing aid.
+Start narrow and expand only when the request is broad, risky, or ambiguous.
+Keep active lenses explicit when more than one is in play.
 
 ## Optional BC/DR lens
 
-BC/DR is optional.
+Activate BC/DR only when resilience, backup, recovery, failover, RTO, RPO, or
+multi-region continuity changes the recommendation. Otherwise state that the
+continuity lens was not material.
 
-Activate it only when:
+## Freshness dependency
 
-- the user asks about resilience, backup, recovery, failover, RTO, RPO, or multi-region design
-- the decision has clear continuity implications
-- the recommendation would be materially incomplete without it
-
-If BC/DR seems relevant but is not requested, suggest it as an optional lens instead of forcing it.
-
-## Use of current documentation
-
-Use `internal-aws-mcp-research` when the answer depends on current AWS documentation, service behavior, IAM semantics, support boundaries, limits, or updated best-practice guidance.
-
-Do not invoke research by default for stable, generic reasoning. Use it when freshness materially affects the answer.
+When current AWS documentation, service behavior, IAM semantics, support
+boundaries, limits, or updated guidance can change the decision, state the
+required current-fact evidence and the affected assumption. Do not present an
+unverified current fact as settled.
 
 ## Mandatory behavior
 
-- Identify the decision first, not the implementation tool.
+- Identify the decision before discussing implementation tools.
 - Make assumptions explicit.
-- Compare realistic options, not strawmen.
+- Compare two or three realistic options, not strawmen.
 - Keep tradeoffs concrete.
-- Surface material risk, blast radius, and reversibility when relevant.
-- Include cost-value considerations when they matter to the decision.
+- Surface material risk, blast radius, and reversibility.
+- Include cost-value considerations when they matter.
 - Stay proportional to the size of the question.
 
 ## Adaptive output modes
 
-Choose the lightest output that fits the request.
-
 ### Quick answer
 
-Use for narrow asks.
-
-Include:
-
-- direct recommendation
-- short rationale
-- optional risk or follow-up note
+Use for narrow asks. Include a direct recommendation, short rationale, and an
+optional risk or evidence note.
 
 ### Decision note
 
-Use for normal strategic support.
-
-Include:
-
-- decision statement
-- key options or tradeoff
-- recommended direction
-- main risk or validation note
+Use when at least two viable options exist. Include the decision statement,
+assumptions, options, recommendation, strongest tradeoff, and validation note.
 
 ### Deep analysis
 
-Use only for broad, ambiguous, high-risk, or explicitly detailed requests.
-
-Include:
-
-- context and assumptions
-- options considered
-- active lenses used
-- recommendation and why it wins
-- main risks and blast radius
-- validation or follow-up path
+Use for broad, ambiguous, high-risk, or explicitly detailed requests. Include
+context, assumptions, active lenses, options, recommendation, risks, blast
+radius, reversibility, and evidence requirements.
 
 ## Common mistakes
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Forcing a full multi-lens analysis for a small question | The answer becomes heavier than the decision requires | Start with the smallest useful lens set and widen only if risk or ambiguity justifies it |
-| Treating BC/DR as mandatory for every answer | Continuity language crowds out the actual AWS tradeoff | Activate BC/DR only when recovery posture or multi-region continuity changes the recommendation |
-| Recommending a direction without current-source verification when freshness matters | AWS support boundaries, limits, or service behavior may have changed | Call out the freshness dependency and route to `internal-aws-mcp-research` when it can change the decision |
-| Confusing decision support with implementation guidance | The user loses the strategic framing they asked for | Keep the answer at decision level and hand back to `internal-aws` after the direction is chosen |
-| Expanding into tool or IaC selection when the user did not ask for it | The response drifts from AWS platform tradeoffs into execution detail | Keep the recommendation centered on the AWS choice, not the delivery tooling |
-| Giving generic best-practice advice without context, tradeoff, or cost implication | Generic guidance is hard to act on and easy to misapply | Tie the recommendation to assumptions, viable options, and cost-value consequences |
+| Forcing full multi-lens analysis for a small question | The answer becomes heavier than the decision requires | Start with the smallest useful lens set |
+| Treating BC/DR as mandatory for every answer | Continuity language crowds out the actual tradeoff | Activate it only when continuity changes the recommendation |
+| Recommending a direction without current-source verification when freshness matters | Support boundaries or limits may have changed | Call out the freshness dependency and unresolved evidence |
+| Confusing decision support with implementation guidance | The requested decision becomes hard to evaluate | Keep the answer at decision level |
+| Expanding into tool or IaC selection without a request | The response drifts from AWS platform tradeoffs | Center the recommendation on the AWS choice |
+| Giving generic advice without context or cost implication | The result is hard to act on and easy to misapply | Tie it to assumptions, options, tradeoffs, and value |
 
-## Validation
+## Completion contract
 
-- Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
-- Confirm assumptions, active lenses, and the main tradeoff are named instead of implied.
-- Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.
-- Confirm cost-value or operational impact is called out when it materially changes the recommendation.
-- Confirm the answer states when freshness matters and whether `internal-aws-mcp-research` should be used.
+- The decision statement is explicit and narrow enough to evaluate.
+- Assumptions, active lenses, and strongest tradeoff are named.
+- Reversibility or blast-radius guidance is included when material.
+- Cost-value or operational impact is called out when it changes the decision.
+- Freshness dependencies and unresolved evidence gaps are visible.

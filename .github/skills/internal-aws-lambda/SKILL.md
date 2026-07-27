@@ -1,14 +1,12 @@
 ---
 name: internal-aws-lambda
-description: Use when designing, implementing, refactoring, or reviewing AWS Lambda code, handlers, triggers, packaging, retries, or cold-start behavior after the AWS platform direction is chosen.
-disable-model-invocation: true
+description: Use when /internal-aws selects the AWS Lambda lane for handlers, event sources, runtimes, packaging, retries, concurrency, cold starts, or Lambda-specific configuration.
 ---
 
 # Internal AWS Lambda
 
-Owns AWS Lambda handler, trigger, packaging, retry, and cold-start behavior after the AWS platform direction is chosen.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
+Own AWS Lambda handler, event-source, runtime, packaging, retry, concurrency,
+cold-start, and configuration behavior.
 
 ## When to use
 
@@ -40,9 +38,10 @@ Load `references/examples.md` for minimal handler patterns and event-source chec
 Load `references/sharp-edges.md` when diagnosing cold starts, VPC latency, retry storms, response-shape mismatches, or file-ingest recursion.
 Load `references/common-mistakes.md` for the full mistake table.
 
-## Validation
+## Completion contract
 
 - Unit tests run outside the Lambda runtime; AWS boundaries are mocked.
 - HTTP handlers: malformed body, path, query, and error-response cases tested.
 - Queue consumers: duplicate delivery, poison messages, timeout pressure, and partial batch failure tested.
 - Code assumptions validated together with deployed timeout, memory, event-source, and queue configuration.
+- Event contract, boundary normalization, retry behavior, and idempotency are explicit.
