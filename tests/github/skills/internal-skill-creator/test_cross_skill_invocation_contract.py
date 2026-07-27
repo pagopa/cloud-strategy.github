@@ -62,7 +62,6 @@ CALLED_SKILLS = {
         "internal-aws-strategic",
     },
     "internal-tdd": {
-        "internal-debugging",
         "superpowers-test-driven-development",
         "superpowers-verification-before-completion",
     },

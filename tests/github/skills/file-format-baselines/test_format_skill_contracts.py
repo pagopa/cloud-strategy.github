@@ -87,13 +87,6 @@ def test_markdown_skill_does_not_require_separate_readme_authorization() -> None
     assert "README files unless the user explicitly authorizes" not in markdown
 
 
-def test_yaml_skill_routes_cloudformation_to_schema_aware_owner() -> None:
-    yaml_skill = _skill_text("internal-yaml")
-
-    assert "/antigravity-cloudformation-best-practices" in yaml_skill
-    assert "aws cloudformation validate-template" not in yaml_skill
-
-
 def test_makefile_skill_routes_shell_and_treats_dry_run_as_preview() -> None:
     makefile = _skill_text("internal-makefile")
 

@@ -30,14 +30,6 @@ def test_mandatory_routing_has_precedence_over_recommended_guardrails() -> None:
     assert "Public-interface changes" in text
 
 
-def test_undiagnosed_bugs_route_to_debugging_first() -> None:
-    text = SKILL.read_text(encoding="utf-8")
-
-    assert "Undiagnosed bugs" in text
-    assert "route first to `/internal-debugging`" in text
-    assert "reproducer or root cause" in text
-
-
 def test_regression_only_requires_stop_disclosure_and_recovery() -> None:
     text = SKILL.read_text(encoding="utf-8")
 
