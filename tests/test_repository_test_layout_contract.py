@@ -9,36 +9,8 @@ REPO_ROOT = next(
 )
 TESTS_ROOT = REPO_ROOT / "tests"
 MAKEFILE = REPO_ROOT / "Makefile"
-AGENTS = REPO_ROOT / "AGENTS.md"
-INTERNAL_TDD = REPO_ROOT / ".github/skills/internal-tdd/SKILL.md"
-INTERNAL_CONTRACT = REPO_ROOT / "INTERNAL_CONTRACT.md"
-ANTI_PATTERNS = (
-    REPO_ROOT / ".github/skills/internal-python/references/review-anti-patterns.md"
-)
 SKILL_PATH_PATTERN = re.compile(r"\.github/skills/([a-z0-9-]+)(?:/|[\"'])")
 AGENT_PATH_PATTERN = re.compile(r"\.github/agents/([a-z0-9-]+)\.agent\.md")
-
-
-def test_global_guidance_documents_generic_test_placement_rule() -> None:
-    agents_text = AGENTS.read_text(encoding="utf-8")
-    internal_tdd_text = INTERNAL_TDD.read_text(encoding="utf-8")
-    contract_text = INTERNAL_CONTRACT.read_text(encoding="utf-8")
-    anti_patterns_text = ANTI_PATTERNS.read_text(encoding="utf-8")
-
-    assert "repository-root `tests/`" in agents_text
-    assert "make the owning\n  source or checked behavior obvious" in agents_text
-    assert (
-        "When adding tests, keep them under repository-root `tests/`"
-        in internal_tdd_text
-    )
-    assert (
-        "test paths under `tests/` should make the covered owner or checked behavior obvious"
-        in contract_text
-    )
-    assert (
-        "without paths that make the covered owner or checked behavior obvious"
-        in anti_patterns_text
-    )
 
 
 def test_github_owned_python_tests_make_owner_obvious() -> None:
@@ -71,11 +43,7 @@ def test_github_owned_python_tests_make_owner_obvious() -> None:
             and "github" in rel_path.parts
             and "scripts" in rel_path.parts
         )
-        if (
-            skill_or_agent_owner_is_obvious
-            or agent_owner_is_obvious
-            or script_owner_is_obvious
-        ):
+        if skill_or_agent_owner_is_obvious or agent_owner_is_obvious or script_owner_is_obvious:
             continue
 
         if not owners:
@@ -99,7 +67,4 @@ def test_catalog_fast_check_lists_existing_test_files() -> None:
     test_paths = shlex.split(line.split(":=", 1)[1].strip())
     missing_paths = [path for path in test_paths if not (REPO_ROOT / path).is_file()]
 
-    missing_summary = ", ".join(missing_paths)
-    assert not missing_paths, (
-        f"catalog-fast-check lists missing tests: {missing_summary}"
-    )
+    assert not missing_paths, f"catalog-fast-check lists missing tests: {', '.join(missing_paths)}"

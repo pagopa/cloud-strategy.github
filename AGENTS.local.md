@@ -36,3 +36,11 @@ as consumer-repository defaults without an explicit sync contract change.
   instructions, references, examples, fixtures, scripts, and `agents/openai.yaml`
   resolvable from the bundle itself; do not require bundle users to load
   guidance from outside the skill directory.
+
+## Skill Test Boundaries
+
+- Source wording in skills, prompts, references, and instructions is not itself
+  an executable or evaluable seam.
+- Validate parsed structure, public producer-consumer protocols, executable
+  behavior, or concrete evaluation cases. Do not manufacture tests that assert
+  instructional prose.

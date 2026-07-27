@@ -53,6 +53,12 @@ The levels are mutually exclusive. When more than one description appears to
 fit, `mandatory` takes precedence over `recommended`, and `recommended` takes
 precedence over `not suitable`.
 
+- Reading instructional source and asserting its wording does not create an
+  evaluable seam.
+- Skill-only changes without a parser, executable consumer, public protocol, or
+  concrete evaluation case are `not suitable`; use structural validation and
+  human review.
+
 ## Core Contract
 
 - Delegate mandatory red-green-refactor work to

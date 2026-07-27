@@ -42,4 +42,4 @@ interface:
     Guided questions, alternatives, design sections, and required critique
     schemas are content-bearing output. Do not announce skipped checkpoints or
     print internal ledgers. Always show a material risk, blocker, validation gap,
-    or user decision. Keep the agent filename, frontmatter name, and workflow aligned.
+    or user decision.

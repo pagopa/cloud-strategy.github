@@ -19,7 +19,12 @@ from lib.shared import Finding, find_repo_root, log_success, log_warn
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Validate internal-* skill metadata, references, and token hygiene.")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validate internal-* skill metadata, references, token hygiene, "
+            "and repository-wide skill-test boundaries."
+        )
+    )
     parser.add_argument("--root", default=".", help="Repository root or any path inside it.")
     parser.add_argument(
         "--skill",

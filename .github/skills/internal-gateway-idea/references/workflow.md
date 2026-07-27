@@ -72,8 +72,6 @@ flowchart TD
 
 ## Routing Stability Rule
 
-Keep the agent filename, frontmatter name, and workflow aligned.
-
 The state-machine labels are internal workflow state. Normal chat emits one compact user-facing decision card for status, approval, routing, material risk, blocker, and requested user action, and never dumps the state-machine trace.
 Content-bearing output uses its owning schema and is outside the four-line card limit. Guided questions, alternatives, design sections, and required critique schemas are content-bearing output.
 Use 🎯 for a goal, 🧭 for a decision, 🛠️ for a proposed change, 🧪 for validation, ⚠️ for a material risk or blocker, ✅ for a recommendation or result, 💡 for a short reason, and ✈️ for a requested user action.
@@ -90,9 +88,5 @@ The transition notification is exactly:
 
 This is the only transition notification. The subsequently produced
 implementation plan remains normal content-bearing output.
-
-## Local validation lane
-
-Run `python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py` before widening to catalog-wide checks. This scoped lane must cover the bundle audit and marker consistency.
 
 The checkpoint must use one bounded research question; do not start a second research pass automatically.

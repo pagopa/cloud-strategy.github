@@ -15,8 +15,7 @@ description: Use when a repository-owned idea needs brainstorming, assumption ch
 ## Local references
 
 - `references/workflow.md`: authoritative state machine, Mermaid workflow,
-  approval rules, routing stability, and scoped local validation lane for this bundle.
-- `scripts/audit_workflow.py`: marker-consistency validator; run via `python3 .github/skills/internal-gateway-idea/scripts/audit_workflow.py`.
+  approval rules, and routing stability for this bundle.
 - Script output contract: `text` for short operator summaries (default), `json` for nested or machine-consumed output, `tsv`/`csv` only for large flat tables; data on stdout, diagnostics on stderr; keep output bounded.
 
 Lightweight repository-owned wrapper for idea shaping. Use `/superpowers-brainstorming` as the core workflow and add the local gates below. Loading `/superpowers-brainstorming` is an intentional, globally-resolvable exception to the bundle self-containment rule. This skill does not replace the core brainstorming process; it constrains it for repository-owned idea work.
@@ -53,7 +52,6 @@ Lightweight repository-owned wrapper for idea shaping. Use `/superpowers-brainst
 - Keep collaborative questioning inside the core brainstorming workflow.
 - Load `/internal-gateway-writing-plans` automatically after `accepted`; no additional artifact-choice or plan-writing approval is required.
 - Stop after the delegated writing outcome. Do not implement, invoke execution owners, or run execution commands from this skill.
-- Keep the agent filename, frontmatter name, and workflow aligned.
 
 ## User-facing communication
 
@@ -257,4 +255,3 @@ implementation execution.
 - The skill loaded `/internal-gateway-writing-plans` only for implementation-plan writing after `accepted`.
 - The skill stopped after `/internal-gateway-writing-plans` produced a writing outcome.
 - The Mermaid workflow and runtime prompt contain the same mandatory gate names.
-- The phrase `agent filename, frontmatter name, and workflow aligned` appears in the skill, workflow, and runtime prompt.

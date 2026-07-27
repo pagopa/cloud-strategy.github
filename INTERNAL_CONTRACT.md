@@ -213,6 +213,15 @@ Treat the current skill-first architecture as the source of truth. Do not infer 
   - flat root-level files such as `tests/test_*.py` are best reserved for root-owned contracts or sources that also live at the repository root
   - deeper layout conventions may be defined by a nearer language or tool owner when the repository-wide rule is not enough
 
+#### `testing-skill-prose-is-not-a-test-seam`
+
+- Goal: keep skill tests coupled to observable boundaries rather than source wording.
+- Expected behavior:
+  - raw instructional prose is not treated as executable or evaluable behavior
+  - parsed structure, executable consumers, public protocols, and concrete
+    evaluation cases remain valid evidence
+  - repository automation rejects tests that assert raw skill wording
+
 ### Naming And Operating Model
 
 #### `resource-governance-uses-supported-origin-naming`
