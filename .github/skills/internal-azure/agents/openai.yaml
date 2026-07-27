@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Azure"
-  short_description: "Official Azure entry point and router"
-  default_prompt: "Use $internal-azure as the entry point for any Azure task; it routes to the minimum specialist set, or to $internal-azure-strategic for decision framing."
+  short_description: "Azure platform entry point and deliverable selector"
+  default_prompt: "Use $internal-azure to select the right Azure platform specialist for the immediate deliverable."

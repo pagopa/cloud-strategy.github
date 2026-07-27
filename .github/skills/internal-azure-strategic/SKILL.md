@@ -1,126 +1,50 @@
 ---
 name: internal-azure-strategic
-description: Use when you need high-level Azure decision support, tradeoff framing, or multi-lens analysis before implementation, or when internal-azure routes a strategic question here. Invoke manually ($internal-azure-strategic) or via internal-azure handoff. Do not use for clearly scoped specialist tasks with a known owner.
-disable-model-invocation: true
+description: Use when /internal-azure selects explicit Azure decision framing, tradeoff analysis, or proportional multi-lens support.
 ---
 
 # Internal Azure Strategic
 
-Strategic support skill for high-level Azure decision framing. Reached via `internal-azure` handoff or explicit manual invocation. Identify the decision first, not the implementation tool, and hand back to `internal-azure` for specialist routing once the direction is chosen.
+Use this workflow for Azure decisions where comparing viable directions is the
+immediate deliverable.
 
 ## When to use
 
-Use this skill for high-level Azure decision support, tradeoff framing, or multi-lens analysis before implementation. Do not use it for clearly scoped specialist tasks with a known owner; those belong to the specialists via `internal-azure`.
+Use when `/internal-azure` selects a strategic Azure decision, tradeoff note, or
+multi-lens analysis.
 
-## Optional lens activation
+## Workflow
 
-Do not load every lens by default.
+1. State the decision statement: the Azure choice and the outcome it must
+   support.
+2. Record assumptions about current state, constraints, timing, ownership,
+   cost, and required evidence.
+3. Select the minimum lenses that can change the recommendation and make the
+   active lenses explicit.
+4. Compare realistic options with concrete tradeoffs, operating impact, and
+   cost-value implications when material.
+5. Give a recommendation and explain why it wins under the stated assumptions.
+6. Record material risk, blast radius, and validation needs.
+7. State reversibility and the conditions for staged adoption or rollback.
+8. Apply the completion criteria: the decision, assumptions, active lenses,
+   options, recommendation, risks, reversibility, and validation path are
+   explicit.
 
-Use only the minimum set of lenses needed for the request. If the user explicitly names one or more lenses, prioritize only those. If the user does not name lenses, infer the smallest useful set.
+## Proportional output
 
-Available lenses include:
+- Use a quick answer for a narrow choice with one clear direction.
+- Use a decision note when two or three viable options require tradeoff review.
+- Use deep analysis for broad, consequential, high-risk, or explicitly detailed
+  decisions.
 
-- security
-- identity and access
-- organization-structure
-- governance
-- operations
-- monitoring and observability
-- BC/DR
-- FinOps
-- compliance
-- rollout and rollback
-- blast radius
-- maintainability
+Use current Microsoft documentation when freshness about service support,
+landing-zone guidance, Policy behavior, regional capability, or service limits
+could change the recommendation.
 
-Rules:
+Load `references/lens-playbook.md` for lens combinations, depth selection, and
+decision-note structure.
 
-- Start narrow.
-- Expand only when the request is broad, risky, or ambiguous.
-- If another lens would materially improve the recommendation, suggest it briefly instead of forcing it.
-- Keep the active lenses explicit when more than one is in play.
+## Completion criteria
 
-Load `references/lens-playbook.md` when the user wants a deeper framing aid or when the choice of lenses is not obvious.
-
-## Optional BC/DR lens
-
-BC/DR is optional.
-
-Activate it only when:
-
-- the user asks about resilience, backup, recovery, failover, RTO, RPO, Site Recovery, or regional continuity
-- the decision has clear continuity implications
-- the recommendation would be materially incomplete without it
-
-If BC/DR seems relevant but is not requested, suggest it as an optional lens instead of forcing it.
-
-## Use of current documentation
-
-Use current Microsoft documentation only when freshness materially affects the answer, especially for Azure service support, landing-zone guidance updates, Policy behavior, RBAC semantics, regional capability, or service limits.
-
-Do not invoke current-doc research by default for stable, generic reasoning.
-
-## Mandatory behavior
-
-- Identify the decision first, not the implementation tool.
-- Make assumptions explicit.
-- Compare realistic options, not strawmen.
-- Keep tradeoffs concrete.
-- Surface material risk, blast radius, and reversibility when relevant.
-- Include cost-value considerations when they matter to the decision.
-- Stay proportional to the size of the question.
-
-## Adaptive output modes
-
-Choose the lightest output that fits the request.
-
-### Quick answer
-
-Use for narrow asks.
-
-Include:
-
-- direct recommendation
-- short rationale
-- optional risk or follow-up note
-
-### Decision note
-
-Use for normal strategic support.
-
-Include:
-
-- decision statement
-- key options or tradeoff
-- recommended direction
-- main risk or validation note
-
-### Deep analysis
-
-Use only for broad, ambiguous, high-risk, or explicitly detailed requests.
-
-Include:
-
-- context and assumptions
-- options considered
-- active lenses used
-- recommendation and why it wins
-- main risks and blast radius
-- validation or follow-up path
-
-## Anti-patterns
-
-- forcing a full multi-lens analysis for a small question
-- treating BC/DR as mandatory for every answer
-- recommending a direction without current-source verification when freshness matters
-- expanding into tool selection when the user did not ask for it
-- giving generic best-practice advice without context, tradeoff, or cost implication
-- retaining ownership after the direction is chosen instead of handing back to `internal-azure` for specialist routing
-
-## Validation
-
-- Confirm the decision statement is explicit and narrow enough that the next owner is obvious.
-- Confirm assumptions, active lenses, and the main tradeoff are named instead of implied.
-- Confirm the recommendation includes reversibility or blast-radius guidance when the choice is hard to unwind.
-- Confirm cost-value or operational impact is called out when it materially changes the recommendation.
-- Confirm the answer states when freshness matters and which current Microsoft fact still needs validation.
+Return the decision statement, assumptions, active lenses, realistic options,
+recommendation, material risk, reversibility, and validation path.
