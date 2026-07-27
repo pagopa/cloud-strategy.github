@@ -1,8 +1,8 @@
 # Internal Gateway Idea Workflow
 
 This workflow defines the canonical contract for `internal-gateway-idea`.
-The delegated core workflow is `/superpowers-brainstorming`; retained-spec
-writing remains with that owner.
+The delegated core workflow is `/superpowers-brainstorming`; this wrapper
+defines the local routing contract after critical resolution.
 
 ## State Machine
 
@@ -30,19 +30,17 @@ flowchart TD
     J --> K{User approves design direction?}
     K -- no --> D
     K -- yes --> L[Critical Challenge Gate]
-    L --> M{Critical result}
-    M -- reopen --> D
-    M -- narrow --> J
-    M -- continue --> N[Spec vs plan decision]
-    N --> O{Decision}
-    O -- spec first --> P1[Write retained spec in brainstorming]
-    P1 --> P2[Self-review]
-    P2 --> P3[User reviews retained spec]
-    P3 --> P4[Approve implementation-plan writing]
-    P4 --> P5[Load /internal-gateway-writing-plans]
-    O -- direct plan --> Q1[Approve implementation-plan writing]
-    Q1 --> Q2[Load /internal-gateway-writing-plans]
-    P5 --> T[Writing outcome only]
+    L --> M{Critical resolution loop}
+    M -- accepted --> Q1[Automatic plan handoff]
+    M -- revise-design --> J
+    M -- reopen-analysis --> D
+    M -- needs-clarification --> R[Run one or more /grill-me sessions]
+    R --> R1{Did clarification materially change an accepted decision?}
+    R1 -- yes --> R2[Return to relevant earlier approval gate]
+    R1 -- no --> L
+    R2 --> D
+    Q1 --> Q1A[Notify user only that plan writing has started]
+    Q1A --> Q2[Load /internal-gateway-writing-plans]
     Q2 --> T
     T --> U[Stop before implementation execution]
 ```
@@ -57,20 +55,20 @@ flowchart TD
 | `External Research Checkpoint` | Skip unless local evidence is insufficient and one external fact could change feasibility, approach, constraints, or risk. When needed, load `/mattpocock-research` on-demand with one bounded question, write one Markdown report under `tmp/research/`, and return only decision-relevant conclusions. | Do not preload the research skill, copy its research procedure, run generic best-practice research, or start a second research pass automatically. |
 | `Assumption Challenge Gate` | Test whether the proposed target or solution is necessary before choosing an approach. | Do not only polish the user's proposed solution. |
 | `Alternative discovery` | Present 2-3 approaches and explain why the recommended one beats the strongest rejected option. | Do not present a single-path design as inevitable. |
-| `Critical Challenge Gate` | Challenge the chosen direction as its own visible gate after design-direction approval and before spec or plan writing. Reopen or narrow when the objection is material. | Do not use this gate after loading `/internal-gateway-writing-plans`; an embedded critique does not satisfy Critical Challenge Gate. |
-| `Spec vs plan decision` | Choose `Decision: direct plan` or `Decision: spec first`, explain why, name the rejected path, and ask for approval. | Do not load `/internal-gateway-writing-plans` from the decision alone. |
-| `Writing outcome only` | Load `/internal-gateway-writing-plans` only after explicit user approval for the selected writing path. Stop after the delegated writing outcome. | Do not implement, edit target files, run execution commands, or invoke execution owners. |
+| `Critical Challenge Gate` | Challenge the chosen direction as its own visible gate after design-direction approval and before plan writing. Return `accepted`, `revise-design`, `reopen-analysis`, or `needs-clarification`; `accepted` is legal only when every material objection raised during the current critical pass is closed or explicitly routed. | Do not use this gate after loading `/internal-gateway-writing-plans`; an embedded critique does not satisfy Critical Challenge Gate. |
+| `Critical resolution loop` | For `revise-design`, return to design presentation and approval; for `reopen-analysis`, return to `Idea Gate 0`; for `needs-clarification`, load `/grill-me` for one or more numbered clarification sessions over the critic's newly surfaced elements. A material change returns to the relevant earlier approval gate; unchanged clarifications rerun `Critical Challenge Gate` directly. | Do not force a clarification into planning or silently discard a new material point. |
+| `Automatic plan handoff` | For `accepted`, start implementation-plan writing immediately and emit only the approved three-line transition card. | Do not ask whether to write a spec, request another plan-writing approval, or write a retained spec. |
+| `Writing outcome only` | Load `/internal-gateway-writing-plans` automatically after `accepted`. Stop after the delegated writing outcome. | Do not implement, edit target files, run execution commands, or invoke execution owners. |
 
 ## Approval Rules
 
 - `procedi`, `ok`, `go`, or similar approval advances only the active visible gate.
-- If the active gate is ambiguous, ask whether the user means critical review,
-  retained spec or plan writing, or implementation execution.
+- If the active gate is ambiguous, ask whether the user means design approval,
+  critical review, or implementation execution.
 - If a previous mandatory gate was skipped, approval words cannot heal it. Use
   `Skipped-gate recovery` and resume at the first skipped mandatory gate.
 - Approval of a design direction is not approval to implement.
-- Approval of `Decision: direct plan` skips a retained spec, not the user
-  approval gate and not the stop-before-execution boundary.
+- `accepted` authorizes automatic plan writing, not implementation execution.
 
 ## Routing Stability Rule
 
@@ -81,6 +79,17 @@ Content-bearing output uses its owning schema and is outside the four-line card 
 Use 🎯 for a goal, 🧭 for a decision, 🛠️ for a proposed change, 🧪 for validation, ⚠️ for a material risk or blocker, ✅ for a recommendation or result, 💡 for a short reason, and ✈️ for a requested user action.
 Skipped checkpoints remain silent. Material risks, blockers, validation gaps,
 and user decisions remain visible.
+
+The transition notification is exactly:
+
+```text
+🚀 **Scrittura del piano avviata**
+✅ La critica si è conclusa senza obiezioni materiali aperte.
+🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione.
+```
+
+This is the only transition notification. The subsequently produced
+implementation plan remains normal content-bearing output.
 
 ## Local validation lane
 

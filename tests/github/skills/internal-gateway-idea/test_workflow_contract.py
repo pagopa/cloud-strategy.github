@@ -50,7 +50,9 @@ def test_idea_runtime_surfaces_delegate_to_the_expected_owners() -> None:
     surfaces = (
         SKILL_PATH.read_text(encoding="utf-8"),
         WORKFLOW_PATH.read_text(encoding="utf-8"),
-        AGENT_PATH.read_text(encoding="utf-8"),
+        yaml.safe_load(AGENT_PATH.read_text(encoding="utf-8"))["interface"][
+            "default_prompt"
+        ],
         SCRIPT_PATH.read_text(encoding="utf-8"),
     )
     for text in surfaces:
@@ -92,6 +94,11 @@ def test_audit_workflow_reports_extended_contract_status() -> None:
     assert payload["markers"]["compact_chat_projection"] is True
     assert payload["markers"]["runtime_gate_sequence"] is True
     assert payload["markers"]["runtime_research_checkpoint"] is True
+    assert payload["markers"]["skill_exclusion_removed"] is True
+    assert payload["markers"]["critical_routing"] is True
+    assert payload["markers"]["critical_mermaid_routing"] is True
+    assert payload["markers"]["handoff_card"] is True
+    assert payload["markers"]["automatic_plan_handoff"] is True
 
 
 def test_idea_bundle_has_compact_user_facing_projection() -> None:
@@ -203,51 +210,53 @@ def test_external_research_checkpoint_has_bounded_outcomes() -> None:
         assert marker in workflow_text
 
 
-def test_confirmed_critical_consensus_starts_plan_without_spec_decision() -> None:
+def test_skill_has_no_when_not_to_use_exclusion_block() -> None:
+    skill_text = SKILL_PATH.read_text(encoding="utf-8")
+
+    assert "## When not to use" not in skill_text
+
+
+def test_critical_routing_contract_exposes_only_approved_outcomes() -> None:
     surfaces = (
         SKILL_PATH.read_text(encoding="utf-8"),
         WORKFLOW_PATH.read_text(encoding="utf-8"),
-        AGENT_PATH.read_text(encoding="utf-8"),
+        yaml.safe_load(AGENT_PATH.read_text(encoding="utf-8"))["interface"][
+            "default_prompt"
+        ],
     )
-    required = [
-        "Critical result: confirmed",
-        "start implementation-plan writing immediately",
-        "notify the user only that plan writing has started",
-        "do not run a spec-vs-plan decision",
+    outcomes = [
+        "accepted",
+        "revise-design",
+        "reopen-analysis",
+        "needs-clarification",
     ]
     for text in surfaces:
-        for marker in required:
+        for marker in outcomes:
             assert marker in text
+        assert "every material objection raised during the current critical pass is closed or explicitly routed" in text
+        assert "accepted" in text and "Automatic plan handoff" in text
+        assert "revise-design" in text and "design presentation" in text and "design approval" in text
+        assert "reopen-analysis" in text and "Idea Gate 0" in text
+        assert "needs-clarification" in text and "/grill-me" in text
+        assert "material change" in text and "Critical Challenge Gate" in text
         assert "Spec vs plan decision" not in text
         assert "Decision: spec first" not in text
         assert "Approval request" not in text
 
 
-def test_unresolved_critical_consensus_runs_repeatable_grill_me_sessions() -> None:
+def test_critical_routing_uses_the_exact_plan_handoff_card() -> None:
     surfaces = (
         SKILL_PATH.read_text(encoding="utf-8"),
         WORKFLOW_PATH.read_text(encoding="utf-8"),
-        AGENT_PATH.read_text(encoding="utf-8"),
-    )
-    required = [
-        "Critical result: unresolved",
-        "load `/grill-me`",
-        "one or more `/grill-me` sessions",
-        "new elements raised by the critic",
-        "until every material point is definitively resolved",
-    ]
-    for text in surfaces:
-        for marker in required:
-            assert marker in text
-
-    workflow = surfaces[1]
-    _assert_in_order(
-        workflow,
-        [
-            "M -- unresolved --> R[Run one or more /grill-me sessions]",
-            "R --> L",
+        yaml.safe_load(AGENT_PATH.read_text(encoding="utf-8"))["interface"][
+            "default_prompt"
         ],
     )
+    card = """🚀 **Scrittura del piano avviata**
+✅ La critica si è conclusa senza obiezioni materiali aperte.
+🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione."""
+    for text in surfaces:
+        assert card in text
 
 
 def test_writing_gateway_is_only_an_implementation_plan_owner() -> None:

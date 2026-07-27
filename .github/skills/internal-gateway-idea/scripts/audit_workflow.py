@@ -19,6 +19,15 @@ def contains_in_order(text: str, markers: list[str]) -> bool:
     return positions == sorted(positions)
 
 
+def runtime_prompt_text(runtime_source: str) -> str:
+    """Return the de-indented prompt body from the YAML runtime surface."""
+    _, prompt_source = runtime_source.split("default_prompt:", 1)
+    prompt_lines = prompt_source.splitlines()[1:]
+    return "\n".join(
+        line[4:] if line.startswith("    ") else line for line in prompt_lines
+    )
+
+
 MANDATORY_SEQUENCE = [
     "Specialization Checkpoint: gated",
     "Idea Gate 0",
@@ -26,7 +35,8 @@ MANDATORY_SEQUENCE = [
     "Assumption Challenge Gate",
     "Alternative discovery",
     "Critical Challenge Gate",
-    "Spec vs plan decision",
+    "Critical resolution loop",
+    "Automatic plan handoff",
     "Stop before implementation execution",
 ]
 
@@ -37,7 +47,8 @@ RUNTIME_SEQUENCE = [
     "Assumption Challenge Gate",
     "Alternative discovery",
     "Critical Challenge Gate",
-    "Spec vs plan decision",
+    "Critical resolution loop",
+    "Automatic plan handoff",
     "Stop before implementation execution",
 ]
 
@@ -46,7 +57,8 @@ def main() -> int:
     bundle_dir = Path(__file__).resolve().parent.parent
     skill_text = (bundle_dir / "SKILL.md").read_text(encoding="utf-8")
     workflow_text = (bundle_dir / "references" / "workflow.md").read_text(encoding="utf-8")
-    runtime_text = (bundle_dir / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    runtime_source = (bundle_dir / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    runtime_text = runtime_prompt_text(runtime_source)
 
     shared_markers = [
         "Specialization Checkpoint: gated",
@@ -56,9 +68,35 @@ def main() -> int:
         "Alternative discovery",
         "Critical Challenge Gate",
         "embedded critique does not satisfy Critical Challenge Gate",
-        "Spec vs plan decision",
+        "Critical resolution loop",
+        "Automatic plan handoff",
         "internal-gateway-writing-plans",
         "Stop before implementation execution",
+    ]
+    critical_routing_markers = [
+        "accepted",
+        "revise-design",
+        "reopen-analysis",
+        "needs-clarification",
+        "every material objection raised during the current critical pass is closed or explicitly routed",
+        "load `/grill-me`",
+        "one or more numbered clarification sessions",
+        "newly surfaced elements",
+        "material change",
+        "relevant earlier approval gate",
+        "rerun `Critical Challenge Gate` directly",
+    ]
+    handoff_card = """🚀 **Scrittura del piano avviata**
+✅ La critica si è conclusa senza obiezioni materiali aperte.
+🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione."""
+    critical_mermaid_markers = [
+        "M -- accepted --> Q1[Automatic plan handoff]",
+        "M -- revise-design --> J",
+        "M -- reopen-analysis --> D",
+        "M -- needs-clarification --> R[Run one or more /grill-me sessions]",
+        "R --> R1{Did clarification materially change an accepted decision?}",
+        "R1 -- yes --> R2[Return to relevant earlier approval gate]",
+        "R1 -- no --> L",
     ]
     chat_projection_markers = [
         "compact user-facing decision card",
@@ -107,7 +145,8 @@ def main() -> int:
                 "Specialization Checkpoint: gated",
                 "Idea Gate 0",
                 "Critical Challenge Gate",
-                "Spec vs plan decision",
+                "Critical resolution loop",
+                "Automatic plan handoff",
             ],
         ),
         "skill_gate_sequence": contains_in_order(skill_text, MANDATORY_SEQUENCE),
@@ -148,11 +187,29 @@ def main() -> int:
             contains_all(text, chat_projection_markers)
             for text in (skill_text, workflow_text, runtime_text)
         ),
-        "retained_spec_owner": "Retained spec writing stays with `/superpowers-brainstorming`" in skill_text,
-        "spec_review_before_plan_handoff": "Write retained spec" in workflow_text
-        and "User reviews retained spec" in workflow_text
-        and "Approve implementation-plan writing" in workflow_text
-        and "Load /internal-gateway-writing-plans" in workflow_text,
+        "critical_routing": all(
+            contains_all(text, critical_routing_markers)
+            for text in (skill_text, workflow_text, runtime_text)
+        ),
+        "handoff_card": all(
+            handoff_card in text for text in (skill_text, workflow_text, runtime_text)
+        ),
+        "skill_exclusion_removed": "## When not to use" not in skill_text,
+        "critical_mermaid_routing": contains_all(
+            workflow_text, critical_mermaid_markers
+        ),
+        "spec_choice_removed": all(
+            "Spec vs plan decision" not in text
+            and "Decision: spec first" not in text
+            and "Approval request" not in text
+            for text in (skill_text, workflow_text, runtime_text)
+        ),
+        "automatic_plan_handoff": "M -- accepted --> Q1[Automatic plan handoff]"
+        in workflow_text
+        and "Q1A --> Q2[Load /internal-gateway-writing-plans]" in workflow_text,
+        "repeatable_grill_me_loop": "M -- needs-clarification --> R[Run one or more /grill-me sessions]"
+        in workflow_text
+        and "R1 -- no --> L" in workflow_text,
         "writing_gateway_is_plan_only": "implementation-plan writing" in skill_text
         and "retained spec or implementation-plan writing" not in skill_text
         and "retained spec or implementation-plan writing" not in workflow_text

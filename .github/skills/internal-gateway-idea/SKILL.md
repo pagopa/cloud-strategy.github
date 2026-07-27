@@ -1,14 +1,15 @@
 ---
 name: internal-gateway-idea
-description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, and a spec-vs-plan recommendation before implementation planning.
+description: Use when a repository-owned idea needs brainstorming, assumption challenge, alternative discovery, critical resolution, and an automatic handoff to implementation planning.
 ---
 
 # Internal Gateway Idea
 
 ## Referenced skills
 
-- `/superpowers-brainstorming`: core idea-to-design workflow; retained spec writing and review stay with this owner.
-- `/internal-gateway-writing-plans`: implementation-plan writing only, after the user approves the direction.
+- `/superpowers-brainstorming`: core idea-to-design workflow before the local critical-resolution override.
+- `/grill-me`: repeatable clarification sessions for material points the critic cannot resolve unanimously.
+- `/internal-gateway-writing-plans`: implementation-plan writing immediately after the critic emits `accepted`.
 - `/mattpocock-research`: on-demand owner for decision-relevant external research after local evidence is exhausted; this reference does not preload the skill.
 
 ## Local references
@@ -24,30 +25,33 @@ Lightweight repository-owned wrapper for idea shaping. Use `/superpowers-brainst
 
 - A repository-owned request starts as an idea, option set, proposed direction, or unclear goal.
 - The user asks to brainstorm, shape, challenge, or decide before implementation.
-- The work may become a retained spec or implementation plan, but the right artifact is not yet confirmed.
-
-## When not to use
-
-- The request is already a concrete low-risk edit with a known owner and validation path.
-- The primary task is defect-first review.
-- The user has already approved a retained plan for execution.
-- The request is only to maintain imported `superpowers-*` assets.
+- The work needs a validated design direction before implementation planning.
 
 ## Core contract
 
-- Follow the mandatory gate sequence: `Specialization Checkpoint: gated`, `Idea Gate 0`, `External Research Checkpoint`, `Assumption Challenge Gate`, `Alternative discovery`, `Critical Challenge Gate`, `Spec vs plan decision`, `Stop before implementation execution`.
+- Follow the mandatory gate sequence: `Specialization Checkpoint: gated`, `Idea Gate 0`, `External Research Checkpoint`, `Assumption Challenge Gate`, `Alternative discovery`, `Critical Challenge Gate`, `Critical resolution loop`, `Automatic plan handoff`, `Stop before implementation execution`.
 - Load `/superpowers-brainstorming` as the core workflow.
 - Read `references/workflow.md` before presenting the final design direction.
-- Keep the `/superpowers-brainstorming` hard gate: no implementation action before the user approves the design or direct-plan recommendation.
+- Keep the `/superpowers-brainstorming` hard gate: no implementation action before the user approves the design.
 - Treat approval as gate-local. `procedi`, `ok`, `go`, or similar approval advances only the active visible gate.
-- If approval wording is ambiguous, ask whether it means critical review, retained spec or plan writing, or implementation execution.
+- If approval wording is ambiguous, ask whether it means design approval, critical review, or implementation execution.
 - After the bounded evidence pass, run `Idea Gate 0` as one numbered bulk question block; evidence cannot replace Idea Gate 0.
-- Do not proceed to `External Research Checkpoint`, assumption challenge, alternative discovery, design direction, critical challenge, or spec-vs-plan decision until `Idea Gate 0` is accepted or the user explicitly overrides its defaults.
-- Run `Critical Challenge Gate` as its own visible gate after the user approves the design direction and before the spec-vs-plan decision; an embedded critique does not satisfy Critical Challenge Gate.
+- Do not proceed to `External Research Checkpoint`, assumption challenge,
+  alternative discovery, design direction, critical resolution, or plan writing
+  until `Idea Gate 0` is accepted or the user explicitly overrides its defaults.
+- Run `Critical Challenge Gate` as its own visible gate after the user approves the design direction and before plan writing; an embedded critique does not satisfy Critical Challenge Gate.
+- The only critical outcomes are `accepted`, `revise-design`, `reopen-analysis`, and `needs-clarification`.
+- `accepted` is legal only when every material objection raised during the current `Critical Challenge Gate` is closed or explicitly routed; continue to `Automatic plan handoff`.
+- Every material objection raised during the current critical pass is closed or explicitly routed before `accepted`.
+- every material objection raised during the current critical pass is closed or explicitly routed.
+- `revise-design` returns to design presentation and approval, then reruns `Critical Challenge Gate`.
+- `reopen-analysis` returns to `Idea Gate 0` so the assumption, scope decision, or alternative can be reconsidered.
+- `needs-clarification` means load `/grill-me` for one or more numbered clarification sessions over the critic's newly surfaced elements.
+- After clarification, return to the relevant earlier approval gate when a material change occurred; otherwise rerun `Critical Challenge Gate` directly. Repeat until the critic emits one conclusive routing outcome.
 - If any mandatory gate was skipped, stop, name the missed gate, mark any downstream artifact as draft-only, and resume at the first skipped mandatory gate.
 - Use this skill only to add repository-owned idea gates, not to fork the core brainstorming process.
 - Keep collaborative questioning inside the core brainstorming workflow.
-- Load `/internal-gateway-writing-plans` only after the user approves implementation-plan writing, either directly or after retained-spec review.
+- Load `/internal-gateway-writing-plans` automatically after `accepted`; no additional artifact-choice or plan-writing approval is required.
 - Stop after the delegated writing outcome. Do not implement, invoke execution owners, or run execution commands from this skill.
 - Keep the agent filename, frontmatter name, and workflow aligned.
 
@@ -98,18 +102,18 @@ Follow `references/workflow.md` in this order:
 6. `Alternative discovery`
 7. `Present design direction`
 8. `Critical Challenge Gate`
-9. `Spec vs plan decision`
-10. `Approved writing handoff`
+9. `Critical resolution loop`
+10. `Automatic plan handoff`
 11. `Stop before implementation execution`
 
 If a later step happened before an earlier mandatory gate, use `Skipped-gate
 recovery`: stop the current lane, identify the first skipped mandatory gate,
 and resume there before producing or revising a retained artifact.
 
-Do not skip from evidence, design approval, or `Decision: direct plan` to
-implementation. The only post-brainstorming owner this skill may load is
-`/internal-gateway-writing-plans`, and only after explicit approval for the
-selected writing path.
+Do not skip from evidence or design approval to implementation. The only
+post-brainstorming owner this skill may load is
+`/internal-gateway-writing-plans`, automatically after the critic emits
+`accepted`.
 
 ## Idea Gate 0
 
@@ -178,7 +182,7 @@ The output must include:
 3. `Alternative path:` one sentence.
 4. `Why not chosen:` one sentence, or `Chosen instead:` when the alternative is better.
 
-If the alternative path is better, reopen the relevant brainstorming branch instead of forcing the original proposal through refinement.
+If the alternative path is better, return to the relevant brainstorming branch instead of forcing the original proposal through refinement.
 
 ## Alternative discovery
 
@@ -194,39 +198,48 @@ The recommendation must explain why the chosen approach beats the strongest reje
 
 ## Critical Challenge Gate
 
-Before moving to a retained spec or implementation plan:
+Before moving to an implementation plan:
 
 - Challenge the chosen direction with first principles, opportunity cost, or reverse-assumption reasoning.
 - Name the strongest objection.
-- Decide whether to continue, reopen a branch, or narrow scope.
+- Close or explicitly route every material objection raised during the current critical pass.
 
 Use this visible shape:
 
 1. `Challenge:` the strongest objection.
-2. `Resolution:` continue, reopen, or narrow.
+2. `Resolution:` accepted, revise-design, reopen-analysis, or needs-clarification.
 3. `Reason:` one evidence-based sentence.
+
+`accepted` is legal only when every material objection raised during the current `Critical Challenge Gate` is closed or explicitly routed.
 
 Keep this gate inside the local idea wrapper and the core brainstorming workflow.
 
-## Spec vs plan decision
+## Critical resolution loop
 
-After the user approves the design direction, decide whether to go straight to an implementation plan or write a retained spec first.
+- `accepted` continues to `Automatic plan handoff`.
+- `revise-design` returns to design presentation and approval before another critical pass.
+- `reopen-analysis` returns to `Idea Gate 0`.
+- `needs-clarification` loads `/grill-me` and runs one or more numbered clarification sessions over the critic's newly surfaced elements.
 
-Retained spec writing stays with `/superpowers-brainstorming`. After the spec is written and reviewed, the user may then approve implementation-plan writing, which loads `/internal-gateway-writing-plans`.
+After `/grill-me`, return to the relevant earlier approval gate when a material change occurred; otherwise rerun `Critical Challenge Gate` directly. Repeat until the critic emits one conclusive routing outcome.
 
-Choose `Decision: direct plan` when target, owner, scope, constraints, rejected alternatives, and validation path are clear enough that a retained spec would mostly duplicate the implementation plan.
+## Automatic plan handoff
 
-Choose `Decision: spec first` when product, architecture, data flow, rollout, ownership, or risk decisions are still material enough that a retained spec would reduce the chance of building the wrong thing.
+For `accepted`, start implementation-plan writing immediately by loading
+`/internal-gateway-writing-plans`. The transition notification is exactly:
 
-Always explain the choice:
+```text
+🚀 **Scrittura del piano avviata**
+✅ La critica si è conclusa senza obiezioni materiali aperte.
+🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione.
+```
 
-- `Decision: direct plan` or `Decision: spec first`
-- `Why:` one evidence-based sentence.
-- `Rejected option:` the other path and why it is weaker.
-- `Next owner:` `/internal-gateway-writing-plans` after user approval for implementation-plan writing.
-- `Approval request:` ask the user to approve the selected path before loading the next owner.
+This is the only transition notification. The subsequently produced
+implementation plan remains normal content-bearing output. Do not ask for
+another approval or write a retained spec.
 
-Approval of `Decision: direct plan` skips a retained spec only. It does not authorize implementation execution.
+This automatic handoff authorizes plan writing only. It does not authorize
+implementation execution.
 
 ## Validation
 
@@ -235,10 +248,13 @@ Approval of `Decision: direct plan` skips a retained spec only. It does not auth
 - The skill loaded `/superpowers-brainstorming` as core instead of copying its workflow.
 - The skill challenged the user's initial assumption, not only corrected the proposed solution.
 - The skill presented 2-3 approaches and explained why the recommendation beat the strongest rejected option.
-- The skill used `Critical Challenge Gate` before spec or plan writing.
+- The skill used `Critical Challenge Gate` before plan writing.
+- Every material objection raised during the current critical pass was closed or explicitly routed before `accepted`.
+- A `needs-clarification` result ran one or more `/grill-me` sessions over the critic's newly surfaced elements and returned to the relevant earlier approval gate after a material change or reran the critic otherwise.
+- An `accepted` result started implementation-plan writing immediately and emitted only the exact transition notification.
 - The skill treated ambiguous approval words as gate-local and clarified the active gate when needed.
 - The skill kept collaborative questioning inside the core brainstorming workflow.
-- The skill loaded `/internal-gateway-writing-plans` only for implementation-plan writing after user approval.
+- The skill loaded `/internal-gateway-writing-plans` only for implementation-plan writing after `accepted`.
 - The skill stopped after `/internal-gateway-writing-plans` produced a writing outcome.
 - The Mermaid workflow and runtime prompt contain the same mandatory gate names.
 - The phrase `agent filename, frontmatter name, and workflow aligned` appears in the skill, workflow, and runtime prompt.
