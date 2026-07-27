@@ -1,6 +1,7 @@
 ---
 name: internal-github-action-composite
 description: Use when creating or modifying a reusable GitHub composite action under `.github/actions/`, especially when input validation, shell safety, `outputs:` contract compatibility, or backward compatibility matters. Do not use for workflow-level authoring or reuse-pattern selection; route those to internal-github-actions.
+disable-model-invocation: true
 ---
 
 # GitHub Composite Action Skill

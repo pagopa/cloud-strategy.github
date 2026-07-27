@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal GitHub"
-  short_description: "GitHub routing and strategic decision support"
-  default_prompt: "Use $internal-github to route an unclear GitHub task to the minimum specialist set, or to frame a GitHub platform or operating-model decision when the next step is not yet governance, operations, or delivery."
+  short_description: "Official GitHub entry point and router"
+  default_prompt: "Use $internal-github as the entry point for any GitHub task; it routes to the minimum specialist set, or to $internal-github-strategic for decision framing."

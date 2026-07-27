@@ -1,6 +1,7 @@
 ---
 name: internal-aws-governance
 description: Use when the user needs AWS governance guidance for IAM operating models, role and trust design, permission boundaries, federation, SCPs, tag policies, exception handling, or other guardrails that define what principals can do after the AWS structure is chosen.
+disable-model-invocation: true
 ---
 
 # Internal AWS Governance

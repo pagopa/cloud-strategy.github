@@ -1,6 +1,7 @@
 ---
 name: internal-aws-lambda
 description: Use when designing, implementing, refactoring, or reviewing AWS Lambda code, handlers, triggers, packaging, retries, or cold-start behavior after the AWS platform direction is chosen.
+disable-model-invocation: true
 ---
 
 # Internal AWS Lambda

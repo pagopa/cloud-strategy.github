@@ -1,6 +1,7 @@
 ---
 name: internal-azure-operations
 description: Use when the user needs Azure monitoring and logging posture, backup and restore proof, Site Recovery or DR validation, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for tenant or subscription layout; RBAC, Policy, or identity design; Azure DevOps pipelines; or materially ambiguous requests with no clear operational deliverable.
+disable-model-invocation: true
 ---
 
 # Internal Azure Operations

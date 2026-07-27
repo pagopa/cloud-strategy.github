@@ -1,6 +1,7 @@
 ---
 name: internal-aws-operations
 description: Use when the user needs AWS operational guidance for monitoring, logging, backup and restore, DR validation, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision has already been made.
+disable-model-invocation: true
 ---
 
 # Internal AWS Operations

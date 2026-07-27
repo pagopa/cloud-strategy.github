@@ -9,20 +9,27 @@ REPO_ROOT = next(
     if (parent / "AGENTS.md").exists() and (parent / ".github").exists()
 )
 SKILL_DIR = REPO_ROOT / ".github/skills/internal-azure"
-LEGACY_SKILL_DIR = REPO_ROOT / ".github/skills" / ("internal-azure-" + "strategic")
+STRATEGIC_SKILL_DIR = REPO_ROOT / ".github/skills/internal-azure-strategic"
 SKILL_PATH = SKILL_DIR / "SKILL.md"
 AGENT_PATH = SKILL_DIR / "agents/openai.yaml"
 ROUTING_MATRIX_PATH = SKILL_DIR / "references/routing-matrix.md"
-LENS_PLAYBOOK_PATH = SKILL_DIR / "references/lens-playbook.md"
+STRATEGIC_SKILL_PATH = STRATEGIC_SKILL_DIR / "SKILL.md"
+STRATEGIC_AGENT_PATH = STRATEGIC_SKILL_DIR / "agents/openai.yaml"
+LENS_PLAYBOOK_PATH = STRATEGIC_SKILL_DIR / "references/lens-playbook.md"
 
-EXPECTED_DESCRIPTION = (
-    "Use when an Azure task cannot be routed confidently to a specific Azure "
-    "skill because the request is materially ambiguous, has multiple Azure "
-    "domains with no clear primary owner, or requires clarification before "
-    "selecting the correct specialist, or when the user needs high-level Azure "
-    "platform decision support or tradeoff framing before implementation. "
-    "Do not use for clearly scoped organization structure, governance or "
-    "identity, operations or validation, or Azure DevOps pipeline tasks."
+EXPECTED_ROUTER_DESCRIPTION = (
+    "Official entry point for any Azure task. Routes every Azure request to "
+    "the right specialist - organization structure, governance, operations, "
+    "or Azure DevOps - or to internal-azure-strategic for high-level decision "
+    "framing. Use for any Azure request, scoped or ambiguous."
+)
+
+EXPECTED_STRATEGIC_DESCRIPTION = (
+    "Use when you need high-level Azure decision support, tradeoff framing, "
+    "or multi-lens analysis before implementation, or when internal-azure "
+    "routes a strategic question here. Invoke manually "
+    "($internal-azure-strategic) or via internal-azure handoff. Do not use "
+    "for clearly scoped specialist tasks with a known owner."
 )
 
 
@@ -31,49 +38,72 @@ def load_frontmatter(path: Path) -> dict[str, object]:
     return yaml.safe_load(raw_frontmatter)
 
 
-def test_internal_azure_replaces_the_legacy_bundle() -> None:
+def test_internal_azure_router_is_the_unflagged_entry_point() -> None:
     assert SKILL_PATH.is_file()
-    assert not LEGACY_SKILL_DIR.exists()
     assert load_frontmatter(SKILL_PATH) == {
         "name": "internal-azure",
-        "description": EXPECTED_DESCRIPTION,
+        "description": EXPECTED_ROUTER_DESCRIPTION,
     }
 
 
-def test_internal_azure_contract_is_router_and_strategic() -> None:
+def test_internal_azure_strategic_is_user_invoked_only() -> None:
+    assert STRATEGIC_SKILL_PATH.is_file()
+    assert load_frontmatter(STRATEGIC_SKILL_PATH) == {
+        "name": "internal-azure-strategic",
+        "description": EXPECTED_STRATEGIC_DESCRIPTION,
+        "disable-model-invocation": True,
+    }
+
+
+def test_internal_azure_router_contract() -> None:
     skill_text = SKILL_PATH.read_text()
 
     router_markers = (
-        "material routing uncertainty",
-        "Do not activate only because the task concerns Azure",
-        "Do not activate when one specialist clearly owns the next step",
-        "Select the minimum specialist set",
-        "Explicit `$internal-azure` invocation remains valid",
+        "Official entry point and lightweight router",
+        "## When to use",
+        "## Destinations",
+        "`internal-azure-strategic`",
+        "Hand off by reading the chosen skill's `SKILL.md`",
+        "disable-model-invocation: true",
     )
     for marker in router_markers:
         assert marker in skill_text
 
+
+def test_internal_azure_strategic_contract() -> None:
+    skill_text = STRATEGIC_SKILL_PATH.read_text()
+
     strategic_markers = (
+        "## When to use",
+        "## Optional lens activation",
+        "## Adaptive output modes",
         "Identify the decision first, not the implementation tool",
-        "Compare realistic options, not strawmen.",
-        "Keep tradeoffs concrete.",
+        "`internal-azure` handoff or explicit manual invocation",
     )
     for marker in strategic_markers:
         assert marker in skill_text
 
 
-def test_internal_azure_interface_names_router_and_strategic() -> None:
+def test_internal_azure_interface_names_the_entry_point() -> None:
     interface = yaml.safe_load(AGENT_PATH.read_text())["interface"]
 
     assert interface == {
         "display_name": "Internal Azure",
-        "short_description": "Azure routing and strategic decision support",
+        "short_description": "Official Azure entry point and router",
         "default_prompt": (
-            "Use $internal-azure to route an unclear Azure task to the minimum "
-            "specialist set, or to frame an Azure decision when the next "
-            "step is not yet structure, governance, operations, or delivery."
+            "Use $internal-azure as the entry point for any Azure task; it "
+            "routes to the minimum specialist set, or to "
+            "$internal-azure-strategic for decision framing."
         ),
     }
+
+
+def test_internal_azure_strategic_has_agent_metadata() -> None:
+    interface = yaml.safe_load(STRATEGIC_AGENT_PATH.read_text())["interface"]
+
+    assert interface["display_name"] == "Internal Azure Strategic"
+    assert interface["short_description"]
+    assert interface["default_prompt"]
 
 
 def test_routing_matrix_covers_positive_negative_and_multi_domain_cases() -> None:
@@ -102,7 +132,7 @@ def test_lens_playbook_keeps_strategic_depth() -> None:
 AZURE_SKILL_PATHS = sorted(
     (REPO_ROOT / ".github/skills").glob("internal-azure*/SKILL.md")
 )
-LEGACY_SKILL_ID = "internal-azure-" + "strategic"
+STRATEGIC_SKILL_ID = "internal-azure-strategic"
 FORBIDDEN_GENERIC_REFERENCES = (
     "internal-bash-script",
     "internal-python-script",
@@ -113,31 +143,35 @@ FORBIDDEN_GENERIC_REFERENCES = (
     "internal-terraform",
 )
 
-EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES = {
-    "internal-azure-organization-structure": "Use when ",
-    "internal-azure-governance": "Use when ",
-    "internal-azure-operations": "Use when ",
-    "internal-azure-devops": "Use when ",
-}
 
-
-def test_azure_family_has_no_legacy_or_generic_skill_references() -> None:
-    assert len(AZURE_SKILL_PATHS) == 5
+def test_azure_family_shape_and_generic_reference_ban() -> None:
+    assert len(AZURE_SKILL_PATHS) == 6
 
     for path in AZURE_SKILL_PATHS:
         skill_text = path.read_text()
-        assert LEGACY_SKILL_ID not in skill_text
         for forbidden_name in FORBIDDEN_GENERIC_REFERENCES:
             assert f"`{forbidden_name}`" not in skill_text
 
 
 def test_specialists_name_internal_azure_only_as_uncertainty_fallback() -> None:
-    specialist_paths = [path for path in AZURE_SKILL_PATHS if path != SKILL_PATH]
+    specialist_paths = [
+        path
+        for path in AZURE_SKILL_PATHS
+        if path != SKILL_PATH and path != STRATEGIC_SKILL_PATH
+    ]
+    assert len(specialist_paths) == 4
 
     for path in specialist_paths:
         skill_text = path.read_text()
         assert "`internal-azure`" in skill_text
         assert "material routing uncertainty" in skill_text
+
+
+def test_strategic_hands_back_to_the_router() -> None:
+    skill_text = STRATEGIC_SKILL_PATH.read_text()
+
+    assert "`internal-azure`" in skill_text
+    assert "explicit manual invocation" in skill_text
 
 
 LANE_SKILL_IDS = (
@@ -180,6 +214,15 @@ def test_lane_skills_have_no_sibling_references_or_handoffs() -> None:
             )
 
 
+EXPECTED_SPECIALIST_DESCRIPTION_PREFIXES = {
+    "internal-azure-organization-structure": "Use when ",
+    "internal-azure-governance": "Use when ",
+    "internal-azure-operations": "Use when ",
+    "internal-azure-devops": "Use when ",
+    "internal-azure-strategic": "Use when ",
+}
+
+
 def test_specialist_descriptions_carry_positive_and_negative_triggers() -> None:
     for path in AZURE_SKILL_PATHS:
         frontmatter = load_frontmatter(path)
@@ -192,16 +235,16 @@ def test_specialist_descriptions_carry_positive_and_negative_triggers() -> None:
         assert "Do not use" in description
 
 
-def test_inventory_lists_only_the_canonical_internal_azure_bundle() -> None:
+def test_inventory_lists_the_router_and_the_strategic() -> None:
     inventory_text = (REPO_ROOT / ".github/INVENTORY.md").read_text()
 
     assert ".github/skills/internal-azure/SKILL.md" in inventory_text
-    assert LEGACY_SKILL_ID not in inventory_text
+    assert ".github/skills/internal-azure-strategic/SKILL.md" in inventory_text
 
 
-def test_repo_profiles_reference_the_canonical_internal_azure_bundle() -> None:
+def test_repo_profiles_point_to_the_router_only() -> None:
     profiles = yaml.safe_load((REPO_ROOT / ".github/repo-profiles.yml").read_text())
     azure_skills = profiles["profiles"]["azure-platform"]["recommended_skills"]
 
     assert "skills/internal-azure/SKILL.md" in azure_skills
-    assert not any(LEGACY_SKILL_ID in entry for entry in azure_skills)
+    assert not any(STRATEGIC_SKILL_ID in entry for entry in azure_skills)

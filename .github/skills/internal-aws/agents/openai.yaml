@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal AWS"
-  short_description: "AWS routing and strategic decision support"
-  default_prompt: "Use $internal-aws to route an unclear AWS task to the minimum specialist set, or to frame an AWS decision when the next step is not yet structure, governance, operations, or delivery."
+  short_description: "Official AWS entry point and router"
+  default_prompt: "Use $internal-aws as the entry point for any AWS task; it routes to the minimum specialist set, or to $internal-aws-strategic for decision framing."

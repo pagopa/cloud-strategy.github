@@ -1,6 +1,7 @@
 ---
 name: internal-aws-organization-structure
 description: Use when the user needs AWS control-plane or multi-account structure guidance for Organizations, OUs, account models, delegated administrator placement, StackSets topology, network topology at platform level, or other organization-shaping decisions that affect how AWS is laid out before implementation.
+disable-model-invocation: true
 ---
 
 # Internal AWS Organization Structure

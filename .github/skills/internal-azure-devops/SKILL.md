@@ -1,6 +1,7 @@
 ---
 name: internal-azure-devops
 description: Use when the user needs Azure DevOps pipeline YAML authoring or review, project automation, pipeline triggers, variables, environments, approvals, or artifact-flow guidance. Do not use for GitHub Actions; Azure CLI or Resource Manager work with no pipeline surface; tenant, governance, or operations design; or materially ambiguous requests with no clear pipeline deliverable.
+disable-model-invocation: true
 ---
 
 # Internal Azure DevOps

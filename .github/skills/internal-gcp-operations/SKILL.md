@@ -1,6 +1,7 @@
 ---
 name: internal-gcp-operations
 description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for org, folder, project, or Shared VPC layout; IAM, workload identity, or Org Policy design; or materially ambiguous requests with no clear operational deliverable.
+disable-model-invocation: true
 ---
 
 # Internal GCP Operations

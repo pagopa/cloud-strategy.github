@@ -1,6 +1,7 @@
 ---
 name: internal-azure-governance
 description: Use when the user needs Azure RBAC operating models, managed identity boundaries, PIM or PAM posture, Azure Policy and initiatives, naming and tagging guardrails, or exception-handling design after the Azure structure is chosen. Do not use for tenant or subscription layout; monitoring, backup, or rollout validation; Azure DevOps pipelines; or materially ambiguous requests with no clear governance deliverable.
+disable-model-invocation: true
 ---
 
 # Internal Azure Governance

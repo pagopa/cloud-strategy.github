@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Azure"
-  short_description: "Azure routing and strategic decision support"
-  default_prompt: "Use $internal-azure to route an unclear Azure task to the minimum specialist set, or to frame an Azure decision when the next step is not yet structure, governance, operations, or delivery."
+  short_description: "Official Azure entry point and router"
+  default_prompt: "Use $internal-azure as the entry point for any Azure task; it routes to the minimum specialist set, or to $internal-azure-strategic for decision framing."

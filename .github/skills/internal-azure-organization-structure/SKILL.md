@@ -1,6 +1,7 @@
 ---
 name: internal-azure-organization-structure
 description: Use when the user needs Azure tenant hierarchy, management-group layout, subscription models, landing-zone placement, environment segmentation, or platform-level network topology guidance before implementation. Do not use for RBAC, Policy, or identity design; monitoring, backup, or rollout validation; Azure DevOps pipelines; or materially ambiguous requests with no clear structural deliverable.
+disable-model-invocation: true
 ---
 
 # Internal Azure Organization Structure

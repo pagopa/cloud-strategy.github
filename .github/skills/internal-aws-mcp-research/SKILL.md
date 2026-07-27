@@ -1,6 +1,7 @@
 ---
 name: internal-aws-mcp-research
 description: Use when the task needs current AWS documentation or safe IAM inspection for Organizations, SCPs, IAM policies, delegated administrators, regional availability, or StackSets, and the assistant should prefer AWS Knowledge MCP and AWS IAM MCP when available.
+disable-model-invocation: true
 ---
 
 # Internal AWS MCP Research

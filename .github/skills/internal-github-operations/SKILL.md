@@ -1,6 +1,7 @@
 ---
 name: internal-github-operations
 description: Use when the user needs GitHub operational guidance — Actions health, runner operations, audit logs, reporting and export, drift checks, preflight checks, post-rollout validation, or operational evidence — after a governance or operating-model decision has already been made. Do not use for direction framing or guardrail design.
+disable-model-invocation: true
 ---
 
 # Internal GitHub Operations

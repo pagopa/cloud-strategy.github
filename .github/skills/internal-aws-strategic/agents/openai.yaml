@@ -1,0 +1,4 @@
+interface:
+  display_name: "Internal AWS Strategic"
+  short_description: "AWS strategic decision support, manual or router handoff only"
+  default_prompt: "Use $internal-aws-strategic to frame a high-level AWS decision, compare tradeoffs, or run a multi-lens analysis before implementation."

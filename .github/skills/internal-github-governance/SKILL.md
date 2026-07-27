@@ -1,6 +1,7 @@
 ---
 name: internal-github-governance
 description: Use when the user needs GitHub guardrail or permission guidance — rulesets, branch protection, repository or organization permissions, GitHub Apps permissions, Actions permissions, OIDC posture, secret handling, environments, or Copilot governance — after the broad operating model is known. Do not use for enterprise, org, or repo-model decision framing.
+disable-model-invocation: true
 ---
 
 # Internal GitHub Governance

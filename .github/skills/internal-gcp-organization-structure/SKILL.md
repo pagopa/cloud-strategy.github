@@ -1,6 +1,7 @@
 ---
 name: internal-gcp-organization-structure
 description: Use when the user needs Google Cloud control-plane or platform-structure guidance for org or folder layout, billing-account model, project segmentation, Shared VPC host and service project topology, environment segmentation, or platform-level network topology that shapes how GCP is organized before implementation. Do not use for IAM, service account, workload identity, or Org Policy design; monitoring, backup, or rollout validation; or materially ambiguous requests with no clear structural deliverable.
+disable-model-invocation: true
 ---
 
 # Internal GCP Organization Structure
