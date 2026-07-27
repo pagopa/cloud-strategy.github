@@ -5,14 +5,6 @@ description: Use when Python work needs a lightweight shared baseline or its pri
 
 # Internal Python
 
-## Referenced skills
-
-Treat the referenced skills below as on-demand owners. Do not preload them for
-every Python edit; load them only when the task proves script or project depth.
-
-- `internal-python-script`: standalone Python scripts, CLIs, and operator-facing toolkits when dependency bootstrap, launcher behavior, or direct execution becomes the main concern.
-- `internal-python-project`: Python packages, application code, service boundaries, and framework-owned flows when importable behavior or service structure becomes the main concern.
-
 ## Referenced files
 
 - `references/review-anti-patterns.md`: Python review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Python-specific defect depth.
@@ -27,19 +19,10 @@ every Python edit; load them only when the task proves script or project depth.
 
 ## When not to use
 
-- Standalone CLIs, automation scripts, or operator-facing toolkits; use `internal-python-script`.
-- Package, application, service, or framework-owned behavior; use `internal-python-project`.
 - Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
-
-Once direct operator-facing execution is established, route to
-`internal-python-script`. Once importable behavior is established, route to
-`internal-python-project`; this baseline is an uncertainty fallback, not an
-umbrella that remains active after ownership is known.
 
 ## Baseline
 
-- Classify Python work by primary contract before choosing structure: direct operator execution belongs to `internal-python-script`; importable package, application, service, or framework behavior belongs to `internal-python-project`.
-- Do not classify by file count alone. A multi-module toolkit can remain script-owned when its main contract is CLI execution.
 - Prefer early returns, guard clauses, clear names, and readable control flow.
 - Keep functions small enough to read without tracing hidden state. Prefer explicit inputs over module-level lookups inside reusable logic.
 - Add type hints on public or non-trivial function signatures.
@@ -60,12 +43,6 @@ umbrella that remains active after ownership is known.
 - Do not vendor libraries, wheelhouses, copied site-packages, or fallback dependency mirrors.
 - Preserve the repository-declared dependency manager. For pip requirements, keep exact pins and hashes in the owning requirements file; for another declared dependency manager, update its canonical lock artifact and use its frozen or locked validation command.
 - Keep human-facing console reporting separate from reusable Python logging and machine-readable output. Script or CLI adapter boundaries may use `rich`; project/package internals and JSON-style output paths should stay neutral, structured, or plain data.
-
-## Dependency And Runtime Depth
-
-Use `internal-python-script` when dependency bootstrap, launcher behavior, local virtual environments, or direct operator execution is the main concern.
-
-Use `internal-python-project` when importable behavior, service boundaries, application tests, or framework flows are the main concern.
 
 ## Validation
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Script Python"
   short_description: "Direct-execution Python tooling"
-  default_prompt: "Use $internal-python-script for directly executed Python scripts, CLIs, automation, or operator-facing toolkits; route importable application behavior to $internal-python-project."
+  default_prompt: "Use $internal-python-script for directly executed Python scripts, CLIs, automation, or operator-facing toolkits."

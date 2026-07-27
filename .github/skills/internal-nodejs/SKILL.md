@@ -5,14 +5,6 @@ description: Use when creating, editing, or reviewing JavaScript, Node.js, TypeS
 
 # Internal Node.js
 
-## Referenced skills
-
-Treat the referenced skill below as an on-demand owner. Do not preload it for
-every Node.js or TypeScript edit; load it only when application structure,
-package architecture, or deterministic test design becomes the real issue.
-
-- `internal-nodejs-project`: Node.js or TypeScript services, APIs, middleware, modules, and deterministic tests when project-level architecture becomes the main concern.
-
 ## Referenced files
 
 - `references/review-anti-patterns.md`: Node.js/TypeScript review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Node.js-specific defect depth.
@@ -25,7 +17,6 @@ package architecture, or deterministic test design becomes the real issue.
 
 ## When not to use
 
-- Service, API, middleware, package architecture, or test design is the main concern; use `internal-nodejs-project`.
 - Generic JSON formatting is the only concern and the file is not Node.js project metadata.
 - Frontend design or browser UI behavior is the dominant task.
 

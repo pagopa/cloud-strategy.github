@@ -16,7 +16,6 @@ description: Use when editing or reviewing Makefile or .mk syntax, targets, prer
 
 ## When not to use
 
-- Embedded shell behavior dominates the recipe; use `/internal-bash`.
 - CI or runtime semantics are the main concern; use the matching owner.
 - Generated Makefiles unless the generator is the intended edit point.
 

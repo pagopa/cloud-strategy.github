@@ -5,10 +5,6 @@ description: Use when creating, modifying, or reviewing directly executed Python
 
 # Python Script Skill
 
-## Referenced skills
-
-- `internal-python-project`: route away when imported package, application, service, or framework behavior becomes the primary contract.
-
 ## When to use
 
 - New standalone Python scripts.
@@ -18,16 +14,12 @@ description: Use when creating, modifying, or reviewing directly executed Python
 
 ## When not to use
 
-- Package, application, service, or framework-owned behavior; use `internal-python-project`.
 - Lambda-specific runtime behavior; combine the Lambda owner with the relevant Python owner.
 
 ## Boundary
 
 - This skill covers standalone operational tools, CLI entrypoints, and small script toolkits whose primary contract is direct execution.
 - A tool does not become application code just because it has multiple files, a `lib/` folder, or root-level tests.
-- Move out of this lane only when the primary contract becomes imported behavior,
-  service boundaries, or framework-owned flows; route those cases to
-  `internal-python-project`.
 
 ## Script-specific guidance
 

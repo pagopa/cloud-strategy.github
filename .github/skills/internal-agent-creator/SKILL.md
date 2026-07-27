@@ -11,14 +11,11 @@ metadata:
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `local-agent-sync-external-resources`: sync-managed catalog governance when the decision is keep, refresh, replace, or retire across managed assets.
 - `internal-copilot-docs-research`: current GitHub Copilot or VS Code platform behavior verification.
 
 Use this skill when authoring or materially revising repository-owned agents in `.github/agents/`.
 
 This workflow is agent-only. If the main requested output is not an agent file or an agent contract review, stop and name the better owner instead of continuing inside this skill.
-
-Use `local-agent-sync-external-resources` when deciding keep, refresh, replace, or retire outcomes across the sync-managed catalog rather than improving one agent.
 
 Prefer a singular core-skill architecture for routers and broader command centers:
 

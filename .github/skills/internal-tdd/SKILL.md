@@ -9,7 +9,6 @@ description: Use when modifying code with executable or evaluable behavior, incl
 
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
-- `internal-debugging`: diagnosis owner for bugs without an established reproducer or root cause.
 - `superpowers-test-driven-development`: core red-green-refactor loop after this wrapper selects a mandatory test-first slice.
 - `superpowers-verification-before-completion`: evidence gate before completion, passing, or coverage claims.
 
@@ -39,8 +38,6 @@ mechanics. Those belong to the core skill.
   contract.
 - Review-only work where the job is defect-first review rather than
   implementation.
-- Undiagnosed bugs route first to `/internal-debugging` when no established
-  reproducer or root cause exists; return here when the fix boundary is understood.
 - Mechanical realignment with no behavior change and no credible executable
   seam.
 

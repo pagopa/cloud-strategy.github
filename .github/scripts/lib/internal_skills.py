@@ -29,6 +29,12 @@ TRIGGER_FIRST_PREFIXES = (
     "Use before",
     "When ",
 )
+ROUTER_SKILL_NAMES = frozenset({
+    "internal-azure",
+    "internal-aws",
+    "internal-gcp",
+    "internal-github",
+})
 ALLOWED_VIRTUAL_PATHS = {
     ".github/copilot-sync.manifest.json",
 }
@@ -125,7 +131,7 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
                     suggestion="Add a clear description that states what the skill does and when to use it.",
                 )
             )
-        elif not description.strip().startswith(TRIGGER_FIRST_PREFIXES):
+        elif skill_name not in ROUTER_SKILL_NAMES and not description.strip().startswith(TRIGGER_FIRST_PREFIXES):
             findings.append(
                 Finding(
                     severity="blocking",

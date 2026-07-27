@@ -12,7 +12,6 @@ Treat the referenced skills below as on-demand supports. Do not preload them
 for every failure loop; load only the owner proved by the active diagnosis,
 next claim, or validated handoff.
 
-- `internal-review-code`: defect-first review when diagnosis exposes unsafe code or missing tests.
 - `internal-performance-optimization`: performance owner when measured slowness or throughput is primary.
 - `internal-tdd`: regression-test owner after the root cause is understood.
 - `superpowers-systematic-debugging`: stricter diagnosis discipline for hard, flaky, or guess-prone failures.
@@ -35,8 +34,6 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
 
 - Use `internal-performance-optimization` when slowness or throughput is the
   primary problem and a measurable performance question exists.
-- Use `internal-review-code` when the task is review-only and no diagnosis loop
-  is needed.
 - Use `internal-tdd` when the main job is test-first delivery of new executable
   behavior, not diagnosing a current failure.
 - Do not force this skill onto Markdown-only, prompt-only, agent-only, or
@@ -72,8 +69,6 @@ When an unexpected failure appears, stop adjacent feature work, preserve the cur
   that the bug, failing loop, or drift signal is resolved.
 - `internal-tdd`: regression tests and public-interface test seams after the
   root cause is understood.
-- `internal-review-code`: defect-first review when the diagnosis exposes a code
-  smell, missing test, or unsafe fix.
 - Runtime-specific internal skills: language, workflow, Terraform, GitHub
   Actions, or script owners for idiomatic fixes and validation.
 
