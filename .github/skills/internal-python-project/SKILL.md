@@ -1,24 +1,29 @@
 ---
 name: internal-python-project
-description: Use when Python imported behavior covers importable packages, libraries, applications, services, and framework-owned flows, while routing direct scripts and CLIs to internal-python-script.
+description: Use when Python work primarily changes reusable imported behavior in importable packages, libraries, applications, services, or framework-owned flows; do not use when the primary contract is direct execution.
 ---
 
 # Python Project Skill
 
-## Boundary and routing
+## Boundary
 
-This skill owns Python imported behavior: packages, libraries, applications,
-services, and framework-owned flows. Directly executed scripts, CLIs,
-automation, and operator-facing toolkits belong to `internal-python-script`.
-The shared `internal-python` baseline is not a required preload; use it only
-when a cross-cutting concern or unresolved ownership question remains.
+This skill owns reusable imported behavior in Python packages, libraries,
+applications, services, and framework-owned flows. It applies the complete
+project baseline directly and does not require another skill.
 
 ## When to use
 
 - Imported packages, libraries, applications, services, and framework-owned
   behavior whose primary contract is reusable code.
 - Thin CLI or transport adapters whose stable contract remains imported
-  project behavior; direct-execution tooling belongs to the script owner.
+  project behavior.
+
+## When not to use
+
+- Do not use when the primary contract is direct execution through a standalone
+  script, CLI, automation entrypoint, or operator-facing toolkit.
+- Do not use for an unresolved mixed change until repository evidence
+  establishes reusable imported behavior as the primary contract.
 
 ## Project contract
 

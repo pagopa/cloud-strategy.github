@@ -1,20 +1,16 @@
 ---
 name: internal-python
-description: Use when Python work needs a shared Python baseline for ownership routing; the shared baseline handles cross-cutting concerns when the primary contract is still unclear and decisions between imported behavior and directly executed tooling.
+description: Use when Python work is cross-cutting, spans imported and directly executed code, or ownership is unclear; do not use for work with one clear imported or direct-execution contract.
 ---
 
 # Internal Python
 
-## Owner routing
+## Boundary
 
-- Use this shared Python baseline when ownership is still unclear or a concern
-  crosses imported code and direct execution boundaries.
-- Route importable packages, libraries, applications, services, and framework
-  flows to `internal-python-project`.
-- Route directly executed scripts, CLIs, automation, and operator-facing
-  toolkits to `internal-python-script`.
-- This baseline is an uncertainty and review fallback; it is not a required
-  preload after the primary contract becomes clear.
+This skill owns cross-cutting Python work and ambiguous mixed changes. It
+provides a shared baseline when a task spans reusable imported behavior and
+direct execution, or when repository evidence does not yet establish one
+primary contract. It completes that work directly without delegating it.
 
 ## Review reference
 
@@ -29,6 +25,13 @@ linter-owned diagnostics to the configured tooling.
 - Lightweight reviews or small fixes where direct operator-facing execution
   versus importable application behavior is not yet clear.
 - `.py` changes that need the shared baseline before a narrower owner is chosen.
+
+## When not to use
+
+- Do not use when the primary contract is clearly reusable imported code and no
+  cross-cutting ownership decision remains.
+- Do not use when the primary contract is clearly a direct-execution tool and
+  no cross-cutting ownership decision remains.
 
 ## Cross-cutting baseline
 

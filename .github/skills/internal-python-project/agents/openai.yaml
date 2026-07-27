@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Project Python"
   short_description: "Importable Python application guidance"
-  default_prompt: "Use $internal-python-project for Python imported behavior in packages, libraries, applications, services, or framework-owned flows; route directly executed scripts and CLIs to $internal-python-script. $internal-python is not a required preload."
+  default_prompt: "Use $internal-python-project for reusable imported Python behavior in packages, libraries, applications, services, framework-owned flows, and thin adapters that preserve that contract."

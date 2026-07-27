@@ -1,16 +1,16 @@
 ---
 name: internal-python-script
-description: Use when Python direct execution covers directly executed scripts, CLIs, automation entrypoints, and small operator-facing toolkits, while routing imported behavior to internal-python-project.
+description: Use when Python work primarily changes directly executed scripts, CLIs, automation entrypoints, or small operator-facing toolkits; do not use when reusable imported behavior is the primary contract.
 ---
 
 # Python Script Skill
 
-## Boundary and routing
+## Boundary
 
-This skill owns Python direct execution: scripts, CLIs, automation entrypoints,
-and small operator-facing toolkits. Importable packages, libraries,
-applications, services, and framework-owned flows belong to
-`internal-python-project`. The shared `internal-python` baseline is not a required preload; use it only when a cross-cutting concern or unresolved ownership question remains.
+This skill owns Python work whose primary contract is direct execution:
+scripts, CLIs, automation entrypoints, and small operator-facing toolkits. It
+applies the complete script baseline directly and does not require another
+skill.
 
 ## When to use
 
@@ -18,6 +18,13 @@ applications, services, and framework-owned flows belong to
   entrypoints whose primary contract is direct execution.
 - Small multi-entrypoint toolkits that remain operator-facing even when they
   have tests, a `lib/` folder, or several maintained files.
+
+## When not to use
+
+- Do not use when the primary contract is reusable imported behavior in a
+  package, library, application, service, or framework-owned flow.
+- Do not use for an unresolved mixed change until repository evidence
+  establishes direct execution as the primary contract.
 
 ## Script contract
 
