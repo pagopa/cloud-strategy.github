@@ -1,46 +1,54 @@
 # Analysis Dimensions
 
-Use these optional questions to deepen a high-level review. Select only the
-groups that fit the target and question.
+These are optional questions, not a second workflow. Select only dimensions
+that can change the verdict for the target and declared decision.
 
-## Intent and contract
+## Common assurance dimensions
 
-- What outcome does the target promise?
-- Are the terms, boundaries, and obligations clear?
-- Does the observed change match the stated intent?
+- Intent and contract alignment
+- Internal coherence
+- Evidence quality and coverage
+- Scope drift and governance drift
+- Ownership and accountability
+- Consumer and stakeholder impact
+- Feasibility and operability
+- Risk, reversibility, and decision readiness
+- Lifecycle and maintainability
 
-## System fit and boundaries
+## AI resources
 
-- Does the target fit the surrounding system?
-- Are responsibilities and boundaries clear?
-- What assumptions cross the boundary?
+- Trigger and routing accuracy
+- Instruction hierarchy and conflicts
+- Tool, permission, and trust boundary clarity
+- Handoffs, stop conditions, and degraded behavior
+- Evaluation and observability readiness
+- Consumer, catalog, and propagation impact
 
-## Cross-cutting and operational impact
+## Architectures
 
-- What workflows, teams, or services could be affected?
-- What operational burden or failure mode could follow?
-- Is the impact observable and reversible?
+- Context and quality attributes
+- Responsibilities, interfaces, and dependencies
+- Trust boundaries and failure modes
+- Operating model and reversibility
+- Decision traceability
 
-## Ownership and maintainability
+## Proposals and mature ideas
 
-- Is ongoing ownership clear?
-- Can a maintainer find and update the relevant guidance?
-- Does the target reduce or add unnecessary complexity?
+- Problem evidence and hidden assumptions
+- Alternatives and opportunity cost
+- Expected value, cost, and feasibility
+- Adoption, risk, and decision criteria
 
-## Scope alignment
+## Documents, policies, plans, and specifications
 
-- Does the work stay within its declared scope?
-- Are exclusions and adjacent concerns explicit?
-- Is any expansion supported by evidence?
+- Audience and purpose
+- Factual support and normative clarity
+- Consistency and completeness
+- Ownership, enforceability, and lifecycle
+- Consumer impact
+- Conditional plan-to-change coverage
 
-## Validation and evidence
-
-- What evidence supports each material conclusion?
-- What checks have been completed?
-- Which gaps could change the result?
-
-## Orientation
-
-- What are the key concepts and relationships?
-- What is the main flow or decision path?
-- Where is uncertainty highest?
+For a declared change baseline, inspect intent mapping, scope drift, and
+governance drift only when those lenses can affect the decision. Preserve
+orientation as context for the review frame; do not turn it into a separate
+entry mode.

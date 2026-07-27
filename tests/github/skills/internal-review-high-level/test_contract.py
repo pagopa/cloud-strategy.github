@@ -26,6 +26,111 @@ def _bundle_runtime_text() -> str:
     )
 
 
+def test_reviewer_is_independent_non_code_and_report_only() -> None:
+    text = SKILL.read_text(encoding="utf-8").lower()
+    for marker in (
+        "independent",
+        "non-code",
+        "evidence-first",
+        "report-only",
+        "no remediation",
+    ):
+        assert marker in text
+
+
+def test_bundle_has_no_cross_skill_routing() -> None:
+    text = _bundle_runtime_text().lower()
+    for marker in (
+        "## referenced skills",
+        "load /",
+        "invoke /",
+        "delegate to /",
+        "route to /",
+    ):
+        assert marker not in text
+
+
+def test_one_adaptive_method_handles_available_baselines() -> None:
+    text = SKILL.read_text(encoding="utf-8").lower()
+    assert "## review method" in text
+    assert "available baseline" in text
+    assert "standalone" in text
+    assert "change" in text
+    assert "plan-to-change" in text
+    assert "only when" in text
+    assert "## entry modes" not in text
+
+
+def test_material_findings_are_traceable_and_report_only() -> None:
+    text = SKILL.read_text(encoding="utf-8")
+    for field in (
+        "Evidence",
+        "Impact",
+        "Severity",
+        "Confidence",
+        "Recommendation",
+        "Fix owner",
+        "Expected verification",
+    ):
+        assert field in text
+    lower = text.lower()
+    assert "no material findings" in lower
+    assert "insufficient evidence" in lower
+    assert "omit" in lower
+
+
+def test_runtime_prompt_projects_the_same_boundary() -> None:
+    text = RUNTIME.read_text(encoding="utf-8").lower()
+    for marker in (
+        "/internal-review-high-level",
+        "non-code",
+        "evidence-first",
+        "report-only",
+        "material findings",
+        "evidence gaps",
+    ):
+        assert marker in text
+
+
+def test_analysis_dimensions_cover_every_approved_artifact_class() -> None:
+    text = ANALYSIS.read_text(encoding="utf-8").lower()
+    for heading in (
+        "## common assurance dimensions",
+        "## ai resources",
+        "## architectures",
+        "## proposals and mature ideas",
+        "## documents, policies, plans, and specifications",
+    ):
+        assert heading in text
+    for marker in (
+        "scope drift",
+        "governance drift",
+        "trust boundary",
+        "stop condition",
+        "decision readiness",
+        "lifecycle",
+    ):
+        assert marker in text
+
+
+def test_review_lenses_separate_evidence_severity_confidence_and_verdict() -> None:
+    text = LENSES.read_text(encoding="utf-8")
+    for heading in (
+        "## Evidence status",
+        "## Severity",
+        "## Confidence",
+        "## Verdict",
+        "## Material finding",
+    ):
+        assert heading in text
+    lower = text.lower()
+    assert "observation" in lower
+    assert "inference" in lower
+    assert "evidence gap" in lower
+    assert "no material findings" in lower
+    assert "insufficient evidence" in lower
+
+
 def test_high_level_review_has_a_non_code_boundary() -> None:
     text = SKILL.read_text(encoding="utf-8").lower()
     assert "non-code" in text
