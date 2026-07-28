@@ -307,6 +307,59 @@ def test_normalization_enforces_teach_workspace_without_upstream_text_coupling(
     assert "Upstream may reorganize every surrounding section." in content
 
 
+def test_normalization_enforces_codebase_improvement_workspace_for_all_artifacts(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/mattpocock-improve-codebase-architecture"
+    skill_dir = candidate / local
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: improve-codebase-architecture\n---\n"
+        "# Changed upstream workflow\n\nCreate architecture artifacts as needed.\n",
+        encoding="utf-8",
+    )
+    (skill_dir / "HTML-REPORT.md").write_text(
+        "# Changed upstream report guidance\n\nWrite the report wherever appropriate.\n",
+        encoding="utf-8",
+    )
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream="skills/engineering/improve-codebase-architecture",
+        local=local,
+        canonical_name="mattpocock-improve-codebase-architecture",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    expected_changed = (
+        f"{local}/HTML-REPORT.md",
+        f"{local}/SKILL.md",
+    )
+    assert first_changed == expected_changed
+    assert second_changed == ()
+    for file_name in ("SKILL.md", "HTML-REPORT.md"):
+        content = (skill_dir / file_name).read_text(encoding="utf-8")
+        assert content.count("local-sync:codebase-improve-workspace:start") == 1
+        assert content.count("local-sync:codebase-improve-workspace:end") == 1
+        assert "`./tmp/codebase-improve/`" in content
+        assert "every generated artifact" in content
+
+
 def test_normalization_rewrites_declared_mattpocock_skill_references(
     tmp_path: Path,
 ) -> None:

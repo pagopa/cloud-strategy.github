@@ -97,7 +97,7 @@ overrides:
   reason: Remove disable-model-invocation because internal-gateway-codebase-improvement
     delegates architecture discovery to this imported method owner.
   patch_path: patches/mattpocock-improve-codebase-architecture-delegated-invocation.patch
-  expected_content_hash: 336d2b1b9a36341d9134a7a86c041bdab8834b13e01bd106dc0e830ce59143c1
+  expected_content_hash: 53e074792392f6c544af1f995679b3f80ce4da21cc037cab3c9a54168b945e31
   baseline_repo_commit: ed37663cc5fbef691ddfecd080dff42f7e7e350d
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     the codebase-improvement gateway still delegates to this method owner.

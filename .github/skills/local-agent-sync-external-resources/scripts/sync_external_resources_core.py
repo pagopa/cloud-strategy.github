@@ -481,6 +481,31 @@ instructions.
   teaching workspace.
 {_TEACH_WORKSPACE_CONTRACT_END}"""
 
+_CODEBASE_IMPROVE_SKILL = "mattpocock-improve-codebase-architecture"
+_CODEBASE_IMPROVE_FILES = frozenset({"SKILL.md", "HTML-REPORT.md"})
+_CODEBASE_IMPROVE_CONTRACT_START = (
+    "<!-- local-sync:codebase-improve-workspace:start -->"
+)
+_CODEBASE_IMPROVE_CONTRACT_END = "<!-- local-sync:codebase-improve-workspace:end -->"
+_CODEBASE_IMPROVE_CONTRACT_RE = re.compile(
+    re.escape(_CODEBASE_IMPROVE_CONTRACT_START)
+    + r".*?"
+    + re.escape(_CODEBASE_IMPROVE_CONTRACT_END),
+    re.DOTALL,
+)
+_CODEBASE_IMPROVE_CONTRACT = f"""\
+{_CODEBASE_IMPROVE_CONTRACT_START}
+## Local codebase-improvement workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Create or reuse `./tmp/codebase-improve/` as the parent workspace.
+- Resolve every generated artifact against that workspace root. Keep reports,
+    diagrams, analysis, working state, and supporting files inside it.
+- Do not create codebase-improvement artifacts outside the active workspace.
+{_CODEBASE_IMPROVE_CONTRACT_END}"""
+
 
 def _enforce_marked_contract(
     content: str,
@@ -505,6 +530,14 @@ def _enforce_teach_workspace_contract(content: str) -> str:
         content,
         _TEACH_WORKSPACE_CONTRACT_RE,
         _TEACH_WORKSPACE_CONTRACT,
+    )
+
+
+def _enforce_codebase_improve_workspace_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _CODEBASE_IMPROVE_CONTRACT_RE,
+        _CODEBASE_IMPROVE_CONTRACT,
     )
 
 
@@ -597,6 +630,12 @@ def normalize_candidate(
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_teach_workspace_contract(content)
+            if (
+                asset.canonical_name == _CODEBASE_IMPROVE_SKILL
+                and file_path.name in _CODEBASE_IMPROVE_FILES
+                and file_path.parent == asset_dir
+            ):
+                content = _enforce_codebase_improve_workspace_contract(content)
 
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
