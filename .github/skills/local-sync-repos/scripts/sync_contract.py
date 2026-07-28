@@ -14,6 +14,7 @@ MANAGED_COPY_PATHS: tuple[str, ...] = (
     ".editorconfig",
     ".github/copilot-instructions.md",
     ".github/workflows/_pre-commit.yml",
+    ".github/workflows/_pr-title.yml",
 )
 
 _INSTRUCTION_ROOT = ".github/instructions"

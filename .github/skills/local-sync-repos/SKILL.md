@@ -21,6 +21,7 @@ Manage only these exact target paths:
 - `.editorconfig`
 - `.github/copilot-instructions.md`
 - `.github/workflows/_pre-commit.yml`
+- `.github/workflows/_pr-title.yml`
 - `.github/instructions/**` (source-authoritative; preserve target `local-*` filenames)
 - `AGENTS.local.md` (create-once header-only seed from template; never overwrite or delete)
 

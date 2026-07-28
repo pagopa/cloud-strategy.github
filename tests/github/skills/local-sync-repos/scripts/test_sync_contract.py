@@ -25,6 +25,7 @@ MANAGED_COPY_PATHS_EXPECTED = (
     ".editorconfig",
     ".github/copilot-instructions.md",
     ".github/workflows/_pre-commit.yml",
+    ".github/workflows/_pr-title.yml",
 )
 
 
@@ -54,6 +55,9 @@ def _populate_source(source: Path) -> None:
     (source / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
     (source / ".github" / "workflows" / "_pre-commit.yml").write_text(
         "name: pre-commit\n", encoding="utf-8"
+    )
+    (source / ".github" / "workflows" / "_pr-title.yml").write_text(
+        "name: pr-title\n", encoding="utf-8"
     )
     instructions = source / ".github" / "instructions"
     instructions.mkdir(parents=True, exist_ok=True)
