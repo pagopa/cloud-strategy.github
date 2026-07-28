@@ -138,3 +138,19 @@ Glossaries, in particular, are an essential reference. Once one is created, it s
 ## `NOTES.md`
 
 The user will sometimes express preferences of how they want to be taught, or things you should keep in mind. This is the place to record those preferences, so you can refer back to them when designing lessons or working with the user.
+
+<!-- local-sync:teach-workspace:start -->
+## Local teaching-workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Create or reuse one self-contained workspace at
+  `./tmp/teach/<lesson-name>/`.
+- Derive `<lesson-name>` from the learning goal as a stable dash-case slug.
+  Reuse it when later sessions continue the same goal.
+- Resolve every generated path against that workspace root. Keep all teaching
+  state, lessons, references, learning records, and supporting assets inside it.
+- Do not create teaching resources in the repository root or outside the active
+  teaching workspace.
+<!-- local-sync:teach-workspace:end -->

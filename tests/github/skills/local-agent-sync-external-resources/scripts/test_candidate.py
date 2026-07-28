@@ -261,6 +261,51 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     assert "overrides any earlier instruction to ask one question at a time" in content
 
 
+def test_normalization_enforces_teach_workspace_without_upstream_text_coupling(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/mattpocock-teach"
+    skill = candidate / local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: teach\n---\n"
+        "# Changed upstream teaching guidance\n\n"
+        "Upstream may reorganize every surrounding section.\n",
+        encoding="utf-8",
+    )
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream="skills/productivity/teach",
+        local=local,
+        canonical_name="mattpocock-teach",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    content = skill.read_text(encoding="utf-8")
+    assert first_changed == (f"{local}/SKILL.md",)
+    assert second_changed == ()
+    assert content.count("local-sync:teach-workspace:start") == 1
+    assert content.count("local-sync:teach-workspace:end") == 1
+    assert "`./tmp/teach/<lesson-name>/`" in content
+    assert "Upstream may reorganize every surrounding section." in content
+
+
 def test_normalization_rewrites_declared_mattpocock_skill_references(
     tmp_path: Path,
 ) -> None:

@@ -70,6 +70,17 @@ declared external resource refreshes safely. The single public entrypoint is
 - The append is marker-based and idempotent. Do not replace it with a
   context-sensitive replay patch.
 
+## Repository-Owned Skill Contracts
+
+- Express additive repository-owned behavior, workspace, and output-path
+  requirements as canonical-name-scoped, marker-based candidate normalizations.
+- These normalizations must replace their own marked block, remain idempotent,
+  and preserve unrelated upstream content when surrounding text changes.
+- Do not use replay patches for this class of managed-skill customization.
+- Reserve replay patches for irreducible edits to upstream-owned lines that
+  cannot be expressed safely as an additive marked contract. Record why a
+  normalization is insufficient before registering such an exception.
+
 ## Workspace Convention
 
 - The runtime workspace must be outside this repository.
@@ -139,6 +150,8 @@ manifest refs or repository targets. Do not run without separate authorization.
 
 ## Override Rules
 
+- Do not register a replay patch for an additive repository-owned skill
+  contract; implement a canonical-name-scoped marked normalization instead.
 - Every approved imported in-place override must be registered in
   `references/imported-asset-overrides.yaml` with a replay patch and expected
   content hash.

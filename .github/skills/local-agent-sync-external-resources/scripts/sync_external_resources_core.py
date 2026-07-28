@@ -456,15 +456,57 @@ This repository-owned contract overrides any earlier instruction to ask one ques
   question remains, present it as a numbered one-item block.
 {_GUIDED_QUESTION_CONTRACT_END}"""
 
+_TEACH_WORKSPACE_SKILL = "mattpocock-teach"
+_TEACH_WORKSPACE_CONTRACT_START = "<!-- local-sync:teach-workspace:start -->"
+_TEACH_WORKSPACE_CONTRACT_END = "<!-- local-sync:teach-workspace:end -->"
+_TEACH_WORKSPACE_CONTRACT_RE = re.compile(
+    re.escape(_TEACH_WORKSPACE_CONTRACT_START)
+    + r".*?"
+    + re.escape(_TEACH_WORKSPACE_CONTRACT_END),
+    re.DOTALL,
+)
+_TEACH_WORKSPACE_CONTRACT = f"""\
+{_TEACH_WORKSPACE_CONTRACT_START}
+## Local teaching-workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Create or reuse one self-contained workspace at
+  `./tmp/teach/<lesson-name>/`.
+- Derive `<lesson-name>` from the learning goal as a stable dash-case slug.
+  Reuse it when later sessions continue the same goal.
+- Resolve every generated path against that workspace root. Keep all teaching
+  state, lessons, references, learning records, and supporting assets inside it.
+- Do not create teaching resources in the repository root or outside the active
+  teaching workspace.
+{_TEACH_WORKSPACE_CONTRACT_END}"""
+
+
+def _enforce_marked_contract(
+    content: str,
+    contract_re: re.Pattern[str],
+    contract: str,
+) -> str:
+    if contract_re.search(content):
+        return contract_re.sub(contract, content, count=1)
+    return content.rstrip() + "\n\n" + contract + "\n"
+
 
 def _enforce_guided_question_contract(content: str) -> str:
-    if _GUIDED_QUESTION_CONTRACT_RE.search(content):
-        return _GUIDED_QUESTION_CONTRACT_RE.sub(
-            _GUIDED_QUESTION_CONTRACT,
-            content,
-            count=1,
-        )
-    return content.rstrip() + "\n\n" + _GUIDED_QUESTION_CONTRACT + "\n"
+    return _enforce_marked_contract(
+        content,
+        _GUIDED_QUESTION_CONTRACT_RE,
+        _GUIDED_QUESTION_CONTRACT,
+    )
+
+
+def _enforce_teach_workspace_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _TEACH_WORKSPACE_CONTRACT_RE,
+        _TEACH_WORKSPACE_CONTRACT,
+    )
 
 
 def normalize_candidate(
@@ -551,6 +593,11 @@ def normalize_candidate(
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_guided_question_contract(content)
+            if (
+                asset.canonical_name == _TEACH_WORKSPACE_SKILL
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_teach_workspace_contract(content)
 
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
