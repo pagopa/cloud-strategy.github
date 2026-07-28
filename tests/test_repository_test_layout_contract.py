@@ -43,7 +43,11 @@ def test_github_owned_python_tests_make_owner_obvious() -> None:
             and "github" in rel_path.parts
             and "scripts" in rel_path.parts
         )
-        if skill_or_agent_owner_is_obvious or agent_owner_is_obvious or script_owner_is_obvious:
+        if (
+            skill_or_agent_owner_is_obvious
+            or agent_owner_is_obvious
+            or script_owner_is_obvious
+        ):
             continue
 
         if not owners:
@@ -67,4 +71,6 @@ def test_catalog_fast_check_lists_existing_test_files() -> None:
     test_paths = shlex.split(line.split(":=", 1)[1].strip())
     missing_paths = [path for path in test_paths if not (REPO_ROOT / path).is_file()]
 
-    assert not missing_paths, f"catalog-fast-check lists missing tests: {', '.join(missing_paths)}"
+    assert not missing_paths, (
+        f"catalog-fast-check lists missing tests: {', '.join(missing_paths)}"
+    )

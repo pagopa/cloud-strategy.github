@@ -201,9 +201,7 @@ def test_needs_review_accepts_environmental_external_gap(tmp_path: Path) -> None
 
     findings = validate_status(status)
 
-    assert "needs-review-classification" not in {
-        item.code for item in findings
-    }
+    assert "needs-review-classification" not in {item.code for item in findings}
 
 
 def test_resume_rejects_plan_fingerprint_drift(

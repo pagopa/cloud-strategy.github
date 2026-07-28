@@ -52,7 +52,9 @@ def test_gate_helper_mentions_internal_tdd_for_executable_behavior() -> None:
     assert "internal-tdd" in decision["readiness_brief"]["executable_behavior"]
 
 
-def test_support_skill_helper_suggests_internal_tdd_for_code_paths_and_symptom() -> None:
+def test_support_skill_helper_suggests_internal_tdd_for_code_paths_and_symptom() -> (
+    None
+):
     assert suggest_support_skills.SYMPTOM_METHODS["tdd"][0] == "load-internal-tdd"
 
     suggestions: dict[str, set[str]] = {}
@@ -139,7 +141,11 @@ def test_claim_requirements_return_documented_methods() -> None:
     requirements = resolve_simple_task.resolve_claim_requirements(["fixed"])
     methods = [requirement["method"] for requirement in requirements]
 
-    assert {"reproduce-loop", "scope-check", "superpowers-verification-before-completion"} <= set(methods)
+    assert {
+        "reproduce-loop",
+        "scope-check",
+        "superpowers-verification-before-completion",
+    } <= set(methods)
 
 
 def test_suggest_cli_returns_runtime_support_without_worktree_mapping() -> None:
