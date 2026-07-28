@@ -182,6 +182,7 @@ def test_agents_local_is_create_once(source_repo: Path, target_repo: Path) -> No
     _run_cli("plan", source_repo, target_repo)
     assert _run_cli("apply", source_repo, target_repo).returncode == 0
     first_content = (target_repo / "AGENTS.local.md").read_bytes()
+    assert first_content == b"# AGENTS.local.md - Repository-Local Policy\n"
     (target_repo / "AGENTS.local.md").write_bytes(b"consumer-edit\n")
     _run_cli("plan", source_repo, target_repo)
     assert _run_cli("apply", source_repo, target_repo).returncode == 0

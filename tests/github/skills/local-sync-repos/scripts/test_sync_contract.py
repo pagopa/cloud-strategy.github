@@ -139,17 +139,6 @@ def test_build_plan_preserves_local_instruction_and_deletes_other_target_only_in
     ) in {(item.action, item.path) for item in plan.operations}
 
 
-def test_existing_agents_local_is_preserved_byte_for_byte(
-    source_repo: Path, target_repo: Path
-) -> None:
-    local_policy = target_repo / "AGENTS.local.md"
-    local_policy.write_bytes(b"consumer-owned\n")
-    plan = build_plan(source_repo, target_repo)
-    assert ("preserve", "AGENTS.local.md") in {
-        (item.action, item.path) for item in plan.operations
-    }
-
-
 def test_nested_source_instructions_are_discovered(
     source_repo: Path, target_repo: Path
 ) -> None:
@@ -204,11 +193,18 @@ def test_missing_source_path_raises_source_contract_error(
         build_plan(empty_source, target_repo)
 
 
-def test_fingerprint_is_deterministic(source_repo: Path, target_repo: Path) -> None:
-    first = build_plan(source_repo, target_repo)
-    second = build_plan(source_repo, target_repo)
-    assert first.fingerprint == second.fingerprint
-    assert len(first.fingerprint) == 64
+def test_fingerprint_is_stable_and_changes_with_plan(
+    source_repo: Path, target_repo: Path
+) -> None:
+    initial = build_plan(source_repo, target_repo).fingerprint
+    repeated = build_plan(source_repo, target_repo).fingerprint
+
+    (target_repo / ".editorconfig").write_text("changed\n", encoding="utf-8")
+    changed = build_plan(source_repo, target_repo).fingerprint
+
+    assert repeated == initial
+    assert changed != initial
+    assert len(initial) == 64
 
 
 def test_dirty_managed_overlap_is_reported(
