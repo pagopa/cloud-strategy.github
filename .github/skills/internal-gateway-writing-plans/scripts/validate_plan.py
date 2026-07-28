@@ -30,7 +30,15 @@ def _check_filename(path: Path) -> str | None:
 
 
 def _check_preflight(text: str) -> str | None:
-    required = ("Target", "Anti-scope", "Validation path", "Stop conditions", "Observable acceptance")
+    required = (
+        "Goal",
+        "Global Constraints",
+        "Target",
+        "Anti-scope",
+        "Validation path",
+        "Stop conditions",
+        "Observable acceptance",
+    )
     for marker in required:
         if marker not in text:
             return "preflight"

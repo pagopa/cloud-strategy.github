@@ -28,6 +28,21 @@ def test_valid_fixture_has_no_objective_findings() -> None:
     assert _module().validate_plan(VALID) == []
 
 
+def test_plan_requires_delegated_header_sections(tmp_path: Path) -> None:
+    plan = tmp_path / "2026-07-27-2000-missing-header.md"
+    text = VALID.read_text().replace(
+        "## Goal\n\nValidate the plan execution CLI against a realistic plan shape.\n\n"
+        "## Global Constraints\n\n- Preserve fixture integrity.\n\n",
+        "",
+        1,
+    )
+    plan.write_text(text)
+
+    codes = {finding["code"] for finding in _module().validate_plan(plan)}
+
+    assert "preflight" in codes
+
+
 def test_invalid_fixture_reports_every_objective_rule() -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
         invalid_copy = Path(tmpdir) / "invalid-name.md"
@@ -64,6 +79,37 @@ def test_cli_is_quiet_on_success_and_bounded_on_failure() -> None:
     assert "PASS" in passed.stdout
     assert failed.returncode == 1
     assert failed.stdout.count("\n") <= 10
+
+
+def test_accepted_writer_fixture_passes_executor_preflight(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text("# Test repository\n")
+    (tmp_path / ".github").mkdir()
+    retained = tmp_path / "tmp" / "superpowers" / "plans"
+    retained.mkdir(parents=True)
+    staged_plan = retained / VALID.name
+    shutil.copy(VALID, staged_plan)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(
+                REPO_ROOT
+                / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
+            ),
+            "preflight",
+            str(staged_plan),
+            "--repo-root",
+            str(tmp_path),
+            "--format",
+            "compact",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_recovery_fields_require_actionable_content(tmp_path: Path) -> None:

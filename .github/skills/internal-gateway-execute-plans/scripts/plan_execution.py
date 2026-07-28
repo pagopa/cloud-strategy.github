@@ -140,6 +140,32 @@ def _extract_section(text: str, heading: str) -> str:
     return "\n".join(collected).strip()
 
 
+def _extract_plan_reference(text: str) -> str | None:
+    section = _extract_section(text, "Plan")
+    for line in section.splitlines():
+        value = line.strip().strip("`").strip()
+        if value:
+            return value
+    return None
+
+
+def _plan_reference_matches(
+    plan_path: Path,
+    status_path: Path,
+    declared_reference: str,
+    repo_root: Path,
+) -> bool:
+    declared_path = Path(declared_reference)
+    candidates: set[Path] = set()
+    if declared_path.is_absolute():
+        candidates.add(declared_path.resolve())
+    else:
+        candidates.add((status_path.parent / declared_path).resolve())
+        candidates.add((plan_path.parent / declared_path).resolve())
+        candidates.add((repo_root / declared_path).resolve())
+    return plan_path.resolve() in candidates
+
+
 def _validate_execution_field_quality(text: str) -> list[Finding]:
     findings: list[Finding] = []
     values = {
@@ -164,7 +190,13 @@ def _validate_execution_field_quality(text: str) -> list[Finding]:
     )
     recovery_is_bounded = "tbd" not in recovery and any(
         marker in recovery
-        for marker in ("in-scope", "in scope", "task-local", "bounded")
+        for marker in (
+            "in-scope",
+            "in scope",
+            "task-local",
+            "bounded",
+            "planned changes",
+        )
     )
     escalation_distinguishes_failures = (
         "task-local" in escalation
@@ -382,6 +414,27 @@ def validate_resume(plan_path: Path, status_path: Path, repo_root: Path | None =
 
     plan_fingerprint = compute_sha256(plan_path)
     status_text = status_path.read_text()
+
+    declared_plan = _extract_plan_reference(status_text)
+    if declared_plan is None:
+        findings.append(
+            Finding(
+                "missing-plan-binding",
+                "Status must declare the plan path under the Plan heading",
+            )
+        )
+    elif not _plan_reference_matches(
+        plan_path,
+        status_path,
+        declared_plan,
+        effective_root,
+    ):
+        findings.append(
+            Finding(
+                "plan-binding-mismatch",
+                f"Status plan reference does not match the validated plan: {declared_plan}",
+            )
+        )
 
     recorded_fingerprint = None
     for line in status_text.splitlines():

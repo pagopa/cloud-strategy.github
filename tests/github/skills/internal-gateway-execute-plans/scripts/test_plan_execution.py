@@ -278,6 +278,24 @@ def test_resume_rejects_plan_fingerprint_drift(
     assert {item.code for item in findings} >= {"plan-fingerprint-drift"}
 
 
+def test_resume_accepts_matching_status_binding(
+    valid_plan: Path, valid_partial_status: Path
+) -> None:
+    assert validate_resume(valid_plan, valid_partial_status) == []
+
+
+def test_resume_rejects_status_bound_to_different_plan(
+    valid_plan: Path, valid_partial_status: Path
+) -> None:
+    valid_partial_status.write_text(
+        valid_partial_status.read_text().replace("valid-plan.md", "other-plan.md")
+    )
+
+    findings = validate_resume(valid_plan, valid_partial_status)
+
+    assert {item.code for item in findings} >= {"plan-binding-mismatch"}
+
+
 def test_compact_output_is_bounded() -> None:
     payload = build_compact_payload([Finding("missing-heading", "detail", "blocking")])
     assert payload == {
