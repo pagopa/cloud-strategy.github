@@ -24,7 +24,7 @@ major dialect mismatch. Do not recommend Bash syntax to a POSIX `sh` target.
 | --- | --- | --- |
 | SH-M01 | Required status or error handling is omitted without a dialect-appropriate compatibility reason | Unchecked failures can corrupt behavior |
 | SH-M02 | Unquoted variable expansion outside a safe, dialect-appropriate context | Word splitting and globbing bugs |
-| SH-M03 | `cd` without error handling (`cd dir || exit 1`) | Silent directory change failure |
+| SH-M03 | `cd` without an immediate failure exit | Silent directory change failure |
 | SH-M04 | Bash `local` is used outside `Dialect: Bash` | POSIX `sh` cannot rely on the extension |
 | SH-M05 | Bash-specific syntax under a POSIX shell shebang | The declared interpreter cannot reliably execute the script |
 | SH-M06 | Missing cleanup trap for temporary files | Resource leak |
@@ -38,7 +38,7 @@ major dialect mismatch. Do not recommend Bash syntax to a POSIX `sh` target.
 | SH-m01 | `echo` used where portable formatting or escape handling matters | Output can vary between shells and inputs |
 | SH-m02 | Hardcoded paths such as `/usr/local/bin/tool` | Portability concern |
 | SH-m03 | Operator-facing script lacks purpose or usage context | Operators cannot discover the entrypoint contract locally |
-| SH-m04 | `grep | awk` where a single `awk` suffices | Unnecessary pipe |
+| SH-m04 | A `grep`-to-`awk` pipeline where one `awk` suffices | Unnecessary pipe |
 | SH-m05 | Missing `command -v` check before using external tools | Fails confusingly if a tool is missing |
 | SH-m06 | Non-English log messages or comments | Language policy violation |
 

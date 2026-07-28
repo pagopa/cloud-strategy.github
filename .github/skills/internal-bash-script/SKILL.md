@@ -24,7 +24,7 @@ Classify the shell before choosing script patterns. Preserve the declared
 interpreter and record the execution environment and compatibility target:
 
 - `Dialect: Bash` when the entrypoint and runtime provide Bash.
-- `Dialect: POSIX `sh`` when the entrypoint or deployment target requires POSIX
+- `Dialect: POSIX`sh`` when the entrypoint or deployment target requires POSIX
   shell syntax.
 
 Require an explicit POSIX baseline before treating POSIX.1-2024 Issue 8
@@ -46,7 +46,7 @@ options are valid only in this branch.
 
 ## POSIX `sh` branch
 
-For `Dialect: POSIX `sh``, follow the shebang convention declared by the target,
+For `Dialect: POSIX`sh``, follow the shebang convention declared by the target,
 use `set -eu` with contextual `-e` caveats, and use scalar variables, positional
 parameters, `[ ]`, and `test`. Do not use Bash arrays or `local`; use `pipefail`
 only for an explicit POSIX.1-2024 baseline.

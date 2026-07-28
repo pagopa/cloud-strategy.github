@@ -40,6 +40,8 @@ install_hook() {
     fi
 
     temporary_path="$(mktemp "$HOOKS_DIR/.${hook_name}.XXXXXX")"
+    # The generated hook must expand these variables when it runs, not while it is written.
+    # shellcheck disable=SC2016
     {
         printf '%s\n' '#!/usr/bin/env bash'
         printf '%s\n' "$HOOK_MARKER"

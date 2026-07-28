@@ -61,6 +61,19 @@ overrides:
   baseline_repo_commit: e986f49
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     an internal wrapper should replace the override.
+- id: search-company-knowledge-description-budget
+  target_path: .github/skills/search-company-knowledge/SKILL.md
+  source_family: atlassian/atlassian-mcp-server
+  lifecycle_mode: post-refresh-patch
+  apply_strategy: git-apply
+  approval: explicit-user-counter-validated
+  reason: Keep the imported skill available while reducing frontmatter description
+    payload and retrieval ambiguity.
+  patch_path: patches/search-company-knowledge-description.patch
+  expected_content_hash: 64ec4427ab123f4d729dcab63cc7b87d1bfd9941471ee9be4256abd70396a596
+  baseline_repo_commit: 10cc5e9
+  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
+    the shortened company-knowledge trigger still covers internal search requests.
 - id: mattpocock-writing-great-skills-delegated-invocation
   target_path: .github/skills/mattpocock-writing-great-skills/SKILL.md
   source_family: mattpocock/skills

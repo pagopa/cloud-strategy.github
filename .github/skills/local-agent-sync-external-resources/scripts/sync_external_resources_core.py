@@ -11,7 +11,6 @@ from typing import Literal
 
 import yaml
 
-
 _COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 
 
@@ -691,12 +690,19 @@ def select_overrides(
     return tuple(selected)
 
 
-def _sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(65536), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def _content_hash(path: Path) -> str:
+    raw_bytes = path.read_bytes()
+    try:
+        text = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        normalized_bytes = raw_bytes
+    else:
+        normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+        normalized_lines = [line.rstrip() for line in normalized.split("\n")]
+        while normalized_lines and normalized_lines[-1] == "":
+            normalized_lines.pop()
+        normalized_bytes = ("\n".join(normalized_lines) + "\n").encode("utf-8")
+    return hashlib.sha256(normalized_bytes).hexdigest()
 
 
 def verify_override_hash(
@@ -707,7 +713,7 @@ def verify_override_hash(
         raise ValueError(
             f"Override target missing on disk: {override.target_path}"
         )
-    actual = _sha256_file(target)
+    actual = _content_hash(target)
     if actual != override.expected_content_hash:
         raise ValueError(
             f"content hash mismatch for {override.target_path}: "
@@ -735,7 +741,6 @@ def _replay_one_override(
     if not patch_file.exists():
         raise ValueError(f"Override patch missing: {override.patch_path}")
 
-    patch_text = patch_file.read_text(encoding="utf-8")
     target = trial_repo / override.target_path
     before_content = target.read_text(encoding="utf-8") if target.exists() else ""
 

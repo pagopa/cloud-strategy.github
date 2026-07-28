@@ -14,6 +14,7 @@ the decision beside the declared dependency lock.
 
 Prefer semantic methods such as `banner`, `section`, `step`, `detail`,
 `success`, `warning`, `error`, `table`, and
+
 - `summary(status, counts, produced_files, diagnostics)`. Keep technical details
 behind a verbose flag and never log tokens, passwords, credentials, or
 sensitive payloads.

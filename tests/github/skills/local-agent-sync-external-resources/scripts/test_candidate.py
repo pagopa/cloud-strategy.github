@@ -29,6 +29,7 @@ from sync_external_resources_core import (  # noqa: E402
     select_overrides,
     validate_external_workspace,
     validate_override_patches,
+    verify_override_hash,
 )
 
 
@@ -383,6 +384,22 @@ def candidate_repo(tmp_path: Path) -> Path:
 
 def _sha256(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def test_override_hash_normalizes_text_whitespace(tmp_path: Path) -> None:
+    target_rel = ".github/skills/test/SKILL.md"
+    target = tmp_path / target_rel
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"---\r\nname: test  \r\n---\r\nBody.  \r\n\r\n")
+    override = ImportedOverride(
+        override_id="test-override",
+        target_path=target_rel,
+        patch_path="patches/test.patch",
+        apply_strategy="git-apply",
+        expected_content_hash=_sha256("---\nname: test\n---\nBody.\n"),
+    )
+
+    verify_override_hash(tmp_path, override)
 
 
 def _make_override(
