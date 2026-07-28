@@ -24,7 +24,8 @@ Thin repository wrapper for approved implementation-plan writing. This skill rec
 
 ### Preflight Gate
 
-Capture the preflight: `Target`, `Anti-scope`, `Nearest owner`,
+Write the retained plan section as `## Preflight Gate`. Capture `Target`,
+`Anti-scope`, `Nearest owner`,
 `Validation path`, `Stop conditions`, `Observable acceptance`,
 `Baseline validation`, `Recovery policy`, `Escalation conditions`, and
 `User-facing report`.

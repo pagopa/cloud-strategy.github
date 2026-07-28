@@ -31,7 +31,11 @@ REQUIRED_PLAN_HEADINGS = (
 )
 
 PLAN_HEADING_ALIASES = {
-    "Repository Preflight": ("Repository Preflight", "Preflight"),
+    "Repository Preflight": (
+        "Repository Preflight",
+        "Preflight",
+        "Preflight Gate",
+    ),
 }
 
 REQUIRED_EXECUTION_FIELDS = (
@@ -39,6 +43,13 @@ REQUIRED_EXECUTION_FIELDS = (
     "Recovery Policy",
     "Escalation Conditions",
     "User-Facing Report",
+)
+
+REPORT_CONCEPT_MARKERS = (
+    ("outcome", "result"),
+    ("validation", "check"),
+    ("recovery", "remediation"),
+    ("next action", "follow-up"),
 )
 
 REQUIRED_STATUS_HEADINGS = (
@@ -101,7 +112,8 @@ def _has_named_field(text: str, name: str) -> bool:
 def _extract_named_field(text: str, name: str) -> str | None:
     escaped = re.escape(name)
     bullet_pattern = re.compile(
-        rf"(?im)^\s*[-*]\s+(?:\*\*)?{escaped}:(?:\*\*)?\s*(.+?)\s*$"
+        rf"(?im)^[ \t]*[-*][ \t]+(?:\*\*)?{escaped}:(?:\*\*)?"
+        rf"[ \t]*([^\r\n]*)$"
     )
     bullet_match = bullet_pattern.search(text)
     if bullet_match:
@@ -134,8 +146,13 @@ def _validate_execution_field_quality(text: str) -> list[Finding]:
         name: _extract_named_field(text, name)
         for name in REQUIRED_EXECUTION_FIELDS
     }
-    if any(value is None for value in values.values()):
-        return findings
+    if any(not value for value in values.values()):
+        return [
+            Finding(
+                "invalid-execution-field",
+                "Execution fields must be non-empty",
+            )
+        ]
 
     baseline = (values["Baseline Validation"] or "").lower()
     recovery = (values["Recovery Policy"] or "").lower()
@@ -154,8 +171,8 @@ def _validate_execution_field_quality(text: str) -> list[Finding]:
         and any(marker in escalation for marker in ("pre-existing", "unrelated"))
     )
     report_is_complete = all(
-        marker in report
-        for marker in ("outcome", "validation", "recovery", "next action")
+        any(marker in report for marker in concept_markers)
+        for concept_markers in REPORT_CONCEPT_MARKERS
     )
 
     if not all(

@@ -3,6 +3,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = next(
     parent
     for parent in Path(__file__).resolve().parents
@@ -28,13 +30,29 @@ def _fixture(name: str) -> Path:
     return FIXTURES / name
 
 
+def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
+    (tmp_path / "AGENTS.md").write_text("# agents\n")
+    (tmp_path / ".github").mkdir()
+    staged = tmp_path / "tmp" / "superpowers" / "plans"
+    staged.mkdir(parents=True)
+    plan = staged / "valid-plan.md"
+    plan.write_text(text or _fixture("valid-plan.md").read_text())
+    return plan
+
+
 def test_valid_plan_is_bound_to_its_sha256(valid_plan: Path) -> None:
     findings = validate_plan(valid_plan, repo_root=valid_plan.parents[3])
     assert findings == []
     assert compute_sha256(valid_plan).startswith("sha256:")
 
 
-def test_plan_accepts_preflight_heading_alias(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "preflight_heading",
+    ("Repository Preflight", "Preflight", "Preflight Gate"),
+)
+def test_plan_accepts_preflight_heading_alias(
+    tmp_path: Path, preflight_heading: str
+) -> None:
     (tmp_path / "AGENTS.md").write_text("# agents\n")
     (tmp_path / ".github").mkdir()
     staged = tmp_path / "tmp" / "superpowers" / "plans"
@@ -43,7 +61,7 @@ def test_plan_accepts_preflight_heading_alias(tmp_path: Path) -> None:
     plan.write_text(
         "# Plan\n\n"
         "## Goal\n\n- Validate the plan.\n\n"
-        "## Preflight\n\n- Use the repository validator.\n\n"
+        f"## {preflight_heading}\n\n- Use the repository validator.\n\n"
         "- Baseline Validation: run `python3 validator.py` before edits.\n"
         "- Recovery Policy: repair only in-scope regressions.\n"
         "- Escalation Conditions: continue pre-existing failures; stop on unsafe or task-local regression.\n"
@@ -53,6 +71,18 @@ def test_plan_accepts_preflight_heading_alias(tmp_path: Path) -> None:
     )
 
     assert validate_plan(plan, repo_root=tmp_path) == []
+
+
+def test_plan_without_supported_preflight_heading_is_rejected(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        "## Repository Preflight",
+        "## Execution Setup",
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert {item.code for item in findings} >= {"missing-heading"}
 
 
 def test_plan_outside_retained_plan_directory_is_rejected(tmp_path: Path) -> None:
@@ -108,6 +138,42 @@ def test_plan_rejects_weak_execution_recovery_fields(tmp_path: Path) -> None:
         "- **Escalation Conditions:** stop on failure.",
     )
     plan.write_text(text)
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert {item.code for item in findings} >= {"invalid-execution-field"}
+
+
+def test_plan_accepts_semantically_complete_user_facing_report(
+    tmp_path: Path,
+) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        "summarize outcome, changes, validation, recovery, gaps, and next action.",
+        "summarize the result, checks performed, remediation attempts, and follow-up.",
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    assert validate_plan(plan, repo_root=tmp_path) == []
+
+
+def test_plan_rejects_incomplete_user_facing_report(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        "summarize outcome, changes, validation, recovery, gaps, and next action.",
+        "summarize outcome, validation, and recovery.",
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert {item.code for item in findings} >= {"invalid-execution-field"}
+
+
+def test_plan_rejects_empty_execution_field(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        "- **Recovery Policy:** repair only task-local validation failures in scope.",
+        "- **Recovery Policy:**",
+    )
+    plan = _stage_valid_plan(tmp_path, text)
 
     findings = validate_plan(plan, repo_root=tmp_path)
 

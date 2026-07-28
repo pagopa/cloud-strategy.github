@@ -7,6 +7,8 @@ review, todo, task execution, or core stop procedure.
 ## Before the delegated loop
 
 - Require the exact retained plan path under `tmp/superpowers/plans/`.
+- Accept `Preflight Gate` as the canonical plan heading and
+  `Repository Preflight` or `Preflight` as compatibility aliases.
 - Confirm explicit user approval is present in the current conversation.
 - Compute and record the SHA-256 plan fingerprint with `scripts/plan_execution.py`.
 - Record branch, dirty files, and in-scope overlap before editing.
