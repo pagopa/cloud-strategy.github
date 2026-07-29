@@ -448,6 +448,50 @@ def test_normalization_removes_unsupported_invocation_field_from_all_mattpocock_
         assert "/mattpocock-domain-modeling" in content
 
 
+def test_normalization_removes_unsupported_invocation_field_from_all_managed_skills(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    asset = ManagedAsset(
+        source="external-skills",
+        upstream="skills/example",
+        local=".github/skills/external-example",
+        canonical_name="external-example",
+    )
+    skill = candidate / asset.local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\n"
+        "name: example\n"
+        "description: Test skill.\n"
+        "disable-model-invocation: true\n"
+        "---\n"
+        "Use the skill.\n",
+        encoding="utf-8",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="external-skills",
+                repository="https://example.com/external/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    changed = normalize_candidate(resources, candidate)
+
+    assert changed == (".github/skills/external-example/SKILL.md",)
+    content = skill.read_text(encoding="utf-8")
+    frontmatter = yaml.safe_load(content.split("---", 2)[1])
+    assert set(frontmatter) == {"name", "description"}
+    assert frontmatter["name"] == "external-example"
+
+
 def test_materialize_candidate_copies_upstream_to_local(
     tmp_path: Path,
 ) -> None:

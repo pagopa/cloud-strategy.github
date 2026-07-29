@@ -430,7 +430,7 @@ _SLASH_SKILL_REF_RE = re.compile(
 _BACKTICK_SKILL_REF_RE = re.compile(
     r"(?<![A-Za-z0-9_-])`(?P<name>[a-z0-9][a-z0-9-]*)`"
 )
-_DISABLE_MODEL_INVOCATION_RE = re.compile(
+_SKILL_DISABLE_MODEL_INVOCATION_RE = re.compile(
     r"^disable-model-invocation\s*:\s*.*(?:\n|$)",
     re.MULTILINE,
 )
@@ -645,11 +645,10 @@ def normalize_candidate(
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
 
-            if (
-                asset.source == _MATTPOCOCK_SOURCE
-                and file_path == asset_dir / "SKILL.md"
-            ):
-                content = _DISABLE_MODEL_INVOCATION_RE.sub("", content, count=1)
+            if file_path == asset_dir / "SKILL.md":
+                content = _SKILL_DISABLE_MODEL_INVOCATION_RE.sub(
+                    "", content, count=1
+                )
 
             if content != original:
                 file_path.write_text(content, encoding="utf-8")

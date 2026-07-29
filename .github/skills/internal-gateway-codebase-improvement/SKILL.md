@@ -1,7 +1,6 @@
 ---
 name: internal-gateway-codebase-improvement
 description: Use when manually improving codebase architecture and implementation clarity.
-disable-model-invocation: true
 ---
 
 # Internal Gateway Codebase Improvement
