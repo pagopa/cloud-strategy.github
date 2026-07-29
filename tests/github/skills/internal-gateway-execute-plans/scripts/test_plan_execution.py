@@ -86,9 +86,13 @@ def test_plan_accepts_preflight_heading_alias(
 
 
 def test_plan_without_supported_preflight_heading_is_a_notice(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        "## Repository Preflight",
-        "## Execution Setup",
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            "## Repository Preflight",
+            "## Execution Setup",
+        )
     )
     plan = _stage_valid_plan(tmp_path, text)
 
@@ -124,8 +128,7 @@ def test_plan_without_actionable_task_is_blocking(tmp_path: Path) -> None:
     findings = validate_plan(plan, repo_root=tmp_path)
 
     assert any(
-        item.code == "missing-task" and item.severity == "blocking"
-        for item in findings
+        item.code == "missing-task" and item.severity == "blocking" for item in findings
     )
 
 
@@ -143,9 +146,13 @@ def test_minimal_status_is_valid(tmp_path: Path, valid_plan: Path) -> None:
     assert validate_status(status) == []
 
 
-def test_minimal_status_preserves_resume_binding(tmp_path: Path, valid_plan: Path) -> None:
+def test_minimal_status_preserves_resume_binding(
+    tmp_path: Path, valid_plan: Path
+) -> None:
     status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(_minimal_status(valid_plan).replace("valid-plan.md", "other-plan.md"))
+    status.write_text(
+        _minimal_status(valid_plan).replace("valid-plan.md", "other-plan.md")
+    )
 
     assert {item.code for item in validate_resume(valid_plan, status)} >= {
         "plan-binding-mismatch"
@@ -202,9 +209,13 @@ def test_plan_ignores_execution_field_quality(tmp_path: Path) -> None:
 def test_plan_accepts_semantically_complete_user_facing_report(
     tmp_path: Path,
 ) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        "summarize outcome, changes, validation, recovery, gaps, and next action.",
-        "summarize the result, checks performed, remediation attempts, and follow-up.",
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            "summarize outcome, changes, validation, recovery, gaps, and next action.",
+            "summarize the result, checks performed, remediation attempts, and follow-up.",
+        )
     )
     plan = _stage_valid_plan(tmp_path, text)
 
@@ -212,9 +223,13 @@ def test_plan_accepts_semantically_complete_user_facing_report(
 
 
 def test_plan_ignores_user_facing_report_quality(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        "summarize outcome, changes, validation, recovery, gaps, and next action.",
-        "summarize outcome, validation, and recovery.",
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            "summarize outcome, changes, validation, recovery, gaps, and next action.",
+            "summarize outcome, validation, and recovery.",
+        )
     )
     plan = _stage_valid_plan(tmp_path, text)
 
@@ -225,9 +240,13 @@ def test_plan_ignores_user_facing_report_quality(tmp_path: Path) -> None:
 
 
 def test_plan_accepts_empty_execution_field(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        "- **Recovery Policy:** repair only task-local validation failures in scope.",
-        "- **Recovery Policy:**",
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            "- **Recovery Policy:** repair only task-local validation failures in scope.",
+            "- **Recovery Policy:**",
+        )
     )
     plan = _stage_valid_plan(tmp_path, text)
 
@@ -276,7 +295,9 @@ def test_status_rejects_unclassified_failure_evidence(
     tmp_path: Path, valid_plan: Path
 ) -> None:
     status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(_minimal_status(valid_plan) + "\n## Failure Classification\n\nTBD\n")
+    status.write_text(
+        _minimal_status(valid_plan) + "\n## Failure Classification\n\nTBD\n"
+    )
 
     findings = validate_status(status)
 

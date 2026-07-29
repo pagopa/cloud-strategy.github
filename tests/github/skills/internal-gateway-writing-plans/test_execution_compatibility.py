@@ -11,7 +11,8 @@ REPO_ROOT = next(
 BUNDLE = REPO_ROOT / ".github/skills/internal-gateway-writing-plans"
 WRITER_FIXTURE = BUNDLE / "fixtures/2026-07-25-1829-valid-plan.md"
 EXECUTOR_SCRIPT = (
-    REPO_ROOT / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
+    REPO_ROOT
+    / ".github/skills/internal-gateway-execute-plans/scripts/plan_execution.py"
 )
 
 
