@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 REPO_ROOT = next(
     parent
@@ -386,6 +387,65 @@ def test_normalization_rewrites_declared_mattpocock_skill_references(
     assert "/grilling" not in content
     assert "/domain-modeling" not in content
     assert "/unmanaged" in content
+
+
+def test_normalization_removes_unsupported_invocation_field_from_all_mattpocock_skills(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    assets = (
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/wayfinder",
+            local=".github/skills/mattpocock-wayfinder",
+            canonical_name="mattpocock-wayfinder",
+        ),
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/domain-modeling",
+            local=".github/skills/mattpocock-domain-modeling",
+            canonical_name="mattpocock-domain-modeling",
+        ),
+    )
+    for asset in assets:
+        skill = candidate / asset.local / "SKILL.md"
+        skill.parent.mkdir(parents=True)
+        skill.write_text(
+            "---\n"
+            f"name: {Path(asset.upstream).name}\n"
+            "description: Test skill.\n"
+            "disable-model-invocation: true\n"
+            "---\n"
+            "Use /domain-modeling when needed.\n",
+            encoding="utf-8",
+        )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=assets,
+                rewrite_skill_references=True,
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    assert first_changed == tuple(
+        sorted(f"{asset.local}/SKILL.md" for asset in assets)
+    )
+    assert second_changed == ()
+    for asset in assets:
+        content = (candidate / asset.local / "SKILL.md").read_text(encoding="utf-8")
+        frontmatter = yaml.safe_load(content.split("---", 2)[1])
+        assert set(frontmatter) == {"name", "description"}
+        assert "/mattpocock-domain-modeling" in content
 
 
 def test_materialize_candidate_copies_upstream_to_local(

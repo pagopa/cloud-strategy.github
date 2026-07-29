@@ -49,6 +49,14 @@ declared external resource refreshes safely. The single public entrypoint is
 - References to undeclared skills remain unchanged and must be reported as
   unresolved dependencies; do not silently import or rewrite them.
 
+## Matt Pocock Skill Frontmatter
+
+- Normalize every `mattpocock-skills` `SKILL.md` for Codex and GitHub Copilot
+  while preserving its `/skill-name` references.
+- Remove `disable-model-invocation` from skill frontmatter. That field belongs
+  to custom agents and makes the skill invalid for Codex skill discovery.
+- Keep invocation policy in each bundle's `agents/openai.yaml`.
+
 ## Executable Python Normalization
 
 - A source may set `ensure_python_shebangs: true` to prepend

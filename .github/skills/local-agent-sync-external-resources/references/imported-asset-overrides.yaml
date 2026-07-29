@@ -18,7 +18,7 @@ overrides:
     repository-local tmp/handoff directory instead of the operating system
     temporary directory.
   patch_path: patches/mattpocock-handoff-tmp-path.patch
-  expected_content_hash: c41182a1631c303fd024b4acd83124791aeaf4bc28a7ba1af5eba48eb26a5cfa
+  expected_content_hash: 8ccb23424a7bc19ca638da956a2ad7d610517fcd133b41617de28a797a4cd6e9
   baseline_repo_commit: efa058a
   validation_note: Stop the refresh if the patch does not apply cleanly; review
     whether the repository-local handoff path remains the intended contract.
@@ -81,23 +81,10 @@ overrides:
   apply_strategy: git-apply
   approval: explicit-user-counter-validated
   reason: Narrow the imported Matt Pocock writing-great-skills description to delegation-oriented
-    use by internal-skill-creator and remove disable-model-invocation so the orchestrator
-    can invoke it programmatically during the predictability review stage.
+    use by internal-skill-creator during the predictability review stage. The
+    source-wide normalization owns cross-runtime invocation compatibility.
   patch_path: patches/mattpocock-writing-great-skills-delegated-invocation.patch
   expected_content_hash: 41d4749ab5b4d903a8242b2e799c52ec405c35a520969bff6a43d6e788fe9254
   baseline_repo_commit: ed37663cc5fbef691ddfecd080dff42f7e7e350d
   validation_note: Stop the refresh if the patch does not apply cleanly; review whether
     the delegation contract still matches the intended orchestration order.
-- id: mattpocock-improve-codebase-architecture-delegated-invocation
-  target_path: .github/skills/mattpocock-improve-codebase-architecture/SKILL.md
-  source_family: mattpocock/skills
-  lifecycle_mode: post-refresh-patch
-  apply_strategy: git-apply
-  approval: explicit-user-counter-validated
-  reason: Remove disable-model-invocation because internal-gateway-codebase-improvement
-    delegates architecture discovery to this imported method owner.
-  patch_path: patches/mattpocock-improve-codebase-architecture-delegated-invocation.patch
-  expected_content_hash: 53e074792392f6c544af1f995679b3f80ce4da21cc037cab3c9a54168b945e31
-  baseline_repo_commit: ed37663cc5fbef691ddfecd080dff42f7e7e350d
-  validation_note: Stop the refresh if the patch does not apply cleanly; review whether
-    the codebase-improvement gateway still delegates to this method owner.
