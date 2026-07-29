@@ -29,6 +29,16 @@ description: "Use when executing or resuming an approved repository-owned retain
 - Running same-chat work that is not driven by an approved retained plan.
 - Changing imported execution behavior or replacing the delegated core workflow.
 
+## Safety Boundary
+
+The bundled CLI proves only mechanical safety: the plan is in the canonical
+retained directory, readable, and actionable; status files are bound to the
+plan and fingerprint; and completion state is consistent. Missing descriptive
+headings or execution metadata are notices with gateway defaults, not stop
+conditions. Status files require only the minimal resumable core; richer
+evidence is optional and validated when present. Conversational approval and
+runtime safety remain gateway responsibilities.
+
 ## Gateway boundary
 
 The gateway is a repository-owned extension of `/superpowers-executing-plans`. The

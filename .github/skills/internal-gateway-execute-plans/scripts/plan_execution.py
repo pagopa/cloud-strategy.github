@@ -30,6 +30,13 @@ REQUIRED_PLAN_HEADINGS = (
     "Global Constraints",
 )
 
+PLAN_NOTICE_CODES = frozenset({"missing-heading", "missing-execution-field"})
+
+TASK_HEADING_RE = re.compile(
+    r"(?im)^#{2,6}\s+Task(?:\s+\d+)?(?:\s*:|\b)"
+)
+UNCHECKED_TASK_RE = re.compile(r"(?m)^\s*[-*]\s+\[\s\]\s+\S")
+
 PLAN_HEADING_ALIASES = {
     "Repository Preflight": (
         "Repository Preflight",
@@ -45,28 +52,14 @@ REQUIRED_EXECUTION_FIELDS = (
     "User-Facing Report",
 )
 
-REPORT_CONCEPT_MARKERS = (
-    ("outcome", "result"),
-    ("validation", "check"),
-    ("recovery", "remediation"),
-    ("next action", "follow-up"),
-)
-
 REQUIRED_STATUS_HEADINGS = (
     "Status",
     "Plan",
     "Plan Fingerprint",
-    "Reason",
-    "Workspace Baseline",
-    "Baseline Validation",
-    "Files Changed",
     "Completed",
     "Remaining",
     "Validation",
-    "Recovery Attempts",
-    "Failure Classification",
     "Next",
-    "Resume Notes",
 )
 
 
@@ -109,20 +102,9 @@ def _has_named_field(text: str, name: str) -> bool:
     return any(re.search(pattern, text) for pattern in patterns)
 
 
-def _extract_named_field(text: str, name: str) -> str | None:
-    escaped = re.escape(name)
-    bullet_pattern = re.compile(
-        rf"(?im)^[ \t]*[-*][ \t]+(?:\*\*)?{escaped}:(?:\*\*)?"
-        rf"[ \t]*([^\r\n]*)$"
-    )
-    bullet_match = bullet_pattern.search(text)
-    if bullet_match:
-        return bullet_match.group(1).strip()
-
-    section = _extract_section(text, name)
-    if section:
-        return section.strip()
-    return None
+def _plan_finding(code: str, message: str) -> Finding:
+    severity = "notice" if code in PLAN_NOTICE_CODES else "blocking"
+    return Finding(code, message, severity)
 
 
 def _extract_section(text: str, heading: str) -> str:
@@ -164,64 +146,6 @@ def _plan_reference_matches(
         candidates.add((plan_path.parent / declared_path).resolve())
         candidates.add((repo_root / declared_path).resolve())
     return plan_path.resolve() in candidates
-
-
-def _validate_execution_field_quality(text: str) -> list[Finding]:
-    findings: list[Finding] = []
-    values = {
-        name: _extract_named_field(text, name)
-        for name in REQUIRED_EXECUTION_FIELDS
-    }
-    if any(not value for value in values.values()):
-        return [
-            Finding(
-                "invalid-execution-field",
-                "Execution fields must be non-empty",
-            )
-        ]
-
-    baseline = (values["Baseline Validation"] or "").lower()
-    recovery = (values["Recovery Policy"] or "").lower()
-    escalation = (values["Escalation Conditions"] or "").lower()
-    report = (values["User-Facing Report"] or "").lower()
-
-    baseline_is_actionable = bool(
-        re.search(r"`[^`\n]+`|\b(?:rtk|python3|pytest|make)\b", baseline)
-    )
-    recovery_is_bounded = "tbd" not in recovery and any(
-        marker in recovery
-        for marker in (
-            "in-scope",
-            "in scope",
-            "task-local",
-            "bounded",
-            "planned changes",
-        )
-    )
-    escalation_distinguishes_failures = (
-        "task-local" in escalation
-        and any(marker in escalation for marker in ("pre-existing", "unrelated"))
-    )
-    report_is_complete = all(
-        any(marker in report for marker in concept_markers)
-        for concept_markers in REPORT_CONCEPT_MARKERS
-    )
-
-    if not all(
-        (
-            baseline_is_actionable,
-            recovery_is_bounded,
-            escalation_distinguishes_failures,
-            report_is_complete,
-        )
-    ):
-        findings.append(
-            Finding(
-                "invalid-execution-field",
-                "Execution fields must define an actionable baseline, bounded recovery, failure distinction, and standalone report",
-            )
-        )
-    return findings
 
 
 def _validate_status_evidence(text: str, status: str | None) -> list[Finding]:
@@ -319,7 +243,11 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
             )
         )
 
-    text = path.read_text()
+    try:
+        text = path.read_text()
+    except (OSError, UnicodeError) as exc:
+        findings.append(Finding("plan-unreadable", f"Plan content is unreadable: {exc}"))
+        return findings
     headings = _extract_headings(text)
     heading_set = set(headings)
 
@@ -328,30 +256,29 @@ def validate_plan(path: Path, repo_root: Path) -> list[Finding]:
             inline_pattern = f"**{required}:**"
             if inline_pattern not in text:
                 findings.append(
-                    Finding("missing-heading", f"Plan missing required heading: {required}")
+                    _plan_finding(
+                        "missing-heading", f"Plan missing required heading: {required}"
+                    )
                 )
 
     for canonical, aliases in PLAN_HEADING_ALIASES.items():
         if not any(alias in heading_set for alias in aliases):
-            findings.append(
-                Finding(
-                    "missing-heading",
-                    f"Plan missing required heading: {canonical}",
+                findings.append(
+                    _plan_finding(
+                        "missing-heading", f"Plan missing required heading: {canonical}"
+                    )
                 )
-            )
 
     for required in REQUIRED_EXECUTION_FIELDS:
         if not _has_named_field(text, required):
-            findings.append(
-                Finding(
-                    "missing-execution-field",
-                    f"Plan missing required execution field: {required}",
+                findings.append(
+                    _plan_finding(
+                        "missing-execution-field",
+                        f"Plan missing required execution field: {required}",
+                    )
                 )
-            )
 
-    findings.extend(_validate_execution_field_quality(text))
-
-    if "Task" not in " ".join(headings) and "## Task" not in text:
+    if not (TASK_HEADING_RE.search(text) or UNCHECKED_TASK_RE.search(text)):
         findings.append(
             Finding("missing-task", "Plan must contain at least one task heading")
         )

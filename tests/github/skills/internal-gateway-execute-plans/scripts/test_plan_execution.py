@@ -40,6 +40,18 @@ def _stage_valid_plan(tmp_path: Path, text: str | None = None) -> Path:
     return plan
 
 
+def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
+    return (
+        f"## Status\n\n`{status}`\n\n"
+        f"## Plan\n\n`{plan}`\n\n"
+        f"## Plan Fingerprint\n\n`{compute_sha256(plan)}`\n\n"
+        "## Completed\n\n- Task 1\n\n"
+        "## Remaining\n\n- Task 2\n\n"
+        "## Validation\n\n- Focused tests passed.\n\n"
+        "## Next\n\nResume Task 2.\n"
+    )
+
+
 def test_valid_plan_is_bound_to_its_sha256(valid_plan: Path) -> None:
     findings = validate_plan(valid_plan, repo_root=valid_plan.parents[3])
     assert findings == []
@@ -73,7 +85,7 @@ def test_plan_accepts_preflight_heading_alias(
     assert validate_plan(plan, repo_root=tmp_path) == []
 
 
-def test_plan_without_supported_preflight_heading_is_rejected(tmp_path: Path) -> None:
+def test_plan_without_supported_preflight_heading_is_a_notice(tmp_path: Path) -> None:
     text = _fixture("valid-plan.md").read_text().replace(
         "## Repository Preflight",
         "## Execution Setup",
@@ -82,7 +94,39 @@ def test_plan_without_supported_preflight_heading_is_rejected(tmp_path: Path) ->
 
     findings = validate_plan(plan, repo_root=tmp_path)
 
-    assert {item.code for item in findings} >= {"missing-heading"}
+    assert not [item for item in findings if item.severity == "blocking"]
+    assert any(
+        item.code == "missing-heading" and item.severity == "notice"
+        for item in findings
+    )
+
+
+def test_legacy_draft_plan_metadata_is_non_blocking(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path, _fixture("legacy-draft-plan.md").read_text())
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert not [item for item in findings if item.severity == "blocking"]
+    assert {item.code for item in findings} >= {
+        "missing-heading",
+        "missing-execution-field",
+    }
+    assert all(
+        item.severity == "notice"
+        for item in findings
+        if item.code in {"missing-heading", "missing-execution-field"}
+    )
+
+
+def test_plan_without_actionable_task_is_blocking(tmp_path: Path) -> None:
+    plan = _stage_valid_plan(tmp_path, "# Notes\n\nNo executable work is defined.\n")
+
+    findings = validate_plan(plan, repo_root=tmp_path)
+
+    assert any(
+        item.code == "missing-task" and item.severity == "blocking"
+        for item in findings
+    )
 
 
 def test_plan_outside_retained_plan_directory_is_rejected(tmp_path: Path) -> None:
@@ -92,7 +136,23 @@ def test_plan_outside_retained_plan_directory_is_rejected(tmp_path: Path) -> Non
     assert {item.code for item in findings} >= {"plan-outside-retained-directory"}
 
 
-def test_plan_without_recovery_contract_is_blocking(tmp_path: Path) -> None:
+def test_minimal_status_is_valid(tmp_path: Path, valid_plan: Path) -> None:
+    status = tmp_path / "valid-plan.PARTIAL.md"
+    status.write_text(_minimal_status(valid_plan))
+
+    assert validate_status(status) == []
+
+
+def test_minimal_status_preserves_resume_binding(tmp_path: Path, valid_plan: Path) -> None:
+    status = tmp_path / "valid-plan.PARTIAL.md"
+    status.write_text(_minimal_status(valid_plan).replace("valid-plan.md", "other-plan.md"))
+
+    assert {item.code for item in validate_resume(valid_plan, status)} >= {
+        "plan-binding-mismatch"
+    }
+
+
+def test_plan_without_execution_metadata_is_non_blocking(tmp_path: Path) -> None:
     (tmp_path / "AGENTS.md").write_text("# agents\n")
     (tmp_path / ".github").mkdir()
     staged = tmp_path / "tmp" / "superpowers" / "plans"
@@ -108,21 +168,15 @@ def test_plan_without_recovery_contract_is_blocking(tmp_path: Path) -> None:
 
     findings = validate_plan(plan, repo_root=tmp_path)
 
-    messages = {item.message for item in findings}
+    assert not [item for item in findings if item.severity == "blocking"]
     missing_fields = [
         item for item in findings if item.code == "missing-execution-field"
     ]
     assert missing_fields
-    assert all(item.severity == "blocking" for item in missing_fields)
-    assert messages >= {
-        "Plan missing required execution field: Baseline Validation",
-        "Plan missing required execution field: Recovery Policy",
-        "Plan missing required execution field: Escalation Conditions",
-        "Plan missing required execution field: User-Facing Report",
-    }
+    assert all(item.severity == "notice" for item in missing_fields)
 
 
-def test_plan_rejects_weak_execution_recovery_fields(tmp_path: Path) -> None:
+def test_plan_ignores_execution_field_quality(tmp_path: Path) -> None:
     (tmp_path / "AGENTS.md").write_text("# agents\n")
     (tmp_path / ".github").mkdir()
     staged = tmp_path / "tmp" / "superpowers" / "plans"
@@ -141,7 +195,8 @@ def test_plan_rejects_weak_execution_recovery_fields(tmp_path: Path) -> None:
 
     findings = validate_plan(plan, repo_root=tmp_path)
 
-    assert {item.code for item in findings} >= {"invalid-execution-field"}
+    assert not [item for item in findings if item.severity == "blocking"]
+    assert "invalid-execution-field" not in {item.code for item in findings}
 
 
 def test_plan_accepts_semantically_complete_user_facing_report(
@@ -156,7 +211,7 @@ def test_plan_accepts_semantically_complete_user_facing_report(
     assert validate_plan(plan, repo_root=tmp_path) == []
 
 
-def test_plan_rejects_incomplete_user_facing_report(tmp_path: Path) -> None:
+def test_plan_ignores_user_facing_report_quality(tmp_path: Path) -> None:
     text = _fixture("valid-plan.md").read_text().replace(
         "summarize outcome, changes, validation, recovery, gaps, and next action.",
         "summarize outcome, validation, and recovery.",
@@ -165,10 +220,11 @@ def test_plan_rejects_incomplete_user_facing_report(tmp_path: Path) -> None:
 
     findings = validate_plan(plan, repo_root=tmp_path)
 
-    assert {item.code for item in findings} >= {"invalid-execution-field"}
+    assert not [item for item in findings if item.severity == "blocking"]
+    assert "invalid-execution-field" not in {item.code for item in findings}
 
 
-def test_plan_rejects_empty_execution_field(tmp_path: Path) -> None:
+def test_plan_accepts_empty_execution_field(tmp_path: Path) -> None:
     text = _fixture("valid-plan.md").read_text().replace(
         "- **Recovery Policy:** repair only task-local validation failures in scope.",
         "- **Recovery Policy:**",
@@ -177,7 +233,8 @@ def test_plan_rejects_empty_execution_field(tmp_path: Path) -> None:
 
     findings = validate_plan(plan, repo_root=tmp_path)
 
-    assert {item.code for item in findings} >= {"invalid-execution-field"}
+    assert not [item for item in findings if item.severity == "blocking"]
+    assert "invalid-execution-field" not in {item.code for item in findings}
 
 
 def test_status_rejects_unknown_state_and_missing_headings(
@@ -189,7 +246,7 @@ def test_status_rejects_unknown_state_and_missing_headings(
     assert "missing-heading" in codes
 
 
-def test_status_requires_baseline_delta_and_recovery_evidence(tmp_path: Path) -> None:
+def test_status_accepts_missing_optional_evidence(tmp_path: Path) -> None:
     status = tmp_path / "plan.PARTIAL.md"
     status.write_text(
         "\n\n".join(
@@ -212,21 +269,14 @@ def test_status_requires_baseline_delta_and_recovery_evidence(tmp_path: Path) ->
 
     findings = validate_status(status)
 
-    messages = {item.message for item in findings}
-    assert messages >= {
-        "Status missing required heading: Baseline Validation",
-        "Status missing required heading: Recovery Attempts",
-        "Status missing required heading: Failure Classification",
-    }
+    assert findings == []
 
 
-def test_status_rejects_unclassified_failure_evidence(tmp_path: Path) -> None:
+def test_status_rejects_unclassified_failure_evidence(
+    tmp_path: Path, valid_plan: Path
+) -> None:
     status = tmp_path / "valid-plan.PARTIAL.md"
-    status.write_text(
-        _fixture("valid-plan.PARTIAL.md")
-        .read_text()
-        .replace("None; validation passed.", "TBD")
-    )
+    status.write_text(_minimal_status(valid_plan) + "\n## Failure Classification\n\nTBD\n")
 
     findings = validate_status(status)
 
@@ -234,15 +284,14 @@ def test_status_rejects_unclassified_failure_evidence(tmp_path: Path) -> None:
 
 
 def test_status_rejects_noncomparable_baseline_and_final_commands(
-    tmp_path: Path,
+    tmp_path: Path, valid_plan: Path
 ) -> None:
     status = tmp_path / "valid-plan.PARTIAL.md"
     status.write_text(
-        _fixture("valid-plan.PARTIAL.md")
-        .read_text()
-        .replace(
-            "`pytest -q tests/fixture/` — passed\n\n## Recovery Attempts",
-            "`make unrelated-check` — passed\n\n## Recovery Attempts",
+        _minimal_status(valid_plan).replace(
+            "## Validation\n\n- Focused tests passed.",
+            "## Baseline Validation\n\n- `pytest -q tests/fixture/` — passed\n\n"
+            "## Validation\n\n- `make unrelated-check` — passed",
         )
     )
 
@@ -251,18 +300,12 @@ def test_status_rejects_noncomparable_baseline_and_final_commands(
     assert {item.code for item in findings} >= {"validation-delta-mismatch"}
 
 
-def test_needs_review_accepts_environmental_external_gap(tmp_path: Path) -> None:
+def test_needs_review_accepts_environmental_external_gap(
+    tmp_path: Path, valid_plan: Path
+) -> None:
     status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
-    text = _fixture("valid-plan.PARTIAL.md").read_text()
-    text = text.replace("`PARTIAL`", "`NEEDS_REVIEW`")
-    text = text.replace(
-        "- Task 2: Integration test",
-        "None.",
-    )
-    text = text.replace(
-        "None; validation passed.",
-        "Environmental: validation service unavailable.",
-    )
+    text = _minimal_status(valid_plan, "NEEDS_REVIEW")
+    text += "\n## Failure Classification\n\nEnvironmental: validation service unavailable.\n"
     status.write_text(text)
 
     findings = validate_status(status)
@@ -351,7 +394,9 @@ def test_preflight_cli_rejects_plan_outside_directory() -> None:
     assert payload["status"] == "failed"
 
 
-def test_preflight_json_rejects_missing_current_fields(tmp_path: Path) -> None:
+def test_preflight_json_reports_missing_current_fields_as_notices(
+    tmp_path: Path,
+) -> None:
     (tmp_path / "AGENTS.md").write_text("# agents\n")
     (tmp_path / ".github").mkdir()
     staged = tmp_path / "tmp" / "superpowers" / "plans"
@@ -381,9 +426,10 @@ def test_preflight_json_rejects_missing_current_fields(tmp_path: Path) -> None:
     )
 
     payload = json.loads(result.stdout)
-    assert result.returncode != 0
-    assert payload["status"] == "failed"
-    assert all(item["severity"] == "blocking" for item in payload["findings"])
+    assert result.returncode == 0
+    assert payload["status"] == "passed"
+    assert payload["findings"]
+    assert all(item["severity"] == "notice" for item in payload["findings"])
 
 
 def test_status_check_cli_invalid() -> None:

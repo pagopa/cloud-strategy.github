@@ -1,6 +1,6 @@
 # Status Contract
 
-Status transition rules, required headings, and exact sibling filenames for plan closeout.
+Status transition rules, required core, optional evidence, and exact sibling filenames for plan closeout.
 
 ## Status Transition Table
 
@@ -21,41 +21,57 @@ unapproved scope expansion, or unknown attribution. Use `NEEDS_REVIEW` when all
 in-scope work is complete and the remaining failure is proven pre-existing or
 unrelated or environmental.
 
-## Required Headings
+## Required Core
 
-Every status file must contain these headings in order:
+Every status file must contain this minimal resumable core in order:
 
 ```markdown
 ## Status
 ## Plan
 ## Plan Fingerprint
+## Completed
+## Remaining
+## Validation
+## Next
+```
+
+The parser accepts these optional evidence headings and validates their
+contents when present:
+
+```markdown
 ## Reason
 ## Workspace Baseline
 ## Baseline Validation
 ## Files Changed
-## Completed
-## Remaining
-## Validation
 ## Recovery Attempts
 ## Failure Classification
-## Next
 ## Resume Notes
 ```
+
+Record optional evidence when it improves reviewability, especially for broad
+validation deltas, recovery attempts, failure classification, or resume
+context. Its absence is not a parser failure.
 
 - **Status** — one of `DONE`, `PARTIAL`, `BLOCKED`, or `NEEDS_REVIEW`.
 - **Plan** — the exact plan file path.
 - **Plan Fingerprint** — the SHA-256 hash of the approved plan, prefixed with `sha256:`.
-- **Reason** — why this status was chosen; for `BLOCKED`, name the blocker; for `DONE`, confirm all evidence is fresh.
-- **Workspace Baseline** — branch, dirty files, and in-scope overlap at the time of closeout.
-- **Baseline Validation** — commands, exit status, and bounded failure summary captured before edits.
-- **Files Changed** — list of files created or modified during execution.
 - **Completed** — list of tasks that passed their transition gate, with task-level evidence.
 - **Remaining** — list of tasks not yet complete, with the exact work remaining.
 - **Validation** — list of validation commands run and their results.
-- **Recovery Attempts** — bounded actions taken, evidence delta, and why recovery stopped; use `none` only when no failure required recovery.
-- **Failure Classification** — classify every failure as task-local regression, pre-existing, unrelated/external, environmental, or unknown, with supporting baseline/final evidence.
 - **Next** — the exact next action to resume or finish.
-- **Resume Notes** — context needed to resume execution, including any drift or blockers.
+- **Reason** *(optional)* — why this status was chosen; name a blocker for
+  `BLOCKED` or confirm fresh evidence for `DONE`.
+- **Workspace Baseline** *(optional)* — branch, dirty files, and in-scope
+  overlap at closeout.
+- **Baseline Validation** *(optional)* — commands, exit status, and bounded
+  failure summary captured before edits.
+- **Files Changed** *(optional)* — files created or modified during execution.
+- **Recovery Attempts** *(optional)* — bounded actions, evidence delta, and why
+  recovery stopped; use `none` when no failure required recovery.
+- **Failure Classification** *(optional)* — task-local regression,
+  pre-existing, unrelated/external, environmental, or unknown, with evidence.
+- **Resume Notes** *(optional)* — context needed to resume, including drift or
+  blockers.
 
 ## Exact Allowed Sibling Filenames
 

@@ -17,6 +17,15 @@ review, todo, task execution, or core stop procedure.
   retain its command, exit status, and bounded failure summary.
 - Preserve the no-Git-mutation rule throughout execution.
 
+## Mechanical safety boundary
+
+The bundled validator blocks only when it cannot safely identify or inspect the
+retained plan, when the plan has no actionable task, or when status binding,
+fingerprint, or completion checks fail. Missing `Goal`, `Global Constraints`,
+preflight aliases, and legacy execution fields are notices; the gateway uses
+its conversational approval and runtime safety responsibilities as defaults.
+The validator does not interpret textual states such as `Draft-only`.
+
 ## Before each delegated task
 
 - State the task's observable outcome, dependency set, and focused validation.
@@ -63,6 +72,9 @@ review, todo, task execution, or core stop procedure.
   the retained plan before continuing.
 - If the plan changed after approval, stop and record plan drift until the
   approval and fingerprint are refreshed.
+- A status file needs only the required resumable core; optional evidence is
+  validated when present and should be recorded when it improves handoff or
+  failure attribution.
 
 ## Closeout
 
