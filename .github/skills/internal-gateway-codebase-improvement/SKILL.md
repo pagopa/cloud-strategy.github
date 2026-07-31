@@ -1,81 +1,53 @@
 ---
 name: internal-gateway-codebase-improvement
-description: Use when manually improving codebase architecture and implementation clarity.
+description: Use when a repository-owned codebase needs evidence-backed architecture analysis, deep-module design, mandatory critical challenge, and an implementation plan without executing changes.
 ---
 
 # Internal Gateway Codebase Improvement
 
 ## Referenced skills
 
-- `/mattpocock-improve-codebase-architecture`: architecture discovery and
-  candidate report owner.
-- `/addyosmani-code-simplification`: behavior-preserving implementation
-  simplification owner.
-- `/internal-tdd`: executable or evaluable behavior-change gate.
-- `/superpowers-verification-before-completion`: final evidence owner.
+- `/mattpocock-codebase-design`: architecture vocabulary and design-method owner.
+- `/internal-gateway-critical-master`: mandatory final challenge owner.
+- `/internal-gateway-writing-plans`: only successful terminal handoff.
 
-## Manual invocation boundary
+## Invocation boundary
 
-This skill runs only after the user invokes it explicitly. It is not a
-canonical gateway, implicit fallback, peer-dispatch target, or subagent target.
+Run only when explicitly invoked. Own analysis through plan writing. Never own implementation.
 
 ## When to use
 
-- The user explicitly requests codebase improvement and the evidence supports
-  one of the three supported lanes.
+Use when repository evidence suggests a module boundary, interface, seam, or
+locality problem requires architecture analysis before implementation.
 
-## When not to use
+## Scope
 
-- Feature development, performance optimization, security remediation, or
-  dependency upgrades.
-- Work that needs a canonical gateway or automatic routing.
+- Use for shallow modules, leaking seams, poor locality, low-leverage interfaces,
+  cross-module coupling, or testability constrained by architecture.
+- Do not use for local simplification, feature delivery, performance tuning,
+  security remediation, dependency upgrades, or direct implementation.
 
-## Lane selection
+## Contract
 
-Select exactly one lane from repository evidence:
+1. Run Preflight and Analysis Gates from [`references/workflow.md`](references/workflow.md).
+2. Present evidence-backed candidates and obtain candidate selection.
+3. Use `/mattpocock-codebase-design` to design the selected deepening.
+4. Run Feasibility and Structural Approval Gates.
+5. Run `/internal-gateway-critical-master` for every approved design.
+6. If the critic leaves any open point, invalidate approval and return to Analysis.
+7. Repeat analysis, design, feasibility, approval, and critical challenge until clear.
+8. On a clear critical result, invoke `/internal-gateway-writing-plans` and stop
+   after the retained plan is written. Never execute it.
 
-- `local-simplification`: readability, naming, nesting, duplication, dead code,
-  or unnecessary implementation abstraction inside an already valid boundary.
-- `architecture-improvement`: shallow modules, leaking seams, poor locality,
-  cross-module coupling, or testability constrained by current interfaces.
-- `combined`: an approved architecture refactor whose changed implementation
-  also contains bounded simplification opportunities.
+## Non-negotiable critical rule
 
-Do not run both source methods by default. No silent lane escalation: stop and
-ask before changing from `local-simplification` to an architecture lane.
+Plan writing is illegal before a current-cycle critical pass has no material
+objection, unresolved uncertainty, unanswered question, or accepted residual risk.
+`accept-with-risk` is not clear and must reopen Analysis.
 
-## Core workflow
+## Output
 
-1. Recover explicit target and anti-scope.
-2. Inspect bounded evidence and choose one lane.
-3. State the lane, reason, expected files, and validation path.
-4. Establish a Passing behavior baseline.
-5. For architecture lanes, run architecture discovery and stop at the
-   Structural Approval Gate before any write.
-6. For executable changes, load `/internal-tdd`.
-7. Record the approved interfaces and seams as the Protected seam set.
-8. Apply the executable refactor in the approved scope.
-9. Apply behavior-preserving simplification only for
-   `local-simplification` or the approved changed scope of `combined`.
-10. Run the focused checks and the Final Evidence Gate.
-
-Domain-model and ADR writes from the architecture method also require the
-Structural Approval Gate.
-
-## Structural Approval Gate
-
-Before any architecture, domain-model, or ADR write, present the candidate
-report and the expected file set. Stop and wait for explicit user approval.
-Do not proceed without it.
-
-## Protected seam set
-
-Before any executable refactor, record the approved modules, interfaces,
-adapters, side effects, error behavior, ordering, and test surfaces.
-Simplification must not alter any protected seam.
-
-## Final Evidence Gate
-
-After all writes, load `/superpowers-verification-before-completion` and
-present fresh passing evidence for the focused validation path before
-claiming completion.
+Keep one compact evidence ledger across loops. Use the schemas in
+[`references/evidence-contract.md`](references/evidence-contract.md), report the
+retained plan path, and name `/internal-gateway-execute-plans` only as the plan
+writer's next owner; do not invoke it.

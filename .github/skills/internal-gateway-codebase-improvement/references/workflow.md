@@ -1,107 +1,116 @@
-# Codebase Improvement Workflow
+# Generic Architecture-Analysis Workflow
 
 ## State machine
 
-```mermaid
-flowchart TD
-    A[Manual user invocation] --> B[Bounded evidence]
-    B --> C{Select exactly one lane}
-    C -->|local-simplification| D[Passing behavior baseline]
-    C -->|architecture-improvement| E[Architecture candidate report]
-    C -->|combined| E
-    E --> F[Structural Approval Gate]
-    F -->|rejected| X[Stop without writes]
-    F -->|approved| G[Passing behavior baseline]
-    G --> H[Protected seam set]
-    H --> I[Executable refactor]
-    D --> J[Behavior-preserving simplification]
-    I --> K{Combined lane?}
-    K -->|no| L[Focused validation]
-    K -->|yes| J
-    J --> L
-    L --> M[Final Evidence Gate]
+```text
+Preflight Gate
+  -> Analysis Gate
+  -> Candidate Gate
+  -> Design Gate
+  -> Feasibility Gate
+  -> Structural Approval Gate
+  -> Mandatory Critical Gate
+       -> critical-clear: Plan Handoff
+       -> open-point: Analysis Gate
+       -> insufficient-evidence: Stop without plan
+  -> Plan Handoff
+  -> Stop before implementation
 ```
 
-## Lane selection signals
+The gateway owns every transition. The referenced skills provide methods or
+handoffs only; they do not replace a gate in this state machine.
 
-### `local-simplification`
+## Gate contract
 
-Signals: readability, naming, nesting, duplication, dead code, or unnecessary
-implementation abstraction inside an already valid boundary. The module
-structure, interfaces, and side-effect shape are not in question.
+### Preflight Gate
 
-Anti-signals: the change requires new modules, new interfaces, cross-module
-coupling changes, or testability improvements that depend on interface
-redesign.
+Record the target, nearest owner, goal, anti-scope, repository policy, domain
+vocabulary and ADRs when present, recent active decisions, validation
+discovery, and a clean or known workspace baseline. Stop if ownership or the
+validation path cannot be established safely. Record the immutable dependency
+set used for the analysis and verify that referenced core bundles remain
+unchanged.
 
-### `architecture-improvement`
+### Analysis Gate
 
-Signals: shallow modules, leaking seams, poor locality, cross-module coupling,
-or testability constrained by current interfaces. The improvement requires
-changing approved module boundaries or interface contracts.
+Record the current interface, whether the implementation is hidden or leaked,
+callers, tests, dependency categories, real adapters, observable behavior, the
+deletion test, and evidence gaps. Distinguish confirmed evidence, inference,
+and estimate. Do not propose a new boundary until the current one is understood.
 
-Anti-signals: the problem is confined to implementation clarity within an
-already valid module boundary and does not require structural change.
+### Candidate Gate
 
-### `combined`
+Present one to three candidates. Each candidate separates value from confidence,
+states blast radius and reversibility, and exposes overlap or conflict. Obtain
+the user's selection before design. If the request is out of scope, stop without
+plan writing.
 
-Signals: an approved architecture refactor whose changed implementation also
-contains bounded simplification opportunities. Both structural and local
-clarity improvements are evidenced.
+### Design Gate
 
-Anti-signals: either the structural or the simplification case is not
-supported by bounded evidence.
+Use `/mattpocock-codebase-design` and its vocabulary: module, interface,
+implementation, depth, seam, adapter, leverage, locality, deletion test,
+dependency categories, and design-it-twice. For a material interface change,
+design it twice and compare alternatives on depth, locality, seam placement,
+caller cost, and hidden implementation. Record the selected deep module,
+interface, invariants, ordering, errors, and protected behavior. Give the
+packet a cycle number and stable packet ID.
 
-## No silent lane escalation
+### Feasibility Gate
 
-If the initial evidence selects `local-simplification` but the work reveals
-an architecture problem, stop and ask the user before changing lanes. Do not
-proceed into architecture writes on a `local-simplification` selection.
+Check that every interface field or method has a productive caller or an
+explicit invariant. Complete the caller × invariant × test mapping. Check seam
+propagation, anti-scope leakage, error modes, ordering, and validation commands.
+Reject designs that add interface members solely for tests or that lack two real
+adapters when introducing an injectable seam.
 
-## Structural Approval Gate
+### Structural Approval Gate
 
-For `architecture-improvement` and `combined` lanes, present the candidate
-report, expected file set, and affected interfaces before any write. Stop and
-wait for explicit user approval. Domain-model and ADR writes require the same
-approval boundary.
+Present the complete design packet, including alternatives rejected, migration
+sequence, stop conditions, and validation commands. Continue only when the user
+approves the design packet, not merely the candidate direction. Approval is
+current-cycle state and is invalidated by any reopened analysis. Record an
+approval receipt that names the exact cycle and packet ID.
 
-## Passing behavior baseline
+### Mandatory Critical Gate
 
-Before any executable refactor, establish that the current code passes its
-focused validation. Record the command and result. This baseline is the
-reference point for the post-refactor check.
+Run `/internal-gateway-critical-master` after every Structural Approval Gate.
+Earlier discussion or an embedded critique does not satisfy this gate. Challenge
+the current approved design for material objections, unresolved uncertainty,
+unanswered questions, evidence gaps that affect interface or scope, and
+accepted residual risk.
 
-## Protected seam set
+## Critical resolution loop
 
-Before any executable refactor, record the approved modules, interfaces,
-adapters, side effects, error behavior, ordering, and test surfaces that the
-refactor must not alter. Simplification applies only within these bounds.
+Any of the following is an open point and returns to Analysis: a material
+objection; unresolved uncertainty; a decision-changing question; an evidence
+gap affecting the interface or scope; defense `unanswered` or `accepts-risk`;
+or canonical outcome `review-evidence`,
+`continue-critical-with-new-evidence`, `reformulate-plan`, or
+`accept-with-risk`. In every such case, invalidate the current design approval,
+record the objection and required evidence in the Critical Resolution Ledger,
+and do not invoke plan writing.
 
-## Behavior-preserving simplification
+The only clear transition is canonical outcome `route-to-execution-owner`
+combined with defense `none` or `resolves`, with no unresolved uncertainty or
+material objection. The critical result must name the same current cycle and
+packet ID as the approval receipt. A mismatch, missing receipt, or stale packet
+is an open point and cannot reach plan writing. This challenge-readiness result
+routes to `/internal-gateway-writing-plans`; the gateway does not invoke an
+execution owner. `de-escalate-to-simple` stops out of scope without a plan.
 
-Apply `/addyosmani-code-simplification` only for `local-simplification` or the
-approved changed scope of `combined`. The simplification must not alter any
-entry in the Protected seam set.
+On every reopened cycle, rerun Analysis, Feasibility, Structural Approval, and
+Mandatory Critical. Rerun Candidate selection only when the new evidence
+changes the candidate set; otherwise retain the selected candidate and record
+why it remains valid. Always create a new current-cycle Design Packet and obtain
+fresh approval before the next critical challenge.
 
-## Executable refactor
+## Plan Handoff and stop
 
-For executable changes, load `/internal-tdd` before implementation. Apply the
-refactor within the approved scope and protected seam set.
-
-## Focused validation
-
-Run the focused test or check identified during lane selection. The check
-must cover the changed files and their direct dependents.
-
-## Final Evidence Gate
-
-Load `/superpowers-verification-before-completion` and present fresh passing
-evidence before claiming completion.
-
-## Stop conditions
-
-- Missing Passing behavior baseline.
-- Unclear ownership or affected-file set.
-- Focused validation fails after refactor.
-- Simplification would change a protected architecture seam.
-- Evidence does not support the selected lane.
+Load `/internal-gateway-writing-plans` only after `critical-clear`, passing one
+handoff package containing the current Design Packet, its approval receipt, the
+matching critical result, compact evidence ledger, Critical Resolution Ledger,
+and validation path. The writer must receive the exact packet and cycle ID
+named by the clear critical result; do not reconstruct or substitute a design
+between the Critical Gate and handoff. Wait for the retained plan to be
+written, report its path, and stop before implementation. A missing or
+incomplete plan is not a successful terminal state.
