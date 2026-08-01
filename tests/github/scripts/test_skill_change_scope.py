@@ -93,7 +93,10 @@ def test_collect_changed_paths_includes_worktree_and_base_ref_changes(
     tmp_path: Path,
 ) -> None:
     _run_git(tmp_path, "init", "-q")
-    _run_git_git = lambda *args: _run_git(tmp_path, *args)
+
+    def _run_git_git(*args: str) -> None:
+        _run_git(tmp_path, *args)
+
     _run_git_git("config", "user.email", "tests@example.com")
     _run_git_git("config", "user.name", "Skill scope tests")
 
