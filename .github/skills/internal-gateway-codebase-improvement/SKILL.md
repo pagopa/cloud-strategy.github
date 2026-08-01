@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-codebase-improvement
-description: Use when explicitly invoked to run the core codebase-architecture improvement workflow with a mandatory critical challenge after analysis, then stop after the core report is written.
+description: Use when explicitly invoked to run the core codebase-architecture improvement workflow, challenge its completed report, and stop at the report-only boundary.
 ---
 
 # Internal Gateway Codebase Improvement
@@ -8,7 +8,7 @@ description: Use when explicitly invoked to run the core codebase-architecture i
 ## Referenced skills
 
 - `/mattpocock-improve-codebase-architecture`: owns the complete architecture-improvement workflow.
-- `/internal-gateway-critical-master`: challenges the completed draft analysis before the core writes its report.
+- `/internal-gateway-critical-master`: challenges the completed report analysis before the gateway returns the report.
 
 ## Invocation boundary
 
@@ -16,17 +16,16 @@ Run only when explicitly invoked. This skill is a repository-owned wrapper; it d
 
 ## When to use
 
-Use when the core architecture-improvement workflow must produce a draft analysis that receives a critical challenge before report writing.
+Use when the core architecture-improvement workflow must produce a completed report that receives a critical challenge before the gateway returns it.
 
 ## Contract
 
-1. Load `/mattpocock-improve-codebase-architecture` and follow it unchanged through completion of `Explore`.
-2. Keep the resulting evidence, candidates, recommendation, assumptions, and evidence gaps as the current draft analysis. Do not write or present the HTML report yet.
-3. Run `/internal-gateway-critical-master` against that current draft analysis.
-4. Treat the pass as clear only when the critic returns `route-to-execution-owner`, Defense is `none` or `resolves`, and no material objection or unresolved uncertainty remains.
-5. For every non-clear pass, return to the core's `Explore` step with the objection and smallest required evidence. Revise the analysis, then run a fresh critical challenge before report writing.
-6. Repeat only when the analysis materially changes or new evidence appears. If required evidence is unavailable, unsafe, outside scope, declined, or needs a user decision, stop and report the blocker and resume condition.
-7. After a clear pass, invoke `/mattpocock-improve-codebase-architecture` only for its report-generation section. Preserve its HTML report format and `./tmp/codebase-improve/` workspace contract. When the report is written, return its path and stop. Do not enter the core's post-report candidate-selection or grilling loop.
+1. Load `/mattpocock-improve-codebase-architecture` unchanged and let it complete `Explore` and HTML report generation.
+2. In the same agent orchestration context, intercept before the core presents its candidate-selection question and challenge the completed report analysis with `/internal-gateway-critical-master`. Consume the critic's internal Defense, canonical routing outcome, strongest objection, and unresolved uncertainty as working state. Do not add those internal fields to the critic's public card.
+3. Treat the pass as clear only when the canonical outcome is `route-to-execution-owner`, Defense is `none` or `resolves`, and no material objection or unresolved uncertainty remains.
+4. For every non-clear pass, rerun the core's report flow with the strongest objection and the smallest new evidence, then challenge the newly completed report in the same orchestration context.
+5. If safe rerun evidence or same-context critic state is unavailable, or if required evidence is unavailable, unsafe, outside scope, declined, or needs a user decision, stop with a blocker and a concrete resume condition.
+6. After a clear pass, return the core report path and stop. Preserve its HTML report format and `./tmp/codebase-improve/` workspace contract. Do not enter the core's post-report candidate-selection or grilling loop.
 
 ## Boundaries
 
@@ -41,7 +40,8 @@ Use when the core architecture-improvement workflow must produce a draft analysi
 ## Validation
 
 - The wrapper directly references only the core and the critic.
-- The critical challenge occurs after `Explore` and before report generation.
-- No report is written from an analysis with a material objection or unresolved uncertainty.
-- Every retry uses changed analysis or new evidence; terminal evidence gaps stop with a visible resume condition.
+- The critical challenge occurs after completed report generation and before report-only return.
+- The report fingerprint and critic-input fingerprint identify the same completed report analysis.
+- The critic's internal outcome and Defense stay in the same orchestration context and do not alter its public card.
+- A non-clear result triggers a fresh report flow or stops with a visible resume condition.
 - A clear pass writes exactly the core report, returns its path, and stops before grilling or any downstream owner.

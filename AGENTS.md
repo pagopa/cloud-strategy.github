@@ -99,6 +99,22 @@ nearest owner, avoid duplicated guidance, and require explicit validation.
 - If this gate is skipped, agents must stop, disclose the violation, establish
   the recovery path, and must not claim retroactive red-green-refactor work.
 
+## Protected Skill Boundary
+
+- Skill bundles under `.github/skills/` whose names do not start with
+  `internal-` or `local-` are protected and read-only by default.
+- Invocation, wrapping, synchronization, dependency, or perceived necessity
+  never implies authorization to edit a protected skill.
+- Only an explicit instruction in the current user conversation naming the
+  exact protected skill or path authorizes an edit.
+- Authorization is limited to the requested files and purpose and does not
+  carry into later turns.
+- Before completion, run `.github/scripts/validate_skill_change_scope.py`
+  without an allowlist, or with only the exact currently authorized bundle
+  paths.
+- An unapproved protected-skill finding is a stop condition; do not create an
+  allowlist to bypass it.
+
 ## Agent skills
 
 ### Issue tracker

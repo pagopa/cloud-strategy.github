@@ -1,0 +1,16 @@
+{
+  "contract_version": "internal-gateway-codebase-improvement-eval-v2",
+  "required_case_ids": [
+    "CLEAR_REPORT_STOP",
+    "NON_CLEAR_RETRY",
+    "UNAVAILABLE_EVIDENCE_BLOCK",
+    "REPORT_INPUT_IDENTITY"
+  ],
+  "required_direct_skills": [
+    "mattpocock-improve-codebase-architecture",
+    "internal-gateway-critical-master"
+  ],
+  "maximum_identity_drift_cases": 0,
+  "maximum_post_report_actions": 0,
+  "forbid_non_clear_reports": true
+}

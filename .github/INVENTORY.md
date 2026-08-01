@@ -185,10 +185,12 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/scripts/lib/jsonc.py`
 - `.github/scripts/lib/repo_paths.py`
 - `.github/scripts/lib/shared.py`
+- `.github/scripts/lib/skill_change_scope.py`
 - `.github/scripts/lib/sync_exclusions.py`
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
 - `.github/scripts/validate_internal_skills.py`
+- `.github/scripts/validate_skill_change_scope.py`
 
 ## Agents
 

@@ -1,0 +1,61 @@
+{
+  "contract_version": "internal-gateway-codebase-improvement-eval-v2",
+  "observations": [
+    {
+      "case_id": "CLEAR_REPORT_STOP",
+      "direct_skills": ["mattpocock-improve-codebase-architecture", "internal-gateway-critical-master"],
+      "report_fingerprint": "sha256:clear",
+      "critic_input_fingerprint": "sha256:clear",
+      "report_written_before_critique": true,
+      "critical_outcome": "route-to-execution-owner",
+      "defense": "none",
+      "unresolved_material_issue": false,
+      "reran_external_report_flow": false,
+      "report_returned": true,
+      "resume_condition": null,
+      "post_report_actions": []
+    },
+    {
+      "case_id": "NON_CLEAR_RETRY",
+      "direct_skills": ["mattpocock-improve-codebase-architecture", "internal-gateway-critical-master"],
+      "report_fingerprint": "sha256:retry",
+      "critic_input_fingerprint": "sha256:retry",
+      "report_written_before_critique": true,
+      "critical_outcome": "accept-with-risk",
+      "defense": "accepts-risk",
+      "unresolved_material_issue": true,
+      "reran_external_report_flow": true,
+      "report_returned": false,
+      "resume_condition": null,
+      "post_report_actions": []
+    },
+    {
+      "case_id": "UNAVAILABLE_EVIDENCE_BLOCK",
+      "direct_skills": ["mattpocock-improve-codebase-architecture", "internal-gateway-critical-master"],
+      "report_fingerprint": null,
+      "critic_input_fingerprint": null,
+      "report_written_before_critique": false,
+      "critical_outcome": null,
+      "defense": null,
+      "unresolved_material_issue": true,
+      "reran_external_report_flow": false,
+      "report_returned": false,
+      "resume_condition": "Resume when the completed report and same-context critic state are observable.",
+      "post_report_actions": []
+    },
+    {
+      "case_id": "REPORT_INPUT_IDENTITY",
+      "direct_skills": ["mattpocock-improve-codebase-architecture", "internal-gateway-critical-master"],
+      "report_fingerprint": "sha256:identity",
+      "critic_input_fingerprint": "sha256:identity",
+      "report_written_before_critique": true,
+      "critical_outcome": "route-to-execution-owner",
+      "defense": "resolves",
+      "unresolved_material_issue": false,
+      "reran_external_report_flow": false,
+      "report_returned": true,
+      "resume_condition": null,
+      "post_report_actions": []
+    }
+  ]
+}

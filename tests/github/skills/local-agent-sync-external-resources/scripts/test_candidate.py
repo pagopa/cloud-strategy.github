@@ -360,6 +360,13 @@ def test_normalization_enforces_codebase_improvement_workspace_for_all_artifacts
         assert "`./tmp/codebase-improve/`" in content
         assert "every generated artifact" in content
 
+    skill_content = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    report_content = (skill_dir / "HTML-REPORT.md").read_text(encoding="utf-8")
+
+    for content in (skill_content, report_content):
+        assert "local-sync:codebase-improve-pre-render" not in content
+        assert "Local pre-render analysis checkpoint" not in content
+
 
 def test_normalization_rewrites_declared_mattpocock_skill_references(
     tmp_path: Path,

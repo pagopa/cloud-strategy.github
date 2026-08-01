@@ -12,10 +12,10 @@ CATALOG_FAST_INCLUDE_TOKEN_RISKS ?= 0
 MARKDOWNLINT_VERSION := 0.22.1
 MARKDOWNLINT_PATTERNS := "**/*.md" "\#tmp/**" "\#graphify-out/**" "\#.graphify_*"
 
-.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all
+.PHONY: help python-version-check lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint skill-change-scope docs-lint all
 
 help:
-	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint docs-lint all'
+	@printf '%s\n' 'Targets: lint catalog-lint catalog-fast-check github-catalog-validation test scripts-bootstrap catalog-check catalog-audit inventory-build token-risks skill-lint skill-change-scope docs-lint all'
 
 python-version-check:
 	@test -s "$(PYTHON_VERSION_FILE)" || { printf '%s\n' 'Missing or empty .python-version.' >&2; exit 1; }
@@ -66,6 +66,9 @@ token-risks: scripts-bootstrap
 
 skill-lint: scripts-bootstrap
 	@$(SCRIPTS_RUNNER) validate_internal_skills --root . --strict
+
+skill-change-scope: scripts-bootstrap
+	@$(SCRIPTS_RUNNER) validate_skill_change_scope --root .
 
 docs-lint:
 	@if command -v npx >/dev/null 2>&1; then \
