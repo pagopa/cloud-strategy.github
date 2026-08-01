@@ -1,66 +1,76 @@
 ---
 name: internal-gateway-writing-plans
-description: Use when repository-owned work needs approved implementation plan writing from an approved design or reviewed retained spec.
+description: Use when repository-owned work needs an approved implementation plan written from an approved design or reviewed retained spec.
 ---
 
 # Internal Gateway Writing Plans
 
 ## Referenced skills
 
-- `/superpowers-writing-plans`: required owner after the repository preflight.
-
-Thin repository wrapper for approved implementation-plan writing. This skill records the local handoff facts, delegates artifact decisions to `/superpowers-writing-plans`, treats the delegated result as a draft until the local acceptance gate passes, and stops after reporting the accepted plan path.
+- `/superpowers-writing-plans`: required owner for producing the retained plan.
+- `/internal-gateway-execute-plans`: required next owner after human review and
+  explicit execution approval.
 
 ## When to use
 
-- Use after the user approves implementation-plan writing from an approved design or reviewed retained spec.
+- Use after the user approves implementation-plan writing from an approved
+  design or reviewed retained spec.
 
 ## When not to use
 
 - Retained-spec writing stays in the brainstorming lane.
-- Route same-chat work, ideation, plan review, execution, and imported `superpowers-*` maintenance to their existing owners.
+- Route same-chat work, plan review, plan execution, and imported
+  `superpowers-*` maintenance to their existing owners.
 
 ## Contract
 
-### Preflight Gate
+1. Capture the target, anti-scope, nearest owner, validation path, stop
+   conditions, and observable acceptance. Keep the no-version-control-mutation
+   rule in scope. Completion: all six facts and the no-mutation rule are
+   recorded before delegation.
+2. Load `/superpowers-writing-plans` and produce one reviewable retained plan
+   under `tmp/superpowers/plans/` with ordered actionable tasks, concrete file
+   targets, focused validation, and an execution handoff. Completion: one plan
+   exists at the retained path and contains those four artifact properties plus
+   one versioned `## Execution Contract` fenced JSON object.
+3. Perform human review for task actionability, approved scope, focused
+   validation, safety, and handoff quality. The contract must declare native
+   authoritative validation commands and phases, equivalence policy, manual
+   obligations, and authority boundaries. It must not predict runtime
+   discovery results or recovery candidates. Completion: each review concern
+   is accepted or has a recorded revision.
+4. Report the retained plan path, name `/internal-gateway-execute-plans` as
+   the next owner, and wait for explicit execution approval. Completion: the
+   path and next owner are reported and execution has not started without
+   approval.
 
-Capture the preflight: `Target`, `Anti-scope`, `Nearest owner`,
-`Validation path`, `Stop conditions`, and `Observable acceptance`.
+## Command Portability
 
-Completion criterion: all six preflight facts are present and no fact is missing or explicitly recorded as a gap.
+- Write every baseline, focused, and final validation command in directly
+  executable native form. The command recorded in the plan is the
+  authoritative command and evidence label.
+- Do not make `rtk`, `graphify`, or another optional accelerator a prerequisite
+  or command prefix unless the task's actual subject is that tool.
+- Executor-side optimization may accelerate an invocation, but must not alter
+  the recorded authoritative command or its validation meaning.
 
-### Delegated Draft Gate
-
-Load `/superpowers-writing-plans` and let it create a plan, ask a blocking clarification, redirect, or stop with a reason. Pass an explicit anti-scope and the relevant owners already identified in the preflight so the delegated plan avoids duplicate or speculative tasks at the source. Pass an explicit delivery rule: the delegated plan must not contain `git add`, `git commit`, or `git push` steps or instructions, and must not present committing changes as the default next step unless the user explicitly asks for commit help. The delegated writing outcome persists as a draft-only artifact under `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md`.
-
-Completion criterion: one delegated plan artifact exists under the timestamped plan path and is marked draft-only.
-
-### Local Acceptance Gate
-
-Delegated output remains draft-only until objective checks pass and human judgment checks pass. If either fails, revise the draft in place.
-
-Objective checks: run `python3 scripts/validate_plan.py <retained-plan-path>`. A non-zero finding result keeps the artifact draft-only. Follow mechanical validation with human checks.
-
-Human judgment checks: owner duplication, speculative scope, coherent task boundaries, one responsibility per task, edit intent, focused validation, stop conditions, and handoff readiness. Reject unapproved simplification or duplicated execution workflow.
-
-Completion criterion: objective checks pass and human judgment checks pass.
-
-### Writing Stop
-
-After the local acceptance gate passes, name `/internal-gateway-execute-plans` as the next owner. Stop after reporting the accepted plan path and wait for the user's next choice.
-
-Completion criterion: accepted plan path is reported and `/internal-gateway-execute-plans` is named as the next owner.
-
-Preserve handoff quality with targeted rereads only when the delegation has a real evidence gap.
+The executor owns the single mechanical plan validator. Do not add a
+writer-local validator, draft-only lifecycle, or duplicate parser contract.
+Before handoff, run the executor-owned `preflight` against the written plan and
+revise it until there are zero blocking findings. Plans without the versioned
+contract are not actionable.
 
 ## No-Commit Rule
 
-- The skill must never run `git add`, `git commit`, `git push`, or any other git mutation while creating, persisting, or handing off plans. Retained artifacts stay uncommitted under `tmp/superpowers/`; the user reviews and commits them personally.
-- This rule is mandatory. The user may bypass it only with an explicit request for commit help in the current task; state the bypass in the outcome summary.
-- The produced plan contains no Git mutation steps or default commit advice.
+- Never run `git add`, `git commit`, `git push`, or another Git mutation while
+  writing or handing off a plan. Retained artifacts stay uncommitted for user
+  review unless the user explicitly requests commit help.
+- Do not put Git mutation steps or default commit advice in the produced plan.
 
 ## Validation
 
-- Confirm the delegated plan carries ordered tasks, concrete file targets, clear edit intent, validation commands or explicit gaps, no duplicate-owner or speculative-scope drift, and no direct commit instructions unless the user explicitly asked for commit help.
-- Confirm no git mutation ran while producing the writing outcome and that retained artifacts remain uncommitted, unless the user explicitly asked for commit help.
-- `git diff --check`
+- Confirm the delegated plan has ordered tasks, concrete file targets, focused
+  validation, clear scope and safety boundaries, and no duplicate owner.
+- Confirm the handoff names `/internal-gateway-execute-plans` and waits for
+  explicit approval.
+- Run `git diff --check` and confirm no Git mutation occurred.

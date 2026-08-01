@@ -1,6 +1,8 @@
-# Java Anti-Patterns
+# Java Review Defects
 
-Baseline owner: `internal-java`
+Report a pattern only when repository evidence shows that it creates a
+correctness, security, maintainability, or observable boundary problem. Review
+cues are not universal mandates.
 
 ## Critical
 
@@ -14,13 +16,11 @@ Baseline owner: `internal-java`
 
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
-| JV-M01 | Bare `catch (Exception e)` that swallows without re-throw or logging | Silent failures |
+| JV-M01 | Caught failure is swallowed or converted without preserving the required observable error | Silent or misleading failures |
 | JV-M02 | Missing `try-with-resources` for `AutoCloseable` | Resource leak |
-| JV-M03 | Mutable shared state without synchronization | Race conditions |
-| JV-M04 | `null` return from public methods without `@Nullable` or `Optional` | NullPointerException traps |
-| JV-M05 | Method body longer than 40 lines | Complexity and testability concern |
-| JV-M06 | Missing unit tests for new public methods | Coverage mandate |
-| JV-M07 | Raw types or unchecked casts without justification | Type safety erosion |
+| JV-M03 | Shared mutable state crosses concurrent boundaries without a proven synchronization or ownership model | Race conditions |
+| JV-M04 | Raw types or unchecked casts can accept an invalid value without a documented, checked boundary | Type-safety erosion |
+| JV-M05 | Public or external input crosses a boundary without validation required by the contract | Invalid state or unsafe behavior |
 | JV-M08 | `System.out.println` in application/library code | No log level control |
 
 ## Minor
@@ -28,22 +28,22 @@ Baseline owner: `internal-java`
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
 | JV-m01 | Unused imports | Dead code noise |
-| JV-m02 | Missing purpose JavaDoc on public classes | Discoverability gap |
-| JV-m03 | Field injection (`@Autowired` on fields) instead of constructor injection | Testability and immutability |
-| JV-m04 | `@SuppressWarnings` without inline justification | Hides real issues |
-| JV-m05 | Dead code (unreachable branches, commented-out blocks) | Maintenance burden |
-| JV-m06 | Mutable collections returned from public API without wrapping | Encapsulation leak |
+| JV-m02 | `@SuppressWarnings` or an equivalent escape hatch lacks an inline reason | Hides real issues |
+| JV-m03 | Dead code, unreachable branches, or commented-out implementation remains in the changed path | Maintenance burden |
+| JV-m04 | Mutable collections or internal state escape a public boundary where callers can violate invariants | Encapsulation leak |
+| JV-m05 | Changed public behavior lacks a focused test for its observable contract or boundary failure | Regression risk |
 
-## Nit
+## Review cues
 
-| ID | Anti-pattern | Why |
-| --- | --- | --- |
-| JV-N01 | Non-standard naming (camelCase for methods, PascalCase for classes) | Convention consistency |
-| JV-N02 | Missing trailing newline at end of file | POSIX convention |
-| JV-N03 | Inconsistent brace style within a file | Style consistency |
-| JV-N04 | Import not organized (java → javax → third-party → project) | Convention |
+- A large class, method, or constructor is a review cue when its actual
+  responsibilities, branching, or collaborator set makes behavior hard to
+  understand or test. Do not assign severity from a line-count threshold.
+- Request documentation when a changed public type or method has non-obvious
+  contract or intent. Do not require JavaDoc for every public symbol.
+- Prefer the repository formatter and linter for naming, imports, braces, and
+  whitespace; do not duplicate formatter policy here.
 
-## Good vs bad examples
+## Example
 
 ```java
 // BAD (JV-M02): resource leak
@@ -52,22 +52,10 @@ public String readFile(Path path) throws IOException {
     return reader.readLine();
 }
 
-// GOOD: try-with-resources
+// GOOD: preserve the resource lifecycle
 public String readFile(Path path) throws IOException {
     try (var reader = new BufferedReader(new FileReader(path.toFile()))) {
         return reader.readLine();
     }
-}
-```
-
-```java
-// BAD (JV-M04): null return trap
-public User findUser(String id) {
-    return userMap.get(id);
-}
-
-// GOOD: Optional return
-public Optional<User> findUser(String id) {
-    return Optional.ofNullable(userMap.get(id));
 }
 ```

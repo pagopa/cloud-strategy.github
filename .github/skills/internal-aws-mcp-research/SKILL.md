@@ -1,15 +1,20 @@
 ---
 name: internal-aws-mcp-research
-description: Use when the task needs current AWS documentation or safe IAM inspection for Organizations, SCPs, IAM policies, delegated administrators, regional availability, or StackSets, and the assistant should prefer AWS Knowledge MCP and AWS IAM MCP when available.
+description: Use when /internal-aws selects the AWS research lane to retrieve current official AWS documentation, regional availability, service behavior, IAM state, or policy-simulation evidence.
 ---
 
 # Internal AWS MCP Research
 
-Standardizes an AWS research workflow that prefers AWS MCP servers when available and falls back to official AWS documentation. Designed for principal-level platform governance questions, not only application coding.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
+Provide current AWS facts through AWS MCP servers when available, with official
+AWS documentation as the fallback. Label every conclusion as documentation,
+live observation, or inference.
 
 ## When to use
+
+Use this lane for current AWS documentation, regional availability, service
+behavior, IAM observations, and policy-simulation evidence.
+
+## Research scope
 
 - Current AWS documentation, regional availability, or official guidance that may have changed.
 - Safe IAM inspection or policy simulation for Organizations, SCPs, IAM policies, roles, or delegated administrators.
@@ -63,7 +68,7 @@ Exact configured name can vary by client.
 
 Load `references/mcp-capabilities.md` for capability splits across the two MCP servers.
 
-## Output expectations
+## Output contract
 
 - Research question and scope
 - MCP availability used or missing
@@ -76,4 +81,4 @@ Load `references/mcp-capabilities.md` for capability splits across the two MCP s
 
 - Source type (docs / live IAM / inference) is labeled for every claim.
 - IAM MCP usage stayed read-only unless an explicit change was requested.
-- Implications beyond the research lane are reported as labeled findings, not acted on.
+- Unresolved freshness gaps are stated beside the affected conclusion.

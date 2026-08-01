@@ -1,6 +1,8 @@
 {
   "config": {
-    "MD013": false
+    "MD013": false,
+    // markdownlint-cli2 0.22.1 introduced this non-structural table style rule.
+    "MD060": false
   },
   "ignores": [
     // Keep transient retained work out of markdownlint; dedicated contract tests cover tmp/superpowers artifacts.
@@ -19,6 +21,8 @@
     ".github/skills/internal-gateway-critical-master/fixtures/*.md",
     // Retained-plan and status fixtures intentionally start at contract-owned H2 headings.
     ".github/skills/internal-gateway-execute-plans/fixtures/*.md",
+    // The internal Markdown checker owns these deliberately invalid regression fixtures.
+    ".github/skills/internal-markdown/fixtures/invalid/*.md",
     // Ignore local OpenCode runtime artifacts.
     ".opencode/**",
     // Preserve imported support skill families verbatim by default; lint only repo-owned Markdown.

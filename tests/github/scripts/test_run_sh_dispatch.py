@@ -34,3 +34,13 @@ def test_resolve_script_handles_validator_and_debug_log_tools() -> None:
     assert lines[2].endswith(
         ".github/skills/local-agent-sync-install-ai-resources/scripts/run.sh"
     )
+
+
+def test_resolve_script_handles_protected_skill_scope_validator() -> None:
+    result = run_shell(
+        "source ./.github/scripts/run.sh; resolve_script validate_skill_change_scope"
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip().endswith(
+        ".github/scripts/validate_skill_change_scope.py"
+    )

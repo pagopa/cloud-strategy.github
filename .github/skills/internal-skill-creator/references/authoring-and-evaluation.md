@@ -40,6 +40,19 @@ Classify each candidate branch as applicable, skipped, or blocked. Objective
 file transformations and fixed workflows use executable checks. Subjective
 writing, design, and judgment work use human review.
 
+| Change surface | Required evidence |
+| --- | --- |
+| Frontmatter, metadata, paths, references | Parsed structural validator |
+| Script, CLI, parser, generator | Executable test with fixtures |
+| Stable public output | Producer and consumer test |
+| LLM routing or trigger | Executable resolver or concrete evaluation cases |
+| Subjective instructional prose | Human review with an explicit evidence gap when runtime evaluation is unavailable |
+| Editorial wording or reorganization | Markdown and token validation only |
+
+Raw instructional wording is not an executable or evaluable seam. Do not
+manufacture wording tests when a change has no parser, executable consumer,
+public protocol, or concrete evaluation case.
+
 ## Baselines
 
 For a material revision, compare with the previous version. For a new skill,

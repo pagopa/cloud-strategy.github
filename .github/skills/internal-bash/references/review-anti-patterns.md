@@ -1,6 +1,14 @@
-# Bash Anti-Patterns
+# Shell Review Anti-Patterns
 
-Baseline owner: `internal-bash`
+Scope: embedded shell, sourced helpers, and non-operator shell fragments.
+
+## Controlling review question
+
+### Declared dialect
+
+Identify the declared interpreter, execution environment, and POSIX baseline
+before classifying a finding. A Bash extension under a POSIX `sh` shebang is a
+major dialect mismatch. Do not recommend Bash syntax to a POSIX `sh` target.
 
 ## Critical
 
@@ -8,58 +16,52 @@ Baseline owner: `internal-bash`
 | --- | --- | --- |
 | SH-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
 | SH-C02 | `eval` on user-controlled input | Arbitrary command execution |
-| SH-C03 | World-writable temp files without `mktemp` | Race condition / symlink attack |
+| SH-C03 | World-writable temp files without `mktemp` | Race condition or symlink attack |
 
 ## Major
 
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
-| SH-M01 | Strict mode omitted without a documented compatibility reason or equivalent error handling | Unchecked failures and undefined variables can silently corrupt behavior |
-| SH-M02 | Unquoted variable expansion outside `[[ ]]` | Word splitting and globbing bugs |
-| SH-M03 | `cd` without error handling (`cd dir \|\| exit 1`) | Silent directory change failure |
-| SH-M04 | Missing `local` keyword for function variables | Pollutes global scope |
+| SH-M01 | Required status or error handling is omitted without a dialect-appropriate compatibility reason | Unchecked failures can corrupt behavior |
+| SH-M02 | Unquoted variable expansion outside a safe, dialect-appropriate context | Word splitting and globbing bugs |
+| SH-M03 | `cd` without an immediate failure exit | Silent directory change failure |
+| SH-M04 | Bash `local` is used outside `Dialect: Bash` | POSIX `sh` cannot rely on the extension |
 | SH-M05 | Bash-specific syntax under a POSIX shell shebang | The declared interpreter cannot reliably execute the script |
-| SH-M06 | Missing cleanup trap (`trap cleanup EXIT`) for temp files | Resource leak |
+| SH-M06 | Missing cleanup trap for temporary files | Resource leak |
 | SH-M07 | Function mixes parsing, orchestration, and mutation | Coupled responsibilities make failure handling and safe testing difficult |
+| SH-M08 | Missing `pipefail` under `Dialect: Bash` or an explicit POSIX.1-2024 baseline | Pipeline failures may be hidden |
 
 ## Minor
 
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
 | SH-m01 | `echo` used where portable formatting or escape handling matters | Output can vary between shells and inputs |
-| SH-m02 | Hardcoded paths (e.g., `/usr/local/bin/tool`) | Portability concern |
+| SH-m02 | Hardcoded paths such as `/usr/local/bin/tool` | Portability concern |
 | SH-m03 | Operator-facing script lacks purpose or usage context | Operators cannot discover the entrypoint contract locally |
-| SH-m04 | `grep \| awk` where a single `awk` suffices | Unnecessary pipe |
-| SH-m05 | Missing `command -v` check before using external tools | Fails confusingly if tool missing |
+| SH-m04 | A `grep`-to-`awk` pipeline where one `awk` suffices | Unnecessary pipe |
+| SH-m05 | Missing `command -v` check before using external tools | Fails confusingly if a tool is missing |
 | SH-m06 | Non-English log messages or comments | Language policy violation |
 
 ## Nit
 
 | ID | Anti-pattern | Why |
 | --- | --- | --- |
-| SH-N01 | `[ ... ]` instead of `[[ ... ]]` | Bash convention |
+| SH-N01 | Bash `[ ]` use where `[[ ]]` would improve a Bash-only expression | Bash readability or word-splitting concern; not a POSIX `sh` finding |
 | SH-N02 | Backticks `` `cmd` `` instead of `$(cmd)` | Readability and nesting |
 | SH-N03 | Missing blank line between function definitions | Visual structure |
-| SH-N04 | Inconsistent indentation (mix of tabs and spaces) | Style consistency |
+| SH-N04 | Inconsistent indentation | Style consistency |
 | SH-N05 | Missing trailing newline at end of file | POSIX convention |
 
-## Good vs bad examples
+## Safe examples
 
 ```bash
-# BAD (SH-M01, SH-M05): POSIX, no strict mode
-#!/bin/sh
-name=$1
-cd /tmp
-rm -rf $name
-
-# GOOD: Bash, strict mode, safe patterns
+# Bash branch: arrays and local are deliberate.
 #!/usr/bin/env bash
 set -euo pipefail
 
 process_directory() {
   local base_dir="${1:?Missing base directory}"
   local name="${2:?Missing name}"
-
   cd -- "$base_dir" || {
     printf '❌ Failed to enter %s\n' "$base_dir" >&2
     return 1
@@ -68,19 +70,17 @@ process_directory() {
 }
 ```
 
-```bash
-# BAD (SH-M04): global variable in function
-process_file() {
-  result=$(cat "$1")
-  count=${#result}
-}
+```sh
+# POSIX sh branch: scalar variables and [ ] are deliberate.
+#!/bin/sh
+set -eu
 
-# GOOD: local variables
 process_file() {
-  local result
-  local count
-  result=$(cat "$1")
-  count=${#result}
-  printf 'ℹ️ Processed %s bytes\n' "$count"
+  name=${1:?Missing name}
+  if [ -z "$name" ]; then
+    printf '%s\n' '❌ Missing name' >&2
+    return 1
+  fi
+  printf 'ℹ️ Processing %s\n' "$name"
 }
 ```

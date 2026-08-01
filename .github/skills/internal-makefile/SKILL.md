@@ -16,7 +16,6 @@ description: Use when editing or reviewing Makefile or .mk syntax, targets, prer
 
 ## When not to use
 
-- Embedded shell behavior dominates the recipe; use `/internal-bash`.
 - CI or runtime semantics are the main concern; use the matching owner.
 - Generated Makefiles unless the generator is the intended edit point.
 
@@ -31,6 +30,11 @@ description: Use when editing or reviewing Makefile or .mk syntax, targets, prer
   as review concerns.
 - `make` and `make -n` are not generic safety boundaries; `make -n` is only a
   preview, so inspect recipes before execution.
+
+## Narrow owner routing
+
+- Route embedded shell behavior to `/internal-bash` when shell semantics are
+  the primary concern.
 
 ## Validation
 

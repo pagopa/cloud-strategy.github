@@ -139,7 +139,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         / ".github/skills/local-agent-sync-external-resources/references/managed-resources.yaml"
     )
 
-    assert len(manifest.assets) == 58
+    assert len(manifest.assets) == 59
     assert len(manifest.watchlist) == 11
     matt_source = next(
         source for source in manifest.sources if source.source_id == "mattpocock-skills"
@@ -171,6 +171,7 @@ def test_live_manifest_preserves_declared_scope(repo_root: Path) -> None:
         "mattpocock-codebase-design",
         "mattpocock-improve-codebase-architecture",
         "mattpocock-implement",
+        "mattpocock-teach",
         "mattpocock-to-tickets",
         "mattpocock-tdd",
         "mattpocock-to-spec",
@@ -355,8 +356,12 @@ def test_mattpocock_skill_creator_review_keeps_invocation_override(
         digest = hashlib.sha256((repo_root / target).read_bytes()).hexdigest()
         assert override.expected_content_hash == digest
         patch = (bundle_root / override.patch_path).read_text(encoding="utf-8")
-        assert "-disable-model-invocation: true" in patch
+        assert "disable-model-invocation" not in patch
         assert "internal-skill-creator" in patch
+    assert (
+        ".github/skills/mattpocock-improve-codebase-architecture/SKILL.md"
+        not in by_target
+    )
     assert ".github/skills/anthropic-skill-creator/SKILL.md" not in by_target
 
 

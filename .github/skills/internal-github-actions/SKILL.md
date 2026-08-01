@@ -1,100 +1,83 @@
 ---
 name: internal-github-actions
-description: Use when authoring or revising GitHub Actions workflows under `.github/workflows/`, creating reusable workflows via `workflow_call`, deciding whether shared step logic should stay inline, move to a reusable workflow, or move to a composite action. Do not use for ruleset, permission, OIDC, or guardrail design; route those to internal-github-governance.
+description: Use when /internal-github routes GitHub Actions workflow authoring or debugging under `.github/workflows/`, including `workflow_call` and reuse-pattern selection.
+user-invocable: false
 ---
 
 # GitHub Actions Skill
 
-## Referenced skills
-
-Treat the referenced skills below as on-demand supports. Do not preload them
-for every workflow edit; load only the owner proved by the workflow surface,
-reuse decision, delivery question, or infrastructure coupling.
-
-- `internal-devops-core-principles`: delivery-system strategy, release safety, operational readiness, and incident learning.
-- `internal-github-action-composite`: composite-action authoring and step-level reuse.
-- `internal-github`: route back under material routing uncertainty when the owning GitHub lane is unclear or the work is still strategic platform framing.
+Own GitHub Actions workflow behavior under `.github/workflows/`, including
+workflow authoring, debugging, `workflow_call`, and reuse-pattern selection.
 
 ## When to use
 
-- Create or modify GitHub Actions workflows under `.github/workflows/`.
-- Create or modify reusable workflows exposed through `workflow_call`.
-- Decide whether repeated step logic should stay inline, move to a reusable workflow, or move to a composite action.
-- Add CI/CD jobs such as build, test, lint, release, or deployment.
-- Review whether a workflow should stay inline, move to `workflow_call`, or extract script-first logic before introducing another reusable layer.
+- Create or modify standard or reusable workflows.
+- Add CI/CD jobs for build, test, lint, release, or deployment.
+- Decide whether repeated logic stays inline, moves to a script, becomes a
+  reusable workflow, or becomes a composite action.
 
-Use `internal-devops-core-principles` when the question is delivery strategy, release model, or operating-model health rather than workflow authoring.
-
-## Mandatory rules
+## Workflow authoring rules
 
 - Prefer OIDC for cloud authentication.
-- Pin every third-party action to a full-length SHA with adjacent release comment.
-- Keep `permissions` least-privilege.
+- Pin every third-party action to a full-length SHA with an adjacent release
+  comment.
+- Keep `permissions` least-privilege and declare them where they matter.
 - Keep step names and logs in English.
-- Read GitHub's official workflow syntax and context-availability documentation before making or validating changes that depend on expression scope, context usage, or key-specific rules; do not rely on memory.
-- Validate `workflow_dispatch` free-form inputs before shell or deploy steps consume them.
-- Before enabling auto-merge for a release PR, re-verify the PR through GitHub API/CLI data and enforce branch, author, state, and cross-repository checks instead of trusting upstream action outputs alone.
-- Manual `release-please` tests on non-production branches should pass `skip-github-release: true`; otherwise a branch-validation run can create real tags and GitHub Releases.
+- Read official workflow syntax and context-availability documentation when
+  expression scope or key-specific rules affect the change.
+- Validate `workflow_dispatch` inputs before shell or deploy steps consume
+  them.
+- Before enabling release auto-merge, re-verify branch, author, state, and
+  cross-repository conditions using GitHub API or CLI data.
+- Manual `release-please` tests on non-production branches must pass
+  `skip-github-release: true`.
 
-## Reference map
-
-- Load [auth snippets](references/auth-snippets.md) for AWS, Azure, and GCP OIDC examples.
-- Load [workflow example](references/workflow-example.md) for a compact validated deploy archetype.
-- Load [reusable workflow template](references/reusable-workflow-template.md) when the repeated unit is one or more jobs.
-- Load [workflow patterns catalog](references/workflow-patterns-catalog.md) for matrix, scheduled, environment-gated, and reusable-workflow shapes.
-- Load [caching and artifacts](references/caching-and-artifacts.md) for deterministic cache keys and reviewed artifact handoffs.
-- Load [reuse decision tree](references/reuse-decision-tree.md) when inline steps, scripts, reusable workflows, and composite actions all look plausible.
-- Load [security hardening checklist](references/security-hardening-checklist.md) when the workflow touches deployment, secrets, self-hosted runners, or untrusted events.
-- Load `internal-github-action-composite` when the reusable unit becomes step-level or contract-sensitive.
-
-## Choose the right reuse pattern
+## Reuse-pattern selection
 
 | Situation | Pattern |
 | --- | --- |
 | Simple pipeline in one repository | Standard workflow |
 | Repeated job orchestration inside one repository | Reusable workflow (`workflow_call`) |
 | Shared step logic across repositories or many workflows | Composite action |
-| Mostly shell or language-specific commands with thin orchestration | Script called from the workflow |
-| Composite action authoring or contract changes | Load `internal-github-action-composite` |
+| Mostly shell or language-specific commands | Repository script called from the workflow |
 
-## Common mistakes
+Choose by the unit of reuse: jobs and their runners, permissions, or
+concurrency belong in a reusable workflow; steps and caller-visible outputs
+belong in a composite action; thin orchestration around language-specific
+commands belongs in a script.
 
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Using `permissions: write-all` or omitting permissions entirely | Grants the token maximum access and widens the blast radius of a compromised step | Declare only the permissions the job needs |
-| Pinning actions by tag (`@v4`) instead of SHA | Tags are mutable and can be retargeted upstream | Pin to a full-length commit SHA with a release comment |
-| Long-lived cloud credentials in secrets instead of OIDC | Static credentials can leak and do not expire automatically | Configure OIDC federation for AWS, Azure, or GCP |
-| Missing `environment` protection on production deploys | Anyone who can push to the branch can deploy to production | Add an environment with required reviewers |
-| Letting `workflow_dispatch` inputs flow directly into shell or deploy steps | Free-form input becomes a control path without validation | Validate and normalize inputs in an early step or job |
-| Using `runner.temp` or other runner-scoped contexts in workflow-root `env` or `jobs.<job_id>.env` | The workflow fails validation before it even queues | Use `runner` only in keys that allow it, or derive the path from runner environment variables inside `run` |
-| Treating a cache miss or restore notice as the failing condition | You stop at an informational setup line and fix the wrong thing | Find the first failed step and confirm whether the action can actually fail on that message |
-| Smoke-testing a repository wrapper around an external CLI without installing that CLI | Wrapper preflight dependency checks can fail even on `--dry-run` paths | Install the external CLI on the runner before exercising wrapper help, validation, or dry-run commands |
-| Using timestamp-driven or branch-only cache keys | Cache hits become noisy, stale, or misleading across runs | Key caches from lockfiles, tool versions, and other stable inputs |
-| Uploading artifacts without explicit name or retention | Review and deploy handoffs become ambiguous and harder to clean up | Name artifacts deliberately and set `retention-days` |
-| Duplicating steps across workflows instead of reusable workflow or composite action | Maintenance burden grows with every copy | Extract to a reusable workflow in one repo or a composite action across repos |
+## Reference map
 
-## Cross-references
+- Load [auth snippets](references/auth-snippets.md) for AWS, Azure, and GCP
+  OIDC examples.
+- Load [workflow example](references/workflow-example.md) for a compact manual
+  deploy archetype.
+- Load [reusable workflow template](references/reusable-workflow-template.md)
+  for typed inputs and job-level reuse.
+- Load [workflow patterns catalog](references/workflow-patterns-catalog.md)
+  for matrix, scheduled, environment-gated, and reusable shapes.
+- Load [caching and artifacts](references/caching-and-artifacts.md) for
+  deterministic cache keys and reviewed artifact transfers.
+- Load [reuse decision tree](references/reuse-decision-tree.md) when multiple
+  reuse patterns remain plausible.
+- Load [security hardening checklist](references/security-hardening-checklist.md)
+  for deployment, secrets, self-hosted runners, or untrusted events.
 
-- **internal-github-action-composite**: for composite-action authoring and compatibility-sensitive contract changes.
-- **internal-terraform**: for the Terraform resources deployed by CI/CD.
+## Completion criteria
 
-## Checklist
-
-- [ ] OIDC configured for cloud auth.
-- [ ] All third-party actions pinned by full SHA with release comments.
-- [ ] `permissions` minimized per job.
-- [ ] `workflow_dispatch` inputs validated before shell, deploy, or infrastructure steps use them.
-- [ ] Context usage matches GitHub's context-availability rules for the specific workflow keys involved.
-- [ ] Cache keys are deterministic and artifacts set explicit `retention-days` when they bridge jobs.
-- [ ] Environment protection and `concurrency` are enabled for production deploys.
-- [ ] Self-hosted runner use is justified and scoped.
-- [ ] The reuse choice has been checked against `references/reuse-decision-tree.md`.
+- Workflow behavior and `workflow_call` contracts are valid.
+- The reuse-pattern selection is explicit and matches the unit of reuse.
+- OIDC, least privilege, full-SHA pins, input validation, and release safety
+  are addressed when relevant.
+- Context availability and focused validation are checked.
 
 ## Validation
 
-- `actionlint` on workflow files, if available.
-- When expressions use non-global contexts, compare each workflow key against GitHub's official context-availability table.
-- For CI-log debugging, verify the first failed step before treating earlier cache or setup lines as causal.
-- Verify there is no `permissions: write-all` and no missing permissions block where least privilege matters.
-- Verify all third-party `uses:` lines reference full SHAs instead of tags.
-- Re-check that every referenced local guide resolves before treating the skill update as complete.
+- Run `actionlint` on changed workflow files when available.
+- Compare non-global expression contexts with the official context-availability
+  table.
+- Verify the first failed step in CI-log debugging.
+- Verify no `permissions: write-all` and no missing permissions block where
+  least privilege matters.
+- Verify every third-party `uses:` line references a full SHA.
+- Verify every referenced local guide resolves before completion.

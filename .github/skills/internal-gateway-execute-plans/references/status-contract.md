@@ -1,49 +1,81 @@
 # Status Contract
 
-Status transition rules, required headings, and exact sibling filenames for plan closeout.
+Status transition rules, required core, optional evidence, and exact sibling filenames for plan closeout.
 
 ## Status Transition Table
 
 | Current condition | Status | Continuation |
 | --- | --- | --- |
-| All tasks and broader validation have fresh passing evidence | `DONE` | none |
-| At least one task is complete and executable tasks remain | `PARTIAL` | continuing |
-| A named blocker prevents further execution | `BLOCKED` | waiting |
-| Execution is complete but a human or external verification remains | `NEEDS_REVIEW` | waiting |
+| All tasks and broader validation have fresh exact or classifier-approved equivalent evidence | `DONE` | none |
+| The caller explicitly paused while executable tasks remain | `PARTIAL` | continuing |
+| An exhausted fatal condition prevents safe further execution | `BLOCKED` | waiting |
+| Implementation is complete, recovery is exhausted, and a human, external, or non-substitutable environmental obligation remains | `NEEDS_REVIEW` | waiting |
 
-Use `DONE` only when every task passed its transition gate, all in-scope work is complete, and required broader validation has fresh passing evidence. A final broad check does not retroactively validate skipped task gates.
+Use `DONE` only when every task passed its transition gate, all in-scope work is complete, and required broader validation has fresh passing evidence. A final broad check does not retroactively validate skipped task gates. Active classifier routes (`continue-execution`, `continue-recovery`, and `request-authority`) do not produce status siblings.
 
-For any gap, use the status that best explains the remaining action and record the exact evidence needed to resume or finish.
+Do not use `BLOCKED` only because a broad validation failed. Compare the same
+command at baseline and closeout, record the baseline/final delta, classify the
+failure, and run `closeout-check`. `DONE` accepts exact passes and equivalent
+passes only when all four equivalence conditions are true. `PARTIAL` requires
+`pause_requested: true`. `BLOCKED` requires an exhausted fatal condition,
+unknown attribution, or unresolved task-local regression. `NEEDS_REVIEW` requires
+completed implementation, no safe recovery candidate, exhaustion evidence, and
+a remaining human, external, or non-substitutable environmental obligation;
+`environmental` alone is insufficient.
 
-## Required Headings
+## Required Core
 
-Every status file must contain these headings in order:
+Every status file must contain this minimal resumable core in order:
 
 ```markdown
 ## Status
 ## Plan
 ## Plan Fingerprint
-## Reason
-## Workspace Baseline
-## Files Changed
 ## Completed
 ## Remaining
 ## Validation
 ## Next
+```
+
+The parser accepts these optional evidence headings and validates their
+contents when present:
+
+```markdown
+## Reason
+## Workspace Baseline
+## Baseline Validation
+## Files Changed
+## Recovery Attempts
+## Failure Classification
+## Closeout Decision
+## Recovery Exhaustion
 ## Resume Notes
 ```
+
+Record optional evidence when it improves reviewability, especially for broad
+validation deltas, recovery attempts, failure classification, or resume
+context. Its absence is not a parser failure.
 
 - **Status** — one of `DONE`, `PARTIAL`, `BLOCKED`, or `NEEDS_REVIEW`.
 - **Plan** — the exact plan file path.
 - **Plan Fingerprint** — the SHA-256 hash of the approved plan, prefixed with `sha256:`.
-- **Reason** — why this status was chosen; for `BLOCKED`, name the blocker; for `DONE`, confirm all evidence is fresh.
-- **Workspace Baseline** — branch, dirty files, and in-scope overlap at the time of closeout.
-- **Files Changed** — list of files created or modified during execution.
 - **Completed** — list of tasks that passed their transition gate, with task-level evidence.
 - **Remaining** — list of tasks not yet complete, with the exact work remaining.
 - **Validation** — list of validation commands run and their results.
 - **Next** — the exact next action to resume or finish.
-- **Resume Notes** — context needed to resume execution, including any drift or blockers.
+- **Reason** *(optional)* — why this status was chosen; name a blocker for
+  `BLOCKED` or confirm fresh evidence for `DONE`.
+- **Workspace Baseline** *(optional)* — branch, dirty files, and in-scope
+  overlap at closeout.
+- **Baseline Validation** *(optional)* — commands, exit status, and bounded
+  failure summary captured before edits.
+- **Files Changed** *(optional)* — files created or modified during execution.
+- **Recovery Attempts** *(optional)* — bounded actions, evidence delta, and why
+  recovery stopped; use `none` when no failure required recovery.
+- **Failure Classification** *(optional)* — task-local regression,
+  pre-existing, unrelated/external, environmental, or unknown, with evidence.
+- **Resume Notes** *(optional)* — context needed to resume, including drift or
+  blockers.
 
 ## Exact Allowed Sibling Filenames
 
@@ -81,6 +113,16 @@ When resuming from a `PARTIAL` or `BLOCKED` status:
 When resuming from `NEEDS_REVIEW`:
 
 1. Verify the status file exists and contains all required headings.
-2. Confirm the human or external verification is complete.
-3. If verification passed, update the status to `DONE` with fresh broader-validation evidence.
-4. If verification failed, update the status to `BLOCKED` with the failure details.
+2. Rerun discovery because the environment may have changed.
+3. Confirm the human or external verification is complete.
+4. If verification passed, update the status to `DONE` with fresh broader-validation evidence.
+5. If verification still has only a proven pre-existing or unrelated external
+   failure, keep `NEEDS_REVIEW` and refresh the evidence. Use `BLOCKED` only if
+   the new evidence establishes a fatal condition.
+
+## User-Facing Closeout
+
+After writing the status sibling, give the user a concise user-facing report
+with the outcome, changed work, validation, blocker or external gap, Recovery
+Attempts, and exact next action. The report must stand alone; do not require the
+user to open the status file.

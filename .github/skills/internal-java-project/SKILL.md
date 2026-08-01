@@ -1,77 +1,56 @@
 ---
 name: internal-java-project
-description: Use when creating or modifying Java project code and the main concern is Java application structure, tests, or library/service design rather than Spring Boot framework choices.
+description: Use when framework-neutral Java application or library design is the primary concern, including module, package, domain, API, collaborator, concurrency, unit-test, or contract-test boundaries. Do not use for isolated language-level source changes, generic build metadata, or framework-managed wiring and runtime behavior.
 ---
 
 # Java Project Skill
 
-## Referenced skills
-
-Treat the referenced skill below as an on-demand owner. Do not preload it for
-every Java project edit; load it only when Spring Boot framework behavior is
-the main constraint.
-
-- `internal-java-spring-boot-development`: Spring Boot controllers, configuration, repositories, scheduling, and Spring test-slice depth.
-
 ## When to use
 
-- Services, handlers, controllers, utilities, modules.
-- Refactoring or extending existing Java components.
+- Designing or changing framework-neutral Java modules, packages, services,
+  libraries, domains, APIs, handlers, utilities, or collaborators.
+- Refactoring application structure where boundaries, ownership, or domain
+  behavior are the main concern.
+- Choosing unit, contract, or narrow integration tests for behavior that does
+  not depend on a framework lifecycle.
 
 ## When not to use
 
-- Spring Boot framework behavior drives the work; use `internal-java-spring-boot-development`.
+- Framework-managed wiring, configuration binding, transactions, HTTP or data
+  adapters, scheduling, test contexts, service connections, or runtime
+  behavior determines correctness.
+- An isolated Java source change or generic build metadata is the main concern.
 - Build-system behavior is generic Make, YAML, or CI rather than Java-specific.
 
-## Compact Java baseline
+## Project design
 
-- Keep business logic separate from I/O, persistence, SDK calls, and transport adapters.
-- Prefer clear domain names, guard clauses, and readable control flow.
-- Add concise JavaDoc only when a new or changed core type has non-obvious intent.
-- Use JUnit 5 for unit tests unless the repository has another established test stack.
-- Keep dependency, plugin, runtime, and test intent explicit in Maven or Gradle files.
+- Give modules, packages, services, libraries, domains, APIs, and collaborators
+  explicit boundaries and one clear reason to change.
+- Keep domain behavior separate from I/O, persistence, SDK calls, and transport
+  adapters. Use composition and bounded polymorphism when they express the
+  domain better than inheritance.
+- Make required dependencies explicit and keep state immutable where practical.
+  Treat a growing collaborator set or mixed responsibility as a review cue for
+  a narrower boundary.
+- Use Java features compatible with the declared project support and existing
+  codebase. Do not introduce a newer language feature without checking the
+  compiler release and runtime target.
 
-## Boundary
+## Concurrency and tests
 
-- Keep machine-readable output stable and undecorated at data boundaries, and keep human-friendly formatting at CLI or UI boundaries only.
-- Keep logs structured with contextual keys and avoid mixing log streams with program output consumed by tools.
-- Validate external input at transport and persistence boundaries before state changes.
-- Use `Optional` at boundaries where absence is expected and avoid `null` as hidden control flow.
-
-## Project-specific guidance
-
-- Prefer constructor injection and immutable dependencies in Spring components.
-- Keep controllers thin, services stateless, and API DTOs separate from persistence entities.
-- Split-or-justify any class or service that trends toward a god class role with mixed responsibilities.
-- Use Java 21 features only when the project already targets them or the runtime requirement is explicit.
-- Prefer immutable domain types and final fields by default.
-- Prefer static factory methods when constructor intent is ambiguous.
-- Prefer composition over inheritance unless bounded polymorphism is a true domain constraint.
-
-Load `references/examples.md` when you need a minimal class or test example.
-
-## Test stack
-
-- Follow the JUnit 5 defaults.
-- Use `@ParameterizedTest`, `assertAll`, `@Nested`, and `@Tag` when they improve test clarity rather than just adding ceremony.
-- Use Spring test slices such as `@WebMvcTest` or `@DataJpaTest` before defaulting to full-context tests.
-- Use Testcontainers when integration tests need real databases or external dependencies.
-- For behavior changes or bug fixes, keep focused tests on observable service, controller, module, or boundary behavior and rerun the narrowest meaningful test set before widening scope.
-- For pure refactors, keep behavior stable and run compile plus existing tests before and after.
-- Mock only external boundaries and keep internal collaborators real where practical.
-- Prefer targeted coverage for changed behavior and boundary failures over broad percentage goals.
-
-## Spring coordination
-
-- Keep Spring-specific design decisions lightweight here and treat controller, configuration, repository, or test-slice-heavy work as a separate framework-focused lane.
-- Prefer constructor injection with `private final` dependencies and keep transaction boundaries narrow.
-
-## Modern Java guidance
-
-- Prefer records for small immutable data carriers when the codebase already uses them.
-- Use sealed hierarchies only when bounded polymorphism is a real domain constraint.
-- Consider virtual threads for high-concurrency I/O-heavy flows only when the framework and blocking model are understood.
-- Reach for Testcontainers and profiling before speculative JVM tuning.
+- For generic concurrency or virtual-thread suitability, check declared Java
+  support, blocking-I/O workload, bounded downstream resources, context
+  propagation, observability, and representative load behavior. Do not infer
+  suitability from throughput claims alone.
+- Select tests from repository evidence: use plain unit tests for isolated
+  behavior, contract tests for stable boundaries, and narrow integration tests
+  when a real external dependency is required to prove the contract.
+- Use real external dependencies when mocks cannot prove serialization,
+  persistence, protocol, or other boundary behavior. Keep setup representative
+  and validation focused on observable outcomes.
+- Validate inputs and preserve established output and error contracts at public
+  boundaries. Keep machine-readable output stable and human formatting at the
+  CLI or UI edge.
 
 ## Common mistakes
 
@@ -79,6 +58,6 @@ Load `references/common-mistakes.md` for the full mistake table.
 
 ## Validation
 
-- Compile with `mvn compile` or `gradle build`.
-- Run tests with `mvn test` or `gradle test`.
-- Check code style with project linter when available.
+- Run the repository's wrapper or established compile and test commands.
+- Check the project linter or formatter when available.
+- Re-run the narrowest meaningful test set before widening validation.

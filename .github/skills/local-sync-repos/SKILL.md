@@ -21,8 +21,9 @@ Manage only these exact target paths:
 - `.editorconfig`
 - `.github/copilot-instructions.md`
 - `.github/workflows/_pre-commit.yml`
+- `.github/workflows/_pr-title.yml`
 - `.github/instructions/**` (source-authoritative; preserve target `local-*` filenames)
-- `AGENTS.local.md` (create-once from template; never overwrite or delete)
+- `AGENTS.local.md` (create-once header-only seed from template; never overwrite or delete)
 
 Do not synchronize agents, skills, prompts, inventory, documentation, lesson ledgers, VS Code settings, or unrelated workflows.
 
@@ -41,7 +42,7 @@ python3 .github/skills/local-sync-repos/scripts/sync_repos.py apply --source-roo
 - Mirror source-managed files exactly.
 - Preserve target `.github/instructions/**/local-*` files byte-identical.
 - Delete target-only non-local instruction files only during an explicitly requested `apply`.
-- Create `AGENTS.local.md` only when missing and never overwrite or delete an existing target copy.
+- Create a header-only `AGENTS.local.md` only when missing and never overwrite or delete an existing target copy.
 - Block `apply` when a dirty target path overlaps a planned managed mutation.
 - Block `apply` when the saved plan fingerprint does not match the current plan.
 - Do not expose `--force`, `--allow-dirty-target`, or broader category selectors.

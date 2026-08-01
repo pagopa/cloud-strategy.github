@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 REPO_ROOT = next(
     parent
@@ -29,6 +30,7 @@ from sync_external_resources_core import (  # noqa: E402
     select_overrides,
     validate_external_workspace,
     validate_override_patches,
+    verify_override_hash,
 )
 
 
@@ -261,6 +263,111 @@ def test_normalization_enforces_guided_bulk_questions_for_interview_skills(
     assert "overrides any earlier instruction to ask one question at a time" in content
 
 
+def test_normalization_enforces_teach_workspace_without_upstream_text_coupling(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/mattpocock-teach"
+    skill = candidate / local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: teach\n---\n"
+        "# Changed upstream teaching guidance\n\n"
+        "Upstream may reorganize every surrounding section.\n",
+        encoding="utf-8",
+    )
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream="skills/productivity/teach",
+        local=local,
+        canonical_name="mattpocock-teach",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    content = skill.read_text(encoding="utf-8")
+    assert first_changed == (f"{local}/SKILL.md",)
+    assert second_changed == ()
+    assert content.count("local-sync:teach-workspace:start") == 1
+    assert content.count("local-sync:teach-workspace:end") == 1
+    assert "`./tmp/teach/<lesson-name>/`" in content
+    assert "Upstream may reorganize every surrounding section." in content
+
+
+def test_normalization_enforces_codebase_improvement_workspace_for_all_artifacts(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    local = ".github/skills/mattpocock-improve-codebase-architecture"
+    skill_dir = candidate / local
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: improve-codebase-architecture\n---\n"
+        "# Changed upstream workflow\n\nCreate architecture artifacts as needed.\n",
+        encoding="utf-8",
+    )
+    (skill_dir / "HTML-REPORT.md").write_text(
+        "# Changed upstream report guidance\n\nWrite the report wherever appropriate.\n",
+        encoding="utf-8",
+    )
+    asset = ManagedAsset(
+        source="mattpocock-skills",
+        upstream="skills/engineering/improve-codebase-architecture",
+        local=local,
+        canonical_name="mattpocock-improve-codebase-architecture",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    expected_changed = (
+        f"{local}/HTML-REPORT.md",
+        f"{local}/SKILL.md",
+    )
+    assert first_changed == expected_changed
+    assert second_changed == ()
+    for file_name in ("SKILL.md", "HTML-REPORT.md"):
+        content = (skill_dir / file_name).read_text(encoding="utf-8")
+        assert content.count("local-sync:codebase-improve-workspace:start") == 1
+        assert content.count("local-sync:codebase-improve-workspace:end") == 1
+        assert "`./tmp/codebase-improve/`" in content
+        assert "every generated artifact" in content
+
+    skill_content = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    report_content = (skill_dir / "HTML-REPORT.md").read_text(encoding="utf-8")
+
+    for content in (skill_content, report_content):
+        assert "local-sync:codebase-improve-pre-render" not in content
+        assert "Local pre-render analysis checkpoint" not in content
+
+
 def test_normalization_rewrites_declared_mattpocock_skill_references(
     tmp_path: Path,
 ) -> None:
@@ -287,6 +394,107 @@ def test_normalization_rewrites_declared_mattpocock_skill_references(
     assert "/grilling" not in content
     assert "/domain-modeling" not in content
     assert "/unmanaged" in content
+
+
+def test_normalization_removes_unsupported_invocation_field_from_all_mattpocock_skills(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    assets = (
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/wayfinder",
+            local=".github/skills/mattpocock-wayfinder",
+            canonical_name="mattpocock-wayfinder",
+        ),
+        ManagedAsset(
+            source="mattpocock-skills",
+            upstream="skills/engineering/domain-modeling",
+            local=".github/skills/mattpocock-domain-modeling",
+            canonical_name="mattpocock-domain-modeling",
+        ),
+    )
+    for asset in assets:
+        skill = candidate / asset.local / "SKILL.md"
+        skill.parent.mkdir(parents=True)
+        skill.write_text(
+            "---\n"
+            f"name: {Path(asset.upstream).name}\n"
+            "description: Test skill.\n"
+            "disable-model-invocation: true\n"
+            "---\n"
+            "Use /domain-modeling when needed.\n",
+            encoding="utf-8",
+        )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="mattpocock-skills",
+                repository="https://example.com/mattpocock/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=assets,
+                rewrite_skill_references=True,
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    first_changed = normalize_candidate(resources, candidate)
+    second_changed = normalize_candidate(resources, candidate)
+
+    assert first_changed == tuple(sorted(f"{asset.local}/SKILL.md" for asset in assets))
+    assert second_changed == ()
+    for asset in assets:
+        content = (candidate / asset.local / "SKILL.md").read_text(encoding="utf-8")
+        frontmatter = yaml.safe_load(content.split("---", 2)[1])
+        assert set(frontmatter) == {"name", "description"}
+        assert "/mattpocock-domain-modeling" in content
+
+
+def test_normalization_removes_unsupported_invocation_field_from_all_managed_skills(
+    tmp_path: Path,
+) -> None:
+    candidate = tmp_path / "candidate"
+    asset = ManagedAsset(
+        source="external-skills",
+        upstream="skills/example",
+        local=".github/skills/external-example",
+        canonical_name="external-example",
+    )
+    skill = candidate / asset.local / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\n"
+        "name: example\n"
+        "description: Test skill.\n"
+        "disable-model-invocation: true\n"
+        "---\n"
+        "Use the skill.\n",
+        encoding="utf-8",
+    )
+    resources = ManagedResources(
+        sources=(
+            ManagedSource(
+                source_id="external-skills",
+                repository="https://example.com/external/skills.git",
+                ref="a" * 40,
+                advertised_ref=None,
+                assets=(asset,),
+            ),
+        ),
+        replacements=(),
+        watchlist=(),
+    )
+
+    changed = normalize_candidate(resources, candidate)
+
+    assert changed == (".github/skills/external-example/SKILL.md",)
+    content = skill.read_text(encoding="utf-8")
+    frontmatter = yaml.safe_load(content.split("---", 2)[1])
+    assert set(frontmatter) == {"name", "description"}
+    assert frontmatter["name"] == "external-example"
 
 
 def test_materialize_candidate_copies_upstream_to_local(
@@ -324,6 +532,46 @@ def test_materialize_candidate_copies_upstream_to_local(
     assert "upstream-name" in target.read_text(encoding="utf-8")
 
 
+def test_materialize_candidate_rejects_mismatched_prepared_ref(
+    tmp_path: Path,
+) -> None:
+    workspace = tmp_path / "workspace"
+    sources_root = workspace / "sources"
+    source_checkout = sources_root / "test-source" / "skills" / "example"
+    source_checkout.mkdir(parents=True)
+    (source_checkout / "SKILL.md").write_text(
+        "---\nname: upstream-name\n---\n", encoding="utf-8"
+    )
+
+    asset = ManagedAsset(
+        source="test-source",
+        upstream="skills/example",
+        local=".github/skills/example",
+        canonical_name="example",
+    )
+    source = ManagedSource(
+        source_id="test-source",
+        repository="https://example.com/repo.git",
+        ref="a" * 40,
+        advertised_ref=None,
+        assets=(asset,),
+    )
+    _write_source_metadata(sources_root, source)
+    metadata_path = sources_root / "test-source" / ".external-resource-source.tsv"
+    metadata_path.write_text(
+        metadata_path.read_text(encoding="utf-8").replace("a" * 40, "b" * 40),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="ref"):
+        materialize_candidate(
+            ManagedResources(sources=(source,), replacements=(), watchlist=()),
+            workspace,
+            tmp_path / "candidate",
+        )
+    assert not (tmp_path / "candidate" / ".github/skills/example/SKILL.md").exists()
+
+
 @pytest.fixture
 def candidate_repo(tmp_path: Path) -> Path:
     repo = tmp_path / "candidate"
@@ -338,6 +586,22 @@ def candidate_repo(tmp_path: Path) -> Path:
 
 def _sha256(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def test_override_hash_normalizes_text_whitespace(tmp_path: Path) -> None:
+    target_rel = ".github/skills/test/SKILL.md"
+    target = tmp_path / target_rel
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"---\r\nname: test  \r\n---\r\nBody.  \r\n\r\n")
+    override = ImportedOverride(
+        override_id="test-override",
+        target_path=target_rel,
+        patch_path="patches/test.patch",
+        apply_strategy="git-apply",
+        expected_content_hash=_sha256("---\nname: test\n---\nBody.\n"),
+    )
+
+    verify_override_hash(tmp_path, override)
 
 
 def _make_override(
@@ -598,7 +862,7 @@ def test_materialize_candidate_reports_expected_source_root(tmp_path: Path) -> N
 
     message = str(excinfo.value)
     assert "Missing prepared source metadata:" in message
-    assert "Run prepare before audit/plan/apply." in message
+    assert "Run prepare before plan/apply." in message
 
 
 def test_load_overrides_rejects_missing_patch_file(tmp_path: Path) -> None:

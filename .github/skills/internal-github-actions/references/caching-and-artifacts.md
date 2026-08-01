@@ -1,11 +1,11 @@
 # Caching and Artifacts
 
-Use cache for reproducible dependency reuse across runs. Use artifacts for explicit handoffs or human review between jobs.
+Use cache for reproducible dependency reuse across runs. Use artifacts for explicit transfers or human review between jobs.
 
 | Need | Prefer | Why |
 | --- | --- | --- |
 | Restore dependency state across runs | Cache | Keyed reuse is automatic and disposable |
-| Pass reviewed output to another job or stage | Artifact | Named handoff with retention and download semantics |
+| Pass reviewed output to another job or stage | Artifact | Named transfer with retention and download semantics |
 | Keep logs or plans for human inspection | Artifact | Retention and download are part of the contract |
 
 ## Deterministic cache example
@@ -45,7 +45,7 @@ When a cache path needs a runner-scoped location such as `runner.temp`, resolve 
     echo "Using cache at ${PRE_COMMIT_CACHE_DIR}"
 ```
 
-## Artifact handoff example
+## Artifact transfer example
 
 ```yaml
 - name: Upload reviewed plan
@@ -69,7 +69,7 @@ When a cache path needs a runner-scoped location such as `runner.temp`, resolve 
 
 Keep artifact usage explicit:
 
-- name artifacts for the exact handoff they represent
+- name artifacts for the exact transfer they represent
 - set `retention-days` deliberately instead of inheriting defaults
 - upload only reviewed or reusable outputs, not hidden mutable state
-- prefer job outputs or reusable workflows when the handoff is small and immediate
+- prefer job outputs or reusable workflows when the transfer is small and immediate

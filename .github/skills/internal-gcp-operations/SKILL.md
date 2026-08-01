@@ -1,83 +1,41 @@
 ---
 name: internal-gcp-operations
-description: Use when the user needs Google Cloud operational guidance for monitoring, logging, backup and restore, DR validation, asset inventory, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for org, folder, project, or Shared VPC layout; IAM, workload identity, or Org Policy design; or materially ambiguous requests with no clear operational deliverable.
+description: Use when /internal-gcp selects operations for Google Cloud monitoring, logging, backup, restore, recovery validation, asset inventory, rollout evidence, or operational reporting.
 ---
 
 # Internal GCP Operations
 
-Use this skill when the next need is to validate, observe, or operationalize a GCP platform decision.
+## Purpose
 
-This skill owns the operational side of the platform: monitoring, evidence, inventory, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
+Validate, observe, and operationalize a Google Cloud platform decision through preflight signals, staged rollout observations, recovery evidence, inventory, and reporting.
 
 ## When to use
 
-- The user needs operational readiness guidance after a design choice.
-- The user needs Cloud Monitoring, Cloud Logging, backup, restore, or DR validation guidance.
-- The user needs asset inventory, reporting, or export guidance.
-- The user needs preflight or post-rollout validation patterns.
-- The user needs operational guidance for Cloud Run or Cloud Functions after the broader GCP structure and governance choices are already settled.
+Use this skill when the requested deliverable is operational readiness, validation, reporting, or evidence for a Google Cloud surface.
 
-## Main domains covered
+## Process
 
-- monitoring and observability posture
-- Cloud Monitoring and Cloud Logging evidence paths
-- backup and restore expectations
-- DR validation and recovery evidence
-- asset inventory and reporting
-- preflight checks before rollout
-- post-rollout validation
-- operational proof that a governance or structure change behaved as expected
+1. Establish the operational objective, affected surface, rollout unit, business criticality, and recovery expectations.
+2. Define preflight signals, owners, success criteria, and the rollback trigger before the change begins.
+3. Define rollout observations for monitoring, logging, inventory, connectivity, identity, policy, and other affected signals.
+4. Distinguish expected evidence, observed evidence, backup evidence, restore evidence, and recovery evidence.
+5. Report remaining operational risk, evidence gaps, and the condition for widening the rollout.
 
-## Core rules
+Load `references/validation-and-evidence.md` only when an evidence path needs deeper detail.
 
-- Keep validation proportional to blast radius.
-- Treat backup posture and restore evidence as different things.
-- Prefer preflight and staged validation before wide rollout when identity, policy, or shared networking could break.
-- Keep monitoring, inventory, evidence, and reporting tied to the decision that needs confirmation.
-- Name what is confirmed, what is inferred, and what still needs a real test.
+## Output
 
-Load `references/validation-and-evidence.md` when the user needs a deeper checklist for preflight, rollout validation, asset inventory, or DR evidence.
+- operational objective and affected surface
+- rollout unit, preflight signals, owners, and rollback trigger
+- staged observation and validation plan
+- expected versus observed evidence
+- backup, restore, and recovery evidence when stateful or critical services are involved
+- inventory, reporting, and remaining operational risk
 
-## Use of current facts
+## Completion
 
-Use current Google Cloud documentation when the answer depends on current Monitoring, Logging, Backup and DR behavior, asset-inventory capability, or service-specific validation details.
-
-## Output expectations
-
-For narrow asks, return:
-
-- recommended validation or evidence path
-- short reason
-- main operational risk
-
-For broader asks, return:
-
-- operational objective
-- preflight checks
-- rollout-stage validation path
-- post-rollout evidence path
-- recovery, DR, or inventory note when relevant
-- open operational risks
-
-Until a dedicated GCP serverless owner is justified by real usage, keep Cloud Run and Cloud Functions operational readiness, validation, and evidence questions in this skill instead of inventing a fifth lane for symmetry alone.
-
-## Common mistakes
-
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Treating monitoring as proof that restore or recovery works | Healthy metrics do not prove recovery viability | Keep monitoring evidence, backup proof, and restore proof as separate lines |
-| Skipping preflight for high-blast-radius rollout | IAM, Org Policy, or Shared VPC regressions surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
-| Reporting only control intent without operational evidence | The platform appears compliant without proof that it works | Record what Monitoring, Logging, asset inventory, or recovery exercises actually showed |
-| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Org Policy or IAM design out of the validation answer and validate the chosen design here |
-| Giving a DR answer without making the business criticality assumption visible | Recovery guidance can be overbuilt or incomplete | State the assumed criticality, RTO, or RPO before recommending the evidence path |
-| Treating one successful rollout wave as proof for all folders or projects | Wider inheritance or network paths can still fail differently | Validate the first safe unit and widen only after recording real evidence |
-
-## Validation
-
-- Confirm the answer distinguishes confirmed evidence from inferred evidence.
-- Confirm preflight checks, rollback trigger, and rollout unit are explicit for risky changes.
-- Confirm Monitoring, Logging, and inventory signals are named for the affected surface, not as a generic checklist.
-- Confirm backup proof and restore proof are treated as separate validation paths when state exists.
-- Confirm DR or continuity notes are included only when business criticality or recovery posture is actually in scope.
+- The affected surface and rollout unit are explicit.
+- Preflight signals, success criteria, owner, and rollback trigger are named.
+- Observations cover the signals needed to confirm the decision.
+- Expected, observed, backup, restore, and recovery evidence are clearly distinguished.
+- Remaining risk and the widening condition are reported.

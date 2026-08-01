@@ -1,4 +1,7 @@
 interface:
   display_name: "Internal Node.js"
-  short_description: "Node.js and TypeScript routing"
-  default_prompt: "Use $internal-nodejs for JavaScript, Node.js, TypeScript, package.json, or tsconfig.json work."
+  short_description: "Node.js and TypeScript review and metadata"
+  default_prompt: >-
+    Use $internal-nodejs for localized Node.js or TypeScript review, package
+    metadata, dependencies, runtime configuration, or single-module work with
+    established application boundaries.

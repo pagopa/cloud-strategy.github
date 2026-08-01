@@ -141,6 +141,9 @@ sources:
       - upstream: skills/productivity/writing-great-skills
         local: .github/skills/mattpocock-writing-great-skills
         canonical_name: mattpocock-writing-great-skills
+      - upstream: skills/productivity/teach
+        local: .github/skills/mattpocock-teach
+        canonical_name: mattpocock-teach
   vercel-labs-skills:
     repository: https://github.com/vercel-labs/skills.git
     ref: e173b8c88f2581cfdaa1b6767c6519a08155790e

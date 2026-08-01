@@ -12,6 +12,7 @@ These files are mirrored byte-exact from source to target:
 - `.editorconfig`
 - `.github/copilot-instructions.md`
 - `.github/workflows/_pre-commit.yml`
+- `.github/workflows/_pr-title.yml`
 
 ### Source-managed instructions
 
@@ -27,7 +28,7 @@ Any file under `.github/instructions/` that is not in the source and does not st
 
 ### AGENTS.local.md (create-once)
 
-Created from `templates/AGENTS.local.md` only when the target lacks the file. An existing target `AGENTS.local.md` is preserved byte-identical and never overwritten or deleted.
+Created as a header-only seed from `templates/AGENTS.local.md` only when the target lacks the file. An existing target `AGENTS.local.md` is preserved byte-identical and never overwritten or deleted.
 
 ## Action Semantics
 

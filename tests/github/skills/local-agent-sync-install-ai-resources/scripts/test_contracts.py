@@ -396,19 +396,6 @@ def test_parse_targets_orders_cross_aliases_and_rejects_unknown() -> None:
         parse_targets("skills,invalid")
 
 
-def test_agents_md_request_routes_skill_and_agent_to_global_baseline_sync() -> None:
-    skill_text = (
-        REPO_ROOT / ".github/skills/local-agent-sync-install-ai-resources/SKILL.md"
-    ).read_text(encoding="utf-8")
-    agent_text = (
-        REPO_ROOT / ".github/agents/local-sync-install-ai-resources.agent.md"
-    ).read_text(encoding="utf-8")
-
-    routing_contract = "`agents.md` means `sync --targets agents.md`"
-    assert routing_contract in skill_text
-    assert routing_contract in agent_text
-
-
 def test_render_install_report_omits_empty_sections_and_uses_emoji_headings() -> None:
     report = render_install_report(
         {

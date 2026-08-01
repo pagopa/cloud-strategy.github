@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal GCP"
-  short_description: "GCP routing and strategic decision support"
-  default_prompt: "Use $internal-gcp to route an unclear GCP task to the minimum specialist set, or to frame a Google Cloud decision when the next step is not yet structure, governance, operations, or delivery."
+  short_description: "Official and default GCP entry point"
+  default_prompt: "Use $internal-gcp as the official and default entry point for any Google Cloud request; select and invoke the specialist that owns the primary deliverable."

@@ -13,16 +13,6 @@ description: Use when editing or reviewing YAML or YML syntax, encoding, parser 
 - Routing a file to a narrower owner when platform or schema semantics are the
   real concern.
 
-## When not to use
-
-- GitHub Actions workflow semantics; use `/internal-github-actions`.
-- Composite action metadata; use `/internal-github-action-composite`.
-- Kubernetes workload, service, rollout, or policy semantics; use
-  `/internal-kubernetes`.
-- Azure DevOps pipeline behavior; use `/internal-azure-devops`.
-- CloudFormation template semantics; use
-  `/antigravity-cloudformation-best-practices`.
-
 ## Baseline
 
 - Use 2-space indentation and never use tabs for indentation.

@@ -1,13 +1,13 @@
 ---
 name: internal-aws-organization-structure
-description: Use when the user needs AWS control-plane or multi-account structure guidance for Organizations, OUs, account models, delegated administrator placement, StackSets topology, network topology at platform level, or other organization-shaping decisions that affect how AWS is laid out before implementation.
+description: Use when /internal-aws selects the AWS organization-structure lane for Organizations, accounts, OUs, delegated administrators, StackSets topology, or platform-level network placement.
 ---
 
 # Internal AWS Organization Structure
 
-Owns AWS layout decisions: account, OU, delegated admin, StackSets topology, and platform-level network layout. Translates a platform goal into account, OU, delegated admin, network, and rollout structure. Does not own generic strategy, detailed IAM, or monitoring implementation.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
+Own AWS layout decisions: account, OU, delegated administrator, StackSets
+topology, and platform-level network placement. Translate the platform goal
+into a structural result with explicit ownership and rollout scope.
 
 ## When to use
 
@@ -47,10 +47,10 @@ Broader asks: structural objective · candidate layouts · recommended placement
 | Using structure answers to sneak in IAM or SCP design | Lane boundary blurs and review gets weaker | Keep placement here and keep guardrail logic out of the structure answer |
 | Recommending shared services placement without naming ownership | Central accounts become dumping grounds | State which platform capability lives centrally and which workload teams own execution accounts |
 
-## Validation
+## Completion contract
 
 - Placement model is explicit: management account, delegated administrator, shared-services account, or member account.
 - Smallest safe rollout unit is named and matches the proposed structural change.
 - Blast radius is explicit for OU moves, delegated admin changes, StackSets rollout, or regional topology shifts.
 - Financial ownership and operational ownership are separated when both appear.
-- Out-of-scope needs, such as guardrail design or operational validation, are identified as outside this lane instead of being answered here.
+- Structural assumptions and rollback boundaries are visible.

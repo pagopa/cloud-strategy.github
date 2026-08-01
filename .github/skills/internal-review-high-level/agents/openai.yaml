@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Review High Level"
-  short_description: "High-level non-code review"
-  default_prompt: "Use /internal-review-high-level for an evidence-first, high-level review of a non-code target. Resolve intent and scope, apply only relevant dimensions, support material conclusions with evidence, use the compact emoji projection, and state uncertainty and validation gaps."
+  short_description: "Independent non-code assurance review"
+  default_prompt: "Use /internal-review-high-level for an independent, evidence-first, report-only review of a non-code artifact or change. Establish intent, available baseline, scope, risk, and evidence; apply only relevant local lenses; report material findings and evidence gaps; use the canonical public verdicts DECISION READY, DECISION READY WITH KNOWN RISK, DECISION BLOCKED, or REVIEW INCONCLUSIVE and the evidence outcomes NO MATERIAL CONCERNS FOUND or INSUFFICIENT EVIDENCE TO ASSESS; state residual risk; do not remediate."

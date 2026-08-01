@@ -62,11 +62,13 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-aws-mcp-research/SKILL.md`
 - `.github/skills/internal-aws-operations/SKILL.md`
 - `.github/skills/internal-aws-organization-structure/SKILL.md`
+- `.github/skills/internal-aws-strategic/SKILL.md`
 - `.github/skills/internal-aws/SKILL.md`
 - `.github/skills/internal-azure-devops/SKILL.md`
 - `.github/skills/internal-azure-governance/SKILL.md`
 - `.github/skills/internal-azure-operations/SKILL.md`
 - `.github/skills/internal-azure-organization-structure/SKILL.md`
+- `.github/skills/internal-azure-strategic/SKILL.md`
 - `.github/skills/internal-azure/SKILL.md`
 - `.github/skills/internal-bash-script/SKILL.md`
 - `.github/skills/internal-bash/SKILL.md`
@@ -79,7 +81,6 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-devops-core-principles/SKILL.md`
 - `.github/skills/internal-docker/SKILL.md`
 - `.github/skills/internal-excel/SKILL.md`
-- `.github/skills/internal-gateway-codebase-improvement/SKILL.md`
 - `.github/skills/internal-gateway-critical-master/SKILL.md`
 - `.github/skills/internal-gateway-execute-plans/SKILL.md`
 - `.github/skills/internal-gateway-idea/SKILL.md`
@@ -88,12 +89,14 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/internal-gcp-governance/SKILL.md`
 - `.github/skills/internal-gcp-operations/SKILL.md`
 - `.github/skills/internal-gcp-organization-structure/SKILL.md`
+- `.github/skills/internal-gcp-strategic/SKILL.md`
 - `.github/skills/internal-gcp/SKILL.md`
 - `.github/skills/internal-github-action-composite/SKILL.md`
 - `.github/skills/internal-github-actions/SKILL.md`
 - `.github/skills/internal-github-governance/SKILL.md`
 - `.github/skills/internal-github-operations/SKILL.md`
 - `.github/skills/internal-github-pr/SKILL.md`
+- `.github/skills/internal-github-strategic/SKILL.md`
 - `.github/skills/internal-github/SKILL.md`
 - `.github/skills/internal-go/SKILL.md`
 - `.github/skills/internal-java-project/SKILL.md`
@@ -132,6 +135,7 @@ This file is the exact path inventory for the live GitHub Copilot catalog in thi
 - `.github/skills/mattpocock-research/SKILL.md`
 - `.github/skills/mattpocock-setup-matt-pocock-skills/SKILL.md`
 - `.github/skills/mattpocock-tdd/SKILL.md`
+- `.github/skills/mattpocock-teach/SKILL.md`
 - `.github/skills/mattpocock-to-spec/SKILL.md`
 - `.github/skills/mattpocock-to-tickets/SKILL.md`
 - `.github/skills/mattpocock-triage/SKILL.md`
@@ -180,10 +184,12 @@ These vendor-prefixed imported document skills remain support-only depth for rep
 - `.github/scripts/lib/jsonc.py`
 - `.github/scripts/lib/repo_paths.py`
 - `.github/scripts/lib/shared.py`
+- `.github/scripts/lib/skill_change_scope.py`
 - `.github/scripts/lib/sync_exclusions.py`
 - `.github/scripts/lib/token_risks.py`
 - `.github/scripts/run.sh`
 - `.github/scripts/validate_internal_skills.py`
+- `.github/scripts/validate_skill_change_scope.py`
 
 ## Agents
 

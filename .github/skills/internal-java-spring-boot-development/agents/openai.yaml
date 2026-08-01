@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Spring Boot"
-  short_description: "Spring Boot app design and coding"
-  default_prompt: "Use $internal-java-spring-boot-development to design or refactor this Spring Boot task with the repository-owned workflow."
+  short_description: "Spring Boot runtime and framework semantics"
+  default_prompt: "Use $internal-java-spring-boot-development when Spring Boot-specific framework or runtime semantics determine correctness."

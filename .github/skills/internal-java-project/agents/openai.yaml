@@ -1,4 +1,4 @@
 interface:
-  display_name: "Internal Project Java"
-  short_description: "Help with Internal Project Java tasks"
-  default_prompt: "Use $internal-java-project for this task and follow the repository-owned workflow in the skill."
+  display_name: "Internal Java Project"
+  short_description: "Framework-neutral Java project design"
+  default_prompt: "Use $internal-java-project when framework-neutral Java application or library boundaries and design are the primary concern."

@@ -1,77 +1,80 @@
-# Node.js / TypeScript Anti-Patterns
+# Node.js / TypeScript Review Anti-Patterns
 
 Baseline owner: `internal-nodejs`
 
+## Evidence threshold
+
+Report a finding only when the changed code demonstrates a concrete
+correctness, security, compatibility, resource-lifecycle, or operability risk.
+Leave naming, import order, semicolons, trailing newlines, unused symbols, and
+other mechanically enforceable style checks to repository tooling.
+
 ## Critical
 
-| ID | Anti-pattern | Why |
+| ID | Anti-pattern | Report when the evidence shows |
 | --- | --- | --- |
-| ND-C01 | Hardcoded secrets, tokens, or passwords | Credential exposure risk |
-| ND-C02 | `eval()` or `new Function()` on untrusted input | Arbitrary code execution |
-| ND-C03 | User input in `child_process.exec()` without sanitization | Command injection |
+| ND-C01 | Hardcoded secrets, tokens, or passwords | A credential can be exposed through the changed code or artifact. |
+| ND-C02 | `eval()` or `new Function()` on untrusted input | Input reaches dynamic code execution without a trusted, constrained source. |
+| ND-C03 | User input in `child_process.exec()` | Input reaches a shell command without a demonstrated safe argument boundary. |
 
 ## Major
 
-| ID | Anti-pattern | Why |
+| ID | Anti-pattern | Report when the evidence shows |
 | --- | --- | --- |
-| ND-M01 | Unhandled promise rejection (missing `.catch()` or `try/catch` on `await`) | Silent crash or process exit |
-| ND-M02 | Synchronous file I/O (`readFileSync`) in request path | Event loop blocking |
-| ND-M03 | Missing `AbortController` or timeout on outbound HTTP/fetch | Unbounded resource consumption |
-| ND-M04 | `any` type used without justification in TypeScript | Type safety erosion |
-| ND-M05 | Missing error handling on stream/event emitter `error` events | Uncaught exception crash |
-| ND-M06 | `console.log` in application/library code instead of structured logger | No log level control |
-| ND-M07 | Missing unit tests for new exported functions | Coverage mandate |
-| ND-M08 | Callback-based patterns where async/await is available | Readability and error propagation |
+| ND-M01 | Unhandled async failure | A rejected promise can escape an owned execution path without an intentional failure policy. |
+| ND-M02 | Blocking I/O on a latency-sensitive path | Synchronous file or child-process work can block request or event processing. |
+| ND-M03 | Unbounded outbound I/O | Network work lacks a timeout, cancellation, or bounded retry where the path can outlive its owner. |
+| ND-M04 | Unjustified boundary `any` | External data crosses a TypeScript boundary without a documented validation or compatibility reason. |
+| ND-M05 | Missing stream or event-emitter error handling | An owned stream or emitter can emit `error` without an observer. |
+| ND-M06 | Missing listener or resource cleanup | A changed lifecycle leaves listeners, timers, streams, or controllers retained beyond ownership. |
+| ND-M07 | Module-system mismatch | Imports, exports, or package settings conflict with the repository's active runtime conventions. |
+| ND-M08 | Unjustified suppression directive | `@ts-ignore` or equivalent suppresses a defect without a local compatibility explanation. |
 
-## Minor
+## Review examples
 
-| ID | Anti-pattern | Why |
-| --- | --- | --- |
-| ND-m01 | Unused imports or variables | Dead code noise |
-| ND-m02 | Missing purpose comment on exported modules | Discoverability gap |
-| ND-m03 | `require()` in ESM context or mixed module systems | Import consistency |
-| ND-m04 | `// @ts-ignore` without inline justification | Hides real issues |
-| ND-m05 | Dead code (unreachable branches, commented-out blocks) | Maintenance burden |
-| ND-m06 | Event listener without corresponding cleanup/removal | Memory leak risk |
+### Unsafe command-execution boundary
 
-## Nit
+```javascript
+// Reportable: request input is interpolated into a shell command.
+import { exec } from "node:child_process";
 
-| ID | Anti-pattern | Why |
-| --- | --- | --- |
-| ND-N01 | Non-standard naming (camelCase for functions, PascalCase for classes/types) | Convention consistency |
-| ND-N02 | Missing trailing newline at end of file | POSIX convention |
-| ND-N03 | Inconsistent use of semicolons within a project | Style consistency |
-| ND-N04 | Import order not organized (node builtins → third-party → local) | Convention |
-
-## Good vs bad examples
-
-```typescript
-// BAD (ND-M01): unhandled rejection
-async function fetchUser(id: string) {
-  const res = await fetch(`/api/users/${id}`);
-  return res.json();
-}
-
-// GOOD: error handling + timeout
-async function fetchUser(id: string): Promise<User> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
-  try {
-    const res = await fetch(`/api/users/${id}`, { signal: controller.signal });
-    if (!res.ok) throw new Error(`⚠️ User fetch failed: ${res.status}`);
-    return await res.json();
-  } finally {
-    clearTimeout(timeout);
-  }
+export function removeArtifact(name) {
+  return exec(`rm -rf /srv/artifacts/${name}`);
 }
 ```
 
 ```javascript
-// BAD (ND-M02): blocking the event loop
-const data = fs.readFileSync('/path/to/file');
-processRequest(data);
+// Safer boundary: the command and arguments are separated from the shell.
+import { execFile } from "node:child_process";
 
-// GOOD: async I/O
-const data = await fs.promises.readFile('/path/to/file');
-processRequest(data);
+export function removeArtifact(name) {
+  return execFile("rm", ["-rf", `/srv/artifacts/${name}`]);
+}
+```
+
+### Bounded outbound I/O
+
+```javascript
+// Reportable: the request has no owner-controlled timeout or cancellation.
+export async function fetchUser(id) {
+  const response = await fetch(`/users/${id}`);
+  return response.json();
+}
+```
+
+```javascript
+// Bounded: the request is cancelled after the owned time budget.
+export async function fetchUser(id) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch(`/users/${id}`, {
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`User fetch failed: ${response.status}`);
+    return response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 ```

@@ -75,5 +75,5 @@ jobs:
 Adapt this archetype by:
 
 - adding `workflow_call` when the same deploy orchestration is reused inside the repository
-- introducing artifacts with explicit `retention-days` only when a reviewed handoff is required
+- introducing artifacts with explicit `retention-days` only when a reviewed transfer is required
 - moving repeated step logic into a composite action instead of expanding the deploy job inline

@@ -2,23 +2,19 @@
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Missing `if __name__ == "__main__":` guard | Script runs on import, breaks testing and reuse | Always guard the entry point |
-| Using a hyphenated or file-only entrypoint that cannot be imported cleanly | Breaks `python -m`, packaging, and test reuse | Expose an importable `cli.py`, package `__main__.py`, or `console_scripts` entrypoint |
-| Using `print()` for errors | Errors go to stdout, mixed with normal output | Use `print(..., file=sys.stderr)` or `logging` |
-| bare `except:` at the script boundary | Also catches control-flow exceptions such as `KeyboardInterrupt` and `SystemExit` | Catch the narrowest expected exception and let control-flow exceptions propagate |
-| Broad `except Exception` without handling, logging, or re-raise | Can hide ordinary application failures and leave partial work unexplained | Handle expected failures explicitly and let unexpected failures propagate |
-| Hardcoded file paths | Non-portable across machines | Use `argparse`, `pathlib`, or environment variables |
-| No argument parsing | Caller has to modify script source to change behavior | Use `argparse` for any configurable parameter |
-| Installing deps outside the declared dependency manager or without a reproducible lock | Non-reproducible environment and hidden setup drift | Preserve the declared manager; for pip use exact pins and hashes, otherwise use its canonical lock artifact |
-| Adding an empty `requirements.txt` to a stdlib-only tool | Adds noise and implies missing setup steps | Omit `requirements.txt` when the script uses only the standard library |
-| Changing dependencies without updating the declared manager's lock artifact | Breaks reproducible installs and hides dependency drift | Preserve the declared manager; for pip regenerate exact pins and hashes, otherwise run its frozen or locked validation command |
-| Wrapping a stdlib-only script in Bash | Adds setup indirection without solving a real dependency problem | Document direct `python3 <script>.py` execution and skip the wrapper |
-| Shipping a loose `.py` file with undocumented setup steps | Users must guess how to run the tool safely | Generate a self-contained folder and add a pip `run.sh` plus `requirements.txt` only when external packages are needed and no other manager is declared |
-| Treating a multi-entrypoint toolkit as app code just because it has `lib/` and tests | Pushes script tooling into the wrong guidance lane | Keep it in `internal-python-script` when the primary contract is still direct execution |
-| Copying the same `.venv` bootstrap and dependency install code into every wrapper | Maintenance drift and inconsistent operator behavior | Use one shared `run.sh` and let thin wrappers delegate to it |
-| Assuming the tool will always run from the repository root | Breaks when operators call it from subdirectories or nested paths | Resolve the repo root from an explicit `--root` or path argument when needed |
-| Adding JSON output without a real machine consumer | Increases surface area and maintenance cost | Keep text output first and add `--format json` only when automation needs it |
-| Defaulting to stdlib without comparing mature libraries | Leaves avoidable boilerplate, edge cases, and custom parsing logic in the script | Write the dependency decision note first and choose the option that makes the final code simpler |
-| Rejecting a useful dependency just to keep dependency count low | Optimizes the wrong thing and increases custom code | Optimize for simpler final code and justified value, not dependency minimization |
-| Adding `rich` because output looks nicer, without a human-facing reporting contract | Adds dependency cost without a clear user benefit and can corrupt JSON or other machine-readable output | Use `rich` for polished human-facing console reporting only, keep data output plain, and record the dependency decision |
-| Forcing async or framework abstractions into a simple tool | Raises complexity without improving the script | Keep the script synchronous and direct unless concurrency is essential |
+| Missing `if __name__ == "__main__":` guard | Runs the script on import and breaks reuse | Guard the entrypoint |
+| A file-only or hyphenated entrypoint that cannot be imported | Breaks `python -m`, packaging, and focused tests | Expose an importable `cli.py`, `__main__.py`, or console entrypoint |
+| `print()` for errors | Mixes errors with normal stdout | Use stderr or logging |
+| bare `except:` at the script boundary | Catches `KeyboardInterrupt` and `SystemExit` | Catch the narrowest expected exception |
+| Broad `except Exception` without handling, logging, or re-raise | Hides ordinary failures and partial work | Handle expected failures and let unexpected failures propagate |
+| Hardcoded paths or no argument parsing when inputs vary | Makes the tool non-portable and requires source edits | Use `argparse`, `pathlib`, or an explicit configuration boundary when inputs require it |
+| Dependency installation outside the declared manager or without a lock | Creates hidden, non-reproducible setup drift | Preserve the manager and its exact pins and hashes |
+| Empty `requirements.txt` for a stdlib-only tool | Implies setup work that does not exist | Omit it until an external library is justified |
+| Bash wrapper around a stdlib-only script | Adds indirection without a contract benefit | Document direct Python execution unless a repository runner is required |
+| Loose script with undocumented setup | Forces operators to guess safe invocation | Document a self-contained layout only when the tool needs it |
+| Multi-entrypoint toolkit routed to application guidance only because it has `lib/` or tests | Misclassifies direct-execution behavior | Route by the primary direct-execution contract |
+| Repeated `.venv` bootstrap in wrappers | Creates inconsistent setup behavior | Use one existing shared runner when one exists |
+| Assuming the current directory is the repository root | Breaks nested invocation | Resolve the root from an explicit path when needed |
+| Adding JSON without a real machine consumer | Increases surface area and maintenance | Keep text as the default and add formats only for consumers |
+| Adding `rich` only because output looks nicer | Adds dependency cost and can corrupt machine output | Use it only for a human-facing reporting contract and record the decision |
+| Forcing async or framework abstractions into a simple tool | Raises complexity without benefit | Add them only for real I/O concurrency or a framework-owned boundary |

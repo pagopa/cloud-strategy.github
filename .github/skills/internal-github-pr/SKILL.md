@@ -1,97 +1,55 @@
 ---
 name: internal-github-pr
-description: Use when creating, updating, validating, or merging GitHub pull requests in this repository — PR template bodies, approval and required-review checks, merge method choice, terminal-state verification via `gh pr view --json state,mergedAt`, or PR lifecycle evidence. Do not use for workflow authoring touched by a PR.
+description: Use when /internal-github routes pull-request lifecycle work covering creation, body updates, readiness, reviews, merge, or terminal-state verification.
+user-invocable: false
 ---
 
 # Internal GitHub PR
 
-Owns pull request lifecycle work in this repository: template-compliant bodies, readiness checks, merge method choice, and terminal-state evidence.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-github`.
+Own pull-request lifecycle work from template resolution through verified
+terminal state. Ground every statement in the actual diff, review state, and
+fresh validation evidence.
 
 ## When to use
 
-- Create a new pull request description.
-- Improve an incomplete pull request body.
-- Summarize changes from modified files and checks.
-- Map a specification, issue, or template-driven request into a PR title and body without overstating what the diff actually delivers.
-- Check whether a pull request is ready to merge.
-- Merge a pull request or verify its terminal state after merge.
+Use when the requested deliverable is pull-request content, review readiness,
+merge execution, or repository-scoped terminal-state proof.
 
-## Mandatory rules
+## PR workflow
 
-- Use English for all PR content.
-- Keep summary concise and outcome-oriented.
-- Include only relevant scope checkboxes.
-- Provide a short bullet list of key changes.
-- Include validation commands and results.
-- Explicitly state risk level and rollback plan.
-- If PR tools are available, apply updates to the PR directly.
-- Do not modify any `README.md` file unless explicitly requested.
-- For self-authored PRs under required-review policy, do not treat green checks as sufficient; confirm a qualifying non-author approval still exists before merge.
-- Prefer `gh pr merge --squash` over the default merge-commit path unless the repository clearly standardizes on another allowed merge method.
-- Use `--admin` only when policy explicitly allows a bypass.
-- Treat organization-wide `gh search prs` results as eventually consistent immediately after merge; confirm terminal state with repository-scoped `gh pr view --json state,mergedAt` before treating a just-merged PR as still open.
-- When the PR touches GitHub Actions workflow or action pinning, require full-SHA pinning and consistent release references in the PR evidence.
-- Verify fresh evidence before claiming a PR is ready, valid, mergeable, merged, or complete.
+1. Resolve one repository pull-request template and preserve its headings and
+   order.
+2. Extract specification outcomes and map them to the actual diff. Identify
+   gaps instead of inventing completion.
+3. Draft or update concise PR content with relevant scope, changes, risk,
+   rollback, and validation evidence.
+4. Detect the current PR state and update or create the draft as appropriate.
+5. For readiness, verify checks and qualifying non-author review state from
+   PR-specific evidence; green checks alone are insufficient under required
+   review policy.
+6. Prefer `gh pr merge --squash` unless the repository standardizes another
+   allowed method. Use `--admin` only when policy permits a bypass.
+7. When Actions workflows or action pins are touched, require full-SHA pins
+   and consistent release references in the evidence.
+8. After merge, re-fetch repository-scoped terminal state with
+   `gh pr view --json state,mergedAt` and verify the final PR state.
 
 ## Template resolution
 
-Resolve and use one existing repository template:
+Check these paths in order and use the first existing template:
 
 1. `.github/PULL_REQUEST_TEMPLATE.md`
-2. the lowercase filename under `.github/` if the repository exposes one
+2. the lowercase filename under `.github/`
 3. `PULL_REQUEST_TEMPLATE.md`
 4. `pull_request_template.md`
 
-Keep headings and section order unchanged. If a section is not applicable, write `N/A`.
+Keep headings and section order unchanged. Mark an inapplicable section `N/A`.
 
-## Specification-aware drafting
+## Completion criteria
 
-If the user provides a specification, issue, or acceptance outline:
-
-- Extract the required outcomes, constraints, and acceptance points first.
-- Map the actual diff to that requested scope instead of inventing completion.
-- Call out anything requested by the specification that is not present in the diff as a gap, follow-up, or `N/A`.
-- Keep the PR body grounded in the repository template, not in the source specification's original formatting.
-
-## Tool-driven workflow
-
-1. Detect whether an open PR exists for the current branch.
-2. If PR exists → update title/body directly.
-3. If PR does not exist → create a draft PR first.
-4. Update PR title/body using template-compliant content.
-5. For merge-readiness work, verify checks and required review state from PR-specific evidence.
-6. For merge or post-merge work, re-fetch repository-scoped terminal state with `gh pr view --json state,mergedAt`.
-7. Re-fetch PR and verify required section headings exist when editing body content.
-8. Return PR URL and a concise confirmation.
-9. If PR tools are unavailable → return ready-to-paste markdown plus CLI fallback commands.
-
-## Minimal example
-
-- Input:
-  - title: "Externalize Copilot inventory"
-  - changed_files: "AGENTS.md, .github/INVENTORY.md, .github/copilot-instructions.md"
-  - validation: "make lint"
-- Expected output: Complete PR body with all required template sections and concise change bullets.
-
-## Common mistakes
-
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Generic summary ("Various improvements") | Reviewers cannot assess impact or scope | Write specific outcome: "Adds region validation to SCP deploy pipeline" |
-| Missing risk level or rollback plan | Reviewers approve without understanding blast radius | Always fill Risk and Rollback sections explicitly |
-| Adding sections not in the repo template | Breaks template consistency across PRs | Use only the sections from the resolved template |
-| Leaving placeholder text (`TODO`, `fill in`) | Looks unfinished, blocks approval | Fill every section with real content or `N/A` |
-| Listing every changed file instead of summarizing | Noisy description that obscures intent | Group changes by purpose; detail only non-obvious changes |
-| Not including validation commands and output | Reviewer has no confidence that code was tested | Always include the exact commands and their results |
-
-## Validation
-
-- Every template-defined section heading is present.
-- `Changes` has concise bullets describing the real diff.
-- Risk and rollback are explicit and actionable.
-- Final PR body is persisted when tooling supports PR updates.
-- Merge readiness is based on PR-scoped checks and qualifying review evidence.
-- Recently merged PR state is confirmed with repository-scoped `gh pr view --json state,mergedAt`.
-- Fresh evidence was verified before claiming PR readiness, validity, mergeability, merge, or completion.
+- Template fidelity is preserved.
+- The summary and claims are grounded in the actual diff.
+- Review state and required checks have fresh evidence.
+- Validation evidence, risk, and rollback are explicit.
+- Merge method and any admin bypass follow repository policy.
+- The verified terminal state is recorded for merge or post-merge work.

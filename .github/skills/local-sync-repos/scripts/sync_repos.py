@@ -93,38 +93,44 @@ def _read_saved_fingerprint(plan_file: Path) -> str:
     return match.group(1)
 
 
+def _read_operation_source(plan: SyncPlan, operation: Operation) -> bytes:
+    source_file = plan.source_root / operation.path
+    if source_file.is_file():
+        return source_file.read_bytes()
+
+    template_path = SCRIPT_DIR.parent / "templates" / "AGENTS.local.md"
+    if operation.path == "AGENTS.local.md" and template_path.is_file():
+        return template_path.read_bytes()
+    return source_file.read_bytes()
+
+
 def _apply_operation(plan: SyncPlan, operation: Operation) -> None:
     _reject_unsafe_path(operation.path)
     target_file = plan.target_root / operation.path
-    if operation.action == "create" or operation.action == "update":
-        if operation.source_sha256 is None:
-            raise ValueError(f"create/update missing source hash: {operation.path}")
-        source_file = plan.source_root / operation.path
-        if not source_file.is_file():
-            template_path = SCRIPT_DIR.parent / "templates" / "AGENTS.local.md"
-            if operation.path == "AGENTS.local.md" and template_path.is_file():
-                source_bytes = template_path.read_bytes()
-            else:
-                source_bytes = source_file.read_bytes()
-        else:
-            source_bytes = source_file.read_bytes()
-        target_file.parent.mkdir(parents=True, exist_ok=True)
-        fd, tmp = tempfile.mkstemp(dir=str(target_file.parent), suffix=".tmp")
-        try:
-            with os.fdopen(fd, "wb") as handle:
-                handle.write(source_bytes)
-            Path(tmp).replace(target_file)
-        except BaseException:
-            if Path(tmp).exists():
-                Path(tmp).unlink()
-            raise
-    elif operation.action == "delete":
+    if operation.action == "preserve":
+        return
+    if operation.action == "delete":
         if not operation.path.startswith(".github/instructions/"):
             raise ValueError(f"delete outside instructions: {operation.path}")
         if target_file.is_file():
             target_file.unlink()
-    elif operation.action == "preserve":
-        pass
+        return
+    if operation.action not in {"create", "update"}:
+        return
+    if operation.source_sha256 is None:
+        raise ValueError(f"create/update missing source hash: {operation.path}")
+
+    source_bytes = _read_operation_source(plan, operation)
+    target_file.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=str(target_file.parent), suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(source_bytes)
+        Path(tmp).replace(target_file)
+    except BaseException:
+        if Path(tmp).exists():
+            Path(tmp).unlink()
+        raise
 
 
 def _build_compact_payload(plan: SyncPlan, mode: str, status: str) -> dict[str, object]:

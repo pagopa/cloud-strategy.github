@@ -1,80 +1,54 @@
 ---
 name: internal-azure-governance
-description: Use when the user needs Azure RBAC operating models, managed identity boundaries, PIM or PAM posture, Azure Policy and initiatives, naming and tagging guardrails, or exception-handling design after the Azure structure is chosen. Do not use for tenant or subscription layout; monitoring, backup, or rollout validation; Azure DevOps pipelines; or materially ambiguous requests with no clear governance deliverable.
+description: Use when /internal-azure selects Azure authorization, workload identity, privileged access, Policy, guardrail, or exception work.
 ---
 
 # Internal Azure Governance
 
-Use this skill when the next need is to define or review Azure identity, access, and guardrail decisions.
-
-This skill owns governance logic after the broad structure is known. It helps separate tenant or management-group guardrails from subscription or workload grants and keeps permission decisions auditable.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-azure`.
+Use this workflow to define auditable Azure identity, access, and guardrail
+decisions.
 
 ## When to use
 
-- The user needs RBAC model guidance across management groups or subscriptions.
-- The user needs managed identity or privileged-access posture guidance.
-- The user needs Azure Policy, initiative, naming, or tagging guardrails.
-- The user needs a review of guardrail design, exceptions, or access governance.
+Use when `/internal-azure` selects an Azure governance deliverable involving
+RBAC, workload identity, PIM/PAM, Policy, tagging, or exceptions.
 
-## Main domains covered
+## Workflow
 
-- RBAC operating model
-- Entra group and role-assignment strategy
-- managed identity boundaries
-- PIM and PAM posture
-- Azure Policy and initiatives
-- naming and tagging guardrails
-- security baseline tied to identity and access decisions
-- exception handling at governance level
+1. State the governance objective: the access, prevention, detection, or
+   privileged-elevation outcome required.
+2. Set the control scope: management group, subscription set, subscription, or
+   resource, with the affected principals and workloads.
+3. Design the authorization model and distinguish grants, preventive controls,
+   detective controls, workload identity, and privileged elevation.
+4. Define the exception path with an owner, business reason, compensating
+   control, expiry or review date, and audit evidence.
+5. Stage the rollout with a safe scope, compliance or access checks, rollback
+   triggers, and evidence collection.
+6. Apply the completion criteria: scope is explicit, controls are classified,
+   authorization is least-privilege, exceptions are reviewable, and rollout
+   evidence is recorded.
 
-## Core rules
+## Azure governance patterns
 
-- Keep tenant or management-group guardrails distinct from subscription or resource-level grants.
-- Treat Azure Policy as preventive or detective governance, not as permission grants.
-- Prefer managed identities and federated workload access over long-lived secrets unless there is a proven reason not to.
-- Make scope explicit: management group, subscription set, or single subscription.
-- Make exception handling explicit when a control is not universal.
+- Use Azure Policy and initiatives for preventive or detective guardrails.
+- Use RBAC role assignments for authorization with explicit scope.
+- Use managed identities or federation for workload access and keep runtime
+  identity separate from human access grants.
+- Use PIM or PAM for time-bound, approved, and reviewable elevation.
+- Use naming and tagging controls when metadata consistency is part of the
+  governance objective.
 
-Load `references/guardrail-map.md` when the correct governance surface is ambiguous or when the user needs a deeper split between RBAC, managed identities, PIM/PAM, and Policy controls.
+## Current facts
 
-## Use of current facts
+Use current Microsoft documentation when the recommendation depends on Azure
+RBAC semantics, managed identity support, Policy effects, or privileged-access
+behavior.
 
-Use current Microsoft documentation when the answer depends on current Azure RBAC semantics, managed identity support, Policy effects, or privileged-access behavior.
+Load `references/guardrail-map.md` for control patterns, identity examples, and
+exception evidence.
 
-## Output expectations
+## Completion criteria
 
-For narrow asks, return:
-
-- recommended governance mechanism
-- short reason
-- main risk or validation note
-
-For broader asks, return:
-
-- governance objective
-- scope
-- candidate mechanisms
-- recommended control stack
-- exception or blast-radius note
-- what should be validated before rollout
-
-## Common mistakes
-
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Treating Azure Policy as if it grants access | Preventive controls get confused with authorization paths | Pair Policy guidance with the RBAC or identity model that actually grants access |
-| Answering a governance question without naming scope | Management-group, subscription, and resource scopes behave differently | State the exact scope before recommending a mechanism |
-| Mixing tenant-wide guardrails and subscription-level authorization into one vague recommendation | Reviewers cannot see what prevents versus what grants | Separate Policy or PIM posture from RBAC assignments and workload identity design |
-| Proposing emergency access without boundaries, audit expectations, or privileged-access posture | Break-glass becomes a standing exception instead of controlled elevation | Define who can elevate, how long it lasts, and what evidence must exist |
-| Recommending rollout without staged validation when the blast radius is high | Wide RBAC or Policy errors can block operations quickly | Use scoped rollout, compliance checks, and explicit rollback triggers |
-| Treating managed identities as a reason to skip scope design | Identity becomes secretless but still over-privileged | Keep identity type and authorization scope as separate decisions |
-
-## Validation
-
-- Confirm the governance scope is explicit: management group, subscription set, or single subscription.
-- Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains privileged access.
-- Confirm identity boundaries and exception paths are explicit for human and workload access.
-- Confirm staged rollout validation is named before high-blast-radius Policy, RBAC, or PIM changes.
-- Confirm out-of-scope needs, such as operational proof or structure placement, are identified as outside this lane instead of being answered here.
+Return the governance objective, control scope, recommended mechanism, exception
+path, rollout evidence, and remaining validation risks.

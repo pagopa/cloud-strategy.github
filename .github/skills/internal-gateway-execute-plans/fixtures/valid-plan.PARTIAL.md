@@ -8,20 +8,7 @@
 
 ## Plan Fingerprint
 
-`sha256:137de56698597d2a33f3644f6ebc693139c571f485ce4a7460d2dd4ff7d6c3ca`
-
-## Reason
-
-Task 1 is complete; remaining tasks pending execution.
-
-## Workspace Baseline
-
-- Branch: main
-- Dirty files: none in scope
-
-## Files Changed
-
-- `fixtures/valid-plan.PARTIAL.md`
+`sha256:8adf77b4214f91acf7d575992656d15f4c4de4cc6ffba7d70a7b77ee412fd1cd`
 
 ## Completed
 
@@ -33,12 +20,20 @@ Task 1 is complete; remaining tasks pending execution.
 
 ## Validation
 
-- `pytest -q tests/fixture/` — passed
+- Focused tests passed.
 
 ## Next
 
-Execute Task 2
+Execute Task 2.
 
-## Resume Notes
+## Closeout Decision
 
-No blockers; continue from Task 2.
+- Route: PARTIAL; the caller explicitly paused with work remaining.
+
+## Recovery Attempts
+
+- None required; no validation failed.
+
+## Recovery Exhaustion
+
+- None; execution remains resumable.

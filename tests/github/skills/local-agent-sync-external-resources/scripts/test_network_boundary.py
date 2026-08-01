@@ -182,39 +182,24 @@ def test_audit_does_not_call_prepare_sources() -> None:
                         pytest.fail("_audit calls prepare_sources")
 
 
-def test_plan_does_not_call_prepare_sources() -> None:
+def test_plan_and_apply_delegate_source_readiness_to_auto_prepare() -> None:
     source = (SCRIPT_DIR / "sync_external_resources.py").read_text(encoding="utf-8")
     tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name == "_plan":
-            for inner in ast.walk(node):
-                if isinstance(inner, ast.Call):
-                    if (
-                        isinstance(inner.func, ast.Name)
-                        and inner.func.id == "prepare_sources"
-                    ):
-                        pytest.fail("_plan calls prepare_sources")
-                    if (
-                        isinstance(inner.func, ast.Attribute)
-                        and inner.func.attr == "prepare_sources"
-                    ):
-                        pytest.fail("_plan calls prepare_sources")
+    functions = {
+        node.name: node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)
+    }
 
+    for function_name in ("_plan", "_apply"):
+        calls = {
+            inner.func.id
+            for inner in ast.walk(functions[function_name])
+            if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
+        }
+        assert "_materialize_candidate_with_auto_prepare" in calls
 
-def test_apply_does_not_call_prepare_sources() -> None:
-    source = (SCRIPT_DIR / "sync_external_resources.py").read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name == "_apply":
-            for inner in ast.walk(node):
-                if isinstance(inner, ast.Call):
-                    if (
-                        isinstance(inner.func, ast.Name)
-                        and inner.func.id == "prepare_sources"
-                    ):
-                        pytest.fail("_apply calls prepare_sources")
-                    if (
-                        isinstance(inner.func, ast.Attribute)
-                        and inner.func.attr == "prepare_sources"
-                    ):
-                        pytest.fail("_apply calls prepare_sources")
+    auto_prepare_calls = {
+        inner.func.id
+        for inner in ast.walk(functions["_materialize_candidate_with_auto_prepare"])
+        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
+    }
+    assert "prepare_sources" in auto_prepare_calls

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import re
 import shutil
@@ -11,8 +12,14 @@ from typing import Literal
 
 import yaml
 
-
 _COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+_PREPARED_SOURCE_METADATA_NAME = ".external-resource-source.tsv"
+_PREPARED_SOURCE_METADATA_FIELDS = (
+    "source_id",
+    "repository",
+    "ref",
+    "paths_sha256",
+)
 
 
 @dataclass(frozen=True)
@@ -34,6 +41,21 @@ class ManagedSource:
     ensure_python_shebangs: bool = False
     skill_reference_aliases: tuple[tuple[str, str], ...] = ()
     backtick_skill_references: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class PreparedSourceMetadata:
+    source_id: str
+    repository: str
+    ref: str
+    paths_sha256: str
+
+
+def compute_prepared_source_paths_sha256(source: ManagedSource) -> str:
+    upstream_paths = sorted(asset.upstream for asset in source.assets)
+    return hashlib.sha256(
+        ",".join(upstream_paths).encode("utf-8")
+    ).hexdigest()
 
 
 @dataclass(frozen=True)
@@ -372,18 +394,86 @@ def validate_prepared_sources(
 ) -> None:
     missing: list[str] = []
     for source in resources.sources:
-        metadata = (
-            sources_root / source.source_id / ".external-resource-source.tsv"
+        metadata_path = (
+            sources_root / source.source_id / _PREPARED_SOURCE_METADATA_NAME
         )
-        if not metadata.exists():
+        if not metadata_path.exists():
             missing.append(source.source_id)
+            continue
+        _validate_prepared_source(source, metadata_path)
     if missing:
         raise ValueError(
             "Missing prepared source metadata: "
             + ", ".join(missing)
             + ". Expected prepared sources under "
             + sources_root.as_posix()
-            + ". Run prepare before audit/plan/apply."
+            + ". Run prepare before plan/apply."
+        )
+
+
+def _read_prepared_source_metadata(
+    metadata_path: Path,
+) -> PreparedSourceMetadata:
+    try:
+        with metadata_path.open("r", encoding="utf-8", newline="") as stream:
+            reader = csv.DictReader(stream, delimiter="\t")
+            if reader.fieldnames != list(_PREPARED_SOURCE_METADATA_FIELDS):
+                raise ValueError(
+                    f"Invalid prepared source metadata header in {metadata_path}"
+                )
+            rows = list(reader)
+    except UnicodeDecodeError as exc:
+        raise ValueError(
+            f"Invalid prepared source metadata encoding in {metadata_path}"
+        ) from exc
+
+    if len(rows) != 1:
+        raise ValueError(
+            f"Invalid prepared source metadata row count in {metadata_path}"
+        )
+
+    row = rows[0]
+    if None in row:
+        raise ValueError(
+            f"Invalid prepared source metadata column count in {metadata_path}"
+        )
+    values: dict[str, str] = {}
+    for field in _PREPARED_SOURCE_METADATA_FIELDS:
+        value = row.get(field)
+        if value is None or not value:
+            raise ValueError(
+                f"Invalid prepared source metadata field {field} in {metadata_path}"
+            )
+        values[field] = value
+
+    return PreparedSourceMetadata(
+        source_id=values["source_id"],
+        repository=values["repository"],
+        ref=values["ref"],
+        paths_sha256=values["paths_sha256"],
+    )
+
+
+def _validate_prepared_source(
+    source: ManagedSource,
+    metadata_path: Path,
+) -> None:
+    actual = _read_prepared_source_metadata(metadata_path)
+    expected = PreparedSourceMetadata(
+        source_id=source.source_id,
+        repository=source.repository,
+        ref=source.ref,
+        paths_sha256=compute_prepared_source_paths_sha256(source),
+    )
+    mismatches = [
+        f"{field} expected {getattr(expected, field)!r}, got {getattr(actual, field)!r}"
+        for field in _PREPARED_SOURCE_METADATA_FIELDS
+        if getattr(expected, field) != getattr(actual, field)
+    ]
+    if mismatches:
+        raise ValueError(
+            f"Prepared source metadata mismatch for {source.source_id}: "
+            + "; ".join(mismatches)
         )
 
 
@@ -431,6 +521,11 @@ _SLASH_SKILL_REF_RE = re.compile(
 _BACKTICK_SKILL_REF_RE = re.compile(
     r"(?<![A-Za-z0-9_-])`(?P<name>[a-z0-9][a-z0-9-]*)`"
 )
+_SKILL_DISABLE_MODEL_INVOCATION_RE = re.compile(
+    r"^disable-model-invocation\s*:\s*.*(?:\n|$)",
+    re.MULTILINE,
+)
+_MATTPOCOCK_SOURCE = "mattpocock-skills"
 _GUIDED_QUESTION_SKILLS = frozenset({"superpowers-brainstorming", "grill-me"})
 _GUIDED_QUESTION_CONTRACT_START = "<!-- local-sync:guided-questions:start -->"
 _GUIDED_QUESTION_CONTRACT_END = "<!-- local-sync:guided-questions:end -->"
@@ -456,15 +551,89 @@ This repository-owned contract overrides any earlier instruction to ask one ques
   question remains, present it as a numbered one-item block.
 {_GUIDED_QUESTION_CONTRACT_END}"""
 
+_TEACH_WORKSPACE_SKILL = "mattpocock-teach"
+_TEACH_WORKSPACE_CONTRACT_START = "<!-- local-sync:teach-workspace:start -->"
+_TEACH_WORKSPACE_CONTRACT_END = "<!-- local-sync:teach-workspace:end -->"
+_TEACH_WORKSPACE_CONTRACT_RE = re.compile(
+    re.escape(_TEACH_WORKSPACE_CONTRACT_START)
+    + r".*?"
+    + re.escape(_TEACH_WORKSPACE_CONTRACT_END),
+    re.DOTALL,
+)
+_TEACH_WORKSPACE_CONTRACT = f"""\
+{_TEACH_WORKSPACE_CONTRACT_START}
+## Local teaching-workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Create or reuse one self-contained workspace at
+  `./tmp/teach/<lesson-name>/`.
+- Derive `<lesson-name>` from the learning goal as a stable dash-case slug.
+  Reuse it when later sessions continue the same goal.
+- Resolve every generated path against that workspace root. Keep all teaching
+  state, lessons, references, learning records, and supporting assets inside it.
+- Do not create teaching resources in the repository root or outside the active
+  teaching workspace.
+{_TEACH_WORKSPACE_CONTRACT_END}"""
+
+_CODEBASE_IMPROVE_SKILL = "mattpocock-improve-codebase-architecture"
+_CODEBASE_IMPROVE_FILES = frozenset({"SKILL.md", "HTML-REPORT.md"})
+_CODEBASE_IMPROVE_CONTRACT_START = (
+    "<!-- local-sync:codebase-improve-workspace:start -->"
+)
+_CODEBASE_IMPROVE_CONTRACT_END = "<!-- local-sync:codebase-improve-workspace:end -->"
+_CODEBASE_IMPROVE_CONTRACT_RE = re.compile(
+    re.escape(_CODEBASE_IMPROVE_CONTRACT_START)
+    + r".*?"
+    + re.escape(_CODEBASE_IMPROVE_CONTRACT_END),
+    re.DOTALL,
+)
+_CODEBASE_IMPROVE_CONTRACT = f"""\
+{_CODEBASE_IMPROVE_CONTRACT_START}
+## Local codebase-improvement workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Create or reuse `./tmp/codebase-improve/` as the parent workspace.
+- Resolve every generated artifact against that workspace root. Keep reports,
+    diagrams, analysis, working state, and supporting files inside it.
+- Do not create codebase-improvement artifacts outside the active workspace.
+{_CODEBASE_IMPROVE_CONTRACT_END}"""
+
+def _enforce_marked_contract(
+    content: str,
+    contract_re: re.Pattern[str],
+    contract: str,
+) -> str:
+    if contract_re.search(content):
+        return contract_re.sub(contract, content, count=1)
+    return content.rstrip() + "\n\n" + contract + "\n"
+
 
 def _enforce_guided_question_contract(content: str) -> str:
-    if _GUIDED_QUESTION_CONTRACT_RE.search(content):
-        return _GUIDED_QUESTION_CONTRACT_RE.sub(
-            _GUIDED_QUESTION_CONTRACT,
-            content,
-            count=1,
-        )
-    return content.rstrip() + "\n\n" + _GUIDED_QUESTION_CONTRACT + "\n"
+    return _enforce_marked_contract(
+        content,
+        _GUIDED_QUESTION_CONTRACT_RE,
+        _GUIDED_QUESTION_CONTRACT,
+    )
+
+
+def _enforce_teach_workspace_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _TEACH_WORKSPACE_CONTRACT_RE,
+        _TEACH_WORKSPACE_CONTRACT,
+    )
+
+
+def _enforce_codebase_improve_workspace_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _CODEBASE_IMPROVE_CONTRACT_RE,
+        _CODEBASE_IMPROVE_CONTRACT,
+    )
 
 
 def normalize_candidate(
@@ -551,9 +720,24 @@ def normalize_candidate(
                 and file_path == asset_dir / "SKILL.md"
             ):
                 content = _enforce_guided_question_contract(content)
-
+            if (
+                asset.canonical_name == _TEACH_WORKSPACE_SKILL
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_teach_workspace_contract(content)
+            if (
+                asset.canonical_name == _CODEBASE_IMPROVE_SKILL
+                and file_path.name in _CODEBASE_IMPROVE_FILES
+                and file_path.parent == asset_dir
+            ):
+                content = _enforce_codebase_improve_workspace_contract(content)
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
+
+            if file_path == asset_dir / "SKILL.md":
+                content = _SKILL_DISABLE_MODEL_INVOCATION_RE.sub(
+                    "", content, count=1
+                )
 
             if content != original:
                 file_path.write_text(content, encoding="utf-8")
@@ -644,12 +828,19 @@ def select_overrides(
     return tuple(selected)
 
 
-def _sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(65536), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def _content_hash(path: Path) -> str:
+    raw_bytes = path.read_bytes()
+    try:
+        text = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        normalized_bytes = raw_bytes
+    else:
+        normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+        normalized_lines = [line.rstrip() for line in normalized.split("\n")]
+        while normalized_lines and normalized_lines[-1] == "":
+            normalized_lines.pop()
+        normalized_bytes = ("\n".join(normalized_lines) + "\n").encode("utf-8")
+    return hashlib.sha256(normalized_bytes).hexdigest()
 
 
 def verify_override_hash(
@@ -660,7 +851,7 @@ def verify_override_hash(
         raise ValueError(
             f"Override target missing on disk: {override.target_path}"
         )
-    actual = _sha256_file(target)
+    actual = _content_hash(target)
     if actual != override.expected_content_hash:
         raise ValueError(
             f"content hash mismatch for {override.target_path}: "
@@ -688,7 +879,6 @@ def _replay_one_override(
     if not patch_file.exists():
         raise ValueError(f"Override patch missing: {override.patch_path}")
 
-    patch_text = patch_file.read_text(encoding="utf-8")
     target = trial_repo / override.target_path
     before_content = target.read_text(encoding="utf-8") if target.exists() else ""
 

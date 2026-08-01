@@ -24,7 +24,7 @@ Before substantive review, resolve the concrete target and fully load the
 declared review engine from its resolved source. Record the target identity,
 target fingerprint, engine identity, and source. If the target is empty or the
 engine identity or resolved source cannot be confirmed, stop with
-`NEEDS INVESTIGATION` and name the missing evidence.
+`REVIEW BLOCKED` and name the missing evidence.
 
 The review is report-only. Planning, remediation, and other state-changing
 follow-ups require a separate explicit request outside the current review.
@@ -47,7 +47,7 @@ Run this sequence after the review preflight:
 7. Apply green-test anchoring: treat green tests as evidence only and ask
    which defect classes they would fail to catch.
 8. Run a final coverage counter-analysis before approval and project severity
-   to `B`, `I`, and `S`.
+   to `BLOCKER`, `IMPORTANT`, and `SUGGESTION`.
 
 The wrapper owns the repository-specific differential sequence; Addy owns the
 substantive review standard. Security stays inside the engine's security axis
@@ -86,17 +86,23 @@ For each material finding, preserve `Location`, `Evidence`, `Impact`,
 `Correction`, and `Expected verification` when closure is not obvious. Map the
 engine category using this table, show every blocking and important finding,
 consolidate equivalent findings, and mark uncertainty inline as `to confirm`.
+The localized verdict in `🔎` must be exactly one of `MERGE READY`,
+`CHANGES REQUIRED`, or `REVIEW BLOCKED`. Use `MERGE READY` for an approval
+result, `CHANGES REQUIRED` when blocking findings remain, and `REVIEW BLOCKED`
+when the preflight evidence is insufficient to conduct the review. Number
+public finding identifiers by label, such as `BLOCKER-1`, `IMPORTANT-1`, and
+`SUGGESTION-1`.
 
-| Engine category | Projection identifier | Rule |
+| Engine category | Projection label | Rule |
 | --- | --- | --- |
-| Critical | `B` | Blocking finding. |
-| Required change | `B` | Blocking required change by default. |
-| Optional / Consider | `S` | Non-blocking suggestion. |
-| Nit | `S` | Non-blocking suggestion. |
+| Critical | `BLOCKER` | Blocking finding. |
+| Required change | `BLOCKER` | Blocking required change by default. |
+| Optional / Consider | `SUGGESTION` | Non-blocking suggestion. |
+| Nit | `SUGGESTION` | Non-blocking suggestion. |
 | FYI | — | Omit unless it changes the verdict. |
 
-Reserve `I` for a required change that does not block merge; it is not a third
-undefined severity scale.
+Use `IMPORTANT` for a correction or follow-up that does not independently
+block merge. It is not a third undefined severity scale.
 
 This mapping depends on the imported engine's categories; after an engine
 refresh, rerun the review-engine contract before relying on this projection.

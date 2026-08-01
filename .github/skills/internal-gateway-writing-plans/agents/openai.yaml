@@ -1,12 +1,14 @@
 interface:
-  display_name: "Internal Gateway Writing Plans"
+  display_name: "Writing Plans Internal Gateway"
   short_description: "Approved implementation-plan writing"
   default_prompt: >-
-    Use /internal-gateway-writing-plans to capture Target, Anti-scope,
-    Nearest owner, Validation path, Stop conditions, and Observable acceptance.
-    Then load /superpowers-writing-plans and delegate the approved implementation plan
-    writing outcome. The delegated draft remains draft-only until the local acceptance gate
-    passes. Persist the plan under `tmp/superpowers/plans/YYYY-MM-DD-HHMM-<feature-name>.md`.
-    After the local acceptance gate passes, name /internal-gateway-execute-plans as the
-    next owner. Stop after reporting the accepted plan path. Observe the No-Commit Rule:
-    no git mutations during writing.
+    Use /internal-gateway-writing-plans after approval to capture the target,
+    anti-scope, nearest owner, validation path, stop conditions, and observable
+    acceptance. Load /superpowers-writing-plans to produce one reviewable plan
+    under tmp/superpowers/plans/ with ordered tasks, concrete targets, focused
+    validation, and a versioned ## Execution Contract declaring native commands,
+    equivalence policy, manual obligations, and authority boundaries. Do not
+    predict runtime candidates. Run the executor-owned preflight and revise
+    until it has zero blocking findings. Perform human review, report the plan
+    path, name /internal-gateway-execute-plans as next owner, and wait for
+    explicit execution approval. Observe the No-Commit Rule: no Git mutations.

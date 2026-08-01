@@ -1,8 +1,10 @@
-# Bash Script Templates
+# Bash and POSIX `sh` Script Templates
 
-Use this reference when you need a starter script, a CLI parsing pattern, or the standard cleanup helpers.
+Load this reference after dialect selection. The shebangs below are deployment
+conventions; they do not change the language guarantees of the selected
+dialect.
 
-## Minimal Template
+## Bash Minimal Template
 
 ```bash
 #!/usr/bin/env bash
@@ -55,7 +57,73 @@ EOF
 main "$@"
 ```
 
-## Argument Parsing Pattern
+## POSIX sh Minimal Template
+
+```sh
+#!/bin/sh
+#
+# Purpose: {description}
+# Usage examples:
+#   ./{script_name}.sh
+#   ./{script_name}.sh --help
+#   ./{script_name}.sh --target custom-target
+
+set -eu
+
+DEFAULT_TARGET=default-target
+
+log_info() {
+  printf 'ℹ️  %s\n' "$*"
+}
+
+log_warn() {
+  printf '⚠️  %s\n' "$*"
+}
+
+log_success() {
+  printf '✅ %s\n' "$*"
+}
+
+log_error() {
+  printf '❌ %s\n' "$*" >&2
+}
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./{script_name}.sh [--target value]
+EOF
+}
+
+target=$DEFAULT_TARGET
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --target)
+      if [ "$#" -lt 2 ] || [ "${2#-}" != "$2" ]; then
+        log_error "--target requires a value"
+        exit 1
+      fi
+      target=$2
+      shift 2
+      ;;
+    --help)
+      usage
+      exit 0
+      ;;
+    *)
+      log_error "Unknown option: $1"
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+log_info "Processing $target"
+# ... logic ...
+log_success "Done"
+```
+
+## Bash Argument Parsing Pattern
 
 ```bash
 DEFAULT_SCOPE="repo"
@@ -79,7 +147,41 @@ while [[ $# -gt 0 ]]; do
 done
 ```
 
-## ERR Trap Pattern
+## POSIX sh Argument Parsing Pattern
+
+```sh
+DEFAULT_SCOPE=repo
+SCOPE=$DEFAULT_SCOPE
+DRY_RUN=false
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --scope)
+      if [ "$#" -lt 2 ] || [ "${2#-}" != "$2" ]; then
+        log_error "--scope requires a value"
+        exit 1
+      fi
+      SCOPE=$2
+      shift 2
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --help)
+      usage
+      exit 0
+      ;;
+    *)
+      log_error "Unknown option: $1"
+      usage
+      exit 1
+      ;;
+  esac
+done
+```
+
+## Bash ERR Trap Pattern
 
 ```bash
 set -eEuo pipefail
@@ -93,7 +195,7 @@ on_error() {
 trap 'on_error "${LINENO}" "${BASH_COMMAND}"' ERR
 ```
 
-## Hardening Helpers
+## Bash Hardening Helpers
 
 ```bash
 require_command() {
@@ -110,4 +212,17 @@ cleanup() {
 
 TMP_DIR="$(mktemp -d)"
 trap cleanup EXIT
+```
+
+## POSIX sh Cleanup Helper
+
+```sh
+cleanup() {
+  if [ -n "${TMP_DIR:-}" ] && [ -d "$TMP_DIR" ]; then
+    rm -rf -- "$TMP_DIR"
+  fi
+}
+
+TMP_DIR=$(mktemp -d)
+trap cleanup 0
 ```

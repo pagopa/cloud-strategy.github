@@ -41,6 +41,7 @@ Tools:
     sync_home_ai_resources
     validate_critical_output
     validate_internal_skills
+    validate_skill_change_scope
 EOF
 }
 
@@ -143,6 +144,9 @@ resolve_script() {
             ;;
         validate_internal_skills|validate_internal_skills.py)
             printf '%s\n' "$SCRIPT_DIR/validate_internal_skills.py"
+            ;;
+        validate_skill_change_scope|validate_skill_change_scope.py)
+            printf '%s\n' "$SCRIPT_DIR/validate_skill_change_scope.py"
             ;;
         *)
             return 1

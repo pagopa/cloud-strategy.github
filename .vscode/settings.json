@@ -8,5 +8,5 @@
   "chat.instructionsFilesLocations": {
     ".github/instructions": false
   },
-  "python-envs.defaultEnvManager": "ms-python.python:pyenv"
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }

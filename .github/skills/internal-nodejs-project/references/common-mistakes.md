@@ -2,12 +2,10 @@
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Mixing async/sync without `await` | Unhandled promise rejections, silent failures | Always `await` async calls; use `async` on the function |
-| Business logic inside route handlers | Untestable, coupled to Express/framework | Extract to service modules, inject dependencies |
-| Using `var` instead of `const`/`let` | Hoisting bugs, scope confusion | Use `const` by default, `let` only when reassignment is needed |
-| Bare `catch(err) {}` that swallows errors | Silent failures, impossible to debug | Log the error and rethrow, or handle specifically |
-| No input validation on API boundaries | Runtime crashes on malformed input | Validate and fail fast at handler entry |
-| Callback-style code in modern Node.js | Hard to read, callback hell | Use async/await with Promises |
-| Mixing Jest and `node:test` in the same project without reason | Duplicated conventions and confusing tooling | Follow the test stack already used by the repository |
-| Changing module system casually | Breaks tooling, imports, and runtime behavior | Stay with the existing ESM/CJS choice unless the migration is explicit |
-| Using `Promise.all` on dependent work | Masks ordering assumptions and makes failures harder to interpret | Keep dependent async steps sequential |
+| Floating or unintentionally unobserved promises | Failures can disappear from the owning application flow. | Observe intentional outcomes and make fire-and-forget ownership, failure handling, and lifecycle explicit. |
+| Domain logic coupled to transport handlers | Application behavior becomes difficult to reuse and test. | Move domain decisions behind application services with transport-independent inputs and results. |
+| Swallowed operational errors | Callers and operators lose the information needed to recover. | Classify expected operational failures and route them through the central error path. |
+| Missing boundary validation | Malformed external data reaches domain logic and causes unstable behavior. | Validate transport and adapter inputs before invoking domain operations. |
+| Concurrency primitives used with incorrect dependency assumptions | Work can race, reorder, or hide partial failures. | Make dependencies explicit and choose sequential, all-or-nothing, or partial-failure behavior deliberately. |
+| Framework or module-system migration without an explicit compatibility decision | Runtime behavior, imports, and test seams can break together. | Record the compatibility decision and migrate the affected boundary as one application change. |
+| Mocks replacing internal behavior rather than external boundaries | Tests can pass while the real application contract is broken. | Keep internal modules real where practical and mock only external systems or adapters. |

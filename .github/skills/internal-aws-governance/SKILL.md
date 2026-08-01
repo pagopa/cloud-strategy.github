@@ -1,13 +1,13 @@
 ---
 name: internal-aws-governance
-description: Use when the user needs AWS governance guidance for IAM operating models, role and trust design, permission boundaries, federation, SCPs, tag policies, exception handling, or other guardrails that define what principals can do after the AWS structure is chosen.
+description: Use when /internal-aws selects the AWS governance lane for IAM operating models, trust policies, federation, permission boundaries, SCPs, tag policies, exception controls, or access guardrails.
 ---
 
 # Internal AWS Governance
 
-Owns AWS IAM, trust, SCP, federation, permission-boundary, and access-guardrail decisions after the broad structure is known. Separates org-level guardrails from account-level grants and keeps permission decisions auditable.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
+Own AWS IAM, trust, SCP, federation, permission-boundary, and access-guardrail
+decisions. Separate org-level guardrails from account-level grants and keep
+permission decisions auditable.
 
 ## When to use
 
@@ -42,10 +42,10 @@ IAM operating model · role and group strategy · trust-policy boundaries · per
 | Recommending rollout without simulation when blast radius is high | A wide deny or trust failure can interrupt platform operations | Use simulation, targeted rollout, and explicit rollback triggers before widening |
 | Treating permission boundaries as a replacement for trust design | Delegation stays too broad even if identity policies are constrained | Use boundaries to limit delegated builders and trust policies to control who assumes the role |
 
-## Validation
+## Completion contract
 
 - Governance scope is explicit: root, OU, account set, or single account.
 - Recommended mechanism is clear about whether it prevents, grants, or constrains.
 - Trust boundaries and exception paths are explicit when access crosses account boundaries.
 - Staged validation or simulation is named before high-blast-radius rollout.
-- Out-of-scope needs, such as operational proof or structure placement, are identified as outside this lane instead of being answered here.
+- Expected effects and evidence requirements are explicit for every proposed control.

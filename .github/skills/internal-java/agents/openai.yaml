@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Java"
-  short_description: "Java baseline and routing"
-  default_prompt: "Use $internal-java for Java code or Java build metadata changes."
+  short_description: "Java source and build metadata"
+  default_prompt: "Use $internal-java when Java language or source correctness, or generic Maven/Gradle build metadata, is the primary concern."

@@ -1,54 +1,32 @@
 # Python Script Reporting
 
-Use this reference when a Python script or operator-facing toolkit needs polished human-facing console reporting, `rich` rendering, status tables, redaction behavior, or a final summary.
+Load this reference when a script needs human-facing output, `rich` rendering,
+redaction, diagnostics, or a final operator summary.
 
-## Boundary
+## Boundary and dependency decision
 
-- Keep reporting at the human-facing CLI or operator adapter boundary.
-- Keep application logic, reusable helpers, project modules, and machine-readable output paths free of `rich`, panels, tables, color, and emoji formatting.
-- Let application logic call semantic reporter methods such as `step()`, `success()`, or `summary()`; do not build styled strings inside business logic.
-- Reserve plain `print()` for machine-readable output boundaries such as `--format json`; human output should go through the reporter.
+Keep reporting at the human-facing CLI or operator adapter boundary. Reusable
+helpers and machine-readable output stay free of terminal styling. Use `rich`
+only when the terminal experience is part of the accepted contract, and keep
+the decision beside the declared dependency lock.
 
-## Dependency Decision
+## Reporter contract
 
-Use `rich` when the human-facing terminal experience is part of the script contract. Preserve the declared dependency manager and keep the decision close to its canonical lock artifact.
+Prefer semantic methods such as `banner`, `section`, `step`, `detail`,
+`success`, `warning`, `error`, `table`, and
 
-```text
-Dependency decision note
-- Candidates: stdlib print/logging, rich
-- Final choice: rich
-- Why: the tool has operator-facing sections, status tables, warnings, and summaries where consistent terminal rendering reduces mistakes.
-```
+- `summary(status, counts, produced_files, diagnostics)`. Keep technical details
+behind a verbose flag and never log tokens, passwords, credentials, or
+sensitive payloads.
 
-After adding or updating dependencies, follow the `internal-python-script` Dependency policy for the declared manager's lock generation and validation.
-
-## Reporter Shape
-
-Preferred methods:
-
-- `banner(title, *, run_id, mode, scope, output_path, options)`
-- `section(title, description=None)`
-- `step(message)`
-- `detail(message)`
-- `success(message)`
-- `warning(message)`
-- `error(message)`
-- `table(title, columns, rows)`
-- `summary(status, counts, produced_files, diagnostics)`
-
-Use concise, deduplicated retry messages. Put technical details behind `--verbose` or `--debug`. Never log tokens, bearer values, passwords, secrets, credentials, or sensitive payloads.
-
-## Rich Skeleton
+## Minimal rich reporter
 
 ```python
-from __future__ import annotations
-
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 
 from rich.console import Console
 from rich.markup import escape
-from rich.panel import Panel
 from rich.table import Table
 
 
@@ -73,33 +51,17 @@ class ExecutionReporter:
         self.console = console or Console()
         self.verbose = verbose
 
-    def banner(
-        self,
-        title: str,
-        *,
-        run_id: str,
-        mode: str,
-        scope: str,
-        output_path: Path | None,
-        options: Mapping[str, object],
-    ) -> None:
-        lines = [
-            f"Run: {escape(run_id)}",
-            f"Mode: {escape(mode)}",
-            f"Scope: {escape(scope)}",
-        ]
-        if output_path is not None:
-            lines.append(f"Output: {escape(output_path.as_posix())}")
+    def banner(self, title: str, *, options: Mapping[str, object]) -> None:
+        self.console.print(escape(title))
         if options:
             rendered = ", ".join(
                 f"{escape(str(key))}={_render_option(str(key), value)}"
                 for key, value in options.items()
             )
-            lines.append(f"Options: {rendered}")
-        self.console.print(Panel("\n".join(lines), title=escape(title), border_style="blue"))
+            self.console.print(rendered)
 
     def section(self, title: str, description: str | None = None) -> None:
-        self.console.rule(f"ℹ️  {escape(title)}")
+        self.console.rule(escape(title))
         if description:
             self.console.print(escape(description))
 
@@ -108,16 +70,16 @@ class ExecutionReporter:
 
     def detail(self, message: str) -> None:
         if self.verbose:
-            self.console.print(f"ℹ️  {escape(message)}", style="dim")
+            self.console.print(escape(message))
 
     def success(self, message: str) -> None:
-        self.console.print(f"✅ {escape(message)}", style="green")
+        self.console.print(f"✅ {escape(message)}")
 
     def warning(self, message: str) -> None:
-        self.console.print(f"⚠️  {escape(message)}", style="yellow")
+        self.console.print(f"⚠️ {escape(message)}")
 
     def error(self, message: str) -> None:
-        self.console.print(f"❌ {escape(message)}", style="red")
+        self.console.print(f"❌ {escape(message)}")
 
     def table(self, title: str, columns: Sequence[str], rows: Iterable[Sequence[object]]) -> None:
         table = Table(title=escape(title))
@@ -135,9 +97,6 @@ class ExecutionReporter:
         produced_files: Sequence[Path],
         diagnostics: Sequence[str],
     ) -> None:
-        rows = [(name, value) for name, value in counts.items()]
-        if rows:
-            self.table("Counts", ("Metric", "Value"), rows)
         self.console.print(f"Status: {escape(status)}")
         self.console.print("Produced files:")
         for path in produced_files:
@@ -147,8 +106,6 @@ class ExecutionReporter:
             self.console.print(f"• {escape(diagnostic)}")
 ```
 
-Callers must pass only sanitized diagnostics because arbitrary free-text diagnostics cannot be reliably redacted by key inspection.
-
-## Summary Expectations
-
-End operator-facing runs with a compact summary that includes final status, produced files, relevant counts, diagnostics, and remaining gaps. Use tables for repeated file or diagnostic rows, and keep secrets redacted even in debug mode.
+Callers must sanitize free-text diagnostics before passing them to a reporter.
+Summaries should state final status, produced files, relevant counts, and
+remaining gaps without exposing secrets.

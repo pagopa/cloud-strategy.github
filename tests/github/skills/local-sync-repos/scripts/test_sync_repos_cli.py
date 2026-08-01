@@ -20,6 +20,7 @@ MANAGED_COPY_PATHS_EXPECTED = (
     ".editorconfig",
     ".github/copilot-instructions.md",
     ".github/workflows/_pre-commit.yml",
+    ".github/workflows/_pr-title.yml",
 )
 
 
@@ -49,6 +50,9 @@ def _populate_source(source: Path) -> None:
     (source / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
     (source / ".github" / "workflows" / "_pre-commit.yml").write_text(
         "name: pre-commit\n", encoding="utf-8"
+    )
+    (source / ".github" / "workflows" / "_pr-title.yml").write_text(
+        "name: pr-title\n", encoding="utf-8"
     )
     instructions = source / ".github" / "instructions"
     instructions.mkdir(parents=True, exist_ok=True)
@@ -145,6 +149,9 @@ def test_apply_converges_and_preserves_consumer_owned_files(
     second = _run_cli("plan", source_repo, target_repo, output_format="json")
     payload = json.loads(second.stdout)
     assert payload["managed_mutation_paths"] == []
+    assert (target_repo / ".github/workflows/_pr-title.yml").read_bytes() == (
+        source_repo / ".github/workflows/_pr-title.yml"
+    ).read_bytes()
     assert local_instruction.read_bytes() == b"local instruction\n"
     assert local_agents.read_bytes() == b"local policy\n"
 
@@ -182,6 +189,7 @@ def test_agents_local_is_create_once(source_repo: Path, target_repo: Path) -> No
     _run_cli("plan", source_repo, target_repo)
     assert _run_cli("apply", source_repo, target_repo).returncode == 0
     first_content = (target_repo / "AGENTS.local.md").read_bytes()
+    assert first_content == b"# AGENTS.local.md - Repository-Local Policy\n"
     (target_repo / "AGENTS.local.md").write_bytes(b"consumer-edit\n")
     _run_cli("plan", source_repo, target_repo)
     assert _run_cli("apply", source_repo, target_repo).returncode == 0

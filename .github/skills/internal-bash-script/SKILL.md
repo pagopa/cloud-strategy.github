@@ -1,43 +1,62 @@
 ---
 name: internal-bash-script
-description: Use when creating, modifying, or reviewing standalone Bash scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints.
+description: Use when creating, reviewing, or modifying standalone Bash or POSIX `sh` scripts, utilities, wrappers, launchers, or other operator-facing shell entrypoints.
 ---
 
-# Bash Script Skill
-
-## Referenced skills
-
-- `internal-github-action-composite`: route Bash embedded in GitHub composite actions.
-- `internal-github-actions`: route GitHub workflow-level behavior.
+# Internal Bash Script
 
 ## When to use
 
 - New Bash scripts.
-- Existing Bash scripts that need updates.
+- Existing Bash scripts that need review or updates.
 - Standalone operator-facing wrappers, launchers, and shell utilities.
 
 ## When not to use
 
-- Bash embedded in GitHub composite actions; use `internal-github-action-composite`.
-- GitHub workflow-level behavior; use `internal-github-actions`.
-- embedded shell and non-operator Bash helpers; use `internal-bash`.
+- Embedded shell fragments.
+- Sourced or non-operator Bash helpers that do not own an operator-facing
+  entrypoint.
+- Workflow or platform behavior beyond the standalone shell entrypoint.
 
-Use this skill directly when standalone operator behavior is the primary
-contract; the lightweight sibling is not a required preload.
+## Dialect decision
 
-## Compact Bash baseline
+Classify the shell before choosing script patterns. Preserve the declared
+interpreter and record the execution environment and compatibility target:
 
-- Prefer `#!/usr/bin/env bash` for repository-owned Bash scripts.
-- Use `set -euo pipefail` unless the script has a documented compatibility reason.
-- Quote variable expansions and use arrays for dynamic commands.
-- Prefer `[[ ]]`, `local`, and readable guard clauses when Bash is available.
-- Use `mktemp` plus cleanup traps for temporary state.
-- Validate required external commands with `command -v` before first use.
+- `Dialect: Bash` when the entrypoint and runtime provide Bash.
+- `Dialect: POSIX`sh`` when the entrypoint or deployment target requires POSIX
+  shell syntax.
+
+Require an explicit POSIX baseline before treating POSIX.1-2024 Issue 8
+behavior as portable. Bash invoked as `sh` is not cross-shell portability proof,
+and the interpreter must not be changed silently.
+
+## Portable core
+
+Quote expansions, check statuses at correctness boundaries, use `if`, `case`,
+`test`, or `[ ]` for shared control flow, validate dependencies before first
+use, and use `mktemp` with cleanup traps for temporary state.
+
+## Bash branch
+
+For `Dialect: Bash`, follow the deployment shebang convention, normally
+`#!/usr/bin/env bash`, and use `set -euo pipefail` with documented exceptions.
+Arrays for dynamic commands, `[[ ]]`, `local`, and Bash-specific traps or
+options are valid only in this branch.
+
+## POSIX `sh` branch
+
+For `Dialect: POSIX`sh``, follow the shebang convention declared by the target,
+use `set -eu` with contextual `-e` caveats, and use scalar variables, positional
+parameters, `[ ]`, and `test`. Do not use Bash arrays or `local`; use `pipefail`
+only for an explicit POSIX.1-2024 baseline.
+
+## Script-specific operator guidance
+
+- Use `command -v` before first use of required external tools.
 - Use structured parsers such as `jq` or `yq` for JSON and YAML when available.
-
-## Script-specific hardening guidance
-
-- Prefer `printf` for formatted output and arrays for dynamic commands.
+- Prefer `printf` for formatted output and arrays for dynamic commands only in
+  the Bash branch.
 - Destructive or repeatable scripts should be idempotent and expose `--dry-run` when operator risk is non-trivial.
 - Keep operator entrypoints thin and extract repeated branches into sourced helper files only when reuse is real.
 - Treat 300 lines as a review threshold and 400 lines as a split-or-justify gate for standalone scripts.
@@ -56,7 +75,9 @@ contract; the lightweight sibling is not a required preload.
 
 ## Templates and hardening helpers
 
-Load `references/templates.md` when you need the starter script, the standard argument parser skeleton, or optional cleanup helpers for scripts that own temporary state.
+After dialect selection, load `references/templates.md` when you need the
+starter script, argument parser skeleton, or cleanup helpers. Choose only the
+matching Bash or POSIX `sh` section.
 
 - Prefer safe reruns with guards like `mkdir -p`, existence checks, or replace-in-place flows.
 - Use `--` before user-supplied paths in destructive commands such as `rm -rf -- "$target"`.

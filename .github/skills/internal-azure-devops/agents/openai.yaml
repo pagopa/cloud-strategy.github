@@ -1,4 +1,4 @@
 interface:
   display_name: "Internal Azure DevOps"
-  short_description: "Azure DevOps pipeline routing"
-  default_prompt: "Use $internal-azure-devops for Azure DevOps pipeline or project automation work."
+  short_description: "Azure DevOps pipeline and automation delivery"
+  default_prompt: "Use $internal-azure for an Azure DevOps request, then apply $internal-azure-devops for pipeline or project-automation delivery."

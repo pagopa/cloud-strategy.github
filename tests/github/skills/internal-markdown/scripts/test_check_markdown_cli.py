@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import stat
 import subprocess
 from pathlib import Path
@@ -10,6 +11,26 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[5]
 CHECKER = REPO_ROOT / ".github/skills/internal-markdown/scripts/check.sh"
 VALID_FIXTURE = ".github/skills/internal-markdown/fixtures/valid/document.md"
+
+
+def test_makefile_markdownlint_version_matches_bundle_checker() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+    checker = CHECKER.read_text(encoding="utf-8")
+
+    makefile_version = re.search(
+        r"^MARKDOWNLINT_VERSION := ([^\s]+)$",
+        makefile,
+        re.MULTILINE,
+    )
+    checker_version = re.search(
+        r'^required_version="markdownlint-cli2 v([^"]+)"$',
+        checker,
+        re.MULTILINE,
+    )
+
+    assert makefile_version is not None
+    assert checker_version is not None
+    assert makefile_version.group(1) == checker_version.group(1)
 
 
 @pytest.fixture

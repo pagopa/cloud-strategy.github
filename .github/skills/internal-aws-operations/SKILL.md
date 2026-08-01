@@ -1,13 +1,12 @@
 ---
 name: internal-aws-operations
-description: Use when the user needs AWS operational guidance for monitoring, logging, backup and restore, DR validation, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision has already been made.
+description: Use when /internal-aws selects the AWS operations lane for monitoring, logging, rollout validation, backup and restore proof, DR evidence, reporting, or audit evidence.
 ---
 
 # Internal AWS Operations
 
-Owns the operational side of the AWS platform: monitoring, evidence, preflight, and post-rollout verification. Does not replace strategic framing, structure design, or governance design.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-aws`.
+Own the operational proof for AWS changes: monitoring, evidence, preflight,
+rollout validation, recovery proof, reporting, and audit evidence.
 
 ## When to use
 
@@ -41,7 +40,7 @@ Load `references/validation-and-evidence.md` for a deeper preflight, rollout-val
 | Giving a DR answer without making criticality assumption visible | Recovery effort may be overbuilt or underbuilt | State assumed RTO, RPO, or criticality before recommending the evidence path |
 | Treating one successful rollout wave as proof for all scopes | Wider OUs, regions, or accounts can still fail differently | Widen only after the first safe unit is validated and recorded |
 
-## Validation
+## Completion contract
 
 - Confirmed evidence is distinguished from inferred evidence.
 - Preflight checks, rollback trigger, and rollout unit are explicit for risky changes.

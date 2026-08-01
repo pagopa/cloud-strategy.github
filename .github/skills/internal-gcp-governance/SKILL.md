@@ -1,79 +1,41 @@
 ---
 name: internal-gcp-governance
-description: Use when the user needs Google Cloud governance guidance for IAM operating models, workload identity federation, service account boundaries, Org Policy design, inheritance strategy, security guardrails, or exception handling that define what principals can do after the GCP structure is chosen. Do not use for org, folder, project, or Shared VPC layout; monitoring, backup, or rollout validation; or materially ambiguous requests with no clear governance deliverable.
+description: Use when /internal-gcp selects governance for Google Cloud IAM, workload identity, service-account boundaries, Org Policy, inherited guardrails, or governed exceptions.
 ---
 
 # Internal GCP Governance
 
-Use this skill when the next need is to define or review Google Cloud identity, access, and guardrail decisions.
+## Purpose
 
-This skill owns governance logic after the broad structure is known. It helps separate org or folder guardrails from project-level grants and keeps permission decisions auditable.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-gcp`.
+Define Google Cloud identity, authorization, preventive guardrails, workload trust, governed exceptions, and the verification needed to apply them safely.
 
 ## When to use
 
-- The user needs IAM model guidance across folders or projects.
-- The user needs workload identity federation or service account boundary guidance.
-- The user needs Org Policy, inheritance, or security-guardrail guidance.
-- The user needs a review of guardrail design, exceptions, or access governance.
+Use this skill when the requested deliverable is a Google Cloud control stack, identity boundary, or governed exception decision.
 
-## Main domains covered
+## Process
 
-- IAM operating model
-- role-binding strategy
-- service account boundary design
-- workload identity federation
-- Org Policy and inheritance strategy
-- security guardrails tied to identity and access decisions
-- exception handling at governance level
+1. Establish the control objective, affected scope, principals, workloads, ownership boundaries, and blast radius.
+2. Separate preventive guardrails, authorization, and workload trust into explicit decision areas.
+3. Select the control stack across Org Policy, inheritance, IAM, workload identity federation, and service-account boundaries.
+4. Define governed exceptions with an owner, reason, scope, compensating controls, review date, and closure condition.
+5. Name staged control verification, rollback triggers, and the evidence required before widening a high-blast-radius change.
 
-## Core rules
+Load `references/guardrail-map.md` only when the control surface or exception pattern needs deeper comparison.
 
-- Keep org or folder guardrails distinct from project-level grants.
-- Treat Org Policy as preventive governance, not as permission grants.
-- Prefer workload identity federation over long-lived service account keys unless there is a proven reason not to.
-- Make scope explicit: org, folder set, or project set.
-- Make exception handling explicit when a control is not universal.
+## Output
 
-Load `references/guardrail-map.md` when the correct governance surface is ambiguous or when the user needs a deeper split between IAM, service accounts, workload identity federation patterns, and Org Policy or CEL-backed guardrail controls.
-
-## Use of current facts
-
-Use current Google Cloud documentation when the answer depends on current IAM semantics, workload identity federation support, Org Policy behavior, or product-specific guardrail limits.
-
-## Output expectations
-
-For narrow asks, return:
-
-- recommended governance mechanism
-- short reason
-- main risk or validation note
-
-For broader asks, return:
-
-- governance objective
-- scope
-- candidate mechanisms
+- governance objective and scope
+- distinction between prevention, authorization, and workload trust
 - recommended control stack
-- exception or blast-radius note
-- what should be validated before rollout
+- service-account and human-access boundaries
+- governed exception record and review condition
+- blast-radius, staged rollout, rollback, and verification plan
 
-## Common mistakes
+## Completion
 
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Treating Org Policy as if it grants access | Preventive governance gets confused with authorization | Pair Org Policy guidance with the IAM path that actually grants access |
-| Answering a governance question without naming scope | Org, folder, and project controls behave differently | State the exact governance scope before recommending a mechanism |
-| Mixing org-wide guardrails and project-level authorization into one vague recommendation | Reviewers cannot see what prevents versus what grants | Separate Org Policy or inheritance posture from IAM bindings and workload identity design |
-| Proposing service account or emergency access without boundaries or audit expectations | Privilege becomes durable and hard to review | Define who can use it, how it is bounded, and what evidence must exist |
-| Recommending rollout without staged validation when the blast radius is high | A wide deny or identity failure can interrupt platform operations | Use targeted rollout, explicit rollback, and verification before widening scope |
-| Treating workload identity federation as a reason to skip service-account boundary design | Keys may disappear but privilege can still stay too broad | Keep identity mechanism and authorization scope as separate decisions |
-
-## Validation
-
-- Confirm the governance scope is explicit: org, folder set, or project set.
-- Confirm the recommended mechanism is clear about whether it prevents, grants, or constrains workload identity.
-- Confirm service-account and human-access boundaries are explicit when access crosses project or folder boundaries.
-- Confirm staged rollout validation is named before high-blast-radius Org Policy or IAM changes.
-- Confirm out-of-scope needs, such as operational proof or structure placement, are identified as outside this lane instead of being answered here.
+- The governance scope is explicit at org, folder, or project level.
+- Each recommendation states whether it prevents, grants, or constrains access.
+- Service-account, workload, and human-access boundaries are named when relevant.
+- Exceptions have an owner, reason, scope, review date, and compensating evidence.
+- High-blast-radius controls have staged validation and a rollback trigger.

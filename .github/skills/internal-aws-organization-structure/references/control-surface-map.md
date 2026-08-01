@@ -1,6 +1,7 @@
 # AWS Organization Structure Control Surface Map
 
-Use this reference when turning a structural AWS question into the right control surface.
+Use this reference when turning a structural AWS question into an explicit
+placement and rollout result.
 
 ## Core boundary
 
@@ -8,14 +9,13 @@ Use this reference when turning a structural AWS question into the right control
 - **Delegated administrator accounts**: prefer for day-to-day operation of integrated AWS services when supported.
 - **Member accounts**: keep workload execution, service ownership, and most resource-level IAM decisions here.
 
-## Default review checklist
+## Structural review checklist
 
-1. Is this a structure choice, a governance control, or an operations concern?
-2. Must the management account perform the action, or can it be delegated?
-3. Is the change shaping layout, shaping permissions, or rolling out infrastructure?
-4. What is the smallest safe rollout unit: one account, one OU, or one region set?
-5. What must be validated before broad rollout?
-6. What is the rollback path if access, billing, or platform automation breaks?
+1. State the platform goal, ownership model, and constraints.
+2. Decide whether the management account must perform the action or whether it can be delegated.
+3. Make the smallest safe rollout unit explicit: one account, one OU, or one region set.
+4. Record the structural blast radius and rollback path.
+5. Name the evidence required before broad rollout.
 
 ## Common structural mappings
 

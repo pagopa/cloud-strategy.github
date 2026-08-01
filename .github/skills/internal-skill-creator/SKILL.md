@@ -63,6 +63,11 @@ Read `references/authoring-and-evaluation.md`. Select the applicable evaluation
 branches, including compatibility, lifecycle, propagation, and retirement when
 material. Record skipped branches and reasons.
 
+Use the reference's evaluation-selection matrix to choose evidence for each
+change surface. Do not manufacture tests that assert instructional wording;
+use parsed structure, executable consumers, public protocols, or concrete
+evaluation cases instead.
+
 Completion criterion: applicable branches have evidence; evidence, blockers,
 and completion status are explicit.
 

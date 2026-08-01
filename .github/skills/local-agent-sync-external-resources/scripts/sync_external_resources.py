@@ -33,12 +33,16 @@ from sync_output_core import (  # noqa: E402
     OutputRecord,
     render_tsv,
 )
+from source_prepare_core import (  # noqa: E402
+    PrepareSourceResult,
+    prepare_sources,
+)
 
 DEFAULT_MANIFEST = (
     SCRIPT_DIR.parent / "references" / "managed-resources.yaml"
 ).as_posix()
-from source_prepare_core import (  # noqa: E402
-    prepare_sources,
+DEFAULT_SNAPSHOT_ROOT = Path(
+    "tmp/.cache/external-sync-resources-snapshots"
 )
 
 DEFAULT_OVERRIDES = (
@@ -56,7 +60,8 @@ class SyncOutcome:
     validations: tuple[str, ...]
     blockers: tuple[str, ...]
     repository_changed: bool
-    source_results: tuple[object, ...] = ()
+    source_results: tuple[PrepareSourceResult, ...] = ()
+    source_root: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         result: dict[str, object] = {
@@ -76,6 +81,8 @@ class SyncOutcome:
             "blockers": list(self.blockers),
             "repository_changed": self.repository_changed,
         }
+        if self.source_root is not None:
+            result["source_root"] = self.source_root
         if self.source_results:
             result["source_results"] = [
                 {
@@ -127,6 +134,10 @@ class SyncOutcome:
         if self.workspace is not None:
             records.append(
                 OutputRecord("summary", "workspace", "ok", self.workspace)
+            )
+        if self.source_root is not None:
+            records.append(
+                OutputRecord("summary", "source_root", "ok", self.source_root)
             )
         for validation in self.validations:
             records.append(
@@ -387,7 +398,7 @@ def _prepare(
     rebuild_cache: bool,
 ) -> SyncOutcome:
     validate_external_workspace(repo_root, workspace)
-    sources_root = workspace / "sources"
+    sources_root = _resolve_sources_root(repo_root, None)
 
     results = prepare_sources(
         resources,
@@ -406,6 +417,7 @@ def _prepare(
         blockers=(),
         repository_changed=False,
         source_results=results,
+        source_root=str(sources_root),
     )
 
 
@@ -444,8 +456,43 @@ def _audit(
     )
 
 
-def _resolve_sources_root(workspace: Path, source_root: Path | None) -> Path:
-    return source_root if source_root is not None else workspace / "sources"
+def _resolve_sources_root(repo_root: Path, source_root: Path | None) -> Path:
+    return (
+        source_root
+        if source_root is not None
+        else repo_root / DEFAULT_SNAPSHOT_ROOT
+    )
+
+
+def _is_missing_prepared_sources_error(error: ValueError) -> bool:
+    return str(error).startswith(
+        ("Missing prepared source metadata:", "Missing upstream paths:")
+    )
+
+
+def _materialize_candidate_with_auto_prepare(
+    resources: ManagedResources,
+    workspace: Path,
+    candidate: Path,
+    sources_root: Path,
+) -> tuple[PrepareSourceResult, ...]:
+    try:
+        materialize_candidate(
+            resources, workspace, candidate, sources_root=sources_root
+        )
+    except ValueError as exc:
+        if not _is_missing_prepared_sources_error(exc):
+            raise
+        source_results = prepare_sources(
+            resources,
+            workspace,
+            sources_root,
+        )
+        materialize_candidate(
+            resources, workspace, candidate, sources_root=sources_root
+        )
+        return tuple(source_results)
+    return ()
 
 
 def _plan(
@@ -457,10 +504,20 @@ def _plan(
 ) -> SyncOutcome:
     validate_external_workspace(repo_root, workspace)
 
-    sources_root = _resolve_sources_root(workspace, source_root)
+    sources_root = _resolve_sources_root(repo_root, source_root)
     candidate = workspace / "candidate"
-    materialize_candidate(resources, workspace, candidate, sources_root=sources_root)
+    source_results = _materialize_candidate_with_auto_prepare(
+        resources, workspace, candidate, sources_root
+    )
     changed = normalize_candidate(resources, candidate)
+    validations = (
+        "prepared-sources-validated",
+        "candidate-built",
+        "normalized",
+        "overrides-replayed",
+    )
+    if source_results:
+        validations = ("sources-auto-prepared", *validations)
 
     override_results: tuple[OverrideResult, ...] = ()
     if overrides_path.exists():
@@ -475,9 +532,11 @@ def _plan(
         managed_assets=len(resources.assets),
         changed_paths=tuple(changed),
         override_results=override_results,
-        validations=("candidate-built", "normalized", "overrides-replayed"),
+        validations=validations,
         blockers=(),
         repository_changed=False,
+        source_results=source_results,
+        source_root=str(sources_root),
     )
 
 
@@ -490,6 +549,7 @@ def _apply(
     allow_dirty: bool,
 ) -> SyncOutcome:
     validate_external_workspace(repo_root, workspace)
+    sources_root = _resolve_sources_root(repo_root, source_root)
 
     dirty = find_dirty_targets(repo_root, resources.assets)
     if dirty and not allow_dirty:
@@ -502,12 +562,23 @@ def _apply(
             validations=(),
             blockers=(f"dirty managed targets: {', '.join(dirty)}",),
             repository_changed=False,
+            source_root=str(sources_root),
         )
 
-    sources_root = _resolve_sources_root(workspace, source_root)
     candidate = workspace / "candidate"
-    materialize_candidate(resources, workspace, candidate, sources_root=sources_root)
+    source_results = _materialize_candidate_with_auto_prepare(
+        resources, workspace, candidate, sources_root
+    )
     changed = normalize_candidate(resources, candidate)
+    validations = (
+        "prepared-sources-validated",
+        "candidate-built",
+        "normalized",
+        "overrides-replayed",
+        "patch-applied",
+    )
+    if source_results:
+        validations = ("sources-auto-prepared", *validations)
 
     override_results: tuple[OverrideResult, ...] = ()
     if overrides_path.exists():
@@ -525,9 +596,11 @@ def _apply(
         managed_assets=len(resources.assets),
         changed_paths=tuple(changed),
         override_results=override_results,
-        validations=("candidate-built", "normalized", "overrides-replayed", "patch-applied"),
+        validations=validations,
         blockers=(),
         repository_changed=repository_changed,
+        source_results=source_results,
+        source_root=str(sources_root),
     )
 
 

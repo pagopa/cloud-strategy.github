@@ -14,6 +14,7 @@ MANAGED_COPY_PATHS: tuple[str, ...] = (
     ".editorconfig",
     ".github/copilot-instructions.md",
     ".github/workflows/_pre-commit.yml",
+    ".github/workflows/_pr-title.yml",
 )
 
 _INSTRUCTION_ROOT = ".github/instructions"
@@ -83,30 +84,91 @@ def dirty_paths(target_root: Path) -> frozenset[str]:
     return frozenset(paths)
 
 
-def _discover_source_instructions(source_root: Path) -> list[str]:
-    instruction_dir = source_root / _INSTRUCTION_ROOT
+def _discover_instructions(root: Path) -> list[str]:
+    instruction_dir = root / _INSTRUCTION_ROOT
     if not instruction_dir.is_dir():
         return []
-    found: list[str] = []
-    for path in sorted(instruction_dir.rglob("*")):
-        if path.is_file():
-            found.append(_normalize_posix(path.relative_to(source_root).as_posix()))
-    return found
-
-
-def _discover_target_instructions(target_root: Path) -> list[str]:
-    instruction_dir = target_root / _INSTRUCTION_ROOT
-    if not instruction_dir.is_dir():
-        return []
-    found: list[str] = []
-    for path in sorted(instruction_dir.rglob("*")):
-        if path.is_file():
-            found.append(_normalize_posix(path.relative_to(target_root).as_posix()))
-    return found
+    return [
+        _normalize_posix(path.relative_to(root).as_posix())
+        for path in sorted(instruction_dir.rglob("*"))
+        if path.is_file()
+    ]
 
 
 def _is_local_instruction(path: str) -> bool:
     return Path(path).name.startswith("local-")
+
+
+def _build_file_operation(source_file: Path, target_file: Path, path: str) -> Operation:
+    normalized_path = _normalize_posix(path)
+    source_hash = _sha256_path(source_file)
+    if not target_file.is_file():
+        return Operation(
+            action="create",
+            path=normalized_path,
+            reason="missing in target",
+            source_sha256=source_hash,
+        )
+
+    target_hash = _sha256_path(target_file)
+    if source_hash == target_hash:
+        return Operation(
+            action="preserve",
+            path=normalized_path,
+            reason="target matches source",
+            source_sha256=source_hash,
+            target_sha256=target_hash,
+        )
+    return Operation(
+        action="update",
+        path=normalized_path,
+        reason="target differs from source",
+        source_sha256=source_hash,
+        target_sha256=target_hash,
+    )
+
+
+def _build_instruction_operation(
+    path: str,
+    source: Path,
+    target: Path,
+    source_paths: set[str],
+) -> Operation:
+    normalized_path = _normalize_posix(path)
+    target_file = target / path
+    if _is_local_instruction(path):
+        target_hash = _sha256_path(target_file) if target_file.is_file() else None
+        return Operation(
+            action="preserve",
+            path=normalized_path,
+            reason="target-local instruction",
+            target_sha256=target_hash,
+        )
+    if path in source_paths:
+        return _build_file_operation(source / path, target_file, path)
+    return Operation(
+        action="delete",
+        path=normalized_path,
+        reason="target-only non-local instruction",
+        target_sha256=_sha256_path(target_file),
+    )
+
+
+def _build_agents_local_operation(target: Path, template_path: Path) -> Operation:
+    target_file = target / _AGENTS_LOCAL
+    if target_file.is_file():
+        return Operation(
+            action="preserve",
+            path=_AGENTS_LOCAL,
+            reason="consumer-owned local policy",
+            target_sha256=_sha256_path(target_file),
+        )
+    return Operation(
+        action="create",
+        path=_AGENTS_LOCAL,
+        reason="create-once from template",
+        source_sha256=_sha256_bytes(template_path.read_bytes()),
+    )
 
 
 def build_plan(source_root: Path, target_root: Path) -> SyncPlan:
@@ -124,127 +186,27 @@ def build_plan(source_root: Path, target_root: Path) -> SyncPlan:
     if not template_path.is_file():
         raise SourceContractError(f"missing AGENTS.local.md template: {template_path}")
 
-    operations: list[Operation] = []
+    operations = [
+        _build_file_operation(source / path, target / path, path)
+        for path in MANAGED_COPY_PATHS
+    ]
 
-    for relative in MANAGED_COPY_PATHS:
-        source_file = source / relative
-        target_file = target / relative
-        source_hash = _sha256_path(source_file)
-        if target_file.is_file():
-            target_hash = _sha256_path(target_file)
-            if source_hash == target_hash:
-                operations.append(
-                    Operation(
-                        action="preserve",
-                        path=_normalize_posix(relative),
-                        reason="target matches source",
-                        source_sha256=source_hash,
-                        target_sha256=target_hash,
-                    )
-                )
-            else:
-                operations.append(
-                    Operation(
-                        action="update",
-                        path=_normalize_posix(relative),
-                        reason="target differs from source",
-                        source_sha256=source_hash,
-                        target_sha256=target_hash,
-                    )
-                )
-        else:
-            operations.append(
-                Operation(
-                    action="create",
-                    path=_normalize_posix(relative),
-                    reason="missing in target",
-                    source_sha256=source_hash,
-                )
-            )
-
-    source_instructions = _discover_source_instructions(source)
-    target_instructions = _discover_target_instructions(target)
+    source_instructions = _discover_instructions(source)
+    target_instructions = _discover_instructions(target)
     source_instruction_set = set(source_instructions)
     target_instruction_set = set(target_instructions)
 
-    for rel in sorted(source_instruction_set | target_instruction_set):
-        if _is_local_instruction(rel):
-            target_file = target / rel
-            target_hash = _sha256_path(target_file) if target_file.is_file() else None
-            operations.append(
-                Operation(
-                    action="preserve",
-                    path=_normalize_posix(rel),
-                    reason="target-local instruction",
-                    target_sha256=target_hash,
-                )
+    for path in sorted(source_instruction_set | target_instruction_set):
+        operations.append(
+            _build_instruction_operation(
+                path,
+                source,
+                target,
+                source_instruction_set,
             )
-        elif rel in source_instruction_set and rel in target_instruction_set:
-            source_hash = _sha256_path(source / rel)
-            target_hash = _sha256_path(target / rel)
-            if source_hash == target_hash:
-                operations.append(
-                    Operation(
-                        action="preserve",
-                        path=_normalize_posix(rel),
-                        reason="target matches source",
-                        source_sha256=source_hash,
-                        target_sha256=target_hash,
-                    )
-                )
-            else:
-                operations.append(
-                    Operation(
-                        action="update",
-                        path=_normalize_posix(rel),
-                        reason="target differs from source",
-                        source_sha256=source_hash,
-                        target_sha256=target_hash,
-                    )
-                )
-        elif rel in source_instruction_set:
-            source_hash = _sha256_path(source / rel)
-            operations.append(
-                Operation(
-                    action="create",
-                    path=_normalize_posix(rel),
-                    reason="missing in target",
-                    source_sha256=source_hash,
-                )
-            )
-        else:
-            target_hash = _sha256_path(target / rel)
-            operations.append(
-                Operation(
-                    action="delete",
-                    path=_normalize_posix(rel),
-                    reason="target-only non-local instruction",
-                    target_sha256=target_hash,
-                )
-            )
+        )
 
-    agents_local_target = target / _AGENTS_LOCAL
-    if agents_local_target.is_file():
-        target_hash = _sha256_path(agents_local_target)
-        operations.append(
-            Operation(
-                action="preserve",
-                path=_AGENTS_LOCAL,
-                reason="consumer-owned local policy",
-                target_sha256=target_hash,
-            )
-        )
-    else:
-        template_bytes = template_path.read_bytes()
-        source_hash = _sha256_bytes(template_bytes)
-        operations.append(
-            Operation(
-                action="create",
-                path=_AGENTS_LOCAL,
-                reason="create-once from template",
-                source_sha256=source_hash,
-            )
-        )
+    operations.append(_build_agents_local_operation(target, template_path))
 
     operations.sort(key=lambda op: (op.path, op.action))
 

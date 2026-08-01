@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import ast
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
@@ -29,12 +31,334 @@ TRIGGER_FIRST_PREFIXES = (
     "Use before",
     "When ",
 )
+ROUTER_SKILL_NAMES = frozenset({
+    "internal-azure",
+    "internal-aws",
+    "internal-gcp",
+    "internal-github",
+})
 ALLOWED_VIRTUAL_PATHS = {
     ".github/copilot-sync.manifest.json",
 }
 ALLOWED_VIRTUAL_PREFIXES = (
     "tmp/",
 )
+SKILL_INVOCATION_PATTERN = re.compile(r"(?<![\w-])/(internal|local)-[a-z0-9][a-z0-9-]*")
+RAW_SKILL_SOURCE_PATTERN = re.compile(
+    r"(?:^|/)\.github/skills/(?:internal|local)-[^/]+/"
+    r"(?:SKILL\.md|references/.+\.md|agents/openai\.yaml)$"
+)
+LEXICAL_METHODS = frozenset({"find", "startswith", "endswith"})
+STRUCTURAL_PARSERS = frozenset({"load", "safe_load", "loads", "safe_load_all"})
+
+
+@dataclass(frozen=True)
+class _Taint:
+    raw: bool = False
+
+
+class _SkillProseTaintAnalyzer:
+    def __init__(self, root: Path, source_path: Path, tree: ast.AST) -> None:
+        self.root = root
+        self.source_path = source_path
+        self.tree = tree
+        self.path_aliases: set[str] = set()
+        self.path_values: dict[str, str] = {}
+        self.module_taint: dict[str, bool] = {}
+        self.functions: dict[str, ast.FunctionDef | ast.AsyncFunctionDef] = {}
+        self.function_cache: dict[str, bool] = {}
+        self.function_stack: set[str] = set()
+        self.findings: list[Finding] = []
+
+    def run(self) -> list[Finding]:
+        if not isinstance(self.tree, ast.Module):
+            return []
+        for statement in self.tree.body:
+            if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                self.functions[statement.name] = statement
+        self._collect_module_taint()
+        self._scan_block(self.tree.body, dict(self.module_taint))
+        return self.findings
+
+    def _collect_module_taint(self) -> None:
+        changed = True
+        while changed:
+            changed = False
+            environment = dict(self.module_taint)
+            for statement in self.tree.body:
+                if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                if isinstance(statement, (ast.Assign, ast.AnnAssign)):
+                    value = statement.value
+                    if value is None:
+                        continue
+                    taint = self._expr_tainted(value, environment)
+                    for name in self._assigned_names(statement):
+                        if taint and not self.module_taint.get(name, False):
+                            self.module_taint[name] = True
+                            changed = True
+                        if self._is_raw_path_expression(value):
+                            if name not in self.path_aliases:
+                                self.path_aliases.add(name)
+                                changed = True
+                        literal = self._path_literal(value)
+                        if literal is not None and self.path_values.get(name) != literal:
+                            self.path_values[name] = literal
+                            changed = True
+                    for name in self._assigned_names(statement):
+                        environment[name] = taint
+
+    def _scan_block(self, statements: list[ast.stmt], environment: dict[str, bool]) -> None:
+        for statement in statements:
+            if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                self._scan_function(statement, environment)
+                continue
+            if isinstance(statement, (ast.Assign, ast.AnnAssign)):
+                value = statement.value
+                if value is not None:
+                    taint = self._expr_tainted(value, environment)
+                    for name in self._assigned_names(statement):
+                        environment[name] = taint
+                        if self._is_raw_path_expression(value):
+                            self.path_aliases.add(name)
+                        literal = self._path_literal(value)
+                        if literal is not None:
+                            self.path_values[name] = literal
+                continue
+            if isinstance(statement, ast.Assert) and self._contains_lexical_taint(
+                statement.test, environment
+            ):
+                self._add_finding(statement.lineno)
+                continue
+            if isinstance(statement, (ast.If, ast.For, ast.AsyncFor, ast.While)):
+                branches = [statement.body, statement.orelse]
+                for branch in branches:
+                    self._scan_block(branch, dict(environment))
+
+    def _scan_function(
+        self,
+        function: ast.FunctionDef | ast.AsyncFunctionDef,
+        outer_environment: dict[str, bool],
+    ) -> None:
+        environment = dict(outer_environment)
+        self._scan_block(function.body, environment)
+
+    def _add_finding(self, line: int) -> None:
+        self.findings.append(
+            Finding(
+                severity="blocking",
+                code="skill-prose-lexical-assertion",
+                path=f"{self.source_path.as_posix()}:{line}",
+                message="Test assertion compares or lexically searches raw skill prose.",
+                suggestion=(
+                    "Use parsed structure, an executable consumer, a public protocol "
+                    "validator, or a concrete evaluation case."
+                ),
+            )
+        )
+
+    def _function_returns_tainted(self, name: str) -> bool:
+        if name in self.function_cache:
+            return self.function_cache[name]
+        if name in self.function_stack:
+            return False
+        function = self.functions.get(name)
+        if function is None:
+            return False
+        self.function_stack.add(name)
+        environment = dict(self.module_taint)
+        result = False
+        for statement in function.body:
+            if isinstance(statement, (ast.Assign, ast.AnnAssign)):
+                value = statement.value
+                if value is not None:
+                    taint = self._expr_tainted(value, environment)
+                    for assigned_name in self._assigned_names(statement):
+                        environment[assigned_name] = taint
+            elif isinstance(statement, ast.Return) and statement.value is not None:
+                result = result or self._expr_tainted(statement.value, environment)
+        self.function_stack.remove(name)
+        self.function_cache[name] = result
+        return result
+
+    def _expr_tainted(self, node: ast.AST, environment: dict[str, bool]) -> bool:
+        if isinstance(node, ast.Name):
+            return environment.get(node.id, False)
+        if isinstance(node, ast.Attribute):
+            return False
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                if node.func.id in STRUCTURAL_PARSERS:
+                    return False
+                if node.func.id in self.functions:
+                    return self._function_returns_tainted(node.func.id)
+            if isinstance(node.func, ast.Attribute):
+                receiver = node.func.value
+                if node.func.attr == "read_text" and self._is_raw_path_expression(
+                    receiver
+                ):
+                    return True
+                if node.func.attr in STRUCTURAL_PARSERS and isinstance(
+                    receiver, ast.Name
+                ):
+                    return False
+                if self._expr_tainted(receiver, environment):
+                    return True
+                if node.func.attr == "join":
+                    return any(
+                        self._expr_tainted(argument, environment)
+                        for argument in node.args
+                    )
+            return any(self._expr_tainted(argument, environment) for argument in node.args)
+        if isinstance(node, ast.Compare):
+            return self._expr_tainted(node.left, environment) or any(
+                self._expr_tainted(comparator, environment)
+                for comparator in node.comparators
+            )
+        if isinstance(node, ast.BoolOp):
+            return any(self._expr_tainted(value, environment) for value in node.values)
+        if isinstance(node, ast.UnaryOp):
+            return self._expr_tainted(node.operand, environment)
+        if isinstance(node, ast.Subscript):
+            return self._expr_tainted(node.value, environment)
+        if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+            return any(self._expr_tainted(element, environment) for element in node.elts)
+        if isinstance(node, ast.Dict):
+            return any(
+                self._expr_tainted(element, environment)
+                for element in (*node.keys, *node.values)
+                if element is not None
+            )
+        if isinstance(node, ast.GeneratorExp):
+            return self._expr_tainted(node.elt, environment) or any(
+                self._expr_tainted(generator.iter, environment)
+                or any(self._expr_tainted(condition, environment) for condition in generator.ifs)
+                for generator in node.generators
+            )
+        return False
+
+    def _contains_lexical_taint(
+        self, node: ast.AST, environment: dict[str, bool]
+    ) -> bool:
+        if isinstance(node, ast.Compare):
+            return self._expr_tainted(node, environment)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            if node.func.attr in LEXICAL_METHODS and self._expr_tainted(
+                node.func.value, environment
+            ):
+                return True
+        return any(
+            self._contains_lexical_taint(child, environment)
+            for child in ast.iter_child_nodes(node)
+        )
+
+    def _assigned_names(self, statement: ast.Assign | ast.AnnAssign) -> list[str]:
+        targets = statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+        return [target.id for target in targets if isinstance(target, ast.Name)]
+
+    def _is_raw_path_expression(self, node: ast.AST) -> bool:
+        if isinstance(node, ast.Name):
+            return node.id in self.path_aliases
+        literal = self._path_literal(node)
+        if literal is None:
+            return False
+        normalized = literal.replace("\\", "/").lstrip("/")
+        return normalized == "INTERNAL_CONTRACT.md" or bool(
+            RAW_SKILL_SOURCE_PATTERN.search(normalized)
+        )
+
+    def _path_literal(self, node: ast.AST) -> str | None:
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.Name):
+            if node.id == "REPO_ROOT":
+                return ""
+            if node.id == "SKILLS_ROOT":
+                return ".github/skills"
+            return self.path_values.get(node.id)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if node.func.id == "Path" and node.args:
+                return self._path_literal(node.args[0])
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            left = self._path_literal(node.left)
+            right = self._path_literal(node.right)
+            if left is not None and right is not None:
+                return f"{left}/{right}"
+        return None
+
+
+def detect_skill_prose_assertion_findings(root: Path) -> list[Finding]:
+    repo_root = find_repo_root(root)
+    findings: list[Finding] = []
+    tests_root = repo_root / "tests"
+    for source_path in sorted(tests_root.rglob("*.py")):
+        try:
+            tree = ast.parse(read_text(source_path), filename=source_path.as_posix())
+        except (OSError, SyntaxError):
+            continue
+        findings.extend(_SkillProseTaintAnalyzer(repo_root, source_path, tree).run())
+    return findings
+
+
+def _skill_invocation_sources(skill_dir: Path) -> list[Path]:
+    sources = [skill_dir / "SKILL.md"]
+    references = skill_dir / "references"
+    if references.exists():
+        sources.extend(sorted(references.rglob("*.md")))
+    metadata = skill_dir / "agents/openai.yaml"
+    if metadata.exists():
+        sources.append(metadata)
+    return sources
+
+
+def detect_skill_invocation_findings(
+    root: Path, selected_skills: set[str] | None = None
+) -> list[Finding]:
+    repo_root = find_repo_root(root)
+    skill_dirs = iter_internal_skills(repo_root, selected_skills)
+    known_skills = {
+        skill_dir.name: skill_dir for skill_dir in iter_internal_skills(repo_root)
+    }
+    findings: list[Finding] = []
+    seen: set[tuple[str, str, str]] = set()
+    for skill_dir in skill_dirs:
+        for source_path in _skill_invocation_sources(skill_dir):
+            text = strip_code_fences(read_text(source_path)) if source_path.suffix == ".md" else read_text(source_path)
+            for match in SKILL_INVOCATION_PATTERN.finditer(text):
+                target_name = f"{match.group(1)}-{match.group(0).split('-', 1)[1]}"
+                target_dir = known_skills.get(target_name)
+                code = "unknown-skill-invocation"
+                if target_dir is None:
+                    finding = Finding(
+                        severity="blocking",
+                        code=code,
+                        path=source_path.as_posix(),
+                        message=f"Operational skill invocation targets missing skill '{target_name}'.",
+                        suggestion="Invoke an existing repository-owned skill or keep the identifier non-operational.",
+                    )
+                else:
+                    target_frontmatter, _ = split_frontmatter(
+                        read_text(target_dir / "SKILL.md")
+                    )
+                    if target_frontmatter.get("disable-model-invocation") is not True:
+                        continue
+                    if target_name == skill_dir.name:
+                        # A bundle's default prompt is a user-facing entrypoint,
+                        # not a cross-skill operational call.
+                        continue
+                    code = "disabled-skill-invocation"
+                    finding = Finding(
+                        severity="blocking",
+                        code=code,
+                        path=source_path.as_posix(),
+                        message=f"Operational skill invocation targets disabled skill '{target_name}'.",
+                        suggestion="Keep called skills model-invocable or remove the operational invocation.",
+                    )
+                key = (source_path.as_posix(), target_name, code)
+                if key not in seen:
+                    seen.add(key)
+                    findings.append(finding)
+    return findings
 
 
 def detect_internal_skill_findings(root: Path, selected_skills: set[str] | None = None) -> list[Finding]:
@@ -43,6 +367,10 @@ def detect_internal_skill_findings(root: Path, selected_skills: set[str] | None 
 
     for skill_dir in iter_internal_skills(repo_root, selected_skills):
         findings.extend(validate_internal_skill(repo_root, skill_dir))
+
+    findings.extend(detect_skill_invocation_findings(repo_root, selected_skills))
+    if selected_skills is None:
+        findings.extend(detect_skill_prose_assertion_findings(repo_root))
 
     return findings
 
@@ -125,7 +453,7 @@ def validate_internal_skill(root: Path, skill_dir: Path) -> list[Finding]:
                     suggestion="Add a clear description that states what the skill does and when to use it.",
                 )
             )
-        elif not description.strip().startswith(TRIGGER_FIRST_PREFIXES):
+        elif skill_name not in ROUTER_SKILL_NAMES and not description.strip().startswith(TRIGGER_FIRST_PREFIXES):
             findings.append(
                 Finding(
                     severity="blocking",

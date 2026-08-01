@@ -1,7 +1,7 @@
 interface:
-  display_name: "Internal Gateway Idea"
+  display_name: "Idea Internal Gateway"
   short_description: "Idea brainstorming with assumption challenge"
-  default_prompt: >-
+  default_prompt: |-
     Use /internal-gateway-idea when a repository-owned idea, proposed direction,
     unclear goal, or option set needs brainstorming before planning. Load
     /superpowers-brainstorming as the core workflow, then read
@@ -12,23 +12,34 @@ interface:
     evidence cannot replace Idea Gate 0. Follow the mandatory gate sequence:
     Specialization Checkpoint: gated, Idea Gate 0, External Research Checkpoint,
     Assumption Challenge Gate, Alternative discovery, Critical Challenge Gate,
-    Spec vs plan decision, Stop before implementation execution. External
+    Critical resolution loop, Automatic plan handoff, Stop before implementation execution. External
     research is on-demand after local evidence is insufficient; load
     /mattpocock-research only when one external fact could change feasibility,
     approach, constraints, or risk. Run Critical Challenge Gate as its own
     visible gate after design-direction approval; an embedded critique does not
-    satisfy Critical Challenge Gate. Treat procedi, ok, go, or similar approval
-    as advancing only the active visible gate; clarify ambiguous approval before
-    loading another owner. If a mandatory gate was skipped, stop and resume at
-    the first skipped mandatory gate. Load /internal-gateway-writing-plans only
-    after the user explicitly approves implementation-plan writing. Retained spec
-    writing stays with /superpowers-brainstorming. Stop after the writing outcome;
-    do not implement or invoke execution owners from this skill.
+    satisfy Critical Challenge Gate. The only critical outcomes are accepted,
+    revise-design, reopen-analysis, and needs-clarification. accepted is legal
+    only when every material objection raised during the current Critical
+    Challenge Gate is closed or explicitly routed. Every material objection
+    raised during the current critical pass is closed or explicitly routed.
+    every material objection raised during the current critical pass is closed or explicitly routed.
+    revise-design returns to
+    design presentation and design approval. reopen-analysis returns to Idea
+    Gate 0. needs-clarification means load `/grill-me` for one or more numbered clarification sessions over the critic's newly surfaced elements. After clarification, return to the relevant earlier approval gate when a material change occurred; otherwise rerun `Critical Challenge Gate` directly. Repeat
+    until the critic emits one conclusive routing outcome. For accepted, load
+    /internal-gateway-writing-plans automatically without another approval.
+    Treat procedi, ok, go, or similar approval as advancing only the active visible gate; clarify ambiguous approval before loading another owner. If a mandatory gate was skipped, stop and resume at the first skipped mandatory gate. Stop after the writing outcome; do not implement or invoke execution
+    owners from this skill.
+
+    The only transition notification is exactly:
+    🚀 **Scrittura del piano avviata**
+    ✅ La critica si è conclusa senza obiezioni materiali aperte.
+    🛠️ `/internal-gateway-writing-plans` sta preparando il piano di implementazione.
+
     Keep mandatory gates as internal workflow state. In chat, emit one compact user-facing decision card with 🎯 🧭 🛠️ 🧪 ⚠️ ✅ 💡 ✈️ for status, approval,
     routing, material risk, blocker, and requested user action. Content-bearing
     output uses its owning schema and is outside the four-line card limit.
     Guided questions, alternatives, design sections, and required critique
-    schemas are content-bearing output. Do
-    not announce skipped checkpoints or print internal ledgers.
-    Always show a material risk, blocker, validation gap, or user decision.
-    Keep the agent filename, frontmatter name, and workflow aligned.
+    schemas are content-bearing output. Do not announce skipped checkpoints or
+    print internal ledgers. Always show a material risk, blocker, validation gap,
+    or user decision.

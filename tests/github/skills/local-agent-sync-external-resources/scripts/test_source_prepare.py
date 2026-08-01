@@ -36,6 +36,58 @@ from sync_external_resources_core import (  # noqa: E402
 _FULL_SHA40 = "a" * 40
 
 
+def _write_prepared_metadata(
+    sources_root: Path,
+    source: ManagedSource,
+    *,
+    source_id: str | None = None,
+    repository: str | None = None,
+    ref: str | None = None,
+    paths_sha256: str | None = None,
+) -> None:
+    source_dir = sources_root / source.source_id
+    source_dir.mkdir(parents=True, exist_ok=True)
+    upstream_paths = sorted(asset.upstream for asset in source.assets)
+    expected_paths_sha256 = hashlib.sha256(
+        ",".join(upstream_paths).encode("utf-8")
+    ).hexdigest()
+    row = {
+        "source_id": source_id or source.source_id,
+        "repository": repository or source.repository,
+        "ref": ref or source.ref,
+        "paths_sha256": paths_sha256 or expected_paths_sha256,
+    }
+    metadata = (
+        "source_id\trepository\tref\tpaths_sha256\n"
+        f"{row['source_id']}\t{row['repository']}\t{row['ref']}\t"
+        f"{row['paths_sha256']}\n"
+    )
+    (source_dir / ".external-resource-source.tsv").write_text(
+        metadata, encoding="utf-8"
+    )
+
+
+def _metadata_resources() -> ManagedResources:
+    asset = ManagedAsset(
+        source="test-source",
+        upstream="skills/example",
+        local=".github/skills/example",
+        canonical_name="example",
+    )
+    source = ManagedSource(
+        source_id="test-source",
+        repository="https://example.com/repo.git",
+        ref="a" * 40,
+        advertised_ref=None,
+        assets=(asset,),
+    )
+    return ManagedResources(
+        sources=(source,),
+        replacements=(),
+        watchlist=(),
+    )
+
+
 def _run_git(cwd: Path, args: list[str]) -> None:
     subprocess.run(
         ["git", *args],
@@ -186,6 +238,14 @@ def test_prepare_sources_cold_fetch_creates_selective_snapshot(
     assert not (snapshot / ".git").exists()
     assert not (snapshot / "decoy-8mib.bin").exists()
     assert not (snapshot / "skills" / "other-skill").exists()
+
+    metadata_path = snapshot / ".external-resource-source.tsv"
+    assert metadata_path.read_text(encoding="utf-8") == (
+        "source_id\trepository\tref\tpaths_sha256\n"
+        f"test-source\t{remote_path}\t{commit_sha}\t"
+        f"{hashlib.sha256(b'skills/target-skill').hexdigest()}\n"
+    )
+    validate_prepared_sources(resources, sources_root)
 
 
 def test_prepare_sources_warm_run_is_cached(
@@ -361,8 +421,85 @@ def test_validate_prepared_sources_reports_missing_metadata(
     sources_root = tmp_path / "sources"
     sources_root.mkdir()
 
-    with pytest.raises(ValueError, match="test-source"):
+    with pytest.raises(ValueError) as exc_info:
         validate_prepared_sources(resources, sources_root)
+    message = str(exc_info.value)
+    assert "Missing prepared source metadata:" in message
+    assert "Run prepare before plan/apply." in message
+
+
+def test_validate_prepared_sources_accepts_exact_attestation(
+    tmp_path: Path,
+) -> None:
+    resources = _metadata_resources()
+    sources_root = tmp_path / "sources"
+    _write_prepared_metadata(sources_root, resources.sources[0])
+
+    validate_prepared_sources(resources, sources_root)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("source_id", "other-source"),
+        ("repository", "https://example.com/other.git"),
+        ("ref", "b" * 40),
+        ("paths_sha256", "0" * 64),
+    ),
+)
+def test_validate_prepared_sources_rejects_attestation_mismatch(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    resources = _metadata_resources()
+    source = resources.sources[0]
+    sources_root = tmp_path / "sources"
+    _write_prepared_metadata(sources_root, source, **{field: value})
+
+    with pytest.raises(ValueError, match=field):
+        validate_prepared_sources(resources, sources_root)
+
+
+def test_validate_prepared_sources_rejects_wrong_header_or_row_count(
+    tmp_path: Path,
+) -> None:
+    resources = _metadata_resources()
+    source = resources.sources[0]
+    metadata_path = (
+        tmp_path / "sources" / source.source_id / ".external-resource-source.tsv"
+    )
+    metadata_path.parent.mkdir(parents=True)
+    metadata_path.write_text(
+        "source_id\trepository\tref\n"
+        f"{source.source_id}\t{source.repository}\t{source.ref}\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="header"):
+        validate_prepared_sources(resources, tmp_path / "sources")
+
+
+def test_validate_prepared_sources_rejects_extra_data_row(
+    tmp_path: Path,
+) -> None:
+    resources = _metadata_resources()
+    source = resources.sources[0]
+    metadata_path = (
+        tmp_path / "sources" / source.source_id / ".external-resource-source.tsv"
+    )
+    metadata_path.parent.mkdir(parents=True)
+    metadata_path.write_text(
+        "source_id\trepository\tref\tpaths_sha256\n"
+        f"{source.source_id}\t{source.repository}\t{source.ref}\t"
+        f"{'0' * 64}\n"
+        f"{source.source_id}\t{source.repository}\t{source.ref}\t"
+        f"{'1' * 64}\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="row count"):
+        validate_prepared_sources(resources, tmp_path / "sources")
 
 
 def _tar_bytes_with(info: tarfile.TarInfo, payload: bytes = b"") -> bytes:

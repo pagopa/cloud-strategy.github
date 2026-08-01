@@ -1,32 +1,42 @@
 # GitHub Routing Scenario Matrix
 
-## Fallback-positive cases
+## Direct routes
 
-| Scenario | Why no primary owner |
-|---|---|
-| Underspecified cross-domain GitHub problem mixing governance, operations, and workflow authoring with no clear primary deliverable | The request names multiple GitHub domains but does not identify which deliverable takes priority. |
-| GitHub platform question asking which lane should own the work without naming governance, operations, actions, composite, PR, or Copilot research | The user has not selected a domain; the fallback must clarify the lane before any specialist can engage. |
-| Broad GitHub adoption review where the user wants a general health assessment across all domains | No single specialist owns a cross-domain health review; the fallback selects the minimum set. |
-
-## Direct-specialist negative cases
-
-| Scenario | Direct owner | Reason |
+| Request signal | Primary deliverable | Destination |
 |---|---|---|
-| Ruleset, branch protection, repository or organization permissions, GitHub Apps permissions, OIDC, secrets, environments, or Copilot governance | `internal-github-governance` | The deliverable is a guardrail or permission boundary. |
-| Actions health, runner operations, audit-log review, reporting, drift, preflight, or post-rollout validation | `internal-github-operations` | The deliverable is operational evidence or continuity proof. |
-| Workflow authoring under `.github/workflows/` or reusable workflow design | `internal-github-actions` | The deliverable is workflow behavior. |
-| Composite action authoring under `.github/actions/` or contract compatibility | `internal-github-action-composite` | The deliverable is the reusable step unit. |
-| PR creation, body, merge readiness, merge method, or terminal-state verification | `internal-github-pr` | The deliverable is PR lifecycle evidence. |
-| Current GitHub Copilot or MCP platform behavior verification | `internal-copilot-docs-research` | The deliverable is current-source research. |
+| Mono-repo versus multi-repo decision | Platform or operating-model choice | `/internal-github-strategic` |
+| Organization ruleset design | Governance control design | `/internal-github-governance` |
+| Runner fleet health | Operational evidence and continuity proof | `/internal-github-operations` |
+| `.github/workflows/` deployment edit | Workflow behavior | `/internal-github-actions` |
+| `.github/actions/` `action.yml` edit | Composite-action contract | `/internal-github-action-composite` |
+| Merge readiness for one PR | Pull-request terminal state | `/internal-github-pr` |
+| Current Copilot frontmatter behavior | Current-source platform research | `/internal-copilot-docs-research` |
 
-## Multi-domain primary-owner cases
+## Collision rules
 
-| Scenario | Primary owner | Secondary | Reason |
-|---|---|---|---|
-| Org or repo-model decision with later ruleset work | `internal-github-governance` | `internal-github-operations` | The first deliverable is placement; ruleset validation follows once the model is settled. |
-| Ruleset rollout evidence | `internal-github-governance` | `internal-github-operations` | The first deliverable is governance design; operations validates the rollout. |
-| Workflow permission detail | `internal-github-actions` or `internal-github-governance` | depends on deliverable | Choose `internal-github-actions` when the deliverable is workflow behavior; choose `internal-github-governance` when the deliverable is the permission boundary. |
+Choose by the primary deliverable when the same technical subject appears in
+different work products:
 
-## Review rule
+| Collision | Destination | Decision rule |
+|---|---|---|
+| OIDC policy versus OIDC workflow YAML | `/internal-github-governance` versus `/internal-github-actions` | Route the trust or permission boundary to governance; route the workflow implementation to Actions. |
+| Required-review policy versus readiness of one PR | `/internal-github-governance` versus `/internal-github-pr` | Route the repository control to governance; route the state of one pull request to PR. |
+| Workflow failure versus runner-fleet health | `/internal-github-operations` | Route workflow-specific failure evidence and fleet-wide runner evidence to operations. |
+| Reuse-pattern decision versus composite-action authoring | `/internal-github-actions` versus `/internal-github-action-composite` | Route the selection among inline, reusable-workflow, and composite options to Actions; route the concrete `action.yml` contract to composite. |
 
-Prefer a direct specialist whenever a reasonable reviewer can name one primary owner from the request itself. Activate the fallback only when the request does not identify a primary owner and clarification is required before a specialist can engage.
+## Multi-deliverable sequencing
+
+| Request | Sequence |
+|---|---|
+| Choose a repository model, define its ruleset, then prove rollout | `/internal-github-strategic` → `/internal-github-governance` → `/internal-github-operations` |
+| Select a workflow reuse pattern, author the workflow, then validate a failed run | `/internal-github-actions` → `/internal-github-actions` → `/internal-github-operations` |
+| Draft a PR body, verify required reviews, then confirm terminal state | `/internal-github-pr` for each PR deliverable in dependency order |
+
+## Near misses
+
+| Request | Route |
+|---|---|
+| A ruleset change happens to be delivered in a pull request | `/internal-github-governance`; use `/internal-github-pr` only when the PR itself is a requested deliverable. |
+| A workflow change requires a permission update | `/internal-github-actions` for workflow behavior and `/internal-github-governance` for the permission boundary. |
+| A composite action is called from a reusable workflow | `/internal-github-action-composite` for the action contract and `/internal-github-actions` for the workflow contract. |
+| A current Copilot or MCP fact informs another GitHub decision | `/internal-copilot-docs-research` for the fact, followed by the owner of the resulting deliverable. |

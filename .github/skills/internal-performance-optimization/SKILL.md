@@ -10,8 +10,6 @@ description: Use when performance is the primary problem, such as profiling slow
 This index lists every other skill that this file asks the agent to load, route to, compare against, or delegate to.
 
 - `antigravity-network-engineer`: network-specific owner when latency, DNS, load-balancer behavior, or topology is primary.
-- `internal-debugging`: root-cause owner when the problem is not yet a confirmed performance bottleneck.
-- `superpowers-systematic-debugging`: stricter loop discipline when reproduction is flaky or hard.
 - `superpowers-verification-before-completion`: evidence gate before claiming a performance gain.
 
 Use this skill when performance is the primary constraint. Start from measured
@@ -102,10 +100,6 @@ After a fix, add at least one of:
 
 ## Cross-references
 
-- Use `internal-debugging` when the first problem is still root-cause isolation
-  rather than a confirmed performance bottleneck.
-- Use `superpowers-systematic-debugging` when the performance symptom is flaky
-  or the reproduction loop is the hard part.
 - Use `superpowers-verification-before-completion` before claiming latency,
   throughput, allocation, or query-plan improvement.
 - Use `antigravity-network-engineer` when latency, packet flow, DNS, load-balancer behavior, or network topology is the primary bottleneck.

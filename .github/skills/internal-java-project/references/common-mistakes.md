@@ -1,13 +1,12 @@
-# Common Mistakes For Java Projects
+# Common Mistakes For Framework-Neutral Java Projects
 
 | Mistake | Why it matters | Instead |
 | --- | --- | --- |
-| Business logic inside controller/handler | Untestable, tightly coupled to framework | Extract to a service class, inject via constructor |
-| Catching `Exception` everywhere | Swallows unexpected errors, hides bugs | Catch specific exceptions; let runtime errors propagate |
-| Mutable shared state in service classes | Thread-safety bugs in concurrent environments | Use immutable objects or proper synchronization |
-| No null checks on external input | NullPointerException at runtime | Validate at entry point with guard clauses |
-| Test names like `test1`, `testMethod` | No documentation value, hard to diagnose failures | Use `given_when_then` naming with `@DisplayName` |
-| Full `@SpringBootTest` for every test | Slow feedback and blurred failure scope | Prefer unit tests or Spring test slices first |
-| Exposing JPA entities directly from controllers | Leaks persistence shape into the API and couples layers | Map entities to request/response DTOs |
-| Adding virtual threads without checking execution model | Can mask blocking or context propagation issues | Adopt them only when runtime support and workload fit are clear |
-| Over-using inheritance for code reuse | Rigid hierarchies, fragile base class problem | Prefer composition and delegation |
+| Business logic mixed with I/O or transport concerns | Hard to test and change safely | Extract a framework-neutral collaborator around the domain behavior |
+| Catching `Exception` everywhere | Swallows unexpected errors and hides bugs | Catch specific failures and preserve the established error contract |
+| Mutable shared state without an ownership model | Thread-safety bugs in concurrent environments | Use immutable state or an explicit synchronization strategy |
+| External input reaches domain code without validation | Invalid state fails far from its source | Validate at the public boundary with the repository's established contract |
+| Hidden required dependencies or collaborator construction | Dependencies are difficult to reason about and replace | Make required collaborators explicit and keep composition visible |
+| Tests prove only implementation details | Refactors break tests without protecting behavior | Assert observable service, module, API, or boundary outcomes |
+| Unbounded concurrency or downstream work | Resource exhaustion and unstable latency | Bound work and validate representative load against downstream limits |
+| Over-using inheritance for code reuse | Rigid hierarchies and fragile base-class coupling | Prefer composition and delegation |

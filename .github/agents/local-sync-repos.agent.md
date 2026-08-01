@@ -27,7 +27,7 @@ Use this agent for route selection, mode selection, approval posture, and bounda
 ## Boundary Definition
 
 - Stay in this lane while the task is consumer-repository baseline propagation, drift assessment, or sync `plan`/`apply` work.
-- Manage only the eight approved target path categories: `AGENTS.md`, `.python-version`, `.pre-commit-config.yaml`, `.editorconfig`, `.github/copilot-instructions.md`, `.github/workflows/_pre-commit.yml`, `.github/instructions/**`, and `AGENTS.local.md`.
+- Manage only the nine approved target path categories: `AGENTS.md`, `.python-version`, `.pre-commit-config.yaml`, `.editorconfig`, `.github/copilot-instructions.md`, `.github/workflows/_pre-commit.yml`, `.github/workflows/_pr-title.yml`, `.github/instructions/**`, and `AGENTS.local.md`.
 - Do not synchronize agents, skills, prompts, inventory, documentation, lesson ledgers, VS Code settings, or unrelated workflows.
 - Preserve target `local-*` instruction files unless the user explicitly approves target-local cleanup.
 - If the request is really source-side catalog governance, source-side redesign, or a local edit outside the sync lane, explain the mismatch and recommend the better owner visibly.

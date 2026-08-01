@@ -1,50 +1,55 @@
 ---
 name: internal-nodejs
-description: Use when creating, editing, or reviewing JavaScript, Node.js, TypeScript, package.json, tsconfig.json, or package-manager lockfile work before project depth is needed.
+description: Use when reviewing localized JavaScript or TypeScript changes, changing Node.js package metadata, runtime configuration, dependencies, or editing a single module within established application boundaries.
 ---
 
 # Internal Node.js
 
-## Referenced skills
-
-Treat the referenced skill below as an on-demand owner. Do not preload it for
-every Node.js or TypeScript edit; load it only when application structure,
-package architecture, or deterministic test design becomes the real issue.
-
-- `internal-nodejs-project`: Node.js or TypeScript services, APIs, middleware, modules, and deterministic tests when project-level architecture becomes the main concern.
-
 ## Referenced files
 
-- `references/review-anti-patterns.md`: Node.js/TypeScript review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Node.js-specific defect depth.
+- `references/review-anti-patterns.md`: load for evidence-based,
+  Node.js-specific code review depth.
 
 ## When to use
 
-- `.js`, `.cjs`, `.mjs`, `.ts`, `.tsx`, `package.json`, `tsconfig.json`, or Node.js package-manager lockfile changes.
-- Lightweight Node.js or TypeScript reviews focused on readability, boundary hygiene, dependency intent, scripts, engines, or compiler options.
-- Small module edits where the target package and validation path are concrete.
+- Review localized JavaScript or TypeScript changes for language, runtime,
+  dependency, async, module-system, and resource-lifecycle defects.
+- Change `package.json`, `tsconfig.json`, supported lockfiles, scripts,
+  dependencies, or runtime configuration.
+- Create, fix, or refactor a single module whose application boundaries and
+  validation path are already clear.
 
 ## When not to use
 
-- Service, API, middleware, package architecture, or test design is the main concern; use `internal-nodejs-project`.
-- Generic JSON formatting is the only concern and the file is not Node.js project metadata.
-- Frontend design or browser UI behavior is the dominant task.
+- Do not use for application-wide changes spanning services, APIs, handlers,
+  modules, adapters, or tests across multiple application boundaries.
+- Route frontend design, generic JSON, Docker, workflows, and infrastructure
+  to their domain owners.
+
+## Responsibility boundary
+
+- Own Node.js and TypeScript runtime correctness, package and compiler
+  configuration, dependency intent, and localized module quality.
+- Do not own application decomposition, cross-boundary behavior, transport
+  orchestration, or application-wide test strategy.
 
 ## Baseline
 
-- Keep business logic in focused modules, separate from transport adapters and infrastructure wiring.
-- Prefer early returns, clear domain names, and straightforward control flow.
-- Treat 300 lines as a review threshold for cohesive JavaScript and TypeScript files.
-- Treat 400 lines as a split-or-justify threshold and move repeated decision logic into focused modules.
-- Apply pragmatic DRY: extract repeated decision paths and shared adapters, but avoid speculative abstractions.
-- Use `node:test` and `node:assert/strict` unless the repository already standardizes on another test framework.
-- Keep `package.json` scripts, engines, and dependency intent explicit.
-- Keep dependency delivery reproducible: no vendored packages, commit the lockfile, and use `npm ci` for deterministic installs.
-- Keep comments, JSDoc, logs, thrown errors, and operator-facing output in English.
-- Centralize runtime configuration and keep domain invariants in code rather than environment toggles.
-- Keep strict `tsconfig.json` settings enabled, avoid drift toward `any`, and type external boundaries explicitly.
-- Preserve the existing module system and package conventions unless the task explicitly changes them.
+- Follow the repository's local conventions for package manager, module system,
+  runtime, compiler, and test stack before choosing defaults.
+- Keep package metadata, scripts, dependency intent, lockfiles, and runtime
+  configuration explicit and reproducible.
+- Preserve the existing module system and package conventions unless the task
+  explicitly changes them.
+- Keep strict TypeScript boundary types and justify unavoidable `any` usage.
+- Centralize runtime configuration and keep domain invariants in code rather
+  than environment toggles.
+- Bound async resources and outbound work with timeouts, cancellation, and
+  cleanup where the execution path requires them.
+- Run the repository-native validation nearest to the changed metadata or
+  localized module.
 
 ## Validation
 
-- Run the nearest `npm`, `pnpm`, `yarn`, or `node --test` command already used by the repository.
-- Run TypeScript checking when `tsconfig.json` or typed source changes.
+- Use the repository's established package, compiler, and test commands for
+  the changed surface.

@@ -5,15 +5,6 @@ description: Use when adding, refactoring, or reviewing Terraform or OpenTofu co
 
 # Terraform Skill
 
-## Referenced skills
-
-Treat the referenced skills below as on-demand complements. Do not preload them
-for ordinary Terraform authoring; load them only when import workflows or
-Terraform-native test behavior becomes part of the task.
-
-- `terraform-terraform-search-import`: unmanaged-resource discovery and Terraform import workflows when existing resources must enter Terraform state.
-- `terraform-terraform-test`: `.tftest.hcl` coverage, mocks, and Terraform test execution when Terraform-native testing is part of the job.
-
 ## Referenced files
 
 - `references/review-anti-patterns.md`: Terraform review anti-pattern catalog with ID-tagged patterns, severity, rationale, and examples. Load when `internal-review-code` or a review-oriented caller needs Terraform-specific defect depth.
@@ -88,11 +79,6 @@ See `references/decision-guide.md` for the full decision flowchart. Quick rule:
 ## Templates
 
 Load `references/template-examples.md` when you need a minimal inline feature example or a starter reusable module.
-
-## Imported complements
-
-- Load `terraform-terraform-search-import` when existing unmanaged resources must be discovered or bulk-imported into Terraform state.
-- Load `terraform-terraform-test` when authoring `.tftest.hcl` coverage, choosing plan-vs-apply test modes, or troubleshooting Terraform test execution.
 
 ## Common mistakes
 

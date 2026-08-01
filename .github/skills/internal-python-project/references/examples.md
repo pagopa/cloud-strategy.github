@@ -1,6 +1,6 @@
 # Python Project Examples
 
-## Minimal Module Example
+## Minimal importable contract
 
 `account_status.py`
 
@@ -25,12 +25,15 @@ def resolve_account_state(account_id: AccountId, is_locked: bool) -> str:
     return f"active:{account_id.value}"
 ```
 
-## Minimal Test Example
+## Focused test
+
+Follow the repository's configured import ordering and test naming. This
+example keeps the subject importable and tests its public contract.
 
 ```python
-from account_status import AccountId
-
 import pytest
+
+from account_status import AccountId
 
 
 def test_given_blank_account_id_when_creating_then_raises_value_error() -> None:

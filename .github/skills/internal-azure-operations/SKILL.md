@@ -1,80 +1,55 @@
 ---
 name: internal-azure-operations
-description: Use when the user needs Azure monitoring and logging posture, backup and restore proof, Site Recovery or DR validation, preflight checks, post-rollout validation, reporting, or audit evidence after a structure or governance decision is made. Do not use for tenant or subscription layout; RBAC, Policy, or identity design; Azure DevOps pipelines; or materially ambiguous requests with no clear operational deliverable.
+description: Use when /internal-azure selects Azure preflight, observability, rollout evidence, backup/restore proof, continuity validation, or operational reporting.
 ---
 
 # Internal Azure Operations
 
-Use this skill when the next need is to validate, observe, or operationalize an Azure platform decision.
-
-This skill owns the operational side of the platform: monitoring, evidence, preflight, and post-rollout verification. It does not replace strategic framing, structure design, or governance design.
-
-If the request falls outside this lane, or routing is unclear under material routing uncertainty, route back to `internal-azure`.
+Use this workflow to validate, observe, and operationalize an Azure platform
+decision.
 
 ## When to use
 
-- The user needs operational readiness guidance after a design choice.
-- The user needs Azure Monitor, Log Analytics, backup, restore, or DR validation guidance.
-- The user needs preflight or post-rollout validation patterns.
-- The user needs reporting, export, compliance evidence, or operational proof.
+Use when `/internal-azure` selects an operational readiness, evidence,
+monitoring, recovery, or reporting deliverable.
 
-## Main domains covered
+## Workflow
 
-- monitoring and observability posture
-- Azure Monitor and Log Analytics evidence paths
-- backup and restore expectations
-- Site Recovery or DR validation
-- preflight checks before rollout
-- post-rollout validation
-- export and reporting for platform operations
-- operational proof that a governance or structure change behaved as expected
+1. State the operational objective: the behavior, readiness condition, or
+   recovery expectation that requires proof.
+2. Record the evidence state: confirmed observations, inferred conditions, and
+   open checks.
+3. Define the rollout unit and its blast radius, owner, rollback trigger, and
+   widening condition.
+4. Run preflight for scope, identity, policy, connectivity, monitoring,
+   logging, and backup assumptions relevant to the change.
+5. Capture observation signals from Azure Monitor, Log Analytics, activity
+   evidence, compliance state, intended operations, and regressions.
+6. Add recovery proof when stateful services, business criticality, or
+   continuity expectations make it relevant; distinguish backup, restore, and
+   DR evidence.
+7. Apply the completion criteria: evidence is attributable to the rollout unit,
+   open risks are named, rollback conditions are actionable, and widening has
+   fresh proof.
 
-## Core rules
+## Evidence patterns
 
-- Keep validation proportional to blast radius.
-- Treat backup posture and restore evidence as different things.
-- Prefer preflight and staged validation before wide rollout when identity, policy, or platform automation could break.
-- Keep monitoring, evidence, and reporting tied to the decision that needs confirmation.
-- Name what is confirmed, what is inferred, and what still needs a real test.
+- Keep confirmed and inferred evidence on separate lines.
+- Tie monitoring and reporting to the affected control-plane surface.
+- Validate a first safe unit before widening management-group, subscription,
+  landing-zone, or region scope.
+- Treat backup posture, restore viability, and continuity exercises as distinct
+  proof paths.
 
-Load `references/validation-and-evidence.md` when the user needs a deeper checklist for preflight, rollout validation, or DR evidence.
+## Current facts
 
-## Use of current facts
+Use current Microsoft documentation when the answer depends on Azure Monitor,
+Backup, Site Recovery, Policy compliance, or service behavior.
 
-Use current Microsoft documentation when the answer depends on current Azure Monitor, Backup, Site Recovery, Policy compliance, or service-behavior details.
+Load `references/validation-and-evidence.md` for branch-specific preflight,
+rollout, recovery, and evidence checklists.
 
-## Output expectations
+## Completion criteria
 
-For narrow asks, return:
-
-- recommended validation or evidence path
-- short reason
-- main operational risk
-
-For broader asks, return:
-
-- operational objective
-- preflight checks
-- rollout-stage validation path
-- post-rollout evidence path
-- recovery or DR note when relevant
-- open operational risks
-
-## Common mistakes
-
-| Mistake | Why it matters | Instead |
-| --- | --- | --- |
-| Treating monitoring as proof that restore or recovery works | Healthy dashboards do not prove recovery viability | Keep monitoring evidence, backup proof, and restore proof as separate lines |
-| Skipping preflight for high-blast-radius rollout | Policy, identity, or connectivity failures surface too late | Define rollout unit, preflight checks, rollback trigger, and owner before rollout |
-| Reporting only control intent without operational evidence | The platform appears compliant without proof that it works | Record what Azure Monitor, Log Analytics, backup, or compliance signals actually showed |
-| Mixing validation advice with new governance design instead of keeping the boundary clear | The operations skill stops being a reliable validation owner | Keep new Policy or RBAC design out of the validation answer and validate the chosen design here |
-| Giving a DR answer without making the business criticality assumption visible | Recovery guidance can be overbuilt or incomplete | State the assumed criticality, RTO, or RPO before recommending the validation path |
-| Treating one successful rollout wave as proof for all subscriptions or regions | Wider inheritance, network, or residency paths can still fail differently | Validate the first safe unit and widen only after recording real evidence |
-
-## Validation
-
-- Confirm the answer distinguishes confirmed evidence from inferred evidence.
-- Confirm preflight checks, rollback trigger, and rollout unit are explicit for risky changes.
-- Confirm Azure Monitor or Log Analytics signals are named for the affected surface, not as a generic checklist.
-- Confirm backup proof and restore proof are treated as separate validation paths when state exists.
-- Confirm DR or continuity notes are included only when business criticality or recovery posture is actually in scope.
+Return the operational objective, evidence state, rollout unit, observed signals,
+recovery proof when relevant, open risks, and next validation action.
