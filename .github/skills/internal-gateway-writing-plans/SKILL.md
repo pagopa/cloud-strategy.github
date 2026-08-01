@@ -41,6 +41,16 @@ description: Use when repository-owned work needs an approved implementation pla
    path and next owner are reported and execution has not started without
    approval.
 
+## Command Portability
+
+- Write every baseline, focused, and final validation command in directly
+  executable native form. The command recorded in the plan is the
+  authoritative command and evidence label.
+- Do not make `rtk`, `graphify`, or another optional accelerator a prerequisite
+  or command prefix unless the task's actual subject is that tool.
+- Executor-side optimization may accelerate an invocation, but must not alter
+  the recorded authoritative command or its validation meaning.
+
 The executor owns the single mechanical plan validator. Do not add a
 writer-local validator, draft-only lifecycle, or duplicate parser contract.
 

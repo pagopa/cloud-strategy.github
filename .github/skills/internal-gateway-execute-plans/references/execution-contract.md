@@ -13,6 +13,9 @@ review, todo, task execution, or core stop procedure.
 - Compute and record the SHA-256 plan fingerprint with `scripts/plan_execution.py`.
 - Record branch, dirty files, and in-scope overlap before editing.
 - Name the local task dependency set and focused validation command.
+- Record the native authoritative command for baseline and focused validation;
+  an optional accelerator may optimize an invocation but must not replace the
+  command or its evidence label.
 - Run every broad validation named by `Baseline Validation` before edits and
   retain its command, exit status, and bounded failure summary.
 - Preserve the no-Git-mutation rule throughout execution.
@@ -37,8 +40,14 @@ The validator does not interpret textual states such as `Draft-only`.
 ## After each delegated task
 
 - Run the plan-specified focused validation command.
+- Apply `optional-tool-fallbacks.md`: probe the accelerator, execute the native
+  fallback when needed, and validate its required result. A warning alone is
+  not recovery.
 - Confirm the dependency set no longer asserts the replaced behavior.
 - Retain fresh evidence before transitioning to the next task.
+- When graphify is unavailable, stale, or fails, record the bounded evidence
+  question, fallback strategy, bounded result, and stop condition. Do not copy
+  full search output into status files.
 - Classify each failure as `task-local regression`, `pre-existing`,
   `unrelated/external`, `environmental`, or `unknown`.
 - Attempt bounded recovery only when it is directly required by the current
@@ -80,6 +89,9 @@ The validator does not interpret textual states such as `Draft-only`.
 
 - Run all broader validation required by the retained plan.
 - Use the same commands as the baseline and record the baseline/final delta.
+- Preserve the native authoritative command and evidence label even when an
+  optional accelerator optimized the invocation; require fallback execution
+  and result validation before treating recovery as complete.
 - Load `/superpowers-verification-before-completion` before claiming completion.
 - Run `git diff --check` and verify no Git mutation was performed.
 - Replace older status siblings for the same plan basename and write exactly

@@ -9,6 +9,7 @@ description: "Use when executing or resuming an approved repository-owned retain
 
 - `references/execution-contract.md` — repository hooks around the delegated execution loop.
 - `references/status-contract.md` — status transition table, required headings, and exact sibling filenames.
+- `references/optional-tool-fallbacks.md` — deterministic RTK recovery and bounded graphify fallback protocol.
 - `scripts/plan_execution.py` — read-only stdlib-only CLI for plan binding, status shape, resume safety, and completion readiness.
 
 ## Referenced skills
@@ -67,6 +68,13 @@ improves. Pre-existing or unrelated broad failures do not stop independent
 tasks. Load `/superpowers-verification-before-completion` before any positive
 completion claim; load `/addyosmani-code-simplification` only when explicitly
 authorized by the plan.
+
+Before a task transition or closeout, apply
+`references/optional-tool-fallbacks.md`: probe optional accelerators, preserve
+the native authoritative command, execute and validate any native fallback,
+and keep repository searches within the prescribed token budget. Optional-tool
+warnings are recovery context, not successful recovery or a final blocker when
+a safe fallback exists.
 
 On pause or resume, preserve the plan fingerprint and use the status and resume
 checks from `scripts/plan_execution.py`. At closeout, run the required broader
