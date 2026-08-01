@@ -1,68 +1,44 @@
 ---
 name: internal-gateway-codebase-improvement
-description: Use when a repository-owned codebase needs evidence-backed architecture analysis, deep-module design, mandatory critical challenge, and a retained challenged Design Packet without executing changes.
+description: Use when explicitly invoked to run the core codebase-architecture improvement workflow with a mandatory critical challenge after analysis and before report writing.
 ---
 
 # Internal Gateway Codebase Improvement
 
 ## Referenced skills
 
-- `/mattpocock-codebase-design`: architecture vocabulary and design-method owner.
-- `/internal-gateway-critical-master`: mandatory final challenge owner; call it
-  as-is and consume its existing result.
-- `/internal-gateway-writing-plans`: optional manual next owner after a separate user request.
+- `/mattpocock-improve-codebase-architecture`: owns the complete architecture-improvement workflow.
+- `/internal-gateway-critical-master`: challenges the completed draft analysis before the core writes its report.
 
 ## Invocation boundary
 
-Run only when explicitly invoked. Own analysis through a retained challenged
-Design Packet. Stop before any planning or execution owner and never own
-implementation.
+Run only when explicitly invoked. This skill is a repository-owned wrapper; it does not replace, copy, or extend the core workflow beyond the critical gate defined below.
 
 ## When to use
 
-Use when repository evidence suggests a module boundary, interface, seam, or
-locality problem requires architecture analysis before implementation.
-
-## Scope
-
-- Use for shallow modules, leaking seams, poor locality, low-leverage interfaces,
-  cross-module coupling, or testability constrained by architecture.
-- Do not use for local simplification, feature delivery, performance tuning,
-  security remediation, dependency upgrades, or direct implementation.
+Use when the core architecture-improvement workflow must produce a draft analysis that receives a critical challenge before report writing.
 
 ## Contract
 
-1. Run Preflight and Analysis Gates from [`references/workflow.md`](references/workflow.md).
-2. Present evidence-backed candidates and obtain candidate selection.
-3. Use `/mattpocock-codebase-design` to design the selected deepening.
-4. Run Feasibility and Structural Approval Gates.
-5. Run `/internal-gateway-critical-master` for every approved design.
-6. If the critic leaves any open point, invalidate approval and return to Analysis.
-7. Repeat analysis, design, feasibility, approval, and critical challenge until clear.
-8. On a clear critical result, retain the challenged Design Packet, report its
-   artifact path, and stop before `/internal-gateway-writing-plans`. A separate
-   user request may select that owner later.
+1. Load `/mattpocock-improve-codebase-architecture` and follow it unchanged through completion of `Explore`.
+2. Keep the resulting evidence, candidates, recommendation, assumptions, and evidence gaps as the current draft analysis. Do not write or present the HTML report yet.
+3. Run `/internal-gateway-critical-master` against that current draft analysis.
+4. Treat the pass as clear only when the critic returns `route-to-execution-owner`, Defense is `none` or `resolves`, and no material objection or unresolved uncertainty remains.
+5. For every non-clear pass, return to the core's `Explore` step with the objection and smallest required evidence. Revise the analysis, then run a fresh critical challenge before report writing.
+6. Repeat only when the analysis materially changes or new evidence appears. If required evidence is unavailable, unsafe, outside scope, declined, or needs a user decision, stop and report the blocker and resume condition.
+7. After a clear pass, resume `/mattpocock-improve-codebase-architecture` at report generation and let it own every remaining step.
 
-## Critical-master boundary
+## Boundaries
 
-This gateway calls `/internal-gateway-critical-master` without changing its
-skill, prompts, outcomes, or output contract. Consume the result it returns;
-do not require a gateway-specific envelope or add producer-side metadata. The
-existing `route-to-execution-owner` result is treated as challenge readiness
-for this gateway only: retain the Design Packet and stop, without invoking an
-execution or planning owner.
+- Call only the two referenced skills directly. Skills used transitively by the core remain the core's responsibility.
+- Do not modify or reinterpret either referenced skill, and do not add fields or outcomes to the critic.
+- Do not create a second workflow, separate design artifact, evidence contract, transition resolver, gateway-specific artifact, planning handoff, or additional approval gate.
+- Preserve the core's workspace, report, candidate-selection, grilling, domain-modeling, and stop behavior.
 
-## Non-negotiable critical rule
+## Validation
 
-Design readiness is illegal before a current-cycle critical pass has no material
-objection, unresolved uncertainty, unanswered question, or accepted residual
-risk. `accept-with-risk` is not clear and must reopen Analysis.
-
-## Output
-
-Keep one compact evidence ledger across loops. Use the schemas in
-[`references/evidence-contract.md`](references/evidence-contract.md), retain a
-Design Artifact under `tmp/codebase-improvement/designs/`, report its path, and
-stop. `/internal-gateway-writing-plans` may be invoked only after a separate
-user request that passes the retained artifact manually; this gateway never
-invokes it.
+- The wrapper directly references only the core and the critic.
+- The critical challenge occurs after `Explore` and before report generation.
+- No report is written from an analysis with a material objection or unresolved uncertainty.
+- Every retry uses changed analysis or new evidence; terminal evidence gaps stop with a visible resume condition.
+- The core resumes unchanged after a clear critical result.
