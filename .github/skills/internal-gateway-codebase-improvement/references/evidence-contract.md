@@ -55,6 +55,45 @@ re-entry instead of regenerating settled evidence.
 - `validation_commands`: repository-owned checks for the future implementation.
 - `approval_receipt`: explicit user approval naming this `cycle` and `packet_id`.
 
+## Critical challenge records
+
+- `critical_result`: the exact result returned by the existing
+  `/internal-gateway-critical-master` call. Preserve its producer semantics;
+  this gateway must not add fields, outcomes, or correlation metadata to it.
+- `resolver_decision`: the pure `TransitionDecision` containing `next_state`,
+  `approval_invalidated`, `reason`, and the required stop-report facts.
+
+## Retained Design Artifact
+
+The successful terminal output is a reviewable, disposable Design Artifact at:
+
+`tmp/codebase-improvement/designs/YYYY-MM-DD-<target-slug>.md`
+
+It must contain:
+
+- Target Brief.
+- Latest accepted Design Packet.
+- Approval receipt naming the current cycle and packet ID.
+- Matching critical receipt returned by `/internal-gateway-critical-master`.
+- Critical Resolution Ledger.
+- Validation path and fresh evidence.
+- Explicit anti-scope.
+
+The artifact remains uncommitted working state. It may be passed to
+`/internal-gateway-writing-plans` only after a separate user request; this
+gateway never invokes that owner automatically.
+
+## Stop report
+
+Every `stop-with-reason` decision records non-empty values for these six fields:
+
+- `what_happened`
+- `recovery_attempted`
+- `evidence_unavailable_reason`
+- `approval_status`
+- `consequence`
+- `resume_condition`
+
 ## Critical Resolution Ledger
 
 - `cycle`: current analysis/design cycle number.
@@ -65,7 +104,7 @@ re-entry instead of regenerating settled evidence.
 - `changed_decisions`: design or scope deltas.
 - `approval_invalidated`: must be `true` for an open point.
 - `critical_result`: canonical outcome, defense, and whether the result is clear.
-- `next_state`: Analysis, Stop without plan, or Plan Handoff.
+- `next_state`: Analysis, Stop with reason, or Challenged Design Ready.
 
 ## Invariants
 
@@ -75,6 +114,6 @@ re-entry instead of regenerating settled evidence.
 - Require two real adapters before introducing an injectable seam.
 - Apply the deletion test to both current and proposed modules.
 - Compare proposed interfaces against anti-scope and rejected candidates.
-- Retain only the latest accepted Design Packet for plan handoff.
-- Bind the approval receipt, critical result, and plan handoff to the same
+- Retain only the latest accepted Design Packet in the Design Artifact.
+- Bind the approval receipt, critical result, and retained artifact to the same
   current `cycle` and `packet_id`; mismatches are open points.

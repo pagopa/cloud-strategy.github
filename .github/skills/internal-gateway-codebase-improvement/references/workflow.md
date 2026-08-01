@@ -10,11 +10,12 @@ Preflight Gate
   -> Feasibility Gate
   -> Structural Approval Gate
   -> Mandatory Critical Gate
-       -> critical-clear: Plan Handoff
+       -> critical-clear: Challenged Design Ready
        -> open-point: Analysis Gate
-       -> insufficient-evidence: Stop without plan
-  -> Plan Handoff
-  -> Stop before implementation
+       -> insufficient-evidence: Stop with reason
+  -> Challenged Design Ready
+  -> Retain Design Artifact
+  -> Stop
 ```
 
 The gateway owns every transition. The referenced skills provide methods or
@@ -90,13 +91,26 @@ or canonical outcome `review-evidence`,
 record the objection and required evidence in the Critical Resolution Ledger,
 and do not invoke plan writing.
 
-The only clear transition is canonical outcome `route-to-execution-owner`
-combined with defense `none` or `resolves`, with no unresolved uncertainty or
-material objection. The critical result must name the same current cycle and
-packet ID as the approval receipt. A mismatch, missing receipt, or stale packet
-is an open point and cannot reach plan writing. This challenge-readiness result
-routes to `/internal-gateway-writing-plans`; the gateway does not invoke an
-execution owner. `de-escalate-to-simple` stops out of scope without a plan.
+After every critical result, call
+`.github/skills/internal-gateway-codebase-improvement/scripts/resolve_gateway_transition.py`
+with the approved and challenged cycle/packet IDs and the result returned by
+the critical-master call. The resolver owns only the local gateway transition;
+it does not alter, extend, or reinterpret the critical-master output.
+
+The only clear transition is the existing critical-master outcome
+`route-to-execution-owner`
+combined with defense `none` or `resolves`, no unresolved uncertainty or
+material objection, matching current cycle and packet IDs, and clear evidence.
+The gateway records the result against the same current cycle and packet ID as
+the approval receipt. A missing or stale local binding is an open point and
+invalidates approval; no new binding fields are added to critical-master.
+
+`missing-recoverable` permits one bounded evidence-recovery attempt. If the
+attempt is not yet used, return to Analysis; after it is used, stop with the
+six-field reason report and do not retry. Evidence states `unavailable`,
+`unsafe`, `out-of-scope`, and `declined` stop immediately and invalidate
+approval. `de-escalate-to-simple` stops because the request is outside this
+gateway. No branch may reach readiness when evidence is unavailable.
 
 On every reopened cycle, rerun Analysis, Feasibility, Structural Approval, and
 Mandatory Critical. Rerun Candidate selection only when the new evidence
@@ -104,13 +118,20 @@ changes the candidate set; otherwise retain the selected candidate and record
 why it remains valid. Always create a new current-cycle Design Packet and obtain
 fresh approval before the next critical challenge.
 
-## Plan Handoff and stop
+## Challenged Design Ready and stop
 
-Load `/internal-gateway-writing-plans` only after `critical-clear`, passing one
-handoff package containing the current Design Packet, its approval receipt, the
-matching critical result, compact evidence ledger, Critical Resolution Ledger,
-and validation path. The writer must receive the exact packet and cycle ID
-named by the clear critical result; do not reconstruct or substitute a design
-between the Critical Gate and handoff. Wait for the retained plan to be
-written, report its path, and stop before implementation. A missing or
-incomplete plan is not a successful terminal state.
+On `challenged-design-ready`, retain one Design Artifact at
+`tmp/codebase-improvement/designs/YYYY-MM-DD-<target-slug>.md`, report its path,
+and stop. The artifact receives the exact current Design Packet, approval
+receipt, matching critical result, Critical Resolution Ledger, validation path,
+and explicit anti-scope; do not reconstruct or substitute the packet.
+
+On `analysis`, reopen the required analysis, feasibility, approval, and critical
+gates. On `stop-with-reason`, report what happened, the bounded recovery
+attempted, why evidence remains unavailable, approval status, consequence, and
+the condition required to resume. The gateway terminates without planning
+handoff.
+
+`/internal-gateway-writing-plans` is an optional manual next owner only after a
+separate user request. This gateway never invokes it automatically; a user may
+pass the retained Design Artifact to it later.

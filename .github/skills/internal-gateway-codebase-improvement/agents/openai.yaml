@@ -1,6 +1,6 @@
 interface:
   display_name: "Codebase Improvement Gateway"
-  short_description: "Analyze architecture and write a challenged plan"
-  default_prompt: "Use $internal-gateway-codebase-improvement to analyze this codebase architecture, resolve every mandatory critical finding, and write an implementation plan without executing it."
+  short_description: "Analyze architecture and retain a challenged design"
+  default_prompt: "Use $internal-gateway-codebase-improvement to analyze this codebase architecture, resolve every mandatory critical finding, retain a challenged Design Packet under tmp/codebase-improvement/designs/, report its path, and stop without writing or invoking an implementation plan. The user may request /internal-gateway-writing-plans separately later."
 policy:
   allow_implicit_invocation: false

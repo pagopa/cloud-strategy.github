@@ -1,6 +1,6 @@
 ---
 name: internal-gateway-codebase-improvement
-description: Use when a repository-owned codebase needs evidence-backed architecture analysis, deep-module design, mandatory critical challenge, and an implementation plan without executing changes.
+description: Use when a repository-owned codebase needs evidence-backed architecture analysis, deep-module design, mandatory critical challenge, and a retained challenged Design Packet without executing changes.
 ---
 
 # Internal Gateway Codebase Improvement
@@ -8,12 +8,15 @@ description: Use when a repository-owned codebase needs evidence-backed architec
 ## Referenced skills
 
 - `/mattpocock-codebase-design`: architecture vocabulary and design-method owner.
-- `/internal-gateway-critical-master`: mandatory final challenge owner.
-- `/internal-gateway-writing-plans`: only successful terminal handoff.
+- `/internal-gateway-critical-master`: mandatory final challenge owner; call it
+  as-is and consume its existing result.
+- `/internal-gateway-writing-plans`: optional manual next owner after a separate user request.
 
 ## Invocation boundary
 
-Run only when explicitly invoked. Own analysis through plan writing. Never own implementation.
+Run only when explicitly invoked. Own analysis through a retained challenged
+Design Packet. Stop before any planning or execution owner and never own
+implementation.
 
 ## When to use
 
@@ -36,18 +39,30 @@ locality problem requires architecture analysis before implementation.
 5. Run `/internal-gateway-critical-master` for every approved design.
 6. If the critic leaves any open point, invalidate approval and return to Analysis.
 7. Repeat analysis, design, feasibility, approval, and critical challenge until clear.
-8. On a clear critical result, invoke `/internal-gateway-writing-plans` and stop
-   after the retained plan is written. Never execute it.
+8. On a clear critical result, retain the challenged Design Packet, report its
+   artifact path, and stop before `/internal-gateway-writing-plans`. A separate
+   user request may select that owner later.
+
+## Critical-master boundary
+
+This gateway calls `/internal-gateway-critical-master` without changing its
+skill, prompts, outcomes, or output contract. Consume the result it returns;
+do not require a gateway-specific envelope or add producer-side metadata. The
+existing `route-to-execution-owner` result is treated as challenge readiness
+for this gateway only: retain the Design Packet and stop, without invoking an
+execution or planning owner.
 
 ## Non-negotiable critical rule
 
-Plan writing is illegal before a current-cycle critical pass has no material
-objection, unresolved uncertainty, unanswered question, or accepted residual risk.
-`accept-with-risk` is not clear and must reopen Analysis.
+Design readiness is illegal before a current-cycle critical pass has no material
+objection, unresolved uncertainty, unanswered question, or accepted residual
+risk. `accept-with-risk` is not clear and must reopen Analysis.
 
 ## Output
 
 Keep one compact evidence ledger across loops. Use the schemas in
-[`references/evidence-contract.md`](references/evidence-contract.md), report the
-retained plan path, and name `/internal-gateway-execute-plans` only as the plan
-writer's next owner; do not invoke it.
+[`references/evidence-contract.md`](references/evidence-contract.md), retain a
+Design Artifact under `tmp/codebase-improvement/designs/`, report its path, and
+stop. `/internal-gateway-writing-plans` may be invoked only after a separate
+user request that passes the retained artifact manually; this gateway never
+invokes it.
