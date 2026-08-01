@@ -1,6 +1,0 @@
-interface:
-  display_name: "Architecture Codebase Improvement Internal Gateway"
-  short_description: "Challenge the completed architecture report"
-  default_prompt: "Use $internal-gateway-codebase-improvement to let the core complete its architecture report, challenge that completed report in the same orchestration context, rerun the core report flow when the result is not clear, and return only a clear report path or a visible resume condition. Stop before candidate selection, grilling, or follow-up work."
-policy:
-  allow_implicit_invocation: false
