@@ -12,6 +12,42 @@ declared external resource refreshes safely. The single public entrypoint is
 `scripts/sync_external_resources.py`. Bundle siblings: `references/`,
 `patches/`, `agents/openai.yaml`, `scripts/`.
 
+## Managed source inventory
+
+The table below is a quick-reference view of the repositories managed by this
+skill. The canonical source of truth is
+[`references/managed-resources.yaml`](references/managed-resources.yaml); its
+`ref` field is the full commit object ID used by the sync. Open a hash to
+inspect the exact upstream commit.
+
+| Source ID | Repository | Pinned `ref` | Commit date (UTC) | Release/tag |
+| --- | --- | --- | --- | --- |
+| `github-awesome-copilot` | [`github/awesome-copilot`](https://github.com/github/awesome-copilot) | [`aa280f28b1b73f9b6e6917b607eb92127b67b419`](https://github.com/github/awesome-copilot/commit/aa280f28b1b73f9b6e6917b607eb92127b67b419) | 2026-07-24 | not tagged |
+| `obra-superpowers` | [`obra/superpowers`](https://github.com/obra/superpowers) | [`3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9`](https://github.com/obra/superpowers/commit/3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9) | 2026-07-24 | [v6.2.0](https://github.com/obra/superpowers/releases/tag/v6.2.0) |
+| `hashicorp-agent-skills` | [`hashicorp/agent-skills`](https://github.com/hashicorp/agent-skills) | [`8c6573abbd21e8094fab8f538eb5f97db63133fd`](https://github.com/hashicorp/agent-skills/commit/8c6573abbd21e8094fab8f538eb5f97db63133fd) | 2026-07-15 | not tagged |
+| `mattpocock-skills` | [`mattpocock/skills`](https://github.com/mattpocock/skills) | [`ed37663cc5fbef691ddfecd080dff42f7e7e350d`](https://github.com/mattpocock/skills/commit/ed37663cc5fbef691ddfecd080dff42f7e7e350d) | 2026-07-21 | not tagged |
+| `vercel-labs-skills` | [`vercel-labs/skills`](https://github.com/vercel-labs/skills) | [`e173b8c88f2581cfdaa1b6767c6519a08155790e`](https://github.com/vercel-labs/skills/commit/e173b8c88f2581cfdaa1b6767c6519a08155790e) | 2026-07-22 | not tagged |
+| `openai-skills-curated` | [`openai/skills`](https://github.com/openai/skills) | [`49f948faa9258a0c61caceaf225e179651397431`](https://github.com/openai/skills/commit/49f948faa9258a0c61caceaf225e179651397431) | 2026-06-24 | not tagged |
+| `openai-skills-retained-doc` | [`openai/skills`](https://github.com/openai/skills) | [`49f948faa9258a0c61caceaf225e179651397431`](https://github.com/openai/skills/commit/49f948faa9258a0c61caceaf225e179651397431) | 2026-06-24 | not tagged |
+| `sickn33-antigravity` | [`sickn33/antigravity-awesome-skills`](https://github.com/sickn33/antigravity-awesome-skills) | [`e66fc833f2022c3534ba74af835db14c34f9a732`](https://github.com/sickn33/antigravity-awesome-skills/commit/e66fc833f2022c3534ba74af835db14c34f9a732) | 2026-07-24 | [v15.4.0](https://github.com/sickn33/agentic-awesome-skills/releases/tag/v15.4.0) |
+| `addyosmani-agent-skills` | [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) | [`ff2df4c07e7836a092ed28e1e9b42f4d6009280c`](https://github.com/addyosmani/agent-skills/commit/ff2df4c07e7836a092ed28e1e9b42f4d6009280c) | 2026-07-24 | [0.6.5](https://github.com/addyosmani/agent-skills/releases/tag/0.6.5) |
+| `atlassian-mcp-server` | [`atlassian/atlassian-mcp-server`](https://github.com/atlassian/atlassian-mcp-server) | [`f22e7075136a62baa7c10200a64884f83bf3ebe1`](https://github.com/atlassian/atlassian-mcp-server/commit/f22e7075136a62baa7c10200a64884f83bf3ebe1) | 2026-07-08 | not tagged |
+| `anthropic-skills` | [`anthropics/skills`](https://github.com/anthropics/skills) | [`b29e7cf65e5cb78a5ac33d582270551bc74a14eb`](https://github.com/anthropics/skills/commit/b29e7cf65e5cb78a5ac33d582270551bc74a14eb) | 2026-07-24 | not tagged |
+
+Commit dates are the committer dates in UTC. Release/tag values are shown only
+when an exact tag points to the pinned commit; otherwise the value is
+`not tagged`. The metadata was checked on 2026-08-01.
+
+This catalog is commit-pinned, not release-pinned:
+
+- `ref` is the immutable upstream version identity; tags and branches are not
+  accepted as the source identity.
+- The top-level `version: 1` in the manifest is the manifest schema version,
+  not an upstream release version.
+- Release/tag is informational and never replaces `ref`. The optional
+  `advertised_ref` can provide another human-readable ref when deliberately
+  declared, but it never replaces `ref`.
+
 ## Modes
 
 - `prepare`: the only mode that uses the network. Fetches pinned Git content
