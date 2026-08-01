@@ -1,4 +1,4 @@
 interface:
   display_name: "Local Sync External Resources"
   short_description: "Audit, plan, or apply declared external refreshes."
-  default_prompt: "Use $local-agent-sync-external-resources to refresh only declared managed external resources through the staged sync CLI; plan and apply automatically prepare missing pinned snapshots under tmp/external-sync-resources-snapshots."
+  default_prompt: "Use $local-agent-sync-external-resources to refresh only declared managed external resources through the staged sync CLI; plan and apply automatically prepare missing pinned snapshots under tmp/.cache/external-sync-resources-snapshots."

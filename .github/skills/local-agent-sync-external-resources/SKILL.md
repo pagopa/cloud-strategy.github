@@ -131,12 +131,12 @@ This catalog is commit-pinned, not release-pinned:
 - The runtime workspace must be outside this repository.
 - Use an external workspace such as `../cloud-strategy.github-external-refresh`.
 - Keep prepared source snapshots under
-  `<repo-root>/tmp/external-sync-resources-snapshots/` for normal CLI runs.
+  `<repo-root>/tmp/.cache/external-sync-resources-snapshots/` for normal CLI runs.
   `--source-root` remains an explicit override for a prepared checkout supplied
   by an operator or a test.
 - The Git object cache lives under `<workspace>/cache/repositories/`.
 - Each prepared source snapshot under
-  `<repo-root>/tmp/external-sync-resources-snapshots/<source_id>/` contains
+  `<repo-root>/tmp/.cache/external-sync-resources-snapshots/<source_id>/` contains
   `.external-resource-source.tsv` with
   the exact fields `source_id`, `repository`, `ref`, and `paths_sha256`.
 - Before copying source assets, `plan` and `apply` compare all four fields with
@@ -151,7 +151,7 @@ This catalog is commit-pinned, not release-pinned:
 - Cold `prepare` fetches each declared source SHA into the partial-clone cache,
   verifies the commit object, and exports only declared upstream paths into
   atomic snapshots under
-  `<repo-root>/tmp/external-sync-resources-snapshots/<source_id>/`.
+  `<repo-root>/tmp/.cache/external-sync-resources-snapshots/<source_id>/`.
 - Warm `prepare` finds the pin ref already cached and performs no fetch,
   reporting `cached` status and zero added cache bytes.
 - `--rebuild-cache` forces a fresh cache rebuild beside the active one,
@@ -173,7 +173,7 @@ This catalog is commit-pinned, not release-pinned:
 ## Safety
 
 - Workspace must be outside the repository; the default snapshot root is the
-  repository's disposable `tmp/external-sync-resources-snapshots/` directory.
+  repository's disposable `tmp/.cache/external-sync-resources-snapshots/` directory.
 - Dirty managed targets block `apply` unless `--allow-dirty` is supplied.
 - Missing snapshots trigger the declared pinned prepare flow in `plan` and
   `apply`; invalid or mismatched snapshots stop before candidate creation.

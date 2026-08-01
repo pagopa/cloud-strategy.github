@@ -41,7 +41,9 @@ from source_prepare_core import (  # noqa: E402
 DEFAULT_MANIFEST = (
     SCRIPT_DIR.parent / "references" / "managed-resources.yaml"
 ).as_posix()
-DEFAULT_SNAPSHOT_ROOT = Path("tmp/external-sync-resources-snapshots")
+DEFAULT_SNAPSHOT_ROOT = Path(
+    "tmp/.cache/external-sync-resources-snapshots"
+)
 
 DEFAULT_OVERRIDES = (
     SCRIPT_DIR.parent / "references" / "imported-asset-overrides.yaml"

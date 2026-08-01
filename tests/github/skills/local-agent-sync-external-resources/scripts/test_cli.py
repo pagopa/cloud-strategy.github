@@ -178,7 +178,7 @@ overrides: []
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
-    sources_root = repo / "tmp" / "external-sync-resources-snapshots"
+    sources_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
     source_dir = sources_root / "test-source" / "skills" / "example"
     source_dir.mkdir(parents=True)
     (source_dir / "SKILL.md").write_text(
@@ -307,7 +307,7 @@ watchlist: []
     assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
     assert payload["repository_changed"] is True
-    snapshot_root = repo / "tmp" / "external-sync-resources-snapshots"
+    snapshot_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
     assert (snapshot_root / "test-source" / ".external-resource-source.tsv").exists()
     assert payload["source_root"] == str(snapshot_root)
     assert "sources-auto-prepared" in payload["validations"]
@@ -437,7 +437,7 @@ overrides: []
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
-    sources_root = repo / "tmp" / "external-sync-resources-snapshots"
+    sources_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
     source_dir = sources_root / "test-source" / "skills" / "example"
     source_dir.mkdir(parents=True)
     (source_dir / "SKILL.md").write_text(
@@ -524,7 +524,7 @@ watchlist: []
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
-    sources_root = repo / "tmp" / "external-sync-resources-snapshots"
+    sources_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
     source_dir = sources_root / "test-source" / "skills" / "example"
     source_dir.mkdir(parents=True)
     (source_dir / "SKILL.md").write_text(
@@ -675,7 +675,7 @@ watchlist: []
     assert "source\ttest-source" in first.stdout
     assert "metric\ttest-source.materialized_files\tok" in first.stdout
 
-    snapshot_root = repo / "tmp" / "external-sync-resources-snapshots"
+    snapshot_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
     snapshot_skill = (
         snapshot_root / "test-source" / "skills" / "example" / "SKILL.md"
     )
