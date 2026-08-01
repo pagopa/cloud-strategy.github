@@ -26,11 +26,13 @@ contract instead of reproducing its procedure here.
 
 - Load and follow the core skill for every in-scope operation.
 - Preserve the requested mode. Bare `sync` means `apply`; never promote
-  `audit` or `plan` into a mutating or networked mode.
-- Run networked `prepare` only when the user explicitly requests source
-  preparation or otherwise authorizes that network step.
-- If an offline mode lacks prepared source metadata, report the blocker and the
-  required `prepare` action. Do not fetch automatically.
+  `audit` or `plan` into a mutating mode.
+- `plan` and `apply` use
+  `tmp/.cache/external-sync-resources-snapshots/` by default and automatically invoke
+  the pinned prepare flow when snapshots or declared upstream paths are
+  missing. The current user request for sync or execution authorizes that
+  network step; otherwise report the blocker and required authorization.
+- Keep `audit` offline and never prepare sources from it.
 - Treat `--allow-dirty` as explicit risk acceptance. Never infer it from a
   general request to continue.
 - Use the core skill's single public CLI and declared manifest. Do not
