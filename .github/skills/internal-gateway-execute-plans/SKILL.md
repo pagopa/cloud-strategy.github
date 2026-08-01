@@ -8,8 +8,8 @@ description: "Use when executing or resuming an approved repository-owned retain
 ## Bundle References
 
 - `references/execution-contract.md` — repository hooks around the delegated execution loop.
+- `references/recovery-contract.md` — continuation-first recovery and closeout decision ladder.
 - `references/status-contract.md` — status transition table, required headings, and exact sibling filenames.
-- `references/optional-tool-fallbacks.md` — deterministic RTK recovery and bounded graphify fallback protocol.
 - `scripts/plan_execution.py` — read-only stdlib-only CLI for plan binding, status shape, resume safety, and completion readiness.
 
 ## Referenced skills
@@ -50,10 +50,27 @@ only these local responsibilities here:
 - compute the SHA-256 fingerprint, run dirty-worktree preflight, and capture
   the plan-required validation baseline;
 - apply task-level `/internal-tdd` and evidence hooks;
-- classify failures, attempt bounded recovery, and preserve the baseline/final delta;
+- classify closeout evidence with `closeout-check`, continue while a safe route exists,
+  and preserve the baseline/final delta;
 - enforce the no-Git-mutation policy;
 - replace the exact `DONE`, `PARTIAL`, `BLOCKED`, or `NEEDS_REVIEW` sibling;
 - run resume and completion checks through `scripts/plan_execution.py`.
+
+## Gateway phases
+
+1. **Bind** the approved retained plan, fingerprint, workspace overlap, and native
+   validation commands. Completion: preflight passes and the baseline is recorded.
+2. **Execute** the delegated plan task-by-task with task-level red-first gates.
+   Completion: each task has fresh focused evidence or a recorded safe pause.
+3. **Recover** through `references/recovery-contract.md` whenever validation or
+   execution is unresolved. Completion: the next candidate was tried, authority
+   was requested when required, or exhaustion evidence is complete.
+4. **Decide** with `closeout-check`. Completion: continue immediately on a
+   `continue-*` route, or write one legal status sibling for a terminal or explicit
+   pause route.
+5. **Close** with broader validation, `git diff --check`, status binding, and the
+   verification-before-completion gate. Completion: the status sibling and report
+   contain the same fresh evidence.
 
 ## Delegation checkpoints
 
@@ -70,11 +87,8 @@ completion claim; load `/addyosmani-code-simplification` only when explicitly
 authorized by the plan.
 
 Before a task transition or closeout, apply
-`references/optional-tool-fallbacks.md`: probe optional accelerators, preserve
-the native authoritative command, execute and validate any native fallback,
-and keep repository searches within the prescribed token budget. Optional-tool
-warnings are recovery context, not successful recovery or a final blocker when
-a safe fallback exists.
+`references/recovery-contract.md`. Preserve the native authoritative command,
+continue on a safe `continue-*` route, and keep bounded search and retry evidence.
 
 On pause or resume, preserve the plan fingerprint and use the status and resume
 checks from `scripts/plan_execution.py`. At closeout, run the required broader
@@ -97,5 +111,6 @@ mutation steps, skip them and record the plan drift in the status sibling.
 - `python3 scripts/plan_execution.py preflight <plan-file> --format compact`
 - `python3 scripts/plan_execution.py status-check <status-file> --format compact`
 - `python3 scripts/plan_execution.py resume-check <plan-file> <status-file> --format compact`
+- `python3 scripts/plan_execution.py closeout-check <evidence-file> --format compact`
 - `python3 scripts/plan_execution.py completion-check <plan-file> <status-file> --format compact`
 - Confirm no live repository references point to removed bundle files.

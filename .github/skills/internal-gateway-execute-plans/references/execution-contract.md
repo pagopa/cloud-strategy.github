@@ -40,9 +40,9 @@ The validator does not interpret textual states such as `Draft-only`.
 ## After each delegated task
 
 - Run the plan-specified focused validation command.
-- Apply `optional-tool-fallbacks.md`: probe the accelerator, execute the native
-  fallback when needed, and validate its required result. A warning alone is
-  not recovery.
+- When a command is unresolved, attribute the failure and run the discovery and
+  retry phases in `recovery-contract.md` before considering a stop.
+- Require a distinct evidence delta for every retry; a warning alone is not recovery.
 - Confirm the dependency set no longer asserts the replaced behavior.
 - Retain fresh evidence before transitioning to the next task.
 - When graphify is unavailable, stale, or fails, record the bounded evidence
@@ -54,6 +54,9 @@ The validator does not interpret textual states such as `Draft-only`.
   task or its validation, stays inside approved scope, and evidence improves.
   Record recovery as an auxiliary execution task without changing the approved
   plan or fingerprint.
+- Run `closeout-check` after recovery evidence changes. Continue without writing
+  an intermediate status while it returns `continue-execution` or
+  `continue-recovery`.
 - If the plan authorizes simplification, `/addyosmani-code-simplification`
   may be loaded at that task's explicit gate.
 
@@ -70,6 +73,8 @@ The validator does not interpret textual states such as `Draft-only`.
 - A baseline failure classified as pre-existing or unrelated/external is not a
   fatal condition. Continue independent tasks and validations, preserve the
   baseline/final delta, and report the unresolved external gap.
+- Do not stop for an environmental failure until one discovery pass and every
+  safe in-scope recovery candidate have been recorded.
 - Stop recovery when evidence no longer improves or the next action would cross
   scope, safety, approval, ownership, or Git-mutation boundaries.
 

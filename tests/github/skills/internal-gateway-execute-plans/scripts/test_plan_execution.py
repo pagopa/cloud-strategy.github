@@ -19,11 +19,279 @@ sys.path.insert(0, str(SCRIPTS))
 from plan_execution import (  # noqa: E402
     Finding,
     build_compact_payload,
+    classify_closeout,
     compute_sha256,
     validate_plan,
     validate_resume,
     validate_status,
 )
+
+
+def _closeout_evidence(
+    *,
+    outcome: str = "exact-pass",
+    equivalence: dict[str, bool] | None = None,
+    tasks_complete: bool = True,
+    tasks_remaining: list[str] | None = None,
+    human_review_required: bool = False,
+    fatal_conditions: list[str] | None = None,
+    recovery_candidates: list[str] | None = None,
+    required: bool = True,
+    pause_requested: bool = False,
+    exhaustion_evidence: list[str] | None = None,
+) -> dict[str, object]:
+    return {
+        "tasks_complete": tasks_complete,
+        "tasks_remaining": tasks_remaining or [],
+        "human_review_required": human_review_required,
+        "fatal_conditions": fatal_conditions or [],
+        "pause_requested": pause_requested,
+        "exhaustion_evidence": exhaustion_evidence or [],
+        "validations": [
+            {
+                "name": "focused validation",
+                "required": required,
+                "outcome": outcome,
+                "recovery_candidates": recovery_candidates or [],
+                **({"equivalence": equivalence} if equivalence is not None else {}),
+            }
+        ],
+    }
+
+
+def test_closeout_is_done_when_all_required_obligations_pass_exactly() -> None:
+    decision = classify_closeout(_closeout_evidence(outcome="exact-pass"))
+    assert decision.route == "DONE"
+
+
+def test_closeout_accepts_fully_admissible_equivalent_validation() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            outcome="equivalent-pass",
+            equivalence={
+                "target_did_not_start": True,
+                "same_checks": True,
+                "same_inputs": True,
+                "runtime_not_material": True,
+            },
+        )
+    )
+    assert decision.route == "DONE"
+
+
+def test_closeout_rejects_equivalence_when_runtime_is_material() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            outcome="equivalent-pass",
+            equivalence={
+                "target_did_not_start": True,
+                "same_checks": True,
+                "same_inputs": True,
+                "runtime_not_material": False,
+            },
+        )
+    )
+    assert decision.route != "DONE"
+
+
+def test_closeout_continues_incomplete_executable_work() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(tasks_complete=False, tasks_remaining=["Task 2"])
+    )
+    assert decision.route == "continue-execution"
+
+
+def test_closeout_continues_recovery_when_a_candidate_exists() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            outcome="unresolved",
+            recovery_candidates=["rerun with supported interpreter"],
+        )
+    )
+    assert decision.route == "continue-recovery"
+
+
+def test_closeout_continues_python_313_token_risk_recovery() -> None:
+    decision = classify_closeout(
+        {
+            **_closeout_evidence(
+                outcome="unresolved",
+                recovery_candidates=[
+                    ".github/scripts/.venv/bin/python (Python 3.13)"
+                ],
+            ),
+            "validations": [
+                {
+                    "name": "make token-risks",
+                    "required": True,
+                    "outcome": "unresolved",
+                    "recovery_candidates": [
+                        ".github/scripts/.venv/bin/python (Python 3.13)"
+                    ],
+                },
+                {
+                    "name": "make github-catalog-validation",
+                    "required": True,
+                    "outcome": "unresolved",
+                    "recovery_candidates": [
+                        ".github/scripts/.venv/bin/python (Python 3.13)"
+                    ],
+                },
+            ],
+        }
+    )
+    assert decision.route == "continue-recovery"
+    assert "make token-risks" in decision.next_action
+    assert "make github-catalog-validation" in decision.next_action
+    assert ".github/scripts/.venv/bin/python (Python 3.13)" in decision.next_action
+
+
+def test_closeout_blocks_exhausted_task_local_regression() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            outcome="regression",
+            fatal_conditions=["task-local regression"],
+            exhaustion_evidence=["safe retry candidates exhausted"],
+        )
+    )
+    assert decision.route == "BLOCKED"
+
+
+def test_closeout_blocks_unknown_fatal_condition() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            fatal_conditions=["unknown fatal condition"],
+            exhaustion_evidence=["no safe autonomous action remains"],
+        )
+    )
+    assert decision.route == "BLOCKED"
+
+
+def test_closeout_requires_review_for_exhausted_human_decision() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            outcome="unresolved",
+            human_review_required=True,
+            exhaustion_evidence=["requires owner decision"],
+        )
+    )
+    assert decision.route == "NEEDS_REVIEW"
+
+
+def test_closeout_requires_review_for_exhausted_environmental_gap() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            outcome="unresolved",
+            exhaustion_evidence=["no compatible interpreter is available"],
+        )
+    )
+    assert decision.route == "NEEDS_REVIEW"
+
+
+def test_closeout_allows_partial_only_for_an_explicit_pause() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            tasks_complete=False,
+            tasks_remaining=["Task 2"],
+            pause_requested=True,
+        )
+    )
+    assert decision.route == "PARTIAL"
+
+
+def test_closeout_never_uses_partial_for_an_active_run() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(
+            tasks_complete=False,
+            tasks_remaining=["Task 2"],
+            pause_requested=False,
+        )
+    )
+    assert decision.route == "continue-execution"
+
+
+def test_closeout_allows_non_required_warning() -> None:
+    decision = classify_closeout(
+        _closeout_evidence(outcome="warning", required=False)
+    )
+    assert decision.route == "DONE"
+
+
+def test_closeout_cli_reports_continue_route_in_compact_output(
+    tmp_path: Path,
+) -> None:
+    evidence = tmp_path / "closeout.json"
+    evidence.write_text(
+        json.dumps(
+            _closeout_evidence(
+                outcome="unresolved",
+                recovery_candidates=["supported interpreter"],
+            )
+        )
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "closeout-check",
+            str(evidence),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["route"] == "continue-recovery"
+    assert payload["reason_codes"]
+    assert payload["next_action"]
+
+
+def test_closeout_cli_rejects_unknown_outcome(tmp_path: Path) -> None:
+    evidence = tmp_path / "closeout.json"
+    evidence.write_text(json.dumps(_closeout_evidence(outcome="maybe-pass")))
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "closeout-check",
+            str(evidence),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    assert "outcome" in result.stderr
+
+
+def test_closeout_cli_rejects_equivalent_pass_without_admissibility_evidence(
+    tmp_path: Path,
+) -> None:
+    evidence = tmp_path / "closeout.json"
+    evidence.write_text(json.dumps(_closeout_evidence(outcome="equivalent-pass")))
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "closeout-check",
+            str(evidence),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    assert "equivalence" in result.stderr
 
 
 def _fixture(name: str) -> Path:
@@ -302,6 +570,27 @@ def test_status_rejects_unclassified_failure_evidence(
     findings = validate_status(status)
 
     assert {item.code for item in findings} >= {"invalid-failure-classification"}
+
+
+@pytest.mark.parametrize(
+    ("heading", "code"),
+    (
+        ("Closeout Decision", "invalid-closeout-decision"),
+        ("Recovery Exhaustion", "invalid-recovery-exhaustion"),
+    ),
+)
+def test_status_rejects_unresolved_closeout_evidence(
+    tmp_path: Path,
+    valid_plan: Path,
+    heading: str,
+    code: str,
+) -> None:
+    status = tmp_path / "valid-plan.PARTIAL.md"
+    status.write_text(_minimal_status(valid_plan) + f"\n## {heading}\n\nTBD\n")
+
+    findings = validate_status(status)
+
+    assert code in {item.code for item in findings}
 
 
 def test_status_rejects_noncomparable_baseline_and_final_commands(
