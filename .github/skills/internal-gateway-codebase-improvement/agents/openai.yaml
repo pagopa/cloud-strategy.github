@@ -1,6 +1,6 @@
 interface:
   display_name: "Architecture Codebase Improvement Internal Gateway"
   short_description: "Challenge architecture analysis before its report"
-  default_prompt: "Use $internal-gateway-codebase-improvement to run the core architecture-improvement workflow, challenge each completed draft analysis before report writing, reopen analysis until no material objection or unresolved uncertainty remains, then resume the core workflow."
+  default_prompt: "Use $internal-gateway-codebase-improvement to run the core architecture-improvement workflow, challenge each completed draft analysis before report generation, reopen analysis until no material objection or unresolved uncertainty remains, then generate only the core report and stop without grilling or follow-up work."
 policy:
   allow_implicit_invocation: false
