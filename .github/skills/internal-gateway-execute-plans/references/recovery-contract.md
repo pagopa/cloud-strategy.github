@@ -41,8 +41,9 @@ A direct validator is equivalent only when all four conditions are true:
 - the same inputs were used; and
 - the runtime difference is not material.
 
-Record these booleans in closeout evidence. `closeout-check` rejects an
-equivalent pass without all four admissibility conditions.
+Record these booleans in structured closeout evidence. `closeout-check`
+rejects an equivalent pass without all four admissibility conditions and the
+plan-declared `allowed-if-admissible` policy.
 
 Completion: the equivalent result is represented as `equivalent-pass`, or it is
 kept unresolved.
@@ -70,7 +71,7 @@ new authority, and the rejection reasons are explicit.
 Build the JSON evidence document and run:
 
 ```text
-python3 scripts/plan_execution.py closeout-check <evidence-file> --format compact
+python3 scripts/plan_execution.py closeout-check <plan-file> <evidence-file> --format compact
 ```
 
 Continue immediately for `continue-execution` or `continue-recovery`; do not

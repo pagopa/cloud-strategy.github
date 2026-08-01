@@ -11,7 +11,7 @@ Status transition rules, required core, optional evidence, and exact sibling fil
 | An exhausted fatal condition prevents safe further execution | `BLOCKED` | waiting |
 | Implementation is complete, recovery is exhausted, and a human, external, or non-substitutable environmental obligation remains | `NEEDS_REVIEW` | waiting |
 
-Use `DONE` only when every task passed its transition gate, all in-scope work is complete, and required broader validation has fresh passing evidence. A final broad check does not retroactively validate skipped task gates.
+Use `DONE` only when every task passed its transition gate, all in-scope work is complete, and required broader validation has fresh passing evidence. A final broad check does not retroactively validate skipped task gates. Active classifier routes (`continue-execution`, `continue-recovery`, and `request-authority`) do not produce status siblings.
 
 Do not use `BLOCKED` only because a broad validation failed. Compare the same
 command at baseline and closeout, record the baseline/final delta, classify the

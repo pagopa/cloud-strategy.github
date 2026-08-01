@@ -602,7 +602,6 @@ instructions.
 - Do not create codebase-improvement artifacts outside the active workspace.
 {_CODEBASE_IMPROVE_CONTRACT_END}"""
 
-
 def _enforce_marked_contract(
     content: str,
     contract_re: re.Pattern[str],
@@ -732,7 +731,6 @@ def normalize_candidate(
                 and file_path.parent == asset_dir
             ):
                 content = _enforce_codebase_improve_workspace_contract(content)
-
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
 

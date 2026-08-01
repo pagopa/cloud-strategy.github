@@ -10,7 +10,7 @@ description: "Use when executing or resuming an approved repository-owned retain
 - `references/execution-contract.md` — repository hooks around the delegated execution loop.
 - `references/recovery-contract.md` — continuation-first recovery and closeout decision ladder.
 - `references/status-contract.md` — status transition table, required headings, and exact sibling filenames.
-- `scripts/plan_execution.py` — read-only stdlib-only CLI for plan binding, status shape, resume safety, and completion readiness.
+- `scripts/plan_execution.py` — read-only stdlib-only CLI for strict plan binding, structured recovery classification, status shape, resume safety, and completion readiness.
 
 ## Referenced skills
 
@@ -33,12 +33,12 @@ description: "Use when executing or resuming an approved repository-owned retain
 ## Safety Boundary
 
 The bundled CLI proves only mechanical safety: the plan is in the canonical
-retained directory, readable, and actionable; status files are bound to the
-plan and fingerprint; and completion state is consistent. Missing descriptive
-headings or execution metadata are notices with gateway defaults, not stop
-conditions. Status files require only the minimal resumable core; richer
-evidence is optional and validated when present. Conversational approval and
-runtime safety remain gateway responsibilities.
+retained directory, readable, actionable, and contains exactly one supported
+execution contract; status files are bound to the plan and fingerprint; and
+completion state is consistent. Missing required headings, execution fields,
+or contract data are blocking findings. Status files require the minimal
+resumable core plus closeout evidence for serialized routes. Conversational
+approval and runtime safety remain gateway responsibilities.
 
 ## Gateway boundary
 
@@ -66,7 +66,7 @@ only these local responsibilities here:
    execution is unresolved. Completion: the next candidate was tried, authority
    was requested when required, or exhaustion evidence is complete.
 4. **Decide** with `closeout-check`. Completion: continue immediately on a
-   `continue-*` route, or write one legal status sibling for a terminal or explicit
+  `continue-*` or `request-authority` route, or write one legal status sibling for a terminal or explicit
    pause route.
 5. **Close** with broader validation, `git diff --check`, status binding, and the
    verification-before-completion gate. Completion: the status sibling and report
@@ -111,6 +111,13 @@ mutation steps, skip them and record the plan drift in the status sibling.
 - `python3 scripts/plan_execution.py preflight <plan-file> --format compact`
 - `python3 scripts/plan_execution.py status-check <status-file> --format compact`
 - `python3 scripts/plan_execution.py resume-check <plan-file> <status-file> --format compact`
-- `python3 scripts/plan_execution.py closeout-check <evidence-file> --format compact`
+- `python3 scripts/plan_execution.py closeout-check <plan-file> <evidence-file> --format compact`
 - `python3 scripts/plan_execution.py completion-check <plan-file> <status-file> --format compact`
 - Confirm no live repository references point to removed bundle files.
+
+The writer-owned versioned `## Execution Contract` is authoritative for
+validation IDs, native commands, required flags, equivalence policy, manual
+obligations, and authority boundaries. The executor owns all six discovery
+categories, recovery candidates, attempts, rejection evidence, authority
+state, and closeout routing. `request-authority` keeps execution active and
+does not produce a status sibling.

@@ -31,11 +31,14 @@ description: Use when repository-owned work needs an approved implementation pla
 2. Load `/superpowers-writing-plans` and produce one reviewable retained plan
    under `tmp/superpowers/plans/` with ordered actionable tasks, concrete file
    targets, focused validation, and an execution handoff. Completion: one plan
-   exists at the retained path and contains those four artifact properties.
+   exists at the retained path and contains those four artifact properties plus
+   one versioned `## Execution Contract` fenced JSON object.
 3. Perform human review for task actionability, approved scope, focused
-   validation, safety, and handoff quality. Treat descriptive metadata as
-   review guidance, not as a writer-owned machine acceptance state. Completion:
-   each review concern is accepted or has a recorded revision.
+   validation, safety, and handoff quality. The contract must declare native
+   authoritative validation commands and phases, equivalence policy, manual
+   obligations, and authority boundaries. It must not predict runtime
+   discovery results or recovery candidates. Completion: each review concern
+   is accepted or has a recorded revision.
 4. Report the retained plan path, name `/internal-gateway-execute-plans` as
    the next owner, and wait for explicit execution approval. Completion: the
    path and next owner are reported and execution has not started without
@@ -53,6 +56,9 @@ description: Use when repository-owned work needs an approved implementation pla
 
 The executor owns the single mechanical plan validator. Do not add a
 writer-local validator, draft-only lifecycle, or duplicate parser contract.
+Before handoff, run the executor-owned `preflight` against the written plan and
+revise it until there are zero blocking findings. Plans without the versioned
+contract are not actionable.
 
 ## No-Commit Rule
 

@@ -7,6 +7,7 @@ review, todo, task execution, or core stop procedure.
 ## Before the delegated loop
 
 - Require the exact retained plan path under `tmp/superpowers/plans/`.
+- Treat the writer-owned versioned `## Execution Contract` as authoritative.
 - Accept `Preflight Gate` as the canonical plan heading and
   `Repository Preflight` or `Preflight` as compatibility aliases.
 - Confirm explicit user approval is present in the current conversation.
@@ -22,12 +23,12 @@ review, todo, task execution, or core stop procedure.
 
 ## Mechanical safety boundary
 
-The bundled validator blocks only when it cannot safely identify or inspect the
-retained plan, when the plan has no actionable task, or when status binding,
-fingerprint, or completion checks fail. Missing `Goal`, `Global Constraints`,
-preflight aliases, and legacy execution fields are notices; the gateway uses
-its conversational approval and runtime safety responsibilities as defaults.
-The validator does not interpret textual states such as `Draft-only`.
+The bundled validator blocks when it cannot safely identify or inspect the
+retained plan, when the plan has no actionable task, when the strict versioned
+execution contract is missing or malformed, or when status binding,
+fingerprint, or completion checks fail. Required plan headings and execution
+fields are blocking. The validator does not interpret textual states such as
+`Draft-only`.
 
 ## Before each delegated task
 
@@ -54,9 +55,9 @@ The validator does not interpret textual states such as `Draft-only`.
   task or its validation, stays inside approved scope, and evidence improves.
   Record recovery as an auxiliary execution task without changing the approved
   plan or fingerprint.
-- Run `closeout-check` after recovery evidence changes. Continue without writing
-  an intermediate status while it returns `continue-execution` or
-  `continue-recovery`.
+- Run `closeout-check <plan-file> <evidence-file>` after recovery evidence
+  changes. Continue without writing an intermediate status while it returns
+  `continue-execution`, `continue-recovery`, or `request-authority`.
 - If the plan authorizes simplification, `/addyosmani-code-simplification`
   may be loaded at that task's explicit gate.
 

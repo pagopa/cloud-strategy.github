@@ -17,6 +17,37 @@ Validate the plan execution CLI against a realistic plan shape.
 
 - Preserve fixture integrity.
 
+## Execution Contract
+
+```json
+{
+  "schema_version": 1,
+  "validations": [
+    {
+      "id": "focused-tests",
+      "command": "python3 -m pytest -q tests/fixture/",
+      "phases": ["baseline", "focused", "final"],
+      "required": true,
+      "success": "exit-code-0",
+      "equivalence": "allowed-if-admissible"
+    },
+    {
+      "id": "diff-check",
+      "command": "git diff --check",
+      "phases": ["final"],
+      "required": true,
+      "success": "exit-code-0",
+      "equivalence": "exact-only"
+    }
+  ],
+  "manual_obligations": [],
+  "authority": {
+    "autonomous": ["read-only-discovery", "supported-runtime-override", "idempotent-retry"],
+    "requires_approval": ["dependency-installation", "network-access", "destructive-change", "scope-expansion", "plan-modification"]
+  }
+}
+```
+
 ## Task 1: Validate CLI
 
 **Files:**

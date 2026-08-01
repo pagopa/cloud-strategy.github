@@ -5,10 +5,10 @@ interface:
     Use /internal-gateway-writing-plans after approval to capture the target,
     anti-scope, nearest owner, validation path, stop conditions, and observable
     acceptance. Load /superpowers-writing-plans to produce one reviewable plan
-    under tmp/superpowers/plans/ with ordered actionable tasks, concrete file
-    targets, focused validation, and an execution handoff. Perform human review
-    for scope, safety, actionability, validation, and handoff quality. Do not
-    create a writer-local validator or draft-only lifecycle. Report the plan
-    path, name /internal-gateway-execute-plans as the next owner, and wait for
-    explicit execution approval. Observe the No-Commit Rule: no Git mutations
-    during writing.
+    under tmp/superpowers/plans/ with ordered tasks, concrete targets, focused
+    validation, and a versioned ## Execution Contract declaring native commands,
+    equivalence policy, manual obligations, and authority boundaries. Do not
+    predict runtime candidates. Run the executor-owned preflight and revise
+    until it has zero blocking findings. Perform human review, report the plan
+    path, name /internal-gateway-execute-plans as next owner, and wait for
+    explicit execution approval. Observe the No-Commit Rule: no Git mutations.

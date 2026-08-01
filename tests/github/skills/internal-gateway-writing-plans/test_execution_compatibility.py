@@ -35,4 +35,4 @@ def test_writer_plan_is_actionable_for_executor(tmp_path: Path) -> None:
 
     findings = _executor_module().validate_plan(plan, repo_root=tmp_path)
 
-    assert not [item for item in findings if item.severity == "blocking"]
+    assert findings == []
