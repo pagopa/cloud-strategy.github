@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import re
 import shutil
@@ -12,6 +13,13 @@ from typing import Literal
 import yaml
 
 _COMMIT_OBJECT_ID_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+_PREPARED_SOURCE_METADATA_NAME = ".external-resource-source.tsv"
+_PREPARED_SOURCE_METADATA_FIELDS = (
+    "source_id",
+    "repository",
+    "ref",
+    "paths_sha256",
+)
 
 
 @dataclass(frozen=True)
@@ -33,6 +41,21 @@ class ManagedSource:
     ensure_python_shebangs: bool = False
     skill_reference_aliases: tuple[tuple[str, str], ...] = ()
     backtick_skill_references: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class PreparedSourceMetadata:
+    source_id: str
+    repository: str
+    ref: str
+    paths_sha256: str
+
+
+def compute_prepared_source_paths_sha256(source: ManagedSource) -> str:
+    upstream_paths = sorted(asset.upstream for asset in source.assets)
+    return hashlib.sha256(
+        ",".join(upstream_paths).encode("utf-8")
+    ).hexdigest()
 
 
 @dataclass(frozen=True)
@@ -371,11 +394,13 @@ def validate_prepared_sources(
 ) -> None:
     missing: list[str] = []
     for source in resources.sources:
-        metadata = (
-            sources_root / source.source_id / ".external-resource-source.tsv"
+        metadata_path = (
+            sources_root / source.source_id / _PREPARED_SOURCE_METADATA_NAME
         )
-        if not metadata.exists():
+        if not metadata_path.exists():
             missing.append(source.source_id)
+            continue
+        _validate_prepared_source(source, metadata_path)
     if missing:
         raise ValueError(
             "Missing prepared source metadata: "
@@ -383,6 +408,72 @@ def validate_prepared_sources(
             + ". Expected prepared sources under "
             + sources_root.as_posix()
             + ". Run prepare before audit/plan/apply."
+        )
+
+
+def _read_prepared_source_metadata(
+    metadata_path: Path,
+) -> PreparedSourceMetadata:
+    try:
+        with metadata_path.open("r", encoding="utf-8", newline="") as stream:
+            reader = csv.DictReader(stream, delimiter="\t")
+            if reader.fieldnames != list(_PREPARED_SOURCE_METADATA_FIELDS):
+                raise ValueError(
+                    f"Invalid prepared source metadata header in {metadata_path}"
+                )
+            rows = list(reader)
+    except UnicodeDecodeError as exc:
+        raise ValueError(
+            f"Invalid prepared source metadata encoding in {metadata_path}"
+        ) from exc
+
+    if len(rows) != 1:
+        raise ValueError(
+            f"Invalid prepared source metadata row count in {metadata_path}"
+        )
+
+    row = rows[0]
+    if None in row:
+        raise ValueError(
+            f"Invalid prepared source metadata column count in {metadata_path}"
+        )
+    values: dict[str, str] = {}
+    for field in _PREPARED_SOURCE_METADATA_FIELDS:
+        value = row.get(field)
+        if value is None or not value:
+            raise ValueError(
+                f"Invalid prepared source metadata field {field} in {metadata_path}"
+            )
+        values[field] = value
+
+    return PreparedSourceMetadata(
+        source_id=values["source_id"],
+        repository=values["repository"],
+        ref=values["ref"],
+        paths_sha256=values["paths_sha256"],
+    )
+
+
+def _validate_prepared_source(
+    source: ManagedSource,
+    metadata_path: Path,
+) -> None:
+    actual = _read_prepared_source_metadata(metadata_path)
+    expected = PreparedSourceMetadata(
+        source_id=source.source_id,
+        repository=source.repository,
+        ref=source.ref,
+        paths_sha256=compute_prepared_source_paths_sha256(source),
+    )
+    mismatches = [
+        f"{field} expected {getattr(expected, field)!r}, got {getattr(actual, field)!r}"
+        for field in _PREPARED_SOURCE_METADATA_FIELDS
+        if getattr(expected, field) != getattr(actual, field)
+    ]
+    if mismatches:
+        raise ValueError(
+            f"Prepared source metadata mismatch for {source.source_id}: "
+            + "; ".join(mismatches)
         )
 
 

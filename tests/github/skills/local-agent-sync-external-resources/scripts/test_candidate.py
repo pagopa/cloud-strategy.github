@@ -527,6 +527,46 @@ def test_materialize_candidate_copies_upstream_to_local(
     assert "upstream-name" in target.read_text(encoding="utf-8")
 
 
+def test_materialize_candidate_rejects_mismatched_prepared_ref(
+    tmp_path: Path,
+) -> None:
+    workspace = tmp_path / "workspace"
+    sources_root = workspace / "sources"
+    source_checkout = sources_root / "test-source" / "skills" / "example"
+    source_checkout.mkdir(parents=True)
+    (source_checkout / "SKILL.md").write_text(
+        "---\nname: upstream-name\n---\n", encoding="utf-8"
+    )
+
+    asset = ManagedAsset(
+        source="test-source",
+        upstream="skills/example",
+        local=".github/skills/example",
+        canonical_name="example",
+    )
+    source = ManagedSource(
+        source_id="test-source",
+        repository="https://example.com/repo.git",
+        ref="a" * 40,
+        advertised_ref=None,
+        assets=(asset,),
+    )
+    _write_source_metadata(sources_root, source)
+    metadata_path = sources_root / "test-source" / ".external-resource-source.tsv"
+    metadata_path.write_text(
+        metadata_path.read_text(encoding="utf-8").replace("a" * 40, "b" * 40),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="ref"):
+        materialize_candidate(
+            ManagedResources(sources=(source,), replacements=(), watchlist=()),
+            workspace,
+            tmp_path / "candidate",
+        )
+    assert not (tmp_path / "candidate" / ".github/skills/example/SKILL.md").exists()
+
+
 @pytest.fixture
 def candidate_repo(tmp_path: Path) -> Path:
     repo = tmp_path / "candidate"

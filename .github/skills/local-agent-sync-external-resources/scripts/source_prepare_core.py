@@ -18,6 +18,7 @@ from sync_external_resources_core import (
     ManagedSource,
     SyncCommandError,
     _run_command,
+    compute_prepared_source_paths_sha256,
 )
 
 
@@ -305,10 +306,7 @@ def _write_source_metadata(
     snapshot: Path,
     source: ManagedSource,
 ) -> None:
-    upstream_paths = sorted(asset.upstream for asset in source.assets)
-    digest = hashlib.sha256(
-        ",".join(upstream_paths).encode("utf-8")
-    ).hexdigest()
+    digest = compute_prepared_source_paths_sha256(source)
     tsv_content = (
         f"source_id\trepository\tref\tpaths_sha256\n"
         f"{source.source_id}\t{source.repository}\t{source.ref}\t{digest}\n"
@@ -454,4 +452,3 @@ def prepare_sources(
         )
         results.append(result)
     return tuple(results)
-

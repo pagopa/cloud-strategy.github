@@ -475,7 +475,12 @@ def _plan(
         managed_assets=len(resources.assets),
         changed_paths=tuple(changed),
         override_results=override_results,
-        validations=("candidate-built", "normalized", "overrides-replayed"),
+        validations=(
+            "prepared-sources-validated",
+            "candidate-built",
+            "normalized",
+            "overrides-replayed",
+        ),
         blockers=(),
         repository_changed=False,
     )
@@ -525,7 +530,13 @@ def _apply(
         managed_assets=len(resources.assets),
         changed_paths=tuple(changed),
         override_results=override_results,
-        validations=("candidate-built", "normalized", "overrides-replayed", "patch-applied"),
+        validations=(
+            "prepared-sources-validated",
+            "candidate-built",
+            "normalized",
+            "overrides-replayed",
+            "patch-applied",
+        ),
         blockers=(),
         repository_changed=repository_changed,
     )

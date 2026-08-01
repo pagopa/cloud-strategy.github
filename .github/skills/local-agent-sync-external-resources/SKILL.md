@@ -96,6 +96,14 @@ declared external resource refreshes safely. The single public entrypoint is
 - Keep prepared source snapshots under the workspace `sources/` directory,
   unless an explicit `--source-root` is supplied.
 - The Git object cache lives under `<workspace>/cache/repositories/`.
+- Each prepared source snapshot contains `.external-resource-source.tsv` with
+  the exact fields `source_id`, `repository`, `ref`, and `paths_sha256`.
+- Before copying source assets, `plan` and `apply` compare all four fields with
+  the manifest source. A mismatch blocks candidate creation.
+- `ref` is the full manifest commit object ID. `paths_sha256` hashes only the
+  sorted declared upstream path names; it is not a file-content integrity hash.
+- `audit` remains registry and target-state validation and does not consume
+  prepared snapshots.
 
 ## Prepare Cold and Warm Flow
 
@@ -136,8 +144,8 @@ declared external resource refreshes safely. The single public entrypoint is
 4. Review the changed-path summary and override replay results.
 5. Run `apply` only after `plan` succeeds; `apply` does not fetch sources.
 
-If `plan` or `apply` reports `Missing prepared source metadata`, run `prepare`
-first.
+If `plan` or `apply` reports missing or invalid prepared source metadata, run
+`prepare` first and rerun the same mode.
 
 ## Canonical Commands
 

@@ -377,6 +377,7 @@ overrides: []
     assert plan_result.returncode == 0, plan_result.stderr
     plan_payload = json.loads(plan_result.stdout)
     assert plan_payload["repository_changed"] is False
+    assert "prepared-sources-validated" in plan_payload["validations"]
 
     apply_result = subprocess.run(
         [*common_args, "apply"],
@@ -387,7 +388,82 @@ overrides: []
     assert apply_result.returncode == 0, apply_result.stderr
     apply_payload = json.loads(apply_result.stdout)
     assert apply_payload["repository_changed"] is True
+    assert "prepared-sources-validated" in apply_payload["validations"]
     assert "New content." in target.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("mode", ("plan", "apply"))
+def test_plan_and_apply_reject_mismatched_prepared_ref(
+    tmp_path: Path,
+    mode: str,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+    (repo / "README.md").write_text("init\n", encoding="utf-8")
+    _commit_all(repo)
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        """\
+version: 1
+sources:
+  test-source:
+    repository: https://example.com/repo.git
+    ref: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+
+    workspace = tmp_path / "external-workspace"
+    workspace.mkdir()
+    source_dir = workspace / "sources" / "test-source" / "skills" / "example"
+    source_dir.mkdir(parents=True)
+    (source_dir / "SKILL.md").write_text(
+        "---\nname: example\n---\nNew content.\n", encoding="utf-8"
+    )
+    _write_source_metadata_for_fixture(
+        workspace / "sources",
+        "test-source",
+        "https://example.com/repo.git",
+        "b" * 40,
+        "skills/example",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            mode,
+            "--repo-root",
+            str(repo),
+            "--workspace",
+            str(workspace),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    failure_output = result.stdout + result.stderr
+    assert "Prepared source metadata mismatch" in failure_output
+    assert "ref" in failure_output
 
 
 def test_audit_tsv_contains_summary_mode_row(repo_root: Path) -> None:
