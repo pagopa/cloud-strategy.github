@@ -676,9 +676,7 @@ watchlist: []
     assert "metric\ttest-source.materialized_files\tok" in first.stdout
 
     snapshot_root = repo / "tmp" / ".cache" / "external-sync-resources-snapshots"
-    snapshot_skill = (
-        snapshot_root / "test-source" / "skills" / "example" / "SKILL.md"
-    )
+    snapshot_skill = snapshot_root / "test-source" / "skills" / "example" / "SKILL.md"
     assert snapshot_skill.exists()
     assert not (snapshot_root / "test-source" / "decoy.bin").exists()
 

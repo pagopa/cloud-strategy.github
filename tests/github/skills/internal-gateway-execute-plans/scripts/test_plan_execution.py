@@ -88,7 +88,12 @@ def _validation(
                 "failure_phase": "validator-result",
                 "discovery_results": _discovery(),
                 "candidates": [candidate] if candidate else [],
-                "authority": {"state": authority_state, "action": "dependency-installation" if authority_state != "not-required" else "read-only-discovery"},
+                "authority": {
+                    "state": authority_state,
+                    "action": "dependency-installation"
+                    if authority_state != "not-required"
+                    else "read-only-discovery",
+                },
             }
         )
     return value
@@ -133,8 +138,16 @@ def _closeout_evidence(
 
 
 def _minimal_status(plan: Path, status: str = "PARTIAL") -> str:
-    reason = "Recovery exhausted for an environmental validation." if status == "NEEDS_REVIEW" else "Classifier route is paused by the caller."
-    exhaustion = "No safe candidate remains after complete discovery." if status in {"BLOCKED", "NEEDS_REVIEW"} else "None; execution remains resumable."
+    reason = (
+        "Recovery exhausted for an environmental validation."
+        if status == "NEEDS_REVIEW"
+        else "Classifier route is paused by the caller."
+    )
+    exhaustion = (
+        "No safe candidate remains after complete discovery."
+        if status in {"BLOCKED", "NEEDS_REVIEW"}
+        else "None; execution remains resumable."
+    )
     return (
         f"## Status\n\n`{status}`\n\n"
         f"## Plan\n\n`{plan}`\n\n"
@@ -176,51 +189,98 @@ def test_legacy_plan_is_rejected(tmp_path: Path) -> None:
 
 
 def test_plan_rejects_duplicate_validation_ids(tmp_path: Path) -> None:
-    text = _fixture("valid-plan.md").read_text().replace(
-        '"id": "diff-check"', '"id": "focused-tests"'
+    text = (
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace('"id": "diff-check"', '"id": "focused-tests"')
     )
     plan = _stage_valid_plan(tmp_path, text)
-    assert "duplicate-validation-id" in {item.code for item in validate_plan(plan, tmp_path)}
+    assert "duplicate-validation-id" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
 
 
 @pytest.mark.parametrize(
     ("needle", "replacement", "message"),
     (
         ('"schema_version": 1', '"schema_version": 2', "schema_version"),
-        ('"id": "focused-tests"', '"id": "focused-tests", "unknown": true', "unknown fields"),
-        ('"command": "python3 -m pytest -q tests/fixture/"', '"command": ""', "command"),
+        (
+            '"id": "focused-tests"',
+            '"id": "focused-tests", "unknown": true',
+            "unknown fields",
+        ),
+        (
+            '"command": "python3 -m pytest -q tests/fixture/"',
+            '"command": ""',
+            "command",
+        ),
         ('"phases": ["final"]', '"phases": ["other"]', "phases"),
         ('"equivalence": "exact-only"', '"equivalence": "never"', "equivalence"),
     ),
 )
-def test_execution_contract_rejects_invalid_fields(tmp_path: Path, needle: str, replacement: str, message: str) -> None:
-    plan = _stage_valid_plan(tmp_path, _fixture("valid-plan.md").read_text().replace(needle, replacement, 1))
+def test_execution_contract_rejects_invalid_fields(
+    tmp_path: Path, needle: str, replacement: str, message: str
+) -> None:
+    plan = _stage_valid_plan(
+        tmp_path, _fixture("valid-plan.md").read_text().replace(needle, replacement, 1)
+    )
     assert any(message in item.message for item in validate_plan(plan, tmp_path))
 
 
-def test_execution_contract_rejects_malformed_json_and_duplicate_blocks(tmp_path: Path) -> None:
-    malformed = _stage_valid_plan(tmp_path, _fixture("valid-plan.md").read_text().replace('"schema_version": 1', '"schema_version":', 1))
-    assert "malformed-execution-contract" in {item.code for item in validate_plan(malformed, tmp_path)}
-    duplicate = _stage_valid_plan(tmp_path / "duplicate", _fixture("valid-plan.md").read_text() + "\n## Execution Contract\n\n```json\n{}\n```\n")
-    assert "duplicate-execution-contract" in {item.code for item in validate_plan(duplicate, duplicate.parents[3])}
+def test_execution_contract_rejects_malformed_json_and_duplicate_blocks(
+    tmp_path: Path,
+) -> None:
+    malformed = _stage_valid_plan(
+        tmp_path,
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace('"schema_version": 1', '"schema_version":', 1),
+    )
+    assert "malformed-execution-contract" in {
+        item.code for item in validate_plan(malformed, tmp_path)
+    }
+    duplicate = _stage_valid_plan(
+        tmp_path / "duplicate",
+        _fixture("valid-plan.md").read_text()
+        + "\n## Execution Contract\n\n```json\n{}\n```\n",
+    )
+    assert "duplicate-execution-contract" in {
+        item.code for item in validate_plan(duplicate, duplicate.parents[3])
+    }
 
 
-def test_closeout_is_done_when_all_required_obligations_pass_exactly(valid_plan: Path) -> None:
+def test_closeout_is_done_when_all_required_obligations_pass_exactly(
+    valid_plan: Path,
+) -> None:
     decision = classify_closeout(_contract(valid_plan), _closeout_evidence(valid_plan))
     assert decision.route == "DONE"
 
 
 def test_closeout_accepts_admissible_equivalent_validation(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(valid_plan, validations=[
-        _validation(valid_plan, "focused-tests", equivalent_evidence={"target_did_not_start": True, "same_checks": True, "same_inputs": True, "runtime_not_material": True}),
-        _validation(valid_plan, "diff-check"),
-    ])
+    evidence = _closeout_evidence(
+        valid_plan,
+        validations=[
+            _validation(
+                valid_plan,
+                "focused-tests",
+                equivalent_evidence={
+                    "target_did_not_start": True,
+                    "same_checks": True,
+                    "same_inputs": True,
+                    "runtime_not_material": True,
+                },
+            ),
+            _validation(valid_plan, "diff-check"),
+        ],
+    )
     assert classify_closeout(_contract(valid_plan), evidence).route == "DONE"
 
 
 def test_closeout_rejects_omitted_required_plan_validation(valid_plan: Path) -> None:
     with pytest.raises(ValueError, match="missing required validation"):
-        classify_closeout(_contract(valid_plan), _closeout_evidence(valid_plan, validations=[]))
+        classify_closeout(
+            _contract(valid_plan), _closeout_evidence(valid_plan, validations=[])
+        )
 
 
 def test_closeout_rejects_changed_command_and_unknown_id(valid_plan: Path) -> None:
@@ -235,41 +295,104 @@ def test_closeout_rejects_changed_command_and_unknown_id(valid_plan: Path) -> No
 
 
 def test_closeout_continues_on_safe_untried_candidate(valid_plan: Path) -> None:
-    candidate = {"name": "retry with compatible runtime", "source": "path-executable", "safe": True, "requires_authority": False, "attempted": False, "result": "not-run", "evidence_delta": "candidate has not been tried"}
-    assert classify_closeout(_contract(valid_plan), _closeout_evidence(valid_plan, outcome="unresolved", candidate=candidate)).route == "continue-recovery"
+    candidate = {
+        "name": "retry with compatible runtime",
+        "source": "path-executable",
+        "safe": True,
+        "requires_authority": False,
+        "attempted": False,
+        "result": "not-run",
+        "evidence_delta": "candidate has not been tried",
+    }
+    assert (
+        classify_closeout(
+            _contract(valid_plan),
+            _closeout_evidence(valid_plan, outcome="unresolved", candidate=candidate),
+        ).route
+        == "continue-recovery"
+    )
 
 
 def test_closeout_requests_authority_before_terminal_status(valid_plan: Path) -> None:
-    candidate = {"name": "install compatible runtime", "source": "path-executable", "safe": False, "requires_authority": True, "attempted": False, "result": "not-run", "evidence_delta": "compatible runtime is not installed"}
-    assert classify_closeout(_contract(valid_plan), _closeout_evidence(valid_plan, outcome="unresolved", candidate=candidate, authority_state="required-unrequested")).route == "request-authority"
+    candidate = {
+        "name": "install compatible runtime",
+        "source": "path-executable",
+        "safe": False,
+        "requires_authority": True,
+        "attempted": False,
+        "result": "not-run",
+        "evidence_delta": "compatible runtime is not installed",
+    }
+    assert (
+        classify_closeout(
+            _contract(valid_plan),
+            _closeout_evidence(
+                valid_plan,
+                outcome="unresolved",
+                candidate=candidate,
+                authority_state="required-unrequested",
+            ),
+        ).route
+        == "request-authority"
+    )
 
 
 def test_closeout_rejects_narrative_only_exhaustion(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(valid_plan, outcome="unresolved", exhaustion_evidence=["no compatible interpreter is available"])
+    evidence = _closeout_evidence(
+        valid_plan,
+        outcome="unresolved",
+        exhaustion_evidence=["no compatible interpreter is available"],
+    )
     evidence["validations"][0].pop("discovery_results")  # type: ignore[index]
     with pytest.raises(ValueError, match="structured recovery"):
         classify_closeout(_contract(valid_plan), evidence)
 
 
 def test_closeout_blocks_fatal_task_local_regression(valid_plan: Path) -> None:
-    evidence = _closeout_evidence(valid_plan, fatal_conditions=["task-local regression exhausted"])
+    evidence = _closeout_evidence(
+        valid_plan, fatal_conditions=["task-local regression exhausted"]
+    )
     assert classify_closeout(_contract(valid_plan), evidence).route == "BLOCKED"
 
 
 def test_closeout_routes_incomplete_work_and_explicit_pause(valid_plan: Path) -> None:
-    active = _closeout_evidence(valid_plan, tasks_complete=False, tasks_remaining=["Task 2"])
-    paused = _closeout_evidence(valid_plan, tasks_complete=False, tasks_remaining=["Task 2"], pause_requested=True)
-    assert classify_closeout(_contract(valid_plan), active).route == "continue-execution"
+    active = _closeout_evidence(
+        valid_plan, tasks_complete=False, tasks_remaining=["Task 2"]
+    )
+    paused = _closeout_evidence(
+        valid_plan,
+        tasks_complete=False,
+        tasks_remaining=["Task 2"],
+        pause_requested=True,
+    )
+    assert (
+        classify_closeout(_contract(valid_plan), active).route == "continue-execution"
+    )
     assert classify_closeout(_contract(valid_plan), paused).route == "PARTIAL"
 
 
 def test_closeout_requires_review_for_pending_manual_obligation(tmp_path: Path) -> None:
-    plan = _stage_valid_plan(tmp_path, _fixture("valid-plan.md").read_text().replace('"manual_obligations": []', '"manual_obligations": [{"id": "owner-check", "kind": "human", "required": true, "acceptance": "Owner confirms output."}]'))
-    evidence = _closeout_evidence(plan, manual_obligations=[{"id": "owner-check", "satisfied": False, "evidence": "Awaiting owner."}])
+    plan = _stage_valid_plan(
+        tmp_path,
+        _fixture("valid-plan.md")
+        .read_text()
+        .replace(
+            '"manual_obligations": []',
+            '"manual_obligations": [{"id": "owner-check", "kind": "human", "required": true, "acceptance": "Owner confirms output."}]',
+        ),
+    )
+    evidence = _closeout_evidence(
+        plan,
+        manual_obligations=[
+            {"id": "owner-check", "satisfied": False, "evidence": "Awaiting owner."}
+        ],
+    )
     assert classify_closeout(_contract(plan), evidence).route == "NEEDS_REVIEW"
 
 
-@pytest.mark.parametrize("route", ("continue-execution", "continue-recovery", "request-authority"))
+@pytest.mark.parametrize(
+    "route", ("continue-execution", "continue-recovery", "request-authority")
+)
 def test_active_route_cannot_be_serialized_as_terminal_status(route: str) -> None:
     assert status_for_route(route) is None
 
@@ -282,37 +405,73 @@ def test_minimal_status_is_valid(tmp_path: Path, valid_plan: Path) -> None:
 
 def test_needs_review_requires_bound_reason(tmp_path: Path, valid_plan: Path) -> None:
     status = tmp_path / "valid-plan.NEEDS_REVIEW.md"
-    status.write_text(_minimal_status(valid_plan, "NEEDS_REVIEW").replace("Recovery exhausted for an environmental validation.", "Pending work."))
-    assert "needs-review-without-bound-reason" in {item.code for item in validate_status(status)}
+    status.write_text(
+        _minimal_status(valid_plan, "NEEDS_REVIEW").replace(
+            "Recovery exhausted for an environmental validation.", "Pending work."
+        )
+    )
+    assert "needs-review-without-bound-reason" in {
+        item.code for item in validate_status(status)
+    }
 
 
-def test_status_rejects_unknown_state_and_missing_headings(invalid_status: Path) -> None:
+def test_status_rejects_unknown_state_and_missing_headings(
+    invalid_status: Path,
+) -> None:
     codes = {item.code for item in validate_status(invalid_status)}
     assert "unknown-status" in codes
     assert "missing-heading" in codes
 
 
-def test_resume_rejects_plan_fingerprint_drift(valid_plan: Path, valid_partial_status: Path) -> None:
+def test_resume_rejects_plan_fingerprint_drift(
+    valid_plan: Path, valid_partial_status: Path
+) -> None:
     valid_plan.write_text(valid_plan.read_text() + "\nChanged after approval.\n")
-    assert "plan-fingerprint-drift" in {item.code for item in validate_resume(valid_plan, valid_partial_status)}
+    assert "plan-fingerprint-drift" in {
+        item.code for item in validate_resume(valid_plan, valid_partial_status)
+    }
 
 
-def test_resume_accepts_matching_status_binding(valid_plan: Path, valid_partial_status: Path) -> None:
+def test_resume_accepts_matching_status_binding(
+    valid_plan: Path, valid_partial_status: Path
+) -> None:
     assert validate_resume(valid_plan, valid_partial_status) == []
 
 
-def test_completion_requires_done_and_no_remaining(valid_plan: Path, valid_partial_status: Path) -> None:
+def test_completion_requires_done_and_no_remaining(
+    valid_plan: Path, valid_partial_status: Path
+) -> None:
     findings = validate_completion(valid_plan, valid_partial_status)
-    assert "not-done" in {item.code for item in findings} or "plan-fingerprint-drift" in {item.code for item in findings}
+    assert "not-done" in {
+        item.code for item in findings
+    } or "plan-fingerprint-drift" in {item.code for item in findings}
 
 
 def test_compact_output_is_bounded() -> None:
-    assert build_compact_payload([Finding("missing-heading", "detail", "blocking")])["status"] == "failed"
+    assert (
+        build_compact_payload([Finding("missing-heading", "detail", "blocking")])[
+            "status"
+        ]
+        == "failed"
+    )
 
 
 def test_preflight_cli_valid_fixture(tmp_path: Path) -> None:
     plan = _stage_valid_plan(tmp_path)
-    result = subprocess.run([sys.executable, str(SCRIPTS / "plan_execution.py"), "preflight", str(plan), "--repo-root", str(tmp_path), "--format", "compact"], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "preflight",
+            str(plan),
+            "--repo-root",
+            str(tmp_path),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
     assert result.returncode == 0, result.stderr
 
 
@@ -320,7 +479,19 @@ def test_closeout_cli_binds_plan_and_evidence(tmp_path: Path) -> None:
     plan = _stage_valid_plan(tmp_path)
     evidence = tmp_path / "closeout.json"
     evidence.write_text(json.dumps(_closeout_evidence(plan)))
-    result = subprocess.run([sys.executable, str(SCRIPTS / "plan_execution.py"), "closeout-check", str(plan), str(evidence), "--format", "compact"], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "closeout-check",
+            str(plan),
+            str(evidence),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["route"] == "DONE"
 
@@ -331,13 +502,36 @@ def test_closeout_cli_rejects_fingerprint_mismatch(tmp_path: Path) -> None:
     payload = _closeout_evidence(plan)
     payload["plan_fingerprint"] = "sha256:wrong"
     evidence.write_text(json.dumps(payload))
-    result = subprocess.run([sys.executable, str(SCRIPTS / "plan_execution.py"), "closeout-check", str(plan), str(evidence), "--format", "compact"], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "closeout-check",
+            str(plan),
+            str(evidence),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
     assert result.returncode != 0
     assert "fingerprint" in result.stderr
 
 
 def test_status_check_cli_valid() -> None:
-    result = subprocess.run([sys.executable, str(SCRIPTS / "plan_execution.py"), "status-check", str(_fixture("valid-plan.PARTIAL.md")), "--format", "compact"], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "status-check",
+            str(_fixture("valid-plan.PARTIAL.md")),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
     assert result.returncode == 0, result.stderr
 
 
@@ -346,6 +540,20 @@ def test_resume_check_cli_detects_drift(tmp_path: Path) -> None:
     status = tmp_path / "valid-plan.PARTIAL.md"
     status.write_text(_fixture("valid-plan.PARTIAL.md").read_text())
     plan.write_text(plan.read_text() + "\nDrifted.\n")
-    result = subprocess.run([sys.executable, str(SCRIPTS / "plan_execution.py"), "resume-check", str(plan), str(status), "--format", "compact"], capture_output=True, text=True)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPTS / "plan_execution.py"),
+            "resume-check",
+            str(plan),
+            str(status),
+            "--format",
+            "compact",
+        ],
+        capture_output=True,
+        text=True,
+    )
     assert result.returncode != 0
-    assert "plan-fingerprint-drift" in {item["code"] for item in json.loads(result.stdout)["finding_sample"]}
+    assert "plan-fingerprint-drift" in {
+        item["code"] for item in json.loads(result.stdout)["finding_sample"]
+    }

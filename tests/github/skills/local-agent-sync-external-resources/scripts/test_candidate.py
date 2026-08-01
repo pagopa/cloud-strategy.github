@@ -444,9 +444,7 @@ def test_normalization_removes_unsupported_invocation_field_from_all_mattpocock_
     first_changed = normalize_candidate(resources, candidate)
     second_changed = normalize_candidate(resources, candidate)
 
-    assert first_changed == tuple(
-        sorted(f"{asset.local}/SKILL.md" for asset in assets)
-    )
+    assert first_changed == tuple(sorted(f"{asset.local}/SKILL.md" for asset in assets))
     assert second_changed == ()
     for asset in assets:
         content = (candidate / asset.local / "SKILL.md").read_text(encoding="utf-8")

@@ -94,7 +94,9 @@ def _validate_run(run: dict[str, object]) -> list[dict[str, object]]:
         for field, expected_type in _CASE_FIELDS.items():
             if field not in case or not isinstance(case[field], expected_type):
                 _schema_error(f"observation {index} has invalid {field}")
-        _require_string_list(case["direct_skills"], f"observation {index} direct_skills")
+        _require_string_list(
+            case["direct_skills"], f"observation {index} direct_skills"
+        )
         _require_string_list(
             case["post_report_actions"],
             f"observation {index} post_report_actions",
@@ -134,18 +136,21 @@ def score(manifest: dict[str, object], run: dict[str, object]) -> dict[str, obje
         critic_input_fingerprint = case["critic_input_fingerprint"]
         critical_outcome = case["critical_outcome"]
         defense = case["defense"]
-        report_available = report_fingerprint is not None or critic_input_fingerprint is not None
+        report_available = (
+            report_fingerprint is not None or critic_input_fingerprint is not None
+        )
 
         if case["direct_skills"] != required_direct_skills:
             direct_skill_violation_cases.append(case_id)
 
-        if not report_available and (critical_outcome is not None or defense is not None):
+        if not report_available and (
+            critical_outcome is not None or defense is not None
+        ):
             invalid_critic_state_cases.append(case_id)
         elif (critical_outcome is None) != (defense is None):
             invalid_critic_state_cases.append(case_id)
         elif (
-            critical_outcome is not None
-            and critical_outcome not in _CANONICAL_OUTCOMES
+            critical_outcome is not None and critical_outcome not in _CANONICAL_OUTCOMES
         ) or (defense is not None and defense not in _CANONICAL_DEFENSES):
             invalid_critic_state_cases.append(case_id)
 
@@ -173,8 +178,14 @@ def score(manifest: dict[str, object], run: dict[str, object]) -> dict[str, obje
             and case["unresolved_material_issue"] is False
         )
         resume_condition = case["resume_condition"]
-        has_resume_condition = isinstance(resume_condition, str) and bool(resume_condition.strip())
-        if not clear and not case["reran_external_report_flow"] and not has_resume_condition:
+        has_resume_condition = isinstance(resume_condition, str) and bool(
+            resume_condition.strip()
+        )
+        if (
+            not clear
+            and not case["reran_external_report_flow"]
+            and not has_resume_condition
+        ):
             missing_rerun_or_resume_cases.append(case_id)
         if not clear and case["report_returned"]:
             false_report_return_cases.append(case_id)

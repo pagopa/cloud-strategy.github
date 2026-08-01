@@ -28,7 +28,10 @@ def test_protected_skill_bundle_classifies_direct_skill_descendants() -> None:
         protected_skill_bundle(".github/skills/mattpocock-tdd/SKILL.md")
         == ".github/skills/mattpocock-tdd"
     )
-    assert protected_skill_bundle(".github/skills/grill-me/SKILL.md") == ".github/skills/grill-me"
+    assert (
+        protected_skill_bundle(".github/skills/grill-me/SKILL.md")
+        == ".github/skills/grill-me"
+    )
     assert protected_skill_bundle(".github/skills/grill-me") is None
     assert protected_skill_bundle(".github/other/grill-me/SKILL.md") is None
     assert protected_skill_bundle(".github/skills/../grill-me/SKILL.md") is None
@@ -73,17 +76,22 @@ def test_detect_protected_skill_changes_requires_exact_allowlist() -> None:
     assert findings[0].severity == "blocking"
     assert findings[0].path == ".github/skills/grill-me"
 
-    assert detect_protected_skill_changes(
-        changed,
-        [".github/skills/grill-me"],
-    ) == []
+    assert (
+        detect_protected_skill_changes(
+            changed,
+            [".github/skills/grill-me"],
+        )
+        == []
+    )
 
 
 def _run_git(root: Path, *args: str) -> None:
     subprocess.run(["git", *args], cwd=root, check=True, capture_output=True, text=True)
 
 
-def test_collect_changed_paths_includes_worktree_and_base_ref_changes(tmp_path: Path) -> None:
+def test_collect_changed_paths_includes_worktree_and_base_ref_changes(
+    tmp_path: Path,
+) -> None:
     _run_git(tmp_path, "init", "-q")
     _run_git_git = lambda *args: _run_git(tmp_path, *args)
     _run_git_git("config", "user.email", "tests@example.com")

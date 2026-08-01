@@ -186,17 +186,14 @@ def test_plan_and_apply_delegate_source_readiness_to_auto_prepare() -> None:
     source = (SCRIPT_DIR / "sync_external_resources.py").read_text(encoding="utf-8")
     tree = ast.parse(source)
     functions = {
-        node.name: node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.FunctionDef)
+        node.name: node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)
     }
 
     for function_name in ("_plan", "_apply"):
         calls = {
             inner.func.id
             for inner in ast.walk(functions[function_name])
-            if isinstance(inner, ast.Call)
-            and isinstance(inner.func, ast.Name)
+            if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
         }
         assert "_materialize_candidate_with_auto_prepare" in calls
 
