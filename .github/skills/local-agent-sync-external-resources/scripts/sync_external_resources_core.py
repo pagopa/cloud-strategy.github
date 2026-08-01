@@ -407,7 +407,7 @@ def validate_prepared_sources(
             + ", ".join(missing)
             + ". Expected prepared sources under "
             + sources_root.as_posix()
-            + ". Run prepare before audit/plan/apply."
+            + ". Run prepare before plan/apply."
         )
 
 

@@ -425,7 +425,7 @@ def test_validate_prepared_sources_reports_missing_metadata(
         validate_prepared_sources(resources, sources_root)
     message = str(exc_info.value)
     assert "Missing prepared source metadata:" in message
-    assert "Run prepare before audit/plan/apply." in message
+    assert "Run prepare before plan/apply." in message
 
 
 def test_validate_prepared_sources_accepts_exact_attestation(

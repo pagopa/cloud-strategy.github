@@ -50,17 +50,18 @@ This catalog is commit-pinned, not release-pinned:
 
 ## Modes
 
-- `prepare`: the only mode that uses the network. Fetches pinned Git content
-  into a repository-keyed partial-clone cache and exports only manifest-declared
-  asset paths into verified snapshots under `sources/`. All other modes are
-  offline and consume these verified snapshots.
+- `prepare`: explicitly fetches pinned Git content into a repository-keyed
+  partial-clone cache and exports only manifest-declared asset paths into
+  verified snapshots under the repository `tmp/` root.
 - `audit`: parse all registries, validate local paths, canonical names, hashes,
   watchlist shape, and dirty state. Does not fetch or write.
-- `plan`: require an external workspace, build and validate the complete
-  candidate, then emit the changed-path summary without repository writes.
-- `apply`: perform `plan`, reject dirty targets unless `--allow-dirty`,
-  generate one patch, run `git apply --check`, apply once, rebuild inventory,
-  and rerun scoped validation.
+- `plan`: require an external workspace, automatically run the pinned prepare
+  flow when snapshots are missing, build and validate the complete candidate,
+  then emit the changed-path summary without repository writes.
+- `apply`: perform `plan`, automatically prepare missing snapshots, reject
+  dirty targets unless `--allow-dirty`, generate one patch, run
+  `git apply --check`, apply once, rebuild inventory, and rerun scoped
+  validation.
 
 ## Pinned Content Only
 
@@ -129,10 +130,14 @@ This catalog is commit-pinned, not release-pinned:
 
 - The runtime workspace must be outside this repository.
 - Use an external workspace such as `../cloud-strategy.github-external-refresh`.
-- Keep prepared source snapshots under the workspace `sources/` directory,
-  unless an explicit `--source-root` is supplied.
+- Keep prepared source snapshots under
+  `<repo-root>/tmp/external-sync-resources-snapshots/` for normal CLI runs.
+  `--source-root` remains an explicit override for a prepared checkout supplied
+  by an operator or a test.
 - The Git object cache lives under `<workspace>/cache/repositories/`.
-- Each prepared source snapshot contains `.external-resource-source.tsv` with
+- Each prepared source snapshot under
+  `<repo-root>/tmp/external-sync-resources-snapshots/<source_id>/` contains
+  `.external-resource-source.tsv` with
   the exact fields `source_id`, `repository`, `ref`, and `paths_sha256`.
 - Before copying source assets, `plan` and `apply` compare all four fields with
   the manifest source. A mismatch blocks candidate creation.
@@ -145,7 +150,8 @@ This catalog is commit-pinned, not release-pinned:
 
 - Cold `prepare` fetches each declared source SHA into the partial-clone cache,
   verifies the commit object, and exports only declared upstream paths into
-  atomic snapshots under `<workspace>/sources/<source_id>/`.
+  atomic snapshots under
+  `<repo-root>/tmp/external-sync-resources-snapshots/<source_id>/`.
 - Warm `prepare` finds the pin ref already cached and performs no fetch,
   reporting `cached` status and zero added cache bytes.
 - `--rebuild-cache` forces a fresh cache rebuild beside the active one,
@@ -160,13 +166,17 @@ This catalog is commit-pinned, not release-pinned:
   `validation`, `blocker`.
 - `metric` and per-source `validation` rows use `key` `<source_id>.<name>`,
   `status` `ok` or `fail`, and the measured value in `value`.
+- `summary.source_root` identifies the snapshot directory used by the run.
 - `--format text` remains the default for operators.
 - `--format json` retains backward-compatible keys.
 
 ## Safety
 
-- Workspace must be outside the repository.
+- Workspace must be outside the repository; the default snapshot root is the
+  repository's disposable `tmp/external-sync-resources-snapshots/` directory.
 - Dirty managed targets block `apply` unless `--allow-dirty` is supplied.
+- Missing snapshots trigger the declared pinned prepare flow in `plan` and
+  `apply`; invalid or mismatched snapshots stop before candidate creation.
 - Override replay is atomic: if any override fails verification, no candidate
   changes reach the repository.
 - Do not modify repository targets until the complete candidate tree,
@@ -174,14 +184,16 @@ This catalog is commit-pinned, not release-pinned:
 
 ## Workflow
 
-1. Run `prepare` to fetch pinned content into verified snapshots.
-2. Run `audit` to validate the manifest, overrides, and local dirty-state.
-3. Run `plan` with `--workspace` to confirm the candidate can be built.
-4. Review the changed-path summary and override replay results.
-5. Run `apply` only after `plan` succeeds; `apply` does not fetch sources.
+1. Run `audit` to validate the manifest, overrides, and local dirty-state.
+2. Run `plan` with `--workspace`; it prepares missing pinned content
+  automatically and confirms the candidate can be built.
+3. Review the changed-path summary, source metrics, and override replay
+  results.
+4. Run `apply`; it reuses valid snapshots or prepares missing ones before the
+  repository patch.
 
-If `plan` or `apply` reports missing or invalid prepared source metadata, run
-`prepare` first and rerun the same mode.
+Automatic preparation is limited to missing source metadata or missing
+upstream paths. Invalid metadata and mismatched attestations remain blockers.
 
 ## Canonical Commands
 
@@ -229,5 +241,6 @@ override results, source metrics, validation, and blockers.
 - Do not refresh or modify any imported skill while implementing sync tooling.
 - Do not add a plugin system, concurrency, compatibility aliases, legacy
   fallback paths, or a generic sync framework.
-- Do not perform a live network refresh unless the user separately authorizes it.
+- Do not perform network refreshes outside the declared pinned prepare flow.
+  The live benchmark still requires separate authorization.
 - Do not use package managers or mutable branch updates in any sync mode.

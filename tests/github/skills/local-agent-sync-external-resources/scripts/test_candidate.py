@@ -857,7 +857,7 @@ def test_materialize_candidate_reports_expected_source_root(tmp_path: Path) -> N
 
     message = str(excinfo.value)
     assert "Missing prepared source metadata:" in message
-    assert "Run prepare before audit/plan/apply." in message
+    assert "Run prepare before plan/apply." in message
 
 
 def test_load_overrides_rejects_missing_patch_file(tmp_path: Path) -> None:

@@ -178,13 +178,14 @@ overrides: []
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
-    source_dir = workspace / "sources" / "test-source" / "skills" / "example"
+    sources_root = repo / "tmp" / "external-sync-resources-snapshots"
+    source_dir = sources_root / "test-source" / "skills" / "example"
     source_dir.mkdir(parents=True)
     (source_dir / "SKILL.md").write_text(
         "---\nname: example\n---\nNew content.\n", encoding="utf-8"
     )
     _write_source_metadata_for_fixture(
-        workspace / "sources",
+        sources_root,
         "test-source",
         "https://example.com/repo.git",
         "a" * 40,
@@ -215,7 +216,103 @@ overrides: []
     assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
     assert payload["repository_changed"] is True
+    assert payload["source_root"] == str(sources_root)
     assert "New content." in target.read_text(encoding="utf-8")
+
+
+def test_apply_prepares_missing_snapshots_in_repository_tmp(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run_git(repo, ["init"])
+    _run_git(repo, ["config", "user.email", "test@test.com"])
+    _run_git(repo, ["config", "user.name", "Test"])
+
+    remote = tmp_path / "remote.git"
+    remote.mkdir()
+    _run_git(remote, ["init", "--bare"])
+    _run_git(remote, ["config", "uploadpack.allowFilter", "true"])
+    _run_git(remote, ["config", "uploadpack.allowReachableSHA1InWant", "true"])
+
+    source_worktree = tmp_path / "source-worktree"
+    source_worktree.mkdir()
+    _run_git(source_worktree, ["init"])
+    _run_git(source_worktree, ["config", "user.email", "test@test.com"])
+    _run_git(source_worktree, ["config", "user.name", "Test"])
+    source_skill = source_worktree / "skills" / "example"
+    source_skill.mkdir(parents=True)
+    (source_skill / "SKILL.md").write_text(
+        "---\nname: example\n---\nPrepared content.\n",
+        encoding="utf-8",
+    )
+    _commit_all(source_worktree)
+    commit_sha = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=source_worktree,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    _run_git(source_worktree, ["remote", "add", "origin", str(remote)])
+    _run_git(source_worktree, ["push", "origin", "HEAD:refs/heads/main"])
+
+    manifest_src = tmp_path / "manifest.yaml"
+    manifest_src.write_text(
+        f"""\
+version: 1
+sources:
+  test-source:
+    repository: {remote}
+    ref: {commit_sha}
+    assets:
+      - upstream: skills/example
+        local: .github/skills/example
+        canonical_name: example
+watchlist: []
+""",
+        encoding="utf-8",
+    )
+    overrides_src = tmp_path / "overrides.yaml"
+    overrides_src.write_text("version: 1\noverrides: []\n", encoding="utf-8")
+
+    target = repo / ".github/skills/example/SKILL.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("---\nname: example\n---\nOld content.\n", encoding="utf-8")
+    _commit_all(repo)
+
+    workspace = tmp_path / "external-workspace"
+    workspace.mkdir()
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "sync_external_resources.py"),
+            "apply",
+            "--repo-root",
+            str(repo),
+            "--workspace",
+            str(workspace),
+            "--manifest",
+            str(manifest_src),
+            "--overrides",
+            str(overrides_src),
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["repository_changed"] is True
+    snapshot_root = repo / "tmp" / "external-sync-resources-snapshots"
+    assert (snapshot_root / "test-source" / ".external-resource-source.tsv").exists()
+    assert payload["source_root"] == str(snapshot_root)
+    assert "sources-auto-prepared" in payload["validations"]
+    assert not (workspace / "sources").exists()
+    assert "Prepared content." in target.read_text(encoding="utf-8")
 
 
 def test_plan_uses_explicit_source_root(tmp_path: Path) -> None:
@@ -340,13 +437,14 @@ overrides: []
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
-    source_dir = workspace / "sources" / "test-source" / "skills" / "example"
+    sources_root = repo / "tmp" / "external-sync-resources-snapshots"
+    source_dir = sources_root / "test-source" / "skills" / "example"
     source_dir.mkdir(parents=True)
     (source_dir / "SKILL.md").write_text(
         "---\nname: example\n---\nNew content.\n", encoding="utf-8"
     )
     _write_source_metadata_for_fixture(
-        workspace / "sources",
+        sources_root,
         "test-source",
         "https://example.com/repo.git",
         "a" * 40,
@@ -426,13 +524,14 @@ watchlist: []
 
     workspace = tmp_path / "external-workspace"
     workspace.mkdir()
-    source_dir = workspace / "sources" / "test-source" / "skills" / "example"
+    sources_root = repo / "tmp" / "external-sync-resources-snapshots"
+    source_dir = sources_root / "test-source" / "skills" / "example"
     source_dir.mkdir(parents=True)
     (source_dir / "SKILL.md").write_text(
         "---\nname: example\n---\nNew content.\n", encoding="utf-8"
     )
     _write_source_metadata_for_fixture(
-        workspace / "sources",
+        sources_root,
         "test-source",
         "https://example.com/repo.git",
         "b" * 40,
@@ -576,11 +675,12 @@ watchlist: []
     assert "source\ttest-source" in first.stdout
     assert "metric\ttest-source.materialized_files\tok" in first.stdout
 
+    snapshot_root = repo / "tmp" / "external-sync-resources-snapshots"
     snapshot_skill = (
-        workspace / "sources" / "test-source" / "skills" / "example" / "SKILL.md"
+        snapshot_root / "test-source" / "skills" / "example" / "SKILL.md"
     )
     assert snapshot_skill.exists()
-    assert not (workspace / "sources" / "test-source" / "decoy.bin").exists()
+    assert not (snapshot_root / "test-source" / "decoy.bin").exists()
 
     second = subprocess.run(
         [*common_args, "prepare"],
@@ -683,7 +783,7 @@ watchlist: []
     ]
 
 
-def test_plan_missing_sources_names_explicit_source_root(tmp_path: Path) -> None:
+def test_plan_reports_missing_source_prepare_failure(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     _run_git(repo, ["init"])
@@ -736,7 +836,9 @@ watchlist: []
     )
 
     assert result.returncode != 0
-    assert str(source_root) in result.stderr + result.stdout
+    failure_output = result.stderr + result.stdout
+    assert "Command" in failure_output
+    assert "fetch" in failure_output
 
 
 def test_agent_and_skill_do_not_route_to_unneeded_skills(repo_root: Path) -> None:
