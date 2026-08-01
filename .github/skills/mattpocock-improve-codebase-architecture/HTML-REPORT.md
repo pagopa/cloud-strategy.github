@@ -130,6 +130,6 @@ instructions.
 
 - Create or reuse `./tmp/codebase-improve/` as the parent workspace.
 - Resolve every generated artifact against that workspace root. Keep reports,
-  diagrams, analysis, working state, and supporting files inside it.
+    diagrams, analysis, working state, and supporting files inside it.
 - Do not create codebase-improvement artifacts outside the active workspace.
 <!-- local-sync:codebase-improve-workspace:end -->
