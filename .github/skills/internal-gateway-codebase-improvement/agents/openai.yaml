@@ -1,5 +1,5 @@
 interface:
-  display_name: "Codebase Improvement Gateway"
+  display_name: "Architecture Codebase Improvement Internal Gateway"
   short_description: "Challenge architecture analysis before its report"
   default_prompt: "Use $internal-gateway-codebase-improvement to run the core architecture-improvement workflow, challenge each completed draft analysis before report writing, reopen analysis until no material objection or unresolved uncertainty remains, then resume the core workflow."
 policy:

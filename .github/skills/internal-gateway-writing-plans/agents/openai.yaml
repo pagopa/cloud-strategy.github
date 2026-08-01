@@ -1,5 +1,5 @@
 interface:
-  display_name: "Internal Gateway Writing Plans"
+  display_name: "Writing Plans Internal Gateway"
   short_description: "Approved implementation-plan writing"
   default_prompt: >-
     Use /internal-gateway-writing-plans after approval to capture the target,

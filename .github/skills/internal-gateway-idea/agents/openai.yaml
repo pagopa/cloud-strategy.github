@@ -1,5 +1,5 @@
 interface:
-  display_name: "Internal Gateway Idea"
+  display_name: "Idea Internal Gateway"
   short_description: "Idea brainstorming with assumption challenge"
   default_prompt: |-
     Use /internal-gateway-idea when a repository-owned idea, proposed direction,
