@@ -14,7 +14,7 @@
 
 ### Issue tracker
 
-Issues and PRDs are tracked as local Markdown files under `.scratch/<feature-slug>`. See `docs/agents/issue-tracker.md`.
+Issues and PRDs are tracked as local Markdown files under `tmp/.issues/<feature-slug>`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

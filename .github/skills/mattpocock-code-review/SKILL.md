@@ -28,7 +28,7 @@ Look for the originating spec, in this order:
 
 1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.) — fetch via the workflow in `docs/agents/issue-tracker.md`.
 2. A path the user passed as an argument.
-3. A PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
+3. A PRD/spec file under `docs/`, `specs/`, or `tmp/.issues/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
 
 ### 3. Identify the standards sources
@@ -87,3 +87,12 @@ A change can pass one axis and fail the other:
 - Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Standards fail.**
 
 Reporting them separately stops one axis from masking the other.
+
+<!-- local-sync:mattpocock-git-autonomy:start -->
+## Local Git-autonomy contract
+
+- Keep completed changes in the working tree for user review.
+- You may stage only changes owned by the current task when staging helps inspect the exact diff.
+- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
+- Keep pre-existing or unrelated user changes out of the index.
+<!-- local-sync:mattpocock-git-autonomy:end -->

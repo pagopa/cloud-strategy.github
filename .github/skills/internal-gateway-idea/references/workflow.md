@@ -21,7 +21,7 @@ flowchart TD
     E -- yes --> F{External Research Checkpoint}
     F -- skip --> H[Assumption Challenge Gate]
     F -- research needed --> G[Load /mattpocock-research on-demand]
-    G --> G1[Write one report under tmp/research/]
+    G --> G1[Write one report under tmp/.research/]
     G1 --> G2{Accepted defaults changed?}
     G2 -- yes --> D
     G2 -- no --> H
@@ -52,7 +52,7 @@ flowchart TD
 | `Specialization Checkpoint: gated` | Use when the incoming ask is already a file edit, command run, validator run, implementation step, or other execution-shaped request. Name the later execution owner only as a future consequence. | Do not execute, hand off, or present the post-critical recommendation. |
 | `Skipped-gate recovery` | Stop the current lane, name the first skipped mandatory gate, mark downstream artifacts draft-only, and resume at that gate. | Do not continue from an invalid later state or ask the user to approve a handoff built on skipped gates. |
 | `Idea Gate 0` | Confirm the recovered intent, defaults, constraints, success criteria, validation path, and anti-scope internally; render all currently known unresolved questions in one numbered bulk question block with `Question`, `Recommendation`, `Why`, and `Default if accepted`; evidence cannot replace Idea Gate 0. | Do not treat repository evidence alone as user approval, and do not proceed to challenge, alternatives, design, or planning until this gate is accepted. |
-| `External Research Checkpoint` | Skip unless local evidence is insufficient and one external fact could change feasibility, approach, constraints, or risk. When needed, load `/mattpocock-research` on-demand with one bounded question, write one Markdown report under `tmp/research/`, and return only decision-relevant conclusions. | Do not preload the research skill, copy its research procedure, run generic best-practice research, or start a second research pass automatically. |
+| `External Research Checkpoint` | Skip unless local evidence is insufficient and one external fact could change feasibility, approach, constraints, or risk. When needed, load `/mattpocock-research` on-demand with one bounded question, write one Markdown report under `tmp/.research/`, and return only decision-relevant conclusions. | Do not preload the research skill, copy its research procedure, run generic best-practice research, or start a second research pass automatically. |
 | `Assumption Challenge Gate` | Test whether the proposed target or solution is necessary before choosing an approach. | Do not only polish the user's proposed solution. |
 | `Alternative discovery` | Present 2-3 approaches and explain why the recommended one beats the strongest rejected option. | Do not present a single-path design as inevitable. |
 | `Critical Challenge Gate` | Challenge the chosen direction as its own visible gate after design-direction approval and before plan writing. Return `accepted`, `revise-design`, `reopen-analysis`, or `needs-clarification`; `accepted` is legal only when every material objection raised during the current critical pass is closed or explicitly routed. | Do not use this gate after loading `/internal-gateway-writing-plans`; an embedded critique does not satisfy Critical Challenge Gate. |

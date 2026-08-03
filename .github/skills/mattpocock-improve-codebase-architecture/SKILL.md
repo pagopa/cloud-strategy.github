@@ -75,8 +75,17 @@ Side effects happen inline as decisions crystallize — run the `/mattpocock-dom
 This repository-owned contract overrides earlier workspace and output-path
 instructions.
 
-- Create or reuse `./tmp/codebase-improve/` as the parent workspace.
+- Create or reuse `./tmp/.codebase-improve/` as the parent workspace.
 - Resolve every generated artifact against that workspace root. Keep reports,
     diagrams, analysis, working state, and supporting files inside it.
 - Do not create codebase-improvement artifacts outside the active workspace.
 <!-- local-sync:codebase-improve-workspace:end -->
+
+<!-- local-sync:mattpocock-git-autonomy:start -->
+## Local Git-autonomy contract
+
+- Keep completed changes in the working tree for user review.
+- You may stage only changes owned by the current task when staging helps inspect the exact diff.
+- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
+- Keep pre-existing or unrelated user changes out of the index.
+<!-- local-sync:mattpocock-git-autonomy:end -->

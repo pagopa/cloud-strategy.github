@@ -148,7 +148,7 @@ When all conditions hold:
 
 1. Define one bounded research question.
 2. load `/mattpocock-research` on-demand and write one Markdown report under
-   `tmp/research/YYYY-MM-DD-<slug>.md`.
+   `tmp/.research/YYYY-MM-DD-<slug>.md`.
 3. Bring only the report path and decision-relevant conclusions back into the
    brainstorming flow.
 4. Continue to `Assumption Challenge Gate`, or return to `Idea Gate 0` when the
@@ -159,7 +159,7 @@ When all conditions hold:
 research procedure here, and do not start a second research pass automatically.
 
 Validation must keep this checkpoint on-demand, bounded to one question and one
-report, preceded by local evidence, and routed to `tmp/research/`.
+report, preceded by local evidence, and routed to `tmp/.research/`.
 
 ## Assumption Challenge Gate
 

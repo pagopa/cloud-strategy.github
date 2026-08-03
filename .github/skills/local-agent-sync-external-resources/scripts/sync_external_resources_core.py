@@ -526,6 +526,107 @@ _SKILL_DISABLE_MODEL_INVOCATION_RE = re.compile(
     re.MULTILINE,
 )
 _MATTPOCOCK_SOURCE = "mattpocock-skills"
+_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START = (
+    "<!-- local-sync:mattpocock-git-autonomy:start -->"
+)
+_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_END = "<!-- local-sync:mattpocock-git-autonomy:end -->"
+_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_RE = re.compile(
+    re.escape(_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_GIT_AUTONOMY_CONTRACT = f"""\
+{_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_START}
+## Local Git-autonomy contract
+
+- Keep completed changes in the working tree for user review.
+- You may stage only changes owned by the current task when staging helps inspect the exact diff.
+- Leave changes uncommitted and unpushed unless the current user explicitly requests the specific commit or push action.
+- Keep pre-existing or unrelated user changes out of the index.
+{_MATTPOCOCK_GIT_AUTONOMY_CONTRACT_END}"""
+_MATTPOCOCK_LEGACY_PATHS = {
+    ".scratch/": "tmp/.issues/",
+    ".out-of-scope/": "tmp/.out-of-scope/",
+    "tmp/handoff/": "tmp/.handoff/",
+    "./tmp/teach/": "./tmp/.teach/",
+    "./tmp/codebase-improve/": "./tmp/.codebase-improve/",
+}
+_MATTPOCOCK_WAYFINDER_SKILL = "mattpocock-wayfinder"
+_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_START = (
+    "<!-- local-sync:wayfinder-workspace:start -->"
+)
+_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END = (
+    "<!-- local-sync:wayfinder-workspace:end -->"
+)
+_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_RE = re.compile(
+    re.escape(_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT = f"""\
+{_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_START}
+## Local Wayfinder workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Keep all Wayfinder analysis, research, prototype, and supporting assets under `tmp/.wayfinder/<analysis-slug>/`.
+- Keep local maps and tickets under the tracker-owned `tmp/.issues/` directory.
+- Keep research findings and prototypes inside the active Wayfinder workspace.
+{_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END}"""
+_MATTPOCOCK_WAYFINDER_LEGACY_BRANCH_RE = re.compile(
+    r"captur(?:e|ing)\s+(?:its\s+)?findings\s+on\s+a\s+throwaway\s+"
+    r"`research/<name>`\s+branch",
+    re.IGNORECASE,
+)
+_MATTPOCOCK_RESEARCH_SKILL = "mattpocock-research"
+_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_START = (
+    "<!-- local-sync:research-workspace:start -->"
+)
+_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_END = (
+    "<!-- local-sync:research-workspace:end -->"
+)
+_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_RE = re.compile(
+    re.escape(_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT = f"""\
+{_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_START}
+## Local research-workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Save the default one-file research output to `tmp/.research/YYYY-MM-DD-<slug>.md`.
+- An explicit caller-owned output path may override this default.
+{_MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_END}"""
+_MATTPOCOCK_HANDOFF_SKILL = "mattpocock-handoff"
+_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_START = (
+    "<!-- local-sync:handoff-workspace:start -->"
+)
+_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_END = (
+    "<!-- local-sync:handoff-workspace:end -->"
+)
+_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_RE = re.compile(
+    re.escape(_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_START)
+    + r".*?"
+    + re.escape(_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_END),
+    re.DOTALL,
+)
+_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT = f"""\
+{_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_START}
+## Local handoff-workspace contract
+
+This repository-owned contract overrides earlier workspace and output-path
+instructions.
+
+- Save handoff documents under `tmp/.handoff/`.
+- Do not duplicate content already captured in other artifacts (PRDs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead.
+{_MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_END}"""
 _GUIDED_QUESTION_SKILLS = frozenset({"superpowers-brainstorming", "grill-me"})
 _GUIDED_QUESTION_CONTRACT_START = "<!-- local-sync:guided-questions:start -->"
 _GUIDED_QUESTION_CONTRACT_END = "<!-- local-sync:guided-questions:end -->"
@@ -568,7 +669,7 @@ This repository-owned contract overrides earlier workspace and output-path
 instructions.
 
 - Create or reuse one self-contained workspace at
-  `./tmp/teach/<lesson-name>/`.
+  `./tmp/.teach/<lesson-name>/`.
 - Derive `<lesson-name>` from the learning goal as a stable dash-case slug.
   Reuse it when later sessions continue the same goal.
 - Resolve every generated path against that workspace root. Keep all teaching
@@ -596,7 +697,7 @@ _CODEBASE_IMPROVE_CONTRACT = f"""\
 This repository-owned contract overrides earlier workspace and output-path
 instructions.
 
-- Create or reuse `./tmp/codebase-improve/` as the parent workspace.
+- Create or reuse `./tmp/.codebase-improve/` as the parent workspace.
 - Resolve every generated artifact against that workspace root. Keep reports,
     diagrams, analysis, working state, and supporting files inside it.
 - Do not create codebase-improvement artifacts outside the active workspace.
@@ -617,6 +718,54 @@ def _enforce_guided_question_contract(content: str) -> str:
         content,
         _GUIDED_QUESTION_CONTRACT_RE,
         _GUIDED_QUESTION_CONTRACT,
+    )
+
+
+def _normalize_mattpocock_legacy_paths(content: str) -> str:
+    for legacy_path, canonical_path in _MATTPOCOCK_LEGACY_PATHS.items():
+        legacy_pattern = re.compile(
+            r"(?<!tmp/)" + re.escape(legacy_path)
+        )
+        content = legacy_pattern.sub(canonical_path, content)
+    return content
+
+
+def _normalize_mattpocock_wayfinder_legacy_instruction(content: str) -> str:
+    return _MATTPOCOCK_WAYFINDER_LEGACY_BRANCH_RE.sub(
+        "keeping findings in the caller-owned Wayfinder workspace",
+        content,
+    )
+
+
+def _enforce_mattpocock_git_autonomy_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_GIT_AUTONOMY_CONTRACT_RE,
+        _MATTPOCOCK_GIT_AUTONOMY_CONTRACT,
+    )
+
+
+def _enforce_mattpocock_wayfinder_workspace_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_RE,
+        _MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT,
+    )
+
+
+def _enforce_mattpocock_research_workspace_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT_RE,
+        _MATTPOCOCK_RESEARCH_WORKSPACE_CONTRACT,
+    )
+
+
+def _enforce_mattpocock_handoff_workspace_contract(content: str) -> str:
+    return _enforce_marked_contract(
+        content,
+        _MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT_RE,
+        _MATTPOCOCK_HANDOFF_WORKSPACE_CONTRACT,
     )
 
 
@@ -715,6 +864,16 @@ def normalize_candidate(
                         content,
                     )
 
+            if asset.source == _MATTPOCOCK_SOURCE:
+                content = _normalize_mattpocock_legacy_paths(content)
+                if (
+                    asset.canonical_name == _MATTPOCOCK_WAYFINDER_SKILL
+                    and file_path == asset_dir / "SKILL.md"
+                ):
+                    content = _normalize_mattpocock_wayfinder_legacy_instruction(
+                        content
+                    )
+
             if (
                 asset.canonical_name in _GUIDED_QUESTION_SKILLS
                 and file_path == asset_dir / "SKILL.md"
@@ -731,6 +890,29 @@ def normalize_candidate(
                 and file_path.parent == asset_dir
             ):
                 content = _enforce_codebase_improve_workspace_contract(content)
+            if (
+                asset.source == _MATTPOCOCK_SOURCE
+                and asset.canonical_name == _MATTPOCOCK_WAYFINDER_SKILL
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_mattpocock_wayfinder_workspace_contract(content)
+            if (
+                asset.source == _MATTPOCOCK_SOURCE
+                and asset.canonical_name == _MATTPOCOCK_RESEARCH_SKILL
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_mattpocock_research_workspace_contract(content)
+            if (
+                asset.source == _MATTPOCOCK_SOURCE
+                and asset.canonical_name == _MATTPOCOCK_HANDOFF_SKILL
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_mattpocock_handoff_workspace_contract(content)
+            if (
+                asset.source == _MATTPOCOCK_SOURCE
+                and file_path == asset_dir / "SKILL.md"
+            ):
+                content = _enforce_mattpocock_git_autonomy_contract(content)
             for replacement in replacements_by_source.get(asset.source, []):
                 content = content.replace(replacement.old, replacement.new)
 

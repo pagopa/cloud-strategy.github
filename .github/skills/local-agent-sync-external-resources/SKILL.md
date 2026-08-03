@@ -121,6 +121,8 @@ This catalog is commit-pinned, not release-pinned:
   requirements as canonical-name-scoped, marker-based candidate normalizations.
 - These normalizations must replace their own marked block, remain idempotent,
   and preserve unrelated upstream content when surrounding text changes.
+- Matt Pocock handoff output and its PRD-aware non-duplication wording are
+  canonical marked normalizations, not replay-patch ownership.
 - Do not use replay patches for this class of managed-skill customization.
 - Reserve replay patches for irreducible edits to upstream-owned lines that
   cannot be expressed safely as an additive marked contract. Record why a
@@ -216,6 +218,8 @@ manifest refs or repository targets. Do not run without separate authorization.
 
 - Do not register a replay patch for an additive repository-owned skill
   contract; implement a canonical-name-scoped marked normalization instead.
+- Do not register the former Matt Pocock handoff replay patch; its output path
+  and non-duplication wording are supplied by candidate normalization.
 - Every approved imported in-place override must be registered in
   `references/imported-asset-overrides.yaml` with a replay patch and expected
   content hash.

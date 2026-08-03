@@ -128,7 +128,7 @@ No hedging, no throat-clearing, no "it's worth noting that…". If a sentence co
 This repository-owned contract overrides earlier workspace and output-path
 instructions.
 
-- Create or reuse `./tmp/codebase-improve/` as the parent workspace.
+- Create or reuse `./tmp/.codebase-improve/` as the parent workspace.
 - Resolve every generated artifact against that workspace root. Keep reports,
     diagrams, analysis, working state, and supporting files inside it.
 - Do not create codebase-improvement artifacts outside the active workspace.
