@@ -33,6 +33,10 @@ def test_writer_plan_is_actionable_for_executor(tmp_path: Path) -> None:
     plan = retained / WRITER_FIXTURE.name
     shutil.copy(WRITER_FIXTURE, plan)
 
+    writer_text = WRITER_FIXTURE.read_text()
+    assert "## Control Inventory" in writer_text
+    assert "- No Git mutation." in writer_text
+
     findings = _executor_module().validate_plan(plan, repo_root=tmp_path)
 
     assert findings == []

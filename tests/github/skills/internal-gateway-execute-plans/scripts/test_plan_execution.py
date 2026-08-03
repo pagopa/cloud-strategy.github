@@ -183,6 +183,33 @@ def test_plan_without_execution_contract_is_blocking(tmp_path: Path) -> None:
     assert any(item.severity == "blocking" for item in findings)
 
 
+def test_current_plan_requires_control_inventory(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text()
+    start = text.index("## Control Inventory")
+    end = text.index("\n## ", start + 1)
+    plan = _stage_valid_plan(tmp_path, text[:start] + text[end + 1 :])
+    assert "missing-control-inventory" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_current_plan_requires_explicit_no_git_constraint(tmp_path: Path) -> None:
+    text = _fixture("valid-plan.md").read_text().replace(
+        "- No Git mutation.\n", "", 1
+    )
+    plan = _stage_valid_plan(tmp_path, text)
+    assert "missing-no-git-constraint" in {
+        item.code for item in validate_plan(plan, tmp_path)
+    }
+
+
+def test_explicit_legacy_or_imported_plan_remains_non_actionable(
+    tmp_path: Path,
+) -> None:
+    plan = _stage_valid_plan(tmp_path, _fixture("legacy-draft-plan.md").read_text())
+    assert any(item.severity == "blocking" for item in validate_plan(plan, tmp_path))
+
+
 def test_legacy_plan_is_rejected(tmp_path: Path) -> None:
     plan = _stage_valid_plan(tmp_path, _fixture("legacy-draft-plan.md").read_text())
     assert any(item.severity == "blocking" for item in validate_plan(plan, tmp_path))
