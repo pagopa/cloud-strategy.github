@@ -51,6 +51,7 @@ REQUIRED_PLACEHOLDERS = frozenset(
         "metrics",
         "understand",
         "review",
+        "preview_attributes",
     }
 )
 STATUS_CLASSES = {
@@ -499,7 +500,11 @@ def _write_page(report_dir: Path, destination: Path, content: str) -> None:
 
 
 def render_report(
-    workspace: Path, model_path: Path, template_path: Path | None = None
+    workspace: Path,
+    model_path: Path,
+    template_path: Path | None = None,
+    *,
+    preview: bool = False,
 ) -> Path:
     """Validate inputs, then write the deterministic single-page report."""
 
@@ -524,6 +529,7 @@ def render_report(
             "metrics": _metrics_strip(model),
             "understand": _understand_section(model, workspace_root, report_dir),
             "review": _review_section(model, workspace_root, report_dir),
+            "preview_attributes": ' data-template-preview="true"' if preview else "",
         },
     )
     index_path = report_dir / "index.html"
@@ -532,14 +538,17 @@ def render_report(
 
 
 def render_preview(target: Path, template_path: Path | None = None) -> Path:
-    """Materialize the bundled sample workspace and render it for template review."""
+    """Render the bundled sample workspace with the template structure overlay."""
 
     try:
         shutil.copytree(SAMPLE_WORKSPACE, target, dirs_exist_ok=True)
     except OSError as exc:
         raise ModelError(f"preview workspace cannot be prepared: {exc}") from exc
     return render_report(
-        target, target / "report" / "report-model.v1.json", template_path
+        target,
+        target / "report" / "report-model.v1.json",
+        template_path,
+        preview=True,
     )
 
 
@@ -555,7 +564,7 @@ def _parser() -> argparse.ArgumentParser:
         nargs="?",
         const=DEFAULT_PREVIEW_DIR,
         type=Path,
-        help="Render the bundled sample workspace into the given directory.",
+        help="Render the sample workspace with the template overlay into the given directory.",
     )
     return parser
 

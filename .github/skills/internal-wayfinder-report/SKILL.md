@@ -120,13 +120,15 @@ these exact placeholders:
 
 ```text
 title, slug, status_label, status_class, generated_at, destination, metrics,
-understand, review
+understand, review, preview_attributes
 ```
 
 Pass `--template PATH` to render with a custom shell. Pass `--preview [PATH]`
 to materialize the bundled sample workspace and render it to
 `tmp/.wayfinder-report-preview/` by default. A missing or unsupported template
-placeholder fails before any report file is written.
+placeholder fails before any report file is written. The preview renders the
+same template with a visible structure overlay and uses only the bundled sample
+workspace, so the layout can be adjusted before real report data is supplied.
 
 Mermaid is optional, pinned, isolated in the template, and removable. The
 renderer parses each explicit diagram before attempting to render it. A

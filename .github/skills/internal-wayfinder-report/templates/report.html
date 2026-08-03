@@ -12,6 +12,7 @@
   --accent: #075985; --accent-soft: #e0f2fe;
   --warning: #92400e; --warning-soft: #ffedd5;
   --critical: #991b1b; --critical-soft: #fee2e2;
+  --preview: #7c3aed;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -21,6 +22,7 @@
     --accent: #7dd3fc; --accent-soft: #0c4a6e;
     --warning: #fcd34d; --warning-soft: #4a2f08;
     --critical: #fca5a5; --critical-soft: #4c1111;
+    --preview: #c4b5fd;
   }
 }
 * { box-sizing: border-box; }
@@ -96,6 +98,25 @@ summary { cursor: pointer; font-weight: 800; }
 .diagram-fallback { color: var(--muted); font-style: italic; }
 .diagram-error[role="alert"] { color: var(--critical); font-weight: 700; }
 .diagram-debug { margin-top: .75rem; }
+.template-outline { display: none; }
+body[data-template-preview] .template-outline {
+  display: block;
+  border-bottom: 1px solid var(--preview);
+  background: var(--surface);
+  color: var(--ink);
+}
+.template-outline-inner { max-width: 1120px; margin: 0 auto; padding: .75rem 1.25rem; }
+.template-outline strong { color: var(--preview); }
+.template-outline p { margin: .25rem 0 0; color: var(--muted); }
+.template-outline ol { display: flex; flex-wrap: wrap; gap: .4rem 1.5rem; margin: .5rem 0 0; }
+body[data-template-preview] header,
+body[data-template-preview] .page > .lede,
+body[data-template-preview] .metrics,
+body[data-template-preview] main > section,
+body[data-template-preview] .card {
+  outline: 2px dashed var(--preview);
+  outline-offset: .2rem;
+}
 .empty { color: var(--muted); font-style: italic; }
 .section-anchor { scroll-margin-top: 6rem; }
 @media (max-width: 720px) {
@@ -117,10 +138,11 @@ summary { cursor: pointer; font-weight: 800; }
   .diagram-fallback, .diagram-debug { display: block; }
   .diagram-error[hidden] { display: none; }
   .diagram-source { background: #fff; color: #000; border: 1px solid #999; }
+  .template-outline { display: none !important; }
 }
 </style>
 </head>
-<body>
+<body${preview_attributes}>
 <header>
   <div class="header-inner">
     <div>
@@ -137,6 +159,21 @@ summary { cursor: pointer; font-weight: 800; }
     </nav>
   </div>
 </header>
+<aside class="template-outline" aria-label="Struttura del template">
+  <div class="template-outline-inner">
+    <strong>Struttura del template</strong>
+    <p>Anteprima grafica: i bordi evidenziano i blocchi prima del modello reale.</p>
+    <ol>
+      <li>Header e navigazione</li>
+      <li>Destinazione e indicatori</li>
+      <li>Panoramica</li>
+      <li>Soluzione</li>
+      <li>Decisioni</li>
+      <li>Ambito</li>
+      <li>Revisione</li>
+    </ol>
+  </div>
+</aside>
 <main class="page">
   <p class="lede">${destination}</p>
   <div class="metrics">${metrics}</div>
@@ -162,7 +199,7 @@ summary { cursor: pointer; font-weight: 800; }
       flowchart: { htmlLabels: false }
     });
     var figures = document.querySelectorAll('.diagram');
-    Array.prototype.forEach.call(figures, function (figure, index) {
+    figures.forEach(function (figure, index) {
       var source = figure.querySelector('.diagram-source');
       var target = figure.querySelector('.diagram-target');
       var fallback = figure.querySelector('.diagram-fallback');
@@ -185,7 +222,7 @@ summary { cursor: pointer; font-weight: 800; }
   if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
     return;
   }
-  Array.prototype.forEach.call(copyButtons, function (button) {
+  copyButtons.forEach(function (button) {
     button.hidden = false;
     button.addEventListener('click', function () {
       var request = document.getElementById(button.getAttribute('data-copy-target'));

@@ -353,6 +353,19 @@ def test_preview_renders_the_bundled_sample_into_the_target_directory(
     assert 'id="review"' in markup
 
 
+def test_preview_exposes_the_template_structure_overlay(tmp_path: Path) -> None:
+    target = tmp_path / "anteprima-struttura"
+
+    index_path = render_report_module.render_preview(target)
+
+    markup = index_path.read_text(encoding="utf-8")
+    assert 'data-template-preview="true"' in markup
+    assert 'class="template-outline"' in markup
+    assert "Struttura del template" in markup
+    assert "Panoramica" in markup
+    assert "Revisione" in markup
+
+
 def test_preview_default_directory_is_outside_the_wayfinder_slug_namespace() -> None:
     assert render_report_module.DEFAULT_PREVIEW_DIR == Path(
         "tmp/.wayfinder-report-preview"
