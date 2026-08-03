@@ -386,7 +386,19 @@ def _scope_section(
             implemented_block,
             "</article>",
             "</div>",
-            "<h3>Come leggere questo report</h3>",
+            "</section>",
+        ]
+    )
+
+
+def _reading_section(
+    model: ReportModel, workspace: Path, report_dir: Path
+) -> str:
+    return "".join(
+        [
+            '<section id="reading" class="section-anchor">',
+            "<h2>Come leggere questo report</h2>",
+            '<p class="lede">Metodo di lettura e vincoli operativi dichiarati dal modello, subito dopo l&#x27;ambito.</p>',
             _claim_card("Metodo", model.understand.operation, workspace, report_dir),
             "</section>",
         ]
@@ -400,6 +412,7 @@ def _understand_section(model: ReportModel, workspace: Path, report_dir: Path) -
             _solution_section(model, workspace, report_dir),
             _decisions_section(model, workspace, report_dir),
             _scope_section(model, workspace, report_dir),
+            _reading_section(model, workspace, report_dir),
         )
     )
 

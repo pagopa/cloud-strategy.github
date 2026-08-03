@@ -210,9 +210,36 @@ def test_report_uses_progressive_section_order(tmp_path: Path) -> None:
     markup = index_path.read_text(encoding="utf-8")
     offsets = [
         markup.index(f'id="{section}"')
-        for section in ("overview", "solution", "decisions", "scope", "review")
+        for section in (
+            "overview",
+            "solution",
+            "decisions",
+            "scope",
+            "reading",
+            "review",
+        )
     ]
     assert offsets == sorted(offsets)
+
+
+def test_reading_guide_follows_scope_before_review(tmp_path: Path) -> None:
+    workspace = make_workspace_with_fixture(tmp_path)
+    markup = render_report(
+        workspace, workspace / "report" / "report-model.v1.json"
+    ).read_text(encoding="utf-8")
+
+    assert 'id="reading"' in markup
+    assert "Come leggere questo report" in markup
+    assert markup.index('id="scope"') < markup.index('id="reading"')
+    assert markup.index('id="reading"') < markup.index('id="review"')
+    assert markup.index('id="scope"') < markup.index(
+        "Come leggere questo report"
+    )
+    # Keep the guide outside the Ambito content block.
+    scope_html = markup[
+        markup.index('id="scope"') : markup.index('id="reading"')
+    ]
+    assert "Come leggere questo report" not in scope_html
 
 
 def test_render_is_byte_identical_on_repeated_runs(tmp_path: Path) -> None:

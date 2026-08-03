@@ -6,7 +6,7 @@ description: Use when an active local Wayfinder workspace needs a traceable HTML
 # Internal Wayfinder Report
 
 Turn one local Wayfinder workspace into a traceable single-page report with
-progressive overview, solution, decision, scope, and review sections. The
+progressive overview, solution, decision, scope, reading, and review sections. The
 report is an evidence projection: it explains what the workspace says and
 surfaces coherence questions, while source maps, analysis, and tickets remain
 the authoritative artifacts.
@@ -103,8 +103,8 @@ The renderer writes exactly one page:
 tmp/.wayfinder/<analysis-slug>/report/index.html
 ```
 
-The page presents `overview`, `solution`, `decisions`, `scope`, and `review` in
-that order. It includes a derived indicator strip, truthful decision-state
+The page presents `overview`, `solution`, `decisions`, `scope`, `reading`, and
+`review` in that order. It includes a derived indicator strip, truthful decision-state
 groups without inferred dependencies, collapsed but complete source blocks,
 and every finding as a ranked progressive disclosure. Only diagrams explicitly
 declared by the model use Mermaid; no decision flowchart is fabricated when no
