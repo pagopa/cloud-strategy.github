@@ -359,6 +359,9 @@ def test_normalization_updates_wayfinder_contracts_without_changing_lifecycle(
     for field in ("Question", "Recommendation", "Why", "Default if accepted"):
         assert f"`{field}`" in wayfinder_content
     assert "`tmp/.wayfinder/<analysis-slug>/`" in wayfinder_content
+    assert "`tmp/.wayfinder/<analysis-slug>/map.md`" in wayfinder_content
+    assert "`tmp/.wayfinder/<analysis-slug>/issues/`" in wayfinder_content
+    assert "tracker-owned `tmp/.issues/`" not in wayfinder_content
     assert "throwaway `research/<name>` branch" not in wayfinder_content
 
 

@@ -132,9 +132,11 @@ The user may run unblocked tickets in parallel, so expect other sessions to be e
 This repository-owned contract overrides earlier workspace and output-path
 instructions.
 
-- Keep all Wayfinder analysis, research, prototype, and supporting assets under `tmp/.wayfinder/<analysis-slug>/`.
-- Keep local maps and tickets under the tracker-owned `tmp/.issues/` directory.
-- Keep research findings and prototypes inside the active Wayfinder workspace.
+- Keep each Wayfinder analysis unit under `tmp/.wayfinder/<analysis-slug>/`.
+- Keep its map at `tmp/.wayfinder/<analysis-slug>/map.md` and its child tickets
+  under `tmp/.wayfinder/<analysis-slug>/issues/`.
+- Keep analysis, research findings, prototypes, and supporting assets inside the
+  same active Wayfinder workspace.
 <!-- local-sync:wayfinder-workspace:end -->
 
 <!-- local-sync:wayfinder-critical-validation:start -->

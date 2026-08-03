@@ -1,6 +1,8 @@
 # Issue tracker: Local Markdown
 
-Issues and specs (you may know a spec as a PRD) for this repo live as markdown files in `tmp/.issues/`.
+Ordinary issues and specs (you may know a spec as a PRD) for this repo live as
+Markdown files in `tmp/.issues/`. Wayfinder efforts use the self-contained
+workspace described below.
 
 ## Conventions
 
@@ -22,9 +24,10 @@ Read the file at the referenced path. The user will normally pass the path or th
 
 Used by `/mattpocock-wayfinder`. The **map** is a file with one **child** file per ticket.
 
-- **Map**: `tmp/.issues/<effort>/map.md` — the Notes / Decisions-so-far / Fog body.
-- **Child ticket**: `tmp/.issues/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
+- **Workspace**: `tmp/.wayfinder/<effort>/` — the self-contained analysis unit.
+- **Map**: `tmp/.wayfinder/<effort>/map.md` — the Notes / Decisions-so-far / Fog body.
+- **Child ticket**: `tmp/.wayfinder/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
 - **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it lists is `resolved`.
-- **Frontier**: scan `tmp/.issues/<effort>/issues/` for files that are open, unblocked, and unclaimed; first by number wins.
+- **Frontier**: scan `tmp/.wayfinder/<effort>/issues/` for files that are open, unblocked, and unclaimed; first by number wins.
 - **Claim**: set `Status: claimed` and save before any work.
 - **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a context pointer (gist + link) to the map’s Decisions-so-far in `map.md`.

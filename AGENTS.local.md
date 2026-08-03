@@ -14,7 +14,9 @@
 
 ### Issue tracker
 
-Issues and PRDs are tracked as local Markdown files under `tmp/.issues/<feature-slug>`. See `docs/agents/issue-tracker.md`.
+Ordinary issues and PRDs use `tmp/.issues/<feature-slug>`. Wayfinder maps,
+tickets, and analysis assets share `tmp/.wayfinder/<analysis-slug>/`. See
+`docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

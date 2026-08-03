@@ -572,9 +572,11 @@ _MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT = f"""\
 This repository-owned contract overrides earlier workspace and output-path
 instructions.
 
-- Keep all Wayfinder analysis, research, prototype, and supporting assets under `tmp/.wayfinder/<analysis-slug>/`.
-- Keep local maps and tickets under the tracker-owned `tmp/.issues/` directory.
-- Keep research findings and prototypes inside the active Wayfinder workspace.
+- Keep each Wayfinder analysis unit under `tmp/.wayfinder/<analysis-slug>/`.
+- Keep its map at `tmp/.wayfinder/<analysis-slug>/map.md` and its child tickets
+  under `tmp/.wayfinder/<analysis-slug>/issues/`.
+- Keep analysis, research findings, prototypes, and supporting assets inside the
+  same active Wayfinder workspace.
 {_MATTPOCOCK_WAYFINDER_WORKSPACE_CONTRACT_END}"""
 _MATTPOCOCK_WAYFINDER_CRITICAL_CONTRACT_START = (
     "<!-- local-sync:wayfinder-critical-validation:start -->"
